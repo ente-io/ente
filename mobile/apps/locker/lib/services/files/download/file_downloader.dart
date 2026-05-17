@@ -29,13 +29,13 @@ Future<File> ensureEncryptedOfflineCopy(
   ProgressCallback? progressCallback,
 }) async {
   final existingFile = await getCurrentOfflineEncryptedCopy(file);
+  final String logPrefix = 'File-${file.uploadedFileID}:';
   if (existingFile != null) {
     final existingSize = await existingFile.length();
     progressCallback?.call(existingSize, existingSize);
     return existingFile;
   }
 
-  final String logPrefix = 'File-${file.uploadedFileID}:';
   final String tempDir = Configuration.instance.getTempDirectory();
   final String tempEncryptedFilePath =
       "$tempDir${file.uploadedFileID}.encrypted";
@@ -96,7 +96,6 @@ Future<File> ensureEncryptedOfflineCopy(
 
     await encryptedFile.copy(finalEncryptedFilePath);
     await encryptedFile.delete();
-    _logger.info('$logPrefix persisted encrypted offline copy');
     return finalEncryptedFile;
   } catch (e, s) {
     _logger.severe(
@@ -228,7 +227,6 @@ Future<File?> downloadAndDecrypt(
     if (shouldUseCache && await decryptedFile.exists()) {
       final decryptedSize = await decryptedFile.length();
       if (decryptedSize > 0) {
-        _logger.info('$logPrefix using cached decrypted file');
         progressCallback?.call(decryptedSize, decryptedSize);
         return decryptedFile;
       } else {
@@ -246,7 +244,6 @@ Future<File?> downloadAndDecrypt(
           usingCachedEncryptedFile = true;
           encryptedFilePath = cachedEncryptedFilePath;
           encryptedFile = cachedEncryptedFile;
-          _logger.info('$logPrefix using cached encrypted file');
         } else {
           await cachedEncryptedFile.delete();
         }
@@ -320,11 +317,14 @@ Future<File?> downloadAndDecrypt(
         fileKey,
       );
       fakeProgress?.stop();
-      _logger
-          .info('$logPrefix decryption completed (ID ${file.uploadedFileID})');
     } catch (e, s) {
       fakeProgress?.stop();
       _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
+      try {
+        if (await decryptedFile.exists()) {
+          await decryptedFile.delete();
+        }
+      } catch (_) {}
       if (downloadedFreshEncryptedFile) {
         try {
           await encryptedFile.delete();

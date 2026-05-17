@@ -1,5 +1,5 @@
 import { type EnteFile } from "ente-media/file";
-import { fileCreationTime } from "ente-media/file-metadata";
+import { fileCreationPhotoSortTime } from "ente-media/file-metadata";
 import { useCallback, useState } from "react";
 import type { JourneyPoint } from "../types";
 
@@ -26,9 +26,17 @@ export const useFileViewer = ({
                 clusterFileIds.includes(file.id),
             );
 
-            // Sort cluster files by creation time
+            // Sort cluster files by the local photo creation date shown in the UI.
+            const sortTimeByFile = new Map<EnteFile, number>();
+            const sortTimeForFile = (file: EnteFile) => {
+                const cached = sortTimeByFile.get(file);
+                if (cached != undefined) return cached;
+                const t = fileCreationPhotoSortTime(file);
+                sortTimeByFile.set(file, t);
+                return t;
+            };
             const sortedClusterFiles = [...clusterFiles].sort(
-                (a, b) => fileCreationTime(a) - fileCreationTime(b),
+                (a, b) => sortTimeForFile(a) - sortTimeForFile(b),
             );
 
             // Find the index of the clicked photo in the cluster files

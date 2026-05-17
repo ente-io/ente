@@ -137,11 +137,8 @@ jobs:
                   echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
                   echo "EOF" >> $GITHUB_ENV
 
-            - name: Setup keys
-              uses: timheuer/base64-to-file@v1
-              with:
-                  fileName: "keystore/ente_photos_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY_PHOTOS }}
+            - name: Add keystore
+              run: echo "${{ secrets.SIGNING_KEY_PHOTOS }}" | base64 -d > "$RUNNER_TEMP/ente_photos_key.jks"
 
             - name: Disk report (before build)
               run: |
@@ -161,7 +158,7 @@ jobs:
               run: |
                   flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore --target-platform android-arm,android-arm64
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_photos_key.jks"
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_photos_key.jks
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_PHOTOS }}
                   SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_PHOTOS }}
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_PHOTOS }}

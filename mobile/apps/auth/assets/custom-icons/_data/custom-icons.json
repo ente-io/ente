@@ -113,6 +113,13 @@
       ]
     },
     {
+      "title": "Art Fight",
+      "slug": "art_fight",
+      "altNames": [
+        "ArtFight"
+      ]
+    },
+    {
       "title": "Aruba",
       "slug": "aruba",
       "hex": "ef8a33"
@@ -295,6 +302,10 @@
       ]
     },
     {
+      "title": "BJ-Share",
+      "slug": "bj-share"
+    },
+    {
       "title": "Blockchain",
       "altNames": [
         "blockchain.com",
@@ -422,8 +433,7 @@
         "schwab",
         "charles-schwab",
         "charles schwab"
-      ],
-      "hex": "01A0E0"
+      ]
     },
     {
       "title": "Chaturbate",
@@ -598,8 +608,7 @@
     },
     {
       "title": "DeepSeek",
-      "slug": "deepseek",
-      "hex": "4D6BFE"
+      "slug": "deepseek"
     },
     {
       "title": "DEGIRO"
@@ -671,6 +680,10 @@
     {
       "title": "ecitizen kenya",
       "slug": "ecitizen_kenya"
+    },
+    {
+      "title": "eClinicalWorks",
+      "slug": "eclinicalworks"
     },
     {
       "title": "ecloud",
@@ -751,8 +764,7 @@
       "slug": "exaroton",
       "altNames": [
         "Exaroton"
-      ],
-      "hex": "17AB17"
+      ]
     },
     {
       "title": "ExoticaZ.to",
@@ -939,8 +951,7 @@
       "altNames": [
         "hsa bank",
         "hsabank"
-      ],
-      "hex": "00FF85"
+      ]
     },
     {
       "title": "HTX"
@@ -953,8 +964,7 @@
     },
     {
       "title": "Hulu",
-      "slug": "hulu",
-      "hex": "1CE783"
+      "slug": "hulu"
     },
     {
       "title": "Hytale",
@@ -1031,8 +1041,7 @@
       "altNames": [
         "Indian Railway Catering and Tourism Corporation",
         "Indian Railways"
-      ],
-      "hex": "000075"
+      ]
     },
     {
       "title": "ISC2",
@@ -1500,8 +1509,7 @@
     },
     {
       "title": "NumberBarn",
-      "slug": "numberbarn",
-      "hex": "1c5787"
+      "slug": "numberbarn"
     },
     {
       "title": "numerai"
@@ -1830,8 +1838,7 @@
         "Rose Hulman",
         "Rose Hulman Institute of Technology",
         "RHIT"
-      ],
-      "hex": "800000"
+      ]
     },
     {
       "title": "RuneMate"
@@ -1839,6 +1846,13 @@
     {
       "title": "RuneScape Wiki",
       "slug": "runescape_wiki"
+    },
+    {
+      "title": "RustDesk",
+      "slug": "rustdesk",
+      "altNames": [
+      "RustDesk Connection"
+      ]
     },
     {
       "title": "Rust Language Forum",
@@ -1909,6 +1923,13 @@
     {
       "title": "Skyscanner",
       "hex": "0770E3"
+    },
+    {
+      "title": "Smogon",
+      "slug": "smogon",
+      "altNames": [
+        "Smogon University"
+      ]
     },
     {
       "title": "SMSPool",
@@ -2387,6 +2408,10 @@
       ]
     },
     {
+      "title": "Zabbix",
+      "slug": "zabbix"
+    },
+    {
       "title": "Zitadel"
     },
     {
@@ -2399,6 +2424,10 @@
     {
       "title": "DLsite",
       "slug": "dlsite"
+    },
+    {
+      "title": "Zyxel Nebula",
+      "slug": "zyxel-nebula"
     }
   ]
 }

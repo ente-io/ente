@@ -44,7 +44,7 @@ class SocialSectionWidget extends StatelessWidget {
       sectionOptionSpacing,
       SocialsMenuItemWidget(
         l10n.merchandise,
-        "https://shop.ente.io",
+        "https://shop.ente.com",
         launchInExternalApp: !Platform.isAndroid,
       ),
       sectionOptionSpacing,

@@ -323,6 +323,17 @@ export const getPublicKey = async (email: string) => {
         .publicKey;
 };
 
+/**
+ * Fetch the TOTP based two-factor status for the logged in user from remote.
+ */
+export const getTwoFactorStatus = async () => {
+    const res = await fetch(await apiURL("/users/two-factor/status"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return z.object({ status: z.boolean() }).parse(await res.json()).status;
+};
+
 export interface GenerateKeysAndAttributesResult {
     masterKey: string;
     kek: string;
@@ -876,6 +887,19 @@ export const setupTwoFactorFinish = async (
         twoFactorSecretDecryptionNonce: box.nonce,
     });
     updateSavedLocalUser({ isTwoFactorEnabled: true });
+};
+
+/**
+ * Disable TOTP based two-factor authentication for the logged in user.
+ */
+export const disableTwoFactor = async () => {
+    ensureOk(
+        await fetch(await apiURL("/users/two-factor/disable"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+        }),
+    );
+    updateSavedLocalUser({ isTwoFactorEnabled: false });
 };
 
 interface EnableTwoFactorRequest {

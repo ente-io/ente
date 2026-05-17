@@ -462,15 +462,6 @@
   "linkDeviceLimit": "حد الأجهزة",
   "expiredLinkInfo": "انتهت صلاحية هذا الرابط. يرجى اختيار وقت انتهاء صلاحية جديد أو تعطيل انتهاء صلاحية الرابط.",
   "linkExpiresOn": "ستنتهي صلاحية الرابط في {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {مشاركة مع أشخاص مُحددين}=1 {مُشارَك مع شخص واحد} other {مُشارَك مع {numberOfPeople} أشخاص}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "انتهت صلاحية الرابط",
   "publicLinkEnabled": "تمكين الرابط العام",
   "shareALink": "مشاركة رابط",
@@ -484,28 +475,6 @@
   "add": "إضافة",
   "collaboratorsCanAddFilesToTheSharedCollection": "يمكن للمتعاونين إضافة عناصر إلى المجموعة المشتركة.",
   "enterEmail": "أدخل البريد الإلكتروني",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 مشاهدين} =1 {تمت إضافة مشاهد واحد} two {تمت إضافة مشاهدين} few {تمت إضافة {count} مشاهدين} many {تمت إضافة {count} مشاهدًا} other {تمت إضافة {count} مشاهدًا}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 متعاونين} =1 {تمت إضافة متعاون واحد} two {تمت إضافة متعاونين} few {تمت إضافة {count} متعاونين} many {تمت إضافة {count} متعاونًا} other {تمت إضافة {count} متعاونًا}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0 {إضافة مشاهد} =1 {إضافة مشاهد} two {إضافة مشاهدين} few {إضافة {count} مشاهدين} many {إضافة {count} مشاهدًا} other {إضافة {count} مشاهدًا}}",
-  "addCollaborators": "{count, plural, =0 {إضافة متعاون} =1 {إضافة متعاون} two {إضافة متعاونين} few {إضافة {count} متعاونين} many {إضافة {count} متعاونًا} other {إضافة {count} متعاونًا}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "اضغط مطولاً على بريد إلكتروني للتحقق من التشفير من طرف إلى طرف.",
   "sharing": "جارٍ المشاركة...",
   "invalidEmailAddress": "عنوان البريد الإلكتروني غير صالح",
@@ -554,16 +523,6 @@
   "viewer": "مشاهد",
   "collaborator": "متعاون",
   "collaboratorsCanAddFilesToTheSharedAlbum": "يمكن للمتعاونين إضافة عناصر إلى المجموعة المشتركة.",
-  "albumParticipantsCount": "{count, plural, =0 {لا يوجد مُشاركون}=1 {مُشارك واحد} other {{count} مُشاركين}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "إضافة المزيد",
   "you": "أنت",
   "albumOwner": "المالك",

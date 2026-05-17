@@ -475,7 +475,8 @@ export const fileFileName = (file: EnteFile) =>
  * This function handles files with edited dates.
  *
  * While sometimes the epoch timestamp is the correct value to use, it is also
- * possible that {@link fileCreationPhotoDate} might be more appropriate.
+ * possible that {@link fileCreationPhotoDate} or
+ * {@link fileCreationPhotoSortTime} might be more appropriate.
  */
 export const fileCreationTime = (file: EnteFile) =>
     file.pubMagicMetadata?.data.editedTime ?? file.metadata.creationTime;
@@ -493,6 +494,15 @@ export const fileCreationPhotoDate = (file: EnteFile) =>
             file.pubMagicMetadata?.data.editedTime ??
             file.metadata.creationTime,
     );
+
+/**
+ * Return a millisecond sort key for the file's creation date in the
+ * hypothetical "timezone of the photo".
+ *
+ * This is a photo-local comparable value, not an absolute UTC timestamp.
+ */
+export const fileCreationPhotoSortTime = (file: EnteFile) =>
+    fileCreationPhotoDate(file).getTime();
 
 /**
  * Return the GPS coordinates (if any) present in the given {@link EnteFile}.

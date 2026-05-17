@@ -1013,7 +1013,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         );
       }
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to open share collection dialog", e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
   }
@@ -1041,7 +1041,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             MaterialPageRoute(
               builder: (context) => WebPage(
                 widget.title ?? "",
-                "https://albums.ente.io/?t=$authToken#$albumKey",
+                "https://albums.ente.com/?t=$authToken#$albumKey",
               ),
             ),
           );
@@ -1050,7 +1050,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         await showAddPhotosSheet(bContext, collection!);
       }
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to show add photo dialog", e, s);
       await showGenericErrorDialog(context: bContext, error: e);
     }
   }
@@ -1145,10 +1145,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await showTextInputDialog(
       context,
       title: context.l10n.playOnTv,
-      body: AppLocalizations.of(context).castInstruction.replaceFirst(
-            'cast.ente.io',
-            flagService.castUrl,
-          ),
+      body: AppLocalizations.of(context).castInstruction(
+        castUrl: flagService.castUrl,
+      ),
       submitButtonLabel: AppLocalizations.of(context).pair,
       textInputType: TextInputType.streetAddress,
       hintText: context.l10n.deviceCodeHint,

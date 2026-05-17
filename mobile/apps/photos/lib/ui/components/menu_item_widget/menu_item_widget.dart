@@ -287,9 +287,14 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     }
     Future.delayed(
       const Duration(milliseconds: 100),
-      () => setState(() {
-        menuItemColor = widget.menuItemColor;
-      }),
+      () {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          menuItemColor = widget.menuItemColor;
+        });
+      },
     );
   }
 

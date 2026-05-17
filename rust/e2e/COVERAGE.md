@@ -2,7 +2,9 @@
 
 Current suite entrypoint:
 
-- [`auth_contacts_and_legacy_recovery_suite`](tests/full_e2e.rs)
+- [`auth_contacts_e2e`](tests/full_e2e.rs)
+- [`legacy_contact_recovery_e2e`](tests/full_e2e.rs)
+- [`legacy_kit_recovery_e2e`](tests/full_e2e.rs)
 
 Shared setup and helpers:
 
@@ -44,4 +46,4 @@ Shared setup and helpers:
 - object-store-backed scenarios
 - passkey flows
 - recovery via elapsed notice period without explicit owner approval
-- multiple independent tests with failure isolation; current default is one ordered suite on a shared owner/trusted pair
+- multi-process shared fixtures; current reuse is scoped to one test binary

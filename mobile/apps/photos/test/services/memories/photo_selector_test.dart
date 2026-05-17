@@ -91,13 +91,7 @@ Map<int, EmbeddingVector> _embMap(List<EmbeddingVector> embeddings) {
 
 /// Creates a simple [FaceWithoutEmbedding] for testing.
 FaceWithoutEmbedding _face(String faceID, int fileID) {
-  return FaceWithoutEmbedding(
-    faceID,
-    fileID,
-    0.9,
-    Detection.empty(),
-    50.0,
-  );
+  return FaceWithoutEmbedding(faceID, fileID, 0.9, Detection.empty(), 50.0);
 }
 
 // ---------------------------------------------------------------------------
@@ -106,22 +100,23 @@ FaceWithoutEmbedding _face(String faceID, int fileID) {
 
 void main() {
   group('PhotoSelector utilities', () {
-    test('memoryFileId returns uploadedFileID when not offline', () {
+    test('memoryFileId returns uploadedFileID when not in local gallery mode',
+        () {
       final f = _file(uploadedFileID: 42, creationTime: _baseTime);
       expect(
-        PhotoSelector.memoryFileId(f, isOfflineMode: false),
+        PhotoSelector.memoryFileId(f, isLocalGalleryMode: false),
         equals(42),
       );
     });
 
-    test('memoryFileId returns generatedID when offline', () {
+    test('memoryFileId returns generatedID when in local gallery mode', () {
       final f = _file(
         uploadedFileID: 42,
         creationTime: _baseTime,
         generatedID: 99,
       );
       expect(
-        PhotoSelector.memoryFileId(f, isOfflineMode: true),
+        PhotoSelector.memoryFileId(f, isLocalGalleryMode: true),
         equals(99),
       );
     });
@@ -147,30 +142,21 @@ void main() {
     });
 
     test('isTooCloseInTime returns false for null creationTime', () {
-      expect(
-        PhotoSelector.isTooCloseInTime(null, [_baseTime]),
-        isFalse,
-      );
+      expect(PhotoSelector.isTooCloseInTime(null, [_baseTime]), isFalse);
     });
 
     test('isNearDuplicate detects similar embeddings', () {
       final e1 = _emb(1, seed: 100);
       final e2 = _nearDuplicateEmb(2, e1);
       final map = _embMap([e1, e2]);
-      expect(
-        PhotoSelector.isNearDuplicate(2, [1], map),
-        isTrue,
-      );
+      expect(PhotoSelector.isNearDuplicate(2, [1], map), isTrue);
     });
 
     test('isNearDuplicate allows distinct embeddings', () {
       final e1 = _emb(1, seed: 100);
       final e2 = _emb(2, seed: 200);
       final map = _embMap([e1, e2]);
-      expect(
-        PhotoSelector.isNearDuplicate(2, [1], map),
-        isFalse,
-      );
+      expect(PhotoSelector.isNearDuplicate(2, [1], map), isFalse);
     });
 
     test('filterNearDuplicates removes visually similar memories', () {
@@ -186,7 +172,7 @@ void main() {
       final result = PhotoSelector.filterNearDuplicates(
         memories,
         map,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
       );
       final ids = result.map((m) => m.file.uploadedFileID).toList();
       expect(ids, contains(1));
@@ -198,10 +184,7 @@ void main() {
       final memories = [
         _mem(_file(uploadedFileID: 1, creationTime: _baseTime)),
         _mem(
-          _file(
-            uploadedFileID: 2,
-            creationTime: _baseTime + 5 * 60 * 1000000,
-          ),
+          _file(uploadedFileID: 2, creationTime: _baseTime + 5 * 60 * 1000000),
         ), // 5 min later
         _mem(_file(uploadedFileID: 3, creationTime: _baseTime + _hour)),
       ];
@@ -226,7 +209,7 @@ void main() {
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -248,7 +231,7 @@ void main() {
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -268,7 +251,7 @@ void main() {
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -288,15 +271,13 @@ void main() {
       final memories = List.generate(30, (i) {
         // Alternate: some 1 minute apart, some 1 hour apart
         final offset = (i.isEven ? i * _hour : (i - 1) * _hour + 60000000);
-        return _mem(
-          _file(uploadedFileID: i, creationTime: _baseTime + offset),
-        );
+        return _mem(_file(uploadedFileID: i, creationTime: _baseTime + offset));
       });
       final embeddings =
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -319,30 +300,32 @@ void main() {
       }
     });
 
-    test('skips no-ML time buckets that cannot satisfy the min-gap filter',
-        () async {
-      const minute = 60 * 1000000;
-      final memories = [
-        _mem(_file(uploadedFileID: 0, creationTime: _baseTime)),
-        _mem(_file(uploadedFileID: 1, creationTime: _baseTime + 7 * minute)),
-        _mem(_file(uploadedFileID: 2, creationTime: _baseTime + 8 * minute)),
-        _mem(_file(uploadedFileID: 3, creationTime: _baseTime + 9 * minute)),
-        _mem(_file(uploadedFileID: 4, creationTime: _baseTime + 20 * minute)),
-      ];
+    test(
+      'skips no-ML time buckets that cannot satisfy the min-gap filter',
+      () async {
+        const minute = 60 * 1000000;
+        final memories = [
+          _mem(_file(uploadedFileID: 0, creationTime: _baseTime)),
+          _mem(_file(uploadedFileID: 1, creationTime: _baseTime + 7 * minute)),
+          _mem(_file(uploadedFileID: 2, creationTime: _baseTime + 8 * minute)),
+          _mem(_file(uploadedFileID: 3, creationTime: _baseTime + 9 * minute)),
+          _mem(_file(uploadedFileID: 4, creationTime: _baseTime + 20 * minute)),
+        ];
 
-      final result = await PhotoSelector.bestSelection(
-        memories,
-        prefferedSize: 3,
-        isOfflineMode: false,
-        mlEnabled: false,
-        fileIdToFaces: const {},
-        faceIDsToPersonID: const {},
-        fileIDToImageEmbedding: const {},
-        clipPositiveTextVector: _positiveTextVector,
-      );
+        final result = await PhotoSelector.bestSelection(
+          memories,
+          prefferedSize: 3,
+          isLocalGalleryMode: false,
+          mlEnabled: false,
+          fileIdToFaces: const {},
+          faceIDsToPersonID: const {},
+          fileIDToImageEmbedding: const {},
+          clipPositiveTextVector: _positiveTextVector,
+        );
 
-      expect(result.map((m) => m.file.uploadedFileID), equals([0, 4]));
-    });
+        expect(result.map((m) => m.file.uploadedFileID), equals([0, 4]));
+      },
+    );
 
     test('prioritizes files with named faces', () async {
       // 20 photos, file 0 has a named face, others don't
@@ -366,7 +349,7 @@ void main() {
       final faceIDsToPersonID = {'face_0': 'person_1'};
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -396,7 +379,7 @@ void main() {
       });
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -440,7 +423,7 @@ void main() {
       }
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -477,7 +460,7 @@ void main() {
       // 35 photos, 7 years. targetSize should be 21 when prefferedSize is null.
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -489,65 +472,61 @@ void main() {
     });
 
     test(
-        'still filters close-in-time photos when expanded target matches count',
-        () async {
-      // 7 years x 3 photos triggers the expanded targetSize of 21 exactly.
-      final memories = <Memory>[];
-      final embeddings = <EmbeddingVector>[];
-      final fileIdToFaces = <int, List<FaceWithoutEmbedding>>{};
-      final faceIDsToPersonID = <String, String>{};
-      int id = 0;
+      'still filters close-in-time photos when expanded target matches count',
+      () async {
+        // 7 years x 3 photos triggers the expanded targetSize of 21 exactly.
+        final memories = <Memory>[];
+        final embeddings = <EmbeddingVector>[];
+        final fileIdToFaces = <int, List<FaceWithoutEmbedding>>{};
+        final faceIDsToPersonID = <String, String>{};
+        int id = 0;
 
-      for (int year = 2016; year <= 2022; year++) {
-        for (int i = 0; i < 3; i++) {
-          final fileID = id++;
-          final creationTime = switch (i) {
-            0 => _timeInYear(year),
-            1 => _timeInYear(year) + 5 * 60 * 1000000,
-            _ => _timeInYear(year, hours: 1),
-          };
+        for (int year = 2016; year <= 2022; year++) {
+          for (int i = 0; i < 3; i++) {
+            final fileID = id++;
+            final creationTime = switch (i) {
+              0 => _timeInYear(year),
+              1 => _timeInYear(year) + 5 * 60 * 1000000,
+              _ => _timeInYear(year, hours: 1),
+            };
 
-          memories.add(
-            _mem(
-              _file(
-                uploadedFileID: fileID,
-                creationTime: creationTime,
-              ),
-            ),
-          );
-          embeddings.add(_emb(fileID));
+            memories.add(
+              _mem(_file(uploadedFileID: fileID, creationTime: creationTime)),
+            );
+            embeddings.add(_emb(fileID));
 
-          final faceID = 'face_$fileID';
-          fileIdToFaces[fileID] = List.generate(3 - i, (_) {
-            return _face(faceID, fileID);
-          });
-          faceIDsToPersonID[faceID] = 'person_$fileID';
+            final faceID = 'face_$fileID';
+            fileIdToFaces[fileID] = List.generate(3 - i, (_) {
+              return _face(faceID, fileID);
+            });
+            faceIDsToPersonID[faceID] = 'person_$fileID';
+          }
         }
-      }
 
-      final result = await PhotoSelector.bestSelection(
-        memories,
-        isOfflineMode: false,
-        mlEnabled: true,
-        fileIdToFaces: fileIdToFaces,
-        faceIDsToPersonID: faceIDsToPersonID,
-        fileIDToImageEmbedding: _embMap(embeddings),
-        clipPositiveTextVector: _positiveTextVector,
-      );
-
-      expect(
-        result.length,
-        equals(14),
-        reason:
-            'Round-robin filtering should still run when fileCount == expanded targetSize',
-      );
-      for (int i = 1; i < result.length; i++) {
-        expect(
-          result[i].file.creationTime!,
-          greaterThanOrEqualTo(result[i - 1].file.creationTime!),
+        final result = await PhotoSelector.bestSelection(
+          memories,
+          isLocalGalleryMode: false,
+          mlEnabled: true,
+          fileIdToFaces: fileIdToFaces,
+          faceIDsToPersonID: faceIDsToPersonID,
+          fileIDToImageEmbedding: _embMap(embeddings),
+          clipPositiveTextVector: _positiveTextVector,
         );
-      }
-    });
+
+        expect(
+          result.length,
+          equals(14),
+          reason:
+              'Round-robin filtering should still run when fileCount == expanded targetSize',
+        );
+        for (int i = 1; i < result.length; i++) {
+          expect(
+            result[i].file.creationTime!,
+            greaterThanOrEqualTo(result[i - 1].file.creationTime!),
+          );
+        }
+      },
+    );
 
     test('output is sorted chronologically (oldest first)', () async {
       final memories = <Memory>[];
@@ -569,7 +548,7 @@ void main() {
       }
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -584,44 +563,46 @@ void main() {
       }
     });
 
-    test('round 0 does not filter duplicates (ensures year coverage)',
-        () async {
-      // 2 years, 6 photos each. All photos are near-duplicates of each other.
-      final base = _emb(0, seed: 42);
-      final memories = <Memory>[];
-      final embeddings = <EmbeddingVector>[];
-      int id = 0;
-      for (final year in [2021, 2022]) {
-        for (int i = 0; i < 6; i++) {
-          final fileID = id++;
-          memories.add(
-            _mem(
-              _file(
-                uploadedFileID: fileID,
-                creationTime: _timeInYear(year, hours: i),
+    test(
+      'round 0 does not filter duplicates (ensures year coverage)',
+      () async {
+        // 2 years, 6 photos each. All photos are near-duplicates of each other.
+        final base = _emb(0, seed: 42);
+        final memories = <Memory>[];
+        final embeddings = <EmbeddingVector>[];
+        int id = 0;
+        for (final year in [2021, 2022]) {
+          for (int i = 0; i < 6; i++) {
+            final fileID = id++;
+            memories.add(
+              _mem(
+                _file(
+                  uploadedFileID: fileID,
+                  creationTime: _timeInYear(year, hours: i),
+                ),
               ),
-            ),
-          );
-          embeddings.add(_nearDuplicateEmb(fileID, base));
+            );
+            embeddings.add(_nearDuplicateEmb(fileID, base));
+          }
         }
-      }
-      final result = await PhotoSelector.bestSelection(
-        memories,
-        isOfflineMode: false,
-        mlEnabled: true,
-        fileIdToFaces: {},
-        faceIDsToPersonID: {},
-        fileIDToImageEmbedding: _embMap(embeddings),
-        clipPositiveTextVector: _positiveTextVector,
-      );
-      // Despite all being near-duplicates, both years should be represented
-      // because round 0 skips the duplicate check.
-      final yearsRepresented = result.map((m) {
-        return DateTime.fromMicrosecondsSinceEpoch(m.file.creationTime!).year;
-      }).toSet();
-      expect(yearsRepresented, contains(2021));
-      expect(yearsRepresented, contains(2022));
-    });
+        final result = await PhotoSelector.bestSelection(
+          memories,
+          isLocalGalleryMode: false,
+          mlEnabled: true,
+          fileIdToFaces: {},
+          faceIDsToPersonID: {},
+          fileIDToImageEmbedding: _embMap(embeddings),
+          clipPositiveTextVector: _positiveTextVector,
+        );
+        // Despite all being near-duplicates, both years should be represented
+        // because round 0 skips the duplicate check.
+        final yearsRepresented = result.map((m) {
+          return DateTime.fromMicrosecondsSinceEpoch(m.file.creationTime!).year;
+        }).toSet();
+        expect(yearsRepresented, contains(2021));
+        expect(yearsRepresented, contains(2022));
+      },
+    );
 
     test('no two selected photos are within minimumMemoryTimeGap', () async {
       final memories = <Memory>[];
@@ -645,7 +626,7 @@ void main() {
       }
       final result = await PhotoSelector.bestSelection(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
@@ -684,39 +665,37 @@ void main() {
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelectionPeople(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         fileIDToImageEmbedding: _embMap(embeddings),
         clipPositiveTextVector: _positiveTextVector,
       );
       expect(result.length, equals(5));
     });
 
-    test('ignores unrelated embeddings when precomputing people scores',
-        () async {
-      final memories = List.generate(20, (i) {
-        return _mem(
-          _file(uploadedFileID: i, creationTime: _baseTime + i * _hour),
+    test(
+      'ignores unrelated embeddings when precomputing people scores',
+      () async {
+        final memories = List.generate(20, (i) {
+          return _mem(
+            _file(uploadedFileID: i, creationTime: _baseTime + i * _hour),
+          );
+        });
+        final embeddings = memories
+            .map((m) => _emb(m.file.uploadedFileID!))
+            .toList()
+          ..add(EmbeddingVector(fileID: 9999, embedding: const [1.0, 0.0]));
+
+        final result = await PhotoSelector.bestSelectionPeople(
+          memories,
+          isLocalGalleryMode: false,
+          fileIDToImageEmbedding: _embMap(embeddings),
+          clipPositiveTextVector: _positiveTextVector,
         );
-      });
-      final embeddings =
-          memories.map((m) => _emb(m.file.uploadedFileID!)).toList()
-            ..add(
-              EmbeddingVector(
-                fileID: 9999,
-                embedding: const [1.0, 0.0],
-              ),
-            );
 
-      final result = await PhotoSelector.bestSelectionPeople(
-        memories,
-        isOfflineMode: false,
-        fileIDToImageEmbedding: _embMap(embeddings),
-        clipPositiveTextVector: _positiveTextVector,
-      );
-
-      expect(result, isNotEmpty);
-      expect(result.length, lessThanOrEqualTo(10));
-    });
+        expect(result, isNotEmpty);
+        expect(result.length, lessThanOrEqualTo(10));
+      },
+    );
 
     test('limits output to targetSize', () async {
       final memories = List.generate(30, (i) {
@@ -728,7 +707,7 @@ void main() {
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelectionPeople(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         fileIDToImageEmbedding: _embMap(embeddings),
         clipPositiveTextVector: _positiveTextVector,
       );
@@ -746,7 +725,7 @@ void main() {
       final result = await PhotoSelector.bestSelectionPeople(
         memories,
         prefferedSize: 5,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         fileIDToImageEmbedding: _embMap(embeddings),
         clipPositiveTextVector: _positiveTextVector,
       );
@@ -763,7 +742,7 @@ void main() {
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelectionPeople(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         fileIDToImageEmbedding: _embMap(embeddings),
         clipPositiveTextVector: _positiveTextVector,
       );
@@ -786,7 +765,7 @@ void main() {
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelectionPeople(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         fileIDToImageEmbedding: _embMap(embeddings),
         clipPositiveTextVector: _positiveTextVector,
       );
@@ -836,7 +815,7 @@ void main() {
       }
       final result = await PhotoSelector.bestSelectionPeople(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         fileIDToImageEmbedding: _embMap(embeddings),
         clipPositiveTextVector: _positiveTextVector,
       );
@@ -861,7 +840,7 @@ void main() {
       final embeddings = [_emb(0), _emb(5), _emb(15)];
       final result = await PhotoSelector.bestSelectionPeople(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         fileIDToImageEmbedding: _embMap(embeddings),
         clipPositiveTextVector: _positiveTextVector,
       );
@@ -893,15 +872,12 @@ void main() {
           memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
       final result = await PhotoSelector.bestSelectionPeople(
         memories,
-        isOfflineMode: false,
+        isLocalGalleryMode: false,
         fileIDToImageEmbedding: _embMap(embeddings),
         clipPositiveTextVector: _positiveTextVector,
       );
       // File 1 (no creationTime) should not be in result
-      expect(
-        result.any((m) => m.file.uploadedFileID == 1),
-        isFalse,
-      );
+      expect(result.any((m) => m.file.uploadedFileID == 1), isFalse);
     });
   });
 
@@ -934,7 +910,7 @@ void main() {
             .toList();
         final result = await PhotoSelector.bestSelection(
           copy,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           mlEnabled: true,
           fileIdToFaces: {},
           faceIDsToPersonID: {},
@@ -982,7 +958,7 @@ void main() {
             .toList();
         final result = await PhotoSelector.bestSelection(
           copy,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           mlEnabled: true,
           fileIdToFaces: {},
           faceIDsToPersonID: {},
@@ -997,41 +973,43 @@ void main() {
       expect(run1, equals(run2));
     });
 
-    test('bestSelectionPeople: produces same output on repeated calls',
-        () async {
-      final memories = List.generate(30, (i) {
-        return _mem(
-          _file(uploadedFileID: i, creationTime: _baseTime + i * _hour),
-        );
-      });
-      final embeddings =
-          memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
-      final embMap = _embMap(embeddings);
+    test(
+      'bestSelectionPeople: produces same output on repeated calls',
+      () async {
+        final memories = List.generate(30, (i) {
+          return _mem(
+            _file(uploadedFileID: i, creationTime: _baseTime + i * _hour),
+          );
+        });
+        final embeddings =
+            memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
+        final embMap = _embMap(embeddings);
 
-      Future<List<int>> run() async {
-        final copy = memories
-            .map(
-              (m) => _mem(
-                _file(
-                  uploadedFileID: m.file.uploadedFileID!,
-                  creationTime: m.file.creationTime!,
+        Future<List<int>> run() async {
+          final copy = memories
+              .map(
+                (m) => _mem(
+                  _file(
+                    uploadedFileID: m.file.uploadedFileID!,
+                    creationTime: m.file.creationTime!,
+                  ),
                 ),
-              ),
-            )
-            .toList();
-        final result = await PhotoSelector.bestSelectionPeople(
-          copy,
-          isOfflineMode: false,
-          fileIDToImageEmbedding: embMap,
-          clipPositiveTextVector: _positiveTextVector,
-        );
-        return result.map((m) => m.file.uploadedFileID!).toList();
-      }
+              )
+              .toList();
+          final result = await PhotoSelector.bestSelectionPeople(
+            copy,
+            isLocalGalleryMode: false,
+            fileIDToImageEmbedding: embMap,
+            clipPositiveTextVector: _positiveTextVector,
+          );
+          return result.map((m) => m.file.uploadedFileID!).toList();
+        }
 
-      final run1 = await run();
-      final run2 = await run();
-      expect(run1, equals(run2));
-    });
+        final run1 = await run();
+        final run2 = await run();
+        expect(run1, equals(run2));
+      },
+    );
   });
 
   // -------------------------------------------------------------------------
@@ -1049,7 +1027,7 @@ void main() {
         memories,
         const SelectionConfig(
           targetSize: 10,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           fileIDToImageEmbedding: {},
           scores: {},
           distribution: SelectionDistribution.none,
@@ -1060,41 +1038,43 @@ void main() {
       expect(result.length, equals(5));
     });
 
-    test('flat distribution selects by score and respects targetSize',
-        () async {
-      final memories = List.generate(20, (i) {
-        return _mem(
-          _file(uploadedFileID: i, creationTime: _baseTime + i * _hour),
+    test(
+      'flat distribution selects by score and respects targetSize',
+      () async {
+        final memories = List.generate(20, (i) {
+          return _mem(
+            _file(uploadedFileID: i, creationTime: _baseTime + i * _hour),
+          );
+        });
+        final embeddings =
+            memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
+        final embMap = _embMap(embeddings);
+        // Score = fileID (so higher IDs are preferred)
+        final scores = {
+          for (final m in memories)
+            m.file.uploadedFileID!: m.file.uploadedFileID!.toDouble(),
+        };
+        final result = await PhotoSelector.select(
+          memories,
+          SelectionConfig(
+            targetSize: 10,
+            isLocalGalleryMode: false,
+            fileIDToImageEmbedding: embMap,
+            scores: scores,
+            distribution: SelectionDistribution.none,
+            pick: SelectionPick.ranked,
+            sort: SelectionSort.chronological,
+          ),
         );
-      });
-      final embeddings =
-          memories.map((m) => _emb(m.file.uploadedFileID!)).toList();
-      final embMap = _embMap(embeddings);
-      // Score = fileID (so higher IDs are preferred)
-      final scores = {
-        for (final m in memories)
-          m.file.uploadedFileID!: m.file.uploadedFileID!.toDouble(),
-      };
-      final result = await PhotoSelector.select(
-        memories,
-        SelectionConfig(
-          targetSize: 10,
-          isOfflineMode: false,
-          fileIDToImageEmbedding: embMap,
-          scores: scores,
-          distribution: SelectionDistribution.none,
-          pick: SelectionPick.ranked,
-          sort: SelectionSort.chronological,
-        ),
-      );
-      expect(result.length, lessThanOrEqualTo(10));
-      // Should prefer higher-scored files
-      expect(
-        result.any((m) => m.file.uploadedFileID == 19),
-        isTrue,
-        reason: 'Highest-scored file should be selected',
-      );
-    });
+        expect(result.length, lessThanOrEqualTo(10));
+        // Should prefer higher-scored files
+        expect(
+          result.any((m) => m.file.uploadedFileID == 19),
+          isTrue,
+          reason: 'Highest-scored file should be selected',
+        );
+      },
+    );
 
     test('timeBuckets distribution spreads across time range', () async {
       final memories = List.generate(30, (i) {
@@ -1112,7 +1092,7 @@ void main() {
         memories,
         SelectionConfig(
           targetSize: 10,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           fileIDToImageEmbedding: embMap,
           scores: scores,
           distribution: SelectionDistribution.timeBuckets,
@@ -1164,7 +1144,7 @@ void main() {
         memories,
         SelectionConfig(
           targetSize: 10,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           fileIDToImageEmbedding: embMap,
           scores: scores,
           distribution: SelectionDistribution.yearRoundRobin,
@@ -1207,7 +1187,7 @@ void main() {
         ),
         SelectionConfig(
           targetSize: 10,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           fileIDToImageEmbedding: embMap,
           scores: scores,
           distribution: SelectionDistribution.none,
@@ -1235,7 +1215,7 @@ void main() {
         ),
         SelectionConfig(
           targetSize: 10,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           fileIDToImageEmbedding: embMap,
           scores: scores,
           distribution: SelectionDistribution.none,

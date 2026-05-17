@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	downloadHost = "https://files.ente.io/?fileID="
+	downloadHost = "https://files.ente.com/?fileID="
 )
 
 func downloadUrl(fileID int64) string {

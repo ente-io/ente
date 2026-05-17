@@ -14,9 +14,12 @@ struct MessageInputView: View {
     let editingMessage: RenderedChatMessage?
     let isProcessingAttachments: Bool
     let isAttachmentDownloadBlocked: Bool
+    let voiceInputState: VoiceInputState
+    let moveCursorToEndToken: UUID
     let onSend: () -> Void
     let onStop: () -> Void
     let onCancelEdit: () -> Void
+    let onVoiceInput: () -> Void
     let onAddImage: (Data, String?) -> Void
     let onAddDocument: (URL) -> Void
     let onRemoveAttachment: (ChatAttachment) -> Void
@@ -62,7 +65,10 @@ struct MessageInputView: View {
 
                 VStack(alignment: .leading, spacing: inputStackSpacing) {
                     if !attachments.isEmpty {
-                        let maxAttachmentHeight = CGFloat(3) * 40 + CGFloat(2) * EnsuSpacing.sm
+                        let hasImageAttachment = attachments.contains { $0.kind == .image }
+                        let maxAttachmentHeight = hasImageAttachment
+                            ? CGFloat(2) * 76 + EnsuSpacing.sm
+                            : CGFloat(3) * 40 + CGFloat(2) * EnsuSpacing.sm
                         let shouldScroll = attachments.count > 4
 
                         Group {
@@ -85,6 +91,33 @@ struct MessageInputView: View {
                         Text("Reading attachment...")
                             .font(EnsuTypography.small)
                             .foregroundStyle(EnsuColor.textMuted)
+                        Spacer()
+                    }
+                    .padding(.horizontal, EnsuSpacing.pageHorizontal)
+                }
+
+                if let voiceStatus = voiceInputState.statusText {
+                    HStack(spacing: EnsuSpacing.sm) {
+                        switch voiceInputState {
+                        case .downloading, .transcribing:
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        case .recording:
+                            Image("Mic02Icon")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 14, height: 14)
+                                .foregroundStyle(EnsuColor.stopButton)
+                        case .error:
+                            Image(systemName: "exclamationmark.circle")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(EnsuColor.stopButton)
+                        case .idle, .unsupported:
+                            EmptyView()
+                        }
+                        Text(voiceStatus)
+                            .font(EnsuTypography.small)
+                            .foregroundStyle(voiceInputState.isError ? EnsuColor.stopButton : EnsuColor.textMuted)
                         Spacer()
                     }
                     .padding(.horizontal, EnsuSpacing.pageHorizontal)
@@ -118,8 +151,18 @@ struct MessageInputView: View {
                                 inputResetToken = UUID()
                             }
                         }
+                        #if os(iOS)
+                        .background(
+                            CursorEndSynchronizer(
+                                token: moveCursorToEndToken,
+                                text: text
+                            )
+                            .frame(width: 0, height: 0)
+                        )
+                        #endif
 
                     if EnsuFeatureFlags.enableImageUploads && editingMessage == nil {
+                        let canUseAttachment = !isGenerating && !isDownloading && !isAttachmentDownloadBlocked
                         PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                             Image("Upload01Icon")
                                 .resizable()
@@ -127,8 +170,8 @@ struct MessageInputView: View {
                                 .frame(width: attachmentIconSize, height: attachmentIconSize)
                                 .frame(width: 32, height: 32, alignment: .center)
                         }
-                        .disabled(isGenerating || isDownloading || isAttachmentDownloadBlocked)
-                        .foregroundStyle(EnsuColor.textMuted)
+                        .disabled(!canUseAttachment)
+                        .foregroundStyle(canUseAttachment ? EnsuColor.textPrimary : EnsuColor.textMuted)
                         .simultaneousGesture(TapGesture().onEnded {
                             hapticTap()
                         })
@@ -148,6 +191,48 @@ struct MessageInputView: View {
                                 }
                             }
                         }
+                    }
+
+                    if voiceInputState != .unsupported && editingMessage == nil {
+                        let isVoiceBusy = voiceInputState.isTranscriptionBusy
+                        let canUseVoice = voiceInputState.isRecording ||
+                            (!isGenerating && !isDownloading && !isAttachmentDownloadBlocked && !isVoiceBusy)
+
+                        Button {
+                            if voiceInputState.isRecording {
+                                hapticWarning()
+                            } else {
+                                hapticTap()
+                                isFocused = false
+                                hideKeyboard()
+                                onDismissKeyboard()
+                            }
+                            onVoiceInput()
+                        } label: {
+                            if isVoiceBusy {
+                                ProgressView()
+                                    .scaleEffect(0.75)
+                                    .frame(width: 32, height: 32)
+                            } else if voiceInputState.isRecording {
+                                Image("StopIcon")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: attachmentIconSize, height: attachmentIconSize)
+                                    .foregroundStyle(EnsuColor.stopButton)
+                                    .frame(width: 32, height: 32)
+                            } else {
+                                Image("Mic02Icon")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: attachmentIconSize, height: attachmentIconSize)
+                                    .foregroundStyle(canUseVoice ? EnsuColor.textPrimary : EnsuColor.textMuted)
+                                    .frame(width: 32, height: 32)
+                            }
+                        }
+                        .disabled(!canUseVoice)
+                        #if os(macOS)
+                        .buttonStyle(.plain)
+                        #endif
                     }
 
                     Button {
@@ -247,13 +332,25 @@ struct MessageInputView: View {
     private var attachmentFlowLayout: some View {
         FlowLayout(spacing: EnsuSpacing.sm) {
             ForEach(attachments) { attachment in
-                AttachmentChip(
-                    name: attachment.name,
-                    size: attachment.formattedSize,
-                    icon: attachment.iconName,
-                    isUploading: attachment.isUploading
-                ) {
-                    onRemoveAttachment(attachment)
+                if attachment.kind == .image, attachment.url != nil {
+                    ImageAttachmentThumbnail(
+                        url: attachment.url,
+                        accessibilityLabel: attachment.name,
+                        width: 76,
+                        height: 76,
+                        isUploading: attachment.isUploading
+                    ) {
+                        onRemoveAttachment(attachment)
+                    }
+                } else {
+                    AttachmentChip(
+                        name: attachment.name,
+                        size: attachment.formattedSize,
+                        icon: attachment.iconName,
+                        isUploading: attachment.isUploading
+                    ) {
+                        onRemoveAttachment(attachment)
+                    }
                 }
             }
         }
@@ -328,6 +425,93 @@ struct InputBarHeightKey: PreferenceKey {
         value = nextValue()
     }
 }
+
+#if os(iOS)
+private struct CursorEndSynchronizer: UIViewRepresentable {
+    let token: UUID
+    let text: String
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        guard context.coordinator.lastToken != token else { return }
+        context.coordinator.lastToken = token
+
+        DispatchQueue.main.async {
+            Self.moveCursorToEnd(from: uiView, text: text)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            Self.moveCursorToEnd(from: uiView, text: text)
+        }
+    }
+
+    private static func moveCursorToEnd(from view: UIView, text: String) {
+        var currentView: UIView? = view
+        while let candidate = currentView {
+            let inputs = candidate.cursorEndTextInputs()
+            let target = inputs.first(where: { $0.isFirstResponder }) ??
+                inputs.first(where: { $0.cursorText == text })
+            if let target {
+                target.moveCursorToEnd()
+                return
+            }
+            currentView = candidate.superview
+        }
+    }
+
+    final class Coordinator {
+        var lastToken: UUID?
+    }
+}
+
+private protocol CursorEndTextInput: AnyObject {
+    var cursorText: String { get }
+    var isFirstResponder: Bool { get }
+    func moveCursorToEnd()
+}
+
+extension UITextField: CursorEndTextInput {
+    var cursorText: String {
+        text ?? ""
+    }
+
+    func moveCursorToEnd() {
+        let end = endOfDocument
+        selectedTextRange = textRange(from: end, to: end)
+    }
+}
+
+extension UITextView: CursorEndTextInput {
+    var cursorText: String {
+        text ?? ""
+    }
+
+    func moveCursorToEnd() {
+        selectedRange = NSRange(location: (text as NSString).length, length: 0)
+    }
+}
+
+private extension UIView {
+    func cursorEndTextInputs() -> [CursorEndTextInput] {
+        var inputs: [CursorEndTextInput] = []
+        if let input = self as? CursorEndTextInput {
+            inputs.append(input)
+        }
+        for subview in subviews {
+            inputs.append(contentsOf: subview.cursorEndTextInputs())
+        }
+        return inputs
+    }
+}
+#endif
 #else
 import SwiftUI
 

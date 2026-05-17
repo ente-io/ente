@@ -22,7 +22,7 @@ your iCloud library and import.
 
 ## Importing iCloud shared albums
 
-iCloud shared albums use reduced-quality copies of your photos and videos — they
+iCloud shared albums use reduced-quality copies of your photos and videos - they
 are **not** the same as your original files. Apple downscales photos to 2,048
 pixels on the long edge and caps videos at 720p / 15 minutes. Location data,
 captions, and original dates are also stripped.
@@ -59,7 +59,7 @@ This is the recommended path, as it preserves full quality and metadata.
 ## Importing iCloud Shared Photo Library
 
 iCloud Shared Photo Library lets one organiser share a photo library with up to
-five other people. Ente does not have an exact equivalent — instead, Ente
+five other people. Ente does not have an exact equivalent - instead, Ente
 supports shared and collaborative albums on a per-album basis.
 
 On iPhone or iPad running iOS 16.1 or later, Shared Library photos are available

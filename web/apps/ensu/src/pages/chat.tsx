@@ -155,9 +155,6 @@ const randomLoadingPhrase = () => {
 
 const MEDIA_MARKER = "<__media__>";
 const IMAGE_TOKEN_ESTIMATE = 768;
-const MAX_INFERENCE_IMAGE_PIXELS = 1_500_000;
-const MAX_INFERENCE_IMAGE_LONG_EDGE = 2048;
-const INFERENCE_IMAGE_QUALITY = 0.92;
 const IMAGE_SELECTOR_EXTENSIONS = [
     "png",
     "jpg",
@@ -275,267 +272,16 @@ const buildPromptWithDocuments = (
     return promptText ? `${promptText}\n\n${blocks}` : blocks;
 };
 
-const sanitizeImageExtension = (filename?: string) => {
-    if (!filename) return undefined;
-    const extension = filename.split(".").pop();
-    if (!extension) return undefined;
-    const cleaned = extension.replace(/[^a-z0-9]+/gi, "");
-    return cleaned || undefined;
-};
-
-const isJpegExtension = (extension?: string) => {
-    const lower = extension?.toLowerCase();
-    return lower === "jpg" || lower === "jpeg";
-};
-
-const prepareInferenceImageBytes = async (
-    image: ImageAttachment,
-    maxPixels: number,
-) => {
-    const originalBytes = new Uint8Array(await image.file.arrayBuffer());
-    const originalExtension = sanitizeImageExtension(image.name);
-
-    if (typeof document === "undefined") {
-        return { bytes: originalBytes, extension: originalExtension };
-    }
-
-    const encodeToJpeg = async (
-        width: number,
-        height: number,
-        draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void,
-    ) => {
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-            return null;
-        }
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-        draw(ctx, width, height);
-        const blob = await new Promise<Blob>((resolve, reject) => {
-            canvas.toBlob(
-                (result) => {
-                    if (result) {
-                        resolve(result);
-                    } else {
-                        reject(new Error("Failed to encode image"));
-                    }
-                },
-                "image/jpeg",
-                INFERENCE_IMAGE_QUALITY,
-            );
-        });
-        const bytes = new Uint8Array(await blob.arrayBuffer());
-        return {
-            bytes,
-            extension: "jpg" as const,
-            resizedWidth: width,
-            resizedHeight: height,
-        };
-    };
-
-    const resizeToJpeg = async (
-        width: number,
-        height: number,
-        draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void,
-    ) => {
-        const totalPixels = width * height;
-        const maxPixelCount = Math.max(1, maxPixels);
-        const longestEdge = Math.max(width, height);
-
-        const areaScale =
-            totalPixels > maxPixelCount
-                ? Math.sqrt(maxPixelCount / totalPixels)
-                : 1;
-        const edgeScale =
-            longestEdge > MAX_INFERENCE_IMAGE_LONG_EDGE
-                ? MAX_INFERENCE_IMAGE_LONG_EDGE / longestEdge
-                : 1;
-
-        const scale = Math.min(1, areaScale, edgeScale);
-        if (scale >= 0.999) {
-            return null;
-        }
-
-        const targetWidth = Math.max(1, Math.round(width * scale));
-        const targetHeight = Math.max(1, Math.round(height * scale));
-        return encodeToJpeg(targetWidth, targetHeight, draw);
-    };
-
-    const loadImage = async () => {
-        return await new Promise<HTMLImageElement>((resolve, reject) => {
-            const url = URL.createObjectURL(image.file);
-            const img = new Image();
-            const cleanup = () => URL.revokeObjectURL(url);
-            img.onload = () => {
-                cleanup();
-                resolve(img);
-            };
-            img.onerror = () => {
-                cleanup();
-                reject(new Error("Failed to decode image"));
-            };
-            img.src = url;
-        });
-    };
-
-    try {
-        const img = await loadImage();
-        const { width, height } = img;
-        if (!width || !height) {
-            throw new Error("Decoded image has invalid dimensions");
-        }
-        const resized = await resizeToJpeg(width, height, (ctx, w, h) => {
-            ctx.drawImage(img, 0, 0, w, h);
-        });
-        if (resized) {
-            log.info("Prepared inference image", {
-                id: image.id,
-                name: image.name,
-                maxPixels,
-                originalWidth: width,
-                originalHeight: height,
-                resizedWidth: resized.resizedWidth,
-                resizedHeight: resized.resizedHeight,
-                originalBytes: originalBytes.length,
-                resizedBytes: resized.bytes.length,
-            });
-            return { bytes: resized.bytes, extension: resized.extension };
-        }
-        if (width * height > maxPixels) {
-            throw new Error("Image too large to resize for inference");
-        }
-
-        if (isJpegExtension(originalExtension)) {
-            log.info("Prepared inference image (no resize)", {
-                id: image.id,
-                name: image.name,
-                maxPixels,
-                width,
-                height,
-                bytes: originalBytes.length,
-            });
-            return { bytes: originalBytes, extension: originalExtension };
-        }
-
-        const converted = await encodeToJpeg(width, height, (ctx, w, h) => {
-            ctx.drawImage(img, 0, 0, w, h);
-        });
-
-        if (converted) {
-            log.info("Prepared inference image (format normalized)", {
-                id: image.id,
-                name: image.name,
-                maxPixels,
-                width,
-                height,
-                originalBytes: originalBytes.length,
-                resizedBytes: converted.bytes.length,
-                originalExtension,
-            });
-            return { bytes: converted.bytes, extension: converted.extension };
-        }
-
-        return { bytes: originalBytes, extension: originalExtension };
-    } catch (error) {
-        log.error("Failed to decode image for inference", error);
-        if (typeof createImageBitmap !== "undefined") {
-            try {
-                const bitmap = await createImageBitmap(image.file);
-                try {
-                    const resized = await resizeToJpeg(
-                        bitmap.width,
-                        bitmap.height,
-                        (ctx, w, h) => {
-                            ctx.drawImage(bitmap, 0, 0, w, h);
-                        },
-                    );
-                    if (resized) {
-                        log.info("Prepared inference image (bitmap fallback)", {
-                            id: image.id,
-                            name: image.name,
-                            originalWidth: bitmap.width,
-                            originalHeight: bitmap.height,
-                            resizedWidth: resized.resizedWidth,
-                            resizedHeight: resized.resizedHeight,
-                            originalBytes: originalBytes.length,
-                            resizedBytes: resized.bytes.length,
-                        });
-                        return {
-                            bytes: resized.bytes,
-                            extension: resized.extension,
-                        };
-                    }
-                    if (bitmap.width * bitmap.height > maxPixels) {
-                        throw new Error(
-                            "Image too large to resize for inference",
-                        );
-                    }
-
-                    if (isJpegExtension(originalExtension)) {
-                        log.info(
-                            "Prepared inference image (bitmap no resize)",
-                            {
-                                id: image.id,
-                                name: image.name,
-                                width: bitmap.width,
-                                height: bitmap.height,
-                                bytes: originalBytes.length,
-                            },
-                        );
-                        return {
-                            bytes: originalBytes,
-                            extension: originalExtension,
-                        };
-                    }
-
-                    const converted = await encodeToJpeg(
-                        bitmap.width,
-                        bitmap.height,
-                        (ctx, w, h) => {
-                            ctx.drawImage(bitmap, 0, 0, w, h);
-                        },
-                    );
-
-                    if (converted) {
-                        log.info(
-                            "Prepared inference image (bitmap format normalized)",
-                            {
-                                id: image.id,
-                                name: image.name,
-                                width: bitmap.width,
-                                height: bitmap.height,
-                                originalBytes: originalBytes.length,
-                                resizedBytes: converted.bytes.length,
-                                originalExtension,
-                            },
-                        );
-                        return {
-                            bytes: converted.bytes,
-                            extension: converted.extension,
-                        };
-                    }
-
-                    return {
-                        bytes: originalBytes,
-                        extension: originalExtension,
-                    };
-                } finally {
-                    bitmap.close();
-                }
-            } catch (bitmapError) {
-                log.error(
-                    "Failed to resize image with ImageBitmap",
-                    bitmapError,
-                );
-            }
-        }
-        throw error instanceof Error
-            ? error
-            : new Error("Unable to prepare image for inference");
-    }
+const normalizedJpegAttachmentName = (filename?: string) => {
+    const raw =
+        filename
+            ?.replace(/\0/g, "")
+            .replace(/\\/g, "/")
+            .split("/")
+            .pop()
+            ?.trim() || "image";
+    const base = raw.replace(/\.[^/.]+$/, "").trim() || "image";
+    return `${base}.jpg`;
 };
 
 const formatBytes = (bytes: number) => {
@@ -843,6 +589,10 @@ const Page: React.FC = () => {
     const [pendingImagePreviews, setPendingImagePreviews] = useState<
         Record<string, string>
     >({});
+    const [imagePreview, setImagePreview] = useState<{
+        url: string;
+        name: string;
+    } | null>(null);
     const [downloadStatus, setDownloadStatus] =
         useState<DownloadProgress | null>(null);
     const [loadedModelName, setLoadedModelName] = useState<string | null>(null);
@@ -873,6 +623,7 @@ const Page: React.FC = () => {
     const inputRef = useRef<HTMLTextAreaElement | null>(null);
     const attachmentPreviewUrlsRef = useRef<Record<string, string>>({});
     const pendingPreviewUrlsRef = useRef<Record<string, string>>({});
+    const imagePreviewUrlRef = useRef<string | null>(null);
     const attachmentPreviewInFlightRef = useRef<Record<string, Promise<void>>>(
         {},
     );
@@ -2208,13 +1959,10 @@ const Page: React.FC = () => {
 
             const paths = await Promise.all(
                 images.map(async (image) => {
-                    const { bytes, extension } =
-                        await prepareInferenceImageBytes(
-                            image,
-                            MAX_INFERENCE_IMAGE_PIXELS,
-                        );
-                    const suffix = extension ? `.${extension}` : ".jpg";
-                    const path = await join(dir, `${image.id}${suffix}`);
+                    const bytes = new Uint8Array(
+                        await image.file.arrayBuffer(),
+                    );
+                    const path = await join(dir, `${image.id}.jpg`);
                     await writeBinaryFile({ path, contents: bytes });
                     return path;
                 }),
@@ -2429,6 +2177,20 @@ const Page: React.FC = () => {
             showMiniDialog({ title: "Model error", message });
         }
     }, [ensureProvider, formatErrorMessage, getModelSettings, showMiniDialog]);
+
+    const prewarmSelectedImageInference = useCallback(() => {
+        if (!isTauriRuntime) return;
+        void (async () => {
+            try {
+                const provider = await ensureProvider();
+                await provider.prewarmImageInferenceIfAvailable(
+                    getModelSettings(),
+                );
+            } catch (error) {
+                log.error("Failed to prewarm image inference", error);
+            }
+        })();
+    }, [ensureProvider, getModelSettings, isTauriRuntime]);
 
     useEffect(() => {
         if (!firstPaintDone) return;
@@ -2825,6 +2587,14 @@ const Page: React.FC = () => {
         [showToast],
     );
 
+    const closeImagePreview = useCallback(() => {
+        setImagePreview(null);
+        if (imagePreviewUrlRef.current) {
+            URL.revokeObjectURL(imagePreviewUrlRef.current);
+            imagePreviewUrlRef.current = null;
+        }
+    }, []);
+
     const handleOpenAttachment = useCallback(
         async (message: ChatMessage, attachment: ChatAttachment) => {
             if (!chatKey) return;
@@ -2847,6 +2617,20 @@ const Page: React.FC = () => {
                       : baseName.includes(".")
                         ? `${baseName.replace(/\.[^/.]+$/, "")}.txt`
                         : `${baseName}.txt`;
+
+                if (treatAsImage) {
+                    const mime = inferImageMime(baseName);
+                    const blob = new Blob([toSafeBlobPart(bytes)], {
+                        type: mime,
+                    });
+                    const url = URL.createObjectURL(blob);
+                    if (imagePreviewUrlRef.current) {
+                        URL.revokeObjectURL(imagePreviewUrlRef.current);
+                    }
+                    imagePreviewUrlRef.current = url;
+                    setImagePreview({ url, name: baseName });
+                    return;
+                }
 
                 if (isTauriRuntime) {
                     const [
@@ -2885,12 +2669,6 @@ const Page: React.FC = () => {
                     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
                     return;
                 }
-
-                const mime = inferImageMime(baseName);
-                const blob = new Blob([toSafeBlobPart(bytes)], { type: mime });
-                const url = URL.createObjectURL(blob);
-                window.open(url, "_blank", "noopener");
-                window.setTimeout(() => URL.revokeObjectURL(url), 1000);
             } catch (error) {
                 log.error("Failed to open attachment", error);
                 showMiniDialog({
@@ -2902,6 +2680,15 @@ const Page: React.FC = () => {
         },
         [chatKey, inferImageMime, isTauriRuntime, showMiniDialog],
     );
+
+    useEffect(() => {
+        return () => {
+            if (imagePreviewUrlRef.current) {
+                URL.revokeObjectURL(imagePreviewUrlRef.current);
+                imagePreviewUrlRef.current = null;
+            }
+        };
+    }, []);
 
     const flushStreamingText = useCallback(() => {
         if (streamingFlushTimerRef.current) {
@@ -3769,22 +3556,34 @@ const Page: React.FC = () => {
                 return;
             }
 
-            const { readBinaryFile } = await import("@tauri-apps/api/fs");
+            const { invoke } = await import("@tauri-apps/api/tauri");
             const files = await Promise.all(
                 selectedPaths.map(async (selectedPath) => {
                     const normalized = selectedPath.replace(/\\/g, "/");
                     const name =
                         normalized.split("/").pop()?.replace(/\0/g, "") ||
                         "image";
-                    const bytes = await readBinaryFile(selectedPath);
-                    return new File([toSafeBlobPart(bytes)], name, {
-                        type: inferImageMime(name),
-                    });
+                    const compressed = await invoke<number[]>(
+                        "chat_db_compress_attachment_image_file",
+                        { path: selectedPath },
+                    );
+                    const bytes = new Uint8Array(compressed);
+                    return new File(
+                        [toSafeBlobPart(bytes)],
+                        normalizedJpegAttachmentName(name),
+                        { type: "image/jpeg" },
+                    );
                 }),
             );
 
+            log.info("Compressed selected image attachments", {
+                count: files.length,
+                totalBytes: files.reduce((sum, file) => sum + file.size, 0),
+            });
+
             if (files.length > 0) {
                 handleImageSelect(files);
+                prewarmSelectedImageInference();
             } else {
                 handleImageCancel();
             }
@@ -3799,7 +3598,7 @@ const Page: React.FC = () => {
         closeAttachmentMenu,
         handleImageCancel,
         handleImageSelect,
-        inferImageMime,
+        prewarmSelectedImageInference,
         showMiniDialog,
     ]);
 
@@ -4455,6 +4254,8 @@ const Page: React.FC = () => {
                 setSyncNotificationOpen={setSyncNotificationOpen}
                 syncNotification={syncNotification}
                 modelGateStatus={modelGateStatus}
+                imagePreview={imagePreview}
+                closeImagePreview={closeImagePreview}
             />
         </>
     );

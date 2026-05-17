@@ -11,9 +11,10 @@ private val Context.endpointPreferences by preferencesDataStore("ensu_developer_
 
 class EndpointPreferencesDataStore(private val context: Context) {
     private val endpointKey = stringPreferencesKey("custom_endpoint")
+    private val legacyProductionEndpoint = "https://api.ente.io"
 
     val endpointFlow: Flow<String?> = context.endpointPreferences.data.map { prefs ->
-        prefs[endpointKey]
+        prefs[endpointKey]?.takeUnless { it == legacyProductionEndpoint }
     }
 
     suspend fun setEndpoint(endpoint: String?) {

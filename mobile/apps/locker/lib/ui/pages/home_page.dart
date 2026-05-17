@@ -14,6 +14,7 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/opened_settings_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -653,7 +654,12 @@ class _HomePageState extends UploaderPageState<HomePage>
                   child: _settingsPage,
                 ),
                 drawerEnableOpenDragGesture: true,
-                onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
+                onDrawerChanged: (isOpened) {
+                  _isSettingsOpen = isOpened;
+                  if (isOpened) {
+                    Bus.instance.fire(OpenedSettingsEvent());
+                  }
+                },
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,

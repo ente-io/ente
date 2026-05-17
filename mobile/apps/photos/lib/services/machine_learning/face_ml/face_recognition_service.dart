@@ -53,8 +53,8 @@ class FaceRecognitionService {
     if (_isSyncing) {
       return;
     }
-    if (isOfflineMode) {
-      _logger.finest("Skipping person feedback sync in offline mode");
+    if (isLocalGalleryMode) {
+      _logger.finest("Skipping person feedback sync in local gallery mode");
       return;
     }
     _isSyncing = true;
@@ -154,12 +154,7 @@ class FaceRecognitionService {
 
       // Add detected faces to the faceResults
       for (var i = 0; i < faces.length; i++) {
-        faceResults.add(
-          FaceResult.fromFaceDetection(
-            faces[i],
-            fileID,
-          ),
-        );
+        faceResults.add(FaceResult.fromFaceDetection(faces[i], fileID));
       }
 
       return faces;
@@ -181,11 +176,7 @@ class FaceRecognitionService {
   ) async {
     try {
       final (alignedFaces, alignmentResults, _, blurValues, _) =
-          await preprocessToMobileFaceNetFloat32List(
-        dim,
-        rawRgbaBytes,
-        faces,
-      );
+          await preprocessToMobileFaceNetFloat32List(dim, rawRgbaBytes, faces);
 
       // Store the results
       if (alignmentResults.length != faces.length) {

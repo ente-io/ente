@@ -3,11 +3,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { Album02Icon, Folder01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import GoogleIcon from "@mui/icons-material/Google";
-import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
-import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
 import {
     Box,
     CircularProgress,
@@ -1224,7 +1224,9 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                 <RoundedButtonStack>
                     {intent != "import" && (
                         <RowButton
-                            startIcon={<ImageOutlinedIcon />}
+                            startIcon={
+                                <HugeiconsIcon icon={Album02Icon} size={20} />
+                            }
                             endIcon={
                                 pendingUploadType == "files" ? (
                                     <PendingIndicator />
@@ -1232,12 +1234,14 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                                     <ChevronRightIcon />
                                 )
                             }
-                            label={t("file")}
+                            label={t("files")}
                             onClick={() => onSelect("files")}
                         />
                     )}
                     <RowButton
-                        startIcon={<PermMediaOutlinedIcon />}
+                        startIcon={
+                            <HugeiconsIcon icon={Folder01Icon} size={20} />
+                        }
                         endIcon={
                             pendingUploadType == "folders" ? (
                                 <PendingIndicator />

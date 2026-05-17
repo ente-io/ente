@@ -234,16 +234,6 @@
   "after1Month": "Na 1 maand",
   "after1Year": "Na 1 jaar",
   "manageParticipants": "Beheren",
-  "albumParticipantsCount": "{count, plural, =0 {Geen deelnemers} =1 {1 deelnemer} other {{count} deelnemers}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Maak een link waarmee mensen foto's in jouw gedeelde album kunnen toevoegen en bekijken zonder dat ze daarvoor een Ente app of account nodig hebben. Handig voor het verzamelen van foto's van evenementen.",
   "collectPhotos": "Foto's verzamelen",
   "collaborativeLink": "Gezamenlijke link",
@@ -257,15 +247,6 @@
   "publicLinkEnabled": "Publieke link ingeschakeld",
   "shareALink": "Deel een link",
   "sharedAlbumSectionDescription": "Maak gedeelde en collaboratieve albums met andere Ente gebruikers, inclusief gebruikers met gratis abonnementen.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Deel met specifieke mensen} =1 {Gedeeld met 1 persoon} other {Gedeeld met {numberOfPeople} mensen}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Dit is uw verificatie-ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Iemand die albums met je deelt zou hetzelfde ID op hun apparaat moeten zien.",
   "howToViewShareeVerificationID": "Vraag hen om hun e-mailadres lang in te drukken op het instellingenscherm en te controleren dat de ID's op beide apparaten overeenkomen.",
@@ -562,6 +543,17 @@
     }
   },
   "familyPlans": "Familie abonnement",
+  "enterAValidEmailAddress": "Vul een geldig e-mailadres in",
+  "thisUserIsNotOnEnte": "Dit is geen gebruiker van Ente",
+  "members": "Leden",
+  "editStorageLimit": "Bewerk opslag limiet",
+  "noLimitSet": "Geen limiet ingesteld",
+  "removeFromFamily": "Verwijder uit familie",
+  "removeMemberConfirmTitle": "Lid verwijderen?",
+  "resendInvite": "Uitnodiging opnieuw verzenden",
+  "revokeInviteConfirmTitle": "Uitnodiging intrekken?",
+  "revoke": "Intrekken",
+  "inviteResent": "Uitnodiging opnieuw verstuurd",
   "referrals": "Referenties",
   "notifications": "Meldingen",
   "advanced": "Geavanceerd",
@@ -592,6 +584,10 @@
   "reportBug": "Fout melden",
   "suggestFeatures": "Features voorstellen",
   "support": "Ondersteuning",
+  "message": "Bericht",
+  "deviceInfo": "Apparaat informatie",
+  "export": "Exporteren",
+  "copied": "Gekopieerd",
   "theme": "Thema",
   "lightTheme": "Licht",
   "darkTheme": "Donker",
@@ -663,7 +659,16 @@
   "playstoreSubscription": "PlayStore abonnement",
   "appstoreSubscription": "PlayStore abonnement",
   "subAlreadyLinkedErrMessage": "Jouw {id} is al aan een ander Ente account gekoppeld.\nAls je jouw {id} wilt gebruiken met dit account, neem dan contact op met onze klantenservice",
-  "visitWebToManage": "Bezoek alstublieft web.ente.io om uw abonnement te beheren",
+  "visitWebToManage": "Bezoek alstublieft {webUrl} om uw abonnement te beheren",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "Kon abonnement niet wijzigen",
   "paymentFailed": "Betaling mislukt",
   "paymentFailedTalkToProvider": "Praat met {providerName} klantenservice als u in rekening bent gebracht",
@@ -686,6 +691,11 @@
   "youAreOnAFamilyPlan": "U bent onderdeel van een familie abonnement!",
   "contactFamilyAdmin": "Neem contact op met <green>{familyAdminEmail}</green> om uw abonnement te beheren",
   "leaveFamily": "Familie abonnement verlaten",
+  "needHelpContact": "Hulp nodig? Contact ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Weet u zeker dat u het familie abonnement wilt verlaten?",
   "leave": "Verlaten",
   "rateTheApp": "Beoordeel de app",
@@ -780,14 +790,6 @@
   "share": "Delen",
   "unhideToAlbum": "Zichtbaar maken in album",
   "restoreToAlbum": "Terugzetten naar album",
-  "moveItem": "{count, plural, =1 {Bestand verplaatsen} other {Bestanden verplaatsen}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {Bestand toevoegen} other {Bestanden toevoegen}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Maak of selecteer album",
   "selectAlbum": "Album selecteren",
   "searchByAlbumNameHint": "Albumnaam",
@@ -812,16 +814,6 @@
   "referFriendsAnd2xYourPlan": "Verwijs vrienden en 2x uw abonnement",
   "shareAlbumHint": "Open een album en tik op de deelknop rechts bovenaan om te delen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Bestanden tonen het aantal resterende dagen voordat ze permanent worden verwijderd",
-  "trashDaysLeft": "{count, plural, =0 {Binnenkort} =1 {1 dag} other {{count} dagen}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Alles Verwijderen",
   "renameAlbum": "Albumnaam wijzigen",
   "convertToAlbum": "Omzetten naar album",
@@ -885,7 +877,6 @@
   "authToViewYourMemories": "Graag verifiëren om uw herinneringen te bekijken",
   "unlock": "Ontgrendelen",
   "freeUpSpace": "Ruimte vrijmaken",
-  "freeUpSpaceSaving": "{count, plural, =1 {Het kan verwijderd worden van het apparaat om {formattedSize} vrij te maken} other {Ze kunnen verwijderd worden van het apparaat om {formattedSize} vrij te maken}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 bestand} other {{formattedNumber} bestanden}} in dit album is veilig geback-upt",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -913,18 +904,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Je hebt nog steeds toegang tot {count, plural, =1 {het} other {ze}} op Ente zolang je een actief abonnement hebt",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1022,7 +1001,16 @@
   "loadMessage5": "Onze broncode en cryptografie zijn extern gecontroleerd en geverifieerd",
   "loadMessage6": "Je kunt links naar je albums delen met je dierbaren",
   "loadMessage7": "Onze mobiele apps draaien op de achtergrond om alle nieuwe foto's die je maakt te versleutelen en te back-uppen",
-  "loadMessage8": "web.ente.io heeft een vlotte uploader",
+  "loadMessage8": "{webUrl} heeft een vlotte uploader",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "We gebruiken Xchacha20Poly1305 om uw gegevens veilig te versleutelen",
   "photoDescriptions": "Foto beschrijvingen",
   "fileTypesAndNames": "Bestandstypen en namen",
@@ -1239,7 +1227,16 @@
   "playOnTv": "Album afspelen op TV",
   "pair": "Koppelen",
   "deviceNotFound": "Apparaat niet gevonden",
-  "castInstruction": "Bezoek cast.ente.io op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen.",
+  "castInstruction": "Bezoek {castUrl} op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Voer de code in",
   "joinDiscord": "Join de Discord",
   "locations": "Locaties",
@@ -1249,8 +1246,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Mensen snel op naam zoeken",
-  "addViewers": "{count, plural, =0 {Kijker toevoegen} =1 {Kijker toevoegen} other {Kijkers toevoegen}}",
-  "addCollaborators": "{count, plural, =0 {Samenwerker toevoegen} =1 {Samenwerker toevoegen} other {Samenwerkers toevoegen}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Druk lang op een e-mail om de versleuteling te verifiëren.",
   "developerSettingsWarning": "Weet je zeker dat je de ontwikkelaarsinstellingen wilt wijzigen?",
   "developerSettings": "Ontwikkelaarsinstellingen",
@@ -1380,26 +1375,6 @@
   "enableMachineLearningBanner": "Schakel machine learning in voor magische zoekopdrachten en gezichtsherkenning",
   "searchDiscoverEmptySection": "Afbeeldingen worden hier getoond zodra verwerking en synchroniseren voltooid is",
   "searchPersonsEmptySection": "Personen worden hier getoond zodra verwerking en synchroniseren voltooid is",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 kijkers toegevoegd} =1 {1 kijker toegevoegd} other {{count} kijkers toegevoegd}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 samenwerkers toegevoegd} =1 {1 samenwerker toegevoegd} other {{count} samenwerkers toegevoegd}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "Account is al geconfigureerd.",
   "sessionIdMismatch": "Sessie ID komt niet overeen",
   "@sessionIdMismatch": {
@@ -1465,15 +1440,6 @@
   },
   "currentlyRunning": "momenteel bezig",
   "ignored": "genegeerd",
-  "photosCount": "{count, plural, =0 {0 foto's} =1 {1 foto} other {{count} foto's}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Bestand",
   "searchSectionsLengthMismatch": "Lengte van secties komt niet overeen: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1661,21 +1627,11 @@
   "moveSelectedPhotosToOneDate": "Verplaats de geselecteerde foto's naar één datum",
   "shiftDatesAndTime": "Verschuif datum en tijd",
   "photosKeepRelativeTimeDifference": "Foto's behouden relatief tijdsverschil",
-  "photocountPhotos": "{count, plural, =0 {Geen foto's} =1 {1 foto} other {{count} foto's}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "App icoon",
   "notThisPerson": "Niet dezelfde persoon?",
   "selectedItemsWillBeRemovedFromThisPerson": "Geselecteerde bestanden worden van deze persoon verwijderd, maar niet uit uw bibliotheek verwijderd.",
   "throughTheYears": "{dateFormat} door de jaren",
   "thisWeekThroughTheYears": "Deze week door de jaren",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Deze week, {count} jaar geleden} other {Deze week, {count} jaren geleden}}",
   "youAndThem": "Jij en {name}",
   "admiringThem": "{name} bewonderen",
   "embracingThem": "{name} omarmen",
@@ -1691,7 +1647,6 @@
   "spotlightOnThem": "Spotlicht op {name}",
   "personIsAge": "{name} is {age}!",
   "personTurningAge": "{name} wordt binnenkort {age}",
-  "lastTimeWithThem": "Laatste keer met {name}",
   "tripToLocation": "Reis naar {location}",
   "tripInYear": "Reis in {year}",
   "lastYearsTrip": "Reis van vorig jaar",
@@ -1777,15 +1732,6 @@
   "font": "Lettertype",
   "background": "Achtergrond",
   "align": "Uitlijnen",
-  "addedToAlbums": "{count, plural, =1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "Video's verwerkt",
   "totalVideos": "Totaal aantal video's",
   "skippedVideos": "Overgeslagen video's",
@@ -1803,14 +1749,6 @@
   "similarImages": "Soortgelijke afbeeldingen",
   "findSimilarImages": "Vind soortgelijke afbeeldingen",
   "noSimilarImagesFound": "Geen soortgelijke afbeeldingen gevonden",
-  "similarGroupsFound": "{count, plural, =1{{count} groep gevonden} other{{count} groepen gevonden}}",
-  "@similarGroupsFound": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "reviewAndRemoveSimilarImages": "Controleer en verwijder soortgelijke afbeeldingen",
   "deletePhotosWithSize": "Verwijder {count} foto's ({size})",
   "@deletePhotosWithSize": {

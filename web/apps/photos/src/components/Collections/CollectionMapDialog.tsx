@@ -23,7 +23,7 @@ import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
-    fileCreationTime,
+    fileCreationPhotoSortTime,
     fileLocation,
     ItemVisibility,
 } from "ente-media/file-metadata";
@@ -134,7 +134,7 @@ interface MapComponents {
  * - fileId: Unique identifier for the photo file
  * - lat: Latitude coordinate of the photo location
  * - lng: Longitude coordinate of the photo location
- * - timestamp: Unix timestamp (milliseconds) of when the photo was created
+ * - timestamp: Millisecond sort key in the local photo timeline.
  */
 
 interface MapIndexPoint {
@@ -149,7 +149,6 @@ interface MapPhotoPoint {
     lng: number;
     name: string;
     country: string;
-    timestamp: string;
     image: string;
     fileId: number;
 }
@@ -162,8 +161,9 @@ interface MapPhotoPoint {
  */
 
 /**
- * The small payload we attach to a point: fileId points to the photo, and timestamp keeps
- * enough context for sorting or choosing the freshest item in a cluster.
+ * The small payload we attach to a point: fileId points to the photo, and
+ * timestamp keeps enough local-photo timeline context for sorting or choosing
+ * the freshest item in a cluster.
  */
 interface MapPointProperties {
     fileId: number;
@@ -329,7 +329,7 @@ const buildMapIndexPoints = async (files: EnteFile[]) => {
         const loc = fileLocation(file);
         if (!loc) continue;
 
-        const timestamp = fileCreationTime(file);
+        const timestamp = fileCreationPhotoSortTime(file);
         points.push({
             fileId: file.id,
             lat: loc.latitude,
@@ -743,7 +743,7 @@ function useMapData(
                     //If the file was previously hidden then adding it back to the existing list.
                     const loc = fileLocation(file);
                     if (loc) {
-                        const timestamp = fileCreationTime(file);
+                        const timestamp = fileCreationPhotoSortTime(file);
                         mapPoints = [
                             ...prev.mapPoints,
                             {
@@ -2065,9 +2065,6 @@ const MapClusters = React.memo(function MapClusters({
                         lng,
                         name: "",
                         country: "",
-                        timestamp: new Date(
-                            leaf.properties.timestamp / 1000,
-                        ).toISOString(),
                         image: "",
                         fileId: leaf.properties.fileId,
                     };

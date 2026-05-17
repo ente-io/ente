@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{항목 없음} =1{1개 항목} other{{count}개 항목}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "컬렉션 만들기",
   "uploadDocumentTooltip": "문서 업로드",
   "restore": "복구",
@@ -470,15 +460,6 @@
   "linkDeviceLimit": "기기 제한",
   "expiredLinkInfo": "이 링크가 만료되었습니다. 새 만료 시간을 선택하거나 링크 만료를 비활성화해 주세요.",
   "linkExpiresOn": "링크가 {expiryTime}에 만료됩니다",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0{특정 사람들과 공유} =1{1명과 공유됨} other{{numberOfPeople}명과 공유됨}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "링크가 만료되었습니다",
   "publicLinkEnabled": "공개 링크 활성화됨",
   "shareALink": "링크 공유",
@@ -492,28 +473,6 @@
   "add": "추가",
   "collaboratorsCanAddFilesToTheSharedCollection": "협업자는 공유된 컬렉션에 항목을 추가할 수 있습니다.",
   "enterEmail": "이메일 입력",
-  "viewersSuccessfullyAdded": "{count, plural, =0{뷰어 0명 추가됨} =1{뷰어 1명 추가됨} other{뷰어 {count}명 추가됨}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0{협업자 0명 추가됨} =1{협업자 1명 추가됨} other{협업자 {count}명 추가됨}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0{뷰어 추가} =1{뷰어 추가} other{뷰어 추가}}",
-  "addCollaborators": "{count, plural, =0{협업자 추가} =1{협업자 추가} other{협업자 추가}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "이메일을 길게 눌러 종단간 암호화를 확인하세요.",
   "sharing": "공유 중...",
   "invalidEmailAddress": "잘못된 이메일 주소",
@@ -562,16 +521,6 @@
   "viewer": "뷰어",
   "collaborator": "협업자",
   "collaboratorsCanAddFilesToTheSharedAlbum": "협업자는 공유된 컬렉션에 항목을 추가할 수 있습니다.",
-  "albumParticipantsCount": "{count, plural, =0{참여자 없음} =1{참여자 1명} other{참여자 {count}명}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "더 추가",
   "you": "나",
   "albumOwner": "소유자",
@@ -679,16 +628,6 @@
   "clickHereToUpload": "여기를 클릭하여 업로드",
   "saveDocument": "문서 저장",
   "uploadFiles": "항목 업로드",
-  "filesSelected": "{count, plural, =0{선택된 항목 없음} =1{1개 항목 선택됨} other{{count}개 항목 선택됨}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "컬렉션에 추가",
   "newCollection": "새 컬렉션",
   "title": "제목",
@@ -707,16 +646,6 @@
     }
   },
   "informationCollectionName": "정보",
-  "recordSavedToMultipleCollections": "기록이 {count, plural, =1{1개 컬렉션} other{{count}개 컬렉션}}에 성공적으로 저장되었습니다",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName}이(가) 클립보드에 복사되었습니다",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -724,20 +653,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "\"{query}\"에 대한 {count, plural, =1{1개 결과} other{{count}개 결과}}",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -784,49 +699,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1개 컬렉션} other{{count}개 컬렉션}}이 영구적으로 삭제됩니다.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1개 항목} other{{count}개 항목}}이 영구적으로 삭제됩니다.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "항목도 모든 곳에서 삭제",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "예, {count, plural, =1{컬렉션} other{컬렉션}}을(를) 삭제합니다",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "예, {count, plural, =1{항목} other{항목}}을(를) 삭제합니다",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "사용량",
   "important": "중요",
@@ -835,16 +710,6 @@
   "markingAsImportant": "중요로 표시 중...",
   "fileMarkedAsImportant": "항목이 중요로 표시되었습니다",
   "fileRemovedFromImportant": "항목이 중요에서 제거되었습니다",
-  "filesMarkedAsImportant": "{count, plural, =1{1개 항목이 중요로 표시됨} other{{count}개 항목이 중요로 표시됨}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "모든 항목이 이미 중요로 표시되어 있습니다",
   "failedToMarkFilesAsImportant": "항목을 중요로 표시 실패: {error}",
   "@failedToMarkFilesAsImportant": {

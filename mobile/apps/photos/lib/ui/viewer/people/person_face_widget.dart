@@ -9,7 +9,7 @@ import "package:photos/db/offline_files_db.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
@@ -116,10 +116,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           return Stack(
             fit: StackFit.expand,
             children: [
-              Image(
-                image: imageProvider,
-                fit: BoxFit.cover,
-              ),
+              Image(image: imageProvider, fit: BoxFit.cover),
               if (kDebugMode && _showingFallback)
                 Positioned(
                   top: 4,
@@ -163,17 +160,16 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
             "faceCropFuture is null, no cover face found for person or cluster.",
           );
         }
-        return _EmptyPersonThumbnail(
-          initial: isPerson ? _personName : null,
-        );
+        return _EmptyPersonThumbnail(initial: isPerson ? _personName : null);
       },
     );
   }
 
   Future<Uint8List?> _loadFaceCrop() async {
     if (!widget.useFullFile) {
-      final Uint8List? thumbnailCrop =
-          await _getFaceCrop(useFullFile: widget.useFullFile);
+      final Uint8List? thumbnailCrop = await _getFaceCrop(
+        useFullFile: widget.useFullFile,
+      );
       if (thumbnailCrop != null) {
         _fallbackEverUsed = true;
       }
@@ -181,8 +177,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       return thumbnailCrop;
     }
 
-    final Uint8List? fullCrop =
-        await _getFaceCrop(useFullFile: widget.useFullFile);
+    final Uint8List? fullCrop = await _getFaceCrop(
+      useFullFile: widget.useFullFile,
+    );
     if (fullCrop != null) {
       _showingFallback = false;
       return fullCrop;
@@ -209,14 +206,16 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   Future<Uint8List?> _getFaceCrop({required bool useFullFile}) async {
     try {
       final String personOrClusterId = widget.personId ?? widget.clusterID!;
-      final tryInMemoryCachedCrop =
-          checkInMemoryCachedCropForPersonOrClusterID(personOrClusterId);
+      final tryInMemoryCachedCrop = checkInMemoryCachedCropForPersonOrClusterID(
+        personOrClusterId,
+      );
       if (tryInMemoryCachedCrop != null) return tryInMemoryCachedCrop;
       String? fixedFaceID;
       PersonEntity? personEntity;
-      final mlDataDB =
-          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-      if (isPerson && !isOfflineMode) {
+      final mlDataDB = isLocalGalleryMode
+          ? MLDataDB.localGalleryInstance
+          : MLDataDB.instance;
+      if (isPerson && !isLocalGalleryMode) {
         personEntity = await PersonService.instance.getPerson(widget.personId!);
         if (personEntity == null) {
           _logger.severe(
@@ -227,11 +226,12 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         _personName = personEntity.data.name;
         fixedFaceID = personEntity.data.avatarFaceID;
       }
-      fixedFaceID ??=
-          await checkUsedFaceIDForPersonOrClusterId(personOrClusterId);
+      fixedFaceID ??= await checkUsedFaceIDForPersonOrClusterId(
+        personOrClusterId,
+      );
 
       EnteFile? fileForFaceCrop;
-      if (isOfflineMode) {
+      if (isLocalGalleryMode) {
         final allFiles = await SearchService.instance.getAllFilesForSearch();
         final localIdToFile = <String, EnteFile>{};
         for (final file in allFiles) {
@@ -242,8 +242,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         }
         if (fixedFaceID != null) {
           final localIntId = getFileIdFromFaceId<int>(fixedFaceID);
-          final localId =
-              await OfflineFilesDB.instance.getLocalIdForIntId(localIntId);
+          final localId = await OfflineFilesDB.instance.getLocalIdForIntId(
+            localIntId,
+          );
           if (localId == null) {
             await checkRemoveCachedFaceIDForPersonOrClusterId(
               personOrClusterId,
@@ -259,15 +260,18 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         }
         if (fileForFaceCrop == null) {
           final List<String> allFaces = isPerson
-              ? await mlDataDB
-                  .getFaceIDsForPersonOrderedByScore(widget.personId!)
-              : await mlDataDB
-                  .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
+              ? await mlDataDB.getFaceIDsForPersonOrderedByScore(
+                  widget.personId!,
+                )
+              : await mlDataDB.getFaceIDsForClusterOrderedByScore(
+                  widget.clusterID!,
+                );
           final localIntIds = allFaces
               .map((faceID) => getFileIdFromFaceId<int>(faceID))
               .toSet();
-          final localIdMap =
-              await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+          final localIdMap = await OfflineFilesDB.instance.getLocalIdsForIntIds(
+            localIntIds,
+          );
           for (final faceID in allFaces) {
             final localIntId = getFileIdFromFaceId<int>(faceID);
             final localId = localIdMap[localIntId];
@@ -312,10 +316,12 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         }
         if (fileForFaceCrop == null) {
           final List<String> allFaces = isPerson
-              ? await mlDataDB
-                  .getFaceIDsForPersonOrderedByScore(widget.personId!)
-              : await mlDataDB
-                  .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
+              ? await mlDataDB.getFaceIDsForPersonOrderedByScore(
+                  widget.personId!,
+                )
+              : await mlDataDB.getFaceIDsForClusterOrderedByScore(
+                  widget.clusterID!,
+                );
           for (final faceID in allFaces) {
             final fileID = getFileIdFromFaceId<int>(faceID);
             if (hiddenFileIDs.contains(fileID)) {
@@ -342,7 +348,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         }
       }
       int? recentFileID;
-      if (isOfflineMode) {
+      if (isLocalGalleryMode) {
         final localId = fileForFaceCrop.localID;
         if (localId == null || localId.isEmpty) {
           _logger.severe(
@@ -350,8 +356,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           );
           return null;
         }
-        recentFileID =
-            await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+        recentFileID = await OfflineFilesDB.instance.getOrCreateLocalIntId(
+          localId,
+        );
       } else {
         recentFileID = fileForFaceCrop.uploadedFileID;
       }
@@ -371,9 +378,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         _logger.severe(
           "No cover face for person: ${widget.personId} or cluster ${widget.clusterID} and fileID $recentFileID",
         );
-        await checkRemoveCachedFaceIDForPersonOrClusterId(
-          personOrClusterId,
-        );
+        await checkRemoveCachedFaceIDForPersonOrClusterId(personOrClusterId);
         return null;
       }
       final cropMap = await getCachedFaceCrops(
@@ -407,9 +412,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
 class _EmptyPersonThumbnail extends StatelessWidget {
   final String? initial;
 
-  const _EmptyPersonThumbnail({
-    this.initial,
-  });
+  const _EmptyPersonThumbnail({this.initial});
 
   @override
   Widget build(BuildContext context) {
@@ -420,10 +423,7 @@ class _EmptyPersonThumbnail extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.fillFaint,
-        border: Border.all(
-          color: colorScheme.strokeFaint,
-          width: 1,
-        ),
+        border: Border.all(color: colorScheme.strokeFaint, width: 1),
       ),
       child: Center(
         child: hasInitial
@@ -445,10 +445,7 @@ class _EmptyPersonThumbnail extends StatelessWidget {
                   );
                 },
               )
-            : Icon(
-                Icons.person_outline,
-                color: colorScheme.strokeMuted,
-              ),
+            : Icon(Icons.person_outline, color: colorScheme.strokeMuted),
       ),
     );
   }

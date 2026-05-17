@@ -1,3 +1,9 @@
-- Fixed system authentication prompt phrasing to read naturally as "... is trying to unlock ..."
-- Added shared `unlock` localization key in `ente_strings` for lock-screen auth reason
-- Added Proton Authenticator import support, including encrypted backups, and normalized Proton TOTP imports to prevent duplicate reimports
+- Added custom icons for Art Fight, BJ-Share, CatRealm, eClinicalWorks, RustDesk, Smogon, Zabbix, and Zyxel Nebula
+- Updated the Availity custom icon
+- Fixed several multi-color custom icons rendering as single-color masks
+- Preserved maximized window state across desktop app launches
+- Hid the share-code option for HOTP entries, keeping sharing limited to TOTP-compatible codes
+- Migrated Auth app API, sharing, billing, web access, and exported HTML asset links to ente.com domains
+- Added Android and iOS web credential associations for ente.com Ente properties to improve password autofill/passkey handoff
+- Reduced direct-distribution Android APK size by filtering supported ABIs and compressing native libraries
+- Updated Estonian and Lithuanian translations

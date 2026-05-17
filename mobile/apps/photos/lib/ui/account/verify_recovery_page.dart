@@ -89,7 +89,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         secondButtonLabel: AppLocalizations.of(context).viewRecoveryKey,
         secondButtonAction: ButtonAction.second,
       );
-      if (result!.action == ButtonAction.second) {
+      if (result?.action == ButtonAction.second) {
         await _onViewRecoveryKeyClick();
       }
     }

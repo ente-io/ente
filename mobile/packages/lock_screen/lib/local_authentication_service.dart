@@ -27,8 +27,9 @@ class LocalAuthenticationService {
     BuildContext context,
     String infoMessage, {
     bool refocusWindows = true,
+    bool useDebugAuthCache = true,
   }) async {
-    if (kDebugMode) {
+    if (kDebugMode && useDebugAuthCache) {
       // if last auth time is less than 60 seconds, don't ask for auth again
       if (lastAuthTime != 0 &&
           DateTime.now().millisecondsSinceEpoch - lastAuthTime < 60000) {
@@ -44,9 +45,9 @@ class LocalAuthenticationService {
         macOSReason: context.strings.unlock,
         isAuthenticatingForInAppChange: true,
       );
-      AppLock.of(context)!.setEnabled(
-        await LockScreenSettings.instance.shouldShowLockScreen(),
-      );
+      AppLock.of(
+        context,
+      )!.setEnabled(await LockScreenSettings.instance.shouldShowLockScreen());
       if (refocusWindows) {
         await PlatformUtil.refocusWindows();
       }
@@ -54,7 +55,9 @@ class LocalAuthenticationService {
         showToast(context, infoMessage);
         return false;
       } else {
-        lastAuthTime = DateTime.now().millisecondsSinceEpoch;
+        if (useDebugAuthCache) {
+          lastAuthTime = DateTime.now().millisecondsSinceEpoch;
+        }
         return true;
       }
     }
@@ -121,21 +124,18 @@ class LocalAuthenticationService {
       );
       if (result) {
         AppLock.of(context)!.setEnabled(shouldEnableLockScreen);
-        await LockScreenSettings.instance
-            .setSystemLockScreen(shouldEnableLockScreen);
+        await LockScreenSettings.instance.setSystemLockScreen(
+          shouldEnableLockScreen,
+        );
         return true;
       } else {
-        AppLock.of(context)!.setEnabled(
-          await LockScreenSettings.instance.shouldShowLockScreen(),
-        );
+        AppLock.of(
+          context,
+        )!.setEnabled(await LockScreenSettings.instance.shouldShowLockScreen());
       }
     } else {
       // ignore: unawaited_futures
-      showErrorDialog(
-        context,
-        errorDialogTitle,
-        errorDialogContent,
-      );
+      showErrorDialog(context, errorDialogTitle, errorDialogContent);
     }
     return false;
   }

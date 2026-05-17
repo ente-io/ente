@@ -60,24 +60,24 @@ class PetVectorDB {
     BigInt.from(bodyDimension),
   );
 
-  // ── Offline vector spaces ──
+  // ── Local-gallery vector spaces ──
 
-  static final offlineDogFace = PetVectorDB._named(
+  static final localGalleryDogFace = PetVectorDB._named(
     "ente.ml.offline.vectordb.pet.dog_face.usearch",
     BigInt.from(faceDimension),
   );
 
-  static final offlineCatFace = PetVectorDB._named(
+  static final localGalleryCatFace = PetVectorDB._named(
     "ente.ml.offline.vectordb.pet.cat_face.usearch",
     BigInt.from(faceDimension),
   );
 
-  static final offlineDogBody = PetVectorDB._named(
+  static final localGalleryDogBody = PetVectorDB._named(
     "ente.ml.offline.vectordb.pet.dog_body.usearch",
     BigInt.from(bodyDimension),
   );
 
-  static final offlineCatBody = PetVectorDB._named(
+  static final localGalleryCatBody = PetVectorDB._named(
     "ente.ml.offline.vectordb.pet.cat_body.usearch",
     BigInt.from(bodyDimension),
   );
@@ -90,12 +90,12 @@ class PetVectorDB {
     catBody,
   ];
 
-  /// All offline vector DB instances for iteration.
-  static final List<PetVectorDB> allOfflineInstances = [
-    offlineDogFace,
-    offlineCatFace,
-    offlineDogBody,
-    offlineCatBody,
+  /// All local-gallery vector DB instances for iteration.
+  static final List<PetVectorDB> allLocalGalleryInstances = [
+    localGalleryDogFace,
+    localGalleryCatFace,
+    localGalleryDogBody,
+    localGalleryCatBody,
   ];
 
   /// Get the correct vector DB for a species + embedding type.
@@ -104,17 +104,17 @@ class PetVectorDB {
   static PetVectorDB forModel({
     required int species,
     required bool isFace,
-    bool offline = false,
+    bool localGallery = false,
   }) {
     assert(
       species == 0 || species == 1,
       'Invalid pet species: $species (expected 0=dog or 1=cat)',
     );
-    if (offline) {
+    if (localGallery) {
       if (species == 0) {
-        return isFace ? offlineDogFace : offlineDogBody;
+        return isFace ? localGalleryDogFace : localGalleryDogBody;
       } else {
-        return isFace ? offlineCatFace : offlineCatBody;
+        return isFace ? localGalleryCatFace : localGalleryCatBody;
       }
     }
     if (species == 0) {

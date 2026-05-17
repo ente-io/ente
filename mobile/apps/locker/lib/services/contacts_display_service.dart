@@ -21,7 +21,7 @@ class LockerContactsDisplayService {
   }
 
   static Future<void> ensureReady() async {
-    final session = _buildSession();
+    final session = buildSession();
     if (session == null) {
       return;
     }
@@ -68,7 +68,7 @@ class LockerContactsDisplayService {
     return current;
   }
 
-  static contacts.ContactsSession? _buildSession() {
+  static contacts.ContactsSession? buildSession() {
     final packageInfo = _packageInfo;
     final token = Configuration.instance.getToken();
     final userId = Configuration.instance.getUserID();

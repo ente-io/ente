@@ -89,6 +89,13 @@ struct ContactRecordJs {
     updated_at: i64,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyRecoveryBundleJs {
+    recovery_key: String,
+    user_key_attributes: KeyAttributes,
+}
+
 impl From<ente_contacts::ContactRecord> for ContactRecordJs {
     fn from(value: ente_contacts::ContactRecord) -> Self {
         Self {
@@ -311,7 +318,11 @@ impl ContactsCtxHandle {
             .inner
             .legacy_recovery_bundle(&recovery_id, &current_user_key_attrs)
             .await?;
-        swb::to_value(&bundle).map_err(Into::into)
+        swb::to_value(&LegacyRecoveryBundleJs {
+            recovery_key: crypto::encode_b64(bundle.recovery_key.as_ref()),
+            user_key_attributes: bundle.user_key_attributes,
+        })
+        .map_err(Into::into)
     }
 
     /// Complete the legacy password reset flow fully in Rust.

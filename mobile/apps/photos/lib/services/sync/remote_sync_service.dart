@@ -685,7 +685,7 @@ class RemoteSyncService {
       );
       await _uploader.verifyMediaLocationAccess();
       await _uploader.checkNetworkForUpload();
-      await _uploader.fetchUploadURLs(toBeUploaded);
+      await _uploader.validateUploadEligibility();
     }
     final List<Future> futures = [];
 

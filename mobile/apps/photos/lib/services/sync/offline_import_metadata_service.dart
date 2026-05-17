@@ -32,7 +32,7 @@ class OfflineImportMetadataService {
     int batchSize = kDefaultBatchSize,
     int maxBatches = 4,
   }) async {
-    if (!Platform.isAndroid || !isOfflineMode) {
+    if (!Platform.isAndroid || !isLocalGalleryMode) {
       return;
     }
     if (_running != null) {
@@ -43,10 +43,8 @@ class OfflineImportMetadataService {
     _running = Completer<void>();
     try {
       for (var batch = 0; batch < maxBatches; batch++) {
-        if (!isOfflineMode) {
-          _logger.info(
-            "Offline mode disabled, stopping metadata processing",
-          );
+        if (!isLocalGalleryMode) {
+          _logger.info("Offline mode disabled, stopping metadata processing");
           return;
         }
 
@@ -60,7 +58,7 @@ class OfflineImportMetadataService {
 
         final updatedFiles = <EnteFile>[];
         for (final file in files) {
-          if (!isOfflineMode) {
+          if (!isLocalGalleryMode) {
             _logger.info(
               "Offline mode disabled during per-file processing, stopping",
             );
@@ -107,11 +105,7 @@ class OfflineImportMetadataService {
       final exifData = await tryExifFromFile(originFile);
       final exifTime = await tryParseExifDateTime(null, exifData);
 
-      await _updateLocationForOfflineFile(
-        file,
-        originFile,
-        exifData,
-      );
+      await _updateLocationForOfflineFile(file, originFile, exifData);
 
       final mediaUploadData = MediaUploadData(
         originFile,
@@ -159,8 +153,10 @@ class OfflineImportMetadataService {
       final asset = await file.getAsset;
       if (asset != null) {
         final latLong = await asset.latlngAsync();
-        file.location =
-            Location(latitude: latLong.latitude, longitude: latLong.longitude);
+        file.location = Location(
+          latitude: latLong.latitude,
+          longitude: latLong.longitude,
+        );
       }
     }
 

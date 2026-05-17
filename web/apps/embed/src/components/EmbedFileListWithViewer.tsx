@@ -6,7 +6,7 @@ import { formattedDate } from "ente-base/i18n-date";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { fileCreationTime } from "ente-media/file-metadata";
+import { fileCreationPhotoDate } from "ente-media/file-metadata";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -138,7 +138,7 @@ export const EmbedFileListWithViewer: React.FC<
 const Container = styled("div")({ flex: 1, width: "100%" });
 
 const fileTimelineDateString = (file: EnteFile) => {
-    const date = new Date(fileCreationTime(file) / 1000);
+    const date = fileCreationPhotoDate(file);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))

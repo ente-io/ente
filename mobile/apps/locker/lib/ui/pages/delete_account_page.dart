@@ -63,17 +63,17 @@ class DeleteAccountPage extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: l10n
-                          .deleteAccountFeedbackPrompt("feedback@ente.io")
-                          .split("feedback@ente.io")[0],
+                          .deleteAccountFeedbackPrompt("feedback@ente.com")
+                          .split("feedback@ente.com")[0],
                     ),
                     TextSpan(
-                      text: "feedback@ente.io",
+                      text: "feedback@ente.com",
                       style: TextStyle(color: colorScheme.primary700),
                     ),
                     TextSpan(
                       text: l10n
-                          .deleteAccountFeedbackPrompt("feedback@ente.io")
-                          .split("feedback@ente.io")[1],
+                          .deleteAccountFeedbackPrompt("feedback@ente.com")
+                          .split("feedback@ente.com")[1],
                     ),
                   ],
                   style: textTheme.body.copyWith(
@@ -87,7 +87,7 @@ class DeleteAccountPage extends StatelessWidget {
                 onTap: () async {
                   await sendEmail(
                     context,
-                    to: "feedback@ente.io",
+                    to: "feedback@ente.com",
                     subject: "[Feedback]",
                   );
                 },
@@ -182,7 +182,7 @@ class DeleteAccountPage extends StatelessWidget {
       context,
       title: context.strings.deleteAccount,
       message:
-          "Please send an email to account-deletion@ente.io from your registered email address.\n\nYour request will be processed within 72 hours.",
+          "Please send an email to account-deletion@ente.com from your registered email address.\n\nYour request will be processed within 72 hours.",
       assetPath: "assets/file_delete_icon.png",
       buttons: [
         GradientButton(
@@ -192,7 +192,7 @@ class DeleteAccountPage extends StatelessWidget {
             Navigator.of(context).pop();
             await sendEmail(
               context,
-              to: "account-deletion@ente.io",
+              to: "account-deletion@ente.com",
               subject: "[Delete account]",
             );
           },

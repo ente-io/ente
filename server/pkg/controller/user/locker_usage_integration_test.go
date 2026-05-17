@@ -148,7 +148,7 @@ func insertLockerUsageTestUser(t *testing.T, db *sql.DB, userID int64, familyAdm
 
 	testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:        userID,
-		Email:         fmt.Sprintf("locker-usage-user-%d@ente.io", userID),
+		Email:         fmt.Sprintf("locker-usage-user-%d@ente.com", userID),
 		CreationTime:  1,
 		FamilyAdminID: familyAdminID,
 	})

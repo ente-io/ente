@@ -140,6 +140,11 @@ fn to_message(message: core::Message) -> Message {
 }
 
 #[uniffi::export]
+pub fn compress_attachment_image(data: Vec<u8>) -> Result<Vec<u8>, DbError> {
+    Ok(core::compress_attachment_image(&data)?)
+}
+
+#[uniffi::export]
 impl EnsuDb {
     #[uniffi::constructor]
     pub fn open(

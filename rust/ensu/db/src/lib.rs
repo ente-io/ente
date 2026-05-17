@@ -8,6 +8,7 @@ pub mod crypto;
 pub mod db;
 pub mod ensu;
 pub mod error;
+pub mod image;
 pub mod migrations;
 pub mod models;
 pub mod schema;
@@ -20,6 +21,9 @@ pub use crate::backend::{Backend, BackendTx, Row, Value};
 pub use crate::db::ChatDb;
 pub use crate::ensu::EnsuDb;
 pub use crate::error::{Error, Result};
+pub use crate::image::{
+    ATTACHMENT_IMAGE_JPEG_QUALITY, ATTACHMENT_IMAGE_MAX_LONG_EDGE, compress_attachment_image,
+};
 pub use crate::models::{
     Attachment, AttachmentKind, AttachmentMeta, EntityType, Message, Sender, Session,
     SessionWithPreview,

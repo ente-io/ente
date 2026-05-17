@@ -206,7 +206,7 @@ class FaceClusteringService extends SuperIsolate {
         return clusterResult;
       }
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Face clustering prediction failed", e, s);
       rethrow;
     }
   }
@@ -268,7 +268,7 @@ class FaceClusteringService extends SuperIsolate {
       );
       return faceIdToCluster;
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Linear face clustering failed", e, s);
       rethrow;
     }
   }
@@ -316,7 +316,7 @@ class FaceClusteringService extends SuperIsolate {
       );
       return clusteringResult;
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Complete face clustering failed", e, s);
       rethrow;
     }
   }

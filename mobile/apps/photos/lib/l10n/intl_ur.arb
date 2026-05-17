@@ -266,16 +266,6 @@
   "after1Month": "۱ مہینے بعد",
   "after1Year": "۱ سال بعد",
   "manageParticipants": "انتظام کریں",
-  "albumParticipantsCount": "{count, plural, =0 {کوئی شریک نہیں} =1 {۱ شریک} other {{count} شرکاء}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "لوگوں کو Ente ایپ یا اکاؤنٹ کی ضرورت کے بغیر آپ کے مشترکہ البم میں تصاویر شامل کرنے اور دیکھنے کی اجازت دینے کے لیے ایک لنک بنائیں. ایونٹ کی تصاویر جمع کرنے کے لیے بہترین.",
   "collectPhotos": "تصاویر جمع کریں",
   "collaborativeLink": "تعاون کا لنک",
@@ -290,15 +280,6 @@
   "publicLinkEnabled": "عوامی لنک فعال ہے",
   "shareALink": "لنک شیئر کریں",
   "sharedAlbumSectionDescription": "دوسرے Ente صارفین کے ساتھ مشترکہ اور باہمی البمز بنائیں، بشمول مفت پلان والے صارفین.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {مخصوص لوگوں کے ساتھ شیئر کریں} =1 {۱ شخص کے ساتھ شیئر کیا گیا} other {{numberOfPeople} لوگوں کے ساتھ شیئر کیا گیا}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "یہ آپ کی تصدیقی آئی ڈی ہے",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "آپ کے ساتھ البمز شیئر کرنے والے شخص کو اپنی ڈیوائس پر وہی ID دیکھنی چاہیے.",
   "howToViewShareeVerificationID": "براہ کرم ان سے کہیں کہ سیٹنگ اسکرین پر اپنے ای میل ایڈریس کو دیر تک دبائیں، اور تصدیق کریں کہ دونوں ڈیوائسز پر IDs مماثل ہیں.",
@@ -545,7 +526,6 @@
   "updateSettings": "ترتیبات اپ ڈیٹ کریں",
   "updatingFolderSelection": "فولڈر کا انتخاب اپ ڈیٹ ہو رہا ہے...",
   "itemCount": "{count, plural, one{{count} آئٹم} other{{count} آئٹمز}}",
-  "deleteItemCount": "{count, plural, =1 {{count} آئٹم ڈیلیٹ کریں} other {{count} آئٹمز ڈیلیٹ کریں}}",
   "duplicateItemsGroup": "{count} فائلیں، ہر ایک {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -757,7 +737,16 @@
   "playstoreSubscription": "پلے اسٹور (PlayStore) سبسکرپشن",
   "appstoreSubscription": "ایپ اسٹور (AppStore) سبسکرپشن",
   "subAlreadyLinkedErrMessage": "آپ کی {id} پہلے سے ہی کسی دوسرے Ente اکاؤنٹ سے منسلک ہے.\nاگر آپ اپنی {id} کو اس اکاؤنٹ کے ساتھ استعمال کرنا چاہتے ہیں، تو براہ کرم ہماری سپورٹ سے رابطہ کریں''",
-  "visitWebToManage": "اپنی سبسکرپشن کا انتظام کرنے کے لیے براہ کرم web.ente.io پر جائیں",
+  "visitWebToManage": "اپنی سبسکرپشن کا انتظام کرنے کے لیے براہ کرم {webUrl} پر جائیں",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "سبسکرپشن اپ ڈیٹ نہیں کی جا سکی",
   "paymentFailed": "ادائیگی ناکام",
   "paymentFailedTalkToProvider": "اگر آپ سے چارج کیا گیا تھا تو براہ کرم {providerName} سپورٹ سے بات کریں",
@@ -880,14 +869,6 @@
   "share": "شیئر کریں",
   "unhideToAlbum": "البم میں ظاہر کریں",
   "restoreToAlbum": "البم میں بحال کریں",
-  "moveItem": "{count, plural, =1 {آئٹم منتقل کریں} other {آئٹمز منتقل کریں}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {آئٹم شامل کریں} other {آئٹمز شامل کریں}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "البم بنائیں یا منتخب کریں",
   "selectAlbum": "البم منتخب کریں",
   "searchByAlbumNameHint": "البم کا نام",
@@ -912,16 +893,6 @@
   "referFriendsAnd2xYourPlan": "دوستوں کو ریفر کریں اور اپنے پلان کو 2x کریں",
   "shareAlbumHint": "شیئر کرنے کے لیے البم کھولیں اور اوپر دائیں جانب شیئر بٹن پر ٹیپ کریں.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "آئٹمز مستقل ڈیلیٹ ہونے سے پہلے باقی دنوں کی تعداد دکھاتے ہیں",
-  "trashDaysLeft": "{count, plural, =0 {جلد} =1 {۱ دن} other {{count} دن}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "سبھی ڈیلیٹ کریں",
   "renameAlbum": "البم کا نام تبدیل کریں",
   "convertToAlbum": "البم میں تبدیل کریں",
@@ -1021,7 +992,6 @@
   "authToViewYourMemories": "اپنی یادیں دیکھنے کے لیے براہ کرم تصدیق کریں",
   "unlock": "ان لاک کریں",
   "freeUpSpace": "جگہ خالی کریں",
-  "freeUpSpaceSaving": "{count, plural, =1 {{formattedSize} جگہ خالی کرنے کے لیے اسے ڈیوائس سے ڈیلیٹ کیا جا سکتا ہے} other {{formattedSize} جگہ خالی کرنے کے لیے انہیں ڈیوائس سے ڈیلیٹ کیا جا سکتا ہے}}",
   "filesBackedUpInAlbum": "{count, plural, one {اس البم میں ۱ فائل کا محفوظ طریقے سے بیک اپ لیا گیا ہے} other {اس البم میں {formattedNumber} فائلوں کا محفوظ طریقے سے بیک اپ لیا گیا ہے}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1049,18 +1019,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "آپ اب بھی Ente پر {count, plural, =1 {اس تک} other {ان تک}} رسائی حاصل کر سکتے ہیں جب تک کہ آپ کے پاس فعال سبسکرپشن ہے",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1158,7 +1116,16 @@
   "loadMessage5": "ہمارے سورس کوڈ اور کرپٹوگرافی کا بیرونی آڈٹ کیا گیا ہے",
   "loadMessage6": "آپ اپنے البمز کے لنکس اپنے پیاروں کے ساتھ شیئر کر سکتے ہیں",
   "loadMessage7": "ہماری موبائل ایپس پس منظر میں چلتی ہیں تاکہ آپ کی کلک کردہ کسی بھی نئی تصویر کو انکرپٹ اور بیک اپ کیا جا سکے",
-  "loadMessage8": "web.ente.io میں ایک عمدہ اپ لوڈر ہے",
+  "loadMessage8": "{webUrl} میں ایک عمدہ اپ لوڈر ہے",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "ہم آپ کے ڈیٹا کو محفوظ طریقے سے انکرپٹ کرنے کے لیے Xchacha20Poly1305 استعمال کرتے ہیں",
   "photoDescriptions": "تصویر کی تفصیل",
   "searchResultFileName": "فائل کا نام",
@@ -1426,7 +1393,16 @@
   "playOnTv": "ٹی وی پر البم چلائیں",
   "pair": "جوڑا بنائیں",
   "deviceNotFound": "ڈیوائس نہیں ملی",
-  "castInstruction": "جس ڈیوائس کو آپ منسلک pair کرنا چاہتے ہیں اس پر cast.ente.io کھولیں.\n\nاپنے ٹی وی پر البم چلانے کے لیے نیچے دیا گیا کوڈ درج کریں.",
+  "castInstruction": "جس ڈیوائس کو آپ منسلک pair کرنا چاہتے ہیں اس پر {castUrl} کھولیں.\n\nاپنے ٹی وی پر البم چلانے کے لیے نیچے دیا گیا کوڈ درج کریں.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "کوڈ درج کریں",
   "joinDiscord": "ڈسکارڈ (Discord) جوائن کریں",
   "locations": "مقامات",
@@ -1436,8 +1412,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "نام سے لوگوں کو جلدی تلاش کریں",
-  "addViewers": "{count, plural, =0 {ناظر شامل کریں} =1 {ناظر شامل کریں} other {ناظرین شامل کریں}}",
-  "addCollaborators": "{count, plural, =0 {معاون شامل کریں} =1 {معاون شامل کریں} other {معاونین شامل کریں}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "اینڈ ٹو اینڈ انکرپشن کی تصدیق کے لیے ای میل پر دیر تک دبائیں.",
   "developerSettingsWarning": "کیا آپ واقعی ڈویلپر سیٹنگز میں ترمیم کرنا چاہتے ہیں؟",
   "developerSettings": "ڈویلپر سیٹنگز",
@@ -1567,34 +1541,6 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {{personName} میں ۱ فائل شامل کی گئی} other {{personName} میں {count} فائلیں شامل کی گئیں}}",
-  "@addedFilesToPerson": {
-    "description": "Toast shown after manually tagging one or more files to a person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {۱ فائل پہلے ہی {personName} سے منسلک ہے} other {{count} فائلیں پہلے ہی {personName} سے منسلک ہیں}}",
-  "@filesAlreadyLinkedToPerson": {
-    "description": "Toast shown when selected files are already manually tagged to the selected person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
   "addNewPerson": "نیا شخص شامل کریں",
   "addNameOrMerge": "نام شامل کریں یا ضم کریں",
   "mergeWithExisting": "موجودہ کے ساتھ ضم کریں",
@@ -1641,46 +1587,6 @@
   "enableMachineLearningBanner": "میجک سرچ اور چہرے کی شناخت کے لیے مشین لرننگ کو فعال کریں",
   "searchDiscoverEmptySection": "پروسیسنگ اور Sync مکمل ہونے کے بعد تصاویر یہاں دکھائی جائیں گی",
   "searchPersonsEmptySection": "پروسیسنگ اور Sync مکمل ہونے کے بعد لوگ یہاں دکھائے جائیں گے",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 ناظرین شامل کیے گئے} =1 {1 ناظر شامل کیا گیا} other {{count} ناظرین شامل کیے گئے}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 معاونین شامل کیے گئے} =1 {1 معاون شامل کیا گیا} other {{count} معاونین شامل کیے گئے}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
-  "adminsSuccessfullyAdded": "{count, plural, =0 {کوئی ایڈمن شامل نہیں کیا گیا} =1 {1 ایڈمن کامیابی سے شامل کیا گیا} other {{count} ایڈمنز کامیابی سے شامل کیے گئے}}",
-  "@adminsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of admins that were successfully added to an album."
-  },
-  "addAdmins": "{count, plural, =0 {ایڈمن شامل کریں} =1 {ایڈمن شامل کریں} other {ایڈمنز شامل کریں}}",
-  "@addAdmins": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Button text to add admins"
-  },
   "adminsCanManagePhotosAndParticipants": "ایڈمنز تصاویر اور شرکاء کا انتظام کر سکتے ہیں.",
   "suggestDeletion": "ڈیلیٹ کرنے کی تجویز دیں",
   "suggestDeletionDescription": "منتخب کردہ تصاویر اس البم سے ہٹا دی جائیں گی. تصویر کے مالکان کو بھی تصاویر کا جائزہ لینے اور ڈیلیٹ کرنے کی تجویز ملے گی.",
@@ -1750,15 +1656,6 @@
   },
   "currentlyRunning": "فی الحال جاری ہے",
   "ignored": "نظر انداز کردہ",
-  "photosCount": "{count, plural, =0 {0 تصاویر} =1 {1 تصویر} other {{count} تصاویر}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "فائل",
   "searchSectionsLengthMismatch": "سیکشنز کی لمبائی مماثل نہیں: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1946,21 +1843,11 @@
   "moveSelectedPhotosToOneDate": "منتخب تصاویر کو ایک تاریخ پر منتقل کریں",
   "shiftDatesAndTime": "تاریخیں اور وقت شفٹ کریں",
   "photosKeepRelativeTimeDifference": "تصاویر نسبتی وقت کا فرق برقرار رکھتی ہیں",
-  "photocountPhotos": "{count, plural, =0 {کوئی تصویر نہیں} =1 {1 تصویر} other {{count} تصاویر}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "ایپ آئیکن",
   "notThisPerson": "یہ شخص نہیں؟",
   "selectedItemsWillBeRemovedFromThisPerson": "منتخب آئٹمز اس شخص سے ہٹا دیے جائیں گے، لیکن آپ کی لائبریری سے ڈیلیٹ نہیں ہوں گے.",
   "throughTheYears": "{dateFormat} سالوں کے دوران",
   "thisWeekThroughTheYears": "اس ہفتے سالوں کے دوران",
-  "thisWeekXYearsAgo": "{count, plural, =1 {اس ہفتے، {count} سال پہلے} other {اس ہفتے، {count} سال پہلے}}",
   "youAndThem": "آپ اور {name}",
   "admiringThem": "{name} کی تعریف",
   "embracingThem": "{name} کو گلے لگاتے ہوئے",
@@ -1976,11 +1863,9 @@
   "spotlightOnThem": "{name} پر اسپاٹ لائٹ",
   "personIsAge": "{name} {age} کا ہے!",
   "personTurningAge": "{name} جلد {age} کا ہو جائے گا",
-  "lastTimeWithThem": "{name} کے ساتھ آخری بار",
   "unnamedPeopleSpotlight": "ایک جانا پہچانا چہرہ",
   "unnamedPeopleYouAndThem": "آپ دونوں",
   "unnamedPeopleDoingSomethingTogether": "ایک ساتھ کرتے ہوئے",
-  "unnamedPeopleLastTimeYouSawThem": "آخری بار ایک ساتھ",
   "tripToLocation": "{location} کا سفر",
   "tripInYear": "{year} میں سفر",
   "lastYearsTrip": "پچھلے سال کا سفر",
@@ -2075,15 +1960,6 @@
   "font": "فونٹ",
   "background": "پس منظر",
   "align": "سیدھ کریں",
-  "addedToAlbums": "{count, plural, =1{1 البم میں کامیابی سے شامل کر دیا گیا} other{{count} البمز میں کامیابی سے شامل کر دیا گیا}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "ویڈیوز پروسیس ہو گئیں",
   "totalVideos": "کل ویڈیوز",
   "skippedVideos": "چھوڑی گئی ویڈیوز",
@@ -2114,14 +1990,6 @@
   "findSimilarImages": "ملتی جلتی تصاویر تلاش کریں",
   "noSimilarImagesFound": "کوئی ملتی جلتی تصویر نہیں ملی",
   "yourPhotosLookUnique": "آپ کی تصاویر منفرد لگتی ہیں",
-  "similarGroupsFound": "{count, plural, =1{{count} گروپ ملا} other{{count} گروپس ملے}}",
-  "@similarGroupsFound": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "reviewAndRemoveSimilarImages": "ملتی جلتی تصاویر کا جائزہ لیں اور ہٹائیں",
   "deletePhotosWithSize": "{count} تصاویر ڈیلیٹ کریں ({size})",
   "@deletePhotosWithSize": {
@@ -2445,15 +2313,6 @@
       }
     }
   },
-  "likesCount": "{count, plural, =1{۱ لائک} other{{count} لائکس}}",
-  "@likesCount": {
-    "description": "Number of likes with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "noLikesYet": "ابھی کوئی لائک نہیں",
   "@noLikesYet": {
     "description": "Empty state when no likes exist"
@@ -2466,27 +2325,9 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, =1{۱ البم کو لائک کرنے میں ناکام} other{{count} البمز کو لائک کرنے میں ناکام}}",
-  "@failedToLikeAlbums": {
-    "description": "Error when liking albums fails",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "couldNotLoadAlbums": "البمز لوڈ نہیں ہو سکے",
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
-  },
-  "albumsCount": "{count, plural, =1{1 البم} other{{count} البمز}}",
-  "@albumsCount": {
-    "description": "Number of albums with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "likeAll": "سب لائک کریں",
   "@likeAll": {
@@ -2522,15 +2363,6 @@
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "commentsCount": "{count, plural, =0{کوئی تبصرہ نہیں} =1{1 تبصرہ} other{{count} تبصرے}}",
-  "@commentsCount": {
-    "description": "Number of comments with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },

@@ -3,9 +3,10 @@ use fast_image_resize::{
     images::{Image as FirImage, ImageRef as FirImageRef},
 };
 
-use crate::image::image_compression::{
+use ente_image::image_compression::{
     EncodedImageFormat, FACE_THUMBNAIL_JPEG_QUALITY, FACE_THUMBNAIL_MIN_DIMENSION, encode_rgb,
 };
+
 use crate::ml::{
     error::{MlError, MlResult},
     types::DecodedImage,

@@ -110,11 +110,23 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
     _logger.info("Computing position to title map");
     final result = <({double position, String title})>[];
     heightOfScrollTrack = await _getHeightOfScrollTrack();
+    if (!mounted ||
+        heightOfScrollTrack == null ||
+        heightOfScrollTrack! <= 0 ||
+        heightOfScrollbarDivider == null) {
+      return;
+    }
     final maxScrollExtent = widget.scrollController.position.maxScrollExtent;
+    if (maxScrollExtent <= 0) {
+      return;
+    }
 
     for (final scrollbarDivision in widget.galleryGroups.scrollbarDivisions) {
       final scrollOffsetOfGroup = widget
-          .galleryGroups.groupIdToScrollOffsetMap[scrollbarDivision.groupID]!;
+          .galleryGroups.groupIdToScrollOffsetMap[scrollbarDivision.groupID];
+      if (scrollOffsetOfGroup == null) {
+        continue;
+      }
 
       final groupScrollOffsetToUse = scrollOffsetOfGroup - heightOfScrollTrack!;
       if (groupScrollOffsetToUse < 0) {
@@ -163,6 +175,10 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
     }
     final filteredResult = <({double position, String title})>[];
 
+    if (result.isEmpty) {
+      return;
+    }
+
     // Remove first scrollbar division since it doesn't add value in terms of UX
     result.removeAt(0);
 
@@ -185,11 +201,13 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
   Future<double> _getHeightOfScrollTrack() {
     final renderBox =
         _scrollbarKey.currentContext?.findRenderObject() as RenderBox?;
-    assert(renderBox != null, "RenderBox is null");
+    if (renderBox == null) {
+      return Future.value(0);
+    }
     // Retry for : https://github.com/flutter/flutter/issues/25827
     return MiscUtil()
         .getNonZeroDoubleWithRetry(
-          () => renderBox!.size.height,
+          () => renderBox.size.height,
           id: "getHeightOfScrollTrack",
         )
         .then(

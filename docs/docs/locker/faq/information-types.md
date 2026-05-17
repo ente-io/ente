@@ -91,8 +91,8 @@ need to add credentials manually.
 
 ### Does Locker have browser integration? {#locker-browser-integration}
 
-No. Ente Locker is a mobile-only app and does not have browser extensions or
-autofill integration.
+No. Ente Locker does not currently have browser extensions or autofill
+integration.
 
 For frequent password use with autofill, consider using Locker alongside a
 dedicated password manager.

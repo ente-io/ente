@@ -8,10 +8,13 @@ name = "inference_rs"
 crate-type = ["rlib"]
 
 [dependencies]
+futures-util = "0.3"
 parking_lot = "0.12"
+reqwest = { version = "0.12", default-features = false, features = ["http2", "charset", "system-proxy", "rustls-tls-webpki-roots"] }
 self_cell = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tokio = { version = "1", features = ["rt", "time"] }
 thiserror = "1"
 
 # llama-cpp-2's default features are "openmp" and "android-shared-stdcxx".
@@ -29,7 +32,7 @@ thiserror = "1"
 #
 # "mtmd" is used on all platforms for enabling multimodal support.
 [target.'cfg(target_os = "macos")'.dependencies]
-llama-cpp-2 = { version = "=0.1.138", default-features = false, features = ["mtmd"] }
+llama-cpp-2 = { version = "=0.1.144", default-features = false, features = ["mtmd"] }
 
 [target.'cfg(not(target_os = "macos"))'.dependencies]
-llama-cpp-2 = { version = "=0.1.138", features = ["mtmd"] }
+llama-cpp-2 = { version = "=0.1.144", features = ["mtmd"] }

@@ -300,7 +300,6 @@
   "selectAll": "เลือกทั้งหมด",
   "skip": "ข้าม",
   "itemCount": "{count, plural, other{{count} รายการ}}",
-  "deleteItemCount": "{count, plural, =1 {ลบ {count} รายการ} other {ลบ {count} รายการ}}",
   "showMemories": "แสดงความทรงจำ",
   "about": "รายละเอียด",
   "weAreOpenSource": "พวกเราเป็นโอเพนซอร์ส!",

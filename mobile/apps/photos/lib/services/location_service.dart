@@ -31,7 +31,7 @@ class LocationService {
   bool reloadLocationDiscoverySection = false;
 
   static const _kCitiesKdTreeRemotePath =
-      "https://assets.ente.io/world_cities.kdtree.bin";
+      "https://assets.ente.com/world_cities.kdtree.bin";
 
   List<City> _cities = [];
   List<List<int>> _kdTreeNodes = [];

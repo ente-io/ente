@@ -54,9 +54,9 @@ The web version of Ensu stores the model in the browser's Origin Private File
 System (OPFS). To reclaim this space:
 
 1. Open your browser's settings.
-2. Find the site data for **ensu.ente.io**.
+2. Find the site data for **ensu.ente.com**.
 3. Delete it.
 
 In Chrome, this is under **Settings > Privacy and security > Site settings >
-View permissions and data stored across sites**. Search for `ensu.ente.io` and
+View permissions and data stored across sites**. Search for `ensu.ente.com` and
 click **Delete data**.

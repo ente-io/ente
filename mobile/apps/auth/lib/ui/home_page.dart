@@ -476,6 +476,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _onSharePressed(Code code) async {
+    if (!code.type.canShareCodes) {
+      return;
+    }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.authenticateGeneric);
     await PlatformUtil.refocusWindows();
@@ -566,16 +569,18 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(width: 10),
-            _buildActionButton(
-              context.l10n.share,
-              () => _onSharePressed(code),
-              iconWidget: HugeIcon(
-                icon: HugeIcons.strokeRoundedNavigation03,
-                size: 21,
-                color: getEnteColorScheme(context).textBase,
+            if (code.type.canShareCodes) ...[
+              _buildActionButton(
+                context.l10n.share,
+                () => _onSharePressed(code),
+                iconWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedNavigation03,
+                  size: 21,
+                  color: getEnteColorScheme(context).textBase,
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
+              const SizedBox(width: 10),
+            ],
             _buildActionButton(
               context.l10n.qrCode,
               () => _onShowQrPressed(code),
@@ -2065,11 +2070,13 @@ class _HomePageState extends State<HomePage> {
       );
 
       if (singleCode != null) {
-        addButton(
-          context.l10n.share,
-          Icons.adaptive.share_outlined,
-          () => _onSharePressed(singleCode),
-        );
+        if (singleCode.type.canShareCodes) {
+          addButton(
+            context.l10n.share,
+            Icons.adaptive.share_outlined,
+            () => _onSharePressed(singleCode),
+          );
+        }
         addButton(
           context.l10n.qr,
           Icons.qr_code_2_outlined,

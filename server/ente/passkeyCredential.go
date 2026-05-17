@@ -10,12 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-// PasskeyCredential are the actual WebAuthn credentials we will send back to the user during auth for the browser to check if they have an eligible authenticator.
+// PasskeyCredential is our stored representation of a WebAuthn credential.
+// The credential material is converted back into webauthn.Credential during
+// authentication; RPID records which relying party the credential is scoped to.
 type PasskeyCredential struct {
 	PasskeyID uuid.UUID `json:"passkeyID"`
 
 	CredentialID string `json:"credentialID"` // string
 
+	RPID                    string `json:"rpID"`
 	PublicKey               string `json:"publicKey"` // b64 []byte
 	AttestationType         string `json:"attestationType"`
 	AuthenticatorTransports string `json:"authenticatorTransports"` // comma-separated slice of strings

@@ -232,16 +232,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{geen items} =1{1 item} other{{count} items}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Collectie aanmaken",
   "uploadDocumentTooltip": "Document uploaden",
   "restore": "Herstellen",
@@ -481,15 +471,6 @@
   "linkDeviceLimit": "Apparaat limiet",
   "expiredLinkInfo": "Deze link is verlopen. Selecteer een nieuwe vervaltijd of schakel de vervaldatum uit.",
   "linkExpiresOn": "Link vervalt op {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Deel met specifieke mensen} =1 {Gedeeld met 1 persoon} other {Gedeeld met {numberOfPeople} mensen}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Link is vervallen",
   "publicLinkEnabled": "Publieke link ingeschakeld",
   "shareALink": "Deel een link",
@@ -503,28 +484,6 @@
   "add": "Toevoegen",
   "collaboratorsCanAddFilesToTheSharedCollection": "Medewerkers kunnen items toevoegen aan de gedeelde collectie.",
   "enterEmail": "Voer e-mailadres in",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 kijkers toegevoegd} =1 {1 kijker toegevoegd} other {{count} kijkers toegevoegd}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 samenwerkers toegevoegd} =1 {1 samenwerker toegevoegd} other {{count} samenwerkers toegevoegd}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0 {Kijker toevoegen} =1 {Kijker toevoegen} other {Kijkers toevoegen}}",
-  "addCollaborators": "{count, plural, =0 {Samenwerker toevoegen} =1 {Samenwerker toevoegen} other {Samenwerkers toevoegen}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Druk lang op een e-mail om de versleuteling te verifiëren.",
   "sharing": "Delen...",
   "invalidEmailAddress": "Ongeldig e-mailadres",
@@ -573,16 +532,6 @@
   "viewer": "Kijker",
   "collaborator": "Samenwerker",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Medewerkers kunnen items toevoegen aan de gedeelde collectie.",
-  "albumParticipantsCount": "{count, plural, =0 {Geen deelnemers} =1 {1 deelnemer} other {{count} deelnemers}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Meer toevoegen",
   "you": "Jij",
   "albumOwner": "Eigenaar",
@@ -691,16 +640,6 @@
   "clickHereToUpload": "Klik hier om te uploaden",
   "saveDocument": "Document opslaan",
   "uploadFiles": "Items uploaden",
-  "filesSelected": "{count, plural, =0{Geen items geselecteerd} =1{1 item geselecteerd} other{{count} items geselecteerd}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Toevoegen aan collectie",
   "newCollection": "Nieuwe collectie",
   "title": "Titel",
@@ -719,16 +658,6 @@
     }
   },
   "informationCollectionName": "Informatie",
-  "recordSavedToMultipleCollections": "Record opgeslagen in {count, plural, =1{1 collectie} other{{count} collecties}}",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} gekopieerd naar klembord",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -736,20 +665,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 resultaat} other{{count} resultaten}} voor \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -797,49 +712,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 collectie} other{{count} collecties}} worden permanent verwijderd.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 item} other{{count} items}} worden permanent verwijderd.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Items ook overal verwijderen",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Ja, {count, plural, =1{collectie} other{collecties}} verwijderen",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Ja, {count, plural, =1{item} other{items}} verwijderen",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Gebruik",
   "fileCount": "{used} / {max}",
@@ -862,16 +737,6 @@
   "markingAsImportant": "Markeren als belangrijk...",
   "fileMarkedAsImportant": "Item gemarkeerd als belangrijk",
   "fileRemovedFromImportant": "Item verwijderd uit belangrijk",
-  "filesMarkedAsImportant": "{count, plural, =1{1 item gemarkeerd als belangrijk} other{{count} items gemarkeerd als belangrijk}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Alle items zijn al gemarkeerd als belangrijk",
   "failedToMarkFilesAsImportant": "Kan items niet markeren als belangrijk: {error}",
   "@failedToMarkFilesAsImportant": {
@@ -913,26 +778,6 @@
   "selectLanguage": "Taal kiezen",
   "general": "Algemeen",
   "language": "Taal",
-  "selectedCount": "{count, plural, =1{1 geselecteerd} other{{count} geselecteerd}}",
-  "@selectedCount": {
-    "description": "Number of items selected",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "actionNotSupportedForSharedFiles": "{count, plural, =1{Actie wordt niet ondersteund voor 1 gedeeld bestand} other{Actie wordt niet ondersteund voor {count} gedeelde bestanden}}",
-  "@actionNotSupportedForSharedFiles": {
-    "description": "Message when action is not supported for shared files",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addTo": "Toevoegen aan",
   "shareNotSupportedForSharedFiles": "Delen wordt niet ondersteund voor gedeelde bestanden",
   "editNotSupportedForSharedFiles": "Bewerken wordt niet ondersteund voor gedeelde bestanden",
@@ -946,16 +791,6 @@
   "collectionUpdated": "Collectie bijgewerkt",
   "actionNotSupportedOnFavouritesAlbum": "Actie niet ondersteund op Favorieten album",
   "leaveCollectionSuccessfully": "Collectie succesvol verlaten",
-  "leftCollectionsSuccessfully": "{count, plural, =1{1 collectie succesvol verlaten} other{{count} collecties succesvol verlaten}}",
-  "@leftCollectionsSuccessfully": {
-    "description": "Success message when leaving collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "removePublicLink": "Verwijder publieke link",
   "removePublicLinkConfirmation": "Dit verwijdert de publieke link voor toegang tot \"{collectionName}\".",
   "@removePublicLinkConfirmation": {
@@ -967,52 +802,12 @@
       }
     }
   },
-  "collectionsDeletedSuccessfully": "{count, plural, =1{1 collectie succesvol verwijderd} other{{count} collecties succesvol verwijderd}}",
-  "@collectionsDeletedSuccessfully": {
-    "description": "Success message when collections are deleted",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "restoreToCollection": "Herstel naar collectie",
   "restoringFiles": "Herstellen...",
-  "filesRestoredSuccessfully": "{count, plural, =1{1 item succesvol hersteld} other{{count} items succesvol hersteld}}",
-  "@filesRestoredSuccessfully": {
-    "description": "Success message when items are restored from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "failedToRestoreFiles": "Herstellen van items mislukt",
   "permanentlyDelete": "Permanent verwijderen",
-  "permanentlyDeleteFilesBody": "{count, plural, =1{Dit item} other{Deze {count} items}} wordt permanent verwijderd en kan niet worden hersteld.",
-  "@permanentlyDeleteFilesBody": {
-    "description": "Confirmation body for permanent deletion from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "yesDelete": "Ja, verwijderen",
   "deletingFiles": "Verwijderen...",
-  "filesDeletedPermanently": "{count, plural, =1{1 item permanent verwijderd} other{{count} items permanent verwijderd}}",
-  "@filesDeletedPermanently": {
-    "description": "Success message when items are permanently deleted from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "failedToDeleteFiles": "Verwijderen van items mislukt",
   "itemsStored": "Items opgeslagen",
   "of_": "van",

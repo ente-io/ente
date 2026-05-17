@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{inga objekt} =1{1 objekt} other{{count} objekt}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Skapa samling",
   "uploadDocumentTooltip": "Ladda upp dokument",
   "restore": "Återställ",
@@ -468,15 +458,6 @@
   "linkDeviceLimit": "Enhetsgräns",
   "expiredLinkInfo": "Denna länk har upphört att gälla. Välj ett nytt datum eller inaktivera tidsbegränsningen.",
   "linkExpiresOn": "Länken upphör att gälla {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Dela med specifika personer} =1 {Delad med en person} other {Delad med {numberOfPeople} personer}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Länk har upphört att gälla",
   "publicLinkEnabled": "Offentlig länk aktiverad",
   "shareALink": "Dela en länk",
@@ -490,28 +471,6 @@
   "add": "Lägg till",
   "collaboratorsCanAddFilesToTheSharedCollection": "Medarbetare kan laegga till objekt i den delade samlingen.",
   "enterEmail": "Ange e-post",
-  "viewersSuccessfullyAdded": "{count, plural, =0{Lade till 0 visare} =1{Lade till 1 visare} other{Lade till {count} visare}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0{Lade till 0 medarbetare} =1{Lade till 1 medarbetare} other{Lade till {count} medarbetare}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0{Laegg till visare} =1{Laegg till visare} other{Laegg till visare}}",
-  "addCollaborators": "{count, plural, =0{Laegg till medarbetare} =1{Laegg till medarbetare} other{Laegg till medarbetare}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Tryck laenge paa en e-post foer att verifiera end-to-end-kryptering.",
   "sharing": "Delar...",
   "invalidEmailAddress": "Ogiltig e-postadress",
@@ -560,16 +519,6 @@
   "viewer": "Bildvy",
   "collaborator": "Samarbetspartner",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Medarbetare kan laegga till objekt i den delade samlingen.",
-  "albumParticipantsCount": "{count, plural, =0 {Inga deltagare} =1 {1 deltagare} other {{count} deltagare}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Lägg till fler",
   "you": "Du",
   "albumOwner": "Ägare",
@@ -677,16 +626,6 @@
   "clickHereToUpload": "Klicka haer foer att ladda upp",
   "saveDocument": "Spara dokument",
   "uploadFiles": "Ladda upp objekt",
-  "filesSelected": "{count, plural, =0{Inga objekt valda} =1{1 objekt valt} other{{count} objekt valda}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Laegg till i samling",
   "newCollection": "Ny samling",
   "title": "Titel",
@@ -704,16 +643,6 @@
       }
     }
   },
-  "recordSavedToMultipleCollections": "Posten sparades till {count, plural, =1{1 samling} other{{count} samlingar}}",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} kopierades till urklipp",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -721,20 +650,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 resultat} other{{count} resultat}} foer \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -781,49 +696,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 samling} other{{count} samlingar}} kommer att tas bort permanent.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 objekt} other{{count} objekt}} kommer att tas bort permanent.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Ta aeven bort objekt fraan alla platser",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Ja, ta bort {count, plural, =1{samling} other{samlingar}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Ja, ta bort {count, plural, =1{objekt} other{objekt}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Anvaendning",
   "important": "Viktig",
@@ -832,16 +707,6 @@
   "markingAsImportant": "Markerar som viktig...",
   "fileMarkedAsImportant": "Objektet markerades som viktigt",
   "fileRemovedFromImportant": "Objektet togs bort fraan viktigt",
-  "filesMarkedAsImportant": "{count, plural, =1{1 objekt markerat som viktigt} other{{count} objekt markerade som viktiga}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Alla objekt aer redan markerade som viktiga",
   "failedToMarkFilesAsImportant": "Kunde inte markera objekt som viktiga: {error}",
   "@failedToMarkFilesAsImportant": {

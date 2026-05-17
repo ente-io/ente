@@ -83,7 +83,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             val endpoint = endpointPreferences.endpointFlow.first()
             val buildEndpoint = BuildConfig.API_ENDPOINT.trim()
             if (endpoint.isNullOrBlank()) {
-                val fallback = "https://api.ente.io"
+                val fallback = "https://api.ente.com"
                 val resolved = if (buildEndpoint.isNotBlank()) buildEndpoint else fallback
                 endpointPreferences.setEndpoint(resolved)
             } else if (buildEndpoint.isNotBlank() && buildEndpoint != endpoint) {
@@ -181,6 +181,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 title = "Qwen 3.5 2B (Q8_0)",
                 url = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
                 mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
+            ),
+            io.ente.ensu.domain.model.EnsuModelPreset(
+                id = "gemma-4-e2b-q4km",
+                title = "Gemma 4 E2B (Q4_K_M)",
+                url = "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_K_M.gguf?download=true",
+                mmprojUrl = "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/mmproj-F16.gguf"
             )
         ),
         desktopDefaultModel = io.ente.ensu.domain.model.EnsuModelPreset(

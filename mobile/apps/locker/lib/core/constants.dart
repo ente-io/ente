@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-const String kAccountsUrl = "https://accounts.ente.io";
 const int microSecondsInDay = 86400000000;
 const int android11SDKINT = 30;
 
@@ -8,7 +7,7 @@ const int android11SDKINT = 30;
 // https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Generating_the_mnemonic
 const mnemonicKeyWordCount = 24;
 
-const kDefaultProductionEndpoint = 'https://api.ente.io';
+const kDefaultProductionEndpoint = 'https://api.ente.com';
 const String githubDiscussionsUrl =
     "https://github.com/ente-io/ente/discussions";
 

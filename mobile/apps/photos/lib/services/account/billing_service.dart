@@ -15,12 +15,12 @@ import 'package:photos/utils/dialog_util.dart';
 
 const kWebPaymentRedirectUrl = String.fromEnvironment(
   "web-payment-redirect",
-  defaultValue: "https://payments.ente.io/frameRedirect",
+  defaultValue: "https://payments.ente.com/frameRedirect",
 );
 
 const kWebPaymentBaseEndpoint = String.fromEnvironment(
   "web-payment",
-  defaultValue: "https://payments.ente.io",
+  defaultValue: "https://payments.ente.com",
 );
 
 class BillingService {
@@ -67,7 +67,7 @@ class BillingService {
             paymentProvider ?? (Platform.isAndroid ? "playstore" : "appstore"),
       );
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to verify subscription", e, s);
       rethrow;
     }
   }
@@ -76,7 +76,7 @@ class BillingService {
     try {
       return await _gateway.getSubscription();
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to fetch subscription", e, s);
       rethrow;
     }
   }
@@ -85,7 +85,7 @@ class BillingService {
     try {
       return await _gateway.cancelStripeSubscription();
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to cancel Stripe subscription", e, s);
       rethrow;
     }
   }
@@ -94,7 +94,7 @@ class BillingService {
     try {
       return await _gateway.activateStripeSubscription();
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to activate Stripe subscription", e, s);
       rethrow;
     }
   }
@@ -107,7 +107,7 @@ class BillingService {
         redirectURL: kWebPaymentRedirectUrl,
       );
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to fetch Stripe customer portal URL", e, s);
       rethrow;
     }
   }

@@ -49,6 +49,8 @@ interface LlmProvider {
         onToken: (String) -> Unit
     ): GenerationSummary
 
+    suspend fun prewarmImageInference(target: LlmModelTarget)
+
     fun isModelDownloaded(target: LlmModelTarget): Boolean
     val isManualDownloadActive: Boolean
     suspend fun estimateModelDownloadSize(target: LlmModelTarget): Long?

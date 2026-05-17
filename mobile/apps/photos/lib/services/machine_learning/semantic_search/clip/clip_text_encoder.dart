@@ -6,6 +6,9 @@ import "package:photos/services/machine_learning/ml_model.dart";
 import 'package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart';
 import "package:photos/utils/ml_util.dart";
 
+/// MobileCLIP S2 text encoder (quantized) used for semantic search text embeddings.
+///
+/// Model size: ~67.1 MB. Vocab file size: ~3.2 MB.
 class ClipTextEncoder extends MlModel {
   static const kRemoteBucketModelPath =
       "mobileclip_s2_text_opset18_quant.onnx"; // Quantized model

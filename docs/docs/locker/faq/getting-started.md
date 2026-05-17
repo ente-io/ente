@@ -28,18 +28,17 @@ Open the App Store, search for "Ente Locker", and tap Get.
 
 ### Is Ente Locker available on desktop? {#locker-desktop-availability}
 
-Ente Locker is currently available only for iOS and Android. Desktop apps are
-not yet available.
+Ente Locker is currently available for iOS, Android, and the web. Native desktop apps are not yet available.
 
-However, public links created in Locker can be opened in any web browser on
-desktop.
+You can use Locker on desktop from
+your browser at [locker.ente.com](https://locker.ente.com).
 
 ### Can I access Locker from a web browser? {#locker-web-access}
 
-There is no web app for Ente Locker at this time. The mobile apps for iOS and
-Android are required to access your data.
+Yes. Open [locker.ente.com](https://locker.ente.com) in your browser and sign in
+with your Ente account.
 
-Public links to shared content can be viewed in any web browser.
+Public links to shared content can also be viewed in any web browser.
 
 ## Account
 
@@ -65,7 +64,8 @@ all use the same account.
 
 ### How do I log in on multiple devices? {#locker-multi-device}
 
-1. Install Ente Locker on your additional device
+1. Install Ente Locker on your additional device, or open
+   [locker.ente.com](https://locker.ente.com)
 2. Tap **Sign in**
 3. Enter your Ente email and password
 4. If 2FA is enabled, enter your authentication code

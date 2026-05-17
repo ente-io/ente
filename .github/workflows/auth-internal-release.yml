@@ -42,20 +42,17 @@ jobs:
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - name: Setup keys
-              uses: timheuer/base64-to-file@v1
-              with:
-                  fileName: "keystore/ente_auth_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY }}
+            - name: Add keystore
+              run: echo "${{ secrets.SIGNING_KEY_AUTH }}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
 
             - name: Build PlayStore AAB
               run: |
                   flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_auth_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_AUTH }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_AUTH }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_AUTH }}
 
             - name: Upload AAB to PlayStore
               uses: r0adkll/upload-google-play@v1

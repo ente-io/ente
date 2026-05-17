@@ -106,7 +106,7 @@ func mustInsertTestUser(t *testing.T, db *sql.DB, userID int64) {
 
 	testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       userID,
-		Email:        fmt.Sprintf("contacts-%d@ente.io", userID),
+		Email:        fmt.Sprintf("contacts-%d@ente.com", userID),
 		CreationTime: 1,
 	})
 }
@@ -254,7 +254,7 @@ func TestContactCRUDAndDiff(t *testing.T) {
 	if created.ContactUserID != 11 {
 		t.Fatalf("contactUserID = %d, want 11", created.ContactUserID)
 	}
-	expectedCreateEmail := "contacts-11@ente.io"
+	expectedCreateEmail := "contacts-11@ente.com"
 	if created.Email == nil || *created.Email != expectedCreateEmail {
 		t.Fatalf("email = %v, want %q", created.Email, expectedCreateEmail)
 	}
@@ -286,7 +286,7 @@ func TestContactCRUDAndDiff(t *testing.T) {
 	if updated.ContactUserID != 12 {
 		t.Fatalf("updated contactUserID = %d, want 12", updated.ContactUserID)
 	}
-	expectedUpdatedEmail := "contacts-12@ente.io"
+	expectedUpdatedEmail := "contacts-12@ente.com"
 	if updated.Email == nil || *updated.Email != expectedUpdatedEmail {
 		t.Fatalf("updated email = %v, want %q", updated.Email, expectedUpdatedEmail)
 	}
@@ -357,7 +357,7 @@ func TestUpdateRevivesDeletedContact(t *testing.T) {
 	if revived.EncryptedData == nil || string(*revived.EncryptedData) != "payload-2" {
 		t.Fatalf("revived encrypted data = %v, want payload-2", revived.EncryptedData)
 	}
-	expectedEmail := "contacts-32@ente.io"
+	expectedEmail := "contacts-32@ente.com"
 	if revived.Email == nil || *revived.Email != expectedEmail {
 		t.Fatalf("revived email = %v, want %q", revived.Email, expectedEmail)
 	}
@@ -575,11 +575,11 @@ func TestTouchContactsForContactUserRefreshesResolvedEmailInDiff(t *testing.T) {
 		SecretEncryptionKey: testutil.SecretEncryptionKey(),
 		HashingKey:          testutil.HashingKey(),
 	}
-	encryptedEmail, err := crypto.Encrypt("updated-82@ente.io", testutil.SecretEncryptionKey())
+	encryptedEmail, err := crypto.Encrypt("updated-82@ente.com", testutil.SecretEncryptionKey())
 	if err != nil {
 		t.Fatalf("failed to encrypt email: %v", err)
 	}
-	emailHash, err := crypto.GetHash("updated-82@ente.io", testutil.HashingKey())
+	emailHash, err := crypto.GetHash("updated-82@ente.com", testutil.HashingKey())
 	if err != nil {
 		t.Fatalf("failed to hash email: %v", err)
 	}
@@ -600,7 +600,7 @@ func TestTouchContactsForContactUserRefreshesResolvedEmailInDiff(t *testing.T) {
 	if len(diff) != 1 {
 		t.Fatalf("diff length = %d, want 1", len(diff))
 	}
-	if diff[0].Email == nil || *diff[0].Email != "updated-82@ente.io" {
+	if diff[0].Email == nil || *diff[0].Email != "updated-82@ente.com" {
 		t.Fatalf("resolved email = %v, want updated email", diff[0].Email)
 	}
 }

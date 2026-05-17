@@ -219,16 +219,6 @@
   "after1Month": "Hilabete bat barru",
   "after1Year": "Urtebete barru",
   "manageParticipants": "Kudeatu",
-  "albumParticipantsCount": "{count, plural,=0 {Parte hartzailerik ez}=1 {Parte hartzaile 1}other {{count} Parte hartzaile}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Sortu esteka bat beste pertsona batzuei zure album partekatuan arriskuak gehitu eta ikusten uzteko, naiz eta Ente aplikazio edo kontua ez izan. Oso egokia gertakizun bateko argazkiak biltzeko.",
   "collectPhotos": "Bildu argazkiak",
   "collaborativeLink": "Parte hartzeko esteka",
@@ -240,15 +230,6 @@
   "publicLinkEnabled": "Esteka publikoa indarrean",
   "shareALink": "Partekatu esteka",
   "sharedAlbumSectionDescription": "Sortu partekatutako eta parte hartzeko albumak beste Ente erabiltzaileekin, debaldeko planak dituztenak barne.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural,=0 {Partekatu pertsona zehatz batzuekin}=1 {Partekatu pertsona batekin} other {Partekatu {numberOfPeople} pertsonarekin}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Hau da zure Egiaztatze IDa",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Zurekin albumak partekatzen dituen norbaitek ID berbera ikusi beharko luke bere gailuan.",
   "howToViewShareeVerificationID": "Mesedez, eska iezaiozu ezarpenen landutako bere e-mail helbidean luze klikatzeko, eta egiaztatu gailu bietako IDak bat direla.",

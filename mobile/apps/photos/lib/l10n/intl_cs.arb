@@ -5,6 +5,7 @@
   "accountWelcomeBack": "Vítejte zpět!",
   "emailAlreadyRegistered": "E-mail je již zaregistrován.",
   "emailNotRegistered": "E-mail není registrován.",
+  "accountSetupIncompleteCreateAccount": "Nastavení účtu je neúplné. Pro dokončení nastavení vytvořte účet.",
   "email": "E-mail",
   "cancel": "Zrušit",
   "verify": "Ověřit",
@@ -28,9 +29,11 @@
   "deleteReason4": "Můj důvod není uveden",
   "sendEmail": "Odeslat e-mail",
   "deleteRequestSLAText": "Váš požadavek bude zpracován do 72 hodin.",
+  "deleteEmailRequest": "Prosím, zašlete e-mail na <warning>account-deletion@ente.com</warning> z e-mailové adresy, se kterou jste se registrovali.",
   "entePhotosPerm": "Ente <i>potřebuje oprávnění</i> k uchovávání vašich fotek",
   "ok": "Ok",
   "createAccount": "Vytvořit účet",
+  "createAccountTitle": "Vytvořit účet",
   "createNewAccount": "Vytvořit nový účet",
   "password": "Heslo",
   "confirmPassword": "Potvrďte heslo",
@@ -120,6 +123,7 @@
   "generatingEncryptionKeys": "Generování šifrovacích klíčů...",
   "pleaseWait": "Čekejte prosím...",
   "continueLabel": "Pokračovat",
+  "continueInMailApp": "Pokračovat v e-mailové aplikaci",
   "insecureDevice": "Nezabezpečené zařízení",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Omlouváme se, nemohli jsme vygenerovat bezpečné klíče na tomto zařízení.\n\nProsíme, zaregistrujte se z jiného zařízení.",
   "howItWorks": "Jak to funguje",
@@ -241,6 +245,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Rozložení alba",
+  "layoutMasonry": "Zednictví",
   "layoutGrouped": "Seskupeno",
   "layoutContinuous": "Plynulý",
   "layoutTrip": "Výlet",
@@ -268,16 +273,6 @@
   "after1Month": "Po 1 měsíci",
   "after1Year": "Po 1 roce",
   "manageParticipants": "Spravovat",
-  "albumParticipantsCount": "{count, plural, few {{count} účastníci} many {{count} účastníků}=0 {Žádní účastníci} =1 {1 účastník} other {{count} účastníků}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Vytvořte odkaz, který umožní ostatním přidávat a prohlížet fotografie ve Vašem sdíleném albu, aniž by potřebovali aplikaci Ente nebo účet. Skvělé pro shromažďování fotografií z akcí.",
   "collectPhotos": "Shromáždit fotografie",
   "collaborativeLink": "Odkaz na spolupráci",
@@ -293,15 +288,6 @@
   "publicLinkEnabled": "Veřejný odkaz povolen",
   "shareALink": "Sdílet odkaz",
   "sharedAlbumSectionDescription": "Vytvářejte sdílená a společná alba s ostatními uživateli Ente, včetně uživatelů na bezplatném plánu.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Sdílet s konkrétními osobami} =1 {Sdíleno s 1 osobou} other {Sdíleno s {numberOfPeople} osobami}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Toto je Vaše ověřovací ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Osoba, která s Vámi sdílí alba, by měla na svém zařízení vidět stejné ID.",
   "howToViewShareeVerificationID": "Požádejte je, aby dlouze stiskli svou e-mailovou adresu na obrazovce nastavení a ověřili, zda se ID na obou zařízeních shodují.",
@@ -317,8 +303,12 @@
   "verificationId": "Ověřovací ID",
   "verifyEmailID": "Ověřit {email}",
   "emailNoEnteAccount": "{email} nemá účet Ente.\n\nPošlete jim pozvánku ke sdílení fotek.",
+  "shareMyVerificationID": "Zde je moje ověřovací ID: {verificationID} pro ente.com.",
+  "shareTextConfirmOthersVerificationID": "Ahoj, můžeš potvrdit, že toto je tvé ověřovací ID ente.com: {verificationID}",
   "somethingWentWrong": "Něco se pokazilo",
   "sendInvite": "Odeslat pozvánku",
+  "shareTextRecommendUsingEnte": "Stáhněte si aplikaci Ente, abychom mohli snadno sdílet fotografie a videa v originální kvalitě\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Stáhněte si Ente, abych Vás mohl přidat do svého rodinného plánu\n\nhttps://ente.com",
   "done": "Hotovo",
   "applyCodeTitle": "Uplatnit kód",
   "enterCodeDescription": "Zadejte kód, který Vám poskytl Váš přítel, a získejte bezplatné úložiště pro Vás oba",
@@ -346,6 +336,7 @@
   "theyAlsoGetXGb": "Získají také {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB pro ně + {storageAmountInGB} GB pro Vás když zvýší svůj tarif.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB pokaždé, když se někdo zaregistruje do placeného plánu a použije Váš kód",
+  "shareTextReferralCode": "Ente Photos je soukromý a bezpečný domov pro Vaše fotografie\n* Stáhněte si Ente Photos z https://ente.com/app\n* Založte si účet\n* Použijte referenční kód {referralCode} v Nastavení->Doporučení\n* Získejte {referralStorageInGB}GB zdarma, když přejdete na placený tarif",
   "claimFreeStorage": "Získat úložiště zdarma",
   "inviteYourFriends": "Pozvěte své přátele",
   "earnFreeStorage": "Získat úložiště zdarma",
@@ -503,6 +494,7 @@
   },
   "discover_identity": "Identita",
   "discover_screenshots": "Snímky obrazovky",
+  "discover_qr_codes": "QR kódy",
   "discover_receipts": "Účtenky",
   "discover_notes": "Poznámky",
   "discover_memes": "Memy",
@@ -516,6 +508,7 @@
   "discover_sunset": "Západ slunce",
   "discover_hills": "Kopce",
   "discover_greenery": "Zeleň",
+  "mlIndexingDescription": "Vezměte prosím na vědomí, že strojové učení bude mít za následek vyšší využití sítě a baterie, dokud nebudou zpracovány všechny položky. Pro rychlejší zpracování zvažte použití desktopové aplikace a všechny výsledky budou synchronizovány automaticky.",
   "loadingModel": "Stahování modelů...",
   "waitingForWifi": "Čekání na WiFi...",
   "status": "Stav",
@@ -550,7 +543,6 @@
   "updateSettings": "Aktualizovat nastavení",
   "updatingFolderSelection": "Aktualizuji výběr složek...",
   "itemCount": "{count, plural, one{{count} položka} few{{count} položky} other{{count} položek}}",
-  "deleteItemCount": "{count, plural, =1 {Smazat {count} položku} few{Smazat {count} položky} other {Smazat {count} položek}}",
   "duplicateItemsGroup": "{count} souborů, {formattedSize} každý",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -658,8 +650,153 @@
     }
   },
   "familyPlans": "Rodinné plány",
+  "family": "Rodina",
+  "designedForFamilies": "Navrženo pro rodiny",
+  "shareYourSubscription": "Sdílejte své předplatné se svými blízkými",
+  "shareStorageWith5Members": "Sdílejte úložiště s 5 členy",
+  "privateSpaceForEveryMember": "Soukromý prostor pro každého člena",
+  "feedToEngageWithFamily": "Feed pro spojení s rodinou",
+  "plansStartAt": "Tarify začínají na {price}/měsíc",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Zobrazit tarify",
+  "bringYourFamilyAlong": "Přiveďte svou rodinu",
+  "yourPlanSupportsFamily": "Váš plán již podporuje rodinu",
+  "addUpTo5MembersFree": "Přidejte až 5 členů zdarma",
+  "addFamilyMember": "Přidat člena rodiny",
+  "addMember": "Přidat člena",
+  "inviteMembers": "Pozvat členy",
+  "enterEmailAddresses": "Zadejte jejich e-mailové adresy. Potřebují účet Ente.",
+  "inviteLimitReached": "Přidali jste 5 pozvánek. Pro přidání další jednu odeberte",
+  "emailAddress": "E-mailová adresa",
+  "sendInvites": "Odeslat pozvánky",
+  "enterAnEmailAddress": "Zadejte e-mailovou adresu",
+  "enterAValidEmailAddress": "Zadejte platnou e-mailovou adresu",
+  "alreadyAdded": "Již přidáno",
+  "thisUserIsNotOnEnte": "Tento uživatel nemá účet Ente",
+  "emailNeedsEnteAccountForFamily": "{email} nemá účet Ente.\n\nPošlete jim pozvánku a přidejte je do své rodiny, jakmile si vytvoří účet na Ente.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "failedToInvite": "Nelze pozvat {email}",
+  "@failedToInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "failedToInviteCount": "Nelze pozvat {count} členy",
+  "@failedToInviteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "storageUsedOfTotal": "{used} z {total} použito",
+  "@storageUsedOfTotal": {
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "67 GB"
+      },
+      "total": {
+        "type": "String",
+        "example": "200 GB"
+      }
+    }
+  },
+  "members": "Členové",
+  "pending": "Nevyřízeno",
+  "closeFamilyPlan": "Uzavřít rodinný plán",
+  "closeFamilyConfirmTitle": "Uzavřít rodinný plán?",
+  "closeFamilyConfirmBody": "Všichni členové ztratí přístup ke sdílenému úložišti. Tuto akci nelze vrátit zpět.",
+  "editStorageLimit": "Upravit limit úložiště",
+  "noLimitSet": "Limit není nastaven",
+  "removeFromFamily": "Odebrat z rodiny",
+  "removeMemberConfirmTitle": "Odebrat člena?",
+  "removeMemberConfirmBody": "{email} ztratí přístup ke sdílenému úložišti.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Znovu zaslat pozvánku",
+  "revokeInviteConfirmTitle": "Zrušit pozvánku?",
+  "revokeInviteConfirmBody": "Pozvánka pro {email} bude zrušena.",
+  "@revokeInviteConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "revoke": "Odvolat",
+  "inviteResent": "Pozvánka znovu odeslána",
+  "memberStorageUsed": "{amount} použito",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Kapacita úložiště",
+  "usingStorage": "Používá se {amount}",
+  "@usingStorage": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "yourStorageIsLimitedTo": "Vaše úložiště je omezeno na {limit}",
+  "@yourStorageIsLimitedTo": {
+    "placeholders": {
+      "limit": {
+        "type": "String",
+        "example": "50 GB"
+      }
+    }
+  },
+  "storageLimitExplanation": "Nastavte maximální kapacitu úložišťě, kterou může tento člen použít. Po dosažení limitu nebudou moci nahrávat další.",
+  "limit": "Limit",
+  "noLimit": "Žádný limit",
+  "currentUsageNote": "Aktuální použití: {amount}. Nastavte na 0 pro žádné omezení.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Opustit rodinný plán?",
+  "leaveFamilyConfirmBody": "Ztratíte přístup ke sdílenému úložišti.",
   "referrals": "Doporučení",
   "notifications": "Oznámení",
+  "sharedPhotoNotifications": "Nové sdílené fotografie a alba",
+  "sharedPhotoNotificationsExplanation": "Dostávejte upozornění na nové fotografie ve sdílených albech, ve kterých se nacházíte, a pro nová alba sdílená s Vámi.",
   "socialNotifications": "Líbí se a komentáře",
   "socialNotificationsExplanation": "Přijímat oznámení pro líbí se u Vašich fotek a komentáře na albech, kterých jste součástí",
   "advanced": "Pokročilé",
@@ -690,12 +827,68 @@
   "reportBug": "Nahlásit chybu",
   "suggestFeatures": "Navrhnout funkce",
   "support": "Podpora",
+  "helpAndSupport": "Nápověda a podpora",
+  "browseHelpPages": "Procházet stránky nápovědy",
+  "searchAndDiscovery": "Hledat a objevovat",
+  "searchAndDiscoveryDesc": "Obličeje, místa, popisy a další",
+  "backupAndSync": "Zálohování a synchronizace",
+  "backupAndSyncDesc": "Automatické zálohování, stav synchronizace a nahrávání",
+  "sharingAndCollaboration": "Sdílení a spolupráce",
+  "sharingAndCollaborationDesc": "Alba, odkazy a rodinné tarify",
+  "storageAndPlans": "Úložiště a tarify",
+  "storageAndPlansDesc": "Tarify, vyúčtování a využití úložiště",
+  "troubleshooting": "Řešení problémů",
+  "troubleshootingDesc": "Běžné problémy a jejich řešení",
+  "viewAllHelpTopics": "Zobrazit všechna témata nápovědy",
+  "getInTouch": "Kontaktujte nás",
+  "reportAnIssue": "Nahlásit problém",
+  "askAQuestion": "Zeptejte se",
+  "requestAFeature": "Žádost o funkci",
+  "subject": "Předmět",
+  "description": "Popis",
+  "oneLineAboutTheIssue": "Jeden řádek týkající se problému",
+  "detailsAboutTheIssue": "Podrobnosti o problému",
+  "yourQuestion": "Vaše otázka",
+  "anyAdditionalInformation": "Doplňující informace",
+  "attachLogs": "Připojit protokoly",
+  "attachLogsHelper": "Pomůže nám rychleji diagnostikovat problém",
+  "pleaseEnterASubject": "Zadejte prosím předmět",
+  "pleaseEnterADescription": "Zadejte prosím popis",
+  "noEmailAppFound": "Nebyla nalezena žádná e-mailová aplikace",
+  "noEmailAppBody": "Zkopírujte svou zprávu a pošlete ji na {email} z jakékoli e-mailové služby.",
+  "@noEmailAppBody": {
+    "description": "No-mail-app fallback subtitle with the target email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "support@ente.com"
+      }
+    }
+  },
+  "message": "Zpráva",
+  "deviceInfo": "Informace o zařízení",
+  "logs": "Protokoly",
+  "export": "Export",
+  "logsNotCopiedDownloadNote": "Protokoly nejsou zkopírovány. Exportujte protokoly a připojte je ke svému e-mailu.",
+  "attachedSize": "Přiloženo ({size})",
+  "@attachedSize": {
+    "description": "Label for attached logs with formatted file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "12.4 KB"
+      }
+    }
+  },
+  "copyAllToClipboard": "Kopírovat vše do schránky",
+  "copied": "Zkopírováno",
   "appearance": "Vzhled",
   "theme": "Motiv",
   "lightTheme": "Světlý",
   "darkTheme": "Tmavý",
   "systemTheme": "Systém",
   "freeTrial": "Bezplatná zkušební verze",
+  "chooseYourPlan": "Vyberte si svůj plán",
   "enteSubscriptionPitch": "Ente uchovává Vaše vzpomínky, takže jsou Vám vždy k dispozici, i když ztratíte své zařízení.",
   "enteSubscriptionShareWithFamily": "Do Vašeho plánu lze přidat i Vaši rodinu.",
   "currentUsageIs": "Aktuálně využíváte ",
@@ -716,6 +909,7 @@
   "subscription": "Předplatné",
   "paymentDetails": "Platební údaje",
   "manageFamily": "Spravovat rodinu",
+  "contactToManageSubscription": "Kontaktujte nás prosím na adrese support@ente.com pro správu Vašeho {provider} předplatného.",
   "renewSubscription": "Obnovit předplatné",
   "cancelSubscription": "Zrušit předplatné",
   "areYouSureYouWantToRenew": "Opravdu chcete obnovit?",
@@ -762,8 +956,19 @@
   "playstoreSubscription": "Předplatné PlayStore",
   "appstoreSubscription": "Předplatné AppStore",
   "subAlreadyLinkedErrMessage": "Vaše {id} je již propojeno s jiným účtem Ente.\nPokud chcete použít své {id} s tímto účtem, kontaktujte prosím naši podporu",
-  "visitWebToManage": "Pro správu předplatného navštivte prosím web.ente.io",
+  "visitWebToManage": "Pro správu předplatného navštivte prosím {webUrl}",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
+  "managePaymentMethod": "Spravovat způsob platby",
   "couldNotUpdateSubscription": "Předplatné nelze aktualizovat",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Kontaktujte nás na adrese support@ente.com a rádi Vám pomůžeme!",
   "paymentFailed": "Platba se nezdařila",
   "paymentFailedTalkToProvider": "Pokud Vám byla účtována platba, obraťte se prosím na podporu {providerName}",
   "@paymentFailedTalkToProvider": {
@@ -814,6 +1019,7 @@
   "grantFullAccessPrompt": "Povolte prosím přístup ke všem fotografiím v aplikaci Nastavení",
   "allowPermTitle": "Povolit přístup k fotografiím",
   "allowPermBody": "Povolte v Nastavení přístup k vašim fotografiím aby Ente mohl zobrazit a zálohovat vaši knihovnu.",
+  "openSettings": "Otevřít nastavení",
   "selectMorePhotos": "Vybrat více fotografií",
   "existingUser": "Existující uživatel",
   "newToEnte": "Nový uživatel Ente",
@@ -837,6 +1043,7 @@
   "couldNotBackUpTryLater": "Vaše data se nepodařilo zálohovat.\nZkusíme to znovu později.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente může šifrovat a uchovávat soubory pouze v případě, že mu k nim udělíte přístup",
   "pleaseGrantPermissions": "Prosím, udělte oprávnění",
+  "grantPermissionDesc": "Povolte prosím aplikaci Ente přístup do Vaší knihovny, abychom ji mohli zorganizovat s rozpoznáváním obličeje. Veškeré zpracování se děje na Vašem zařízení.",
   "privateSharing": "Soukromé sdílení",
   "shareOnlyWithThePeopleYouWant": "Sdílejte pouze s lidmi, se kterými chcete",
   "usePublicLinksForPeopleNotOnEnte": "Používejte veřejné odkazy pro osoby, které nejsou na Ente",
@@ -893,7 +1100,20 @@
   "unarchive": "Odebrat z archivu",
   "favorite": "Oblíbené",
   "removeFromFavorite": "Odebrat z oblíbených",
+  "shareMemories": "Sdílet vzpomínky",
+  "shareTheseMemories": "Sdílet tyto vzpomínky",
+  "shareThisPhoto": "Sdílet tuto fotografii",
+  "shareThisVideo": "Sdílet toto video",
   "shareLink": "Sdílet odkaz",
+  "memoryShareLinkDescription": "Tento odkaz automaticky vyprší za 7 dní.",
+  "deleteLink": "Smazat odkaz",
+  "deleteLinkQuestion": "Smazat odkaz?",
+  "deleteMemoryLinkMessage": "Lidé, se kterými jste sdíleli tento odkaz, ztratí přístup, jakmile bude smazán.",
+  "linkDeletedSuccessfully": "Odkaz byl úspěšně smazán",
+  "memoryLinks": "Odkazy na paměť",
+  "openLink": "Otevřít odkaz",
+  "pay": "Zaplatit",
+  "noPaymentAppFound": "Nebyla nalezena žádná platební aplikace",
   "createCollage": "Vytvořit koláž",
   "saveCollage": "Uložit koláž",
   "collageSaved": "Koláž uložena do galerie",
@@ -905,14 +1125,6 @@
   "share": "Sdílet",
   "unhideToAlbum": "Odkrýt do alba",
   "restoreToAlbum": "Obnovit do alba",
-  "moveItem": "{count, plural, few {Přesunout položky} many {Přesunout položky}=1 {Přesunout položku} other {Přesunout položek}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, few {Přidat položky} many {Přidat položky}=1 {Přidat položku} other {Přidat položek}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Vytvořit nebo vybrat album",
   "selectAlbum": "Vybrat album",
   "searchByAlbumNameHint": "Název alba",
@@ -937,16 +1149,6 @@
   "referFriendsAnd2xYourPlan": "Doporučte přátele a zdvojnásobte svůj tarif",
   "shareAlbumHint": "Otevřete album a klepněte na tlačítko sdílení v pravém horním rohu, abyste jej sdíleli.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Položky zobrazují počet dní zbývajících do trvalého smazání",
-  "trashDaysLeft": "{count, plural, =0{Brzy} =1{1 den} few{{count} dny} other{{count} dní}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Smazat vše",
   "renameAlbum": "Přejmenovat album",
   "convertToAlbum": "Převést na album",
@@ -975,6 +1177,16 @@
   "clickOnTheOverflowMenu": "• Klikněte na rozbalovací nabídku",
   "click": "• Klikněte",
   "nothingToSeeHere": "Tady není nic k vidění! 👀",
+  "addANameAndPhoto": "Přidat jméno a fotografii",
+  "photosSharedByWillAppearHere": "Zde se objeví fotografie sdílené {email}.",
+  "@photosSharedByWillAppearHere": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "a@test.test"
+      }
+    }
+  },
   "selectFoldersToBackup": "<action>Vyberte složky</action> pro zobrazení a zálohování na ente.",
   "unarchiveAlbum": "Odebrat album z archivu",
   "archiveAlbum": "Archivovat album",
@@ -1046,7 +1258,6 @@
   "authToViewYourMemories": "Pro zobrazení svých vzpomínek se prosím ověřte",
   "unlock": "Odemknout",
   "freeUpSpace": "Uvolnit místo",
-  "freeUpSpaceSaving": "{count, plural, few {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}} many {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}}=1 {Může být ze zařízení odstraněno aby se uvolnilo {formattedSize}} other {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 soubor v tomto albu byl bezpečně zálohován} few {{formattedNumber} soubory v tomto albu byly bezpečně zálohovány} other {{formattedNumber} souborů v tomto albu bylo bezpečně zálohováno}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1074,18 +1285,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Stále k {count, plural, =1 {němu} other {nim}} máte přístup na Ente, pokud máte aktivní předplatné",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1191,7 +1390,16 @@
   "loadMessage5": "Náš zdrojový kód a kryptografie byly podrobeny externímu auditu",
   "loadMessage6": "Můžete sdílet odkazy na svá alba se svými blízkými",
   "loadMessage7": "Naše mobilní aplikace běží na pozadí, šifruje a zálohuje všechny nové fotografie, které pořídíte",
-  "loadMessage8": "web.ente.io má šikovný nástroj pro nahrávání souborů",
+  "loadMessage8": "{webUrl} má šikovný nástroj pro nahrávání souborů",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "K bezpečnému šifrování Vašich dat používáme Xchacha20Poly1305",
   "photoDescriptions": "Popisky fotografií",
   "searchResultFileName": "Název souboru",
@@ -1237,6 +1445,7 @@
   "fileTypesAndNames": "Typy a názvy souborů",
   "location": "Poloha",
   "moments": "Momenty",
+  "searchFaceEmptySection": "Lidé se zobrazí zde, jakmile bude zpracování hotovo",
   "searchDatesEmptySection": "Hledat podle data, měsíce nebo roku",
   "searchLocationEmptySection": "Seskupte fotografie pořízené v určitém okruhu od fotografie",
   "searchPeopleEmptySection": "Pozvěte lidi a uvidíte všechny fotografie, které zde sdíleli",
@@ -1245,6 +1454,14 @@
   "searchCaptionEmptySection": "Přidejte do informací o fotografii popisky jako \"#výlet\", abyste je zde mohli rychle najít",
   "language": "Jazyk",
   "selectLanguage": "Vybrat jazyk",
+  "noLocation": "Žádná poloha",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "Žádný štítek polohy",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Název místa",
   "addLocation": "Přidat polohu",
   "groupNearbyPhotos": "Seskupit fotografie pořízené v okolí",
@@ -1459,7 +1676,16 @@
   "playOnTv": "Přehrát album na televizi",
   "pair": "Spárovat",
   "deviceNotFound": "Zařízení nebylo nalezeno",
-  "castInstruction": "Navštivte stránku cast.ente.io na zařízení, které chcete spárovat.\n\nZadejte níže uvedený kód a album se přehraje na Vaší televizi.",
+  "castInstruction": "Navštivte stránku {castUrl} na zařízení, které chcete spárovat.\n\nZadejte níže uvedený kód a album se přehraje na Vaší televizi.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Zadejte kód",
   "joinDiscord": "Připojte se na Discord",
   "locations": "Lokality",
@@ -1469,8 +1695,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Rychlé vyhledávání osob podle jména",
-  "addViewers": "{count, plural, few {Přidat diváky} many {Přidat diváků}=0 {Přidat diváků} =1 {Přidat diváka} other {Přidat diváků}}",
-  "addCollaborators": "{count, plural, few {Přidejte spolupracovníky} many {Přidejte spolupracovníky}=0 {Přidejte spolupracovníka} =1 {Přidejte spolupracovníka} other {Přidejte spolupracovníků}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Dlouhým stisknutím e-mailu ověříte koncové šifrování.",
   "developerSettingsWarning": "Opravdu chcete změnit nastavení pro vývojáře?",
   "developerSettings": "Nastavení pro vývojáře",
@@ -1485,8 +1709,14 @@
   "editEmailAlreadyLinked": "Tento e-mail je již propojen s {name}.",
   "viewPersonToUnlink": "Zobraz {name} pro zrušení propojení",
   "enterName": "Zadejte jméno",
+  "editContact": "Upravit kontakt",
+  "autoFetchFromPeople": "Automatické načtení od lidí",
+  "useTheirNameAndPhoto": "Použít jejich jméno a fotografii",
   "savePerson": "Uložit osobu",
+  "saveContact": "Uložit kontakt",
   "editPerson": "Upravit osobu",
+  "enterDateOfBirthHint": "Zadejte datum narození",
+  "setAContactPhoto": "Nastavit fotografii kontaktu",
   "mergedPhotos": "Sloučené fotografie",
   "orMergeWithExistingPerson": "Nebo sloučit se stávajícími",
   "enterDateOfBirth": "Narozeniny (volitelné)",
@@ -1600,34 +1830,6 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, few {Přidány {count} soubory k osobě {personName}} many {Přidáno {count} souborů k osobě {personName}}=1 {Přidán 1 soubor k osobě {personName}} other {Přidáno {count} souborů k osobě {personName}}}",
-  "@addedFilesToPerson": {
-    "description": "Toast shown after manually tagging one or more files to a person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
-  "filesAlreadyLinkedToPerson": "{count, plural, one {{count} soubor je již propojen s osobou {personName}} few {{count} soubory jsou již propojeny s osobou {personName}} many {{count} souborů je již propojeno s osobou{personName}} other {{count} souborů je již propojeno s osobou {personName}}}",
-  "@filesAlreadyLinkedToPerson": {
-    "description": "Toast shown when selected files are already manually tagged to the selected person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
   "addNewPerson": "Přidat novou osobu",
   "addNameOrMerge": "Přidat jméno nebo sloučit",
   "mergeWithExisting": "Sloučit s existujícím",
@@ -1664,6 +1866,9 @@
   },
   "extraPhotosFound": "Nalezeny další fotografie",
   "configuration": "Nastavení",
+  "localIndexing": "Lokální zpracování",
+  "offlineLocalIndexingDisabledDescription": "Toto zařízení ve výchozím nastavení udržuje lokální zpracování vypnuto, aby se snížilo využití paměti.",
+  "offlineLocalIndexingDisabledCardDescription": "Toto zařízení ve výchozím nastavení udržuje lokální zpracování vypnuto, aby se snížilo využití paměti. Zapněte ho v nastavení, pokud chcete offline vyhledávání obličejů a chytré vyhledávání.",
   "processed": "Zpracováno",
   "resetPerson": "Odstranit",
   "areYouSureYouWantToResetThisPerson": "Opravdu chcete tuto osobu zapomenout?",
@@ -1674,46 +1879,6 @@
   "enableMachineLearningBanner": "Povolte strojové učení pro magické vyhledávání a rozpoznávání obličejů",
   "searchDiscoverEmptySection": "Obrázky se zde zobrazí po dokončení zpracování a synchronizace",
   "searchPersonsEmptySection": "Lidé se zde zobrazí po dokončení zpracování a synchronizace",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Přidáno 0 diváků} =1 {Přidán 1 divák} few {Přidáni {count} diváci} other {Přidáno {count} diváků}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Přidáno 0 spolupracovníků} =1 {Přidán 1 spolupracovník} few {Přidáni {count} spolupracovníci} other {Přidáno {count} spolupracovníků}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
-  "adminsSuccessfullyAdded": "{count, plural, few {{count} správci byli úspěšně přidáni} many {{count} správci byli úspěšně přidáni}=0 {Žádní správci nebyli přidáni} =1 {1 správce byl úspěšně přidán} other {{count} správců bylo úspěšně přidáno}}",
-  "@adminsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of admins that were successfully added to an album."
-  },
-  "addAdmins": "{count, plural, few {Přidat správce} many {Přidat správce}=0 {Přidat správce} =1 {Přidat správce} other {Přidat správce}}",
-  "@addAdmins": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Button text to add admins"
-  },
   "adminsCanManagePhotosAndParticipants": "Správci mohou spravovat fotografie a účastníky.",
   "suggestDeletion": "Navrhnout odstranění",
   "suggestDeletionDescription": "Vybrané fotografie budou z tohoto alba odebrány. Vlastníci fotografií také obdrží návrh na kontrolu a odstranění fotografií.",
@@ -1783,15 +1948,6 @@
   },
   "currentlyRunning": "aktuálně běží",
   "ignored": "ignorováno",
-  "photosCount": "{count, plural, =0 {0 fotografií} =1 {1 fotografie} few {{count} fotografie} other {{count} fotografií}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Soubor",
   "searchSectionsLengthMismatch": "Nesoulad délky sekcí: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -2077,21 +2233,11 @@
   "moveSelectedPhotosToOneDate": "Přesunout vybrané fotografie do jednoho data",
   "shiftDatesAndTime": "Posunout datum a čas",
   "photosKeepRelativeTimeDifference": "Fotografie zachovávají relativní časový rozdíl",
-  "photocountPhotos": "{count, plural, =0 {Žádné fotografie} =1 {1 fotografie} few {{count} fotografie} other {{count} fotografií}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "Ikona aplikace",
   "notThisPerson": "Není to tato osoba?",
   "selectedItemsWillBeRemovedFromThisPerson": "Vybrané položky budou z této osoby odebrány, ale nebudou smazány z Vaší knihovny.",
   "throughTheYears": "{dateFormat} v průběhu let",
   "thisWeekThroughTheYears": "Tento týden v průběhu let",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Tento týden, {count} rok nazpět} few {Tento týden, {count} roky nazpět} other {Tento týden, {count} let nazpět}}",
   "youAndThem": "Vy a {name}",
   "admiringThem": "Obdiv k {name}",
   "embracingThem": "Objímání {name}",
@@ -2107,11 +2253,11 @@
   "spotlightOnThem": "Nejdůležitější události s {name}",
   "personIsAge": "{name} má {age} let!",
   "personTurningAge": "{name} brzy oslaví {age} let",
-  "lastTimeWithThem": "Naposledy s {name}",
+  "throwbackWithThem": "Ohlédnutí za minulostí s {name}",
   "unnamedPeopleSpotlight": "Známá tvář",
   "unnamedPeopleYouAndThem": "Vy dva",
   "unnamedPeopleDoingSomethingTogether": "Dělat to společně",
-  "unnamedPeopleLastTimeYouSawThem": "Naposledy spolu",
+  "unnamedPeopleThrowbackTogether": "Ohlédnutí za minulostí",
   "tripToLocation": "Výlet do {location}",
   "tripInYear": "Cesta v roce {year}",
   "lastYearsTrip": "Loňský výlet",
@@ -2127,6 +2273,9 @@
   "curatedMemories": "Vybrané vzpomínky",
   "widgets": "Widgety",
   "memories": "Vzpomínky",
+  "peopleWidgetDesc": "Vyberte osoby, které chcete zobrazit na své domovské obrazovce.",
+  "albumsWidgetDesc": "Vyberte alba, která chcete zobrazit na své domovské obrazovce.",
+  "memoriesWidgetDesc": "Vyberte typ vzpomínek, které chcete zobrazit na své domovské obrazovce.",
   "smartMemories": "Chytré vzpomínky",
   "pastYearsMemories": "Vzpomínky na minulé roky",
   "deleteMultipleAlbumDialog": "Odstranit také fotografie (a videa) obsažená v těchto {count} albech ze <bold>všech</bold> ostatních alb, jejichž součástí jsou?",
@@ -2140,6 +2289,10 @@
   "sorryWeHadToPauseYourBackups": "Omlouváme se, museli jsme pozastavit Vaše zálohy",
   "clickToInstallOurBestVersionYet": "Klikněte pro instalaci naší dosud nejlepší verze",
   "onThisDayNotificationExplanation": "Dostávejte připomenutí vzpomínek z tohoto dne v předchozích letech.",
+  "addMemoriesWidgetPrompt": "Přidejte na domovskou obrazovku widget vzpomínek a upravte jej zde.",
+  "addAlbumWidgetPrompt": "Přidejte na domovskou obrazovku widget alba a upravte jej zde.",
+  "addPeopleWidgetPrompt": "Přidejte na domovskou obrazovku widget lidí a upravte jej zde.",
+  "showTextOnWidget": "Zobrazit text na widgetu",
   "birthdayNotifications": "Oznámení o narozeninách",
   "receiveRemindersOnBirthdays": "Dostávejte připomenutí, když má někdo narozeniny. Klepnutím na oznámení se dostanete k fotkám oslavence.",
   "happyBirthday": "Všechno nejlepší k narozeninám! 🥳",
@@ -2169,9 +2322,11 @@
   "same": "Stejné",
   "different": "Odlišné",
   "sameperson": "Stejná osoba?",
+  "indexingPausedStatusDescription": "Zpracovávání je pozastaveno. Automaticky se obnoví, jakmile bude zařízení připraveno. Zařízení je považováno za připravené, pokud jsou úroveň nabití baterie, stav baterie a teplotní stav v normálním rozmezí.",
   "thisWeek": "Tento týden",
   "lastWeek": "Minulý týden",
   "thisMonth": "Tento měsíc",
+  "lastMonth": "Minulý měsíc",
   "thisYear": "Tento rok",
   "groupBy": "Seskupit podle",
   "groupByDay": "Den",
@@ -2206,15 +2361,6 @@
   "font": "Písmo",
   "background": "Pozadí",
   "align": "Zarovnat",
-  "addedToAlbums": "{count, plural, =1{Úspěšně přidáno do 1 alba} other{Úspěšně přidáno do {count} alb}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "Zpracovaná videa",
   "totalVideos": "Celkový počet videí",
   "skippedVideos": "Přeskočená videa",
@@ -2245,14 +2391,6 @@
   "findSimilarImages": "Najít podobné obrázky",
   "noSimilarImagesFound": "Nebyly nalezeny žádné podobné obrázky",
   "yourPhotosLookUnique": "Vaše fotografie vypadají jedinečně",
-  "similarGroupsFound": "{count, plural, =1{{count} skupina nalezena} few{{count} skupiny nalezeny} other{{count} skupin nalezeno}}",
-  "@similarGroupsFound": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "reviewAndRemoveSimilarImages": "Zkontrolujte a odstraňte podobné obrázky",
   "deletePhotosWithSize": "Smazat {count} fotek ({size})",
   "@deletePhotosWithSize": {
@@ -2375,6 +2513,10 @@
   "artisticPortraits": "Umělecké portréty",
   "streetFood": "Kousky pouličního jídla",
   "riverCruises": "Výhledy z plavby po řece",
+  "facesTimelineBannerTitle": "Vzpomínání",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
+  },
   "facesTimelineBannerSubtitle": "Zobrazit fotografie {name} během let",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",
@@ -2439,6 +2581,16 @@
   },
   "playfulKids": "Hravé děti",
   "coastalCliffs": "Útesy u moře",
+  "candidLaughter": "Výbuch smíchu",
+  "groupSelfies": "My všichni",
+  "birthdayJoy": "Narozeninová radost",
+  "weddingMoments": "Záře svatebního dne",
+  "goldenHourPortraits": "Obličeje zlaté hodiny",
+  "concertNights": "Koncertní noci",
+  "poolDays": "Bazénové dny",
+  "picnicDays": "Piknikové vzpomínky",
+  "campingMoments": "Táborákové momenty",
+  "babySmiles": "Dětské úsměvy",
   "ritualsTitle": "Rituály",
   "ritualAddTooltip": "Přidat rituál",
   "ritualActivityHeading": "Aktivita",
@@ -2539,6 +2691,88 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
+  "likedYourPhoto": "líbí se Vaše fotografie",
+  "@likedYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAPhoto": "líbí se fotografie",
+  "@likedAPhoto": {
+    "description": "Social action text shown after a person's name, for example 'John liked a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourVideo": "se líbí Vaše video",
+  "@likedYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourPhoto": "okomentoval(a) Vaši fotografii",
+  "@commentedOnYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAPhoto": "okomentoval(a) fotografii",
+  "@commentedOnAPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourVideo": "okomentoval(a) Vaše video",
+  "@commentedOnYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAVideo": "okomentoval(a) video",
+  "@commentedOnAVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToYourComment": "odpověděl(a) na Váš komentář",
+  "@repliedToYourComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToAComment": "odpověděl(a) na komentář",
+  "@repliedToAComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourComment": "se libí Váš komentář",
+  "@likedYourComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAComment": "se libí komentář",
+  "@likedAComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourReply": "se líbí Vaše odpověď",
+  "@likedYourReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked your reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAReply": "se líbí odpověď",
+  "@likedAReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked a reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "addedAMemoryTo": "přidána vzpomínka do {albumName}",
+  "@addedAMemoryTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added a memory to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "přidáno {count} vzpomínek do {albumName}",
+  "@addedNMemoriesTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added 4 memories to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedAlbumWithYou": "sdílel(a) s Vámi {albumName}",
+  "@sharedAlbumWithYou": {
+    "description": "Social notification action text shown after a person's name, for example 'John shared Recents with you'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "a 1 další",
   "andXOthers": "a {count} další",
   "@andXOthers": {
@@ -2576,15 +2810,6 @@
       }
     }
   },
-  "likesCount": "{count, plural, few {{count} se líbí} many {{count} se líbí}=1{1 se líbí} other{{count} se líbí}}",
-  "@likesCount": {
-    "description": "Number of likes with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "noLikesYet": "Zatím žádné líbí se",
   "@noLikesYet": {
     "description": "Empty state when no likes exist"
@@ -2597,27 +2822,13 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, few {Nepodařilo se líbit {count} alba} many {Nepodařilo se líbit {count} alba}=1{Nepodařilo se líbit 1 album} other{Nepodařilo se líbit {count} alb}}",
-  "@failedToLikeAlbums": {
-    "description": "Error when liking albums fails",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "couldNotLoadAlbums": "Nepodařilo se načíst alba",
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, few {{count} alba} many {{count} alba}=1{1 album} other{{count} alb}}",
-  "@albumsCount": {
-    "description": "Number of albums with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+  "couldNotLoadSelectedPhoto": "Nelze načíst vybranou fotografii",
+  "@couldNotLoadSelectedPhoto": {
+    "description": "Toast when the selected contact photo cannot be loaded"
   },
   "likeAll": "Dát líbí se všem",
   "@likeAll": {
@@ -2656,15 +2867,6 @@
       }
     }
   },
-  "commentsCount": "{count, plural, few {{count} komentáře} many {{count} komentáře}=0{Žádné komentáře} =1{1 komentář} other{{count} komentářů}}",
-  "@commentsCount": {
-    "description": "Number of comments with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "searchSettings": "Nastavení vyhledávání",
   "suggestions": "Doporučení",
   "cleanupHiddenFiles": "Vyčistit skryté soubory",
@@ -2675,6 +2877,7 @@
   "deleteOnDeviceFiles": "Odstranit soubory ze zařízení",
   "noHiddenFilesOnDevice": "Na zařízení nejsou žádné skryté soubory",
   "welcome": "Vítejte",
+  "grantGalleryPermissionDesc": "Udělte oprávnění k přístupu a organizaci fotek s rozpoznáváním obličeje. Všechno zpracování se děje na Vašem zařízení.",
   "grantPermission": "Udělit oprávnění",
   "privateAI": "Soukromá AI",
   "privateAIDescription": "Ente využívá AI pouze ve Vašem zařízení k analýze vašich fotografií a rozpoznávání tváří, objektů, míst a textu. Tyto údaje se používají k napájení funkcí, jako je rozpoznávání tváří a inteligentní vyhledávání. Vše se zpracovává a ukládá lokálně ve Vašem zařízení – nic se nikdy nenahrává na naše servery.",
@@ -2682,18 +2885,28 @@
   "moreThanJustAGallery": "Více než jen galerie.",
   "encryptedBackupDescription": "Šifrované zálohování, inteligentní vyhledávání, sdílené odkazy a plynulá synchronizace napříč všemi Vašimi zařízeními.",
   "getStarted": "Pojďme na to",
+  "offlineHomeSignupBannerTitle": "Chraňte si své vzpomínky navždy",
+  "offlineHomeSignupBannerDescription": "Šifrované zálohy na 3 místech, aby byly Vaše vzpomínky v bezpečí.",
+  "offlineHomeSignupBannerAction": "Zálohovat nyní",
   "unlockSmartFeatures": "Odemkněte chytré funkce",
   "enableOnDeviceMLDescription": "Povolte strojové učení v zařízení, abyste mohli vyhledávat podle tváří, míst a dalších kritérií. Vaše fotografie nikdy neopustí vaše zařízení.",
   "offlineEnableSharingTitle": "Sdílení začíná zde",
   "offlineEnableSharingDesc": "Zaregistrujte se a sdílejte fotografie se všemi – i s těmi, kteří nejsou na Ente",
+  "offlineEnableBackupTitle": "Zde se zobrazí zálohovaná alba",
   "offlineEnableBackupDesc": "Zaregistrujte se a uchovejte své vzpomínky s Ente.",
+  "offlineEnableBackupTagLabel": "10 GB ZDARMA!",
   "offlineEnableBackupAction": "Začněte s 10 GB ZDARMA",
   "offlineSettingsBannerTitle": "Vaše fotografie nemůžeme vidět. Nikdy.",
   "offlineSettingsBannerDesc": "Šifrování s nulovou znalostí znamená, že vaše vzpomínky zůstanou vaše.",
   "alreadyHaveAnAccount": "Už máte účet?",
+  "dontHaveAnAccount": "Ještě nemáte účet?",
   "loginToEnte": "Přihlásit se do Ente",
   "searchAndDiscover": "Hledejte a Objevujte",
+  "searchAndDiscoverDesc": "Vyhledávejte fotografie a objevujte vzpomínky pomocí strojového učení prováděného na zařízení",
   "shareYourMemories": "Sdílejte své vzpomínky",
+  "shareYourMemoriesDesc": "Sdílejte alba, sbírejte fotografie a shromažďujte komentáře s veřejnými odkazy",
+  "privateAndSecureBackups": "Zálohujte s ochranou soukromí",
+  "privateAndSecureBackupsDesc": "Koncově šifrovaný, nezávisle auditovaný a plně open source",
   "mlProgressBannerTitle": "Vydržte!",
   "mlProgressBannerDescription": "Vaše fotografie se zpracovávají v zařízení za účelem detekce obličejů, objektů a dalších prvků.",
   "mlProgressBannerStatus": "{indexed} z {total} fotografií zpracováno",
@@ -2711,5 +2924,7 @@
   "offlineFacesBannerSubtitle": "Zaregistrujte se, abyste mohli označovat lidi a snadno je později najít.",
   "offlineNameFaceBannerTitle": "Dejte této tváři jméno",
   "offlineNameFaceBannerSubtitle": "Zaregistrujte se, abyste je mohli označit a později snadno najít jejich fotografie.",
-  "signUp": "Zaregistrovat se"
+  "signUp": "Zaregistrovat se",
+  "dog": "Pes",
+  "cat": "Kočka"
 }

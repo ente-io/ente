@@ -347,6 +347,14 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 	return urls, nil
 }
 
+// ValidateUploadEligibility checks if a user is allowed to upload without minting upload URLs.
+func (c *FileController) ValidateUploadEligibility(ctx context.Context, userID int64, app ente.App) error {
+	if err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
 // GetUploadURLWithMetadata returns a single presigned URL that enforces checksum & length
 func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID int64, req ente.UploadURLRequest, app ente.App) (ente.UploadURL, error) {
 	if req.ContentLength <= 0 {

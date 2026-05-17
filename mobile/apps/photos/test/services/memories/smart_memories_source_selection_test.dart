@@ -46,12 +46,7 @@ void main() {
           for (int i = 0; i < 20; i++)
             _file(
               id: i + 1,
-              createdAt: DateTime.utc(
-                2024,
-                1,
-                10 + (i ~/ 7),
-                8 + (i % 7) * 2,
-              ),
+              createdAt: DateTime.utc(2024, 1, 10 + (i ~/ 7), 8 + (i % 7) * 2),
               location: tripLocation,
             ),
         ];
@@ -67,7 +62,7 @@ void main() {
           <TripsShownLog>[],
           surfaceAll: true,
           cachedTripMemories: const <ToShowMemory>[],
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           mlEnabled: true,
           seenTimes: const <int, int>{},
           fileIdToFaces: const <int, List<FaceWithoutEmbedding>>{},
@@ -84,7 +79,7 @@ void main() {
           <TripsShownLog>[],
           surfaceAll: true,
           cachedTripMemories: const <ToShowMemory>[],
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           mlEnabled: true,
           seenTimes: const <int, int>{},
           fileIdToFaces: const <int, List<FaceWithoutEmbedding>>{},
@@ -109,12 +104,7 @@ void main() {
             for (int photoIndex = 0; photoIndex < 4; photoIndex++)
               _file(
                 id: dayOffset * 10 + photoIndex + 1,
-                createdAt: DateTime.utc(
-                  2026,
-                  4,
-                  1 + dayOffset,
-                  9 + photoIndex,
-                ),
+                createdAt: DateTime.utc(2026, 4, 1 + dayOffset, 9 + photoIndex),
               ),
         ];
         final depletedRemainingFiles = fullRecentSource.take(6).toList();
@@ -123,7 +113,7 @@ void main() {
           depletedRemainingFiles,
           currentTime,
           recentSourceFiles: fullRecentSource,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           mlEnabled: true,
           seenTimes: const <int, int>{},
           fileIdToFaces: const <int, List<FaceWithoutEmbedding>>{},
@@ -180,7 +170,7 @@ void main() {
           currentTime,
           <ClipShownLog>[],
           surfaceAll: true,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           seenTimes: const <int, int>{},
           fileIDToImageEmbedding: fileIDToImageEmbedding,
           clipMemoryTypeVectors: <ClipMemoryType, Vector>{
@@ -193,7 +183,7 @@ void main() {
           currentTime,
           <ClipShownLog>[],
           surfaceAll: true,
-          isOfflineMode: false,
+          isLocalGalleryMode: false,
           seenTimes: const <int, int>{},
           fileIDToImageEmbedding: fileIDToImageEmbedding,
           clipMemoryTypeVectors: <ClipMemoryType, Vector>{

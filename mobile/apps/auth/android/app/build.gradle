@@ -123,6 +123,20 @@ android {
     }
 }
 
+androidComponents {
+    onVariants(selector().withFlavor("default", "independent")) { variant ->
+        // Compress native libraries for direct APK distribution:
+        // https://developer.android.com/build/releases/agp-4-2-0-release-notes#compress-native-libs-dsl
+        variant.packaging.jniLibs.useLegacyPackaging.set(true)
+    }
+
+    onVariants(selector().withFlavor("default", "fdroid")) { variant ->
+        // Compress native libraries for direct APK distribution:
+        // https://developer.android.com/build/releases/agp-4-2-0-release-notes#compress-native-libs-dsl
+        variant.packaging.jniLibs.useLegacyPackaging.set(true)
+    }
+}
+
 flutter {
     source '../..'
 }

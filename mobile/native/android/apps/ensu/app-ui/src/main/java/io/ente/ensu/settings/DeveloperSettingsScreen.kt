@@ -43,7 +43,7 @@ fun DeveloperSettingsScreen(
     onOpenModelSettings: () -> Unit,
     onSaved: () -> Unit
 ) {
-    val currentEndpoint by currentEndpointFlow.collectAsState(initial = "https://api.ente.io")
+    val currentEndpoint by currentEndpointFlow.collectAsState(initial = "https://api.ente.com")
     var endpointInput by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }

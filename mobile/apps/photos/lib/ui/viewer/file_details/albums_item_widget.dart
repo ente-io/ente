@@ -67,7 +67,7 @@ class AlbumsItemWidget extends StatelessWidget {
       }
       return chipButtons;
     } catch (e, s) {
-      Logger("AlbumsItemWidget").info(e, s);
+      Logger("AlbumsItemWidget").info("Failed to build owned album chips", e, s);
       return [];
     }
   }
@@ -125,7 +125,7 @@ class AlbumsItemWidget extends StatelessWidget {
 
       return chipButtons;
     } catch (e, s) {
-      Logger("AlbumsItemWidget").info(e, s);
+      Logger("AlbumsItemWidget").info("Failed to build shared album chips", e, s);
       return [];
     }
   }

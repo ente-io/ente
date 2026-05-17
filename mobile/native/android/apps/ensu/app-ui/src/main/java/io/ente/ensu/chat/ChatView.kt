@@ -1,5 +1,9 @@
 package io.ente.ensu.chat
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -31,13 +35,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.domain.model.Attachment
@@ -66,7 +73,24 @@ fun ChatView(
     onOverflowCancel: () -> Unit
 ) {
     val density = LocalDensity.current
+    val context = LocalContext.current
     var inputBarHeightDp by remember { mutableStateOf(0.dp) }
+    val latestMessageText by rememberUpdatedState(chatState.messageText)
+    val latestOnMessageChange by rememberUpdatedState(onMessageChange)
+    val voiceController = rememberVoiceTranscriptionController(
+        onTranscript = { transcript ->
+            latestOnMessageChange(appendVoiceTranscript(latestMessageText, transcript))
+        }
+    )
+    val microphonePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            voiceController.startRecording()
+        } else {
+            voiceController.onPermissionDenied()
+        }
+    }
 
     val showDownloadOnboarding by remember(
         chatState.isModelDownloaded,
@@ -213,6 +237,21 @@ fun ChatView(
                     onAttachmentSelected = onAttachmentSelected,
                     onRemoveAttachment = onRemoveAttachment,
                     onCancelEdit = onCancelEdit,
+                    voiceInputState = voiceController.state,
+                    onVoiceInput = {
+                        if (voiceController.state.isRecording) {
+                            voiceController.stopAndTranscribe()
+                        } else if (
+                            ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.RECORD_AUDIO
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            voiceController.startRecording()
+                        } else {
+                            microphonePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                        }
+                    },
                     focusRequestId = focusRequestId
                 )
             }
@@ -263,4 +302,16 @@ fun ChatView(
             )
         }
     }
+}
+
+private fun appendVoiceTranscript(currentText: String, transcript: String): String {
+    val cleaned = transcript.trim()
+    if (cleaned.isBlank()) {
+        return currentText
+    }
+    val trimmedDraft = currentText.trimEnd()
+    if (trimmedDraft.isBlank()) {
+        return cleaned
+    }
+    return "$trimmedDraft $cleaned"
 }

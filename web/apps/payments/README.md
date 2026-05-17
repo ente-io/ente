@@ -1,6 +1,6 @@
 # Payments
 
-Code that runs on `payments.ente.io`. It brokers between our services and
+Code that runs on `payments.ente.com`. It brokers between our services and
 Stripe's API for payments.
 
 ## Development
@@ -22,7 +22,7 @@ Add the following to `web/apps/photos/.env.local`:
 NEXT_PUBLIC_ENTE_ENDPOINT = http://localhost:8080
 ```
 
-Modify "https://payments.ente.io" to "http://localhost:3001".
+Modify "https://payments.ente.com" to "http://localhost:3001".
 
 Then start it locally
 

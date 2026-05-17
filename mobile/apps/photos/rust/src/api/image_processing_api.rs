@@ -1,9 +1,9 @@
-use ente_media_inspector::{
-    image::{
-        decode::decode_image_from_path,
-        image_compression::{EncodedImageFormat, encode_rgb},
-    },
-    ml::face::thumbnail::{FaceBox, generate_face_thumbnails as generate_face_thumbnails_impl},
+use ente_image::{
+    decode::decode_image_from_path,
+    image_compression::{EncodedImageFormat, encode_rgb},
+};
+use ente_photos::ml::face::thumbnail::{
+    FaceBox, generate_face_thumbnails as generate_face_thumbnails_impl,
 };
 
 #[derive(Clone, Debug)]
@@ -31,7 +31,7 @@ pub fn generate_face_thumbnails(
     generate_face_thumbnails_impl(&decoded, &face_boxes).map_err(|e| e.to_string())
 }
 
-/// Decode an image (including HEIC/HEIF) to JPEG bytes using libheic-rs,
+/// Decode an image (including HEIC/HEIF) to JPEG bytes using ente_heic,
 /// bypassing the platform's potentially broken image decoder.
 pub fn decode_to_jpeg(image_path: String, quality: Option<u8>) -> Result<Vec<u8>, String> {
     let decoded = decode_image_from_path(&image_path).map_err(|e| e.to_string())?;

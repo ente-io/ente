@@ -3,6 +3,8 @@ import "package:photos/services/machine_learning/ml_model.dart";
 
 /// Pet face detection model (YOLOv5s-face with 3 keypoints, FP16).
 /// Model: yolov5s_pet_face_fp16_V2.onnx — detects pet faces with left_eye, right_eye, nose landmarks.
+///
+/// Model size: ~14.8 MB.
 class PetFaceDetectionService extends MlModel {
   static const kRemoteBucketModelPath = "yolov5s_pet_face_fp16_V2.onnx";
   static const _modelName = "YOLOv5PetFace";
@@ -23,6 +25,8 @@ class PetFaceDetectionService extends MlModel {
 }
 
 /// Dog face embedding model (BYOL 128-d).
+///
+/// Model size: ~4.1 MB.
 class PetFaceEmbeddingDogService extends MlModel {
   static const kRemoteBucketModelPath = "dog_face_embedding128.onnx";
   static const _modelName = "DogFaceByol128";
@@ -43,6 +47,8 @@ class PetFaceEmbeddingDogService extends MlModel {
 }
 
 /// Cat face embedding model (BYOL 128-d).
+///
+/// Model size: ~4.1 MB.
 class PetFaceEmbeddingCatService extends MlModel {
   static const kRemoteBucketModelPath = "cat_face_embedding128.onnx";
   static const _modelName = "CatFaceByol128";
@@ -63,6 +69,8 @@ class PetFaceEmbeddingCatService extends MlModel {
 }
 
 /// Pet body detection model (YOLOv5s — COCO classes 15=cat, 16=dog).
+///
+/// Model size: ~15.0 MB.
 class PetBodyDetectionService extends MlModel {
   static const kRemoteBucketModelPath = "yolov5s_object_fp16.onnx";
   static const _modelName = "YOLOv5sPetBody";
@@ -83,6 +91,8 @@ class PetBodyDetectionService extends MlModel {
 }
 
 /// Dog body embedding model.
+///
+/// Model size: ~4.6 MB.
 class PetBodyEmbeddingDogService extends MlModel {
   static const kRemoteBucketModelPath = "dog_body_embedding192.onnx";
   static const _modelName = "DogBody";
@@ -103,6 +113,8 @@ class PetBodyEmbeddingDogService extends MlModel {
 }
 
 /// Cat body embedding model.
+///
+/// Model size: ~4.6 MB.
 class PetBodyEmbeddingCatService extends MlModel {
   static const kRemoteBucketModelPath = "cat_body_embedding192.onnx";
   static const _modelName = "CatBody";

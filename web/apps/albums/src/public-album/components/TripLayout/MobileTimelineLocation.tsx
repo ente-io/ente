@@ -17,9 +17,7 @@ export const MobileTimelineLocation = memo<MobileTimelineLocationProps>(
         if (!firstPhoto) return null;
 
         const sortedData = [...journeyData].sort(
-            (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime(),
+            (a, b) => a.timestamp - b.timestamp,
         );
         const firstData = sortedData[0];
         if (!firstData) return null;

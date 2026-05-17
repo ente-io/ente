@@ -3,8 +3,7 @@ use std::fs;
 use std::io::{Read, Write};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
-#[cfg(target_os = "macos")]
-use std::process::Command;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -29,6 +28,18 @@ pub struct SrpState {
 pub struct LlmState {
     model: Mutex<Option<llm::ModelHandleRef>>,
     context: Mutex<Option<llm::ContextHandleRef>>,
+}
+
+pub struct LlmModelDownloadState {
+    cancel_requested: Arc<AtomicBool>,
+}
+
+impl Default for LlmModelDownloadState {
+    fn default() -> Self {
+        Self {
+            cancel_requested: Arc::new(AtomicBool::new(false)),
+        }
+    }
 }
 
 #[derive(Default)]
@@ -97,6 +108,26 @@ pub struct TauriEnsuDefaults {
     desktop_model_presets: Vec<TauriEnsuModelPreset>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TauriLlmModelDownloadTarget {
+    label: String,
+    url: String,
+    path: String,
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct TauriLlmModelDownloadProgress {
+    label: String,
+    percent: i32,
+    status: String,
+    bytes_downloaded: u64,
+    total_bytes: Option<u64>,
+    file_bytes_downloaded: u64,
+    file_total_bytes: Option<u64>,
+}
+
 impl From<llm::EnsuModelPreset> for TauriEnsuModelPreset {
     fn from(p: llm::EnsuModelPreset) -> Self {
         Self {
@@ -141,6 +172,10 @@ fn chat_db_thread_error() -> ApiError {
 
 fn fs_thread_error() -> ApiError {
     ApiError::new("io_thread", "FS task failed")
+}
+
+fn image_thread_error() -> ApiError {
+    ApiError::new("image_thread", "Image task failed")
 }
 
 fn replace_llm_state(
@@ -190,30 +225,38 @@ fn default_llm_threads() -> i32 {
     i32::try_from(threads).unwrap_or(1)
 }
 
-#[cfg(target_os = "macos")]
-fn macos_total_memory_bytes() -> Option<u64> {
-    for candidate in ["/usr/sbin/sysctl", "/sbin/sysctl", "sysctl"] {
-        let output = match Command::new(candidate).args(["-n", "hw.memsize"]).output() {
-            Ok(output) => output,
-            Err(_) => continue,
-        };
-
-        if !output.status.success() {
-            continue;
-        }
-
-        if let Ok(text) = String::from_utf8(output.stdout) {
-            if let Ok(bytes) = text.trim().parse::<u64>() {
-                return Some(bytes);
-            }
-        }
+#[cfg(unix)]
+fn total_memory_bytes() -> Option<u64> {
+    let pages = unsafe { libc::sysconf(libc::_SC_PHYS_PAGES) };
+    let page_size = unsafe { libc::sysconf(libc::_SC_PAGESIZE) };
+    if pages <= 0 || page_size <= 0 {
+        return None;
     }
 
-    None
+    u64::try_from(pages)
+        .ok()?
+        .checked_mul(u64::try_from(page_size).ok()?)
 }
 
-#[cfg(not(target_os = "macos"))]
-fn macos_total_memory_bytes() -> Option<u64> {
+#[cfg(target_os = "windows")]
+fn total_memory_bytes() -> Option<u64> {
+    use windows_sys::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX};
+
+    let mut status = MEMORYSTATUSEX {
+        dwLength: std::mem::size_of::<MEMORYSTATUSEX>() as u32,
+        ..Default::default()
+    };
+
+    let ok = unsafe { GlobalMemoryStatusEx(&mut status) };
+    if ok == 0 {
+        None
+    } else {
+        Some(status.ullTotalPhys)
+    }
+}
+
+#[cfg(not(any(unix, target_os = "windows")))]
+fn total_memory_bytes() -> Option<u64> {
     None
 }
 
@@ -292,6 +335,7 @@ impl From<DbError> for ApiError {
             E::Sqlite(_) => "db_sqlite",
             E::UnsupportedOperation(_) => "db_unsupported_operation",
             E::Migration(_) => "db_migration",
+            E::Image(_) => "db_image",
         };
 
         ApiError::new(code, e.to_string())
@@ -1560,13 +1604,149 @@ impl llm::EventSink for LlmEventSink {
 pub fn system_info() -> SystemInfo {
     SystemInfo {
         platform: std::env::consts::OS.to_string(),
-        total_memory_bytes: macos_total_memory_bytes(),
+        total_memory_bytes: total_memory_bytes(),
     }
 }
 
 #[tauri::command]
 pub fn get_ensu_defaults() -> TauriEnsuDefaults {
     llm::ensu_defaults().into()
+}
+
+#[tauri::command]
+pub async fn llm_download_model_files(
+    window: Window,
+    state: State<'_, LlmModelDownloadState>,
+    downloads: Vec<TauriLlmModelDownloadTarget>,
+) -> Result<(), ApiError> {
+    let cancel_requested = Arc::clone(&state.cancel_requested);
+    cancel_requested.store(false, Ordering::SeqCst);
+    let targets = downloads
+        .into_iter()
+        .map(|download| llm::LlmModelDownloadTarget {
+            label: download.label,
+            url: download.url,
+            destination_path: download.path,
+        })
+        .collect::<Vec<_>>();
+
+    async_runtime::spawn_blocking(move || {
+        let progress_window = window.clone();
+        llm::download_llm_model_files(
+            targets,
+            move |progress| {
+                log_download_metrics(&progress);
+                let payload = tauri_download_progress(progress);
+                let _ = progress_window.emit("llm-download-progress", payload);
+            },
+            move || cancel_requested.load(Ordering::SeqCst),
+        )
+        .map_err(llm_error)
+    })
+    .await
+    .map_err(|_| fs_thread_error())?
+}
+
+#[tauri::command]
+pub fn llm_cancel_model_download(state: State<'_, LlmModelDownloadState>) {
+    state.cancel_requested.store(true, Ordering::SeqCst);
+}
+
+fn tauri_download_progress(
+    progress: llm::LlmModelDownloadProgress,
+) -> TauriLlmModelDownloadProgress {
+    let percent = if progress.total_bytes.is_some() {
+        progress.percentage.round().clamp(0.0, 100.0) as i32
+    } else {
+        0
+    };
+    let status = download_progress_status(&progress);
+
+    TauriLlmModelDownloadProgress {
+        label: progress.label,
+        percent,
+        status,
+        bytes_downloaded: progress.downloaded_bytes,
+        total_bytes: progress.total_bytes,
+        file_bytes_downloaded: progress.file_downloaded_bytes,
+        file_total_bytes: progress.file_total_bytes,
+    }
+}
+
+fn download_progress_status(progress: &llm::LlmModelDownloadProgress) -> String {
+    if progress.label == "Complete" {
+        return "Download complete".to_string();
+    }
+    if progress.label == "Preparing downloads" {
+        return "Preparing downloads...".to_string();
+    }
+
+    if let Some(total) = progress.total_bytes {
+        format!(
+            "Downloading... {} / {}",
+            format_bytes(progress.downloaded_bytes),
+            format_bytes(total)
+        )
+    } else if progress.file_downloaded_bytes > 0 {
+        format!(
+            "Downloading {}... {}",
+            progress.label.to_lowercase(),
+            format_bytes(progress.file_downloaded_bytes)
+        )
+    } else {
+        format!("Downloading {}...", progress.label.to_lowercase())
+    }
+}
+
+fn log_download_metrics(progress: &llm::LlmModelDownloadProgress) {
+    if progress.file_complete {
+        logging::log(
+            "LLMDownload",
+            format!(
+                "file_complete label={} bytes={} elapsed_ms={} rate={} retries={}",
+                progress.label,
+                progress.file_downloaded_bytes,
+                progress.file_elapsed_ms,
+                format_rate(progress.file_bytes_per_second),
+                progress.file_retry_count
+            ),
+        );
+    }
+
+    if progress.complete {
+        logging::log(
+            "LLMDownload",
+            format!(
+                "complete bytes={} elapsed_ms={} rate={} retries={}",
+                progress.downloaded_bytes,
+                progress.elapsed_ms,
+                format_rate(progress.bytes_per_second),
+                progress.retry_count
+            ),
+        );
+    }
+}
+
+fn format_bytes(bytes: u64) -> String {
+    const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
+    let mut value = bytes as f64;
+    let mut unit = 0usize;
+    while value >= 1024.0 && unit < UNITS.len() - 1 {
+        value /= 1024.0;
+        unit += 1;
+    }
+    if unit == 0 {
+        format!("{} {}", bytes, UNITS[unit])
+    } else {
+        format!("{value:.1} {}", UNITS[unit])
+    }
+}
+
+fn format_rate(bytes_per_second: f64) -> String {
+    if !bytes_per_second.is_finite() || bytes_per_second <= 0.0 {
+        return "0 B/s".to_string();
+    }
+    format!("{}/s", format_bytes(bytes_per_second.round() as u64))
 }
 
 #[tauri::command]
@@ -1694,6 +1874,47 @@ pub fn llm_free_model(state: State<LlmState>) -> Result<(), ApiError> {
 }
 
 #[tauri::command]
+pub async fn llm_prewarm_multimodal_context(
+    state: State<'_, LlmState>,
+    mmproj_path: String,
+    media_marker: Option<String>,
+) -> Result<(), ApiError> {
+    let context = state
+        .context
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?
+        .clone()
+        .ok_or_else(|| ApiError::new("llm_not_ready", "Model context not loaded"))?;
+
+    logging::log(
+        "LLM",
+        format!("prewarm multimodal context requested mmproj_path={mmproj_path}"),
+    );
+    async_runtime::spawn_blocking(move || {
+        match catch_unwind(AssertUnwindSafe(|| {
+            llm::prewarm_multimodal_context(context.as_ref(), mmproj_path, media_marker)
+        })) {
+            Ok(result) => result.map_err(llm_error),
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("llm_prewarm_multimodal_context", &message);
+                Err(ApiError::new(
+                    "llm_panic",
+                    format!("llm_prewarm_multimodal_context panicked: {message}"),
+                ))
+            }
+        }
+    })
+    .await
+    .map_err(|err| {
+        logging::log("LLM", format!("prewarm multimodal join failed error={err}"));
+        llm_thread_error()
+    })??;
+    logging::log("LLM", "prewarm multimodal context succeeded");
+    Ok(())
+}
+
+#[tauri::command]
 pub fn llm_generate_chat_stream(
     state: State<LlmState>,
     window: Window,
@@ -1806,6 +2027,29 @@ fn parse_entity_type(value: &str) -> Result<ensu_db::EntityType, ApiError> {
 
 fn parse_uuid(value: &str) -> Result<Uuid, ApiError> {
     Uuid::parse_str(value).map_err(|err| ApiError::new("uuid", err.to_string()))
+}
+
+#[tauri::command]
+pub async fn chat_db_compress_attachment_image(data: Vec<u8>) -> Result<Vec<u8>, ApiError> {
+    async_runtime::spawn_blocking(move || {
+        ensu_db::compress_attachment_image(&data)
+            .map_err(|err| ApiError::new("image", err.to_string()))
+    })
+    .await
+    .map_err(|_| image_thread_error())?
+}
+
+#[tauri::command]
+pub async fn chat_db_compress_attachment_image_file(path: String) -> Result<Vec<u8>, ApiError> {
+    async_runtime::spawn_blocking(move || {
+        let data = fs::read(&path).map_err(|err| {
+            ApiError::new("io", format!("failed to read image file '{path}': {err}"))
+        })?;
+        ensu_db::compress_attachment_image(&data)
+            .map_err(|err| ApiError::new("image", err.to_string()))
+    })
+    .await
+    .map_err(|_| image_thread_error())?
 }
 
 #[tauri::command]

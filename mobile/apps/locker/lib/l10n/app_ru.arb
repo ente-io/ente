@@ -232,16 +232,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{нет элементов} =1{1 элемент} few{{count} элемента} many{{count} элементов} other{{count} элементов}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Создать коллекцию",
   "uploadDocumentTooltip": "Загрузить документ",
   "restore": "Восстановить",
@@ -489,15 +479,6 @@
   "linkDeviceLimit": "Ограничение по количеству устройств",
   "expiredLinkInfo": "Срок действия этой ссылки истёк. Пожалуйста, выберите новый срок или отключите его.",
   "linkExpiresOn": "Ссылка истечёт {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Поделиться с конкретными людьми} =1 {Доступно 1 человеку} other {Доступно {numberOfPeople} людям}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Срок действия ссылки истёк",
   "publicLinkEnabled": "Публичная ссылка включена",
   "shareALink": "Поделиться ссылкой",
@@ -511,28 +492,6 @@
   "add": "Добавить",
   "collaboratorsCanAddFilesToTheSharedCollection": "Соавторы могут добавлять элементы в общую коллекцию.",
   "enterEmail": "Введите электронную почту",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 зрителей} =1 {Добавлен 1 зритель} other {Добавлено {count} зрителей}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 соавторов} =1 {Добавлен 1 соавтор} other {Добавлено {count} соавторов}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0 {Добавить зрителя} =1 {Добавить зрителя} other {Добавить зрителей}}",
-  "addCollaborators": "{count, plural, =0 {Добавить соавтора} =1 {Добавить соавтора} other {Добавить соавторов}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Нажмите с удержанием на электронную почту для подтверждения сквозного шифрования.",
   "sharing": "Отправка...",
   "invalidEmailAddress": "Недействительный адрес электронной почты",
@@ -584,16 +543,6 @@
   "viewer": "Зритель",
   "collaborator": "Соавтор",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Соавторы могут добавлять элементы в общую коллекцию.",
-  "albumParticipantsCount": "{count, plural, =0 {Нет участников} =1 {{count} участник} other {{count} участников}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Добавить ещё",
   "you": "Вы",
   "albumOwner": "Владелец",
@@ -710,16 +659,6 @@
   "clickHereToUpload": "Нажмите здесь для загрузки",
   "saveDocument": "Сохранить документ",
   "uploadFiles": "Загрузить элементы",
-  "filesSelected": "{count, plural, =0{Элементы не выбраны} =1{Выбран 1 элемент} few{Выбрано {count} элемента} many{Выбрано {count} элементов} other{Выбрано {count} элементов}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Добавить в коллекцию",
   "newCollection": "Новая коллекция",
   "title": "Заголовок",
@@ -738,16 +677,6 @@
     }
   },
   "informationCollectionName": "Информация",
-  "recordSavedToMultipleCollections": "Запись успешно сохранена в {count, plural, =1{1 коллекцию} few{{count} коллекции} many{{count} коллекций} other{{count} коллекций}}",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} скопировано в буфер обмена",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -755,20 +684,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 результат} few{{count} результата} many{{count} результатов} other{{count} результатов}} для \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -816,49 +731,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 коллекция будет удалена} few{{count} коллекции будут удалены} many{{count} коллекций будут удалены} other{{count} коллекций будут удалены}} навсегда.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 элемент будет удалён} few{{count} элемента будут удалены} many{{count} элементов будут удалены} other{{count} элементов будут удалены}} навсегда.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Также удалить элементы отовсюду",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Да, удалить {count, plural, =1{коллекцию} few{коллекции} many{коллекций} other{коллекций}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Да, удалить {count, plural, =1{элемент} few{элемента} many{элементов} other{элементов}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Использование",
   "fileCount": "{used} / {max}",
@@ -881,16 +756,6 @@
   "markingAsImportant": "Отметка как важное...",
   "fileMarkedAsImportant": "Элемент отмечен как важный",
   "fileRemovedFromImportant": "Элемент удалён из важного",
-  "filesMarkedAsImportant": "{count, plural, =1{1 элемент отмечен как важный} few{{count} элемента отмечены как важные} many{{count} элементов отмечены как важные} other{{count} элементов отмечены как важные}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Все элементы уже отмечены как важные",
   "failedToMarkFilesAsImportant": "Не удалось отметить элементы как важные: {error}",
   "@failedToMarkFilesAsImportant": {
@@ -932,26 +797,6 @@
   "selectLanguage": "Выберите язык",
   "general": "Общие",
   "language": "Язык",
-  "selectedCount": "{count, plural, =1{1 выбран} other{{count} выбрано}}",
-  "@selectedCount": {
-    "description": "Number of items selected",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "actionNotSupportedForSharedFiles": "{count, plural, =1{Действие не поддерживается для 1 общего файла} other{Действие не поддерживается для {count} общих файлов}}",
-  "@actionNotSupportedForSharedFiles": {
-    "description": "Message when action is not supported for shared files",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addTo": "Добавить в",
   "shareNotSupportedForSharedFiles": "Нельзя делиться общими файлами",
   "editNotSupportedForSharedFiles": "Нельзя редактировать общие файлы",
@@ -965,16 +810,6 @@
   "collectionUpdated": "Коллекция обновлена",
   "actionNotSupportedOnFavouritesAlbum": "Это действие недоступно для альбома «Избранное»",
   "leaveCollectionSuccessfully": "Вы успешно покинули коллекцию",
-  "leftCollectionsSuccessfully": "{count, plural, =1 {Вы успешно покинули 1 коллекцию} few {Вы успешно покинули {count} коллекции} many {Вы успешно покинули {count} коллекций} other {Вы успешно покинули {count} коллекции}}",
-  "@leftCollectionsSuccessfully": {
-    "description": "Success message when leaving collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "removePublicLink": "Удалить публичную ссылку",
   "removePublicLinkConfirmation": "Это удалит публичную ссылку для доступа к «{collectionName}».",
   "@removePublicLinkConfirmation": {
@@ -986,52 +821,12 @@
       }
     }
   },
-  "collectionsDeletedSuccessfully": "{count, plural, =1{1 коллекция успешно удалена} few {{count} коллекции успешно удалены} many {{count} коллекций успешно удалено} other {{count} коллекции успешно удалены}\n}",
-  "@collectionsDeletedSuccessfully": {
-    "description": "Success message when collections are deleted",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "restoreToCollection": "Восстановить в коллекцию",
   "restoringFiles": "Восстановление...",
-  "filesRestoredSuccessfully": "{count, plural, =1{1 элемент успешно восстановлен} few {{count} элемента успешно восстановлено} many {{count} элементов успешно восстановлено} other {{count} элемента успешно восстановлено}}",
-  "@filesRestoredSuccessfully": {
-    "description": "Success message when items are restored from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "failedToRestoreFiles": "Не удалось восстановить элементы",
   "permanentlyDelete": "Удалить безвозвратно",
-  "permanentlyDeleteFilesBody": "{count, plural, =1{Этот элемент} few {Эти {count} элемента} many {Эти {count} элементов} other {Эти {count} элемента}} будут удалены навсегда без возможности восстановления.",
-  "@permanentlyDeleteFilesBody": {
-    "description": "Confirmation body for permanent deletion from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "yesDelete": "Да, удалить",
   "deletingFiles": "Удаление...",
-  "filesDeletedPermanently": "{count, plural, =1{1 элемент удалён навсегда} few {{count} элемента удалены навсегда} many {{count} элементов удалено навсегда} other {{count} элемента удалены навсегда}}",
-  "@filesDeletedPermanently": {
-    "description": "Success message when items are permanently deleted from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "failedToDeleteFiles": "Не удалось удалить элементы",
   "itemsStored": "Сохранено элементов",
   "of_": "от",

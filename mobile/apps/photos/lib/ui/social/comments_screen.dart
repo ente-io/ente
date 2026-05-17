@@ -10,6 +10,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/social/comment.dart";
+import "package:photos/models/social/comment_author_utils.dart";
 import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
@@ -133,7 +134,9 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   Timer? _sendLoadingTimer;
   bool _hasMoreComments = true;
   int _offset = 0;
-  final Map<int, User> _userCache = {};
+  final CommentAuthorResolver _commentAuthorResolver = CommentAuthorResolver();
+  final MissingAnonProfileSyncTracker _anonProfileSyncTracker =
+      MissingAnonProfileSyncTracker();
   Map<String, String> _anonDisplayNames = {};
   String? _highlightedCommentID;
   bool _hasScrolledToHighlight = false;
@@ -275,6 +278,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
       _hasMoreComments = comments.length == _pageSize;
       _isLoading = false;
     });
+    unawaited(_syncMissingAnonDisplayNamesFor(comments));
 
     // Scroll to highlighted comment if specified
     _scrollToHighlightedComment();
@@ -292,22 +296,31 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
 
       if (!mounted) return;
 
-      // Reload comments after sync
-      final freshComments =
-          await SocialDataProvider.instance.getCommentsForFilePaginated(
-        widget.fileID,
-        collectionID: _selectedCollectionID,
-        limit: _pageSize,
-        offset: 0,
-      );
+      // Reload comments and any already-synced anonymous names after sync.
+      final results = await Future.wait([
+        SocialDataProvider.instance.getCommentsForFilePaginated(
+          widget.fileID,
+          collectionID: _selectedCollectionID,
+          limit: _pageSize,
+          offset: 0,
+        ),
+        SocialDataProvider.instance.getAnonDisplayNamesForCollection(
+          _selectedCollectionID,
+        ),
+      ]);
+
+      final freshComments = results[0] as List<Comment>;
+      final anonNames = results[1] as Map<String, String>;
 
       if (mounted) {
         setState(() {
           _comments.clear();
           _comments.addAll(freshComments);
+          _anonDisplayNames = anonNames;
           _offset = freshComments.length;
           _hasMoreComments = freshComments.length == _pageSize;
         });
+        unawaited(_syncMissingAnonDisplayNamesFor(freshComments));
       }
     } catch (_) {
       // Ignore sync errors, local data is already displayed
@@ -333,6 +346,31 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
       _hasMoreComments = comments.length == _pageSize;
       _isLoadingMore = false;
     });
+    unawaited(_syncMissingAnonDisplayNamesFor(comments));
+  }
+
+  Future<void> _syncMissingAnonDisplayNamesFor(List<Comment> comments) async {
+    final collectionID = _selectedCollectionID;
+    final missingIDs = _anonProfileSyncTracker.nextIDsToSync(
+      collectionID: collectionID,
+      comments: comments,
+      anonDisplayNames: _anonDisplayNames,
+    );
+    if (missingIDs.isEmpty) {
+      return;
+    }
+
+    try {
+      await SocialDataProvider.instance.syncAnonProfiles(collectionID);
+      final anonNames = await SocialDataProvider.instance
+          .getAnonDisplayNamesForCollection(collectionID);
+      if (!mounted || _selectedCollectionID != collectionID) {
+        return;
+      }
+      setState(() => _anonDisplayNames = anonNames);
+    } catch (_) {
+      // Missing anonymous names should not block showing comments.
+    }
   }
 
   void _onScroll() {
@@ -450,7 +488,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
       _comments.clear();
       _offset = 0;
       _hasMoreComments = true;
-      _userCache.clear();
+      _commentAuthorResolver.clear();
       _anonDisplayNames = {};
     });
     _loadInitialComments();
@@ -470,27 +508,12 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   }
 
   User _getUserForComment(Comment comment) {
-    if (_userCache.containsKey(comment.userID)) {
-      return _userCache[comment.userID]!;
-    }
-
-    if (comment.isAnonymous) {
-      final anonID = comment.anonUserID;
-      final displayName =
-          anonID != null ? (_anonDisplayNames[anonID] ?? anonID) : "Anonymous";
-      final user = User(
-        id: comment.userID,
-        email: "${anonID ?? "anonymous"}@unknown.com",
-        name: displayName,
-      );
-      _userCache[comment.userID] = user;
-      return user;
-    }
-
-    final user = CollectionsService.instance
-        .getFileOwner(comment.userID, _selectedCollectionID);
-    _userCache[comment.userID] = user;
-    return user;
+    return _commentAuthorResolver.resolve(
+      comment: comment,
+      anonDisplayNames: _anonDisplayNames,
+      registeredUserResolver: (userID) => CollectionsService.instance
+          .getFileOwner(userID, _selectedCollectionID),
+    );
   }
 
   void _dismissReply() {

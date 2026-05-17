@@ -183,6 +183,16 @@ class _AppState extends State<App>
   }
 
   @override
+  void onWindowMaximize() {
+    WindowListenerService.instance.onWindowMaximize().ignore();
+  }
+
+  @override
+  void onWindowUnmaximize() {
+    WindowListenerService.instance.onWindowUnmaximize().ignore();
+  }
+
+  @override
   void onTrayIconMouseDown() {
     if (Platform.isWindows) {
       windowManager.show();

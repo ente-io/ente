@@ -7,6 +7,23 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v1.3.40 (mobile) - May 2026
+
+- Faster Memories loading
+- Memory lane improvements
+- New QR Codes section in Discovery
+- Photos loading improvements
+- Better handling of high resolution images
+- Fixed widget showing hidden photos
+
+## v1.7.23 (desktop) - May 2026
+
+- All People dialogs shows entire face clusters
+- Public Albums app separated from Photos app
+- Faster and Light-weight public albums
+- Memory and Memory Lane links
+- Improvements (Public albums, file viewer, metadata preservation on editing, and more)
+
 ## v1.3.36 (mobile) - Apr 2026
 
 - Memories improvements

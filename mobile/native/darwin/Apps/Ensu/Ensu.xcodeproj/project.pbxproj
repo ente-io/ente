@@ -136,7 +136,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "Ensu" */;
 			buildPhases = (
-				CC142736A470612F436ECF8E /* Build Rust (core/db/sync/inference) */,
+				CC142736A470612F436ECF8E /* Build Rust (core/db/sync/inference/transcription) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
 				DA72BC5E2E5F87A000D128FF /* Frameworks */,
 				DA72BC5F2E5F87A000D128FF /* Resources */,
@@ -224,24 +224,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		CC142736A470612F436ECF8E /* Build Rust (core/db/sync/inference) */ = {
+		CC142736A470612F436ECF8E /* Build Rust (core/db/sync/inference/transcription) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (core/db/sync/inference)";
+			name = "Build Rust (core/db/sync/inference/transcription)";
 			outputPaths = (
 				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libtranscription.a",
 				"$(SRCROOT)/Ensu/Generated/EndpointConfig.swift",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "ENTE_API_ENDPOINT=\"${ENTE_API_ENDPOINT}\" \"${SRCROOT}/scripts/build-rust.sh\"\n";
+			shellScript = "ENTE_API_ENDPOINT=\"${ENTE_API_ENDPOINT}\" bash \"${SRCROOT}/scripts/build-rust.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -286,8 +287,8 @@
 					"$(SRCROOT)/Ensu/Generated",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 0.1.15;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap";
+				MARKETING_VERSION = 0.1.16;
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/transcriptionFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -312,8 +313,8 @@
 					"$(SRCROOT)/Ensu/Generated",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 0.1.15;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap";
+				MARKETING_VERSION = 0.1.16;
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/transcriptionFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -478,7 +479,7 @@
 					"$(inherited)",
 					"$(TARGET_TEMP_DIR)/ensu_rust",
 				);
-				MARKETING_VERSION = 0.1.15;
+				MARKETING_VERSION = 0.1.16;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -492,8 +493,9 @@
 					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libtranscription.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/transcriptionFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -535,7 +537,7 @@
 					"$(inherited)",
 					"$(TARGET_TEMP_DIR)/ensu_rust",
 				);
-				MARKETING_VERSION = 0.1.15;
+				MARKETING_VERSION = 0.1.16;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -549,8 +551,9 @@
 					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libtranscription.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/transcriptionFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

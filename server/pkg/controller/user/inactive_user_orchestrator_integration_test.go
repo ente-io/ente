@@ -23,7 +23,8 @@ func TestProcessInactiveUsersWarn2mIntegration(t *testing.T) {
 
 	now := timeutil.Microseconds()
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
-		Email:        "inactive-user@ente.io",
+		UserID:       1,
+		Email:        "inactive-user@ente.com",
 		CreationTime: now - inactiveUserWarn2MonthsInMicroSeconds - inactiveUserOneDayInMicroSeconds,
 	})
 

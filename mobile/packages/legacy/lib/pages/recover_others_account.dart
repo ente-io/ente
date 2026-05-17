@@ -140,7 +140,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium!
-                        .copyWith(fontSize: 14),
+                        .copyWith(fontSize: 14.0),
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(12)),
@@ -344,7 +344,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
       );
       Navigator.of(context).pop();
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to recover account", e, s);
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }

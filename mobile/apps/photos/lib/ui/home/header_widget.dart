@@ -13,9 +13,7 @@ import 'package:photos/ui/home/status_bar_widget.dart';
 import "package:photos/ui/wrapped/rewind_banner.dart";
 
 class HeaderWidget extends StatefulWidget {
-  const HeaderWidget({
-    super.key,
-  });
+  const HeaderWidget({super.key});
 
   @override
   State<HeaderWidget> createState() => _HeaderWidgetState();
@@ -63,7 +61,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     _logger.info("Building header widget");
     final bool showWrappedBanner = wrappedService.shouldShowHomeBanner;
     final bool showGetStartedBanner =
-        isOfflineMode && !Configuration.instance.hasConfiguredAccount();
+        isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
     final List<Widget> children = <Widget>[
       const StatusBarWidget(),
       if (showGetStartedBanner) const GetStartedBanner(),

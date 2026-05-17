@@ -46,7 +46,7 @@ class CastSession: ObservableObject {
 // MARK: - Real Cast Pairing Service
 
 class RealCastPairingService {
-    private let baseURL = "https://api.ente.io"
+    private let baseURL = "https://api.ente.com"
     private var pollingTimer: Timer?
     private var lastLoggedMessages: [String: Date] = [:]
     private let logThrottleInterval: TimeInterval = 5.0 // 5 seconds

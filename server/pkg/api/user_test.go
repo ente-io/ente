@@ -21,7 +21,7 @@ func TestSetAttributesHandlerRejectsUnexpectedKDFStrength(t *testing.T) {
 
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       101,
-		Email:        "set-attributes-kdf@ente.io",
+		Email:        "set-attributes-kdf@ente.com",
 		CreationTime: 1,
 	})
 
@@ -39,7 +39,7 @@ func TestSetAttributesHandlerRejectsLowMemoryLimit(t *testing.T) {
 
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       102,
-		Email:        "set-attributes-low-mem@ente.io",
+		Email:        "set-attributes-low-mem@ente.com",
 		CreationTime: 1,
 	})
 

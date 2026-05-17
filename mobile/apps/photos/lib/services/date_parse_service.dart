@@ -355,12 +355,16 @@ class DateParseService {
         final n1 = numbers[0];
         final n2 = numbers[1];
 
-        if (n1 >= 1 && n1 <= 31 && n2 >= _MIN_YEAR && n2 <= _MAX_YEAR) {
-          day = n1;
-          year = n2;
-        } else if (n2 >= 1 && n2 <= 31 && n1 >= _MIN_YEAR && n1 <= _MAX_YEAR) {
-          day = n2;
+        if (n1 >= _MIN_YEAR && n1 <= _MAX_YEAR) {
           year = n1;
+          if (n2 >= 1 && n2 <= 31) {
+            day = n2;
+          }
+        } else if (n2 >= _MIN_YEAR && n2 <= _MAX_YEAR) {
+          year = n2;
+          if (n1 >= 1 && n1 <= 31) {
+            day = n1;
+          }
         }
       } else if (numbers.length == 1) {
         final n = numbers.first;

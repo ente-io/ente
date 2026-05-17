@@ -758,7 +758,7 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
                 { headers: publicRequestHeaders() },
             );
         } else {
-            return fetch(`https://thumbnails.ente.io/?fileID=${file.id}`, {
+            return fetch(`https://thumbnails.ente.com/?fileID=${file.id}`, {
                 headers: await authenticatedRequestHeaders(),
             });
         }
@@ -843,7 +843,7 @@ const photos_downloadFile = async (
             const url = await apiURL(`/files/download/${file.id}`, { token });
             return fetch(url, { headers: publicRequestHeaders() });
         } else {
-            return fetch(`https://files.ente.io/?fileID=${file.id}`, {
+            return fetch(`https://files.ente.com/?fileID=${file.id}`, {
                 headers: await authenticatedRequestHeaders(),
             });
         }
@@ -876,7 +876,7 @@ const publicAlbums_downloadThumbnail = async (
             );
         } else {
             return fetch(
-                `https://public-albums.ente.io/preview/?fileID=${file.id}`,
+                `https://public-albums.ente.com/preview/?fileID=${file.id}`,
                 {
                     headers:
                         authenticatedPublicAlbumsRequestHeaders(credentials),
@@ -908,7 +908,7 @@ const publicAlbums_downloadFile = async (
             );
         } else {
             return fetch(
-                `https://public-albums.ente.io/download/?fileID=${file.id}`,
+                `https://public-albums.ente.com/download/?fileID=${file.id}`,
                 {
                     headers:
                         authenticatedPublicAlbumsRequestHeaders(credentials),

@@ -96,6 +96,52 @@ Duplicates can occur:
 >
 > Special mention to l1br3770 for his [detailed guide](https://www.reddit.com/r/enteio/comments/1jyxk4b/howto_migration_from_google_photos_pitfalls/).
 
+### Why aren't my Google Takeout albums preserved after import? {#takeout-albums-not-preserved}
+
+Usually because the album folders weren't placed directly inside one parent folder during extraction. Ente expects this structure:
+
+```
+Google Photos/
+  Album 1/
+  Album 2/
+  Album 3/
+```
+
+Not this:
+
+```
+Google Photos/
+  Takeout 1/
+    Album 1/
+    Album 2/
+  Takeout 2/
+    Album 3/
+```
+
+When you have multiple Takeout ZIPs, extract all of them into the same parent folder so the album folders end up at the same level — don't keep `Takeout 1/`, `Takeout 2/` as wrappers.
+
+If photos already uploaded without the right album assignment, Ente can't reconstruct it after the fact. The cleanest fix:
+
+1. Delete the existing upload and empty Trash.
+2. Re-arrange the extracted Takeout contents into a single merged folder as shown above.
+3. Re-upload through the desktop app.
+
+### Why is my storage usage in Ente higher than what Google Photos showed? {#ente-storage-higher-than-google}
+
+Google Photos and Ente count storage differently:
+
+- **Compression**: Google's "Storage saver" mode compresses photos. Ente always stores the original quality, so the same library can take noticeably more space.
+- **Edited photos and motion photos**: Takeout exports the original and any edited copies as separate files. Live/motion photos export as separate image and video components.
+- **Shared and partner-shared items**: These often appear as additional files in Takeout.
+- **Older uploads**: Photos from before Google's storage policy change didn't count toward Google's quota but are stored fully in Ente.
+- **Duplicates in Takeout**: Google repeats files across album folders. Ente tries to deduplicate, but some can slip through.
+
+To clean up duplicates after import, use `Desktop app > Settings > Deduplicate files`. See [How do I prevent duplicates while migrating from Google Photos?](#prevent-duplicates-migration).
+
+### Does Google Photos show the full size of my library? {#google-photos-full-size}
+
+Not always. The storage figure shown in Google Photos only counts items that use your Google quota. Older uploads, partner-shared photos, and other items can be present in Takeout without showing up in that number.
+
 ### What is the best way to migrate Google Photos shared albums to Ente? {#migrate-google-photos-shared-albums}
 
 Google Takeout does not reliably export shared albums:

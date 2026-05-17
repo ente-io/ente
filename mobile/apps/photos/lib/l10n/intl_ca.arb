@@ -245,16 +245,6 @@
   "after1Month": "Després d'1 mes",
   "after1Year": "Després d'1 any",
   "manageParticipants": "Gestiona",
-  "albumParticipantsCount": "{count, plural, =0 {Sense participants} =1 {1 participant} other {{count} participants}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Crea un enllaç per permetre que la gent afegeixi i vegi fotos al teu àlbum compartit sense necessitat d'una aplicació o compte d'Ente. Genial per recollir fotos d'esdeveniments.",
   "collectPhotos": "Recull fotos",
   "collaborativeLink": "Enllaç col·laboratiu",
@@ -269,15 +259,6 @@
   "publicLinkEnabled": "Enllaç públic activat",
   "shareALink": "Comparteix un enllaç",
   "sharedAlbumSectionDescription": "Crea àlbums compartits i col·laboratius amb altres usuaris d'Ente, inclosos els usuaris de plans gratuïts.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Comparteix amb persones específiques} =1 {Compartit amb 1 persona} other {Compartit amb {numberOfPeople} persones}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Aquest és el teu ID de verificació",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Algú que comparteixi àlbums amb tu hauria de veure el mateix ID al seu dispositiu.",
   "howToViewShareeVerificationID": "Si us plau, demana'ls que facin una pressió llarga sobre la seva adreça de correu a la pantalla de configuració, i verifica que els ID en ambdós dispositius coincideixen.",
@@ -524,7 +505,6 @@
   "updateSettings": "Actualitza la configuració",
   "updatingFolderSelection": "Actualitzant selecció de carpetes...",
   "itemCount": "{count, plural, one{{count} element} other{{count} elements}}",
-  "deleteItemCount": "{count, plural, =1 {Esborra {count} element} other {Esborra {count} elements}}",
   "duplicateItemsGroup": "{count} fitxers, {formattedSize} cadascun",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -736,7 +716,16 @@
   "playstoreSubscription": "Subscripció de PlayStore",
   "appstoreSubscription": "Subscripció d'AppStore",
   "subAlreadyLinkedErrMessage": "El teu {id} ja està vinculat a un altre compte d'Ente.\nSi vols utilitzar el teu {id} amb aquest compte, si us plau contacta amb el nostre suport''",
-  "visitWebToManage": "Si us plau, visita web.ente.io per gestionar la teva subscripció",
+  "visitWebToManage": "Si us plau, visita {webUrl} per gestionar la teva subscripció",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "No s'ha pogut actualitzar la subscripció",
   "paymentFailed": "El pagament ha fallat",
   "paymentFailedTalkToProvider": "Si us plau, parla amb el suport de {providerName} si se t'ha cobrat",
@@ -854,14 +843,6 @@
   "share": "Comparteix",
   "unhideToAlbum": "Mostra a l'àlbum",
   "restoreToAlbum": "Restaura a l'àlbum",
-  "moveItem": "{count, plural, =1 {Mou element} other {Mou elements}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {Afegeix element} other {Afegeix elements}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Crea o selecciona àlbum",
   "selectAlbum": "Selecciona àlbum",
   "searchByAlbumNameHint": "Nom de l'àlbum",
@@ -886,16 +867,6 @@
   "referFriendsAnd2xYourPlan": "Referencia amics i duplica el teu pla",
   "shareAlbumHint": "Obre un àlbum i toca el botó de compartir a la part superior dreta per compartir.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Els elements mostren el nombre de dies restants abans de l'eliminació permanent",
-  "trashDaysLeft": "{count, plural, =0 {Aviat} =1 {1 dia} other {{count} dies}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Esborra tot",
   "renameAlbum": "Reanomena àlbum",
   "convertToAlbum": "Converteix a àlbum",
@@ -960,7 +931,6 @@
   "authToViewYourMemories": "Si us plau, autentica't per veure els teus records",
   "unlock": "Desbloqueja",
   "freeUpSpace": "Allibera espai",
-  "freeUpSpaceSaving": "{count, plural, =1 {Es pot esborrar del dispositiu per alliberar {formattedSize}} other {Es poden esborrar del dispositiu per alliberar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fitxer} other {{formattedNumber} fitxers}} en aquest àlbum s'han copiat de manera segura",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -988,18 +958,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Encara podràs accedir a {count, plural, =1 {ell} other {ells}} a Ente mentre tinguis una subscripció activa",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1097,7 +1055,16 @@
   "loadMessage5": "El nostre codi font i criptografia han estat auditats externament",
   "loadMessage6": "Pots compartir enllaços als teus àlbums amb els teus éssers estimats",
   "loadMessage7": "Les nostres aplicacions mòbils s'executen en segon pla per xifrar i fer còpia de seguretat de qualsevol foto nova que facis",
-  "loadMessage8": "web.ente.io té un carregador elegant",
+  "loadMessage8": "{webUrl} té un carregador elegant",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Utilitzem Xchacha20Poly1305 per xifrar de manera segura les teves dades",
   "photoDescriptions": "Descripcions de fotos",
   "searchResultFileName": "Nom de fitxer",
@@ -1364,7 +1331,16 @@
   "playOnTv": "Reprodueix àlbum a la TV",
   "pair": "Aparella",
   "deviceNotFound": "Dispositiu no trobat",
-  "castInstruction": "Visita cast.ente.io al dispositiu que vols aparellar.\n\nIntrodueix el codi de sota per reproduir l'àlbum a la teva TV.",
+  "castInstruction": "Visita {castUrl} al dispositiu que vols aparellar.\n\nIntrodueix el codi de sota per reproduir l'àlbum a la teva TV.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Introdueix el codi",
   "joinDiscord": "Uneix-te a Discord",
   "locations": "Ubicacions",
@@ -1374,8 +1350,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Troba gent ràpidament per nom",
-  "addViewers": "{count, plural, =0 {Afegeix visualitzador} =1 {Afegeix visualitzador} other {Afegeix visualitzadors}}",
-  "addCollaborators": "{count, plural, =0 {Afegeix col·laborador} =1 {Afegeix col·laborador} other {Afegeix col·laboradors}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Fes una pressió llarga sobre un correu per verificar el xifratge d'extrem a extrem.",
   "developerSettingsWarning": "Estàs segur que vols modificar la configuració de desenvolupador?",
   "developerSettings": "Configuració de desenvolupador",
@@ -1505,34 +1479,6 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {S'ha afegit 1 fitxer a {personName}} other {S'han afegit {count} fitxers a {personName}}}",
-  "@addedFilesToPerson": {
-    "description": "Toast shown after manually tagging one or more files to a person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 fitxer ja està enllaçat a {personName}} other {{count} fitxers ja estan enllaçats a {personName}}}",
-  "@filesAlreadyLinkedToPerson": {
-    "description": "Toast shown when selected files are already manually tagged to the selected person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
   "addNewPerson": "Afegeix nova persona",
   "addNameOrMerge": "Afegeix nom o fusiona",
   "mergeWithExisting": "Fusiona amb existent",
@@ -1579,46 +1525,6 @@
   "enableMachineLearningBanner": "Activa l'aprenentatge automàtic per a la cerca màgica i el reconeixement facial",
   "searchDiscoverEmptySection": "Les imatges es mostraran aquí un cop completat el processament i la sincronització",
   "searchPersonsEmptySection": "La gent es mostrarà aquí un cop completat el processament i la sincronització",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Afegits 0 visualitzadors} =1 {Afegit 1 visualitzador} other {Afegits {count} visualitzadors}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Afegit 0 col·laborador} =1 {Afegit 1 col·laborador} other {Afegits {count} col·laboradors}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
-  "adminsSuccessfullyAdded": "{count, plural, =0 {No s'ha afegit cap administrador} =1 {1 administrador afegit amb èxit} other {{count} administradors afegits amb èxit}}",
-  "@adminsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of admins that were successfully added to an album."
-  },
-  "addAdmins": "{count, plural, =0 {Afegeix administrador} =1 {Afegeix administrador} other {Afegeix administradors}}",
-  "@addAdmins": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Button text to add admins"
-  },
   "adminsCanManagePhotosAndParticipants": "Els administradors poden gestionar les fotos i els participants.",
   "suggestDeletion": "Suggerir eliminació",
   "suggestDeletionDescription": "Les fotos seleccionades seran eliminades d'aquest àlbum. Els propietaris de les fotos també rebran una suggerència per revisar i eliminar les fotos.",
@@ -1688,15 +1594,6 @@
   },
   "currentlyRunning": "actualment en execució",
   "ignored": "ignorat",
-  "photosCount": "{count, plural, =0 {0 fotos} =1 {1 foto} other {{count} fotos}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Fitxer",
   "searchSectionsLengthMismatch": "La longitud de les seccions no coincideix: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1884,21 +1781,11 @@
   "moveSelectedPhotosToOneDate": "Mou les fotos seleccionades a una data",
   "shiftDatesAndTime": "Desplaça dates i hora",
   "photosKeepRelativeTimeDifference": "Les fotos mantenen la diferència horària relativa",
-  "photocountPhotos": "{count, plural, =0 {Sense fotos} =1 {1 foto} other {{count} fotos}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "Icona de l'aplicació",
   "notThisPerson": "No és aquesta persona?",
   "selectedItemsWillBeRemovedFromThisPerson": "Els elements seleccionats s'eliminaran d'aquesta persona, però no s'esborraran de la teva biblioteca.",
   "throughTheYears": "{dateFormat} a través dels anys",
   "thisWeekThroughTheYears": "Aquesta setmana a través dels anys",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Aquesta setmana, fa {count} any} other {Aquesta setmana, fa {count} anys}}",
   "youAndThem": "Tu i {name}",
   "admiringThem": "Admirant {name}",
   "embracingThem": "Abraçant {name}",
@@ -1914,7 +1801,6 @@
   "spotlightOnThem": "Focus en {name}",
   "personIsAge": "{name} té {age}!",
   "personTurningAge": "{name} farà {age} aviat",
-  "lastTimeWithThem": "Última vegada amb {name}",
   "tripToLocation": "Viatge a {location}",
   "tripInYear": "Viatge el {year}",
   "lastYearsTrip": "Viatge de l'any passat",
@@ -2005,15 +1891,6 @@
   "font": "Font",
   "background": "Fons",
   "align": "Alinea",
-  "addedToAlbums": "{count, plural, =1{Afegit amb èxit a 1 àlbum} other{Afegit amb èxit a {count} àlbums}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "Vídeos processats",
   "totalVideos": "Total de vídeos",
   "skippedVideos": "Vídeos omesos",
@@ -2044,14 +1921,6 @@
   "findSimilarImages": "Troba imatges similars",
   "noSimilarImagesFound": "No s'han trobat imatges similars",
   "yourPhotosLookUnique": "Les teves fotos semblen úniques",
-  "similarGroupsFound": "{count, plural, =1{{count} grup trobat} other{{count} grups trobats}}",
-  "@similarGroupsFound": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "reviewAndRemoveSimilarImages": "Revisa i elimina imatges similars",
   "deletePhotosWithSize": "Esborra {count} fotos ({size})",
   "@deletePhotosWithSize": {
@@ -2375,15 +2244,6 @@
       }
     }
   },
-  "likesCount": "{count, plural, =1{1 m'agrada} other{{count} m'agrades}}",
-  "@likesCount": {
-    "description": "Number of likes with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "noLikesYet": "Cap m'agrada encara",
   "@noLikesYet": {
     "description": "Empty state when no likes exist"
@@ -2396,27 +2256,9 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, =1{No s'ha pogut donar m'agrada a 1 àlbum} other{No s'ha pogut fer m'agrada a {count} àlbums}}",
-  "@failedToLikeAlbums": {
-    "description": "Error when liking albums fails",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "couldNotLoadAlbums": "No s'han pogut carregar els àlbums",
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
-  },
-  "albumsCount": "{count, plural, =1{1 àlbum} other{{count} àlbums}}",
-  "@albumsCount": {
-    "description": "Number of albums with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "likeAll": "Donar m'agrada a tots",
   "@likeAll": {
@@ -2452,15 +2294,6 @@
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "commentsCount": "{count, plural, =0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
-  "@commentsCount": {
-    "description": "Number of comments with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },

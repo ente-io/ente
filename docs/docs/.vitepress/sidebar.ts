@@ -329,6 +329,10 @@ export const sidebar = [
             { text: "Introduction", link: "/auth/" },
             { text: "Features", link: "/auth/features/" },
             {
+                text: "Offline mode",
+                link: "/auth/features/offline-mode",
+            },
+            {
                 text: "FAQ",
                 collapsed: true,
                 items: [
@@ -354,8 +358,16 @@ export const sidebar = [
                         link: "/auth/migration/authy/",
                     },
                     {
+                        text: "From Microsoft Authenticator",
+                        link: "/auth/migration/microsoft-authenticator/",
+                    },
+                    {
                         text: "From Steam",
                         link: "/auth/migration/steam/",
+                    },
+                    {
+                        text: "From Others",
+                        link: "/auth/migration/import",
                     },
                     {
                         text: "Export",

@@ -7,7 +7,6 @@ import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
-import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
@@ -70,10 +69,7 @@ class _SearchTabState extends State<SearchTab> {
       children: [
         ColoredBox(
           color: headerColor,
-          child: const SafeArea(
-            bottom: false,
-            child: SearchWidget(),
-          ),
+          child: const SafeArea(bottom: false, child: SearchWidget()),
         ),
         Expanded(
           child: AllSectionsExamplesProvider(
@@ -112,43 +108,51 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
       padding: const EdgeInsets.only(top: 4),
       child: Stack(
         children: [
-          FutureBuilder<List<List<SearchResult>>>(
-            future: InheritedAllSectionsExamples.of(context)
-                .allSectionsExamplesFuture,
+          FutureBuilder<AllSectionsExamplesData>(
+            future: InheritedAllSectionsExamples.of(
+              context,
+            ).allSectionsExamplesFuture,
             builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              if (snapshot.hasData &&
+                  snapshot.data!.sectionResults.isNotEmpty) {
+                final sectionResultsByType = snapshot.data!.sectionResults;
+                final hasAnySearchableFiles =
+                    snapshot.data!.hasAnySearchableFiles;
                 // In offline mode, skip the empty state check since DeviceAlbumsSection
                 // fetches its own data and may have albums to show
-                if (!isOfflineMode &&
-                    snapshot.data!.every((element) => element.isEmpty)) {
+                if (!isLocalGalleryMode &&
+                    !hasAnySearchableFiles &&
+                    sectionResultsByType.every((element) => element.isEmpty)) {
                   return const Padding(
                     padding: EdgeInsets.only(bottom: 72),
                     child: SearchTabEmptyState(),
                   );
                 }
-                if (snapshot.data!.length != searchTypes.length) {
+                if (sectionResultsByType.length != searchTypes.length) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 72),
                     child: Text(
                       AppLocalizations.of(context).searchSectionsLengthMismatch(
-                        snapshotLength: snapshot.data!.length,
+                        snapshotLength: sectionResultsByType.length,
                         searchLength: searchTypes.length,
                       ),
                     ),
                   );
                 }
                 final faceSectionIndex = searchTypes.indexOf(SectionType.face);
-                final hasSurfacedOfflineFaces = isOfflineMode &&
+                final hasSurfacedOfflineFaces = isLocalGalleryMode &&
                     faceSectionIndex >= 0 &&
-                    faceSectionIndex < snapshot.data!.length &&
-                    snapshot.data!.elementAt(faceSectionIndex).isNotEmpty;
+                    faceSectionIndex < sectionResultsByType.length &&
+                    sectionResultsByType.elementAt(faceSectionIndex).isNotEmpty;
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
                   itemCount: searchTypes.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      if (!isOfflineMode) return const SizedBox.shrink();
+                      if (!isLocalGalleryMode) {
+                        return const SizedBox.shrink();
+                      }
                       if (hasSurfacedOfflineFaces) {
                         return const SizedBox.shrink();
                       }
@@ -162,19 +166,19 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(
-                          examples: snapshot.data!.elementAt(sectionIndex)
+                          examples: sectionResultsByType.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
-                        if (isOfflineMode) {
+                        if (isLocalGalleryMode) {
                           return const DeviceAlbumsSection();
                         }
                         return AlbumsSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          sectionResultsByType.elementAt(sectionIndex)
                               as List<AlbumSearchResult>,
                         );
                       case SectionType.ritual:
-                        if (isOfflineMode) {
+                        if (isLocalGalleryMode) {
                           return const SizedBox.shrink();
                         }
                         return const _RitualsDiscoverySection();
@@ -189,32 +193,31 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                             if (!wrappedService.shouldShowDiscoveryEntry) {
                               return const SizedBox.shrink();
                             }
-                            return WrappedDiscoverySection(state: state);
+                            return WrappedDiscoverySection(
+                              state: state,
+                            );
                           },
                         );
                       case SectionType.location:
                         return LocationsSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          sectionResultsByType.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.contacts:
                         return const SizedBox.shrink();
                       case SectionType.fileTypesAndExtension:
                         return FileTypeSection(
-                          snapshot.data!.elementAt(sectionIndex)
-                              as List<GenericSearchResult>,
+                          hasAnySearchableFiles: hasAnySearchableFiles,
                         );
                       case SectionType.magic:
                         return MagicSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          sectionResultsByType.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                     }
                   },
                 )
-                    .animate(
-                      delay: const Duration(milliseconds: 150),
-                    )
+                    .animate(delay: const Duration(milliseconds: 150))
                     .slide(
                       begin: const Offset(0, -0.015),
                       end: const Offset(0, 0),

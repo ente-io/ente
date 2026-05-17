@@ -1,6 +1,6 @@
 [package]
 name = "ensu-tauri"
-version = "0.1.15"
+version = "0.1.16-beta"
 description = "Ensu Desktop (Tauri)"
 edition = "2021"
 
@@ -17,6 +17,12 @@ ensu-sync = { path = "../../../ensu/sync" }
 inference_rs = { path = "../../../ensu/inference" }
 uuid = { version = "1", features = ["v4"] }
 keyring = { version = "3", default-features = false, features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = ["Win32_System_SystemInformation"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

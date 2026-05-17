@@ -1,6 +1,6 @@
 # Ente Accounts
 
-Code that runs on `accounts.ente.io`.
+Code that runs on `accounts.ente.com`.
 
 Primarily, this serves a common domain where our clients can create and
 authenticate using shared passkeys tied to the user's Ente account.
@@ -11,6 +11,9 @@ authenticate using shared passkeys tied to the user's Ente account.
 > separate web origin for sharing passkeys between our (photos and auth) web
 > clients, but we do need a web origin to handle the passkey flow for the
 > desktop and mobile clients.
+
+`accounts.ente.io` remains the legacy origin for users who already have
+Passkeys scoped to the old `ente.io` relying-party ID.
 
 For more details about the Passkey flows,
 [docs/webauthn-passkeys.md](../../docs/webauthn-passkeys.md).

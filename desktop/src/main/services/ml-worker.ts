@@ -171,7 +171,7 @@ const downloadModel = async (saveLocation: string, name: string) => {
     await fs.mkdir(saveDir, { recursive: true });
     // Download.
     log.info(`Downloading ML model from ${name}`);
-    const url = `https://models.ente.io/${name}`;
+    const url = `https://models.ente.com/${name}`;
     const res = await net.fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     const body = res.body;

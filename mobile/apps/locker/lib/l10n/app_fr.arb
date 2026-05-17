@@ -229,16 +229,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{aucun element} =1{1 element} other{{count} elements}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Creer une collection",
   "uploadDocumentTooltip": "Televerser un document",
   "restore": "Restaurer",
@@ -460,15 +450,6 @@
   "linkDeviceLimit": "Limite d'appareil",
   "expiredLinkInfo": "Ce lien a expiré. Veuillez sélectionner un nouveau délai d'expiration ou désactiver l'expiration du lien.",
   "linkExpiresOn": "Le lien expirera le {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Partagez avec des personnes spécifiques} =1 {Partagé avec 1 personne} other {Partagé avec {numberOfPeople} personnes}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Le lien a expiré",
   "publicLinkEnabled": "Lien public activé",
   "shareALink": "Partager le lien",
@@ -482,28 +463,6 @@
   "add": "Ajouter",
   "collaboratorsCanAddFilesToTheSharedCollection": "Les collaborateurs peuvent ajouter des elements a la collection partagee.",
   "enterEmail": "Entrer un email",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 collaborateur ajouté} =1 {1 collaborateur ajouté} other {{count} collaborateurs ajoutés}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
-  "addCollaborators": "{count, plural, =0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "sharing": "Partage...",
   "invalidEmailAddress": "Adresse e-mail invalide",
@@ -552,16 +511,6 @@
   "viewer": "Observateur",
   "collaborator": "Collaborateur",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Les collaborateurs peuvent ajouter des elements a la collection partagee.",
-  "albumParticipantsCount": "{count, plural, =0 {Aucun Participant} =1 {1 Participant} other {{count} Participants}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Ajouter",
   "you": "Vous",
   "albumOwner": "Propriétaire",
@@ -667,16 +616,6 @@
   "clickHereToUpload": "Clique ici pour televerser",
   "saveDocument": "Enregistrer le document",
   "uploadFiles": "Televerser des elements",
-  "filesSelected": "{count, plural, =0{Aucun element selectionne} =1{1 element selectionne} other{{count} elements selectionnes}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Ajouter a la collection",
   "newCollection": "Nouvelle collection",
   "title": "Titre",
@@ -694,16 +633,6 @@
       }
     }
   },
-  "recordSavedToMultipleCollections": "Enregistrement sauvegarde dans {count, plural, =1{1 collection} other{{count} collections}} avec succes",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} copie dans le presse-papiers",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -711,20 +640,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 resultat} other{{count} resultats}} pour \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -770,49 +685,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 collection sera supprimee} other{{count} collections seront supprimees}} definitivement.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 element sera supprime} other{{count} elements seront supprimes}} definitivement.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Supprimer egalement les elements partout",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Oui, supprimer {count, plural, =1{la collection} other{les collections}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Oui, supprimer {count, plural, =1{l'element} other{les elements}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Utilisation",
   "unimportant": "Non important",
@@ -820,16 +695,6 @@
   "markingAsImportant": "Marquage comme important...",
   "fileMarkedAsImportant": "Element marque comme important",
   "fileRemovedFromImportant": "Element supprime des importants",
-  "filesMarkedAsImportant": "{count, plural, =1{1 element marque comme important} other{{count} elements marques comme importants}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Tous les elements sont deja marques comme importants",
   "failedToMarkFilesAsImportant": "Echec du marquage des elements comme importants : {error}",
   "@failedToMarkFilesAsImportant": {

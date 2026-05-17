@@ -73,7 +73,7 @@ class DeviceFolderItem extends StatelessWidget {
                                   deviceCollection.thumbnail!.tag,
                             ),
                           ),
-                          if (!isBackedUp && !isOfflineMode)
+                          if (!isBackedUp && !isLocalGalleryMode)
                             const UnSyncedIcon(),
                         ],
                       ),
@@ -99,8 +99,9 @@ class DeviceFolderItem extends StatelessWidget {
             child: Text(
               deviceCollection.count.toString(),
               textAlign: TextAlign.left,
-              style:
-                  Theme.of(context).colorScheme.enteTheme.textTheme.miniMuted,
+              style: Theme.of(
+                context,
+              ).colorScheme.enteTheme.textTheme.miniMuted,
               overflow: TextOverflow.ellipsis,
             ),
           ),

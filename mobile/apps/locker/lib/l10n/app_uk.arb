@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{немає елементів} =1{1 елемент} few{{count} елементи} many{{count} елементів} other{{count} елементів}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Створити колекцію",
   "uploadDocumentTooltip": "Завантажити документ",
   "restore": "Відновити",
@@ -471,15 +461,6 @@
   "linkDeviceLimit": "Досягнуто ліміту пристроїв",
   "expiredLinkInfo": "Термін дії цього посилання минув. Будь ласка, виберіть новий час терміну дії або вимкніть це посилання.",
   "linkExpiresOn": "Посилання закінчується через {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Поділитися з конкретними людьми} =1 {Поділитися з 1 особою} other {Поділитися з {numberOfPeople} людьми}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Посилання прострочено",
   "publicLinkEnabled": "Публічне посилання увімкнено",
   "shareALink": "Поділитися посиланням",
@@ -493,28 +474,6 @@
   "add": "Додати",
   "collaboratorsCanAddFilesToTheSharedCollection": "Співавтори можуть додавати елементи до спільної колекції.",
   "enterEmail": "Введіть поштову адресу",
-  "viewersSuccessfullyAdded": "{count, plural, =0{Додано 0 переглядачів} =1{Додано 1 переглядача} few{Додано {count} переглядачі} many{Додано {count} переглядачів} other{Додано {count} переглядачів}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0{Додано 0 співавторів} =1{Додано 1 співавтора} few{Додано {count} співавтори} many{Додано {count} співавторів} other{Додано {count} співавторів}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0{Додати переглядача} =1{Додати переглядача} other{Додати переглядачів}}",
-  "addCollaborators": "{count, plural, =0{Додати співавтора} =1{Додати співавтора} other{Додати співавторів}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Довго утримуйте поштову адресу, щоб перевірити наскрізне шифрування.",
   "sharing": "Відправлення...",
   "invalidEmailAddress": "Хибна адреса електронної пошти",
@@ -563,16 +522,6 @@
   "viewer": "Глядач",
   "collaborator": "Співавтор",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Співавтори можуть додавати елементи до спільної колекції.",
-  "albumParticipantsCount": "{count, plural, =0 {Немає учасників} =1 {1 учасник} other {{count} учасників}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Додати більше",
   "you": "Ви",
   "albumOwner": "Власник",
@@ -680,16 +629,6 @@
   "clickHereToUpload": "Натисніть тут, щоб завантажити",
   "saveDocument": "Зберегти документ",
   "uploadFiles": "Завантажити елементи",
-  "filesSelected": "{count, plural, =0{Елементів не вибрано} =1{1 елемент вибрано} few{{count} елементи вибрано} many{{count} елементів вибрано} other{{count} елементів вибрано}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Додати до колекції",
   "newCollection": "Нова колекція",
   "title": "Заголовок",
@@ -708,16 +647,6 @@
     }
   },
   "informationCollectionName": "Інформація",
-  "recordSavedToMultipleCollections": "Запис успішно збережено до {count, plural, =1{1 колекції} few{{count} колекцій} many{{count} колекцій} other{{count} колекцій}}",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} скопійовано в буфер обміну",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -725,20 +654,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 результат} few{{count} результати} many{{count} результатів} other{{count} результатів}} для \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -785,49 +700,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 колекція} few{{count} колекції} many{{count} колекцій} other{{count} колекцій}} буде остаточно видалено.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 елемент} few{{count} елементи} many{{count} елементів} other{{count} елементів}} буде остаточно видалено.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Також видалити елементи звідусіль",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Так, видалити {count, plural, =1{колекцію} few{колекції} many{колекцій} other{колекцій}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Так, видалити {count, plural, =1{елемент} few{елементи} many{елементів} other{елементів}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Використання",
   "important": "Важливе",
@@ -836,16 +711,6 @@
   "markingAsImportant": "Позначення як важливе...",
   "fileMarkedAsImportant": "Елемент позначено як важливий",
   "fileRemovedFromImportant": "Елемент видалено з важливого",
-  "filesMarkedAsImportant": "{count, plural, =1{1 елемент позначено як важливий} few{{count} елементи позначено як важливі} many{{count} елементів позначено як важливі} other{{count} елементів позначено як важливі}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Усі елементи вже позначені як важливі",
   "failedToMarkFilesAsImportant": "Не вдалося позначити елементи як важливі: {error}",
   "@failedToMarkFilesAsImportant": {

@@ -85,8 +85,16 @@ export const Verify2FACodeForm: React.FC<Verify2FACodeFormProps> = ({
                     value={values.otp}
                     onChange={handleChange("otp")}
                     numInputs={6}
+                    inputType="tel"
                     renderSeparator={<span>-</span>}
-                    renderInput={(props) => <IndividualInput {...props} />}
+                    renderInput={(props, index) => (
+                        <IndividualInput
+                            {...props}
+                            autoComplete={index === 0 ? "one-time-code" : "off"}
+                            name={index === 0 ? "otp" : undefined}
+                            pattern="[0-9]*"
+                        />
+                    )}
                 />
                 {errors.otp && (
                     <Typography variant="mini" sx={{ color: "critical.main" }}>

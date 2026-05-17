@@ -36,7 +36,7 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
   @override
   Widget build(BuildContext context) {
     if (_dismissed) return const SizedBox.shrink();
-    if (localSettings.isOfflineGetStartedBannerDismissed) {
+    if (localSettings.isLocalGalleryGetStartedBannerDismissed) {
       return const SizedBox.shrink();
     }
 
@@ -117,10 +117,7 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
 
           TextStyle descriptionStyleForWidth(double maxWidth) {
             if (maxWidth < 180) {
-              return descriptionStyle.copyWith(
-                fontSize: 11,
-                height: 18 / 11,
-              );
+              return descriptionStyle.copyWith(fontSize: 11, height: 18 / 11);
             }
             return descriptionStyle;
           }
@@ -128,8 +125,9 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
           var resolvedDuckWidth = sculptedDuckWidth;
           var resolvedFirstLineMaxWidth = firstLineMaxWidth;
           var resolvedSecondLineMaxWidth = secondLineMaxWidth;
-          var sculptedDescriptionStyle =
-              descriptionStyleForWidth(secondLineMaxWidth);
+          var sculptedDescriptionStyle = descriptionStyleForWidth(
+            secondLineMaxWidth,
+          );
           var useAccessibilityDescriptionLayout =
               _descriptionNeedsAccessibilityFallback(
             context: context,
@@ -160,8 +158,9 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                   duckOpaqueStartFraction: _duckSecondLineOpaqueStartFraction,
                 ),
               );
-              final candidateDescriptionStyle =
-                  descriptionStyleForWidth(candidateSecondLineMaxWidth);
+              final candidateDescriptionStyle = descriptionStyleForWidth(
+                candidateSecondLineMaxWidth,
+              );
               final fitsWithCandidateDuck =
                   !_descriptionNeedsAccessibilityFallback(
                 context: context,
@@ -198,10 +197,13 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
           final descriptionMaxWidth = useAccessibilityDescriptionLayout
               ? fallbackDescriptionMaxWidth
               : resolvedSecondLineMaxWidth;
-          final effectiveDescriptionStyle =
-              descriptionStyleForWidth(descriptionMaxWidth);
-          final descriptionLineHeight =
-              _scaledLineHeight(effectiveDescriptionStyle, textScaler);
+          final effectiveDescriptionStyle = descriptionStyleForWidth(
+            descriptionMaxWidth,
+          );
+          final descriptionLineHeight = _scaledLineHeight(
+            effectiveDescriptionStyle,
+            textScaler,
+          );
           final descriptionLines = useAccessibilityDescriptionLayout
               ? _measureTextLineCount(
                   context: context,
@@ -338,11 +340,7 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                       behavior: HitTestBehavior.opaque,
                       child: const Padding(
                         padding: EdgeInsets.all(4),
-                        child: Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 16,
-                        ),
+                        child: Icon(Icons.close, color: Colors.white, size: 16),
                       ),
                     ),
                   ),
@@ -359,7 +357,7 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
     setState(() {
       _dismissed = true;
     });
-    await localSettings.setOfflineGetStartedBannerDismissed(true);
+    await localSettings.setLocalGalleryGetStartedBannerDismissed(true);
   }
 
   Future<void> _onGetStarted() async {
@@ -406,8 +404,9 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
       textDirection: Directionality.of(context),
       textScaler: textScaler,
     )..layout(maxWidth: firstLineMaxWidth);
-    final firstLineRange =
-        firstLinePainter.getLineBoundary(const TextPosition(offset: 0));
+    final firstLineRange = firstLinePainter.getLineBoundary(
+      const TextPosition(offset: 0),
+    );
     final splitIndex = firstLineRange.end.clamp(0, text.length);
     final secondLine = text.substring(splitIndex).trimLeft();
     firstLinePainter.dispose();
@@ -554,8 +553,9 @@ class _BannerDescriptionTextState extends State<_BannerDescriptionText> {
       textDirection: Directionality.of(context),
       textScaler: textScaler,
     )..layout(maxWidth: widget.firstLineMaxWidth);
-    final firstLineRange =
-        painter.getLineBoundary(const TextPosition(offset: 0));
+    final firstLineRange = painter.getLineBoundary(
+      const TextPosition(offset: 0),
+    );
     final splitIndex = firstLineRange.end.clamp(0, widget.text.length);
     final firstLine = widget.text.substring(0, splitIndex).trimRight();
     final secondLine = widget.text.substring(splitIndex).trimLeft();

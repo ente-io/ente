@@ -234,7 +234,7 @@ class TrashSyncService {
         latestUpdatedAtTime,
       );
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to parse trash diff", e, s);
       rethrow;
     }
   }

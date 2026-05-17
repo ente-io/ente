@@ -54,6 +54,12 @@ If we are unable to decipher the creation time from these 3 sources, we will set
 
 This shows all the technical data about the photo including camera settings, lens information, and more.
 
+### What metadata can people I share with see? {#shared-metadata-visibility}
+
+Anyone you share an album with sees the same item details you do: capture date, camera EXIF, captions, album titles, and map pins, because that metadata decrypts together with the photo.
+
+Public link viewers see the same fields. Contributor emails on a shared album are masked on public links by default; see [Why do emails on my feed appear masked for public links?](https://ente.com/help/photos/faq/sharing-and-collaboration#masked-emails-public-links).
+
 ## Importing from Google Photos
 
 ### How does Ente handle Google Takeout metadata? {#google-takeout-metadata}
@@ -286,6 +292,25 @@ This ensures:
 - You always have access to originals
 - Your edits are preserved separately
 - You can use the metadata JSON with other tools
+
+### How can I read the corrected date for a photo from my Ente export? {#read-corrected-date-export}
+
+Ente never modifies your original files, so corrected dates are not written back into the photo's EXIF. Instead, they live in the metadata JSON sidecar that ships alongside the file in your export.
+
+To check either:
+
+- **Original embedded EXIF**: use a tool like [exiftool](https://exiftool.org/) on the photo file itself.
+- **Corrected date set in Ente**: open the matching JSON in `metadata/` with any text or JSON viewer and look at `photoTakenTime`.
+
+If a photo has no original EXIF date and no Ente correction, the JSON will reflect Ente's best-guess fallback (filename or upload time).
+
+### Why do some exported photos show the wrong date when imported into another app? {#wrong-export-date-other-app}
+
+Ente exports the original file untouched and writes the corrected date to a separate JSON sidecar (Google Takeout format). Other apps will only show the right date if they read that JSON.
+
+This shows up most often with files that never had a proper EXIF date to begin with, for example, WhatsApp forwards or screenshots, where Ente had to fall back to the filename or upload time. The original file simply has no embedded date for the new app to read.
+
+If the importing app supports Google Takeout-style JSON, keep the `metadata/` folder alongside the photos when transferring. Learn more at [Does the exported data preserve metadata?](#export-data-preserve-metadata).
 
 ## Platform-Specific Behavior
 

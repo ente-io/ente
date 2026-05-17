@@ -48,7 +48,9 @@ class DetailPageConfiguration {
   final String tagPrefix;
   final DetailPageMode mode;
   final bool isLocalOnlyContext;
+  final bool showEditAction;
   final GalleryType? galleryType;
+  final FutureOr<void> Function(BuildContext context)? onBackPressed;
 
   /// Callback invoked with the page context after the page is ready.
   /// Useful for showing bottom sheets or dialogs after navigation completes.
@@ -60,7 +62,9 @@ class DetailPageConfiguration {
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
     this.isLocalOnlyContext = false,
+    this.showEditAction = true,
     this.galleryType,
+    this.onBackPressed,
     this.onPageReady,
   });
 
@@ -69,15 +73,23 @@ class DetailPageConfiguration {
     GalleryLoader? asyncLoader,
     int? selectedIndex,
     String? tagPrefix,
+    DetailPageMode? mode,
     bool? isLocalOnlyContext,
+    bool? showEditAction,
     GalleryType? galleryType,
+    FutureOr<void> Function(BuildContext context)? onBackPressed,
+    void Function(BuildContext context)? onPageReady,
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
+      mode: mode ?? this.mode,
       isLocalOnlyContext: isLocalOnlyContext ?? this.isLocalOnlyContext,
+      showEditAction: showEditAction ?? this.showEditAction,
       galleryType: galleryType ?? this.galleryType,
+      onBackPressed: onBackPressed ?? this.onBackPressed,
+      onPageReady: onPageReady ?? this.onPageReady,
     );
   }
 }
@@ -235,6 +247,8 @@ class _BodyState extends State<_Body> {
                     .enableFullScreenNotifier,
                 galleryType: widget.config.galleryType,
                 mode: widget.config.mode,
+                showEditAction: widget.config.showEditAction,
+                onBackPressed: widget.config.onBackPressed,
               );
             },
             valueListenable: _selectedIndexNotifier,

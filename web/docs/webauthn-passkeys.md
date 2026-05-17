@@ -51,11 +51,12 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 | Key           | Type   | Value                                                             |
 | ------------- | ------ | ----------------------------------------------------------------- |
 | accountsToken | string | The Accounts-specific JWT session token. It is encoded in base64. |
+| accountsUrl   | string | The Accounts origin the client should open for this user.         |
 
 ### Automatically logging into Ente Accounts
 
 Clients open a WebView with the URL
-`https://accounts.ente.io/passkeys?token=<accountsToken>`.
+`<accountsUrl>/passkeys?token=<accountsToken>`.
 
 If the token is valid, the user will be show a list of their passkeys, and they
 can edit / delete them, or add new ones.
@@ -303,13 +304,17 @@ The client should redirect the user to the Ente Accounts web app with this
 session ID to prompt credential authentication.
 
 ```
-https://accounts.ente.io/passkeys?
+https://accounts.ente.com/passkeys?
     passkeySessionID=<sid>&clientPackage=<pkg>&
     redirect=<redirect>&recover=<recover-redirect>
 ```
 
 We use Ente Accounts as the central WebAuthn hub since it allows us to handle
 mobile and desktop clients too.
+
+During the dual-RP migration, the server returns `accounts.ente.io` for users
+who still have legacy `ente.io` passkeys, and `accounts.ente.com` for users
+without legacy passkeys.
 
 ### Requesting publicKey options (begin)
 

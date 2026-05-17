@@ -472,7 +472,12 @@ class CollectionsService {
       allowedRoles.add(CollectionParticipantRole.collaborator);
       allowedRoles.add(CollectionParticipantRole.admin);
     }
-    final int userID = _config.getUserID()!;
+    final int? userID = _config.getUserID();
+    if (userID == null) {
+      _logger
+          .info("Skipping collections for UI because user ID is unavailable");
+      return <Collection>[];
+    }
     return _collectionIDToCollections.values
         .where(
           (c) =>
@@ -1450,7 +1455,7 @@ class CollectionsService {
       }
       return collections;
     } catch (e, s) {
-      _logger.warning(e, s);
+      _logger.warning("Failed to fetch collections", e, s);
       if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
@@ -1535,7 +1540,8 @@ class CollectionsService {
     Map<String, dynamic> collectionData,
     Uint8List collectionKey,
   ) async {
-    collection.setName(_decryptCollectionNameWithKey(collection, collectionKey));
+    collection
+        .setName(_decryptCollectionNameWithKey(collection, collectionKey));
     if (collectionData['pubMagicMetadata'] != null) {
       final utfEncodedMmd = await CryptoUtil.decryptChaCha(
         CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
@@ -1546,8 +1552,7 @@ class CollectionsService {
       );
       collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
       collection.mMbPubVersion = collectionData['pubMagicMetadata']['version'];
-      collection.pubMagicMetadata =
-          CollectionPubMagicMetadata.fromEncodedJson(
+      collection.pubMagicMetadata = CollectionPubMagicMetadata.fromEncodedJson(
         collection.mMdPubEncodedJson ?? '{}',
       );
     }
@@ -1643,7 +1648,7 @@ class CollectionsService {
       );
       return null;
     } catch (e, s) {
-      _logger.warning(e, s);
+      _logger.warning("Failed to fetch public collection", e, s);
       _logger.severe("Failed to fetch public collection");
       await showGenericErrorDialog(context: context, error: e);
       rethrow;

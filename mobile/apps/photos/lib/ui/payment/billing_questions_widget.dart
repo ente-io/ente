@@ -16,7 +16,7 @@ class BillingQuestionsWidget extends StatelessWidget {
     return FutureBuilder(
       future: NetworkClient.instance
           .getDio()
-          .get("https://static.ente.io/faq.json")
+          .get("https://static.ente.com/faq.json")
           .then((response) {
         final faqItems = <FaqItem>[];
         for (final item in response.data as List) {

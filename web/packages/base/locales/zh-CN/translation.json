@@ -543,6 +543,7 @@
     "password_lock": "密码锁",
     "lock": "锁定",
     "file": "文件",
+    "files": "",
     "folder": "文件夹",
     "google_takeout": "Google takeout",
     "free_up_space": "",

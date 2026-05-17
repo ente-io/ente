@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{アイテムなし} =1{1個のアイテム} other{{count}個のアイテム}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "コレクションを作成",
   "uploadDocumentTooltip": "ドキュメントをアップロード",
   "restore": "復元",
@@ -471,15 +461,6 @@
   "linkDeviceLimit": "デバイスの制限",
   "expiredLinkInfo": "このリンクは期限切れです。新たな期限を設定するか、期限設定そのものを無くすか、選択してください",
   "linkExpiresOn": "リンクは {expiryTime} に期限切れになります",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {誰かと共有しましょう} =1 {1人と共有されています} other {{numberOfPeople} 人と共有されています}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "リンクは期限切れです",
   "publicLinkEnabled": "公開リンクを有効にしました",
   "shareALink": "リンクをシェアする",
@@ -493,28 +474,6 @@
   "add": "追加",
   "collaboratorsCanAddFilesToTheSharedCollection": "共同編集者は共有コレクションにアイテムを追加できます。",
   "enterEmail": "Eメールアドレスを入力してください",
-  "viewersSuccessfullyAdded": "{count, plural, =0{0人の閲覧者を追加しました} =1{1人の閲覧者を追加しました} other{{count}人の閲覧者を追加しました}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {{count}人のコラボレーターを追加} =1 {{count}人のコラボレーターを追加} other {{count}人のコラボレーターを追加}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0{閲覧者を追加} =1{閲覧者を追加} other{閲覧者を追加}}",
-  "addCollaborators": "{count, plural, =0{共同編集者を追加} =1{共同編集者を追加} other{共同編集者を追加}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "表示されているEメールアドレスを長押しして、暗号化を確認します。",
   "sharing": "共有中...",
   "invalidEmailAddress": "無効なEメールアドレス",
@@ -562,16 +521,6 @@
   "viewer": "ビューアー",
   "collaborator": "コラボレーター",
   "collaboratorsCanAddFilesToTheSharedAlbum": "共同編集者は共有コレクションにアイテムを追加できます。",
-  "albumParticipantsCount": "{count, plural, =0 {参加者なし} =1 {1 参加者} other {{count} 参加者}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "さらに追加",
   "you": "あなた",
   "albumOwner": "所有者",
@@ -679,16 +628,6 @@
   "clickHereToUpload": "ここをクリックしてアップロード",
   "saveDocument": "ドキュメントを保存",
   "uploadFiles": "アイテムをアップロード",
-  "filesSelected": "{count, plural, =0{アイテムが選択されていません} =1{1個のアイテムを選択中} other{{count}個のアイテムを選択中}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "コレクションに追加",
   "newCollection": "新しいコレクション",
   "title": "タイトル",
@@ -707,16 +646,6 @@
     }
   },
   "informationCollectionName": "情報",
-  "recordSavedToMultipleCollections": "レコードが{count, plural, =1{1個のコレクション} other{{count}個のコレクション}}に正常に保存されました",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName}がクリップボードにコピーされました",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -724,20 +653,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "「{query}」の検索結果: {count, plural, =1{1件} other{{count}件}}",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -784,49 +699,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1個のコレクション} other{{count}個のコレクション}}が完全に削除されます。",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1個のアイテム} other{{count}個のアイテム}}が完全に削除されます。",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "すべての場所からアイテムも削除",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "はい、{count, plural, =1{コレクション} other{コレクション}}を削除",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "はい、{count, plural, =1{アイテム} other{アイテム}}を削除",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "使用量",
   "important": "重要",
@@ -835,16 +710,6 @@
   "markingAsImportant": "重要としてマーク中...",
   "fileMarkedAsImportant": "アイテムを重要としてマークしました",
   "fileRemovedFromImportant": "アイテムを重要から削除しました",
-  "filesMarkedAsImportant": "{count, plural, =1{1個のアイテムを重要としてマークしました} other{{count}個のアイテムを重要としてマークしました}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "すべてのアイテムは既に重要としてマークされています",
   "failedToMarkFilesAsImportant": "アイテムを重要としてマークできませんでした: {error}",
   "@failedToMarkFilesAsImportant": {

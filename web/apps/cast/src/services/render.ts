@@ -261,8 +261,8 @@ const downloadFile = async (
             });
         } else {
             const url = shouldUseThumbnail
-                ? `https://cast-albums.ente.io/preview/?fileID=${file.id}`
-                : `https://cast-albums.ente.io/download/?fileID=${file.id}`;
+                ? `https://cast-albums.ente.com/preview/?fileID=${file.id}`
+                : `https://cast-albums.ente.com/download/?fileID=${file.id}`;
             return fetch(url, {
                 headers: {
                     ...publicRequestHeaders(),

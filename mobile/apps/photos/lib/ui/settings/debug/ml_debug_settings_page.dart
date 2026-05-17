@@ -14,6 +14,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
+import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -106,10 +107,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                "ML Debug",
-                style: textTheme.h3Bold,
-              ),
+              Text("ML Debug", style: textTheme.h3Bold),
               const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
@@ -374,18 +372,16 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       color = colorScheme.warning500;
     }
 
-    return Text(
-      label,
-      style: textTheme.miniBold.copyWith(color: color),
-    );
+    return Text(label, style: textTheme.miniBold.copyWith(color: color));
   }
 
   Future<({bool clipDone, bool clusterCentroidDone})>
       _getVectorDbMigrationStatus() async {
-    final clipVectorDB =
-        isOfflineMode ? ClipVectorDB.offlineInstance : ClipVectorDB.instance;
-    final clusterCentroidVectorDB = isOfflineMode
-        ? ClusterCentroidVectorDB.offlineInstance
+    final clipVectorDB = isLocalGalleryMode
+        ? ClipVectorDB.localGalleryInstance
+        : ClipVectorDB.instance;
+    final clusterCentroidVectorDB = isLocalGalleryMode
+        ? ClusterCentroidVectorDB.localGalleryInstance
         : ClusterCentroidVectorDB.instance;
     final migrationStatus = await Future.wait<bool>([
       clipVectorDB.checkIfMigrationDone(),
@@ -449,22 +445,13 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: textTheme.smallBold,
-          ),
+          Text(title, style: textTheme.smallBold),
           const SizedBox(height: 4),
-          Text(
-            description,
-            style: textTheme.miniMuted,
-          ),
+          Text(description, style: textTheme.miniMuted),
           const SizedBox(height: 12),
           Row(
             children: [
-              Text(
-                min.toStringAsFixed(2),
-                style: textTheme.mini,
-              ),
+              Text(min.toStringAsFixed(2), style: textTheme.mini),
               Expanded(
                 child: Slider(
                   value: clampedValue,
@@ -476,10 +463,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
                   },
                 ),
               ),
-              Text(
-                max.toStringAsFixed(2),
-                style: textTheme.mini,
-              ),
+              Text(max.toStringAsFixed(2), style: textTheme.mini),
             ],
           ),
           Text(
@@ -495,10 +479,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Save on device",
-                style: textTheme.mini,
-              ),
+              Text("Save on device", style: textTheme.mini),
               ToggleSwitchWidget(
                 value: () => persistValue,
                 onChanged: () async {
@@ -528,9 +509,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
     final rounded = _roundToStep(value);
     PersonService.autoMergeThreshold = rounded;
     if (_persistAutoMergeThreshold) {
-      unawaited(
-        localSettings.setAutoMergeThresholdOverride(rounded),
-      );
+      unawaited(localSettings.setAutoMergeThresholdOverride(rounded));
     }
     setState(() {
       _autoMergeThreshold = rounded;
@@ -550,9 +529,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
     final rounded = _roundToStep(value);
     FaceClusteringService.defaultDistanceThreshold = rounded;
     if (_persistDefaultClusteringDistance) {
-      unawaited(
-        localSettings.setDefaultClusteringDistanceOverride(rounded),
-      );
+      unawaited(localSettings.setDefaultClusteringDistanceOverride(rounded));
     }
     setState(() {
       _defaultClusteringDistance = rounded;
@@ -735,7 +712,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   Future<void> _onRunMLDuringInteractionChanged() async {
     try {
       final enabled = !localSettings.runMLDuringInteractionOverride;
-      await computeController.setMLDebugInteractionOverride(turnOn: enabled);
+      await computeController.setMLInteractionOverride(turnOn: enabled);
       logger.info(
         'run ML during interaction is turned ${enabled ? 'on' : 'off'}',
       );
@@ -756,7 +733,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       // Invalidate cached runtime args so pet model paths are rebuilt
       // with the new toggle state on the next indexing run.
       await MLIndexingIsolate.instance.releaseRustRuntime();
-      MLIndexingIsolate.instance.invalidateModelDownloadCache();
+      MLModelDownloadService.instance.invalidateModelDownloadCache();
       logger.info(
         'Pet recognition is turned ${localSettings.petRecognitionEnabled ? 'on' : 'off'}',
       );
@@ -806,7 +783,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       MLService.instance.debugIndexingDisabled = false;
       unawaited(
         MLService.instance.fetchAndIndexAllImages(
-          mode: isOfflineMode ? MLMode.offline : MLMode.online,
+          mode: isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery,
         ),
       );
       showShortToast(context, "Indexing started");
@@ -852,10 +829,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   }
 
   Future<void> _onShowAllMemoriesDebug(BuildContext context) async {
-    await routeToPage(
-      context,
-      const MemoriesDebugPage(),
-    );
+    await routeToPage(context, const MemoriesDebugPage());
   }
 
   Future<void> _onSyncPersonMappings(BuildContext context) async {
@@ -984,8 +958,8 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       firstButtonLabel: "Yes, confirm",
       firstButtonOnTap: () async {
         try {
-          final vectorDB = isOfflineMode
-              ? ClipVectorDB.offlineInstance
+          final vectorDB = isLocalGalleryMode
+              ? ClipVectorDB.localGalleryInstance
               : ClipVectorDB.instance;
           await vectorDB.deleteIndexFile();
           showShortToast(context, "Done");

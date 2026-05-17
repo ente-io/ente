@@ -21,7 +21,7 @@
     <string>APPL</string>
 
     <key>CFBundleShortVersionString</key>
-    <string>0.1.15</string>
+    <string>0.1.16</string>
 
     <key>CFBundleVersion</key>
     <string>31</string>
@@ -56,6 +56,9 @@
 
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Allow access to select photos and images to attach to chat messages.</string>
+
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Allow microphone access to transcribe spoken chat drafts.</string>
 
     <key>UISupportedInterfaceOrientations</key>
     <array>

@@ -211,16 +211,6 @@
   "after1Month": "אחרי חודש 1",
   "after1Year": "אחרי שנה 1",
   "manageParticipants": "נהל",
-  "albumParticipantsCount": "{count, plural, =0 {אין משתתפים} =1 {1 משתתף} two {2 משתתפים} other {{count} משתתפים}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "צור קישור על מנת לאפשר לאנשים להוסיף ולצפות בתמונות באלבום ששיתפת בלי צורך באפליקציית ente או חשבון. נהדר לאיסוף תמונות של אירועים.",
   "collectPhotos": "אסוף תמונות",
   "collaborativeLink": "קישור לשיתוף פעולה",
@@ -232,15 +222,6 @@
   "publicLinkEnabled": "לינק ציבורי אופשר",
   "shareALink": "שתף קישור",
   "sharedAlbumSectionDescription": "צור אלבומים הניתנים לשיתוף ושיתוף פעולה עם משתמשי ente אחרים, כולל משתמשים בתוכניות החינמיות.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {שתף עם אנשים ספציפיים} =1 {שותף עם איש 1} two {שותף עם 2 אנשים} other {שותף עם {numberOfPeople} אנשים}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "זה מזהה האימות שלך",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "מי שמשתף איתך אלבומים יוכל לראות את אותו המזהה במכשיר שלהם.",
   "howToViewShareeVerificationID": "אנא בקש מהם ללחוץ לחיצה ארוכה על הכתובת אימייל שלהם בעמוד ההגדרות, וודא שהמזההים בשני המכשירים תואמים.",
@@ -379,7 +360,6 @@
   "skip": "דלג",
   "updatingFolderSelection": "מעדכן את בחירת התיקיות...",
   "itemCount": "{count, plural, one{{count} פריט} two {{count} פריטים} many {{count} פריטים} other{{count} פריטים}}",
-  "deleteItemCount": "{count, plural, =1 {מחק {count} פריט} two {מחק {count} פריטים} other {מחק {count} פריטים}}",
   "duplicateItemsGroup": "{count} קבצים, כל אחד {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -548,7 +528,16 @@
   "appleId": "Apple ID",
   "playstoreSubscription": "מנוי PlayStore",
   "appstoreSubscription": "מנוי AppStore",
-  "visitWebToManage": "אנא בקר ב-web.ente.io על מנת לנהל את המנוי שלך",
+  "visitWebToManage": "אנא בקר ב-{webUrl} על מנת לנהל את המנוי שלך",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "לא ניתן לעדכן את המנוי",
   "paymentFailed": "התשלום נכשל",
   "paymentFailedTalkToProvider": "אנא דבר עם התמיכה של {providerName} אם אתה חוייבת",

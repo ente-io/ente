@@ -39,7 +39,7 @@ works on Windows, Linux and macOS.
 
 ### Web
 
-You can view your 2FA codes at [auth.ente.io](https://auth.ente.io). For adding
+You can view your 2FA codes at [auth.ente.com](https://auth.ente.com). For adding
 or managing your secrets, please use our mobile or desktop app.
 
 ## 🧑‍💻 Build from source

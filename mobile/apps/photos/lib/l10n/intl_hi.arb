@@ -25,6 +25,7 @@
   "entePhotosPerm": "Ente को आपकी तस्वीरों को संरक्षित करने के लिए <i>अनुमति की आवश्यकता है</i>",
   "ok": "ठीक है",
   "createAccount": "अकाउंट बनायें",
+  "createAccountTitle": "एक अकाउंट बनाएँ",
   "createNewAccount": "नया अकाउंट बनाएँ",
   "password": "पासवर्ड",
   "confirmPassword": "पासवर्ड की पुष्टि करें",

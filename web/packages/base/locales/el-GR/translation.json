@@ -543,6 +543,7 @@
     "password_lock": "Κλείδωμα κωδικού πρόσβασης",
     "lock": "Κλείδωμα",
     "file": "Αρχείο",
+    "files": "",
     "folder": "Φάκελος",
     "google_takeout": "Εξαγωγή από Google",
     "free_up_space": "",

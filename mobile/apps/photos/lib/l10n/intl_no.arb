@@ -218,16 +218,6 @@
   "after1Month": "Etter 1 måned",
   "after1Year": "Etter 1 år",
   "manageParticipants": "Administrer",
-  "albumParticipantsCount": "{count, plural, =0 {Ingen deltakere} =1 {1 deltaker} other {{count} deltakere}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Opprett en lenke slik at folk kan legge til og se bilder i det delte albumet ditt uten å trenge Ente-appen eller en konto. Perfekt for å samle bilder fra arrangementer.",
   "collectPhotos": "Samle bilder",
   "collaborativeLink": "Samarbeidslenke",
@@ -239,15 +229,6 @@
   "publicLinkEnabled": "Offentlig lenke aktivert",
   "shareALink": "Del en lenke",
   "sharedAlbumSectionDescription": "Opprett delte album du kan samarbeide om med andre Ente-brukere, inkludert brukere med gratisabonnement.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Del med bestemte personer} =1 {Delt med 1 person} other {Delt med {numberOfPeople} personer}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Dette er din bekreftelses-ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Folk som deler album med deg bør se den samme ID-en på deres enhet.",
   "howToViewShareeVerificationID": "Vennligst be dem om å trykke og holde inne på e-postadressen sin på innstillingsskjermen, og bekreft at ID-ene på begge enhetene er like.",
@@ -446,7 +427,6 @@
   "skip": "Hopp over",
   "updatingFolderSelection": "Oppdaterer mappevalg...",
   "itemCount": "{count, plural, one{{count} element} other{{count} elementer}}",
-  "deleteItemCount": "{count, plural, =1 {Slett {count} element} other {Slett {count} elementer}}",
   "duplicateItemsGroup": "{count} filer, {formattedSize} hver",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -645,7 +625,16 @@
   "playstoreSubscription": "PlayStore abonnement",
   "appstoreSubscription": "AppStore subscription",
   "subAlreadyLinkedErrMessage": "Din {id} er allerede koblet til en annen Ente-konto.\nHvis du ønsker å bruke din {id} med denne kontoen, vennligst kontakt vår brukerstøtte''",
-  "visitWebToManage": "Vennligst besøk web.ente.io for å administrere abonnementet",
+  "visitWebToManage": "Vennligst besøk {webUrl} for å administrere abonnementet",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "Kunne ikke oppdatere abonnement",
   "paymentFailed": "Betaling feilet",
   "paymentFailedTalkToProvider": "Snakk med {providerName} kundestøtte hvis du ble belastet",
@@ -762,14 +751,6 @@
   "share": "Del",
   "unhideToAlbum": "Gjør synlig i album",
   "restoreToAlbum": "Gjenopprett til album",
-  "moveItem": "{count, plural, =1 {Flytt elementet} other {Flytt elementene}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {Legg til element} other {Legg til elementene}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Opprett eller velg album",
   "selectAlbum": "Velg album",
   "searchByAlbumNameHint": "Albumnavn",
@@ -794,16 +775,6 @@
   "referFriendsAnd2xYourPlan": "Verv venner og doble abonnementet ditt",
   "shareAlbumHint": "Åpne et album og trykk på del-knappen øverst til høyre for å dele.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementer viser gjenværende dager før de slettes for godt",
-  "trashDaysLeft": "{count, plural, =0 {Snart} =1 {1 dag} other {{count} dager}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Slett alt",
   "renameAlbum": "Gi album nytt navn",
   "convertToAlbum": "Gjør om til album",
@@ -867,7 +838,6 @@
   "authToViewYourMemories": "Vennligst autentiser deg for å se minnene dine",
   "unlock": "Lås opp",
   "freeUpSpace": "Frigjør lagringsplass",
-  "freeUpSpaceSaving": "{count, plural, =1 {Det kan slettes fra enheten for å frigi {formattedSize}} other {De kan slettes fra enheten for å frigjøre {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fil} other {{formattedNumber} filer}} I dette albumet har blitt sikkerhetskopiert",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -895,18 +865,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Du kan fortsatt få tilgang til {count, plural, =1 {det} other {dem}} på Ente så lenge du har et aktivt abonnement",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1004,7 +962,16 @@
   "loadMessage5": "Vår kildekode og kryptografi har blitt revidert eksternt",
   "loadMessage6": "Du kan dele lenker til dine album med dine kjære",
   "loadMessage7": "Våre mobilapper kjører i bakgrunnen for å kryptere og sikkerhetskopiere de nye bildene du klikker",
-  "loadMessage8": "web.ente.io har en flott opplaster",
+  "loadMessage8": "{webUrl} har en flott opplaster",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Vi bruker Xcha20Poly1305 for å trygt kryptere dataene dine",
   "photoDescriptions": "Bildebeskrivelser",
   "fileTypesAndNames": "Filtyper og navn",
@@ -1220,7 +1187,16 @@
   "playOnTv": "Spill av album på TV",
   "pair": "Par",
   "deviceNotFound": "Enhet ikke funnet",
-  "castInstruction": "Besøk cast.ente.io på enheten du vil parre.\n\nSkriv inn koden under for å spille albumet på TV-en din.",
+  "castInstruction": "Besøk {castUrl} på enheten du vil parre.\n\nSkriv inn koden under for å spille albumet på TV-en din.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Skriv inn koden",
   "joinDiscord": "Bli med i Discord",
   "locations": "Plasseringer",
@@ -1230,8 +1206,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Finn folk raskt med navn",
-  "addViewers": "{count, plural, =0 {Legg til seer} =1 {Legg til seer} other {Legg til seere}}",
-  "addCollaborators": "{count, plural, =0 {Legg til samarbeidspartner} =1 {Legg til samarbeidspartner} other {Legg til samarbeidspartnere}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Trykk og hold på en e-post for å bekrefte ende-til-ende-kryptering.",
   "developerSettingsWarning": "Er du sikker på at du vil endre utviklerinnstillingene?",
   "developerSettings": "Utviklerinnstillinger",
@@ -1361,26 +1335,6 @@
   "enableMachineLearningBanner": "Aktiver maskinlæring for magisk søk og ansiktsgjenkjenning",
   "searchDiscoverEmptySection": "Bilder vil vises her når behandlingen og synkronisering er fullført",
   "searchPersonsEmptySection": "Folk vil vises her når behandling og synkronisering er fullført",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {La til 0 tilskuere} =1 {La til 1 tilskuer} other {La til {count} tilskuer}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {La til 0 samarbeidspartner} =1 {La til 1 samarbeidspartner} other {Lagt til {count} samarbeidspartnere}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "Kontoen er allerede konfigurert.",
   "sessionIdMismatch": "Økt-ID stemmer ikke",
   "@sessionIdMismatch": {
@@ -1446,15 +1400,6 @@
   },
   "currentlyRunning": "Kjører for øyeblikket",
   "ignored": "ignorert",
-  "photosCount": "{count, plural, =0 {0 bilder} =1 {1 bilde} other {{count} bilder}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Fil",
   "searchSectionsLengthMismatch": "Uoverensstemmelse i seksjonslengde: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1642,21 +1587,11 @@
   "moveSelectedPhotosToOneDate": "Flytt valgte bilder til en dato",
   "shiftDatesAndTime": "Forskyv datoer og klokkeslett",
   "photosKeepRelativeTimeDifference": "Bilder holder relativ tidsforskjell",
-  "photocountPhotos": "{count, plural, =0 {Ingen bilder} =1 {1 bilde} other {{count} bilder}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "App-ikon",
   "notThisPerson": "Ikke denne personen?",
   "selectedItemsWillBeRemovedFromThisPerson": "Valgte elementer fjernes fra denne personen, men blir ikke slettet fra biblioteket ditt.",
   "throughTheYears": "{dateFormat} gjennom årene",
   "thisWeekThroughTheYears": "Denne uka gjennom årene",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Denne uka, {count} år siden} other {Denne uka, {count} år siden}}",
   "youAndThem": "Du og {name}",
   "admiringThem": "Beundrer {name}",
   "embracingThem": "Omfavner {name}",
@@ -1672,7 +1607,6 @@
   "spotlightOnThem": "Fremhev {name}",
   "personIsAge": "{name} er {age}!",
   "personTurningAge": "{name} fyller {age} snart",
-  "lastTimeWithThem": "Siste gang med {name}",
   "tripToLocation": "Reise til {location}",
   "tripInYear": "Reise i {year}",
   "lastYearsTrip": "Fjorårets tur",

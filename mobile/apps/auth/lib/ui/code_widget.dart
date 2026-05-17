@@ -601,7 +601,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   ) {
     if (widget.code.isTrashed) return;
 
-    if (widget.code.type.isTOTPCompatible) {
+    if (widget.code.type.canShareCodes) {
       entries.add(
         MenuItem(
           label: l10n.share,
@@ -949,6 +949,9 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onSharePressed([bool? pop]) async {
+    if (!widget.code.type.canShareCodes) {
+      return;
+    }
     if (mounted && pop == true) {
       Navigator.of(context).pop();
     }

@@ -42,6 +42,9 @@ dictionary Message {
 };
 
 namespace db {
+  [Throws=DbError]
+  sequence<u8> compress_attachment_image(sequence<u8> data);
+
   interface EnsuDb {
     [Constructor, Throws=DbError]
     EnsuDb(string main_db_path, string attachments_db_path, sequence<u8> key);

@@ -284,14 +284,14 @@ export interface PublicURL {
      * A URL that can be used access the shared collection.
      *
      * This will be of the form "https://<public-albums-app>/?t=<token>", e.g.,
-     * "https://albums.ente.io/?t=xxxxxx".
+     * "https://albums.ente.com/?t=xxxxxx".
      *
      * In particular, this URL does not contain the URL fragment (the part after
      * the "#"). URL fragments are client side only, and not sent to remote.
      * They contain the decryption key.
      *
      * The client can use this field to form the fully usable URL (e.g.
-     * "https://albums.ente.io/?t=xxxxxx#yyy...yyy") and provide it to the user
+     * "https://albums.ente.com/?t=xxxxxx#yyy...yyy") and provide it to the user
      * for sharing.
      */
     url: string;

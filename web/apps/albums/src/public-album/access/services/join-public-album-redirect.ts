@@ -1,5 +1,5 @@
 import type { PublicAlbumsCredentials } from "ente-base/http";
-import { albumsAppOrigin, photosAppOrigin } from "ente-base/origins";
+import { photosAppOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import type { RefObject } from "react";
 
@@ -104,8 +104,9 @@ export const joinPublicAlbumViaRedirect = ({
     };
 
     if (navigator.userAgent.includes("Android")) {
-        const albumsHost = new URL(albumsAppOrigin()).host;
-        const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
+        // Older Android clients only recognize albums.ente.io in ente://
+        // public-album join links. Newer ones also support albums.ente.com.
+        const deepLinkURL = `ente://albums.ente.io/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
         tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb);
     } else {

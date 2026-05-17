@@ -86,14 +86,20 @@ automatically.
 - **Automatic daily backups:** When enabled, Ente Auth creates one local backup
   per day when you open the app.
 - **Password-protected:** All local backups are encrypted with a password you
-  set. This password is stored securely on your device.
+  set. Keep this password safe, because Ente cannot recover it for you.
 - **Custom backup location:** Choose where to store your backups on your device.
 - **Backup retention:** The app keeps up to 5 most recent backups and
   automatically removes older ones.
 
+If you use Ente Auth in offline mode, encrypted exports and local backups are
+the supported recovery path. Device transfers and OS backups should not be
+treated as a backup for offline codes. Store the backup or export file in a
+separate location you can access after a reset or device change. Learn more
+about [using offline mode safely](/auth/features/offline-mode).
+
 **Setting up local backups:**
 
-1. Go to **Settings → Data → Local backup**.
+1. Open `Settings > Data > Local backup`.
 2. Enable **Automatic backups**.
 3. Set a backup password (minimum 8 characters).
 4. Select a folder where backups will be stored.

@@ -6,7 +6,7 @@ class ClipMemoriesCalculator {
     DateTime currentTime,
     List<ClipShownLog> shownClip, {
     bool surfaceAll = false,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required Map<int, int> seenTimes,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Map<ClipMemoryType, Vector> clipMemoryTypeVectors,
@@ -29,14 +29,12 @@ class ClipMemoriesCalculator {
       for (final entry in fileIDToImageEmbedding.entries) {
         similarities[entry.key] = entry.value.vector.dot(activityVector);
       }
-      w?.log(
-        'comparing embeddings for clipMemoryType $clipMemoryType',
-      );
+      w?.log('comparing embeddings for clipMemoryType $clipMemoryType');
       final List<EnteFile> clipFiles = [];
       for (final file in allFiles) {
         final memoryFileID = SmartMemoriesService._memoryFileId(
           file,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
         );
         if (memoryFileID == null) continue;
         final similarity = similarities[memoryFileID];
@@ -49,11 +47,11 @@ class ClipMemoriesCalculator {
       clipFiles.sort((a, b) {
         final int bFileID = SmartMemoriesService._memoryFileId(
           b,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
         )!;
         final int aFileID = SmartMemoriesService._memoryFileId(
           a,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
         )!;
         return similarities[bFileID]!.compareTo(similarities[aFileID]!);
       });
@@ -68,7 +66,7 @@ class ClipMemoriesCalculator {
         if (selected.length >= 10) break;
         final fileID = SmartMemoriesService._memoryFileId(
           file,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
         );
         if (fileID == null) continue;
         final creationTime = file.creationTime;
@@ -97,11 +95,11 @@ class ClipMemoriesCalculator {
       selected.sort((a, b) {
         final int bFileID = SmartMemoriesService._memoryFileId(
           b,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
         )!;
         final int aFileID = SmartMemoriesService._memoryFileId(
           a,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
         )!;
         return similarities[bFileID]!.compareTo(similarities[aFileID]!);
       });
@@ -129,8 +127,9 @@ class ClipMemoriesCalculator {
     for (final clipMemoryType in rotationOrder) {
       for (final shownLog in shownClip) {
         if (shownLog.clipMemoryType != clipMemoryType) continue;
-        final shownDate =
-            DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
+        final shownDate = DateTime.fromMicrosecondsSinceEpoch(
+          shownLog.lastTimeShown,
+        );
         final bool seenRecently =
             currentTime.difference(shownDate) < kClipShowTimeout;
         if (seenRecently) continue clipMemoriesLoop;

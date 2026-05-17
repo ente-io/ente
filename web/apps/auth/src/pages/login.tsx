@@ -45,7 +45,7 @@ const Page: React.FC = () => {
     const onSignUp = useCallback(() => void router.push("/signup"), [router]);
 
     const handleBackgroundClick: React.MouseEventHandler = (event) => {
-        // Don't allow this when running on (e.g.) web.ente.io.
+        // Don't allow this when running on (e.g.) auth.ente.com.
         if (!shouldAllowChangingAPIOrigin()) return;
 
         // Only count clicks directly on the background
@@ -116,5 +116,9 @@ export default Page;
  */
 const shouldAllowChangingAPIOrigin = () => {
     const hostname = new URL(window.location.origin).hostname;
-    return !(hostname.endsWith(".ente.io") || hostname.endsWith(".ente.sh"));
+    return !(
+        hostname.endsWith(".ente.com") ||
+        hostname.endsWith(".ente.io") ||
+        hostname.endsWith(".ente.sh")
+    );
 };

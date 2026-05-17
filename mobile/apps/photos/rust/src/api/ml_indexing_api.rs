@@ -1,4 +1,5 @@
-use ente_media_inspector::ml::{
+use ente_photos::ml::{
+    error::MlError as SharedMlError,
     indexing as shared_indexing,
     runtime::{ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
     types as shared_types,
@@ -52,6 +53,16 @@ pub struct AnalyzeImageRequest {
     pub run_pets: bool,
     pub model_paths: RustModelPaths,
     pub provider_policy: RustExecutionProviderPolicy,
+}
+
+#[derive(Clone, Debug)]
+pub enum RustMlError {
+    InvalidRequest(String),
+    Decode(String),
+    Preprocess(String),
+    Ort(String),
+    Postprocess(String),
+    Runtime(String),
 }
 
 #[derive(Clone, Debug)]
@@ -155,7 +166,7 @@ pub fn release_ml_runtime() -> Result<(), String> {
     shared_indexing::release_ml_runtime().map_err(|e| e.to_string())
 }
 
-pub fn analyze_image_rust(req: AnalyzeImageRequest) -> Result<AnalyzeImageResult, String> {
+pub fn analyze_image_rust(req: AnalyzeImageRequest) -> Result<AnalyzeImageResult, RustMlError> {
     let shared_req = shared_indexing::AnalyzeImageRequest {
         file_id: req.file_id,
         image_path: req.image_path,
@@ -170,7 +181,7 @@ pub fn analyze_image_rust(req: AnalyzeImageRequest) -> Result<AnalyzeImageResult
 
     shared_indexing::analyze_image(shared_req)
         .map(to_api_analyze_image_result)
-        .map_err(|e| e.to_string())
+        .map_err(RustMlError::from)
 }
 
 pub fn run_clip_text_rust(req: RunClipTextRequest) -> Result<RunClipTextResult, String> {
@@ -224,6 +235,19 @@ fn to_provider_policy(policy: &RustExecutionProviderPolicy) -> ExecutionProvider
         prefer_nnapi: policy.prefer_nnapi,
         prefer_xnnpack: policy.prefer_xnnpack,
         allow_cpu_fallback: policy.allow_cpu_fallback,
+    }
+}
+
+impl From<SharedMlError> for RustMlError {
+    fn from(value: SharedMlError) -> Self {
+        match value {
+            SharedMlError::InvalidRequest(message) => RustMlError::InvalidRequest(message),
+            SharedMlError::Decode(message) => RustMlError::Decode(message),
+            SharedMlError::Preprocess(message) => RustMlError::Preprocess(message),
+            SharedMlError::Ort(message) => RustMlError::Ort(message),
+            SharedMlError::Postprocess(message) => RustMlError::Postprocess(message),
+            SharedMlError::Runtime(message) => RustMlError::Runtime(message),
+        }
     }
 }
 

@@ -106,17 +106,14 @@ jobs:
                   echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
                   echo "EOF" >> $GITHUB_ENV
 
-            - name: Setup keys
-              uses: timheuer/base64-to-file@v1
-              with:
-                  fileName: "keystore/ente_locker_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY_LOCKER }}
+            - name: Add keystore
+              run: echo "${{ secrets.SIGNING_KEY_LOCKER }}" | base64 -d > "$RUNNER_TEMP/ente_locker_key.jks"
 
             - name: Build PlayStore AAB
               run: |
                   flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_locker_key.jks"
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_locker_key.jks
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}
                   SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_LOCKER }}
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_LOCKER }}
@@ -124,7 +121,7 @@ jobs:
             - name: Upload AAB to PlayStore
               uses: r0adkll/upload-google-play@v1
               with:
-                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_LOCKER }}
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.locker
                   releaseFiles: mobile/apps/locker/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal

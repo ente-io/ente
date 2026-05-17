@@ -18,6 +18,23 @@ enum MLModels {
   petBodyEmbeddingCat,
 }
 
+Iterable<MLModels> get petIndexingModels => const <MLModels>[
+      MLModels.petFaceDetection,
+      MLModels.petFaceEmbeddingDog,
+      MLModels.petFaceEmbeddingCat,
+      MLModels.petBodyDetection,
+      MLModels.petBodyEmbeddingDog,
+      MLModels.petBodyEmbeddingCat,
+    ];
+
+Iterable<MLModels> get coreIndexingModels => MLModels.values.where(
+      (model) => model.isIndexingModel && !model.isPetIndexingModel,
+    );
+
+Iterable<MLModels> get nonIndexingModels => MLModels.values.where(
+      (model) => !model.isIndexingModel,
+    );
+
 extension MLModelsExtension on MLModels {
   MlModel get model {
     switch (this) {
@@ -60,4 +77,6 @@ extension MLModelsExtension on MLModels {
         return false;
     }
   }
+
+  bool get isPetIndexingModel => petIndexingModels.contains(this);
 }

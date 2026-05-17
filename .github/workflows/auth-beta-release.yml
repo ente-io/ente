@@ -141,11 +141,8 @@ jobs:
                   echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
                   echo "EOF" >> $GITHUB_ENV
 
-            - name: Setup keys
-              uses: timheuer/base64-to-file@v1
-              with:
-                  fileName: "keystore/ente_auth_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY }}
+            - name: Add keystore
+              run: echo "${{ secrets.SIGNING_KEY_AUTH }}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
 
             - name: Create artifacts directory
               run: mkdir artifacts
@@ -155,19 +152,19 @@ jobs:
                   flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
                   mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta.apk
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_auth_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_AUTH }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_AUTH }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_AUTH }}
 
             - name: Build PlayStore AAB
               run: |
                   flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore --dart-define=cronetHttpNoPlay=true
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_auth_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_AUTH }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_AUTH }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_AUTH }}
 
             - name: Install dependencies for desktop build
               run: |
@@ -240,7 +237,6 @@ jobs:
 
     build-windows:
         runs-on: windows-latest
-        environment: "auth-win-build"
         needs: build-android-linux
 
         defaults:

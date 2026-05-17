@@ -104,7 +104,7 @@ struct NetworkConfiguration {
     let apiEndpoint: URL
 
     static var `default`: NetworkConfiguration {
-        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.io")!)
+        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.com")!)
     }
 }
 
@@ -183,6 +183,10 @@ final class InferenceRsProvider {
     func isModelDownloaded(target: InferenceModelTarget) -> Bool {
         _ = target
         return true
+    }
+
+    func prewarmImageInference(target: InferenceModelTarget) async {
+        _ = target
     }
 
     func estimatedDownloadSize(target: InferenceModelTarget) async -> Int64? {
@@ -456,8 +460,11 @@ final class ChatViewModel: ObservableObject {
     @Published var syncErrorMessage: String?
     @Published var syncSuccessMessage: String?
     @Published var generationErrorMessage: String?
+    @Published var voiceInputState: VoiceInputState = .initial
+    @Published var draftCursorMoveToken = UUID()
 
     private let provider: InferenceRsProvider
+    private let voiceTranscriber: VoiceTranscriptionService
     private var chatDb: EnsuDb
     private var syncEngine: EnsuSync
     private let attachmentsDir: URL
@@ -489,6 +496,7 @@ final class ChatViewModel: ObservableObject {
     private var generationTask: Task<Void, Never>?
     private var modelDownloadTask: Task<Void, Never>?
     private var downloadProgressMonitorTask: Task<Void, Never>?
+    private var voiceTransientErrorTask: Task<Void, Never>?
     private var sharedModelReadyTask: Task<Void, Error>?
     private var sharedModelReadyTaskId: UUID?
     private var sharedModelReadyKey: ModelReadyKey?
@@ -518,6 +526,7 @@ final class ChatViewModel: ObservableObject {
         // LLM model files.
         let llmDir = baseDir.appendingPathComponent("llm", isDirectory: true)
         let provider = InferenceRsProvider(modelDir: llmDir)
+        let voiceTranscriber = VoiceTranscriptionService(baseDir: baseDir)
 
         // Chat DB + attachments.
         let dbDir = baseDir.appendingPathComponent("llmchat", isDirectory: true)
@@ -562,6 +571,7 @@ final class ChatViewModel: ObservableObject {
 
         // Stored properties.
         self.provider = provider
+        self.voiceTranscriber = voiceTranscriber
         self.chatDb = chatDb
         self.syncEngine = syncEngine
         self.attachmentsDir = attachmentsDir
@@ -777,6 +787,7 @@ final class ChatViewModel: ObservableObject {
 
     func startNewSession() {
         resetGenerationState()
+        cancelVoiceInput()
         draftText = ""
         draftAttachments = []
         editingMessageId = nil
@@ -788,6 +799,7 @@ final class ChatViewModel: ObservableObject {
 
     func selectSession(_ session: ChatSession) {
         resetGenerationState()
+        cancelVoiceInput()
         currentSessionId = session.id
         messages = []
         loadMessagesFromDb(for: session.id)
@@ -1006,6 +1018,72 @@ final class ChatViewModel: ObservableObject {
         draftAttachments = []
     }
 
+    func toggleVoiceInput() {
+        if voiceInputState.isRecording {
+            voiceTranscriber.stopAndTranscribe(
+                onState: { [weak self] state in
+                    self?.setVoiceInputState(state)
+                },
+                onTranscript: { [weak self] transcript in
+                    self?.appendVoiceTranscript(transcript)
+                }
+            )
+            return
+        }
+
+        guard !isGenerating,
+              !isDownloading,
+              !isAttachmentDownloadBlocked,
+              editingMessageId == nil else {
+            return
+        }
+
+        voiceTranscriber.startRecording { [weak self] state in
+            self?.setVoiceInputState(state)
+        }
+    }
+
+    func cancelVoiceInput() {
+        voiceTransientErrorTask?.cancel()
+        voiceTransientErrorTask = nil
+        voiceTranscriber.cancel()
+        if voiceInputState != .unsupported {
+            voiceInputState = .idle
+        }
+    }
+
+    private func setVoiceInputState(_ state: VoiceInputState) {
+        voiceTransientErrorTask?.cancel()
+        voiceTransientErrorTask = nil
+        voiceInputState = state
+
+        guard state.isNoSpeechError else { return }
+        voiceTransientErrorTask = Task { @MainActor in
+            do {
+                try await Task.sleep(nanoseconds: 10_000_000_000)
+            } catch {
+                return
+            }
+            if self.voiceInputState == state {
+                self.voiceInputState = .idle
+            }
+            self.voiceTransientErrorTask = nil
+        }
+    }
+
+    private func appendVoiceTranscript(_ transcript: String) {
+        let cleaned = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else { return }
+
+        let trimmedDraft = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedDraft.isEmpty {
+            draftText = cleaned
+        } else {
+            draftText = "\(trimmedDraft) \(cleaned)"
+        }
+        draftCursorMoveToken = UUID()
+    }
+
     func addImageAttachment(data: Data, fileName: String?) {
         guard !isGenerating && !isDownloading && !isAttachmentDownloadBlocked else { return }
         isProcessingAttachments = true
@@ -1014,11 +1092,12 @@ final class ChatViewModel: ObservableObject {
             guard let self else { return }
             do {
                 let id = UUID()
-                let url = try self.writeAttachment(data: data, attachmentId: id)
+                let compressed = try compressAttachmentImage(data: data)
+                let url = try self.writeAttachment(data: compressed, attachmentId: id)
                 let attachment = ChatAttachment(
                     id: id,
-                    name: fileName ?? "photo.jpg",
-                    size: Int64(data.count),
+                    name: self.normalizedJpegAttachmentName(fileName),
+                    size: Int64(compressed.count),
                     kind: .image,
                     url: url,
                     isUploading: false
@@ -1026,11 +1105,36 @@ final class ChatViewModel: ObservableObject {
                 await MainActor.run {
                     self.draftAttachments.append(attachment)
                     self.isProcessingAttachments = false
+                    self.prewarmImageInferenceIfDownloaded()
                 }
             } catch {
                 await MainActor.run { self.isProcessingAttachments = false }
             }
         }
+    }
+
+    private func prewarmImageInferenceIfDownloaded() {
+        guard !isGenerating && !isDownloading else { return }
+        let target = modelSettings.currentTarget()
+        guard provider.isModelDownloaded(target: target) else { return }
+
+        Task { [weak self] in
+            guard let self else { return }
+            await self.provider.prewarmImageInference(target: target)
+        }
+    }
+
+    private nonisolated func normalizedJpegAttachmentName(_ fileName: String?) -> String {
+        let raw = fileName?
+            .replacingOccurrences(of: "\0", with: "")
+            .replacingOccurrences(of: "\\", with: "/")
+            .split(separator: "/")
+            .last
+            .map(String.init)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleaned = raw?.isEmpty == false ? raw! : "photo"
+        let base = (cleaned as NSString).deletingPathExtension
+        return "\(base.isEmpty ? "photo" : base).jpg"
     }
 
     func addDocumentAttachment(url: URL) {
