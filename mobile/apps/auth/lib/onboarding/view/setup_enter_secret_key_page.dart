@@ -163,7 +163,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
 
   bool _isYandexIssuer(String issuer) {
     final String lower = issuer.trim().toLowerCase();
-    return lower == 'yandex' || lower.contains('yandex');
+    return lower == 'yandex';
   }
 
   void _applyYandexDefaults() {
