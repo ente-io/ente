@@ -342,9 +342,6 @@ class Code {
 
   static Type _getType(Uri uri) {
     if (uri.host == "totp") {
-      if (uri.queryParameters.containsKey("pin")) {
-        return Type.yandex;
-      }
       return Type.totp;
     } else if (uri.host == "yandex") {
       return Type.yandex;

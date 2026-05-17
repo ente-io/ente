@@ -129,8 +129,7 @@ otp.Algorithm _getAlgorithm(Code code) {
 }
 
 bool _isYandexCode(Code code) {
-  return code.type == Type.yandex ||
-      (code.type == Type.totp && code.pin != null && code.pin!.isNotEmpty);
+  return code.type == Type.yandex;
 }
 
 String _requireYandexPin(Code code) {

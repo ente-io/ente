@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:base32/base32.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/models/code_display.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:base32/base32.dart';
 import 'package:pointycastle/export.dart';
 
 void main() {
@@ -50,6 +50,16 @@ void main() {
     expect(code.type, Type.yandex);
     expect(code.pin, "1234");
     expect(code.digits, Code.yandexDigits);
+  });
+
+  test("parseTotpWithPinDoesNotBecomeYandex", () {
+    final code = Code.fromOTPAuthUrl(
+      "otpauth://totp/test@ente.io?secret=ASKZNWOU6SVYAMVS&issuer=GitHub&digits=6&period=30&pin=1234",
+    );
+    expect(code.type, Type.totp);
+    expect(code.pin, "1234");
+    expect(code.digits, 6);
+    expect(code.period, 30);
   });
 
   test("validateDisplay", () {
