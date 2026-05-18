@@ -161,12 +161,19 @@ fn rust_root() -> Result<PathBuf, DynError> {
         .ok_or_else(|| "failed to resolve rust workspace root".into())
 }
 
+fn target_dir() -> Result<PathBuf, DynError> {
+    Ok(rust_root()?.join("target"))
+}
+
 fn build_host_library(crate_dir: &Path) -> Result<(), DynError> {
+    let target_dir = target_dir()?;
     run_command(
         Command::new("cargo")
             .arg("build")
             .arg("--locked")
             .arg("--release")
+            .arg("--target-dir")
+            .arg(target_dir)
             .current_dir(crate_dir),
         format!("failed to build {}", crate_dir.display()),
     )
@@ -205,7 +212,7 @@ fn generate_bindings(
     out_dir: &Path,
     uniffi_crate: &UniffiCrate<'_>,
 ) -> Result<(), DynError> {
-    let source = uniffi_crate.crate_dir.join("target/release").join(format!(
+    let source = target_dir()?.join("release").join(format!(
         "{}{}{}",
         env::consts::DLL_PREFIX,
         uniffi_crate.crate_name,

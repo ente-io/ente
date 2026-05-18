@@ -20,6 +20,7 @@ set -euo pipefail
 REPO_ROOT=$(cd "$SRCROOT/../../../../.." && pwd)
 GENERATED_DIR="$SRCROOT/Ensu/Generated"
 OUT_DIR="$TARGET_TEMP_DIR/ensu_rust"
+TARGET_DIR="$REPO_ROOT/rust/target"
 mkdir -p "$GENERATED_DIR" "$OUT_DIR"
 
 # Xcode's build-phase PATH omits Homebrew and rustup's install dir.
@@ -109,9 +110,9 @@ build_crate() {
             rustflags+=" -C link-arg=$min_flag=$IPHONEOS_DEPLOYMENT_TARGET"
         fi
 
-        (cd "$crate_dir" && RUSTFLAGS="$rustflags" cargo rustc "${cargo_flags[@]}" --target "$target" --lib --crate-type staticlib)
+        (cd "$crate_dir" && RUSTFLAGS="$rustflags" CARGO_TARGET_DIR="$TARGET_DIR" cargo rustc "${cargo_flags[@]}" --target "$target" --lib --crate-type staticlib)
 
-        local built="$crate_dir/target/$target/$profile/$lib"
+        local built="$TARGET_DIR/$target/$profile/$lib"
         [[ -f "$built" ]] || { echo "error: expected $built" >&2; exit 1; }
 
         local arch_lib="$OUT_DIR/${lib%.a}_${arch}.a"

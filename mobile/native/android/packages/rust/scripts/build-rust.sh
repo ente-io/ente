@@ -15,6 +15,7 @@
 set -euo pipefail
 
 REPO_ROOT=$(cd "$(dirname "$0")/../../../../../.." && pwd)
+TARGET_DIR="$REPO_ROOT/rust/target"
 TOOLCHAIN=""
 OUT_DIR=""
 
@@ -85,9 +86,9 @@ build_abi() {
     mkdir -p "$out"
     echo "==> $abi"
     for crate in "${CRATES[@]}"; do
-        (cd "$REPO_ROOT/rust/$crate" && cargo build --release --target "$target")
+        (cd "$REPO_ROOT/rust/$crate" && CARGO_TARGET_DIR="$TARGET_DIR" cargo build --release --target "$target")
         local name=${crate##*/}
-        cp "$REPO_ROOT/rust/$crate/target/$target/release/lib${name}.so" "$out/"
+        cp "$TARGET_DIR/$target/release/lib${name}.so" "$out/"
     done
     cp "$TOOLCHAIN/sysroot/usr/lib/$libcxx_dir/libc++_shared.so" "$out/"
 }
