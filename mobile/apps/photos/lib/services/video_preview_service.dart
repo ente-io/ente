@@ -127,10 +127,6 @@ class VideoPreviewService {
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
-    if (flagService.internalUser) {
-      return;
-    }
-
     serviceLocator.prefs.setBool(_videoStreamingEnabled, value).ignore();
     Bus.instance.fire(VideoStreamingChanged());
 
