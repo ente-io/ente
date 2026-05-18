@@ -350,22 +350,20 @@ const renderTableCellContent = (
                     )}
                 </Box>
             );
-        // If Expirty time (in format 30/1/2026, 11:12:53 am) is greatheer than current date, show it in bold green
         case "Expiry time": {
-            const expiryTime = new Date(
-                Date.parse(
-                    value.replace(
-                        /(\d+)\/(\d+)\/(\d+), (\d+:\d+:\d+ \w+)/,
-                        "$2/$1/$3 $4",
-                    ),
-                ),
-            );
+            const expiryTime = new Date(value);
             const currentTime = new Date();
+            const isValidExpiryTime = !Number.isNaN(expiryTime.getTime());
             return (
                 <Typography
-                    sx={{ color: expiryTime > currentTime ? "#00B33C" : "red" }}
+                    sx={{
+                        color:
+                            isValidExpiryTime && expiryTime > currentTime
+                                ? "#00B33C"
+                                : "red",
+                    }}
                 >
-                    {value}
+                    {isValidExpiryTime ? expiryTime.toLocaleString() : value}
                 </Typography>
             );
         }

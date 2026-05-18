@@ -122,7 +122,7 @@ const App: React.FC = () => {
                         "Expiry time":
                             new Date(
                                 userDataResponse.subscription.expiryTime / 1000,
-                            ).toLocaleString() || "None",
+                            ).toISOString() || "None",
                     },
                     security: {
                         "Email MFA": userDataResponse.details?.profileData
