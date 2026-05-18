@@ -39,6 +39,10 @@ class FileInfoFaceWidget extends StatefulWidget {
   final double? width;
   final bool highlight;
   final bool isEditMode;
+  final bool isSelected;
+  final bool isSelectionMode;
+  final VoidCallback? onSelected;
+  final VoidCallback? onLongPressSelected;
   final Future<void> Function() reloadAllFaces;
 
   const FileInfoFaceWidget(
@@ -50,6 +54,10 @@ class FileInfoFaceWidget extends StatefulWidget {
     this.highlight = false,
     this.isEditMode = false,
     this.width,
+    this.isSelected = false,
+    this.isSelectionMode = false,
+    this.onSelected,
+    this.onLongPressSelected,
     required this.reloadAllFaces,
     super.key,
   });
@@ -61,6 +69,7 @@ class FileInfoFaceWidget extends StatefulWidget {
 class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
   bool get hasPerson => widget.person != null;
   bool get isEditMode => widget.isEditMode;
+  bool get isSelectionMode => widget.isSelectionMode;
   double get thumbnailWidth => widget.width ?? 68;
 
   @override
@@ -71,35 +80,73 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
           clipBehavior: Clip.none,
           children: [
             GestureDetector(
-              onTap: isEditMode
-                  ? hasPerson
-                      ? _onMinusIconTap
-                      : (isLocalGalleryMode ? null : _onPlusIconTap)
-                  : _routeToPersonOrClusterPage,
+              onTap: isSelectionMode
+                  ? widget.onSelected
+                  : isEditMode
+                      ? hasPerson
+                          ? _onMinusIconTap
+                          : (isLocalGalleryMode ? null : _onPlusIconTap)
+                      : _routeToPersonOrClusterPage,
+              onLongPress: isEditMode && !isSelectionMode
+                  ? widget.onLongPressSelected
+                  : null,
               child: Container(
                 height: thumbnailWidth,
                 width: thumbnailWidth,
                 decoration: ShapeDecoration(
                   shape: faceThumbnailSquircleBorder(
                     side: thumbnailWidth,
-                    borderSide: widget.highlight
+                    borderSide: widget.highlight || widget.isSelected
                         ? BorderSide(
-                            color: getEnteColorScheme(context).primary700,
+                            color: widget.isSelected
+                                ? getEnteColorScheme(context).primary500
+                                : getEnteColorScheme(context).primary700,
                             width: 1.0,
                           )
                         : BorderSide.none,
                   ),
                 ),
                 child: FaceThumbnailSquircleClip(
-                  child: FileFaceWidget(
-                    key: ValueKey(widget.face.faceID),
-                    widget.file,
-                    faceCrop: widget.faceCrop,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      FileFaceWidget(
+                        key: ValueKey(widget.face.faceID),
+                        widget.file,
+                        faceCrop: widget.faceCrop,
+                      ),
+                      if (widget.isSelected)
+                        Container(
+                          color: Colors.black.withValues(alpha: 0.12),
+                        ),
+                    ],
                   ),
                 ),
               ),
             ),
-            if (isEditMode) _buildEditIcon(context),
+            if (widget.isSelected)
+              Positioned(
+                left: -4,
+                top: -4,
+                child: Container(
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: getEnteColorScheme(context).primary500,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: getEnteColorScheme(context).backgroundBase,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    size: 10,
+                    color: getEnteColorScheme(context).backgroundBase,
+                  ),
+                ),
+              ),
+            if (isEditMode && !isSelectionMode) _buildEditIcon(context),
           ],
         ),
         const SizedBox(height: 8),

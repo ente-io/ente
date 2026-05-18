@@ -9,6 +9,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -36,6 +37,7 @@ final Logger _logger = Logger("FacesItemWidget");
 
 class FacesItemWidget extends StatefulWidget {
   final EnteFile file;
+
   const FacesItemWidget(this.file, {super.key});
 
   @override
@@ -47,6 +49,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   bool _isEditMode = false;
   bool _showRemainingFaces = false;
   bool _isLoading = true;
+  final Set<String> _selectedFaceIDs = {};
   List<_FaceInfo> _defaultFaces = [];
   List<_FaceInfo> _remainingFaces = [];
   List<PersonEntity> _manualPersons = [];
@@ -76,11 +79,17 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       }
       final result = await _fetchFaceData();
       if (mounted) {
+        final currentFaceIDs = {
+          ...result.defaultFaces.map((faceInfo) => faceInfo.face.faceID),
+          ...result.remainingFaces.map((faceInfo) => faceInfo.face.faceID),
+        };
         setState(() {
           _defaultFaces = result.defaultFaces;
           _remainingFaces = result.remainingFaces;
           _manualPersons = result.manualPersons;
           _errorReason = result.errorReason;
+          _selectedFaceIDs
+              .removeWhere((faceID) => !currentFaceIDs.contains(faceID));
           if (!isRefresh) {
             _isLoading = false;
           }
@@ -194,6 +203,10 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           clusterID: faceInfo.clusterID,
           width: thumbnailWidth,
           isEditMode: _isEditMode,
+          isSelectionMode: _selectedFaceIDs.isNotEmpty,
+          isSelected: _selectedFaceIDs.contains(faceInfo.face.faceID),
+          onSelected: () => _toggleSelectedFace(faceInfo.face.faceID),
+          onLongPressSelected: () => _startSelectionMode(faceInfo.face.faceID),
           reloadAllFaces: () => loadFaces(isRefresh: true),
         ),
       );
@@ -364,6 +377,11 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                 clusterID: faceInfo.clusterID,
                 width: thumbnailWidth,
                 isEditMode: _isEditMode,
+                isSelectionMode: _selectedFaceIDs.isNotEmpty,
+                isSelected: _selectedFaceIDs.contains(faceInfo.face.faceID),
+                onSelected: () => _toggleSelectedFace(faceInfo.face.faceID),
+                onLongPressSelected: () =>
+                    _startSelectionMode(faceInfo.face.faceID),
                 reloadAllFaces: () => loadFaces(isRefresh: true),
               ),
             )
@@ -415,31 +433,47 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       return const SizedBox.shrink();
     }
     if (_isEditMode) {
+      final hasSelection = _selectedFaceInfos().isNotEmpty;
       return Padding(
         padding: const EdgeInsets.only(right: 12.0),
         child: SizedBox(
           height: _kHeaderActionHeight,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _toggleEditMode,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: getEnteColorScheme(context).primary500,
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hasSelection)
+                IconButtonWidget(
+                  icon: Icons.person_off,
+                  iconButtonType: IconButtonType.secondary,
+                  onTap: _onIgnoreSelectedFaces,
                 ),
-                child: Text(
-                  AppLocalizations.of(context).done,
-                  style: getEnteTextTheme(context).small.copyWith(
+              if (hasSelection) const SizedBox(width: 8),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _toggleEditMode,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
                         color: getEnteColorScheme(context).primary500,
+                        width: 1,
                       ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context).done,
+                      style: getEnteTextTheme(context).small.copyWith(
+                            color: getEnteColorScheme(context).primary500,
+                          ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       );
@@ -449,6 +483,108 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       iconButtonType: IconButtonType.secondary,
       onTap: _toggleEditMode,
     );
+  }
+
+  List<_FaceInfo> _allFaceInfos() => [..._defaultFaces, ..._remainingFaces];
+
+  List<_FaceInfo> _selectedFaceInfos() {
+    return _allFaceInfos()
+        .where((f) => _selectedFaceIDs.contains(f.face.faceID))
+        .toList(growable: false);
+  }
+
+  void _startSelectionMode(String faceID) {
+    setState(() {
+      _isEditMode = true;
+      _selectedFaceIDs.add(faceID);
+    });
+  }
+
+  void _toggleSelectedFace(String faceID) {
+    if (!_isEditMode) return;
+    setState(() {
+      if (_selectedFaceIDs.contains(faceID)) {
+        _selectedFaceIDs.remove(faceID);
+      } else {
+        _selectedFaceIDs.add(faceID);
+      }
+    });
+  }
+
+  void _clearSelectionMode() {
+    if (_selectedFaceIDs.isEmpty) {
+      return;
+    }
+    setState(() {
+      _selectedFaceIDs.clear();
+    });
+  }
+
+  Future<void> _onIgnoreSelectedFaces() async {
+    final selectedFaces = _selectedFaceInfos();
+    if (selectedFaces.isEmpty) return;
+
+    final result = await showChoiceActionSheet(
+      context,
+      title: selectedFaces.length == 1
+          ? AppLocalizations.of(context).areYouSureYouWantToIgnoreThisPerson
+          : AppLocalizations.of(context).areYouSureYouWantToIgnoreThesePersons,
+      body: selectedFaces.length == 1
+          ? AppLocalizations.of(context).thePersonWillNotBeDisplayed
+          : AppLocalizations.of(context).thePersonGroupsWillNotBeDisplayed,
+      firstButtonLabel: AppLocalizations.of(context).yesIgnore,
+      firstButtonType: ButtonType.critical,
+      secondButtonLabel: AppLocalizations.of(context).cancel,
+      isCritical: true,
+    );
+    if (result?.action != ButtonAction.first) return;
+
+    final mlDataDB =
+        isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+    final faceIDToNewClusterID = <String, String>{};
+    final createdPersonIDs = <String>[];
+    try {
+      final clusterIDs = <String>{};
+      for (final f in selectedFaces) {
+        var clusterID =
+            f.clusterID ?? await mlDataDB.getClusterIDForFaceID(f.face.faceID);
+        if (clusterID == null) {
+          clusterID = newClusterID();
+          faceIDToNewClusterID[f.face.faceID] = clusterID;
+        }
+        clusterIDs.add(clusterID);
+      }
+
+      if (faceIDToNewClusterID.isNotEmpty) {
+        await mlDataDB.updateFaceIdToClusterId(faceIDToNewClusterID);
+      }
+
+      for (final clusterID in clusterIDs) {
+        try {
+          final ignoredPerson = await PersonService.instance.addPerson(
+            name: '',
+            clusterID: clusterID,
+            isHidden: true,
+          );
+          createdPersonIDs.add(ignoredPerson.remoteID);
+          // Try automatic merges for the ignored person but avoid firing events per cluster
+          await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(
+            ignoredPerson,
+            personClusterID: clusterID,
+            firePeopleChangedEvent: false,
+          );
+        } catch (e, s) {
+          _logger.warning('Error ignoring cluster $clusterID', e, s);
+        }
+      }
+
+      // Fire a single people changed event and reload faces
+      Bus.instance.fire(PeopleChangedEvent());
+      _clearSelectionMode();
+      await loadFaces(isRefresh: true);
+    } catch (e, s) {
+      _logger.severe('Error while ignoring unlinked faces', e, s);
+    }
   }
 
   Future<_FaceDataResult> _fetchFaceData() async {
@@ -598,7 +734,12 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
-  void _toggleEditMode() => setState(() => _isEditMode = !_isEditMode);
+  void _toggleEditMode() => setState(() {
+        _isEditMode = !_isEditMode;
+        if (!_isEditMode) {
+          _selectedFaceIDs.clear();
+        }
+      });
 
   void _toggleRemainingFaces() =>
       setState(() => _showRemainingFaces = !_showRemainingFaces);
