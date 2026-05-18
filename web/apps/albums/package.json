@@ -54,7 +54,7 @@
         "@types/heic-convert": "^2.1.0",
         "@types/leaflet": "^1.9.21",
         "@types/libsodium-wrappers-sumo": "^0.7.8",
-        "@types/node": "^22.15.32",
+        "@types/node": "^24.12.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
         "@types/react-window": "^1.8.8",
