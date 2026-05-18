@@ -21,7 +21,7 @@ interface ChangeEmailProps {
     onClose: () => void;
 }
 
-const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
+export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
     const [newEmail, setNewEmail] = useState<string>("");
     const [userID, setUserID] = useState<string>("");
 
@@ -155,5 +155,3 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         </Dialog>
     );
 };
-
-export default ChangeEmail;

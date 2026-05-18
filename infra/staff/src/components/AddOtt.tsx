@@ -39,7 +39,7 @@ interface AddOttProps {
     userEmail: string;
 }
 
-const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
+export const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
     const [selectedApp, setSelectedApp] = useState<AppOption>("photos");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -202,5 +202,3 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
         </Dialog>
     );
 };
-
-export default AddOtt;

@@ -20,7 +20,7 @@ interface Disable2FAProps {
     handleDisable2FA: () => void; // Callback to handle 2FA disablement
 }
 
-const Disable2FA: React.FC<Disable2FAProps> = ({
+export const Disable2FA: React.FC<Disable2FAProps> = ({
     open,
     handleClose,
     handleDisable2FA,
@@ -124,5 +124,3 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
         </div>
     );
 };
-
-export default Disable2FA;

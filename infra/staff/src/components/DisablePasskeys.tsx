@@ -15,7 +15,7 @@ import {
 } from "../services/support";
 import type { DisablePasskeysProps } from "../types";
 
-const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
+export const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
     open,
     handleClose,
     handleDisablePasskeys,
@@ -121,5 +121,3 @@ const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
         </div>
     );
 };
-
-export default DisablePasskeys;

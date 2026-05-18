@@ -20,7 +20,7 @@ interface TokenData {
     app: string;
 }
 
-const TokensTableComponent: React.FC = () => {
+export const TokensTableComponent: React.FC = () => {
     const [tokens, setTokens] = useState<TokenData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -176,5 +176,3 @@ const TokensTableComponent: React.FC = () => {
         </div>
     );
 };
-
-export default TokensTableComponent;

@@ -14,9 +14,9 @@ import { useEffect, useState } from "react";
 import { getCurrentAdminUser } from "../services/support";
 import type { FamilyMember } from "../types";
 import { formatUsageToGB } from "../utils/";
-import CloseFamily from "./CloseFamily";
+import { CloseFamily } from "./CloseFamily";
 
-const FamilyTableComponent: React.FC = () => {
+export const FamilyTableComponent: React.FC = () => {
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [closeFamilyOpen, setCloseFamilyOpen] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
@@ -152,5 +152,3 @@ const FamilyTableComponent: React.FC = () => {
         </>
     );
 };
-
-export default FamilyTableComponent;

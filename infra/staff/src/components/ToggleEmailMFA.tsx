@@ -20,7 +20,7 @@ interface ToggleEmailMFAProps {
     handleToggleEmailMFA: (status: boolean) => void; // Callback to handle toggling Email MFA
 }
 
-const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
+export const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
     open,
     handleClose,
     handleToggleEmailMFA,
@@ -141,5 +141,3 @@ const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
         </div>
     );
 };
-
-export default ToggleEmailMFA;

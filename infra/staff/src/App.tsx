@@ -7,10 +7,10 @@ import TextField from "@mui/material/TextField";
 import * as React from "react";
 import { useCallback, useEffect, useState } from "react";
 import "./App.css";
-import FamilyTableComponent from "./components/FamilyComponentTable";
-import StorageBonusTableComponent from "./components/StorageBonusTableComponent";
-import TokensTableComponent from "./components/TokenTableComponent";
-import UserComponent from "./components/UserComponent";
+import { FamilyTableComponent } from "./components/FamilyComponentTable";
+import { StorageBonusTableComponent } from "./components/StorageBonusTableComponent";
+import { TokensTableComponent } from "./components/TokenTableComponent";
+import { UserComponent } from "./components/UserComponent";
 import duckieimage from "./components/duckie.png";
 import { getEmail, getToken, setEmail, setToken } from "./services/session";
 import { apiOrigin } from "./services/support";
@@ -36,7 +36,7 @@ const formatStorage = (bytes: number | undefined, noneWhenZero = false) => {
     return `${(bytes / 1024 ** 2).toFixed(2)} MB`;
 };
 
-const App: React.FC = () => {
+export const App: React.FC = () => {
     const [localEmail, setLocalEmail] = useState<string>("");
     const [localToken, setLocalToken] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -330,5 +330,3 @@ const App: React.FC = () => {
         </div>
     );
 };
-
-export default App;

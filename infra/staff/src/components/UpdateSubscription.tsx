@@ -47,7 +47,7 @@ interface FormValues {
     attributes: { customerID: string; stripeAccountCountry: string };
 }
 
-const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
+export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
     open,
     onClose,
 }) => {
@@ -377,5 +377,3 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         </Dialog>
     );
 };
-
-export default UpdateSubscription;

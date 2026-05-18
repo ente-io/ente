@@ -16,7 +16,10 @@ interface DeleteAccountProps {
     handleClose: () => void;
 }
 
-const DeleteAccount: React.FC<DeleteAccountProps> = ({ open, handleClose }) => {
+export const DeleteAccount: React.FC<DeleteAccountProps> = ({
+    open,
+    handleClose,
+}) => {
     const handleDelete = async () => {
         try {
             const email = getEmail();
@@ -104,5 +107,3 @@ const DeleteAccount: React.FC<DeleteAccountProps> = ({ open, handleClose }) => {
         </div>
     );
 };
-
-export default DeleteAccount;

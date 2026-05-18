@@ -19,7 +19,7 @@ interface BonusData {
     isRevoked: boolean;
 }
 
-const StorageBonusTableComponent: React.FC = () => {
+export const StorageBonusTableComponent: React.FC = () => {
     const [storageBonuses, setStorageBonuses] = useState<BonusData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -140,5 +140,3 @@ const StorageBonusTableComponent: React.FC = () => {
         </div>
     );
 };
-
-export default StorageBonusTableComponent;

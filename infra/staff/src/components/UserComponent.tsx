@@ -14,15 +14,15 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import type { UserComponentProps } from "../types";
-import AddOtt from "./AddOtt";
-import ChangeEmail from "./ChangeEmail";
-import DeleteAccount from "./DeleteAccont";
-import Disable2FA from "./Disable2FA";
-import DisablePasskeys from "./DisablePasskeys";
-import ToggleEmailMFA from "./ToggleEmailMFA";
-import UpdateSubscription from "./UpdateSubscription";
+import { AddOtt } from "./AddOtt";
+import { ChangeEmail } from "./ChangeEmail";
+import { DeleteAccount } from "./DeleteAccont";
+import { Disable2FA } from "./Disable2FA";
+import { DisablePasskeys } from "./DisablePasskeys";
+import { ToggleEmailMFA } from "./ToggleEmailMFA";
+import { UpdateSubscription } from "./UpdateSubscription";
 
-const UserComponent = ({ userData }: UserComponentProps) => {
+export const UserComponent = ({ userData }: UserComponentProps) => {
     const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
     const [email2FAEnabled, setEmail2FAEnabled] = useState(false);
     const [email2FAOpen, setEmail2FAToggleOpen] = useState(false);
@@ -409,5 +409,3 @@ const renderTableCellContent = (
             return <Typography>{value}</Typography>;
     }
 };
-
-export default UserComponent;

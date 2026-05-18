@@ -20,7 +20,7 @@ interface CloseFamilyProps {
     handleCloseFamily: () => void; // Callback to handle closing family
 }
 
-const CloseFamily: React.FC<CloseFamilyProps> = ({
+export const CloseFamily: React.FC<CloseFamilyProps> = ({
     open,
     handleClose,
     handleCloseFamily,
@@ -126,5 +126,3 @@ const CloseFamily: React.FC<CloseFamilyProps> = ({
         </div>
     );
 };
-
-export default CloseFamily;
