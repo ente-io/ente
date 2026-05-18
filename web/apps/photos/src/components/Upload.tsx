@@ -618,7 +618,21 @@ export const Upload: React.FC<UploadProps> = ({
         const uploadedFiles = successfulFilesFromUploadBatchResult(batchResult);
         if (!uploadedFiles.length) return;
 
-        await addOrCopyToCollection(targetCollection, uploadedFiles);
+        log.info(
+            `Adding ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+        );
+        try {
+            await addOrCopyToCollection(targetCollection, uploadedFiles);
+            log.info(
+                `Added ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+            );
+        } catch (e) {
+            log.error(
+                `Failed to add ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+                e,
+            );
+            throw e;
+        }
     };
 
     const resetUploadUIState = () => {
