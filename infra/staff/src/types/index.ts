@@ -10,11 +10,7 @@ export interface UserResponse {
     user: User;
     subscription: Subscription;
     authCodes?: number;
-    details?: {
-        usage?: number;
-        storageBonus?: number;
-        profileData: Security;
-    };
+    details?: { usage?: number; storageBonus?: number; profileData: Security };
 }
 
 export interface UserData {
@@ -22,11 +18,7 @@ export interface UserData {
     storage: Record<string, string>;
     subscription?: Record<string, string>;
     security: Record<string, string>;
-    details?: {
-        familyData: {
-            members: FamilyMember[];
-        };
-    };
+    details?: { familyData: { members: FamilyMember[] } };
 }
 
 export interface UserComponentProps {

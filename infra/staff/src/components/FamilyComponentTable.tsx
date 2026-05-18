@@ -85,10 +85,7 @@ const FamilyTableComponent: React.FC = () => {
         <>
             <TableContainer
                 component={Paper}
-                style={{
-                    marginTop: "20px",
-                    backgroundColor: "#F1F1F3",
-                }}
+                style={{ marginTop: "20px", backgroundColor: "#F1F1F3" }}
             >
                 <Table aria-label="family-table">
                     <TableHead>

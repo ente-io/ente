@@ -12,11 +12,7 @@ export const getUserDetails = async (
     authToken: string,
 ): Promise<UserDetails> => {
     const url = `${apiOrigin}/users/details/v2`;
-    const res = await fetch(url, {
-        headers: {
-            "X-Auth-Token": authToken,
-        },
-    });
+    const res = await fetch(url, { headers: { "X-Auth-Token": authToken } });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return UserDetails.parse(await res.json());
 };

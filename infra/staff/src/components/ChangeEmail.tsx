@@ -20,9 +20,7 @@ interface ChangeEmailProps {
 }
 
 interface UserDataResponse {
-    subscription: {
-        userID: string;
-    } | null;
+    subscription: { userID: string } | null;
 }
 
 const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
@@ -78,10 +76,7 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         const token = getToken();
         const url = `${apiOrigin}/admin/user/change-email`;
 
-        const body = {
-            userID,
-            email: newEmail,
-        };
+        const body = { userID, email: newEmail };
 
         try {
             const response = await fetch(url, {
@@ -123,18 +118,15 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         <Dialog
             open={open}
             onClose={onClose}
-            BackdropProps={{
-                style: {
-                    backdropFilter: "blur(5px)",
-                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+            slotProps={{
+                backdrop: {
+                    style: {
+                        backdropFilter: "blur(5px)",
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    },
                 },
             }}
-            PaperProps={{
-                style: {
-                    width: "444px",
-                    height: "300px",
-                },
-            }}
+            PaperProps={{ style: { width: "444px", height: "300px" } }}
         >
             <DialogTitle style={{ marginBottom: "20px", marginTop: "20px" }}>
                 Change Email

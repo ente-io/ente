@@ -182,7 +182,7 @@ const App: React.FC = () => {
         }
     }, [fetchData]);
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLFormElement>) => {
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
         if (event.key === "Enter") {
             event.preventDefault();
             fetchData().catch((error: unknown) =>
@@ -211,7 +211,7 @@ const App: React.FC = () => {
     return (
         <div className="container">
             <div>
-                <form className="input-form" onKeyPress={handleKeyPress}>
+                <form className="input-form" onKeyDown={handleKeyDown}>
                     <div className="horizontal-group">
                         <a
                             href="https://staff.ente.sh"
@@ -246,9 +246,7 @@ const App: React.FC = () => {
                                     );
                                 }}
                                 className="fetch-button"
-                                style={{
-                                    padding: "0 16px",
-                                }}
+                                style={{ padding: "0 16px" }}
                             >
                                 FETCH
                             </Button>
@@ -259,11 +257,7 @@ const App: React.FC = () => {
             <div className="content-container">
                 {loading ? (
                     <CircularProgress
-                        sx={{
-                            color: "black",
-                            top: "200px",
-                            position: "fixed",
-                        }}
+                        sx={{ color: "black", top: "200px", position: "fixed" }}
                     />
                 ) : error ? (
                     <div className="error-message">{error}</div>
@@ -289,9 +283,7 @@ const App: React.FC = () => {
                                         height: "5px",
                                         borderRadius: "20px",
                                     },
-                                    "& .MuiTab-root": {
-                                        textTransform: "none",
-                                    },
+                                    "& .MuiTab-root": { textTransform: "none" },
                                 }}
                             >
                                 <Tab label="User" />

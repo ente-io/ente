@@ -21,11 +21,7 @@ interface BonusData {
 }
 
 interface UserData {
-    details: {
-        bonusData: {
-            storageBonuses: BonusData[];
-        };
-    };
+    details: { bonusData: { storageBonuses: BonusData[] } };
 }
 
 const StorageBonusTableComponent: React.FC = () => {
@@ -101,9 +97,7 @@ const StorageBonusTableComponent: React.FC = () => {
         <div style={{ marginTop: "20px", marginBottom: "20px" }}>
             <TableContainer
                 component={Paper}
-                style={{
-                    backgroundColor: "#F1F1F3",
-                }}
+                style={{ backgroundColor: "#F1F1F3" }}
             >
                 <Table aria-label="storage-bonus-table">
                     <TableHead>

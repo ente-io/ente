@@ -22,10 +22,7 @@ interface Subscription {
     originalTransactionID: string;
     expiryTime: number;
     userID: string;
-    attributes: {
-        customerID: string;
-        stripeAccountCountry: string;
-    };
+    attributes: { customerID: string; stripeAccountCountry: string };
 }
 
 interface UserDataResponse {
@@ -44,10 +41,7 @@ interface FormValues {
     transactionId: string;
     expiryTime: string | Date | null;
     userId: string;
-    attributes: {
-        customerID: string;
-        stripeAccountCountry: string;
-    };
+    attributes: { customerID: string; stripeAccountCountry: string };
 }
 
 const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
@@ -61,10 +55,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         transactionId: "",
         expiryTime: "",
         userId: "",
-        attributes: {
-            customerID: "",
-            stripeAccountCountry: "",
-        },
+        attributes: { customerID: "", stripeAccountCountry: "" },
     });
 
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -77,9 +68,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 const encodedEmail = encodeURIComponent(email);
                 const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
                 const response = await fetch(url, {
-                    headers: {
-                        "X-AUTH-TOKEN": token,
-                    },
+                    headers: { "X-AUTH-TOKEN": token },
                 });
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
@@ -142,18 +131,12 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         const { name, value } = event.target;
 
         if (name) {
-            setValues({
-                ...values,
-                [name]: value,
-            });
+            setValues({ ...values, [name]: value });
         }
     };
 
     const handleDatePickerChange = (date: Date | null) => {
-        setValues({
-            ...values,
-            expiryTime: date,
-        });
+        setValues({ ...values, expiryTime: date });
         setIsDatePickerOpen(false);
     };
 
@@ -214,10 +197,12 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         <Dialog
             open={open}
             onClose={onClose}
-            BackdropProps={{
-                style: {
-                    backdropFilter: "blur(5px)",
-                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+            slotProps={{
+                backdrop: {
+                    style: {
+                        backdropFilter: "blur(5px)",
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    },
                 },
             }}
         >

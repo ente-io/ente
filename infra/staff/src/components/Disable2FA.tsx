@@ -111,9 +111,11 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
                     alignItems: "center",
                     justifyContent: "center",
                 }}
-                BackdropProps={{
-                    style: {
-                        backgroundColor: "rgba(255, 255, 255, 0.9)", // Semi-transparent backdrop
+                slotProps={{
+                    backdrop: {
+                        style: {
+                            backgroundColor: "rgba(255, 255, 255, 0.9)", // Semi-transparent backdrop
+                        },
                     },
                 }}
             >

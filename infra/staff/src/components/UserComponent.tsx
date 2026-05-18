@@ -166,11 +166,7 @@ const DataTable: React.FC<DataTableProps> = ({
             <Typography
                 variant="h6"
                 component="div"
-                sx={{
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    width: "100%",
-                }}
+                sx={{ fontWeight: "bold", textAlign: "center", width: "100%" }}
             >
                 {title.charAt(0).toUpperCase() + title.slice(1)}
             </Typography>
@@ -231,7 +227,7 @@ const DataTable: React.FC<DataTableProps> = ({
                                             : "none",
                                 }}
                             >
-                                {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+                                {}
                                 {renderTableCellContent(
                                     label,
                                     value,
@@ -252,19 +248,13 @@ const DataTable: React.FC<DataTableProps> = ({
                         <TableCell
                             component="th"
                             scope="row"
-                            style={{
-                                padding: "16px",
-                                borderBottom: "none",
-                            }}
+                            style={{ padding: "16px", borderBottom: "none" }}
                         >
                             Add OTT
                         </TableCell>
                         <TableCell
                             align="right"
-                            style={{
-                                padding: "10px",
-                                borderBottom: "none",
-                            }}
+                            style={{ padding: "10px", borderBottom: "none" }}
                         >
                             <Button
                                 variant="contained"
@@ -354,9 +344,7 @@ const renderTableCellContent = (
                                     },
                                 },
                                 "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                                    {
-                                        backgroundColor: "#00B33C",
-                                    },
+                                    { backgroundColor: "#00B33C" },
                             }}
                         />
                     )}
@@ -375,9 +363,7 @@ const renderTableCellContent = (
             const currentTime = new Date();
             return (
                 <Typography
-                    sx={{
-                        color: expiryTime > currentTime ? "#00B33C" : "red",
-                    }}
+                    sx={{ color: expiryTime > currentTime ? "#00B33C" : "red" }}
                 >
                     {value}
                 </Typography>
@@ -411,9 +397,7 @@ const renderTableCellContent = (
                                     },
                                 },
                                 "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                                    {
-                                        backgroundColor: "#00B33C",
-                                    },
+                                    { backgroundColor: "#00B33C" },
                             }}
                         />
                     )}

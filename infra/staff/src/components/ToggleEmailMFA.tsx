@@ -114,9 +114,11 @@ const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
                     alignItems: "center",
                     justifyContent: "center",
                 }}
-                BackdropProps={{
-                    style: {
-                        backgroundColor: "rgba(255, 255, 255, 0.9)", // Semi-transparent backdrop
+                slotProps={{
+                    backdrop: {
+                        style: {
+                            backgroundColor: "rgba(255, 255, 255, 0.9)", // Semi-transparent backdrop
+                        },
                     },
                 }}
             >
