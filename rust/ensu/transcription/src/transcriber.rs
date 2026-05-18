@@ -67,6 +67,16 @@ impl TranscriptionManager {
         Ok(filter_transcription_output(&result.text))
     }
 
+    fn load(&mut self, models_dir: impl AsRef<Path>) -> Result<()> {
+        let models_dir = models_dir.as_ref();
+        let model_dir = model_path(models_dir);
+        if !model_dir.is_dir() {
+            return Err(error("Transcription model is not downloaded"));
+        }
+
+        self.ensure_loaded(&model_dir)
+    }
+
     fn ensure_loaded(&mut self, model_dir: &Path) -> Result<()> {
         if self.loaded_path.as_deref() == Some(model_dir) && self.model.is_some() {
             return Ok(());
@@ -98,6 +108,13 @@ pub fn transcribe_pcm16(
         .lock()
         .map_err(|_| error("transcription manager lock poisoned"))?
         .transcribe(models_dir, vad_cache_dir, input_sample_rate, pcm_le)
+}
+
+pub fn load_model(models_dir: impl AsRef<Path>) -> Result<()> {
+    manager()
+        .lock()
+        .map_err(|_| error("transcription manager lock poisoned"))?
+        .load(models_dir)
 }
 
 pub fn unload_model() -> Result<()> {
