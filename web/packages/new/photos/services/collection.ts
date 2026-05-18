@@ -36,7 +36,7 @@ import {
     createMagicMetadata,
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
-import { splitByPredicate } from "ente-utils/array";
+import { batch, splitByPredicate } from "ente-utils/array";
 import { z } from "zod";
 import { batched, type UpdateMagicMetadataRequest } from "./file";
 import {
@@ -56,6 +56,7 @@ const uncategorizedCollectionName = "Uncategorized";
 const defaultHiddenCollectionName = ".hidden";
 export const defaultHiddenCollectionUserFacingName = "Hidden";
 const favoritesCollectionName = "Favorites";
+const copyRequestBatchSize = 100;
 
 /**
  * Create a new album (a collection of type "album") on remote, and return its
@@ -813,7 +814,7 @@ export const copyFiles = async (
     for (const [srcCollectionID, sourceFiles] of groupFilesByCollectionID(
         uniqueFiles,
     ).entries()) {
-        await batched(sourceFiles, async (batchFiles) => {
+        for (const batchFiles of batch(sourceFiles, copyRequestBatchSize)) {
             /**
              * As said earlier this is strictly for files which aren't owned
              * by the currentUser and only such files can be copied so thus
@@ -870,7 +871,7 @@ export const copyFiles = async (
                     collectionID: dstCollection.id,
                 });
             }
-        });
+        }
     }
 
     return copiedFiles;
