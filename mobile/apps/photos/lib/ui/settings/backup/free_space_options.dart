@@ -1,9 +1,11 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/duplicate_files.dart";
 import "package:photos/models/freeable_space_info.dart";
@@ -11,10 +13,6 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/deduplication_service.dart";
 import "package:photos/services/files_service.dart";
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/buttons/button_widget.dart';
-import "package:photos/ui/components/dialog_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/debug/app_storage_viewer.dart";
@@ -41,15 +39,10 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+    final colors = context.componentColors;
 
     return Scaffold(
-      backgroundColor: pageBackgroundColor,
+      backgroundColor: colors.backgroundBase,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -61,14 +54,14 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                 onTap: () => Navigator.of(context).pop(),
                 child: Icon(
                   Icons.arrow_back,
-                  color: colorScheme.strokeBase,
+                  color: colors.iconColor,
                   size: 24,
                 ),
               ),
               const SizedBox(height: 24),
               Text(
                 AppLocalizations.of(context).freeUpSpace,
-                style: textTheme.h3Bold,
+                style: TextStyles.h1Bold.copyWith(color: colors.textBase),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -76,55 +69,29 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MenuItemWidgetNew(
+                      _buildFreeSpaceOption(
+                        context,
                         title: AppLocalizations.of(context).freeUpDeviceSpace,
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        showOnlyLoadingState: true,
                         onTap: () async => _onFreeUpDeviceSpaceTapped(),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context).freeUpDeviceSpaceDesc +
-                              (Platform.isIOS
-                                  ? " ${AppLocalizations.of(context).freeUpDeviceSpaceDescICloud}"
-                                  : ""),
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
+                      _description(
+                        AppLocalizations.of(context).freeUpDeviceSpaceDesc +
+                            (Platform.isIOS
+                                ? " ${AppLocalizations.of(context).freeUpDeviceSpaceDescICloud}"
+                                : ""),
                       ),
-                      MenuItemWidgetNew(
+                      _buildFreeSpaceOption(
+                        context,
                         title: AppLocalizations.of(context).removeDuplicates,
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        showOnlyLoadingState: true,
                         onTap: () async => _onRemoveDuplicatesTapped(),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context).removeDuplicatesDesc,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
+                      _description(
+                        AppLocalizations.of(context).removeDuplicatesDesc,
                       ),
                       if (flagService.enableVectorDb) ...[
-                        MenuItemWidgetNew(
+                        _buildFreeSpaceOption(
+                          context,
                           title: AppLocalizations.of(context).similarImages,
-                          trailingIcon: Icons.chevron_right_outlined,
-                          trailingIconIsMuted: true,
-                          showOnlyLoadingState: true,
                           onTap: () async {
                             await routeToPage(
                               context,
@@ -134,26 +101,13 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                             );
                           },
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 16,
-                            right: 16,
-                            top: 8,
-                            bottom: 16,
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)
-                                .useMLToFindSimilarImages,
-                            style: textTheme.mini
-                                .copyWith(color: colorScheme.textMuted),
-                          ),
+                        _description(
+                          AppLocalizations.of(context).useMLToFindSimilarImages,
                         ),
                       ],
-                      MenuItemWidgetNew(
+                      _buildFreeSpaceOption(
+                        context,
                         title: AppLocalizations.of(context).viewLargeFiles,
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        showOnlyLoadingState: true,
                         onTap: () async {
                           await routeToPage(
                             context,
@@ -161,43 +115,20 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                           );
                         },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context).viewLargeFilesDesc,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
+                      _description(
+                        AppLocalizations.of(context).viewLargeFilesDesc,
                       ),
-                      MenuItemWidgetNew(
+                      _buildFreeSpaceOption(
+                        context,
                         title: AppLocalizations.of(context).deleteSuggestions,
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        showOnlyLoadingState: true,
                         onTap: () async => _onDeleteSuggestionsTapped(),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context).deleteSuggestionsDesc,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
+                      _description(
+                        AppLocalizations.of(context).deleteSuggestionsDesc,
                       ),
-                      MenuItemWidgetNew(
+                      _buildFreeSpaceOption(
+                        context,
                         title: AppLocalizations.of(context).manageDeviceStorage,
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
                         onTap: () async {
                           await routeToPage(
                             context,
@@ -205,18 +136,8 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                           );
                         },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context).manageDeviceStorageDesc,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
+                      _description(
+                        AppLocalizations.of(context).manageDeviceStorageDesc,
                       ),
                     ],
                   ),
@@ -226,6 +147,42 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _description(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: Spacing.lg,
+        right: Spacing.lg,
+        top: Spacing.sm,
+        bottom: Spacing.lg,
+      ),
+      child: Text(
+        text,
+        style: TextStyles.mini.copyWith(
+          color: context.componentColors.textLight,
+        ),
+      ),
+    );
+  }
+
+  MenuComponent _buildFreeSpaceOption(
+    BuildContext context, {
+    required String title,
+    required Future<void> Function() onTap,
+  }) {
+    final colors = context.componentColors;
+    return MenuComponent(
+      title: title,
+      trailing: HugeIcon(
+        icon: HugeIcons.strokeRoundedArrowRight02,
+        color: colors.textLight,
+        size: 18,
+        strokeWidth: 1.6,
+      ),
+      showOnlyLoadingState: true,
+      onTap: onTap,
     );
   }
 
@@ -346,28 +303,35 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
         },
       );
     } else {
-      showDialogWidget(
+      showBottomSheetComponent<void>(
         context: context,
-        title: AppLocalizations.of(context).success,
-        body: AppLocalizations.of(context)
-            .youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
-        icon: Icons.download_done_rounded,
         isDismissible: true,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.neutral,
-            labelText: AppLocalizations.of(context).ok,
-            isInAlert: true,
-            onTap: () async {
-              if (Platform.isIOS) {
-                showToast(
-                  context,
-                  AppLocalizations.of(context).remindToEmptyDeviceTrash,
-                );
-              }
-            },
+        builder: (_) => BottomSheetComponent(
+          title: AppLocalizations.of(context).success,
+          message: AppLocalizations.of(context).youHaveSuccessfullyFreedUp(
+            storageSaved: formatBytes(status.size),
           ),
-        ],
+          illustration: Icon(
+            Icons.download_done_rounded,
+            size: 64,
+            color: context.componentColors.primary,
+          ),
+          actions: [
+            ButtonComponent(
+              label: AppLocalizations.of(context).ok,
+              variant: ButtonComponentVariant.neutral,
+              onTap: () async {
+                if (Platform.isIOS) {
+                  showToast(
+                    context,
+                    AppLocalizations.of(context).remindToEmptyDeviceTrash,
+                  );
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
       );
     }
   }

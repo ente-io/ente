@@ -577,13 +577,13 @@ void main() {
         height: 600,
       );
 
-      scrollController.jumpTo(54);
+      scrollController.jumpTo(48);
       await tester.pump();
 
       final title = tester.widget<Text>(find.text('Menu items'));
       expect(title.style?.fontSize, greaterThan(18));
 
-      scrollController.jumpTo(60);
+      scrollController.jumpTo(54);
       await tester.pump();
 
       final collapsedTitle = tester.widget<Text>(find.text('Menu items'));
@@ -618,14 +618,14 @@ void main() {
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -40));
     await tester.pumpAndSettle();
 
-    expect(scrollController.offset, closeTo(60, 1));
+    expect(scrollController.offset, closeTo(54, 1));
     final collapsedTitle = tester.widget<Text>(find.text('Appearance'));
     expect(collapsedTitle.style?.fontSize, closeTo(18, 0.01));
     expect(tester.getTopLeft(find.text('System theme')).dy, closeTo(56, 1));
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 32));
     await tester.pumpAndSettle();
-    expect(scrollController.offset, closeTo(60, 1));
+    expect(scrollController.offset, closeTo(54, 1));
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
     await tester.pumpAndSettle();
