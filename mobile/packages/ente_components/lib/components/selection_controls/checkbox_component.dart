@@ -1,3 +1,4 @@
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,11 @@ class CheckboxComponent extends StatelessWidget {
           border: Border.all(color: selected ? fill : stroke),
         ),
         child: selected
-            ? Icon(Icons.check_rounded, size: 12, color: colors.specialWhite)
+            ? Icon(
+                Icons.check_rounded,
+                size: IconSizes.tiny,
+                color: colors.specialWhite,
+              )
             : null,
       ),
     );

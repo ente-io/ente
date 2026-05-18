@@ -18,6 +18,12 @@ void main() {
       expect(Radii.buttonRadius, const Radius.circular(20));
       expect(Radii.buttonBorder, const BorderRadius.all(Radius.circular(20)));
 
+      expect(IconSizes.micro, 8);
+      expect(IconSizes.tiny, 12);
+      expect(IconSizes.small, 18);
+      expect(IconSizes.medium, 24);
+      expect(IconSizes.large, 36);
+
       expect(Motion.quick, const Duration(milliseconds: 120));
       expect(Motion.standard, const Duration(milliseconds: 180));
       expect(Motion.slow, const Duration(milliseconds: 260));
@@ -45,11 +51,11 @@ void main() {
     });
 
     test("selects app primary tokens without changing shared colors", () {
-      final photosLight = ColorTokens.forApp(EnteApp.photos);
-      final authLight = ColorTokens.forApp(EnteApp.auth);
-      final lockerLight = ColorTokens.forApp(EnteApp.locker);
+      final photosLight = ColorTokens.forApp(ComponentApp.photos);
+      final authLight = ColorTokens.forApp(ComponentApp.auth);
+      final lockerLight = ColorTokens.forApp(ComponentApp.locker);
       final authDark = ColorTokens.forApp(
-        EnteApp.auth,
+        ComponentApp.auth,
         brightness: Brightness.dark,
       );
 
@@ -285,8 +291,8 @@ void main() {
     });
 
     test("maps selected app primary tokens into ThemeData", () {
-      final authTheme = ComponentTheme.lightTheme(app: EnteApp.auth);
-      final lockerTheme = ComponentTheme.darkTheme(app: EnteApp.locker);
+      final authTheme = ComponentTheme.lightTheme(app: ComponentApp.auth);
+      final lockerTheme = ComponentTheme.darkTheme(app: ComponentApp.locker);
 
       expect(authTheme.colorScheme.primary, purpleDefaultLight);
       expect(
@@ -344,7 +350,7 @@ void main() {
 
       await tester.pumpWidget(
         Theme(
-          data: ComponentTheme.lightTheme(app: EnteApp.auth),
+          data: ComponentTheme.lightTheme(app: ComponentApp.auth),
           child: Builder(
             builder: (context) {
               authColors = context.componentColors;
@@ -356,7 +362,7 @@ void main() {
 
       await tester.pumpWidget(
         Theme(
-          data: ComponentTheme.darkTheme(app: EnteApp.locker),
+          data: ComponentTheme.darkTheme(app: ComponentApp.locker),
           child: Builder(
             builder: (context) {
               lockerColors = context.componentColors;
@@ -370,6 +376,29 @@ void main() {
       expect(authColors.backgroundBase, ColorTokens.light.backgroundBase);
       expect(lockerColors.primary, blueDefaultDark);
       expect(lockerColors.backgroundBase, ColorTokens.dark.backgroundBase);
+    });
+
+    testWidgets("uses configured app tokens when ThemeData has no extension", (
+      tester,
+    ) async {
+      addTearDown(() => ComponentTheme.configure(app: ComponentApp.photos));
+      ComponentTheme.configure(app: ComponentApp.locker);
+
+      late ColorTokens colors;
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(brightness: Brightness.dark),
+          child: Builder(
+            builder: (context) {
+              colors = context.componentColors;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(colors.primary, blueDefaultDark);
+      expect(colors.backgroundBase, ColorTokens.dark.backgroundBase);
     });
 
     test("defaults to photos primary tokens when no app is passed", () {

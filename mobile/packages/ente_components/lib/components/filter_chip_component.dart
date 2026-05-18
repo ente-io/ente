@@ -1,3 +1,4 @@
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -5,11 +6,7 @@ import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 
-enum FilterChipComponentState {
-  selected,
-  unselected,
-  disabled,
-}
+enum FilterChipComponentState { selected, unselected, disabled }
 
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=9524-4352&m=dev
 /// Section: Filter Chip
@@ -129,7 +126,7 @@ class FilterChipComponent extends StatelessWidget {
       children.add(
         _FilterChipIcon(
           color: color,
-          size: selectedTrailing ? 12 : 18,
+          size: selectedTrailing ? IconSizes.tiny : IconSizes.small,
           child: selectedTrailing ? const Icon(Icons.close_rounded) : trailing!,
         ),
       );
@@ -181,10 +178,7 @@ class FilterChipComponent extends StatelessWidget {
       return const EdgeInsets.fromLTRB(18, Spacing.md, Spacing.md, Spacing.md);
     }
 
-    return const EdgeInsets.symmetric(
-      horizontal: 18,
-      vertical: Spacing.md,
-    );
+    return const EdgeInsets.symmetric(horizontal: 18, vertical: Spacing.md);
   }
 }
 
@@ -192,7 +186,7 @@ class _FilterChipIcon extends StatelessWidget {
   const _FilterChipIcon({
     required this.color,
     required this.child,
-    this.size = 18,
+    this.size = IconSizes.small,
   });
 
   final Color color;
@@ -202,7 +196,9 @@ class _FilterChipIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox.square(
-      dimension: size == 12 ? 20 : 16,
+      dimension: size == IconSizes.tiny
+          ? _selectedTrailingIconSlotSize
+          : _iconSlotSize,
       child: Center(
         child: IconTheme.merge(
           data: IconThemeData(color: color, size: size),
@@ -213,11 +209,11 @@ class _FilterChipIcon extends StatelessWidget {
   }
 }
 
+const double _iconSlotSize = 16;
+const double _selectedTrailingIconSlotSize = 20;
+
 class _FilterChipAvatar extends StatelessWidget {
-  const _FilterChipAvatar({
-    required this.enabled,
-    required this.child,
-  });
+  const _FilterChipAvatar({required this.enabled, required this.child});
 
   final bool enabled;
   final Widget child;
@@ -228,10 +224,7 @@ class _FilterChipAvatar extends StatelessWidget {
       opacity: enabled ? 1 : 0.6,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(Radii.button),
-        child: SizedBox.square(
-          dimension: 32,
-          child: child,
-        ),
+        child: SizedBox.square(dimension: 32, child: child),
       ),
     );
   }
