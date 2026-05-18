@@ -1,5 +1,7 @@
 Latest changes:
 - Neeraj: Fix Android video preview/export generation by restoring ffmpeg x264 support
+- Neeraj: Fix video edit delete navigation
+- Neeraj: Fix grey screen after single-memory delete or favorite actions
 - Aman: Flutter upgrade
 
 Still behind internal flag:
