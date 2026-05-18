@@ -121,7 +121,7 @@ mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 - `ente-core` - shared business logic (pure Rust, no FFI)
   - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
 - `ente_photos` - shared Photos Rust logic
-- `ente-rs` - CLI binary
+- `ente-rs` - Rust CLI package (`ente-cli` binary)
 - `ente-e2e` - ignored Rust integration tests that run against a live Museum
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
@@ -176,7 +176,7 @@ cargo fmt        # format
 cargo clippy     # lint
 cargo build      # build
 cargo test       # test
-cargo run -- --help
+cargo run --bin ente-cli -- --help
 ```
 
 **ente-e2e (rust/e2e/):**

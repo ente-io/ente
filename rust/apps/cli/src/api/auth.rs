@@ -18,7 +18,7 @@ where
 fn shared_client(api: &ApiClient, account_id: Option<&str>) -> Result<AccountsClient> {
     let mut config = AccountsClientConfig::new(api.client_package())
         .with_base_url(api.base_url().to_string())
-        .with_user_agent(format!("ente-rs/{}", env!("CARGO_PKG_VERSION")));
+        .with_user_agent(format!("ente-cli-rust/{}", env!("CARGO_PKG_VERSION")));
     if let Some(token) = account_id.and_then(|id| api.get_token(id)) {
         config = config.with_auth_token(token);
     }

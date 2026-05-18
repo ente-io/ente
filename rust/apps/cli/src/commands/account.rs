@@ -575,7 +575,7 @@ fn new_accounts_client(endpoint: &str, app: App) -> Result<AccountsClient> {
     AccountsClient::new(
         AccountsClientConfig::new(app.client_package())
             .with_base_url(endpoint.to_string())
-            .with_user_agent("ente-rs"),
+            .with_user_agent("ente-cli-rust"),
     )
     .map_err(Error::from)
 }
