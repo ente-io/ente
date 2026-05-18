@@ -333,7 +333,6 @@
     }
   },
   "sorry": "Atsiprašome",
-  "importFailureDesc": "Nepavyko išanalizuoti pasirinkto failo.\nJei reikia pagalbos, rašykite adresu support@ente.com.",
   "pendingSyncs": "Įspėjimas",
   "pendingSyncsWarningBody": "Kai kurių jūsų kodų atsarginės kopijos nebuvo sukurtos.\n\nPrieš atsijungdami įsitikinkite, kad turite atsarginę šių kodų kopiją.",
   "checkInboxAndSpamFolder": "Patikrinkite savo gautieją (ir šlamštą), kad užbaigtumėte patvirtinimą.",
@@ -509,7 +508,7 @@
   "pinLock": "PIN užraktas",
   "enterPin": "Įveskite PIN",
   "setNewPin": "Nustatykite naują PIN",
-  "importFailureDescNew": "Nepavyko išanalizuoti pasirinkto failo.",
+  "importFailureDesc": "Nepavyko išanalizuoti pasirinkto failo.",
   "appLockNotEnabled": "Programos užraktas neįjungtas",
   "appLockNotEnabledDescription": "Įjunkite programos užraktą iš Saugumas > Programos užraktas",
   "authToViewPasskey": "Nustatykite tapatybę, kad peržiūrėtumėte slaptaraktį",

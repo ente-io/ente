@@ -505,7 +505,7 @@
   "pinLock": "Pin vergrendeling",
   "enterPin": "Pin invoeren",
   "setNewPin": "Nieuwe pin instellen",
-  "importFailureDescNew": "Kon het geselecteerde bestand niet lezen.",
+  "importFailureDesc": "Kon het geselecteerde bestand niet lezen.",
   "appLockNotEnabled": "App-vergrendeling niet ingeschakeld",
   "appLockNotEnabledDescription": "Schakel app vergrendeling in vanuit Beveiliging > App vergrendeling",
   "authToViewPasskey": "Verifieer uzelf om uw passkey te bekijken",

@@ -505,7 +505,7 @@
   "pinLock": "Pin 鎖定",
   "enterPin": "輸入 PIN 碼",
   "setNewPin": "設定新 PIN 碼",
-  "importFailureDescNew": "無法解析選取的檔案。",
+  "importFailureDesc": "無法解析選取的檔案。",
   "appLockNotEnabled": "App鎖定未啟用",
   "appLockNotEnabledDescription": "請從「安全 > App鎖」啟用App鎖定",
   "authToViewPasskey": "請驗證身份以查看通行金鑰",

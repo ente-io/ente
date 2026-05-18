@@ -333,7 +333,6 @@
     }
   },
   "sorry": "Omlouváme se",
-  "importFailureDesc": "Nelze analyzovat vybraný soubor.\nProsím napište na support@ente.com, pokud potřebujete pomoc!",
   "pendingSyncs": "Varování",
   "pendingSyncsWarningBody": "Některé z Vašich kódů nebyly zálohovány.\n\nProsím, ujistěte se, že máte zálohu těchto kódů před odhlášením.",
   "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření",
@@ -509,7 +508,7 @@
   "pinLock": "Uzamčení na PIN",
   "enterPin": "Zadejte PIN",
   "setNewPin": "Nastavit nový PIN",
-  "importFailureDescNew": "Nelze analyzovat vybraný soubor.",
+  "importFailureDesc": "Nelze analyzovat vybraný soubor.",
   "appLockNotEnabled": "Zámek aplikace není povolen",
   "appLockNotEnabledDescription": "Povolte prosím zámek aplikace v Zabezpečení > Zámek aplikace",
   "authToViewPasskey": "Pro zobrazení Vašeho přístupového klíče se prosím ověřte",

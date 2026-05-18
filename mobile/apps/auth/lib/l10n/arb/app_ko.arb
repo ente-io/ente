@@ -505,7 +505,7 @@
   "pinLock": "Pin 잠금",
   "enterPin": "PIN 번호 입력",
   "setNewPin": "새 PIN 번호 설정",
-  "importFailureDescNew": "선택하신 파일을 분석할 수 없습니다.",
+  "importFailureDesc": "선택하신 파일을 분석할 수 없습니다.",
   "appLockNotEnabled": "App 잠금 설정되지 않음",
   "appLockNotEnabledDescription": "설정 > App 잠금에서 App 잠금을 활성화해주세요",
   "authToViewPasskey": "패스키를 보려면 인증 절차를 거쳐주세요",
