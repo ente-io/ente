@@ -168,11 +168,7 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
                                 label="App type"
                                 onChange={(
                                     event: SelectChangeEvent<AppOption>,
-                                ) =>
-                                    setSelectedApp(
-                                        event.target.value as AppOption,
-                                    )
-                                }
+                                ) => setSelectedApp(event.target.value)}
                             >
                                 {APP_OPTIONS.map((option) => (
                                     <MenuItem

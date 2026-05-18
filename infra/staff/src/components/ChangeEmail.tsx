@@ -70,7 +70,9 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         setNewEmail(event.target.value); // Update newEmail state on input change
     };
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (
+        event: React.SyntheticEvent<HTMLFormElement>,
+    ) => {
         event.preventDefault();
 
         const token = getToken();
@@ -106,9 +108,7 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
             console.error("Error updating email:", error);
         }
     };
-    const handleSubmitSync: React.FormEventHandler<HTMLFormElement> = (
-        event,
-    ) => {
+    const handleSubmitSync = (event: React.SyntheticEvent<HTMLFormElement>) => {
         handleSubmit(event).catch((error: unknown) => {
             console.error("Error in handleSubmit:", error);
         });
@@ -125,8 +125,8 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                     },
                 },
+                paper: { style: { width: "444px", height: "300px" } },
             }}
-            PaperProps={{ style: { width: "444px", height: "300px" } }}
         >
             <DialogTitle style={{ marginBottom: "20px", marginTop: "20px" }}>
                 Change Email

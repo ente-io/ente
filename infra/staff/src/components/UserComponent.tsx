@@ -51,9 +51,9 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     if (!userData) return null;
 
     return (
-        <Grid container spacing={6} justifyContent="center">
+        <Grid container spacing={6} sx={{ justifyContent: "center" }}>
             {Object.entries(userData).map(([title, data]) => (
-                <Grid item xs={12} sm={10} md={6} key={title}>
+                <Grid size={{ xs: 12, sm: 10, md: 6 }} key={title}>
                     <DataTable
                         title={title}
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -140,7 +140,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         setIsDatePickerOpen(false);
     };
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
         event.preventDefault();
         (async () => {
             const token = getToken();
@@ -218,7 +218,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={4}>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                             <div style={{ marginBottom: "8px" }}>
                                 <label
                                     htmlFor="productId"
@@ -239,7 +239,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                 />
                             </div>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                             <div style={{ marginBottom: "8px" }}>
                                 <label
                                     htmlFor="provider"
@@ -269,7 +269,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                 </Select>
                             </div>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                             <div style={{ marginBottom: "8px" }}>
                                 <label
                                     htmlFor="storage"
@@ -291,7 +291,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                 />
                             </div>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                             <div style={{ marginBottom: "8px" }}>
                                 <label
                                     htmlFor="transactionId"
@@ -312,7 +312,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                 />
                             </div>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                             <div style={{ marginBottom: "8px" }}>
                                 <label
                                     htmlFor="expiryTime"
@@ -335,13 +335,15 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                             : ""
                                     }
                                     onClick={handleCalendarClick}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <CalendarTodayIcon />
-                                            </InputAdornment>
-                                        ),
-                                        readOnly: true,
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <CalendarTodayIcon />
+                                                </InputAdornment>
+                                            ),
+                                            readOnly: true,
+                                        },
                                     }}
                                     fullWidth
                                 />

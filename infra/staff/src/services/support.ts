@@ -3,7 +3,7 @@ import { z } from "zod";
 export const apiOrigin =
     import.meta.env.VITE_ENTE_API_ORIGIN ?? "https://api.ente.io";
 
-const UserDetails = z.object({}).passthrough();
+const UserDetails = z.looseObject({});
 
 export type UserDetails = z.infer<typeof UserDetails>;
 
