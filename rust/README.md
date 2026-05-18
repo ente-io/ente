@@ -14,7 +14,7 @@
               │                            │                            │
               ▼                            ▼                            ▼
 ┌───────────────────────────┐ ┌───────────────────────────┐ ┌────────────────────────┐
-│  mobile/packages/rust/    │ │   web/packages/wasm/      │ │      rust/cli/         │
+│  mobile/packages/rust/    │ │   web/packages/wasm/      │ │    rust/apps/cli/      │
 │    (ente_rust crate)      │ │    (ente-wasm crate)      │ │                        │
 │                           │ │                           │ │  CLI binary, depends   │
 │  Shared #[frb] wrappers   │ │  #[wasm_bindgen] wrappers │ │  on ente-core          │
@@ -42,7 +42,7 @@
 
 - `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
 - `rust/photos/` (`ente_photos`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
-- `rust/cli/` (`ente-rs`) - Rust CLI.
+- `rust/apps/cli/` (`ente-rs`) - Rust CLI.
 - `rust/e2e/` (`ente-e2e`) - live Museum-backed Rust end-to-end tests.
 - `rust/ensu/` - LLM chat stack (see `rust/ensu/README.md`).
 
@@ -50,11 +50,18 @@
 
 ```
 rust/
-├── cli/                          # CLI package (ente-rs)
-│   ├── src/
-│   │   └── main.rs
-│   ├── Cargo.toml
-│   └── Cargo.lock
+├── apps/
+│   ├── cli/                      # CLI package (ente-rs)
+│   │   ├── src/
+│   │   │   └── main.rs
+│   │   └── Cargo.toml
+│   │
+│   └── codegen/                  # Cargo-powered repo codegen helper
+│       ├── src/
+│       └── Cargo.toml
+│
+├── crates/
+│   └── image/                    # Shared image crate
 │
 ├── e2e/                          # Rust e2e tests requiring live Museum
 │   ├── src/
@@ -114,7 +121,7 @@ mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 - `ente-core` - shared business logic (pure Rust, no FFI)
   - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
 - `ente_photos` - shared Photos Rust logic
-- `ente-rs` - CLI binary
+- `ente-rs` - Rust CLI package (`ente-cli` binary)
 - `ente-e2e` - ignored Rust integration tests that run against a live Museum
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
@@ -162,14 +169,14 @@ cargo build      # build
 cargo test       # test
 ```
 
-**ente-cli (rust/cli/):**
+**ente-cli (rust/apps/cli/):**
 
 ```sh
 cargo fmt        # format
 cargo clippy     # lint
 cargo build      # build
 cargo test       # test
-cargo run -- --help
+cargo run --bin ente-cli -- --help
 ```
 
 **ente-e2e (rust/e2e/):**

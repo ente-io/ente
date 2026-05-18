@@ -4,9 +4,11 @@ on:
     pull_request:
         paths:
             - "rust/e2e/**"
-            - "rust/cli/**"
+            - "rust/apps/cli/**"
             - "rust/contacts/**"
             - "rust/core/**"
+            - "rust/Cargo.lock"
+            - "rust/Cargo.toml"
             - "server/**"
             - ".github/workflows/rust-e2e-test.yml"
     workflow_dispatch:
@@ -37,7 +39,7 @@ jobs:
                       ~/.cargo/registry
                       ~/.cargo/git
                       rust/e2e/target
-                  key: ${{ runner.os }}-cargo-rust-e2e-${{ hashFiles('rust/e2e/Cargo.lock', 'rust/cli/Cargo.lock', 'rust/contacts/Cargo.lock', 'rust/core/Cargo.lock') }}
+                  key: ${{ runner.os }}-cargo-rust-e2e-${{ hashFiles('rust/e2e/Cargo.lock', 'rust/Cargo.lock', 'rust/contacts/Cargo.lock', 'rust/core/Cargo.lock') }}
 
             - name: Run rust e2e suite
               env:

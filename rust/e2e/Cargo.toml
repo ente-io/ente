@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-ente-rs = { path = "../cli" }
+ente-rs = { path = "../apps/cli" }
 ente-accounts = { path = "../accounts" }
 ente-contacts = { path = "../contacts" }
 ente-core = { path = "../core", features = ["srp"] }
