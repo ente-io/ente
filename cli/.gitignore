@@ -6,7 +6,7 @@ logs/**
 .vscode/**
 tmp/**
 scratch/**
-main
+/main
 config.yaml
 ente-cli.db
 bin/**
