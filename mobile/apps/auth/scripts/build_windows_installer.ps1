@@ -49,6 +49,7 @@ Compression=zip
 SolidCompression=yes
 SetupIconFile=$iconPath
 WizardStyle=modern
+MinVersion=10.0
 ;PrivilegesRequired=none
 PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesAllowed=x64compatible

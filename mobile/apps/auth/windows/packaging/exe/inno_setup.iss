@@ -14,6 +14,7 @@ Compression=zip
 SolidCompression=yes
 SetupIconFile={{SETUP_ICON_FILE}}
 WizardStyle=modern
+MinVersion=10.0
 ;PrivilegesRequired={{PRIVILEGES_REQUIRED}}
 PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesAllowed=x64compatible
