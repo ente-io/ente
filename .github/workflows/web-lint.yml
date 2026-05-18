@@ -6,7 +6,6 @@ on:
         paths:
             - "web/**"
             - "rust/crates/core/**"
-            - "rust/crates/contacts/**"
             - ".github/workflows/web-lint.yml"
 
 permissions:

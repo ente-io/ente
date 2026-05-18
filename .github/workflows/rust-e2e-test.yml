@@ -5,7 +5,6 @@ on:
         paths:
             - "rust/e2e/**"
             - "rust/apps/cli/**"
-            - "rust/crates/accounts/**"
             - "rust/crates/contacts/**"
             - "rust/crates/core/**"
             - "rust/Cargo.lock"

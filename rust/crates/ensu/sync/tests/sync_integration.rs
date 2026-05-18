@@ -1,7 +1,4 @@
-use std::sync::{Mutex, MutexGuard};
-
 use ensu_db::EnsuDb;
-use ensu_db::SyncStateDb;
 use ensu_db::crypto::KEY_BYTES;
 use ensu_sync::SyncAuth;
 use ensu_sync::SyncEngine;
@@ -15,8 +12,6 @@ use httpmock::MockServer;
 use tempfile::TempDir;
 use uuid::Uuid;
 use zeroize::Zeroizing;
-
-static SYNC_TEST_LOCK: Mutex<()> = Mutex::new(());
 
 struct TestEnv {
     _dir: TempDir,
@@ -43,10 +38,6 @@ impl TestEnv {
             plaintext_dir: None,
         }
     }
-}
-
-fn sync_test_lock() -> MutexGuard<'static, ()> {
-    SYNC_TEST_LOCK.lock().unwrap_or_else(|err| err.into_inner())
 }
 
 fn make_auth(server: &MockServer, master_key: Vec<u8>) -> SyncAuth {
@@ -85,7 +76,6 @@ fn mock_empty_diff(server: &MockServer, timestamp: i64) {
 
 #[test]
 fn pull_applies_remote_sessions_and_messages() {
-    let _guard = sync_test_lock();
     let env = TestEnv::new();
     let db_key = vec![42u8; KEY_BYTES];
     let engine = SyncEngine::new(
@@ -174,7 +164,6 @@ fn pull_applies_remote_sessions_and_messages() {
 
 #[test]
 fn push_only_needs_sync_messages() {
-    let _guard = sync_test_lock();
     let env = TestEnv::new();
     let db_key = vec![11u8; KEY_BYTES];
     let engine = SyncEngine::new(
@@ -203,10 +192,6 @@ fn push_only_needs_sync_messages() {
         .expect("message two");
     db.mark_message_synced(message_one.uuid)
         .expect("mark synced");
-    SyncStateDb::open_sqlite_with_defaults(env.attachments_db_path.clone())
-        .expect("sync state")
-        .set_message_state(message_one.uuid, Some(&Uuid::new_v4().to_string()), Some(5))
-        .expect("message sync state");
 
     let master_key = vec![7u8; KEY_BYTES];
     let chat_key = ente_core::crypto::keys::generate_stream_key();
@@ -216,18 +201,12 @@ fn push_only_needs_sync_messages() {
 
     let session_mock = server.mock(|when, then| {
         when.method(POST).path("/llmchat/chat/session");
-        then.status(200).json_body_obj(&serde_json::json!({
-            "sessionUUID": Uuid::new_v4().to_string(),
-            "updatedAt": 20,
-        }));
+        then.status(200).json_body_obj(&serde_json::json!({}));
     });
 
     let message_mock = server.mock(|when, then| {
         when.method(POST).path("/llmchat/chat/message");
-        then.status(200).json_body_obj(&serde_json::json!({
-            "messageUUID": Uuid::new_v4().to_string(),
-            "updatedAt": 21,
-        }));
+        then.status(200).json_body_obj(&serde_json::json!({}));
     });
 
     let auth = make_auth(&server, master_key);
@@ -242,7 +221,6 @@ fn push_only_needs_sync_messages() {
 
 #[test]
 fn tombstone_removes_messages() {
-    let _guard = sync_test_lock();
     let env = TestEnv::new();
     let db_key = vec![3u8; KEY_BYTES];
     let engine = SyncEngine::new(

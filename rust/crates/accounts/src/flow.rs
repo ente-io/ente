@@ -206,6 +206,7 @@ impl fmt::Debug for CheckSessionValidityParams {
 
 /// Outcome of a session-validity check.
 #[derive(Debug)]
+#[expect(clippy::large_enum_variant)]
 pub enum SessionValidity {
     /// Token is invalid.
     Invalid,

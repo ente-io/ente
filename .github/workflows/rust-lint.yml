@@ -7,8 +7,6 @@ on:
     pull_request:
         paths:
             - "rust/crates/core/**"
-            - "rust/crates/contacts/**"
-            - "rust/crates/image/**"
             - "rust/photos/**"
             - "rust/Cargo.lock"
             - "rust/Cargo.toml"

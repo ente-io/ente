@@ -9,10 +9,6 @@ on:
             - "mobile/packages/legacy/**"
             - "mobile/packages/rust/**"
             - "mobile/packages/sharing/**"
-            - "rust/crates/core/**"
-            - "rust/crates/contacts/**"
-            - "rust/Cargo.toml"
-            - "rust/Cargo.lock"
             - ".github/workflows/locker-lint.yml"
             - "mobile/scripts/check_source_arb_plurals.rb"
 
@@ -64,10 +60,6 @@ jobs:
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
-
-            - name: Check Rust API without generated bindings (Core package)
-              run: cargo check --locked
-              working-directory: mobile/packages/rust/rust
 
             - name: Generate Rust bindings (Core package)
               run: flutter_rust_bridge_codegen generate

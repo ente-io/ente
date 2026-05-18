@@ -1,7 +1,0 @@
-cargo:
-  debug:
-    extra_flags: ["--features", "frb-generated"]
-  release:
-    extra_flags: ["--features", "frb-generated"]
-  profile:
-    extra_flags: ["--features", "frb-generated"]

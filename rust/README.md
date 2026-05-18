@@ -2,7 +2,7 @@
 
 ```
                          ┌───────────────────────────────────────┐
-                         │         rust/crates/core/             │
+                         │            rust/crates/core/                 │
                          │        (ente-core crate)              │
                          │                                       │
                          │   Pure Rust - NO FFI annotations      │
@@ -34,20 +34,17 @@
 │  (ente_photos_rust crate) │
 │                           │
 │  Thin app-specific #[frb] │
-│ wrappers for rust/photos  │
+│  wrappers for rust/photos │
 └───────────────────────────┘
 ```
 
 ## Contents (this repo)
 
 - `rust/crates/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
-- `rust/crates/accounts/` (`ente-accounts`) - shared account/auth flows built on `ente-core`.
-- `rust/crates/contacts/` (`ente-contacts`) - shared contacts/domain logic.
 - `rust/photos/` (`ente_photos`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
-- `rust/crates/ensu/` - shared Ensu logic (see `rust/crates/ensu/README.md`).
-- `rust/bindings/uniffi/` - UniFFI bindings for core crypto/auth + Ensu.
 - `rust/apps/cli/` (`ente-rs`) - Rust CLI.
 - `rust/e2e/` (`ente-e2e`) - live Museum-backed Rust end-to-end tests.
+- `rust/crates/ensu/` - LLM chat stack (see `rust/crates/ensu/README.md`).
 
 ## Directory Structure
 
@@ -64,33 +61,37 @@ rust/
 │       └── Cargo.toml
 │
 ├── crates/
-│   ├── accounts/                 # Shared account/auth flows
-│   ├── contacts/                 # Shared contacts/domain logic
-│   ├── core/                     # Pure Rust shared logic (ente-core)
-│   │   ├── src/
-│   │   ├── docs/
-│   │   └── Cargo.toml
-│   ├── ensu/                     # Ensu shared logic
-│   │   ├── db/
-│   │   ├── inference/
-│   │   ├── sync/
-│   │   └── transcription/
 │   └── image/                    # Shared image crate
-│
-├── photos/                       # Shared Photos Rust logic
-│   ├── src/
-│   └── Cargo.toml
-│
-├── bindings/
-│   └── uniffi/                   # UniFFI bindings for core crypto/auth + Ensu
-│       ├── core/
-│       └── ensu/
 │
 ├── e2e/                          # Rust e2e tests requiring live Museum
 │   ├── src/
 │   │   └── lib.rs
 │   ├── tests/
 │   └── Cargo.toml
+│
+├── core/                         # Pure Rust shared logic (ente-core)
+│   ├── src/
+│   │   ├── lib.rs
+│   │   ├── crypto/
+│   │   └── auth/
+│   ├── docs/
+│   │   ├── crypto.md
+│   │   └── auth.md
+│   └── Cargo.toml
+│
+├── photos/                       # Shared Photos Rust logic
+│   ├── src/
+│   │   ├── lib.rs
+│   │   ├── image/
+│   │   ├── ml/
+│   │   └── vector_db.rs
+│   └── Cargo.toml
+│
+└── ensu/                         # LLM chat stack (see rust/crates/ensu/README.md)
+
+rust/bindings/uniffi/                      # UniFFI bindings for core crypto/auth + ensu
+├── core/
+└── ensu/
 
 web/packages/wasm/                # WASM bindings (lives in web workspace)
 ├── src/
@@ -119,10 +120,7 @@ mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
   - Docs: `rust/crates/core/docs/crypto.md`, `rust/crates/core/docs/auth.md`
-- `ente-accounts` - shared account/auth flows
-- `ente-contacts` - shared contacts/domain logic
 - `ente_photos` - shared Photos Rust logic
-- `ensu-db`, `ensu-sync`, `inference_rs`, `ensu-transcription` - shared Ensu Rust logic
 - `ente-rs` - Rust CLI package (`ente-cli` binary)
 - `ente-e2e` - ignored Rust integration tests that run against a live Museum
 - `ente-wasm` - wasm-bindgen wrappers for web

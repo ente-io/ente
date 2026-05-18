@@ -19,8 +19,6 @@ members = [
 ]
 exclude = [
     "apps/ensu/src-tauri",
-    # Photos stays outside the root workspace until its app-provided ONNX Runtime
-    # can move from ort rc.4 to the workspace's ort rc.12.
     "photos",
     "e2e",
 ]

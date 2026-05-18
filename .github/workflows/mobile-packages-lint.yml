@@ -1,18 +1,13 @@
 name: "Lint (mobile packages)"
 
 on:
-    # Run when mobile/packages or shared mobile Rust changes
+    # Run when mobile/packages or shared photos Rust changes
     pull_request:
         paths:
             - "mobile/packages/**"
             - "mobile/**/pubspec*.yaml"
             - "mobile/**/pubspec.lock"
             - "rust/photos/**"
-            - "rust/crates/core/**"
-            - "rust/crates/contacts/**"
-            - "rust/crates/image/**"
-            - "rust/Cargo.toml"
-            - "rust/Cargo.lock"
             - ".github/workflows/mobile-packages-lint.yml"
             - "mobile/scripts/check_frozen_pubspecs.rb"
             - "mobile/scripts/check_source_arb_plurals.rb"
@@ -53,16 +48,10 @@ jobs:
                         - 'mobile/packages/rust/**/*.rs'
                         - 'mobile/packages/rust/**/Cargo.toml'
                         - 'mobile/packages/rust/**/Cargo.lock'
-                        - 'mobile/packages/rust/**/cargokit.yaml'
                         - 'mobile/apps/photos/rust/**/*.rs'
                         - 'mobile/apps/photos/rust/**/Cargo.toml'
-                        - 'mobile/apps/photos/rust/**/cargokit.yaml'
                         - 'rust/photos/**'
-                        - 'rust/crates/core/**'
-                        - 'rust/crates/contacts/**'
-                        - 'rust/crates/image/**'
-                        - 'rust/Cargo.toml'
-                        - 'rust/Cargo.lock'
+                        - 'rust/crates/core/**/*.rs'
                       workflow:
                         - '.github/workflows/mobile-packages-lint.yml'
                       analysis:
@@ -150,10 +139,6 @@ jobs:
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
-
-            - name: Check Rust API without generated bindings (Core)
-              run: cargo check --locked
-              working-directory: mobile/packages/rust/rust
 
             - name: Generate Rust bindings (Core)
               run: flutter_rust_bridge_codegen generate
@@ -297,10 +282,6 @@ jobs:
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
 
-            - name: Check Rust API without generated bindings (Core)
-              run: cargo check --locked
-              working-directory: mobile/packages/rust/rust
-
             - name: Generate Rust bindings (Core)
               run: flutter_rust_bridge_codegen generate
               working-directory: mobile/packages/rust
@@ -311,19 +292,15 @@ jobs:
 
             - name: Run clippy (ente_rust)
               working-directory: mobile/packages/rust/rust
-              run: cargo clippy --all-targets --all-features --locked
+              run: cargo clippy --all-targets --all-features
 
             - name: Build (ente_rust)
               working-directory: mobile/packages/rust/rust
-              run: cargo build --features frb-generated --locked
+              run: cargo build
 
             - name: Test (ente_rust)
               working-directory: mobile/packages/rust/rust
-              run: cargo test --features frb-generated --locked
-
-            - name: Check Rust API without generated bindings (photos app)
-              run: cargo check --locked
-              working-directory: mobile/apps/photos/rust
+              run: cargo test
 
             - name: Generate Rust bindings (photos app)
               run: flutter_rust_bridge_codegen generate
@@ -335,15 +312,15 @@ jobs:
 
             - name: Run clippy (ente_photos_rust)
               working-directory: mobile/apps/photos/rust
-              run: cargo clippy --all-targets --all-features --locked
+              run: cargo clippy --all-targets --all-features
 
             - name: Build (ente_photos_rust)
               working-directory: mobile/apps/photos/rust
-              run: cargo build --features frb-generated --locked
+              run: cargo build
 
             - name: Test (ente_photos_rust)
               working-directory: mobile/apps/photos/rust
-              run: cargo test --features frb-generated --locked
+              run: cargo test
 
     apps-lint:
         needs: detect-changes

@@ -14,7 +14,3 @@ ente-contacts = { path = "../../../../rust/crates/contacts" }
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 missing_docs = "warn"
-
-[features]
-default = []
-frb-generated = []
