@@ -4,17 +4,18 @@ import eslint from "@eslint/js";
 import reactPlugin from "eslint-plugin-react";
 import hooksPlugin from "eslint-plugin-react-hooks";
 import reactRefreshPlugin from "eslint-plugin-react-refresh";
+import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default defineConfig(
     eslint.configs.recommended,
-    tseslint.configs.strictTypeChecked,
-    tseslint.configs.stylisticTypeChecked,
+    ...tseslint.configs.strictTypeChecked,
+    ...tseslint.configs.stylisticTypeChecked,
     {
         languageOptions: { parserOptions: { projectService: true } },
         linterOptions: { reportUnusedDisableDirectives: "error" },
     },
-    { ignores: ["dist", ".env*", "eslint.config.mjs"] },
+    globalIgnores(["dist", ".env*", "eslint.config.mjs"]),
     {
         rules: {
             "@typescript-eslint/restrict-template-expressions": [
@@ -51,8 +52,8 @@ export default tseslint.config(
     {
         files: ["**/*.{jsx,tsx}"],
         plugins: {
-            "react-hooks": hooksPlugin,
-            "react-refresh": reactRefreshPlugin,
+            "react-hooks": { rules: hooksPlugin.rules },
+            "react-refresh": { rules: reactRefreshPlugin.rules },
         },
         rules: {
             ...hooksPlugin.configs.recommended.rules,
