@@ -505,7 +505,7 @@
   "pinLock": "PIN kódos zár",
   "enterPin": "PIN kód megadása",
   "setNewPin": "Új PIN kód beállítása",
-  "importFailureDescNew": "Nem sikerült elemezni a kiválasztott fájlt.",
+  "importFailureDesc": "Nem sikerült elemezni a kiválasztott fájlt.",
   "appLockNotEnabled": "Az alkalmazászár nincs engedélyezve",
   "appLockNotEnabledDescription": "A passkey megtekintéséhez kérjük, hitelesítsd magad",
   "authToViewPasskey": "A jelszó megtekintéséhez kérjük, hitelesítsd magad",

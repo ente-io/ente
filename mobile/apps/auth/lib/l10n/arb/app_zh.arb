@@ -317,7 +317,6 @@
     }
   },
   "sorry": "抱歉",
-  "importFailureDesc": "无法解析所选文件。\n如果您需要帮助，请发邮件给 support@ente.com！",
   "pendingSyncs": "警告",
   "pendingSyncsWarningBody": "您的一些代码尚未备份。\n\n请确保您在登出之前备份这些代码。",
   "checkInboxAndSpamFolder": "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证",
@@ -492,7 +491,7 @@
   "pinLock": "Pin 锁定",
   "enterPin": "输入 PIN 码",
   "setNewPin": "设置新 PIN 码",
-  "importFailureDescNew": "无法解析选定的文件。",
+  "importFailureDesc": "无法解析选定的文件。",
   "appLockNotEnabled": "应用锁未启用",
   "appLockNotEnabledDescription": "请从“安全”>“应用锁”启用应用锁",
   "authToViewPasskey": "请验证身份以查看通行密钥",

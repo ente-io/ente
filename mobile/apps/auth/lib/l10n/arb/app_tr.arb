@@ -505,7 +505,7 @@
   "pinLock": "Pin kilidi",
   "enterPin": "PIN Girin",
   "setNewPin": "Yeni PIN belirleyin",
-  "importFailureDescNew": "Seçilen dosya ayrıştırılamadı.",
+  "importFailureDesc": "Seçilen dosya ayrıştırılamadı.",
   "appLockNotEnabled": "Uygulama kilidi etkin değil",
   "appLockNotEnabledDescription": "Uygulama kilidini Güvenlik -> Uygulama Kilidi üzerinden etkinleştirin",
   "authToViewPasskey": "Geçiş anahtarını görmek için lütfen kimliğinizi doğrulayın",

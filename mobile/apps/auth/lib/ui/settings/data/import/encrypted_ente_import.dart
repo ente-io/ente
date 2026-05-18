@@ -142,7 +142,7 @@ Future<void> _pickEnteJsonFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      context.l10n.importFailureDescNew,
+      context.l10n.importFailureDesc,
     );
   }
 }

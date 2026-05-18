@@ -78,7 +78,7 @@ Future<void> _pickAndOTPFile(BuildContext context) async {
     await showErrorDialog(
       context,
       l10n.sorry,
-      "${l10n.importFailureDescNew}\n Error: ${e.toString()}",
+      "${l10n.importFailureDesc}\n Error: ${e.toString()}",
     );
   }
 }

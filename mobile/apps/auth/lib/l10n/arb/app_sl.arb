@@ -488,7 +488,7 @@
   "pinLock": "Zaklepanje s PIN",
   "enterPin": "Vnesi PIN",
   "setNewPin": "Nastavi nov PIN",
-  "importFailureDescNew": "Izbrane datoteke ni bilo mogoče prebrati",
+  "importFailureDesc": "Izbrane datoteke ni bilo mogoče prebrati",
   "appLockNotEnabled": "Zaklepanje aplikacije ni omogočeno",
   "appLockNotEnabledDescription": "Prosimo, omogočite zaklepanje aplikacije v Nastavitve > Zaklepanje Aplikacije (Security > App Lock)",
   "authToViewPasskey": "Da vidite passkey, se overite",

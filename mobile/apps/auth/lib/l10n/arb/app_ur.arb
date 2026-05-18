@@ -505,7 +505,7 @@
   "pinLock": "پن لاک",
   "enterPin": "پن (PIN) درج کریں",
   "setNewPin": "نیا پن (PIN) سیٹ کریں",
-  "importFailureDescNew": "منتخب فائل کو پارس (parse) نہیں کیا جا سکا۔",
+  "importFailureDesc": "منتخب فائل کو پارس (parse) نہیں کیا جا سکا۔",
   "appLockNotEnabled": "ایپ لاک فعال نہیں ہے",
   "appLockNotEnabledDescription": "براہ کرم Security > App Lock سے ایپ لاک فعال کریں",
   "authToViewPasskey": "پاس کی passkey دیکھنے کے لیے براہ کرم توثیق کریں",
