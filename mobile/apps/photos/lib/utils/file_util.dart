@@ -299,7 +299,10 @@ Future<_LivePhoto?> _downloadLivePhoto(
           await imageFile.writeAsBytes(data);
           File imageConvertedFile = imageFile;
           if ((fileExtension == "unknown") ||
-              (Platform.isAndroid && fileExtension == "heic")) {
+              (Platform.isAndroid &&
+                  (fileExtension == "heic" ||
+                      fileExtension == "heif" ||
+                      fileExtension == "hif"))) {
             final compressResult =
                 await FlutterImageCompress.compressAndGetFile(
               decodePath,

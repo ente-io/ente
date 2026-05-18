@@ -767,7 +767,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   bool _isHeic() {
     final ext = _photo.displayName.toLowerCase().split('.').last;
-    return ext == 'heic' || ext == 'heif';
+    return ext == 'heic' || ext == 'heif' || ext == 'hif';
   }
 
   bool _isRawFile() {

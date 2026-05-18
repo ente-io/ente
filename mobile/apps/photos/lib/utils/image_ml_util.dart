@@ -104,7 +104,12 @@ Future<DecodedImage> decodeImageFromPath(
         minWidth: 20000, // High value to ensure image is not scaled down
         minHeight: 20000, // High value to ensure image is not scaled down
       );
-      image = await decodeImageFromData(convertedData!);
+      if (convertedData == null) {
+        throw Exception(
+          'InvalidImageFormatException: Error decoding image of format $format',
+        );
+      }
+      image = await decodeImageFromData(convertedData);
       _logger.info('Conversion successful, jpeg decoded');
       if (image.width >= 20000 || image.height >= 20000) {
         // Failing and storing empty result when the image dimensions are higher than max compression limits
