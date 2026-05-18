@@ -821,7 +821,17 @@
   "storageLimitExplanation": "Lege die maximale Speicherkapazität fest, die dieses Mitglied verwenden kann. Sobald das Limit erreicht ist, wird ein Hochladen nicht mehr möglich sein.",
   "limit": "Limit",
   "noLimit": "Kein Limit",
+  "currentUsageNote": "Aktuell in Benutzung: {amount}. Auf 0 setzen, um das Limit aufzuheben.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
   "leaveFamilyConfirmTitle": "Familientarif verlassen?",
+  "leaveFamilyConfirmBody": "Du verlierst Zugriff auf den geteilten Speicher.",
   "referrals": "Weiterempfehlungen",
   "notifications": "Benachrichtigungen",
   "sharedPhotoNotifications": "Neue geteilte Fotos und Alben",
@@ -929,7 +939,7 @@
     "type": "text"
   },
   "faqs": "FAQs",
-  "renewsOn": "Erneuert am {endDate}",
+  "renewsOn": "Abo verlängert sich am {endDate}",
   "freeTrialValidTill": "Kostenlose Demo verfügbar bis zum {endDate}",
   "validTill": "Gültig bis {endDate}",
   "addOnValidTill": "Dein {storageAmount} Add-on ist gültig bis {endDate}",
@@ -2023,7 +2033,7 @@
   "@failedToFetchActiveSessions": {
     "description": "In session page, warn user (in toast) that active sessions could not be fetched."
   },
-  "failedToRefreshStripeSubscription": "Abonnement konnte nicht erneuert werden",
+  "failedToRefreshStripeSubscription": "Abo konnte nicht verlängert werden",
   "failedToPlayVideo": "Fehler beim Abspielen des Videos",
   "uploadIsIgnoredDueToIgnorereason": "Upload wird aufgrund von {ignoreReason} ignoriert",
   "@uploadIsIgnoredDueToIgnorereason": {
@@ -2845,6 +2855,8 @@
   "ritualCreateNew": "Neu erstellen",
   "ritualAlbumSelectionPlaceholder": "Album auswählen",
   "ritualPickEmojiTitle": "Emoji auswählen",
+  "ritualCustomKeyboardLabel": "Benutzerdefiniert (Tastatur)",
+  "ritualEmojiKeyboardHint": "Tippe, um die Emoji-Tastatur zu öffnen",
   "feed": "Feed",
   "newCommentNotificationTitle": "Du hast einen Kommentar erhalten",
   "@newCommentNotificationTitle": {
