@@ -1,4 +1,5 @@
 import {
+    Box,
     Button,
     CircularProgress,
     Paper,
@@ -73,7 +74,7 @@ export const FamilyTableComponent: React.FC = () => {
         <>
             <TableContainer
                 component={Paper}
-                style={{ marginTop: "20px", backgroundColor: "#F1F1F3" }}
+                sx={{ mt: "20px", bgcolor: "#F1F1F3" }}
             >
                 <Table aria-label="family-table">
                     <TableHead>
@@ -137,7 +138,7 @@ export const FamilyTableComponent: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <div style={{ marginTop: "20px" }}>
+            <Box sx={{ mt: "20px" }}>
                 <Button
                     variant="contained"
                     color="error"
@@ -145,7 +146,7 @@ export const FamilyTableComponent: React.FC = () => {
                 >
                     Close Family
                 </Button>
-            </div>
+            </Box>
 
             {closeFamilyOpen && (
                 <CloseFamily

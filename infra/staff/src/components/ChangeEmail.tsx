@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import {
+    Box,
     Button,
     Dialog,
     DialogActions,
@@ -13,11 +14,8 @@ import {
     apiOrigin,
     getCurrentAdminUserId,
     requireToken,
+    responseErrorMessage,
 } from "../services/support";
-
-interface ErrorResponse {
-    message: string;
-}
 
 interface ChangeEmailProps {
     open: boolean;
@@ -64,20 +62,18 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-AUTH-TOKEN": token,
+                    "X-Auth-Token": token,
                 },
                 body: JSON.stringify(body),
             });
 
             if (!response.ok) {
-                let errorMessage = "Network response was not ok";
-                try {
-                    const errorData = (await response.json()) as ErrorResponse;
-                    errorMessage = errorData.message;
-                } catch (error) {
-                    console.error("Error parsing error response:", error);
-                }
-                throw new Error(errorMessage);
+                throw new Error(
+                    await responseErrorMessage(
+                        response,
+                        "Network response was not ok",
+                    ),
+                );
             }
 
             onClose();
@@ -100,28 +96,22 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
                 paper: { style: { width: "444px", height: "300px" } },
             }}
         >
-            <DialogTitle style={{ marginBottom: "20px", marginTop: "20px" }}>
+            <DialogTitle sx={dialogTitleSx}>
                 Change Email
-                <Button
-                    onClick={onClose}
-                    style={{ position: "absolute", right: 10, top: 10 }}
-                >
-                    <CloseIcon style={{ color: "black" }} />
+                <Button onClick={onClose} sx={dialogCloseButtonSx}>
+                    <CloseIcon sx={{ color: "black" }} />
                 </Button>
             </DialogTitle>
             <DialogContent>
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: "16px" }}>
-                        <label
+                    <Box sx={{ mb: 2 }}>
+                        <Box
+                            component="label"
                             htmlFor="newEmail"
-                            style={{
-                                textAlign: "left",
-                                display: "block",
-                                marginBottom: "4px",
-                            }}
+                            sx={fieldLabelSx}
                         >
                             Email
-                        </label>
+                        </Box>
                         <TextField
                             id="newEmail"
                             name="newEmail"
@@ -129,19 +119,10 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
                             onChange={handleChange}
                             fullWidth
                         />
-                    </div>
+                    </Box>
 
-                    <DialogActions
-                        style={{ justifyContent: "center", marginTop: "40px" }}
-                    >
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            style={{
-                                backgroundColor: "#00B33C",
-                                color: "white",
-                            }}
-                        >
+                    <DialogActions sx={{ justifyContent: "center", mt: 5 }}>
+                        <Button type="submit" variant="contained" sx={submitSx}>
                             Change Email
                         </Button>
                     </DialogActions>
@@ -150,3 +131,11 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         </Dialog>
     );
 };
+
+const dialogTitleSx = { mb: "20px", mt: "20px" };
+
+const dialogCloseButtonSx = { position: "absolute", right: 10, top: 10 };
+
+const fieldLabelSx = { display: "block", mb: "4px", textAlign: "left" };
+
+const submitSx = { bgcolor: "#00B33C", color: "white" };

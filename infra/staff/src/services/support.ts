@@ -30,6 +30,30 @@ export const requireToken = () => {
     return token;
 };
 
+export const responseErrorMessage = async (
+    response: Response,
+    fallback: string,
+) => {
+    const text = await response.text();
+    if (!text) {
+        return fallback;
+    }
+
+    try {
+        const body = JSON.parse(text) as unknown;
+        if (body && typeof body === "object" && "message" in body) {
+            const { message } = body as { message?: unknown };
+            if (typeof message === "string" && message) {
+                return message;
+            }
+        }
+    } catch {
+        return text;
+    }
+
+    return text;
+};
+
 export const getCurrentAdminUser = async <T>(): Promise<T> => {
     const email = requireEmail();
     const token = requireToken();
@@ -37,7 +61,11 @@ export const getCurrentAdminUser = async <T>(): Promise<T> => {
     const response = await fetch(url, {
         headers: { "Content-Type": "application/json", "X-Auth-Token": token },
     });
-    if (!response.ok) throw new Error("Failed to fetch user data");
+    if (!response.ok) {
+        throw new Error(
+            await responseErrorMessage(response, "Failed to fetch user data"),
+        );
+    }
     return (await response.json()) as T;
 };
 

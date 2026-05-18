@@ -1,6 +1,7 @@
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CloseIcon from "@mui/icons-material/Close";
 import {
+    Box,
     Button,
     Dialog,
     DialogActions,
@@ -20,6 +21,7 @@ import {
     apiOrigin,
     getCurrentAdminUser,
     requireToken,
+    responseErrorMessage,
 } from "../services/support";
 
 interface Subscription {
@@ -165,13 +167,18 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-AUTH-TOKEN": token,
+                    "X-Auth-Token": token,
                 },
                 body: JSON.stringify(body),
             });
 
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                throw new Error(
+                    await responseErrorMessage(
+                        response,
+                        "Network response was not ok",
+                    ),
+                );
             }
             onClose();
         } catch (error) {
@@ -196,58 +203,37 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 },
             }}
         >
-            <DialogTitle style={{ marginBottom: "20px", marginTop: "20px" }}>
+            <DialogTitle sx={dialogTitleSx}>
                 Update Subscription
-                <Button
-                    onClick={onClose}
-                    style={{ position: "absolute", right: 10, top: 10 }}
-                >
-                    <CloseIcon style={{ color: "black" }} />
+                <Button onClick={onClose} sx={dialogCloseButtonSx}>
+                    <CloseIcon sx={{ color: "black" }} />
                 </Button>
             </DialogTitle>
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={4}>
+                        <SubscriptionTextField
+                            id="productId"
+                            label="Product ID"
+                            value={values.productId}
+                            onChange={handleChange}
+                        />
                         <Grid size={6}>
-                            <div style={{ marginBottom: "8px" }}>
-                                <label
-                                    htmlFor="productId"
-                                    style={{
-                                        textAlign: "left",
-                                        display: "block",
-                                        marginBottom: "4px",
-                                    }}
-                                >
-                                    Product ID
-                                </label>
-                                <TextField
-                                    id="productId"
-                                    name="productId"
-                                    value={values.productId}
-                                    onChange={handleChange}
-                                    fullWidth
-                                />
-                            </div>
-                        </Grid>
-                        <Grid size={6}>
-                            <div style={{ marginBottom: "8px" }}>
-                                <label
+                            <Box sx={fieldWrapperSx}>
+                                <Box
+                                    component="label"
                                     htmlFor="provider"
-                                    style={{
-                                        textAlign: "left",
-                                        display: "block",
-                                        marginBottom: "4px",
-                                    }}
+                                    sx={fieldLabelSx}
                                 >
                                     Provider
-                                </label>
+                                </Box>
                                 <Select
                                     id="provider"
                                     name="provider"
                                     value={values.provider}
                                     onChange={handleChangeProvider}
                                     fullWidth
-                                    style={{ textAlign: "left" }}
+                                    sx={{ textAlign: "left" }}
                                 >
                                     <MenuItem value="stripe">Stripe</MenuItem>
                                     <MenuItem value="appstore">
@@ -257,63 +243,30 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                     <MenuItem value="bitpay">BitPay</MenuItem>
                                     <MenuItem value="None">None</MenuItem>
                                 </Select>
-                            </div>
+                            </Box>
                         </Grid>
+                        <SubscriptionTextField
+                            id="storage"
+                            label="Storage (GB)"
+                            type="number"
+                            value={values.storage}
+                            onChange={handleChange}
+                        />
+                        <SubscriptionTextField
+                            id="transactionId"
+                            label="Transaction ID"
+                            value={values.transactionId}
+                            onChange={handleChange}
+                        />
                         <Grid size={6}>
-                            <div style={{ marginBottom: "8px" }}>
-                                <label
-                                    htmlFor="storage"
-                                    style={{
-                                        textAlign: "left",
-                                        display: "block",
-                                        marginBottom: "4px",
-                                    }}
-                                >
-                                    Storage (GB)
-                                </label>
-                                <TextField
-                                    id="storage"
-                                    name="storage"
-                                    type="number"
-                                    value={values.storage}
-                                    onChange={handleChange}
-                                    fullWidth
-                                />
-                            </div>
-                        </Grid>
-                        <Grid size={6}>
-                            <div style={{ marginBottom: "8px" }}>
-                                <label
-                                    htmlFor="transactionId"
-                                    style={{
-                                        textAlign: "left",
-                                        display: "block",
-                                        marginBottom: "4px",
-                                    }}
-                                >
-                                    Transaction ID
-                                </label>
-                                <TextField
-                                    id="transactionId"
-                                    name="transactionId"
-                                    value={values.transactionId}
-                                    onChange={handleChange}
-                                    fullWidth
-                                />
-                            </div>
-                        </Grid>
-                        <Grid size={6}>
-                            <div style={{ marginBottom: "8px" }}>
-                                <label
+                            <Box sx={fieldWrapperSx}>
+                                <Box
+                                    component="label"
                                     htmlFor="expiryTime"
-                                    style={{
-                                        textAlign: "left",
-                                        display: "block",
-                                        marginBottom: "4px",
-                                    }}
+                                    sx={fieldLabelSx}
                                 >
                                     Expiry Time
-                                </label>
+                                </Box>
                                 <TextField
                                     id="expiryTime"
                                     name="expiryTime"
@@ -355,18 +308,11 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                         inline
                                     />
                                 )}
-                            </div>
+                            </Box>
                         </Grid>
                     </Grid>
-                    <DialogActions style={{ justifyContent: "center" }}>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            style={{
-                                backgroundColor: "#00B33C",
-                                color: "white",
-                            }}
-                        >
+                    <DialogActions sx={{ justifyContent: "center" }}>
+                        <Button type="submit" variant="contained" sx={submitSx}>
                             Update
                         </Button>
                     </DialogActions>
@@ -375,3 +321,47 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         </Dialog>
     );
 };
+
+type SubscriptionTextFieldId = "productId" | "storage" | "transactionId";
+
+interface SubscriptionTextFieldProps {
+    id: SubscriptionTextFieldId;
+    label: string;
+    type?: string;
+    value: string | number;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const SubscriptionTextField = ({
+    id,
+    label,
+    type,
+    value,
+    onChange,
+}: SubscriptionTextFieldProps) => (
+    <Grid size={6}>
+        <Box sx={fieldWrapperSx}>
+            <Box component="label" htmlFor={id} sx={fieldLabelSx}>
+                {label}
+            </Box>
+            <TextField
+                id={id}
+                name={id}
+                type={type}
+                value={value}
+                onChange={onChange}
+                fullWidth
+            />
+        </Box>
+    </Grid>
+);
+
+const dialogTitleSx = { mb: "20px", mt: "20px" };
+
+const dialogCloseButtonSx = { position: "absolute", right: 10, top: 10 };
+
+const fieldWrapperSx = { mb: 1 };
+
+const fieldLabelSx = { display: "block", mb: "4px", textAlign: "left" };
+
+const submitSx = { bgcolor: "#00B33C", color: "white" };

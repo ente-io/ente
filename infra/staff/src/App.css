@@ -73,6 +73,10 @@
     font-weight: bold;
 }
 
+.empty-state-image {
+    margin-top: 150px;
+}
+
 @media screen and (max-width: 475px) {
     .link-text {
         font-size: 30px;

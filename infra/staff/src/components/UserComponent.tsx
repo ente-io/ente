@@ -204,7 +204,7 @@ const DataTable: React.FC<DataTableProps> = ({
                     aria-label="edit"
                     onClick={onEditSubscription}
                 >
-                    <EditIcon style={{ color: "black", marginRight: "15px" }} />
+                    <EditIcon sx={{ color: "black", mr: "15px" }} />
                 </IconButton>
             )}
         </Box>
@@ -226,8 +226,8 @@ const DataTable: React.FC<DataTableProps> = ({
                             <TableCell
                                 component="th"
                                 scope="row"
-                                style={{
-                                    padding: "16px",
+                                sx={{
+                                    p: "16px",
                                     borderBottom:
                                         index === 1 || index === 0
                                             ? "1px solid rgba(224, 224, 224, 1)"
@@ -238,8 +238,8 @@ const DataTable: React.FC<DataTableProps> = ({
                             </TableCell>
                             <TableCell
                                 align="right"
-                                style={{
-                                    padding: "10px",
+                                sx={{
+                                    p: "10px",
                                     borderBottom:
                                         index === 1 || index === 0
                                             ? "1px solid rgba(224, 224, 224, 1)"
@@ -266,13 +266,13 @@ const DataTable: React.FC<DataTableProps> = ({
                         <TableCell
                             component="th"
                             scope="row"
-                            style={{ padding: "16px", borderBottom: "none" }}
+                            sx={{ p: "16px", borderBottom: "none" }}
                         >
                             Add OTT
                         </TableCell>
                         <TableCell
                             align="right"
-                            style={{ padding: "10px", borderBottom: "none" }}
+                            sx={{ p: "10px", borderBottom: "none" }}
                         >
                             <Button
                                 variant="contained"
@@ -317,7 +317,7 @@ const renderTableCellContent = (
                         aria-label="edit-email"
                         onClick={onEditEmail}
                     >
-                        <EditIcon style={{ color: "black" }} />
+                        <EditIcon sx={{ color: "black" }} />
                     </IconButton>
                 </Box>
             );

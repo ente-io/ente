@@ -84,7 +84,7 @@ export const App: React.FC = () => {
                 const response = await fetch(url, {
                     headers: {
                         "Content-Type": "application/json",
-                        "X-AUTH-TOKEN": authToken ?? getToken(),
+                        "X-Auth-Token": authToken ?? getToken(),
                     },
                 });
                 if (!response.ok) {
@@ -235,7 +235,7 @@ export const App: React.FC = () => {
                                     console.error("Fetch data error:", error),
                                 );
                             }}
-                            style={{ padding: "0 16px" }}
+                            sx={{ px: 2 }}
                         >
                             FETCH
                         </Button>
@@ -310,7 +310,7 @@ export const App: React.FC = () => {
                     <img
                         src={duckieimage}
                         alt="duckie"
-                        style={{ marginTop: "150px" }}
+                        className="empty-state-image"
                     />
                 )}
             </div>

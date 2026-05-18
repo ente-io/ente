@@ -78,96 +78,90 @@ export const TokensTableComponent: React.FC = () => {
     }
 
     return (
-        <div style={{ marginTop: "20px", marginBottom: "20px" }}>
-            <TableContainer
-                component={Paper}
-                style={{ backgroundColor: "#F1F1F3" }}
-            >
-                <Table aria-label="tokens-table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell
-                                sortDirection={
-                                    orderBy === "creationTime" ? order : false
+        <TableContainer
+            component={Paper}
+            sx={{ mt: "20px", mb: "20px", bgcolor: "#F1F1F3" }}
+        >
+            <Table aria-label="tokens-table">
+                <TableHead>
+                    <TableRow>
+                        <TableCell
+                            sortDirection={
+                                orderBy === "creationTime" ? order : false
+                            }
+                        >
+                            <TableSortLabel
+                                active={orderBy === "creationTime"}
+                                direction={
+                                    orderBy === "creationTime" ? order : "asc"
+                                }
+                                onClick={() =>
+                                    handleRequestSort("creationTime")
                                 }
                             >
-                                <TableSortLabel
-                                    active={orderBy === "creationTime"}
-                                    direction={
-                                        orderBy === "creationTime"
-                                            ? order
-                                            : "asc"
-                                    }
-                                    onClick={() =>
-                                        handleRequestSort("creationTime")
-                                    }
-                                >
-                                    Created At
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell
-                                sortDirection={
-                                    orderBy === "lastUsedTime" ? order : false
+                                Created At
+                            </TableSortLabel>
+                        </TableCell>
+                        <TableCell
+                            sortDirection={
+                                orderBy === "lastUsedTime" ? order : false
+                            }
+                        >
+                            <TableSortLabel
+                                active={orderBy === "lastUsedTime"}
+                                direction={
+                                    orderBy === "lastUsedTime" ? order : "asc"
+                                }
+                                onClick={() =>
+                                    handleRequestSort("lastUsedTime")
                                 }
                             >
-                                <TableSortLabel
-                                    active={orderBy === "lastUsedTime"}
-                                    direction={
-                                        orderBy === "lastUsedTime"
-                                            ? order
-                                            : "asc"
-                                    }
-                                    onClick={() =>
-                                        handleRequestSort("lastUsedTime")
-                                    }
+                                Last Used At
+                            </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                            <b>User Agent</b>
+                        </TableCell>
+                        <TableCell>
+                            <b>App</b>
+                        </TableCell>
+                        <TableCell>
+                            <b>Is Deleted</b>
+                        </TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {sortedTokens.map((token, index) => (
+                        <TableRow key={index}>
+                            <TableCell>
+                                {formatDate(token.creationTime)}
+                            </TableCell>
+                            <TableCell>
+                                {formatDate(token.lastUsedTime)}
+                            </TableCell>
+                            <TableCell>{token.ua || "-"}</TableCell>
+                            <TableCell>{token.app}</TableCell>
+                            <TableCell>
+                                <span
+                                    style={{
+                                        backgroundColor: token.isDeleted
+                                            ? "#494949"
+                                            : "transparent",
+                                        color: token.isDeleted
+                                            ? "white"
+                                            : "inherit",
+                                        padding: "4px 8px",
+                                        borderRadius: "10px",
+                                    }}
                                 >
-                                    Last Used At
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell>
-                                <b>User Agent</b>
-                            </TableCell>
-                            <TableCell>
-                                <b>App</b>
-                            </TableCell>
-                            <TableCell>
-                                <b>Is Deleted</b>
+                                    {token.isDeleted ? "Yes" : "No"}
+                                </span>
                             </TableCell>
                         </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {sortedTokens.map((token, index) => (
-                            <TableRow key={index}>
-                                <TableCell>
-                                    {formatDate(token.creationTime)}
-                                </TableCell>
-                                <TableCell>
-                                    {formatDate(token.lastUsedTime)}
-                                </TableCell>
-                                <TableCell>{token.ua || "-"}</TableCell>
-                                <TableCell>{token.app}</TableCell>
-                                <TableCell>
-                                    <span
-                                        style={{
-                                            backgroundColor: token.isDeleted
-                                                ? "#494949"
-                                                : "transparent",
-                                            color: token.isDeleted
-                                                ? "white"
-                                                : "inherit",
-                                            padding: "4px 8px",
-                                            borderRadius: "10px",
-                                        }}
-                                    >
-                                        {token.isDeleted ? "Yes" : "No"}
-                                    </span>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </div>
+                    ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
     );
 };
 

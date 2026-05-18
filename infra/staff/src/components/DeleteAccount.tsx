@@ -1,15 +1,11 @@
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Paper,
-} from "@mui/material";
 import React from "react";
 import { getEmail } from "../services/session";
-import { apiOrigin, requireToken } from "../services/support";
+import {
+    apiOrigin,
+    requireToken,
+    responseErrorMessage,
+} from "../services/support";
+import { ConfirmationDialog } from "./ConfirmationDialog";
 
 interface DeleteAccountProps {
     open: boolean;
@@ -25,14 +21,17 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
             const email = getEmail();
             if (!email) throw new Error("Email not found");
             const token = requireToken();
-
-            const deleteUrl = `${apiOrigin}/admin/user/delete?email=${encodeURIComponent(email)}`;
-            const response = await fetch(deleteUrl, {
-                method: "DELETE",
-                headers: { "X-Auth-Token": token },
-            });
+            const response = await fetch(
+                `${apiOrigin}/admin/user/delete?email=${encodeURIComponent(email)}`,
+                { method: "DELETE", headers: { "X-Auth-Token": token } },
+            );
             if (!response.ok) {
-                throw new Error("Failed to delete user account");
+                throw new Error(
+                    await responseErrorMessage(
+                        response,
+                        "Failed to delete user account",
+                    ),
+                );
             }
             handleClose();
         } catch (error) {
@@ -45,59 +44,22 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     };
 
     return (
-        <Dialog
+        <ConfirmationDialog
             open={open}
             onClose={handleClose}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-            PaperComponent={Paper}
-            sx={{
-                width: "499px",
-                height: "286px",
-                margin: "auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-            slotProps={{
-                backdrop: {
-                    style: { backgroundColor: "rgba(255, 255, 255, 0.9)" },
-                },
-            }}
-        >
-            <DialogTitle id="alert-dialog-title">Delete Account?</DialogTitle>
-            <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                    Are you sure you want to delete the account?
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions sx={{ justifyContent: "center" }}>
-                <Button
-                    onClick={handleClose}
-                    sx={{
-                        bgcolor: "white",
-                        color: "black",
-                        "&:hover": { bgcolor: "#FAFAFA" },
-                    }}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={() => {
+            title="Delete Account?"
+            actions={[
+                {
+                    label: "Delete",
+                    onClick: () => {
                         handleDelete().catch((error: unknown) =>
                             console.error("Fetch data error:", error),
                         );
-                    }}
-                    sx={{
-                        bgcolor: "#F4473D",
-                        color: "white",
-                        "&:hover": { bgcolor: "#E53935" },
-                    }}
-                >
-                    Delete
-                </Button>
-            </DialogActions>
-        </Dialog>
+                    },
+                },
+            ]}
+        >
+            Are you sure you want to delete the account?
+        </ConfirmationDialog>
     );
 };

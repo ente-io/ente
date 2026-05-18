@@ -15,7 +15,11 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { apiOrigin, requireToken } from "../services/support";
+import {
+    apiOrigin,
+    requireToken,
+    responseErrorMessage,
+} from "../services/support";
 
 const APP_OPTIONS = [
     { label: "Photos", value: "photos" },
@@ -67,7 +71,7 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
 
             const token = requireToken();
 
-            const otp = generateOtp();
+            const otp = generateOTP();
             const expiryTime = computeExpiryTimeMicros();
             setExpiryPreview(expiryTime);
 
@@ -86,8 +90,12 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
             });
 
             if (!response.ok) {
-                const message = await response.text();
-                throw new Error(message || "Failed to create OTT");
+                throw new Error(
+                    await responseErrorMessage(
+                        response,
+                        "Failed to create OTT",
+                    ),
+                );
             }
 
             setCreatedOtp(otp);
@@ -198,7 +206,8 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
 const computeExpiryTimeMicros = () =>
     Date.now() * 1000 + 7 * 24 * 60 * 60 * 1_000_000;
 
-const generateOtp = () =>
-    Math.floor(Math.random() * 1_000_000)
-        .toString()
-        .padStart(6, "0");
+const generateOTP = () => {
+    const values = new Uint32Array(1);
+    crypto.getRandomValues(values);
+    return `${values[0]! % 1_000_000}`.padStart(6, "0");
+};

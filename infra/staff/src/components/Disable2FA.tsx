@@ -1,18 +1,11 @@
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Paper,
-} from "@mui/material";
 import React, { useState } from "react";
 import {
     apiOrigin,
     getCurrentAdminUserId,
     requireToken,
+    responseErrorMessage,
 } from "../services/support";
+import { ConfirmationDialog } from "./ConfirmationDialog";
 
 interface Disable2FAProps {
     open: boolean;
@@ -32,20 +25,25 @@ export const Disable2FA: React.FC<Disable2FAProps> = ({
             setLoading(true);
             const token = requireToken();
             const userID = await getCurrentAdminUserId();
-
-            const disableUrl = `${apiOrigin}/admin/user/disable-2fa`;
-            const disableResponse = await fetch(disableUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
+            const response = await fetch(
+                `${apiOrigin}/admin/user/disable-2fa`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Auth-Token": token,
+                    },
+                    body: JSON.stringify({ userID }),
                 },
-                body: JSON.stringify({ userID }),
-            });
+            );
 
-            if (!disableResponse.ok) {
-                const errorResponse = await disableResponse.text();
-                throw new Error(`Failed to disable 2FA: ${errorResponse}`);
+            if (!response.ok) {
+                throw new Error(
+                    await responseErrorMessage(
+                        response,
+                        "Failed to disable 2FA",
+                    ),
+                );
             }
             handleDisable2FA();
             handleClose();
@@ -61,60 +59,24 @@ export const Disable2FA: React.FC<Disable2FAProps> = ({
     };
 
     return (
-        <Dialog
+        <ConfirmationDialog
             open={open}
             onClose={handleClose}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-            PaperComponent={Paper}
-            sx={{
-                width: "499px",
-                height: "286px",
-                margin: "auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-            slotProps={{
-                backdrop: {
-                    style: { backgroundColor: "rgba(255, 255, 255, 0.9)" },
-                },
-            }}
-        >
-            <DialogTitle id="alert-dialog-title">Disable 2FA?</DialogTitle>
-            <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                    Are you sure you want to disable 2FA for this account?
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions sx={{ justifyContent: "center" }}>
-                <Button
-                    onClick={handleClose}
-                    sx={{
-                        bgcolor: "white",
-                        color: "black",
-                        "&:hover": { bgcolor: "#FAFAFA" },
-                    }}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={() => {
+            title="Disable 2FA?"
+            actions={[
+                {
+                    label: "Disable",
+                    loadingLabel: "Disabling...",
+                    loading,
+                    onClick: () => {
                         handleDisable().catch((error: unknown) =>
                             console.error(error),
                         );
-                    }}
-                    sx={{
-                        bgcolor: "#F4473D",
-                        color: "white",
-                        "&:hover": { bgcolor: "#E53935" },
-                    }}
-                    disabled={loading}
-                >
-                    {loading ? "Disabling..." : "Disable"}
-                </Button>
-            </DialogActions>
-        </Dialog>
+                    },
+                },
+            ]}
+        >
+            Are you sure you want to disable 2FA for this account?
+        </ConfirmationDialog>
     );
 };
