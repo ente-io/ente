@@ -11,9 +11,8 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
-import type { FamilyMember, UserData } from "../types";
+import { getCurrentAdminUser } from "../services/support";
+import type { FamilyMember } from "../types";
 import { formatUsageToGB } from "../utils/";
 import CloseFamily from "./CloseFamily";
 
@@ -26,22 +25,11 @@ const FamilyTableComponent: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const encodedEmail = encodeURIComponent(getEmail());
-                const token = getToken();
-                const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Auth-Token": token,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const userData = (await response.json()) as UserData; // Typecast to UserData interface
+                const userData = await getCurrentAdminUser<{
+                    details?: { familyData?: { members?: FamilyMember[] } };
+                }>();
                 const members: FamilyMember[] =
-                    userData.details?.familyData.members ?? [];
+                    userData.details?.familyData?.members ?? [];
                 setFamilyMembers(members);
             } catch (error) {
                 console.error("Error fetching family data:", error);
@@ -62,11 +50,6 @@ const FamilyTableComponent: React.FC = () => {
 
     const handleCloseCloseFamily = () => {
         setCloseFamilyOpen(false);
-    };
-
-    const handleCloseFamily = () => {
-        console.log("Close family action");
-        handleOpenCloseFamily();
     };
 
     if (loading) {
@@ -153,7 +136,7 @@ const FamilyTableComponent: React.FC = () => {
                 <Button
                     variant="contained"
                     color="error"
-                    onClick={handleCloseFamily}
+                    onClick={handleOpenCloseFamily}
                 >
                     Close Family
                 </Button>

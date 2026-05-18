@@ -8,8 +8,8 @@ import {
     Paper,
 } from "@mui/material";
 import React from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
+import { getEmail } from "../services/session";
+import { apiOrigin, requireToken } from "../services/support";
 
 interface DeleteAccountProps {
     open: boolean;
@@ -19,11 +19,11 @@ interface DeleteAccountProps {
 const DeleteAccount: React.FC<DeleteAccountProps> = ({ open, handleClose }) => {
     const handleDelete = async () => {
         try {
-            const encodedEmail = encodeURIComponent(getEmail());
-            console.log(encodedEmail);
-            const token = getToken();
+            const email = getEmail();
+            if (!email) throw new Error("Email not found");
+            const token = requireToken();
 
-            const deleteUrl = `${apiOrigin}/admin/user/delete?email=${encodedEmail}`;
+            const deleteUrl = `${apiOrigin}/admin/user/delete?email=${encodeURIComponent(email)}`;
             const response = await fetch(deleteUrl, {
                 method: "DELETE",
                 headers: { "X-Auth-Token": token },
@@ -31,8 +31,7 @@ const DeleteAccount: React.FC<DeleteAccountProps> = ({ open, handleClose }) => {
             if (!response.ok) {
                 throw new Error("Failed to delete user account");
             }
-            handleClose(); // Close dialog on successful delete
-            console.log("Account deleted successfully");
+            handleClose();
         } catch (error) {
             if (error instanceof Error) {
                 alert("Failed to delete the account: " + error.message);
@@ -98,7 +97,7 @@ const DeleteAccount: React.FC<DeleteAccountProps> = ({ open, handleClose }) => {
                             "&:hover": { bgcolor: "#E53935" },
                         }}
                     >
-                        Delete{" "}
+                        Delete
                     </Button>
                 </DialogActions>
             </Dialog>

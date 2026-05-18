@@ -8,19 +8,17 @@ import {
     TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
+import { getEmail } from "../services/session";
+import {
+    apiOrigin,
+    getCurrentAdminUserId,
+    requireToken,
+} from "../services/support";
 import type { ErrorResponse } from "../types";
 
-// The below interfaces will only be used in this file
-// hence not including them into a sub-merged types file
 interface ChangeEmailProps {
     open: boolean;
     onClose: () => void;
-}
-
-interface UserDataResponse {
-    subscription: { userID: string } | null;
 }
 
 const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
@@ -30,30 +28,10 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
     useEffect(() => {
         const fetchUserID = async () => {
             const email = getEmail();
-            setNewEmail(email); // Set initial email state
+            setNewEmail(email);
 
-            const encodedEmail = encodeURIComponent(email);
-
-            const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
             try {
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-AUTH-TOKEN": getToken(),
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-
-                const data = (await response.json()) as UserDataResponse;
-                if (data.subscription) {
-                    setUserID(data.subscription.userID); // Update userID state
-                } else {
-                    throw new Error("Subscription data not found");
-                }
+                setUserID(await getCurrentAdminUserId());
             } catch (error) {
                 console.error("Error fetching user ID:", error);
             }
@@ -67,7 +45,7 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
     }, [open]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setNewEmail(event.target.value); // Update newEmail state on input change
+        setNewEmail(event.target.value);
     };
 
     const handleSubmit = async (
@@ -75,7 +53,7 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
     ) => {
         event.preventDefault();
 
-        const token = getToken();
+        const token = requireToken();
         const url = `${apiOrigin}/admin/user/change-email`;
 
         const body = { userID, email: newEmail };
@@ -102,7 +80,6 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
                 );
             }
 
-            console.log("Email updated successfully");
             onClose();
         } catch (error) {
             console.error("Error updating email:", error);

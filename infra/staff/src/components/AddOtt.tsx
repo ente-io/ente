@@ -15,8 +15,7 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useEffect, useState } from "react";
-import { getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
+import { apiOrigin, requireToken } from "../services/support";
 
 const APP_OPTIONS = [
     { label: "Photos", value: "photos" },
@@ -74,10 +73,7 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
                 throw new Error("User email is unavailable");
             }
 
-            const token = getToken();
-            if (!token) {
-                throw new Error("Auth token is unavailable");
-            }
+            const token = requireToken();
 
             const otp = generateOtp();
             const expiryTime = computeExpiryTimeMicros();
@@ -93,7 +89,7 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
                     email: userEmail,
                     code: otp,
                     app: selectedApp,
-                    expiryTime: expiryTime,
+                    expiryTime,
                 }),
             });
 

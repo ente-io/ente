@@ -8,9 +8,11 @@ import {
     Paper,
 } from "@mui/material";
 import React, { useState } from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
-import type { UserData } from "../types";
+import {
+    apiOrigin,
+    getCurrentAdminUserId,
+    requireToken,
+} from "../services/support";
 
 interface Disable2FAProps {
     open: boolean;
@@ -28,57 +30,25 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
     const handleDisable = async () => {
         try {
             setLoading(true);
-            const email = getEmail();
-            const token = getToken();
+            const token = requireToken();
+            const userID = await getCurrentAdminUserId();
 
-            if (!email) {
-                throw new Error("Email not found");
-            }
-
-            if (!token) {
-                throw new Error("Token not found");
-            }
-
-            const encodedEmail = encodeURIComponent(email);
-
-            // Fetch user data
-            const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-            const userResponse = await fetch(userUrl, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-            });
-            if (!userResponse.ok) {
-                throw new Error("Failed to fetch user data");
-            }
-            const userData = (await userResponse.json()) as UserData;
-            const userID = userData.subscription?.userID;
-
-            if (!userID) {
-                throw new Error("User ID not found");
-            }
-
-            // Disable 2FA
             const disableUrl = `${apiOrigin}/admin/user/disable-2fa`;
-            const body = JSON.stringify({ userID });
             const disableResponse = await fetch(disableUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-Auth-Token": token,
                 },
-                body: body,
+                body: JSON.stringify({ userID }),
             });
 
             if (!disableResponse.ok) {
                 const errorResponse = await disableResponse.text();
                 throw new Error(`Failed to disable 2FA: ${errorResponse}`);
             }
-            handleDisable2FA(); // Notify parent component of successful disable
-            handleClose(); // Close dialog on successful disable
-            console.log("2FA disabled successfully");
+            handleDisable2FA();
+            handleClose();
         } catch (error) {
             if (error instanceof Error) {
                 alert(error.message);
@@ -88,10 +58,6 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleCancel = () => {
-        handleClose(); // Close dialog
     };
 
     return (
@@ -129,7 +95,7 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: "center" }}>
                     <Button
-                        onClick={handleCancel}
+                        onClick={handleClose}
                         sx={{
                             bgcolor: "white",
                             color: "black",

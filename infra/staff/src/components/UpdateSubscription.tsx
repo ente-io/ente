@@ -13,8 +13,11 @@ import TextField from "@mui/material/TextField";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
+import {
+    apiOrigin,
+    getCurrentAdminUser,
+    requireToken,
+} from "../services/support";
 interface Subscription {
     productID: string;
     paymentProvider: string;
@@ -63,18 +66,8 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const email = getEmail();
-                const token = getToken();
-                const encodedEmail = encodeURIComponent(email);
-                const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-                const response = await fetch(url, {
-                    headers: { "X-AUTH-TOKEN": token },
-                });
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
                 const userDataResponse =
-                    (await response.json()) as UserDataResponse;
+                    await getCurrentAdminUser<UserDataResponse>();
 
                 if (!userDataResponse.subscription) {
                     throw new Error("Subscription data not found");
@@ -143,7 +136,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
     const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
         event.preventDefault();
         (async () => {
-            const token = getToken();
+            const token = requireToken();
             const url = `${apiOrigin}/admin/user/subscription`;
 
             let expiryTime = null;
@@ -179,7 +172,6 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
                 }
-                console.log("Subscription updated successfully");
                 onClose();
             } catch (error) {
                 if (error instanceof Error) {

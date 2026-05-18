@@ -26,6 +26,16 @@ const buildUserSearchUrl = (input: string): string => {
     return `${apiOrigin}/admin/user?email=${encodeURIComponent(trimmedInput)}`;
 };
 
+const formatStorage = (bytes: number | undefined, noneWhenZero = false) => {
+    if (bytes === undefined || (noneWhenZero && bytes === 0)) {
+        return "None";
+    }
+    if (bytes >= 1024 ** 3) {
+        return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
+    }
+    return `${(bytes / 1024 ** 2).toFixed(2)} MB`;
+};
+
 const App: React.FC = () => {
     const [localEmail, setLocalEmail] = useState<string>("");
     const [localToken, setLocalToken] = useState<string>("");
@@ -81,7 +91,6 @@ const App: React.FC = () => {
                 }
                 const userDataResponse: UserResponse =
                     (await response.json()) as UserResponse;
-                console.log("API Response:", userDataResponse);
                 setEmail(userDataResponse.user.email || userSearchInput);
 
                 const extractedUserData: UserData = {
@@ -94,24 +103,16 @@ const App: React.FC = () => {
                             ).toLocaleString() || "None",
                     },
                     storage: {
-                        Total: userDataResponse.subscription.storage
-                            ? userDataResponse.subscription.storage >= 1024 ** 3
-                                ? `${(userDataResponse.subscription.storage / 1024 ** 3).toFixed(2)} GB`
-                                : `${(userDataResponse.subscription.storage / 1024 ** 2).toFixed(2)} MB`
-                            : "None",
-                        Consumed:
-                            userDataResponse.details?.usage !== undefined
-                                ? userDataResponse.details.usage >= 1024 ** 3
-                                    ? `${(userDataResponse.details.usage / 1024 ** 3).toFixed(2)} GB`
-                                    : `${(userDataResponse.details.usage / 1024 ** 2).toFixed(2)} MB`
-                                : "None",
-                        Bonus:
-                            userDataResponse.details?.storageBonus !== undefined
-                                ? userDataResponse.details.storageBonus >=
-                                  1024 ** 3
-                                    ? `${(userDataResponse.details.storageBonus / 1024 ** 3).toFixed(2)} GB`
-                                    : `${(userDataResponse.details.storageBonus / 1024 ** 2).toFixed(2)} MB`
-                                : "None",
+                        Total: formatStorage(
+                            userDataResponse.subscription.storage,
+                            true,
+                        ),
+                        Consumed: formatStorage(
+                            userDataResponse.details?.usage,
+                        ),
+                        Bonus: formatStorage(
+                            userDataResponse.details?.storageBonus,
+                        ),
                     },
                     subscription: {
                         "Product ID":
@@ -171,11 +172,15 @@ const App: React.FC = () => {
         const urlEmail = urlParams.get("email");
         const urlToken = urlParams.get("token");
 
-        if (urlEmail && urlToken) {
+        if (urlEmail) {
             setLocalEmail(urlEmail);
-            setLocalToken(urlToken);
             setEmail(urlEmail);
+        }
+        if (urlToken) {
+            setLocalToken(urlToken);
             setToken(urlToken);
+        }
+        if (urlEmail && urlToken) {
             fetchData(urlEmail, urlToken).catch((error: unknown) =>
                 console.error("Fetch data error:", error),
             );
@@ -198,16 +203,6 @@ const App: React.FC = () => {
     ) => {
         setTabValue(newValue);
     };
-    useEffect(() => {
-        const searchParam = new URLSearchParams(window.location.search);
-        const userToken = searchParam.get("token");
-
-        if (userToken) {
-            setLocalToken(userToken);
-            setToken(userToken);
-        }
-    }, []);
-
     return (
         <div className="container">
             <div>

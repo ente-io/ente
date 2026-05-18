@@ -8,9 +8,11 @@ import {
     Paper,
 } from "@mui/material";
 import React, { useState } from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
-import type { UserData } from "../types";
+import {
+    apiOrigin,
+    getCurrentAdminUserId,
+    requireToken,
+} from "../services/support";
 
 interface ToggleEmailMFAProps {
     open: boolean;
@@ -28,48 +30,17 @@ const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
     const handleToggle = async (enable: boolean) => {
         try {
             setLoading(true);
-            const email = getEmail();
-            const token = getToken();
+            const token = requireToken();
+            const userId = await getCurrentAdminUserId();
 
-            if (!email) {
-                throw new Error("Email not found");
-            }
-
-            if (!token) {
-                throw new Error("Token not found");
-            }
-
-            const encodedEmail = encodeURIComponent(email);
-
-            // Fetch user data
-            const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-            const userResponse = await fetch(userUrl, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-            });
-            if (!userResponse.ok) {
-                throw new Error("Failed to fetch user data");
-            }
-            const userData = (await userResponse.json()) as UserData;
-            const userId = userData.subscription?.userID;
-
-            if (!userId) {
-                throw new Error("User ID not found");
-            }
-
-            // Toggle Email MFA action
             const toggleEmailMFAUrl = `${apiOrigin}/admin/user/update-email-mfa`;
-            const body = JSON.stringify({ userID: userId, emailMFA: enable });
             const toggleEmailMFAResponse = await fetch(toggleEmailMFAUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-Auth-Token": token,
                 },
-                body: body,
+                body: JSON.stringify({ userID: userId, emailMFA: enable }),
             });
 
             if (!toggleEmailMFAResponse.ok) {
@@ -77,11 +48,8 @@ const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
                 throw new Error(`Failed to update Email MFA: ${errorResponse}`);
             }
 
-            handleToggleEmailMFA(enable); // Notify parent component of successful action with status
-            handleClose(); // Close dialog on successful action
-            console.log(
-                `Email MFA ${enable ? "enabled" : "disabled"} successfully`,
-            );
+            handleToggleEmailMFA(enable);
+            handleClose();
         } catch (error) {
             if (error instanceof Error) {
                 alert(error.message);
@@ -91,10 +59,6 @@ const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleCancel = () => {
-        handleClose(); // Close dialog
     };
 
     return (
@@ -133,7 +97,7 @@ const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: "center" }}>
                     <Button
-                        onClick={handleCancel}
+                        onClick={handleClose}
                         sx={{
                             bgcolor: "white",
                             color: "black",

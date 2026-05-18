@@ -9,9 +9,8 @@ import {
     TableSortLabel,
 } from "@mui/material";
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
+import { useEffect, useMemo, useState } from "react";
+import { getCurrentAdminUser } from "../services/support";
 
 interface TokenData {
     creationTime: number;
@@ -19,10 +18,6 @@ interface TokenData {
     ua: string;
     isDeleted: boolean;
     app: string;
-}
-
-interface UserData {
-    tokens: TokenData[];
 }
 
 const TokensTableComponent: React.FC = () => {
@@ -35,21 +30,10 @@ const TokensTableComponent: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const encodedEmail = encodeURIComponent(getEmail());
-                const token = getToken();
-                const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Auth-Token": token,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error("Failed to fetch token data");
-                }
-                const userData = (await response.json()) as UserData;
-                setTokens(userData.tokens);
+                const userData = await getCurrentAdminUser<{
+                    tokens?: TokenData[];
+                }>();
+                setTokens(userData.tokens ?? []);
             } catch (error) {
                 console.error("Error fetching token data:", error);
                 setError("No token data");
@@ -69,14 +53,18 @@ const TokensTableComponent: React.FC = () => {
         setOrderBy(property);
     };
 
-    const sortedTokens = tokens.sort((a, b) => {
-        if (orderBy === "lastUsedTime" || orderBy === "creationTime") {
-            return order === "asc"
-                ? a[orderBy] - b[orderBy]
-                : b[orderBy] - a[orderBy];
-        }
-        return 0;
-    });
+    const sortedTokens = useMemo(() => {
+        const sortableTokens = [...tokens];
+        sortableTokens.sort((a, b) => {
+            if (orderBy === "lastUsedTime" || orderBy === "creationTime") {
+                return order === "asc"
+                    ? a[orderBy] - b[orderBy]
+                    : b[orderBy] - a[orderBy];
+            }
+            return 0;
+        });
+        return sortableTokens;
+    }, [order, orderBy, tokens]);
 
     const formatDate = (timestamp: number): string => {
         const date = new Date(timestamp / 1000);

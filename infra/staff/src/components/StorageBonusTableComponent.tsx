@@ -9,8 +9,7 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
+import { getCurrentAdminUser } from "../services/support";
 
 interface BonusData {
     storage: number;
@@ -18,10 +17,6 @@ interface BonusData {
     createdAt: number;
     validTill: number;
     isRevoked: boolean;
-}
-
-interface UserData {
-    details: { bonusData: { storageBonuses: BonusData[] } };
 }
 
 const StorageBonusTableComponent: React.FC = () => {
@@ -32,22 +27,11 @@ const StorageBonusTableComponent: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const encodedEmail = encodeURIComponent(getEmail());
-                const token = getToken();
-                const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Auth-Token": token,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error("Failed to fetch bonus data");
-                }
-                const userData = (await response.json()) as UserData; // Typecast to UserData interface
+                const userData = await getCurrentAdminUser<{
+                    details?: { bonusData?: { storageBonuses?: BonusData[] } };
+                }>();
                 const bonuses: BonusData[] =
-                    userData.details.bonusData.storageBonuses;
+                    userData.details?.bonusData?.storageBonuses ?? [];
                 setStorageBonuses(bonuses);
             } catch (error) {
                 console.error("Error fetching bonus data:", error);

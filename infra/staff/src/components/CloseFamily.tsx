@@ -8,9 +8,11 @@ import {
     Paper,
 } from "@mui/material";
 import React, { useState } from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
-import type { UserData } from "../types";
+import {
+    apiOrigin,
+    getCurrentAdminUserId,
+    requireToken,
+} from "../services/support";
 
 interface CloseFamilyProps {
     open: boolean;
@@ -28,48 +30,17 @@ const CloseFamily: React.FC<CloseFamilyProps> = ({
     const handleClosure = async () => {
         try {
             setLoading(true);
-            const email = getEmail();
-            const token = getToken();
+            const token = requireToken();
+            const userId = await getCurrentAdminUserId();
 
-            if (!email) {
-                throw new Error("Email not found");
-            }
-
-            if (!token) {
-                throw new Error("Token not found");
-            }
-
-            const encodedEmail = encodeURIComponent(email);
-
-            // Fetch user data
-            const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-            const userResponse = await fetch(userUrl, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-            });
-            if (!userResponse.ok) {
-                throw new Error("Failed to fetch user data");
-            }
-            const userData = (await userResponse.json()) as UserData;
-            const userId = userData.subscription?.userID;
-
-            if (!userId) {
-                throw new Error("User ID not found");
-            }
-
-            // Close family action
             const closeFamilyUrl = `${apiOrigin}/admin/user/close-family`;
-            const body = JSON.stringify({ userId });
             const closeFamilyResponse = await fetch(closeFamilyUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-Auth-Token": token,
                 },
-                body: body,
+                body: JSON.stringify({ userId }),
             });
 
             if (!closeFamilyResponse.ok) {
@@ -77,8 +48,8 @@ const CloseFamily: React.FC<CloseFamilyProps> = ({
                 throw new Error(`Failed to close family: ${errorResponse}`);
             }
 
-            handleCloseFamily(); // Notify parent component of successful action
-            handleClose(); // Close dialog on successful action
+            handleCloseFamily();
+            handleClose();
         } catch (error) {
             if (error instanceof Error) {
                 alert(error.message);
@@ -88,10 +59,6 @@ const CloseFamily: React.FC<CloseFamilyProps> = ({
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleCancel = () => {
-        handleClose(); // Close dialog
     };
 
     return (
@@ -130,7 +97,7 @@ const CloseFamily: React.FC<CloseFamilyProps> = ({
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: "center" }}>
                     <Button
-                        onClick={handleCancel}
+                        onClick={handleClose}
                         sx={{
                             bgcolor: "white",
                             color: "black",

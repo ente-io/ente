@@ -12,7 +12,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
-import * as React from "react";
+import { useEffect, useState } from "react";
 import type { UserComponentProps } from "../types";
 import AddOtt from "./AddOtt";
 import ChangeEmail from "./ChangeEmail";
@@ -22,20 +22,19 @@ import DisablePasskeys from "./DisablePasskeys";
 import ToggleEmailMFA from "./ToggleEmailMFA";
 import UpdateSubscription from "./UpdateSubscription";
 
-const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
-    const [deleteAccountOpen, setDeleteAccountOpen] = React.useState(false);
-    const [email2FAEnabled, setEmail2FAEnabled] = React.useState(false);
-    const [email2FAOpen, setEmail2FAToggleOpen] = React.useState(false);
-    const [disable2FAOpen, setDisable2FAOpen] = React.useState(false);
-    const [twoFactorEnabled, setTwoFactorEnabled] = React.useState(false);
-    const [canDisableEmailMFA, setCanDisableEmailMFA] = React.useState(false);
-    const [updateSubscriptionOpen, setUpdateSubscriptionOpen] =
-        React.useState(false);
-    const [changeEmailOpen, setChangeEmailOpen] = React.useState(false);
-    const [disablePasskeysOpen, setDisablePasskeysOpen] = React.useState(false);
-    const [addOttOpen, setAddOttOpen] = React.useState(false);
+const UserComponent = ({ userData }: UserComponentProps) => {
+    const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+    const [email2FAEnabled, setEmail2FAEnabled] = useState(false);
+    const [email2FAOpen, setEmail2FAToggleOpen] = useState(false);
+    const [disable2FAOpen, setDisable2FAOpen] = useState(false);
+    const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+    const [canDisableEmailMFA, setCanDisableEmailMFA] = useState(false);
+    const [updateSubscriptionOpen, setUpdateSubscriptionOpen] = useState(false);
+    const [changeEmailOpen, setChangeEmailOpen] = useState(false);
+    const [disablePasskeysOpen, setDisablePasskeysOpen] = useState(false);
+    const [addOttOpen, setAddOttOpen] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setTwoFactorEnabled(userData?.security["Two factor 2FA"] === "Enabled");
         setEmail2FAEnabled(userData?.security["Email MFA"] === "Enabled");
         setCanDisableEmailMFA(
@@ -50,13 +49,19 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
 
     if (!userData) return null;
 
+    const sections = [
+        { title: "user", data: userData.user },
+        { title: "storage", data: userData.storage },
+        { title: "subscription", data: userData.subscription },
+        { title: "security", data: userData.security },
+    ];
+
     return (
         <Grid container spacing={6} sx={{ justifyContent: "center" }}>
-            {Object.entries(userData).map(([title, data]) => (
+            {sections.map(({ title, data }) => (
                 <Grid size={{ xs: 12, sm: 10, md: 6 }} key={title}>
                     <DataTable
                         title={title}
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         data={data}
                         onEditEmail={handleEditEmail}
                         onDeleteAccount={handleDeleteAccountClick}
@@ -125,7 +130,7 @@ interface DataTableProps {
     setEmail2FAToggleOpen: (open: boolean) => void;
 }
 
-const DataTable: React.FC<DataTableProps> = ({
+const DataTable = ({
     title,
     data,
     onEditEmail,
@@ -139,7 +144,7 @@ const DataTable: React.FC<DataTableProps> = ({
     setDisable2FAOpen,
     email2FAEnabled,
     setEmail2FAToggleOpen,
-}) => (
+}: DataTableProps) => (
     <TableContainer
         component={Paper}
         variant="outlined"
@@ -382,8 +387,7 @@ const renderTableCellContent = (
                     {canToggleEmailMFA && (
                         <Switch
                             checked={email2FAEnabled}
-                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                            onChange={(_) => {
+                            onChange={() => {
                                 setEmail2FAToggleOpen(true);
                             }}
                             sx={{

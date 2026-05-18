@@ -8,9 +8,12 @@ import {
     Paper,
 } from "@mui/material";
 import React, { useState } from "react";
-import { getEmail, getToken } from "../services/session";
-import { apiOrigin } from "../services/support";
-import type { DisablePasskeysProps, UserData } from "../types";
+import {
+    apiOrigin,
+    getCurrentAdminUserId,
+    requireToken,
+} from "../services/support";
+import type { DisablePasskeysProps } from "../types";
 
 const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
     open,
@@ -22,48 +25,17 @@ const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
     const handleDisabling = async () => {
         try {
             setLoading(true);
-            const email = getEmail();
-            const token = getToken();
+            const token = requireToken();
+            const userId = await getCurrentAdminUserId();
 
-            if (!email) {
-                throw new Error("Email not found");
-            }
-
-            if (!token) {
-                throw new Error("Token not found");
-            }
-
-            const encodedEmail = encodeURIComponent(email);
-
-            // Fetch user data
-            const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-            const userResponse = await fetch(userUrl, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-            });
-            if (!userResponse.ok) {
-                throw new Error("Failed to fetch user data");
-            }
-            const userData = (await userResponse.json()) as UserData;
-            const userId = userData.subscription?.userID;
-
-            if (!userId) {
-                throw new Error("User ID not found");
-            }
-
-            // Disable passkeys action
             const disablePasskeysUrl = `${apiOrigin}/admin/user/disable-passkeys`;
-            const body = JSON.stringify({ userId });
             const disablePasskeysResponse = await fetch(disablePasskeysUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-Auth-Token": token,
                 },
-                body: body,
+                body: JSON.stringify({ userId }),
             });
 
             if (!disablePasskeysResponse.ok) {
@@ -71,9 +43,8 @@ const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
                 throw new Error(`Failed to disable passkeys: ${errorResponse}`);
             }
 
-            handleDisablePasskeys(); // Notify parent component of successful action
-            handleClose(); // Close dialog on successful action
-            console.log("Passkeys disabled successfully");
+            handleDisablePasskeys();
+            handleClose();
         } catch (error) {
             if (error instanceof Error) {
                 alert(error.message);
@@ -83,10 +54,6 @@ const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleCancel = () => {
-        handleClose(); // Close dialog
     };
 
     return (
@@ -125,7 +92,7 @@ const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: "center" }}>
                     <Button
-                        onClick={handleCancel}
+                        onClick={handleClose}
                         sx={{
                             bgcolor: "white",
                             color: "black",
