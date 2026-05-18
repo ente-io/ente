@@ -5,6 +5,7 @@ Still behind internal flag:
 - Aman: (I) Use Rust HEIC decoder for Android photo viewer when dimensions are known
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use cloudflare worker for upload for internal users
+- Neeraj: Fix Android video preview/export generation by restoring ffmpeg x264 support
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
 - Neeraj: (i) Save Contact
 - Prateek: (i) Enable BG sync notifications by default for internal users on iOS
