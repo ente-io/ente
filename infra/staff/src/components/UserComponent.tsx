@@ -15,7 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { AddOtt } from "./AddOtt";
+import { AddOTT } from "./AddOTT";
 import { ChangeEmail } from "./ChangeEmail";
 import { DeleteAccount } from "./DeleteAccount";
 import { Disable2FA } from "./Disable2FA";
@@ -44,7 +44,7 @@ export const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [updateSubscriptionOpen, setUpdateSubscriptionOpen] = useState(false);
     const [changeEmailOpen, setChangeEmailOpen] = useState(false);
     const [disablePasskeysOpen, setDisablePasskeysOpen] = useState(false);
-    const [addOttOpen, setAddOttOpen] = useState(false);
+    const [addOTTOpen, setAddOTTOpen] = useState(false);
 
     useEffect(() => {
         setTwoFactorEnabled(userData?.security["Two factor 2FA"] === "Enabled");
@@ -59,7 +59,9 @@ export const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const handleEditSubscription = () => setUpdateSubscriptionOpen(true);
     const handleDisablePasskeys = () => setDisablePasskeysOpen(true);
 
-    if (!userData) return null;
+    if (!userData) {
+        return null;
+    }
 
     const sections = [
         { title: "user", data: userData.user },
@@ -79,13 +81,13 @@ export const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                         onDeleteAccount={handleDeleteAccountClick}
                         onEditSubscription={handleEditSubscription}
                         onDisablePasskeys={handleDisablePasskeys}
-                        onAddOtt={() => setAddOttOpen(true)}
+                        onAddOTT={() => setAddOTTOpen(true)}
                         canDisableEmailMFA={canDisableEmailMFA}
                         twoFactorEnabled={twoFactorEnabled}
                         setTwoFactorEnabled={setTwoFactorEnabled}
                         setDisable2FAOpen={setDisable2FAOpen}
                         email2FAEnabled={email2FAEnabled}
-                        setEmail2FAToggleOpen={setEmail2FAToggleOpen}
+                        onToggleEmailMFA={() => setEmail2FAToggleOpen(true)}
                     />
                 </Grid>
             ))}
@@ -102,7 +104,7 @@ export const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
             <ToggleEmailMFA
                 open={email2FAOpen}
                 handleClose={() => setEmail2FAToggleOpen(false)}
-                handleToggleEmailMFA={(status) => setEmail2FAToggleOpen(status)}
+                handleToggleEmailMFA={setEmail2FAEnabled}
             />
             <UpdateSubscription
                 open={updateSubscriptionOpen}
@@ -117,9 +119,9 @@ export const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                 handleClose={() => setDisablePasskeysOpen(false)}
                 handleDisablePasskeys={() => setDisablePasskeysOpen(false)}
             />
-            <AddOtt
-                open={addOttOpen}
-                onClose={() => setAddOttOpen(false)}
+            <AddOTT
+                open={addOTTOpen}
+                onClose={() => setAddOTTOpen(false)}
                 userEmail={userData.user.Email ?? ""}
             />
         </Grid>
@@ -133,13 +135,13 @@ interface DataTableProps {
     onDeleteAccount: () => void;
     onEditSubscription: () => void;
     onDisablePasskeys: () => void;
-    onAddOtt: () => void;
+    onAddOTT: () => void;
     canDisableEmailMFA: boolean;
     twoFactorEnabled: boolean;
     setTwoFactorEnabled: (enabled: boolean) => void;
     setDisable2FAOpen: (open: boolean) => void;
     email2FAEnabled: boolean;
-    setEmail2FAToggleOpen: (open: boolean) => void;
+    onToggleEmailMFA: () => void;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -149,13 +151,13 @@ const DataTable: React.FC<DataTableProps> = ({
     onDeleteAccount,
     onEditSubscription,
     onDisablePasskeys,
-    onAddOtt,
+    onAddOTT,
     canDisableEmailMFA,
     twoFactorEnabled,
     setTwoFactorEnabled,
     setDisable2FAOpen,
     email2FAEnabled,
-    setEmail2FAToggleOpen,
+    onToggleEmailMFA,
 }) => (
     <TableContainer
         component={Paper}
@@ -193,7 +195,7 @@ const DataTable: React.FC<DataTableProps> = ({
                     aria-label="delete"
                     onClick={onDeleteAccount}
                 >
-                    <DeleteIcon style={{ color: "" }} />
+                    <DeleteIcon />
                 </IconButton>
             )}
             {title === "subscription" && (
@@ -244,7 +246,6 @@ const DataTable: React.FC<DataTableProps> = ({
                                             : "none",
                                 }}
                             >
-                                {}
                                 {renderTableCellContent(
                                     label,
                                     value,
@@ -255,7 +256,7 @@ const DataTable: React.FC<DataTableProps> = ({
                                     setTwoFactorEnabled,
                                     setDisable2FAOpen,
                                     email2FAEnabled,
-                                    setEmail2FAToggleOpen,
+                                    onToggleEmailMFA,
                                 )}
                             </TableCell>
                         </TableRow>
@@ -275,7 +276,7 @@ const DataTable: React.FC<DataTableProps> = ({
                         >
                             <Button
                                 variant="contained"
-                                onClick={onAddOtt}
+                                onClick={onAddOTT}
                                 sx={{ textTransform: "none" }}
                             >
                                 Add OTT
@@ -298,7 +299,7 @@ const renderTableCellContent = (
     setTwoFactorEnabled: (enabled: boolean) => void,
     setDisable2FAOpen: (open: boolean) => void,
     email2FAEnabled: boolean,
-    setEmail2FAToggleOpen: (open: boolean) => void,
+    onToggleEmailMFA: () => void,
 ) => {
     switch (label) {
         case "Email":
@@ -336,7 +337,7 @@ const renderTableCellContent = (
                     sx={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "right",
+                        justifyContent: "flex-end",
                         width: "100%",
                         paddingRight: "50px",
                     }}
@@ -390,7 +391,7 @@ const renderTableCellContent = (
                     sx={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "right",
+                        justifyContent: "flex-end",
                         width: "100%",
                         paddingRight: "50px",
                     }}
@@ -399,9 +400,7 @@ const renderTableCellContent = (
                     {canToggleEmailMFA && (
                         <Switch
                             checked={email2FAEnabled}
-                            onChange={() => {
-                                setEmail2FAToggleOpen(true);
-                            }}
+                            onChange={onToggleEmailMFA}
                             sx={{
                                 "& .MuiSwitch-switchBase.Mui-checked": {
                                     color: "#00B33C",

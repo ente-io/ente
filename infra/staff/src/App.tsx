@@ -199,57 +199,49 @@ export const App: React.FC = () => {
 
     const handleTabChange = (
         _event: React.SyntheticEvent,
-
         newValue: number,
     ) => {
         setTabValue(newValue);
     };
+
     return (
         <div className="container">
-            <div>
-                <form className="input-form" onKeyDown={handleKeyDown}>
-                    <div className="horizontal-group">
-                        <a
-                            href="https://staff.ente.sh"
-                            target="_blank"
-                            rel="noopener"
-                            className="link-text"
-                        >
-                            staff.ente.io
-                        </a>
-                        <div className="text-fields">
-                            <TextField
-                                label="Email"
-                                value={localEmail}
-                                onChange={(e) => {
-                                    setLocalEmail(e.target.value);
-                                    setEmail(e.target.value);
-                                }}
-                                size="medium"
-                                className="text-field-email"
-                                style={{ width: "parent" }}
-                            />
-                        </div>
-                        <div className="fetch-button-container">
-                            <Button
-                                variant="contained"
-                                onClick={() => {
-                                    fetchData().catch((error: unknown) =>
-                                        console.error(
-                                            "Fetch data error:",
-                                            error,
-                                        ),
-                                    );
-                                }}
-                                className="fetch-button"
-                                style={{ padding: "0 16px" }}
-                            >
-                                FETCH
-                            </Button>
-                        </div>
+            <form className="input-form" onKeyDown={handleKeyDown}>
+                <div className="horizontal-group">
+                    <a
+                        href="https://staff.ente.sh"
+                        target="_blank"
+                        rel="noopener"
+                        className="link-text"
+                    >
+                        staff.ente.io
+                    </a>
+                    <div className="text-fields">
+                        <TextField
+                            label="Email"
+                            value={localEmail}
+                            onChange={(e) => {
+                                setLocalEmail(e.target.value);
+                                setEmail(e.target.value);
+                            }}
+                            size="medium"
+                        />
                     </div>
-                </form>
-            </div>
+                    <div className="fetch-button-container">
+                        <Button
+                            variant="contained"
+                            onClick={() => {
+                                fetchData().catch((error: unknown) =>
+                                    console.error("Fetch data error:", error),
+                                );
+                            }}
+                            style={{ padding: "0 16px" }}
+                        >
+                            FETCH
+                        </Button>
+                    </div>
+                </div>
+            </form>
             <div className="content-container">
                 {loading ? (
                     <CircularProgress
@@ -304,19 +296,13 @@ export const App: React.FC = () => {
                                 <UserComponent userData={userData} />
                             )}
                             {tabValue === 1 && userData && (
-                                <div>
-                                    <FamilyTableComponent />
-                                </div>
+                                <FamilyTableComponent />
                             )}
                             {tabValue === 2 && userData && (
-                                <div>
-                                    <StorageBonusTableComponent />
-                                </div>
+                                <StorageBonusTableComponent />
                             )}
                             {tabValue === 3 && userData && (
-                                <div>
-                                    <TokensTableComponent />
-                                </div>
+                                <TokensTableComponent />
                             )}
                         </Box>
                     </>

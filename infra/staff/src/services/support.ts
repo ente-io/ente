@@ -4,9 +4,9 @@ import { getEmail, getToken } from "./session";
 export const apiOrigin =
     import.meta.env.VITE_ENTE_API_ORIGIN ?? "https://api.ente.io";
 
-const UserDetails = z.looseObject({});
+const UserDetailsSchema = z.looseObject({});
 
-export type UserDetails = z.infer<typeof UserDetails>;
+export type UserDetails = z.infer<typeof UserDetailsSchema>;
 
 /** Fetch details of the user associated with the given {@link authToken}. */
 export const getUserDetails = async (
@@ -15,7 +15,7 @@ export const getUserDetails = async (
     const url = `${apiOrigin}/users/details/v2`;
     const res = await fetch(url, { headers: { "X-Auth-Token": authToken } });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-    return UserDetails.parse(await res.json());
+    return UserDetailsSchema.parse(await res.json());
 };
 
 const requireEmail = () => {

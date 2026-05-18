@@ -56,12 +56,10 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
     ) => {
         event.preventDefault();
 
-        const token = requireToken();
-        const url = `${apiOrigin}/admin/user/change-email`;
-
-        const body = { userID, email: newEmail };
-
         try {
+            const token = requireToken();
+            const url = `${apiOrigin}/admin/user/change-email`;
+            const body = { userID, email: newEmail };
             const response = await fetch(url, {
                 method: "PUT",
                 headers: {
@@ -72,26 +70,20 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
             });
 
             if (!response.ok) {
-                let errorData;
+                let errorMessage = "Network response was not ok";
                 try {
-                    errorData = (await response.json()) as ErrorResponse;
+                    const errorData = (await response.json()) as ErrorResponse;
+                    errorMessage = errorData.message;
                 } catch (error) {
                     console.error("Error parsing error response:", error);
                 }
-                throw new Error(
-                    errorData?.message ?? "Network response was not ok",
-                );
+                throw new Error(errorMessage);
             }
 
             onClose();
         } catch (error) {
             console.error("Error updating email:", error);
         }
-    };
-    const handleSubmitSync = (event: React.SyntheticEvent<HTMLFormElement>) => {
-        handleSubmit(event).catch((error: unknown) => {
-            console.error("Error in handleSubmit:", error);
-        });
     };
 
     return (
@@ -118,7 +110,7 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
                 </Button>
             </DialogTitle>
             <DialogContent>
-                <form onSubmit={handleSubmitSync}>
+                <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: "16px" }}>
                         <label
                             htmlFor="newEmail"

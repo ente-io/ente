@@ -61,66 +61,60 @@ export const Disable2FA: React.FC<Disable2FAProps> = ({
     };
 
     return (
-        <div>
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-                PaperComponent={Paper}
-                sx={{
-                    width: "499px",
-                    height: "286px",
-                    margin: "auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-                slotProps={{
-                    backdrop: {
-                        style: {
-                            backgroundColor: "rgba(255, 255, 255, 0.9)", // Semi-transparent backdrop
-                        },
-                    },
-                }}
-            >
-                <DialogTitle id="alert-dialog-title">
-                    {"Disable 2FA?"}
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        Are you sure you want to disable 2FA for this account?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions sx={{ justifyContent: "center" }}>
-                    <Button
-                        onClick={handleClose}
-                        sx={{
-                            bgcolor: "white",
-                            color: "black",
-                            "&:hover": { bgcolor: "#FAFAFA" },
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={() => {
-                            handleDisable().catch((error: unknown) =>
-                                console.error(error),
-                            );
-                        }}
-                        sx={{
-                            bgcolor: "#F4473D",
-                            color: "white",
-                            "&:hover": { bgcolor: "#E53935" },
-                        }}
-                        disabled={loading}
-                    >
-                        {loading ? "Disabling..." : "Disable"}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </div>
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+            PaperComponent={Paper}
+            sx={{
+                width: "499px",
+                height: "286px",
+                margin: "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+            }}
+            slotProps={{
+                backdrop: {
+                    style: { backgroundColor: "rgba(255, 255, 255, 0.9)" },
+                },
+            }}
+        >
+            <DialogTitle id="alert-dialog-title">Disable 2FA?</DialogTitle>
+            <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                    Are you sure you want to disable 2FA for this account?
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions sx={{ justifyContent: "center" }}>
+                <Button
+                    onClick={handleClose}
+                    sx={{
+                        bgcolor: "white",
+                        color: "black",
+                        "&:hover": { bgcolor: "#FAFAFA" },
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    onClick={() => {
+                        handleDisable().catch((error: unknown) =>
+                            console.error(error),
+                        );
+                    }}
+                    sx={{
+                        bgcolor: "#F4473D",
+                        color: "white",
+                        "&:hover": { bgcolor: "#E53935" },
+                    }}
+                    disabled={loading}
+                >
+                    {loading ? "Disabling..." : "Disable"}
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };

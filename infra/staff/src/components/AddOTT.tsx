@@ -25,13 +25,13 @@ const APP_OPTIONS = [
 
 type AppOption = (typeof APP_OPTIONS)[number]["value"];
 
-interface AddOttProps {
+interface AddOTTProps {
     open: boolean;
     onClose: () => void;
     userEmail: string;
 }
 
-export const AddOtt: React.FC<AddOttProps> = ({ open, onClose, userEmail }) => {
+export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
     const [selectedApp, setSelectedApp] = useState<AppOption>("photos");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);

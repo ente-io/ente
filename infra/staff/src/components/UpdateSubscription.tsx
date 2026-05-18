@@ -46,7 +46,7 @@ interface FormValues {
     provider: string;
     storage: number;
     transactionId: string;
-    expiryTime: string | Date | null;
+    expiryTime: Date | null;
     userId: string;
     attributes: { customerID: string; stripeAccountCountry: string };
 }
@@ -60,7 +60,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         provider: "",
         storage: 0,
         transactionId: "",
-        expiryTime: "",
+        expiryTime: null,
         userId: "",
         attributes: { customerID: "", stripeAccountCountry: "" },
     });
@@ -118,41 +118,39 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
-        setValues({
+        setValues((values) => ({
             ...values,
             [name]: name === "storage" ? parseInt(value, 10) : value,
-        });
+        }));
     };
 
     const handleChangeProvider = (event: SelectChangeEvent) => {
-        const { name, value } = event.target;
-
-        if (name) {
-            setValues({ ...values, [name]: value });
-        }
+        setValues((values) => ({ ...values, provider: event.target.value }));
     };
 
     const handleDatePickerChange = (date: Date | null) => {
-        setValues({ ...values, expiryTime: date });
+        setValues((values) => ({ ...values, expiryTime: date }));
         setIsDatePickerOpen(false);
     };
 
-    const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
+    const handleSubmit = async (
+        event: React.SyntheticEvent<HTMLFormElement>,
+    ) => {
         event.preventDefault();
-        (async () => {
+
+        try {
             const token = requireToken();
             const url = `${apiOrigin}/admin/user/subscription`;
 
             let expiryTime = null;
-            if (values.expiryTime instanceof Date) {
-                const utcExpiryTime = new Date(values.expiryTime);
-                expiryTime = utcExpiryTime.getTime() * 1000;
+            if (values.expiryTime) {
+                expiryTime = values.expiryTime.getTime() * 1000;
             }
 
             const body = {
                 userId: values.userId,
-                storage: values.storage * (1024 * 1024 * 1024),
-                expiryTime: expiryTime,
+                storage: values.storage * 1024 ** 3,
+                expiryTime,
                 productId: values.productId,
                 paymentProvider: values.provider,
                 transactionId: values.transactionId,
@@ -163,30 +161,26 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 },
             };
 
-            try {
-                const response = await fetch(url, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-AUTH-TOKEN": token,
-                    },
-                    body: JSON.stringify(body),
-                });
+            const response = await fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-AUTH-TOKEN": token,
+                },
+                body: JSON.stringify(body),
+            });
 
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                onClose();
-            } catch (error) {
-                if (error instanceof Error) {
-                    alert(`Failed to update subscription: ${error.message}`);
-                } else {
-                    alert("Failed to update subscription");
-                }
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
             }
-        })().catch((error: unknown) => {
-            console.error("Unhandled promise rejection:", error);
-        });
+            onClose();
+        } catch (error) {
+            if (error instanceof Error) {
+                alert(`Failed to update subscription: ${error.message}`);
+            } else {
+                alert("Failed to update subscription");
+            }
+        }
     };
 
     return (

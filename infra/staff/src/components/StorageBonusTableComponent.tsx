@@ -45,21 +45,6 @@ export const StorageBonusTableComponent: React.FC = () => {
         );
     }, []);
 
-    const formatCreatedAt = (createdAt: number): string =>
-        new Date(createdAt / 1000).toLocaleDateString();
-
-    const formatValidTill = (validTill: number): string => {
-        if (validTill === 0) {
-            return "Forever";
-        }
-        return new Date(validTill / 1000).toLocaleDateString();
-    };
-
-    const formatStorage = (storage: number): string => {
-        const inGB = storage / (1024 * 1024 * 1024);
-        return `${inGB.toFixed(2)} GB`;
-    };
-
     if (loading) {
         return <p>Loading...</p>;
     }
@@ -135,3 +120,16 @@ export const StorageBonusTableComponent: React.FC = () => {
         </div>
     );
 };
+
+const formatCreatedAt = (createdAt: number): string =>
+    new Date(createdAt / 1000).toLocaleDateString();
+
+const formatValidTill = (validTill: number): string => {
+    if (validTill === 0) {
+        return "Forever";
+    }
+    return new Date(validTill / 1000).toLocaleDateString();
+};
+
+const formatStorage = (storage: number): string =>
+    `${(storage / 1024 ** 3).toFixed(2)} GB`;

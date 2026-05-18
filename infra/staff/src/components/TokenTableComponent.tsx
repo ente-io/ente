@@ -65,9 +65,6 @@ export const TokensTableComponent: React.FC = () => {
         return sortableTokens;
     }, [order, orderBy, tokens]);
 
-    const formatDate = (timestamp: number): string =>
-        new Date(timestamp / 1000).toLocaleDateString();
-
     if (loading) {
         return <p>Loading...</p>;
     }
@@ -173,3 +170,6 @@ export const TokensTableComponent: React.FC = () => {
         </div>
     );
 };
+
+const formatDate = (timestamp: number): string =>
+    new Date(timestamp / 1000).toLocaleDateString();
