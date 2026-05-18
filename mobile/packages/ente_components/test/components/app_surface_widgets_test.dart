@@ -4,6 +4,7 @@ import 'package:ente_components/components/app_bar_component.dart';
 import 'package:ente_components/components/menu_component.dart';
 import 'package:ente_components/components/menu_group_component.dart';
 import 'package:ente_components/theme/colors.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,7 +47,7 @@ void main() {
         trailing: Icon(
           Icons.chevron_right,
           color: ColorTokens.light.textLight,
-          size: 18,
+          size: IconSizes.small,
         ),
         selected: true,
         titleColor: ColorTokens.light.warning,

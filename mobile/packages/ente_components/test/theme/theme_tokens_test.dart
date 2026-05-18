@@ -23,11 +23,6 @@ void main() {
       expect(IconSizes.small, 18);
       expect(IconSizes.medium, 24);
       expect(IconSizes.large, 36);
-      expect(IconFrameSizes.micro, 12);
-      expect(IconFrameSizes.tiny, 20);
-      expect(IconFrameSizes.small, 34);
-      expect(IconFrameSizes.medium, 48);
-      expect(IconFrameSizes.large, 44);
 
       expect(Motion.quick, const Duration(milliseconds: 120));
       expect(Motion.standard, const Duration(milliseconds: 180));

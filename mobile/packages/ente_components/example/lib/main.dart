@@ -356,7 +356,7 @@ double _drawerWidth(BuildContext context) {
 }
 
 class _CatalogHugeIcon extends StatelessWidget {
-  const _CatalogHugeIcon(this.icon, {this.color, this.size = 24});
+  const _CatalogHugeIcon(this.icon, {this.color, this.size = IconSizes.medium});
 
   final HugeIconData icon;
   final Color? color;
@@ -383,7 +383,7 @@ class _CatalogTrailingIcon extends StatelessWidget {
     return _CatalogHugeIcon(
       icon,
       color: context.componentColors.textLight,
-      size: 18,
+      size: IconSizes.small,
     );
   }
 }
@@ -457,11 +457,11 @@ class _CatalogSectionTile extends StatelessWidget {
     return MenuComponent(
       key: ValueKey('catalog-section-${section.title}'),
       title: section.title,
-      leading: _CatalogHugeIcon(section.icon, size: 18),
+      leading: _CatalogHugeIcon(section.icon, size: IconSizes.small),
       trailing: _CatalogHugeIcon(
         HugeIcons.strokeRoundedArrowRight02,
         color: colors.textLight,
-        size: 18,
+        size: IconSizes.small,
       ),
       onTap: () {
         final routeBuilder = section.routeBuilder;
@@ -678,7 +678,7 @@ class _SettingsTrailingIcon extends StatelessWidget {
     return _CatalogHugeIcon(
       HugeIcons.strokeRoundedArrowRight02,
       color: color ?? context.componentColors.textLight,
-      size: 18,
+      size: IconSizes.small,
     );
   }
 }
@@ -872,7 +872,7 @@ class _SettingsThemeOption extends StatelessWidget {
           ? _CatalogHugeIcon(
               HugeIcons.strokeRoundedTick02,
               color: colors.primary,
-              size: 18,
+              size: IconSizes.small,
             )
           : null,
       onTap: onTap,
@@ -1447,7 +1447,10 @@ class _IconButtonStatePreview extends StatelessWidget {
           : state == 'Error'
           ? () => _runPreviewError(context)
           : () {},
-      icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01, size: 18),
+      icon: const _CatalogHugeIcon(
+        HugeIcons.strokeRoundedAdd01,
+        size: IconSizes.small,
+      ),
     );
   }
 
@@ -2121,7 +2124,7 @@ class _HeaderImage extends StatelessWidget {
         child: _CatalogHugeIcon(
           HugeIcons.strokeRoundedUser,
           color: colors.textLight,
-          size: 20,
+          size: IconSizes.small,
         ),
       ),
     );
@@ -2228,7 +2231,7 @@ class _HeaderAppBarDemoLeading extends StatelessWidget {
         child: _CatalogHugeIcon(
           HugeIcons.strokeRoundedMenuCircle,
           color: colors.specialWhite,
-          size: 20,
+          size: IconSizes.small,
         ),
       ),
     );
@@ -2468,7 +2471,7 @@ class _MenuItemPreviewState extends State<_MenuItemPreview> {
                 leading: _CatalogHugeIcon(
                   HugeIcons.strokeRoundedDelete02,
                   color: colors.warning,
-                  size: 18,
+                  size: IconSizes.small,
                 ),
                 trailing: const _CatalogTrailingIcon(
                   HugeIcons.strokeRoundedArrowRight01,
@@ -2648,7 +2651,10 @@ class _MenuItemExample extends StatelessWidget {
       title: hasLeading ? 'Camera uploads' : 'Storage plan',
       subtitle: hasSubtitle ? '834 items' : null,
       leading: hasLeading
-          ? const _CatalogHugeIcon(HugeIcons.strokeRoundedUser, size: 18)
+          ? const _CatalogHugeIcon(
+              HugeIcons.strokeRoundedUser,
+              size: IconSizes.small,
+            )
           : null,
       trailing: _trailing(context),
       selected: selected,
@@ -2662,7 +2668,7 @@ class _MenuItemExample extends StatelessWidget {
       return _CatalogHugeIcon(
         HugeIcons.strokeRoundedCheckmarkCircle02,
         color: colors.primary,
-        size: 18,
+        size: IconSizes.small,
       );
     }
     return switch (trailingKind) {

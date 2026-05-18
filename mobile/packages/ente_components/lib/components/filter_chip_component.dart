@@ -197,8 +197,8 @@ class _FilterChipIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox.square(
       dimension: size == IconSizes.tiny
-          ? IconFrameSizes.tiny
-          : IconFrameSizes.tiny - Spacing.xs,
+          ? _selectedTrailingIconSlotSize
+          : _iconSlotSize,
       child: Center(
         child: IconTheme.merge(
           data: IconThemeData(color: color, size: size),
@@ -208,6 +208,9 @@ class _FilterChipIcon extends StatelessWidget {
     );
   }
 }
+
+const double _iconSlotSize = 16;
+const double _selectedTrailingIconSlotSize = 20;
 
 class _FilterChipAvatar extends StatelessWidget {
   const _FilterChipAvatar({required this.enabled, required this.child});

@@ -403,7 +403,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
           _obscureText
               ? Icons.visibility_off_outlined
               : Icons.visibility_outlined,
-          size: IconFrameSizes.tiny,
+          size: IconSizes.small,
           color: colors.textLighter,
         ),
       );
@@ -421,7 +421,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
               },
         child: Icon(
           Icons.close_rounded,
-          size: IconFrameSizes.tiny,
+          size: IconSizes.small,
           color: colors.textLighter,
         ),
       );
