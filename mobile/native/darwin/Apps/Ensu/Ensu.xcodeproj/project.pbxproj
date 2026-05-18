@@ -35,7 +35,6 @@
 		DA01087C2E682336006E79AE /* Exceptions for "Ensu" folder in "Ensu" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Ensu.entitlements,
 				Info.plist,
 			);
 			target = DA72BC602E5F87A000D128FF /* Ensu */;

@@ -87,6 +87,8 @@ final class VoiceTranscriptionService {
 
     private let modelsDir: URL
     private var transcriptionTask: Task<Void, Never>?
+    private var activeVoiceTaskId = UUID()
+    private var activeDownloadId: UUID?
 
     #if os(iOS)
     private let recorder = PcmAudioRecorder()
@@ -97,15 +99,17 @@ final class VoiceTranscriptionService {
         try? FileManager.default.createDirectory(at: modelsDir, withIntermediateDirectories: true, attributes: nil)
     }
 
-    func startRecording(onState: @escaping StateHandler) {
+    func startRecording(
+        onState: @escaping StateHandler,
+        shouldStartRecording: @escaping @MainActor @Sendable () -> Bool = { true }
+    ) {
         #if os(iOS)
         guard !recorder.isRecording else { return }
-        transcriptionTask?.cancel()
 
         let session = AVAudioSession.sharedInstance()
         switch session.recordPermission {
         case .granted:
-            beginRecording(onState: onState)
+            prepareModelAndStartRecording(onState: onState, shouldStartRecording: shouldStartRecording)
         case .denied:
             onState(.error("Microphone permission is required for voice input."))
         case .undetermined:
@@ -113,7 +117,10 @@ final class VoiceTranscriptionService {
                 Task { @MainActor in
                     guard let self else { return }
                     if granted {
-                        self.beginRecording(onState: onState)
+                        self.prepareModelAndStartRecording(
+                            onState: onState,
+                            shouldStartRecording: shouldStartRecording
+                        )
                     } else {
                         onState(.error("Microphone permission is required for voice input."))
                     }
@@ -141,43 +148,37 @@ final class VoiceTranscriptionService {
             return
         }
 
-        transcriptionTask?.cancel()
+        let taskId = beginVoiceTask()
+        let downloadId = beginDownload(taskId: taskId)
+        let downloadCallback = transcriptionDownloadCallback(
+            taskId: taskId,
+            downloadId: downloadId,
+            onState: onState
+        )
         let modelsDirPath = modelsDir.path
         let sampleRate = recording.sampleRate
         let pcm = recording.pcm
 
-        transcriptionTask = Task.detached(priority: .userInitiated) {
+        transcriptionTask = Task.detached(priority: .userInitiated) { [weak self] in
             do {
                 uniffiEnsureTranscriptionInitialized()
 
                 if !isTranscriptionModelDownloaded(modelsDir: modelsDirPath) {
-                    await MainActor.run {
+                    await MainActor.run { [weak self] in
+                        guard self?.isDownloadActive(taskId: taskId, downloadId: downloadId) == true else { return }
                         onState(.downloading(percent: nil))
                     }
-                    let callback = TranscriptionProgressCallback { event in
-                        switch event {
-                        case let .downloadProgress(downloaded: _, total: _, percentage: percentage):
-                            let percent = min(max(Int(percentage.rounded()), 0), 100)
-                            Task { @MainActor in
-                                onState(.downloading(percent: percent))
-                            }
-                        case .extractionStarted:
-                            Task { @MainActor in
-                                onState(.downloading(percent: 100))
-                            }
-                        case .extractionCompleted, .downloadComplete:
-                            break
-                        case .downloadError:
-                            Task { @MainActor in
-                                onState(.error("Voice model download failed."))
-                            }
-                        }
-                    }
-                    _ = try downloadTranscriptionModel(modelsDir: modelsDirPath, callback: callback)
+                    _ = try downloadTranscriptionModel(modelsDir: modelsDirPath, callback: downloadCallback)
                 }
 
                 if Task.isCancelled { return }
-                await MainActor.run {
+                let isActive = await MainActor.run { [weak self] in
+                    self?.finishDownload(downloadId: downloadId)
+                    return self?.isVoiceTaskActive(taskId) == true
+                }
+                guard isActive else { return }
+                await MainActor.run { [weak self] in
+                    guard self?.isVoiceTaskActive(taskId) == true else { return }
                     onState(.transcribing)
                 }
                 let transcript = try transcribePcm16(
@@ -189,7 +190,8 @@ final class VoiceTranscriptionService {
                 .trimmingCharacters(in: .whitespacesAndNewlines)
 
                 if Task.isCancelled { return }
-                await MainActor.run {
+                await MainActor.run { [weak self] in
+                    guard self?.isVoiceTaskActive(taskId) == true else { return }
                     if transcript.isEmpty {
                         onState(.error("No speech detected."))
                     } else {
@@ -200,7 +202,9 @@ final class VoiceTranscriptionService {
             } catch is CancellationError {
                 return
             } catch {
-                await MainActor.run {
+                await MainActor.run { [weak self] in
+                    self?.finishDownload(downloadId: downloadId)
+                    guard self?.isVoiceTaskActive(taskId) == true else { return }
                     onState(.error("Could not transcribe voice input."))
                 }
             }
@@ -213,6 +217,8 @@ final class VoiceTranscriptionService {
     func cancel() {
         transcriptionTask?.cancel()
         transcriptionTask = nil
+        activeVoiceTaskId = UUID()
+        activeDownloadId = nil
         #if os(iOS)
         if recorder.isRecording {
             _ = recorder.stop()
@@ -221,6 +227,112 @@ final class VoiceTranscriptionService {
     }
 
     #if os(iOS)
+    private func prepareModelAndStartRecording(
+        onState: @escaping StateHandler,
+        shouldStartRecording: @escaping @MainActor @Sendable () -> Bool
+    ) {
+        let taskId = beginVoiceTask()
+        let downloadId = beginDownload(taskId: taskId)
+        let downloadCallback = transcriptionDownloadCallback(
+            taskId: taskId,
+            downloadId: downloadId,
+            onState: onState
+        )
+        let modelsDirPath = modelsDir.path
+
+        transcriptionTask = Task.detached(priority: .userInitiated) { [weak self] in
+            do {
+                uniffiEnsureTranscriptionInitialized()
+
+                if !isTranscriptionModelDownloaded(modelsDir: modelsDirPath) {
+                    await MainActor.run { [weak self] in
+                        guard self?.isDownloadActive(taskId: taskId, downloadId: downloadId) == true else { return }
+                        onState(.downloading(percent: nil))
+                    }
+                    _ = try downloadTranscriptionModel(modelsDir: modelsDirPath, callback: downloadCallback)
+                }
+
+                if Task.isCancelled { return }
+                await MainActor.run { [weak self] in
+                    self?.finishDownload(downloadId: downloadId)
+                    guard let self, self.isVoiceTaskActive(taskId) else { return }
+                    guard shouldStartRecording() else {
+                        onState(.idle)
+                        return
+                    }
+                    self.beginRecording(onState: onState)
+                }
+            } catch is CancellationError {
+                return
+            } catch {
+                await MainActor.run { [weak self] in
+                    self?.finishDownload(downloadId: downloadId)
+                    guard self?.isVoiceTaskActive(taskId) == true else { return }
+                    onState(.error("Voice model download failed."))
+                }
+            }
+        }
+    }
+
+    private func beginVoiceTask() -> UUID {
+        transcriptionTask?.cancel()
+        let taskId = UUID()
+        activeVoiceTaskId = taskId
+        activeDownloadId = nil
+        return taskId
+    }
+
+    private func isVoiceTaskActive(_ taskId: UUID) -> Bool {
+        activeVoiceTaskId == taskId
+    }
+
+    private func beginDownload(taskId: UUID) -> UUID {
+        let downloadId = UUID()
+        if isVoiceTaskActive(taskId) {
+            activeDownloadId = downloadId
+        }
+        return downloadId
+    }
+
+    private func finishDownload(downloadId: UUID) {
+        if activeDownloadId == downloadId {
+            activeDownloadId = nil
+        }
+    }
+
+    private func isDownloadActive(taskId: UUID, downloadId: UUID) -> Bool {
+        isVoiceTaskActive(taskId) && activeDownloadId == downloadId
+    }
+
+    private func transcriptionDownloadCallback(
+        taskId: UUID,
+        downloadId: UUID,
+        onState: @escaping StateHandler
+    ) -> TranscriptionProgressCallback {
+        TranscriptionProgressCallback { [weak self] event in
+            switch event {
+            case let .downloadProgress(downloaded: _, total: _, percentage: percentage):
+                let percent = min(max(Int(percentage.rounded()), 0), 100)
+                Task { @MainActor [weak self] in
+                    guard self?.isDownloadActive(taskId: taskId, downloadId: downloadId) == true else { return }
+                    onState(.downloading(percent: percent))
+                }
+            case .extractionStarted:
+                Task { @MainActor [weak self] in
+                    guard self?.isDownloadActive(taskId: taskId, downloadId: downloadId) == true else { return }
+                    onState(.downloading(percent: 100))
+                }
+            case .extractionCompleted, .downloadComplete:
+                break
+            case .downloadError:
+                Task { @MainActor [weak self] in
+                    guard self?.isDownloadActive(taskId: taskId, downloadId: downloadId) == true else { return }
+                    onState(.error("Voice model download failed."))
+                }
+            }
+        }
+    }
+
     private func beginRecording(onState: @escaping StateHandler) {
         do {
             try recorder.start()
