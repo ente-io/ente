@@ -2,6 +2,7 @@ use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
 use flate2::read::GzDecoder;
@@ -16,6 +17,7 @@ const MODEL_DIR_NAME: &str = "parakeet-tdt-0.6b-v3-int8";
 const MODEL_SIZE_MB: u64 = 480;
 const VAD_MODEL_URL: &str = "https://models.ente.io/silero_vad_v4.onnx";
 const VAD_MODEL_FILE_NAME: &str = "silero_vad_v4.onnx";
+static DOWNLOAD_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
 #[derive(Debug, Clone)]
 pub enum ModelEvent {
@@ -53,6 +55,11 @@ pub fn download_model(
     models_dir: impl AsRef<Path>,
     mut on_event: impl FnMut(ModelEvent),
 ) -> Result<PathBuf> {
+    let _download_guard = DOWNLOAD_LOCK
+        .get_or_init(|| Mutex::new(()))
+        .lock()
+        .map_err(|_| error("Transcription model download lock poisoned"))?;
+
     let models_dir = models_dir.as_ref();
     fs::create_dir_all(models_dir)?;
 
