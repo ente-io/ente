@@ -51,7 +51,7 @@ jobs:
             - name: Setup node
               uses: actions/setup-node@v6
               with:
-                  node-version: 22
+                  node-version: 24
 
             - name: Increase yarn timeout
               # `yarn install` times out sometimes on the Windows runner,
@@ -92,7 +92,7 @@ jobs:
               run: sudo apt-get update && sudo apt-get install libarchive-tools
 
             - name: Build
-              uses: ente-io/action-electron-builder@eff78a1d33bdab4c54ede0e5cdc71e0c2cf803e2
+              uses: ente-io/action-electron-builder@3dde7c58833c74cf0a0065c0563101065a35025f
               with:
                   package_root: desktop
                   build_script_name: build:ci

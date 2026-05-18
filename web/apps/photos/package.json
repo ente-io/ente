@@ -29,7 +29,7 @@
         "supercluster": "^8.0.1"
     },
     "devDependencies": {
-        "@types/node": "^22.15.32",
+        "@types/node": "^24.12.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
         "@types/react-window": "^1.8.8",

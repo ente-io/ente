@@ -70,7 +70,7 @@ limactl shell docker /bin/bash -lc '
     -v "$HOME/ente/web:/workspace" \
     -w /workspace \
     -e NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 \
-    node:22-bookworm \
+    node:24-bookworm \
     bash -lc "
       corepack enable &&
       corepack prepare yarn@1.22.22 --activate &&
