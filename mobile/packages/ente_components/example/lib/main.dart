@@ -18,7 +18,7 @@ class ComponentsCatalogApp extends StatefulWidget {
 
 class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
   ThemeMode _themeMode = ThemeMode.light;
-  EnteApp _appTheme = EnteApp.photos;
+  ComponentApp _appTheme = ComponentApp.photos;
   Duration? _lastPointerUpAt;
   Offset? _lastPointerUpPosition;
 
@@ -64,9 +64,9 @@ class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
 
   void _cycleAppTheme() {
     final nextTheme = switch (_appTheme) {
-      EnteApp.photos => EnteApp.locker,
-      EnteApp.locker => EnteApp.auth,
-      EnteApp.auth => EnteApp.photos,
+      ComponentApp.photos => ComponentApp.locker,
+      ComponentApp.locker => ComponentApp.auth,
+      ComponentApp.auth => ComponentApp.photos,
     };
     setState(() => _appTheme = nextTheme);
   }
@@ -330,14 +330,12 @@ class CatalogSettingsDrawer extends StatelessWidget {
       width: _drawerWidth(context),
       shape: const RoundedRectangleBorder(),
       backgroundColor: colors.backgroundBase,
-      child: CustomScrollView(
-        slivers: [
-          HeaderAppBarComponent(
-            title: 'Settings',
-            subtitle: 'aman@example.com',
-            onBack: () => Navigator.of(context).pop(),
-          ),
-          const SliverPadding(
+      child: AppBarComponent(
+        title: 'Settings',
+        subtitle: 'aman@example.com',
+        onBack: () => Navigator.of(context).pop(),
+        slivers: const [
+          SliverPadding(
             padding: EdgeInsets.fromLTRB(
               Spacing.sm,
               Spacing.xs,
@@ -511,19 +509,17 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          HeaderAppBarComponent(
-            title: widget.section.title,
-            subtitle: widget.section.components.join(', '),
-            onBack: () => Navigator.of(context).pop(),
-            actions: [
-              _CatalogThemeCycleButton(
-                themeMode: _themeMode,
-                onChanged: _setThemeMode,
-              ),
-            ],
+      body: AppBarComponent(
+        title: widget.section.title,
+        subtitle: widget.section.components.join(', '),
+        onBack: () => Navigator.of(context).pop(),
+        actions: [
+          _CatalogThemeCycleButton(
+            themeMode: _themeMode,
+            onChanged: _setThemeMode,
           ),
+        ],
+        slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               Spacing.lg,
@@ -697,13 +693,11 @@ class _SettingsExampleShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     return Scaffold(
-      body: CustomScrollView(
+      body: AppBarComponent(
+        title: title,
+        subtitle: 'Settings',
+        onBack: () => Navigator.of(context).pop(),
         slivers: [
-          HeaderAppBarComponent(
-            title: title,
-            subtitle: 'Settings',
-            onBack: () => Navigator.of(context).pop(),
-          ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               Spacing.lg,
@@ -2181,26 +2175,24 @@ class _HeaderAppBarDemoPageState extends State<HeaderAppBarDemoPage> {
     final colors = context.componentColors;
     return Scaffold(
       backgroundColor: colors.backgroundBase,
-      body: CustomScrollView(
-        slivers: [
-          HeaderAppBarComponent(
-            title: 'Menu items',
-            subtitle: 'Scroll to collapse into a single app bar row',
-            onBack: () => Navigator.of(context).pop(),
-            leading: const _HeaderAppBarDemoLeading(),
-            actions: [
-              IconButtonComponent(
-                tooltip: 'Add item',
-                variant: IconButtonComponentVariant.primary,
-                icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
-                onTap: () => _showAction('Add tapped'),
-              ),
-              _CatalogThemeCycleButton(
-                themeMode: _themeMode,
-                onChanged: _setThemeMode,
-              ),
-            ],
+      body: AppBarComponent(
+        title: 'Menu items',
+        subtitle: 'Scroll to collapse into a single app bar row',
+        onBack: () => Navigator.of(context).pop(),
+        leading: const _HeaderAppBarDemoLeading(),
+        actions: [
+          IconButtonComponent(
+            tooltip: 'Add item',
+            variant: IconButtonComponentVariant.primary,
+            icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
+            onTap: () => _showAction('Add tapped'),
           ),
+          _CatalogThemeCycleButton(
+            themeMode: _themeMode,
+            onChanged: _setThemeMode,
+          ),
+        ],
+        slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               Spacing.lg,

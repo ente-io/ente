@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ente_components/models/component_execution_state.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -417,7 +418,7 @@ class _IconButtonComponentState extends State<IconButtonComponent>
 }
 
 const double _buttonSize = 36;
-const double _iconSize = 18;
+const double _iconSize = IconSizes.small;
 
 class _ResolvedIconButtonColors {
   const _ResolvedIconButtonColors({

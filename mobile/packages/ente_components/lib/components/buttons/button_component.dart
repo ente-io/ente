@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ente_components/models/component_execution_state.dart';
 import 'package:ente_components/theme/colors.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -54,7 +55,7 @@ class ButtonComponent extends StatefulWidget {
 
 class _ButtonComponentState extends State<ButtonComponent>
     with SingleTickerProviderStateMixin {
-  static const double _executionIconSize = 24;
+  static const double _executionIconSize = IconSizes.medium;
   static const double _contentMinHeight = 24;
   static const double _verticalPadding = 14;
   static const Duration _loadingDelay = Duration(milliseconds: 300);

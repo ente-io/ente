@@ -16,6 +16,7 @@ export 'components/stepper_component.dart';
 export 'components/text_input_component.dart';
 export 'models/component_execution_state.dart';
 export 'theme/colors.dart';
+export 'theme/icon_sizes.dart';
 export 'theme/motion.dart';
 export 'theme/radii.dart';
 export 'theme/shadows.dart';

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=57-6281&view=variables
 /// Section: Colours / Semantic tokens
 /// Specs: Color Tokens collection with light and dark modes.
-enum EnteApp { photos, auth, locker }
+enum ComponentApp { photos, auth, locker }
 
 class ColorTokens {
   const ColorTokens({
@@ -134,11 +134,12 @@ class ColorTokens {
   static const dark = colorTokensDark;
 
   factory ColorTokens.forApp(
-    EnteApp app, {
+    ComponentApp app, {
     Brightness brightness = Brightness.light,
   }) {
-    final base =
-        brightness == Brightness.dark ? colorTokensDark : colorTokensLight;
+    final base = brightness == Brightness.dark
+        ? colorTokensDark
+        : colorTokensLight;
     return base.withPrimary(_primaryTokensForApp(app, brightness));
   }
 
@@ -228,12 +229,18 @@ class PrimaryColorTokens {
   final Color primaryDarker;
 }
 
-PrimaryColorTokens _primaryTokensForApp(EnteApp app, Brightness brightness) {
+PrimaryColorTokens _primaryTokensForApp(
+  ComponentApp app,
+  Brightness brightness,
+) {
   final dark = brightness == Brightness.dark;
   return switch (app) {
-    EnteApp.photos => dark ? greenPrimaryTokensDark : greenPrimaryTokensLight,
-    EnteApp.auth => dark ? purplePrimaryTokensDark : purplePrimaryTokensLight,
-    EnteApp.locker => dark ? bluePrimaryTokensDark : bluePrimaryTokensLight,
+    ComponentApp.photos =>
+      dark ? greenPrimaryTokensDark : greenPrimaryTokensLight,
+    ComponentApp.auth =>
+      dark ? purplePrimaryTokensDark : purplePrimaryTokensLight,
+    ComponentApp.locker =>
+      dark ? bluePrimaryTokensDark : bluePrimaryTokensLight,
   };
 }
 
