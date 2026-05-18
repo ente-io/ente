@@ -59,7 +59,7 @@ jobs:
               run: yarn config set network-timeout 900000 -g
 
             - name: Install dependencies
-              run: yarn install
+              run: yarn install --frozen-lockfile
 
             - name: Create universal ffmpeg binaries for macOS
               if: startsWith(matrix.os, 'macos')
@@ -92,7 +92,15 @@ jobs:
               run: sudo apt-get update && sudo apt-get install libarchive-tools
 
             - name: Build
-              run: node scripts/ci-electron-builder.js
+              shell: bash
+              run: |
+                  if [ "${RUNNER_OS}" = "macOS" ]; then
+                      export CSC_LINK="${MAC_CERTS}"
+                      export CSC_KEY_PASSWORD="${MAC_CERTS_PASSWORD}"
+                  fi
+
+                  yarn run build:ci
+                  yarn run electron-builder --${{ startsWith(matrix.os, 'macos') && 'mac' || startsWith(matrix.os, 'windows') && 'windows' || 'linux' }} --publish always
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   MAC_CERTS: ${{ secrets.MAC_CERTS }}
