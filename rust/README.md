@@ -2,7 +2,7 @@
 
 ```
                          ┌───────────────────────────────────────┐
-                         │            rust/core/                 │
+                         │            rust/crates/core/                 │
                          │        (ente-core crate)              │
                          │                                       │
                          │   Pure Rust - NO FFI annotations      │
@@ -40,11 +40,11 @@
 
 ## Contents (this repo)
 
-- `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
+- `rust/crates/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
 - `rust/photos/` (`ente_photos`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
 - `rust/apps/cli/` (`ente-rs`) - Rust CLI.
 - `rust/e2e/` (`ente-e2e`) - live Museum-backed Rust end-to-end tests.
-- `rust/ensu/` - LLM chat stack (see `rust/ensu/README.md`).
+- `rust/crates/ensu/` - LLM chat stack (see `rust/crates/ensu/README.md`).
 
 ## Directory Structure
 
@@ -87,9 +87,9 @@ rust/
 │   │   └── vector_db.rs
 │   └── Cargo.toml
 │
-└── ensu/                         # LLM chat stack (see rust/ensu/README.md)
+└── ensu/                         # LLM chat stack (see rust/crates/ensu/README.md)
 
-rust/uniffi/                      # UniFFI bindings for core crypto/auth + ensu
+rust/bindings/uniffi/                      # UniFFI bindings for core crypto/auth + ensu
 ├── core/
 └── ensu/
 
@@ -119,7 +119,7 @@ mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 **Crates:**
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
-  - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
+  - Docs: `rust/crates/core/docs/crypto.md`, `rust/crates/core/docs/auth.md`
 - `ente_photos` - shared Photos Rust logic
 - `ente-rs` - Rust CLI package (`ente-cli` binary)
 - `ente-e2e` - ignored Rust integration tests that run against a live Museum
@@ -160,7 +160,7 @@ Both depend on `ente-core` and use `#[frb]` annotations to generate Dart binding
 
 ### Commands
 
-**ente-core (rust/core/):**
+**ente-core (rust/crates/core/):**
 
 ```sh
 cargo fmt        # format
@@ -207,7 +207,7 @@ yarn build:wasm  # builds the WASM package
 > ```sh
 > cargo install cargo-watch
 > cd web/
-> cargo watch -w ../rust/core -w packages/wasm/src -s "yarn build:wasm"
+> cargo watch -w ../rust/crates/core -w packages/wasm/src -s "yarn build:wasm"
 > ```
 
 **ente_rust (mobile/packages/rust/):**
