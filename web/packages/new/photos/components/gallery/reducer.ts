@@ -1869,7 +1869,7 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
         const visibleSearchFiles = suppressSharedFilesSavedByUser(
             searchFiles,
             state.user?.id,
-            state.view?.type == "albums"
+            state.view?.type == "albums" || state.view?.type == "hidden-albums"
                 ? state.view.activeCollection
                 : undefined,
         );
