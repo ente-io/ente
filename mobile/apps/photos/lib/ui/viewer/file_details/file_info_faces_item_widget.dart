@@ -580,8 +580,10 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       // Fire a single people changed event and reload faces
       Bus.instance.fire(PeopleChangedEvent());
-      _clearSelectionMode();
-      await loadFaces(isRefresh: true);
+      if (mounted) {
+        _clearSelectionMode();
+        await loadFaces(isRefresh: true);
+      }
     } catch (e, s) {
       _logger.severe('Error while ignoring unlinked faces', e, s);
     }
