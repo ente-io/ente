@@ -1,4 +1,4 @@
-FROM golang:1.23.4-alpine3.21 AS builder
+FROM golang:1.23.12-alpine3.22 AS builder
 ENV GOOS=linux CGO_ENABLED=0
 
 WORKDIR /etc/ente/
@@ -11,7 +11,7 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
   go build -trimpath -o museum cmd/museum/main.go
 
-FROM alpine:3.21
+FROM alpine:3.22
 COPY --from=builder /etc/ente/museum .
 COPY configurations configurations
 COPY migrations migrations
