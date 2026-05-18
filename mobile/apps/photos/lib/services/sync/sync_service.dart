@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import 'package:sqlite_async/sqlite_async.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -134,6 +135,12 @@ class SyncService {
           _logger.severe("unable to connect", e, StackTrace.current);
           return false;
         }
+      }
+      if (e is SqliteException && e.resultCode == 5) {
+        // SQLITE_BUSY: transient lock contention between isolates.
+        // The next sync cycle will retry successfully.
+        _logger.warning("backup deferred: database busy", e);
+        return false;
       }
       _logger.severe("backup failed", e, StackTrace.current);
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));

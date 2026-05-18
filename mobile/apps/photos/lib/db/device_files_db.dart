@@ -175,24 +175,29 @@ extension DeviceFiles on FilesDB {
         }
       }
 
-      await db.executeBatch(
-        '''
-        INSERT OR IGNORE INTO device_collections (id, name, should_backup) VALUES (?, ?, ?);
-      ''',
-        parameterSetsForInsert,
-      );
-
-      await db.executeBatch(
-        '''
-        UPDATE device_collections SET name = ? WHERE id = ?;
-      ''',
-        parameterSetsForUpdate,
-      );
-
-      // add the mappings for localIDs
-      if (pathIDToLocalIDsMap.isNotEmpty) {
-        await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
-      }
+      await db.writeTransaction((tx) async {
+        for (final params in parameterSetsForInsert) {
+          await tx.execute(
+            'INSERT OR IGNORE INTO device_collections (id, name, should_backup) VALUES (?, ?, ?)',
+            params,
+          );
+        }
+        for (final params in parameterSetsForUpdate) {
+          await tx.execute(
+            'UPDATE device_collections SET name = ? WHERE id = ?',
+            params,
+          );
+        }
+        for (final entry in pathIDToLocalIDsMap.entries) {
+          final pathID = entry.key;
+          for (final localID in entry.value) {
+            await tx.execute(
+              'INSERT OR IGNORE INTO device_files (id, path_id) VALUES (?, ?)',
+              [localID, pathID],
+            );
+          }
+        }
+      });
     } catch (e) {
       _logger.severe("failed to save path names", e);
       rethrow;
