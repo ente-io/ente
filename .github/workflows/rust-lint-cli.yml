@@ -9,6 +9,8 @@ on:
     pull_request:
         paths:
             - "rust/apps/cli/**"
+            - "rust/crates/accounts/**"
+            - "rust/crates/core/**"
             - "rust/Cargo.lock"
             - "rust/Cargo.toml"
             - ".github/workflows/rust-lint-cli.yml"

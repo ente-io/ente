@@ -1,7 +1,7 @@
 name: "Lint (mobile packages)"
 
 on:
-    # Run when mobile/packages or shared photos Rust changes
+    # Run when mobile/packages or shared Photos Rust changes
     pull_request:
         paths:
             - "mobile/packages/**"
@@ -48,10 +48,12 @@ jobs:
                         - 'mobile/packages/rust/**/*.rs'
                         - 'mobile/packages/rust/**/Cargo.toml'
                         - 'mobile/packages/rust/**/Cargo.lock'
+                        - 'mobile/packages/rust/**/cargokit.yaml'
                         - 'mobile/apps/photos/rust/**/*.rs'
                         - 'mobile/apps/photos/rust/**/Cargo.toml'
+                        - 'mobile/apps/photos/rust/**/cargokit.yaml'
                         - 'rust/photos/**'
-                        - 'rust/core/**/*.rs'
+                        - 'rust/crates/core/**/*.rs'
                       workflow:
                         - '.github/workflows/mobile-packages-lint.yml'
                       analysis:
@@ -139,6 +141,10 @@ jobs:
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
+
+            - name: Check Rust API without generated bindings (Core)
+              run: cargo check --locked
+              working-directory: mobile/packages/rust/rust
 
             - name: Generate Rust bindings (Core)
               run: flutter_rust_bridge_codegen generate
@@ -292,15 +298,19 @@ jobs:
 
             - name: Run clippy (ente_rust)
               working-directory: mobile/packages/rust/rust
-              run: cargo clippy --all-targets --all-features
+              run: cargo clippy --all-targets --all-features --locked
 
             - name: Build (ente_rust)
               working-directory: mobile/packages/rust/rust
-              run: cargo build
+              run: cargo build --features frb-generated --locked
 
             - name: Test (ente_rust)
               working-directory: mobile/packages/rust/rust
-              run: cargo test
+              run: cargo test --features frb-generated --locked
+
+            - name: Check Rust API without generated bindings (photos app)
+              run: cargo check --locked
+              working-directory: mobile/apps/photos/rust
 
             - name: Generate Rust bindings (photos app)
               run: flutter_rust_bridge_codegen generate
@@ -312,15 +322,15 @@ jobs:
 
             - name: Run clippy (ente_photos_rust)
               working-directory: mobile/apps/photos/rust
-              run: cargo clippy --all-targets --all-features
+              run: cargo clippy --all-targets --all-features --locked
 
             - name: Build (ente_photos_rust)
               working-directory: mobile/apps/photos/rust
-              run: cargo build
+              run: cargo build --features frb-generated --locked
 
             - name: Test (ente_photos_rust)
               working-directory: mobile/apps/photos/rust
-              run: cargo test
+              run: cargo test --features frb-generated --locked
 
     apps-lint:
         needs: detect-changes

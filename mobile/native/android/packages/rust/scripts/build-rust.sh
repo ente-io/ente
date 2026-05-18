@@ -18,7 +18,13 @@ REPO_ROOT=$(cd "$(dirname "$0")/../../../../../.." && pwd)
 TOOLCHAIN=""
 OUT_DIR=""
 
-CRATES=(uniffi/core uniffi/ensu/db uniffi/ensu/sync uniffi/ensu/inference uniffi/ensu/transcription)
+CRATES=(
+    bindings/uniffi/core
+    bindings/uniffi/ensu/db
+    bindings/uniffi/ensu/sync
+    bindings/uniffi/ensu/inference
+    bindings/uniffi/ensu/transcription
+)
 
 ABIS=()
 while [[ $# -gt 0 ]]; do

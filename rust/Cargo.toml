@@ -1,20 +1,26 @@
 [workspace]
 resolver = "2"
-members = ["apps/cli", "apps/codegen", "crates/image"]
+members = [
+    "apps/cli",
+    "apps/codegen",
+    "bindings/uniffi/core",
+    "bindings/uniffi/ensu/db",
+    "bindings/uniffi/ensu/inference",
+    "bindings/uniffi/ensu/sync",
+    "bindings/uniffi/ensu/transcription",
+    "crates/accounts",
+    "crates/contacts",
+    "crates/core",
+    "crates/ensu/db",
+    "crates/ensu/inference",
+    "crates/ensu/sync",
+    "crates/ensu/transcription",
+    "crates/image",
+]
 exclude = [
-    "accounts",
     "apps/ensu/src-tauri",
-    "contacts",
-    "core",
-    "e2e",
-    "ensu/db",
-    "ensu/inference",
-    "ensu/sync",
-    "ensu/transcription",
+    # Photos stays outside the root workspace until its app-provided ONNX Runtime
+    # can move from ort rc.4 to the workspace's ort rc.12.
     "photos",
-    "uniffi/core",
-    "uniffi/ensu/db",
-    "uniffi/ensu/inference",
-    "uniffi/ensu/sync",
-    "uniffi/ensu/transcription",
+    "e2e",
 ]

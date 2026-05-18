@@ -5,7 +5,8 @@ on:
     pull_request:
         paths:
             - "web/**"
-            - "rust/core/**"
+            - "rust/crates/core/**"
+            - "rust/crates/contacts/**"
             - ".github/workflows/web-lint.yml"
 
 permissions:

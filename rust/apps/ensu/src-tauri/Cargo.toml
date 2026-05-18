@@ -11,10 +11,10 @@ tauri-build = { version = "1.5.0", features = [] }
 tauri = { version = "1.5.0", features = [ "dialog-save", "dialog-open", "path-all", "fs-all", "shell-open", "process-relaunch"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-ente-core = { path = "../../../core", features = ["srp"] }
-ensu-db = { path = "../../../ensu/db" }
-ensu-sync = { path = "../../../ensu/sync" }
-inference_rs = { path = "../../../ensu/inference" }
+ente-core = { path = "../../../crates/core", features = ["srp"] }
+ensu-db = { path = "../../../crates/ensu/db" }
+ensu-sync = { path = "../../../crates/ensu/sync" }
+inference_rs = { path = "../../../crates/ensu/inference" }
 uuid = { version = "1", features = ["v4"] }
 keyring = { version = "3", default-features = false, features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust"] }
 

@@ -5,8 +5,8 @@ on:
     pull_request:
         paths:
             - "rust/apps/ensu/**"
-            - "rust/core/**"
-            - "rust/ensu/**"
+            - "rust/crates/core/**"
+            - "rust/crates/ensu/**"
             - ".github/workflows/ensu-desktop-lint.yml"
 
 permissions:

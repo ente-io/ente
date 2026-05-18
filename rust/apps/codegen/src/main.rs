@@ -49,23 +49,23 @@ fn generate_ensu_ios() -> Result<(), DynError> {
     let crates = [
         UniffiCrate {
             crate_name: "core",
-            crate_dir: rust_root.join("uniffi/core"),
+            crate_dir: rust_root.join("bindings/uniffi/core"),
         },
         UniffiCrate {
             crate_name: "db",
-            crate_dir: rust_root.join("uniffi/ensu/db"),
+            crate_dir: rust_root.join("bindings/uniffi/ensu/db"),
         },
         UniffiCrate {
             crate_name: "sync",
-            crate_dir: rust_root.join("uniffi/ensu/sync"),
+            crate_dir: rust_root.join("bindings/uniffi/ensu/sync"),
         },
         UniffiCrate {
             crate_name: "inference",
-            crate_dir: rust_root.join("uniffi/ensu/inference"),
+            crate_dir: rust_root.join("bindings/uniffi/ensu/inference"),
         },
         UniffiCrate {
             crate_name: "transcription",
-            crate_dir: rust_root.join("uniffi/ensu/transcription"),
+            crate_dir: rust_root.join("bindings/uniffi/ensu/transcription"),
         },
     ];
 
@@ -100,7 +100,7 @@ fn generate_ensu_android() -> Result<(), DynError> {
         AndroidCrate {
             uniffi: UniffiCrate {
                 crate_name: "core",
-                crate_dir: rust_root.join("uniffi/core"),
+                crate_dir: rust_root.join("bindings/uniffi/core"),
             },
             out_dir: core_out_dir.clone(),
             stale_path: core_out_dir.join("io/ente/ensu/crypto/core.kt"),
@@ -108,7 +108,7 @@ fn generate_ensu_android() -> Result<(), DynError> {
         AndroidCrate {
             uniffi: UniffiCrate {
                 crate_name: "db",
-                crate_dir: rust_root.join("uniffi/ensu/db"),
+                crate_dir: rust_root.join("bindings/uniffi/ensu/db"),
             },
             out_dir: rust_out_dir.clone(),
             stale_path: rust_out_dir.join("io/ente/labs/ensu_db/db.kt"),
@@ -116,7 +116,7 @@ fn generate_ensu_android() -> Result<(), DynError> {
         AndroidCrate {
             uniffi: UniffiCrate {
                 crate_name: "sync",
-                crate_dir: rust_root.join("uniffi/ensu/sync"),
+                crate_dir: rust_root.join("bindings/uniffi/ensu/sync"),
             },
             out_dir: rust_out_dir.clone(),
             stale_path: rust_out_dir.join("io/ente/labs/ensu_sync/sync.kt"),
@@ -124,7 +124,7 @@ fn generate_ensu_android() -> Result<(), DynError> {
         AndroidCrate {
             uniffi: UniffiCrate {
                 crate_name: "inference",
-                crate_dir: rust_root.join("uniffi/ensu/inference"),
+                crate_dir: rust_root.join("bindings/uniffi/ensu/inference"),
             },
             out_dir: rust_out_dir.clone(),
             stale_path: rust_out_dir.join("io/ente/labs/inference_rs/inference.kt"),
@@ -132,7 +132,7 @@ fn generate_ensu_android() -> Result<(), DynError> {
         AndroidCrate {
             uniffi: UniffiCrate {
                 crate_name: "transcription",
-                crate_dir: rust_root.join("uniffi/ensu/transcription"),
+                crate_dir: rust_root.join("bindings/uniffi/ensu/transcription"),
             },
             out_dir: rust_out_dir.clone(),
             stale_path: rust_out_dir.join("io/ente/labs/ensu_transcription/transcription.kt"),

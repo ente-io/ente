@@ -7,8 +7,8 @@ on:
         paths:
             - "mobile/apps/photos/**"
             - "rust/photos/**"
-            - "rust/core/**"
-            - "rust/contacts/**"
+            - "rust/crates/core/**"
+            - "rust/crates/contacts/**"
             - "rust/crates/image/**"
             - ".github/workflows/mobile-lint.yml"
             - "mobile/scripts/check_source_arb_plurals.rb"
@@ -42,7 +42,7 @@ jobs:
 
                   while IFS= read -r file; do
                       case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/core/*|rust/contacts/*)
+                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/crates/core/*|rust/crates/contacts/*)
                               ente_rust=true
                               ;;
                       esac
@@ -96,6 +96,16 @@ jobs:
 
             - run: flutter pub get --enforce-lockfile
 
+            - name: Check Rust API without generated bindings (ente_rust)
+              if: steps.rust_changes.outputs.ente_rust == 'true'
+              working-directory: mobile/packages/rust/rust
+              run: cargo check --locked
+
+            - name: Check Rust API without generated bindings (ente_photos_rust)
+              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
+              working-directory: mobile/apps/photos/rust
+              run: cargo check --locked
+
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
 
@@ -119,17 +129,17 @@ jobs:
             - name: Run clippy (ente_rust)
               if: steps.rust_changes.outputs.ente_rust == 'true'
               working-directory: mobile/packages/rust/rust
-              run: cargo clippy --all-targets --all-features
+              run: cargo clippy --all-targets --all-features --locked
 
             - name: Build (ente_rust)
               if: steps.rust_changes.outputs.ente_rust == 'true'
               working-directory: mobile/packages/rust/rust
-              run: cargo build
+              run: cargo build --features frb-generated --locked
 
             - name: Test (ente_rust)
               if: steps.rust_changes.outputs.ente_rust == 'true'
               working-directory: mobile/packages/rust/rust
-              run: cargo test
+              run: cargo test --features frb-generated --locked
 
             - name: Check formatting (ente_photos_rust)
               if: steps.rust_changes.outputs.ente_photos_rust == 'true'
@@ -139,14 +149,14 @@ jobs:
             - name: Run clippy (ente_photos_rust)
               if: steps.rust_changes.outputs.ente_photos_rust == 'true'
               working-directory: mobile/apps/photos/rust
-              run: cargo clippy --all-targets --all-features
+              run: cargo clippy --all-targets --all-features --locked
 
             - name: Build (ente_photos_rust)
               if: steps.rust_changes.outputs.ente_photos_rust == 'true'
               working-directory: mobile/apps/photos/rust
-              run: cargo build
+              run: cargo build --features frb-generated --locked
 
             - name: Test (ente_photos_rust)
               if: steps.rust_changes.outputs.ente_photos_rust == 'true'
               working-directory: mobile/apps/photos/rust
-              run: cargo test
+              run: cargo test --features frb-generated --locked

@@ -129,8 +129,8 @@ build_crate() {
     echo "    -> $out"
 }
 
-build_crate core      "$REPO_ROOT/rust/uniffi/core"           libcore.a
-build_crate db        "$REPO_ROOT/rust/uniffi/ensu/db"        libdb.a
-build_crate sync      "$REPO_ROOT/rust/uniffi/ensu/sync"      libsync.a
-build_crate inference "$REPO_ROOT/rust/uniffi/ensu/inference" libinference.a
-build_crate transcription "$REPO_ROOT/rust/uniffi/ensu/transcription" libtranscription.a
+build_crate core      "$REPO_ROOT/rust/bindings/uniffi/core"           libcore.a
+build_crate db        "$REPO_ROOT/rust/bindings/uniffi/ensu/db"        libdb.a
+build_crate sync      "$REPO_ROOT/rust/bindings/uniffi/ensu/sync"      libsync.a
+build_crate inference "$REPO_ROOT/rust/bindings/uniffi/ensu/inference" libinference.a
+build_crate transcription "$REPO_ROOT/rust/bindings/uniffi/ensu/transcription" libtranscription.a
