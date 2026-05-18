@@ -219,7 +219,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 titleTextStyle: textTheme.body,
                 backgroundColor: colorScheme.backgroundBase,
               ),
-              bottomAppBarTheme: BottomAppBarTheme(
+              bottomAppBarTheme: BottomAppBarThemeData(
                 color: colorScheme.backgroundBase,
               ),
               brightness: isLightMode ? Brightness.light : Brightness.dark,

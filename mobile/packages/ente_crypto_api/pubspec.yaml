@@ -4,10 +4,10 @@ version: 0.0.1
 publish_to: none
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.10.0 <4.0.0"
 
 dependencies:
-  meta: 1.16.0
+  meta: 1.17.0
 
 dev_dependencies:
   flutter_lints: 5.0.0

@@ -97,23 +97,24 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 GestureDetector(
                   onTap: () async {
                     final locale = (await getLocale())!;
-                    // ignore: unawaited_futures
-                    routeToPage(
-                      context,
-                      LanguageSelectorPage(
-                        appSupportedLocales,
-                        (locale) async {
-                          await setLocale(locale);
-                          App.setLocale(
-                            context,
-                            locale,
-                          );
-                        },
-                        locale,
-                      ),
-                    ).then((value) {
-                      setState(() {});
-                    });
+                    unawaited(
+                      routeToPage(
+                        context,
+                        LanguageSelectorPage(
+                          appSupportedLocales,
+                          (locale) async {
+                            await setLocale(locale);
+                            App.setLocale(
+                              context,
+                              locale,
+                            );
+                          },
+                          locale,
+                        ),
+                      ).then((value) {
+                        setState(() {});
+                      }),
+                    );
                   },
                   child: const Padding(
                     padding: EdgeInsets.only(bottom: 12),
@@ -269,12 +270,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
     if (hasOptedBefore || result?.action == ButtonAction.first) {
       await Configuration.instance.optForOfflineMode();
-      // ignore: unawaited_futures
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return const HomePage();
-          },
+      unawaited(
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const HomePage();
+            },
+          ),
         ),
       );
     }

@@ -134,7 +134,7 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
     final bool isMultiline =
         (widget.maxLines ?? 1) > 1 || (widget.minLines ?? 1) > 1;
     final int? effectiveMaxLines = widget.obscureText ? 1 : widget.maxLines;
-    final int? effectiveMinLines = widget.obscureText
+    final int effectiveMinLines = widget.obscureText
         ? 1
         : (widget.minLines ?? (isMultiline ? (widget.maxLines ?? 3) : 1));
     final textInputType = widget.keyboardType ??
@@ -143,7 +143,7 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
     final backgroundColor = !widget.enabled
         ? colorScheme.fillMuted
         : hasFocus
-            ? accentBlue.withOpacity(0.14)
+            ? accentBlue.withValues(alpha: 0.14)
             : colorScheme.fillFaint;
 
     final textLineHeight = widget.lineHeight ?? (isMultiline ? 1.5 : 1.25);

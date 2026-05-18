@@ -1308,7 +1308,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String uploadedFilesProgressWithError(
-      int completed, int total, String error) {
+    int completed,
+    int total,
+    String error,
+  ) {
     return 'Uploaded $completed/$total items... ($error)';
   }
 

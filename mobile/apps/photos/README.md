@@ -46,7 +46,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ## 🧑‍💻 Building from source
 
-1. Install [Flutter v3.32.8](https://flutter.dev/docs/get-started/install) and [Rust](https://www.rust-lang.org/tools/install).
+1. Install [Flutter v3.38.10](https://flutter.dev/docs/get-started/install) and [Rust](https://www.rust-lang.org/tools/install).
 
 2. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos run codegen:rust`. This will install dependencies and generate Rust bindings.

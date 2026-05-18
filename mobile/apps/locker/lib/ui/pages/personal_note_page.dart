@@ -230,8 +230,9 @@ class _PersonalNotePageState
       _contentFocusNode.unfocus();
     }
     final isEditorFocused = isEditing && _contentFocusNode.hasFocus;
-    final editorFillColor =
-        isEditorFocused ? accentBlue.withOpacity(0.14) : colorScheme.fillFaint;
+    final editorFillColor = isEditorFocused
+        ? accentBlue.withValues(alpha: 0.14)
+        : colorScheme.fillFaint;
 
     final contentPadding = isEditing
         ? _editorContentPadding
@@ -306,7 +307,9 @@ class _PersonalNotePageState
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: colorScheme.fillBase.withOpacity(0.2),
+                              color: colorScheme.fillBase.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
