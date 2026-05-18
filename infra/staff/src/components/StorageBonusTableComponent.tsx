@@ -7,8 +7,7 @@ import {
     TableHead,
     TableRow,
 } from "@mui/material";
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getCurrentAdminUser } from "../services/support";
 
 interface BonusData {
@@ -46,18 +45,14 @@ export const StorageBonusTableComponent: React.FC = () => {
         );
     }, []);
 
-    const formatCreatedAt = (createdAt: number): string => {
-        const date = new Date(createdAt / 1000);
-        return date.toLocaleDateString(); // Adjust date formatting as needed
-    };
+    const formatCreatedAt = (createdAt: number): string =>
+        new Date(createdAt / 1000).toLocaleDateString();
 
     const formatValidTill = (validTill: number): string => {
         if (validTill === 0) {
             return "Forever";
-        } else {
-            const date = new Date(validTill / 1000);
-            return date.toLocaleDateString(); // Adjust date formatting as needed
         }
+        return new Date(validTill / 1000).toLocaleDateString();
     };
 
     const formatStorage = (storage: number): string => {

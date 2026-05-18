@@ -9,17 +9,22 @@ import {
     TableHead,
     TableRow,
 } from "@mui/material";
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getCurrentAdminUser } from "../services/support";
-import type { FamilyMember } from "../types";
-import { formatUsageToGB } from "../utils/";
 import { CloseFamily } from "./CloseFamily";
+
+interface FamilyMember {
+    id: string;
+    email: string;
+    status: string;
+    usage: number;
+    storageLimit: number;
+}
 
 export const FamilyTableComponent: React.FC = () => {
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [closeFamilyOpen, setCloseFamilyOpen] = useState(false);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -152,3 +157,6 @@ export const FamilyTableComponent: React.FC = () => {
         </>
     );
 };
+
+const formatUsageToGB = (usage: number): string =>
+    `${(usage / (1024 * 1024 * 1024)).toFixed(2)} GB`;

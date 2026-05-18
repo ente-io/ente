@@ -11,10 +11,10 @@ import {
     MenuItem,
     Paper,
     Select,
+    type SelectChangeEvent,
     Typography,
 } from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material/Select";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { apiOrigin, requireToken } from "../services/support";
 
 const APP_OPTIONS = [
@@ -25,26 +25,18 @@ const APP_OPTIONS = [
 
 type AppOption = (typeof APP_OPTIONS)[number]["value"];
 
-const computeExpiryTimeMicros = () =>
-    Date.now() * 1000 + 7 * 24 * 60 * 60 * 1_000_000;
-
-const generateOtp = () =>
-    Math.floor(Math.random() * 1_000_000)
-        .toString()
-        .padStart(6, "0");
-
 interface AddOttProps {
     open: boolean;
     onClose: () => void;
     userEmail: string;
 }
 
-export const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
+export const AddOtt: React.FC<AddOttProps> = ({ open, onClose, userEmail }) => {
     const [selectedApp, setSelectedApp] = useState<AppOption>("photos");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [createdOtp, setCreatedOtp] = useState<string | null>(null);
-    const [expiryPreview, setExpiryPreview] = useState<number>(() =>
+    const [expiryPreview, setExpiryPreview] = useState(() =>
         computeExpiryTimeMicros(),
     );
 
@@ -202,3 +194,11 @@ export const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
         </Dialog>
     );
 };
+
+const computeExpiryTimeMicros = () =>
+    Date.now() * 1000 + 7 * 24 * 60 * 60 * 1_000_000;
+
+const generateOtp = () =>
+    Math.floor(Math.random() * 1_000_000)
+        .toString()
+        .padStart(6, "0");

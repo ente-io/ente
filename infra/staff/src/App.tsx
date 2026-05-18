@@ -1,48 +1,49 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-import TextField from "@mui/material/TextField";
-import * as React from "react";
-import { useCallback, useEffect, useState } from "react";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Tab,
+    Tabs,
+    TextField,
+} from "@mui/material";
+import React, { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { FamilyTableComponent } from "./components/FamilyComponentTable";
 import { StorageBonusTableComponent } from "./components/StorageBonusTableComponent";
 import { TokensTableComponent } from "./components/TokenTableComponent";
-import { UserComponent } from "./components/UserComponent";
+import { UserComponent, type UserData } from "./components/UserComponent";
 import duckieimage from "./components/duckie.png";
 import { getEmail, getToken, setEmail, setToken } from "./services/session";
 import { apiOrigin } from "./services/support";
-import type { UserData, UserResponse } from "./types";
 
-const isNumericUserId = (value: string): boolean => /^\d+$/.test(value);
-
-const buildUserSearchUrl = (input: string): string => {
-    const trimmedInput = input.trim();
-    if (isNumericUserId(trimmedInput)) {
-        return `${apiOrigin}/admin/user?id=${encodeURIComponent(trimmedInput)}`;
-    }
-    return `${apiOrigin}/admin/user?email=${encodeURIComponent(trimmedInput)}`;
-};
-
-const formatStorage = (bytes: number | undefined, noneWhenZero = false) => {
-    if (bytes === undefined || (noneWhenZero && bytes === 0)) {
-        return "None";
-    }
-    if (bytes >= 1024 ** 3) {
-        return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
-    }
-    return `${(bytes / 1024 ** 2).toFixed(2)} MB`;
-};
+interface UserResponse {
+    user: { ID: string; email: string; creationTime: number };
+    subscription: {
+        productID: string;
+        paymentProvider: string;
+        expiryTime: number;
+        storage: number;
+    };
+    authCodes?: number;
+    details?: {
+        usage?: number;
+        storageBonus?: number;
+        profileData: {
+            isEmailMFAEnabled: boolean;
+            isTwoFactorEnabled: boolean;
+            passkeyCount: number;
+            canDisableEmailMFA: boolean;
+        };
+    };
+}
 
 export const App: React.FC = () => {
-    const [localEmail, setLocalEmail] = useState<string>("");
-    const [localToken, setLocalToken] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string>("");
-    const [fetchSuccess, setFetchSuccess] = useState<boolean>(false);
-    const [tabValue, setTabValue] = useState<number>(0);
+    const [localEmail, setLocalEmail] = useState("");
+    const [localToken, setLocalToken] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [fetchSuccess, setFetchSuccess] = useState(false);
+    const [tabValue, setTabValue] = useState(0);
     const [userData, setUserData] = useState<UserData | null>(null);
 
     useEffect(() => {
@@ -329,4 +330,24 @@ export const App: React.FC = () => {
             </div>
         </div>
     );
+};
+
+const buildUserSearchUrl = (input: string): string => {
+    const trimmedInput = input.trim();
+    if (isNumericUserId(trimmedInput)) {
+        return `${apiOrigin}/admin/user?id=${encodeURIComponent(trimmedInput)}`;
+    }
+    return `${apiOrigin}/admin/user?email=${encodeURIComponent(trimmedInput)}`;
+};
+
+const isNumericUserId = (value: string): boolean => /^\d+$/.test(value);
+
+const formatStorage = (bytes: number | undefined, noneWhenZero = false) => {
+    if (bytes === undefined || (noneWhenZero && bytes === 0)) {
+        return "None";
+    }
+    if (bytes >= 1024 ** 3) {
+        return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
+    }
+    return `${(bytes / 1024 ** 2).toFixed(2)} MB`;
 };

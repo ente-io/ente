@@ -17,7 +17,7 @@ import {
 interface ToggleEmailMFAProps {
     open: boolean;
     handleClose: () => void;
-    handleToggleEmailMFA: (status: boolean) => void; // Callback to handle toggling Email MFA
+    handleToggleEmailMFA: (status: boolean) => void;
 }
 
 export const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({

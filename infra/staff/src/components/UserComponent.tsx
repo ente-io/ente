@@ -1,28 +1,40 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
-import Paper from "@mui/material/Paper";
-import Switch from "@mui/material/Switch";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
-import { useEffect, useState } from "react";
-import type { UserComponentProps } from "../types";
+import {
+    Box,
+    Button,
+    Grid,
+    IconButton,
+    Paper,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableRow,
+    Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { AddOtt } from "./AddOtt";
 import { ChangeEmail } from "./ChangeEmail";
-import { DeleteAccount } from "./DeleteAccont";
+import { DeleteAccount } from "./DeleteAccount";
 import { Disable2FA } from "./Disable2FA";
 import { DisablePasskeys } from "./DisablePasskeys";
 import { ToggleEmailMFA } from "./ToggleEmailMFA";
 import { UpdateSubscription } from "./UpdateSubscription";
 
-export const UserComponent = ({ userData }: UserComponentProps) => {
+export interface UserData {
+    user: Record<string, string>;
+    storage: Record<string, string>;
+    subscription: Record<string, string>;
+    security: Record<string, string>;
+}
+
+interface UserComponentProps {
+    userData: UserData | null;
+}
+
+export const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
     const [email2FAEnabled, setEmail2FAEnabled] = useState(false);
     const [email2FAOpen, setEmail2FAToggleOpen] = useState(false);
@@ -130,7 +142,7 @@ interface DataTableProps {
     setEmail2FAToggleOpen: (open: boolean) => void;
 }
 
-const DataTable = ({
+const DataTable: React.FC<DataTableProps> = ({
     title,
     data,
     onEditEmail,
@@ -144,7 +156,7 @@ const DataTable = ({
     setDisable2FAOpen,
     email2FAEnabled,
     setEmail2FAToggleOpen,
-}: DataTableProps) => (
+}) => (
     <TableContainer
         component={Paper}
         variant="outlined"

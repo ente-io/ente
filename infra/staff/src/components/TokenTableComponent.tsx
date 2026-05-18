@@ -8,8 +8,7 @@ import {
     TableRow,
     TableSortLabel,
 } from "@mui/material";
-import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getCurrentAdminUser } from "../services/support";
 
 interface TokenData {
@@ -66,10 +65,8 @@ export const TokensTableComponent: React.FC = () => {
         return sortableTokens;
     }, [order, orderBy, tokens]);
 
-    const formatDate = (timestamp: number): string => {
-        const date = new Date(timestamp / 1000);
-        return date.toLocaleDateString();
-    };
+    const formatDate = (timestamp: number): string =>
+        new Date(timestamp / 1000).toLocaleDateString();
 
     if (loading) {
         return <p>Loading...</p>;

@@ -13,7 +13,12 @@ import {
     getCurrentAdminUserId,
     requireToken,
 } from "../services/support";
-import type { DisablePasskeysProps } from "../types";
+
+interface DisablePasskeysProps {
+    open: boolean;
+    handleClose: () => void;
+    handleDisablePasskeys: () => void;
+}
 
 export const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
     open,

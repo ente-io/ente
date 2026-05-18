@@ -14,7 +14,10 @@ import {
     getCurrentAdminUserId,
     requireToken,
 } from "../services/support";
-import type { ErrorResponse } from "../types";
+
+interface ErrorResponse {
+    message: string;
+}
 
 interface ChangeEmailProps {
     open: boolean;
@@ -22,8 +25,8 @@ interface ChangeEmailProps {
 }
 
 export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
-    const [newEmail, setNewEmail] = useState<string>("");
-    const [userID, setUserID] = useState<string>("");
+    const [newEmail, setNewEmail] = useState("");
+    const [userID, setUserID] = useState("");
 
     useEffect(() => {
         const fetchUserID = async () => {

@@ -1,15 +1,18 @@
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CloseIcon from "@mui/icons-material/Close";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Grid from "@mui/material/Grid";
-import InputAdornment from "@mui/material/InputAdornment";
-import MenuItem from "@mui/material/MenuItem";
-import Select, { type SelectChangeEvent } from "@mui/material/Select";
-import TextField from "@mui/material/TextField";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+    InputAdornment,
+    MenuItem,
+    Select,
+    type SelectChangeEvent,
+    TextField,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -18,6 +21,7 @@ import {
     getCurrentAdminUser,
     requireToken,
 } from "../services/support";
+
 interface Subscription {
     productID: string;
     paymentProvider: string;
@@ -87,7 +91,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                     transactionId:
                         userDataResponse.subscription.originalTransactionID ||
                         "",
-                    expiryTime: expiryTime,
+                    expiryTime,
                     userId: userDataResponse.subscription.userID || "",
                     attributes: {
                         customerID:

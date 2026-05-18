@@ -17,7 +17,7 @@ import {
 interface CloseFamilyProps {
     open: boolean;
     handleClose: () => void;
-    handleCloseFamily: () => void; // Callback to handle closing family
+    handleCloseFamily: () => void;
 }
 
 export const CloseFamily: React.FC<CloseFamilyProps> = ({
