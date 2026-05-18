@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
-  go build -o museum cmd/museum/main.go
+  go build -trimpath -o museum cmd/museum/main.go
 
 FROM alpine:3.21
 COPY --from=builder /etc/ente/museum .
