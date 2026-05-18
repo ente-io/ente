@@ -1,13 +1,18 @@
 name: "Lint (mobile packages)"
 
 on:
-    # Run when mobile/packages or shared Photos Rust changes
+    # Run when mobile/packages or shared mobile Rust changes
     pull_request:
         paths:
             - "mobile/packages/**"
             - "mobile/**/pubspec*.yaml"
             - "mobile/**/pubspec.lock"
             - "rust/photos/**"
+            - "rust/crates/core/**"
+            - "rust/crates/contacts/**"
+            - "rust/crates/image/**"
+            - "rust/Cargo.toml"
+            - "rust/Cargo.lock"
             - ".github/workflows/mobile-packages-lint.yml"
             - "mobile/scripts/check_frozen_pubspecs.rb"
             - "mobile/scripts/check_source_arb_plurals.rb"
@@ -53,7 +58,11 @@ jobs:
                         - 'mobile/apps/photos/rust/**/Cargo.toml'
                         - 'mobile/apps/photos/rust/**/cargokit.yaml'
                         - 'rust/photos/**'
-                        - 'rust/crates/core/**/*.rs'
+                        - 'rust/crates/core/**'
+                        - 'rust/crates/contacts/**'
+                        - 'rust/crates/image/**'
+                        - 'rust/Cargo.toml'
+                        - 'rust/Cargo.lock'
                       workflow:
                         - '.github/workflows/mobile-packages-lint.yml'
                       analysis:
@@ -287,6 +296,10 @@ jobs:
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
+
+            - name: Check Rust API without generated bindings (Core)
+              run: cargo check --locked
+              working-directory: mobile/packages/rust/rust
 
             - name: Generate Rust bindings (Core)
               run: flutter_rust_bridge_codegen generate
