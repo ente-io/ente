@@ -325,7 +325,7 @@ internal fun MessageInput(
                 }
 
                 val canSend = (messageText.isNotBlank() || attachments.isNotEmpty()) &&
-                    !voiceInputState.isWorking
+                    !voiceInputState.blocksSend
 
                 IconButton(
                     onClick = {

@@ -56,6 +56,10 @@ internal val VoiceInputState.isWorking: Boolean
         this is VoiceInputState.Downloading ||
         this is VoiceInputState.Transcribing
 
+internal val VoiceInputState.blocksSend: Boolean
+    get() = this is VoiceInputState.Recording ||
+        this is VoiceInputState.Transcribing
+
 internal fun VoiceInputState.statusText(): String? = when (this) {
     VoiceInputState.Idle -> null
     VoiceInputState.Recording -> "Listening..."

@@ -45,6 +45,15 @@ enum VoiceInputState: Equatable {
         }
     }
 
+    var blocksSend: Bool {
+        switch self {
+        case .recording, .transcribing:
+            return true
+        case .idle, .unsupported, .downloading, .error:
+            return false
+        }
+    }
+
     var isError: Bool {
         if case .error = self {
             return true
