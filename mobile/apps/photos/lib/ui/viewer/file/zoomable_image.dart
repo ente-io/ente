@@ -28,6 +28,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/image_size_util.dart";
 import 'package:photos/utils/image_util.dart';
 import "package:photos/utils/ram_check_util.dart";
 import 'package:photos/utils/thumbnail_util.dart';
@@ -94,13 +95,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   // This is to prevent the app from crashing when loading 200MP images
   // https://github.com/flutter/flutter/issues/110331
-  static const int _defaultMaxPixels = 100000000; // 100MP
-  static const int _lowRamMaxPixels = 24000000; // 24MP
+  int get _maxImagePixels => hasLessThan5GBRAM
+      ? kLowRamImagePreviewMaxPixels
+      : kDefaultImagePreviewMaxPixels;
 
-  int get _maxImagePixels =>
-      hasLessThan5GBRAM ? _lowRamMaxPixels : _defaultMaxPixels;
-
-  bool get isTooLargeImage => _photo.width * _photo.height > _maxImagePixels;
+  bool get isTooLargeImage => isKnownImageLargerThan(_photo, _maxImagePixels);
 
   @override
   void initState() {
@@ -569,7 +568,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         "Handling very large image (${_photo.width}x${_photo.height}) by decreasing resolution to ${_maxImagePixels ~/ 1000000}MP to prevent crash",
       );
       final aspectRatio = _photo.width / _photo.height;
-      final maxPixels = min(50000000, _maxImagePixels);
+      final maxPixels = _maxImagePixels;
       final targetHeight = sqrt(maxPixels / aspectRatio);
       final targetWidth = aspectRatio * targetHeight;
 
@@ -826,7 +825,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         "Compressing very large image (${_photo.width}x${_photo.height}) more aggressively down to ${_maxImagePixels ~/ 1000000}MP",
       );
       final aspectRatio = _photo.width / _photo.height;
-      final maxPixels = min(50000000, _maxImagePixels);
+      final maxPixels = _maxImagePixels;
       final targetHeight = sqrt(maxPixels / aspectRatio);
       final targetWidth = aspectRatio * targetHeight;
 
