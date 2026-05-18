@@ -8,7 +8,7 @@ import {
     Paper,
 } from "@mui/material";
 import React, { useState } from "react";
-import { getEmail, getToken } from "../App"; // Import getEmail and getToken functions
+import { getEmail, getToken } from "../services/session";
 import { apiOrigin } from "../services/support";
 import type { UserData } from "../types";
 

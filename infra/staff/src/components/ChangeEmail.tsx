@@ -8,7 +8,7 @@ import {
     TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { getEmail, getToken } from "../App";
+import { getEmail, getToken } from "../services/session";
 import { apiOrigin } from "../services/support";
 import type { ErrorResponse } from "../types";
 

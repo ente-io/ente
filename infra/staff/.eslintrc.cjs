@@ -33,5 +33,6 @@ module.exports = {
             "warn",
             { allowConstantExport: true },
         ],
+        "react/jsx-no-target-blank": ["warn", { allowReferrer: true }],
     },
 };

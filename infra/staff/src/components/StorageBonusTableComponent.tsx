@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { getEmail, getToken } from "../App";
+import { getEmail, getToken } from "../services/session";
 import { apiOrigin } from "../services/support";
 
 interface BonusData {

@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useEffect, useState } from "react";
-import { getToken } from "../App";
+import { getToken } from "../services/session";
 import { apiOrigin } from "../services/support";
 
 const APP_OPTIONS = [

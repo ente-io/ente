@@ -13,7 +13,7 @@ import TextField from "@mui/material/TextField";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { getEmail, getToken } from "../App";
+import { getEmail, getToken } from "../services/session";
 import { apiOrigin } from "../services/support";
 interface Subscription {
     productID: string;
