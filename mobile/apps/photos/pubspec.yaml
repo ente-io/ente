@@ -296,6 +296,13 @@ dependency_overrides:
       url: https://github.com/deckerst/aves_panorama_motion_sensors.git
       ref: 4b11d59f4bda152627f701070272f657f8358e67
   protobuf: 3.1.0
+  # Fixes an iOS AVFoundation crash for videos whose minFrameDuration is zero.
+  # https://github.com/flutter/flutter/issues/151031
+  video_player_avfoundation:
+    git:
+      url: https://github.com/ente-io/packages.git
+      path: packages/video_player/video_player_avfoundation
+      ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
   watcher: 1.1.2
   win32: "5.10.1"
 

@@ -2978,12 +2978,13 @@ packages:
     source: hosted
     version: "2.9.5"
   video_player_avfoundation:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: video_player_avfoundation
-      sha256: e5371e9c09a5f5d55b88fd552bb1192dd5805a5747388553a439a30b85851a6a
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/video_player/video_player_avfoundation"
+      ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
+      resolved-ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
+      url: "https://github.com/ente-io/packages.git"
+    source: git
     version: "2.9.5"
   video_player_platform_interface:
     dependency: transitive
