@@ -3,6 +3,7 @@ import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
+import "package:ente_components/ente_components.dart" as components;
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_rust/ente_rust.dart";
@@ -123,6 +124,7 @@ Future<void> _runInForeground(
   AdaptiveThemeMode? savedThemeMode,
   MediaExtentionAction initialMediaExtensionAction,
 ) async {
+  components.ComponentTheme.configure(app: components.ComponentApp.photos);
   return await runWithLogs(() async {
     _logger.info("Starting app in foreground");
     isProcessBg = false;

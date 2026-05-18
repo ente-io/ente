@@ -57,6 +57,8 @@ dependencies:
   encrypt: 5.0.3
   ente_cast:
     path: plugins/ente_cast
+  ente_components:
+    path: ../../packages/ente_components
   ente_contacts:
     path: ../../packages/contacts
   ente_crypto:
