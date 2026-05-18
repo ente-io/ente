@@ -29,6 +29,7 @@
   "deleteReason4": "Meu motivo não está listado",
   "sendEmail": "Enviar e-mail",
   "deleteRequestSLAText": "Sua solicitação será revisada em até 72 horas.",
+  "deleteEmailRequest": "Por favor, envie um e-mail para <warning>account-deletion@ente.com</warning> do endereço de e-mail registrado.",
   "entePhotosPerm": "Ente <i>precisa de permissão para</i> preservar suas fotos",
   "ok": "OK",
   "createAccount": "Criar conta",
@@ -122,6 +123,7 @@
   "generatingEncryptionKeys": "Gerando chaves de criptografia...",
   "pleaseWait": "Aguarde...",
   "continueLabel": "Continuar",
+  "continueInMailApp": "Continuar no aplicativo de correio",
   "insecureDevice": "Dispositivo inseguro",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Desculpe, não foi possível gerar chaves seguras neste dispositivo.\n\ninicie sessão com um dispositivo diferente.",
   "howItWorks": "Como funciona",
@@ -135,8 +137,8 @@
   "changeEmail": "Alterar e-mail",
   "enterYourPassword": "Insira sua senha",
   "welcomeBack": "Bem-vindo(a) de volta!",
-  "readyToBackupTitle": "Pronto para fazer backup",
-  "readyToBackupSubtitle": "Suas fotos serão sincronizadas em segundo plano. Seu primeiro backup pode demorar um pouco.",
+  "readyToBackupTitle": "Pronto para salvar",
+  "readyToBackupSubtitle": "Suas fotos serão sincronizadas em segundo plano. O salvamento irá demorar um tempo.",
   "contactSupport": "Contatar suporte",
   "locationPickerTip": "Você também pode adicionar uma localização centralizada em uma foto na tela de informações da foto",
   "@locationPickerTip": {
@@ -243,6 +245,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Layout do álbum",
+  "layoutMasonry": "Alvenaria",
   "layoutGrouped": "Agrupados",
   "layoutContinuous": "Contínuo",
   "layoutTrip": "Viagem",
@@ -270,6 +273,16 @@
   "after1Month": "Após 1 mês",
   "after1Year": "Após 1 ano",
   "manageParticipants": "Gerenciar",
+  "albumParticipantsCount": "{count, plural, =0 {Nenhum participante} one {{count} participante} other {{count} participantes}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Crie um link para permitir que as pessoas adicionem e vejam fotos no seu álbum compartilhado sem a necessidade do aplicativo ou uma conta Ente. Ótimo para colecionar fotos de eventos.",
   "collectPhotos": "Coletar fotos",
   "collaborativeLink": "Link colaborativo",
@@ -285,6 +298,15 @@
   "publicLinkEnabled": "Link público ativo",
   "shareALink": "Compartilhar link",
   "sharedAlbumSectionDescription": "Criar álbuns compartilhados e colaborativos com outros usuários Ente, incluindo usuários em planos gratuitos.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Compartilhar com pessoas específicas} one {Compartilhado com {numberOfPeople} pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "thisIsYourVerificationId": "Este é o seu ID de verificação",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Alguém compartilhando álbuns com você deve ver o mesmo ID no dispositivo.",
   "howToViewShareeVerificationID": "Peça-os para pressionarem no e-mail a partir das Opções, e verifique-se os IDs de ambos os dispositivos correspondem.",
@@ -300,8 +322,12 @@
   "verificationId": "ID de verificação",
   "verifyEmailID": "Verificar {email}",
   "emailNoEnteAccount": "{email} não tem uma conta Ente.\n\nEnvie-os um convite para compartilhar fotos.",
+  "shareMyVerificationID": "Aqui está meu ID de verificação: {verificationID} para ente.com.",
+  "shareTextConfirmOthersVerificationID": "Ei, poderia confirmar que este é seu ID de verificação para ente.com: {verificationID}",
   "somethingWentWrong": "Algo deu errado",
   "sendInvite": "Enviar convite",
+  "shareTextRecommendUsingEnte": "Baixe o Ente para podermos compartilhar fotos e vídeos facilmente na qualidade original\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Baixe o Ente para eu poder adicioná-lo para meu plano familiar\n\nhttps://ente.com",
   "done": "Concluído",
   "applyCodeTitle": "Aplicar código",
   "enterCodeDescription": "Insira o código fornecido por um amigo para reivindicar armazenamento grátis para ambos",
@@ -329,6 +355,7 @@
   "theyAlsoGetXGb": "Eles também recebem {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB para eles + {storageAmountInGB} GB para você quando eles atualizarem.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB toda vez que alguém utilizar seu código num plano pago",
+  "shareTextReferralCode": "Ente Fotos é um abrigo privado para suas fotos\n* Baixe o Ente Fotos a partir de https://ente.com/app\n* Crie uma conta\n* Aplique o código de referência {referralCode} em Opções > Referência\n* Obtenha {referralStorageInGB}GB grátis quando você melhorar para um plano pago",
   "claimFreeStorage": "Reivindique armaz. grátis",
   "inviteYourFriends": "Convide seus amigos",
   "earnFreeStorage": "Reivindique armaz. grátis",
@@ -369,6 +396,7 @@
   "claimedByYou": "reivindicado por você",
   "earned": "ganho",
   "usable": "usável",
+  "referralStorageInfo": "Referências de assinantes pagos ganham armazenamento adicional.\n\nVocê pode usar o armazenamento até o limite do seu plano. Melhore-o para usar o resto do seu armazenamento ganho.",
   "removeFromAlbumTitle": "Remover do álbum?",
   "removeFromAlbum": "Remover do álbum",
   "itemsWillBeRemovedFromAlbum": "Os itens selecionados serão removidos deste álbum",
@@ -378,8 +406,11 @@
   "sorryCouldNotAddToFavorites": "Desculpe, não foi possível adicionar aos favoritos!",
   "sorryCouldNotRemoveFromFavorites": "Desculpe, não foi possível remover dos favoritos!",
   "subscribeToEnableSharing": "Você precisa de uma inscrição paga ativa para ativar o compartilhamento.",
+  "subscribeToChangeLinkSetting": "Você precisa de uma assinatura paga para alterar a opção deste link.",
   "subscribe": "Inscrever-se",
   "canOnlyRemoveFilesOwnedByYou": "Só pode remover arquivos de sua propriedade",
+  "cannotMoveToSharedAlbums": "Não é possível mover para álbuns compartilhados",
+  "cannotMoveToSharedAlbumsMessage": "Itens só podem ser adicionados para álbuns compartilhados, não movidos. Deseja adicionar?",
   "deleteSharedAlbum": "Excluir álbum compartilhado?",
   "deleteAlbum": "Excluir álbum",
   "deleteAlbumDialog": "Também excluir as fotos (e vídeos) presentes neste álbum de <bold>todos</bold> os outros álbuns que eles fazem parte?",
@@ -472,12 +503,17 @@
   "mlConsentPrivacy": "Clique aqui para mais detalhes sobre este recurso na política de privacidade",
   "mlConsentConfirmation": "Concordo e desejo ativá-lo",
   "magicSearch": "Busca mágica",
+  "magic": "Magia",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Explorar",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
   },
   "discover_identity": "Identidade",
   "discover_screenshots": "Capturas de tela",
+  "discover_qr_codes": "QR Codes",
   "discover_receipts": "Recibos",
   "discover_notes": "Notas",
   "discover_memes": "Memes",
@@ -491,6 +527,7 @@
   "discover_sunset": "Pôr do sol",
   "discover_hills": "Colinas",
   "discover_greenery": "Vegetação",
+  "mlIndexingDescription": "Por favor, saiba que a aprendizagem automática resultará em maior largura de banda e consumo de bateria até que todos os itens sejam processados. Considere usar o aplicativo para computador para melhor processamento e todos os resultados serão sincronizados automaticamente.",
   "loadingModel": "Baixando modelos...",
   "waitingForWifi": "Aguardando Wi-Fi...",
   "status": "Estado",
@@ -498,13 +535,34 @@
   "pendingItems": "Itens pendentes",
   "clearIndexes": "Limpar índices",
   "selectFoldersForBackup": "Selecione as pastas para salvá-las",
+  "selectFolders": "Selecione as pastas",
+  "backupToEnte": "Salvar no Ente",
+  "selectAlbumsToBackUpToEnte": "Selecione os álbuns para salvar no Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "As pastas selecionadas serão criptografadas e salvas em segurança",
   "unselectAll": "Desmarcar tudo",
   "selectAll": "Selecionar tudo",
   "skip": "Pular",
+  "chooseBackupModeHeader": "<i>Escolha como o </i>Ente salva suas fotos",
+  "startWithLatestPhotos": "Iniciar pelas fotos mais recentes",
+  "backingUpLastSevenDaysPhotos": "Armazenando fotos dos últimos 7 dias",
+  "backupOnlyNewPhotos": "Salvar apenas novas fotos",
+  "backupOnlyNewPhotosAllFoldersSelected": "Todas as pastas estão atualmente selecionadas para salvar.\n\nVocê pode prosseguir por agora, ou atualizar as pastas selecionadas.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Nenhum pasta está atualmente selecionada para salvar.\n\nVocê pode prosseguir por agora, ou atualizar as pastas selecionadas.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Nenhum pasta está atualmente selecionada para salvar.\n\nPor favor, selecione algumas pastas para continuar.",
+  "backupOnlyNewPhotosWarningBody": "Você está atualmente salvando fotos de {formattedDate}. Atualize suas opções para salvar todas as fotos.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
   "updateSettings": "Atualizar configurações",
   "updatingFolderSelection": "Atualizando seleção de pasta...",
   "itemCount": "{count, plural, one{{count} item} other{{count} itens}}",
+  "deleteItemCount": "{count, plural, one {Excluir {count} item} other {Excluir {count} itens}}",
   "duplicateItemsGroup": "{count} arquivos, {formattedSize} cada",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -562,16 +620,27 @@
   "backedUpFolders": "Pastas salvas em segurança",
   "backup": "Salvar em segurança",
   "freeUpDeviceSpace": "Liberar espaço no dispositivo",
+  "freeUpDeviceSpaceDesc": "Libere espaço do seu dispositivo limpando os arquivos que já foram armazenados.",
+  "freeUpDeviceSpaceDescICloud": "Arquivos em álbuns compartilhados no iCloud não podem ser limpos.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ Tudo limpo",
   "noDeviceThatCanBeDeleted": "Você não tem arquivos neste dispositivo que possam ser excluídos",
   "removeDuplicates": "Excluir duplicatas",
   "removeDuplicatesDesc": "Revise e remova arquivos que são duplicatas exatas.",
   "viewLargeFiles": "Arquivos grandes",
   "viewLargeFilesDesc": "Ver arquivos que consumem a maior parte do armazenamento.",
+  "deleteSuggestions": "Excluir sugestões",
+  "deleteSuggestionsDesc": "Rever arquivos sugeridos para exclusão.",
+  "rejectSuggestions": "Recusar sugestões",
+  "noDeleteSuggestion": "Nenhuma sugestão para exclusão",
+  "youHaveNoFileSuggestedForDeletion": "Você não possui arquivos sugeridos para exclusão",
   "noDuplicates": "✨ Sem duplicatas",
   "youveNoDuplicateFilesThatCanBeCleared": "Você não possui nenhum arquivo duplicado que possa ser excluído",
   "success": "Sucesso",
   "rateUs": "Avaliar",
+  "changeLogReferralCta": "Dê 10 GB, Ganhe 10 GB",
   "remindToEmptyDeviceTrash": "Também esvazie o \"Excluído Recentemente\" das \"Opções\" -> \"Armazenamento\" para liberar espaço",
   "youHaveSuccessfullyFreedUp": "Você liberou {storageSaved} com sucesso!",
   "@youHaveSuccessfullyFreedUp": {
@@ -602,8 +671,173 @@
     }
   },
   "familyPlans": "Planos familiares",
+  "family": "Família",
+  "designedForFamilies": "Projetado para familiares",
+  "shareYourSubscription": "Compartilhe sua assinatura com entes queridos",
+  "shareStorageWith5Members": "Compartilhe armazenamento com 5 membros",
+  "privateSpaceForEveryMember": "Espaço privado para cada número",
+  "feedToEngageWithFamily": "Um feed para contatar a família",
+  "plansStartAt": "Planos iniciam a partir de {price}/mês",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Ver planos",
+  "bringYourFamilyAlong": "Traga sua família consigo",
+  "yourPlanSupportsFamily": "Seu plano já suporta uma família",
+  "addUpTo5MembersFree": "Adicione até 5 membros de graça",
+  "addFamilyMember": "Adicionar membro da família",
+  "addMember": "Adicionar membro",
+  "inviteMembers": "Convidar membros",
+  "enterEmailAddresses": "Insira o endereço de e-mail deles. Eles precisam ter uma conta Ente.",
+  "inviteLimitReached": "Você adicionou 5 convites. Remova um para adicionar outro",
+  "emailAddress": "Endereço de e-mail",
+  "sendInvites": "Enviar convite",
+  "sendCountInvites": "{count, plural, =0 {Enviar convite} one {Enviar {count} convite} other {Enviar {count} convites}}",
+  "@sendCountInvites": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterAnEmailAddress": "Insira um endereço de e-mail",
+  "enterAValidEmailAddress": "Insira um endereço de e-mail válido",
+  "alreadyAdded": "Já adicionado",
+  "thisUserIsNotOnEnte": "Este usuário não está no Ente",
+  "emailNeedsEnteAccountForFamily": "{email} não possui uma conta Ente.\n\nEnvie-os um convite para adicioná-los à sua família assim que eles criarem uma conta no Ente.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "invitesSentCount": "{count, plural, one {Convite enviado} other {Convites enviados}}",
+  "@invitesSentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "failedToInvite": "Não foi possível convidar {email}",
+  "@failedToInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "failedToInviteCount": "Não foi possível convidar {count} membros",
+  "@failedToInviteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "storageUsedOfTotal": "{used} de {total} usado",
+  "@storageUsedOfTotal": {
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "67 GB"
+      },
+      "total": {
+        "type": "String",
+        "example": "200 GB"
+      }
+    }
+  },
+  "members": "Membros",
+  "pending": "Pendente",
+  "closeFamilyPlan": "Encerrar plano familiar",
+  "closeFamilyConfirmTitle": "Encerrar plano familiar?",
+  "closeFamilyConfirmBody": "Todos os membros perderão acesso ao armazenamento compartilhado. Isso não pode ser desfeito.",
+  "editStorageLimit": "Editar limite de armazenamento",
+  "noLimitSet": "Nenhum limite definido",
+  "removeFromFamily": "Remover da família",
+  "removeMemberConfirmTitle": "Remover membro?",
+  "removeMemberConfirmBody": "{email} perderá acesso ao armazenamento compartilhado.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Reenviar convite",
+  "revokeInviteConfirmTitle": "Cancelar convite?",
+  "revokeInviteConfirmBody": "O convite para {email} será cancelado.",
+  "@revokeInviteConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "revoke": "Cancelar",
+  "inviteResent": "Convite reenviado",
+  "memberStorageUsed": "{amount} usado",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Limite de armazenamento",
+  "usingStorage": "Usando {amount}",
+  "@usingStorage": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "yourStorageIsLimitedTo": "Seu armazenamento é limitado para {limit}",
+  "@yourStorageIsLimitedTo": {
+    "placeholders": {
+      "limit": {
+        "type": "String",
+        "example": "50 GB"
+      }
+    }
+  },
+  "storageLimitExplanation": "Defina a quantidade máxima de armazenamento que um membro pode usar. Eles não conseguirão enviar assim que o limite for alcançado.",
+  "limit": "Limite",
+  "noLimit": "Sem limite",
+  "currentUsageNote": "Uso atual: {amount}. Defina para 0 para nenhum limite.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Abandonar plano familiar?",
+  "leaveFamilyConfirmBody": "Você perderá acesso ao armazenamento compartilhado.",
   "referrals": "Referências",
   "notifications": "Notificações",
+  "sharedPhotoNotifications": "Novas fotos e álbuns compartilhados",
+  "sharedPhotoNotificationsExplanation": "Obtenha notificações de novas fotos em álbuns compartilhados que você está e para novos álbuns compartilhados com você.",
+  "socialNotifications": "Curtidas e comentários",
+  "socialNotificationsExplanation": "Receba notificações de curtidas em suas fotos ou comentários em álbuns que você faz parte",
   "advanced": "Avançado",
   "general": "Geral",
   "security": "Segurança",
@@ -633,13 +867,67 @@
   "suggestFeatures": "Sugerir recurso",
   "support": "Suporte",
   "helpAndSupport": "Ajuda & Suporte",
+  "browseHelpPages": "Navegar em páginas de ajuda",
+  "searchAndDiscovery": "Busca e descoberta",
+  "searchAndDiscoveryDesc": "Rostos, locais, descrições e mais",
+  "backupAndSync": "Salvamento e sincronização",
+  "backupAndSyncDesc": "Salvamento automático, estado da sincronização e envios",
+  "sharingAndCollaboration": "Compartilhamento e colaboração",
+  "sharingAndCollaborationDesc": "Álbuns, links e planos familiares",
+  "storageAndPlans": "Armazenamento e planos",
+  "storageAndPlansDesc": "Planos, finanças e uso de armazenamento",
+  "troubleshooting": "Solução de problemas",
+  "troubleshootingDesc": "Problemas comuns e suas soluções",
+  "viewAllHelpTopics": "Ver todos os tópicos de ajuda",
+  "getInTouch": "Entrar em contato",
   "reportAnIssue": "Denunciar um problema",
+  "askAQuestion": "Perguntar algo",
+  "requestAFeature": "Solicitar recurso",
+  "subject": "Sujeito",
+  "description": "Descrição",
+  "oneLineAboutTheIssue": "Uma linha detalhando o problema",
+  "detailsAboutTheIssue": "Detalhes sobre o problema",
+  "yourQuestion": "Sua pergunta",
+  "anyAdditionalInformation": "Informações adicionais",
+  "attachLogs": "Anexar registros",
+  "attachLogsHelper": "Ajude-nos a diagnosticar o problema",
+  "pleaseEnterASubject": "Insira um sujeito",
+  "pleaseEnterADescription": "Insira uma descrição",
+  "noEmailAppFound": "Nenhum aplicativo de e-mail encontrado",
+  "noEmailAppBody": "Copie sua mensagem e encaminhe para {email} através de qualquer serviço de e-mail.",
+  "@noEmailAppBody": {
+    "description": "No-mail-app fallback subtitle with the target email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "support@ente.com"
+      }
+    }
+  },
   "message": "Mensagem",
+  "deviceInfo": "Informações do dispositivo",
+  "logs": "Registros",
+  "export": "Exportar",
+  "logsNotCopiedDownloadNote": "Registros não são copiados. Exporte os registros e anexe-os ao seu e-mail.",
+  "attachedSize": "Anexado ({size})",
+  "@attachedSize": {
+    "description": "Label for attached logs with formatted file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "12.4 KB"
+      }
+    }
+  },
+  "copyAllToClipboard": "Copiar tudo a área de transferência",
+  "copied": "Copiado",
+  "appearance": "Aparência",
   "theme": "Tema",
   "lightTheme": "Claro",
   "darkTheme": "Escuro",
   "systemTheme": "Sistema",
   "freeTrial": "Avaliação grátis",
+  "chooseYourPlan": "Escolha seu plano",
   "enteSubscriptionPitch": "O Ente preserva suas memórias, então eles sempre estão disponíveis para você, mesmo se você perder o dispositivo.",
   "enteSubscriptionShareWithFamily": "Sua família também poderá ser adicionada ao seu plano.",
   "currentUsageIs": "O uso atual é ",
@@ -660,6 +948,7 @@
   "subscription": "Assinatura",
   "paymentDetails": "Detalhes de pagamento",
   "manageFamily": "Gerenciar família",
+  "contactToManageSubscription": "Por favor, entre em contato conosco em support@ente.com para gerenciar sua assinatura {provider}.",
   "renewSubscription": "Renovar assinatura",
   "cancelSubscription": "Cancelar assinatura",
   "areYouSureYouWantToRenew": "Deseja renovar?",
@@ -716,7 +1005,9 @@
       }
     }
   },
+  "managePaymentMethod": "Gerenciar método de pagamento",
   "couldNotUpdateSubscription": "Não foi possível atualizar a assinatura",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Por favor, entre em contato conosco em support@ente.com e estaremos felizes em ajudá-lo!",
   "paymentFailed": "O pagamento falhou",
   "paymentFailedTalkToProvider": "Fale com o suporte {providerName} se você foi cobrado",
   "@paymentFailedTalkToProvider": {
@@ -738,6 +1029,26 @@
   "youAreOnAFamilyPlan": "Você está em um plano familiar!",
   "contactFamilyAdmin": "Entre em contato com <green>{familyAdminEmail}</green> para gerenciar sua assinatura",
   "leaveFamily": "Sair do plano familiar",
+  "youAreOnAFamilyPlanSubtitle": "Você está em um plano familiar.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "familyAdminManagesPlanSuffix": " gerencia este plano.\nContate-o(s) para qualquer mudança.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Abandonar plano familiar",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Precisa de ajuda? Entre em contato ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Você tem certeza que queira sair do plano familiar?",
   "leave": "Sair",
   "rateTheApp": "Avalie o aplicativo",
@@ -747,9 +1058,15 @@
   "grantFullAccessPrompt": "Permita o acesso a todas as fotos nas opções do aplicativo",
   "allowPermTitle": "Permita acesso às Fotos",
   "allowPermBody": "Permita o acesso a suas fotos nas Opções para que Ente exiba e salva em segurança sua fototeca.",
+  "openSettings": "Abrir opções",
   "selectMorePhotos": "Selecionar mais fotos",
   "existingUser": "Usuário existente",
   "newToEnte": "Novo no Ente",
+  "createAnEnteAccount": "Criar uma conta Ente",
+  "continueWithoutAccount": "Continuar sem uma conta",
+  "loginToExistingAccount": "Entrar em uma conta existente",
+  "shareTheMoment": "Compartilhar momento",
+  "letFriendsAndFamilyReact": "Deixe seus amigos e sua família reagir e comentar em suas fotos.",
   "pleaseLoginAgain": "Registre-se novamente",
   "autoLogoutMessage": "Devido ao ocorrido de erros técnicos, você foi desconectado. Pedimos desculpas pela inconveniência.",
   "yourSubscriptionHasExpired": "A sua assinatura expirou",
@@ -765,6 +1082,7 @@
   "couldNotBackUpTryLater": "Nós não podemos salvar seus dados.\nNós tentaremos novamente mais tarde.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente pode criptografar e preservar arquivos apenas se você conceder acesso a eles",
   "pleaseGrantPermissions": "Por favor, conceda as permissões",
+  "grantPermissionDesc": "Por favor, permita que Ente tenha acesso a sua biblioteca para podermos organizar com o reconhecimento facial. Todo o processamento ocorre em seu dispositivo.",
   "privateSharing": "Compartilha privada",
   "shareOnlyWithThePeopleYouWant": "Compartilhar apenas com as pessoas que você quiser",
   "usePublicLinksForPeopleNotOnEnte": "Usar links públicos para pessoas que não estão no Ente",
@@ -786,6 +1104,7 @@
   "name": "Nome",
   "newest": "Mais recente",
   "lastUpdated": "Última atualização",
+  "updated": "Atualizado",
   "deleteEmptyAlbums": "Excluir álbuns vazios",
   "deleteEmptyAlbumsWithQuestionMark": "Excluir álbuns vazios?",
   "deleteAlbumsDialogBody": "Isso excluirá todos os álbuns vazios. Isso é útil quando você quiser reduzir a desordem no seu álbum.",
@@ -820,7 +1139,20 @@
   "unarchive": "Desarquivar",
   "favorite": "Favorito",
   "removeFromFavorite": "Desfavoritar",
+  "shareMemories": "Compartilhar memórias",
+  "shareTheseMemories": "Compartilhar estas memórias",
+  "shareThisPhoto": "Compartilhar esta foto",
+  "shareThisVideo": "Compartilhar este vídeo",
   "shareLink": "Compartilhar link",
+  "memoryShareLinkDescription": "Este link irá expirar automaticamente em 7 dias.",
+  "deleteLink": "Excluir link",
+  "deleteLinkQuestion": "Excluir link?",
+  "deleteMemoryLinkMessage": "As pessoas que você compartilhou este link perderão acesso assim que ele for excluído.",
+  "linkDeletedSuccessfully": "Link excluído com sucesso",
+  "memoryLinks": "Links de memória",
+  "openLink": "Abrir link",
+  "pay": "Pagar",
+  "noPaymentAppFound": "Nenhum aplicativo de pagamento encontrado",
   "createCollage": "Criar colagem",
   "saveCollage": "Salvar colagem",
   "collageSaved": "Colagem salva na galeria",
@@ -832,6 +1164,14 @@
   "share": "Compartilhar",
   "unhideToAlbum": "Desocultar para o álbum",
   "restoreToAlbum": "Restaurar para álbum",
+  "moveItem": "{count, plural, one {Mover item} other {Mover itens}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, one {Adicionar item} other {Adicionar itens}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Criar ou selecionar álbum",
   "selectAlbum": "Selecionar álbum",
   "searchByAlbumNameHint": "Nome do álbum",
@@ -856,6 +1196,16 @@
   "referFriendsAnd2xYourPlan": "Recomende seus amigos e duplique seu plano",
   "shareAlbumHint": "Abra um álbum e toque no botão compartilhar no canto superior direito para compartilhar.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Os itens exibem o número de dias restantes antes da exclusão permanente",
+  "trashDaysLeft": "{count, plural, =0 {Em breve} one {{count} dia} other {{count} dias}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "Excluir tudo",
   "renameAlbum": "Renomear álbum",
   "convertToAlbum": "Converter para álbum",
@@ -866,6 +1216,8 @@
   "sortAlbumsBy": "Ordenar por",
   "sortNewestFirst": "Recentes primeiro",
   "sortOldestFirst": "Antigos primeiro",
+  "sortAToZ": "A-Z",
+  "sortZToA": "Z-A",
   "rename": "Renomear",
   "leaveSharedAlbum": "Sair do álbum compartilhado?",
   "leaveAlbum": "Sair do álbum",
@@ -882,6 +1234,17 @@
   "clickOnTheOverflowMenu": "• Clique no menu adicional",
   "click": "• Clique",
   "nothingToSeeHere": "Nada para ver aqui! 👀",
+  "addANameAndPhoto": "Adicionar um nome e foto",
+  "photosSharedByWillAppearHere": "Fotos compartilhadas por {email} aparecerão aqui.",
+  "@photosSharedByWillAppearHere": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "a@test.test"
+      }
+    }
+  },
+  "selectFoldersToBackup": "<action>Selecione as pastas</action> para ver e fazer backup no ente.",
   "unarchiveAlbum": "Desarquivar álbum",
   "archiveAlbum": "Arquivar álbum",
   "calculating": "Calculando...",
@@ -904,6 +1267,39 @@
   "filesSavedToGallery": "Arquivos salvos na galeria",
   "fileFailedToSaveToGallery": "Falhou ao salvar arquivo na galeria",
   "download": "Baixar",
+  "downloadSkippedAlreadyAvailableOnDevice": "{fileName} já está disponível no álbum {albumName} em seu dispositivo",
+  "@downloadSkippedAlreadyAvailableOnDevice": {
+    "description": "Toast shown in single-file download flow when the file already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionSingleFile": "A instalação de {fileName} foi pulada por ela já estar disponível no álbum {albumName} em seu dispositivo",
+  "@downloadSkippedInSelectionSingleFile": {
+    "description": "Toast shown after multi-selection download when exactly one selected file is skipped because it already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionMultipleFiles": "A instalação de {fileCount} arquivos foram pulados por eles já estarem disponíveis em seu dispositivo",
+  "@downloadSkippedInSelectionMultipleFiles": {
+    "description": "Toast shown after multi-selection download when multiple selected files are skipped because they already exist locally",
+    "placeholders": {
+      "fileCount": {
+        "type": "int"
+      }
+    }
+  },
   "pressAndHoldToPlayVideo": "Pressione e segure para reproduzir o vídeo",
   "pressAndHoldToPlayVideoDetailed": "Pressione e segure na imagem para reproduzir o vídeo",
   "downloadFailed": "Falhou ao baixar",
@@ -919,6 +1315,7 @@
   "authToViewYourMemories": "Autentique-se para ver suas memórias",
   "unlock": "Desbloquear",
   "freeUpSpace": "Liberar espaço",
+  "freeUpSpaceSaving": "{count, plural, one {Ele pode ser excluído do dispositivo para liberar {formattedSize}} other {Eles podem ser excluídos do dispositivo para liberar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 arquivo} other {{formattedNumber} arquivos}} deste álbum foi(ram) salvo(s) em segurança",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -946,6 +1343,18 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Você ainda pode acessá{count, plural, one {-lo} other {-los}} no Ente contanto que você ainda possua uma assinatura ativa",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
       }
     }
   },
@@ -1038,6 +1447,14 @@
   "didYouKnow": "Você sabia?",
   "loadingMessage": "Carregando suas fotos...",
   "loadMessage1": "Você pode compartilhar sua assinatura com seus familiares",
+  "loadMessage2": "Até então, já preservamos mais de {memoriesCountInMillions} milhões de memórias",
+  "@loadMessage2": {
+    "placeholders": {
+      "memoriesCountInMillions": {
+        "type": "int"
+      }
+    }
+  },
   "loadMessage3": "Mantemos 3 cópias dos seus dados, uma em um abrigo subterrâneo",
   "loadMessage4": "Todos os nossos aplicativos são de código aberto",
   "loadMessage5": "Nosso código-fonte e criptografia foram auditadas externamente",
@@ -1055,9 +1472,50 @@
   },
   "loadMessage9": "Nós usamos Xchacha20Poly1305 para criptografar seus dados com segurança",
   "photoDescriptions": "Descrições das fotos",
+  "searchResultFileName": "Nome do arquivo",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Descrição",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Tipo",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Extensão do arquivo",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Pessoa",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Compartilhado",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Enviado por",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Marca da câmera",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Modelo da câmera",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Arquivos",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Tipos de arquivo e nomes",
   "location": "Localização",
   "moments": "Momentos",
+  "searchFaceEmptySection": "As pessoas serão exibidas aqui assim que o processamento for concluído",
   "searchDatesEmptySection": "Buscar por data, mês ou ano",
   "searchLocationEmptySection": "Fotos de grupo que estão sendo tiradas em algum raio da foto",
   "searchPeopleEmptySection": "Convide pessoas e você verá todas as fotos compartilhadas por elas aqui",
@@ -1066,6 +1524,14 @@
   "searchCaptionEmptySection": "Adicione marcações como \"#viagem\" nas informações das fotos para encontrá-las aqui com facilidade",
   "language": "Idioma",
   "selectLanguage": "Selecionar idioma",
+  "noLocation": "Nenhum local",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "Nenhuma etiqueta de local",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Nome da localização",
   "addLocation": "Adicionar localização",
   "groupNearbyPhotos": "Agrupar fotos próximas",
@@ -1193,6 +1659,15 @@
   "noImagesWithLocation": "Nenhuma imagem com localização",
   "unpinAlbum": "Desafixar álbum",
   "pinAlbum": "Fixar álbum",
+  "pin": "Fixar",
+  "pinPerson": "Fixar pessoa",
+  "pinToTop": "Fixar no topo",
+  "unpin": "Desafixar",
+  "unpinPerson": "Desafixar pessoa",
+  "visibility": "Visibilidade",
+  "hideFromMemories": "Ocultar das memórias",
+  "showInMemories": "Exibir nas memórias",
+  "showIgnored": "Exibir ignorados",
   "create": "Criar",
   "viewAll": "Ver tudo",
   "nothingSharedWithYouYet": "Nada compartilhado com você ainda",
@@ -1207,10 +1682,12 @@
   "successfullyUnhid": "Desocultado com sucesso",
   "crashReporting": "Relatório de erros",
   "resumableUploads": "Envios retomáveis",
+  "fasterUploads": "Envios mais rápidos",
   "addToHiddenAlbum": "Adicionar ao álbum oculto",
   "moveToHiddenAlbum": "Mover ao álbum oculto",
   "fileTypes": "Tipos de arquivo",
   "deleteConfirmDialogBody": "Esta conta está vinculada aos outros aplicativos do Ente, se você usar algum. Seus dados baixados, entre todos os aplicativos do Ente, serão programados para exclusão, e sua conta será permanentemente excluída.",
+  "hearUsWhereTitle": "Como você ouviu falar do Ente?",
   "hearUsExplanation": "Não rastreamos instalações de aplicativo. Seria útil se você contasse onde nos encontrou!",
   "viewAddOnButton": "Ver complementos",
   "addOns": "Complementos",
@@ -1289,6 +1766,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Busque pessoas facilmente pelo nome",
+  "addViewers": "{count, plural, =0 {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar visualizadores}}",
+  "addCollaborators": "{count, plural, =0 {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione um e-mail para verificar a criptografia ponta a ponta.",
   "developerSettingsWarning": "Deseja modificar as Opções de Desenvolvedor?",
   "developerSettings": "Opções de desenvolvedor",
@@ -1303,7 +1782,11 @@
   "editEmailAlreadyLinked": "Este e-mail já está vinculado a {name}.",
   "viewPersonToUnlink": "Visualizar {name} para desvincular",
   "enterName": "Inserir nome",
+  "editContact": "Editar contato",
+  "autoFetchFromPeople": "Obtenção automática de pessoas",
+  "useTheirNameAndPhoto": "Usar o nome e foto deles",
   "savePerson": "Salvar pessoa",
+  "saveContact": "Salvar contato",
   "editPerson": "Editar pessoa",
   "mergedPhotos": "Fotos mescladas",
   "orMergeWithExistingPerson": "Ou mesclar com existente",
