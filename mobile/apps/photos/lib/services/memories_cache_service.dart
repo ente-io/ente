@@ -127,37 +127,6 @@ class MemoriesCacheService {
         ),
       );
     });
-
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      if (_pendingInitialOfflineCacheUpgrade &&
-          isOfflineMode &&
-          event.source == "offlineImportMetadata" &&
-          LocalSyncService.instance.hasCompletedFirstImport()) {
-        unawaited(
-          _runDeferredInitialOfflineCacheUpgrade(
-            trigger: "offlineImportMetadata",
-          ),
-        );
-      }
-
-      final shouldQueueUpdate =
-          _cachedMemories == null || _cachedMemories!.isEmpty;
-      if (!shouldQueueUpdate) {
-        return;
-      }
-      queueUpdateCache();
-    });
-
-    Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      if (event.status != SyncStatus.completedFirstGalleryImport) {
-        return;
-      }
-      unawaited(
-        _runDeferredInitialOfflineCacheUpgrade(
-          trigger: "completedFirstGalleryImport",
-        ),
-      );
-    });
   }
 
   String get _lastCacheUpdateKey => isLocalGalleryMode
