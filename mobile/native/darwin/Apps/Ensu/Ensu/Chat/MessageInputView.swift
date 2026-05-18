@@ -40,12 +40,12 @@ struct MessageInputView: View {
 
     private var canSend: Bool {
         let hasContent = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachments.isEmpty
-        return hasContent && !isGenerating && !isDownloading && !isAttachmentDownloadBlocked
+        return hasContent && !isGenerating && !isDownloading && !isAttachmentDownloadBlocked && !voiceInputState.isWorking
     }
 
     private var isSendEnabled: Bool {
         let hasContent = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachments.isEmpty
-        return hasContent && !isDownloading && !isAttachmentDownloadBlocked
+        return hasContent && !isDownloading && !isAttachmentDownloadBlocked && !voiceInputState.isWorking
     }
 
     var body: some View {

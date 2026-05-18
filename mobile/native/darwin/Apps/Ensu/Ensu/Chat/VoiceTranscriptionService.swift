@@ -87,6 +87,7 @@ final class VoiceTranscriptionService {
 
     private let modelsDir: URL
     private var transcriptionTask: Task<Void, Never>?
+    private var preloadTask: Task<Void, Never>?
     private var activeVoiceTaskId = UUID()
     private var activeDownloadId: UUID?
 
@@ -172,6 +173,12 @@ final class VoiceTranscriptionService {
                 }
 
                 if Task.isCancelled { return }
+                let preloadTask = await MainActor.run { [weak self] in
+                    self?.takePreloadTask()
+                }
+                await preloadTask?.value
+
+                if Task.isCancelled { return }
                 let isActive = await MainActor.run { [weak self] in
                     self?.finishDownload(downloadId: downloadId)
                     return self?.isVoiceTaskActive(taskId) == true
@@ -217,6 +224,8 @@ final class VoiceTranscriptionService {
     func cancel() {
         transcriptionTask?.cancel()
         transcriptionTask = nil
+        preloadTask?.cancel()
+        preloadTask = nil
         activeVoiceTaskId = UUID()
         activeDownloadId = nil
         #if os(iOS)
@@ -261,6 +270,7 @@ final class VoiceTranscriptionService {
                         return
                     }
                     self.beginRecording(onState: onState)
+                    self.preloadTranscriptionModel(modelsDirPath: modelsDirPath)
                 }
             } catch is CancellationError {
                 return
@@ -280,6 +290,26 @@ final class VoiceTranscriptionService {
         activeVoiceTaskId = taskId
         activeDownloadId = nil
         return taskId
+    }
+
+    private func preloadTranscriptionModel(modelsDirPath: String) {
+        preloadTask?.cancel()
+        preloadTask = Task.detached(priority: .utility) {
+            do {
+                uniffiEnsureTranscriptionInitialized()
+                try loadTranscriptionModel(modelsDir: modelsDirPath)
+            } catch is CancellationError {
+                return
+            } catch {
+                return
+            }
+        }
+    }
+
+    private func takePreloadTask() -> Task<Void, Never>? {
+        let task = preloadTask
+        preloadTask = nil
+        return task
     }
 
     private func isVoiceTaskActive(_ taskId: UUID) -> Bool {

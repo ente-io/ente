@@ -21,6 +21,7 @@ import io.ente.labs.ensu_transcription.TranscriptionModelEvent
 import io.ente.labs.ensu_transcription.TranscriptionModelEventCallback
 import io.ente.labs.ensu_transcription.downloadTranscriptionModel
 import io.ente.labs.ensu_transcription.isTranscriptionModelDownloaded
+import io.ente.labs.ensu_transcription.loadTranscriptionModel
 import io.ente.labs.ensu_transcription.transcribePcm16
 import io.ente.labs.ensu_transcription.uniffiEnsureInitialized
 import kotlinx.coroutines.CancellationException
@@ -103,6 +104,7 @@ internal class VoiceTranscriptionController(
     private var audioRecord: AudioRecord? = null
     private var preparingRecordingJob: Job? = null
     private var recordingJob: Job? = null
+    private var transcriptionPreloadJob: Job? = null
     private var transientErrorJob: Job? = null
     private var recordedPcm = ByteArrayOutputStream()
     private var recordingSampleRate = preferredSampleRate
@@ -131,6 +133,7 @@ internal class VoiceTranscriptionController(
                     return@launch
                 }
                 beginRecording()
+                preloadTranscriptionModel()
             } catch (error: CancellationException) {
                 throw error
             } catch (error: UnsatisfiedLinkError) {
@@ -260,6 +263,7 @@ internal class VoiceTranscriptionController(
     private suspend fun transcribeRecording(pcm: ByteArray, sampleRate: Int) {
         try {
             ensureTranscriptionModelDownloaded()
+            awaitTranscriptionModelPreload()
             val transcript = withContext(Dispatchers.IO) {
                 uniffiEnsureInitialized()
 
@@ -295,6 +299,31 @@ internal class VoiceTranscriptionController(
                 error
             )
             state = VoiceInputState.Error(transcriptionErrorMessage(error.message))
+        }
+    }
+
+    private fun preloadTranscriptionModel() {
+        transcriptionPreloadJob?.cancel()
+        transcriptionPreloadJob = scope.launch(Dispatchers.IO) {
+            try {
+                uniffiEnsureInitialized()
+                loadTranscriptionModel(modelsDir.absolutePath)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                Log.w(TAG, "Voice model preload failed", error)
+            }
+        }
+    }
+
+    private suspend fun awaitTranscriptionModelPreload() {
+        val preloadJob = transcriptionPreloadJob ?: return
+        try {
+            preloadJob.join()
+        } finally {
+            if (transcriptionPreloadJob == preloadJob) {
+                transcriptionPreloadJob = null
+            }
         }
     }
 

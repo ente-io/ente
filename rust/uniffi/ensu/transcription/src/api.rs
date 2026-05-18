@@ -60,6 +60,11 @@ pub fn is_transcription_model_downloaded(models_dir: String) -> bool {
 }
 
 #[uniffi::export]
+pub fn load_transcription_model(models_dir: String) -> Result<(), TranscriptionError> {
+    core::load_model(models_dir).map_err(Into::into)
+}
+
+#[uniffi::export]
 pub fn transcription_model_path(models_dir: String) -> String {
     core::model_path(models_dir).to_string_lossy().into_owned()
 }
