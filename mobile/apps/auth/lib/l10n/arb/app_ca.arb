@@ -333,7 +333,6 @@
     }
   },
   "sorry": "Ho sentim",
-  "importFailureDesc": "No s'ha pogut analitzar el fitxer seleccionat.\nSi necessiteu ajuda, escriviu a support@ente.com!",
   "pendingSyncs": "Advertència",
   "pendingSyncsWarningBody": "Alguns dels teus codis no s'han sincronitzat.\n\nSi us plau, assegura't de tenir una còpia de seguretat d'aquests codis abans de tancar la sessió.",
   "checkInboxAndSpamFolder": "Comprova la teva safata d'entrada (i el correu no desitjat) per completar la verificació",
@@ -509,7 +508,7 @@
   "pinLock": "Bloqueig amb PIN",
   "enterPin": "Introdueix el PIN",
   "setNewPin": "Estableix un nou PIN",
-  "importFailureDescNew": "No s'ha pogut analitzar el fitxer seleccionat.",
+  "importFailureDesc": "No s'ha pogut analitzar el fitxer seleccionat.",
   "appLockNotEnabled": "Bloqueig de l'aplicació no habilitat",
   "appLockNotEnabledDescription": "Si us plau, habilita el bloqueig de l'aplicació a Seguretat > Bloqueig de l'aplicació",
   "authToViewPasskey": "Autentica't per veure la passkey",

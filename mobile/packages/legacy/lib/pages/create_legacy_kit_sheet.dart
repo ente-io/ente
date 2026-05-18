@@ -102,6 +102,7 @@ class _CreateLegacyKitPageState extends State<CreateLegacyKitPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       backgroundColor: colorScheme.backgroundBase,
@@ -164,16 +165,21 @@ class _CreateLegacyKitPageState extends State<CreateLegacyKitPage> {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          color: colorScheme.backgroundBase,
-          padding: const EdgeInsets.all(24),
-          child: GradientButton(
-            text: context.strings.createKit,
-            height: 48,
-            textStyle: textTheme.small.copyWith(height: 20 / 14),
-            onTap: _isValid ? _submit : null,
+      bottomNavigationBar: AnimatedPadding(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: SafeArea(
+          top: false,
+          child: Container(
+            color: colorScheme.backgroundBase,
+            padding: const EdgeInsets.all(24),
+            child: GradientButton(
+              text: context.strings.createKit,
+              height: 48,
+              textStyle: textTheme.small.copyWith(height: 20 / 14),
+              onTap: _isValid ? _submit : null,
+            ),
           ),
         ),
       ),

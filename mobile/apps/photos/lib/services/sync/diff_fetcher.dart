@@ -253,7 +253,7 @@ class DiffFetcher {
           'diff items ( ${updatedFiles.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms');
       return Diff(updatedFiles, deletedFiles, hasMore, latestUpdatedAtTime);
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to parse collection diff", e, s);
       rethrow;
     }
   }

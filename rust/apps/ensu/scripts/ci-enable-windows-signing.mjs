@@ -7,7 +7,6 @@ const configPath =
 const endpoint = process.env.AZURE_ENDPOINT;
 const accountName = process.env.AZURE_CODE_SIGNING_NAME;
 const profileName = process.env.AZURE_CERT_PROFILE_NAME;
-const trustedSigningCliPath = process.env.TRUSTED_SIGNING_CLI_PATH?.trim();
 
 if (!endpoint || !accountName || !profileName) {
     throw new Error(
@@ -31,9 +30,8 @@ if (!bundleConfig || typeof bundleConfig !== "object") {
 
 bundleConfig.windows = bundleConfig.windows || {};
 
-const signerBinary = trustedSigningCliPath || "trusted-signing-cli";
 bundleConfig.windows.signCommand = [
-    signerBinary,
+    "trusted-signing-cli",
     "-e",
     endpoint,
     "-a",

@@ -460,15 +460,6 @@
   "linkDeviceLimit": "设备限制",
   "expiredLinkInfo": "此链接已过期。请选择新的过期时间或禁用链接有效期。",
   "linkExpiresOn": "链接将在 {expiryTime} 过期",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {与特定人员共享} =1 {与 1 人共享} other {与 {numberOfPeople} 人共享}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "链接已过期",
   "publicLinkEnabled": "公开链接已启用",
   "shareALink": "分享链接",
@@ -482,28 +473,6 @@
   "add": "添加",
   "collaboratorsCanAddFilesToTheSharedCollection": "协作者可以向共享集合添加项目。",
   "enterEmail": "输入电子邮件",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {已添加0个查看者} =1 {已添加1个查看者} other {已添加 {count} 个查看者}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {已添加 0 位协作者} =1 {已添加 1 位协作者} other {已添加 {count} 位协作者}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0 {添加查看者} =1 {添加查看者r} other {添加数个查看者}}",
-  "addCollaborators": "{count, plural, =0 {添加协作者} =1 {添加协作者} other {添加数个协作者}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "长按电子邮件以验证端到端加密。",
   "sharing": "正在分享...",
   "invalidEmailAddress": "无效的电子邮件地址",
@@ -552,16 +521,6 @@
   "viewer": "查看者",
   "collaborator": "协作者",
   "collaboratorsCanAddFilesToTheSharedAlbum": "协作者可以向共享集合添加项目。",
-  "albumParticipantsCount": "{count, plural, =0 {无参与者} =1 {1个参与者} other {{count} 个参与者}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "添加更多",
   "you": "您",
   "albumOwner": "所有者",

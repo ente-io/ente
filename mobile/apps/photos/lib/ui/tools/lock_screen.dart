@@ -377,7 +377,7 @@ class _LockScreenState extends State<LockScreen>
       }
     } catch (e, s) {
       _isShowingLockScreen = false;
-      _logger.severe(e, s);
+      _logger.severe("Failed to show lock screen", e, s);
     }
   }
 }

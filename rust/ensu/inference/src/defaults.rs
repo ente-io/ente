@@ -94,6 +94,18 @@ fn gemma_4_e4b_q4km() -> EnsuModelPreset {
     }
 }
 
+fn gemma_4_e2b_q4km() -> EnsuModelPreset {
+    EnsuModelPreset {
+        id: "gemma-4-e2b-q4km".to_string(),
+        title: "Gemma 4 E2B (Q4_K_M)".to_string(),
+        url: "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_K_M.gguf?download=true".to_string(),
+        mmproj_url: Some(
+            "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/mmproj-F16.gguf"
+                .to_string(),
+        ),
+    }
+}
+
 pub fn ensu_defaults() -> EnsuDefaults {
     let mobile_default_model = lfm_vl_1_6b();
     let desktop_default_model = gemma_4_e4b_q4km();
@@ -104,7 +116,7 @@ pub fn ensu_defaults() -> EnsuDefaults {
         system_prompt_date_placeholder: SYSTEM_PROMPT_DATE_PLACEHOLDER.to_string(),
         session_summary_system_prompt: SESSION_SUMMARY_SYSTEM_PROMPT.to_string(),
         mobile_default_model,
-        mobile_model_presets: vec![lfm_1_2b(), qwen_0_8b(), qwen_2b_q8()],
+        mobile_model_presets: vec![lfm_1_2b(), qwen_0_8b(), qwen_2b_q8(), gemma_4_e2b_q4km()],
         desktop_default_model,
         desktop_model_presets: vec![
             qwen_4b_q4km(),

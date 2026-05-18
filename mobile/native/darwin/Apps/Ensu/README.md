@@ -60,7 +60,7 @@ Export an IPA from the archive:
 xcodebuild -exportArchive \
   -archivePath build/Ensu.xcarchive \
   -exportPath build/Export \
-  -exportOptionsPlist ExportOptions-AppStore.plist
+  -exportOptionsPlist scripts/ExportOptions-AppStore.plist
 ```
 
 ### Tests

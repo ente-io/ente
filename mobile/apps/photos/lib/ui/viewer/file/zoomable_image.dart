@@ -26,6 +26,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart';
 import "package:photos/utils/ram_check_util.dart";
@@ -531,7 +532,34 @@ class _ZoomableImageState extends State<ZoomableImage> {
     if (!mounted) {
       return;
     }
+
+    // Image.file -> Android BitmapFactory does not apply EXIF orientation
+    // for HEIC. If the file declares a non-trivial orientation, route through
+    // _loadInSupportedFormat which uses FlutterImageCompress with
+    // autoCorrectionAngle=true (reads EXIF via ExifInterface and rotates the
+    // bitmap before returning bytes).
+    if (await _heicNeedsExifRotation(file)) {
+      await _loadInSupportedFormat(file, "HEIC requires EXIF rotation");
+      return;
+    }
+
     _loadWithPlatformDecoder(file);
+  }
+
+  Future<bool> _heicNeedsExifRotation(File file) async {
+    try {
+      final exif = await readExifAsync(file);
+      final orientation =
+          exif['Image Orientation']?.values.firstAsInt() ?? 1;
+      return orientation > 1;
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to read EXIF orientation for ${_photo.displayName}",
+        e,
+        s,
+      );
+      return false;
+    }
   }
 
   void _loadWithPlatformDecoder(File file) {

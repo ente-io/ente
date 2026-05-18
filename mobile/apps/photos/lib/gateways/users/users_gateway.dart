@@ -1,6 +1,6 @@
 import "package:dio/dio.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/errors.dart";
+import "package:photos/core/network/endpoint_config.dart";
 import "package:photos/gateways/users/models/delete_account.dart";
 import "package:photos/gateways/users/models/key_attributes.dart";
 import "package:photos/gateways/users/models/sessions.dart";
@@ -15,9 +15,11 @@ import "package:photos/models/user_details.dart";
 class UsersGateway {
   final Dio _enteDio;
   final Dio _publicDio;
-  final Configuration _config;
+  final EndpointConfig _endpointConfig;
 
-  UsersGateway(this._enteDio, this._publicDio, this._config);
+  UsersGateway(this._enteDio, this._publicDio, this._endpointConfig);
+
+  String get _endpoint => _endpointConfig.endpoint;
 
   // ============================================================
   // Authentication & Email Verification
@@ -38,7 +40,7 @@ class UsersGateway {
     required bool isMobile,
   }) async {
     await _publicDio.post(
-      "${_config.getHttpEndpoint()}/users/ott",
+      "$_endpoint/users/ott",
       data: {
         "email": email,
         "purpose": isChangeEmail ? "change" : purpose ?? "",
@@ -65,7 +67,7 @@ class UsersGateway {
       data["source"] = source;
     }
     final response = await _publicDio.post(
-      "${_config.getHttpEndpoint()}/users/verify-email",
+      "$_endpoint/users/verify-email",
       data: data,
     );
     return response.data as Map<String, dynamic>;
@@ -340,7 +342,7 @@ class UsersGateway {
   Future<SrpAttributes> getSrpAttributes(String email) async {
     try {
       final response = await _publicDio.get(
-        "${_config.getHttpEndpoint()}/users/srp/attributes",
+        "$_endpoint/users/srp/attributes",
         queryParameters: {"email": email},
       );
       return SrpAttributes.fromMap(response.data);
@@ -413,7 +415,7 @@ class UsersGateway {
     required String srpA,
   }) async {
     final response = await _publicDio.post(
-      "${_config.getHttpEndpoint()}/users/srp/create-session",
+      "$_endpoint/users/srp/create-session",
       data: {
         "srpUserID": srpUserID,
         "srpA": srpA,
@@ -433,7 +435,7 @@ class UsersGateway {
     required String srpM1,
   }) async {
     final response = await _publicDio.post(
-      "${_config.getHttpEndpoint()}/users/srp/verify-session",
+      "$_endpoint/users/srp/verify-session",
       data: {
         "sessionID": sessionID,
         "srpUserID": srpUserID,
@@ -502,7 +504,7 @@ class UsersGateway {
     required String code,
   }) async {
     final response = await _publicDio.post(
-      "${_config.getHttpEndpoint()}/users/two-factor/verify",
+      "$_endpoint/users/two-factor/verify",
       data: {
         "sessionID": sessionID,
         "code": code,
@@ -523,7 +525,7 @@ class UsersGateway {
     required String twoFactorType,
   }) async {
     final response = await _publicDio.get(
-      "${_config.getHttpEndpoint()}/users/two-factor/recover",
+      "$_endpoint/users/two-factor/recover",
       queryParameters: {
         "sessionID": sessionID,
         "twoFactorType": twoFactorType,
@@ -543,7 +545,7 @@ class UsersGateway {
     required String twoFactorType,
   }) async {
     final response = await _publicDio.post(
-      "${_config.getHttpEndpoint()}/users/two-factor/remove",
+      "$_endpoint/users/two-factor/remove",
       data: {
         "sessionID": sessionID,
         "secret": secret,
@@ -564,7 +566,7 @@ class UsersGateway {
   ) async {
     try {
       final response = await _publicDio.get(
-        "${_config.getHttpEndpoint()}/users/two-factor/passkeys/get-token",
+        "$_endpoint/users/two-factor/passkeys/get-token",
         queryParameters: {"sessionID": sessionID},
       );
       return response.data as Map<String, dynamic>;
@@ -621,7 +623,7 @@ class UsersGateway {
     required String type,
   }) async {
     await _publicDio.post(
-      "${_config.getHttpEndpoint()}/anonymous/feedback",
+      "$_endpoint/anonymous/feedback",
       data: {"feedback": feedback, "type": type},
     );
   }

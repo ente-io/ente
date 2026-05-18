@@ -12,6 +12,17 @@ import "package:photos/events/people_sort_order_change_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/services/search_service.dart";
+
+class AllSectionsExamplesData {
+  final List<List<SearchResult>> sectionResults;
+  final bool hasAnySearchableFiles;
+
+  const AllSectionsExamplesData({
+    required this.sectionResults,
+    required this.hasAnySearchableFiles,
+  });
+}
 
 class AllSectionsExamplesProvider extends StatefulWidget {
   final Widget child;
@@ -30,7 +41,12 @@ class _AllSectionsExamplesProviderState
   //can listen to a list of events and rebuild (see sectionUpdateEvents()
   //in search_types.dart) and new results will not reflect in
   //[allSectionsExamplesFuture] unless reloadAllSections() is called.
-  Future<List<List<SearchResult>>> allSectionsExamplesFuture = Future.value([]);
+  Future<AllSectionsExamplesData> allSectionsExamplesFuture = Future.value(
+    const AllSectionsExamplesData(
+      sectionResults: [],
+      hasAnySearchableFiles: false,
+    ),
+  );
 
   late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
   late StreamSubscription<PeopleChangedEvent> _onPeopleChangedEvent;
@@ -104,11 +120,13 @@ class _AllSectionsExamplesProviderState
       setState(() {
         _logger.info("'_debounceTimer: reloading all sections in search tab");
         final allSectionsExamples = <Future<List<SearchResult>>>[];
+        final hasAnySearchableFilesFuture =
+            SearchService.instance.hasAnyFilesForSearch();
         for (SectionType sectionType in SectionType.values) {
-          // Contacts section have been moved to shared collections tab
-          // temporarily from search tab. So we can skip computing data here
-          // since 'allSectionsExamples' is for search tab sections only.
-          if (sectionType == SectionType.contacts) {
+          // Contacts section has been moved to shared collections tab.
+          // File types are rendered as lazy placeholders in the search tab.
+          if (sectionType == SectionType.contacts ||
+              sectionType == SectionType.fileTypesAndExtension) {
             allSectionsExamples.add(Future.value([]));
           } else {
             allSectionsExamples.add(
@@ -117,10 +135,17 @@ class _AllSectionsExamplesProviderState
           }
         }
         try {
-          allSectionsExamplesFuture = Future.wait<List<SearchResult>>(
-            allSectionsExamples,
-            eagerError: false,
-          );
+          allSectionsExamplesFuture = () async {
+            final sectionResults = await Future.wait<List<SearchResult>>(
+              allSectionsExamples,
+              eagerError: false,
+            );
+            final hasAnySearchableFiles = await hasAnySearchableFilesFuture;
+            return AllSectionsExamplesData(
+              sectionResults: sectionResults,
+              hasAnySearchableFiles: hasAnySearchableFiles,
+            );
+          }();
         } catch (e) {
           _logger.severe("Error reloading all sections: $e");
         }
@@ -155,7 +180,7 @@ class _AllSectionsExamplesProviderState
 }
 
 class InheritedAllSectionsExamples extends InheritedWidget {
-  final Future<List<List<SearchResult>>> allSectionsExamplesFuture;
+  final Future<AllSectionsExamplesData> allSectionsExamplesFuture;
   final ValueNotifier<bool> isDebouncingNotifier;
   const InheritedAllSectionsExamples(
     this.allSectionsExamplesFuture,

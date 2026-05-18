@@ -15,9 +15,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/error-reporting/tunneled_transport.dart';
-import "package:photos/core/errors.dart";
+import "package:photos/core/exceptions.dart";
 import 'package:photos/models/typedefs.dart';
-import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/ram_check_util.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -323,14 +322,10 @@ class SuperLogging {
     if (error is DioException) {
       return true;
     }
-    final bool result = error is StorageLimitExceededError ||
-        error is WiFiUnavailableError ||
-        error is InvalidFileError ||
-        error is NoActiveSubscriptionError ||
+    final bool result = error is LocallyHandledError ||
         error is TaskQueueTimeoutException ||
         error is TaskQueueOverflowException ||
-        error is TaskQueueCancelledException ||
-        error is CouldNotRetrieveAnyFileData;
+        error is TaskQueueCancelledException;
     if (kDebugMode && result) {
       $.info('Not sending error to sentry: $error');
     }
@@ -345,6 +340,10 @@ class SuperLogging {
     LogRecord? rec,
   }) async {
     try {
+      if (kDebugMode && error is StackTrace) {
+        _reportInvalidLoggerUsageInDebug(rec, error);
+      }
+
       if (_shouldSkipSentry(error)) {
         return;
       }
@@ -380,6 +379,27 @@ class SuperLogging {
     }
   }
 
+  static void _reportInvalidLoggerUsageInDebug(
+    LogRecord? rec,
+    StackTrace stack,
+  ) {
+    assert(() {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: StateError(
+            "Logger call passed a StackTrace as the error argument. "
+            "Use logger.warning(message, error, stackTrace) or "
+            "logger.severe(message, error, stackTrace)."
+            "${rec == null ? '' : ' Logger: ${rec.loggerName}.'}",
+          ),
+          stack: stack,
+          library: "SuperLogging",
+        ),
+      );
+      return true;
+    }());
+  }
+
   /// Determine execution context from prefix
   static String _getExecutionContext() {
     final prefix = config.prefix.trim();
@@ -408,7 +428,12 @@ class SuperLogging {
     saveLogString(str, rec.error, rec: rec);
   }
 
-  static void saveLogString(String str, Object? error, {LogRecord? rec}) {
+  static void saveLogString(
+    String str,
+    Object? error, {
+    LogRecord? rec,
+    StackTrace? stackTrace,
+  }) {
     // push to log queue
     if (fileIsEnabled) {
       fileQueueEntries.add(str + '\n');
@@ -419,7 +444,8 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && error != null) {
-      _sendErrorToSentry(error, rec?.stackTrace, rec: rec).ignore();
+      _sendErrorToSentry(error, rec?.stackTrace ?? stackTrace, rec: rec)
+          .ignore();
     }
   }
 

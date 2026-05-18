@@ -33,6 +33,19 @@ class MLModelDownloadService {
         (onlyIndexingModels || _areNonIndexingModelsDownloaded);
   }
 
+  Future<bool> canLoadClipTextModel() async {
+    final hasModel = await RemoteAssetsService.instance.hasAsset(
+      ClipTextEncoder.instance.modelRemotePath,
+    );
+    final hasVocab = await RemoteAssetsService.instance.hasAsset(
+      ClipTextEncoder.instance.vocabRemotePath,
+    );
+    if (hasModel && hasVocab) {
+      return true;
+    }
+    return isLocalGalleryMode || await canUseHighBandwidth();
+  }
+
   /// Invalidate the download cache so the next ML run re-enters
   /// [ensureModelsDownloaded], which checks consent, local indexing, bandwidth,
   /// and downloads any newly required models.
@@ -143,6 +156,7 @@ class MLModelDownloadService {
       RemoteAssetsService.instance.getAssetPath(
         ClipTextEncoder.instance.vocabRemotePath,
         refetch: forceRefresh,
+        expectedSha256: ClipTextEncoder.instance.vocabSha256,
       ),
     ];
   }

@@ -6,7 +6,6 @@ import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/errors.dart";
 import "package:photos/db/upload_locks_db.dart";
@@ -78,7 +77,7 @@ class MultiPartUploader {
       !_featureFlagService.disableCFWorker &&
       (localSettings.cfUploadProxyEnabled ??
           _featureFlagService.cloudflareUploadWorker) &&
-      Configuration.instance.isEnteProduction();
+      endpointConfig.isProduction;
 
   int calculatePartCount(int fileSize) {
     // If the feature flag is disabled, return 1

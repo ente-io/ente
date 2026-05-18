@@ -1,3 +1,5 @@
+import "package:photos/core/exceptions.dart";
+
 enum InvalidReason {
   assetDeleted,
   assetDeletedEvent,
@@ -17,7 +19,7 @@ extension InvalidReasonExn on InvalidReason {
       this == InvalidReason.livePhotoVideoMissing;
 }
 
-class InvalidFileError extends ArgumentError {
+class InvalidFileError extends ArgumentError implements LocallyHandledError {
   final InvalidReason reason;
 
   InvalidFileError(String super.message, this.reason);
@@ -30,13 +32,22 @@ class InvalidFileError extends ArgumentError {
 
 class SubscriptionAlreadyClaimedError extends Error {}
 
-class WiFiUnavailableError extends Error {}
+class WiFiUnavailableError extends Error implements LocallyHandledError {
+  final String? message;
+
+  WiFiUnavailableError([this.message]);
+
+  @override
+  String toString() => message == null
+      ? "WiFiUnavailableError"
+      : "WiFiUnavailableError: $message";
+}
 
 class SyncStopRequestedError extends Error {}
 
-class NoActiveSubscriptionError extends Error {}
+class NoActiveSubscriptionError extends Error implements LocallyHandledError {}
 
-class StorageLimitExceededError extends Error {}
+class StorageLimitExceededError extends Error implements LocallyHandledError {}
 
 // error when file size + current usage >= storage plan limit + buffer
 class FileTooLargeForPlanError extends Error {}

@@ -325,6 +325,29 @@ pub extern "C" fn inference_apply_chat_template_json(
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn inference_prewarm_multimodal_context(
+    context: *const inference_context,
+    mmproj_path: *const c_char,
+    media_marker: *const c_char,
+    error_out: *mut *mut c_char,
+) -> bool {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let context =
+            unsafe { context.as_ref() }.ok_or_else(|| "context is required".to_string())?;
+        let mmproj_path = cstr_to_string(mmproj_path, "mmproj_path")?;
+        let media_marker = optional_cstr(media_marker)?;
+        api::prewarm_multimodal_context(context.handle.as_ref(), mmproj_path, media_marker)
+    }));
+
+    let result = match result {
+        Ok(inner) => inner,
+        Err(_) => Err("prewarm_multimodal_context panicked".to_string()),
+    };
+
+    with_error(error_out, result).is_some()
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn inference_generate_chat_stream(
     context: *const inference_context,
     request_json: *const c_char,

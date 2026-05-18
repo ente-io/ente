@@ -282,6 +282,26 @@ Ente backs up a single primary full-resolution image from the Burst. Additional 
 
 iCloud Shared Albums store compressed copies, not the original files. Because of this, Ente sees the shared-album copy as a different file, so it gets backed up separately and appears as a duplicate.
 
+### Why is my Recents count lower in Ente than in the iOS Photos app? {#ios-recents-count-mismatch}
+
+Ente reads photos through Apple's photo library APIs, which don't always return every item shown in the Photos app. In particular, some burst frames and certain shared or synced assets are excluded from third-party app queries by iOS itself. This can make Ente's Recents count in the on-device section slightly lower than iOS's.
+
+### Why aren't photos from my Samsung "Gallery" folder backing up? {#samsung-gallery-folder}
+
+Ente backs up the folders you select under `Settings > Backup > Backed up folders`. On Samsung devices, photos restored by Samsung Cloud often land in a folder called **Gallery**, which is separate from the standard **Camera** folder.
+
+If Ente isn't picking these up:
+
+1. Open `Settings > Backup > Backed up folders` and check whether the Gallery folder is listed and selected.
+2. If it isn't listed, move or copy the photos into the Camera folder, which Ente recognizes by default.
+3. New photos taken with the camera will continue to back up normally.
+
+### Can Ente replace my default Photos or Camera gallery? {#ente-as-default-gallery}
+
+Not as a system gallery. On iOS, tapping a photo from the camera or another app will still open Apple Photos; the OS doesn't allow third-party apps to take that role. Android behaves similarly for most camera apps.
+
+Ente runs alongside your native gallery and backs up new photos automatically in the background. See [How does background sync work?](#how-background-sync-works).
+
 ### On my iPhone, why are my photos not seen in the same albums as selected for backup? {#ios-album-assignment}
 
 When a photo belongs to multiple default albums on iOS and those albums are selected for backup, Ente identifies which album has the fewest photos and uploads the photo into that corresponding album on Ente. For example, if both Recents and Live Photos are marked for backup, live photos are added to the Live Photos album on Ente.

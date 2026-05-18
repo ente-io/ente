@@ -183,7 +183,7 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                                   final enabled = !localSettings
                                       .runMLDuringInteractionOverride;
                                   await computeController
-                                      .setMLDebugInteractionOverride(
+                                      .setMLInteractionOverride(
                                     turnOn: enabled,
                                   );
                                   _logger.info(

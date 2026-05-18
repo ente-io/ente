@@ -89,18 +89,15 @@ jobs:
             - name: Generate Rust bindings
               run: flutter_rust_bridge_codegen generate
 
-            - name: Setup keys
-              uses: timheuer/base64-to-file@v1
-              with:
-                  fileName: "keystore/ente_photos_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY_PHOTOS }}
+            - name: Add keystore
+              run: echo "${{ secrets.SIGNING_KEY_PHOTOS }}" | base64 -d > "$RUNNER_TEMP/ente_photos_key.jks"
 
             - name: Build independent APK
               run: |
                 flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent --target-platform android-arm,android-arm64
                 mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_photos_key.jks"
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_photos_key.jks
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_PHOTOS }}
                   SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_PHOTOS }}
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_PHOTOS }}

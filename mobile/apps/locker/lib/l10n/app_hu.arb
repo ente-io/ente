@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{nincs elem} =1{1 elem} other{{count} elem}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Gyujtemeny letrehozasa",
   "uploadDocumentTooltip": "Dokumentum feltoltese",
   "restore": "Visszaállítás",
@@ -469,15 +459,6 @@
   "linkDeviceLimit": "Készülékkorlát",
   "expiredLinkInfo": "Ez a link lejárt. Kérjük, válasszon új lejárati időt, vagy tiltsa le a link lejáratát.",
   "linkExpiresOn": "Hivatkozás lejár {expiryTime} ",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Megosztás adott személyekkel} =1 {1 személlyel megosztva} other {{numberOfPeople} személlyel megosztva}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "A hivatkozás érvényességi ideje lejárt",
   "publicLinkEnabled": "Nyilvános hivatkozás engedélyezve",
   "shareALink": "Hivatkozás megosztása",
@@ -491,28 +472,6 @@
   "add": "Hozzaadas",
   "collaboratorsCanAddFilesToTheSharedCollection": "A kozremukoik elemeket adhatnak a megosztott gyujtemennyhez.",
   "enterEmail": "Email megadása",
-  "viewersSuccessfullyAdded": "{count, plural, =0{0 megitekto hozzaadva} =1{1 megitekto hozzaadva} other{{count} megitekto hozzaadva}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0{0 kozremukodo hozzaadva} =1{1 kozremukodo hozzaadva} other{{count} kozremukodo hozzaadva}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0{Megitekto hozzaadasa} =1{Megitekto hozzaadasa} other{Megiektok hozzaadasa}}",
-  "addCollaborators": "{count, plural, =0{Kozremukodo hozzaadasa} =1{Kozremukodo hozzaadasa} other{Kozremukoik hozzaadasa}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Hosszan nyomja meg az e-mail cimet a vegpontok kozotti titkositas ellenorzesehez.",
   "sharing": "Megosztás...",
   "invalidEmailAddress": "Érvénytelen e-mail cím",
@@ -561,16 +520,6 @@
   "viewer": "Néző",
   "collaborator": "Együttműködő",
   "collaboratorsCanAddFilesToTheSharedAlbum": "A kozremukoik elemeket adhatnak a megosztott gyujtemennyhez.",
-  "albumParticipantsCount": "{count, plural, =0 {Nincsenek résztvevők} =1 {1 résztvevő} other {{count} résztvevők}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "További hozzáadása",
   "you": "Te",
   "albumOwner": "Tulajdonos",
@@ -678,16 +627,6 @@
   "clickHereToUpload": "Kattintson ide a feltolteshez",
   "saveDocument": "Dokumentum mentese",
   "uploadFiles": "Elemek feltoltese",
-  "filesSelected": "{count, plural, =0{Nincs kivalasztott elem} =1{1 elem kivalasztva} other{{count} elem kivalasztva}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Hozzadas gyujtemennyhez",
   "newCollection": "Uj gyujtemeny",
   "title": "Cim",
@@ -706,16 +645,6 @@
     }
   },
   "informationCollectionName": "Informacio",
-  "recordSavedToMultipleCollections": "Rekord sikeresen mentve {count, plural, =1{1 gyujtemenybe} other{{count} gyujtemenybe}}",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} vagolapra masolva",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -723,20 +652,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 talalat} other{{count} talalat}} a(z) \"{query}\" keresre",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -783,49 +698,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 gyujtemeny} other{{count} gyujtemeny}} veglegesen torolve lesz.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 elem} other{{count} elem}} veglegesen torolve lesz.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Elemek torlese mindenhonnan is",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Igen, {count, plural, =1{gyujtemeny} other{gyujtemenyek}} torlese",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Igen, {count, plural, =1{elem} other{elemek}} torlese",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Haszanalat",
   "important": "Fontos",
@@ -834,16 +709,6 @@
   "markingAsImportant": "Megjeloles fontoskent...",
   "fileMarkedAsImportant": "Elem megjelolve fontoskent",
   "fileRemovedFromImportant": "Elem eltavolitva a fontosbol",
-  "filesMarkedAsImportant": "{count, plural, =1{1 elem megjelolve fontoskent} other{{count} elem megjelolve fontoskent}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Minden elem mar meg van jelolve fontoskent",
   "failedToMarkFilesAsImportant": "Elemek megjelolese fontoskent sikertelen: {error}",
   "@failedToMarkFilesAsImportant": {

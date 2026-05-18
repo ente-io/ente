@@ -1455,7 +1455,7 @@ class CollectionsService {
       }
       return collections;
     } catch (e, s) {
-      _logger.warning(e, s);
+      _logger.warning("Failed to fetch collections", e, s);
       if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
@@ -1648,7 +1648,7 @@ class CollectionsService {
       );
       return null;
     } catch (e, s) {
-      _logger.warning(e, s);
+      _logger.warning("Failed to fetch public collection", e, s);
       _logger.severe("Failed to fetch public collection");
       await showGenericErrorDialog(context: context, error: e);
       rethrow;

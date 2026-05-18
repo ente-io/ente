@@ -1,4 +1,3 @@
-import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_network/network.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/widgets.dart';
@@ -15,7 +14,7 @@ class PasskeyService {
     final response = await _enteDio.get(
       "/users/accounts-token",
     );
-    final accountsUrl = response.data!["accountsUrl"] ?? kAccountsUrl;
+    final accountsUrl = response.data!["accountsUrl"] as String;
     final jwtToken = response.data!["accountsToken"] as String;
     return "$accountsUrl/passkeys?token=$jwtToken";
   }

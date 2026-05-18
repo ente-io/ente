@@ -252,6 +252,28 @@ internal class ModelSettingsActions(
         }
     }
 
+    fun prewarmImageInferenceIfDownloaded() {
+        val scope = scope ?: return
+        val currentState = state.value
+        if (currentState.chat.isGenerating || currentState.chat.isDownloading) return
+
+        val target = resolveTarget(currentState.modelSettings)
+        if (!llmProvider.isModelDownloaded(target)) return
+
+        scope.launch {
+            try {
+                llmProvider.prewarmImageInference(target)
+            } catch (err: Throwable) {
+                logRepository.log(
+                    LogLevel.Warning,
+                    "Image inference prewarm skipped",
+                    details = err.message,
+                    tag = "Model"
+                )
+            }
+        }
+    }
+
     fun cancelModelDownload() {
         modelDownloadJob?.cancel()
         modelDownloadJob = null

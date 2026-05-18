@@ -11,6 +11,7 @@ class MemoryProgressIndicator extends StatefulWidget {
   final double height;
   final double gap;
   final void Function(AnimationController)? animationController;
+  final void Function(AnimationController)? onAnimationControllerDisposed;
   final VoidCallback? onComplete;
 
   const MemoryProgressIndicator({
@@ -23,6 +24,7 @@ class MemoryProgressIndicator extends StatefulWidget {
     this.height = 2.0,
     this.gap = 4.0,
     this.animationController,
+    this.onAnimationControllerDisposed,
     this.onComplete,
   });
 
@@ -61,6 +63,7 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
 
   @override
   void dispose() {
+    widget.onAnimationControllerDisposed?.call(_animationController);
     _animationController.dispose();
     super.dispose();
   }

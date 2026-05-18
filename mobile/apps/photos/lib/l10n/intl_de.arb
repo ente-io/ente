@@ -273,7 +273,7 @@
   "after1Month": "Nach 1 Monat",
   "after1Year": "Nach 1 Jahr",
   "manageParticipants": "Verwalten",
-  "albumParticipantsCount": "{count, plural, =0 {Keine Teilnehmer} =1 {1 Teilnehmer} other {{count} Teilnehmer}}",
+  "albumParticipantsCount": "{count, plural, =0 {Keine Teilnehmer} one {Ein Teilnehmer} other {{count} Teilnehmer}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -298,7 +298,7 @@
   "publicLinkEnabled": "Öffentlicher Link aktiviert",
   "shareALink": "Einen Link teilen",
   "sharedAlbumSectionDescription": "Erstelle gemeinsam mit anderen Ente-Nutzern geteilte Alben, inkl. Nutzern ohne Bezahltarif.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Teile mit bestimmten Personen} =1 {Teilen mit 1 Person} other {Teilen mit {numberOfPeople} Personen}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Teile mit bestimmten Personen} one {Geteilt mit einer Person} other {Geteilt mit {numberOfPeople} Personen}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -640,6 +640,7 @@
   "youveNoDuplicateFilesThatCanBeCleared": "Du hast keine Duplikate, die gelöscht werden können",
   "success": "Abgeschlossen",
   "rateUs": "Bewerte uns",
+  "changeLogReferralCta": "Gib 10 GB, erhalte 10 GB",
   "remindToEmptyDeviceTrash": "Lösche auch Dateien aus \"Kürzlich gelöscht\" unter \"Einstellungen\" -> \"Speicher\" um freien Speicher zu erhalten",
   "youHaveSuccessfullyFreedUp": "Du hast {storageSaved} erfolgreich freigegeben!",
   "@youHaveSuccessfullyFreedUp": {
@@ -696,7 +697,7 @@
   "inviteLimitReached": "Du hast 5 Einladungen hinzugefügt. Entferne eine, um eine weitere hinzuzufügen",
   "emailAddress": "E-Mail-Adresse",
   "sendInvites": "Einladungen versenden",
-  "sendCountInvites": "{count, plural, =0 {Versende Einladungen} =1 {Versende eine Einladung} other {Versende {count} Einladungen}}",
+  "sendCountInvites": "{count, plural, =0 {Einladungen versenden} one {Versende eine Einladung} other {Versende {count} Einladungen}}",
   "@sendCountInvites": {
     "placeholders": {
       "count": {
@@ -718,7 +719,7 @@
       }
     }
   },
-  "invitesSentCount": "{count, plural, =1 {Einladung gesendet} other {Einladungen gesendet}}",
+  "invitesSentCount": "{count, plural, one {Einladung gesendet} other {Einladungen gesendet}}",
   "@invitesSentCount": {
     "placeholders": {
       "count": {
@@ -820,7 +821,17 @@
   "storageLimitExplanation": "Lege die maximale Speicherkapazität fest, die dieses Mitglied verwenden kann. Sobald das Limit erreicht ist, wird ein Hochladen nicht mehr möglich sein.",
   "limit": "Limit",
   "noLimit": "Kein Limit",
+  "currentUsageNote": "Aktuell in Benutzung: {amount}. Auf 0 setzen, um das Limit aufzuheben.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
   "leaveFamilyConfirmTitle": "Familientarif verlassen?",
+  "leaveFamilyConfirmBody": "Du verlierst Zugriff auf den geteilten Speicher.",
   "referrals": "Weiterempfehlungen",
   "notifications": "Benachrichtigungen",
   "sharedPhotoNotifications": "Neue geteilte Fotos und Alben",
@@ -928,7 +939,7 @@
     "type": "text"
   },
   "faqs": "FAQs",
-  "renewsOn": "Erneuert am {endDate}",
+  "renewsOn": "Abo verlängert sich am {endDate}",
   "freeTrialValidTill": "Kostenlose Demo verfügbar bis zum {endDate}",
   "validTill": "Gültig bis {endDate}",
   "addOnValidTill": "Dein {storageAmount} Add-on ist gültig bis {endDate}",
@@ -985,6 +996,15 @@
   "appstoreSubscription": "AppStore Abo",
   "subAlreadyLinkedErrMessage": "Dein {id} ist bereits mit einem anderen Ente-Konto verknüpft.\nWenn du deine {id} mit diesem Konto verwenden möchtest, kontaktiere bitte unseren Support",
   "visitWebToManage": "Bitte rufe \"{webUrl}\" auf, um dein Abo zu verwalten",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "managePaymentMethod": "Zahlungsmethode verwalten",
   "couldNotUpdateSubscription": "Abo konnte nicht aktualisiert werden",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Bitte kontaktiere support@ente.com und wir helfen dir gerne!",
@@ -1144,11 +1164,11 @@
   "share": "Teilen",
   "unhideToAlbum": "Im Album anzeigen",
   "restoreToAlbum": "Album wiederherstellen",
-  "moveItem": "{count, plural, =1 {Element verschieben} other{Elemente verschieben}}",
+  "moveItem": "{count, plural, one {Element verschieben} other {Elemente verschieben}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, =1 {Element hinzufügen} other {Elemente hinzufügen}}",
+  "addItem": "{count, plural, one {Element hinzufügen} other {Elemente hinzufügen}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -1176,7 +1196,7 @@
   "referFriendsAnd2xYourPlan": "Begeistere Freunde für uns und verdopple deinen Speicher",
   "shareAlbumHint": "Öffne ein Album und tippe auf den Teilen-Button oben rechts, um zu teilen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an",
-  "trashDaysLeft": "{count, plural, =0 {Demnächst} =1 {1 Tag} other {{count} Tage}}",
+  "trashDaysLeft": "{count, plural, =0 {Demnächst} one {Ein Tag} other {{count} Tage}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1295,7 +1315,7 @@
   "authToViewYourMemories": "Bitte authentifizieren, um deine Erinnerungsstücke anzusehen",
   "unlock": "Jetzt freischalten",
   "freeUpSpace": "Speicherplatz freigeben",
-  "freeUpSpaceSaving": "{count, plural, =1 {Es kann vom Gerät gelöscht werden, um {formattedSize} freizugeben} other {Sie können vom Gerät gelöscht werden, um {formattedSize} freizugeben}}",
+  "freeUpSpaceSaving": "{count, plural, one {Es kann vom Gerät gelöscht werden, um {formattedSize} freizugeben} other {Sie können vom Gerät gelöscht werden, um {formattedSize} freizugeben}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 Datei} other {{formattedNumber} Dateien}} in diesem Album wurde(n) sicher gespeichert",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1329,7 +1349,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Du hast {count, plural, =1 {darauf} other {auf sie}} weiterhin Zugriff, solange du ein aktives Abo hast",
+  "freeUpAccessPostDelete": "Du kannst weiterhin über Ente {count, plural, one {darauf} other {auf sie}} zugreifen, solange du ein aktives Abo hast",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1441,6 +1461,15 @@
   "loadMessage6": "Du kannst Links zu deinen Alben mit deinen Geliebten teilen",
   "loadMessage7": "Unsere mobilen Apps laufen im Hintergrund, um neue Fotos zu verschlüsseln und zu sichern",
   "loadMessage8": "{webUrl} hat einen Spitzen-Uploader",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Wir verwenden Xchacha20Poly1305, um Ihre Daten sicher zu verschlüsseln",
   "photoDescriptions": "Foto Beschreibungen",
   "searchResultFileName": "Dateiname",
@@ -1719,6 +1748,15 @@
   "pair": "Koppeln",
   "deviceNotFound": "Gerät nicht gefunden",
   "castInstruction": "Besuche {castUrl} auf dem Gerät, das du verbinden möchtest.\n\nGib den unten angegebenen Code ein, um das Album auf deinem Fernseher abzuspielen.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Code eingeben",
   "joinDiscord": "Discord beitreten",
   "locations": "Orte",
@@ -1728,8 +1766,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Finde Personen schnell nach Namen",
-  "addViewers": "{count, plural, =0 {Betrachter hinzufügen} =1 {Betrachter hinzufügen} other {Betrachter hinzufügen}}",
-  "addCollaborators": "{count, plural, =0 {Bearbeiter hinzufügen} =1 {Bearbeiter hinzufügen} other {Bearbeiter hinzufügen}}",
+  "addViewers": "{count, plural, =0 {Betrachter hinzufügen} one {Betrachter hinzufügen} other {Betrachter hinzufügen}}",
+  "addCollaborators": "{count, plural, =0 {Bearbeiter hinzufügen} one {Bearbeiter hinzufügen} other {Bearbeiter hinzufügen}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Lange auf eine E-Mail drücken, um die Ende-zu-Ende-Verschlüsselung zu überprüfen.",
   "developerSettingsWarning": "Bist du sicher, dass du Entwicklereinstellungen bearbeiten willst?",
   "developerSettings": "Entwicklereinstellungen",
@@ -1865,7 +1903,7 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {Eine Datei zu {personName}} other {{count} Dateien zu {personName}}} hinzugefügt",
+  "addedFilesToPerson": "{count, plural, one {Eine Datei zu {personName}} other {{count} Dateien zu {personName}}} hinzugefügt",
   "@addedFilesToPerson": {
     "description": "Toast shown after manually tagging one or more files to a person.",
     "placeholders": {
@@ -1879,7 +1917,7 @@
       }
     }
   },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {Eine Datei ist bereits zu {personName} hinzugefügt} other {{count} Dateien sind bereits zu {personName} hinzugefügt}}",
+  "filesAlreadyLinkedToPerson": "{count, plural, one {Eine Datei ist bereits zu {personName} hinzugefügt} other {{count} Dateien sind bereits zu {personName} hinzugefügt}}",
   "@filesAlreadyLinkedToPerson": {
     "description": "Toast shown when selected files are already manually tagged to the selected person.",
     "placeholders": {
@@ -1942,7 +1980,7 @@
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
   "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald Verarbeitung und Synchronisation abgeschlossen sind",
   "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald Verarbeitung und Synchronisierung abgeschlossen sind",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} =1 {Einen Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} one {Einen Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1952,7 +1990,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} one {Einen Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1962,7 +2000,7 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
-  "adminsSuccessfullyAdded": "{count, plural, =0 {Es wurden keine Admins hinzugefügt} =1 {Ein Admin erfolgreich hinzugefügt} other {{count} Admins erfolgreich hinzugefügt}}",
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Es wurden keine Admins hinzugefügt} one {Ein Admin erfolgreich hinzugefügt} other {{count} Admins erfolgreich hinzugefügt}}",
   "@adminsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1972,7 +2010,7 @@
     },
     "description": "Number of admins that were successfully added to an album."
   },
-  "addAdmins": "{count, plural, =0 {Admin hinzufügen} =1 {Admin hinzufügen} other {Admins hinzufügen}}",
+  "addAdmins": "{count, plural, =0 {Admin hinzufügen} one {Admin hinzufügen} other {Admins hinzufügen}}",
   "@addAdmins": {
     "placeholders": {
       "count": {
@@ -1995,7 +2033,7 @@
   "@failedToFetchActiveSessions": {
     "description": "In session page, warn user (in toast) that active sessions could not be fetched."
   },
-  "failedToRefreshStripeSubscription": "Abonnement konnte nicht erneuert werden",
+  "failedToRefreshStripeSubscription": "Abo konnte nicht verlängert werden",
   "failedToPlayVideo": "Fehler beim Abspielen des Videos",
   "uploadIsIgnoredDueToIgnorereason": "Upload wird aufgrund von {ignoreReason} ignoriert",
   "@uploadIsIgnoredDueToIgnorereason": {
@@ -2051,7 +2089,7 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
-  "photosCount": "{count, plural, =0 {0 Fotos} =1 {Ein Foto} other {{count} Fotos}}",
+  "photosCount": "{count, plural, =0 {0 Fotos} one {Ein Foto} other {{count} Fotos}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -2345,7 +2383,7 @@
   "moveSelectedPhotosToOneDate": "Ausgewählte Fotos auf ein Datum verschieben",
   "shiftDatesAndTime": "Datum und Uhrzeit verschieben",
   "photosKeepRelativeTimeDifference": "Fotos behalten relativen Zeitunterschied",
-  "photocountPhotos": "{count, plural, =0 {Keine Fotos} =1 {Ein Foto} other {{count} Fotos}}",
+  "photocountPhotos": "{count, plural, =0 {Keine Fotos} one {Ein Foto} other {{count} Fotos}}",
   "@photocountPhotos": {
     "placeholders": {
       "count": {
@@ -2359,7 +2397,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Ausgewählte Elemente werden von dieser Person entfernt, aber nicht aus deiner Bibliothek gelöscht.",
   "throughTheYears": "{dateFormat} über die Jahre",
   "thisWeekThroughTheYears": "Diese Woche über die Jahre",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Diese Woche, vor einem Jahr} other {Diese Woche, vor {count} Jahren}}",
+  "thisWeekXYearsAgo": "{count, plural, one {Diese Woche, vor einem Jahr} other {Diese Woche, vor {count} Jahren}}",
   "youAndThem": "Du und {name}",
   "admiringThem": "{name} wertschätzen",
   "embracingThem": "{name} umarmen",
@@ -2483,7 +2521,7 @@
   "font": "Schriftart",
   "background": "Hintergrund",
   "align": "Ausrichten",
-  "addedToAlbums": "{count, plural, =1{Erfolgreich zu einem Album hinzugefügt} other{Erfolgreich zu {count} Alben hinzugefügt}}",
+  "addedToAlbums": "{count, plural, one{Erfolgreich zu einem Album hinzugefügt} other{Erfolgreich zu {count} Alben hinzugefügt}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {
@@ -2522,7 +2560,7 @@
   "findSimilarImages": "Ähnliche Bilder finden",
   "noSimilarImagesFound": "Keine ähnlichen Bilder gefunden",
   "yourPhotosLookUnique": "Deine Fotos sehen einzigartig aus",
-  "similarGroupsFound": "{count, plural, =1{Eine Gruppe gefunden} other{{count} Gruppen gefunden}}",
+  "similarGroupsFound": "{count, plural, one{Eine Gruppe gefunden} other{{count} Gruppen gefunden}}",
   "@similarGroupsFound": {
     "placeholders": {
       "count": {
@@ -2817,6 +2855,8 @@
   "ritualCreateNew": "Neu erstellen",
   "ritualAlbumSelectionPlaceholder": "Album auswählen",
   "ritualPickEmojiTitle": "Emoji auswählen",
+  "ritualCustomKeyboardLabel": "Benutzerdefiniert (Tastatur)",
+  "ritualEmojiKeyboardHint": "Tippe, um die Emoji-Tastatur zu öffnen",
   "feed": "Feed",
   "newCommentNotificationTitle": "Du hast einen Kommentar erhalten",
   "@newCommentNotificationTitle": {
@@ -2949,7 +2989,7 @@
       }
     }
   },
-  "likesCount": "{count, plural, =1{Ein Like} other{{count} Likes}}",
+  "likesCount": "{count, plural, one{Ein Like} other{{count} Likes}}",
   "@likesCount": {
     "description": "Number of likes with pluralization",
     "placeholders": {
@@ -2970,7 +3010,7 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, =1{Ein Album konnte nicht gelikt werden} other{{count} Alben konnten nicht gelikt werden}}",
+  "failedToLikeAlbums": "{count, plural, one{Ein Album konnte nicht gelikt werden} other{{count} Alben konnten nicht gelikt werden}}",
   "@failedToLikeAlbums": {
     "description": "Error when liking albums fails",
     "placeholders": {
@@ -2987,7 +3027,7 @@
   "@couldNotLoadSelectedPhoto": {
     "description": "Toast when the selected contact photo cannot be loaded"
   },
-  "albumsCount": "{count, plural, =1{Ein Album} other{{count} Alben}}",
+  "albumsCount": "{count, plural, one{Ein Album} other{{count} Alben}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -3033,7 +3073,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, =0{Keine Kommentare} =1{Ein Kommentar} other{{count} Kommentare}}",
+  "commentsCount": "{count, plural, =0{Keine Kommentare} one{Ein Kommentar} other{{count} Kommentare}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

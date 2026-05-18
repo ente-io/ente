@@ -31,14 +31,16 @@ class _NoResultWidgetState extends State<NoResultWidget> {
     InheritedAllSectionsExamples.of(context)
         .allSectionsExamplesFuture
         .then((value) {
-      if (value.isEmpty) return;
+      final sectionResultsByType = value.sectionResults;
+      if (sectionResultsByType.isEmpty) return;
       for (int i = 0; i < searchTypes.length; i++) {
         final SectionType sectionType = searchTypes[i];
         final int sectionIndex = SectionType.values.indexOf(sectionType);
-        if (sectionIndex < 0 || sectionIndex >= value.length) {
+        if (sectionIndex < 0 || sectionIndex >= sectionResultsByType.length) {
           continue;
         }
-        final List<SearchResult> sectionResults = value[sectionIndex];
+        final List<SearchResult> sectionResults =
+            sectionResultsByType[sectionIndex];
         final querySuggestions = <String>[];
         for (int j = 0; j < 2 && j < sectionResults.length; j++) {
           querySuggestions.add(sectionResults[j].name());

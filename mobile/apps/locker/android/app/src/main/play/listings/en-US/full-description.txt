@@ -1,19 +1,16 @@
-Ente Locker is a secure vault for your important documents, credentials, and notes.
+Ente Locker is a secure vault for life’s essentials — your most important documents and credentials — protected with end-to-end encryption.
 
-Everything you store is end-to-end encrypted before it leaves your device, so only you can access it.
+STORE WHAT MATTERS
+• IDs and personal documents
+• Financial records and important paperwork
+• Credentials and recovery details
+• Secure notes
 
-FEATURES
+SHARE PRIVATELY
+Share specific items with trusted people, on your terms.
 
-- Store IDs, financial records, recovery details, and other personal documents
-- Save secure notes alongside your files
-- Share selected items privately with trusted people
-- Set up emergency access for trusted contacts
-- Sync across your devices with end-to-end encryption
+EMERGENCY HANDOFF
+Set up trusted contacts so the right information can be passed on automatically when it’s needed most.
 
-PRIVACY
-
-Your data is encrypted with your keys before upload. Ente's architecture and source code have been audited by Cure53.
-
-SUPPORT
-
-If you need help, please write to support@ente.com and someone will get in touch with you.
+PRIVACY BY DESIGN
+Your data is encrypted with your keys before it leaves your device, so only you can access it. Ente’s architecture and source code have been audited by Cure53.

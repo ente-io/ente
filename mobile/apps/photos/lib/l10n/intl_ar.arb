@@ -218,16 +218,6 @@
   "after1Month": "بعد شهر",
   "after1Year": "بعد سنة",
   "manageParticipants": "إدارة المشاركين",
-  "albumParticipantsCount": "{count, plural, =0 {لا يوجد مُشاركون}=1 {مُشارك واحد} other {{count} مُشاركين}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "أنشئ رابطًا يسمح للأشخاص بإضافة الصور ومشاهدتها في ألبومك المشترك دون الحاجة إلى تطبيق أو حساب Ente. خيار مثالي لجمع صور الفعاليات بسهولة.",
   "collectPhotos": "جمع الصور",
   "collaborativeLink": "رابط تعاوني",
@@ -239,15 +229,6 @@
   "publicLinkEnabled": "تمكين الرابط العام",
   "shareALink": "مشاركة رابط",
   "sharedAlbumSectionDescription": "أنشئ ألبومات مشتركة وتعاونية مع مستخدمي Ente الآخرين، بما في ذلك المستخدمين ذوي الاشتراكات المجانية.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {مشاركة مع أشخاص مُحددين}=1 {مُشارَك مع شخص واحد} other {مُشارَك مع {numberOfPeople} أشخاص}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "هذا هو معرّف التحقق الخاص بك",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "يجب أن يرى أي شخص يشارك ألبومات معك نفس معرّف التحقق على جهازه.",
   "howToViewShareeVerificationID": "يرجى الطلب منهم الضغط مطولًا على عنوان بريدهم الإلكتروني في شاشة الإعدادات، والتأكد من تطابق المعرّفات على كلا الجهازين.",
@@ -446,7 +427,6 @@
   "skip": "تخط",
   "updatingFolderSelection": "جارٍ تحديث تحديد المجلد...",
   "itemCount": "{count, plural, one {{count} عُنْصُر} other {{count} عَنَاصِر}}",
-  "deleteItemCount": "{count, plural, =1 {حذف عنصر واحد} two {حذف عنصرين} few {حذف {count} عناصر} many {حذف {count} عنصرًا} other {حذف {count} عنصرًا}}",
   "duplicateItemsGroup": "{count} ملفات، {formattedSize} لكل منها",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -646,6 +626,15 @@
   "appstoreSubscription": "اشتراك متجر App Store",
   "subAlreadyLinkedErrMessage": "تم ربط {id} الخاص بك بحساب Ente آخر.\nإذا كنت ترغب في استخدام {id} مع هذا الحساب، يرجى الاتصال بدعمنا.",
   "visitWebToManage": "يرجى زيارة {webUrl} لإدارة اشتراكك.",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "تعذر تحديث الاشتراك.",
   "paymentFailed": "فشلت عملية الدفع",
   "paymentFailedTalkToProvider": "يرجى التواصل مع دعم {providerName} إذا تم خصم المبلغ منك.",
@@ -762,14 +751,6 @@
   "share": "مشاركة",
   "unhideToAlbum": "إظهار في الألبوم",
   "restoreToAlbum": "استعادة إلى الألبوم",
-  "moveItem": "{count, plural, =1 {نقل عنصر} two {نقل عنصرين} few {نقل {count} عناصر} many {نقل {count} عنصرًا} other {نقل {count} عنصرًا}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {إضافة عنصر} two {إضافة عنصرين} few {إضافة {count} عناصر} many {إضافة {count} عنصرًا} other {إضافة {count} عنصرًا}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "إنشاء أو تحديد ألبوم",
   "selectAlbum": "تحديد ألبوم",
   "searchByAlbumNameHint": "اسم الألبوم",
@@ -794,16 +775,6 @@
   "referFriendsAnd2xYourPlan": "أحِل الأصدقاء وضاعف خطتك مرتين",
   "shareAlbumHint": "افتح ألبومًا وانقر على زر المشاركة في الزاوية اليمنى العليا للمشاركة.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "تعرض العناصر عدد الأيام المتبقية قبل الحذف الدائم.",
-  "trashDaysLeft": "{count, plural, =0 {قريبًا} =1 {يوم واحد} two {يومان} few {{count} أيام} many {{count} يومًا} other {{count} يومًا}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "حذف الكل",
   "renameAlbum": "إعادة تسمية الألبوم",
   "convertToAlbum": "تحويل إلى ألبوم",
@@ -867,7 +838,6 @@
   "authToViewYourMemories": "يرجى المصادقة لعرض ذكرياتك.",
   "unlock": "فتح",
   "freeUpSpace": "تحرير المساحة",
-  "freeUpSpaceSaving": "{count, plural, =1 {يمكن حذفه من الجهاز لتحرير {formattedSize}} two {يمكن حذفهما من الجهاز لتحرير {formattedSize}} few {يمكن حذفها من الجهاز لتحرير {formattedSize}} many {يمكن حذفها من الجهاز لتحرير {formattedSize}} other {يمكن حذفها من الجهاز لتحرير {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {ملف واحد} two {ملفان} few {{formattedNumber} ملفات} many {{formattedNumber} ملفًا} other {{formattedNumber} ملفًا}} في هذا الألبوم تم نسخه احتياطيًا بأمان",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -895,18 +865,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "لا يزال بإمكانك الوصول {count, plural, =1 {إليه} two {إليهما} other {إليها}} على Ente طالما لديك اشتراك نشط.",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1005,6 +963,15 @@
   "loadMessage6": "يمكنك مشاركة روابط ألبوماتك مع أحبائك.",
   "loadMessage7": "تعمل تطبيقات الهاتف المحمول الخاصة بنا في الخلفية لتشفير أي صور جديدة تلتقطها ونسخها احتياطيًا.",
   "loadMessage8": "{webUrl} لديه أداة تحميل رائعة.",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "نستخدم XChaCha20-Poly1305 لتشفير بياناتك بأمان.",
   "photoDescriptions": "أوصاف الصور",
   "fileTypesAndNames": "أنواع وأسماء الملفات",
@@ -1221,6 +1188,15 @@
   "pair": "إقران",
   "deviceNotFound": "لم يتم العثور على الجهاز",
   "castInstruction": "قم بزيارة {castUrl} على الجهاز الذي تريد إقرانه.\n\nأدخل الرمز أدناه لتشغيل الألبوم على تلفزيونك.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "أدخل الرمز",
   "joinDiscord": "الانضمام إلى Discord",
   "locations": "المواقع",
@@ -1230,8 +1206,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "البحث عن الأشخاص بسرعة بالاسم",
-  "addViewers": "{count, plural, =0 {إضافة مشاهد} =1 {إضافة مشاهد} two {إضافة مشاهدين} few {إضافة {count} مشاهدين} many {إضافة {count} مشاهدًا} other {إضافة {count} مشاهدًا}}",
-  "addCollaborators": "{count, plural, =0 {إضافة متعاون} =1 {إضافة متعاون} two {إضافة متعاونين} few {إضافة {count} متعاونين} many {إضافة {count} متعاونًا} other {إضافة {count} متعاونًا}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "اضغط مطولاً على بريد إلكتروني للتحقق من التشفير من طرف إلى طرف.",
   "developerSettingsWarning": "هل أنت متأكد من رغبتك في تعديل إعدادات المطور؟",
   "developerSettings": "إعدادات المطور",
@@ -1361,26 +1335,6 @@
   "enableMachineLearningBanner": "قم بتمكين تعلم الآلة للبحث السحري والتعرف على الوجوه.",
   "searchDiscoverEmptySection": "سيتم عرض الصور هنا بمجرد اكتمال المعالجة والمزامنة.",
   "searchPersonsEmptySection": "سيتم عرض الأشخاص هنا بمجرد اكتمال المعالجة والمزامنة.",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 مشاهدين} =1 {تمت إضافة مشاهد واحد} two {تمت إضافة مشاهدين} few {تمت إضافة {count} مشاهدين} many {تمت إضافة {count} مشاهدًا} other {تمت إضافة {count} مشاهدًا}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 متعاونين} =1 {تمت إضافة متعاون واحد} two {تمت إضافة متعاونين} few {تمت إضافة {count} متعاونين} many {تمت إضافة {count} متعاونًا} other {تمت إضافة {count} متعاونًا}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "الحساب تم تكوينه بالفعل.",
   "sessionIdMismatch": "عدم تطابق معرّف الجلسة",
   "@sessionIdMismatch": {
@@ -1446,15 +1400,6 @@
   },
   "currentlyRunning": "قيد التشغيل حاليًا",
   "ignored": "تم التجاهل",
-  "photosCount": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} few {{count} صور} many {{count} صورة} other {{count} صورة}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "ملف",
   "searchSectionsLengthMismatch": "عدم تطابق طول الأقسام: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1642,21 +1587,11 @@
   "moveSelectedPhotosToOneDate": "نقل الصور المحددة إلى تاريخ واحد",
   "shiftDatesAndTime": "تغيير التواريخ والوقت",
   "photosKeepRelativeTimeDifference": "تحتفظ الصور بالفرق الزمني النسبي",
-  "photocountPhotos": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} few {{count} صور} many {{count} صورة} other {{count} صورة}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "أيقونة التطبيق",
   "notThisPerson": "ليس هذا الشخص؟",
   "selectedItemsWillBeRemovedFromThisPerson": "سيتم إزالة العناصر المحددة من هذا الشخص، ولكن لن يتم حذفها من مكتبتك.",
   "throughTheYears": "{dateFormat} عبر السنين",
   "thisWeekThroughTheYears": "هذا الأسبوع عبر السنين",
-  "thisWeekXYearsAgo": "{count, plural, =1 {هذا الأسبوع، قبل سنة} two {هذا الأسبوع، قبل سنتين} few {هذا الأسبوع، قبل {count} سنوات} many {هذا الأسبوع، قبل {count} سنة} other {هذا الأسبوع، قبل {count} سنة}}",
   "youAndThem": "أنت و {name}",
   "admiringThem": "الإعجاب بـ {name}",
   "embracingThem": "معانقة {name}",
@@ -1757,15 +1692,6 @@
   "font": "الخط",
   "background": "خلفية",
   "align": "محاذاة",
-  "addedToAlbums": "{count, plural, =1{تمت الإضافة إلى ألبوم واحد بنجاح} other{تم الإضافة إلى {count} ألبومات بنجاح}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "تم معالجة الفيديو",
   "grantPermission": "منح الإذن"
 }

@@ -32,9 +32,6 @@ dependencies:
     path: ../strings
   ente_ui:
     path: ../ui
-  ente_utils:
-    path: ../utils
-  file_saver: 0.3.1
   flutter:
     sdk: flutter
   flutter_svg: 2.2.3
@@ -55,6 +52,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/
+    - assets/fonts/
 
 # This package is not meant to be published
 publish_to: none

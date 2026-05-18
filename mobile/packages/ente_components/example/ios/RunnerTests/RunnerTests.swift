@@ -1,0 +1,11 @@
+import Flutter
+import UIKit
+import XCTest
+
+class RunnerTests: XCTestCase {
+
+  func testRunnerTargetLoads() {
+    XCTAssertTrue(true)
+  }
+
+}

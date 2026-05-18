@@ -12,24 +12,21 @@ are documented below:
 
 ## Environment Variables
 
-A self-hosted Ente instance has to specify endpoints for both Museum (the
-server) and web apps.
+A self-hosted Ente web app only needs the Museum API endpoint. Web app origins are configured in `museum.yaml` under `apps`.
 
 This document outlines the essential environment variables and port mappings of
 the web apps.
 
 Here's the list of environment variables that is used by the cluster:
 
-| Service    | Environment Variable   | Description                                                                                                        | Default Value                   |
-| ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
-| `web`      | `ENTE_API_ORIGIN`      | Alias for `NEXT_PUBLIC_ENTE_ENDPOINT`. API Endpoint for Ente's API (Museum).                                       | http://localhost:8080           |
-| `web`      | `ENTE_ALBUMS_ORIGIN`   | Alias for `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT`. Base URL for the Ente Albums app, used for public sharing.           | http://localhost:3002           |
-| `web`      | `ENTE_PHOTOS_ORIGIN`   | Alias for `NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT`. Base URL for Ente Photos web app.                                    | http://localhost:3000           |
-| `postgres` | `POSTGRES_USER`        | Username for PostgreSQL database                                                                                   | `pguser`                        |
-| `postgres` | `POSTGRES_DB`          | Name of database for use with Ente                                                                                 | `ente_db`                       |
-| `postgres` | `POSTGRES_PASSWORD`    | Password for PostgreSQL database's user                                                                            | Randomly generated (quickstart) |
-| `minio`    | `MINIO_ROOT_USER`      | Username for MinIO                                                                                                 | Randomly generated (quickstart) |
-| `minio`    | `MINIO_ROOT_PASSWORD`  | Password for MinIO                                                                                                 | Randomly generated (quickstart) |
+| Service    | Environment Variable  | Description                                                                  | Default Value                   |
+| ---------- | --------------------- | ---------------------------------------------------------------------------- | ------------------------------- |
+| `web`      | `ENTE_API_ORIGIN`     | Alias for `NEXT_PUBLIC_ENTE_ENDPOINT`. API Endpoint for Ente's API (Museum). | http://localhost:8080           |
+| `postgres` | `POSTGRES_USER`       | Username for PostgreSQL database                                             | `pguser`                        |
+| `postgres` | `POSTGRES_DB`         | Name of database for use with Ente                                           | `ente_db`                       |
+| `postgres` | `POSTGRES_PASSWORD`   | Password for PostgreSQL database's user                                      | Randomly generated (quickstart) |
+| `minio`    | `MINIO_ROOT_USER`     | Username for MinIO                                                           | Randomly generated (quickstart) |
+| `minio`    | `MINIO_ROOT_PASSWORD` | Password for MinIO                                                           | Randomly generated (quickstart) |
 
 ## Default Configuration
 

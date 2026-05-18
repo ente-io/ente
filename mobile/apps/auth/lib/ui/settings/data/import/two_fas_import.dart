@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ente_auth/l10n/l10n.dart';
@@ -11,6 +10,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/settings/data/import/import_file_cleanup.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_ui/components/progress_dialog.dart';
@@ -73,7 +73,7 @@ Future<void> _pick2FasFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      "${context.l10n.importFailureDescNew}\n Error: ${e.toString()}",
+      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
     );
   }
 }
@@ -83,9 +83,7 @@ Future<int?> _process2FasExportFile(
   String path,
   final ProgressDialog dialog,
 ) async {
-  File file = File(path);
-
-  final jsonString = await file.readAsString();
+  final jsonString = await readPickedImportFileAsString(path);
   final decodedJson = jsonDecode(jsonString);
   int version = (decodedJson['schemaVersion'] ?? 0) as int;
   if (version != 3 && version != 4) {

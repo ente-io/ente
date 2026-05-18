@@ -213,11 +213,8 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       final packageInfo = await PackageInfo.fromPlatform();
 
-      // Configuration provides endpoint & secure storage (must precede network init).
-      await Configuration.instance.init();
-
       // Initialize network clients before service locator (mirrors app bootstrap).
-      await NetworkClient.instance.init(packageInfo);
+      await NetworkClient.instance.init(packageInfo, prefs);
 
       ServiceLocator.instance.init(
         prefs,
@@ -225,7 +222,7 @@ void main() {
         NetworkClient.instance.getDio(),
         packageInfo,
       );
-      // Configuration already initialized above.
+      await Configuration.instance.init();
 
       // Verify configuration
       expect(

@@ -243,16 +243,6 @@
   "after1Month": "Po 1 mėnesio",
   "after1Year": "Po 1 metų",
   "manageParticipants": "Tvarkyti",
-  "albumParticipantsCount": "{count, plural, =0 {Nėra dalyvių} =1 {1 dalyvis} other {{count} dalyviai}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Sukurkite nuorodą, kad asmenys galėtų pridėti ir peržiūrėti nuotraukas bendrinamame albume, nereikalaujant „Ente“ programos ar paskyros. Puikiai tinka įvykių nuotraukoms rinkti.",
   "collectPhotos": "Rinkti nuotraukas",
   "collaborativeLink": "Bendradarbiavimo nuoroda",
@@ -267,15 +257,6 @@
   "publicLinkEnabled": "Įjungta viešoji nuoroda",
   "shareALink": "Bendrinkite nuorodą",
   "sharedAlbumSectionDescription": "Sukurkite bendrinamus ir bendradarbiaujamus albumus su kitais „Ente“ naudotojais, įskaitant naudotojus nemokamuose planuose.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Bendrinti su konkrečiais asmenimis} =1 {Bendrinta su 1 asmeniu} other {Bendrinta su {numberOfPeople} asmenimis}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Tai – jūsų patvirtinimo ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Asmuo, kuris bendrina albumus su jumis, savo įrenginyje turėtų matyti tą patį ID.",
   "howToViewShareeVerificationID": "Paprašykite jų ilgai paspausti savo el. pašto adresą nustatymų ekrane ir patvirtinti, kad abiejų įrenginių ID sutampa.",
@@ -482,7 +463,6 @@
   "skip": "Praleisti",
   "updatingFolderSelection": "Atnaujinamas aplankų pasirinkimas...",
   "itemCount": "{count, plural, one{{count} elementas} other{{count} elementų}}",
-  "deleteItemCount": "{count, plural, =1 {Ištrinti {count} elementą} other {Ištrinti {count} elementų}}",
   "duplicateItemsGroup": "{count} failai (-ų), kiekvienas {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -755,6 +735,15 @@
   "appstoreSubscription": "„App Store“ prenumerata",
   "subAlreadyLinkedErrMessage": "Jūsų {id} jau susietas su kita „Ente“ paskyra.\nJei norite naudoti savo {id} su šia paskyra, susisiekite su mūsų palaikymo komanda.",
   "visitWebToManage": "Aplankykite {webUrl}, kad tvarkytumėte savo prenumeratą",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "Nepavyko atnaujinti prenumeratos",
   "paymentFailed": "Mokėjimas nepavyko",
   "paymentFailedTalkToProvider": "Kreipkitės į {providerName} palaikymo komandą, jei jums buvo nuskaičiuota.",
@@ -871,14 +860,6 @@
   "share": "Bendrinti",
   "unhideToAlbum": "Rodyti į albumą",
   "restoreToAlbum": "Atkurti į albumą",
-  "moveItem": "{count, plural, =1 {Perkelti elementą} other {Perkelti elementų}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {Pridėti elementą} other {Pridėti elementų}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Kurkite arba pasirinkite albumą",
   "selectAlbum": "Pasirinkti albumą",
   "searchByAlbumNameHint": "Albumo pavadinimas",
@@ -903,16 +884,6 @@
   "referFriendsAnd2xYourPlan": "Rekomenduokite draugams ir 2 kartus padidinkite savo planą",
   "shareAlbumHint": "Atidarykite albumą ir palieskite bendrinimo mygtuką viršuje dešinėje, kad bendrintumėte.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementai rodo likusių dienų skaičių iki visiško ištrynimo.",
-  "trashDaysLeft": "{count, plural, =0 {Netrukus} =1 {1 diena} other {{count} dienų}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Ištrinti viską",
   "renameAlbum": "Pervadinti albumą",
   "convertToAlbum": "Konvertuoti į albumą",
@@ -976,7 +947,6 @@
   "authToViewYourMemories": "Nustatykite tapatybę, kad peržiūrėtumėte savo prisiminimus",
   "unlock": "Atrakinti",
   "freeUpSpace": "Atlaisvinti vietos",
-  "freeUpSpaceSaving": "{count, plural, =1 {Jį galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} other {Jų galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija} few {{formattedNumber} failai šiame albume saugiai sukurtos atsarginės kopijos} many {{formattedNumber} failo šiame albume saugiai sukurtos atsargines kopijos} other {{formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija}}.",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1004,18 +974,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Vis dar galite pasiekti {count, plural, =1 {jį} other {jų}} platformoje „Ente“, kol turite aktyvų prenumeratą.",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1114,6 +1072,15 @@
   "loadMessage6": "Galite bendrinti savo albumų nuorodas su artimaisiais.",
   "loadMessage7": "Mūsų mobiliosios programos veikia fone, kad užšifruotų ir sukurtų atsarginę kopiją visų naujų nuotraukų, kurias spustelėjate.",
   "loadMessage8": "{webUrl} turi sklandų įkėlėją",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Naudojame „Xchacha20Poly1305“, kad saugiai užšifruotume jūsų duomenis.",
   "photoDescriptions": "Nuotraukų aprašai",
   "searchResultFileName": "Failo pavadinimas",
@@ -1357,6 +1324,15 @@
   "pair": "Susieti",
   "deviceNotFound": "Įrenginys nerastas",
   "castInstruction": "Aplankykite {castUrl} įrenginyje, kurį norite susieti.\n\nĮveskite toliau esantį kodą, kad paleistumėte albumą televizoriuje.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Įveskite kodą",
   "joinDiscord": "Jungtis prie „Discord“",
   "locations": "Vietovės",
@@ -1366,8 +1342,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Sparčiai suraskite asmenis pagal vardą",
-  "addViewers": "{count, plural, =0 {Pridėti žiūrėtojų} =1 {Pridėti žiūrėtoją} other {Pridėti žiūrėtojų}}",
-  "addCollaborators": "{count, plural, =0 {Pridėti bendradarbių} =1 {Pridėti bendradarbį} other {Pridėti bendradarbių}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Ilgai paspauskite el. paštą, kad patvirtintumėte visapusį šifravimą.",
   "developerSettingsWarning": "Ar tikrai norite modifikuoti kūrėjo nustatymus?",
   "developerSettings": "Kūrėjo nustatymai",
@@ -1497,26 +1471,6 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 bendradarbių} =1 {Pridėtas 1 bendradarbis} other {Pridėta {count} bendradarbių}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "Paskyra jau sukonfigūruota.",
   "sessionIdMismatch": "Seanso ID nesutampa.",
   "@sessionIdMismatch": {
@@ -1582,15 +1536,6 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Failas",
   "searchSectionsLengthMismatch": "Sekcijų ilgio neatitikimas: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1778,21 +1723,11 @@
   "moveSelectedPhotosToOneDate": "Perkelti pasirinktas nuotraukas į vieną datą",
   "shiftDatesAndTime": "Pastumti datas ir laiką",
   "photosKeepRelativeTimeDifference": "Nuotraukos išlaiko santykinį laiko skirtumą",
-  "photocountPhotos": "{count, plural,  =0 {Nėra nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "Programos piktograma",
   "notThisPerson": "Ne šis asmuo?",
   "selectedItemsWillBeRemovedFromThisPerson": "Pasirinkti elementai bus pašalinti iš šio asmens, bet nebus ištrinti iš jūsų bibliotekos.",
   "throughTheYears": "{dateFormat} per metus",
   "thisWeekThroughTheYears": "Ši savaitė per metus",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Šią savaitę, prieš {count} metus} other {Šią savaitę, prieš {count} metų}}",
   "youAndThem": "Jūs ir {name}",
   "admiringThem": "Žavisi {name}",
   "embracingThem": "Apkabinat {name}",

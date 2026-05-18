@@ -91,6 +91,7 @@ import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/intent_util.dart";
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 class HomeWidget extends StatefulWidget {
@@ -123,6 +124,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
+  bool _mediaViewFallbackNavigationScheduled = false;
   bool _personSyncTriggered = false;
   bool _collectionsSyncTriggered = false;
   bool _isShowingChangeLog = false;
@@ -152,7 +154,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void initState() {
-    _logger.info("Building initstate");
+    _logger.info("initstate");
     super.initState();
 
     NotificationService.instance
@@ -302,7 +304,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (Platform.isAndroid &&
         !localSettings.hasConfiguredInAppLinkPermissions() &&
         RemoteSyncService.instance.isFirstRemoteSyncDone() &&
-        Configuration.instance.isEnteProduction()) {
+        endpointConfig.isProduction) {
       PackageInfo.fromPlatform().then((packageInfo) {
         final packageName = packageInfo.packageName;
         if (packageName == 'io.ente.photos.independent' ||
@@ -568,64 +570,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _intentDataStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
       (List<SharedMediaFile> value) {
-        if (value.isEmpty) {
-          return;
-        }
-        // Check if this is a public album link
-        if (_isPublicAlbumUrl(value[0].path)) {
-          final uri = Uri.parse(value[0].path);
-          _handlePublicAlbumLink(uri, "sharedIntent.getMediaStream");
-          return;
-        }
-
-        if (value[0].mimeType != null &&
-            (value[0].mimeType!.contains("image") ||
-                value[0].mimeType!.contains("video"))) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                actions: [
-                  const SizedBox(height: 24),
-                  ButtonWidget(
-                    labelText: AppLocalizations.of(context).openFile,
-                    buttonType: ButtonType.primary,
-                    onTap: () async {
-                      Navigator.of(context).pop(true);
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  ButtonWidget(
-                    buttonType: ButtonType.secondary,
-                    labelText: AppLocalizations.of(context).backupFile,
-                    onTap: () async {
-                      Navigator.of(context).pop(false);
-                    },
-                  ),
-                ],
-              );
-            },
-          ).then((shouldOpenFile) {
-            if (!mounted) {
-              return;
-            }
-            if (shouldOpenFile == true) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) {
-                    return FileViewer(sharedMediaFile: value[0]);
-                  },
-                ),
-              );
-            } else if (shouldOpenFile == false) {
-              setState(() {
-                _shouldRenderCreateCollectionSheet = true;
-                _sharedFiles = value;
-              });
-            }
-          });
-        }
+        unawaited(_handleSharedMediaStream(value));
       },
       onError: (err) {
         _logger.severe("getIntentDataStream error: $err");
@@ -635,34 +580,164 @@ class _HomeWidgetState extends State<HomeWidget> {
     ReceiveSharingIntent.instance.getInitialMedia().then((
       List<SharedMediaFile> value,
     ) {
-      if (mounted) {
-        // Check if this is a public album link
-        if (value.isNotEmpty && _isPublicAlbumUrl(value[0].path)) {
-          final uri = Uri.parse(value[0].path);
-          _handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia");
-          return;
-        }
+      unawaited(_handleInitialSharedMedia(value));
+    });
+  }
 
-        if (AppLifecycleService.instance.mediaExtensionAction.type ==
-                MediaType.image ||
-            AppLifecycleService.instance.mediaExtensionAction.type ==
-                MediaType.video) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) {
-                return const FileViewer();
-              },
-            ),
-          );
-          return;
-        }
+  Future<void> _handleSharedMediaStream(List<SharedMediaFile> value) async {
+    if (!mounted || value.isEmpty) {
+      return;
+    }
 
-        setState(() {
-          _sharedFiles = value;
-          _shouldRenderCreateCollectionSheet = true;
-        });
+    // Check if this is a public album link
+    if (_isPublicAlbumUrl(value[0].path)) {
+      final uri = Uri.parse(value[0].path);
+      unawaited(_handlePublicAlbumLink(uri, "sharedIntent.getMediaStream"));
+      return;
+    }
+
+    if (await _consumeAndroidMediaViewIntent()) {
+      _scheduleMediaViewFallbackNavigation();
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+    if (value[0].mimeType != null &&
+        (value[0].mimeType!.contains("image") ||
+            value[0].mimeType!.contains("video"))) {
+      unawaited(
+        showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              actions: [
+                const SizedBox(height: 24),
+                ButtonWidget(
+                  labelText: AppLocalizations.of(context).openFile,
+                  buttonType: ButtonType.primary,
+                  onTap: () async {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+                const SizedBox(height: 12),
+                ButtonWidget(
+                  buttonType: ButtonType.secondary,
+                  labelText: AppLocalizations.of(context).backupFile,
+                  onTap: () async {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+              ],
+            );
+          },
+        ).then((shouldOpenFile) {
+          if (!mounted || shouldOpenFile == null) {
+            return;
+          }
+          if (shouldOpenFile) {
+            unawaited(
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) {
+                    return FileViewer(sharedMediaFile: value[0]);
+                  },
+                ),
+              ),
+            );
+          } else {
+            setState(() {
+              _shouldRenderCreateCollectionSheet = true;
+              _sharedFiles = value;
+            });
+          }
+        }),
+      );
+    }
+  }
+
+  Future<void> _handleInitialSharedMedia(List<SharedMediaFile> value) async {
+    if (!mounted) {
+      return;
+    }
+    // Check if this is a public album link
+    if (value.isNotEmpty && _isPublicAlbumUrl(value[0].path)) {
+      final uri = Uri.parse(value[0].path);
+      unawaited(_handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia"));
+      return;
+    }
+
+    if (await _consumeAndroidMediaViewIntent()) {
+      if (!mounted) {
+        return;
       }
+      unawaited(
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) {
+              return const FileViewer();
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (value.isEmpty || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _sharedFiles = value;
+      _shouldRenderCreateCollectionSheet = true;
+    });
+  }
+
+  Future<bool> _consumeAndroidMediaViewIntent() async {
+    if (!Platform.isAndroid) {
+      return false;
+    }
+
+    final mediaExtensionAction = await initIntentAction();
+    AppLifecycleService.instance.setMediaExtensionAction(mediaExtensionAction);
+
+    if (!_isMediaViewAction(mediaExtensionAction)) {
+      return false;
+    }
+
+    _logger.info("Consuming shared media callback for Android media view");
+    await ReceiveSharingIntent.instance.reset();
+    return true;
+  }
+
+  bool _isMediaViewAction(MediaExtentionAction action) {
+    return action.action == IntentAction.view &&
+        (action.type == MediaType.image || action.type == MediaType.video);
+  }
+
+  void _scheduleMediaViewFallbackNavigation() {
+    if (_mediaViewFallbackNavigationScheduled) {
+      return;
+    }
+    _mediaViewFallbackNavigationScheduled = true;
+    Future<void>.delayed(const Duration(milliseconds: 200), () {
+      _mediaViewFallbackNavigationScheduled = false;
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) {
+        return;
+      }
+      unawaited(
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) {
+              return const FileViewer();
+            },
+          ),
+        ),
+      );
     });
   }
 
@@ -1096,6 +1171,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     try {
       final action = await updateService.getChangeLogAction(
         locale: Localizations.localeOf(context),
+        isAndroid: Platform.isAndroid,
         isLocalGallery: isLocalGalleryMode,
         isSignedIn: Configuration.instance.isLoggedIn(),
       );

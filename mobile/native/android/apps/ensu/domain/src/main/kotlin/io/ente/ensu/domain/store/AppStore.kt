@@ -107,6 +107,9 @@ class AppStore(
     fun startModelDownload(userInitiated: Boolean = true) =
         modelSettingsActions.startModelDownload(userInitiated)
 
+    fun prewarmImageInferenceIfDownloaded() =
+        modelSettingsActions.prewarmImageInferenceIfDownloaded()
+
     fun refreshModelDownloadInfo() = modelSettingsActions.refreshModelDownloadInfo()
 
     fun cancelDownload() {

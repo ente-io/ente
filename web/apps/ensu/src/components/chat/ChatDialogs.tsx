@@ -113,6 +113,8 @@ export interface ChatDialogsProps {
     setSyncNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>;
     syncNotification?: NotificationAttributes;
     modelGateStatus: ModelGateStatus;
+    imagePreview: { url: string; name: string } | null;
+    closeImagePreview: () => void;
 }
 
 export const ChatDialogs = memo(
@@ -168,6 +170,8 @@ export const ChatDialogs = memo(
         setSyncNotificationOpen,
         syncNotification,
         modelGateStatus,
+        imagePreview,
+        closeImagePreview,
     }: ChatDialogsProps) => {
         const openExternalUrl = async (url: string) => {
             const hasTauriBridge =
@@ -367,6 +371,76 @@ export const ChatDialogs = memo(
 
         return (
             <>
+                <Dialog
+                    open={!!imagePreview}
+                    onClose={closeImagePreview}
+                    maxWidth={false}
+                    fullScreen={isSmall}
+                    aria-label={imagePreview?.name || "Image preview"}
+                    slotProps={{
+                        paper: {
+                            sx: {
+                                m: 0,
+                                width: "100vw",
+                                height: "100svh",
+                                maxWidth: "none",
+                                maxHeight: "none",
+                                borderRadius: 0,
+                                bgcolor: "rgba(0, 0, 0, 0.94)",
+                                boxShadow: "none",
+                                overflow: "hidden",
+                            },
+                        },
+                    }}
+                >
+                    <DialogContent
+                        onClick={closeImagePreview}
+                        sx={{
+                            position: "relative",
+                            p: { xs: 2, sm: 3 },
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            overflow: "hidden",
+                        }}
+                    >
+                        {imagePreview && (
+                            <Box
+                                component="img"
+                                src={imagePreview.url}
+                                alt={imagePreview.name}
+                                onClick={(event) => event.stopPropagation()}
+                                sx={{
+                                    display: "block",
+                                    maxWidth: "100%",
+                                    maxHeight: "100%",
+                                    objectFit: "contain",
+                                    borderRadius: 1,
+                                }}
+                            />
+                        )}
+                        <IconButton
+                            aria-label="Close image preview"
+                            onClick={closeImagePreview}
+                            sx={{
+                                position: "absolute",
+                                top: { xs: 12, sm: 16 },
+                                right: { xs: 12, sm: 16 },
+                                width: 36,
+                                height: 36,
+                                color: "common.white",
+                                bgcolor: "rgba(0, 0, 0, 0.38)",
+                                "&:hover": { bgcolor: "rgba(0, 0, 0, 0.54)" },
+                            }}
+                        >
+                            <HugeiconsIcon
+                                icon={Cancel01Icon}
+                                {...smallIconProps}
+                            />
+                        </IconButton>
+                    </DialogContent>
+                </Dialog>
+
                 <Dialog
                     open={showSettingsModal}
                     onClose={closeSettingsModal}

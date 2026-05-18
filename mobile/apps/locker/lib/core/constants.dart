@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-const String kAccountsUrl = "https://accounts.ente.com";
 const int microSecondsInDay = 86400000000;
 const int android11SDKINT = 30;
 

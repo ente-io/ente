@@ -46,8 +46,6 @@ import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:uuid/uuid.dart";
 
-const String kAccountsUrl = "https://accounts.ente.com";
-
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
@@ -471,13 +469,13 @@ class UserService {
         Widget page;
         final responseData = response.data;
         final String passkeySessionID = responseData["passkeySessionID"] ?? "";
-        final String accountsUrl = responseData["accountsUrl"] ?? kAccountsUrl;
         String twoFASessionID = responseData["twoFactorSessionID"] ?? "";
         if (twoFASessionID.isEmpty &&
             responseData["twoFactorSessionIDV2"] != null) {
           twoFASessionID = responseData["twoFactorSessionIDV2"];
         }
         if (passkeySessionID.isNotEmpty) {
+          final accountsUrl = responseData["accountsUrl"] as String;
           page = PasskeyPage(
             _config,
             passkeySessionID,
@@ -801,7 +799,6 @@ class UserService {
       Widget? page;
       final responseData = response.data;
       final String passkeySessionID = responseData["passkeySessionID"] ?? "";
-      final String accountsUrl = responseData["accountsUrl"] ?? kAccountsUrl;
       String twoFASessionID = responseData["twoFactorSessionID"] ?? "";
       if (twoFASessionID.isEmpty &&
           responseData["twoFactorSessionIDV2"] != null) {
@@ -809,6 +806,7 @@ class UserService {
       }
       _config.setVolatilePassword(userPassword);
       if (passkeySessionID.isNotEmpty) {
+        final accountsUrl = responseData["accountsUrl"] as String;
         page = PasskeyPage(
           _config,
           passkeySessionID,

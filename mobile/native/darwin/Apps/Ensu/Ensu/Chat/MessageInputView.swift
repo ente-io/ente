@@ -65,7 +65,10 @@ struct MessageInputView: View {
 
                 VStack(alignment: .leading, spacing: inputStackSpacing) {
                     if !attachments.isEmpty {
-                        let maxAttachmentHeight = CGFloat(3) * 40 + CGFloat(2) * EnsuSpacing.sm
+                        let hasImageAttachment = attachments.contains { $0.kind == .image }
+                        let maxAttachmentHeight = hasImageAttachment
+                            ? CGFloat(2) * 76 + EnsuSpacing.sm
+                            : CGFloat(3) * 40 + CGFloat(2) * EnsuSpacing.sm
                         let shouldScroll = attachments.count > 4
 
                         Group {
@@ -329,13 +332,25 @@ struct MessageInputView: View {
     private var attachmentFlowLayout: some View {
         FlowLayout(spacing: EnsuSpacing.sm) {
             ForEach(attachments) { attachment in
-                AttachmentChip(
-                    name: attachment.name,
-                    size: attachment.formattedSize,
-                    icon: attachment.iconName,
-                    isUploading: attachment.isUploading
-                ) {
-                    onRemoveAttachment(attachment)
+                if attachment.kind == .image, attachment.url != nil {
+                    ImageAttachmentThumbnail(
+                        url: attachment.url,
+                        accessibilityLabel: attachment.name,
+                        width: 76,
+                        height: 76,
+                        isUploading: attachment.isUploading
+                    ) {
+                        onRemoveAttachment(attachment)
+                    }
+                } else {
+                    AttachmentChip(
+                        name: attachment.name,
+                        size: attachment.formattedSize,
+                        icon: attachment.iconName,
+                        isUploading: attachment.isUploading
+                    ) {
+                        onRemoveAttachment(attachment)
+                    }
                 }
             }
         }

@@ -88,7 +88,7 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
         result: true,
       );
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to create collage", e, s);
       showShortToast(
         context,
         AppLocalizations.of(context).somethingWentWrong,

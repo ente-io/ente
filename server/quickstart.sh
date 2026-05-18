@@ -108,8 +108,6 @@ services:
     # Modify these values to your custom subdomains, if using any
     environment:
       ENTE_API_ORIGIN: http://localhost:8080
-      ENTE_ALBUMS_ORIGIN: http://localhost:3002
-      ENTE_PHOTOS_ORIGIN: http://localhost:3000
 
   postgres:
     image: postgres:15

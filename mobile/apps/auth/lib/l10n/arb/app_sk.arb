@@ -505,7 +505,7 @@
   "pinLock": "Zámok PIN",
   "enterPin": "Zadajte PIN",
   "setNewPin": "Nastaviť nový PIN",
-  "importFailureDescNew": "Vybraný súbor nie je možné spracovať.",
+  "importFailureDesc": "Vybraný súbor nie je možné spracovať.",
   "appLockNotEnabled": "Zámok aplikácie nie je povolený",
   "appLockNotEnabledDescription": "Prosím, povoľte zámok aplikácie v časti Zabezpečenie > Zámok aplikácie",
   "authToViewPasskey": "Pre zobrazenie vášho passkey sa musíte overiť",

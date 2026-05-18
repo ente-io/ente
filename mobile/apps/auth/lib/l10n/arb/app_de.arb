@@ -505,7 +505,7 @@
   "pinLock": "PIN-Sperre",
   "enterPin": "PIN eingeben",
   "setNewPin": "Neue PIN festlegen",
-  "importFailureDescNew": "Die ausgewählte Datei konnte nicht verarbeitet werden.",
+  "importFailureDesc": "Die ausgewählte Datei konnte nicht verarbeitet werden.",
   "appLockNotEnabled": "App-Sperre nicht aktiviert",
   "appLockNotEnabledDescription": "Bitte aktivieren Sie die App-Sperre über Sicherheit > App-Sperre",
   "authToViewPasskey": "Bitte authentifizieren, um Ihren Passkey zu sehen",

@@ -289,11 +289,13 @@ class LocalSettings {
     await _setFlag(LocalGalleryFlag.mapEnabled, value);
   }
 
-  String get _mlLocalIndexingKey => appMode == AppMode.localGallery
+  bool get isLocalGalleryMode => appMode == AppMode.localGallery;
+
+  String get _mlLocalIndexingKey => isLocalGalleryMode
       ? _kLocalGalleryMLLocalIndexingEnabled
       : _kisMLLocalIndexingEnabled;
 
-  bool get _defaultMLLocalIndexingEnabled => appMode == AppMode.localGallery
+  bool get _defaultMLLocalIndexingEnabled => isLocalGalleryMode
       ? enoughRamForLocalGalleryLocalIndexing
       : enoughRamForLocalIndexing;
 
@@ -335,7 +337,7 @@ class LocalSettings {
   }
 
   bool get runMLDuringInteractionOverride =>
-      _prefs.getBool(_kRunMLDuringInteractionOverride) ?? false;
+      _prefs.getBool(_kRunMLDuringInteractionOverride) ?? isLocalGalleryMode;
 
   Future<void> setRunMLDuringInteractionOverride(bool value) async {
     await _prefs.setBool(_kRunMLDuringInteractionOverride, value);

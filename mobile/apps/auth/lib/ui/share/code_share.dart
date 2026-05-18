@@ -143,6 +143,9 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
 }
 
 void showShareDialog(BuildContext context, Code code) {
+  if (!code.type.canShareCodes) {
+    return;
+  }
   showDialog(
     context: context,
     builder: (BuildContext context) {

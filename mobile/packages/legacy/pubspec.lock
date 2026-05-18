@@ -308,7 +308,7 @@ packages:
     source: path
     version: "1.0.0"
   ente_utils:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       path: "../utils"
       relative: true
@@ -363,7 +363,7 @@ packages:
     source: hosted
     version: "7.0.1"
   file_saver:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: file_saver
       sha256: "9d93db09bd4da9e43238f9dd485360fc51a5c138eea5ef5f407ec56e58079ac0"

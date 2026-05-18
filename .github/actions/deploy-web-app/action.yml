@@ -1,0 +1,25 @@
+name: "Deploy web app"
+description: "Build a web app and publish it to Cloudflare Pages"
+
+inputs:
+    app:
+        description: "Web app slug"
+        required: true
+    output:
+        description: "Build output directory within web/apps/<app>"
+        default: "out"
+
+runs:
+    using: "composite"
+    steps:
+        - name: Build ${{ inputs.app }}
+          shell: bash
+          working-directory: web
+          run: yarn build:${{ inputs.app }}
+
+        - name: Publish ${{ inputs.app }}
+          uses: cloudflare/wrangler-action@v3
+          with:
+              accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+              apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+              command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/${{ inputs.app }} web/apps/${{ inputs.app }}/${{ inputs.output }}

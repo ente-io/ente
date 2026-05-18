@@ -22,18 +22,10 @@ you could:
 docker run -it --rm -p 8000:3000 ghcr.io/ente-io/web
 ```
 
-These images accept four environment variables to allow you to customize them:
+These images accept one environment variable:
 
 - `ENTE_API_ORIGIN` - The API origin (scheme://host:port) for your API server.
   Default: "http://localhost:8080".
-
-- `ENTE_ALBUMS_ORIGIN` - The externally visible origin where the albums app is
-  hosted. This is used for public album links and handoffs between the photos
-  and albums apps. Default: "http://localhost:3002".
-
-- `ENTE_PHOTOS_ORIGIN` - The externally visible origin where the photos app is
-  hosted. This is used for features like join album links. Default:
-  "http://localhost:3000".
 
 For example, if your API server is running at `https://api.example.org`, you can
 configure your Docker image to connect to it:
@@ -41,6 +33,10 @@ configure your Docker image to connect to it:
 ```sh
 docker run -it --rm -e ENTE_API_ORIGIN=https://api.example.org ghcr.io/ente-io/web
 ```
+
+> [!TIP]
+>
+> Configure web app origins, such as Photos and Albums, in Museum's `apps` section.
 
 ### Dockerfile
 

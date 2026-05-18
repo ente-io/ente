@@ -766,6 +766,7 @@ dependencies = [
 name = "ente_image"
 version = "0.1.0"
 dependencies = [
+ "fast_image_resize",
  "heic_decoder",
  "image",
  "kamadak-exif",

@@ -505,7 +505,7 @@
   "pinLock": "Bloqueo con PIN",
   "enterPin": "Ingresa el PIN",
   "setNewPin": "Establecer nuevo PIN",
-  "importFailureDescNew": "No se pudo analizar el archivo seleccionado.",
+  "importFailureDesc": "No se pudo analizar el archivo seleccionado.",
   "appLockNotEnabled": "Bloqueo de aplicación no activado",
   "appLockNotEnabledDescription": "Por favor, activa el bloqueo de aplicación desde Seguridad > Bloqueo de aplicación",
   "authToViewPasskey": "Por favor, autentícate para ver tu clave de acceso",

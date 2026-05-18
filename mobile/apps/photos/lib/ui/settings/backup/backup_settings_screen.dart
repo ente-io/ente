@@ -111,7 +111,7 @@ class BackupSettingsScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                      if (Configuration.instance.isEnteProduction()) ...[
+                      if (endpointConfig.isProduction) ...[
                         const SizedBox(height: 8),
                         MenuItemWidgetNew(
                           title: AppLocalizations.of(context).fasterUploads,

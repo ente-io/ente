@@ -1,0 +1,25 @@
+name: Workflow Security Checks
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - '.github/scripts/check_workflow_security.rb'
+
+permissions:
+  contents: read
+
+jobs:
+  workflow-security-checks:
+    runs-on: ubuntu-latest
+    environment:
+      # Require admin approval for workflow changes.
+      name: workflow-change-approval
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run workflow security checks
+        run: ruby .github/scripts/check_workflow_security.rb "origin/${{ github.base_ref }}" HEAD

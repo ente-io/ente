@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
@@ -9,6 +8,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/settings/data/import/import_file_cleanup.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
@@ -67,7 +67,7 @@ Future<void> _pickLastpassJsonFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      "${context.l10n.importFailureDescNew}\n Error: ${e.toString()}",
+      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
     );
   }
 }
@@ -76,8 +76,7 @@ Future<int?> _processLastpassExportFile(
   BuildContext context,
   String path,
 ) async {
-  File file = File(path);
-  final jsonString = await file.readAsString();
+  final jsonString = await readPickedImportFileAsString(path);
   Map<String, dynamic> jsonData = json.decode(jsonString);
   List<dynamic> accounts = jsonData["accounts"];
   final parsedCodes = [];

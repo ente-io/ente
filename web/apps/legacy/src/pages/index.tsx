@@ -52,12 +52,28 @@ const slotLabels: Record<SlotID, string> = {
 
 const slotNumbers: Record<SlotID, number> = { first: 1, second: 2 };
 
+const inactiveLegacyKitRequestPaths = [
+    "/legacy-kits/recovery/challenge",
+    "/legacy-kits/recovery/open",
+];
+
 const getErrorMessage = (error: unknown) =>
     error instanceof Error
         ? error.message
         : typeof error === "object" && error && "message" in error
           ? String(error.message)
           : "Something went wrong.";
+
+const isInactiveLegacyKitError = (error: unknown) => {
+    const message = getErrorMessage(error).toLowerCase();
+    return (
+        message.includes("legacy kit not found") ||
+        (message.includes("http 404") &&
+            inactiveLegacyKitRequestPaths.some((path) =>
+                message.includes(path),
+            ))
+    );
+};
 
 const parseSlotCode = (rawCode: string): Pick<SheetSlot, "error" | "share"> => {
     if (!rawCode.trim()) {
@@ -136,6 +152,7 @@ const Page: React.FC = () => {
     const [session, setSession] = useState<LegacyKitRecoverySession>();
     const [isOpening, setIsOpening] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isKitInactive, setIsKitInactive] = useState(false);
     const [openError, setOpenError] = useState<string>();
 
     const shares = useMemo<[LegacyKitShare, LegacyKitShare] | undefined>(() => {
@@ -237,6 +254,10 @@ const Page: React.FC = () => {
             setSession(opened.session);
         } catch (error) {
             log.error("Legacy kit recovery open failed", error);
+            if (isInactiveLegacyKitError(error)) {
+                setIsKitInactive(true);
+                return;
+            }
             setOpenError(getErrorMessage(error));
         } finally {
             setIsOpening(false);
@@ -253,6 +274,10 @@ const Page: React.FC = () => {
             setSession(await refreshLegacyKitRecoverySession(handle));
         } catch (error) {
             log.error("Legacy kit recovery refresh failed", error);
+            if (isInactiveLegacyKitError(error)) {
+                setIsKitInactive(true);
+                return;
+            }
             setOpenError(getErrorMessage(error));
         } finally {
             setIsRefreshing(false);
@@ -283,6 +308,10 @@ const Page: React.FC = () => {
                 );
             } catch (error) {
                 log.error("Legacy kit password change failed", error);
+                if (isInactiveLegacyKitError(error)) {
+                    setIsKitInactive(true);
+                    return;
+                }
                 setPasswordsFieldError(getErrorMessage(error));
             }
         },
@@ -292,7 +321,14 @@ const Page: React.FC = () => {
     return (
         <LegacyShell>
             {!hasStarted ? (
-                <LandingStep onStart={() => setHasStarted(true)} />
+                <LandingStep
+                    onStart={() => {
+                        setIsKitInactive(false);
+                        setHasStarted(true);
+                    }}
+                />
+            ) : isKitInactive ? (
+                <InactiveLegacyKitStep />
             ) : !session ? (
                 <UploadStep
                     slots={slots}
@@ -361,7 +397,7 @@ const LegacyShell: React.FC<LegacyShellProps> = ({ children }) => (
                 minHeight: 0,
                 overflow: "hidden auto",
                 px: { xs: 2.5, md: 5 },
-                py: { xs: 3, md: 5 },
+                py: { xs: 3, md: "1px" },
             }}
         >
             {children}
@@ -380,7 +416,7 @@ const LandingStep: React.FC<LandingStepProps> = ({ onStart }) => (
             alignItems: "center",
             gap: { xs: 2, md: "46px" },
             justifyContent: "center",
-            maxWidth: 900,
+            maxWidth: { xs: 343, md: 933 },
             width: "100%",
         }}
     >
@@ -389,9 +425,9 @@ const LandingStep: React.FC<LandingStepProps> = ({ onStart }) => (
             alt=""
             src="/images/legacy-kit/recovery-landing.svg"
             sx={{
-                height: "auto",
+                height: { xs: "auto", md: 293.566 },
                 mt: { xs: 4, md: 0 },
-                width: { xs: 200, md: 304 },
+                width: { xs: 200, md: 304.458 },
             }}
         />
 
@@ -399,7 +435,7 @@ const LandingStep: React.FC<LandingStepProps> = ({ onStart }) => (
             sx={{
                 alignItems: "center",
                 gap: { xs: 2, md: "42px" },
-                maxWidth: { xs: 343, md: 540 },
+                maxWidth: { xs: 343, md: 582 },
                 textAlign: "center",
                 width: "100%",
             }}
@@ -422,7 +458,7 @@ const LandingStep: React.FC<LandingStepProps> = ({ onStart }) => (
                         fontWeight: 500,
                         lineHeight: "24px",
                         mx: "auto",
-                        maxWidth: { xs: 311, md: 500 },
+                        maxWidth: { xs: 311, md: 582 },
                     }}
                 >
                     Use your legacy kit recovery sheets to regain access to an
@@ -465,7 +501,7 @@ const LandingStep: React.FC<LandingStepProps> = ({ onStart }) => (
                             sx={{
                                 fontSize: { xs: 16, md: 20 },
                                 fontWeight: 500,
-                                lineHeight: { xs: "20px", md: "28px" },
+                                lineHeight: { xs: "20px", md: "20px" },
                             }}
                         >
                             {feature}
@@ -704,10 +740,10 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFile, slot }) => (
                 color: "text.muted",
                 cursor: slot.isReading ? "default" : "pointer",
                 display: "flex",
-                flexDirection: { xs: "row", md: "column" },
+                flexDirection: "row",
                 fontSize: { xs: 14, md: 16 },
                 fontWeight: 500,
-                gap: { xs: 1, md: 0 },
+                gap: 1,
                 height: { xs: 52, md: 160 },
                 justifyContent: "center",
                 lineHeight: "20px",
@@ -812,6 +848,51 @@ const ScannedSheetCard: React.FC = () => (
             </Box>
         </Typography>
     </Box>
+);
+
+const inactiveLegacyKitDescription =
+    "This legacy kit has been deleted by the account owner. These recovery sheets can no longer be used. Contact the account owner for help.";
+
+const InactiveLegacyKitStep: React.FC = () => (
+    <Stack
+        sx={{
+            alignItems: "center",
+            gap: { xs: 2.5, md: 3.5 },
+            maxWidth: { xs: 311, md: 560 },
+            p: { xs: 0, md: 6 },
+            textAlign: "center",
+            width: "100%",
+        }}
+    >
+        <Box
+            component="img"
+            alt=""
+            src="/images/legacy-kit/kit-no-longer-active.svg"
+            sx={{ height: "97.261px", width: "103.266px" }}
+        />
+        <Stack sx={{ alignItems: "center", gap: { xs: 1.5, md: 2 } }}>
+            <Typography
+                component="h1"
+                sx={{
+                    fontSize: { xs: 24, md: 32 },
+                    fontWeight: 800,
+                    lineHeight: { xs: "28px", md: "36px" },
+                }}
+            >
+                Kit no longer active
+            </Typography>
+            <Typography
+                sx={{
+                    color: "text.muted",
+                    fontSize: { xs: 12, md: 16 },
+                    fontWeight: 500,
+                    lineHeight: { xs: "16px", md: "20px" },
+                }}
+            >
+                {inactiveLegacyKitDescription}
+            </Typography>
+        </Stack>
+    </Stack>
 );
 
 interface WaitingStepProps {

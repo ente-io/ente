@@ -317,7 +317,7 @@ extension CollectionFileActions on CollectionActions {
           .updateFavorites(context, files, markAsFavorite);
       return true;
     } catch (e, s) {
-      logger.severe(e, s);
+      logger.severe("Failed to update favorites", e, s);
       showShortToast(
         context,
         markAsFavorite

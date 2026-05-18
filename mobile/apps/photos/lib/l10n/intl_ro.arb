@@ -217,16 +217,6 @@
   "after1Month": "După o lună",
   "after1Year": "După un an",
   "manageParticipants": "Gestionare",
-  "albumParticipantsCount": "{count, plural, =0 {Fără participanți} =1 {1 participant} other {{count} de participanți}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Creați un link pentru a permite oamenilor să adauge și să vizualizeze fotografii în albumul dvs. distribuit, fără a avea nevoie de o aplicație sau un cont Ente. Excelent pentru colectarea fotografiilor de la evenimente.",
   "collectPhotos": "Colectare fotografii",
   "collaborativeLink": "Link colaborativ",
@@ -238,15 +228,6 @@
   "publicLinkEnabled": "Link public activat",
   "shareALink": "Distribuiți un link",
   "sharedAlbumSectionDescription": "Creați albume distribuite și colaborative cu alți utilizatori Ente, inclusiv cu utilizatorii planurilor gratuite.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Distribuiți cu anumite persoane} =1 {Distribuit cu o persoană} other {Distribuit cu {numberOfPeople} de persoane}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Acesta este ID-ul dvs. de verificare",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Cineva care distribuie albume cu dvs. ar trebui să vadă același ID pe dispozitivul său.",
   "howToViewShareeVerificationID": "Rugați-i să țină apăsat pe adresa de e-mail din ecranul de setări și să verifice dacă ID-urile de pe ambele dispozitive se potrivesc.",
@@ -430,7 +411,6 @@
   "skip": "Omiteți",
   "updatingFolderSelection": "Se actualizează selecția dosarelor...",
   "itemCount": "{count, plural, one{{count} articol} few {{count} articole} other{{count} de articole}}",
-  "deleteItemCount": "{count, plural, =1 {Ștergeți {count} articol} other {Ștergeți {count} de articole}}",
   "duplicateItemsGroup": "{count} fișiere, {formattedSize} fiecare",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -629,6 +609,15 @@
   "appstoreSubscription": "Abonament AppStore",
   "subAlreadyLinkedErrMessage": "{id} este deja legat la un alt cont Ente.\nDacă doriți să folosiți {id} cu acest cont, vă rugăm să contactați asistența noastră",
   "visitWebToManage": "Vă rugăm să vizitați {webUrl} pentru a vă gestiona abonamentul",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "Nu s-a putut actualiza abonamentul",
   "paymentFailed": "Plata nu a reușit",
   "paymentFailedTalkToProvider": "Vă rugăm să vorbiți cu asistența {providerName} dacă ați fost taxat",
@@ -768,16 +757,6 @@
   "referFriendsAnd2xYourPlan": "Recomandați un prieten și dublați-vă planul",
   "shareAlbumHint": "Deschideți un album și atingeți butonul de distribuire din dreapta sus pentru a distribui.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Articolele afișează numărul de zile rămase până la ștergerea definitivă",
-  "trashDaysLeft": "{count, plural, =0 {Curând} =1 {O zi} other {{count} de zile}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Ștergeți tot",
   "renameAlbum": "Redenumire album",
   "convertToAlbum": "Convertire în album",
@@ -966,6 +945,15 @@
   "loadMessage6": "Puteți distribui linkuri către albumele dvs. celor dragi",
   "loadMessage7": "Aplicațiile noastre mobile rulează în fundal pentru a cripta și salva orice fotografie nouă pe care o realizați",
   "loadMessage8": "{webUrl} are un instrument de încărcare sofisticat",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Folosim Xchacha20Poly1305 pentru a vă cripta datele în siguranță",
   "photoDescriptions": "Descrieri fotografie",
   "fileTypesAndNames": "Tipuri de fișiere și denumiri",
@@ -1182,6 +1170,15 @@
   "pair": "Asociere",
   "deviceNotFound": "Dispozitivul nu a fost găsit",
   "castInstruction": "Accesați {castUrl} de pe dispozitivul pe care doriți să îl asociați.\n\nIntroduceți codul de mai jos pentru a reda albumul pe TV.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Introduceți codul",
   "joinDiscord": "Alăturați-vă pe Discord",
   "locations": "Locații",

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/events/app_mode_changed_event.dart";
@@ -33,8 +32,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final endpoint = endpointConfig.endpoint;
     _logger.info(
-      "Current endpoint is: ${Configuration.instance.getHttpEndpoint()}",
+      "Current endpoint is: $endpoint",
     );
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -65,7 +65,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
               const SizedBox(height: 20),
               TextInputWidgetV2(
                 label: AppLocalizations.of(context).serverEndpoint,
-                hintText: Configuration.instance.getHttpEndpoint(),
+                hintText: endpoint,
                 textEditingController: _urlController,
                 autoCorrect: false,
                 autoFocus: true,
@@ -92,7 +92,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                     final uri = Uri.parse(url);
                     if ((uri.scheme == "http" || uri.scheme == "https")) {
                       await _ping(url);
-                      await Configuration.instance.setHttpEndpoint(url);
+                      await endpointConfig.setEndpoint(url);
                       showToast(
                         context,
                         AppLocalizations.of(context).endpointUpdatedMessage,

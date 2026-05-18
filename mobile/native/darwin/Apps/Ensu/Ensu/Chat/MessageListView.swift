@@ -20,6 +20,7 @@ struct MessageListView: View {
     @State private var isAtBottom = true
     @State private var autoScrollEnabled = true
     @State private var previewItem: AttachmentPreviewItem?
+    @State private var imagePreviewItem: AttachmentPreviewItem?
     @State private var wasAtBottomBeforeKeyboard = false
     @State private var isUserDragging = false
     @State private var lastContentHeight: CGFloat = 0
@@ -28,7 +29,7 @@ struct MessageListView: View {
     @State private var streamingTextStorageId = UUID().uuidString
 
     var body: some View {
-        GeometryReader { proxy in
+        let content = GeometryReader { proxy in
             ScrollViewReader { scrollProxy in
                 ZStack(alignment: .bottomLeading) {
                     ScrollView {
@@ -82,6 +83,19 @@ struct MessageListView: View {
         .sheet(item: $previewItem) { item in
             QuickLookPreview(url: item.url)
         }
+
+        #if os(iOS)
+        content
+            .fullScreenCover(item: $imagePreviewItem) { item in
+                ImageAttachmentPreview(
+                    url: item.url,
+                    accessibilityLabel: item.name.isEmpty ? "Image preview" : item.name,
+                    onDismiss: { imagePreviewItem = nil }
+                )
+            }
+        #else
+        content
+        #endif
     }
 
     private var currentScrollChange: ScrollChange {
@@ -305,6 +319,13 @@ struct MessageListView: View {
     private func openAttachment(_ attachment: ChatAttachment) {
         guard let url = attachment.url else { return }
         guard FileManager.default.fileExists(atPath: url.path) else { return }
+
+        #if os(iOS)
+        if attachment.kind == .image {
+            imagePreviewItem = AttachmentPreviewItem(url: url, name: attachment.name)
+            return
+        }
+        #endif
 
         let tempDir = FileManager.default.temporaryDirectory
         let fileName = sanitizedAttachmentName(attachment)

@@ -109,7 +109,7 @@ build_crate() {
             rustflags+=" -C link-arg=$min_flag=$IPHONEOS_DEPLOYMENT_TARGET"
         fi
 
-        (cd "$crate_dir" && RUSTFLAGS="$rustflags" cargo build "${cargo_flags[@]}" --target "$target")
+        (cd "$crate_dir" && RUSTFLAGS="$rustflags" cargo rustc "${cargo_flags[@]}" --target "$target" --lib --crate-type staticlib)
 
         local built="$crate_dir/target/$target/$profile/$lib"
         [[ -f "$built" ]] || { echo "error: expected $built" >&2; exit 1; }

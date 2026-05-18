@@ -47,6 +47,8 @@ import "package:photos/utils/gzip.dart";
 import "package:photos/utils/network_util.dart";
 
 const _maxRetryCount = 3;
+const _maxFfmpegOutputLines = 24;
+const _maxFfmpegOutputChars = 4000;
 
 class VideoPreviewService {
   final _logger = Logger("VideoPreviewService");
@@ -125,10 +127,6 @@ class VideoPreviewService {
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
-    if (flagService.internalUser) {
-      return;
-    }
-
     serviceLocator.prefs.setBool(_videoStreamingEnabled, value).ignore();
     Bus.instance.fire(VideoStreamingChanged());
 
@@ -668,11 +666,12 @@ class VideoPreviewService {
         }
       } else {
         final output = playlistGenResult["output"] as String?;
-        _logger.shout(
-          "FFmpeg command failed with return code $playlistGenReturnCode",
-          output ?? "Error not found",
+        _logger.warning(
+          "FFmpeg command failed with return code $playlistGenReturnCode\n"
+          "${_summarizeFfmpegOutput(output)}",
         );
-        error = "Failed to generate video preview\nError: $output";
+        error =
+            "Failed to generate video preview (return code $playlistGenReturnCode)";
       }
 
       if (error == null) {
@@ -1107,7 +1106,7 @@ class VideoPreviewService {
     late final ({String encryptedData, String decryptionHeader}) fetchResult;
     if (collectionsService.isSharedPublicLink(file.collectionID!)) {
       fetchResult = await _fileDataGateway.fetchPublicFileData(
-        baseUrl: config.getHttpEndpoint(),
+        baseUrl: endpointConfig.endpoint,
         fileID: file.uploadedFileID!,
         type: "vid_preview",
         headers: collectionsService.publicCollectionHeaders(file.collectionID!),
@@ -1154,7 +1153,7 @@ class VideoPreviewService {
           file.fileType == FileType.video ? "vid_preview" : "img_preview";
       if (collectionsService.isSharedPublicLink(file.collectionID!)) {
         url = await _fileDataGateway.getPublicPreview(
-          baseUrl: config.getHttpEndpoint(),
+          baseUrl: endpointConfig.endpoint,
           fileID: file.uploadedFileID!,
           type: previewType,
           headers: collectionsService.publicCollectionHeaders(
@@ -1440,4 +1439,30 @@ class VideoPreviewService {
       }
     });
   }
+}
+
+String _summarizeFfmpegOutput(String? output) {
+  final trimmedOutput = output?.trim();
+  if (trimmedOutput == null || trimmedOutput.isEmpty) {
+    return "FFmpeg output unavailable";
+  }
+
+  final lines = const LineSplitter()
+      .convert(trimmedOutput)
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toList();
+  final summarizedLines = lines.length > _maxFfmpegOutputLines
+      ? lines.sublist(lines.length - _maxFfmpegOutputLines)
+      : lines;
+  var summary = summarizedLines.join("\n");
+  if (summary.length > _maxFfmpegOutputChars) {
+    summary = summary.substring(summary.length - _maxFfmpegOutputChars);
+  }
+
+  final wasTruncated = lines.length > summarizedLines.length ||
+      trimmedOutput.length > _maxFfmpegOutputChars;
+  return wasTruncated
+      ? "FFmpeg output (truncated):\n$summary"
+      : "FFmpeg output:\n$summary";
 }

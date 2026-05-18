@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{öğe yok} =1{1 öğe} other{{count} öğe}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Koleksiyon oluştur",
   "uploadDocumentTooltip": "Belge yükle",
   "restore": "Geri yükle",
@@ -470,15 +460,6 @@
   "linkDeviceLimit": "Cihaz sınırı",
   "expiredLinkInfo": "Bu bağlantının süresi dolmuştur. Lütfen yeni bir süre belirleyin veya bağlantı süresini devre dışı bırakın.",
   "linkExpiresOn": "Bu bağlantı {expiryTime} tarihinden itibaren geçersiz olacaktır",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Belirli kişilerle paylaş} =1 {1 kişiyle paylaşıldı} other {{numberOfPeople} kişiyle paylaşıldı}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Bağlantının süresi dolmuş",
   "publicLinkEnabled": "Herkese açık bağlantı aktive edildi",
   "shareALink": "Bir bağlantı paylaş",
@@ -492,28 +473,6 @@
   "add": "Ekle",
   "collaboratorsCanAddFilesToTheSharedCollection": "İşbirlikçiler paylaşılan koleksiyona öğe ekleyebilir.",
   "enterEmail": "E-postanızı giriniz",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 izleyici eklendi} =1 {1 izleyici eklendi} other {{count} izleyici eklendi}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 işbirlikçi eklendi} =1 {1 işbirlikçi eklendi} other {{count} işbirlikçi eklendi}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0 {Görüntüleyen ekle} =1 {Görüntüleyen ekle} other {Görüntüleyen ekle}}",
-  "addCollaborators": "{count, plural, =0 {Ortak çalışan ekle} =1 {Ortak çalışan ekle} other {Ortak çalışan ekle}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Uçtan uca şifrelemeyi doğrulamak için bir e-postaya uzun basın.",
   "sharing": "Paylaşılıyor...",
   "invalidEmailAddress": "Geçersiz e-posta adresi",
@@ -562,16 +521,6 @@
   "viewer": "Görüntüleyici",
   "collaborator": "Düzenleyici",
   "collaboratorsCanAddFilesToTheSharedAlbum": "İşbirlikçiler paylaşılan koleksiyona öğe ekleyebilir.",
-  "albumParticipantsCount": "{count, plural, =0 {Katılımcı Yok} =1 {1 Katılımcı} other {{count} Katılımcı}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Daha fazla ekle",
   "you": "Sen",
   "albumOwner": "Sahip",
@@ -679,16 +628,6 @@
   "clickHereToUpload": "Yüklemek için buraya tıklayın",
   "saveDocument": "Belgeyi kaydet",
   "uploadFiles": "Öğe yükle",
-  "filesSelected": "{count, plural, =0{Öğe seçilmedi} =1{1 öğe seçildi} other{{count} öğe seçildi}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Koleksiyona ekle",
   "newCollection": "Yeni koleksiyon",
   "title": "Başlık",
@@ -707,16 +646,6 @@
     }
   },
   "informationCollectionName": "Bilgi",
-  "recordSavedToMultipleCollections": "Kayıt başarıyla {count, plural, =1{1 koleksiyona} other{{count} koleksiyona}} kaydedildi",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} panoya kopyalandı",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -724,20 +653,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "\"{query}\" için {count, plural, =1{1 sonuç} other{{count} sonuç}}",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -784,49 +699,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 koleksiyon} other{{count} koleksiyon}} kalıcı olarak silinecek.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 öğe} other{{count} öğe}} kalıcı olarak silinecek.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Öğeleri her yerden de sil",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Evet, {count, plural, =1{koleksiyonu} other{koleksiyonları}} sil",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Evet, {count, plural, =1{öğeyi} other{öğeleri}} sil",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Kullanım",
   "important": "Önemli",
@@ -835,16 +710,6 @@
   "markingAsImportant": "Önemli olarak işaretleniyor...",
   "fileMarkedAsImportant": "Öğe önemli olarak işaretlendi",
   "fileRemovedFromImportant": "Öğe önemlilerden kaldırıldı",
-  "filesMarkedAsImportant": "{count, plural, =1{1 öğe önemli olarak işaretlendi} other{{count} öğe önemli olarak işaretlendi}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Tüm öğeler zaten önemli olarak işaretli",
   "failedToMarkFilesAsImportant": "Öğeler önemli olarak işaretlenemedi: {error}",
   "@failedToMarkFilesAsImportant": {

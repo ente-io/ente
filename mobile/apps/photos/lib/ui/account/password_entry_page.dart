@@ -351,7 +351,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to change password", e, s);
       await dialog.hide();
       await showGenericErrorBottomSheet(context: context, error: e);
     }
@@ -409,7 +409,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             (route) => route.isFirst,
           );
         } catch (e, s) {
-          _logger.severe(e, s);
+          _logger.severe("Failed to configure account", e, s);
           await dialog.hide();
           await showGenericErrorBottomSheet(context: context, error: e);
         }

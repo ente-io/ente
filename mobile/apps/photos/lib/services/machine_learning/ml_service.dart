@@ -29,6 +29,7 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/video_preview_service.dart";
+import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/ram_check_util.dart";
@@ -530,6 +531,10 @@ class MLService {
         "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image)",
       );
       _logStatus();
+    } on RustCorruptModelCacheDeletedException catch (e) {
+      _logger.warning(
+        "Stopping image indexing because corrupt Rust ONNX model cache was deleted at ${e.modelPath}",
+      );
     } catch (e, s) {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
@@ -752,7 +757,8 @@ class MLService {
       );
       // Check if there's no result simply because MLController paused indexing
       if (result == null) {
-        if (!_shouldPauseIndexingAndClustering) {
+        if (!_shouldPauseIndexingAndClustering &&
+            !MLIndexingIsolate.instance.shouldPauseIndexingAndClustering) {
           _logger.severe(
             "Failed to analyze image with fileID: ${instruction.fileKey}",
           );
@@ -901,6 +907,15 @@ class MLService {
       final String format = instruction.file.displayName.split('.').last;
       final int? size = instruction.file.fileSize;
       final fileType = instruction.file.fileType;
+      if (e is RustCorruptModelCacheDeletedException) {
+        pauseIndexingAndClustering();
+        _logger.warning(
+          "Stopping ML indexing for fileID ${instruction.fileKey} "
+          "(format $format, type $fileType, size $size) because corrupt Rust "
+          "ONNX model cache was deleted at ${e.modelPath}",
+        );
+        rethrow;
+      }
       final bool acceptedIssue = isExpectedMlSkipError(e);
       if (acceptedIssue) {
         _logger.warning(

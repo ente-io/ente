@@ -68,340 +68,151 @@ class ChangeLogStrings {
 
   static const Map<String, ChangeLogStrings> _translations = {
     'en': ChangeLogStrings(
-      title1: 'Smoother memories',
+      title1: 'Photo picker for 3rd party apps',
       desc1:
-          'Rediscovering old memories feels better, with new haptics and under-the-hood improvements.',
-      title2: 'Faster browsing',
+          "Want to share a photo on WhatsApp or Signal, but couldn't select from Ente Photos? Got you covered! We have added support for selecting photos to attach to third-party apps.",
+      title2: 'View camera photos in Ente',
       desc2:
-          "Your photos and videos load faster. We've updated our infrastructure, so everything feels snappier.",
-      title3: 'Better memory lane',
-      desc3:
-          'Memory lanes now appear for more people in your life, including kids 3 and up. Shared links load faster, with smoother animations.',
+          'On supported devices, you can now tap the thumbnail in your Camera app to open the photo directly in Ente Photos. One less hop between snapping a shot and seeing it where you want it.',
     ),
     'cs': ChangeLogStrings(
-      title1: 'Plynulejší vzpomínky',
+      title1: 'Výběr fotek pro aplikace třetích stran',
       desc1:
-          'Znovuobjevování starých vzpomínek je příjemnější díky nové haptické odezvě a vylepšením na pozadí.',
-      title2: 'Rychlejší prohlížení',
+          'Chcete sdílet fotku na WhatsAppu nebo Signalu, ale nemohli jste ji vybrat z Ente Photos? Máme to vyřešené! Přidali jsme podporu pro výběr fotek, které můžete připojit v aplikacích třetích stran.',
+      title2: 'Prohlížejte fotky z fotoaparátu v Ente',
       desc2:
-          'Vaše fotky a videa se načítají rychleji. Aktualizovali jsme naši infrastrukturu, takže vše působí svižněji.',
-      title3: 'Lepší memory lane',
-      desc3:
-          'Memory lane se nyní zobrazuje pro více lidí ve vašem životě, včetně dětí od 3 let. Sdílené odkazy se načítají rychleji a animace jsou plynulejší.',
+          'Na podporovaných zařízeních teď můžete klepnout na náhled v aplikaci Fotoaparát a otevřít fotku přímo v Ente Photos. O jeden krok méně mezi pořízením snímku a jeho zobrazením tam, kde ho chcete mít.',
     ),
     'de': ChangeLogStrings(
-      title1: 'Flüssigere Erinnerungen',
+      title1: 'Fotoauswahl für Drittanbieter-Apps',
       desc1:
-          'Das Wiederentdecken alter Erinnerungen fühlt sich mit neuer Haptik und Verbesserungen im Hintergrund besser an.',
-      title2: 'Schnelleres Browsen',
+          'Möchten Sie ein Foto in WhatsApp oder Signal teilen, konnten es aber nicht aus Ente Photos auswählen? Das ist jetzt möglich! Wir haben Unterstützung hinzugefügt, damit Sie Fotos zum Anhängen in Drittanbieter-Apps auswählen können.',
+      title2: 'Kamerafotos in Ente ansehen',
       desc2:
-          'Ihre Fotos und Videos laden schneller. Wir haben unsere Infrastruktur aktualisiert, damit sich alles reaktionsschneller anfühlt.',
-      title3: 'Bessere Memory Lane',
-      desc3:
-          'Memory Lanes erscheinen jetzt für mehr Menschen in Ihrem Leben, einschließlich Kindern ab 3 Jahren. Geteilte Links laden schneller und Animationen laufen flüssiger.',
+          'Auf unterstützten Geräten können Sie jetzt in Ihrer Kamera-App auf die Miniaturansicht tippen, um das Foto direkt in Ente Photos zu öffnen. Ein Schritt weniger zwischen dem Aufnehmen und dem Anzeigen dort, wo Sie es sehen möchten.',
     ),
     'es': ChangeLogStrings(
-      title1: 'Recuerdos más fluidos',
+      title1: 'Selector de fotos para apps de terceros',
       desc1:
-          'Redescubrir recuerdos antiguos se siente mejor, con nuevas respuestas hápticas y mejoras internas.',
-      title2: 'Navegación más rápida',
+          '¿Quieres compartir una foto en WhatsApp o Signal, pero no podías seleccionarla desde Ente Photos? ¡Ya está cubierto! Hemos añadido soporte para seleccionar fotos y adjuntarlas en apps de terceros.',
+      title2: 'Ver fotos de la cámara en Ente',
       desc2:
-          'Tus fotos y videos cargan más rápido. Hemos actualizado nuestra infraestructura para que todo se sienta más ágil.',
-      title3: 'Mejor memory lane',
-      desc3:
-          'Las memory lanes ahora aparecen para más personas en tu vida, incluidos niños de 3 años en adelante. Los enlaces compartidos cargan más rápido, con animaciones más fluidas.',
+          'En dispositivos compatibles, ahora puedes tocar la miniatura en tu app de Cámara para abrir la foto directamente en Ente Photos. Un paso menos entre tomar la foto y verla donde quieres.',
     ),
     'fr': ChangeLogStrings(
-      title1: 'Souvenirs plus fluides',
+      title1: 'Sélecteur de photos pour les apps tierces',
       desc1:
-          'Redécouvrir d’anciens souvenirs est plus agréable, avec de nouvelles vibrations et des améliorations internes.',
-      title2: 'Navigation plus rapide',
+          'Vous voulez partager une photo sur WhatsApp ou Signal, mais vous ne pouviez pas la sélectionner depuis Ente Photos ? C’est désormais possible ! Nous avons ajouté la prise en charge de la sélection de photos à joindre dans des apps tierces.',
+      title2: 'Voir les photos de l’appareil photo dans Ente',
       desc2:
-          'Vos photos et vidéos se chargent plus vite. Nous avons mis à jour notre infrastructure pour rendre l’ensemble plus réactif.',
-      title3: 'Meilleure memory lane',
-      desc3:
-          'Les memory lanes apparaissent désormais pour davantage de personnes de votre vie, y compris les enfants de 3 ans et plus. Les liens partagés se chargent plus vite, avec des animations plus fluides.',
+          'Sur les appareils compatibles, vous pouvez désormais toucher la miniature dans votre app Appareil photo pour ouvrir la photo directement dans Ente Photos. Une étape de moins entre la prise de vue et l’affichage là où vous le souhaitez.',
     ),
     'it': ChangeLogStrings(
-      title1: 'Ricordi più fluidi',
+      title1: 'Selettore foto per app di terze parti',
       desc1:
-          'Riscoprire vecchi ricordi è più piacevole, con nuovi feedback aptici e miglioramenti interni.',
-      title2: 'Navigazione più veloce',
+          'Vuoi condividere una foto su WhatsApp o Signal, ma non riuscivi a selezionarla da Ente Photos? Ci abbiamo pensato noi! Abbiamo aggiunto il supporto per selezionare foto da allegare alle app di terze parti.',
+      title2: 'Visualizza le foto della fotocamera in Ente',
       desc2:
-          'Le tue foto e i tuoi video si caricano più velocemente. Abbiamo aggiornato la nostra infrastruttura, così tutto risulta più reattivo.',
-      title3: 'Memory lane migliorata',
-      desc3:
-          'Le memory lane ora appaiono per più persone nella tua vita, inclusi i bambini dai 3 anni in su. I link condivisi si caricano più rapidamente, con animazioni più fluide.',
+          'Sui dispositivi supportati, ora puoi toccare la miniatura nell’app Fotocamera per aprire la foto direttamente in Ente Photos. Un passaggio in meno tra lo scatto e la visualizzazione dove vuoi.',
     ),
     'ja': ChangeLogStrings(
-      title1: 'よりスムーズな思い出',
-      desc1: '新しい触覚フィードバックと内部改善により、昔の思い出を振り返る体験がより心地よくなりました。',
-      title2: 'より速い閲覧',
-      desc2: '写真や動画の読み込みが速くなりました。インフラを更新し、全体がより軽快に感じられます。',
-      title3: 'より良いメモリーレーン',
-      desc3:
-          '3歳以上のお子さまを含め、より多くの大切な人のメモリーレーンが表示されるようになりました。共有リンクの読み込みも速くなり、アニメーションもよりスムーズです。',
+      title1: 'サードパーティアプリ用の写真ピッカー',
+      desc1:
+          'WhatsAppやSignalで写真を共有したいのに、Ente Photosから選択できませんでしたか？対応しました！サードパーティアプリに添付する写真を選択できるようになりました。',
+      title2: 'カメラの写真をEnteで表示',
+      desc2:
+          '対応デバイスでは、カメラアプリのサムネイルをタップすると、写真をEnte Photosで直接開けるようになりました。撮影してから見たい場所で表示するまでの手間がひとつ減ります。',
     ),
     'nl': ChangeLogStrings(
-      title1: 'Soepelere herinneringen',
+      title1: 'Fotokiezer voor apps van derden',
       desc1:
-          'Oude herinneringen herontdekken voelt beter, met nieuwe haptiek en verbeteringen onder de motorkap.',
-      title2: 'Sneller bladeren',
+          'Wil je een foto delen via WhatsApp of Signal, maar kon je die niet selecteren vanuit Ente Photos? Dat is nu geregeld! We hebben ondersteuning toegevoegd om foto’s te selecteren en toe te voegen aan apps van derden.',
+      title2: 'Camerafoto’s bekijken in Ente',
       desc2:
-          'Je foto’s en video’s laden sneller. We hebben onze infrastructuur bijgewerkt, zodat alles vlotter aanvoelt.',
-      title3: 'Betere memory lane',
-      desc3:
-          'Memory lanes verschijnen nu voor meer mensen in je leven, inclusief kinderen vanaf 3 jaar. Gedeelde links laden sneller, met soepelere animaties.',
+          'Op ondersteunde apparaten kun je nu op de miniatuur in je Camera-app tikken om de foto direct in Ente Photos te openen. Een stap minder tussen het maken van een foto en die zien waar je wilt.',
     ),
     'no': ChangeLogStrings(
-      title1: 'Jevnere minner',
+      title1: 'Fotovelger for tredjepartsapper',
       desc1:
-          'Det føles bedre å gjenoppdage gamle minner, med ny haptikk og forbedringer under panseret.',
-      title2: 'Raskere blaing',
+          'Vil du dele et bilde på WhatsApp eller Signal, men kunne ikke velge det fra Ente Photos? Det har vi fikset! Vi har lagt til støtte for å velge bilder som vedlegg i tredjepartsapper.',
+      title2: 'Se kamerabilder i Ente',
       desc2:
-          'Bildene og videoene dine lastes raskere. Vi har oppdatert infrastrukturen vår, slik at alt føles kvikkere.',
-      title3: 'Bedre memory lane',
-      desc3:
-          'Memory lanes vises nå for flere personer i livet ditt, inkludert barn fra 3 år og oppover. Delte lenker lastes raskere, med jevnere animasjoner.',
+          'På støttede enheter kan du nå trykke på miniatyrbildet i Kamera-appen for å åpne bildet direkte i Ente Photos. Ett steg mindre fra du tar et bilde til du ser det der du vil.',
     ),
     'pl': ChangeLogStrings(
-      title1: 'Płynniejsze wspomnienia',
+      title1: 'Selektor zdjęć dla aplikacji innych firm',
       desc1:
-          'Odkrywanie dawnych wspomnień jest przyjemniejsze dzięki nowym reakcjom haptycznym i ulepszeniom pod spodem.',
-      title2: 'Szybsze przeglądanie',
+          'Chcesz udostępnić zdjęcie w WhatsAppie lub Signalu, ale nie dało się go wybrać z Ente Photos? Już to obsługujemy! Dodaliśmy możliwość wybierania zdjęć do załączania w aplikacjach innych firm.',
+      title2: 'Wyświetlaj zdjęcia z aparatu w Ente',
       desc2:
-          'Twoje zdjęcia i filmy ładują się szybciej. Zaktualizowaliśmy naszą infrastrukturę, więc wszystko działa sprawniej.',
-      title3: 'Lepsza memory lane',
-      desc3:
-          'Memory lane pojawia się teraz dla większej liczby osób w Twoim życiu, w tym dzieci od 3. roku życia. Udostępnione linki ładują się szybciej, a animacje są płynniejsze.',
+          'Na obsługiwanych urządzeniach możesz teraz stuknąć miniaturę w aplikacji Aparat, aby otworzyć zdjęcie bezpośrednio w Ente Photos. O jeden krok mniej między zrobieniem zdjęcia a obejrzeniem go tam, gdzie chcesz.',
     ),
     'pt_BR': ChangeLogStrings(
-      title1: 'Memórias mais suaves',
+      title1: 'Seletor de fotos para apps de terceiros',
       desc1:
-          'Redescobrir memórias antigas ficou melhor, com novos retornos táteis e melhorias internas.',
-      title2: 'Navegação mais rápida',
+          'Quer compartilhar uma foto no WhatsApp ou Signal, mas não conseguia selecioná-la no Ente Photos? Resolvido! Adicionamos suporte para selecionar fotos e anexá-las em apps de terceiros.',
+      title2: 'Veja fotos da câmera no Ente',
       desc2:
-          'Suas fotos e vídeos carregam mais rápido. Atualizamos nossa infraestrutura, então tudo fica mais ágil.',
-      title3: 'Memory lane melhor',
-      desc3:
-          'As memory lanes agora aparecem para mais pessoas na sua vida, incluindo crianças a partir de 3 anos. Links compartilhados carregam mais rápido, com animações mais suaves.',
+          'Em dispositivos compatíveis, agora você pode tocar na miniatura no app Câmera para abrir a foto diretamente no Ente Photos. Um passo a menos entre tirar a foto e vê-la onde você quer.',
     ),
     'pt_PT': ChangeLogStrings(
-      title1: 'Memórias mais suaves',
+      title1: 'Seletor de fotografias para apps de terceiros',
       desc1:
-          'Redescobrir memórias antigas ficou melhor, com nova resposta háptica e melhorias internas.',
-      title2: 'Navegação mais rápida',
+          'Quer partilhar uma fotografia no WhatsApp ou Signal, mas não conseguia selecioná-la no Ente Photos? Está tratado! Adicionámos suporte para selecionar fotografias e anexá-las em apps de terceiros.',
+      title2: 'Veja fotografias da câmara no Ente',
       desc2:
-          'As suas fotografias e vídeos carregam mais depressa. Atualizámos a nossa infraestrutura, para que tudo pareça mais ágil.',
-      title3: 'Memory lane melhor',
-      desc3:
-          'As memory lanes aparecem agora para mais pessoas na sua vida, incluindo crianças a partir dos 3 anos. As ligações partilhadas carregam mais depressa, com animações mais suaves.',
+          'Em dispositivos compatíveis, pode agora tocar na miniatura na app Câmara para abrir a fotografia diretamente no Ente Photos. Menos um passo entre tirar a fotografia e vê-la onde quer.',
     ),
     'ro': ChangeLogStrings(
-      title1: 'Amintiri mai fluide',
+      title1: 'Selector de fotografii pentru aplicații terțe',
       desc1:
-          'Redescoperirea amintirilor vechi se simte mai bine, cu vibrații noi și îmbunătățiri interne.',
-      title2: 'Navigare mai rapidă',
+          'Vrei să partajezi o fotografie pe WhatsApp sau Signal, dar nu o puteai selecta din Ente Photos? Am rezolvat! Am adăugat suport pentru selectarea fotografiilor de atașat în aplicații terțe.',
+      title2: 'Vezi fotografiile din cameră în Ente',
       desc2:
-          'Fotografiile și videoclipurile tale se încarcă mai rapid. Ne-am actualizat infrastructura, așa că totul pare mai sprinten.',
-      title3: 'Memory lane mai bun',
-      desc3:
-          'Memory lane apare acum pentru mai multe persoane din viața ta, inclusiv copii de 3 ani și peste. Linkurile partajate se încarcă mai rapid, cu animații mai fluide.',
+          'Pe dispozitivele acceptate, poți acum să atingi miniatura din aplicația Cameră pentru a deschide fotografia direct în Ente Photos. Un pas mai puțin între capturarea imaginii și vizualizarea ei unde dorești.',
     ),
     'ru': ChangeLogStrings(
-      title1: 'Более плавные воспоминания',
+      title1: 'Выбор фото для сторонних приложений',
       desc1:
-          'Возвращаться к старым воспоминаниям стало приятнее благодаря новой тактильной отдаче и внутренним улучшениям.',
-      title2: 'Более быстрый просмотр',
+          'Хотите поделиться фото в WhatsApp или Signal, но не могли выбрать его из Ente Photos? Теперь это возможно! Мы добавили поддержку выбора фото для прикрепления в сторонних приложениях.',
+      title2: 'Просматривайте фото с камеры в Ente',
       desc2:
-          'Ваши фото и видео загружаются быстрее. Мы обновили инфраструктуру, поэтому всё ощущается более отзывчивым.',
-      title3: 'Улучшенная memory lane',
-      desc3:
-          'Memory lane теперь появляется для большего числа людей в вашей жизни, включая детей от 3 лет. Общие ссылки загружаются быстрее, а анимации стали плавнее.',
+          'На поддерживаемых устройствах теперь можно нажать миниатюру в приложении Камера, чтобы открыть фото прямо в Ente Photos. На один шаг меньше между съемкой и просмотром там, где вам удобно.',
     ),
     'tr': ChangeLogStrings(
-      title1: 'Daha akıcı anılar',
+      title1: 'Üçüncü taraf uygulamalar için fotoğraf seçici',
       desc1:
-          'Eski anıları yeniden keşfetmek, yeni dokunsal geri bildirimler ve altyapı iyileştirmeleriyle daha iyi hissettiriyor.',
-      title2: 'Daha hızlı gezinme',
+          "WhatsApp veya Signal'de fotoğraf paylaşmak istiyor, ama Ente Photos'tan seçemiyor muydunuz? Artık mümkün! Üçüncü taraf uygulamalara eklemek üzere fotoğraf seçme desteği ekledik.",
+      title2: "Kamera fotoğraflarını Ente'de görüntüleyin",
       desc2:
-          'Fotoğraflarınız ve videolarınız daha hızlı yükleniyor. Altyapımızı güncelledik, böylece her şey daha çevik hissettiriyor.',
-      title3: 'Daha iyi memory lane',
-      desc3:
-          'Memory lane artık hayatınızdaki daha fazla kişi için, 3 yaş ve üzeri çocuklar dahil, görünüyor. Paylaşılan bağlantılar daha hızlı yükleniyor ve animasyonlar daha akıcı.',
+          "Desteklenen cihazlarda artık Kamera uygulamanızdaki küçük resme dokunarak fotoğrafı doğrudan Ente Photos'ta açabilirsiniz. Fotoğraf çekmekten istediğiniz yerde görmeye giden yolda bir adım daha az.",
     ),
     'uk': ChangeLogStrings(
-      title1: 'Плавніші спогади',
+      title1: 'Вибір фото для сторонніх застосунків',
       desc1:
-          'Повертатися до старих спогадів стало приємніше завдяки новій тактильній віддачі та внутрішнім покращенням.',
-      title2: 'Швидший перегляд',
+          'Хочете поділитися фото у WhatsApp або Signal, але не могли вибрати його з Ente Photos? Тепер це можливо! Ми додали підтримку вибору фото для прикріплення у сторонніх застосунках.',
+      title2: 'Переглядайте фото з камери в Ente',
       desc2:
-          'Ваші фото й відео завантажуються швидше. Ми оновили інфраструктуру, тож усе відчувається жвавішим.',
-      title3: 'Краща memory lane',
-      desc3:
-          'Memory lane тепер з’являється для більшої кількості людей у вашому житті, зокрема дітей від 3 років. Спільні посилання завантажуються швидше, а анімації стали плавнішими.',
+          'На підтримуваних пристроях тепер можна торкнутися мініатюри в застосунку Камера, щоб відкрити фото безпосередньо в Ente Photos. На один крок менше між знімком і переглядом там, де вам потрібно.',
     ),
     'vi': ChangeLogStrings(
-      title1: 'Kỷ niệm mượt mà hơn',
+      title1: 'Trình chọn ảnh cho ứng dụng bên thứ ba',
       desc1:
-          'Việc khám phá lại các kỷ niệm cũ nay dễ chịu hơn, với phản hồi rung mới và các cải thiện bên trong.',
-      title2: 'Duyệt nhanh hơn',
+          'Muốn chia sẻ ảnh trên WhatsApp hoặc Signal nhưng không thể chọn từ Ente Photos? Chúng tôi đã hỗ trợ! Chúng tôi đã thêm khả năng chọn ảnh để đính kèm vào các ứng dụng bên thứ ba.',
+      title2: 'Xem ảnh chụp từ camera trong Ente',
       desc2:
-          'Ảnh và video của bạn tải nhanh hơn. Chúng tôi đã cập nhật hạ tầng để mọi thứ phản hồi nhanh hơn.',
-      title3: 'Memory lane tốt hơn',
-      desc3:
-          'Memory lane nay xuất hiện cho nhiều người hơn trong cuộc sống của bạn, bao gồm cả trẻ từ 3 tuổi trở lên. Liên kết chia sẻ tải nhanh hơn, với hoạt ảnh mượt mà hơn.',
+          'Trên các thiết bị được hỗ trợ, giờ bạn có thể nhấn vào hình thu nhỏ trong ứng dụng Camera để mở ảnh trực tiếp trong Ente Photos. Bớt một bước từ lúc chụp đến khi xem ảnh ở nơi bạn muốn.',
     ),
     'zh_CN': ChangeLogStrings(
-      title1: '更流畅的回忆',
-      desc1: '通过新的触觉反馈和底层改进，重新发现旧回忆的体验更好了。',
-      title2: '更快的浏览',
-      desc2: '你的照片和视频加载更快。我们更新了基础设施，让一切感觉更迅速。',
-      title3: '更好的 memory lane',
-      desc3: '现在，memory lane 会为你生活中的更多人显示，包括 3 岁及以上的孩子。共享链接加载更快，动画也更流畅。',
+      title1: '适用于第三方应用的照片选择器',
+      desc1:
+          '想在 WhatsApp 或 Signal 上分享照片，却无法从 Ente Photos 中选择？现在可以了！我们已支持选择照片并将其附加到第三方应用。',
+      title2: '在 Ente 中查看相机照片',
+      desc2:
+          '在受支持的设备上，现在你可以点按相机应用中的缩略图，直接在 Ente Photos 中打开照片。从拍下照片到在想看的地方查看，又少了一步。',
     ),
   };
 
-  static const Map<String, ChangeLogStrings> _offlineTranslations = {
-    'en': ChangeLogStrings(
-      title1: 'Smoother memories',
-      desc1:
-          'Rediscovering old memories feels better, with new haptics and under-the-hood improvements.',
-      title2: 'Faster browsing',
-      desc2:
-          "Your photos and videos load faster. We've updated our infrastructure, so everything feels snappier.",
-    ),
-    'cs': ChangeLogStrings(
-      title1: 'Plynulejší vzpomínky',
-      desc1:
-          'Znovuobjevování starých vzpomínek je příjemnější díky nové haptické odezvě a vylepšením na pozadí.',
-      title2: 'Rychlejší prohlížení',
-      desc2:
-          'Vaše fotky a videa se načítají rychleji. Aktualizovali jsme naši infrastrukturu, takže vše působí svižněji.',
-    ),
-    'de': ChangeLogStrings(
-      title1: 'Flüssigere Erinnerungen',
-      desc1:
-          'Das Wiederentdecken alter Erinnerungen fühlt sich mit neuer Haptik und Verbesserungen im Hintergrund besser an.',
-      title2: 'Schnelleres Browsen',
-      desc2:
-          'Ihre Fotos und Videos laden schneller. Wir haben unsere Infrastruktur aktualisiert, damit sich alles reaktionsschneller anfühlt.',
-    ),
-    'es': ChangeLogStrings(
-      title1: 'Recuerdos más fluidos',
-      desc1:
-          'Redescubrir recuerdos antiguos se siente mejor, con nuevas respuestas hápticas y mejoras internas.',
-      title2: 'Navegación más rápida',
-      desc2:
-          'Tus fotos y videos cargan más rápido. Hemos actualizado nuestra infraestructura para que todo se sienta más ágil.',
-    ),
-    'fr': ChangeLogStrings(
-      title1: 'Souvenirs plus fluides',
-      desc1:
-          'Redécouvrir d’anciens souvenirs est plus agréable, avec de nouvelles vibrations et des améliorations internes.',
-      title2: 'Navigation plus rapide',
-      desc2:
-          'Vos photos et vidéos se chargent plus vite. Nous avons mis à jour notre infrastructure pour rendre l’ensemble plus réactif.',
-    ),
-    'it': ChangeLogStrings(
-      title1: 'Ricordi più fluidi',
-      desc1:
-          'Riscoprire vecchi ricordi è più piacevole, con nuovi feedback aptici e miglioramenti interni.',
-      title2: 'Navigazione più veloce',
-      desc2:
-          'Le tue foto e i tuoi video si caricano più velocemente. Abbiamo aggiornato la nostra infrastruttura, così tutto risulta più reattivo.',
-    ),
-    'ja': ChangeLogStrings(
-      title1: 'よりスムーズな思い出',
-      desc1: '新しい触覚フィードバックと内部改善により、昔の思い出を振り返る体験がより心地よくなりました。',
-      title2: 'より速い閲覧',
-      desc2: '写真や動画の読み込みが速くなりました。インフラを更新し、全体がより軽快に感じられます。',
-    ),
-    'nl': ChangeLogStrings(
-      title1: 'Soepelere herinneringen',
-      desc1:
-          'Oude herinneringen herontdekken voelt beter, met nieuwe haptiek en verbeteringen onder de motorkap.',
-      title2: 'Sneller bladeren',
-      desc2:
-          'Je foto’s en video’s laden sneller. We hebben onze infrastructuur bijgewerkt, zodat alles vlotter aanvoelt.',
-    ),
-    'no': ChangeLogStrings(
-      title1: 'Jevnere minner',
-      desc1:
-          'Det føles bedre å gjenoppdage gamle minner, med ny haptikk og forbedringer under panseret.',
-      title2: 'Raskere blaing',
-      desc2:
-          'Bildene og videoene dine lastes raskere. Vi har oppdatert infrastrukturen vår, slik at alt føles kvikkere.',
-    ),
-    'pl': ChangeLogStrings(
-      title1: 'Płynniejsze wspomnienia',
-      desc1:
-          'Odkrywanie dawnych wspomnień jest przyjemniejsze dzięki nowym reakcjom haptycznym i ulepszeniom pod spodem.',
-      title2: 'Szybsze przeglądanie',
-      desc2:
-          'Twoje zdjęcia i filmy ładują się szybciej. Zaktualizowaliśmy naszą infrastrukturę, więc wszystko działa sprawniej.',
-    ),
-    'pt_BR': ChangeLogStrings(
-      title1: 'Memórias mais suaves',
-      desc1:
-          'Redescobrir memórias antigas ficou melhor, com novos retornos táteis e melhorias internas.',
-      title2: 'Navegação mais rápida',
-      desc2:
-          'Suas fotos e vídeos carregam mais rápido. Atualizamos nossa infraestrutura, então tudo fica mais ágil.',
-    ),
-    'pt_PT': ChangeLogStrings(
-      title1: 'Memórias mais suaves',
-      desc1:
-          'Redescobrir memórias antigas ficou melhor, com nova resposta háptica e melhorias internas.',
-      title2: 'Navegação mais rápida',
-      desc2:
-          'As suas fotografias e vídeos carregam mais depressa. Atualizámos a nossa infraestrutura, para que tudo pareça mais ágil.',
-    ),
-    'ro': ChangeLogStrings(
-      title1: 'Amintiri mai fluide',
-      desc1:
-          'Redescoperirea amintirilor vechi se simte mai bine, cu vibrații noi și îmbunătățiri interne.',
-      title2: 'Navigare mai rapidă',
-      desc2:
-          'Fotografiile și videoclipurile tale se încarcă mai rapid. Ne-am actualizat infrastructura, așa că totul pare mai sprinten.',
-    ),
-    'ru': ChangeLogStrings(
-      title1: 'Более плавные воспоминания',
-      desc1:
-          'Возвращаться к старым воспоминаниям стало приятнее благодаря новой тактильной отдаче и внутренним улучшениям.',
-      title2: 'Более быстрый просмотр',
-      desc2:
-          'Ваши фото и видео загружаются быстрее. Мы обновили инфраструктуру, поэтому всё ощущается более отзывчивым.',
-    ),
-    'tr': ChangeLogStrings(
-      title1: 'Daha akıcı anılar',
-      desc1:
-          'Eski anıları yeniden keşfetmek, yeni dokunsal geri bildirimler ve altyapı iyileştirmeleriyle daha iyi hissettiriyor.',
-      title2: 'Daha hızlı gezinme',
-      desc2:
-          'Fotoğraflarınız ve videolarınız daha hızlı yükleniyor. Altyapımızı güncelledik, böylece her şey daha çevik hissettiriyor.',
-    ),
-    'uk': ChangeLogStrings(
-      title1: 'Плавніші спогади',
-      desc1:
-          'Повертатися до старих спогадів стало приємніше завдяки новій тактильній віддачі та внутрішнім покращенням.',
-      title2: 'Швидший перегляд',
-      desc2:
-          'Ваші фото й відео завантажуються швидше. Ми оновили інфраструктуру, тож усе відчувається жвавішим.',
-    ),
-    'vi': ChangeLogStrings(
-      title1: 'Kỷ niệm mượt mà hơn',
-      desc1:
-          'Việc khám phá lại các kỷ niệm cũ nay dễ chịu hơn, với phản hồi rung mới và các cải thiện bên trong.',
-      title2: 'Duyệt nhanh hơn',
-      desc2:
-          'Ảnh và video của bạn tải nhanh hơn. Chúng tôi đã cập nhật hạ tầng để mọi thứ phản hồi nhanh hơn.',
-    ),
-    'zh_CN': ChangeLogStrings(
-      title1: '更流畅的回忆',
-      desc1: '通过新的触觉反馈和底层改进，重新发现旧回忆的体验更好了。',
-      title2: '更快的浏览',
-      desc2: '你的照片和视频加载更快。我们更新了基础设施，让一切感觉更迅速。',
-    ),
-  };
+  static const Map<String, ChangeLogStrings> _offlineTranslations =
+      _translations;
 }

@@ -53,6 +53,7 @@ import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
+import io.ente.ensu.components.ImageAttachmentThumbnail
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
@@ -145,13 +146,24 @@ internal fun MessageInput(
                 verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
             ) {
                 attachments.forEach { attachment ->
-                    io.ente.ensu.components.AttachmentChip(
-                        name = attachment.name,
-                        size = attachment.sizeBytes.formattedFileSize(),
-                        iconRes = HugeIcons.Attachment01Icon,
-                        isUploading = attachment.isUploading,
-                        onDelete = { onRemoveAttachment(attachment) }
-                    )
+                    if (attachment.type == AttachmentType.Image && attachment.localPath != null) {
+                        ImageAttachmentThumbnail(
+                            path = attachment.localPath,
+                            contentDescription = attachment.name,
+                            width = 76.dp,
+                            height = 76.dp,
+                            isUploading = attachment.isUploading,
+                            onDelete = { onRemoveAttachment(attachment) }
+                        )
+                    } else {
+                        io.ente.ensu.components.AttachmentChip(
+                            name = attachment.name,
+                            size = attachment.sizeBytes.formattedFileSize(),
+                            iconRes = HugeIcons.Attachment01Icon,
+                            isUploading = attachment.isUploading,
+                            onDelete = { onRemoveAttachment(attachment) }
+                        )
+                    }
                 }
             }
         }

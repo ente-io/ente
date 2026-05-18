@@ -4,6 +4,7 @@ import "package:ente_configuration/base_configuration.dart";
 import "package:ente_contacts/contacts.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/components/invite_reject_bottom_sheet.dart";
+import "package:ente_legacy/components/legacy_kit_icons.dart";
 import "package:ente_legacy/components/trusted_contact_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/models/legacy_kit_models.dart";
@@ -36,6 +37,8 @@ import "package:logging/logging.dart";
 final _logger = Logger("EmergencyPage");
 const _legacyEmptyStateDescription =
     "Keep your Ente account accessible to people you trust, even if something happens to you.";
+const _legacyKitRecoveryWarning =
+    "Someone is trying to recover your account using a legacy kit";
 
 class EmergencyPage extends StatefulWidget {
   final BaseConfiguration config;
@@ -104,6 +107,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
         final List<EmergencyContact> trustedContacts = info?.contacts ?? [];
         final hasSecondaryLegacyContent =
             legacyKits.isNotEmpty || othersTrustedContacts.isNotEmpty;
+        final hasActiveLegacyKitRecovery =
+            legacyKits.any((kit) => kit.hasActiveRecoverySession);
         final showFullEmptyState = info != null &&
             info!.recoverSessions.isEmpty &&
             trustedContacts.isEmpty &&
@@ -133,6 +138,13 @@ class _EmergencyPageState extends State<EmergencyPage> {
                   child: _buildPageTitle(colorScheme, textTheme),
                 ),
               ),
+              if (info != null && hasActiveLegacyKitRecovery)
+                const SliverPadding(
+                  padding: EdgeInsets.only(top: 20, left: 16, right: 16),
+                  sliver: SliverToBoxAdapter(
+                    child: _WarningBanner(text: _legacyKitRecoveryWarning),
+                  ),
+                ),
               if (showFullEmptyState)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -528,20 +540,20 @@ class _EmergencyPageState extends State<EmergencyPage> {
             textStyle: _legacyRowTitleStyle(
               colorScheme,
               textTheme,
-              isWarning: legacyKits[index].hasActiveRecoverySession,
             ),
             subTitleTextStyle: _legacyRowSubTitleStyle(
               colorScheme,
               textTheme,
-              isWarning: legacyKits[index].hasActiveRecoverySession,
             ),
           ),
           leadingIconSize: 36,
-          leadingIconWidget: const _LegacyKitLeadingIcon(),
+          leadingIconWidget: _LegacyKitLeadingIcon(
+            showWarningBadge: legacyKits[index].hasActiveRecoverySession,
+          ),
           menuItemColor: cardColor,
           singleBorderRadius: 20,
           trailingIcon: Icons.chevron_right,
-          trailingIconColor: colorScheme.strokeBase,
+          trailingIconIsMuted: true,
           surfaceExecutionStates: false,
           alwaysShowSuccessState: false,
           onTap: () async {
@@ -617,23 +629,21 @@ class _EmergencyPageState extends State<EmergencyPage> {
 
   TextStyle _legacyRowTitleStyle(
     EnteColorScheme colorScheme,
-    EnteTextTheme textTheme, {
-    bool isWarning = false,
-  }) {
+    EnteTextTheme textTheme,
+  ) {
     return textTheme.small.copyWith(
-      color: isWarning ? colorScheme.warning500 : colorScheme.textBase,
-      fontWeight: isWarning ? FontWeight.w600 : FontWeight.w500,
+      color: colorScheme.textBase,
+      fontWeight: FontWeight.w500,
       height: 20 / 14,
     );
   }
 
   TextStyle _legacyRowSubTitleStyle(
     EnteColorScheme colorScheme,
-    EnteTextTheme textTheme, {
-    bool isWarning = false,
-  }) {
+    EnteTextTheme textTheme,
+  ) {
     return textTheme.mini.copyWith(
-      color: isWarning ? colorScheme.warning500 : colorScheme.textMuted,
+      color: colorScheme.textMuted,
       height: 16 / 12,
     );
   }
@@ -1039,89 +1049,39 @@ class _FullLegacyEmptyState extends StatelessWidget {
 }
 
 class _LegacyKitLeadingIcon extends StatelessWidget {
-  const _LegacyKitLeadingIcon();
+  final bool showWarningBadge;
+
+  const _LegacyKitLeadingIcon({required this.showWarningBadge});
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox.square(
+    final colorScheme = getEnteColorScheme(context);
+
+    return SizedBox.square(
       dimension: 36,
-      child: Center(
-        child: CustomPaint(
-          size: Size.square(18),
-          painter: _LegacyKitLeadingIconPainter(),
-        ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Center(
+            child: LegacyKitRowIcon(
+              color: colorScheme.primary700,
+            ),
+          ),
+          if (showWarningBadge)
+            const Positioned(
+              left: 20,
+              top: 20,
+              child: SizedBox.square(
+                dimension: 18,
+                child: Center(
+                  child: LegacyKitAlertIcon(),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
-}
-
-class _LegacyKitLeadingIconPainter extends CustomPainter {
-  const _LegacyKitLeadingIconPainter();
-
-  static const _color = Color(0xFF1071FF);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final scale = size.width / 18;
-    final strokePaint = Paint()
-      ..color = _color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5 * scale
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    canvas.save();
-    canvas.scale(scale);
-    canvas.translate(2.25, 1.5);
-    canvas.drawPath(
-      Path()
-        ..moveTo(8.25, 15.7501)
-        ..lineTo(6.54546, 15.7501)
-        ..cubicTo(4.09955, 15.7501, 2.8766, 15.7501, 2.0273, 15.1517)
-        ..cubicTo(1.78397, 14.9802, 1.56794, 14.7769, 1.38578, 14.5479)
-        ..cubicTo(0.750001, 13.7486, 0.750001, 12.5976, 0.750001, 10.2955)
-        ..lineTo(0.750001, 8.38643)
-        ..cubicTo(0.750001, 6.16405, 0.750002, 5.05287, 1.1017, 4.16538)
-        ..cubicTo(1.66711, 2.73864, 2.86285, 1.61323, 4.37877, 1.08108)
-        ..cubicTo(5.32172, 0.750071, 6.50236, 0.75007, 8.86364, 0.750071)
-        ..cubicTo(10.2129, 0.750071, 10.8876, 0.750071, 11.4264, 0.939222)
-        ..cubicTo(12.2927, 1.24331, 12.9759, 1.88639, 13.299, 2.70168)
-        ..cubicTo(13.5, 3.20881, 13.5, 3.84378, 13.5, 5.11371)
-        ..lineTo(13.5, 6.75007),
-      strokePaint,
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(0.75, 8.25007)
-        ..cubicTo(0.750001, 6.86936, 1.86929, 5.75007, 3.25, 5.75007)
-        ..cubicTo(3.74934, 5.75007, 4.33803, 5.83757, 4.82352, 5.70748)
-        ..cubicTo(5.25489, 5.59189, 5.59182, 5.25496, 5.70741, 4.82359)
-        ..cubicTo(5.8375, 4.3381, 5.75, 3.74941, 5.75, 3.25007)
-        ..cubicTo(5.75, 1.86936, 6.86929, 0.750071, 8.25, 0.750071),
-      strokePaint,
-    );
-    canvas.restore();
-
-    canvas.save();
-    canvas.scale(scale);
-    canvas.drawPath(
-      Path()
-        ..moveTo(9.85601, 10.0817)
-        ..cubicTo(10.7611, 9.53338, 11.551, 9.75434, 12.0255, 10.1063)
-        ..cubicTo(12.2201, 10.2506, 12.3174, 10.3228, 12.3746, 10.3228)
-        ..cubicTo(12.4319, 10.3228, 12.5291, 10.2506, 12.7237, 10.1063)
-        ..cubicTo(13.1983, 9.75434, 13.9882, 9.53338, 14.8932, 10.0817)
-        ..cubicTo(16.081, 10.8013, 16.3498, 13.1753, 13.61, 15.1781)
-        ..cubicTo(13.0882, 15.5596, 12.8273, 15.7503, 12.3746, 15.7503)
-        ..cubicTo(11.922, 15.7503, 11.6611, 15.5596, 11.1392, 15.1781)
-        ..cubicTo(8.39945, 13.1753, 8.66822, 10.8013, 9.85601, 10.0817),
-      strokePaint,
-    );
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_LegacyKitLeadingIconPainter oldDelegate) => false;
 }
 
 class _WarningBanner extends StatelessWidget {
@@ -1133,21 +1093,34 @@ class _WarningBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final backgroundColor = colorScheme.isLightTheme
+        ? const Color(0xFFFAEBEB)
+        : const Color(0xFF292929);
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.warning400.withValues(alpha: 0.13),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset("assets/warning-red.png", width: 32, height: 32),
-          const SizedBox(width: 12),
+          const SizedBox(
+            width: 18,
+            height: 20,
+            child: Center(
+              child: LegacyKitAlertIcon(),
+            ),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: textTheme.bodyBold.copyWith(color: colorScheme.warning400),
+              style: textTheme.bodyBold.copyWith(
+                color: colorScheme.warning400,
+                height: 20 / 14,
+              ),
             ),
           ),
         ],

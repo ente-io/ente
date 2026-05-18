@@ -504,7 +504,7 @@
   "pinLock": "PIN",
   "enterPin": "PINを入力してください",
   "setNewPin": "新しいPINを設定",
-  "importFailureDescNew": "選択されたファイルを解析できませんでした。",
+  "importFailureDesc": "選択されたファイルを解析できませんでした。",
   "appLockNotEnabled": "アプリロックが有効になっていません",
   "appLockNotEnabledDescription": "セキュリティ > アプリロック からアプリロックを有効化してください",
   "authToViewPasskey": "パスキーを見るには認証してください",

@@ -112,7 +112,7 @@ class RecoveryDateSelector extends StatelessWidget {
     final cardColor = colorScheme.isLightTheme
         ? Colors.white
         : colorScheme.backgroundElevated2;
-    final borderColor = colorScheme.primary700.withValues(alpha: 0.24);
+    final checkColor = colorScheme.isLightTheme ? Colors.white : Colors.black;
 
     return Material(
       color: cardColor,
@@ -125,7 +125,8 @@ class RecoveryDateSelector extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16, right: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: isSelected ? Border.all(color: borderColor) : null,
+            border:
+                isSelected ? Border.all(color: colorScheme.primary700) : null,
           ),
           child: Row(
             children: [
@@ -139,12 +140,13 @@ class RecoveryDateSelector extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: 34,
-                height: 34,
+                width: 40,
+                height: 40,
                 child: isSelected
                     ? Center(
                         child: _RecoveryDateSelectedIcon(
                           color: colorScheme.primary700,
+                          checkColor: checkColor,
                         ),
                       )
                     : const SizedBox.shrink(),
@@ -159,22 +161,33 @@ class RecoveryDateSelector extends StatelessWidget {
 
 class _RecoveryDateSelectedIcon extends StatelessWidget {
   final Color color;
+  final Color checkColor;
 
-  const _RecoveryDateSelectedIcon({required this.color});
+  const _RecoveryDateSelectedIcon({
+    required this.color,
+    required this.checkColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       size: const Size.square(18),
-      painter: _RecoveryDateSelectedIconPainter(color),
+      painter: _RecoveryDateSelectedIconPainter(
+        color: color,
+        checkColor: checkColor,
+      ),
     );
   }
 }
 
 class _RecoveryDateSelectedIconPainter extends CustomPainter {
   final Color color;
+  final Color checkColor;
 
-  const _RecoveryDateSelectedIconPainter(this.color);
+  const _RecoveryDateSelectedIconPainter({
+    required this.color,
+    required this.checkColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -201,7 +214,7 @@ class _RecoveryDateSelectedIconPainter extends CustomPainter {
         ..lineTo(7.875, 11.25)
         ..lineTo(12, 6.75),
       Paint()
-        ..color = Colors.white
+        ..color = checkColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5
         ..strokeCap = StrokeCap.round
@@ -213,6 +226,6 @@ class _RecoveryDateSelectedIconPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RecoveryDateSelectedIconPainter oldDelegate) {
-    return color != oldDelegate.color;
+    return color != oldDelegate.color || checkColor != oldDelegate.checkColor;
   }
 }

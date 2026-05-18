@@ -7,10 +7,10 @@ import 'package:dio/io.dart';
 import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/core/network/endpoint_config.dart";
 import 'package:photos/core/network/ente_interceptor.dart';
-import "package:photos/events/endpoint_updated_event.dart";
+import "package:shared_preferences/shared_preferences.dart";
 import "package:ua_client_hints/ua_client_hints.dart";
 
 class NetworkClient {
@@ -22,9 +22,13 @@ class NetworkClient {
   static const kConnectTimeout = 15;
   static const _connectTimeout = Duration(seconds: kConnectTimeout);
 
-  Future<void> init(PackageInfo packageInfo) async {
+  Future<void> init(
+    PackageInfo packageInfo,
+    SharedPreferences preferences,
+  ) async {
+    final endpointConfig = EndpointConfig(preferences);
     final String ua = await userAgent();
-    final endpoint = Configuration.instance.getHttpEndpoint();
+    final endpoint = endpointConfig.endpoint;
     _dio = Dio(
       BaseOptions(
         connectTimeout: _connectTimeout,
@@ -57,9 +61,8 @@ class NetworkClient {
     }
     _endpointUpdatedSubscription =
         Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
-      final endpoint = Configuration.instance.getHttpEndpoint();
-      _enteDio.options.baseUrl = endpoint;
-      _setupInterceptors(endpoint);
+      _enteDio.options.baseUrl = event.endpoint;
+      _setupInterceptors(event.endpoint);
     });
   }
 

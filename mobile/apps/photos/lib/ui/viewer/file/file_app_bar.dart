@@ -52,6 +52,8 @@ class FileAppBar extends StatefulWidget {
   final ValueNotifier<bool> enableFullScreenNotifier;
   final GalleryType? galleryType;
   final DetailPageMode mode;
+  final bool showEditAction;
+  final FutureOr<void> Function(BuildContext context)? onBackPressed;
 
   const FileAppBar(
     this.file,
@@ -60,6 +62,8 @@ class FileAppBar extends StatefulWidget {
     required this.enableFullScreenNotifier,
     this.galleryType,
     this.mode = DetailPageMode.full,
+    this.showEditAction = true,
+    this.onBackPressed,
     super.key,
   });
 
@@ -83,7 +87,8 @@ class FileAppBarState extends State<FileAppBar> {
   void didUpdateWidget(FileAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (detailPageFileIdentifier(oldWidget.file) !=
-        detailPageFileIdentifier(widget.file)) {
+            detailPageFileIdentifier(widget.file) ||
+        oldWidget.showEditAction != widget.showEditAction) {
       _getActions();
     }
   }
@@ -206,6 +211,11 @@ class FileAppBarState extends State<FileAppBar> {
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () {
+                    final onBackPressed = widget.onBackPressed;
+                    if (onBackPressed != null && !isGuestView) {
+                      unawaited(Future.sync(() => onBackPressed(context)));
+                      return;
+                    }
                     isGuestView
                         ? _requestAuthentication()
                         : Navigator.of(context).pop();
@@ -367,9 +377,10 @@ class FileAppBarState extends State<FileAppBar> {
         }
       }
       // Edit option for images, live photos, and videos
-      if (widget.file.fileType == FileType.image ||
-          widget.file.fileType == FileType.livePhoto ||
-          widget.file.fileType == FileType.video) {
+      if (widget.showEditAction &&
+          (widget.file.fileType == FileType.image ||
+              widget.file.fileType == FileType.livePhoto ||
+              widget.file.fileType == FileType.video)) {
         items.add(
           EntePopupMenuItem(
             AppLocalizations.of(context).edit,

@@ -712,7 +712,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   Future<void> _onRunMLDuringInteractionChanged() async {
     try {
       final enabled = !localSettings.runMLDuringInteractionOverride;
-      await computeController.setMLDebugInteractionOverride(turnOn: enabled);
+      await computeController.setMLInteractionOverride(turnOn: enabled);
       logger.info(
         'run ML during interaction is turned ${enabled ? 'on' : 'off'}',
       );

@@ -273,7 +273,7 @@
   "after1Month": "Sau 1 tháng",
   "after1Year": "Sau 1 năm",
   "manageParticipants": "Quản lý",
-  "albumParticipantsCount": "{count, plural, =0 {Không có người tham gia} =1 {1 người tham gia} other {{count} Người tham gia}}",
+  "albumParticipantsCount": "{count, plural, =0 {Không người tham gia} other {{count} Người tham gia}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -298,7 +298,7 @@
   "publicLinkEnabled": "Liên kết công khai đã được bật",
   "shareALink": "Chia sẻ một liên kết",
   "sharedAlbumSectionDescription": "Tạo album chia sẻ và cộng tác với người dùng Ente khác, bao gồm người dùng gói miễn phí.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Chia sẻ với những người cụ thể} =1 {Chia sẻ với 1 người} other {Chia sẻ với {numberOfPeople} người}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Chia sẻ với người cụ thể} other {Đã chia sẻ với {numberOfPeople} người}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -562,7 +562,7 @@
   "updateSettings": "Cập nhật cài đặt",
   "updatingFolderSelection": "Đang cập nhật lựa chọn thư mục...",
   "itemCount": "{count, plural, other{{count} mục}}",
-  "deleteItemCount": "{count, plural, =1 {Xóa {count} mục} other {Xóa {count} mục}}",
+  "deleteItemCount": "{count, plural, other {Xóa {count} mục}}",
   "duplicateItemsGroup": "{count} tệp, {formattedSize} mỗi tệp",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -697,7 +697,7 @@
   "inviteLimitReached": "Bạn đã thêm 5 lời mời. Xóa bớt một",
   "emailAddress": "Địa chỉ email",
   "sendInvites": "Gửi lời mời",
-  "sendCountInvites": "{count, plural, =0 {Gửi lời mời} =1 {Gửi 1 lời mời} other {Gửi {count} lời mời}}",
+  "sendCountInvites": "{count, plural, =0 {Gửi lời mời} other {Gửi {count} lời mời}}",
   "@sendCountInvites": {
     "placeholders": {
       "count": {
@@ -719,7 +719,7 @@
       }
     }
   },
-  "invitesSentCount": "{count, plural, =1 {Lời mời đã gửi} other {Lời mời đã gửi}}",
+  "invitesSentCount": "{count, plural, other {Lời mời đã gửi}}",
   "@invitesSentCount": {
     "placeholders": {
       "count": {
@@ -996,6 +996,15 @@
   "appstoreSubscription": "Gói AppStore",
   "subAlreadyLinkedErrMessage": "ID {id} của bạn đã được liên kết với một tài khoản Ente khác.\nNếu bạn muốn sử dụng ID {id} này với tài khoản này, vui lòng liên hệ bộ phận hỗ trợ của chúng tôi.",
   "visitWebToManage": "Vui lòng truy cập {webUrl} để quản lý gói đăng ký",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "managePaymentMethod": "Quản lý phương thức thanh toán",
   "couldNotUpdateSubscription": "Không thể cập nhật gói",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.com và chúng tôi rất sẵn sàng giúp đỡ!",
@@ -1155,11 +1164,11 @@
   "share": "Chia sẻ",
   "unhideToAlbum": "Hiện lại trong album",
   "restoreToAlbum": "Khôi phục vào album",
-  "moveItem": "{count, plural, =1 {Di chuyển mục} other {Di chuyển các mục}}",
+  "moveItem": "{count, plural, other {Di chuyển các mục}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, =1 {Thêm vào} other {Thêm vào}}",
+  "addItem": "{count, plural, other {Thêm các mục}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -1187,7 +1196,7 @@
   "referFriendsAnd2xYourPlan": "Giới thiệu bạn bè để được ×2 dung lượng gói của bạn",
   "shareAlbumHint": "Mở album và nhấn nút chia sẻ ở góc trên bên phải để chia sẻ.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Trên các mục là số ngày còn lại trước khi xóa vĩnh viễn",
-  "trashDaysLeft": "{count, plural, =0 {Sắp xóa} =1 {1 ngày} other {{count} ngày}}",
+  "trashDaysLeft": "{count, plural, =0 {Sắp xóa} other {{count} ngày}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1306,7 +1315,7 @@
   "authToViewYourMemories": "Vui lòng xác thực để xem kỷ niệm",
   "unlock": "Mở khóa",
   "freeUpSpace": "Giải phóng dung lượng",
-  "freeUpSpaceSaving": "{count, plural, =1 {Xóa chúng khỏi thiết bị để giải phóng {formattedSize}} other {Xóa chúng khỏi thiết bị để giải phóng {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, other {Xóa chúng khỏi thiết bị để giải phóng {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, other {{formattedNumber} tệp}} trong album đã được sao lưu an toàn",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1340,7 +1349,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Bạn vẫn có thể truy cập {count, plural, =1 {chúng} other {chúng}} trên Ente, miễn là gói của bạn còn hiệu lực",
+  "freeUpAccessPostDelete": "Bạn vẫn có thể truy cập {count, plural, other {chúng}} trên Ente miễn là gói của bạn còn hiệu lực",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1452,6 +1461,15 @@
   "loadMessage6": "Bạn có thể chia sẻ liên kết đến album của mình với người thân",
   "loadMessage7": "Các ứng dụng di động của chúng tôi chạy ngầm để mã hóa và sao lưu bất kỳ ảnh nào bạn mới chụp",
   "loadMessage8": "{webUrl} có một trình tải lên mượt mà",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Chúng tôi sử dụng Xchacha20Poly1305 để mã hóa dữ liệu của bạn",
   "photoDescriptions": "Mô tả ảnh",
   "searchResultFileName": "Tên tệp",
@@ -1730,6 +1748,15 @@
   "pair": "Kết nối",
   "deviceNotFound": "Không tìm thấy thiết bị",
   "castInstruction": "Truy cập {castUrl} trên thiết bị bạn muốn kết nối.\n\nNhập mã dưới đây để phát album trên TV của bạn.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Nhập mã",
   "joinDiscord": "Tham gia Discord",
   "locations": "Vị trí",
@@ -1739,8 +1766,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Tìm nhanh người theo tên",
-  "addViewers": "{count, plural, =0 {Thêm người xem} =1 {Thêm người xem} other {Thêm người xem}}",
-  "addCollaborators": "{count, plural, =0 {Thêm cộng tác viên} =1 {Thêm cộng tác viên} other {Thêm cộng tác viên}}",
+  "addViewers": "{count, plural, =0 {Thêm người xem} other {Thêm các người xem}}",
+  "addCollaborators": "{count, plural, =0 {Thêm cộng tác viên} other {Thêm các cộng tác viên}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Nhấn giữ một email để xác minh mã hóa đầu cuối.",
   "developerSettingsWarning": "Bạn có chắc muốn thay đổi cài đặt Nhà phát triển không?",
   "developerSettings": "Cài đặt Nhà phát triển",
@@ -1876,7 +1903,7 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {Đã thêm 1 tệp vào {personName}} other {Đã thêm {count} tệp vào {personName}}}",
+  "addedFilesToPerson": "{count, plural, other {Đã thêm {count} tệp vào {personName}}}",
   "@addedFilesToPerson": {
     "description": "Toast shown after manually tagging one or more files to a person.",
     "placeholders": {
@@ -1890,7 +1917,7 @@
       }
     }
   },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1tệp đã được liên kết với {personName}} other {{count} tệp đã được liên kết với {personName}}}",
+  "filesAlreadyLinkedToPerson": "{count, plural, other {{count} tệp đã được liên kết với {personName}}}",
   "@filesAlreadyLinkedToPerson": {
     "description": "Toast shown when selected files are already manually tagged to the selected person.",
     "placeholders": {
@@ -1953,7 +1980,7 @@
   "enableMachineLearningBanner": "Bật học máy để tìm kiếm vi diệu và nhận diện khuôn mặt",
   "searchDiscoverEmptySection": "Ảnh sẽ được hiển thị ở đây sau khi xử lý và đồng bộ hoàn tất",
   "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Chưa thêm người xem} =1 {Đã thêm 1 người xem} other {Đã thêm {count} người xem}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Chưa thêm người xem} other {Đã thêm {count} người xem}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1963,7 +1990,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Chưa có cộng tác viên} =1 {Đã thêm 1 cộng tác viên} other {Đã thêm {count} cộng tác viên}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Chưa có cộng tác viên} other {Đã thêm {count} cộng tác viên}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1973,7 +2000,7 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
-  "adminsSuccessfullyAdded": "{count, plural, =0 {Chưa thêm quản trị viên} =1 {Đã thêm 1 quản trị viên} other {Đã thêm {count} quản trị viên}}",
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Chưa thêm quản trị viên} other {{count} quản trị viên đã được thêm}}",
   "@adminsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1983,7 +2010,7 @@
     },
     "description": "Number of admins that were successfully added to an album."
   },
-  "addAdmins": "{count, plural, =0 {Thêm quản trị viên} =1 {Thêm quản trị viên} other {Thêm quản trị viên}}",
+  "addAdmins": "{count, plural, =0 {Thêm quản trị viên} other {Thêm các quản trị viên}}",
   "@addAdmins": {
     "placeholders": {
       "count": {
@@ -2062,7 +2089,7 @@
   },
   "currentlyRunning": "đang chạy",
   "ignored": "bỏ qua",
-  "photosCount": "{count, plural, =0 {Chưa có ảnh} =1 {1 ảnh} other {{count} ảnh}}",
+  "photosCount": "{count, plural, =0 {Chưa có ảnh} other {{count} ảnh}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -2356,7 +2383,7 @@
   "moveSelectedPhotosToOneDate": "Di chuyển ảnh đã chọn đến một ngày",
   "shiftDatesAndTime": "Di chuyển ngày và giờ",
   "photosKeepRelativeTimeDifference": "Ảnh giữ nguyên chênh lệch thời gian tương đối",
-  "photocountPhotos": "{count, plural, =0 {Chưa có ảnh} =1 {1 ảnh} other {{count} ảnh}}",
+  "photocountPhotos": "{count, plural, =0 {Chưa có ảnh} other {{count} ảnh}}",
   "@photocountPhotos": {
     "placeholders": {
       "count": {
@@ -2370,7 +2397,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Các mục đã chọn sẽ bị xóa khỏi người này, nhưng không bị xóa khỏi thư viện của bạn.",
   "throughTheYears": "{dateFormat} qua các năm",
   "thisWeekThroughTheYears": "Tuần này qua các năm",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Tuần này, {count} năm trước} other {Tuần này, {count} năm trước}}",
+  "thisWeekXYearsAgo": "{count, plural, other {Tuần này, {count} năm trước}}",
   "youAndThem": "Bạn và {name}",
   "admiringThem": "Ngưỡng mộ {name}",
   "embracingThem": "Yêu mến {name}",
@@ -2494,7 +2521,7 @@
   "font": "Phông chữ",
   "background": "Nền",
   "align": "Căn chỉnh",
-  "addedToAlbums": "{count, plural, =1{Đã thêm vào 1 album thành công} other{Đã thêm vào {count} album thành công}}",
+  "addedToAlbums": "{count, plural, other{Đã thêm vào {count} album thành công}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {
@@ -2533,7 +2560,7 @@
   "findSimilarImages": "Tìm ảnh giống nhau",
   "noSimilarImagesFound": "Không tìm thấy ảnh giống nhau",
   "yourPhotosLookUnique": "Ảnh của bạn trông độc đáo",
-  "similarGroupsFound": "{count, plural, =1{{count} nhóm được tìm thấy} other{{count} nhóm được tìm thấy}}",
+  "similarGroupsFound": "{count, plural, other{{count} nhóm đã tìm thấy}}",
   "@similarGroupsFound": {
     "placeholders": {
       "count": {
@@ -2964,7 +2991,7 @@
       }
     }
   },
-  "likesCount": "{count, plural, =1{1 thích} other{{count} thích}}",
+  "likesCount": "{count, plural, other{{count} thích}}",
   "@likesCount": {
     "description": "Number of likes with pluralization",
     "placeholders": {
@@ -2985,7 +3012,7 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, =1{Không thể thích 1 album} other{Không thể thích {count} album}}",
+  "failedToLikeAlbums": "{count, plural, other{Không thể thích {count} album}}",
   "@failedToLikeAlbums": {
     "description": "Error when liking albums fails",
     "placeholders": {
@@ -3002,7 +3029,7 @@
   "@couldNotLoadSelectedPhoto": {
     "description": "Toast when the selected contact photo cannot be loaded"
   },
-  "albumsCount": "{count, plural, =1{1 album} other{{count} album}}",
+  "albumsCount": "{count, plural, other{{count} album}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -3048,7 +3075,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, =0{Chưa có bình luận} =1{1 bình luận} other{{count} bình luận}}",
+  "commentsCount": "{count, plural, =0{Chưa có bình luận} other{{count} bình luận}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

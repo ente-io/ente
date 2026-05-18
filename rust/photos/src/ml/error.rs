@@ -12,6 +12,8 @@ pub enum MlError {
     Preprocess(String),
     #[error("onnx runtime error: {0}")]
     Ort(String),
+    #[error("corrupt model: {0}")]
+    CorruptModel(String),
     #[error("postprocess error: {0}")]
     Postprocess(String),
     #[error("runtime error: {0}")]

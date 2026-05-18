@@ -90,18 +90,15 @@ jobs:
               run: flutter_rust_bridge_codegen generate
               working-directory: mobile/packages/rust
 
-            - name: Setup keys
-              uses: timheuer/base64-to-file@v1
-              with:
-                  fileName: "keystore/ente_locker_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY_LOCKER }}
+            - name: Add keystore
+              run: echo "${{ secrets.SIGNING_KEY_LOCKER }}" | base64 -d > "$RUNNER_TEMP/ente_locker_key.jks"
 
             - name: Build independent APK
               run: |
                   flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
                   mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_locker_key.jks"
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_locker_key.jks
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}
                   SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_LOCKER }}
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_LOCKER }}

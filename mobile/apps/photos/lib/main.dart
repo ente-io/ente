@@ -16,6 +16,7 @@ import "package:flutter/services.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import "package:intl/date_symbol_data_local.dart";
 import 'package:logging/logging.dart';
+import "package:media_extension/media_extension_action_types.dart";
 import "package:media_kit/media_kit.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import 'package:path_provider/path_provider.dart';
@@ -25,6 +26,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
+import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/l10n/l10n.dart";
@@ -56,6 +58,7 @@ import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
+import "package:photos/utils/intent_util.dart";
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:rive/rive.dart' as rive;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -74,6 +77,11 @@ bool isProcessBg = true;
 bool _stopHearBeat = false;
 bool _isRustInitialized = false;
 Future<void>? _rustInitFuture;
+
+enum ForegroundStartupMode {
+  normal,
+  picker,
+}
 
 void main() async {
   debugRepaintRainbowEnabled = false;
@@ -98,7 +106,10 @@ void main() async {
   MediaKit.ensureInitialized();
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
-  await _runInForeground(savedThemeMode);
+  final initialMediaExtensionAction = Platform.isAndroid
+      ? await initIntentAction()
+      : MediaExtentionAction(action: IntentAction.main);
+  await _runInForeground(savedThemeMode, initialMediaExtensionAction);
 
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
@@ -108,15 +119,33 @@ void main() async {
   unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 }
 
-Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
+Future<void> _runInForeground(
+  AdaptiveThemeMode? savedThemeMode,
+  MediaExtentionAction initialMediaExtensionAction,
+) async {
   return await runWithLogs(() async {
     _logger.info("Starting app in foreground");
     isProcessBg = false;
-    await _init(false, via: 'mainMethod');
+    final isPickerStartup =
+        initialMediaExtensionAction.action == IntentAction.pick;
+    if (isPickerStartup) {
+      unawaited(_warmPickerFilesDb());
+    }
+    await _init(
+      false,
+      via: 'mainMethod',
+      startupMode: isPickerStartup
+          ? ForegroundStartupMode.picker
+          : ForegroundStartupMode.normal,
+    );
     final Locale? locale = await getLocale(noFallback: true);
     runApp(
       AppLock(
-        builder: (args) => EnteApp(locale, savedThemeMode),
+        builder: (args) => EnteApp(
+          locale,
+          savedThemeMode,
+          initialMediaExtensionAction: initialMediaExtensionAction,
+        ),
         lockScreen: const LockScreen(),
         enabled: await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
@@ -126,12 +155,26 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
+    if (isPickerStartup) {
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(SemanticSearchService.instance.init());
       unawaited(_warmForegroundDeferredServices());
     });
     unawaited(_scheduleFGSync('appStart in FG'));
   });
+}
+
+Future<void> _warmPickerFilesDb() async {
+  final tlog = TimeLogger();
+  try {
+    _logger.info("Picker FilesDB warm-up init $tlog");
+    await FilesDB.instance.sqliteAsyncDB;
+    _logger.info("Picker FilesDB warm-up done $tlog");
+  } catch (e, s) {
+    _logger.warning("Picker FilesDB warm-up failed", e, s);
+  }
 }
 
 Future<void> _warmForegroundDeferredServices() async {
@@ -201,6 +244,18 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await _scheduleHeartBeat(prefs, true);
     await _ensureRustInitialized(via: 'workmanager:$taskId');
 
+    _logger.info("[BG TASK] NetworkClient init $tlog");
+    await NetworkClient.instance.init(packageInfo, prefs);
+    _logger.info("[BG TASK] NetworkClient init done $tlog");
+
+    ServiceLocator.instance.init(
+      prefs,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
+    );
+    NotificationService.instance.init(prefs);
+
     _logger.info("(for debugging) Configuration init $tlog");
     await Configuration.instance.init();
     _logger.info("(for debugging) Configuration done $tlog");
@@ -215,16 +270,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await Computer.shared().turnOn(workersCount: 4);
     CryptoUtil.init();
 
-    // Init Network Utils
-    await NetworkClient.instance.init(packageInfo);
-
-    // Global Services
-    ServiceLocator.instance.init(
-      prefs,
-      NetworkClient.instance.enteDio,
-      NetworkClient.instance.getDio(),
-      packageInfo,
-    );
     // Initialize early so thermal/battery listeners can warm up while the
     // rest of background services are being initialized.
     final controller = computeController;
@@ -243,7 +288,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     // Misc Services
     await UserService.instance.init();
-    NotificationService.instance.init(prefs);
     SocialNotificationCoordinator.instance.init(prefs);
     await NotificationService.instance.initializeForBackground();
 
@@ -300,9 +344,15 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   }
 }
 
-Future<void> _init(bool isBackground, {String via = ''}) async {
+Future<void> _init(
+  bool isBackground, {
+  String via = '',
+  ForegroundStartupMode startupMode = ForegroundStartupMode.normal,
+}) async {
   try {
     bool initComplete = false;
+    final isPickerStartup =
+        !isBackground && startupMode == ForegroundStartupMode.picker;
     final TimeLogger tlog = TimeLogger();
     Future.delayed(const Duration(seconds: 15), () {
       if (!initComplete && !isBackground) {
@@ -338,15 +388,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
 
-    _logger.info("Lockscreen init $tlog");
-    unawaited(LockScreenSettings.instance.init(preferences));
-
-    _logger.info("Configuration init $tlog");
-    await Configuration.instance.init();
-    _logger.info("Configuration done $tlog");
-
     _logger.info("NetworkClient init $tlog");
-    await NetworkClient.instance.init(packageInfo);
+    await NetworkClient.instance.init(packageInfo, preferences);
     _logger.info("NetworkClient init done $tlog");
 
     ServiceLocator.instance.init(
@@ -355,6 +398,14 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+
+    _logger.info("Lockscreen init $tlog");
+    unawaited(LockScreenSettings.instance.init(preferences));
+
+    _logger.info("Configuration init $tlog");
+    await Configuration.instance.init();
+    _logger.info("Configuration done $tlog");
+
     await MemoryShareService.instance.init();
 
     _logger.info("UserService init $tlog");
@@ -366,9 +417,24 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init done $tlog");
     SocialNotificationCoordinator.instance.init(preferences);
 
+    SearchService.instance.init();
+
+    if (isPickerStartup) {
+      if (Configuration.instance.hasConfiguredAccount()) {
+        _logger.info("Minor inits for logged in state $tlog");
+        PersonService.init(entityService, MLDataDB.instance, preferences);
+        _logger.info("PersonService init for picker startup done $tlog");
+        await FavoritesService.instance.initFav();
+        _logger.info("FavoritesService init done $tlog");
+      }
+      _logger.info("Picker startup init done $tlog");
+      initComplete = true;
+      _stopHearBeat = true;
+      return;
+    }
+
     FavoritesService.instance.initFav().ignore();
     LocalFileUpdateService.instance.init(preferences);
-    SearchService.instance.init();
 
     _logger.info("FileUploader init $tlog");
     await FileUploader.instance.init(preferences, isBackground);

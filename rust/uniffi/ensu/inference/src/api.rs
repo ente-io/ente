@@ -109,6 +109,31 @@ pub struct GenerateSummary {
     pub total_time_ms: Option<i64>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+pub struct LlmModelDownloadTarget {
+    pub label: String,
+    pub url: String,
+    pub destination_path: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+pub struct LlmModelDownloadProgress {
+    pub label: String,
+    pub downloaded_bytes: i64,
+    pub total_bytes: Option<i64>,
+    pub file_downloaded_bytes: i64,
+    pub file_total_bytes: Option<i64>,
+    pub percentage: f64,
+    pub elapsed_ms: i64,
+    pub bytes_per_second: f64,
+    pub file_elapsed_ms: i64,
+    pub file_bytes_per_second: f64,
+    pub retry_count: i32,
+    pub file_retry_count: i32,
+    pub file_complete: bool,
+    pub complete: bool,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, uniffi::Enum)]
 pub enum GenerateEvent {
     Text {
@@ -138,6 +163,12 @@ pub struct ContextHandle {
 #[uniffi::export(callback_interface)]
 pub trait GenerateEventCallback: Send + Sync {
     fn on_event(&self, event: GenerateEvent);
+}
+
+#[uniffi::export(callback_interface)]
+pub trait LlmModelDownloadCallback: Send + Sync {
+    fn on_progress(&self, progress: LlmModelDownloadProgress);
+    fn is_cancelled(&self) -> bool;
 }
 
 impl From<ModelLoadParams> for core::ModelLoadParams {
@@ -258,6 +289,16 @@ impl From<GenerateChatRequest> for core::GenerateChatRequest {
     }
 }
 
+impl From<LlmModelDownloadTarget> for core::LlmModelDownloadTarget {
+    fn from(value: LlmModelDownloadTarget) -> Self {
+        Self {
+            label: value.label,
+            url: value.url,
+            destination_path: value.destination_path,
+        }
+    }
+}
+
 impl From<core::GenerateSummary> for GenerateSummary {
     fn from(value: core::GenerateSummary) -> Self {
         Self {
@@ -265,6 +306,27 @@ impl From<core::GenerateSummary> for GenerateSummary {
             prompt_tokens: value.prompt_tokens,
             generated_tokens: value.generated_tokens,
             total_time_ms: value.total_time_ms,
+        }
+    }
+}
+
+impl From<core::LlmModelDownloadProgress> for LlmModelDownloadProgress {
+    fn from(value: core::LlmModelDownloadProgress) -> Self {
+        Self {
+            label: value.label,
+            downloaded_bytes: u64_to_i64(value.downloaded_bytes),
+            total_bytes: value.total_bytes.map(u64_to_i64),
+            file_downloaded_bytes: u64_to_i64(value.file_downloaded_bytes),
+            file_total_bytes: value.file_total_bytes.map(u64_to_i64),
+            percentage: value.percentage,
+            elapsed_ms: u64_to_i64(value.elapsed_ms),
+            bytes_per_second: value.bytes_per_second,
+            file_elapsed_ms: u64_to_i64(value.file_elapsed_ms),
+            file_bytes_per_second: value.file_bytes_per_second,
+            retry_count: u32_to_i32(value.retry_count),
+            file_retry_count: u32_to_i32(value.file_retry_count),
+            file_complete: value.file_complete,
+            complete: value.complete,
         }
     }
 }
@@ -287,6 +349,14 @@ impl From<core::GenerateEvent> for GenerateEvent {
             core::GenerateEvent::Error { job_id, message } => Self::Error { job_id, message },
         }
     }
+}
+
+fn u64_to_i64(value: u64) -> i64 {
+    i64::try_from(value).unwrap_or(i64::MAX)
+}
+
+fn u32_to_i32(value: u32) -> i32 {
+    i32::try_from(value).unwrap_or(i32::MAX)
 }
 
 struct CallbackSink {
@@ -348,6 +418,23 @@ pub fn get_ensu_defaults() -> EnsuDefaults {
 }
 
 #[uniffi::export]
+pub fn download_llm_model_files(
+    targets: Vec<LlmModelDownloadTarget>,
+    callback: Box<dyn LlmModelDownloadCallback>,
+) -> Result<(), InferenceError> {
+    let callback: Arc<dyn LlmModelDownloadCallback> = Arc::from(callback);
+    let progress_callback = Arc::clone(&callback);
+    let cancel_callback = Arc::clone(&callback);
+    let targets = targets.into_iter().map(Into::into).collect();
+    core::download_llm_model_files(
+        targets,
+        move |progress| progress_callback.on_progress(progress.into()),
+        move || cancel_callback.is_cancelled(),
+    )
+    .map_err(InferenceError::from)
+}
+
+#[uniffi::export]
 pub fn apply_chat_template(
     model: Arc<ModelHandle>,
     messages: Vec<ChatMessage>,
@@ -362,6 +449,16 @@ pub fn apply_chat_template(
         add_assistant,
     )
     .map_err(InferenceError::from)
+}
+
+#[uniffi::export]
+pub fn prewarm_multimodal_context(
+    context: Arc<ContextHandle>,
+    mmproj_path: String,
+    media_marker: Option<String>,
+) -> Result<(), InferenceError> {
+    core::prewarm_multimodal_context(context.handle.as_ref(), mmproj_path, media_marker)
+        .map_err(InferenceError::from)
 }
 
 #[uniffi::export]

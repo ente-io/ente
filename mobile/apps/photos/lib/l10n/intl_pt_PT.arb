@@ -270,16 +270,6 @@
   "after1Month": "Depois de 1 mês",
   "after1Year": "Depois de 1 ano",
   "manageParticipants": "Gerir",
-  "albumParticipantsCount": "{count, plural, =0 {Nenhum participante} =1 {1 participante} other {{count} participantes}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Criar um link para permitir que as pessoas adicionem e visualizem fotos em seu álbum compartilhado sem precisar de um aplicativo Ente ou conta. Ótimo para coletar fotos do evento.",
   "collectPhotos": "Coletar fotos",
   "collaborativeLink": "Link colaborativo",
@@ -295,15 +285,6 @@
   "publicLinkEnabled": "Link público ativado",
   "shareALink": "Partilhar um link",
   "sharedAlbumSectionDescription": "Criar álbuns compartilhados e colaborativos com outros usuários da Ente, incluindo usuários em planos gratuitos.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Este é o seu ID de verificação",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Alguém compartilhando álbuns com você deve ver o mesmo ID no seu dispositivo.",
   "howToViewShareeVerificationID": "Por favor, peça-lhes para pressionar longamente o endereço de e-mail na tela de configurações e verifique se os IDs de ambos os dispositivos coincidem.",
@@ -549,7 +530,6 @@
   "updateSettings": "Atualizar definições",
   "updatingFolderSelection": "Atualizando seleção de pasta...",
   "itemCount": "{count, plural, one{{count} item} other{{count} itens}}",
-  "deleteItemCount": "{count, plural, =1 {Apagar {count} item} other {Apagar {count} itens}}",
   "duplicateItemsGroup": "{count} arquivos, {formattedSize} cada",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -673,15 +653,6 @@
   "inviteLimitReached": "Adicionou 5 convites. Remova um para adicionar outro",
   "emailAddress": "Correio eletrónico",
   "sendInvites": "Partilhar convites",
-  "sendCountInvites": "{count, plural, =0 {Partilhar convites} =1 {Partilhar 1 convite} other {Partilhar {count} convites}}",
-  "@sendCountInvites": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "enterAnEmailAddress": "Introduza um endereço eletrónico",
   "enterAValidEmailAddress": "Introduza um endereço eletrónico válido",
   "thisUserIsNotOnEnte": "Este utilizador não está em Ente",
@@ -796,6 +767,15 @@
   "appstoreSubscription": "Subscrição da AppStore",
   "subAlreadyLinkedErrMessage": "Seu {id} já está vinculado a outra conta Ente.\nSe você gostaria de usar seu {id} com esta conta, por favor contate nosso suporte''",
   "visitWebToManage": "Visite {webUrl} para gerir a sua subscrição",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "Não foi possível atualizar a subscrição",
   "paymentFailed": "O pagamento falhou",
   "paymentFailedTalkToProvider": "Por favor, fale com o suporte {providerName} se você foi cobrado",
@@ -912,14 +892,6 @@
   "share": "Partilhar",
   "unhideToAlbum": "Mostrar para o álbum",
   "restoreToAlbum": "Restaurar para álbum",
-  "moveItem": "{count, plural, =1 {Mover item} other {Mover itens}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural,=1 {Adicionar item} other {Adicionar itens}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Criar ou selecionar álbum",
   "selectAlbum": "Selecionar álbum",
   "searchByAlbumNameHint": "Nome do álbum",
@@ -944,16 +916,6 @@
   "referFriendsAnd2xYourPlan": "Recomende amigos e duplique o seu plano",
   "shareAlbumHint": "Abra um álbum e toque no botão de partilha no canto superior direito para partilhar",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Os itens mostram o número de dias restantes antes da eliminação permanente",
-  "trashDaysLeft": "{count, plural, =0 {Brevemente} =1 {1 dia} other {{count} dias}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Apagar tudo",
   "renameAlbum": "Renomear álbum",
   "convertToAlbum": "Converter para álbum",
@@ -1017,7 +979,6 @@
   "authToViewYourMemories": "Por favor, autentique-se para ver suas memórias",
   "unlock": "Desbloquear",
   "freeUpSpace": "Libertar espaço",
-  "freeUpSpaceSaving": "{count, plural, one {}=1 {Pode eliminá-lo do aparelho para esvaziar {formattedSize}} other {Pode eliminá-los do aparelho para esvaziar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 arquivo} other {{formattedNumber} arquivos}} neste álbum teve um backup seguro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1045,18 +1006,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Ainda pode acessá{count, plural, =1 {-lo} other {-los}} no Ente contanto que tenha uma subscrição ativa",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1155,6 +1104,15 @@
   "loadMessage6": "Deixar o álbum partilhado?",
   "loadMessage7": "Nossos aplicativos móveis são executados em segundo plano para criptografar e fazer backup de quaisquer novas fotos que você clique",
   "loadMessage8": "{webUrl} tem um envio mais rápido",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Nós usamos Xchacha20Poly1305 para criptografar seus dados com segurança",
   "photoDescriptions": "Descrições das fotos",
   "fileTypesAndNames": "Tipos de arquivo e nomes",
@@ -1371,6 +1329,15 @@
   "pair": "Emparelhar",
   "deviceNotFound": "Dispositivo não encontrado",
   "castInstruction": "Visite {castUrl} no dispositivo que pretende emparelhar.\n\n\nIntroduza o código abaixo para reproduzir o álbum na sua TV.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Introduza o código",
   "joinDiscord": "Juntar-se ao Discord",
   "locations": "Localizações",
@@ -1380,8 +1347,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Encontrar pessoas rapidamente pelo nome",
-  "addViewers": "{count, plural, =0 {Adicionar visualizador} =1 {Adicionar visualizador} other {Adicionar vizualizadores}}",
-  "addCollaborators": "{count, plural, =0 {Adicionar colaborador} =1 {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione e segure um e-mail para verificar a criptografia de ponta a ponta.",
   "developerSettingsWarning": "Tem a certeza de que pretende modificar as definições de programador?",
   "developerSettings": "Definições do programador",
@@ -1511,26 +1476,6 @@
   "enableMachineLearningBanner": "Habilitar aprendizagem automática para pesquisa mágica e reconhecimento de rosto",
   "searchDiscoverEmptySection": "As imagens aparecerão aqui caso o processamento e sincronização for concluído",
   "searchPersonsEmptySection": "As pessoas aparecerão aqui caso o processamento e sincronização for concluído",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 vizualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 colaboradores} =1 {Adicionado 1 colaborador} other {Adicionado {count} colaboradores}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "A conta já está ajustada.",
   "sessionIdMismatch": "Incompatibilidade de ID de sessão",
   "@sessionIdMismatch": {
@@ -1596,15 +1541,6 @@
   },
   "currentlyRunning": "em execução",
   "ignored": "ignorado",
-  "photosCount": "{count, plural, =0 {0 fotos} =1 {1 foto} other {{count} fotos}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Ficheiro",
   "searchSectionsLengthMismatch": "Desigualdade de Largura entre Seções: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1792,21 +1728,11 @@
   "moveSelectedPhotosToOneDate": "Alterar datas de Fotos ao Selecionado",
   "shiftDatesAndTime": "Mude as Datas e Horas",
   "photosKeepRelativeTimeDifference": "As Fotos continuam com uma diferença de horário relativo",
-  "photocountPhotos": "{count, plural, =0 {Sem fotos} =1 {1 foto} other {{count} fotos}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "Ícone da Aplicação",
   "notThisPerson": "Não é esta pessoa?",
   "selectedItemsWillBeRemovedFromThisPerson": "Os itens em seleção serão removidos desta pessoa, mas não da sua biblioteca.",
   "throughTheYears": "{dateFormat} com o avanço dos anos",
   "thisWeekThroughTheYears": "Esta semana com o avanço dos anos",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Esta semana, {count} ano atrás} other {Esta semana, {count} anos atrás}}",
   "youAndThem": "Tu e {name}",
   "admiringThem": "A admirar {name}",
   "embracingThem": "A abraçar {name}",
@@ -1907,14 +1833,5 @@
   "font": "Fonte",
   "background": "Fundo",
   "align": "Alinhar",
-  "addedToAlbums": "{count, plural, =1 {Adicionado com sucesso a 1 álbum} other{Adicionado com sucesso a {count} álbuns}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "grantPermission": "Conceder permissão"
 }

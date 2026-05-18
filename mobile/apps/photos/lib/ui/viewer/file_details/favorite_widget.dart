@@ -121,7 +121,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
         );
         _stateMachine?.trigger("Filled")?.fire();
       } catch (e, s) {
-        _logger.severe(e, s);
+        _logger.severe("Failed to add file to favorites", e, s);
         hasError = true;
         showToast(
           context,
@@ -139,7 +139,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
           widget.file.copyWith(),
         );
       } catch (e, s) {
-        _logger.severe(e, s);
+        _logger.severe("Failed to remove file from favorites", e, s);
         hasError = true;
         showToast(
           context,

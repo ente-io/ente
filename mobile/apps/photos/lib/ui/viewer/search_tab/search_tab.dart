@@ -7,7 +7,6 @@ import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
-import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
@@ -109,27 +108,32 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
       padding: const EdgeInsets.only(top: 4),
       child: Stack(
         children: [
-          FutureBuilder<List<List<SearchResult>>>(
+          FutureBuilder<AllSectionsExamplesData>(
             future: InheritedAllSectionsExamples.of(
               context,
             ).allSectionsExamplesFuture,
             builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              if (snapshot.hasData &&
+                  snapshot.data!.sectionResults.isNotEmpty) {
+                final sectionResultsByType = snapshot.data!.sectionResults;
+                final hasAnySearchableFiles =
+                    snapshot.data!.hasAnySearchableFiles;
                 // In offline mode, skip the empty state check since DeviceAlbumsSection
                 // fetches its own data and may have albums to show
                 if (!isLocalGalleryMode &&
-                    snapshot.data!.every((element) => element.isEmpty)) {
+                    !hasAnySearchableFiles &&
+                    sectionResultsByType.every((element) => element.isEmpty)) {
                   return const Padding(
                     padding: EdgeInsets.only(bottom: 72),
                     child: SearchTabEmptyState(),
                   );
                 }
-                if (snapshot.data!.length != searchTypes.length) {
+                if (sectionResultsByType.length != searchTypes.length) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 72),
                     child: Text(
                       AppLocalizations.of(context).searchSectionsLengthMismatch(
-                        snapshotLength: snapshot.data!.length,
+                        snapshotLength: sectionResultsByType.length,
                         searchLength: searchTypes.length,
                       ),
                     ),
@@ -138,8 +142,8 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 final faceSectionIndex = searchTypes.indexOf(SectionType.face);
                 final hasSurfacedOfflineFaces = isLocalGalleryMode &&
                     faceSectionIndex >= 0 &&
-                    faceSectionIndex < snapshot.data!.length &&
-                    snapshot.data!.elementAt(faceSectionIndex).isNotEmpty;
+                    faceSectionIndex < sectionResultsByType.length &&
+                    sectionResultsByType.elementAt(faceSectionIndex).isNotEmpty;
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
@@ -162,7 +166,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(
-                          examples: snapshot.data!.elementAt(sectionIndex)
+                          examples: sectionResultsByType.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
@@ -170,7 +174,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           return const DeviceAlbumsSection();
                         }
                         return AlbumsSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          sectionResultsByType.elementAt(sectionIndex)
                               as List<AlbumSearchResult>,
                         );
                       case SectionType.ritual:
@@ -196,19 +200,18 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         );
                       case SectionType.location:
                         return LocationsSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          sectionResultsByType.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.contacts:
                         return const SizedBox.shrink();
                       case SectionType.fileTypesAndExtension:
                         return FileTypeSection(
-                          snapshot.data!.elementAt(sectionIndex)
-                              as List<GenericSearchResult>,
+                          hasAnySearchableFiles: hasAnySearchableFiles,
                         );
                       case SectionType.magic:
                         return MagicSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          sectionResultsByType.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                     }
