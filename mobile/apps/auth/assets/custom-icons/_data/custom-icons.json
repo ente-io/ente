@@ -946,6 +946,10 @@
       "title": "Hornbach"
     },
     {
+      "title": "1984 Hosting",
+      "slug": "1984"
+    },
+    {
       "title": "HRDocumentBox",
       "slug": "hrdocumentbox",
       "altNames": [
@@ -1972,6 +1976,10 @@
     },
     {
       "title": "Snapchat"
+    },
+    {
+      "title": "Sony",
+      "slug": "sony"
     },
     {
       "title": "SpaceHey"
