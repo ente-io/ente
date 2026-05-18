@@ -1,5 +1,5 @@
 FROM golang:1.23.12-alpine3.22 AS builder
-ENV GOOS=linux CGO_ENABLED=0
+ENV CGO_ENABLED=0
 
 WORKDIR /etc/ente/
 
