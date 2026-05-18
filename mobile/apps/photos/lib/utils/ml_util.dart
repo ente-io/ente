@@ -35,6 +35,7 @@ import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/src/rust/api/ml_indexing_api.dart" as rust_ml;
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/image_ml_util.dart";
+import "package:photos/utils/image_size_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
@@ -702,6 +703,12 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
       throw ThumbnailRetrievalException(e.toString(), s);
     }
   } else {
+    if (shouldSkipAutomaticImageAnalysis(enteFile)) {
+      throw Exception(
+        "ImageDimensionsTooLargeForMobileIndexing: "
+        "${imageDimensionsForLogs(enteFile)}",
+      );
+    }
     // Don't process the file if it's too large (more than 100MB)
     if (enteFile.fileSize != null && enteFile.fileSize! > maxFileDownloadSize) {
       throw Exception(
@@ -1108,6 +1115,7 @@ bool isExpectedMlSkipError(Object error) {
     "invalidimageformatexception",
     "unhandledexiforientation",
     "filesizetoolargeformobileindexing",
+    "imagedimensionstoolargeformobileindexing",
   ];
   return acceptedIssueMarkers.any(message.contains);
 }
@@ -1126,6 +1134,9 @@ String formatExpectedMlSkipReasonForLogs(Object error) {
   if (normalized.contains("filesizetoolargeformobileindexing")) {
     return "file is too large for mobile indexing";
   }
+  if (normalized.contains("imagedimensionstoolargeformobileindexing")) {
+    return "image dimensions are too large for mobile indexing";
+  }
   final firstLine = error.toString().split('\n').first.trim();
   return firstLine.isEmpty ? "unknown ML skip reason" : firstLine;
 }
@@ -1135,7 +1146,8 @@ bool _isRustDecodeIssue(Object error) {
 }
 
 bool _isRustCorruptModelIssue(Object error) {
-  return error is rust_ml.RustMlError_CorruptModel;
+  final message = _normalizedErrorMessage(error);
+  return message.contains("corruptmodel") || message.contains("corrupt model");
 }
 
 String _normalizedErrorMessage(Object error) {

@@ -11,13 +11,13 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/viewer/file/ocr/text_detector_widget.dart";
 import "package:photos/ui/viewer/file/ocr/text_overlay_widget.dart"
     show ZoomedInteractionPolicy;
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/image_size_util.dart";
 
 /// Inline text detection widget that mimics Apple's Live Text behavior:
 ///
@@ -132,8 +132,17 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   }
 
   bool _isFileEligible(EnteFile file) {
-    return file.fileType == FileType.image ||
-        file.fileType == FileType.livePhoto;
+    if (!isImageLikeFile(file)) {
+      return false;
+    }
+    if (shouldSkipAutomaticImageAnalysis(file)) {
+      _logger.info(
+        "Skipping inline text detection for very large image "
+        "(${imageDimensionsForLogs(file)})",
+      );
+      return false;
+    }
+    return true;
   }
 
   Future<void> _evaluateFile() async {

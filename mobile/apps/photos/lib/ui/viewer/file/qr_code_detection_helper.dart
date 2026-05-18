@@ -5,8 +5,8 @@ import "package:ente_qr/ente_qr.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/file/file_type.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/image_size_util.dart";
 
 class QrCodeDetectionHelper {
   static const _debounceDuration = Duration(milliseconds: 500);
@@ -90,8 +90,17 @@ class QrCodeDetectionHelper {
   }
 
   bool _isFileEligible(EnteFile file) {
-    return file.fileType == FileType.image ||
-        file.fileType == FileType.livePhoto;
+    if (!isImageLikeFile(file)) {
+      return false;
+    }
+    if (shouldSkipAutomaticImageAnalysis(file)) {
+      _logger.info(
+        "Skipping QR scan for very large image "
+        "(${imageDimensionsForLogs(file)})",
+      );
+      return false;
+    }
+    return true;
   }
 
   void dispose() {
