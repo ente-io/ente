@@ -1048,9 +1048,7 @@ export const downloadLockerFile = async (
         if (customOrigin) {
             const token = await ensureAuthToken();
             const url = await apiURL(`/files/download/${fileID}`, { token });
-            response = await fetch(url, {
-                headers: publicRequestHeaders(),
-            });
+            response = await fetch(url, { headers: publicRequestHeaders() });
         } else {
             response = await fetch(`https://files.ente.com/?fileID=${fileID}`, {
                 headers: await authenticatedRequestHeaders(),
