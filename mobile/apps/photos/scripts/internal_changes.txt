@@ -1,4 +1,5 @@
 Latest changes:
+- Neeraj: Fix iOS crash when playing Pixel Long Shot (.LS) videos
 
 Still behind internal flag:
 - Amrithesh: (I) ML/Pet recognition [Indexing]
