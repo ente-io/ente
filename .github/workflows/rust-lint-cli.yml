@@ -1,14 +1,16 @@
 name: "Lint (rust cli)"
 
 on:
-    # Run on every pull request (open or push to it) that changes rust/cli/ related files.
+    # Run on every pull request (open or push to it) that changes Rust CLI files.
     #
     # Kept as a separate workflow than rust-lint.yml since the CLI currently
     # has many dependencies and the lint takes longer, while most of the
     # work is happening on the lighter-weight core.
     pull_request:
         paths:
-            - "rust/cli/**"
+            - "rust/apps/cli/**"
+            - "rust/Cargo.lock"
+            - "rust/Cargo.toml"
             - ".github/workflows/rust-lint-cli.yml"
 
 permissions:
@@ -27,7 +29,7 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: rust/cli
+                working-directory: rust
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
@@ -38,11 +40,11 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      rust/cli/target
-                  key: ${{ runner.os }}-cargo-cli-${{ hashFiles('rust/cli/Cargo.lock') }}
+                      rust/target
+                  key: ${{ runner.os }}-cargo-cli-${{ hashFiles('rust/Cargo.lock') }}
 
-            - run: cargo fmt --check
+            - run: cargo fmt --check -p ente-rs
 
-            - run: cargo clippy --all-targets --all-features
+            - run: cargo clippy -p ente-rs --all-targets --all-features
 
-            - run: cargo build
+            - run: cargo build -p ente-rs
