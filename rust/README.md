@@ -14,8 +14,8 @@
               │                            │                            │
               ▼                            ▼                            ▼
 ┌───────────────────────────┐ ┌───────────────────────────┐ ┌────────────────────────┐
-│  mobile/packages/rust/    │ │   web/packages/wasm/      │ │    rust/apps/cli/      │
-│    (ente_rust crate)      │ │    (ente-wasm crate)      │ │                        │
+│  mobile/packages/rust/    │ │ rust/bindings/wasm/      │ │    rust/apps/cli/      │
+│    (ente_rust crate)      │ │ ente-wasm/               │ │                        │
 │                           │ │                           │ │  CLI binary, depends   │
 │  Shared #[frb] wrappers   │ │  #[wasm_bindgen] wrappers │ │  on ente-core          │
 │  for all mobile apps      │ │  for all web apps         │ │                        │
@@ -43,6 +43,7 @@
 - `rust/crates/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
 - `rust/photos/` (`ente_photos`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
 - `rust/apps/cli/` (`ente-rs`) - Rust CLI.
+- `rust/bindings/wasm/ente-wasm/` (`ente-wasm`) - wasm-bindgen bindings for web.
 - `rust/e2e/` (`ente-e2e`) - live Museum-backed Rust end-to-end tests.
 - `rust/crates/ensu/` - LLM chat stack (see `rust/crates/ensu/README.md`).
 
@@ -93,10 +94,12 @@ rust/bindings/uniffi/                      # UniFFI bindings for core crypto/aut
 ├── core/
 └── ensu/
 
-web/packages/wasm/                # WASM bindings (lives in web workspace)
+rust/bindings/wasm/ente-wasm/     # WASM bindings Rust crate
 ├── src/
 │   └── lib.rs                    # #[wasm_bindgen] wrappers around ente-core
-├── Cargo.toml                    # crate name: ente-wasm
+└── Cargo.toml                    # crate name: ente-wasm
+
+web/packages/wasm/                # JS package surface for ente-wasm
 ├── package.json                  # includes wasm-pack as devDependency
 └── pkg/                          # generated output (gitignored)
 
@@ -187,11 +190,11 @@ rust/e2e/scripts/run.sh                                            # starts Dock
 cargo test --manifest-path rust/Cargo.toml -p ente-e2e -- --ignored --nocapture
 ```
 
-**ente-wasm (web/packages/wasm/):**
+**ente-wasm (Rust source in rust/bindings/wasm/ente-wasm/, JS package in web/packages/wasm/):**
 
 ```sh
 yarn install     # installs wasm-pack
-yarn build       # runs wasm-pack build --target bundler
+yarn build       # runs wasm-pack against the Rust crate
 ```
 
 Or from web/ root:
@@ -207,7 +210,7 @@ yarn build:wasm  # builds the WASM package
 > ```sh
 > cargo install cargo-watch
 > cd web/
-> cargo watch -w ../rust/crates/core -w packages/wasm/src -s "yarn build:wasm"
+> cargo watch -w ../rust/crates/core -w ../rust/bindings/wasm/ente-wasm/src -s "yarn build:wasm"
 > ```
 
 **ente_rust (mobile/packages/rust/):**
