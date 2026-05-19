@@ -133,7 +133,7 @@ pub fn order_for_sync(messages: &[Message]) -> Vec<Message> {
 
     if let Some(roots) = children.get(&None) {
         for root in roots {
-            dfs_order(*root, &children, &mut visited, &mut ordered);
+            dfs_order(root, &children, &mut visited, &mut ordered);
         }
     }
 
@@ -152,7 +152,7 @@ fn dfs_order(
     output.push(node.clone());
     if let Some(kids) = children.get(&Some(node.uuid)) {
         for child in kids {
-            dfs_order(*child, children, visited, output);
+            dfs_order(child, children, visited, output);
         }
     }
 }
@@ -202,7 +202,7 @@ mod tests {
         };
         assert!(
             find_duplicate_message(
-                &[local.clone()],
+                std::slice::from_ref(&local),
                 &Sender::SelfUser,
                 "hello",
                 &[wrong_size],
@@ -214,10 +214,10 @@ mod tests {
 
         assert!(
             find_duplicate_message(
-                &[local.clone()],
+                std::slice::from_ref(&local),
                 &Sender::SelfUser,
                 "hello",
-                &[attachment.clone()],
+                std::slice::from_ref(&attachment),
                 10_000,
                 None,
             )

@@ -182,9 +182,9 @@ cargo run --bin ente-cli -- --help
 **ente-e2e (rust/e2e/):**
 
 ```sh
-cargo test --manifest-path rust/e2e/Cargo.toml                     # compile-only sanity check
+cargo test --manifest-path rust/Cargo.toml -p ente-e2e             # compile-only sanity check
 rust/e2e/scripts/run.sh                                            # starts Docker + runs ignored live suite
-cargo test --manifest-path rust/e2e/Cargo.toml -- --ignored --nocapture
+cargo test --manifest-path rust/Cargo.toml -p ente-e2e -- --ignored --nocapture
 ```
 
 **ente-wasm (web/packages/wasm/):**
