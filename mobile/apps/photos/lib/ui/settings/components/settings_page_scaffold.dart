@@ -10,6 +10,8 @@ class SettingsPageScaffold extends StatelessWidget {
     this.actions = const [],
     this.controller,
     this.onTitleTap,
+    this.onTitleDoubleTap,
+    this.onTitleLongPress,
     this.bottomNavigationBar,
     this.padding = const EdgeInsets.fromLTRB(16, 0, 16, 16),
   });
@@ -20,6 +22,8 @@ class SettingsPageScaffold extends StatelessWidget {
   final List<Widget> children;
   final ScrollController? controller;
   final VoidCallback? onTitleTap;
+  final VoidCallback? onTitleDoubleTap;
+  final VoidCallback? onTitleLongPress;
   final Widget? bottomNavigationBar;
   final EdgeInsetsGeometry padding;
 
@@ -36,6 +40,8 @@ class SettingsPageScaffold extends StatelessWidget {
         actions: actions,
         controller: controller,
         onTitleTap: onTitleTap,
+        onTitleDoubleTap: onTitleDoubleTap,
+        onTitleLongPress: onTitleLongPress,
         slivers: [
           SliverSafeArea(
             top: false,

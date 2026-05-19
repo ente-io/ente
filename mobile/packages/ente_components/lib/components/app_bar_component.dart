@@ -21,6 +21,8 @@ class AppBarComponent extends StatefulWidget {
     required this.title,
     required this.slivers,
     this.onTitleTap,
+    this.onTitleDoubleTap,
+    this.onTitleLongPress,
     this.subtitle,
     this.leading,
     this.backButton,
@@ -37,6 +39,8 @@ class AppBarComponent extends StatefulWidget {
 
   final String title;
   final VoidCallback? onTitleTap;
+  final VoidCallback? onTitleDoubleTap;
+  final VoidCallback? onTitleLongPress;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
@@ -200,6 +204,8 @@ class _AppBarComponentState extends State<AppBarComponent> {
           SliverAppBarComponent(
             title: widget.title,
             onTitleTap: widget.onTitleTap,
+            onTitleDoubleTap: widget.onTitleDoubleTap,
+            onTitleLongPress: widget.onTitleLongPress,
             subtitle: widget.subtitle,
             leading: widget.leading,
             backButton: widget.backButton,
@@ -250,6 +256,8 @@ class SliverAppBarComponent extends StatelessWidget {
     super.key,
     required this.title,
     this.onTitleTap,
+    this.onTitleDoubleTap,
+    this.onTitleLongPress,
     this.subtitle,
     this.leading,
     this.backButton,
@@ -264,6 +272,8 @@ class SliverAppBarComponent extends StatelessWidget {
 
   final String title;
   final VoidCallback? onTitleTap;
+  final VoidCallback? onTitleDoubleTap;
+  final VoidCallback? onTitleLongPress;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
@@ -290,6 +300,8 @@ class SliverAppBarComponent extends StatelessWidget {
       delegate: _HeaderAppBarDelegate(
         title: title,
         onTitleTap: onTitleTap,
+        onTitleDoubleTap: onTitleDoubleTap,
+        onTitleLongPress: onTitleLongPress,
         subtitle: subtitle,
         leading: leading,
         backButton: backButton,
@@ -314,6 +326,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   const _HeaderAppBarDelegate({
     required this.title,
     required this.onTitleTap,
+    required this.onTitleDoubleTap,
+    required this.onTitleLongPress,
     required this.subtitle,
     required this.leading,
     required this.backButton,
@@ -333,6 +347,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   final String title;
   final VoidCallback? onTitleTap;
+  final VoidCallback? onTitleDoubleTap;
+  final VoidCallback? onTitleLongPress;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
@@ -381,7 +397,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
         _expandedContentTop +
         _centerOffset(expandedTextBlockHeight, _headerControlSize);
     final actionsTop = lerpDouble(
-      _expandedContentTop,
+      leadingTop,
       collapsedControlTop,
       titleProgress,
     )!;
@@ -437,6 +453,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
             _MovingHeaderTitle(
               title: title,
               onTap: onTitleTap,
+              onDoubleTap: onTitleDoubleTap,
+              onLongPress: onTitleLongPress,
               top: titleTop,
               left: titleLeft,
               right: titleRight,
@@ -490,6 +508,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _HeaderAppBarDelegate oldDelegate) {
     return oldDelegate.title != title ||
         oldDelegate.onTitleTap != onTitleTap ||
+        oldDelegate.onTitleDoubleTap != onTitleDoubleTap ||
+        oldDelegate.onTitleLongPress != onTitleLongPress ||
         oldDelegate.subtitle != subtitle ||
         oldDelegate.leading != leading ||
         oldDelegate.backButton != backButton ||
@@ -723,6 +743,8 @@ class _MovingHeaderTitle extends StatelessWidget {
   const _MovingHeaderTitle({
     required this.title,
     required this.onTap,
+    required this.onDoubleTap,
+    required this.onLongPress,
     required this.top,
     required this.left,
     required this.right,
@@ -731,6 +753,8 @@ class _MovingHeaderTitle extends StatelessWidget {
 
   final String title;
   final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
   final double top;
   final double left;
   final double right;
@@ -754,11 +778,13 @@ class _MovingHeaderTitle extends StatelessWidget {
       left: left,
       right: right,
       top: top,
-      child: onTap == null
+      child: onTap == null && onDoubleTap == null && onLongPress == null
           ? IgnorePointer(child: titleText)
           : GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: onTap,
+              onDoubleTap: onDoubleTap,
+              onLongPress: onLongPress,
               child: titleText,
             ),
     );
