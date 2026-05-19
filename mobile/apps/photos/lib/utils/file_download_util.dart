@@ -50,6 +50,21 @@ class DownloadUnavailableError extends DownloadFailedError {
   DownloadUnavailableError() : super("Unavailable");
 }
 
+enum GalleryDownloadSideEffectMode {
+  immediate,
+  deferred,
+}
+
+class GalleryDownloadSaveResult {
+  final bool savedToGallery;
+  final EnteFile? persistedFile;
+
+  const GalleryDownloadSaveResult({
+    required this.savedToGallery,
+    required this.persistedFile,
+  });
+}
+
 /// Use this instead of `file.displayName` directly for skip toasts.
 ///
 /// Rationale:
@@ -70,8 +85,9 @@ Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
   if (asset == null || !(await asset.exists)) {
     return null;
   }
-  final folderNames =
-      await FilesDB.instance.getDeviceCollectionNamesForLocalID(file.localID!);
+  final folderNames = await FilesDB.instance.getDeviceCollectionNamesForLocalID(
+    file.localID!,
+  );
   if (folderNames.isNotEmpty) {
     return folderNames.last;
   }
@@ -91,16 +107,18 @@ Future<File?> downloadAndDecryptPublicFile(
   ProgressCallback? progressCallback,
 }) async {
   final String logPrefix = 'Public File-${file.uploadedFileID}:';
-  _logger
-      .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
+  _logger.info(
+    '$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}',
+  );
 
   final String tempDir = Configuration.instance.getTempDirectory();
   final String encryptedFilePath = "$tempDir${file.uploadedFileID}.encrypted";
   final String decryptedFilePath = "$tempDir${file.uploadedFileID}.decrypted";
 
   try {
-    final headers =
-        CollectionsService.instance.publicCollectionHeaders(file.collectionID!);
+    final headers = CollectionsService.instance.publicCollectionHeaders(
+      file.collectionID!,
+    );
     final response = (await NetworkClient.instance.getDio().download(
       FileUrl.getUrl(file.uploadedFileID!, FileUrlType.publicDownload),
       encryptedFilePath,
@@ -139,8 +157,10 @@ Future<File?> downloadAndDecryptPublicFile(
       _logger.info('$logPrefix file saved at $decryptedFilePath');
     } catch (e, s) {
       fakeProgress?.stop();
-      final metadata =
-          await _getFileMetadataForLogging(file, encryptedFilePath);
+      final metadata = await _getFileMetadataForLogging(
+        file,
+        encryptedFilePath,
+      );
       _logger.severe("Critical: $logPrefix failed to decrypt, $metadata", e, s);
       return null;
     }
@@ -165,8 +185,9 @@ Future<File?> downloadAndDecrypt(
   }
 
   final String logPrefix = 'File-${file.uploadedFileID}:';
-  _logger
-      .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
+  _logger.info(
+    '$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}',
+  );
   final String tempDir = Configuration.instance.getTempDirectory();
   String encryptedFilePath = "$tempDir${file.generatedID}.encrypted";
   File encryptedFile = File(encryptedFilePath);
@@ -249,12 +270,15 @@ Future<File?> downloadAndDecrypt(
         getFileKey(file),
       );
       fakeProgress?.stop();
-      _logger
-          .info('$logPrefix decryption completed (genID ${file.generatedID})');
+      _logger.info(
+        '$logPrefix decryption completed (genID ${file.generatedID})',
+      );
     } catch (e, s) {
       fakeProgress?.stop();
-      final metadata =
-          await _getFileMetadataForLogging(file, encryptedFilePath);
+      final metadata = await _getFileMetadataForLogging(
+        file,
+        encryptedFilePath,
+      );
       _logger.severe("Critical: $logPrefix failed to decrypt, $metadata", e, s);
       if (throwOnFailure) {
         throw DownloadFailedError("Failed to decrypt downloaded file");
@@ -325,11 +349,17 @@ Future<String> _getFileMetadataForLogging(
 // the in-memory EnteFile they hold is not updated with the saved localID and
 // LocalSyncService ingests the asset as a new local row rather than marking
 // the existing remote entry. Revisit if this surfaces as a user complaint.
-Future<void> downloadToGallery(
+Future<GalleryDownloadSaveResult> downloadToGallery(
   EnteFile file, {
   bool forceResumableDownload = false,
   bool persistToFilesDB = true,
+  GalleryDownloadSideEffectMode sideEffectMode =
+      GalleryDownloadSideEffectMode.immediate,
 }) async {
+  final runSideEffects =
+      sideEffectMode == GalleryDownloadSideEffectMode.immediate;
+  var savedToGallery = false;
+  EnteFile? persistedFile;
   try {
     final FileType type = file.fileType;
     final bool downloadLivePhotoOnDroid =
@@ -348,13 +378,19 @@ Future<void> downloadToGallery(
     await LocalSyncService.instance.getLock().synchronized(() async {
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
-      await PhotoManager.stopChangeNotify();
+      if (runSideEffects) {
+        await PhotoManager.stopChangeNotify();
+      }
       if (type == FileType.image) {
-        savedAsset = await PhotoManager.editor
-            .saveImageWithPath(fileToSave.path, title: file.title!);
+        savedAsset = await PhotoManager.editor.saveImageWithPath(
+          fileToSave.path,
+          title: file.title!,
+        );
       } else if (type == FileType.video) {
-        savedAsset =
-            await PhotoManager.editor.saveVideo(fileToSave, title: file.title!);
+        savedAsset = await PhotoManager.editor.saveVideo(
+          fileToSave,
+          title: file.title!,
+        );
       } else if (type == FileType.livePhoto) {
         final File? liveVideoFile = await getFileFromServer(
           file,
@@ -366,6 +402,7 @@ Future<void> downloadToGallery(
         }
         if (downloadLivePhotoOnDroid) {
           await _saveLivePhotoOnDroid(fileToSave, liveVideoFile, file);
+          savedToGallery = true;
         } else {
           savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
             imageFile: fileToSave,
@@ -376,23 +413,31 @@ Future<void> downloadToGallery(
       }
 
       if (savedAsset != null) {
+        savedToGallery = true;
         // Public-link downloads should be discovered by local sync so they are
         // materialized as true on-device files instead of remote/shared
         // entries in FilesDB.
         if (persistToFilesDB) {
           file.localID = savedAsset!.id;
           await FilesDB.instance.insert(file);
-          Bus.instance.fire(
-            LocalPhotosUpdatedEvent(
-              [file],
-              source: "download",
-            ),
-          );
+          persistedFile = file;
+          if (runSideEffects) {
+            Bus.instance.fire(
+              LocalPhotosUpdatedEvent(
+                [file],
+                source: "download",
+              ),
+            );
+          }
         }
       } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
         _logger.severe('Failed to save assert of type $type');
       }
     });
+    return GalleryDownloadSaveResult(
+      savedToGallery: savedToGallery,
+      persistedFile: persistedFile,
+    );
   } catch (e) {
     if (forceResumableDownload && _isStorageError(e)) {
       _logger.severe("Failed to save file due to storage limit", e);
@@ -401,8 +446,10 @@ Future<void> downloadToGallery(
     _logger.severe("Failed to save file", e);
     rethrow;
   } finally {
-    await PhotoManager.startChangeNotify();
-    LocalSyncService.instance.checkAndSync().ignore();
+    if (runSideEffects) {
+      await PhotoManager.startChangeNotify();
+      LocalSyncService.instance.checkAndSync().ignore();
+    }
   }
 }
 
@@ -412,11 +459,13 @@ Future<void> _saveLivePhotoOnDroid(
   EnteFile enteFile,
 ) async {
   debugPrint("Downloading LivePhoto on Droid");
-  AssetEntity? savedAsset = await (PhotoManager.editor
-          .saveImageWithPath(image.path, title: enteFile.title!))
-      .catchError((err) {
-    throw Exception("Failed to save image of live photo: $err");
-  });
+  AssetEntity? savedAsset =
+      await (PhotoManager.editor.saveImageWithPath(
+        image.path,
+        title: enteFile.title!,
+      )).catchError((err) {
+        throw Exception("Failed to save image of live photo: $err");
+      });
   IgnoredFile ignoreVideoFile = IgnoredFile(
     savedAsset.id,
     savedAsset.title ?? '',
@@ -424,17 +473,19 @@ Future<void> _saveLivePhotoOnDroid(
     "remoteDownload",
   );
   await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
-  final videoTitle = file_path.basenameWithoutExtension(enteFile.title!) +
+  final videoTitle =
+      file_path.basenameWithoutExtension(enteFile.title!) +
       file_path.extension(video.path);
-  savedAsset = (await (PhotoManager.editor.saveVideo(
-    video,
-    title: videoTitle,
-  )).catchError(
-    (err) {
-      _logger.warning('Failed to save video $videoTitle of live photo');
-      throw Exception("Failed to save video of live photo: $err");
-    },
-  ));
+  savedAsset =
+      (await (PhotoManager.editor.saveVideo(
+        video,
+        title: videoTitle,
+      )).catchError(
+        (err) {
+          _logger.warning('Failed to save video $videoTitle of live photo');
+          throw Exception("Failed to save video of live photo: $err");
+        },
+      ));
 
   ignoreVideoFile = IgnoredFile(
     savedAsset.id,

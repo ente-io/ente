@@ -44,6 +44,8 @@ class LocalSyncService {
   StreamSubscription<PermissionGrantedEvent>? _permissionGrantedSubscription;
   bool _isChangeCallbackRegistered = false;
   final Lock _lock = Lock();
+  int _deferredChangeSyncDepth = 0;
+  bool _hasDeferredChangeSyncRequest = false;
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
@@ -64,15 +66,16 @@ class LocalSyncService {
       if (_permissionGrantedSubscription != null) {
         await _permissionGrantedSubscription!.cancel();
       }
-      _permissionGrantedSubscription =
-          Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
-        _registerChangeCallback();
-        if (isLocalGalleryMode) {
-          // Local gallery onboarding grants permission without explicitly
-          // invoking SyncService, so trigger local import right away.
-          unawaited(checkAndSync());
-        }
-      });
+      _permissionGrantedSubscription = Bus.instance
+          .on<PermissionGrantedEvent>()
+          .listen((event) async {
+            _registerChangeCallback();
+            if (isLocalGalleryMode) {
+              // Local gallery onboarding grants permission without explicitly
+              // invoking SyncService, so trigger local import right away.
+              unawaited(checkAndSync());
+            }
+          });
     }
   }
 
@@ -82,8 +85,8 @@ class LocalSyncService {
       return;
     }
     if (Platform.isAndroid && AppLifecycleService.instance.isForeground) {
-      final permissionState =
-          await permissionService.requestPhotoMangerPermissions();
+      final permissionState = await permissionService
+          .requestPhotoMangerPermissions();
       if (permissionState != PermissionState.authorized) {
         _logger.warning(
           "Skipping local sync because Android gallery permission is "
@@ -197,8 +200,8 @@ class LocalSyncService {
     );
     final int ownerID = Configuration.instance.getUserIDV2();
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
-    final Map<String, Set<String>> pathToLocalIDs =
-        await _db.getDevicePathIDToLocalIDMap();
+    final Map<String, Set<String>> pathToLocalIDs = await _db
+        .getDevicePathIDToLocalIDMap();
 
     final localDiffResult = await getDiffFromExistingImport(
       localAssets,
@@ -245,16 +248,16 @@ class LocalSyncService {
     if (flagService.syncRecoveryDiagnostics) {
       final int newMappingCount =
           localDiffResult.newPathToLocalIDs?.values.fold<int>(
-                0,
-                (sum, ids) => sum + ids.length,
-              ) ??
-              0;
+            0,
+            (sum, ids) => sum + ids.length,
+          ) ??
+          0;
       final int deletedMappingCount =
           localDiffResult.deletePathToLocalIDs?.values.fold<int>(
-                0,
-                (sum, ids) => sum + ids.length,
-              ) ??
-              0;
+            0,
+            (sum, ids) => sum + ids.length,
+          ) ??
+          0;
       if (newMappingCount > 0 || deletedMappingCount > 0 || hasUnsyncedFiles) {
         final sampleRecovered = (localDiffResult.uniqueLocalFiles ?? [])
             .take(3)
@@ -299,6 +302,43 @@ class LocalSyncService {
 
   Lock getLock() {
     return _lock;
+  }
+
+  Future<void> beginDeferredChangeSync() async {
+    if (_deferredChangeSyncDepth > 0) {
+      _deferredChangeSyncDepth++;
+      return;
+    }
+    _deferredChangeSyncDepth = 1;
+    _hasDeferredChangeSyncRequest = false;
+    try {
+      await PhotoManager.stopChangeNotify();
+    } catch (_) {
+      _deferredChangeSyncDepth = 0;
+      rethrow;
+    }
+  }
+
+  Future<void> endDeferredChangeSync({bool runDeferredSync = true}) async {
+    if (_deferredChangeSyncDepth <= 0) {
+      _logger.warning("endDeferredChangeSync called without active deferral");
+      return;
+    }
+    if (_deferredChangeSyncDepth > 1) {
+      _deferredChangeSyncDepth--;
+      return;
+    }
+
+    try {
+      await PhotoManager.startChangeNotify();
+    } finally {
+      _deferredChangeSyncDepth = 0;
+    }
+    final shouldRunSync = runDeferredSync && _hasDeferredChangeSyncRequest;
+    _hasDeferredChangeSyncRequest = false;
+    if (shouldRunSync) {
+      unawaited(checkAndSync());
+    }
   }
 
   bool hasCompletedFirstImport() {
@@ -368,8 +408,10 @@ class LocalSyncService {
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
       if (flagService.syncRecoveryDiagnostics &&
           allFiles.length != files.length) {
-        final sampleLocalIDs =
-            allFiles.take(3).map((file) => file.localID).toList();
+        final sampleLocalIDs = allFiles
+            .take(3)
+            .map((file) => file.localID)
+            .toList();
         _logger.info(
           "localSync partial materialization: "
           "from=$fromTime to=$toTime "
@@ -459,6 +501,10 @@ class LocalSyncService {
     // after file selection dialog is dismissed.
     PhotoManager.addChangeCallback((value) async {
       _logger.info("Something changed on disk");
+      if (_deferredChangeSyncDepth > 0) {
+        _hasDeferredChangeSyncRequest = true;
+        return;
+      }
       _changeCallbackDebouncer.run(() async {
         unawaited(checkAndSync());
       });

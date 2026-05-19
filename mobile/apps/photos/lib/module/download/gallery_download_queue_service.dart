@@ -10,12 +10,14 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/gallery_downloads_db.dart";
 import "package:photos/events/gallery_downloads_events.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/utils/file_download_util.dart";
 
 class GalleryDownloadEnqueueResult {
@@ -40,15 +42,20 @@ class GalleryDownloadQueueService {
   final Set<int> _activeDownloads = {};
   final Map<int, StreamSubscription<DownloadTask>> _watchSubscriptions = {};
   final Map<int, EnteFile> _queuedFilesByID = {};
+  final List<EnteFile> _deferredGalleryUpdatedFiles = [];
 
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   StreamSubscription<UserLoggedOutEvent>? _logoutSubscription;
   Timer? _completionCleanupTimer;
   Completer<void>? _initCompleter;
+  Future<void>? _deferredGallerySideEffectsStart;
+  Future<void>? _deferredGallerySideEffectsFlush;
 
   bool _isInitialized = false;
   bool _isBannerDismissedByUser = false;
   bool _showCompletionBanner = false;
+  bool _isDeferringGallerySideEffects = false;
+  bool _hasDeferredGallerySaves = false;
 
   GalleryDownloadQueueService._privateConstructor();
 
@@ -79,22 +86,22 @@ class GalleryDownloadQueueService {
       .length;
 
   bool get hasPausedDueToNoConnection => _tasks.values.any(
-        (task) =>
-            task.status == DownloadStatus.paused &&
-            task.error == DownloadManager.noConnectionError,
-      );
+    (task) =>
+        task.status == DownloadStatus.paused &&
+        task.error == DownloadManager.noConnectionError,
+  );
 
   bool get hasPausedDueToStorage => _tasks.values.any(
-        (task) =>
-            task.status == DownloadStatus.paused &&
-            task.error == DownloadManager.notEnoughStorageError,
-      );
+    (task) =>
+        task.status == DownloadStatus.paused &&
+        task.error == DownloadManager.notEnoughStorageError,
+  );
 
   bool get hasNonUnavailableErrors => _tasks.values.any(
-        (task) =>
-            task.status == DownloadStatus.error &&
-            task.error != DownloadManager.unavailableError,
-      );
+    (task) =>
+        task.status == DownloadStatus.error &&
+        task.error != DownloadManager.unavailableError,
+  );
 
   bool get isCompletionBannerVisible =>
       _showCompletionBanner &&
@@ -264,6 +271,7 @@ class GalleryDownloadQueueService {
       }
     }
     _activeDownloads.clear();
+    await _flushDeferredGallerySaveSideEffects(force: true);
     _tasks.clear();
     _queuedFilesByID.clear();
     _showCompletionBanner = false;
@@ -341,10 +349,12 @@ class GalleryDownloadQueueService {
 
   void _listenToConnectivity() {
     _connectivitySubscription?.cancel();
-    _connectivitySubscription =
-        Connectivity().onConnectivityChanged.listen((results) {
-      final hasConnection =
-          results.any((result) => result != ConnectivityResult.none);
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
+      final hasConnection = results.any(
+        (result) => result != ConnectivityResult.none,
+      );
       if (!hasConnection) {
         return;
       }
@@ -397,6 +407,7 @@ class GalleryDownloadQueueService {
       _startTask(nextTask);
     }
     _maybeShowCompletionState();
+    _maybeFlushDeferredGallerySaveSideEffects();
     _emitUpdatedEvent();
   }
 
@@ -409,25 +420,27 @@ class GalleryDownloadQueueService {
       ),
     ).ignore();
     _watchSubscriptions[task.id]?.cancel();
-    _watchSubscriptions[task.id] =
-        downloadManager.watchDownload(task.id).listen(
-      (downloadTask) {
-        final existing = _tasks[task.id];
-        if (existing == null) {
-          return;
-        }
-        final updatedTask = existing.copyWith(
-          bytesDownloaded: downloadTask.bytesDownloaded,
-          filePath: downloadTask.filePath,
+    _watchSubscriptions[task.id] = downloadManager
+        .watchDownload(task.id)
+        .listen(
+          (downloadTask) {
+            final existing = _tasks[task.id];
+            if (existing == null) {
+              return;
+            }
+            final updatedTask = existing.copyWith(
+              bytesDownloaded: downloadTask.bytesDownloaded,
+              filePath: downloadTask.filePath,
+            );
+            _updateTask(updatedTask).ignore();
+          },
         );
-        _updateTask(updatedTask).ignore();
-      },
-    );
     _runTask(task.id).ignore();
   }
 
   Future<void> _runTask(int fileID) async {
     try {
+      await _ensureDeferredGallerySaveSideEffects();
       await _downloadAndSaveToGallery(fileID);
       final task = _tasks[fileID];
       if (task != null) {
@@ -481,15 +494,18 @@ class GalleryDownloadQueueService {
       throw DownloadUnavailableError();
     }
     file.fileSize ??= _tasks[fileID]?.totalBytes;
-    final fileToDownload =
-        file.isRemoteFile ? file.copyWith() : (file.copyWith()..localID = null);
-    await downloadToGallery(
+    final fileToDownload = file.isRemoteFile
+        ? file.copyWith()
+        : (file.copyWith()..localID = null);
+    final result = await downloadToGallery(
       fileToDownload,
       forceResumableDownload: true,
       persistToFilesDB: _deserializePersistToFilesDB(
         sourceFileJson ?? _tasks[fileID]?.sourceFileJson,
       ),
+      sideEffectMode: GalleryDownloadSideEffectMode.deferred,
     );
+    _recordDeferredGallerySave(result);
   }
 
   Future<void> _setPausedState(int fileID, String reason) async {
@@ -555,6 +571,95 @@ class GalleryDownloadQueueService {
     );
   }
 
+  Future<void> _ensureDeferredGallerySaveSideEffects() {
+    final existingStart = _deferredGallerySideEffectsStart;
+    if (existingStart != null) {
+      return existingStart;
+    }
+    _isDeferringGallerySideEffects = true;
+    final start = LocalSyncService.instance
+        .beginDeferredChangeSync()
+        .catchError(
+          (Object e, StackTrace s) {
+            _isDeferringGallerySideEffects = false;
+            _deferredGallerySideEffectsStart = null;
+            throw e;
+          },
+        );
+    _deferredGallerySideEffectsStart = start;
+    return start;
+  }
+
+  void _recordDeferredGallerySave(GalleryDownloadSaveResult result) {
+    if (!result.savedToGallery) {
+      return;
+    }
+    _hasDeferredGallerySaves = true;
+    final persistedFile = result.persistedFile;
+    if (persistedFile != null) {
+      _deferredGalleryUpdatedFiles.add(persistedFile);
+    }
+  }
+
+  void _maybeFlushDeferredGallerySaveSideEffects() {
+    if (_hasRunnableTasks) {
+      return;
+    }
+    if (!_isDeferringGallerySideEffects &&
+        !_hasDeferredGallerySaves &&
+        _deferredGalleryUpdatedFiles.isEmpty) {
+      return;
+    }
+    _deferredGallerySideEffectsFlush ??= _flushDeferredGallerySaveSideEffects()
+        .whenComplete(() {
+          _deferredGallerySideEffectsFlush = null;
+        });
+  }
+
+  Future<void> _flushDeferredGallerySaveSideEffects({
+    bool force = false,
+  }) async {
+    if (!force && _hasRunnableTasks) {
+      return;
+    }
+    final start = _deferredGallerySideEffectsStart;
+    if (start != null) {
+      await start;
+    }
+    if (!force && _hasRunnableTasks) {
+      return;
+    }
+
+    final updatedFiles = _deferredGalleryUpdatedFiles.toList(growable: false);
+    _deferredGalleryUpdatedFiles.clear();
+    final shouldSync = _hasDeferredGallerySaves;
+    _hasDeferredGallerySaves = false;
+
+    if (updatedFiles.isNotEmpty) {
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(updatedFiles, source: "download"),
+      );
+    }
+    if (_isDeferringGallerySideEffects) {
+      _isDeferringGallerySideEffects = false;
+      _deferredGallerySideEffectsStart = null;
+      await LocalSyncService.instance.endDeferredChangeSync(
+        runDeferredSync: false,
+      );
+    }
+    if (shouldSync) {
+      LocalSyncService.instance.checkAndSync().ignore();
+    }
+  }
+
+  bool get _hasRunnableTasks =>
+      _activeDownloads.isNotEmpty ||
+      _tasks.values.any(
+        (task) =>
+            task.status == DownloadStatus.pending ||
+            task.status == DownloadStatus.downloading,
+      );
+
   bool get _allTasksAreTerminal =>
       _tasks.isNotEmpty &&
       _tasks.values.every((task) => _isTerminal(task.status));
@@ -588,8 +693,8 @@ class GalleryDownloadQueueService {
       if (await file.exists()) {
         await file.delete();
       }
-      final totalChunks =
-          (task.totalBytes / DownloadManager.downloadChunkSize).ceil();
+      final totalChunks = (task.totalBytes / DownloadManager.downloadChunkSize)
+          .ceil();
       for (int i = 1; i <= totalChunks; i++) {
         final chunk = File("$basePath.${i}_part");
         if (await chunk.exists()) {
