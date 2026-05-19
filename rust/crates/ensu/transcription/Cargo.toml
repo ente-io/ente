@@ -14,7 +14,7 @@ reqwest = { version = "0.12", default-features = false, features = ["blocking", 
 rubato = "0.16"
 tar = "0.4"
 thiserror = "2"
-transcribe-rs = { version = "0.3.11", default-features = false, features = ["onnx", "vad-silero"] }
+transcribe-rs = { git = "https://github.com/ente-io/transcribe-rs.git", rev = "e859d2c4a32e374199c75630c651419a49b0b2d4", default-features = false, features = ["onnx", "vad-silero"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
-ort = { version = "=2.0.0-rc.12", default-features = false, features = ["load-dynamic"] }
+ort = { version = "=2.0.0-rc.4", default-features = false, features = ["load-dynamic"] }
