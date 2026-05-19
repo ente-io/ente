@@ -8,6 +8,7 @@ on:
         paths:
             - "rust/crates/core/**"
             - "rust/crates/contacts/**"
+            - "rust/crates/image/**"
             - "rust/bindings/wasm/ente-wasm/**"
             - "rust/photos/**"
             - "rust/Cargo.lock"
@@ -39,8 +40,7 @@ jobs:
                       ~/.cargo/registry
                       ~/.cargo/git
                       rust/target
-                      rust/photos/target
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock', 'rust/photos/Cargo.lock') }}
+                  key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
 
             - name: Check formatting (core)
               working-directory: rust
@@ -59,20 +59,20 @@ jobs:
               run: cargo test -p ente-core
 
             - name: Check formatting (photos)
-              working-directory: rust/photos
-              run: cargo fmt --check
+              working-directory: rust
+              run: cargo fmt --check -p ente_photos
 
             - name: Run clippy (photos)
-              working-directory: rust/photos
-              run: cargo clippy --all-targets --all-features
+              working-directory: rust
+              run: cargo clippy -p ente_photos --all-targets --all-features
 
             - name: Build (photos)
-              working-directory: rust/photos
-              run: cargo build
+              working-directory: rust
+              run: cargo build -p ente_photos
 
             - name: Test (photos)
-              working-directory: rust/photos
-              run: cargo test
+              working-directory: rust
+              run: cargo test -p ente_photos
 
             - name: Check formatting (wasm)
               working-directory: rust

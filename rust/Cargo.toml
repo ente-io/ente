@@ -19,7 +19,5 @@ members = [
     "crates/ensu/transcription",
     "crates/image",
     "e2e",
-]
-exclude = [
     "photos",
 ]
