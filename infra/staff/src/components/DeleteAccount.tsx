@@ -1,7 +1,8 @@
 import React from "react";
-import { getEmail } from "../services/session";
+import { useStaffSession } from "../services/session";
 import {
     apiOrigin,
+    requireEmail,
     requireToken,
     responseErrorMessage,
 } from "../services/support";
@@ -16,11 +17,12 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     open,
     handleClose,
 }) => {
+    const session = useStaffSession();
+
     const handleDelete = async () => {
         try {
-            const email = getEmail();
-            if (!email) throw new Error("Email not found");
-            const token = requireToken();
+            const email = requireEmail(session);
+            const token = requireToken(session);
             const response = await fetch(
                 `${apiOrigin}/admin/user/delete?email=${encodeURIComponent(email)}`,
                 { method: "DELETE", headers: { "X-Auth-Token": token } },

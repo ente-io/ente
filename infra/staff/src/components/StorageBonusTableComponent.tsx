@@ -8,6 +8,7 @@ import {
     TableRow,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useInitialStaffSession } from "../services/session";
 import { getCurrentAdminUser } from "../services/support";
 
 interface BonusData {
@@ -22,13 +23,14 @@ export const StorageBonusTableComponent: React.FC = () => {
     const [storageBonuses, setStorageBonuses] = useState<BonusData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const session = useInitialStaffSession();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const userData = await getCurrentAdminUser<{
                     details?: { bonusData?: { storageBonuses?: BonusData[] } };
-                }>();
+                }>(session);
                 const bonuses: BonusData[] =
                     userData.details?.bonusData?.storageBonuses ?? [];
                 setStorageBonuses(bonuses);
@@ -43,7 +45,7 @@ export const StorageBonusTableComponent: React.FC = () => {
         fetchData().catch((error: unknown) =>
             console.error("Fetch data error:", error),
         );
-    }, []);
+    }, [session]);
 
     if (loading) {
         return <p>Loading...</p>;

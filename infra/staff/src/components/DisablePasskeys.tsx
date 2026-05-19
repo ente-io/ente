@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useStaffSession } from "../services/session";
 import {
     apiOrigin,
     getCurrentAdminUserId,
@@ -19,12 +20,13 @@ export const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
     handleDisablePasskeys,
 }) => {
     const [loading, setLoading] = useState(false);
+    const session = useStaffSession();
 
     const handleDisabling = async () => {
         try {
             setLoading(true);
-            const token = requireToken();
-            const userId = await getCurrentAdminUserId();
+            const token = requireToken(session);
+            const userId = await getCurrentAdminUserId(session);
 
             const disablePasskeysUrl = `${apiOrigin}/admin/user/disable-passkeys`;
             const response = await fetch(disablePasskeysUrl, {

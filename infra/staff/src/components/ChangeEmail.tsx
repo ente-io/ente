@@ -9,7 +9,7 @@ import {
     TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { getEmail } from "../services/session";
+import { useStaffSessionRef } from "../services/session";
 import {
     apiOrigin,
     getCurrentAdminUserId,
@@ -25,14 +25,16 @@ interface ChangeEmailProps {
 export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
     const [newEmail, setNewEmail] = useState("");
     const [userID, setUserID] = useState("");
+    const sessionRef = useStaffSessionRef();
 
     useEffect(() => {
         const fetchUserID = async () => {
-            const email = getEmail();
+            const session = sessionRef.current;
+            const { email } = session;
             setNewEmail(email);
 
             try {
-                setUserID(await getCurrentAdminUserId());
+                setUserID(await getCurrentAdminUserId(session));
             } catch (error) {
                 console.error("Error fetching user ID:", error);
             }
@@ -43,7 +45,7 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
                 console.error("Error in fetchUserID:", error),
             );
         }
-    }, [open]);
+    }, [open, sessionRef]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setNewEmail(event.target.value);
@@ -55,7 +57,7 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         event.preventDefault();
 
         try {
-            const token = requireToken();
+            const token = requireToken(sessionRef.current);
             const url = `${apiOrigin}/admin/user/change-email`;
             const body = { userID, email: newEmail };
             const response = await fetch(url, {

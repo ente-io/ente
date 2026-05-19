@@ -9,6 +9,7 @@ import {
     TableSortLabel,
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
+import { useInitialStaffSession } from "../services/session";
 import { getCurrentAdminUser } from "../services/support";
 
 interface TokenData {
@@ -25,13 +26,14 @@ export const TokensTableComponent: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [order, setOrder] = useState<"asc" | "desc">("asc");
     const [orderBy, setOrderBy] = useState<keyof TokenData>("lastUsedTime");
+    const session = useInitialStaffSession();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const userData = await getCurrentAdminUser<{
                     tokens?: TokenData[];
-                }>();
+                }>(session);
                 setTokens(userData.tokens ?? []);
             } catch (error) {
                 console.error("Error fetching token data:", error);
@@ -44,7 +46,7 @@ export const TokensTableComponent: React.FC = () => {
         fetchData().catch((error: unknown) =>
             console.error("Fetch data error:", error),
         );
-    }, []);
+    }, [session]);
 
     const handleRequestSort = (property: keyof TokenData) => {
         const isAsc = orderBy === property && order === "asc";

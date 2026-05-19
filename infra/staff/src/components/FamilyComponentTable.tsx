@@ -11,6 +11,7 @@ import {
     TableRow,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useInitialStaffSession } from "../services/session";
 import { getCurrentAdminUser } from "../services/support";
 import { CloseFamily } from "./CloseFamily";
 
@@ -27,13 +28,14 @@ export const FamilyTableComponent: React.FC = () => {
     const [closeFamilyOpen, setCloseFamilyOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const session = useInitialStaffSession();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const userData = await getCurrentAdminUser<{
                     details?: { familyData?: { members?: FamilyMember[] } };
-                }>();
+                }>(session);
                 const members: FamilyMember[] =
                     userData.details?.familyData?.members ?? [];
                 setFamilyMembers(members);
@@ -48,7 +50,7 @@ export const FamilyTableComponent: React.FC = () => {
         fetchData().catch((error: unknown) =>
             console.error("Fetch data error:", error),
         );
-    }, []);
+    }, [session]);
 
     const handleOpenCloseFamily = () => {
         setCloseFamilyOpen(true);

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useStaffSession } from "../services/session";
 import {
     apiOrigin,
     getCurrentAdminUserId,
@@ -19,12 +20,13 @@ export const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
     handleToggleEmailMFA,
 }) => {
     const [loading, setLoading] = useState(false);
+    const session = useStaffSession();
 
     const handleToggle = async (enable: boolean) => {
         try {
             setLoading(true);
-            const token = requireToken();
-            const userId = await getCurrentAdminUserId();
+            const token = requireToken(session);
+            const userId = await getCurrentAdminUserId(session);
 
             const toggleEmailMFAUrl = `${apiOrigin}/admin/user/update-email-mfa`;
             const response = await fetch(toggleEmailMFAUrl, {

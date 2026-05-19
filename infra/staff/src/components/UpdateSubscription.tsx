@@ -17,6 +17,7 @@ import {
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useInitialStaffSession, useStaffSession } from "../services/session";
 import {
     apiOrigin,
     getCurrentAdminUser,
@@ -68,12 +69,14 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
     });
 
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const initialSession = useInitialStaffSession();
+    const session = useStaffSession();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const userDataResponse =
-                    await getCurrentAdminUser<UserDataResponse>();
+                    await getCurrentAdminUser<UserDataResponse>(initialSession);
 
                 if (!userDataResponse.subscription) {
                     throw new Error("Subscription data not found");
@@ -112,7 +115,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         fetchData().catch((error: unknown) => {
             console.error("Unhandled promise rejection:", error);
         });
-    }, []);
+    }, [initialSession]);
 
     const handleCalendarClick = () => {
         setIsDatePickerOpen(true);
@@ -141,7 +144,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         event.preventDefault();
 
         try {
-            const token = requireToken();
+            const token = requireToken(session);
             const url = `${apiOrigin}/admin/user/subscription`;
 
             let expiryTime = null;

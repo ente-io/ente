@@ -15,6 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useStaffSession } from "../services/session";
 import {
     apiOrigin,
     requireToken,
@@ -43,6 +44,7 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
     const [expiryPreview, setExpiryPreview] = useState(() =>
         computeExpiryTimeMicros(),
     );
+    const session = useStaffSession();
 
     useEffect(() => {
         if (open) {
@@ -70,7 +72,7 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
                 throw new Error("User email is unavailable");
             }
 
-            const token = requireToken();
+            const token = requireToken(session);
 
             const otp = generateOTP();
             const expiryTime = computeExpiryTimeMicros();

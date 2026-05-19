@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useStaffSession } from "../services/session";
 import {
     apiOrigin,
     getCurrentAdminUserId,
@@ -19,12 +20,13 @@ export const CloseFamily: React.FC<CloseFamilyProps> = ({
     handleCloseFamily,
 }) => {
     const [loading, setLoading] = useState(false);
+    const session = useStaffSession();
 
     const handleClosure = async () => {
         try {
             setLoading(true);
-            const token = requireToken();
-            const userId = await getCurrentAdminUserId();
+            const token = requireToken(session);
+            const userId = await getCurrentAdminUserId(session);
             const response = await fetch(
                 `${apiOrigin}/admin/user/close-family`,
                 {

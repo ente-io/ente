@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useStaffSession } from "../services/session";
 import {
     apiOrigin,
     getCurrentAdminUserId,
@@ -19,12 +20,13 @@ export const Disable2FA: React.FC<Disable2FAProps> = ({
     handleDisable2FA,
 }) => {
     const [loading, setLoading] = useState(false);
+    const session = useStaffSession();
 
     const handleDisable = async () => {
         try {
             setLoading(true);
-            const token = requireToken();
-            const userID = await getCurrentAdminUserId();
+            const token = requireToken(session);
+            const userID = await getCurrentAdminUserId(session);
             const response = await fetch(
                 `${apiOrigin}/admin/user/disable-2fa`,
                 {
