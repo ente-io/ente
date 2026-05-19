@@ -21,7 +21,7 @@ pub fn extract_speech_from_pcm16(
     if input_sample_rate == 0 {
         return Err(error("input sample rate must be greater than zero"));
     }
-    if pcm_le.len() % 2 != 0 {
+    if !pcm_le.len().is_multiple_of(2) {
         return Err(error("PCM16 input must contain an even number of bytes"));
     }
 
@@ -138,10 +138,10 @@ impl FrameResampler {
             src = &src[take..];
 
             if self.in_buf.len() == self.chunk_in {
-                if let Some(resampler) = self.resampler.as_mut() {
-                    if let Ok(out) = resampler.process(&[&self.in_buf[..]], None) {
-                        self.emit_frames(&out[0], &mut emit);
-                    }
+                if let Some(resampler) = self.resampler.as_mut()
+                    && let Ok(out) = resampler.process(&[&self.in_buf[..]], None)
+                {
+                    self.emit_frames(&out[0], &mut emit);
                 }
                 self.in_buf.clear();
             }
@@ -149,12 +149,12 @@ impl FrameResampler {
     }
 
     fn finish(&mut self, mut emit: impl FnMut(&[f32])) {
-        if let Some(resampler) = self.resampler.as_mut() {
-            if !self.in_buf.is_empty() {
-                self.in_buf.resize(self.chunk_in, 0.0);
-                if let Ok(out) = resampler.process(&[&self.in_buf[..]], None) {
-                    self.emit_frames(&out[0], &mut emit);
-                }
+        if let Some(resampler) = self.resampler.as_mut()
+            && !self.in_buf.is_empty()
+        {
+            self.in_buf.resize(self.chunk_in, 0.0);
+            if let Ok(out) = resampler.process(&[&self.in_buf[..]], None) {
+                self.emit_frames(&out[0], &mut emit);
             }
         }
 

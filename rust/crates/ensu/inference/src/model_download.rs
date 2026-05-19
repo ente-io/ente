@@ -245,7 +245,6 @@ async fn download_llm_model_files_async(
         let progress_states = Rc::clone(&file_states);
         let progress_callback = Rc::clone(&on_progress);
         let target_label = target.label.clone();
-        let download_started_at = download_started_at;
         let client = &client;
         let is_cancelled = &is_cancelled;
 
@@ -456,12 +455,12 @@ async fn download_llm_model_file_single(
 
         let response_metadata = response_metadata(&response);
         let file_total = content_total(&response, resume_from).or(expected_file_total);
-        if let Some(total) = file_total {
-            if total <= resume_from {
-                let _ = fs::remove_file(&tmp_path);
-                retry_count = retry_count.saturating_add(1);
-                continue;
-            }
+        if let Some(total) = file_total
+            && total <= resume_from
+        {
+            let _ = fs::remove_file(&tmp_path);
+            retry_count = retry_count.saturating_add(1);
+            continue;
         }
 
         let append = resume_from > 0 && response.status() == reqwest::StatusCode::PARTIAL_CONTENT;
@@ -566,16 +565,16 @@ async fn download_llm_model_file_single(
             retry_count,
         });
 
-        if let Some(total) = file_total {
-            if downloaded < total {
-                if attempt == MAX_ATTEMPTS {
-                    return Err(format!(
-                        "Download incomplete: expected {total} bytes, got {downloaded}"
-                    ));
-                }
-                retry_count = retry_count.saturating_add(1);
-                continue;
+        if let Some(total) = file_total
+            && downloaded < total
+        {
+            if attempt == MAX_ATTEMPTS {
+                return Err(format!(
+                    "Download incomplete: expected {total} bytes, got {downloaded}"
+                ));
             }
+            retry_count = retry_count.saturating_add(1);
+            continue;
         }
 
         if downloaded < MIN_GGUF_BYTES {
@@ -634,6 +633,7 @@ async fn download_llm_model_file_ranged(
         .create(true)
         .read(true)
         .write(true)
+        .truncate(false)
         .open(&tmp_path)
         .map_err(|err| err.to_string())?;
     file.set_len(total).map_err(|err| err.to_string())?;
@@ -1035,20 +1035,18 @@ fn prepare_range_download_metadata(
     let tmp_path = tmp_path_for(destination);
     let ranges = range_download_parts(total, RANGE_DOWNLOAD_CONCURRENCY);
 
-    if tmp_path.exists() {
-        if let Some(metadata) = read_range_download_metadata(destination) {
-            if file_size(&tmp_path) == Some(total)
-                && range_download_metadata_matches(
-                    &metadata,
-                    target,
-                    total,
-                    response_metadata.as_ref(),
-                    &ranges,
-                )
-            {
-                return Ok(metadata);
-            }
-        }
+    if tmp_path.exists()
+        && let Some(metadata) = read_range_download_metadata(destination)
+        && file_size(&tmp_path) == Some(total)
+        && range_download_metadata_matches(
+            &metadata,
+            target,
+            total,
+            response_metadata.as_ref(),
+            &ranges,
+        )
+    {
+        return Ok(metadata);
     }
 
     cleanup_range_download(destination);
@@ -1157,7 +1155,7 @@ fn emit_range_file_progress(
     drop(states);
 
     let mut callback = on_progress.borrow_mut();
-    (&mut **callback)(FileDownloadProgress {
+    (**callback)(FileDownloadProgress {
         downloaded_bytes,
         total_bytes: Some(total_bytes),
         network_downloaded_bytes,
@@ -1204,12 +1202,12 @@ fn validate_range_response(
         ));
     }
 
-    if let Some(content_total) = content_range.total {
-        if content_total != total {
-            return Err(format!(
-                "Range response total mismatch: expected {total}, got {content_total}"
-            ));
-        }
+    if let Some(content_total) = content_range.total
+        && content_total != total
+    {
+        return Err(format!(
+            "Range response total mismatch: expected {total}, got {content_total}"
+        ));
     }
 
     if let Some(content_length) = response.content_length() {
@@ -1335,10 +1333,8 @@ fn aggregate_progress_metrics(
     progress_metrics(
         elapsed,
         network_downloaded_bytes,
-        file_state.elapsed,
-        file_state.network_downloaded_bytes,
+        file_state,
         retry_count,
-        file_state.retry_count,
         file_complete,
         complete,
     )
@@ -1362,10 +1358,14 @@ fn aggregate_complete_metrics(
     progress_metrics(
         elapsed,
         network_downloaded_bytes,
-        Duration::ZERO,
-        0,
+        FileDownloadState {
+            downloaded_bytes: 0,
+            total_bytes: None,
+            network_downloaded_bytes: 0,
+            elapsed: Duration::ZERO,
+            retry_count: 0,
+        },
         retry_count,
-        0,
         false,
         true,
     )
@@ -1422,20 +1422,21 @@ fn emit_combined_progress(
 fn progress_metrics(
     elapsed: Duration,
     downloaded_bytes: u64,
-    file_elapsed: Duration,
-    file_downloaded_bytes: u64,
+    file_state: FileDownloadState,
     retry_count: u32,
-    file_retry_count: u32,
     file_complete: bool,
     complete: bool,
 ) -> DownloadProgressMetrics {
     DownloadProgressMetrics {
         elapsed_ms: duration_ms(elapsed),
         bytes_per_second: bytes_per_second(downloaded_bytes, elapsed),
-        file_elapsed_ms: duration_ms(file_elapsed),
-        file_bytes_per_second: bytes_per_second(file_downloaded_bytes, file_elapsed),
+        file_elapsed_ms: duration_ms(file_state.elapsed),
+        file_bytes_per_second: bytes_per_second(
+            file_state.network_downloaded_bytes,
+            file_state.elapsed,
+        ),
         retry_count,
-        file_retry_count,
+        file_retry_count: file_state.retry_count,
         file_complete,
         complete,
     }
@@ -1650,23 +1651,22 @@ fn existing_download_bytes(
     if range_metadata_path_for(destination).exists() {
         if let Some(total) = probe.content_length {
             let ranges = range_download_parts(total, RANGE_DOWNLOAD_CONCURRENCY);
-            if let Some(metadata) = read_range_download_metadata(destination) {
-                if file_size(&tmp_path_for(destination)) == Some(total)
-                    && range_download_metadata_matches(
-                        &metadata,
-                        target,
-                        total,
-                        probe.response_metadata.as_ref(),
-                        &ranges,
-                    )
-                {
-                    return metadata
-                        .ranges
-                        .iter()
-                        .filter(|range| range.complete)
-                        .map(|range| range_download_len(*range))
-                        .sum();
-                }
+            if let Some(metadata) = read_range_download_metadata(destination)
+                && file_size(&tmp_path_for(destination)) == Some(total)
+                && range_download_metadata_matches(
+                    &metadata,
+                    target,
+                    total,
+                    probe.response_metadata.as_ref(),
+                    &ranges,
+                )
+            {
+                return metadata
+                    .ranges
+                    .iter()
+                    .filter(|range| range.complete)
+                    .map(|range| range_download_len(*range))
+                    .sum();
             }
         }
         return 0;
@@ -1967,10 +1967,10 @@ mod tests {
             if reader.read_line(&mut line).is_err() || line == "\r\n" || line.is_empty() {
                 break;
             }
-            if let Some((name, value)) = line.split_once(':') {
-                if name.eq_ignore_ascii_case("range") {
-                    range_header = Some(value.trim().to_string());
-                }
+            if let Some((name, value)) = line.split_once(':')
+                && name.eq_ignore_ascii_case("range")
+            {
+                range_header = Some(value.trim().to_string());
             }
         }
 

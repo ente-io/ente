@@ -36,8 +36,8 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      rust/apps/ensu/src-tauri/target
-                  key: ${{ runner.os }}-cargo-ensu-desktop-${{ hashFiles('rust/apps/ensu/src-tauri/Cargo.lock') }}
+                      rust/target
+                  key: ${{ runner.os }}-cargo-ensu-desktop-${{ hashFiles('rust/Cargo.lock') }}
 
             - name: Install Rust 1.93.0
               uses: dtolnay/rust-toolchain@1.93.0

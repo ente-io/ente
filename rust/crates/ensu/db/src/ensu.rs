@@ -51,6 +51,7 @@ impl<B: crate::Backend> EnsuDb<B> {
         self.chat.delete_session(uuid)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn upsert_session(
         &self,
         session_uuid: Uuid,
@@ -96,6 +97,7 @@ impl<B: crate::Backend> EnsuDb<B> {
         Ok(message)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn insert_message_with_uuid_and_state(
         &self,
         message_uuid: Uuid,
@@ -148,6 +150,7 @@ impl<B: crate::Backend> EnsuDb<B> {
         Ok(message)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn insert_message_with_uuid(
         &self,
         message_uuid: Uuid,
@@ -349,6 +352,7 @@ impl<B: crate::Backend> EnsuDb<B> {
         self.chat.apply_session_tombstone(session_uuid, deleted_at)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn upsert_message_from_remote(
         &self,
         message_uuid: Uuid,

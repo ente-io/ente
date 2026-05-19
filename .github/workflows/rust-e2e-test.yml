@@ -38,8 +38,8 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      rust/e2e/target
-                  key: ${{ runner.os }}-cargo-rust-e2e-${{ hashFiles('rust/e2e/Cargo.lock', 'rust/Cargo.lock') }}
+                      rust/target
+                  key: ${{ runner.os }}-cargo-rust-e2e-${{ hashFiles('rust/Cargo.lock') }}
 
             - name: Run rust e2e suite
               env:

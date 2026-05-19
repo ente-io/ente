@@ -158,7 +158,7 @@ pub extern "C" fn inference_string_free(value: *mut c_char) {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn inference_init_backend(error_out: *mut *mut c_char) -> bool {
-    let result = catch_unwind(AssertUnwindSafe(|| api::init_backend()));
+    let result = catch_unwind(AssertUnwindSafe(api::init_backend));
     let result = match result {
         Ok(inner) => inner,
         Err(_) => Err("init_backend panicked".to_string()),
