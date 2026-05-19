@@ -1038,9 +1038,20 @@ final class ChatViewModel: ObservableObject {
             return
         }
 
-        voiceTranscriber.startRecording { [weak self] state in
-            self?.setVoiceInputState(state)
-        }
+        let voiceSessionId = currentSessionId
+        voiceTranscriber.startRecording(
+            onState: { [weak self] state in
+                self?.setVoiceInputState(state)
+            },
+            shouldStartRecording: { [weak self] in
+                guard let self else { return false }
+                return self.currentSessionId == voiceSessionId &&
+                    !self.isGenerating &&
+                    !self.isDownloading &&
+                    !self.isAttachmentDownloadBlocked &&
+                    self.editingMessageId == nil
+            }
+        )
     }
 
     func cancelVoiceInput() {

@@ -509,8 +509,10 @@ class _ButtonComponentState extends State<ButtonComponent>
     final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.specialWhite,
-      ButtonComponentVariant.secondary =>
-        isPressed ? colors.primaryDarker : colors.primaryDark,
+      ButtonComponentVariant.secondary => _secondaryForeground(
+        colors,
+        isPressed: isPressed,
+      ),
       ButtonComponentVariant.neutral => colors.textReverse,
       ButtonComponentVariant.critical => colors.specialWhite,
       ButtonComponentVariant.tertiaryCritical =>
@@ -526,6 +528,13 @@ class _ButtonComponentState extends State<ButtonComponent>
             ? colors.primaryDark
             : colors.primary,
     };
+  }
+
+  Color _secondaryForeground(ColorTokens colors, {required bool isPressed}) {
+    if (colors.primary == colors.blue || colors.primary == colors.purple) {
+      return colors.primary;
+    }
+    return isPressed ? colors.primaryDarker : colors.primaryDark;
   }
 
   ColorTokens _componentColors(BuildContext context) {

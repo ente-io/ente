@@ -1,0 +1,56 @@
+[package]
+name = "ente-rs"
+version = "0.0.1"
+edition = "2024"
+description = "Rust bindings and CLI for Ente"
+homepage = "https://ente.com"
+repository = "https://github.com/ente-io/ente"
+license = "AGPL-3.0-only"
+
+[[bin]]
+name = "ente-cli"
+path = "src/main.rs"
+
+[dependencies]
+# CLI
+clap = { version = "4.5", features = ["derive", "env"] }
+ente-core = { path = "../../crates/core", features = ["srp"] }
+ente-accounts = { path = "../../crates/accounts" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Async runtime and networking
+tokio = { version = "1.41", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "stream"] }
+futures = "0.3"
+
+# Cryptography - using ente-core pure Rust implementation
+base64 = "0.22"
+zeroize = { version = "1.8", features = ["derive"] }
+
+# Storage
+rusqlite = { version = "0.38", features = ["bundled", "serde_json"] }
+
+# Utilities
+thiserror = "2.0"
+log = "0.4"
+env_logger = "0.11"
+dirs = "5.0"
+chrono = "0.4"
+uuid = { version = "1.11", features = ["serde", "v4"] }
+urlencoding = "2.1"
+indicatif = "0.17"
+dialoguer = "0.11"
+open = "5.0"
+
+# File operations
+zip = "2.2"
+
+[dev-dependencies]
+mockito = "1.6"
+sha2 = "0.11"
+# Pinned to upstream commit that includes the padded-u interop fix for
+# leading-zero A/B wire values (matches our Go SRP server behavior):
+# https://github.com/RustCrypto/PAKEs/pull/285
+srp = { git = "https://github.com/RustCrypto/PAKEs", package = "srp", rev = "5b3bd1f3a9d51121a698ffe5d6ecc33cafcd6413", default-features = false }
+tempdir = "0.3"

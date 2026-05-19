@@ -152,8 +152,8 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      rust/apps/ensu/src-tauri/target
-                  key: ${{ runner.os }}-${{ matrix.platform.rust-target }}-cargo-ensu-release-${{ hashFiles('rust/apps/ensu/src-tauri/Cargo.lock') }}
+                      rust/target
+                  key: ${{ runner.os }}-${{ matrix.platform.rust-target }}-cargo-ensu-release-${{ hashFiles('rust/Cargo.lock') }}
 
             - name: Install web dependencies
               working-directory: web
@@ -168,8 +168,7 @@ jobs:
               run: yarn install --frozen-lockfile
 
             - name: Fetch Rust dependencies
-              shell: bash
-              working-directory: rust/apps/ensu/src-tauri
+              working-directory: rust
               run: cargo fetch
 
             - name: Prepare Windows signing
