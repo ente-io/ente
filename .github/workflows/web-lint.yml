@@ -5,7 +5,11 @@ on:
     pull_request:
         paths:
             - "web/**"
+            - "rust/bindings/wasm/ente-wasm/**"
+            - "rust/crates/contacts/**"
             - "rust/crates/core/**"
+            - "rust/Cargo.lock"
+            - "rust/Cargo.toml"
             - ".github/workflows/web-lint.yml"
 
 permissions:

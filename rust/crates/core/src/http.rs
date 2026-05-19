@@ -265,6 +265,7 @@ pub struct HttpClient {
     base_url: String,
     base_origin: Option<Url>,
     auth_token: RwLock<Option<Zeroizing<String>>>,
+    #[cfg(not(target_arch = "wasm32"))]
     user_agent: Option<String>,
     client_package: Option<String>,
     client_version: Option<String>,
@@ -322,6 +323,7 @@ impl HttpClient {
             base_url,
             base_origin,
             auth_token: RwLock::new(config.auth_token.map(Zeroizing::new)),
+            #[cfg(not(target_arch = "wasm32"))]
             user_agent: config.user_agent,
             client_package: config.client_package,
             client_version: config.client_version,
