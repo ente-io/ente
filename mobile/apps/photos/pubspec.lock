@@ -749,8 +749,8 @@ packages:
     dependency: "direct main"
     description:
       path: "flutter/flutter"
-      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
-      resolved-ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
+      ref: "15afc08775a75fe9c12de3366fa99e39bf171ccc"
+      resolved-ref: "15afc08775a75fe9c12de3366fa99e39bf171ccc"
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "6.0.3"
@@ -758,8 +758,8 @@ packages:
     dependency: transitive
     description:
       path: "flutter/flutter_platform_interface"
-      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
-      resolved-ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
+      ref: "15afc08775a75fe9c12de3366fa99e39bf171ccc"
+      resolved-ref: "15afc08775a75fe9c12de3366fa99e39bf171ccc"
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "0.2.1"
@@ -2978,12 +2978,13 @@ packages:
     source: hosted
     version: "2.9.5"
   video_player_avfoundation:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: video_player_avfoundation
-      sha256: e5371e9c09a5f5d55b88fd552bb1192dd5805a5747388553a439a30b85851a6a
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/video_player/video_player_avfoundation"
+      ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
+      resolved-ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
+      url: "https://github.com/ente-io/packages.git"
+    source: git
     version: "2.9.5"
   video_player_platform_interface:
     dependency: transitive

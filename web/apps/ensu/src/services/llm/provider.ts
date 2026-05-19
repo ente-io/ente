@@ -15,7 +15,7 @@ const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 const OVERFLOW_SAFETY_TOKENS = 256;
 const MIN_DESKTOP_DEFAULT_MEMORY_BYTES = 16 * 1024 * 1024 * 1024;
 
-// These fallback values must stay in sync with rust/ensu/inference/src/defaults.rs.
+// These fallback values must stay in sync with rust/crates/ensu/inference/src/defaults.rs.
 // When running inside Tauri, resolveDefaultModelForDevice() overwrites them with
 // values fetched from the Rust get_ensu_defaults command.
 export const DEFAULT_MODEL: ModelInfo = {

@@ -87,7 +87,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
-      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
+      ref: 15afc08775a75fe9c12de3366fa99e39bf171ccc
   figma_squircle: 0.6.3
   file_saver: 0.2.14
   firebase_core: 3.15.1
@@ -296,6 +296,13 @@ dependency_overrides:
       url: https://github.com/deckerst/aves_panorama_motion_sensors.git
       ref: 4b11d59f4bda152627f701070272f657f8358e67
   protobuf: 3.1.0
+  # Fixes an iOS AVFoundation crash for videos whose minFrameDuration is zero.
+  # https://github.com/flutter/flutter/issues/151031
+  video_player_avfoundation:
+    git:
+      url: https://github.com/ente-io/packages.git
+      path: packages/video_player/video_player_avfoundation
+      ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
   watcher: 1.1.2
   win32: "5.10.1"
 

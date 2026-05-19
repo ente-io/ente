@@ -3343,7 +3343,7 @@ const Page: React.FC = () => {
     }, [advancedUnlocked]);
 
     // Hardcoded fallbacks used when Rust defaults are not available (web-only
-    // mode). These must stay in sync with rust/ensu/inference/src/defaults.rs.
+    // mode). These must stay in sync with rust/crates/ensu/inference/src/defaults.rs.
     const fallbackSuggestedModels = useMemo(
         () =>
             isTauriRuntime
