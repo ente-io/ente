@@ -39,7 +39,7 @@ struct PasswordView: View {
                         email: email,
                         srp: srpAttributes,
                         sessionId: result.passkeySessionId!,
-                        accountsUrl: result.accountsUrl ?? "https://accounts.ente.io",
+                        accountsUrl: result.accountsUrl ?? "https://accounts.ente.com",
                         twoFactorSessionId: result.twoFactorSessionId,
                         password: password
                     )

@@ -230,16 +230,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{ingen elementer} =1{1 element} other{{count} elementer}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Opret samling",
   "uploadDocumentTooltip": "Upload dokument",
   "restore": "Genopret",
@@ -458,15 +448,6 @@
   "linkDeviceLimit": "Enheds grænse",
   "expiredLinkInfo": "Dette link er udløbet. Vælg venligst en ny udløbstid eller deaktiver linkudløb.",
   "linkExpiresOn": "Link udløber den {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0{Del med specifikke personer} =1{Delt med 1 person} other{Delt med {numberOfPeople} personer}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Linket er udløbet",
   "publicLinkEnabled": "Offentligt link aktiveret",
   "shareALink": "Del et link",
@@ -480,28 +461,6 @@
   "add": "Tilføj",
   "collaboratorsCanAddFilesToTheSharedCollection": "Samarbejdspartnere kan tilføje elementer til den delte samling.",
   "enterEmail": "Indtast email adresse",
-  "viewersSuccessfullyAdded": "{count, plural, =0{Tilføjet 0 seere} =1{Tilføjet 1 seer} other{Tilføjet {count} seere}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0{Tilføjet 0 samarbejdspartnere} =1{Tilføjet 1 samarbejdspartner} other{Tilføjet {count} samarbejdspartnere}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0{Tilføj seer} =1{Tilføj seer} other{Tilføj seere}}",
-  "addCollaborators": "{count, plural, =0{Tilføj samarbejdspartner} =1{Tilføj samarbejdspartner} other{Tilføj samarbejdspartnere}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen.",
   "sharing": "Deler...",
   "invalidEmailAddress": "Ugyldig email adresse",
@@ -550,16 +509,6 @@
   "viewer": "Seer",
   "collaborator": "Samarbejdspartner",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Samarbejdspartnere kan tilføje elementer til den delte samling.",
-  "albumParticipantsCount": "{count, plural, =0 {Ingen Deltagere} =1 {1 Deltager} other {{count} Deltagere}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Tilføj flere",
   "you": "Dig",
   "albumOwner": "Ejer",
@@ -667,16 +616,6 @@
   "clickHereToUpload": "Klik her for at uploade",
   "saveDocument": "Gem dokument",
   "uploadFiles": "Upload elementer",
-  "filesSelected": "{count, plural, =0{Ingen elementer valgt} =1{1 element valgt} other{{count} elementer valgt}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Tilføj til samling",
   "newCollection": "Ny samling",
   "title": "Titel",
@@ -694,16 +633,6 @@
       }
     }
   },
-  "recordSavedToMultipleCollections": "Post gemt i {count, plural, =1{1 samling} other{{count} samlinger}}",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} kopieret til udklipsholder",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -711,20 +640,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 resultat} other{{count} resultater}} for \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -769,49 +684,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 samling} other{{count} samlinger}} vil blive slettet permanent.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 element} other{{count} elementer}} vil blive slettet permanent.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Slet også elementer overalt",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Ja, slet {count, plural, =1{samling} other{samlinger}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Ja, slet {count, plural, =1{element} other{elementer}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Forbrug",
   "important": "Vigtig",
@@ -820,16 +695,6 @@
   "markingAsImportant": "Markerer som vigtig...",
   "fileMarkedAsImportant": "Element markeret som vigtig",
   "fileRemovedFromImportant": "Element fjernet fra vigtige",
-  "filesMarkedAsImportant": "{count, plural, =1{1 element markeret som vigtig} other{{count} elementer markeret som vigtige}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Alle elementer er allerede markeret som vigtige",
   "failedToMarkFilesAsImportant": "Kunne ikke markere elementer som vigtige: {error}",
   "@failedToMarkFilesAsImportant": {

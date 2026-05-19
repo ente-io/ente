@@ -333,7 +333,6 @@
     }
   },
   "sorry": "Désolé",
-  "importFailureDesc": "Impossible d'analyser le fichier sélectionné.\nVeuillez écrire à support@ente.com si vous avez besoin d'aide !",
   "pendingSyncs": "Attention",
   "pendingSyncsWarningBody": "Certains de vos codes n'ont pas été sauvegardés.\n\nVeuillez vous assurer que vous avez une sauvegarde de ces codes avant de vous déconnecter.",
   "checkInboxAndSpamFolder": "Veuillez consulter votre boîte de courriels (et les spam) pour compléter la vérification",
@@ -509,7 +508,7 @@
   "pinLock": "Verrouillage par code PIN",
   "enterPin": "Saisir le code PIN",
   "setNewPin": "Définir un nouveau code PIN",
-  "importFailureDescNew": "Impossible de lire le fichier sélectionné.",
+  "importFailureDesc": "Impossible de lire le fichier sélectionné.",
   "appLockNotEnabled": "Verrouillage d'application désactivé",
   "appLockNotEnabledDescription": "Activez le verrouillage d'application dans Sécurité > Verrouillage d'application",
   "authToViewPasskey": "Veuillez vous authentifier pour afficher la clé d'accès",

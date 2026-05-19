@@ -7,7 +7,7 @@ on:
     workflow_dispatch: # Allow manual trigger
 
 env:
-    FLUTTER_VERSION: "3.32.8"
+    FLUTTER_VERSION: "3.38.10"
 
 permissions:
     contents: write
@@ -141,11 +141,8 @@ jobs:
                   echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
                   echo "EOF" >> $GITHUB_ENV
 
-            - name: Setup keys
-              uses: timheuer/base64-to-file@v1
-              with:
-                  fileName: "keystore/ente_auth_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY }}
+            - name: Add keystore
+              run: echo "${{ secrets.SIGNING_KEY_AUTH }}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
 
             - name: Create artifacts directory
               run: mkdir artifacts
@@ -155,19 +152,19 @@ jobs:
                   flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
                   mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta.apk
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_auth_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_AUTH }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_AUTH }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_AUTH }}
 
             - name: Build PlayStore AAB
               run: |
                   flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore --dart-define=cronetHttpNoPlay=true
               env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_auth_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_AUTH }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_AUTH }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_AUTH }}
 
             - name: Install dependencies for desktop build
               run: |
@@ -240,7 +237,6 @@ jobs:
 
     build-windows:
         runs-on: windows-latest
-        environment: "auth-win-build"
         needs: build-android-linux
 
         defaults:
@@ -271,21 +267,48 @@ jobs:
             - name: Create artifacts directory
               run: mkdir artifacts
 
-            - name: Build Windows installer
+            - name: Build Windows release
               run: |
                   flutter config --enable-windows-desktop
-                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
                   choco install innosetup -y
-                  fastforge.bat package --platform=windows --targets=exe --skip-clean
-                  shopt -s globstar
-                  mv dist/**/*-windows-setup.exe artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta-installer.exe
+                  flutter build windows --release
               shell: bash
 
-            - name: Retain Windows EXE and DLLs
-              run: cp -r build/windows/x64/runner/Release ente-auth-v${{ env.VERSION_NAME }}-beta-windows
-              shell: bash
+            - name: Verify Windows PE allowlist
+              run: |
+                  & ./scripts/verify_windows_pe_allowlist.ps1 `
+                    -PayloadDir "build/windows/x64/runner/Release" `
+                    -AllowlistPath "windows/signing/allowed-pe-files.txt"
+              shell: pwsh
 
-            - name: Sign files with Trusted Signing
+            - name: Sign Windows payload with Trusted Signing
+              uses: azure/trusted-signing-action@v0
+              with:
+                azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+                endpoint: ${{ secrets.AZURE_ENDPOINT }}
+                trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+                files-folder: ${{ github.workspace }}/mobile/apps/auth/build/windows/x64/runner/Release
+                files-folder-filter: exe,dll
+                files-folder-recurse: true
+                file-digest: SHA256
+                timestamp-rfc3161: http://timestamp.acs.microsoft.com
+                timestamp-digest: SHA256
+
+            - name: Verify signed Windows payload
+              run: ./scripts/verify_windows_authenticode.ps1 -Path "build/windows/x64/runner/Release"
+              shell: pwsh
+
+            - name: Build Windows installer
+              run: |
+                  & ./scripts/build_windows_installer.ps1 `
+                    -SourceDir "build/windows/x64/runner/Release" `
+                    -InstallerPath "artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta-installer.exe"
+              shell: pwsh
+
+            - name: Sign Windows installer with Trusted Signing
               uses: azure/trusted-signing-action@v0
               with:
                 azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -296,15 +319,29 @@ jobs:
                 certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                 files: |
                       ${{ github.workspace }}/mobile/apps/auth/artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta-installer.exe
-                      ${{ github.workspace }}/mobile/apps/auth/ente-auth-v${{ env.VERSION_NAME }}-beta-windows/auth.exe
                 file-digest: SHA256
                 timestamp-rfc3161: http://timestamp.acs.microsoft.com
                 timestamp-digest: SHA256
 
+            - name: Verify signed Windows installer
+              run: ./scripts/verify_windows_authenticode.ps1 -Path "artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta-installer.exe"
+              shell: pwsh
+
+            - name: Retain signed Windows EXE and DLLs
+              run: Copy-Item -Recurse -Force "build/windows/x64/runner/Release" "ente-auth-v${{ env.VERSION_NAME }}-beta-windows"
+              shell: pwsh
 
             - name: Zip Windows EXE and DLLs
-              run: tar.exe -a -c -f artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta-windows.zip ente-auth-v${{ env.VERSION_NAME }}-beta-windows
-              shell: bash
+              shell: pwsh
+              run: |
+                  $zipPath = "artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta-windows.zip"
+                  Compress-Archive `
+                    -Path "ente-auth-v${{ env.VERSION_NAME }}-beta-windows" `
+                    -DestinationPath $zipPath `
+                    -Force
+                  Add-Type -AssemblyName System.IO.Compression.FileSystem
+                  $zip = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zipPath))
+                  $zip.Dispose()
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-auth-* > artifacts/sha256sum-windows
@@ -349,16 +386,6 @@ jobs:
               run: |
                   pip3 install codemagic-cli-tools --break-system-packages
 
-            - name: Add provisioning profiles
-              run: |
-                  PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
-                  mkdir -p "$PROFILES_HOME"
-                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).provisionprofile)"
-                  echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
-                  echo "Saved provisioning profile $PROFILE_PATH"
-              env:
-                  CM_PROVISIONING_PROFILE: ${{ secrets.MAC_OS_BUILD_PROVISION_PROFILE_BASE64 }}
-
             - name: Add certificates
               run: |
                   # create variables
@@ -371,8 +398,12 @@ jobs:
                   keychain initialize
                   keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
 
-                  # Use profile in current project
-                  xcode-project use-profiles --project=macos/**/*.xcodeproj
+                  signing_settings="$RUNNER_TEMP/auth-macos-ci-signing.xcconfig"
+                  printf '%s\n' \
+                      'CODE_SIGN_IDENTITY = Developer ID Application' \
+                      'CODE_SIGN_STYLE = Manual' \
+                      > "$signing_settings"
+                  echo "XCODE_XCCONFIG_FILE=$signing_settings" >> "$GITHUB_ENV"
               env:
                   BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
                   P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}

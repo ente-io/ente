@@ -1,7 +1,7 @@
 import "dart:async";
 import "dart:io" show Platform;
 
-import "package:flutter/foundation.dart" show debugPrint;
+import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
 import "package:logging/logging.dart";
 import "package:photos/service_locator.dart"
     show flagService, isLocalGalleryMode, localSettings;
@@ -81,8 +81,7 @@ class MLIndexingIsolate extends SuperIsolate {
         "Analyzing image ${instruction.fileKey} via rust or legacy: ${useRustMl ? "RUST" : "LEGACY"}",
       );
 
-      final resultJsonString =
-          await runInIsolate(IsolateOperation.analyzeImage, {
+      final isolateResult = await runInIsolate(IsolateOperation.analyzeImage, {
         "enteFileID": instruction.fileKey,
         "filePath": filePath,
         "useRustMl": useRustMl,
@@ -93,7 +92,16 @@ class MLIndexingIsolate extends SuperIsolate {
         "faceDetectionAddress": FaceDetectionService.instance.sessionAddress,
         "faceEmbeddingAddress": FaceEmbeddingService.instance.sessionAddress,
         "clipImageAddress": ClipImageEncoder.instance.sessionAddress,
-      }) as String?;
+      });
+      if (isolateResult is RustCorruptModelCacheDeletedException) {
+        _logger.warning(
+          "Deleted corrupt Rust ONNX model cache at ${isolateResult.modelPath}; "
+          "stopping ML indexing for fileID ${instruction.fileKey}",
+        );
+        shouldPauseIndexingAndClustering = true;
+        throw isolateResult;
+      }
+      final resultJsonString = isolateResult as String?;
       if (resultJsonString == null) {
         if (!shouldPauseIndexingAndClustering) {
           _logger.severe('Analyzing image in isolate is giving back null');
@@ -103,7 +111,8 @@ class MLIndexingIsolate extends SuperIsolate {
       result = MLResult.fromJsonString(resultJsonString);
       result.usedRustMl = useRustMl;
     } catch (e, s) {
-      if (isExpectedMlSkipError(e)) {
+      if (e is RustCorruptModelCacheDeletedException ||
+          isExpectedMlSkipError(e)) {
         rethrow;
       }
       _logger.severe(
@@ -111,9 +120,11 @@ class MLIndexingIsolate extends SuperIsolate {
         e,
         s,
       );
-      debugPrint(
-        "This image with fileID ${instruction.fileKey} has name ${instruction.file.displayName}.",
-      );
+      if (kDebugMode) {
+        debugPrint(
+          "This image with fileID ${instruction.fileKey} has name ${instruction.file.displayName}.",
+        );
+      }
       rethrow;
     }
 

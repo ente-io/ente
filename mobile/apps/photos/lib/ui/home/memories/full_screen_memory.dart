@@ -60,6 +60,15 @@ import "package:photos/utils/thumbnail_util.dart";
 
 //TODO: Use better naming convention. "Memory" should be a whole memory and
 //parts of the memory should be called "items".
+int? _clampedMemoryIndex(int index, int length) {
+  if (length == 0) return null;
+  return min(max(index, 0), length - 1);
+}
+
+bool _isValidMemoryIndex(int index, int length) {
+  return index >= 0 && index < length;
+}
+
 class FullScreenMemoryDataUpdater extends StatefulWidget {
   final List<Memory> memories;
   final int initialIndex;
@@ -91,14 +100,30 @@ class _FullScreenMemoryDataUpdaterState
   @override
   void initState() {
     super.initState();
-    indexNotifier = ValueNotifier(widget.initialIndex);
+    final initialIndex =
+        _clampedMemoryIndex(widget.initialIndex, widget.memories.length);
+    indexNotifier = ValueNotifier(initialIndex ?? 0);
+    if (initialIndex == null) return;
     memoriesCacheService.markMemoryAsSeen(
-      widget.memories[widget.initialIndex],
-      widget.memories.length == widget.initialIndex + 1,
+      widget.memories[initialIndex],
+      widget.memories.length == initialIndex + 1,
     );
-    _warmThumbnailWindow(widget.initialIndex);
-    _warmVideoWindow(widget.initialIndex + 1);
+    _warmThumbnailWindow(initialIndex);
+    _warmVideoWindow(initialIndex + 1);
     unawaited(_setupConnectivityListener());
+  }
+
+  @override
+  void didUpdateWidget(covariant FullScreenMemoryDataUpdater oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final index = _clampedMemoryIndex(
+      indexNotifier.value,
+      widget.memories.length,
+    );
+    final safeIndex = index ?? 0;
+    if (indexNotifier.value != safeIndex) {
+      indexNotifier.value = safeIndex;
+    }
   }
 
   Future<void> _setupConnectivityListener() async {
@@ -146,9 +171,10 @@ class _FullScreenMemoryDataUpdaterState
   static const _fileLookaheadCap = 3;
 
   void _warmThumbnailWindow(int fromIndex) {
+    final start = fromIndex.clamp(0, widget.memories.length).toInt();
     final end =
-        (fromIndex + _thumbnailLookaheadCap).clamp(0, widget.memories.length);
-    for (var i = fromIndex; i < end; i++) {
+        (start + _thumbnailLookaheadCap).clamp(0, widget.memories.length);
+    for (var i = start; i < end; i++) {
       _preloadThumbnailOwned(widget.memories[i].file);
     }
   }
@@ -232,18 +258,22 @@ class _FullScreenMemoryDataUpdaterState
   }
 
   void removeCurrentMemory() {
-    widget.memories.removeAt(indexNotifier.value);
-    if (widget.memories.isNotEmpty) {
-      setState(() {
-        if (widget.memories.length == indexNotifier.value) {
-          indexNotifier.value -= 1;
-        }
-      });
-    }
+    final removeIndex =
+        _clampedMemoryIndex(indexNotifier.value, widget.memories.length);
+    if (removeIndex == null) return;
+    widget.memories.removeAt(removeIndex);
+    if (!mounted) return;
+    setState(() {
+      indexNotifier.value =
+          _clampedMemoryIndex(removeIndex, widget.memories.length) ?? 0;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.memories.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return FullScreenMemoryData(
       memories: widget.memories,
       indexNotifier: indexNotifier,
@@ -353,6 +383,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         final inheritedData = FullScreenMemoryData.of(context);
         if (inheritedData == null) return;
         final index = inheritedData.indexNotifier.value;
+        if (!_isValidMemoryIndex(index, inheritedData.memories.length)) {
+          return;
+        }
         final currentFile = inheritedData.memories[index].file;
 
         if (event.isSameFile(
@@ -371,6 +404,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     durationNotifier.dispose();
     hasPointerOnScreenNotifier.removeListener(_hasPointerListener);
     _detailSheetEventSubscription.cancel();
+    _progressAnimationController = null;
+    _zoomAnimationController = null;
+    _kenBurnsStartToken = null;
     super.dispose();
   }
 
@@ -384,9 +420,11 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _toggleAnimation(pause: true);
     } else {
       _toggleAnimation(pause: false);
-      final inheritedData = FullScreenMemoryData.of(context)!;
-      final currentFile =
-          inheritedData.memories[inheritedData.indexNotifier.value].file;
+      final inheritedData = FullScreenMemoryData.of(context);
+      if (inheritedData == null) return;
+      final index = inheritedData.indexNotifier.value;
+      if (!_isValidMemoryIndex(index, inheritedData.memories.length)) return;
+      final currentFile = inheritedData.memories[index].file;
       Bus.instance.fire(
         ResetZoomOfPhotoView(
           localID: currentFile.localID,
@@ -397,6 +435,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _toggleAnimation({required bool pause}) {
+    if (!mounted) return;
     _isAnimationPaused = pause;
     if (pause) {
       _progressAnimationController?.stop();
@@ -412,6 +451,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _resetAnimation() {
+    if (!mounted) return;
     _progressAnimationController
       ?..stop()
       ..reset();
@@ -420,7 +460,33 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       ..reset();
   }
 
+  void _setProgressAnimationController(AnimationController controller) {
+    _progressAnimationController = controller;
+  }
+
+  void _clearProgressAnimationController(AnimationController controller) {
+    if (_progressAnimationController == controller) {
+      _progressAnimationController = null;
+    }
+  }
+
+  void _setZoomAnimationController(AnimationController controller) {
+    // Freeze the outgoing photo's Ken Burns during auto-advance crossfades.
+    if (_autoAdvanceTransition) {
+      _zoomAnimationController?.stop();
+    }
+    _zoomAnimationController = controller;
+  }
+
+  void _clearZoomAnimationController(AnimationController controller) {
+    if (_zoomAnimationController == controller) {
+      _zoomAnimationController = null;
+      _kenBurnsStartToken = null;
+    }
+  }
+
   void onFinalFileLoad(int duration) {
+    if (!mounted) return;
     hasFinalFileLoaded = true;
     isAtFirstOrLastFile = false;
     if (_progressAnimationController?.isAnimating == true) {
@@ -456,8 +522,13 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _goToNext(FullScreenMemoryData inheritedData) {
+    if (inheritedData.memories.isEmpty) return;
     hasFinalFileLoaded = false;
-    final currentIndex = inheritedData.indexNotifier.value;
+    final currentIndex = _clampedMemoryIndex(
+      inheritedData.indexNotifier.value,
+      inheritedData.memories.length,
+    )!;
+    inheritedData.indexNotifier.value = currentIndex;
     if (currentIndex < inheritedData.memories.length - 1) {
       inheritedData.indexNotifier.value += 1;
       _onPageChange(inheritedData, currentIndex + 1);
@@ -470,8 +541,13 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _goToPrevious(FullScreenMemoryData inheritedData) {
+    if (inheritedData.memories.isEmpty) return;
     hasFinalFileLoaded = false;
-    final currentIndex = inheritedData.indexNotifier.value;
+    final currentIndex = _clampedMemoryIndex(
+      inheritedData.indexNotifier.value,
+      inheritedData.memories.length,
+    )!;
+    inheritedData.indexNotifier.value = currentIndex;
     if (currentIndex > 0) {
       inheritedData.indexNotifier.value -= 1;
       _onPageChange(inheritedData, currentIndex - 1);
@@ -485,6 +561,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _onPageChange(FullScreenMemoryData inheritedData, int index) {
+    if (!_isValidMemoryIndex(index, inheritedData.memories.length)) return;
     isAtFirstOrLastFile = false;
     unawaited(
       memoriesCacheService.markMemoryAsSeen(
@@ -498,7 +575,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   @override
   Widget build(BuildContext context) {
-    final inheritedData = FullScreenMemoryData.of(context)!;
+    final inheritedData = FullScreenMemoryData.of(context);
+    if (inheritedData == null || inheritedData.memories.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final showStepProgressIndicator =
         inheritedData.memories.length < kMemoryProgressTickCutoff;
 
@@ -529,6 +609,11 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     ),
                   ),
                   builder: (context, value, child) {
+                    final safeIndex = _clampedMemoryIndex(
+                      value,
+                      inheritedData.memories.length,
+                    );
+                    if (safeIndex == null) return const SizedBox.shrink();
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -538,15 +623,16 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           builder: (context, duration, _) {
                             return MemoryProgressIndicator(
                               totalSteps: inheritedData.memories.length,
-                              currentIndex: value,
+                              currentIndex: safeIndex,
                               selectedColor: Colors.white,
                               unselectedColor: Colors.white.withValues(
                                 alpha: 0.4,
                               ),
                               duration: duration,
-                              animationController: (controller) {
-                                _progressAnimationController = controller;
-                              },
+                              animationController:
+                                  _setProgressAnimationController,
+                              onAnimationControllerDisposed:
+                                  _clearProgressAnimationController,
                               onComplete: () {
                                 _autoAdvanceTransition = true;
                                 _goToNext(inheritedData);
@@ -569,7 +655,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                   context,
                                   JumpToDateGallery(
                                     fileToJumpTo:
-                                        inheritedData.memories[value].file,
+                                        inheritedData.memories[safeIndex].file,
                                   ),
                                 );
                                 Bus.instance.fire(ResumeVideoEvent());
@@ -593,7 +679,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                       child: Text(
                                         SmartMemoriesService.getDateFormatted(
                                           creationTime: inheritedData
-                                              .memories[value]
+                                              .memories[safeIndex]
                                               .file
                                               .creationTime!,
                                           context: context,
@@ -645,12 +731,17 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   ValueListenableBuilder<int>(
                     valueListenable: inheritedData.indexNotifier,
                     builder: (context, index, _) {
+                      final safeIndex = _clampedMemoryIndex(
+                        index,
+                        inheritedData.memories.length,
+                      );
+                      if (safeIndex == null) return const SizedBox.shrink();
                       for (var i = 1;
                           i <=
                               _FullScreenMemoryDataUpdaterState
                                   ._thumbnailLookaheadCap;
                           i++) {
-                        final j = index + i;
+                        final j = safeIndex + i;
                         if (j >= inheritedData.memories.length) break;
                         inheritedData.preloadThumbnail(
                           inheritedData.memories[j].file,
@@ -661,12 +752,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                               _FullScreenMemoryDataUpdaterState
                                   ._fileLookaheadCap;
                           i++) {
-                        final j = index + i;
+                        final j = safeIndex + i;
                         if (j >= inheritedData.memories.length) break;
                         preloadFile(inheritedData.memories[j].file);
                       }
-                      inheritedData.preloadVideos(index + 1);
-                      final currentMemory = inheritedData.memories[index];
+                      inheritedData.preloadVideos(safeIndex + 1);
+                      final currentMemory = inheritedData.memories[safeIndex];
                       final isVideo =
                           currentMemory.file.fileType == FileType.video;
                       final currentFile = currentMemory.file;
@@ -709,18 +800,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 currentFile.uploadedFileID ??
                                     currentFile.localID,
                               ),
-                              scaleController: (controller) {
-                                // Freeze the outgoing photo's Ken Burns at
-                                // its current transform on auto-advance so
-                                // the crossfade is a dissolve between two
-                                // still images, not between a still and a
-                                // moving one.
-                                if (_autoAdvanceTransition) {
-                                  _zoomAnimationController?.stop();
-                                }
-                                _zoomAnimationController = controller;
-                              },
-                              zoomIn: index % 2 == 0,
+                              scaleController: _setZoomAnimationController,
+                              onScaleControllerDisposed:
+                                  _clearZoomAnimationController,
+                              zoomIn: safeIndex % 2 == 0,
                               isVideo: isVideo,
                               child: FileWidget(
                                 currentFile,
@@ -802,7 +885,10 @@ class BottomIcons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inheritedData = FullScreenMemoryData.of(context)!;
+    final inheritedData = FullScreenMemoryData.of(context);
+    if (inheritedData == null || inheritedData.memories.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final fullScreenState =
         context.findAncestorStateOfType<_FullScreenMemoryState>();
     final memoryTitle =
@@ -812,7 +898,12 @@ class BottomIcons extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: inheritedData.indexNotifier,
       builder: (context, value, _) {
-        final currentFile = inheritedData.memories[value].file;
+        final safeIndex = _clampedMemoryIndex(
+          value,
+          inheritedData.memories.length,
+        );
+        if (safeIndex == null) return const SizedBox.shrink();
+        final currentFile = inheritedData.memories[safeIndex].file;
         final List<Widget> rowChildren = [
           IconButton(
             icon: Icon(
@@ -839,11 +930,15 @@ class BottomIcons extends StatelessWidget {
                 color: Colors.white, //same for both themes
               ),
               onPressed: () async {
+                final currentIndex = _clampedMemoryIndex(
+                  inheritedData.indexNotifier.value,
+                  inheritedData.memories.length,
+                );
+                if (currentIndex == null) return;
                 fullScreenState?._toggleAnimation(pause: true);
                 await showSingleFileDeleteSheet(
                   context,
-                  inheritedData
-                      .memories[inheritedData.indexNotifier.value].file,
+                  inheritedData.memories[currentIndex].file,
                   onFileRemoved: (file) => {
                     inheritedData.removeCurrentMemory.call(),
                     if (inheritedData.memories.isEmpty)
@@ -891,12 +986,20 @@ class MemoryCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inheritedData = FullScreenMemoryData.of(context)!;
+    final inheritedData = FullScreenMemoryData.of(context);
+    if (inheritedData == null || inheritedData.memories.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return ValueListenableBuilder(
       valueListenable: inheritedData.indexNotifier,
       builder: (context, value, _) {
+        final safeIndex = _clampedMemoryIndex(
+          value,
+          inheritedData.memories.length,
+        );
+        if (safeIndex == null) return const SizedBox.shrink();
         return Text(
-          "${value + 1}/${inheritedData.memories.length}",
+          "${safeIndex + 1}/${inheritedData.memories.length}",
           style: darkTextTheme.bodyMuted,
         );
       },
@@ -943,11 +1046,19 @@ class _MemoryBlur extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inheritedData = FullScreenMemoryData.of(context)!;
+    final inheritedData = FullScreenMemoryData.of(context);
+    if (inheritedData == null || inheritedData.memories.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return ValueListenableBuilder(
       valueListenable: inheritedData.indexNotifier,
       builder: (context, value, _) {
-        final currentFile = inheritedData.memories[value].file;
+        final safeIndex = _clampedMemoryIndex(
+          value,
+          inheritedData.memories.length,
+        );
+        if (safeIndex == null) return const SizedBox.shrink();
+        final currentFile = inheritedData.memories[safeIndex].file;
         if (currentFile.fileType == FileType.video) {
           return const SizedBox.shrink();
         }
@@ -956,7 +1067,7 @@ class _MemoryBlur extends StatelessWidget {
           switchInCurve: Curves.easeOutExpo,
           switchOutCurve: Curves.easeInExpo,
           child: ImageFiltered(
-            key: ValueKey(inheritedData.indexNotifier.value),
+            key: ValueKey(safeIndex),
             imageFilter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
             child: ThumbnailWidget(
               currentFile,
@@ -975,6 +1086,7 @@ class MemoriesZoomWidget extends StatefulWidget {
   final Widget child;
   final bool isVideo;
   final void Function(AnimationController)? scaleController;
+  final void Function(AnimationController)? onScaleControllerDisposed;
   final bool zoomIn;
 
   const MemoriesZoomWidget({
@@ -983,6 +1095,7 @@ class MemoriesZoomWidget extends StatefulWidget {
     required this.isVideo,
     required this.zoomIn,
     this.scaleController,
+    this.onScaleControllerDisposed,
   });
 
   @override
@@ -1034,6 +1147,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
 
   @override
   void dispose() {
+    widget.onScaleControllerDisposed?.call(_controller);
     _controller.dispose();
     super.dispose();
   }
@@ -1068,9 +1182,14 @@ Future<void> _shareMemory(
   FullScreenMemoryData inheritedData,
   String memoryTitle,
 ) async {
+  if (inheritedData.memories.isEmpty) return;
   final l10n = AppLocalizations.of(context);
-  final currentFile =
-      inheritedData.memories[inheritedData.indexNotifier.value].file;
+  final currentIndex = _clampedMemoryIndex(
+    inheritedData.indexNotifier.value,
+    inheritedData.memories.length,
+  );
+  if (currentIndex == null) return;
+  final currentFile = inheritedData.memories[currentIndex].file;
   final shareSingleItemLabel = currentFile.isVideo
       ? _titleCase(l10n.videoSmallCase)
       : _titleCase(l10n.photoSmallCase);
@@ -1109,6 +1228,7 @@ Future<(String, int)?> _getOrCreateMemoryLink(
   FullScreenMemoryData inheritedData,
   String memoryTitle,
 ) async {
+  if (inheritedData.memories.isEmpty) return null;
   final l10n = AppLocalizations.of(context);
   final dialog = createProgressDialog(context, l10n.creatingLink);
   await dialog.show();

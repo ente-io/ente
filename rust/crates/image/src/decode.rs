@@ -1,7 +1,13 @@
-use std::{ffi::OsStr, fs::File, io::BufReader, path::Path, sync::Once};
+use std::{
+    ffi::OsStr,
+    fs::File,
+    io::{BufReader, Cursor},
+    path::Path,
+    sync::Once,
+};
 
 use ente_heic::{
-    DecodeGuardrails, exif_orientation_hint_from_path,
+    DecodeGuardrails, exif_orientation_hint, exif_orientation_hint_from_path,
     image_integration::{
         apply_exif_orientation_dynamic, register_image_decoder_hooks_with_guardrails,
     },
@@ -23,7 +29,20 @@ static IMAGE_DECODER_HOOKS_INIT: Once = Once::new();
 
 pub fn decode_image_from_path(image_path: &str) -> ImageResult<DecodedImage> {
     let decoded_dynamic = decode_with_image_crate(image_path)?;
-    let oriented = orient_decoded_image(decoded_dynamic, image_path).to_rgb8();
+    let oriented = orient_decoded_image(decoded_dynamic, image_path).into_rgb8();
+
+    Ok(DecodedImage {
+        dimensions: Dimensions {
+            width: oriented.width(),
+            height: oriented.height(),
+        },
+        rgb: oriented.into_raw(),
+    })
+}
+
+pub fn decode_image_from_bytes(image_bytes: &[u8]) -> ImageResult<DecodedImage> {
+    let decoded_dynamic = decode_bytes_with_image_crate(image_bytes)?;
+    let oriented = orient_decoded_image_from_bytes(decoded_dynamic, image_bytes).into_rgb8();
 
     Ok(DecodedImage {
         dimensions: Dimensions {
@@ -63,6 +82,29 @@ fn decode_with_image_crate(image_path: &str) -> ImageResult<DynamicImage> {
     }
 }
 
+fn decode_bytes_with_image_crate(image_bytes: &[u8]) -> ImageResult<DynamicImage> {
+    init_image_decoders();
+
+    let reader = ImageReader::new(Cursor::new(image_bytes))
+        .with_guessed_format()
+        .map_err(|e| ImageError::Decode(format!("failed to guess image format: {e}")))?;
+    let guessed_format = reader.format();
+
+    match reader.decode() {
+        Ok(decoded) => Ok(decoded),
+        Err(primary_error) if should_attempt_tiff_fallback(guessed_format) => {
+            match decode_tiff_from_bytes(image_bytes) {
+                Ok(decoded) => Ok(decoded),
+                Err(ImageError::Decode(fallback_error)) => Err(ImageError::Decode(format!(
+                    "failed to decode TIFF with image crate: {primary_error}; fallback with tiff crate also failed: {fallback_error}"
+                ))),
+                Err(other) => Err(other),
+            }
+        }
+        Err(other) => Err(other.into()),
+    }
+}
+
 fn should_attempt_tiff_fallback(format: Option<ImageFormat>) -> bool {
     matches!(format, Some(ImageFormat::Tiff))
 }
@@ -83,6 +125,22 @@ fn decode_with_tiff_crate(image_path: &str) -> ImageResult<DynamicImage> {
         .map_err(|e| ImageError::Decode(format!("failed to decode TIFF image data: {e}")))?;
 
     dynamic_image_from_tiff(image_path, width, height, color_type, decoded)
+}
+
+fn decode_tiff_from_bytes(image_bytes: &[u8]) -> ImageResult<DynamicImage> {
+    let mut decoder = TiffDecoder::new(Cursor::new(image_bytes))
+        .map_err(|e| ImageError::Decode(format!("failed to initialize TIFF decoder: {e}")))?;
+    let (width, height) = decoder
+        .dimensions()
+        .map_err(|e| ImageError::Decode(format!("failed to read TIFF dimensions: {e}")))?;
+    let color_type = decoder
+        .colortype()
+        .map_err(|e| ImageError::Decode(format!("failed to read TIFF color type: {e}")))?;
+    let decoded = decoder
+        .read_image()
+        .map_err(|e| ImageError::Decode(format!("failed to decode TIFF image data: {e}")))?;
+
+    dynamic_image_from_tiff("<bytes>", width, height, color_type, decoded)
 }
 
 fn dynamic_image_from_tiff(
@@ -212,6 +270,14 @@ fn orient_decoded_image(image: DynamicImage, image_path: &str) -> DynamicImage {
     apply_standard_exif_orientation(image, image_path)
 }
 
+fn orient_decoded_image_from_bytes(image: DynamicImage, image_bytes: &[u8]) -> DynamicImage {
+    if bytes_look_like_heif(image_bytes) {
+        return apply_heif_exif_orientation_hint_from_bytes(image, image_bytes);
+    }
+
+    apply_standard_exif_orientation_from_bytes(image, image_bytes)
+}
+
 fn apply_heif_exif_orientation_hint(image: DynamicImage, image_path: &Path) -> DynamicImage {
     let hint = match exif_orientation_hint_from_path(image_path) {
         Ok(hint) => hint,
@@ -232,8 +298,31 @@ fn apply_heif_exif_orientation_hint(image: DynamicImage, image_path: &Path) -> D
     image
 }
 
+fn apply_heif_exif_orientation_hint_from_bytes(
+    image: DynamicImage,
+    image_bytes: &[u8],
+) -> DynamicImage {
+    let hint = exif_orientation_hint(image_bytes);
+
+    if let Some(orientation) = hint.orientation_to_apply() {
+        return apply_exif_orientation_dynamic(image, orientation);
+    }
+
+    image
+}
+
 fn apply_standard_exif_orientation(image: DynamicImage, image_path: &str) -> DynamicImage {
     match read_exif_orientation_from_path(image_path) {
+        Some(orientation) => apply_exif_orientation_dynamic(image, orientation),
+        None => image,
+    }
+}
+
+fn apply_standard_exif_orientation_from_bytes(
+    image: DynamicImage,
+    image_bytes: &[u8],
+) -> DynamicImage {
+    match read_exif_orientation_from_bytes(image_bytes) {
         Some(orientation) => apply_exif_orientation_dynamic(image, orientation),
         None => image,
     }
@@ -250,11 +339,41 @@ fn read_exif_orientation_from_path(image_path: &str) -> Option<u8> {
         .filter(|value| (1..=8).contains(value))
 }
 
+fn read_exif_orientation_from_bytes(image_bytes: &[u8]) -> Option<u8> {
+    let mut reader = BufReader::new(Cursor::new(image_bytes));
+    let exif = ExifReader::new().read_from_container(&mut reader).ok()?;
+
+    exif.get_field(Tag::Orientation, In::PRIMARY)
+        .and_then(|field| field.value.get_uint(0))
+        .and_then(|value| u8::try_from(value).ok())
+        .filter(|value| (1..=8).contains(value))
+}
+
+fn bytes_look_like_heif(image_bytes: &[u8]) -> bool {
+    if image_bytes.len() < 12 || &image_bytes[4..8] != b"ftyp" {
+        return false;
+    }
+
+    matches!(
+        &image_bytes[8..12],
+        b"heic"
+            | b"heix"
+            | b"hevc"
+            | b"hevx"
+            | b"heim"
+            | b"heis"
+            | b"hevm"
+            | b"hevs"
+            | b"mif1"
+            | b"msf1"
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use image::ImageFormat;
 
-    use super::should_attempt_tiff_fallback;
+    use super::{bytes_look_like_heif, should_attempt_tiff_fallback};
 
     #[test]
     fn attempts_tiff_fallback_for_tiff_format() {
@@ -267,5 +386,17 @@ mod tests {
         assert!(!should_attempt_tiff_fallback(Some(ImageFormat::Jpeg)));
         assert!(!should_attempt_tiff_fallback(Some(ImageFormat::Png)));
         assert!(!should_attempt_tiff_fallback(Some(ImageFormat::Avif)));
+    }
+
+    #[test]
+    fn detects_heif_brand_in_bytes() {
+        let bytes = b"\0\0\0\x18ftypheic\0\0\0\0";
+
+        assert!(bytes_look_like_heif(bytes));
+    }
+
+    #[test]
+    fn skips_non_heif_bytes() {
+        assert!(!bytes_look_like_heif(b"not an image"));
     }
 }

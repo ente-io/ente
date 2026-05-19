@@ -946,6 +946,9 @@ Future<MLResult> analyzeImageRust(Map args) async {
       rustResult = await runRustAnalyzeForPath(imagePath);
     } catch (e, s) {
       if (!_isRustDecodeIssue(e)) {
+        if (_isRustCorruptModelIssue(e)) {
+          rethrow;
+        }
         _logger.severe(
           "Rust pipeline failed (non-decode) for fileID $enteFileID (format: $fileFormat)",
           e,
@@ -961,20 +964,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
       try {
         fallback = await _createJpegDecodeFallbackFile(imagePath: imagePath);
       } catch (fallbackError, fallbackStack) {
-        if (_shouldStoreEmptyResultForRustDecodeFailure(
-          primaryError: e,
-          fallbackError: fallbackError,
-        )) {
-          _logger.warning(
-            "JPEG fallback conversion failed for fileID $enteFileID (format: $fileFormat); storing empty result instead",
-          );
-          throw _asInvalidImageFormatExceptionForRustDecodeFailure(
-            enteFileID: enteFileID,
-            fileFormat: fileFormat,
-            primaryError: e,
-            fallbackError: fallbackError,
-          );
-        }
         _logger.severe(
           "JPEG fallback conversion threw for fileID $enteFileID (format: $fileFormat)",
           fallbackError,
@@ -983,26 +972,13 @@ Future<MLResult> analyzeImageRust(Map args) async {
         rethrow;
       }
       if (fallback == null) {
-        if (_shouldStoreEmptyResultForRustDecodeFailure(
-          primaryError: e,
-          fallbackReturnedEmpty: true,
-        )) {
-          _logger.warning(
-            "JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat); storing empty result instead",
-          );
-          throw _asInvalidImageFormatExceptionForRustDecodeFailure(
-            enteFileID: enteFileID,
-            fileFormat: fileFormat,
-            primaryError: e,
-          );
-        }
-        _logger.severe(
-          "JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat)",
-          e,
-          s,
+        _logger.warning(
+          "JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat); storing empty result instead",
         );
-        throw Exception(
-          "RustMLDecodeFallbackFailed: JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat)",
+        throw _asInvalidImageFormatExceptionForRustDecodeFailure(
+          enteFileID: enteFileID,
+          fileFormat: fileFormat,
+          primaryError: e,
         );
       }
 
@@ -1012,20 +988,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
           "Rust decode fallback succeeded for fileID $enteFileID (original format: $fileFormat)",
         );
       } catch (retryError, retryStack) {
-        if (_shouldStoreEmptyResultForRustDecodeFailure(
-          primaryError: e,
-          fallbackError: retryError,
-        )) {
-          _logger.warning(
-            "Rust decode fallback retry failed for fileID $enteFileID (format: $fileFormat); storing empty result instead",
-          );
-          throw _asInvalidImageFormatExceptionForRustDecodeFailure(
-            enteFileID: enteFileID,
-            fileFormat: fileFormat,
-            primaryError: e,
-            fallbackError: retryError,
-          );
-        }
         _logger.severe(
           "Rust decode fallback retry failed for fileID $enteFileID (original format: $fileFormat)",
           retryError,
@@ -1169,80 +1131,11 @@ String formatExpectedMlSkipReasonForLogs(Object error) {
 }
 
 bool _isRustDecodeIssue(Object error) {
-  final message = error.toString().toLowerCase();
-  return message.contains("decode error");
+  return error is rust_ml.RustMlError_Decode;
 }
 
-bool _shouldStoreEmptyResultForRustDecodeFailure({
-  required Object primaryError,
-  Object? fallbackError,
-  bool fallbackReturnedEmpty = false,
-}) {
-  if (fallbackReturnedEmpty) {
-    return _isFileSpecificDecodeFailure(primaryError);
-  }
-
-  if (fallbackError == null) {
-    return false;
-  }
-
-  if (_isInfrastructureFallbackFailure(fallbackError)) {
-    return false;
-  }
-
-  if (_isFileSpecificDecodeFailure(fallbackError)) {
-    return true;
-  }
-  return false;
-}
-
-bool _isFileSpecificDecodeFailure(Object error) {
-  final message = _normalizedErrorMessage(error);
-  if (_isInfrastructureFallbackFailure(error)) {
-    return false;
-  }
-
-  const fileIssueMarkers = <String>[
-    "failed to decode",
-    "failed to guess image format",
-    "format error",
-    "required tag",
-    "unsupported image format",
-    "unsupported tiff pixel format",
-    "invalid image",
-    "invalid data",
-    "not an image",
-    "cannot decode",
-    "could not decode",
-    "corrupt",
-    "corrupted",
-    "buffer length does not match dimensions",
-  ];
-  return fileIssueMarkers.any(message.contains);
-}
-
-bool _isInfrastructureFallbackFailure(Object error) {
-  final message = _normalizedErrorMessage(error);
-
-  const infrastructureMarkers = <String>[
-    "failed to open image file",
-    "no such file or directory",
-    "permission denied",
-    "operation not permitted",
-    "read-only file system",
-    "file system",
-    "filesystem",
-    "space left on device",
-    "channel-error",
-    "missingplugin",
-    "unable to establish connection on channel",
-    "platformexception(channel-error",
-    "out of memory",
-    "outofmemory",
-    "timed out",
-    "timeout",
-  ];
-  return infrastructureMarkers.any(message.contains);
+bool _isRustCorruptModelIssue(Object error) {
+  return error is rust_ml.RustMlError_CorruptModel;
 }
 
 String _normalizedErrorMessage(Object error) {

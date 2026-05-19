@@ -21,7 +21,7 @@ deployments, and the action that triggers them:
 | [photos.ente.com](https://photos.ente.com)     | Production | Daily deploy of `main`                     |
 | [albums.ente.com](https://albums.ente.com)     | Production | Daily deploy of `main`                     |
 | [auth.ente.com](https://auth.ente.com)         | Production | Daily deploy of `main`                     |
-| [accounts.ente.io](https://accounts.ente.io)   | Production | Daily deploy of `main`                     |
+| [accounts.ente.com](https://accounts.ente.com) | Production | Daily deploy of `main`                     |
 | [cast.ente.com](https://cast.ente.com)         | Production | Daily deploy of `main`                     |
 | [payments.ente.com](https://payments.ente.com) | Production | Daily deploy of `main`                     |
 | [ente.com/help](https://ente.com/help)         | Production | Changes in `docs/` on push to `main`       |
@@ -33,6 +33,8 @@ Apart from this, there are also some other deployments:
 
 - `family.ente.io` is currently in a separate repository (Enhancement: bring it
   in here).
+- `accounts.ente.io` remains the legacy Passkey RP origin during the
+  `accounts.ente.com` dual-RP migration.
 
 ---
 

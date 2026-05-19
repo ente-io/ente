@@ -1013,7 +1013,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         );
       }
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to open share collection dialog", e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
   }
@@ -1050,7 +1050,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         await showAddPhotosSheet(bContext, collection!);
       }
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to show add photo dialog", e, s);
       await showGenericErrorDialog(context: bContext, error: e);
     }
   }

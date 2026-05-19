@@ -292,7 +292,7 @@ class PhotosContactsService {
     }
     final packageInfo = ServiceLocator.instance.packageInfo;
     return contacts.ContactsSession(
-      baseUrl: config.getHttpEndpoint(),
+      baseUrl: endpointConfig.endpoint,
       authToken: token,
       userId: userId,
       accountKey: accountKey,

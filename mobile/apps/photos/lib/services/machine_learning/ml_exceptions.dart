@@ -1,3 +1,5 @@
+import "package:photos/core/exceptions.dart";
+
 class GeneralFaceMlException implements Exception {
   final String message;
 
@@ -19,7 +21,7 @@ class ThumbnailRetrievalException implements Exception {
   }
 }
 
-class CouldNotRetrieveAnyFileData implements Exception {}
+class CouldNotRetrieveAnyFileData implements Exception, LocallyHandledError {}
 
 class CouldNotRunFaceDetector implements Exception {}
 

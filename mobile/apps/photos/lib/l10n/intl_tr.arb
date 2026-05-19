@@ -270,16 +270,6 @@
   "after1Month": "1 ay sonra",
   "after1Year": "1 yıl sonra",
   "manageParticipants": "Yönet",
-  "albumParticipantsCount": "{count, plural, =0 {Katılımcı Yok} =1 {1 Katılımcı} other {{count} Katılımcı}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Ente aplikasyonu veya hesabı olmadan insanların paylaşılan albümde fotoğraf ekleyip görüntülemelerine izin vermek için bir bağlantı oluşturun. Grup veya etkinlik fotoğraflarını toplamak için harika bir seçenek.",
   "collectPhotos": "Fotoğrafları topla",
   "collaborativeLink": "Ortak bağlantı",
@@ -295,15 +285,6 @@
   "publicLinkEnabled": "Herkese açık bağlantı aktive edildi",
   "shareALink": "Bir bağlantı paylaş",
   "sharedAlbumSectionDescription": "Diğer Ente kullanıcılarıyla paylaşılan ve topluluk albümleri oluşturun, bu arada ücretsiz planlara sahip kullanıcıları da içerir.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Belirli kişilerle paylaş} =1 {1 kişiyle paylaşıldı} other {{numberOfPeople} kişiyle paylaşıldı}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Doğrulama kimliğiniz",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Size albümleri paylaşan biri, kendi cihazında aynı kimliği görmelidir.",
   "howToViewShareeVerificationID": "Lütfen onlardan ayarlar ekranında e-posta adresine uzun süre basmalarını ve her iki cihazdaki kimliklerin eşleştiğini doğrulamalarını isteyin.",
@@ -551,7 +532,6 @@
   "updateSettings": "Ayarları değiştir",
   "updatingFolderSelection": "Klasör seçimi güncelleniyor...",
   "itemCount": "{count,plural, one{{count} öğe} other{{count} öğe}}",
-  "deleteItemCount": "{count, plural, =1 {Delete {count} item} other {Delete {count} items}}",
   "duplicateItemsGroup": "{count} dosyalar, {formattedSize} her biri",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -822,6 +802,15 @@
   "appstoreSubscription": "AppStore aboneliği",
   "subAlreadyLinkedErrMessage": "{id}'niz zaten başka bir ente hesabına bağlı.\n{id} numaranızı bu hesapla kullanmak istiyorsanız lütfen desteğimizle iletişime geçin''",
   "visitWebToManage": "Aboneliğinizi yönetmek için lütfen {webUrl} adresini ziyaret edin",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "managePaymentMethod": "Ödeme yöntemini yönet",
   "couldNotUpdateSubscription": "Abonelikler kaydedilemedi",
   "paymentFailed": "Ödeme başarısız oldu",
@@ -970,14 +959,6 @@
   "share": "Paylaş",
   "unhideToAlbum": "Albümü gizleme",
   "restoreToAlbum": "Albümü yenile",
-  "moveItem": "{count, plural,=1 {Öğeyi taşı} other {Öğeleri taşı}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural,=1 {Öğe ekle} other {Öğeler ekle}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Albüm oluştur veya seç",
   "selectAlbum": "Albüm seçin",
   "searchByAlbumNameHint": "Albüm adı",
@@ -1002,16 +983,6 @@
   "referFriendsAnd2xYourPlan": "Arkadaşlarınıza önerin ve planınızı 2 katına çıkarın",
   "shareAlbumHint": "Bir albüm açın ve paylaşmak için sağ üstteki paylaş düğmesine dokunun.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Öğeler kalıcı olarak silinmeden önce kalan gün sayısını gösterir",
-  "trashDaysLeft": "{count, plural, =0 {Yakında} =1{1 gün} other {{count} gün}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Hepsini Sil",
   "renameAlbum": "Albümü yeniden adlandır",
   "convertToAlbum": "Albüme taşı",
@@ -1078,7 +1049,6 @@
   "authToViewYourMemories": "Kodlarınızı görmek için lütfen kimlik doğrulaması yapın",
   "unlock": "Kilidi aç",
   "freeUpSpace": "Boş alan",
-  "freeUpSpaceSaving": "{count, plural, =1 {Cihazdan silinerek {formattedSize} boşaltılabilir} other {Cihazdan silinerek {formattedSize} boşaltılabilirler}}",
   "filesBackedUpInAlbum": "Bu albümdeki {count, plural, one {1 file} other {{formattedNumber} dosya}} güvenli bir şekilde yedeklendi",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1106,18 +1076,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Aktif bir aboneliğiniz olduğu sürece Ente üzerinden {count, plural, =1 {ona} other {onlara}} hâlâ erişebilirsiniz",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1216,6 +1174,15 @@
   "loadMessage6": "Albümlerinizin bağlantılarını sevdiklerinizle paylaşabilirsiniz",
   "loadMessage7": "Mobil uygulamalarımız, tıkladığınız yeni fotoğrafları şifrelemek ve yedeklemek için arka planda çalışır",
   "loadMessage8": "{webUrl}'nun mükemmel bir yükleyicisi var",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Verilerinizi güvenli bir şekilde şifrelemek için Xchacha20Poly1305 kullanıyoruz",
   "photoDescriptions": "Fotoğraf Açıklaması",
   "searchResultFileName": "Dosya adı",
@@ -1467,6 +1434,15 @@
   "pair": "Eşleştir",
   "deviceNotFound": "Cihaz bulunamadı",
   "castInstruction": "Eşleştirmek istediğiniz cihazda {castUrl} adresini ziyaret edin.\n\nAlbümü TV'nizde oynatmak için aşağıdaki kodu girin.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Kodu girin",
   "joinDiscord": "Discord'a Katıl",
   "locations": "Konum",
@@ -1476,8 +1452,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Kişileri isimlerine göre bulun",
-  "addViewers": "{count, plural, =0 {Görüntüleyen ekle} =1 {Görüntüleyen ekle} other {Görüntüleyen ekle}}",
-  "addCollaborators": "{count, plural, =0 {Ortak çalışan ekle} =1 {Ortak çalışan ekle} other {Ortak çalışan ekle}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Uçtan uca şifrelemeyi doğrulamak için bir e-postaya uzun basın.",
   "developerSettingsWarning": "Geliştirici ayarlarını değiştirmek istediğinizden emin misiniz?",
   "developerSettings": "Geliştirici ayarları",
@@ -1607,34 +1581,6 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {1 dosya {personName} kişisine eklendi} other {{count} dosya {personName} kişisine eklendi}}",
-  "@addedFilesToPerson": {
-    "description": "Toast shown after manually tagging one or more files to a person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 dosya {personName} kişisine zaten ekli} other {{count} dosya {personName} kişisine zaten ekli}}",
-  "@filesAlreadyLinkedToPerson": {
-    "description": "Toast shown when selected files are already manually tagged to the selected person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
   "addNewPerson": "Yeni kişi ekle",
   "addNameOrMerge": "İsim ekleyin veya birleştirin",
   "mergeWithExisting": "Var olan ile birleştir.",
@@ -1671,26 +1617,6 @@
   "enableMachineLearningBanner": "Sihirli arama ve yüz tanıma için makine öğrenimini etkinleştirin",
   "searchDiscoverEmptySection": "İşleme ve senkronizasyon tamamlandığında görüntüler burada gösterilecektir",
   "searchPersonsEmptySection": "İşleme ve senkronizasyon tamamlandığında kişiler burada gösterilecektir",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 izleyici eklendi} =1 {1 izleyici eklendi} other {{count} izleyici eklendi}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 işbirlikçi eklendi} =1 {1 işbirlikçi eklendi} other {{count} işbirlikçi eklendi}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "adminsCanManagePhotosAndParticipants": "Yöneticiler fotoğrafları ve katılımcıları yönetebilir.",
   "accountIsAlreadyConfigured": "Hesap zaten yapılandırılmıştır.",
   "sessionIdMismatch": "Oturum kimliği uyuşmazlığı",
@@ -1757,15 +1683,6 @@
   },
   "currentlyRunning": "şu anda çalışıyor",
   "ignored": "yoksayıldı",
-  "photosCount": "{count, plural, =0 {0 fotoğraf} =1 {1 fotoğraf} other {{count} fotoğraf}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Dosya",
   "searchSectionsLengthMismatch": "Bölüm uzunluğu uyuşmazlığı: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1953,21 +1870,11 @@
   "moveSelectedPhotosToOneDate": "Seçilen fotoğrafları bir tarihe taşıma",
   "shiftDatesAndTime": "Vardiya tarihleri ve saati",
   "photosKeepRelativeTimeDifference": "Fotoğraflar göreli zaman farkını korur",
-  "photocountPhotos": "{count, plural, =0 {Fotoğraf yok} =1 {1 fotoğraf} other {{count} fotoğraf}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "Uygulama simgesi",
   "notThisPerson": "Bu kişi değil mi?",
   "selectedItemsWillBeRemovedFromThisPerson": "Seçili öğeler bu kişiden silinir, ancak kitaplığınızdan silinmez.",
   "throughTheYears": "{dateFormat} yıllar boyunca",
   "thisWeekThroughTheYears": "Yıllar boyunca bu hafta",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Bu hafta, {count} yıl önce} other {Bu hafta, {count} yıl önce}}",
   "youAndThem": "Sen ve {name}",
   "admiringThem": "{name}'e hayran kalmak",
   "embracingThem": "{name}'e sarılmak",
@@ -2072,15 +1979,6 @@
   "font": "Yazı tipi",
   "background": "Arka plan",
   "align": "Hizala",
-  "addedToAlbums": "{count, plural, =1{Başarıyla albüm 1'e eklendi} other{Başarıyla {count} tane şey albümlere eklendi }}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "",
   "totalVideos": "Toplam videolar",
   "skippedVideos": "Atlanan videolar",
@@ -2088,14 +1986,6 @@
   "similarImages": "Benzer resimler",
   "noSimilarImagesFound": "Benzer görsel bulunamadı",
   "yourPhotosLookUnique": "Fotoğraflarınız eşsiz görünüyor",
-  "similarGroupsFound": "{count, plural, =1{{count} grup bulundu} other{{count} grup bulundu}}",
-  "@similarGroupsFound": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "clearSelection": "Seçimi temizle",
   "areYouSureDeleteFiles": "Bu dosyaları silmek istediğinizden emin misiniz?",
   "greatJob": "Harika iş!",
@@ -2166,15 +2056,6 @@
   "couldNotLoadAlbums": "Albümler yüklenemedi",
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
-  },
-  "albumsCount": "{count, plural, =1{1 albüm} other{{count} albüm}}",
-  "@albumsCount": {
-    "description": "Number of albums with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "likeAll": "Hepsini beğen",
   "@likeAll": {

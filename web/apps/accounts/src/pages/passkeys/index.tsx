@@ -82,7 +82,25 @@ const Page: React.FC = () => {
 
     const refreshPasskeys = useCallback(async () => {
         try {
-            setPasskeys(await getPasskeys(token!));
+            const { accountsUrl, passkeys } = await getPasskeys(token!);
+
+            const accountsURL = accountsUrl ? new URL(accountsUrl) : undefined;
+            if (accountsURL && accountsURL.origin !== window.location.origin) {
+                // The accounts URL might change if this was the last passkey
+                // on the legacy RPID.
+                const redirectURL = new URL(accountsURL.href);
+                if (!redirectURL.pathname.endsWith("/")) {
+                    redirectURL.pathname += "/";
+                }
+                redirectURL.pathname += "passkeys";
+                redirectURL.search = new URLSearchParams({
+                    token: token!,
+                }).toString();
+                window.location.href = redirectURL.toString();
+                return;
+            }
+
+            setPasskeys(passkeys);
         } catch (e) {
             log.error("Failed to fetch passkeys", e);
             showPasskeyFetchFailedErrorDialog();

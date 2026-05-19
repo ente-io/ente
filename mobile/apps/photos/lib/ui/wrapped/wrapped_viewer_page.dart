@@ -1036,10 +1036,6 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       return;
     }
     final overlayState = Overlay.of(context, rootOverlay: true);
-    // ignore: unnecessary_null_comparison
-    if (overlayState == null) {
-      return;
-    }
     final RenderRepaintBoundary? shareBoundary = _shareButtonKey.currentContext
         ?.findRenderObject() as RenderRepaintBoundary?;
     if (shareBoundary == null) {

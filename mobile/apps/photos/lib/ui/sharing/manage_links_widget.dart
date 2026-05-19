@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
@@ -108,13 +109,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
                     onTap: () async {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        LayoutPickerPage(widget.collection!),
-                      ).then((value) {
-                        setState(() {});
-                      });
+                      unawaited(
+                        routeToPage(
+                          context,
+                          LayoutPickerPage(widget.collection!),
+                        ).then((value) {
+                          setState(() {});
+                        }),
+                      );
                     },
                   ),
                   const SizedBox(height: 24),
@@ -171,13 +173,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
                     onTap: () async {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        LinkExpiryPickerPage(widget.collection!),
-                      ).then((value) {
-                        setState(() {});
-                      });
+                      unawaited(
+                        routeToPage(
+                          context,
+                          LinkExpiryPickerPage(widget.collection!),
+                        ).then((value) {
+                          setState(() {});
+                        }),
+                      );
                     },
                   ),
                   url.hasExpiry
@@ -207,13 +210,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
                     onTap: () async {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        DeviceLimitPickerPage(widget.collection!),
-                      ).then((value) {
-                        setState(() {});
-                      });
+                      unawaited(
+                        routeToPage(
+                          context,
+                          DeviceLimitPickerPage(widget.collection!),
+                        ).then((value) {
+                          setState(() {});
+                        }),
+                      );
                     },
                   ),
                   DividerWidget(
@@ -236,15 +240,16 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           'enableDownload': !isDownloadEnabled,
                         });
                         if (isDownloadEnabled) {
-                          // ignore: unawaited_futures
-                          showErrorDialog(
-                            context,
-                            AppLocalizations.of(
+                          unawaited(
+                            showErrorDialog(
                               context,
-                            ).disableDownloadWarningTitle,
-                            AppLocalizations.of(
-                              context,
-                            ).disableDownloadWarningBody,
+                              AppLocalizations.of(
+                                context,
+                              ).disableDownloadWarningTitle,
+                              AppLocalizations.of(
+                                context,
+                              ).disableDownloadWarningBody,
+                            ),
                           );
                         }
                       },
@@ -288,29 +293,30 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       value: () => isPasswordEnabled,
                       onChanged: () async {
                         if (!isPasswordEnabled) {
-                          // ignore: unawaited_futures
-                          showTextInputDialog(
-                            context,
-                            title: AppLocalizations.of(context).setAPassword,
-                            submitButtonLabel: AppLocalizations.of(
+                          unawaited(
+                            showTextInputDialog(
                               context,
-                            ).lockButtonLabel,
-                            hintText: AppLocalizations.of(
-                              context,
-                            ).enterPassword,
-                            isPasswordInput: true,
-                            alwaysShowSuccessState: true,
-                            onSubmit: (String password) async {
-                              if (password.trim().isNotEmpty) {
-                                final propToUpdate =
-                                    await _getEncryptedPassword(password);
-                                await _updateUrlSettings(
-                                  context,
-                                  propToUpdate,
-                                  showProgressDialog: false,
-                                );
-                              }
-                            },
+                              title: AppLocalizations.of(context).setAPassword,
+                              submitButtonLabel: AppLocalizations.of(
+                                context,
+                              ).lockButtonLabel,
+                              hintText: AppLocalizations.of(
+                                context,
+                              ).enterPassword,
+                              isPasswordInput: true,
+                              alwaysShowSuccessState: true,
+                              onSubmit: (String password) async {
+                                if (password.trim().isNotEmpty) {
+                                  final propToUpdate =
+                                      await _getEncryptedPassword(password);
+                                  await _updateUrlSettings(
+                                    context,
+                                    propToUpdate,
+                                    showProgressDialog: false,
+                                  );
+                                }
+                              },
+                            ),
                           );
                         } else {
                           await _updateUrlSettings(context, {

@@ -36,7 +36,7 @@ class LegacyKitAdvertPage extends StatelessWidget {
         backgroundColor: colorScheme.backgroundBase,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        toolbarHeight: 48,
+        toolbarHeight: 24,
         leadingWidth: 48,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context, false),
@@ -50,22 +50,26 @@ class LegacyKitAdvertPage extends StatelessWidget {
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 80),
-                    _LegacyKitAdvertContent(
-                      colorScheme: colorScheme,
-                      textTheme: textTheme,
-                    ),
-                    const SizedBox(height: 112),
-                    GradientButton(
-                      text: "Get started",
-                      height: 52,
-                      textStyle: textTheme.small.copyWith(height: 20 / 14),
-                      onTap: () => Navigator.pop(context, true),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _LegacyKitAdvertContent(
+                        colorScheme: colorScheme,
+                        textTheme: textTheme,
+                      ),
+                      const SizedBox(height: 82),
+                      SizedBox(
+                        width: double.infinity,
+                        child: GradientButton(
+                          text: "Get started",
+                          height: 52,
+                          textStyle: textTheme.small.copyWith(height: 20 / 14),
+                          onTap: () => Navigator.pop(context, true),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -89,7 +93,7 @@ class _LegacyKitAdvertContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _LegacyKitAdvertIllustration(colorScheme: colorScheme),
+        const _LegacyKitAdvertIllustration(),
         const SizedBox(height: 24),
         Text(
           "Create a legacy kit",
@@ -109,7 +113,7 @@ class _LegacyKitAdvertContent extends StatelessWidget {
             height: 16 / 12,
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 279),
           child: Column(
@@ -134,41 +138,15 @@ class _LegacyKitAdvertContent extends StatelessWidget {
 }
 
 class _LegacyKitAdvertIllustration extends StatelessWidget {
-  final EnteColorScheme colorScheme;
-
-  const _LegacyKitAdvertIllustration({required this.colorScheme});
+  const _LegacyKitAdvertIllustration();
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Image.asset(
+      "assets/legacy_kit_advert_foreground.png",
       width: 200,
       height: 116,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 34,
-            top: 14,
-            child: Container(
-              width: 132,
-              height: 97,
-              decoration: BoxDecoration(
-                color: colorScheme.primary700,
-                borderRadius: BorderRadius.circular(97),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 37,
-            top: 0,
-            child: Image.asset(
-              "assets/legacy_kit_advert_foreground.png",
-              width: 120,
-              height: 115,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ],
-      ),
+      fit: BoxFit.contain,
     );
   }
 }
@@ -197,7 +175,7 @@ class _LegacyKitAdvertBullet extends StatelessWidget {
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,

@@ -75,6 +75,7 @@ class FilesService {
     final bool hasMigratedSize = await FilesService.instance.hasMigratedSizes();
     if (pathID == null) {
       ids = await FilesDB.instance.getFreeableFileIDs(
+        ownerID: Configuration.instance.getUserID()!,
         excludeLocalIDs: excludeLocalIDs,
       );
     } else {

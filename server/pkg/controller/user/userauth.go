@@ -410,6 +410,22 @@ func storageWarningDeletionScheduledError() error {
 	}, "storage warning deletion scheduled")
 }
 
+func (c *UserController) alertStorageWarningDeletionScheduledLoginBlock(userID int64, app ente.App) {
+	log.WithFields(log.Fields{
+		"user_id": userID,
+		"app":     app,
+		"code":    StorageWarningDeletionScheduledCode,
+	}).Warn("blocked login due to storage warning scheduled deletion")
+
+	if c.DiscordController != nil {
+		discordController := c.DiscordController
+		go discordController.NotifyThrottled(
+			fmt.Sprintf("🔒 Storage warning login block hit: user_id=%d app=%s", userID, app),
+			15*t.Minute,
+		)
+	}
+}
+
 func (c *UserController) ensureStorageWarningDeletionLoginAllowed(userID int64, app ente.App) error {
 	if c.NotificationHistoryRepo == nil || !shouldEnforceStorageWarningDeletionLoginBlock(app) {
 		return nil
@@ -419,6 +435,7 @@ func (c *UserController) ensureStorageWarningDeletionLoginAllowed(userID int64, 
 		return stacktrace.Propagate(err, "failed to read storage warning deletion state")
 	}
 	if deletionScheduled {
+		c.alertStorageWarningDeletionScheduledLoginBlock(userID, app)
 		return storageWarningDeletionScheduledError()
 	}
 	return nil
@@ -592,9 +609,14 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}
-	var passKeySessionID, twoFactorSessionID string
+	var passKeySessionID, twoFactorSessionID, accountsUrl string
 
 	if hasPasskeys {
+		accountsUrl, err = c.PasskeyRepo.AccountsURLForUser(userID)
+		if err != nil {
+			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
+		}
+
 		passKeySessionID, err = auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
@@ -614,7 +636,6 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
-	accountsUrl := viper.GetString("apps.accounts")
 	if hasPasskeys && isTwoFactorEnabled {
 		return ente.EmailAuthorizationResponse{ID: userID, PasskeySessionID: passKeySessionID, AccountsUrl: accountsUrl, TwoFactorSessionIDV2: twoFactorSessionID}, nil
 	} else if hasPasskeys {

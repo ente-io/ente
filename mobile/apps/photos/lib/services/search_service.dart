@@ -198,6 +198,14 @@ class SearchService {
     return _cachedFilesForSearch!;
   }
 
+  Future<bool> hasAnyFilesForSearch() async {
+    if (_cachedFilesFuture != null && _cachedFilesForSearch != null) {
+      return (await _cachedFilesForSearch!).isNotEmpty;
+    }
+
+    return FilesDB.instance.hasAnyFile();
+  }
+
   Future<List<EnteFile>> getAllFilesForHierarchicalSearch() async {
     if (_cachedFilesFuture != null &&
         _cachedFilesForHierarchicalSearch != null) {
@@ -502,6 +510,76 @@ class SearchService {
     return searchResults;
   }
 
+  GenericSearchResult _buildFileTypeSearchResult(
+    FileType fileType,
+    String typeName,
+    List<EnteFile> files,
+  ) {
+    return GenericSearchResult(
+      ResultType.fileType,
+      typeName,
+      files,
+      hierarchicalSearchFilter: FileTypeFilter(
+        fileType: fileType,
+        typeName: typeName,
+        occurrence: kMostRelevantFilter,
+        matchedUploadedIDs: filesToUploadedFileIDs(files),
+      ),
+    );
+  }
+
+  GenericSearchResult _buildFileExtensionSearchResult(
+    String extensionName,
+    List<EnteFile> files,
+  ) {
+    return GenericSearchResult(
+      ResultType.fileExtension,
+      extensionName,
+      files,
+      hierarchicalSearchFilter: TopLevelGenericFilter(
+        filterName: extensionName,
+        occurrence: kMostRelevantFilter,
+        filterResultType: ResultType.fileExtension,
+        matchedUploadedIDs: filesToUploadedFileIDs(files),
+        filterIcon: CupertinoIcons.doc_text,
+      ),
+    );
+  }
+
+  String _fileExtension(String fileName) {
+    final extensionSeparatorIndex = fileName.lastIndexOf(".");
+    if (extensionSeparatorIndex < 0 ||
+        extensionSeparatorIndex == fileName.length - 1) {
+      return "";
+    }
+    return fileName.substring(extensionSeparatorIndex + 1).toUpperCase();
+  }
+
+  Future<GenericSearchResult> getFileTypeResult({
+    required FileType fileType,
+    required String typeName,
+  }) async {
+    final allFiles = await getAllFilesForSearch();
+    final matchedFiles = allFiles.where((e) => e.fileType == fileType).toList();
+    return _buildFileTypeSearchResult(fileType, typeName, matchedFiles);
+  }
+
+  Future<GenericSearchResult> getFileExtensionResult({
+    required String extension,
+    required String extensionName,
+  }) async {
+    final normalizedExtension = extension.startsWith(".")
+        ? extension.substring(1).toUpperCase()
+        : extension.toUpperCase();
+    final allFiles = await getAllFilesForSearch();
+    final matchedFiles = allFiles
+        .where(
+          (file) => _fileExtension(file.displayName) == normalizedExtension,
+        )
+        .toList();
+    return _buildFileExtensionSearchResult(extensionName, matchedFiles);
+  }
+
   Future<List<GenericSearchResult>> getFileTypeResults(
     BuildContext context,
     String query,
@@ -515,16 +593,10 @@ class SearchService {
             allFiles.where((e) => e.fileType == fileType).toList();
         if (matchedFiles.isNotEmpty) {
           searchResults.add(
-            GenericSearchResult(
-              ResultType.fileType,
+            _buildFileTypeSearchResult(
+              fileType,
               fileTypeString,
               matchedFiles,
-              hierarchicalSearchFilter: FileTypeFilter(
-                fileType: fileType,
-                typeName: fileTypeString,
-                occurrence: kMostRelevantFilter,
-                matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-              ),
             ),
           );
         }
@@ -548,12 +620,7 @@ class SearchService {
         }
         fileTypesAndMatchingFiles[file.fileType]!.add(file);
 
-        final String fileName = file.displayName;
-        late final String ext;
-        //Noticed that some old edited files do not have extensions and a '.'
-        ext = fileName.contains(".")
-            ? fileName.split(".").last.toUpperCase()
-            : "";
+        final ext = _fileExtension(file.displayName);
 
         if (ext != "") {
           if (!extensionsAndMatchingFiles.containsKey(ext)) {
@@ -566,33 +633,19 @@ class SearchService {
       fileTypesAndMatchingFiles.forEach((key, value) {
         final name = getHumanReadableString(context, key);
         searchResults.add(
-          GenericSearchResult(
-            ResultType.fileType,
+          _buildFileTypeSearchResult(
+            key,
             name,
             value,
-            hierarchicalSearchFilter: FileTypeFilter(
-              fileType: key,
-              typeName: name,
-              occurrence: kMostRelevantFilter,
-              matchedUploadedIDs: filesToUploadedFileIDs(value),
-            ),
           ),
         );
       });
 
       extensionsAndMatchingFiles.forEach((key, value) {
         searchResults.add(
-          GenericSearchResult(
-            ResultType.fileExtension,
+          _buildFileExtensionSearchResult(
             key + "s",
             value,
-            hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: key + "s",
-              occurrence: kMostRelevantFilter,
-              filterResultType: ResultType.fileExtension,
-              matchedUploadedIDs: filesToUploadedFileIDs(value),
-              filterIcon: CupertinoIcons.doc_text,
-            ),
           ),
         );
       });
@@ -743,7 +796,10 @@ class SearchService {
     for (EnteFile eachFile in allFiles) {
       final String fileName = eachFile.displayName;
       if (fileName.contains(query)) {
-        final String exnType = fileName.split(".").last.toUpperCase();
+        final String exnType = _fileExtension(fileName);
+        if (exnType.isEmpty) {
+          continue;
+        }
         if (!resultMap.containsKey(exnType)) {
           resultMap[exnType] = <EnteFile>[];
         }
@@ -752,17 +808,9 @@ class SearchService {
     }
     for (MapEntry<String, List<EnteFile>> entry in resultMap.entries) {
       searchResults.add(
-        GenericSearchResult(
-          ResultType.fileExtension,
+        _buildFileExtensionSearchResult(
           entry.key.toUpperCase(),
           entry.value,
-          hierarchicalSearchFilter: TopLevelGenericFilter(
-            filterName: entry.key.toUpperCase(),
-            occurrence: kMostRelevantFilter,
-            filterResultType: ResultType.fileExtension,
-            matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
-            filterIcon: CupertinoIcons.doc_text,
-          ),
         ),
       );
     }

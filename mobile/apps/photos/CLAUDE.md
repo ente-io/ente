@@ -146,7 +146,7 @@ lib/
 
 ## Key Dependencies
 
-- **Flutter 3.32.8** with Dart SDK >=3.3.0 <4.0.0
+- **Flutter 3.38.10** with Dart SDK >=3.10.0 <4.0.0
 - **Media**: `photo_manager`, `video_editor`, `ffmpeg_kit_flutter`
 - **Storage**: `sqlite_async`, `flutter_secure_storage`
 - **ML/AI**: Custom ONNX runtime, `ml_linalg`
@@ -154,7 +154,7 @@ lib/
 
 ## Development Setup Requirements
 
-1. Install Flutter v3.32.8 and Rust
+1. Install Flutter v3.38.10 and Rust
 2. Install Flutter Rust Bridge: `cargo install flutter_rust_bridge_codegen`
 3. Generate Rust bindings: `flutter_rust_bridge_codegen generate`
 

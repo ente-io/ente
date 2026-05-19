@@ -288,7 +288,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
       );
       Navigator.of(context).pop();
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to recover account", e, s);
       await dialog.hide();
       showGenericErrorBottomSheet(context: context, error: e).ignore();
     }

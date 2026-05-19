@@ -197,7 +197,7 @@ Future<void> deleteFilesFromRemoteOnly(
   RemoteSyncService.instance.sync(silently: true);
 }
 
-Future<void> deleteFilesOnDeviceOnly(
+Future<List<EnteFile>> deleteFilesOnDeviceOnly(
   BuildContext context,
   List<EnteFile> files,
 ) async {
@@ -226,7 +226,7 @@ Future<void> deleteFilesOnDeviceOnly(
   if (hasLocalOnlyFiles && Platform.isAndroid && !isLocalGalleryMode) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
-      return;
+      return const [];
     }
   }
   Set<String> deletedIDs = <String>{};
@@ -262,6 +262,7 @@ Future<void> deleteFilesOnDeviceOnly(
       ),
     );
   }
+  return deletedFiles;
 }
 
 Future<bool> deleteFromTrash(BuildContext context, List<EnteFile> files) async {
@@ -346,8 +347,13 @@ Future<bool> deleteLocalFiles(
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
 
-  const largeCountThreshold = 20000;
-  final tooManyAssets = localIDs.length > largeCountThreshold;
+  // Keep large platform asset deletes in smaller batches. Shared-media sandbox
+  // IDs are deleted separately above, and only platform asset IDs are sent to
+  // PhotoManager.editor.deleteWithIds. Android 11+ routes those IDs through
+  // MediaStore.createDeleteRequest, where our target SDK has a 2000 URI cap:
+  // https://developer.android.com/reference/android/provider/MediaStore#createDeleteRequest(android.content.ContentResolver,%20java.util.Collection%3Candroid.net.Uri%3E)
+  // Smaller batches are also safer for large iOS Photos deletes.
+  const largeCountThreshold = 1900;
   try {
     for (String id in localIDs) {
       if (id.startsWith(sharedMediaIdentifier)) {
@@ -358,17 +364,18 @@ Future<bool> deleteLocalFiles(
     }
     deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
 
+    final tooManyAssets = localAssetIDs.length > largeCountThreshold;
     final bool shouldDeleteInBatches =
         await isAndroidSDKVersionLowerThan(android11SDKINT) || tooManyAssets;
     if (shouldDeleteInBatches) {
       if (tooManyAssets) {
         _logger.info(
-          "Too many assets (${localIDs.length}) to delete in one shot, deleting in batches",
+          "Too many assets (${localAssetIDs.length}) to delete in one shot, deleting in batches",
         );
         await _recursivelyReduceBatchSizeAndRetryDeletion(
           batchSize: largeCountThreshold,
           context: context,
-          localIDs: localIDs,
+          localIDs: localAssetIDs,
           deletedIDs: deletedIDs,
         );
       } else {
@@ -657,8 +664,10 @@ Future<void> _recursivelyReduceBatchSizeAndRetryDeletion({
   required BuildContext context,
   required List<String> localIDs,
   required List<String> deletedIDs,
-  int minimumBatchSizeThresholdToStopRetry = 2000,
+  int minimumBatchSizeThresholdToStopRetry = 1900,
 }) async {
+  // TODO: Revisit whether this recursive retry is still needed. The batch
+  // helper already falls back to single-ID deletes when a batch fails.
   if (batchSize < minimumBatchSizeThresholdToStopRetry) {
     _logger.warning(
       "Batch size is too small ($batchSize), stopping further retries.",

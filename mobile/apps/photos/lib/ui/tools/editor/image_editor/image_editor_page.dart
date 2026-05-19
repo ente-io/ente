@@ -135,7 +135,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     } catch (e, s) {
       await dialog.hide();
       showToast(context, AppLocalizations.of(context).oopsCouldNotSaveEdits);
-      _logger.severe(e, s);
+      _logger.severe("Failed to save image edits", e, s);
     } finally {
       await PhotoManager.startChangeNotify();
     }
@@ -219,7 +219,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 titleTextStyle: textTheme.body,
                 backgroundColor: colorScheme.backgroundColour,
               ),
-              bottomAppBarTheme: BottomAppBarTheme(
+              bottomAppBarTheme: BottomAppBarThemeData(
                 color: colorScheme.backgroundColour,
               ),
               brightness: isLightMode ? Brightness.light : Brightness.dark,

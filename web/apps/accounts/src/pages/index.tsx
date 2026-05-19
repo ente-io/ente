@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 const Page: React.FC = () => {
     useEffect(() => {
-        // There are no user navigable pages currently on accounts.ente.io.
+        // There are no user navigable pages on the accounts app.
         window.location.href = "https://ente.com";
     }, []);
 

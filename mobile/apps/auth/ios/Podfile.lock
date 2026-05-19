@@ -71,13 +71,8 @@ PODS:
   - move_to_background (0.0.1):
     - Flutter
   - MTBBarcodeScanner (5.0.11)
-  - objective_c (0.0.1):
-    - Flutter
   - package_info_plus (0.4.5):
     - Flutter
-  - path_provider_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - privacy_screen (0.0.1):
     - Flutter
   - qr_code_scanner (0.2.0):
@@ -98,7 +93,7 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - "sodium_libs (3.4.6+1)":
+  - "sodium_libs (3.4.6+4)":
     - Flutter
     - FlutterMacOS
   - sqflite_darwin (0.0.4):
@@ -152,9 +147,7 @@ DEPENDENCIES:
   - launcher_icon_switcher (from `.symlinks/plugins/launcher_icon_switcher/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
-  - objective_c (from `.symlinks/plugins/objective_c/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
   - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
   - scoped_dir_access (from `.symlinks/plugins/scoped_dir_access/ios`)
@@ -216,12 +209,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/local_auth_darwin/darwin"
   move_to_background:
     :path: ".symlinks/plugins/move_to_background/ios"
-  objective_c:
-    :path: ".symlinks/plugins/objective_c/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
-  path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   privacy_screen:
     :path: ".symlinks/plugins/privacy_screen/ios"
   qr_code_scanner:
@@ -257,7 +246,7 @@ SPEC CHECKSUMS:
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
   fk_user_agent: 137145b086229251761678fe034da53753f4ce59
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
   flutter_local_authentication: 989278c681612f1ee0e36019e149137f114b9d7f
   flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4
@@ -268,9 +257,7 @@ SPEC CHECKSUMS:
   local_auth_darwin: d2e8c53ef0c4f43c646462e3415432c4dab3ae19
   move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   qr_code_scanner: d77f94ecc9abf96d9b9b8fc04ef13f611e5a147a
   scoped_dir_access: 4a89af7a2435a101b0cff856d6b6e7021df676de
@@ -278,8 +265,8 @@ SPEC CHECKSUMS:
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
-  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  sodium_libs: ecc719aba13e1077057a4f550592d80bf68e9d69
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
+  sodium_libs: 650f802d77b08c737ca4fed4ed68e822fa560c5a
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   sqlite3: 73513155ec6979715d3904ef53a8d68892d4032b
   sqlite3_flutter_libs: e7fc8c9ea2200ff3271f08f127842131746b70e2

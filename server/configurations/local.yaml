@@ -102,10 +102,17 @@ apps:
     public-paste:
     # Default is https://cast.ente.com
     cast:
-    # Default is https://accounts.ente.io
     # Set this to the URL where your accounts web app is running, primarily used for
     # passkey based 2FA.
+    #
+    # Default is https://accounts.ente.com
     accounts:
+    # Optional. Used only for Ente's accounts.ente.io -> accounts.ente.com
+    # passkey migration. Users with passkeys scoped to webauthn.legacy-rpid are
+    # sent here.
+    #
+    # Default is https://accounts.ente.io
+    accounts-legacy:
     # Default is https://family.ente.io
     family:
     # Default is https://memories.ente.com
@@ -325,6 +332,14 @@ webauthn:
     # See: https://github.com/go-webauthn/webauthn
     rporigins:
         - "http://localhost:3001"
+    # Optional. Used only when migrating existing passkeys from an older RP ID.
+    # Leave unset for normal deployments. Wrong RP/origin values can prevent
+    # users from using their passkeys.
+    #
+    # Credentials without an rp_id are treated as belonging to legacy-rpid.
+    # Users with such credentials keep using apps.accounts-legacy.
+    legacy-rpid:
+    legacy-rporigins: []
 
 # Discord config (optional)
 # Use case: Devops

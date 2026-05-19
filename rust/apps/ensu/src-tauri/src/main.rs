@@ -13,6 +13,7 @@ fn main() {
     let app = tauri::Builder::default()
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
+        .manage(commands::LlmModelDownloadState::default())
         .manage(commands::ChatDbState::default())
         .setup(|app| {
             logging::init_logging(&app.handle());
@@ -63,6 +64,8 @@ fn main() {
             commands::chat_db_mark_session_deleted,
             commands::chat_db_mark_message_deleted,
             commands::chat_db_mark_attachment_uploaded,
+            commands::chat_db_compress_attachment_image,
+            commands::chat_db_compress_attachment_image_file,
             commands::chat_db_get_pending_deletions,
             commands::chat_db_hard_delete,
             commands::chat_db_reset,
@@ -73,10 +76,13 @@ fn main() {
             commands::llm_create_context,
             commands::llm_free_context,
             commands::llm_free_model,
+            commands::llm_prewarm_multimodal_context,
             commands::llm_generate_chat_stream,
             commands::llm_cancel,
             commands::system_info,
             commands::get_ensu_defaults,
+            commands::llm_download_model_files,
+            commands::llm_cancel_model_download,
             commands::fs_file_size,
             commands::fs_read_head,
             commands::fs_append_bytes,

@@ -7,6 +7,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/ui/settings/data/import/import_file_cleanup.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
@@ -105,8 +106,7 @@ Future<void> _pickImportFile(BuildContext context) async {
   await progressDialog.show();
   try {
     final parsedCodes = [];
-    File file = File(result.files.single.path!);
-    final codes = await file.readAsString();
+    final codes = await readPickedImportFileAsString(result.files.single.path!);
 
     if (codes.startsWith('otpauth://')) {
       List<String> splitCodes = codes.split(",");
@@ -144,7 +144,7 @@ Future<void> _pickImportFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      context.l10n.importFailureDescNew,
+      context.l10n.importFailureDesc,
     );
   }
 }

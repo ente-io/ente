@@ -37,7 +37,7 @@ class _ContactPhotoAdjustPageState extends State<ContactPhotoAdjustPage> {
               titleTextStyle: textTheme.body,
               backgroundColor: colorScheme.backgroundColour,
             ),
-            bottomAppBarTheme: BottomAppBarTheme(
+            bottomAppBarTheme: BottomAppBarThemeData(
               color: colorScheme.backgroundColour,
             ),
             brightness: isLightMode ? Brightness.light : Brightness.dark,

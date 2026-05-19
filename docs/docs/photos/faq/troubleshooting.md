@@ -240,6 +240,31 @@ The app will detect and skip already uploaded items, so you can safely drag and 
 
 > Technical note: The underlying issue is Electron's [4GB RAM usage limit](https://www.electronjs.org/blog/v8-memory-cage). We stream large videos to avoid reading them all at once, but in some cases even streaming exceeds the limit.
 
+### Why is my desktop app stuck on a black screen? {#desktop-black-screen}
+
+A black, never-loading window usually means the app can't access its local database. A clean reinstall fixes it in most cases.
+
+**On macOS:**
+
+1. Open Finder > Applications, right-click Ente Photos and select "Move to Bin".
+2. Open Finder > Home, then press `Cmd + Shift + Period` to reveal hidden folders.
+3. Go to `Library > Application Support` and delete the `ente` folder.
+4. Download a fresh copy from [our website](https://ente.com/download/desktop) and install.
+
+**On Windows:**
+
+1. Uninstall Ente Photos from Settings > Apps.
+2. Delete `%APPDATA%\ente\`.
+3. Reinstall from [our website](https://ente.com/download/desktop).
+
+**On Linux:**
+
+1. Remove the app (or AppImage).
+2. Delete `~/.config/ente/`.
+3. Reinstall from [our website](https://ente.com/download/desktop).
+
+Your photos are safe in the cloud; uninstalling and clearing local app data only removes the local cache and the app's database. If the issue persists after a clean reinstall, share your logs with [support@ente.com](mailto:support@ente.com) (see [How do I share debug logs?](#sharing-logs)).
+
 ### Why are my photo thumbnails missing or incorrect? {#thumbnails}
 
 When photos are uploaded on the web app, the most common cause of thumbnails not generating properly is browser security settings blocking canvas access.
@@ -561,6 +586,16 @@ Machine learning features (face recognition and magic search) require downloadin
 - Once indexed on one device, the indexes sync to other devices
 
 Learn more in [Search and Discovery FAQ](/photos/faq/search-and-discovery#ml-offline).
+
+### What are the minimum device requirements for Ente apps? {#minimum-requirements}
+
+Ente needs at least **2 GB of RAM** to run reliably. On devices below that, including most Android Go phones, basic operations like backup, export, and indexing may crash or stall.
+
+If you're running into repeated crashes on a low-RAM device:
+
+- Disable Machine learning under `Settings > Machine learning`.
+- Disable Video streaming if enabled.
+- Use the desktop or web app for heavier tasks like initial backup or export.
 
 ### How can I clear the cache from the Ente app? {#clear-cache}
 

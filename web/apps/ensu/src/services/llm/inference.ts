@@ -67,6 +67,10 @@ export interface InferenceBackend {
         request: GenerateChatRequest,
         onEvent?: (event: GenerateEvent) => void,
     ): Promise<GenerateSummary>;
+    prewarmMultimodalContext?(
+        mmprojPath: string,
+        mediaMarker?: string,
+    ): Promise<void>;
     cancel(jobId: number): void;
     freeContext(): Promise<void>;
     freeModel(): Promise<void>;
@@ -172,6 +176,10 @@ class WasmInference implements InferenceBackend {
             request.templateOverride ?? undefined,
         );
         return this.generateCompletion(prompt, request, onEvent);
+    }
+
+    async prewarmMultimodalContext() {
+        // Multimodal inference is only available through the native Tauri backend.
     }
 
     cancel(jobId: number) {
@@ -599,6 +607,26 @@ class TauriInference implements InferenceBackend {
                 "Failed to create model context",
             );
             log.error("LLM tauri context failed", err);
+            throw err;
+        }
+    }
+
+    async prewarmMultimodalContext(
+        mmprojPath: string,
+        mediaMarker?: string,
+    ): Promise<void> {
+        log.info("LLM tauri prewarm multimodal context", { mmprojPath });
+        try {
+            await invoke("llm_prewarm_multimodal_context", {
+                mmprojPath,
+                mediaMarker: mediaMarker ?? null,
+            });
+        } catch (error) {
+            const err = normalizeInvokeError(
+                error,
+                "Failed to prewarm multimodal context",
+            );
+            log.error("LLM tauri prewarm multimodal context failed", err);
             throw err;
         }
     }

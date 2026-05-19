@@ -1,5 +1,4 @@
 import type { PublicAlbumsCredentials } from "ente-base/http";
-import { photosAppOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import type { RefObject } from "react";
 
@@ -19,9 +18,8 @@ const buildWebRedirectURL = (
     currentHash: string,
     jwtToken?: string,
 ): string => {
-    const webAppURL = photosAppOrigin();
     const hashSuffix = jwtToken ? `&jwt=${encodeURIComponent(jwtToken)}` : "";
-    return `${webAppURL}/?joinAlbum=${accessToken}&collectionId=${collectionId}#${currentHash}${hashSuffix}`;
+    return `https://photos.ente.com/?joinAlbum=${accessToken}&collectionId=${collectionId}#${currentHash}${hashSuffix}`;
 };
 
 /**

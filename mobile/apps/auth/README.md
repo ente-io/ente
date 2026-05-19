@@ -44,7 +44,7 @@ or managing your secrets, please use our mobile or desktop app.
 
 ## 🧑‍💻 Build from source
 
-1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
+1. [Install Flutter v3.38.10](https://flutter.dev/docs/get-started/install).
 
 2. Pull in submodules with `git submodule update --init --recursive`
 

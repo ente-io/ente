@@ -146,6 +146,14 @@ In addition, we also offer [family plans](/photos/features/account/family-plans)
 
 If you need a custom plan, please contact [support@ente.com](mailto:support@ente.com).
 
+### Does my free plan storage stack on top of a paid plan? {#free-storage-stacking}
+
+No. The free plan's 10 GB is replaced, not added to, when you upgrade. Your paid plan's allowance, plus any bonuses included with that plan, becomes your total.
+
+For example, the Starter plan is 50 GB plus a 10 GB welcome bonus, which gives 60 GB total. The free plan's 10 GB does not stack on top.
+
+Referral storage is separate and adds on top of your plan, up to the [referral cap](#referral-storage-limit).
+
 ## Family Plans
 
 ### Does Ente have Family Plans? {#family-plans-faq}

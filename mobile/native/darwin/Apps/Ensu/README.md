@@ -21,7 +21,7 @@ That's it. Apart from the `cargo codegen`, this is a normal iOS project.
 
 > [!NOTE]
 >
-> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/uniffi` changes.
+> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/bindings/uniffi` changes.
 >
 > Xcode compiles and statically links the Rust libraries automatically when building the app.
 
@@ -60,7 +60,7 @@ Export an IPA from the archive:
 xcodebuild -exportArchive \
   -archivePath build/Ensu.xcarchive \
   -exportPath build/Export \
-  -exportOptionsPlist ExportOptions-AppStore.plist
+  -exportOptionsPlist scripts/ExportOptions-AppStore.plist
 ```
 
 ### Tests

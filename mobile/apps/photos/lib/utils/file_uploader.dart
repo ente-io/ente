@@ -1452,7 +1452,7 @@ class FileUploader {
       !flagService.disableCFWorker &&
       (localSettings.cfUploadProxyEnabled ??
           flagService.cloudflareUploadWorker) &&
-      Configuration.instance.isEnteProduction();
+      endpointConfig.isProduction;
 
   void _onStorageLimitExceeded() {
     clearQueue(StorageLimitExceededError());

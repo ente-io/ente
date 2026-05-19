@@ -91,6 +91,18 @@ export const fetchFileInfo = async (
         if (await isDeviceLimitExceededResponse(response)) {
             throw new Error(deviceLimitExceededMessage);
         }
+        if (response.status === 410) {
+            let errorBody: { error?: string } | undefined;
+            try {
+                errorBody = (await response.json()) as { error?: string };
+            } catch {
+                // Ignore JSON parsing errors and use generic message
+            }
+            if (errorBody?.error === "expired token") {
+                throw new Error("This link has expired.");
+            }
+            throw new Error("This link has been deleted by the owner.");
+        }
         throw new Error(`Failed to fetch file`);
     }
 

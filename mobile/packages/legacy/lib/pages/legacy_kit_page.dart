@@ -13,10 +13,9 @@ import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/file_saver_util.dart";
-import "package:file_saver/file_saver.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:share_plus/share_plus.dart";
 
 typedef LegacyKitAuthenticator = Future<bool> Function(
   BuildContext context,
@@ -43,17 +42,7 @@ class LegacyKitPage extends StatefulWidget {
 
 class _LegacyKitPageState extends State<LegacyKitPage> {
   late LegacyKit _kit = widget.kit;
-  bool _loadingRecoveryDetails = false;
   bool _updatingNotice = false;
-  LegacyKitOwnerRecoverySessionDetails? _recoveryDetails;
-
-  @override
-  void initState() {
-    super.initState();
-    if (_kit.hasActiveRecoverySession) {
-      _loadRecoveryDetails();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,9 +80,6 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
                   const SizedBox(height: 20),
                   _RecoveryBanner(
                     session: _kit.activeRecoverySession!,
-                    parts: _kit.parts,
-                    loadingDetails: _loadingRecoveryDetails,
-                    details: _recoveryDetails,
                     onBlockRecovery: _blockRecovery,
                   ),
                 ],
@@ -168,7 +154,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
           cardColor: cardColor,
           avatarColor: _avatarColor(index),
           onTap: () async {
-            await _downloadPart(_kit.parts[index]);
+            await _sharePart(_kit.parts[index]);
           },
         ),
         if (index < _kit.parts.length - 1) const SizedBox(height: 8),
@@ -183,31 +169,6 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
       Color(0xFF1071FF),
     ];
     return colors[index % colors.length];
-  }
-
-  Future<void> _loadRecoveryDetails() async {
-    setState(() {
-      _loadingRecoveryDetails = true;
-    });
-    try {
-      final details =
-          await LegacyKitService.instance.getRecoverySession(_kit.id);
-      if (mounted) {
-        setState(() {
-          _recoveryDetails = details;
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        showShortToast(context, context.strings.somethingWentWrong);
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loadingRecoveryDetails = false;
-        });
-      }
-    }
   }
 
   Future<void> _editRecoveryWaitTime() async {
@@ -295,9 +256,6 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     if (current != null && mounted) {
       setState(() {
         _kit = current;
-        if (!_kit.hasActiveRecoverySession) {
-          _recoveryDetails = null;
-        }
       });
     }
   }
@@ -312,6 +270,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
       final shares = await LegacyKitService.instance.downloadShares(_kit.id);
       final sortedShares = shares.toList(growable: false)
         ..sort((a, b) => a.shareIndex.compareTo(b.shareIndex));
+      final pdfs = <({Uint8List bytes, LegacyKitPart part})>[];
       for (final share in sortedShares) {
         final bytes = await const LegacyKitPdfService().buildRecoverySheet(
           accountEmail: widget.accountEmail,
@@ -319,11 +278,11 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
           share: share,
           allShares: shares,
         );
-        await _savePdf(bytes, _kit, part: _partForShare(share));
+        pdfs.add((bytes: bytes, part: _partForShare(share)));
       }
       await dialog.hide();
       if (mounted) {
-        showShortToast(context, context.strings.legacyKitDownloaded);
+        await _sharePdfs(pdfs);
       }
     } catch (_) {
       await dialog.hide();
@@ -333,7 +292,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     }
   }
 
-  Future<void> _downloadPart(LegacyKitPart part) async {
+  Future<void> _sharePart(LegacyKitPart part) async {
     if (!await _authenticate(context.strings.authToManageLegacyKit)) {
       return;
     }
@@ -353,11 +312,8 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
         share: share,
         allShares: shares,
       );
-      await _savePdf(bytes, _kit, part: part);
       await dialog.hide();
-      if (mounted) {
-        showShortToast(context, context.strings.legacyKitSheetDownloaded);
-      }
+      await _sharePdf(bytes, _kit, part: part);
     } catch (_) {
       await dialog.hide();
       if (mounted) {
@@ -367,23 +323,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
   }
 
   Future<void> _deleteKit() async {
-    final colorScheme = getEnteColorScheme(context);
-    final confirmed = await showAlertBottomSheet<bool>(
-      context,
-      title: context.strings.deleteLegacyKit,
-      message: context.strings.deleteLegacyKitMessage,
-      assetPath: "assets/warning-red.png",
-      buttons: [
-        SizedBox(
-          width: double.infinity,
-          child: GradientButton(
-            text: context.strings.delete,
-            backgroundColor: colorScheme.warning700,
-            onTap: () => Navigator.of(context).pop(true),
-          ),
-        ),
-      ],
-    );
+    final confirmed = await _showDeleteKitConfirmation();
     if (confirmed != true) {
       return;
     }
@@ -403,24 +343,90 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     }
   }
 
-  Future<void> _blockRecovery() async {
-    final colorScheme = getEnteColorScheme(context);
-    final confirmed = await showAlertBottomSheet<bool>(
-      context,
-      title: context.strings.rejectRecovery,
-      message: context.strings.blockLegacyKitRecoveryMessage,
-      assetPath: "assets/warning-red.png",
-      buttons: [
-        SizedBox(
-          width: double.infinity,
-          child: GradientButton(
-            text: context.strings.rejectRecovery,
-            backgroundColor: colorScheme.warning700,
-            onTap: () => Navigator.of(context).pop(true),
+  Future<bool?> _showDeleteKitConfirmation() {
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backgroundElevated2,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
           ),
-        ),
-      ],
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 38,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            context.strings.deleteLegacyKit,
+                            style: textTheme.largeBold.copyWith(
+                              height: 24 / 18,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints.tightFor(
+                            width: 38,
+                            height: 38,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(false),
+                          icon: Icon(
+                            Icons.close,
+                            color: colorScheme.strokeBase,
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.strings.deleteLegacyKitMessage,
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.textMuted,
+                      height: 20 / 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GradientButton(
+                      text: context.strings.delete,
+                      height: 52,
+                      textStyle: textTheme.smallBold.copyWith(
+                        height: 20 / 14,
+                      ),
+                      backgroundColor: colorScheme.warning700,
+                      onTap: () => Navigator.of(context).pop(true),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
+  }
+
+  Future<void> _blockRecovery() async {
+    final confirmed = await _showBlockRecoveryConfirmation();
     if (confirmed != true) {
       return;
     }
@@ -434,7 +440,6 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
       if (current != null && mounted) {
         setState(() {
           _kit = current;
-          _recoveryDetails = null;
         });
       }
       widget.onChanged?.call();
@@ -445,6 +450,92 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     }
   }
 
+  Future<bool?> _showBlockRecoveryConfirmation() {
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
+        final sheetColor =
+            colorScheme.isLightTheme ? Colors.white : colorScheme.backdropBase;
+        final borderColor = colorScheme.isLightTheme
+            ? const Color(0xFFE0E0E0)
+            : const Color(0xFF3E3E3E);
+        return Container(
+          decoration: BoxDecoration(
+            color: sheetColor,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            border: Border.all(color: borderColor),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.strings.rejectRecovery,
+                          style: textTheme.largeBold.copyWith(
+                            height: 24 / 18,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(false),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: sheetColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            color: colorScheme.textBase,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.strings.blockLegacyKitRecoveryMessage,
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.textMuted,
+                      height: 20 / 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GradientButton(
+                      text: context.strings.rejectRecovery,
+                      height: 52,
+                      textStyle: textTheme.small.copyWith(height: 20 / 14),
+                      backgroundColor: colorScheme.warning700,
+                      onTap: () => Navigator.of(context).pop(true),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<bool> _authenticate(String reason) async {
     final authenticator = widget.authenticator;
     if (authenticator == null) {
@@ -453,16 +544,44 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     return authenticator(context, reason);
   }
 
-  Future<void> _savePdf(
+  Future<ShareResult> _sharePdf(
     Uint8List bytes,
     LegacyKit kit, {
     LegacyKitPart? part,
   }) {
-    return FileSaverUtil.saveFile(
-      _fileNameForKit(kit, part: part),
-      "pdf",
-      bytes,
-      MimeType.pdf,
+    return _sharePdfs(
+      [
+        (
+          bytes: bytes,
+          part: part,
+        ),
+      ],
+      kit: kit,
+    );
+  }
+
+  Future<ShareResult> _sharePdfs(
+    List<({Uint8List bytes, LegacyKitPart? part})> pdfs, {
+    LegacyKit? kit,
+  }) {
+    final size = MediaQuery.sizeOf(context);
+    return SharePlus.instance.share(
+      ShareParams(
+        files: pdfs
+            .map(
+              (pdf) => XFile.fromData(
+                pdf.bytes,
+                mimeType: "application/pdf",
+              ),
+            )
+            .toList(growable: false),
+        fileNameOverrides: pdfs
+            .map(
+              (pdf) => "${_fileNameForKit(kit ?? _kit, part: pdf.part)}.pdf",
+            )
+            .toList(growable: false),
+        sharePositionOrigin: Offset.zero & size,
+      ),
     );
   }
 
@@ -496,7 +615,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
             part.name,
             fallback: "part-${part.index}",
           );
-    return "ente-recovery-sheet-$name";
+    return "ente-legacy-kit-$name";
   }
 
   String _fileNameComponent(String value, {required String fallback}) {
@@ -513,16 +632,10 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
 
 class _RecoveryBanner extends StatelessWidget {
   final LegacyKitRecoverySession session;
-  final List<LegacyKitPart> parts;
-  final bool loadingDetails;
-  final LegacyKitOwnerRecoverySessionDetails? details;
   final VoidCallback onBlockRecovery;
 
   const _RecoveryBanner({
     required this.session,
-    required this.parts,
-    required this.loadingDetails,
-    required this.details,
     required this.onBlockRecovery,
   });
 
@@ -530,72 +643,60 @@ class _RecoveryBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final createdAt = _formatDateTime(session.createdAt);
-    final waitTill = _formatWaitRemaining(session.waitTill);
-    final attemptSummaries = details == null
-        ? const <_RecoveryAttemptSummary>[]
-        : _summarizeAttempts(details!.initiators);
+    final availableAt = _formatRecoveryAvailableAt(session.waitTill);
+    final bannerColor = colorScheme.isLightTheme
+        ? const Color(0xFFFAEBEB)
+        : const Color(0xFF292929);
+    const warningColor = Color(0xFFF63A3A);
+    final bodyTextColor = colorScheme.isLightTheme
+        ? colorScheme.textMuted
+        : const Color(0xFF999999);
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.warning400.withValues(alpha: 0.13),
+        color: bannerColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.strings.legacyKitRecoveryInProgress,
-            style: textTheme.bodyBold.copyWith(color: colorScheme.warning400),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.strings.legacyKitRecoveryWindow(createdAt, waitTill),
-            style: textTheme.smallMuted,
-          ),
-          if (!loadingDetails && details != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              context.strings.legacyKitRecoveryAuditHints(
-                details!.initiators.length,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                width: 18,
+                height: 20,
+                child: Center(
+                  child: LegacyKitAlertIcon(),
+                ),
               ),
-              style: textTheme.smallMuted,
-            ),
-            if (attemptSummaries.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              ...attemptSummaries.map(
-                (summary) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${summary.sheetNames} • ${_formatAttemptCount(summary.attemptCount)}",
-                        style: textTheme.miniMuted,
-                      ),
-                      Text(
-                        "Latest IP: ${summary.latestIP}",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.miniMuted,
-                      ),
-                      Text(
-                        "Latest UA: ${summary.latestUserAgent}",
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.miniMuted,
-                      ),
-                    ],
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  context.strings.legacyKitRecoveryAttemptInProgress,
+                  style: textTheme.smallBold.copyWith(
+                    color: warningColor,
+                    height: 20 / 14,
                   ),
                 ),
               ),
             ],
-          ],
-          const SizedBox(height: 14),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            context.strings.legacyKitRecoveryAttemptMessage(availableAt),
+            style: textTheme.mini.copyWith(
+              color: bodyTextColor,
+              height: 16 / 12,
+            ),
+          ),
+          const SizedBox(height: 10),
           GradientButton(
             text: context.strings.rejectRecovery,
-            backgroundColor: colorScheme.warning700,
+            height: 52,
+            textStyle: textTheme.small.copyWith(height: 20 / 14),
+            backgroundColor: warningColor,
             onTap: () async => onBlockRecovery(),
           ),
         ],
@@ -603,79 +704,12 @@ class _RecoveryBanner extends StatelessWidget {
     );
   }
 
-  String _formatDateTime(int micros) {
-    final dateTime = DateTime.fromMicrosecondsSinceEpoch(micros).toLocal();
-    return DateFormat.yMMMd().add_jm().format(dateTime);
-  }
-
-  String _formatWaitRemaining(int waitRemainingMicros) {
+  String _formatRecoveryAvailableAt(int waitRemainingMicros) {
     final dateTime = DateTime.now().add(
       Duration(microseconds: waitRemainingMicros),
     );
-    return DateFormat.yMMMd().add_jm().format(dateTime);
+    return DateFormat.yMMMMd().add_jm().format(dateTime);
   }
-
-  List<_RecoveryAttemptSummary> _summarizeAttempts(
-    List<LegacyKitRecoveryInitiatorHint> initiators,
-  ) {
-    final summaryByKey = <String, _RecoveryAttemptSummary>{};
-    for (var index = 0; index < initiators.length; index++) {
-      final initiator = initiators[index];
-      final partIndexes = initiator.usedPartIndexes.toSet().toList()..sort();
-      final key = partIndexes.isEmpty ? "unknown" : partIndexes.join(",");
-      final sheetNames = _sheetNames(partIndexes);
-      final existing = summaryByKey[key];
-      summaryByKey[key] = _RecoveryAttemptSummary(
-        sheetNames: sheetNames,
-        attemptCount: (existing?.attemptCount ?? 0) + 1,
-        latestAttemptIndex: index,
-        latestIP: _nonEmptyOrUnknown(initiator.ip),
-        latestUserAgent: _nonEmptyOrUnknown(initiator.userAgent),
-      );
-    }
-    return summaryByKey.values.toList()
-      ..sort((a, b) => b.latestAttemptIndex.compareTo(a.latestAttemptIndex));
-  }
-
-  String _sheetNames(List<int> partIndexes) {
-    if (partIndexes.isEmpty) {
-      return "Unknown sheets";
-    }
-    return partIndexes.map((partIndex) {
-      final partName = parts
-          .firstWhereOrNull((part) => part.index == partIndex)
-          ?.name
-          .trim();
-      return partName == null || partName.isEmpty
-          ? "Part $partIndex"
-          : partName;
-    }).join(" + ");
-  }
-
-  String _formatAttemptCount(int count) {
-    return count == 1 ? "1 attempt" : "$count attempts";
-  }
-
-  String _nonEmptyOrUnknown(String value) {
-    final trimmed = value.trim();
-    return trimmed.isEmpty ? "Unknown" : trimmed;
-  }
-}
-
-class _RecoveryAttemptSummary {
-  final String sheetNames;
-  final int attemptCount;
-  final int latestAttemptIndex;
-  final String latestIP;
-  final String latestUserAgent;
-
-  const _RecoveryAttemptSummary({
-    required this.sheetNames,
-    required this.attemptCount,
-    required this.latestAttemptIndex,
-    required this.latestIP,
-    required this.latestUserAgent,
-  });
 }
 
 class _LegacyKitPartRow extends StatelessWidget {
@@ -738,7 +772,7 @@ class _LegacyKitPartRow extends StatelessWidget {
                   height: 40,
                   width: 40,
                   child: Center(
-                    child: LegacyKitDownloadIcon(
+                    child: LegacyKitShareIcon(
                       color: colorScheme.textBase,
                     ),
                   ),

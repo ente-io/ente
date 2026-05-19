@@ -206,21 +206,22 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       ),
       onTap: () async {
         final locale = (await getLocale())!;
-        // ignore: unawaited_futures
-        routeToPage(
-          context,
-          LanguageSelectorPage(
-            appSupportedLocales,
-            (locale) async {
-              await setLocale(locale);
-              EnteApp.setLocale(context, locale);
-              unawaited(AppLocalizations.delegate.load(locale));
-            },
-            locale,
-          ),
-        ).then((value) {
-          setState(() {});
-        });
+        unawaited(
+          routeToPage(
+            context,
+            LanguageSelectorPage(
+              appSupportedLocales,
+              (locale) async {
+                await setLocale(locale);
+                EnteApp.setLocale(context, locale);
+                unawaited(AppLocalizations.delegate.load(locale));
+              },
+              locale,
+            ),
+          ).then((value) {
+            setState(() {});
+          }),
+        );
       },
     );
   }
@@ -321,12 +322,13 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         page = getSubscriptionPage(isOnBoarding: true);
       }
     }
-    // ignore: unawaited_futures
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return page;
-        },
+    unawaited(
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return page;
+          },
+        ),
       ),
     );
   }

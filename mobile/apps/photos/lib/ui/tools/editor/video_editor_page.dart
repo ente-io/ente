@@ -590,7 +590,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         SyncService.instance.sync().ignore();
 
         showShortToast(context, AppLocalizations.of(context).editsSaved);
-        final files = widget.detailPageConfig.files;
+        final files = List<EnteFile>.of(widget.detailPageConfig.files);
 
         // the index could be -1 if the files fetched doesn't contain the newly
         // edited files
@@ -598,8 +598,17 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           (file) => file.generatedID == newFile.generatedID,
         );
         if (selectionIndex == -1) {
-          files.add(newFile);
-          selectionIndex = files.length - 1;
+          final fallbackIndex = min(
+            max(widget.detailPageConfig.selectedIndex, 0),
+            files.length,
+          );
+          final originalIndex = widget.file.generatedID == null
+              ? -1
+              : files.indexWhere(
+                  (file) => file.generatedID == widget.file.generatedID,
+                );
+          selectionIndex = originalIndex == -1 ? fallbackIndex : originalIndex;
+          files.insert(selectionIndex, newFile);
         }
         Navigator.of(dialogKey.currentContext!).pop('dialog');
 

@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{κανένα στοιχείο} =1{1 στοιχείο} other{{count} στοιχεία}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Δημιουργία συλλογής",
   "uploadDocumentTooltip": "Ανέβασμα εγγράφου",
   "restore": "Επαναφορά",
@@ -470,15 +460,6 @@
   "linkDeviceLimit": "Όριο συσκευών",
   "expiredLinkInfo": "Αυτός ο σύνδεσμος έχει λήξει. Επιλέξτε νέα ώρα λήξης ή απενεργοποιήστε τη λήξη συνδέσμου.",
   "linkExpiresOn": "Ο σύνδεσμος θα λήξει στις {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Ο σύνδεσμος έληξε",
   "publicLinkEnabled": "Ο δημόσιος σύνδεσμος ενεργοποιήθηκε",
   "shareALink": "Μοιραστείτε έναν σύνδεσμο",
@@ -492,28 +473,6 @@
   "add": "Προσθήκη",
   "collaboratorsCanAddFilesToTheSharedCollection": "Οι συνεργάτες μπορούν να προσθέσουν στοιχεία στην κοινή συλλογή.",
   "enterEmail": "Εισάγετε ηλεκτρονική διεύθυνση",
-  "viewersSuccessfullyAdded": "{count, plural, =0{Προστέθηκαν 0 θεατές} =1{Προστέθηκε 1 θεατής} other{Προστέθηκαν {count} θεατές}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0{Προστέθηκαν 0 συνεργάτες} =1{Προστέθηκε 1 συνεργάτης} other{Προστέθηκαν {count} συνεργάτες}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0 {Προσθήκη θεατή} =1 {Προσθήκη θεατή} other {Προσθήκη θεατών}}",
-  "addCollaborators": "{count, plural, =0 {Προσθήκη συνεργάτη} =1 {Προσθήκη συνεργάτη} other {Προσθήκη συνεργατών}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Πατήστε παρατεταμένα ένα email για να επιβεβαιώσετε την κρυπτογράφηση από άκρη σε άκρη.",
   "sharing": "Κοινή χρήση...",
   "invalidEmailAddress": "Μη έγκυρη διεύθυνση email",
@@ -562,16 +521,6 @@
   "viewer": "Θεατής",
   "collaborator": "Συνεργάτης",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Οι συνεργάτες μπορούν να προσθέσουν στοιχεία στην κοινή συλλογή.",
-  "albumParticipantsCount": "{count, plural, =0{Χωρίς συμμετέχοντες} =1{1 συμμετέχων} other{{count} συμμετέχοντες}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Προσθήκη περισσότερων",
   "you": "Εσείς",
   "albumOwner": "Κάτοχος",
@@ -679,16 +628,6 @@
   "clickHereToUpload": "Κάντε κλικ εδώ για ανέβασμα",
   "saveDocument": "Αποθήκευση εγγράφου",
   "uploadFiles": "Ανέβασμα στοιχείων",
-  "filesSelected": "{count, plural, =0{Κανένα στοιχείο επιλεγμένο} =1{1 στοιχείο επιλεγμένο} other{{count} στοιχεία επιλεγμένα}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Προσθήκη σε συλλογή",
   "newCollection": "Νέα συλλογή",
   "title": "Τίτλος",
@@ -707,16 +646,6 @@
     }
   },
   "informationCollectionName": "Πληροφορίες",
-  "recordSavedToMultipleCollections": "Η εγγραφή αποθηκεύτηκε σε {count, plural, =1{1 συλλογή} other{{count} συλλογές}} επιτυχώς",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "Το {fieldName} αντιγράφηκε στο πρόχειρο",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -724,20 +653,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 αποτέλεσμα} other{{count} αποτελέσματα}} για \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -783,49 +698,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 συλλογή} other{{count} συλλογές}} θα διαγραφούν οριστικά.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 στοιχείο} other{{count} στοιχεία}} θα διαγραφούν οριστικά.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Διαγραφή στοιχείων και από παντού",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Ναι, διαγραφή {count, plural, =1{συλλογής} other{συλλογών}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Ναι, διαγραφή {count, plural, =1{στοιχείου} other{στοιχείων}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Χρήση",
   "important": "Σημαντικό",
@@ -834,16 +709,6 @@
   "markingAsImportant": "Σήμανση ως σημαντικό...",
   "fileMarkedAsImportant": "Το στοιχείο σημάνθηκε ως σημαντικό",
   "fileRemovedFromImportant": "Το στοιχείο αφαιρέθηκε από τα σημαντικά",
-  "filesMarkedAsImportant": "{count, plural, =1{1 στοιχείο σημάνθηκε ως σημαντικό} other{{count} στοιχεία σημάνθηκαν ως σημαντικά}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Όλα τα στοιχεία είναι ήδη σημαντικά",
   "failedToMarkFilesAsImportant": "Αποτυχία σήμανσης στοιχείων ως σημαντικά: {error}",
   "@failedToMarkFilesAsImportant": {

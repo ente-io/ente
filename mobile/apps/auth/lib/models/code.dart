@@ -328,6 +328,8 @@ enum Type {
   steam;
 
   bool get isTOTPCompatible => this == totp || this == steam;
+
+  bool get canShareCodes => this == totp || this == steam;
 }
 
 enum Algorithm {

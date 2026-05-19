@@ -32,50 +32,6 @@
   "keepOffline": "Ponechat lokálně",
   "cloudOnly": "Smazat lokálně",
   "savingOffline": "Ukládání lokálně...",
-  "filesAvailableOffline": "{count, plural, few {{count} soubory uloženy lokálně}=1{1 soubor uložen lokálně} other{{count} souborů uloženo lokálně}}",
-  "@filesAvailableOffline": {
-    "description": "Success message when files are saved offline",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "filesAvailableOfflinePartial": "{successCount, plural, few {{successCount} soubory uloženy lokálně}=1{1 soubor uložen lokálně} other{{successCount} souborů uloženo lokálně}}{failureCount, plural, few {{failureCount} selhaly}=1{1 selhal} other{{failureCount} selhalo}}",
-  "@filesAvailableOfflinePartial": {
-    "description": "Partial success message for offline save",
-    "placeholders": {
-      "successCount": {
-        "type": "int",
-        "example": "2"
-      },
-      "failureCount": {
-        "type": "int",
-        "example": "1"
-      }
-    }
-  },
-  "failedToSaveFilesOffline": "{count, plural, =1{Nepodařilo se uložit 1 soubor lokálně} few{Nepodařilo se uložit {count} soubory lokálně} other{Nepodařilo se uložit {count} souborů lokálně}}",
-  "@failedToSaveFilesOffline": {
-    "description": "Failure message when files could not be saved offline",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
-  "filesRemovedFromOffline": "{count, plural, =1{1 soubor odstraněn z lokálních} few{{count} soubory odstraněny z lokálních} other{{count} souborů odstraněno z lokálních}}",
-  "@filesRemovedFromOffline": {
-    "description": "Success message when offline copies are removed",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "downloadFailed": "Stahování selhalo",
   "failedToDownloadOrDecrypt": "Položku se nepodařilo stáhnout",
   "errorOpeningFile": "Chyba při otevírání položky",
@@ -271,16 +227,6 @@
   "uploadDocument": "Nahrát dokument",
   "items": "{count} položek",
   "@items": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
-  "files": "{count, plural, =0{žádné položky} =1{1 položka} few{{count} položky} other{{count} položek}}",
-  "@files": {
     "description": "Number of items in a collection",
     "placeholders": {
       "count": {
@@ -537,15 +483,6 @@
   "linkDeviceLimit": "Limit zařízení",
   "expiredLinkInfo": "Platnost odkazu vypršela. Zvolte prosím nový čas vypršení platnosti, nebo zakažte platnost odkazu.",
   "linkExpiresOn": "Platnost odkazu vyprší {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Sdílet s konkrétními osobami} =1 {Sdíleno s 1 osobou} other {Sdíleno s {numberOfPeople} osobami}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Platnost odkazu vypršela",
   "publicLinkEnabled": "Veřejný odkaz povolen",
   "shareALink": "Sdílet odkaz",
@@ -559,28 +496,6 @@
   "add": "Přidat",
   "collaboratorsCanAddFilesToTheSharedCollection": "Spolupracovníci mohou přidávat položky do sdílené kolekce.",
   "enterEmail": "Zadejte email",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Přidáno 0 prohlížejících} =1 {Přidán 1 prohlížející} few {Přidáni {count} prohlížející} other {Přidáno {count} prohlížejících}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Přidáno 0 spolupracovníků} =1 {Přidán 1 spolupracovník} few {Přidáni {count} spolupracovníci} other {Přidáno {count} spolupracovníků}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, few {Přidat prohlížející} many {Přidat prohlížejících}=0 {Přidat prohlížejícího} =1 {Přidat prohlížejícího} other {Přidat prohlížející}}",
-  "addCollaborators": "{count, plural, few {Přidejte spolupracovníky} many {Přidejte spolupracovníky}=0 {Přidejte spolupracovníka} =1 {Přidejte spolupracovníka} other {Přidejte spolupracovníky}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Dlouhým stisknutím emailu ověříte koncové šifrování.",
   "sharing": "Sdílení...",
   "invalidEmailAddress": "Neplatná emailová adresa",
@@ -632,16 +547,6 @@
   "viewer": "Divák",
   "collaborator": "Spolupracovník",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Spolupracovníci mohou přidávat položky do sdílené kolekce.",
-  "albumParticipantsCount": "{count, plural, few {{count} účastníci} many {{count} účastníků}=0 {Žádní účastníci} =1 {1 účastník} other {{count} účastníků}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Přidat další",
   "you": "Vy",
   "albumOwner": "Vlastník",
@@ -758,16 +663,6 @@
   "clickHereToUpload": "Klikněte sem pro nahrání",
   "saveDocument": "Uložit dokument",
   "uploadFiles": "Nahrát položky",
-  "filesSelected": "{count, plural, =0{Žádné položky nebyly vybrány} =1{1 položka vybrána} few{{count} položky vybrány} other{{count} položek vybráno}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Přidat do kolekce",
   "newCollection": "Nová kolekce",
   "title": "Název",
@@ -786,16 +681,6 @@
     }
   },
   "informationCollectionName": "Informace",
-  "recordSavedToMultipleCollections": "Záznam úspěšně uložen do {count, plural, =1{1 kolekce} few{{count} kolekcí} other{{count} kolekcí}}",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} zkopírován do schránky",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -803,20 +688,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 výsledek} few{{count} výsledky} other{{count} výsledků}} pro \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -864,49 +735,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 kolekce bude trvale smazána} few{{count} kolekce budou trvale smazány} other{{count} kolekcí bude trvale smazáno}}.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 položka bude trvale smazána} few{{count} položky budou trvale smazány} other{{count} položek bude trvale smazáno}}.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Smazat položky také ze všech míst",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Ano, smazat {count, plural, =1{kolekci} few{kolekce} other{kolekcí}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Ano, smazat {count, plural, =1{položku} few{položky} other{položek}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Využiti",
   "fileCount": "{used} / {max}",
@@ -929,16 +760,6 @@
   "markingAsImportant": "Označuji jako důležité...",
   "fileMarkedAsImportant": "Položka označena jako důležitá",
   "fileRemovedFromImportant": "Položka odebrána z důležitých",
-  "filesMarkedAsImportant": "{count, plural, =1{1 položka označena jako důležitá} few{{count} položky označeny jako důležité} other{{count} položek označeno jako důležitých}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Všechny položky jsou již označeny jako důležité",
   "failedToMarkFilesAsImportant": "Označení položek jako důležitých se nezdařilo: {error}",
   "@failedToMarkFilesAsImportant": {
@@ -981,26 +802,6 @@
   "selectLanguage": "Vybrat jazyk",
   "general": "Obecné",
   "language": "Jazyk",
-  "selectedCount": "{count, plural, =1{1 vybrána} few{{count} vybrány} other{{count} vybráno}}",
-  "@selectedCount": {
-    "description": "Number of items selected",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "actionNotSupportedForSharedFiles": "{count, plural, =1{Akce není podporována pro 1 sdílený soubor} few{Akce není podporována pro {count} sdílené soubory} other{Akce není podporována pro {count} sdílených souborů}}",
-  "@actionNotSupportedForSharedFiles": {
-    "description": "Message when action is not supported for shared files",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addTo": "Přidat do",
   "shareNotSupportedForSharedFiles": "Sdílení není u sdílených souborů podporováno",
   "editNotSupportedForSharedFiles": "U sdílených souborů není funkce úprav podporována",
@@ -1014,16 +815,6 @@
   "collectionUpdated": "Kolekce aktualizována",
   "actionNotSupportedOnFavouritesAlbum": "Tato akce není v albu Oblíbené podporována",
   "leaveCollectionSuccessfully": "Úspěšně jste opustili kolekci",
-  "leftCollectionsSuccessfully": "{count, plural, =1{1 kolekce úspěšně opuštěna} few{{count} kolekce úspěšně opuštěny} other{{count} kolekcí úspěšně opuštěno}}",
-  "@leftCollectionsSuccessfully": {
-    "description": "Success message when leaving collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "removePublicLink": "Odstranit veřejný odkaz",
   "removePublicLinkConfirmation": "Toto odstraní veřejný odkaz pro přístup k \"{collectionName}\".",
   "@removePublicLinkConfirmation": {
@@ -1035,52 +826,12 @@
       }
     }
   },
-  "collectionsDeletedSuccessfully": "{count, plural, =1{1 kolekce úspěšně odstraněna} few{{count} kolekce úspěšně odstraněny} other{{count} kolekcí úspěšně odstraněno}}",
-  "@collectionsDeletedSuccessfully": {
-    "description": "Success message when collections are deleted",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "restoreToCollection": "Obnovit do kolekce",
   "restoringFiles": "Obnovuji...",
-  "filesRestoredSuccessfully": "{count, plural, =1{1 položka úspěšně obnovena} few{{count} položky úspěšně obnoveny} other{{count} položek úspěšně obnoveno}}",
-  "@filesRestoredSuccessfully": {
-    "description": "Success message when items are restored from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "failedToRestoreFiles": "Nepodařilo se obnovit položky",
   "permanentlyDelete": "Trvale smazat",
-  "permanentlyDeleteFilesBody": "{count, plural, =1{Tato položka bude trvale odstraněna a nelze ji obnovit} few{Tyto {count} položky budou trvale odstraněny a nelze je obnovit} other{Těchto {count} položek bude trvale odstraněno a nelze je obnovit}}.",
-  "@permanentlyDeleteFilesBody": {
-    "description": "Confirmation body for permanent deletion from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "yesDelete": "Ano, smazat",
   "deletingFiles": "Mazání...",
-  "filesDeletedPermanently": "{count, plural, =1{1 položka byla trvale odstraněna} few{{count} položky byly trvale odstraněny} other{{count} položek bylo trvale odstraněno}}",
-  "@filesDeletedPermanently": {
-    "description": "Success message when items are permanently deleted from trash",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "failedToDeleteFiles": "Odstranění položek se nezdařilo",
   "itemsStored": "Uložené položky",
   "of_": "z",

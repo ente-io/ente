@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
@@ -142,17 +144,18 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           isTopBorderRadiusRemoved: true,
           isBottomBorderRadiusRemoved: true,
           onTap: () async {
-            // ignore: unawaited_futures
-            routeToPage(
-              context,
-              AddParticipantPage(
-                [widget.collection],
-                const [ActionTypesToShow.addCollaborator],
-              ),
-            ).then(
-              (value) => {
-                if (mounted) {setState(() => {})},
-              },
+            unawaited(
+              routeToPage(
+                context,
+                AddParticipantPage(
+                  [widget.collection],
+                  const [ActionTypesToShow.addCollaborator],
+                ),
+              ).then((value) {
+                if (mounted) {
+                  setState(() {});
+                }
+              }),
             );
           },
         ),
@@ -232,14 +235,15 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               menuItemColor: getEnteColorScheme(context).fillFaint,
               trailingIconIsMuted: true,
               onTap: () async {
-                // ignore: unawaited_futures
-                routeToPage(
-                  context,
-                  ManageSharedLinkWidget(collection: widget.collection),
-                ).then(
-                  (value) => {
-                    if (mounted) {setState(() => {})},
-                  },
+                unawaited(
+                  routeToPage(
+                    context,
+                    ManageSharedLinkWidget(collection: widget.collection),
+                  ).then((value) {
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  }),
                 );
               },
               isTopBorderRadiusRemoved: true,

@@ -81,6 +81,26 @@ Also ensure that your system time is accurate, as any time drift can cause TOTP 
 
 You can access your codes on the web at [auth.ente.com](https://auth.ente.com).
 
+### Why doesn't auth.ente.com recognize my email when I try to log in? {#auth-web-email-not-recognized}
+
+If the web app says no account exists for your email, even though you're logged in on the mobile or desktop app, it's usually a stale cached email from a previous attempt. Try the following in order:
+
+1. On the login screen, click **Change email address** and re-enter your current email.
+2. Clear your browser's site data for `auth.ente.com` (or the cache for that domain).
+3. Open the page in an incognito or private window.
+
+If you recently changed the email on your Ente account, make sure you're entering the new address, not the old one.
+
+### Why don't I see my codes after logging in? {#auth-codes-not-showing}
+
+A few common reasons and what to check:
+
+- **Wrong account**: confirm you're signed into the same Ente account everywhere. Open `Settings` and check the registered email at the top, then compare across your devices.
+- **Offline mode**: if you were using Ente Auth in **Use without backups** (offline mode), your codes live only on that one device and aren't synced to the cloud. They won't appear on a new device or on the web until you sign in on the original device and let it sync.
+- **Sync check**: log in once on the web app at [auth.ente.com/login](https://auth.ente.com/login) to confirm whether your codes exist in your account at all. If they show up there, the issue is local to one device — try logging out and back in on that device.
+
+If your codes were created offline and you've since lost access to that device, they cannot be recovered from the server because they were never uploaded.
+
 ### Does Ente Auth require an account?
 
 No, Ente Auth does not require an account. You can choose to use the app without

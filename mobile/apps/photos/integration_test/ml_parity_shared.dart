@@ -285,16 +285,16 @@ Future<void> _ensureModelNetworkContext() async {
     return;
   }
 
-  await Configuration.instance.init();
   final prefs = await SharedPreferences.getInstance();
   final packageInfo = await PackageInfo.fromPlatform();
-  await NetworkClient.instance.init(packageInfo);
+  await NetworkClient.instance.init(packageInfo, prefs);
   ServiceLocator.instance.init(
     prefs,
     NetworkClient.instance.enteDio,
     NetworkClient.instance.getDio(),
     packageInfo,
   );
+  await Configuration.instance.init();
   _modelNetworkContextInitialized = true;
 }
 

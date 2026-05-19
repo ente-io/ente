@@ -245,16 +245,6 @@
   "after1Month": "Om en månad",
   "after1Year": "Om ett år",
   "manageParticipants": "Hantera",
-  "albumParticipantsCount": "{count, plural, =0 {Inga deltagare} =1 {1 deltagare} other {{count} deltagare}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Skapa en länk så att personer kan lägga till och visa foton i ditt delade album utan att behöva en Ente app eller konto. Perfekt för att samla in bilder från evenemang.",
   "collectPhotos": "Samla in foton",
   "collaborativeLink": "Samarbetslänk",
@@ -269,15 +259,6 @@
   "publicLinkEnabled": "Offentlig länk aktiverad",
   "shareALink": "Dela en länk",
   "sharedAlbumSectionDescription": "Skapa delade och samarbetande album med andra Ente användare, inklusive användare med gratisnivån.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Dela med specifika personer} =1 {Delad med en person} other {Delad med {numberOfPeople} personer}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Detta är ditt verifierings-ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Någon som delar album med dig bör se samma ID på deras enhet.",
   "howToViewShareeVerificationID": "Be dem att långtrycka på sin e-postadress på inställningsskärmen och verifiera att ID:n på båda enheterna matchar.",
@@ -486,7 +467,6 @@
   "skip": "Hoppa över",
   "updatingFolderSelection": "Uppdaterar mappval...",
   "itemCount": "{count, plural, one{{count} objekt} other{{count} objekt}}",
-  "deleteItemCount": "{count, plural, =1 {Radera {count} objekt} other {Radera {count} objekt}}",
   "duplicateItemsGroup": "{count} filer, {formattedSize} vardera",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -691,6 +671,15 @@
   "appstoreSubscription": "AppStore-prenumeration",
   "subAlreadyLinkedErrMessage": "Din {id} är redan kopplad till ett annat Ente-konto.\nOm du vill använda din {id} med detta konto, vänligen kontakta vår support",
   "visitWebToManage": "Vänligen besök {webUrl} för att hantera ditt abonnemang",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "Kunde inte uppdatera prenumeration",
   "paymentFailed": "Betalning misslyckades",
   "paymentFailedTalkToProvider": "Prata med {providerName} support om du debiterades",

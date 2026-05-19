@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{niciun element} =1{1 element} few{{count} elemente} other{{count} de elemente}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Creaza colectie",
   "uploadDocumentTooltip": "Incarca document",
   "restore": "Restaurare",
@@ -467,15 +457,6 @@
   "linkDeviceLimit": "Limită de dispozitive",
   "expiredLinkInfo": "Acest link a expirat. Vă rugăm să selectați un nou termen de expirare sau să dezactivați expirarea linkului.",
   "linkExpiresOn": "Linkul va expira pe {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Distribuiți cu anumite persoane} =1 {Distribuit cu o persoană} other {Distribuit cu {numberOfPeople} de persoane}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Linkul a expirat",
   "publicLinkEnabled": "Link public activat",
   "shareALink": "Distribuiți un link",
@@ -489,28 +470,6 @@
   "add": "Adăugare",
   "collaboratorsCanAddFilesToTheSharedCollection": "Colaboratorii pot adauga elemente in colectia partajata.",
   "enterEmail": "Introduceți e-mailul",
-  "viewersSuccessfullyAdded": "{count, plural, =0{0 vizualizatori adaugati} =1{1 vizualizator adaugat} few{{count} vizualizatori adaugati} other{{count} de vizualizatori adaugati}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0{0 colaboratori adaugati} =1{1 colaborator adaugat} few{{count} colaboratori adaugati} other{{count} de colaboratori adaugati}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0{Adauga vizualizator} =1{Adauga vizualizator} few{Adauga vizualizatori} other{Adauga vizualizatori}}",
-  "addCollaborators": "{count, plural, =0{Adauga colaborator} =1{Adauga colaborator} few{Adauga colaboratori} other{Adauga colaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Apăsați lung un e-mail pentru a verifica criptarea integrală.",
   "sharing": "Se distribuie...",
   "invalidEmailAddress": "Adresa e-mail nu este validă",
@@ -559,16 +518,6 @@
   "viewer": "Observator",
   "collaborator": "Colaborator",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Colaboratorii pot adauga elemente in colectia partajata.",
-  "albumParticipantsCount": "{count, plural, =0 {Fără participanți} =1 {1 participant} other {{count} de participanți}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Adăugați mai mulți",
   "you": "Dvs.",
   "albumOwner": "Proprietar",
@@ -676,16 +625,6 @@
   "clickHereToUpload": "Click aici pentru a incarca",
   "saveDocument": "Salveaza document",
   "uploadFiles": "Incarca elemente",
-  "filesSelected": "{count, plural, =0{Niciun element selectat} =1{1 element selectat} few{{count} elemente selectate} other{{count} de elemente selectate}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Adauga la colectie",
   "newCollection": "Colectie noua",
   "title": "Titlu",
@@ -704,16 +643,6 @@
     }
   },
   "informationCollectionName": "Informatii",
-  "recordSavedToMultipleCollections": "Inregistrare salvata cu succes in {count, plural, =1{1 colectie} few{{count} colectii} other{{count} de colectii}}",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "{fieldName} copiat in clipboard",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -721,20 +650,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 rezultat} few{{count} rezultate} other{{count} de rezultate}} pentru \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -781,49 +696,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 colectie} few{{count} colectii} other{{count} de colectii}} vor fi sterse definitiv.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 element} few{{count} elemente} other{{count} de elemente}} vor fi sterse definitiv.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "De asemenea, sterge elementele de peste tot",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Da, sterge {count, plural, =1{colectia} few{colectiile} other{colectiile}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Da, sterge {count, plural, =1{elementul} few{elementele} other{elementele}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Utilizare",
   "unimportant": "Neimportant",
@@ -831,16 +706,6 @@
   "markingAsImportant": "Se marcheaza ca important...",
   "fileMarkedAsImportant": "Element marcat ca important",
   "fileRemovedFromImportant": "Element eliminat din importante",
-  "filesMarkedAsImportant": "{count, plural, =1{1 element marcat ca important} few{{count} elemente marcate ca importante} other{{count} de elemente marcate ca importante}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Toate elementele sunt deja marcate ca importante",
   "failedToMarkFilesAsImportant": "Marcare elemente ca importante esuata: {error}",
   "@failedToMarkFilesAsImportant": {

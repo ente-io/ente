@@ -263,16 +263,6 @@
   "after1Month": "1ヶ月後",
   "after1Year": "1年後",
   "manageParticipants": "管理",
-  "albumParticipantsCount": "{count, plural, =0 {参加者なし} =1 {1 参加者} other {{count} 参加者}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Enteアプリやアカウントを持っていない人にも、共有アルバムに写真を追加したり表示したりできるリンクを作成します。",
   "collectPhotos": "写真を集めよう",
   "collaborativeLink": "共同作業リンク",
@@ -288,15 +278,6 @@
   "publicLinkEnabled": "公開リンクを有効にしました",
   "shareALink": "リンクをシェアする",
   "sharedAlbumSectionDescription": "無料プランのユーザーを含む、他のEnteユーザーと共有および共同アルバムを作成します。",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {誰かと共有しましょう} =1 {1人と共有されています} other {{numberOfPeople} 人と共有されています}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "これはあなたの認証IDです",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "アルバムを共有している人はデバイス上で同じIDを見るはずです。",
   "howToViewShareeVerificationID": "設定画面でメールアドレスを長押しし、両デバイスのIDが一致していることを確認してください。",
@@ -500,7 +481,6 @@
   "backupOnlyNewPhotos": "新しい写真のみをバックアップ",
   "updatingFolderSelection": "フォルダの選択を更新しています...",
   "itemCount": "{count, plural, other {{count}個のアイテム}}",
-  "deleteItemCount": "{count, plural,=1 {{count} 個の項目を削除} other {{count} 個の項目を削除}}",
   "duplicateItemsGroup": "{count} 個のファイル、それぞれ{formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -786,6 +766,15 @@
   "appstoreSubscription": "AppStore サブスクリプション",
   "subAlreadyLinkedErrMessage": "あなたの {id} はすでに別のEnteアカウントにリンクされています。\nこのアカウントであなたの {id} を使用したい場合は、サポートにお問い合わせください。",
   "visitWebToManage": "サブスクリプションを管理するには{webUrl}をご覧ください",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "managePaymentMethod": "支払い方法の管理",
   "couldNotUpdateSubscription": "サブスクリプションを更新できませんでした",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "support@ente.comまでお問い合わせください。お手伝いします！",
@@ -958,16 +947,6 @@
   "referFriendsAnd2xYourPlan": "友達に紹介して2倍",
   "shareAlbumHint": "アルバムを開いて右上のシェアボタンをタップ",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "完全に削除されるまでの日数が項目に表示されます",
-  "trashDaysLeft": "{count, plural, =0 {} =1 {1日} other {{count} 日}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "全て削除",
   "renameAlbum": "アルバムの名前変更",
   "convertToAlbum": "アルバムに変換",
@@ -1168,6 +1147,15 @@
   "loadMessage6": "アルバムへのリンクを共有できます",
   "loadMessage7": "当社のモバイルアプリはバックグラウンドで実行され、新しい写真を暗号化してバックアップします",
   "loadMessage8": "{webUrl}にはアップローダーがあります",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Xchacha20Poly1305を使用してデータを安全に暗号化します。",
   "photoDescriptions": "写真の説明",
   "searchResultFileName": "ファイル名",
@@ -1420,6 +1408,15 @@
   "pair": "ペアリング",
   "deviceNotFound": "デバイスが見つかりません",
   "castInstruction": "ペアリングしたいデバイスで{castUrl}にアクセスしてください。\n\nテレビでアルバムを再生するには以下のコードを入力してください。",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "コードを入力する",
   "joinDiscord": "Discordに参加",
   "locations": "場所",
@@ -1571,16 +1568,6 @@
   "enableMachineLearningBanner": "マジック検索と顔認識のため、機械学習を有効にする",
   "searchDiscoverEmptySection": "処理と同期が完了すると、画像がここに表示されます",
   "searchPersonsEmptySection": "処理と同期が完了すると、ここに人々が表示されます",
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {{count}人のコラボレーターを追加} =1 {{count}人のコラボレーターを追加} other {{count}人のコラボレーターを追加}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "アカウントが既に設定されています",
   "sessionIdMismatch": "セッションIDが一致しません",
   "@sessionIdMismatch": {
@@ -1850,21 +1837,11 @@
   "moveSelectedPhotosToOneDate": "選択した写真を1つの日付に移動",
   "shiftDatesAndTime": "日付と時間のシフト",
   "photosKeepRelativeTimeDifference": "写真はお互いの相対的な時間差を維持します",
-  "photocountPhotos": "{count, plural, =0 {0枚の写真} =1 {1枚の写真} other {{count} 枚の写真}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "アプリアイコン",
   "notThisPerson": "この人ではありませんか？",
   "selectedItemsWillBeRemovedFromThisPerson": "選択したアイテムはこの人としての登録が解除されますが、ライブラリからは削除されません。",
   "throughTheYears": "{dateFormat} から年",
   "thisWeekThroughTheYears": "毎年のこの週",
-  "thisWeekXYearsAgo": "{count, plural, =1 {{count} 1年前の今週} other {{count}年前の今週}}",
   "youAndThem": "あなたと{name}",
   "admiringThem": "{name}に注目！",
   "embracingThem": "{name}抱きしめて！",

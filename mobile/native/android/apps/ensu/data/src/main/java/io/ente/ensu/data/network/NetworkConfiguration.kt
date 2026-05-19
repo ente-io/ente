@@ -25,7 +25,7 @@ data class NetworkConfiguration(
 
         val default: NetworkConfiguration = NetworkConfiguration(
             apiEndpoint = "https://api.ente.com".toHttpUrl(),
-            accountsEndpoint = "https://accounts.ente.io".toHttpUrl(),
+            accountsEndpoint = "https://accounts.ente.com".toHttpUrl(),
             castEndpoint = "https://api.ente.com".toHttpUrl(),
             publicAlbumsEndpoint = "https://albums.ente.com".toHttpUrl(),
             familyEndpoint = "https://family.ente.io".toHttpUrl()

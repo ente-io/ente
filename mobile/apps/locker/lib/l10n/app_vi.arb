@@ -231,16 +231,6 @@
       }
     }
   },
-  "files": "{count, plural, =0{khong co muc} =1{1 muc} other{{count} muc}}",
-  "@files": {
-    "description": "Number of items in a collection",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "createCollectionTooltip": "Tao bo suu tap",
   "uploadDocumentTooltip": "Tai len tai lieu",
   "restore": "Khôi phục",
@@ -470,15 +460,6 @@
   "linkDeviceLimit": "Giới hạn thiết bị",
   "expiredLinkInfo": "Liên kết này đã hết hạn. Vui lòng chọn thời gian hết hạn mới hoặc tắt tính năng hết hạn liên kết.",
   "linkExpiresOn": "Liên kết sẽ hết hạn vào {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Chia sẻ với những người cụ thể} =1 {Chia sẻ với 1 người} other {Chia sẻ với {numberOfPeople} người}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "linkHasExpired": "Liên kết đã hết hạn",
   "publicLinkEnabled": "Liên kết công khai đã được bật",
   "shareALink": "Chia sẻ một liên kết",
@@ -492,28 +473,6 @@
   "add": "Thêm",
   "collaboratorsCanAddFilesToTheSharedCollection": "Cong tac vien co the them muc vao bo suu tap duoc chia se.",
   "enterEmail": "Nhập email",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Chưa thêm người xem} =1 {Đã thêm 1 người xem} other {Đã thêm {count} người xem}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to a collection."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Chưa có cộng tác viên} =1 {Đã thêm 1 cộng tác viên} other {Đã thêm {count} cộng tác viên}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to a collection."
-  },
-  "addViewers": "{count, plural, =0 {Thêm người xem} =1 {Thêm người xem} other {Thêm người xem}}",
-  "addCollaborators": "{count, plural, =0 {Thêm cộng tác viên} =1 {Thêm cộng tác viên} other {Thêm cộng tác viên}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Nhấn giữ một email để xác minh mã hóa đầu cuối.",
   "sharing": "Đang chia sẻ...",
   "invalidEmailAddress": "Địa chỉ email không hợp lệ",
@@ -562,16 +521,6 @@
   "viewer": "Người xem",
   "collaborator": "Cộng tác viên",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Cong tac vien co the them muc vao bo suu tap duoc chia se.",
-  "albumParticipantsCount": "{count, plural, =0 {Không có người tham gia} =1 {1 người tham gia} other {{count} Người tham gia}}",
-  "@albumParticipantsCount": {
-    "description": "The count of participants in an album",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
   "addMore": "Thêm nhiều hơn",
   "you": "Bạn",
   "albumOwner": "Chủ sở hữu",
@@ -679,16 +628,6 @@
   "clickHereToUpload": "Nhan vao day de tai len",
   "saveDocument": "Luu tai lieu",
   "uploadFiles": "Tai len muc",
-  "filesSelected": "{count, plural, =0{Chua chon muc nao} =1{Da chon 1 muc} other{Da chon {count} muc}}",
-  "@filesSelected": {
-    "description": "Number of items selected for upload",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "addToCollection": "Them vao bo suu tap",
   "newCollection": "Bo suu tap moi",
   "title": "Tieu de",
@@ -707,16 +646,6 @@
     }
   },
   "informationCollectionName": "Thong tin",
-  "recordSavedToMultipleCollections": "Ban ghi da duoc luu vao {count, plural, =1{1 bo suu tap} other{{count} bo suu tap}} thanh cong",
-  "@recordSavedToMultipleCollections": {
-    "description": "Success message when record is saved to multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "copiedToClipboard": "Da sao chep {fieldName} vao clipboard",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
@@ -724,20 +653,6 @@
       "fieldName": {
         "type": "String",
         "example": "Password"
-      }
-    }
-  },
-  "searchResultsCount": "{count, plural, =1{1 ket qua} other{{count} ket qua}} cho \"{query}\"",
-  "@searchResultsCount": {
-    "description": "Search results count message",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "query": {
-        "type": "String",
-        "example": "vacation"
       }
     }
   },
@@ -783,49 +698,9 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 bo suu tap} other{{count} bo suu tap}} se bi xoa vinh vien.",
-  "@deleteMultipleCollectionsDialogBody": {
-    "description": "Confirmation message body for deleting multiple collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 muc} other{{count} muc}} se bi xoa vinh vien.",
-  "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "deleteCollectionFromEverywhere": "Cung xoa muc khoi moi noi",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
-  },
-  "yesDeleteCollections": "Co, xoa {count, plural, =1{bo suu tap} other{bo suu tap}}",
-  "@yesDeleteCollections": {
-    "description": "Button label for confirming deletion of one or more collections",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "yesDeleteFiles": "Co, xoa {count, plural, =1{muc} other{muc}}",
-  "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more items",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
   },
   "usage": "Su dung",
   "important": "Quan trong",
@@ -834,16 +709,6 @@
   "markingAsImportant": "Dang danh dau quan trong...",
   "fileMarkedAsImportant": "Muc da duoc danh dau quan trong",
   "fileRemovedFromImportant": "Muc da duoc xoa khoi quan trong",
-  "filesMarkedAsImportant": "{count, plural, =1{1 muc da duoc danh dau quan trong} other{{count} muc da duoc danh dau quan trong}}",
-  "@filesMarkedAsImportant": {
-    "description": "Success message when items are marked as important",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "allFilesAlreadyMarkedAsImportant": "Tat ca muc da duoc danh dau quan trong",
   "failedToMarkFilesAsImportant": "Khong the danh dau muc quan trong: {error}",
   "@failedToMarkFilesAsImportant": {

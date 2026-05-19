@@ -218,16 +218,6 @@
   "after1Month": "Setelah 1 bulan",
   "after1Year": "Setelah 1 tahun",
   "manageParticipants": "Atur",
-  "albumParticipantsCount": "{count, plural, =0 {0 Peserta} =1 {1 Peserta} other {{count} Peserta}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Buat link untuk memungkinkan orang lain menambahkan dan melihat foto yang ada pada album bersama kamu tanpa memerlukan app atau akun Ente. Ideal untuk mengumpulkan foto pada suatu acara.",
   "collectPhotos": "Kumpulkan foto",
   "collaborativeLink": "Link kolaborasi",
@@ -239,15 +229,6 @@
   "publicLinkEnabled": "Link publik aktif",
   "shareALink": "Bagikan link",
   "sharedAlbumSectionDescription": "Buat album bersama dan kolaborasi dengan pengguna Ente lain, termasuk pengguna paket gratis.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Bagikan dengan orang tertentu} =1 {Berbagi dengan 1 orang} other {Berbagi dengan {numberOfPeople} orang}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Ini adalah ID Verifikasi kamu",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Orang yang membagikan album denganmu bisa melihat ID yang sama di perangkat mereka.",
   "howToViewShareeVerificationID": "Silakan minta dia untuk menekan lama alamat email-nya di layar pengaturan, dan pastikan bahwa ID di perangkatnya sama.",
@@ -446,7 +427,6 @@
   "skip": "Lewati",
   "updatingFolderSelection": "Memperbaharui pilihan folder...",
   "itemCount": "{count, plural, other{{count} item}}",
-  "deleteItemCount": "{count, plural, =1 {Hapus {count} item} other {Hapus {count} item}}",
   "duplicateItemsGroup": "{count} berkas, masing-masing {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -646,6 +626,15 @@
   "appstoreSubscription": "Langganan AppStore",
   "subAlreadyLinkedErrMessage": "{id} kamu telah terhubung dengan akun Ente lain.\nJika kamu ingin menggunakan {id} kamu untuk akun ini, silahkan hubungi tim bantuan kami",
   "visitWebToManage": "Silakan buka {webUrl} untuk mengatur langgananmu",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "Tidak dapat memperbarui langganan",
   "paymentFailed": "Pembayaran gagal",
   "paymentFailedTalkToProvider": "Harap hubungi dukungan {providerName} jika kamu dikenai biaya",
@@ -762,14 +751,6 @@
   "share": "Bagikan",
   "unhideToAlbum": "Tampikan ke album",
   "restoreToAlbum": "Pulihkan ke album",
-  "moveItem": "{count, plural, =1 {Pindahkan item} other {Pindahkan item}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {Tambahkan item} other {Tambahkan item}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Buat atau pilih album",
   "selectAlbum": "Pilih album",
   "searchByAlbumNameHint": "Nama album",
@@ -794,16 +775,6 @@
   "referFriendsAnd2xYourPlan": "Ajak teman dan gandakan paket anda",
   "shareAlbumHint": "Buka album lalu ketuk tombol bagikan di sudut kanan atas untuk berbagi.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Item menampilkan jumlah hari yang tersisa sebelum dihapus permanen",
-  "trashDaysLeft": "{count, plural, =0 {Segera} =1 {1 hari} other {{count} hari}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Hapus Semua",
   "renameAlbum": "Ubah nama album",
   "convertToAlbum": "Ubah menjadi album",
@@ -867,7 +838,6 @@
   "authToViewYourMemories": "Harap autentikasi untuk melihat kenanganmu",
   "unlock": "Buka",
   "freeUpSpace": "Bersihkan ruang",
-  "freeUpSpaceSaving": "{count, plural, =1 {Itu dapat dihapus dari perangkat untuk mengosongkan {formattedSize}} other {Itu dapat dihapus dari perangkat untuk mengosongkan {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, other {{formattedNumber} file}} dalam album ini telah berhasil dicadangkan",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -895,18 +865,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "anda masih dapat mengakses {count, plural, =1 {itu} other {mereka}} di Ente selama anda memiliki langganan aktif",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1001,6 +959,15 @@
   "loadMessage3": "Kami menyimpan 3 salinan dari data kamu, salah satunya di tempat pengungsian bawah tanah",
   "loadMessage7": "App seluler kami berjalan di latar belakang untuk mengenkripsi dan mencadangkan foto yang kamu potret",
   "loadMessage8": "{webUrl} menyediakan alat pengunggah yang bagus",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Kami menggunakan Xchacha20Poly1305 untuk mengenkripsi data-mu dengan aman",
   "photoDescriptions": "Keterangan foto",
   "fileTypesAndNames": "Nama dan jenis file",
@@ -1159,6 +1126,15 @@
   "pair": "Tautkan",
   "deviceNotFound": "Perangkat tidak ditemukan",
   "castInstruction": "Buka {castUrl} pada perangkat yang ingin kamu tautkan.\n\nMasukkan kode yang ditampilkan untuk memutar album di TV.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Masukkan kode",
   "joinDiscord": "Bergabung ke Discord",
   "addAName": "Tambahkan nama",

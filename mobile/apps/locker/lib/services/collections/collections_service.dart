@@ -403,17 +403,18 @@ class CollectionService {
     // One-time cleanup of orphaned files from before the trash deletion fix
     unawaited(cleanupOrphanedFiles());
 
-    // ignore: unawaited_futures
-    sync().then((_) {
-      ensureDefaultCollections();
-    }).catchError((error) {
-      if (error is UnauthorizedError) {
-        _logger.info("Session expired, triggering logout");
-        Bus.instance.fire(TriggerLogoutEvent());
-      } else {
-        _logger.severe("Failed to initialize collections: $error");
-      }
-    });
+    unawaited(
+      sync().then((_) {
+        ensureDefaultCollections();
+      }).catchError((error) {
+        if (error is UnauthorizedError) {
+          _logger.info("Session expired, triggering logout");
+          Bus.instance.fire(TriggerLogoutEvent());
+        } else {
+          _logger.severe("Failed to initialize collections: $error");
+        }
+      }),
+    );
     final collections = await _db.getCollections();
     for (final collection in collections) {
       _collectionIDToCollections[collection.id] = collection;

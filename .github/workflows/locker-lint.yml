@@ -13,7 +13,7 @@ on:
             - "mobile/scripts/check_source_arb_plurals.rb"
 
 env:
-    FLUTTER_VERSION: "3.32.8"
+    FLUTTER_VERSION: "3.38.10"
     RUST_VERSION: "1.90.0"
 
 permissions:
@@ -71,4 +71,11 @@ jobs:
 
             - run: flutter pub get --enforce-lockfile
 
-            - run: flutter analyze --no-fatal-infos
+            - name: Generate locker localizations
+              run: flutter gen-l10n
+
+            - name: Analyze locker
+              run: flutter analyze --no-fatal-infos
+
+            - name: Test locker
+              run: flutter test

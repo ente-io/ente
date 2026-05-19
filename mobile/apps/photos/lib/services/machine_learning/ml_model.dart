@@ -17,6 +17,8 @@ abstract class MlModel {
 
   String get modelRemotePath;
 
+  String get modelSha256;
+
   String get modelName;
 
   final _downloadModelLock = Lock();
@@ -39,6 +41,7 @@ abstract class MlModel {
     return _downloadModelLock.synchronized(() async {
       final path = await RemoteAssetsService.instance.getAssetPath(
         modelRemotePath,
+        expectedSha256: modelSha256,
       );
       return (modelName, path);
     });
@@ -46,7 +49,10 @@ abstract class MlModel {
 
   Future<String?> downloadModelSafe() async {
     if (await RemoteAssetsService.instance.hasAsset(modelRemotePath)) {
-      return await RemoteAssetsService.instance.getAssetPath(modelRemotePath);
+      return await RemoteAssetsService.instance.getAssetPath(
+        modelRemotePath,
+        expectedSha256: modelSha256,
+      );
     } else {
       if (isLocalGalleryMode || await canUseHighBandwidth()) {
         return await downloadModel();
@@ -64,10 +70,18 @@ abstract class MlModel {
       if (forceRefresh) {
         final file = await RemoteAssetsService.instance.getAssetIfUpdated(
           modelRemotePath,
+          expectedSha256: modelSha256,
         );
-        return file!.path;
+        return file?.path ??
+            await RemoteAssetsService.instance.getAssetPath(
+              modelRemotePath,
+              expectedSha256: modelSha256,
+            );
       } else {
-        return await RemoteAssetsService.instance.getAssetPath(modelRemotePath);
+        return await RemoteAssetsService.instance.getAssetPath(
+          modelRemotePath,
+          expectedSha256: modelSha256,
+        );
       }
     });
   }

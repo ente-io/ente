@@ -84,7 +84,7 @@ class BillingService {
             paymentProvider ?? (Platform.isAndroid ? "playstore" : "appstore"),
       );
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to verify subscription", e, s);
       rethrow;
     }
   }
@@ -93,7 +93,7 @@ class BillingService {
     try {
       return await _gateway.getSubscription();
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to fetch subscription", e, s);
       rethrow;
     }
   }
@@ -102,7 +102,7 @@ class BillingService {
     try {
       return await _gateway.cancelStripeSubscription();
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to cancel Stripe subscription", e, s);
       rethrow;
     }
   }
@@ -111,7 +111,7 @@ class BillingService {
     try {
       return await _gateway.activateStripeSubscription();
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to activate Stripe subscription", e, s);
       rethrow;
     }
   }
@@ -124,7 +124,7 @@ class BillingService {
         redirectURL: kWebPaymentRedirectUrl,
       );
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to fetch Stripe customer portal URL", e, s);
       rethrow;
     }
   }

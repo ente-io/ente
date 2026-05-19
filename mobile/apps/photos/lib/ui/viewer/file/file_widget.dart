@@ -36,8 +36,7 @@ class FileWidget extends StatelessWidget {
     // Specify key to ensure that the widget is rebuilt when the file changes
     // Before changing this, ensure that file deletes are handled properly
 
-    final String fileKey =
-        "file_genID_${file.generatedID}___file_id_${file.uploadedFileID}";
+    final String fileKey = _fileWidgetKey(file);
     if (file.fileType == FileType.livePhoto ||
         file.fileType == FileType.image) {
       return ZoomableLiveImageNew(
@@ -75,4 +74,18 @@ class FileWidget extends StatelessWidget {
       return const Icon(Icons.error);
     }
   }
+}
+
+String _fileWidgetKey(EnteFile file) {
+  final baseKey =
+      "file_genID_${file.generatedID}___file_id_${file.uploadedFileID}";
+  if (file.generatedID != null || file.uploadedFileID != null) {
+    return baseKey;
+  }
+
+  final localID = file.localID;
+  if (localID == null || localID.isEmpty) {
+    return baseKey;
+  }
+  return "${baseKey}___local_id_$localID";
 }

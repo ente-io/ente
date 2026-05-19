@@ -505,7 +505,7 @@
   "pinLock": "Khóa PIN",
   "enterPin": "Nhập PIN",
   "setNewPin": "Đặt PIN mới",
-  "importFailureDescNew": "Không thể phân tích tệp đã chọn.",
+  "importFailureDesc": "Không thể phân tích tệp đã chọn.",
   "appLockNotEnabled": "Khóa ứng dụng chưa được bật",
   "appLockNotEnabledDescription": "Vui lòng bật khóa ứng dụng từ Bảo mật > Khóa ứng dụng",
   "authToViewPasskey": "Vui lòng xác thực để xem mã truy cập",

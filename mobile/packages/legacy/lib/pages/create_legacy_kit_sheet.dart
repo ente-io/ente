@@ -45,6 +45,7 @@ Future<int?> showLegacyKitRecoveryWaitTimeSheet(
   BuildContext context, {
   required int selectedDays,
   bool showCancellationWarning = true,
+  bool requireChange = true,
 }) {
   final colorScheme = getEnteColorScheme(context);
   final textTheme = getEnteTextTheme(context);
@@ -66,6 +67,7 @@ Future<int?> showLegacyKitRecoveryWaitTimeSheet(
     child: _LegacyKitRecoveryWaitSheet(
       selectedDays: selectedDays,
       showCancellationWarning: showCancellationWarning,
+      requireChange: requireChange,
     ),
   );
 }
@@ -100,6 +102,7 @@ class _CreateLegacyKitPageState extends State<CreateLegacyKitPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       backgroundColor: colorScheme.backgroundBase,
@@ -162,16 +165,21 @@ class _CreateLegacyKitPageState extends State<CreateLegacyKitPage> {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          color: colorScheme.backgroundBase,
-          padding: const EdgeInsets.all(24),
-          child: GradientButton(
-            text: context.strings.createKit,
-            height: 48,
-            textStyle: textTheme.small.copyWith(height: 20 / 14),
-            onTap: _isValid ? _submit : null,
+      bottomNavigationBar: AnimatedPadding(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: SafeArea(
+          top: false,
+          child: Container(
+            color: colorScheme.backgroundBase,
+            padding: const EdgeInsets.all(24),
+            child: GradientButton(
+              text: context.strings.createKit,
+              height: 48,
+              textStyle: textTheme.small.copyWith(height: 20 / 14),
+              onTap: _isValid ? _submit : null,
+            ),
           ),
         ),
       ),
@@ -183,6 +191,7 @@ class _CreateLegacyKitPageState extends State<CreateLegacyKitPage> {
       context,
       selectedDays: _selectedDays,
       showCancellationWarning: false,
+      requireChange: false,
     );
     if (selectedDays != null && mounted) {
       setState(() {
@@ -321,10 +330,12 @@ class CreateLegacyKitSheet extends StatefulWidget {
 class _LegacyKitRecoveryWaitSheet extends StatefulWidget {
   final int selectedDays;
   final bool showCancellationWarning;
+  final bool requireChange;
 
   const _LegacyKitRecoveryWaitSheet({
     required this.selectedDays,
     required this.showCancellationWarning,
+    required this.requireChange,
   });
 
   @override
@@ -335,7 +346,8 @@ class _LegacyKitRecoveryWaitSheet extends StatefulWidget {
 class _LegacyKitRecoveryWaitSheetState
     extends State<_LegacyKitRecoveryWaitSheet> {
   late int _selectedDays = widget.selectedDays;
-  bool get _hasChanges => _selectedDays != widget.selectedDays;
+  bool get _canContinue =>
+      !widget.requireChange || _selectedDays != widget.selectedDays;
 
   @override
   Widget build(BuildContext context) {
@@ -347,7 +359,7 @@ class _LegacyKitRecoveryWaitSheetState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "How long before account recovery can happen after your sheets are scanned.",
+          "How soon is account recovery possible after the legacy kit is scanned?",
           style: textTheme.small.copyWith(
             color: colorScheme.textMuted,
             height: 20 / 14,
@@ -380,7 +392,7 @@ class _LegacyKitRecoveryWaitSheetState
           height: 52,
           textStyle: textTheme.small.copyWith(height: 20 / 14),
           disabledTextColor: colorScheme.textFaint,
-          onTap: _hasChanges
+          onTap: _canContinue
               ? () => Navigator.of(context).pop(_selectedDays)
               : null,
         ),

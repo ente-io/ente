@@ -505,7 +505,7 @@
   "pinLock": "Pinkodslås",
   "enterPin": "Ange PIN-kod",
   "setNewPin": "Ställ in ny PIN-kod",
-  "importFailureDescNew": "Kunde inte tolka den valda filen.",
+  "importFailureDesc": "Kunde inte tolka den valda filen.",
   "appLockNotEnabled": "Applås ej aktiverat",
   "appLockNotEnabledDescription": "Vänligen aktivera applås från Säkerhet > Applås",
   "authToViewPasskey": "Autentisera för att visa nyckel",

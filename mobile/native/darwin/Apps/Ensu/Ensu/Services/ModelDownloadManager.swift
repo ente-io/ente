@@ -157,6 +157,21 @@ final class ModelDownloadManager: NSObject {
         clearAllRecords()
     }
 
+    func cancelDownloads(for targets: [ModelDownloadTarget]) async {
+        let cancelledIds = Set(targets.map { recordId(for: $0.destination) })
+        let tasks = await allTasks()
+        tasks.forEach { task in
+            guard let taskId = task.taskDescription, cancelledIds.contains(taskId) else { return }
+            task.cancel()
+        }
+        mutateRecords { records in
+            cancelledIds.forEach { id in
+                guard let record = records.removeValue(forKey: id) else { return }
+                removeResumeData(for: record)
+            }
+        }
+    }
+
     func cancelDownloads(except targets: [ModelDownloadTarget]) async {
         let allowedIds = Set(targets.map { recordId(for: $0.destination) })
         let tasks = await allTasks()

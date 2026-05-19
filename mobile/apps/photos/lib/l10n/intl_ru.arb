@@ -273,16 +273,6 @@
   "after1Month": "Через 1 месяц",
   "after1Year": "Через 1 год",
   "manageParticipants": "Управлять",
-  "albumParticipantsCount": "{count, plural, =0 {Нет участников} =1 {{count} участник} other {{count} участников}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Создайте ссылку, чтобы люди могли добавлять и просматривать фото в вашем общем альбоме без использования приложения или аккаунта Ente. Это отлично подходит для сбора фото с мероприятий.",
   "collectPhotos": "Сбор фото",
   "collaborativeLink": "Совместная ссылка",
@@ -298,15 +288,6 @@
   "publicLinkEnabled": "Публичная ссылка включена",
   "shareALink": "Поделиться ссылкой",
   "sharedAlbumSectionDescription": "Создавайте общие и совместные альбомы с другими пользователями Ente, включая пользователей на бесплатных тарифах.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Поделиться с конкретными людьми} =1 {Доступно 1 человеку} other {Доступно {numberOfPeople} людям}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Это ваш идентификатор подтверждения",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Тот, кто делится с вами альбомами, должен видеть такой же идентификатор на своём устройстве.",
   "howToViewShareeVerificationID": "Попросите их нажать с удержанием на адрес электронной почты на экране настроек и убедиться, что идентификаторы на обоих устройствах совпадают.",
@@ -561,7 +542,6 @@
   "updateSettings": "Обновить настройки",
   "updatingFolderSelection": "Обновление выбора папок...",
   "itemCount": "{count, plural, one{{count} элемент} other{{count} элементов}}",
-  "deleteItemCount": "{count, plural, =1 {Удалить {count} элемент} other {Удалить {count} элементов}}",
   "duplicateItemsGroup": "{count} файлов, по {formattedSize} каждый",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -927,6 +907,15 @@
   "appstoreSubscription": "Подписка AppStore",
   "subAlreadyLinkedErrMessage": "Ваш {id} уже связан с другим аккаунтом Ente.\nЕсли вы хотите использовать {id} с этим аккаунтом, пожалуйста, свяжитесь с нашей службой поддержки",
   "visitWebToManage": "Пожалуйста, посетите {webUrl} для управления вашей подпиской",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "managePaymentMethod": "Управлять методом оплаты",
   "couldNotUpdateSubscription": "Не удалось обновить подписку",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Пожалуйста, свяжитесь с support@ente.com, и мы будем рады помочь!",
@@ -1078,14 +1067,6 @@
   "share": "Поделиться",
   "unhideToAlbum": "Перенести в альбом",
   "restoreToAlbum": "Восстановить в альбом",
-  "moveItem": "{count, plural, =1 {Переместить элемент} other {Переместить элементы}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {Добавить элемент} other {Добавить элементы}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Создать или выбрать альбом",
   "selectAlbum": "Выбрать альбом",
   "searchByAlbumNameHint": "Название альбома",
@@ -1110,16 +1091,6 @@
   "referFriendsAnd2xYourPlan": "Пригласите друзей и удвойте свой тариф",
   "shareAlbumHint": "Откройте альбом и нажмите кнопку «Поделиться» в правом верхнем углу, чтобы поделиться.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "На элементах отображается количество дней, оставшихся до их безвозвратного удаления",
-  "trashDaysLeft": "{count, plural, =0 {Скоро} =1 {1 день}  other {{count} дней}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Удалить всё",
   "renameAlbum": "Переименовать альбом",
   "convertToAlbum": "Преобразовать в альбом",
@@ -1186,7 +1157,6 @@
   "authToViewYourMemories": "Пожалуйста, авторизуйтесь для просмотра воспоминаний",
   "unlock": "Разблокировать",
   "freeUpSpace": "Освободить место",
-  "freeUpSpaceSaving": "{count, plural, =1 {Его можно удалить с устройства, чтобы освободить {formattedSize}} other {Их можно удалить с устройства, чтобы освободить {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} файл в этом альбоме был успешно сохранён} other {{formattedNumber} файлов в этом альбоме были успешно сохранены}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1214,18 +1184,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Вы всё ещё сможете получить доступ к {count, plural, =1 {нему} other {ним}} в Ente, пока у вас активна подписка",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1324,6 +1282,15 @@
   "loadMessage6": "Вы можете делиться ссылками на свои альбомы с близкими",
   "loadMessage7": "Наши мобильные приложения работают в фоновом режиме, чтобы шифровать и сохранять все новые фото, которые вы снимаете",
   "loadMessage8": "На {webUrl} есть удобный загрузчик",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Мы используем Xchacha20Poly1305 для безопасного шифрования ваших данных",
   "photoDescriptions": "Описания фото",
   "searchResultFileName": "Имя файла",
@@ -1596,6 +1563,15 @@
   "pair": "Подключить",
   "deviceNotFound": "Устройство не найдено",
   "castInstruction": "Посетите {castUrl} на устройстве, которое хотите подключить.\n\nВведите код ниже, чтобы воспроизвести альбом на телевизоре.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Введите код",
   "joinDiscord": "Присоединиться в Discord",
   "locations": "Местоположения",
@@ -1605,8 +1581,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "С лёгкостью находите людей по имени",
-  "addViewers": "{count, plural, =0 {Добавить зрителя} =1 {Добавить зрителя} other {Добавить зрителей}}",
-  "addCollaborators": "{count, plural, =0 {Добавить соавтора} =1 {Добавить соавтора} other {Добавить соавторов}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Нажмите с удержанием на электронную почту для подтверждения сквозного шифрования.",
   "developerSettingsWarning": "Вы уверены, что хотите изменить настройки для разработчиков?",
   "developerSettings": "Настройки для разработчиков",
@@ -1736,34 +1710,6 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {Добавлен 1 файл к {personName}} other {Добавлено {count} файлов к {personName}}}",
-  "@addedFilesToPerson": {
-    "description": "Toast shown after manually tagging one or more files to a person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 файл уже связан с {personName}} other {{count} файлов уже связано с {personName}}}",
-  "@filesAlreadyLinkedToPerson": {
-    "description": "Toast shown when selected files are already manually tagged to the selected person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
   "addNewPerson": "Добавить нового человека",
   "addNameOrMerge": "Добавить имя или объединить",
   "mergeWithExisting": "Объединить с существующим",
@@ -1811,46 +1757,6 @@
   "enableMachineLearningBanner": "Включите машинное обучение для магического поиска и распознавания лиц",
   "searchDiscoverEmptySection": "Изображения появятся здесь после завершения обработки и синхронизации",
   "searchPersonsEmptySection": "Люди появятся здесь после завершения обработки и синхронизации",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 зрителей} =1 {Добавлен 1 зритель} other {Добавлено {count} зрителей}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 соавторов} =1 {Добавлен 1 соавтор} other {Добавлено {count} соавторов}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
-  "adminsSuccessfullyAdded": "{count, plural, =0 {Администраторов не добавлено} =1 {1 администратор успешно добавлен} other {{count} администраторов успешно добавлено}}",
-  "@adminsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of admins that were successfully added to an album."
-  },
-  "addAdmins": "{count, plural, =0 {Добавить администратора} =1 {Добавить администратора} other {Добавить администраторов}}",
-  "@addAdmins": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Button text to add admins"
-  },
   "adminsCanManagePhotosAndParticipants": "Администраторы могут управлять фотографиями и участниками.",
   "suggestDeletion": "Предложить удалить",
   "suggestDeletionDescription": "Выбранные фотографии будут удалены из этого альбома. Владельцы фото также получат предложение для просмотра и удаления фотографий.",
@@ -1920,15 +1826,6 @@
   },
   "currentlyRunning": "выполняется",
   "ignored": "игнорируется",
-  "photosCount": "{count, plural, =0 {0 фотографий} =1 {1 фотография}  other {{count} фотографий}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Файл",
   "searchSectionsLengthMismatch": "Несоответствие длины разделов: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -2125,21 +2022,11 @@
   "moveSelectedPhotosToOneDate": "Переместите выбранные фото на одну дату",
   "shiftDatesAndTime": "Сместить даты и время",
   "photosKeepRelativeTimeDifference": "Фото сохранят относительную разницу во времени",
-  "photocountPhotos": "{count, plural, =0 {Нет фото} =1 {1 фото} other {{count} фото}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "Иконка приложения",
   "notThisPerson": "Не этот человек?",
   "selectedItemsWillBeRemovedFromThisPerson": "Выбранные элементы будут отвязаны от этого человека, но не удалены из вашей библиотеки.",
   "throughTheYears": "{dateFormat} сквозь годы",
   "thisWeekThroughTheYears": "Эта неделя сквозь годы",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Эта неделя, {count} год назад} other {Эта неделя, {count} лет назад}}",
   "youAndThem": "Вы и {name}",
   "admiringThem": "Любуясь {name}",
   "embracingThem": "Обнимая {name}",
@@ -2250,15 +2137,6 @@
   "font": "Шрифт",
   "background": "Фон",
   "align": "Выравнивание",
-  "addedToAlbums": "{count, plural, =1{Добавлено в 1 альбом успешно} few{Добавлено в {count} альбомов успешно} other{Добавлено в {count} альбомов успешно}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "Видео было обработано",
   "totalVideos": "Всего видео",
   "skippedVideos": "Пропущенные видео",
@@ -2289,14 +2167,6 @@
   "findSimilarImages": "Найти похожие фотографии",
   "noSimilarImagesFound": "Подходящих фотографий не найдено",
   "yourPhotosLookUnique": "Ваши фотографии выглядят уникальными",
-  "similarGroupsFound": "{count, plural, =1{{count} группа найдена} other{{count} группы найдены}}",
-  "@similarGroupsFound": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "reviewAndRemoveSimilarImages": "Просмотр и удаление дубликатов фотографий",
   "deletePhotosWithSize": "Удалить {count} изображений ({size})",
   "@deletePhotosWithSize": {
@@ -2702,15 +2572,6 @@
       }
     }
   },
-  "likesCount": "{count, plural, =1{1 Нравится} other{{count} Нравится}}",
-  "@likesCount": {
-    "description": "Number of likes with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "noLikesYet": "Пока нет отметок \"Нравится\"",
   "@noLikesYet": {
     "description": "Empty state when no likes exist"
@@ -2723,27 +2584,9 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, =1{Не удалось поставить отметку \"Нравится\" в одном альбоме} other{Не удалось поставить отметку \"Нравится\" в {count} альбомах}}",
-  "@failedToLikeAlbums": {
-    "description": "Error when liking albums fails",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "couldNotLoadAlbums": "Не удалось загрузить альбомы",
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
-  },
-  "albumsCount": "{count, plural,=1{1 альбом}other{{count} альбомов}}",
-  "@albumsCount": {
-    "description": "Number of albums with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "likeAll": "Поставить отметку \"Нравится\" на всё",
   "@likeAll": {
@@ -2779,15 +2622,6 @@
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "commentsCount": "{count, plural, =0{Комментариев нет} =1 {1 комментарий} other{{count} комментариев}}",
-  "@commentsCount": {
-    "description": "Number of comments with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },

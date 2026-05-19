@@ -42,7 +42,7 @@ struct OtpVerificationView: View {
                         email: email,
                         srp: srpAttributes,
                         sessionId: payload.passkeySessionId!,
-                        accountsUrl: payload.accountsUrl ?? "https://accounts.ente.io",
+                        accountsUrl: payload.accountsUrl ?? "https://accounts.ente.com",
                         twoFactorSessionId: payload.twoFactorSessionId,
                         password: nil
                     )

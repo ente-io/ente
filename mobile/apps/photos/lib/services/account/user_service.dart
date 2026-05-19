@@ -188,7 +188,7 @@ class UserService {
       }
     } catch (e, s) {
       await dialog.hide();
-      _logger.severe(e, s);
+      _logger.severe("Failed to send OTT", e, s);
       unawaited(showGenericErrorBottomSheet(context: context, error: e));
     }
   }
@@ -284,10 +284,10 @@ class UserService {
           // Token is already invalid (401 response)
           (e is DioException && e.response?.statusCode == 401) ||
               // Custom endpoints where server might be non-existent or unavailable
-              !_config.isEnteProduction();
+              !endpointConfig.isProduction;
 
       if (silentlyIgnoreError) {
-        if (!_config.isEnteProduction()) {
+        if (!endpointConfig.isProduction) {
           _logger.info(
             "Custom endpoint detected, proceeding with local logout despite server error",
           );
@@ -410,13 +410,13 @@ class UserService {
       await dialog.hide();
       Widget page;
       final String passkeySessionID = responseData["passkeySessionID"] ?? "";
-      final String accountsUrl = responseData["accountsUrl"] ?? kAccountsUrl;
       String twoFASessionID = responseData["twoFactorSessionID"] ?? "";
       if (twoFASessionID.isEmpty &&
           responseData["twoFactorSessionIDV2"] != null) {
         twoFASessionID = responseData["twoFactorSessionIDV2"];
       }
       if (passkeySessionID.isNotEmpty) {
+        final accountsUrl = responseData["accountsUrl"] as String;
         page = PasskeyPage(
           passkeySessionID,
           totp2FASessionID: twoFASessionID,
@@ -686,10 +686,10 @@ class UserService {
       twoFASessionID = responseData["twoFactorSessionIDV2"];
     }
     final String passkeySessionID = responseData["passkeySessionID"] ?? "";
-    final String accountsUrl = responseData["accountsUrl"] ?? kAccountsUrl;
 
     Configuration.instance.setVolatilePassword(userPassword);
     if (passkeySessionID.isNotEmpty) {
+      final accountsUrl = responseData["accountsUrl"] as String;
       page = PasskeyPage(
         passkeySessionID,
         totp2FASessionID: twoFASessionID,
@@ -1081,7 +1081,7 @@ class UserService {
       return true;
     } catch (e, s) {
       await dialog.hide();
-      _logger.severe(e, s);
+      _logger.severe("Failed to enable 2FA", e, s);
       if (e is DioException) {
         if (e.response != null && e.response!.statusCode == 401) {
           // ignore: unawaited_futures
@@ -1168,7 +1168,7 @@ class UserService {
         await dialog.hide();
       } catch (e, s) {
         await dialog.hide();
-        _logger.severe(e, s);
+        _logger.severe("Failed to create recovery key", e, s);
         rethrow;
       }
     }

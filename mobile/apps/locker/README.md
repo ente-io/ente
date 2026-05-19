@@ -5,7 +5,7 @@ important documents in the cloud with secure sharing capabilities.
 
 ## 🧑‍💻 Build from source
 
-1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
+1. [Install Flutter v3.38.10](https://flutter.dev/docs/get-started/install).
 
 2. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.

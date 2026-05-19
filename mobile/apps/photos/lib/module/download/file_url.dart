@@ -1,4 +1,3 @@
-import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/service_locator.dart";
 
@@ -12,7 +11,7 @@ enum FileUrlType {
 
 class FileUrl {
   static String getUrl(int fileID, FileUrlType type) {
-    final endpoint = Configuration.instance.getHttpEndpoint();
+    final endpoint = endpointConfig.endpoint;
     final disableWorker =
         endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker;
 

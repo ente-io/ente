@@ -268,16 +268,6 @@
   "after1Month": "1 aydan sonra",
   "after1Year": "1 ildən sonra",
   "manageParticipants": "İdarə et",
-  "albumParticipantsCount": "{count, plural, =0 {İştirakçı yoxdur} =1 {1 İştirakçı} other {{count} İştirakçı}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "İnsanların Ente tətbiqi və ya hesabı olmadan paylaşılan albomunuza şəkil əlavə etməsinə və baxmasına icazə vermək üçün link yaradın. Tədbir fotolarını toplamaq üçün mükəmməldir.",
   "collectPhotos": "Fotoları topla",
   "collaborativeLink": "Birgə fəaliyyət linki",
@@ -292,15 +282,6 @@
   "publicLinkEnabled": "İctimai link aktiv edildi",
   "shareALink": "Link paylaş",
   "sharedAlbumSectionDescription": "Digər Ente istifadəçiləri ilə pulsuz plan istifadəçiləri daxil olmaqla paylaşılan və birgə işlənilən albomlar yaradın.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Müəyyən şəxslərlə paylaş} =1 {1 şəxslə paylaşıldı} other {{numberOfPeople} şəxslə paylaşıldı}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "Bu sizin Doğrulama ID-nizdir",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Sizinlə albom paylaşan şəxs öz cihazında eyni ID-ni görməlidir.",
   "howToViewShareeVerificationID": "Zəhmət olmasa, onlardan tənzimləmələr ekranında e-poçt ünvanlarının üzərinə uzun basmalarını və hər iki cihazdakı ID-lərin uyğunluğunu yoxlamalarını istəyin.",
@@ -549,7 +530,6 @@
   "updateSettings": "Parametrləri yenilə",
   "updatingFolderSelection": "Qovluq seçimi yenilənir...",
   "itemCount": "{count, plural, one{{count} element} other{{count} element}}",
-  "deleteItemCount": "{count, plural, =1 {{count} elementi sil} other {{count} elementi sil}}",
   "duplicateItemsGroup": "{count} fayl, hər biri {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -762,6 +742,15 @@
   "appstoreSubscription": "AppStore abunəliyi",
   "subAlreadyLinkedErrMessage": "Sizin {id} artıq başqa bir Ente hesabına bağlanıb.\nƏgər {id} kimliyinizi bu hesab ilə istifadə etmək istəyirsinizsə, lütfən dəstək xidmətimizlə əlaqə saxlayın",
   "visitWebToManage": "Abunəliyinizi idarə etmək üçün lütfən {webUrl} saytına daxil olun",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "Abunəliyi yeniləmək mümkün olmadı",
   "paymentFailed": "Ödəniş uğursuz oldu",
   "paymentFailedTalkToProvider": "Əgər ödəniş balansımdan çıxılıbsa, lütfən {providerName} dəstək xidməti ilə danışın",
@@ -904,14 +893,6 @@
   "share": "Paylaş",
   "unhideToAlbum": "Albomda gizlilikdən çıxar",
   "restoreToAlbum": "Alboma bərpa et",
-  "moveItem": "{count, plural, =1 {Elementi köçür} other {Elementləri köçür}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {Element əlavə et} other {Elementlər əlavə et}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Albom yarat və ya seç",
   "selectAlbum": "Albom seç",
   "searchByAlbumNameHint": "Albom adı",
@@ -936,16 +917,6 @@
   "referFriendsAnd2xYourPlan": "Dostlarınızı dəvət edin və planınızı 2 qat böyüdün",
   "shareAlbumHint": "Paylaşmaq üçün bir albom açın və sağ yuxarıdakı paylaş düyməsinə toxunun.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementlər həmişəlik silinməyə qalan günlərin sayını göstərir",
-  "trashDaysLeft": "{count, plural, =0 {Tezliklə} =1 {1 gün} other {{count} gün}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Hamısını sil",
   "renameAlbum": "Albomun adını dəyiş",
   "convertToAlbum": "Alboma çevir",
@@ -1045,7 +1016,6 @@
   "authToViewYourMemories": "Xatirələrinizə baxmaq üçün zəhmət olmasa kimliyinizi təsdiqləyin",
   "unlock": "Kilidi aç",
   "freeUpSpace": "Yer boşaltın",
-  "freeUpSpaceSaving": "{count, plural, =1 {{formattedSize} yer boşaltmaq üçün cihazdan silinə bilər} other {{formattedSize} yer boşaltmaq üçün cihazdan silinə bilərlər}}",
   "filesBackedUpInAlbum": "Bu albomdakı {count, plural, one {1 fayl} other {{formattedNumber} fayl}} təhlükəsiz şəkildə ehtiyat nüsxə kopyalanıb",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1073,18 +1043,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Aktiv abunəliyiniz olduğu müddətcə Ente-də {count, plural, =1 {ona} other {onlara}} hələ də daxil ola bilərsiniz",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1183,6 +1141,15 @@
   "loadMessage6": "Albomlarınızın linklərini sevdiklərinizlə bölüşə bilərsiniz",
   "loadMessage7": "Mobil tətbiqlərimiz çəkdiyiniz hər bir yeni şəkli şifrələmək və yedəkləmək üçün arxa fonda çalışır",
   "loadMessage8": "{webUrl}-nun rahat yükləyicisi var",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "Məlumatlarınızı təhlükəsiz şəkildə şifrələmək üçün Xchacha20Poly1305-dən istifadə edirik",
   "photoDescriptions": "Şəkil təsvirləri",
   "searchResultFileName": "Fayl adı",
@@ -1451,6 +1418,15 @@
   "pair": "Cütləşdirin",
   "deviceNotFound": "Cihaz tapılmadı",
   "castInstruction": "Qoşmaq istədiyiniz cihazda {castUrl} səhifəsinə daxil olun.\n\nAlbomu TV-nizdə oxutmaq üçün aşağıdakı kodu daxil edin.",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "Kodu daxil edin",
   "joinDiscord": "Discord qoşul",
   "locations": "Məkanlar",
@@ -1460,8 +1436,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "İnsanları adı ilə tez tapın",
-  "addViewers": "{count, plural, =0 {İzləyici əlavə et} =1 {İzləyici əlavə et} other {İzləyicilər əlavə et}}",
-  "addCollaborators": "{count, plural, =0 {Əməkdaş əlavə et} =1 {Əməkdaş əlavə et} other {Əməkdaşlar əlavə et}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Ucdan-uca şifrələməni doğrulamaq üçün e-poçtun üzərinə uzun basın.",
   "developerSettingsWarning": "Tərtibatçı tənzimləmələrini dəyişdirmək istədiyinizə əminsiniz?",
   "developerSettings": "Tərtibatçı tənzimləmələri",
@@ -1591,34 +1565,6 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {{personName} adlı şəxsə 1 fayl əlavə edildi} other {{personName} adlı şəxsə {count} fayl əlavə edildi}}",
-  "@addedFilesToPerson": {
-    "description": "Toast shown after manually tagging one or more files to a person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 fayl artıq {personName} ilə link edilib} other {{count} fayl artıq {personName} ilə link edilib}}",
-  "@filesAlreadyLinkedToPerson": {
-    "description": "Toast shown when selected files are already manually tagged to the selected person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
   "addNewPerson": "Yeni şəxs əlavə et",
   "addNameOrMerge": "Ad əlavə et və ya birləşdir",
   "mergeWithExisting": "Mövcud olanla birləşdir",
@@ -1665,46 +1611,6 @@
   "enableMachineLearningBanner": "Sehrli axtarış və üz tanıma üçün maşın öyrənməsini aktiv edin",
   "searchDiscoverEmptySection": "Emal və sinxronizasiya başa çatdıqdan sonra şəkillər burada göstəriləcək",
   "searchPersonsEmptySection": "Emal və sinxronizasiya bitdikdən sonra şəxslər burada görünəcək",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 izləyici əlavə edildi} =1 {1 izləyici əlavə edildi} other {{count} izləyici əlavə edildi}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 həmkar əlavə edildi} =1 {1 həmkar əlavə edildi} other {{count} həmkar əlavə edildi}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
-  "adminsSuccessfullyAdded": "{count, plural, =0 {Heç bir admin əlavə edilmədi} =1 {1 admin uğurla əlavə edildi} other {{count} admin uğurla əlavə edildi}}",
-  "@adminsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of admins that were successfully added to an album."
-  },
-  "addAdmins": "{count, plural, =0 {Admin əlavə et} =1 {Admin əlavə et} other {Adminləri əlavə et}}",
-  "@addAdmins": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Button text to add admins"
-  },
   "adminsCanManagePhotosAndParticipants": "Adminlər şəkilləri və iştirakçıları idarə edə bilərlər.",
   "suggestDeletion": "Silinməni təklif et",
   "suggestDeletionDescription": "Seçilmiş şəkillər bu albomdan silinəcək. Şəkil sahiblərinə də şəkilləri nəzərdən keçirmək və silmək üçün təklif göndəriləcək.",
@@ -1774,15 +1680,6 @@
   },
   "currentlyRunning": "hazırda işləyir",
   "ignored": "rədd edildi",
-  "photosCount": "{count, plural, =0 {0 şəkil} =1 {1 şəkil} other {{count} şəkil}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Fayl",
   "searchSectionsLengthMismatch": "Bölmələrin uzunluğu uyğun gəlmir: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -2068,21 +1965,11 @@
   "moveSelectedPhotosToOneDate": "Seçilmiş şəkilləri bir tarixə köçürün",
   "shiftDatesAndTime": "Tarixləri və vaxtı sürüşdürün",
   "photosKeepRelativeTimeDifference": "Şəkillər nisbi vaxt fərqini saxlayır",
-  "photocountPhotos": "{count, plural, =0 {Şəkil yoxdur} =1 {1 şəkil} other {{count} şəkil}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "Tətbiq ikonu",
   "notThisPerson": "Bu şəxs deyil?",
   "selectedItemsWillBeRemovedFromThisPerson": "Seçilmiş elementlər bu şəxsdən silinəcək, lakin kitabxananızdan silinməyəcək.",
   "throughTheYears": "İllər ərzində {dateFormat}",
   "thisWeekThroughTheYears": "İllər ərzində bu həftə",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Bu həftə, {count} il əvvəl} other {Bu həftə, {count} il əvvəl}}",
   "youAndThem": "Sən və {name}",
   "admiringThem": "{name} personasına heyranlıqla",
   "embracingThem": "{name} ilə qucaqlaşarkən",
@@ -2195,15 +2082,6 @@
   "font": "Şrift",
   "background": "Arxa plan",
   "align": "Hizala",
-  "addedToAlbums": "{count, plural, =1 {1 alboma uğurla əlavə edildi} other {{count} alboma uğurla əlavə edildi}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "Videolar işlənildi",
   "totalVideos": "Ümumi videolar",
   "skippedVideos": "Ötürülmüş videolar",
@@ -2234,14 +2112,6 @@
   "findSimilarImages": "Oxşar şəkilləri tap",
   "noSimilarImagesFound": "Oxşar şəkil tapılmadı",
   "yourPhotosLookUnique": "Şəkilləriniz unikal görünür",
-  "similarGroupsFound": "{count, plural, =1{{count} qrup tapıldı} other{{count} qrup tapıldı}}",
-  "@similarGroupsFound": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "reviewAndRemoveSimilarImages": "Oxşar şəkilləri nəzərdən keçirin və silin",
   "deletePhotosWithSize": "{count} şəkli sil ({size})",
   "@deletePhotosWithSize": {
@@ -2565,15 +2435,6 @@
       }
     }
   },
-  "likesCount": "{count, plural, =1{1 bəyənmə} other{{count} bəyənmə}}",
-  "@likesCount": {
-    "description": "Number of likes with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "noLikesYet": "Hələ bəyənmə yoxdur",
   "@noLikesYet": {
     "description": "Empty state when no likes exist"
@@ -2586,27 +2447,9 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, =1{1 albomu bəyənmək alınmadı} other{{count} albomu bəyənmək alınmadı}}",
-  "@failedToLikeAlbums": {
-    "description": "Error when liking albums fails",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "couldNotLoadAlbums": "Albomları yükləmək mümkün olmadı",
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
-  },
-  "albumsCount": "{count, plural, =1{1 albom} other{{count} albom}}",
-  "@albumsCount": {
-    "description": "Number of albums with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "likeAll": "Hamısını bəyən",
   "@likeAll": {
@@ -2642,15 +2485,6 @@
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "commentsCount": "{count, plural, =0{Şərh yoxdur} =1{1 şərh} other{{count} şərh}}",
-  "@commentsCount": {
-    "description": "Number of comments with pluralization",
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },

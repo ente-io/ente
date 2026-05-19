@@ -12,6 +12,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/events/magic_cache_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -77,39 +78,43 @@ class MagicCache {
 }
 
 String getLocalizedTitle(BuildContext context, String title) {
+  return getLocalizedTitleForL10n(context.l10n, title);
+}
+
+String getLocalizedTitleForL10n(AppLocalizations l10n, String title) {
   switch (title) {
     case 'Identity':
-      return context.l10n.discover_identity;
+      return l10n.discover_identity;
     case 'Screenshots':
-      return context.l10n.discover_screenshots;
+      return l10n.discover_screenshots;
     case 'QR Codes':
-      return context.l10n.discover_qr_codes;
+      return l10n.discover_qr_codes;
     case 'Receipts':
-      return context.l10n.discover_receipts;
+      return l10n.discover_receipts;
     case 'Notes':
-      return context.l10n.discover_notes;
+      return l10n.discover_notes;
     case 'Memes':
-      return context.l10n.discover_memes;
+      return l10n.discover_memes;
     case 'Visiting Cards':
-      return context.l10n.discover_visiting_cards;
+      return l10n.discover_visiting_cards;
     case 'Babies':
-      return context.l10n.discover_babies;
+      return l10n.discover_babies;
     case 'Pets':
-      return context.l10n.discover_pets;
+      return l10n.discover_pets;
     case 'Selfies':
-      return context.l10n.discover_selfies;
+      return l10n.discover_selfies;
     case 'Wallpapers':
-      return context.l10n.discover_wallpapers;
+      return l10n.discover_wallpapers;
     case 'Food':
-      return context.l10n.discover_food;
+      return l10n.discover_food;
     case 'Celebrations':
-      return context.l10n.discover_celebrations;
+      return l10n.discover_celebrations;
     case 'Sunset':
-      return context.l10n.discover_sunset;
+      return l10n.discover_sunset;
     case 'Hills':
-      return context.l10n.discover_hills;
+      return l10n.discover_hills;
     case 'Greenery':
-      return context.l10n.discover_greenery;
+      return l10n.discover_greenery;
     default:
       return title; // If no match, return the original string
   }

@@ -245,16 +245,6 @@
   "after1Month": "1个月后",
   "after1Year": "1 年后",
   "manageParticipants": "管理",
-  "albumParticipantsCount": "{count, plural, =0 {无参与者} =1 {1个参与者} other {{count} 个参与者}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "创建一个链接来让他人无需 Ente 应用程序或账户即可在您的共享相册中添加和查看照片。非常适合收集活动照片。",
   "collectPhotos": "收集照片",
   "collaborativeLink": "协作链接",
@@ -269,15 +259,6 @@
   "publicLinkEnabled": "公开链接已启用",
   "shareALink": "分享链接",
   "sharedAlbumSectionDescription": "与其他 Ente 用户（包括免费计划用户）创建共享和协作相册。",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {与特定人员共享} =1 {与 1 人共享} other {与 {numberOfPeople} 人共享}}",
-  "@shareWithPeopleSectionTitle": {
-    "placeholders": {
-      "numberOfPeople": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "thisIsYourVerificationId": "这是您的验证 ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "与您共享相册的人应该会在他们的设备上看到相同的 ID。",
   "howToViewShareeVerificationID": "请让他们在设置屏幕上长按他们的电子邮件地址，并验证两台设备上的 ID 是否匹配。",
@@ -524,7 +505,6 @@
   "updateSettings": "更新设置",
   "updatingFolderSelection": "正在更新文件夹选择...",
   "itemCount": "{count, plural, one{{count} 个项目} other{{count} 个项目}}",
-  "deleteItemCount": "{count, plural, =1 {删除 {count} 个项目} other {删除 {count} 个项目}}",
   "duplicateItemsGroup": "{count} 个文件，每个文件 {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -737,6 +717,15 @@
   "appstoreSubscription": "AppStore 订阅",
   "subAlreadyLinkedErrMessage": "您的 {id} 已链接到另一个 Ente 账户。\n如果您想在此账户中使用您的 {id} ，请联系我们的支持人员",
   "visitWebToManage": "请访问 {webUrl} 来管理您的订阅",
+  "@visitWebToManage": {
+    "description": "Shown when a Stripe subscriber needs to manage their subscription on the web.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "couldNotUpdateSubscription": "无法升级订阅",
   "paymentFailed": "支付失败",
   "paymentFailedTalkToProvider": "如果您被收取费用，请用英语与 {providerName} 的客服聊天",
@@ -854,14 +843,6 @@
   "share": "分享",
   "unhideToAlbum": "取消隐藏到相册",
   "restoreToAlbum": "恢复到相册",
-  "moveItem": "{count, plural, =1 {移动项目} other {移动数个项目}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, =1 {添加项目} other {添加数个项目}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "创建或选择相册",
   "selectAlbum": "选择相册",
   "searchByAlbumNameHint": "相册名称",
@@ -886,16 +867,6 @@
   "referFriendsAnd2xYourPlan": "把我们推荐给你的朋友然后获得延长一倍的订阅计划",
   "shareAlbumHint": "打开相册并点击右上角的分享按钮进行分享",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "项目显示永久删除前剩余的天数",
-  "trashDaysLeft": "{count, plural, =0 {马上} =1 {1 天} other {{count} 天}}",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "全部删除",
   "renameAlbum": "重命名相册",
   "convertToAlbum": "转换为相册",
@@ -960,7 +931,6 @@
   "authToViewYourMemories": "请验证以查看您的回忆",
   "unlock": "解锁",
   "freeUpSpace": "释放空间",
-  "freeUpSpaceSaving": "{count, plural, =1 {它可以从设备中删除以释放 {formattedSize}} other {它们可以从设备中删除以释放 {formattedSize}}}",
   "filesBackedUpInAlbum": "此相册中的 {count, plural, one {1 个文件} other {{formattedNumber} 个文件}} 已安全备份",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -988,18 +958,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "只要您拥有有效订阅，您仍然可以在 Ente 上访问 {count, plural, =1 {它} other {它们}}",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1098,6 +1056,15 @@
   "loadMessage6": "您可以与您所爱的人分享您相册的链接",
   "loadMessage7": "我们的移动应用程序在后台运行以加密和备份您点击的任何新照片",
   "loadMessage8": "{webUrl} 有一个巧妙的上传器",
+  "@loadMessage8": {
+    "description": "Loading screen message about the web uploader.",
+    "placeholders": {
+      "webUrl": {
+        "type": "String",
+        "example": "photos.ente.com"
+      }
+    }
+  },
   "loadMessage9": "我们使用 Xchacha20Poly1305 加密技术来安全地加密您的数据",
   "photoDescriptions": "照片说明",
   "searchResultFileName": "文件名",
@@ -1343,6 +1310,15 @@
   "pair": "配对",
   "deviceNotFound": "未发现设备",
   "castInstruction": "在您要配对的设备上访问 {castUrl}。\n在下框中输入代码即可在电视上播放相册。",
+  "@castInstruction": {
+    "description": "Instructions shown when pairing a device to play an album on TV.",
+    "placeholders": {
+      "castUrl": {
+        "type": "String",
+        "example": "https://cast.ente.com"
+      }
+    }
+  },
   "deviceCodeHint": "输入代码",
   "joinDiscord": "加入 Discord",
   "locations": "位置",
@@ -1352,8 +1328,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "按名称快速查找人物",
-  "addViewers": "{count, plural, =0 {添加查看者} =1 {添加查看者r} other {添加数个查看者}}",
-  "addCollaborators": "{count, plural, =0 {添加协作者} =1 {添加协作者} other {添加数个协作者}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "长按电子邮件以验证端到端加密。",
   "developerSettingsWarning": "您确定要修改开发者设置吗？",
   "developerSettings": "开发者设置",
@@ -1481,34 +1455,6 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {添加1个文件到 {personName}} other {添加 {count} 文件到 {personName}}}",
-  "@addedFilesToPerson": {
-    "description": "Toast shown after manually tagging one or more files to a person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1个文件已链接到 {personName}} other {{count} 文件已链接到 {personName}}}",
-  "@filesAlreadyLinkedToPerson": {
-    "description": "Toast shown when selected files are already manually tagged to the selected person.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      },
-      "personName": {
-        "type": "String",
-        "example": "Alex"
-      }
-    }
-  },
   "addNewPerson": "添加新人物",
   "addNameOrMerge": "添加名称或合并",
   "mergeWithExisting": "与现有的合并",
@@ -1535,26 +1481,6 @@
   "enableMachineLearningBanner": "启用机器学习进行魔法搜索和面部识别",
   "searchDiscoverEmptySection": "处理和同步完成后，图像将显示在此处",
   "searchPersonsEmptySection": "处理和同步完成后，人物将显示在此处",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {已添加0个查看者} =1 {已添加1个查看者} other {已添加 {count} 个查看者}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {已添加 0 位协作者} =1 {已添加 1 位协作者} other {已添加 {count} 位协作者}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "账户已配置。",
   "sessionIdMismatch": "会话 ID 不匹配",
   "@sessionIdMismatch": {
@@ -1620,15 +1546,6 @@
   },
   "currentlyRunning": "目前正在运行",
   "ignored": "已忽略",
-  "photosCount": "{count, plural, =0 {0张照片} =1 {1张照片} other {{count} 张照片}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "文件",
   "searchSectionsLengthMismatch": "部分长度不匹配：{snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1816,21 +1733,11 @@
   "moveSelectedPhotosToOneDate": "将选定的照片调整到某一日期",
   "shiftDatesAndTime": "调整日期和时间",
   "photosKeepRelativeTimeDifference": "照片保持相对时间差",
-  "photocountPhotos": "{count, plural, =0 {没有照片} =1 {1 张照片} other {{count} 张照片}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "appIcon": "应用图标",
   "notThisPerson": "不是此人？",
   "selectedItemsWillBeRemovedFromThisPerson": "选定的项目将从此人身上移除，但不会从您的库中删除。",
   "throughTheYears": "{dateFormat} 年间",
   "thisWeekThroughTheYears": "历年本周",
-  "thisWeekXYearsAgo": "{count, plural, =1 {{count} 年前的本周} other {{count} 年前的本周}}",
   "youAndThem": "您和 {name}",
   "admiringThem": "欣赏 {name}",
   "embracingThem": "拥抱 {name}",
@@ -1931,15 +1838,6 @@
   "font": "字体",
   "background": "背景",
   "align": "对齐",
-  "addedToAlbums": "{count, plural, =1{已成功添加到 1 个相册} other{已成功添加到 {count} 个相册}}",
-  "@addedToAlbums": {
-    "description": "Message shown when items are added to albums",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "videosProcessed": "视频已处理",
   "totalVideos": "视频总数",
   "skippedVideos": "已跳过的视频",
@@ -1970,14 +1868,6 @@
   "findSimilarImages": "查找相似图片",
   "noSimilarImagesFound": "未找到相似图片",
   "yourPhotosLookUnique": "您的照片看起来很独特",
-  "similarGroupsFound": "{count, plural, =1{{count} 组已找到} other{{count} 组已找到}}",
-  "@similarGroupsFound": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "reviewAndRemoveSimilarImages": "查看并删除相似图片",
   "deletePhotosWithSize": "删除 {count} 张照片 ({size})",
   "@deletePhotosWithSize": {

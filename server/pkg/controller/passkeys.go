@@ -30,6 +30,20 @@ func (c *PasskeyController) GetPasskeys(userID int64) (passkeys []ente.Passkey, 
 	return c.Repo.GetUserPasskeys(user.ID)
 }
 
+func (c *PasskeyController) GetPasskeysAndAccountsURL(userID int64) (passkeys []ente.Passkey, accountsURL string, err error) {
+	user, err := c.UserRepo.Get(userID)
+	if err != nil {
+		return
+	}
+
+	passkeys, err = c.Repo.GetUserPasskeys(user.ID)
+	if err != nil {
+		return
+	}
+	accountsURL, err = c.Repo.AccountsURLForUser(user.ID)
+	return
+}
+
 func (c *PasskeyController) DeletePasskey(userID int64, passkeyID uuid.UUID) (err error) {
 	user, err := c.UserRepo.Get(userID)
 	if err != nil {

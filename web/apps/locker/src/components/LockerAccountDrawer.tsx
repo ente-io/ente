@@ -15,6 +15,7 @@ import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { LockerAuthenticateUser } from "./LockerAuthenticateUser";
 import { LockerSessionsDrawer } from "./LockerSessionsDrawer";
 import { LockerSidebarCardButton } from "./LockerSidebarCardButton";
 import {
@@ -22,6 +23,12 @@ import {
     type LockerNestedSidebarDrawerVisibilityProps,
 } from "./LockerSidebarShell";
 import { LockerTwoFactorDrawer } from "./LockerTwoFactorDrawer";
+
+type AuthenticatedAccountAction =
+    | "recoveryKey"
+    | "activeSessions"
+    | "changePassword"
+    | "changeEmail";
 
 export const LockerAccountDrawer: React.FC<
     LockerNestedSidebarDrawerVisibilityProps
@@ -33,12 +40,15 @@ export const LockerAccountDrawer: React.FC<
     const [isRecoveryKeyOpen, setIsRecoveryKeyOpen] = useState(false);
     const [isSessionsOpen, setIsSessionsOpen] = useState(false);
     const [isTwoFactorOpen, setIsTwoFactorOpen] = useState(false);
+    const [authenticatedAction, setAuthenticatedAction] =
+        useState<AuthenticatedAccountAction>();
 
     useEffect(() => {
         if (!open) {
             setIsRecoveryKeyOpen(false);
             setIsSessionsOpen(false);
             setIsTwoFactorOpen(false);
+            setAuthenticatedAction(undefined);
         }
     }, [open]);
 
@@ -46,13 +56,36 @@ export const LockerAccountDrawer: React.FC<
         setIsRecoveryKeyOpen(false);
         setIsSessionsOpen(false);
         setIsTwoFactorOpen(false);
+        setAuthenticatedAction(undefined);
         onClose();
         onRootClose();
+    };
+
+    const authenticateBefore = (action: AuthenticatedAccountAction) => {
+        setAuthenticatedAction(action);
     };
 
     const handleNavigate = (path: string) => {
         handleRootClose();
         void router.push(path);
+    };
+
+    const handleAuthenticatedAction = () => {
+        switch (authenticatedAction) {
+            case "recoveryKey":
+                setIsRecoveryKeyOpen(true);
+                break;
+            case "activeSessions":
+                setIsSessionsOpen(true);
+                break;
+            case "changePassword":
+                handleNavigate("/change-password");
+                break;
+            case "changeEmail":
+                handleNavigate("/change-email");
+                break;
+        }
+        setAuthenticatedAction(undefined);
     };
 
     const handleOpenPasskeys = async () => {
@@ -86,7 +119,7 @@ export const LockerAccountDrawer: React.FC<
                     <LockerSidebarCardButton
                         icon={Key02Icon}
                         label={t("recovery_key")}
-                        onClick={() => setIsRecoveryKeyOpen(true)}
+                        onClick={() => authenticateBefore("recoveryKey")}
                     />
 
                     <Stack sx={{ gap: 1 }}>
@@ -117,7 +150,7 @@ export const LockerAccountDrawer: React.FC<
                             icon={ComputerPhoneSyncIcon}
                             label={t("active_sessions")}
                             endIcon={<ChevronRightIcon />}
-                            onClick={() => setIsSessionsOpen(true)}
+                            onClick={() => authenticateBefore("activeSessions")}
                         />
                     </Stack>
 
@@ -127,12 +160,12 @@ export const LockerAccountDrawer: React.FC<
                         <LockerSidebarCardButton
                             icon={PasswordValidationIcon}
                             label={t("change_password")}
-                            onClick={() => handleNavigate("/change-password")}
+                            onClick={() => authenticateBefore("changePassword")}
                         />
                         <LockerSidebarCardButton
                             icon={Mail01Icon}
                             label={t("change_email")}
-                            onClick={() => handleNavigate("/change-email")}
+                            onClick={() => authenticateBefore("changeEmail")}
                         />
                     </Stack>
                 </Stack>
@@ -148,6 +181,12 @@ export const LockerAccountDrawer: React.FC<
                 open={isTwoFactorOpen}
                 onClose={() => setIsTwoFactorOpen(false)}
                 onRootClose={handleRootClose}
+            />
+
+            <LockerAuthenticateUser
+                open={!!authenticatedAction}
+                onClose={() => setAuthenticatedAction(undefined)}
+                onAuthenticate={handleAuthenticatedAction}
             />
 
             <RecoveryKey

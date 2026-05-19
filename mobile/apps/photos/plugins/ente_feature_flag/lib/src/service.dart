@@ -16,7 +16,7 @@ class FlagService {
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
   static const int _cfUploadWorkerRolloutPercent = 10;
-  static const int _rustMlRolloutPercent = 20;
+  static const int _rustMlRolloutPercent = 50;
 
   static const String _userIdKey = "user_id";
 

@@ -74,13 +74,7 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
-import {
-    albumsAppOrigin,
-    apiOrigin,
-    isCustomAlbumsAppOrigin,
-    isOfficialAlbumsApp,
-    photosAppOrigin,
-} from "ente-base/origins";
+import { apiOrigin, isCustomAPIOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
@@ -242,11 +236,11 @@ export default function PublicAlbumPage() {
             continue: {
                 text: t("login"),
                 action: async () => {
-                    if (isOfficialAlbumsApp) {
-                        window.location.href = photosAppOrigin();
-                        return;
+                    if (isCustomAPIOrigin) {
+                        await router.push("/");
+                    } else {
+                        window.location.href = "https://photos.ente.com";
                     }
-                    await router.push("/");
                 },
             },
             cancel: false,
@@ -259,23 +253,26 @@ export default function PublicAlbumPage() {
      */
     const checkAndRedirectForTripAlbum = (collection: Collection): boolean => {
         if (
-            collection.pubMagicMetadata?.data.layout === "trip" &&
-            isOfficialAlbumsApp
+            isCustomAPIOrigin ||
+            collection.pubMagicMetadata?.data.layout !== "trip"
         ) {
-            const currentURL = new URL(window.location.href);
-            const albumsURL = new URL(albumsAppOrigin());
-
-            if (currentURL.host !== albumsURL.host) {
-                isRedirectingToAlbumsAppRef.current = true;
-
-                albumsURL.search = currentURL.search;
-                albumsURL.hash = currentURL.hash;
-
-                window.location.href = albumsURL.href;
-                return true;
-            }
+            return false;
         }
-        return false;
+
+        const currentURL = new URL(window.location.href);
+        const albumsURL = new URL("https://albums.ente.com");
+
+        if (currentURL.host === albumsURL.host) {
+            return false;
+        }
+
+        isRedirectingToAlbumsAppRef.current = true;
+
+        albumsURL.search = currentURL.search;
+        albumsURL.hash = currentURL.hash;
+
+        window.location.href = albumsURL.href;
+        return true;
     };
 
     useEffect(() => {
@@ -302,8 +299,8 @@ export default function PublicAlbumPage() {
                 ]);
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
-                    // Only redirect to ente.com if this is NOT a custom/self-hosted instance
-                    if (!isCustomAlbumsAppOrigin) {
+                    // Only redirect to ente.com if this is not a self-hosted instance.
+                    if (!isCustomAPIOrigin) {
                         window.location.href = "https://ente.com";
                         redirectingToWebsite = true;
                     }
@@ -627,7 +624,9 @@ export default function PublicAlbumPage() {
 
     const commentsEnabled =
         publicCollection?.publicURLs[0]?.enableComment ?? false;
-    const joinEnabled = publicCollection?.publicURLs[0]?.enableJoin ?? false;
+    const joinEnabled =
+        !isCustomAPIOrigin &&
+        (publicCollection?.publicURLs[0]?.enableJoin ?? false);
     const handleDrop = useCallback((files: FileWithPath[]) => {
         setShouldRenderUpload(true);
         setDragAndDropFiles(files);
@@ -744,7 +743,7 @@ export default function PublicAlbumPage() {
                     collectionKey={collectionKey.current!}
                     enableDownload={downloadEnabled}
                     enableComment={commentsEnabled}
-                    enableJoin={publicCollection.publicURLs[0]?.enableJoin}
+                    enableJoin={joinEnabled}
                     onJoinAlbum={handleJoinAlbum}
                     onVisualFeedback={handleVisualFeedback}
                     onAddSaveGroup={onAddSaveGroup}
@@ -767,7 +766,7 @@ export default function PublicAlbumPage() {
                     collectionKey={collectionKey.current}
                     credentials={credentials}
                     enableComment={commentsEnabled}
-                    enableJoin={publicCollection?.publicURLs[0]?.enableJoin}
+                    enableJoin={joinEnabled}
                 />
             ) : (
                 <>
@@ -826,7 +825,7 @@ export default function PublicAlbumPage() {
                         collectionKey={collectionKey.current}
                         onJoinAlbum={handleJoinAlbum}
                         enableComment={commentsEnabled}
-                        enableJoin={publicCollection?.publicURLs[0]?.enableJoin}
+                        enableJoin={joinEnabled}
                         pendingFileIndex={pendingFileNavigation?.fileIndex}
                         pendingFileSidebar={pendingFileNavigation?.sidebar}
                         pendingHighlightCommentID={

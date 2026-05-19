@@ -96,6 +96,13 @@ login screen. In this mode, your codes are stored locally on your device.
 Unlike when using an account, data is not synced or backed up to the cloud. You
 are responsible for manually backing up your codes.
 
+The local vault is encrypted using a key protected by your device's secure
+storage. Device transfers and OS backups are not supported recovery methods for
+offline-mode codes. Create an encrypted export or local backup and keep the
+backup password safe.
+
+Learn more about [using offline mode safely](offline-mode).
+
 ### Display options
 
 Customize how your codes are displayed for optimal usability.
@@ -118,6 +125,9 @@ following lock methods:
 
 Additionally, configure **Auto lock** to automatically lock the app after a
 specified period of time (options: Immediately, 5s, 15s, 1m, 5m, 30m).
+
+App lock protects access to the app UI. It is not a recovery password for your
+codes and does not re-encrypt the stored Auth data.
 
 ### Import / Export
 

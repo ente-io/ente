@@ -84,7 +84,7 @@ class ComputeController {
       // Initialize interaction tracking before any await to avoid first-tap races.
       _startInteractionTimer(kDefaultInteractionTimeout);
 
-      await setMLDebugInteractionOverride(
+      await setMLInteractionOverride(
         turnOn: _localSettings.runMLDuringInteractionOverride,
         persist: false,
       );
@@ -245,7 +245,7 @@ class ComputeController {
     _fireControlEvent();
   }
 
-  Future<void> setMLDebugInteractionOverride({
+  Future<void> setMLInteractionOverride({
     required bool turnOn,
     bool persist = true,
   }) async {

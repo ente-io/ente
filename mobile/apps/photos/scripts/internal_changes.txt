@@ -1,18 +1,18 @@
 Latest changes:
-- Ashil: Fix some popup menus auto closing immediately after opening on iPads
-- Ashil: Fix social notifications not working on iOS
-- Laurens: Improved memories loading
-- Laurens: Add "QR Codes" discovery item
-- Laurens: Fixes to widget, most importantly to hidden files and showing album title
-- Neeraj: Add HTTP/2 support with HTTP/1.1 fallback for Photos API requests
-
+- Neeraj: Fix iOS crash when playing Pixel Long Shot (.LS) videos
+- Neeraj: Fix Android video preview/export generation by restoring ffmpeg x264 support
+- Neeraj: Fix video edit delete navigation
+- Neeraj: Fix grey screen after single-memory delete or favorite actions
+- Aman: Flutter upgrade
 
 Still behind internal flag:
 - Amrithesh: (I) ML/Pet recognition [Indexing]
 - Aman: (I) Use Rust HEIC decoder for Android photo viewer when dimensions are known
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use cloudflare worker for upload for internal users
+
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
+- Neeraj: (i) Save Contact
 - Prateek: (i) Enable BG sync notifications by default for internal users on iOS
 - Prateek: (i) Add internal sync recovery diagnostics to classify local discovery vs remote upload-prep misses
 

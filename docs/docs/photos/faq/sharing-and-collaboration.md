@@ -48,6 +48,14 @@ Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/col
 
 For a complete overview, see [Sharing documentation](/photos/features/sharing-and-collaboration/share).
 
+### Can I use "Send link" to share photos with another Ente user? {#send-link-vs-ente-sharing}
+
+You can, but it isn't the intended way. **Send link** (also called a quick link) creates a public link that anyone with the URL can open; it doesn't matter whether the recipient has an Ente account.
+
+For Ente-to-Ente sharing, create an album and share it directly with the other user's Ente email instead. They get end-to-end encrypted access in their own app, can comment and like, and you can grant Viewer, Collaborator, or Admin permissions. See [How do I share an album with other Ente users?](#share-with-users).
+
+Use **Send link** when you want to share with someone who doesn't use Ente or when you don't need permissions and album-level controls.
+
 ### What's the difference between public links and quick links? {#link-types}
 
 Quick links ARE public links - just with a different creation method:

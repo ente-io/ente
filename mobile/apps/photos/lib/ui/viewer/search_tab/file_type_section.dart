@@ -2,66 +2,28 @@ import "dart:async";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
-import "package:photos/events/event.dart";
+import "package:logging/logging.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 
-class FileTypeSection extends StatefulWidget {
-  final List<GenericSearchResult> fileTypesSearchResults;
-  const FileTypeSection(this.fileTypesSearchResults, {super.key});
+class FileTypeSection extends StatelessWidget {
+  final bool hasAnySearchableFiles;
 
-  @override
-  State<FileTypeSection> createState() => _FileTypeSectionState();
-}
-
-class _FileTypeSectionState extends State<FileTypeSection> {
-  late List<GenericSearchResult> _fileTypesSearchResults;
-  final streamSubscriptions = <StreamSubscription>[];
-
-  @override
-  void initState() {
-    super.initState();
-    _fileTypesSearchResults = widget.fileTypesSearchResults;
-
-    final streamsToListenTo =
-        SectionType.fileTypesAndExtension.sectionUpdateEvents();
-    for (Stream<Event> stream in streamsToListenTo) {
-      streamSubscriptions.add(
-        stream.listen((event) async {
-          _fileTypesSearchResults =
-              (await SectionType.fileTypesAndExtension.getData(
-            context,
-            limit: kSearchSectionLimit,
-          )) as List<GenericSearchResult>;
-          setState(() {});
-        }),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    for (var subscriptions in streamSubscriptions) {
-      subscriptions.cancel();
-    }
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant FileTypeSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _fileTypesSearchResults = widget.fileTypesSearchResults;
-  }
+  const FileTypeSection({
+    required this.hasAnySearchableFiles,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (_fileTypesSearchResults.isEmpty) {
+    if (!hasAnySearchableFiles) {
       final textTheme = getEnteTextTheme(context);
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8),
@@ -92,42 +54,126 @@ class _FileTypeSectionState extends State<FileTypeSection> {
           ],
         ),
       );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SectionHeader(
-              SectionType.fileTypesAndExtension,
-              hasMore:
-                  (_fileTypesSearchResults.length >= kSearchSectionLimit - 1),
-            ),
-            const SizedBox(height: 2),
-            SizedBox(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 4.5),
-                physics: const BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _fileTypesSearchResults
-                      .map(
-                        (fileTypeSearchResult) =>
-                            FileTypeRecommendation(fileTypeSearchResult),
-                      )
-                      .toList(),
-                ),
+    }
+
+    final tiles = _previewTiles(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionHeader(
+            SectionType.fileTypesAndExtension,
+            hasMore: true,
+          ),
+          const SizedBox(height: 2),
+          SizedBox(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 4.5),
+              physics: const BouncingScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: tiles
+                    .map(
+                      (tile) => _FileTypeRecommendation(tile),
+                    )
+                    .toList(),
               ),
             ),
-          ],
-        ),
-      );
-    }
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<_FileTypeTile> _previewTiles(BuildContext context) {
+    return [
+      _FileTypeTile.fileType(
+        assetKey: "PHOTO",
+        name: getHumanReadableString(context, FileType.image),
+        type: FileType.image,
+      ),
+      _FileTypeTile.fileType(
+        assetKey: "VIDEO",
+        name: getHumanReadableString(context, FileType.video),
+        type: FileType.video,
+      ),
+      _FileTypeTile.fileType(
+        assetKey: "LIVE",
+        name: getHumanReadableString(context, FileType.livePhoto),
+        type: FileType.livePhoto,
+      ),
+      const _FileTypeTile.extension(
+        assetKey: "PNG",
+        name: "PNGs",
+        extension: "PNG",
+      ),
+      const _FileTypeTile.extension(
+        assetKey: "JPG",
+        name: "JPGs",
+        extension: "JPG",
+      ),
+      const _FileTypeTile.extension(
+        assetKey: "HEIC",
+        name: "HEICs",
+        extension: "HEIC",
+      ),
+      const _FileTypeTile.extension(
+        assetKey: "MP4",
+        name: "MP4s",
+        extension: "MP4",
+      ),
+    ];
   }
 }
 
-class FileTypeRecommendation extends StatelessWidget {
+class _FileTypeTile {
+  final String assetKey;
+  final String name;
+  final FileType? fileType;
+  final String? extension;
+
+  const _FileTypeTile.fileType({
+    required this.assetKey,
+    required this.name,
+    required FileType type,
+  })  : fileType = type,
+        extension = null;
+
+  const _FileTypeTile.extension({
+    required this.assetKey,
+    required this.name,
+    required this.extension,
+  })  : fileType = null,
+        assert(extension != null);
+
+  Future<GenericSearchResult> resolve() {
+    final type = fileType;
+    if (type != null) {
+      return SearchService.instance.getFileTypeResult(
+        fileType: type,
+        typeName: name,
+      );
+    }
+    return SearchService.instance.getFileExtensionResult(
+      extension: extension!,
+      extensionName: name,
+    );
+  }
+}
+
+class _FileTypeRecommendation extends StatefulWidget {
+  final _FileTypeTile tile;
+
+  const _FileTypeRecommendation(this.tile);
+
+  @override
+  State<_FileTypeRecommendation> createState() =>
+      _FileTypeRecommendationState();
+}
+
+class _FileTypeRecommendationState extends State<_FileTypeRecommendation> {
   static const knownTypesToAssetPath = {
     "PHOTO": "assets/type_photos.png",
     "VIDEO": "assets/type_videos.png",
@@ -142,74 +188,40 @@ class FileTypeRecommendation extends StatelessWidget {
     "PNG": "assets/type_PNG.png",
     "WEBP": "assets/type_WEBP.png",
   };
-  final GenericSearchResult fileTypeSearchResult;
-  const FileTypeRecommendation(this.fileTypeSearchResult, {super.key});
+
+  final _logger = Logger("FileTypeRecommendation");
 
   @override
   Widget build(BuildContext context) {
-    final fileTypeKey =
-        fileTypeKeyFromSearchResult(fileTypeSearchResult.name.call());
-    final assetPath = knownTypesToAssetPath[fileTypeKey];
+    final fileTypeKey = widget.tile.assetKey;
+    final assetPath = knownTypesToAssetPath[fileTypeKey]!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 68),
         child: GestureDetector(
-          onTap: () {
-            RecentSearches().add(fileTypeSearchResult.name());
-            if (fileTypeSearchResult.onResultTap != null) {
-              fileTypeSearchResult.onResultTap!(context);
-            } else {
-              routeToPage(
-                context,
-                SearchResultPage(fileTypeSearchResult),
-              );
-            }
-          },
-          child: assetPath != null
-              ? Image.asset(assetPath)
-              : Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.asset(
-                      "assets/type_unknown.png",
-                    ),
-                    Positioned(
-                      bottom: 18,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 48),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            fileTypeKey,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontFamily: "Inter",
-                              color: Colors.white,
-                              letterSpacing: 0.75,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+          onTap: _onTap,
+          child: Image.asset(assetPath),
         ),
       ),
     );
   }
 
-  String fileTypeKeyFromSearchResult(String name) {
-    String fileTypeKey = "";
-    //remove 's' at the end of string
-    if (RegExp(r's$').hasMatch(name)) {
-      fileTypeKey = name.substring(0, name.length - 1);
+  Future<void> _onTap() async {
+    try {
+      final searchResult = await widget.tile.resolve();
+      if (!mounted) {
+        return;
+      }
+      RecentSearches().add(searchResult.name());
+      unawaited(
+        routeToPage(
+          context,
+          SearchResultPage(searchResult),
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to resolve file type result", e, s);
     }
-    //use only 1st word if there exists multiple words
-    fileTypeKey = fileTypeKey.split(" ").first.toUpperCase();
-
-    return fileTypeKey;
   }
 }

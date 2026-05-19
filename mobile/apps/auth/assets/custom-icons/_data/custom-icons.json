@@ -46,8 +46,8 @@
       "hex": "0000ff"
     },
     {
-      "title":"Ahrefs",
-      "slug":"ahrefs"
+      "title": "Ahrefs",
+      "slug": "ahrefs"
     },
     {
       "title": "Airtable"
@@ -64,7 +64,7 @@
     {
       "title": "aliyun",
       "altNames": [
-        "阿里云"
+        "\u963f\u91cc\u4e91"
       ]
     },
     {
@@ -99,7 +99,7 @@
       "title": "Ankara University",
       "slug": "ankara_university",
       "altNames": [
-        "Ankara Üniversitesi"
+        "Ankara \u00dcniversitesi"
       ]
     },
     {
@@ -186,7 +186,7 @@
       "title": "BaiduCloud",
       "slug": "baidu_cloud",
       "altNames": [
-        "百度云",
+        "\u767e\u5ea6\u4e91",
         "baiduyun"
       ]
     },
@@ -228,7 +228,7 @@
       "title": "Binance",
       "slug": "binance_exchange",
       "altNames": [
-        "币安"
+        "\u5e01\u5b89"
       ]
     },
     {
@@ -302,6 +302,10 @@
       ]
     },
     {
+      "title": "BJ-Share",
+      "slug": "bj-share"
+    },
+    {
       "title": "Blockchain",
       "altNames": [
         "blockchain.com",
@@ -363,10 +367,10 @@
       "title": "Bugzilla"
     },
     {
-      "title": "Bundesagentur für Arbeit",
+      "title": "Bundesagentur f\u00fcr Arbeit",
       "slug": "bundesagentur_fur_arbeit",
       "altNames": [
-        "Agentur für Arbeit"
+        "Agentur f\u00fcr Arbeit"
       ]
     },
     {
@@ -429,8 +433,7 @@
         "schwab",
         "charles-schwab",
         "charles schwab"
-      ],
-      "hex": "01A0E0"
+      ]
     },
     {
       "title": "Chaturbate",
@@ -535,6 +538,10 @@
       "slug": "coolify"
     },
     {
+      "title": "Cove Backup",
+      "slug": "cove"
+    },  
+    {
       "title": "Creately",
       "slug": "creately"
     },
@@ -605,8 +612,7 @@
     },
     {
       "title": "DeepSeek",
-      "slug": "deepseek",
-      "hex": "4D6BFE"
+      "slug": "deepseek"
     },
     {
       "title": "DEGIRO"
@@ -762,8 +768,7 @@
       "slug": "exaroton",
       "altNames": [
         "Exaroton"
-      ],
-      "hex": "17AB17"
+      ]
     },
     {
       "title": "ExoticaZ.to",
@@ -845,7 +850,7 @@
       "slug": "fzj",
       "hex": "023d6b",
       "altNames": [
-        "Forschungszentrum Jülich",
+        "Forschungszentrum J\u00fclich",
         "FZJ IdP",
         "iffLogin"
       ]
@@ -887,7 +892,7 @@
       "title": "Gosuslugi",
       "slug": "gosuslugi",
       "altNames": [
-        "Госуслуги"
+        "\u0413\u043e\u0441\u0443\u0441\u043b\u0443\u0433\u0438"
       ]
     },
     {
@@ -927,6 +932,10 @@
       "title": "Habbo"
     },
     {
+      "title": "HaloPSA",
+      "slug": "halo"
+    },
+    {
       "title": "Healthchecks.io",
       "slug": "healthchecks"
     },
@@ -935,6 +944,10 @@
     },
     {
       "title": "Hornbach"
+    },
+    {
+      "title": "1984 Hosting",
+      "slug": "1984"
     },
     {
       "title": "HRDocumentBox",
@@ -950,8 +963,7 @@
       "altNames": [
         "hsa bank",
         "hsabank"
-      ],
-      "hex": "00FF85"
+      ]
     },
     {
       "title": "HTX"
@@ -964,8 +976,7 @@
     },
     {
       "title": "Hulu",
-      "slug": "hulu",
-      "hex": "1CE783"
+      "slug": "hulu"
     },
     {
       "title": "Hytale",
@@ -1042,8 +1053,7 @@
       "altNames": [
         "Indian Railway Catering and Tourism Corporation",
         "Indian Railways"
-      ],
-      "hex": "000075"
+      ]
     },
     {
       "title": "ISC2",
@@ -1072,7 +1082,7 @@
     {
       "title": "jianguoyun",
       "altNames": [
-        "坚果云"
+        "\u575a\u679c\u4e91"
       ]
     },
     {
@@ -1082,6 +1092,10 @@
         "JOYCE"
       ]
     },
+    {
+      "title": "JumpCloud",
+      "slug": "jumpcloud"
+    },  
     {
       "title": "Kagi"
     },
@@ -1164,7 +1178,7 @@
       "title": "Lark",
       "slug": "lark",
       "altNames": [
-        "飞书"
+        "\u98de\u4e66"
       ]
     },
     {
@@ -1319,7 +1333,7 @@
         "MyFigureCollection.net",
         "MFC"
       ]
-    },    
+    },
     {
       "title": "microsoft"
     },
@@ -1428,7 +1442,7 @@
       "title": "NeteaseMail",
       "slug": "netease_mail",
       "altNames": [
-        "网易邮箱",
+        "\u7f51\u6613\u90ae\u7bb1",
         "Mail.163"
       ]
     },
@@ -1462,10 +1476,9 @@
       "hex": "858585"
     },
     {
-      "title": "nintendo",
-      "hex": "ffffff",
+      "title": "Nintendo",
       "altNames": [
-        "任天堂",
+        "\u4efb\u5929\u5802",
         "Nintendo Account"
       ]
     },
@@ -1511,8 +1524,7 @@
     },
     {
       "title": "NumberBarn",
-      "slug": "numberbarn",
-      "hex": "1c5787"
+      "slug": "numberbarn"
     },
     {
       "title": "numerai"
@@ -1527,7 +1539,7 @@
       "title": "okx",
       "hex": "000000",
       "altNames": [
-        "欧易"
+        "\u6b27\u6613"
       ]
     },
     {
@@ -1585,6 +1597,10 @@
       "title": "Parsec"
     },
     {
+      "title": "Patchmon",
+      "slug": "patchmon"
+    },
+    {
       "title": "Patient Access",
       "slug": "patient_access"
     },
@@ -1621,7 +1637,7 @@
       "title": "Peking University",
       "slug": "peking_university",
       "altNames": [
-        "北京大学",
+        "\u5317\u4eac\u5927\u5b66",
         "PKU",
         "Peking Univ"
       ]
@@ -1733,7 +1749,7 @@
     {
       "title": "qiniuyun",
       "altNames": [
-        "七牛云",
+        "\u4e03\u725b\u4e91",
         "qiniu"
       ]
     },
@@ -1747,6 +1763,15 @@
       "altNames": [
         "R10",
         "r10.net"
+      ]
+    },
+    {
+      "title": "Racket Coach",
+      "slug": "racket_coach",
+      "hex": "16a34a",
+      "altNames": [
+        "racketcoach",
+        "racketcoach.app"
       ]
     },
     {
@@ -1841,8 +1866,7 @@
         "Rose Hulman",
         "Rose Hulman Institute of Technology",
         "RHIT"
-      ],
-      "hex": "800000"
+      ]
     },
     {
       "title": "RuneMate"
@@ -1850,6 +1874,13 @@
     {
       "title": "RuneScape Wiki",
       "slug": "runescape_wiki"
+    },
+    {
+      "title": "RustDesk",
+      "slug": "rustdesk",
+      "altNames": [
+      "RustDesk Connection"
+      ]
     },
     {
       "title": "Rust Language Forum",
@@ -1884,7 +1915,7 @@
         "sei",
         "sei!",
         "SEI!",
-        "Sistema Eletrônico de Informações",
+        "Sistema Eletr\u00f4nico de Informa\u00e7\u00f5es",
         "SEI/SEDE"
       ]
     },
@@ -1896,6 +1927,10 @@
     },
     {
       "title": "Shakepay"
+    },
+    {
+      "title": "Sherweb",
+      "slug": "sherweb"
     },
     {
       "title": "SimpleLogin"
@@ -1941,6 +1976,10 @@
     },
     {
       "title": "Snapchat"
+    },
+    {
+      "title": "Sony",
+      "slug": "sony"
     },
     {
       "title": "SpaceHey"
@@ -2057,7 +2096,7 @@
       "title": "tencent cloud",
       "slug": "tencent_cloud",
       "altNames": [
-        "腾讯云",
+        "\u817e\u8baf\u4e91",
         "tencentcloud"
       ]
     },
@@ -2065,7 +2104,7 @@
       "title": "tencent cloud",
       "slug": "tencent_cloud",
       "altNames": [
-        "腾讯云",
+        "\u817e\u8baf\u4e91",
         "tencentcloud"
       ]
     },
@@ -2107,7 +2146,7 @@
     {
       "title": "tianyiyun",
       "altNames": [
-        "天翼云"
+        "\u5929\u7ffc\u4e91"
       ]
     },
     {
@@ -2166,7 +2205,7 @@
       "title": "TU Dresden",
       "slug": "tu_dresden",
       "altNames": [
-        "Technische Universität Dresden",
+        "Technische Universit\u00e4t Dresden",
         "Dresden University of Technology"
       ],
       "hex": "00305d"
@@ -2261,7 +2300,7 @@
       "title": "VGN",
       "slug": "vgn",
       "altNames": [
-        "Ver­kehrs­ver­bund Groß­raum Nürn­berg"
+        "Ver\u00adkehrs\u00adver\u00adbund Gro\u00df\u00adraum N\u00fcrn\u00adberg"
       ]
     },
     {
@@ -2287,7 +2326,7 @@
     {
       "title": "volcengine",
       "altNames": [
-        "火山引擎"
+        "\u706b\u5c71\u5f15\u64ce"
       ]
     },
     {
@@ -2326,9 +2365,9 @@
       "title": "WHMCS"
     },
     {
-       "title": "Wick"
+      "title": "Wick"
     },
-    {     
+    {
       "title": "Windscribe"
     },
     {
@@ -2395,7 +2434,7 @@
       "slug": "yandex",
       "altNames": [
         "Ya",
-        "Яндекс"
+        "\u042f\u043d\u0434\u0435\u043a\u0441"
       ]
     },
     {
@@ -2421,6 +2460,10 @@
     {
       "title": "DLsite",
       "slug": "dlsite"
+    },
+    {
+      "title": "Zyxel Nebula",
+      "slug": "zyxel-nebula"
     }
   ]
 }

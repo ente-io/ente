@@ -79,7 +79,7 @@ used for Compose and quickstart for ease of use.)
 | `apps.public-memories` | Memories app base endpoint for public memory shares     | `https://memories.ente.com` |
 | `apps.cast`            | Cast app base endpoint                                  | `https://cast.ente.com`     |
 | `apps.embed-albums`    | Embed app base endpoint for embedded sharing            | `https://embed.ente.com`    |
-| `apps.accounts`        | Accounts app base endpoint (used for passkey-based 2FA) | `https://accounts.ente.io`  |
+| `apps.accounts`        | Accounts app base endpoint (used for passkey-based 2FA) | `https://accounts.ente.com` |
 
 ### Database
 

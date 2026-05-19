@@ -154,21 +154,23 @@ class _AppIconTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             children: [
-              Radio(
-                value: isSelected,
+              RadioGroup<bool>(
                 groupValue: true,
                 onChanged: (_) {
                   onSelect();
                 },
-                fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-                  if (isSelected) {
-                    return getEnteColorScheme(context).primary700;
-                  } else {
-                    return getEnteColorScheme(context).fillMuted;
-                  }
-                }),
-                visualDensity: VisualDensity.compact,
-                splashRadius: 0,
+                child: Radio<bool>(
+                  value: isSelected,
+                  fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (isSelected) {
+                      return getEnteColorScheme(context).primary700;
+                    } else {
+                      return getEnteColorScheme(context).fillMuted;
+                    }
+                  }),
+                  visualDensity: VisualDensity.compact,
+                  splashRadius: 0,
+                ),
               ),
               const SizedBox(width: 8),
               Padding(

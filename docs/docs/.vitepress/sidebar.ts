@@ -329,6 +329,10 @@ export const sidebar = [
             { text: "Introduction", link: "/auth/" },
             { text: "Features", link: "/auth/features/" },
             {
+                text: "Offline mode",
+                link: "/auth/features/offline-mode",
+            },
+            {
                 text: "FAQ",
                 collapsed: true,
                 items: [

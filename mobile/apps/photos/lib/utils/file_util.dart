@@ -206,19 +206,20 @@ Future<File?> getFileFromServer(
         forGalleryDownload: forGalleryDownload,
       );
     }
-    // ignore: unawaited_futures
-    downloadFuture.then((downloadedFile) {
-      if (!completer.isCompleted) {
-        completer.complete(downloadedFile);
-      }
-    }).catchError((error, stackTrace) {
-      if (!completer.isCompleted) {
-        completer.completeError(error, stackTrace);
-      }
-    }).whenComplete(() {
-      _fileDownloadsInProgress.remove(downloadID);
-      _progressCallbacks.remove(downloadID);
-    });
+    unawaited(
+      downloadFuture.then((downloadedFile) {
+        if (!completer.isCompleted) {
+          completer.complete(downloadedFile);
+        }
+      }).catchError((error, stackTrace) {
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      }).whenComplete(() {
+        _fileDownloadsInProgress.remove(downloadID);
+        _progressCallbacks.remove(downloadID);
+      }),
+    );
   }
   return _fileDownloadsInProgress[downloadID];
 }

@@ -38,7 +38,7 @@ public struct NetworkConfiguration {
     // Default Ente configuration
     public static let `default` = NetworkConfiguration(
         apiEndpoint: URL(string: "https://api.ente.com")!,
-        accountsEndpoint: URL(string: "https://accounts.ente.io"),
+        accountsEndpoint: URL(string: "https://accounts.ente.com"),
         castEndpoint: URL(string: "https://api.ente.com"), // Fix: Use same endpoint as web app
         publicAlbumsEndpoint: URL(string: "https://albums.ente.com"),
         familyEndpoint: URL(string: "https://family.ente.io")

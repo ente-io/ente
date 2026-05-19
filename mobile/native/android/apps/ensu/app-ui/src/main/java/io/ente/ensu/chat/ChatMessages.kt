@@ -62,12 +62,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.ente.ensu.components.BranchSwitcher
+import io.ente.ensu.components.ImageAttachmentThumbnail
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.domain.model.Attachment
+import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.MessageAuthor
 import io.ente.ensu.domain.util.formatBytes
@@ -507,13 +509,27 @@ private fun UserMessageBubble(
                 verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
             ) {
                 message.attachments.forEach { attachment ->
-                    io.ente.ensu.components.AttachmentChip(
-                        name = attachment.name,
-                        size = attachment.sizeBytes.formattedFileSize(),
-                        iconRes = HugeIcons.Attachment01Icon,
-                        isUploading = attachment.isUploading,
-                        onClick = { onOpenAttachment(attachment) }
-                    )
+                    if (attachment.type == AttachmentType.Image && attachment.localPath != null) {
+                        ImageAttachmentThumbnail(
+                            path = attachment.localPath,
+                            contentDescription = attachment.name,
+                            width = 164.dp,
+                            height = 124.dp,
+                            portraitWidth = 124.dp,
+                            portraitHeight = 164.dp,
+                            squareSize = 140.dp,
+                            isUploading = attachment.isUploading,
+                            onClick = { onOpenAttachment(attachment) }
+                        )
+                    } else {
+                        io.ente.ensu.components.AttachmentChip(
+                            name = attachment.name,
+                            size = attachment.sizeBytes.formattedFileSize(),
+                            iconRes = HugeIcons.Attachment01Icon,
+                            isUploading = attachment.isUploading,
+                            onClick = { onOpenAttachment(attachment) }
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))

@@ -7,6 +7,15 @@ description: Release notes of recent updates to Ente Auth
 
 A short summary list of changes to the Ente Auth mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v4.4.22 - May 2026
+
+- Added support for search deep links via enteauth://search.
+- Improved Proton Authenticator import, including support for encrypted exports.
+- Improved QR/image import reliability, including better cleanup of temporary picked images.
+- Reduced duplicate sync work during bulk code imports and updates.
+- Fixed desktop stability issues, including  Linux close behavior and macOS build fixes.
+- Updated app links, translations, icons, and store metadata.
+
 ## v4.4.17 - Feb 2026
 
 - New login/sign up screens

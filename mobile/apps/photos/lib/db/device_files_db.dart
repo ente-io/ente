@@ -392,6 +392,7 @@ extension DeviceFiles on FilesDB {
           WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
           (${FilesDB.columnOwnerID} IS NULL OR ${FilesDB.columnOwnerID} = ?)
           AND (${FilesDB.columnUploadedFileID} IS NOT NULL AND ${FilesDB.columnUploadedFileID} IS NOT -1)
+          AND ${FilesDB.columnUpdationTime} IS NOT NULL
           AND
           ${FilesDB.columnLocalID} IN
           (SELECT id FROM device_files where path_id = ?)

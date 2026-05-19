@@ -103,6 +103,11 @@ class SocialDataProvider {
     return SocialSyncService.instance.syncFileSocialData(collectionID, fileID);
   }
 
+  /// Syncs anonymous profiles for a collection.
+  Future<void> syncAnonProfiles(int collectionID) {
+    return SocialSyncService.instance.syncAnonProfiles(collectionID);
+  }
+
   // ============ Comment mutation methods ============
 
   /// Adds a comment via API, then stores locally.

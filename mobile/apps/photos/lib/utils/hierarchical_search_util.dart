@@ -183,8 +183,19 @@ Future<void> curateFilters(
   BuildContext context,
 ) async {
   try {
+    final l10n = Localizations.of<AppLocalizations>(
+      context,
+      AppLocalizations,
+    );
+    if (l10n == null) {
+      Logger("HierarchicalSearchUtil").warning(
+        "Skipping filter curation because localizations are unavailable",
+      );
+      return;
+    }
+
     final albumFilters = await _curateAlbumFilters(files);
-    final fileTypeFilters = _curateFileTypeFilters(files, context);
+    final fileTypeFilters = _curateFileTypeFilters(files, l10n);
     final locationFilters = await _curateLocationFilters(
       files,
     );
@@ -192,10 +203,10 @@ Future<void> curateFilters(
     final uploaderFilters = _curateUploaderFilter(files);
     final cameraFilters = _curateCameraFilters(files);
     final faceFilters = await curateFaceFilters(files);
-    final magicFilters = await curateMagicFilters(files, context);
+    final magicFilters = await curateMagicFilters(files, l10n);
     final onlyThemFilter = getOnlyThemFilter(
       searchFilterDataProvider,
-      context,
+      l10n,
     );
 
     searchFilterDataProvider.clearAndAddRecommendations(
@@ -218,7 +229,7 @@ Future<void> curateFilters(
 
 List<OnlyThemFilter> getOnlyThemFilter(
   SearchFilterDataProvider searchFilterDataProvider,
-  BuildContext context,
+  AppLocalizations l10n,
 ) {
   if (searchFilterDataProvider.initialGalleryFilter is FaceFilter &&
       searchFilterDataProvider.appliedFilters.isEmpty) {
@@ -227,7 +238,7 @@ List<OnlyThemFilter> getOnlyThemFilter(
         faceFilters: [
           searchFilterDataProvider.initialGalleryFilter as FaceFilter,
         ],
-        onlyThemString: AppLocalizations.of(context).onlyThem,
+        onlyThemString: l10n.onlyThem,
         occurrence: kMostRelevantFilter,
       ),
     ];
@@ -240,7 +251,7 @@ List<OnlyThemFilter> getOnlyThemFilter(
   } else {
     final onlyThemFilter = OnlyThemFilter(
       faceFilters: appliedFaceFilters,
-      onlyThemString: AppLocalizations.of(context).onlyThem,
+      onlyThemString: l10n.onlyThem,
       occurrence: kMostRelevantFilter,
     );
     return [onlyThemFilter];
@@ -284,7 +295,7 @@ Future<List<AlbumFilter>> _curateAlbumFilters(
 
 List<FileTypeFilter> _curateFileTypeFilters(
   List<EnteFile> files,
-  BuildContext context,
+  AppLocalizations l10n,
 ) {
   final fileTypeFilters = <FileTypeFilter>[];
   int photosCount = 0;
@@ -308,7 +319,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.image,
-        typeName: AppLocalizations.of(context).photos,
+        typeName: l10n.photos,
         occurrence: photosCount,
       ),
     );
@@ -317,7 +328,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.video,
-        typeName: AppLocalizations.of(context).videos,
+        typeName: l10n.videos,
         occurrence: videosCount,
       ),
     );
@@ -326,7 +337,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.livePhoto,
-        typeName: AppLocalizations.of(context).livePhotos,
+        typeName: l10n.livePhotos,
         occurrence: livePhotosCount,
       ),
     );
@@ -558,7 +569,7 @@ Future<List<FaceFilter>> curateFaceFilters(
 
 Future<List<MagicFilter>> curateMagicFilters(
   List<EnteFile> files,
-  BuildContext context,
+  AppLocalizations l10n,
 ) async {
   final magicFilters = <MagicFilter>[];
 
@@ -567,7 +578,7 @@ Future<List<MagicFilter>> curateMagicFilters(
   for (MagicCache magicCache in magicCaches) {
     final uploadedIDs = magicCache.fileUploadedIDs.toSet();
     final intersection = uploadedIDs.intersection(filesUploadedFileIDs);
-    final title = getLocalizedTitle(context, magicCache.title);
+    final title = getLocalizedTitleForL10n(l10n, magicCache.title);
 
     if (intersection.length > 3) {
       magicFilters.add(

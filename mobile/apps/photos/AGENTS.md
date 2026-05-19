@@ -10,7 +10,7 @@
 - Shared Flutter packages sit under `mobile/packages/`; Photos-specific Flutter plugins live in `mobile/apps/photos/plugins/`.
 
 ## Project Structure & Module Organization
-`lib/` houses the Flutter client (`core/`, `services/`, `ui/`, `db/`). Tests live in `test/` (unit & widget) and `integration_test/`. Platform shells are `android/` and `ios/`; Rust crates and bridge helpers sit in `rust/` and `rust_builder/`. Assets, fonts, and localization configs are in `assets/`, `fonts/`, `l10n.yaml`, with generated code in `lib/generated/`. Automation scripts include `scripts/` and release tooling under `fastlane/`.
+`lib/` houses the Flutter client (`core/`, `services/`, `ui/`, `db/`). Tests live in `test/` (unit & widget) and `integration_test/`. Platform shells are `android/` and `ios/`; Rust crates and bridge helpers sit in `rust/` and `rust_builder/`. Assets, fonts, and localization configs are in `assets/`, `fonts/`, `l10n.yaml`, with generated code in `lib/generated/`. Automation scripts live under `scripts/`.
 
 ## Build, Test & Development Commands
 Run `flutter pub get` after dependency edits. Launch the app with `flutter run --flavor independent`. Regenerate Rust bindings with `flutter_rust_bridge_codegen generate` before builds. Android releases rely on `flutter build apk --release --flavor independent`; for iOS run `cd ios && pod install` then `flutter build ios`.
@@ -28,7 +28,7 @@ Commits should stay concise and imperative, summarising all substantial code cha
 Regenerate Dart bindings when Rust APIs change and keep generated code in `lib/src/rust/`. Exercise Rust crates with `cargo test` during such updates. For copy edits, update `lib/l10n/intl_en.arb` then run `flutter gen-l10n` (configured by `l10n.yaml`) to refresh `lib/generated/`, and coordinate Crowdin syncs through `crowdin.yml`.
 
 ## Development Setup Requirements
-1. Install Flutter `3.32.8` with a Dart SDK between `>=3.3.0 <4.0.0`.
+1. Install Flutter `3.38.10` with a Dart SDK between `>=3.10.0 <4.0.0`.
 2. Install Rust along with `flutter_rust_bridge_codegen` via `cargo install flutter_rust_bridge_codegen`.
 3. Regenerate Rust bindings whenever native APIs shift using `flutter_rust_bridge_codegen generate`.
 

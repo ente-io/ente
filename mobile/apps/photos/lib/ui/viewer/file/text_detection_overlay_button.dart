@@ -4,7 +4,7 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:mobile_ocr/mobile_ocr.dart";
+import "package:mobile_ocr/mobile_ocr.dart" show MobileOcr;
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";

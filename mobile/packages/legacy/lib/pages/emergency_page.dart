@@ -4,6 +4,7 @@ import "package:ente_configuration/base_configuration.dart";
 import "package:ente_contacts/contacts.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/components/invite_reject_bottom_sheet.dart";
+import "package:ente_legacy/components/legacy_kit_icons.dart";
 import "package:ente_legacy/components/trusted_contact_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/models/legacy_kit_models.dart";
@@ -36,6 +37,8 @@ import "package:logging/logging.dart";
 final _logger = Logger("EmergencyPage");
 const _legacyEmptyStateDescription =
     "Keep your Ente account accessible to people you trust, even if something happens to you.";
+const _legacyKitRecoveryWarning =
+    "Someone is trying to recover your account using a legacy kit";
 
 class EmergencyPage extends StatefulWidget {
   final BaseConfiguration config;
@@ -104,6 +107,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
         final List<EmergencyContact> trustedContacts = info?.contacts ?? [];
         final hasSecondaryLegacyContent =
             legacyKits.isNotEmpty || othersTrustedContacts.isNotEmpty;
+        final hasActiveLegacyKitRecovery =
+            legacyKits.any((kit) => kit.hasActiveRecoverySession);
         final showFullEmptyState = info != null &&
             info!.recoverSessions.isEmpty &&
             trustedContacts.isEmpty &&
@@ -133,6 +138,13 @@ class _EmergencyPageState extends State<EmergencyPage> {
                   child: _buildPageTitle(colorScheme, textTheme),
                 ),
               ),
+              if (info != null && hasActiveLegacyKitRecovery)
+                const SliverPadding(
+                  padding: EdgeInsets.only(top: 20, left: 16, right: 16),
+                  sliver: SliverToBoxAdapter(
+                    child: _WarningBanner(text: _legacyKitRecoveryWarning),
+                  ),
+                ),
               if (showFullEmptyState)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -528,17 +540,16 @@ class _EmergencyPageState extends State<EmergencyPage> {
             textStyle: _legacyRowTitleStyle(
               colorScheme,
               textTheme,
-              isWarning: legacyKits[index].hasActiveRecoverySession,
             ),
             subTitleTextStyle: _legacyRowSubTitleStyle(
               colorScheme,
               textTheme,
-              isWarning: legacyKits[index].hasActiveRecoverySession,
             ),
           ),
-          leadingIconSize: 32,
-          leadingIconWidget:
-              _LegacyKitLeadingIcon(color: colorScheme.primary700),
+          leadingIconSize: 36,
+          leadingIconWidget: _LegacyKitLeadingIcon(
+            showWarningBadge: legacyKits[index].hasActiveRecoverySession,
+          ),
           menuItemColor: cardColor,
           singleBorderRadius: 20,
           trailingIcon: Icons.chevron_right,
@@ -618,23 +629,21 @@ class _EmergencyPageState extends State<EmergencyPage> {
 
   TextStyle _legacyRowTitleStyle(
     EnteColorScheme colorScheme,
-    EnteTextTheme textTheme, {
-    bool isWarning = false,
-  }) {
+    EnteTextTheme textTheme,
+  ) {
     return textTheme.small.copyWith(
-      color: isWarning ? colorScheme.warning500 : colorScheme.textBase,
-      fontWeight: isWarning ? FontWeight.w600 : FontWeight.w500,
+      color: colorScheme.textBase,
+      fontWeight: FontWeight.w500,
       height: 20 / 14,
     );
   }
 
   TextStyle _legacyRowSubTitleStyle(
     EnteColorScheme colorScheme,
-    EnteTextTheme textTheme, {
-    bool isWarning = false,
-  }) {
+    EnteTextTheme textTheme,
+  ) {
     return textTheme.mini.copyWith(
-      color: isWarning ? colorScheme.warning500 : colorScheme.textMuted,
+      color: colorScheme.textMuted,
       height: 16 / 12,
     );
   }
@@ -1040,17 +1049,36 @@ class _FullLegacyEmptyState extends StatelessWidget {
 }
 
 class _LegacyKitLeadingIcon extends StatelessWidget {
-  final Color color;
+  final bool showWarningBadge;
 
-  const _LegacyKitLeadingIcon({required this.color});
+  const _LegacyKitLeadingIcon({required this.showWarningBadge});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.insert_drive_file_outlined,
-        size: 18,
-        color: color,
+    final colorScheme = getEnteColorScheme(context);
+
+    return SizedBox.square(
+      dimension: 36,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Center(
+            child: LegacyKitRowIcon(
+              color: colorScheme.primary700,
+            ),
+          ),
+          if (showWarningBadge)
+            const Positioned(
+              left: 20,
+              top: 20,
+              child: SizedBox.square(
+                dimension: 18,
+                child: Center(
+                  child: LegacyKitAlertIcon(),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1065,21 +1093,34 @@ class _WarningBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final backgroundColor = colorScheme.isLightTheme
+        ? const Color(0xFFFAEBEB)
+        : const Color(0xFF292929);
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.warning400.withValues(alpha: 0.13),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset("assets/warning-red.png", width: 32, height: 32),
-          const SizedBox(width: 12),
+          const SizedBox(
+            width: 18,
+            height: 20,
+            child: Center(
+              child: LegacyKitAlertIcon(),
+            ),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: textTheme.bodyBold.copyWith(color: colorScheme.warning400),
+              style: textTheme.bodyBold.copyWith(
+                color: colorScheme.warning400,
+                height: 20 / 14,
+              ),
             ),
           ),
         ],
@@ -1175,7 +1216,7 @@ class _LegacyKitEmptyCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            "Split your account recovery among people you really trust",
+            "Enable people you trust to come together to recover your account",
             textAlign: TextAlign.center,
             style: textTheme.small.copyWith(
               color: colorScheme.textMuted,

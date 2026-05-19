@@ -85,9 +85,9 @@ class LocalSyncService {
       final permissionState =
           await permissionService.requestPhotoMangerPermissions();
       if (permissionState != PermissionState.authorized) {
-        _logger.severe(
-          "sync requested with invalid permission",
-          permissionState.toString(),
+        _logger.warning(
+          "Skipping local sync because Android gallery permission is "
+          "$permissionState",
         );
         return;
       }

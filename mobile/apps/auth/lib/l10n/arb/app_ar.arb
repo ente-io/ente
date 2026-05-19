@@ -491,7 +491,7 @@
   "pinLock": "قفل رقم التعريف الشخصي",
   "enterPin": "أدخل رقم التعريف الشخصي",
   "setNewPin": "عين رقم تعريف شخصي جديد",
-  "importFailureDescNew": "تعذر إعراب الملف المنتقى.",
+  "importFailureDesc": "تعذر إعراب الملف المنتقى.",
   "appLockNotEnabled": "قُفْل التطبيق غير مفعل ",
   "appLockNotEnabledDescription": "لحماية بياناتك، فعِّل قُفْل التطبيق من إعدادات الأمان ← قُفْل التطبيق",
   "authToViewPasskey": "الرجاء المصادقة لعرض مفتاح الاسترداد الخاص بك",

@@ -40,8 +40,10 @@ Future<void> showSingleFileDeleteSheet(
       );
       return;
     }
-    await deleteFilesOnDeviceOnly(context, [file]);
-    if (onFileRemoved != null && (isLocalOnly || isLocalOnlyContext)) {
+    final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
+    if (deletedFiles.isNotEmpty &&
+        onFileRemoved != null &&
+        (isLocalOnly || isLocalOnlyContext)) {
       onFileRemoved(file);
     }
     return;
@@ -105,11 +107,13 @@ Future<void> showSingleFileDeleteSheet(
         shouldSurfaceExecutionStates: false,
         isInAlert: true,
         onTap: () async {
-          await deleteFilesOnDeviceOnly(context, [file]);
+          final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
           // Remove from viewer if:
           // 1. File is local-only (no remote copy), OR
           // 2. We're in a local-only context (device folder - file disappears from this view)
-          if (onFileRemoved != null && (isLocalOnly || isLocalOnlyContext)) {
+          if (deletedFiles.isNotEmpty &&
+              onFileRemoved != null &&
+              (isLocalOnly || isLocalOnlyContext)) {
             onFileRemoved(file);
           }
         },
