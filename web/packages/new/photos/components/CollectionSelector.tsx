@@ -38,7 +38,6 @@ import {
 import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { isDevBuildAndUser } from "../services/settings";
 import { useSettingsSnapshot } from "./utils/use-snapshot";
 
 export type CollectionSelectorAction =
@@ -143,7 +142,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 490px)");
     const { isInternalUser } = useSettingsSnapshot();
-    const canUseSharedAlbumUpload = isInternalUser || isDevBuildAndUser();
+    const canUseSharedAlbumUpload = isInternalUser;
 
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] =

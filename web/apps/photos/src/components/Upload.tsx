@@ -70,7 +70,6 @@ import {
     savedNormalCollections,
     savedOrCreateUserUncategorizedCollection,
 } from "ente-new/photos/services/collection";
-import { isDevBuildAndUser } from "ente-new/photos/services/settings";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
@@ -181,7 +180,7 @@ export const Upload: React.FC<UploadProps> = ({
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showNotification, watchFolderView } = usePhotosAppContext();
     const { isInternalUser } = useSettingsSnapshot();
-    const canUseSharedAlbumUpload = isInternalUser || isDevBuildAndUser();
+    const canUseSharedAlbumUpload = isInternalUser;
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [
