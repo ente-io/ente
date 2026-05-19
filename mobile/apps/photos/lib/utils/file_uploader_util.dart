@@ -147,7 +147,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
       InvalidReason.sourceFileMissing,
     );
   }
-  if (parseExif) {
+  if (parseExif && shouldReadExif(file)) {
     exifData = await tryExifFromFile(sourceFile);
     if (exifData != null) {
       cameraMake = _extractPrintableExifValue(exifData['Image Make']);

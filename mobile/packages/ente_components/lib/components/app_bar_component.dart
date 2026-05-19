@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
@@ -19,12 +20,15 @@ class AppBarComponent extends StatefulWidget {
     super.key,
     required this.title,
     required this.slivers,
+    this.onTitleTap,
+    this.onTitleDoubleTap,
+    this.onTitleLongPress,
     this.subtitle,
     this.leading,
     this.backButton,
     this.onBack,
     this.actions = const [],
-    this.expandedHeight = 116,
+    this.expandedHeight,
     this.collapsedHeight = 56,
     this.horizontalPadding = Spacing.lg,
     this.backgroundColor,
@@ -34,12 +38,15 @@ class AppBarComponent extends StatefulWidget {
   });
 
   final String title;
+  final VoidCallback? onTitleTap;
+  final VoidCallback? onTitleDoubleTap;
+  final VoidCallback? onTitleLongPress;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
   final VoidCallback? onBack;
   final List<Widget> actions;
-  final double expandedHeight;
+  final double? expandedHeight;
   final double collapsedHeight;
   final double horizontalPadding;
   final Color? backgroundColor;
@@ -175,6 +182,7 @@ class _AppBarComponentState extends State<AppBarComponent> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.componentColors;
     final metrics = _resolveHeaderAppBarMetrics(
       context,
       subtitle: widget.subtitle,
@@ -195,6 +203,9 @@ class _AppBarComponentState extends State<AppBarComponent> {
         slivers: [
           SliverAppBarComponent(
             title: widget.title,
+            onTitleTap: widget.onTitleTap,
+            onTitleDoubleTap: widget.onTitleDoubleTap,
+            onTitleLongPress: widget.onTitleLongPress,
             subtitle: widget.subtitle,
             leading: widget.leading,
             backButton: widget.backButton,
@@ -203,7 +214,7 @@ class _AppBarComponentState extends State<AppBarComponent> {
             expandedHeight: widget.expandedHeight,
             collapsedHeight: widget.collapsedHeight,
             horizontalPadding: widget.horizontalPadding,
-            backgroundColor: widget.backgroundColor,
+            backgroundColor: widget.backgroundColor ?? colors.backgroundBase,
             showExpandedBackButton: widget.showExpandedBackButton,
           ),
           ...widget.slivers,
@@ -244,12 +255,15 @@ class SliverAppBarComponent extends StatelessWidget {
   const SliverAppBarComponent({
     super.key,
     required this.title,
+    this.onTitleTap,
+    this.onTitleDoubleTap,
+    this.onTitleLongPress,
     this.subtitle,
     this.leading,
     this.backButton,
     this.onBack,
     this.actions = const [],
-    this.expandedHeight = 116,
+    this.expandedHeight,
     this.collapsedHeight = 56,
     this.horizontalPadding = Spacing.lg,
     this.backgroundColor,
@@ -257,12 +271,15 @@ class SliverAppBarComponent extends StatelessWidget {
   });
 
   final String title;
+  final VoidCallback? onTitleTap;
+  final VoidCallback? onTitleDoubleTap;
+  final VoidCallback? onTitleLongPress;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
   final VoidCallback? onBack;
   final List<Widget> actions;
-  final double expandedHeight;
+  final double? expandedHeight;
   final double collapsedHeight;
   final double horizontalPadding;
   final Color? backgroundColor;
@@ -270,6 +287,7 @@ class SliverAppBarComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.componentColors;
     final metrics = _resolveHeaderAppBarMetrics(
       context,
       subtitle: subtitle,
@@ -281,6 +299,9 @@ class SliverAppBarComponent extends StatelessWidget {
       pinned: true,
       delegate: _HeaderAppBarDelegate(
         title: title,
+        onTitleTap: onTitleTap,
+        onTitleDoubleTap: onTitleDoubleTap,
+        onTitleLongPress: onTitleLongPress,
         subtitle: subtitle,
         leading: leading,
         backButton: backButton,
@@ -291,6 +312,7 @@ class SliverAppBarComponent extends StatelessWidget {
         horizontalPadding: horizontalPadding,
         topPadding: MediaQuery.paddingOf(context).top,
         backgroundColor: backgroundColor,
+        colors: colors,
         showExpandedBackButton: showExpandedBackButton,
         expandedTitleLineHeight: metrics.expandedTitleLineHeight,
         collapsedTitleLineHeight: metrics.collapsedTitleLineHeight,
@@ -303,6 +325,9 @@ class SliverAppBarComponent extends StatelessWidget {
 class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   const _HeaderAppBarDelegate({
     required this.title,
+    required this.onTitleTap,
+    required this.onTitleDoubleTap,
+    required this.onTitleLongPress,
     required this.subtitle,
     required this.leading,
     required this.backButton,
@@ -313,6 +338,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.horizontalPadding,
     required this.topPadding,
     required this.backgroundColor,
+    required this.colors,
     required this.showExpandedBackButton,
     required this.expandedTitleLineHeight,
     required this.collapsedTitleLineHeight,
@@ -320,6 +346,9 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   });
 
   final String title;
+  final VoidCallback? onTitleTap;
+  final VoidCallback? onTitleDoubleTap;
+  final VoidCallback? onTitleLongPress;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
@@ -330,6 +359,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double horizontalPadding;
   final double topPadding;
   final Color? backgroundColor;
+  final ColorTokens colors;
   final bool showExpandedBackButton;
   final double expandedTitleLineHeight;
   final double collapsedTitleLineHeight;
@@ -347,7 +377,6 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    final colors = context.componentColors;
     final scrollRange = maxExtent - minExtent;
     final progress = scrollRange == 0
         ? 1.0
@@ -368,7 +397,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
         _expandedContentTop +
         _centerOffset(expandedTextBlockHeight, _headerControlSize);
     final actionsTop = lerpDouble(
-      _expandedContentTop,
+      leadingTop,
       collapsedControlTop,
       titleProgress,
     )!;
@@ -423,6 +452,9 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
               ),
             _MovingHeaderTitle(
               title: title,
+              onTap: onTitleTap,
+              onDoubleTap: onTitleDoubleTap,
+              onLongPress: onTitleLongPress,
               top: titleTop,
               left: titleLeft,
               right: titleRight,
@@ -475,6 +507,9 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _HeaderAppBarDelegate oldDelegate) {
     return oldDelegate.title != title ||
+        oldDelegate.onTitleTap != onTitleTap ||
+        oldDelegate.onTitleDoubleTap != onTitleDoubleTap ||
+        oldDelegate.onTitleLongPress != onTitleLongPress ||
         oldDelegate.subtitle != subtitle ||
         oldDelegate.leading != leading ||
         oldDelegate.backButton != backButton ||
@@ -485,6 +520,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.horizontalPadding != horizontalPadding ||
         oldDelegate.topPadding != topPadding ||
         oldDelegate.backgroundColor != backgroundColor ||
+        oldDelegate.colors != colors ||
         oldDelegate.showExpandedBackButton != showExpandedBackButton ||
         oldDelegate.expandedTitleLineHeight != expandedTitleLineHeight ||
         oldDelegate.collapsedTitleLineHeight != collapsedTitleLineHeight ||
@@ -609,7 +645,10 @@ class _HeaderAppBarBackButton extends StatelessWidget {
 const _headerControlSize = 38.0;
 const _headerControlGap = Spacing.sm;
 const _defaultBackIconSize = IconSizes.medium;
+const _titleOnlyExpandedHeight = 92.0;
+const _subtitleExpandedHeight = 110.0;
 const _expandedContentTop = 48.0;
+const _expandedContentBottomGap = Spacing.lg;
 const _subtitleGap = 2.0;
 const _headerSnapTolerance = 1.0;
 const _headerSnapDuration = Duration(milliseconds: 160);
@@ -635,7 +674,7 @@ class _HeaderAppBarMetrics {
 _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
   BuildContext context, {
   required String? subtitle,
-  required double expandedHeight,
+  required double? expandedHeight,
   required double collapsedHeight,
 }) {
   final textScaler = MediaQuery.textScalerOf(context);
@@ -645,6 +684,9 @@ _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
   );
   final collapsedTitleLineHeight = _scaledLineHeight(textScaler, TextStyles.h2);
   final subtitleLineHeight = _scaledLineHeight(textScaler, TextStyles.mini);
+  final defaultExpandedHeight = subtitle == null
+      ? _titleOnlyExpandedHeight
+      : _subtitleExpandedHeight;
   final effectiveCollapsedHeight = _maxDouble(
     collapsedHeight,
     _maxDouble(_headerControlSize, collapsedTitleLineHeight),
@@ -653,9 +695,10 @@ _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
       expandedTitleLineHeight +
       (subtitle == null ? 0 : _subtitleGap + subtitleLineHeight);
   final effectiveExpandedHeight = _maxDouble(
-    expandedHeight,
+    expandedHeight ?? defaultExpandedHeight,
     _expandedContentTop +
-        _maxDouble(expandedTextBlockHeight, _headerControlSize),
+        _maxDouble(expandedTextBlockHeight, _headerControlSize) +
+        _expandedContentBottomGap,
   );
 
   return _HeaderAppBarMetrics(
@@ -699,6 +742,9 @@ double _actionsWidth(int actionCount) {
 class _MovingHeaderTitle extends StatelessWidget {
   const _MovingHeaderTitle({
     required this.title,
+    required this.onTap,
+    required this.onDoubleTap,
+    required this.onLongPress,
     required this.top,
     required this.left,
     required this.right,
@@ -706,6 +752,9 @@ class _MovingHeaderTitle extends StatelessWidget {
   });
 
   final String title;
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
   final double top;
   final double left;
   final double right;
@@ -714,23 +763,30 @@ class _MovingHeaderTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
+    final titleText = Text(
+      title,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle.lerp(
+        TextStyles.h1Bold,
+        TextStyles.h2,
+        progress,
+      )!.copyWith(color: colors.textBase),
+    );
 
     return Positioned(
       left: left,
       right: right,
       top: top,
-      child: IgnorePointer(
-        child: Text(
-          title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle.lerp(
-            TextStyles.h1Bold,
-            TextStyles.h2,
-            progress,
-          )!.copyWith(color: colors.textBase),
-        ),
-      ),
+      child: onTap == null && onDoubleTap == null && onLongPress == null
+          ? IgnorePointer(child: titleText)
+          : GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onTap,
+              onDoubleTap: onDoubleTap,
+              onLongPress: onLongPress,
+              child: titleText,
+            ),
     );
   }
 }

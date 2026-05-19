@@ -1,13 +1,9 @@
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/divider_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/utils/lock_screen_settings.dart";
-import "package:photos/utils/separators_util.dart";
 
 class LockScreenAutoLock extends StatefulWidget {
   const LockScreenAutoLock({super.key});
@@ -19,43 +15,9 @@ class LockScreenAutoLock extends StatefulWidget {
 class _LockScreenAutoLockState extends State<LockScreenAutoLock> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: AppLocalizations.of(context).autoLock,
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 20,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                            child: AutoLockItems(),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
-          ),
-        ],
-      ),
+    return SettingsPageScaffold(
+      title: AppLocalizations.of(context).autoLock,
+      children: const [AutoLockItems()],
     );
   }
 }
@@ -69,10 +31,10 @@ class AutoLockItems extends StatefulWidget {
 
 class _AutoLockItemsState extends State<AutoLockItems> {
   final autoLockDurations = LockScreenSettings.autoLockDurations;
-  final autoLockTimeInMilliseconds =
-      LockScreenSettings.instance.getAutoLockTime();
-  List<Widget> items = [];
+  final autoLockTimeInMilliseconds = LockScreenSettings.instance
+      .getAutoLockTime();
   late Duration currentAutoLockTime;
+
   @override
   void initState() {
     super.initState();
@@ -86,45 +48,35 @@ class _AutoLockItemsState extends State<AutoLockItems> {
 
   @override
   Widget build(BuildContext context) {
-    items.clear();
-    for (Duration autoLockDuration in autoLockDurations) {
-      items.add(
-        _menuItemForPicker(autoLockDuration),
-      );
-    }
-    items = addSeparators(
-      items,
-      DividerWidget(
-        dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
-      ),
-    );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: items,
+    return MenuGroupComponent(
+      items: [
+        for (final autoLockDuration in autoLockDurations)
+          _menuItemForPicker(autoLockDuration),
+      ],
     );
   }
 
-  Widget _menuItemForPicker(Duration autoLockTime) {
-    return MenuItemWidget(
+  MenuComponent _menuItemForPicker(Duration autoLockTime) {
+    final colors = context.componentColors;
+    return MenuComponent(
       key: ValueKey(autoLockTime),
-      menuItemColor: getEnteColorScheme(context).fillFaint,
-      captionedTextWidget: CaptionedTextWidget(
-        title: _formatTime(autoLockTime),
-      ),
-      trailingIcon: currentAutoLockTime == autoLockTime ? Icons.check : null,
-      alignCaptionedTextToLeft: true,
-      isTopBorderRadiusRemoved: true,
-      isBottomBorderRadiusRemoved: true,
+      title: _formatTime(autoLockTime),
+      trailing: currentAutoLockTime == autoLockTime
+          ? HugeIcon(
+              icon: HugeIcons.strokeRoundedTick02,
+              color: colors.primary,
+              size: IconSizes.medium,
+            )
+          : null,
       showOnlyLoadingState: true,
       onTap: () async {
-        await LockScreenSettings.instance.setAutoLockTime(autoLockTime).then(
-              (value) => {
-                setState(() {
-                  currentAutoLockTime = autoLockTime;
-                }),
-              },
-            );
+        await LockScreenSettings.instance.setAutoLockTime(autoLockTime);
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          currentAutoLockTime = autoLockTime;
+        });
       },
     );
   }

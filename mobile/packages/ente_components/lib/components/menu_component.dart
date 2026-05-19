@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:ente_components/models/component_execution_state.dart';
 import 'package:ente_components/src/components/menu_component_surface_style.dart';
@@ -16,6 +17,8 @@ const double _leadingSlotSize = 36;
 const double _trailingSlotSize = 36;
 const Duration _loadingDelay = Duration(milliseconds: 300);
 const Duration _successDisplayDuration = Duration(seconds: 1);
+const int _maxTitleLines = 2;
+const int _maxCombinedTextLines = 3;
 
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=4055-18734&m=dev
 /// Section: List items / Menu Item
@@ -36,7 +39,7 @@ class MenuComponent extends StatefulWidget {
     this.shouldSurfaceExecutionStates = false,
     this.shouldShowSuccessConfirmation = false,
     this.titleMaxLines = 2,
-    this.subtitleMaxLines = 1,
+    this.subtitleMaxLines = 2,
     this.titleColor,
     this.iconColor,
   });
@@ -138,30 +141,40 @@ class _MenuComponentState extends State<MenuComponent> {
                         const SizedBox(width: Spacing.md),
                       ],
                       Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.title,
-                              maxLines: widget.titleMaxLines,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyles.body.copyWith(
-                                color: widget.titleColor ?? colors.textBase,
-                              ),
-                            ),
-                            if (widget.subtitle != null) ...[
-                              const SizedBox(height: Spacing.xs),
-                              Text(
-                                widget.subtitle!,
-                                maxLines: widget.subtitleMaxLines,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyles.mini.copyWith(
-                                  color: colors.textLight,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final titleMaxLines = _effectiveTitleMaxLines;
+                            final subtitleMaxLines = _effectiveSubtitleMaxLines(
+                              context,
+                              constraints.maxWidth,
+                              titleMaxLines,
+                            );
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.title,
+                                  maxLines: titleMaxLines,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyles.body.copyWith(
+                                    color: widget.titleColor ?? colors.textBase,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ],
+                                if (widget.subtitle != null) ...[
+                                  const SizedBox(height: Spacing.xs),
+                                  Text(
+                                    widget.subtitle!,
+                                    maxLines: subtitleMaxLines,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyles.mini.copyWith(
+                                      color: colors.textLight,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            );
+                          },
                         ),
                       ),
                       if (shouldReserveTrailingSlot) ...[
@@ -213,6 +226,54 @@ class _MenuComponentState extends State<MenuComponent> {
   }
 
   bool get _isBusy => _executionState == ComponentExecutionState.inProgress;
+
+  int get _effectiveTitleMaxLines {
+    return math.min(_positiveLineCount(widget.titleMaxLines), _maxTitleLines);
+  }
+
+  int _effectiveSubtitleMaxLines(
+    BuildContext context,
+    double maxWidth,
+    int titleMaxLines,
+  ) {
+    if (widget.subtitle == null) {
+      return 0;
+    }
+    final requestedSubtitleLines = _positiveLineCount(widget.subtitleMaxLines);
+    final titleLineCount = _measuredTitleLineCount(
+      context,
+      maxWidth,
+      titleMaxLines,
+    );
+    final remainingLines = _maxCombinedTextLines - titleLineCount;
+    return math.min(requestedSubtitleLines, math.max(1, remainingLines));
+  }
+
+  int _measuredTitleLineCount(
+    BuildContext context,
+    double maxWidth,
+    int titleMaxLines,
+  ) {
+    if (!maxWidth.isFinite || maxWidth <= 0) {
+      return titleMaxLines;
+    }
+
+    final painter = TextPainter(
+      text: TextSpan(text: widget.title, style: TextStyles.body),
+      maxLines: titleMaxLines,
+      textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+      locale: Localizations.maybeLocaleOf(context),
+    )..layout(maxWidth: maxWidth);
+    return math.max(
+      1,
+      math.min(titleMaxLines, painter.computeLineMetrics().length),
+    );
+  }
+
+  int _positiveLineCount(int value) {
+    return math.max(1, value);
+  }
 
   void _handleDoubleTap() {
     final onDoubleTap = widget.onDoubleTap;

@@ -676,6 +676,12 @@ interface UploadContext {
      */
     isCFUploadProxyDisabled: boolean;
     /**
+     * If true, duplicate files already owned by the user are reused without
+     * being added to the current upload collection.
+     * This is used when the current collection is only an upload staging target.
+     */
+    skipDuplicateAddToUploadCollection?: boolean;
+    /**
      * If present, then the upload is happening in the context of the public
      * albums app and these are the credentials that should be used for
      * performing API requests (instead of trying to obtain and use the
@@ -724,7 +730,8 @@ export const upload = async (
     worker: CryptoWorker,
     uploadContext: UploadContext,
 ): Promise<UploadResult> => {
-    const { abortIfCancelled } = uploadContext;
+    const { abortIfCancelled, skipDuplicateAddToUploadCollection } =
+        uploadContext;
 
     log.info(`Upload ${fileName} | start`);
     try {
@@ -784,15 +791,25 @@ export const upload = async (
             const matchInSameCollection = matches.find(
                 (f) => f.collectionID == collection.id,
             );
-            if (matchInSameCollection) {
+            if (matchInSameCollection && !skipDuplicateAddToUploadCollection) {
                 return { type: "alreadyUploaded", file: matchInSameCollection };
-            } else {
-                // Any of the matching files can be used to add a symlink.
-                const symlink = Object.assign({}, anyMatch);
-                symlink.collectionID = collection.id;
-                await addToCollection(collection, [symlink]);
-                return { type: "addedSymlink", file: symlink };
             }
+
+            if (skipDuplicateAddToUploadCollection) {
+                // The real target collection is updated after the upload batch.
+                // Report duplicate reuse as a success without creating a staging
+                // collection symlink.
+                return {
+                    type: "addedSymlink",
+                    file: matchInSameCollection ?? anyMatch,
+                };
+            }
+
+            // Any of the matching files can be used to add a symlink.
+            const symlink = Object.assign({}, anyMatch);
+            symlink.collectionID = collection.id;
+            await addToCollection(collection, [symlink]);
+            return { type: "addedSymlink", file: symlink };
         }
 
         abortIfCancelled();

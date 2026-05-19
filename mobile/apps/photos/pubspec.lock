@@ -594,6 +594,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_components:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_components"
+      relative: true
+    source: path
+    version: "0.1.0"
   ente_contacts:
     dependency: "direct main"
     description:

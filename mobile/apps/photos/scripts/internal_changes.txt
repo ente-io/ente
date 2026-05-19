@@ -1,4 +1,5 @@
 Latest changes:
+- Neeraj: Skip image EXIF parsing for videos
 - Neeraj: Fix iOS crash when playing Pixel Long Shot (.LS) videos
 - Neeraj: Fix Android video preview/export generation by restoring ffmpeg x264 support
 - Neeraj: Fix video edit delete navigation

@@ -70,12 +70,13 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
         },
         onDone: () {
           Future.delayed(
-              const Duration(milliseconds: _surfaceNewResultsInterval + 20),
-              () {
-            if (_resultsCount == 0) {
-              IndexOfStackNotifier().searchState = SearchState.empty;
-            }
-          });
+            const Duration(milliseconds: _surfaceNewResultsInterval + 20),
+            () {
+              if (_resultsCount == 0) {
+                IndexOfStackNotifier().searchState = SearchState.empty;
+              }
+            },
+          );
           SearchWidgetState.isLoading.value = false;
         },
       );
@@ -99,15 +100,17 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   ///updates the UI.
   void generateResultWidgetsInIntervalsFromQueue() {
     timer = Timer.periodic(
-        const Duration(milliseconds: _surfaceNewResultsInterval), (timer) {
-      if (queueOfSearchResults.isNotEmpty) {
-        for (List<SearchResult> event in queueOfSearchResults) {
-          _addResultsToSections(event);
+      const Duration(milliseconds: _surfaceNewResultsInterval),
+      (timer) {
+        if (queueOfSearchResults.isNotEmpty) {
+          for (List<SearchResult> event in queueOfSearchResults) {
+            _addResultsToSections(event);
+          }
+          queueOfSearchResults.clear();
+          setState(() {});
         }
-        queueOfSearchResults.clear();
-        setState(() {});
-      }
-    });
+      },
+    );
   }
 
   @override
@@ -203,11 +206,9 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
 
 class SearchResultsWidgetGenerator extends StatelessWidget {
   final SearchResult result;
-  final BorderRadius borderRadius;
   final bool showTypeLabel;
   const SearchResultsWidgetGenerator(
     this.result, {
-    this.borderRadius = BorderRadius.zero,
     this.showTypeLabel = true,
     super.key,
   });
@@ -221,7 +222,6 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
         resultCount: CollectionsService.instance.getFileCount(
           albumSearchResult.collectionWithThumbnail.collection,
         ),
-        borderRadius: borderRadius,
         showTypeLabel: showTypeLabel,
         onResultTap: () => routeToPage(
           context,
@@ -236,7 +236,6 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
       return SearchResultWidget(
         result,
         resultCount: Future.value(deviceResult.deviceCollection.count),
-        borderRadius: borderRadius,
         showTypeLabel: showTypeLabel,
         onResultTap: () => routeToPage(
           context,
@@ -246,7 +245,6 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
     } else if (result is GenericSearchResult) {
       return SearchResultWidget(
         result,
-        borderRadius: borderRadius,
         showTypeLabel: showTypeLabel,
         onResultTap: (result as GenericSearchResult).onResultTap != null
             ? () => (result as GenericSearchResult).onResultTap!(context)
@@ -370,11 +368,11 @@ class _SearchResultsSectionWidget extends StatelessWidget {
           color: colorScheme.backgroundElevated,
           borderRadius: radius,
           clipBehavior: Clip.antiAlias,
-          child: SearchResultsWidgetGenerator(
-            results[i],
-            borderRadius: radius,
-            showTypeLabel: showTypeLabel,
-          ).animate().fadeIn(
+          child:
+              SearchResultsWidgetGenerator(
+                results[i],
+                showTypeLabel: showTypeLabel,
+              ).animate().fadeIn(
                 duration: const Duration(milliseconds: 80),
                 curve: Curves.easeIn,
               ),
