@@ -1,13 +1,14 @@
-import "package:dotted_border/dotted_border.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/result/search_thumbnail_widget.dart";
@@ -34,11 +35,13 @@ class SearchableItemWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     final result = searchResult;
-    final bool isCluster = result.type() == ResultType.faces &&
+    final bool isCluster =
+        result.type() == ResultType.faces &&
         result is GenericSearchResult &&
         result.params.containsKey(kClusterParamId);
 
-    return GestureDetector(
+    return ThumbnailListItem(
+      backgroundColor: thumbnailListItemBackgroundColor(context),
       onTap: () {
         RecentSearches().add(searchResult.name());
         if (onResultTap != null) {
@@ -63,88 +66,52 @@ class SearchableItemWidget extends StatelessWidget {
           }
         }
       },
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.strokeFainter),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(6),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex: 6,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: searchResult.type() == ResultType.shared
-                        ? ContactSearchThumbnailWidget(
-                            heroTagPrefix,
-                            searchResult: searchResult as GenericSearchResult,
-                          )
-                        : SearchThumbnailWidget(
-                            searchResult.previewThumbnail(),
-                            heroTagPrefix,
-                            searchResult: searchResult,
-                          ),
-                  ),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          isCluster
-                              ? const SizedBox.shrink()
-                              : Text(
-                                  searchResult.name(),
-                                  style: searchResult.type() ==
-                                          ResultType.locationSuggestion
-                                      ? textTheme.bodyFaint
-                                      : textTheme.body,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                          const SizedBox(
-                            height: 2,
-                          ),
-                          FutureBuilder<int>(
-                            future: resultCount ??
-                                Future.value(searchResult.resultFiles().length),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData && snapshot.data! > 0) {
-                                final noOfMemories = snapshot.data;
-                                final String suffix =
-                                    noOfMemories! > 1 ? " memories" : " memory";
-
-                                return Text(
-                                  noOfMemories.toString() + suffix,
-                                  style: textTheme.smallMuted,
-                                );
-                              } else {
-                                return const SizedBox.shrink();
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      leading: searchResult.type() == ResultType.shared
+          ? ContactSearchThumbnailWidget(
+              heroTagPrefix,
+              searchResult: searchResult as GenericSearchResult,
+              size: ThumbnailListItem.defaultLeadingSize,
+              borderRadius: ThumbnailListItem.defaultLeadingRadius,
+            )
+          : SearchThumbnailWidget(
+              searchResult.previewThumbnail(),
+              heroTagPrefix,
+              searchResult: searchResult,
+              size: ThumbnailListItem.defaultLeadingSize,
+              borderRadius: ThumbnailListItem.defaultLeadingRadius,
             ),
-            Flexible(
-              flex: 1,
-              child: IconButtonWidget(
-                icon: Icons.chevron_right_outlined,
-                iconButtonType: IconButtonType.secondary,
-                iconColor: colorScheme.blurStrokePressed,
-              ),
+      title: isCluster
+          ? const SizedBox.shrink()
+          : Text(
+              searchResult.name(),
+              style: searchResult.type() == ResultType.locationSuggestion
+                  ? textTheme.bodyFaint
+                  : textTheme.body,
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
+      subtitle: FutureBuilder<int>(
+        future: resultCount ?? Future.value(searchResult.resultFiles().length),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data! > 0) {
+            final noOfMemories = snapshot.data!;
+            return Text(
+              AppLocalizations.of(context).memoryCount(
+                count: noOfMemories,
+                formattedCount: NumberFormat().format(noOfMemories),
+              ),
+              style: textTheme.smallMuted,
+              overflow: TextOverflow.ellipsis,
+            );
+          } else {
+            return const SizedBox.shrink();
+          }
+        },
+      ),
+      trailing: Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: Icon(
+          Icons.chevron_right_outlined,
+          color: colorScheme.blurStrokePressed,
         ),
       ),
     );
@@ -163,40 +130,24 @@ class SearchableItemPlaceholder extends StatelessWidget {
 
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    return Padding(
-      padding: const EdgeInsets.only(right: 1),
-      child: GestureDetector(
-        onTap: sectionType.ctaOnTap(context),
-        child: DottedBorder(
-          strokeWidth: 2,
-          borderType: BorderType.RRect,
-          radius: const Radius.circular(4),
-          padding: EdgeInsets.zero,
-          dashPattern: const [4, 4],
-          color: colorScheme.strokeFainter,
-          child: Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  borderRadius:
-                      const BorderRadius.horizontal(left: Radius.circular(4)),
-                  color: colorScheme.fillFaint,
-                ),
-                child: Icon(
-                  sectionType.getCTAIcon(),
-                  color: colorScheme.strokeMuted,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                sectionType.getCTAText(context),
-                style: textTheme.body,
-              ),
-            ],
+    return ThumbnailListItem(
+      backgroundColor: thumbnailListItemBackgroundColor(context),
+      onTap: sectionType.ctaOnTap(context),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(
+          ThumbnailListItem.defaultLeadingRadius,
+        ),
+        child: Container(
+          color: colorScheme.fillFaint,
+          child: Icon(
+            sectionType.getCTAIcon(),
+            color: colorScheme.strokeMuted,
           ),
         ),
+      ),
+      title: Text(
+        sectionType.getCTAText(context),
+        style: textTheme.body,
       ),
     );
   }

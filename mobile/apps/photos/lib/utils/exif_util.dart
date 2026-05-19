@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/services/location_service.dart";
@@ -26,8 +27,15 @@ const kEmptyExifDateTime = "0000:00:00 00:00:00";
 
 final _logger = Logger("ExifUtil");
 
+bool shouldReadExif(EnteFile file) {
+  return file.fileType == FileType.image || file.fileType == FileType.livePhoto;
+}
+
 Future<Map<String, IfdTag>> getExif(EnteFile file) async {
   try {
+    if (!shouldReadExif(file)) {
+      return <String, IfdTag>{};
+    }
     final File? originFile = await getFile(file, isOrigin: true);
     if (originFile == null) {
       throw Exception("Failed to fetch origin file");

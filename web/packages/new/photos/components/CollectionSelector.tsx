@@ -38,6 +38,7 @@ import {
 import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSettingsSnapshot } from "./utils/use-snapshot";
 
 export type CollectionSelectorAction =
     | "upload"
@@ -140,6 +141,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
 }) => {
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 490px)");
+    const { isInternalUser } = useSettingsSnapshot();
+    const canUseSharedAlbumUpload = isInternalUser;
 
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] =
@@ -166,9 +169,11 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 } else if (attributes.action == "add") {
                     return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
+                    const canUploadToCollection = canUseSharedAlbumUpload
+                        ? canAddToCollection(cs)
+                        : canMoveToCollection(cs);
                     return (
-                        (canMoveToCollection(cs) ||
-                            cs.type == "uncategorized") &&
+                        (canUploadToCollection || cs.type == "uncategorized") &&
                         cs.type != "userFavorites"
                     );
                 } else if (attributes.action == "restore") {
@@ -201,7 +206,14 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         setFilteredCollections(collections);
-    }, [collectionSummaries, attributes, open, onClose, sortBy]);
+    }, [
+        collectionSummaries,
+        attributes,
+        open,
+        onClose,
+        sortBy,
+        canUseSharedAlbumUpload,
+    ]);
 
     const searchFilteredCollections = useMemo(() => {
         if (!searchTerm.trim()) {
