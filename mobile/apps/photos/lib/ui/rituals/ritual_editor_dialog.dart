@@ -13,6 +13,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/column_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
+import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 
@@ -81,29 +82,33 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                       builder: (context, setState) {
                         final bool canSave =
                             controller.text.trim().isNotEmpty &&
-                                selectedAlbumId != null;
-                        final bool allDaysOff =
-                            days.every((selected) => !selected);
+                            selectedAlbumId != null;
+                        final bool allDaysOff = days.every(
+                          (selected) => !selected,
+                        );
                         final widgetBackgroundColor =
                             colorScheme.backgroundElevated2;
                         final segmentedBackgroundColor = colorScheme.fillFaint;
-                        final localizations =
-                            MaterialLocalizations.of(dialogContext);
-                        final bool use24HourFormat =
-                            MediaQuery.of(context).alwaysUse24HourFormat;
+                        final localizations = MaterialLocalizations.of(
+                          dialogContext,
+                        );
+                        final bool use24HourFormat = MediaQuery.of(
+                          context,
+                        ).alwaysUse24HourFormat;
                         final int hour12 = selectedTime.hourOfPeriod == 0
                             ? 12
                             : selectedTime.hourOfPeriod;
                         final String hourText = use24HourFormat
                             ? selectedTime.hour.toString().padLeft(2, "0")
                             : hour12.toString();
-                        final String minuteText =
-                            selectedTime.minute.toString().padLeft(2, "0");
+                        final String minuteText = selectedTime.minute
+                            .toString()
+                            .padLeft(2, "0");
                         final String? periodText = use24HourFormat
                             ? null
                             : (selectedTime.period == DayPeriod.am
-                                ? localizations.anteMeridiemAbbreviation
-                                : localizations.postMeridiemAbbreviation);
+                                  ? localizations.anteMeridiemAbbreviation
+                                  : localizations.postMeridiemAbbreviation);
                         final timeTextStyle = textTheme.large.copyWith(
                           fontWeight: FontWeight.w400,
                         );
@@ -200,9 +205,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                                 onTap: () async {
                                                   final emoji =
                                                       await _pickEmoji(
-                                                    context,
-                                                    selectedEmoji,
-                                                  );
+                                                        context,
+                                                        selectedEmoji,
+                                                      );
                                                   if (emoji != null) {
                                                     setState(() {
                                                       selectedEmoji = emoji;
@@ -241,9 +246,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                             fillColor: widgetBackgroundColor,
                                             contentPadding:
                                                 const EdgeInsets.symmetric(
-                                              horizontal: 14,
-                                              vertical: 14,
-                                            ),
+                                                  horizontal: 14,
+                                                  vertical: 14,
+                                                ),
                                             border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(18),
@@ -264,7 +269,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                             if (value == null ||
                                                 value.trim().isEmpty) {
                                               return context
-                                                  .l10n.ritualEnterDescription;
+                                                  .l10n
+                                                  .ritualEnterDescription;
                                             }
                                             return null;
                                           },
@@ -297,18 +303,20 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                         double circleSize = maxCircleSize;
                                         double spacing =
                                             (availableWidth - circleSize * 7) /
-                                                8;
+                                            8;
 
                                         if (spacing < minSpacing) {
                                           spacing = minSpacing;
-                                          circleSize = ((availableWidth -
-                                                      (spacing * 8)) /
-                                                  7)
-                                              .clamp(
-                                            minCircleSize,
-                                            maxCircleSize,
-                                          );
-                                          spacing = (availableWidth -
+                                          circleSize =
+                                              ((availableWidth -
+                                                          (spacing * 8)) /
+                                                      7)
+                                                  .clamp(
+                                                    minCircleSize,
+                                                    maxCircleSize,
+                                                  );
+                                          spacing =
+                                              (availableWidth -
                                                   circleSize * 7) /
                                               8;
                                         }
@@ -316,9 +324,11 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                         final children = <Widget>[
                                           SizedBox(width: spacing),
                                         ];
-                                        for (int index = 0;
-                                            index < days.length;
-                                            index++) {
+                                        for (
+                                          int index = 0;
+                                          index < days.length;
+                                          index++
+                                        ) {
                                           children.add(
                                             _DayCircle(
                                               label: _weekLabel(context, index),
@@ -332,8 +342,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                               },
                                             ),
                                           );
-                                          children
-                                              .add(SizedBox(width: spacing));
+                                          children.add(
+                                            SizedBox(width: spacing),
+                                          );
                                         }
 
                                         return Row(children: children);
@@ -385,7 +396,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                           const SizedBox(width: 10),
                                           Expanded(
                                             child: Text(
-                                              context.l10n
+                                              context
+                                                  .l10n
                                                   .ritualNotificationsOffHint,
                                               style: textTheme.small.copyWith(
                                                 color: colorScheme.textMuted,
@@ -426,8 +438,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                               if (child == null) {
                                                 return const SizedBox.shrink();
                                               }
-                                              final mediaQuery =
-                                                  MediaQuery.of(context);
+                                              final mediaQuery = MediaQuery.of(
+                                                context,
+                                              );
                                               return MediaQuery(
                                                 data: mediaQuery.copyWith(
                                                   alwaysUse24HourFormat:
@@ -447,8 +460,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
                                             color: widgetBackgroundColor,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: Row(
                                             mainAxisAlignment:
@@ -481,8 +495,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                                 ],
                                               ),
                                               Container(
-                                                padding:
-                                                    const EdgeInsets.all(8),
+                                                padding: const EdgeInsets.all(
+                                                  8,
+                                                ),
                                                 decoration: BoxDecoration(
                                                   color:
                                                       segmentedBackgroundColor,
@@ -513,29 +528,35 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                           vertical: 18,
                                         ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(18),
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
                                         ),
                                         side: BorderSide.none,
                                         elevation: 0,
                                       ),
                                       onPressed: canSave
                                           ? () async {
-                                              final updated = (ritual ??
-                                                      ritualsService
-                                                          .createEmptyRitual())
-                                                  .copyWith(
-                                                title: controller.text.trim(),
-                                                daysOfWeek: days,
-                                                timeOfDay: selectedTime,
-                                                remindersEnabled:
-                                                    sendReminderEnabled,
-                                                albumId: selectedAlbumId,
-                                                albumName: selectedAlbumName,
-                                                icon: selectedEmoji,
+                                              final updated =
+                                                  (ritual ??
+                                                          ritualsService
+                                                              .createEmptyRitual())
+                                                      .copyWith(
+                                                        title: controller.text
+                                                            .trim(),
+                                                        daysOfWeek: days,
+                                                        timeOfDay: selectedTime,
+                                                        remindersEnabled:
+                                                            sendReminderEnabled,
+                                                        albumId:
+                                                            selectedAlbumId,
+                                                        albumName:
+                                                            selectedAlbumName,
+                                                        icon: selectedEmoji,
+                                                      );
+                                              await ritualsService.saveRitual(
+                                                updated,
                                               );
-                                              await ritualsService
-                                                  .saveRitual(updated);
                                               Navigator.of(context).pop();
                                             }
                                           : null,
@@ -655,10 +676,10 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
     final filteredAlbums = queryLower.isEmpty
         ? widget.albums
         : widget.albums
-            .where(
-              (album) => album.displayName.toLowerCase().contains(queryLower),
-            )
-            .toList();
+              .where(
+                (album) => album.displayName.toLowerCase().contains(queryLower),
+              )
+              .toList();
 
     Future<void> createAlbum() async {
       Collection? created;
@@ -835,9 +856,11 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                                 ),
                               );
                             },
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 10),
-                            itemCount: filteredAlbums.length +
+                            separatorBuilder: (_, __) => const SizedBox(
+                              height: ThumbnailListItem.defaultItemSpacing,
+                            ),
+                            itemCount:
+                                filteredAlbums.length +
                                 (showNewAlbumRow ? 1 : 0),
                           ),
                   ),
@@ -861,7 +884,8 @@ class _AlbumPreviewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final displayedName = album?.displayName ??
+    final displayedName =
+        album?.displayName ??
         fallbackName ??
         context.l10n.ritualAlbumSelectionPlaceholder;
     final isPlaceholder =
@@ -1107,8 +1131,9 @@ class _EmojiPickerSheetState extends State<_EmojiPickerSheet> {
   void _handleChanged(String value) {
     if (_isUpdatingController || _didPop) return;
     final trimmed = value.trim();
-    final firstGrapheme =
-        trimmed.characters.isEmpty ? "" : trimmed.characters.take(1).toString();
+    final firstGrapheme = trimmed.characters.isEmpty
+        ? ""
+        : trimmed.characters.take(1).toString();
     if (firstGrapheme.isEmpty) {
       _customEmoji = "";
       _isUpdatingController = true;
@@ -1266,8 +1291,8 @@ class _EmojiPickerSheetState extends State<_EmojiPickerSheet> {
                   onPressed: _customEmoji.isEmpty
                       ? null
                       : () => _popWithEmoji(
-                            _customEmoji,
-                          ),
+                          _customEmoji,
+                        ),
                   child: Text(
                     context.l10n.ritualEmojiUseAction,
                     style: textTheme.bodyBold.copyWith(color: Colors.white),

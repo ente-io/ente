@@ -13,6 +13,7 @@ class ThumbnailListItem extends StatefulWidget {
   static const defaultLeadingRadius = 12.0;
   static const defaultBorderRadius = 20.0;
   static const defaultContentSpacing = 12.0;
+  static const defaultItemSpacing = 4.0;
   static const _stateTransitionDuration = Duration(milliseconds: 120);
 
   final Widget leading;
