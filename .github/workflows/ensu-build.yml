@@ -168,8 +168,7 @@ jobs:
               run: yarn install --frozen-lockfile
 
             - name: Fetch Rust dependencies
-              shell: bash
-              working-directory: rust/apps/ensu/src-tauri
+              working-directory: rust
               run: cargo fetch
 
             - name: Prepare Windows signing
