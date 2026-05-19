@@ -165,6 +165,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               );
             },
           ),
+          ButtonComponent(
+            label: l10n.ok,
+            shouldSurfaceExecutionStates: false,
+            onTap: () async {
+              Navigator.of(sheetContext).pop(
+                _OnlyNewWarningAction.continueBackup,
+              );
+            },
+          ),
         ],
       ),
     );
@@ -178,6 +187,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         const BackupSettingsScreen(),
       );
       return false;
+    }
+    if (result == _OnlyNewWarningAction.continueBackup) {
+      return true;
     }
 
     return false;
@@ -452,4 +464,5 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
 enum _OnlyNewWarningAction {
   updateSettings,
+  continueBackup,
 }
