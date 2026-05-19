@@ -164,6 +164,7 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn upsert_session(
         &self,
         session_uuid: Uuid,
@@ -301,6 +302,7 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn insert_message_with_uuid_and_state(
         &self,
         message_uuid: Uuid,
@@ -348,6 +350,7 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn insert_message_with_uuid(
         &self,
         message_uuid: Uuid,
@@ -664,6 +667,7 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn upsert_message_from_remote(
         &self,
         message_uuid: Uuid,

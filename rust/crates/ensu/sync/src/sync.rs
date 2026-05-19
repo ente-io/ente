@@ -523,11 +523,7 @@ impl SyncEngine {
             let bytes = match http.get_bytes(&url) {
                 Ok(bytes) => bytes,
                 Err(SyncError::Http { status: 404, .. }) => {
-                    if let Err(err) =
-                        self.force_upload_attachment(&http, &chat_key, session_uuid, &attachment_id)
-                    {
-                        return Err(err);
-                    }
+                    self.force_upload_attachment(&http, &chat_key, session_uuid, &attachment_id)?;
                     if let Some(updated) = self.db.get_attachment_remote_id(&attachment_id)? {
                         remote_id = updated;
                         url = format!("{}/llmchat/chat/attachment/{}", base_url, remote_id);
@@ -653,14 +649,13 @@ impl SyncEngine {
             let remote_uuid_str = remote_uuid.to_string();
             let mut local = self.db.get_session(local_uuid).ok().flatten();
             let mut local_state = self.sync_state.get_session_state(local_uuid).ok().flatten();
-            if let Some(state) = local_state.as_ref() {
-                if let Some(existing_remote) = state.remote_id.as_deref() {
-                    if existing_remote != remote_uuid_str.as_str() {
-                        local_uuid = remote_uuid;
-                        local = self.db.get_session(local_uuid).ok().flatten();
-                        local_state = self.sync_state.get_session_state(local_uuid).ok().flatten();
-                    }
-                }
+            if let Some(state) = local_state.as_ref()
+                && let Some(existing_remote) = state.remote_id.as_deref()
+                && existing_remote != remote_uuid_str.as_str()
+            {
+                local_uuid = remote_uuid;
+                local = self.db.get_session(local_uuid).ok().flatten();
+                local_state = self.sync_state.get_session_state(local_uuid).ok().flatten();
             }
             remote_session_map.insert(remote_uuid, local_uuid);
             if let Some(local_session) = local.as_ref() {
@@ -692,10 +687,10 @@ impl SyncEngine {
                 .as_ref()
                 .map(|existing| existing.updated_at)
                 .unwrap_or(session.updated_at);
-            if let Some(remote_updated) = remote_message_updates.get(&remote_uuid) {
-                if effective_updated_at < *remote_updated {
-                    effective_updated_at = *remote_updated;
-                }
+            if let Some(remote_updated) = remote_message_updates.get(&remote_uuid)
+                && effective_updated_at < *remote_updated
+            {
+                effective_updated_at = *remote_updated;
             }
             if title_changed && effective_updated_at < session.updated_at {
                 effective_updated_at = session.updated_at;
@@ -769,20 +764,19 @@ impl SyncEngine {
                 .get_message_state(message_uuid)
                 .ok()
                 .flatten();
-            if let Some(state) = local_state.as_ref() {
-                if let Some(existing_remote) = state.remote_id.as_deref() {
-                    if existing_remote != remote_message_uuid_str.as_str() {
-                        message_uuid = remote_message_uuid;
-                        local_message = local_messages
-                            .iter()
-                            .find(|local| local.uuid == message_uuid);
-                        local_state = self
-                            .sync_state
-                            .get_message_state(message_uuid)
-                            .ok()
-                            .flatten();
-                    }
-                }
+            if let Some(state) = local_state.as_ref()
+                && let Some(existing_remote) = state.remote_id.as_deref()
+                && existing_remote != remote_message_uuid_str.as_str()
+            {
+                message_uuid = remote_message_uuid;
+                local_message = local_messages
+                    .iter()
+                    .find(|local| local.uuid == message_uuid);
+                local_state = self
+                    .sync_state
+                    .get_message_state(message_uuid)
+                    .ok()
+                    .flatten();
             }
             remote_message_map.insert(remote_message_uuid, message_uuid);
             if let Some(local_message) = local_message {
@@ -897,10 +891,10 @@ impl SyncEngine {
             let local = self.db.get_session(local_uuid).ok().flatten();
             let local_state = self.sync_state.get_session_state(local_uuid).ok().flatten();
             self.apply_session_tombstone(local, local_state, local_uuid, deleted_at)?;
-            if let Some(offline_db) = offline_db.as_ref() {
-                if offline_db.get_session(local_uuid).ok().flatten().is_some() {
-                    let _ = offline_db.apply_session_tombstone(local_uuid, deleted_at);
-                }
+            if let Some(offline_db) = offline_db.as_ref()
+                && offline_db.get_session(local_uuid).ok().flatten().is_some()
+            {
+                let _ = offline_db.apply_session_tombstone(local_uuid, deleted_at);
             }
         }
 
@@ -961,10 +955,8 @@ impl SyncEngine {
             return Ok(());
         }
 
-        if local.needs_sync && server_updated_at.is_some() {
-            if local.updated_at > deleted_at {
-                return Ok(());
-            }
+        if local.needs_sync && server_updated_at.is_some() && local.updated_at > deleted_at {
+            return Ok(());
         }
 
         self.db.apply_session_tombstone(session_uuid, deleted_at)?;
@@ -1051,15 +1043,16 @@ impl SyncEngine {
                 let _ = self.db.mark_message_synced(message.uuid);
             }
 
-            if blocked.is_empty() && filtered.len() == messages.len() {
-                if let Some(remote_id) = session_remote_id.clone().or_else(|| {
+            if blocked.is_empty()
+                && filtered.len() == messages.len()
+                && let Some(remote_id) = session_remote_id.clone().or_else(|| {
                     self.sync_state
                         .get_session_remote_id(session_uuid)
                         .ok()
                         .flatten()
-                }) {
-                    let _ = self.db.mark_session_synced(session_uuid, &remote_id);
-                }
+                })
+            {
+                let _ = self.db.mark_session_synced(session_uuid, &remote_id);
             }
         } else if should_upsert_session {
             session_remote_id = Some(self.push_session(http, chat_key, session)?);

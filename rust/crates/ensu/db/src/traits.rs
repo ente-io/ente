@@ -38,7 +38,7 @@ impl Clock for SystemClock {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default();
         let micros = duration.as_secs() as i64 * 1_000_000;
-        let sub_micros = (duration.subsec_nanos() / 1_000) as i64;
+        let sub_micros = duration.subsec_micros() as i64;
         micros + sub_micros
     }
 }

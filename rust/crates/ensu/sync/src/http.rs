@@ -150,11 +150,11 @@ impl HttpClient {
                 .headers(headers)
                 .send()
                 .map_err(map_reqwest_error)?;
-            if resp.status().is_redirection() {
-                if let Some(location) = resp.headers().get(LOCATION) {
-                    current_url = self.resolve_redirect(&current_url, location)?;
-                    continue;
-                }
+            if resp.status().is_redirection()
+                && let Some(location) = resp.headers().get(LOCATION)
+            {
+                current_url = self.resolve_redirect(&current_url, location)?;
+                continue;
             }
             return parse_bytes_response(resp);
         }
@@ -180,11 +180,11 @@ impl HttpClient {
             if status == 401 {
                 return Err(SyncError::Unauthorized);
             }
-            if resp.status().is_redirection() {
-                if let Some(location) = resp.headers().get(LOCATION) {
-                    current_url = self.resolve_redirect(&current_url, location)?;
-                    continue;
-                }
+            if resp.status().is_redirection()
+                && let Some(location) = resp.headers().get(LOCATION)
+            {
+                current_url = self.resolve_redirect(&current_url, location)?;
+                continue;
             }
             return Ok(status);
         }
@@ -216,11 +216,11 @@ impl HttpClient {
                 .send()
                 .map_err(map_reqwest_error)?;
 
-            if resp.status().is_redirection() {
-                if let Some(location) = resp.headers().get(LOCATION) {
-                    current_url = self.resolve_redirect(&current_url, location)?;
-                    continue;
-                }
+            if resp.status().is_redirection()
+                && let Some(location) = resp.headers().get(LOCATION)
+            {
+                current_url = self.resolve_redirect(&current_url, location)?;
+                continue;
             }
 
             return parse_empty_response(resp);
@@ -262,30 +262,30 @@ impl HttpClient {
 
     fn build_public_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
-        if let Some(agent) = &self.user_agent {
-            if let Ok(value) = HeaderValue::from_str(agent) {
-                headers.insert("User-Agent", value);
-            }
+        if let Some(agent) = &self.user_agent
+            && let Ok(value) = HeaderValue::from_str(agent)
+        {
+            headers.insert("User-Agent", value);
         }
         headers
     }
 
     fn build_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
-        if let Some(agent) = &self.user_agent {
-            if let Ok(value) = HeaderValue::from_str(agent) {
-                headers.insert("User-Agent", value);
-            }
+        if let Some(agent) = &self.user_agent
+            && let Ok(value) = HeaderValue::from_str(agent)
+        {
+            headers.insert("User-Agent", value);
         }
-        if let Some(pkg) = &self.client_package {
-            if let Ok(value) = HeaderValue::from_str(pkg) {
-                headers.insert("X-Client-Package", value);
-            }
+        if let Some(pkg) = &self.client_package
+            && let Ok(value) = HeaderValue::from_str(pkg)
+        {
+            headers.insert("X-Client-Package", value);
         }
-        if let Some(version) = &self.client_version {
-            if let Ok(value) = HeaderValue::from_str(version) {
-                headers.insert("X-Client-Version", value);
-            }
+        if let Some(version) = &self.client_version
+            && let Ok(value) = HeaderValue::from_str(version)
+        {
+            headers.insert("X-Client-Version", value);
         }
         headers.insert(
             "x-request-id",
@@ -344,18 +344,18 @@ fn parse_bytes_response(resp: Response) -> Result<Vec<u8>, SyncError> {
 
 fn map_error_response(status: u16, body: &str) -> SyncError {
     if let Ok(err) = serde_json::from_str::<ErrorResponse>(body) {
-        if let Some(code) = err.code.clone() {
-            if matches!(
+        if let Some(code) = err.code.clone()
+            && matches!(
                 code.as_str(),
                 "LLMCHAT_MESSAGE_LIMIT_REACHED"
                     | "LLMCHAT_ATTACHMENT_LIMIT_REACHED"
                     | "LLMCHAT_PAYLOAD_TOO_LARGE"
-            ) {
-                return SyncError::LimitReached {
-                    code,
-                    message: err.message,
-                };
-            }
+            )
+        {
+            return SyncError::LimitReached {
+                code,
+                message: err.message,
+            };
         }
         return SyncError::Http {
             status,

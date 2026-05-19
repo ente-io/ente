@@ -25,7 +25,7 @@ jobs:
         runs-on: ubuntu-22.04
         defaults:
             run:
-                working-directory: rust/apps/ensu/src-tauri
+                working-directory: rust
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
@@ -36,8 +36,8 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      rust/apps/ensu/src-tauri/target
-                  key: ${{ runner.os }}-cargo-ensu-desktop-${{ hashFiles('rust/apps/ensu/src-tauri/Cargo.lock') }}
+                      rust/target
+                  key: ${{ runner.os }}-cargo-ensu-desktop-${{ hashFiles('rust/Cargo.lock') }}
 
             - name: Install Rust 1.93.0
               uses: dtolnay/rust-toolchain@1.93.0
@@ -53,10 +53,10 @@ jobs:
               run: cargo fetch
 
             - name: Ensure Tauri distDir exists for macro checks
-              run: mkdir -p ../../../../web/apps/ensu/out
+              run: mkdir -p ../web/apps/ensu/out
 
             - run: cargo fmt --check
 
-            - run: cargo clippy --all-targets --all-features
+            - run: cargo clippy -p ensu-tauri --all-targets --all-features
 
-            - run: cargo build
+            - run: cargo build -p ensu-tauri

@@ -56,17 +56,10 @@ until curl -fsS "$endpoint/ping" >/dev/null 2>&1; do
     sleep 2
 done
 
-cd "$repo_dir"
+cd "$repo_dir/rust"
 export ENTE_E2E_ENDPOINT="$endpoint"
 
-if [ "$#" -gt 0 ]; then
-    if ! cargo test --manifest-path rust/e2e/Cargo.toml "$@" -- --ignored --nocapture; then
-        dump_logs
-        exit 1
-    fi
-else
-    if ! cargo test --manifest-path rust/e2e/Cargo.toml -- --ignored --nocapture; then
-        dump_logs
-        exit 1
-    fi
+if ! cargo test -p ente-e2e "$@" -- --ignored --nocapture; then
+    dump_logs
+    exit 1
 fi

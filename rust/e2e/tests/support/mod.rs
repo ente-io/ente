@@ -31,23 +31,23 @@ pub async fn assert_server_or_skip(endpoint: &str, test_name: &str) -> bool {
 
 pub fn assert_stage_enabled_or_skip(stage_name: &str) -> bool {
     let normalized_stage = stage_name.trim().to_ascii_lowercase();
-    if let Some(only) = env_list("ENTE_E2E_ONLY") {
-        if !only.contains(&normalized_stage) {
-            eprintln!(
-                "skipping {stage_name}: not selected by ENTE_E2E_ONLY={}",
-                std::env::var("ENTE_E2E_ONLY").unwrap_or_default()
-            );
-            return false;
-        }
+    if let Some(only) = env_list("ENTE_E2E_ONLY")
+        && !only.contains(&normalized_stage)
+    {
+        eprintln!(
+            "skipping {stage_name}: not selected by ENTE_E2E_ONLY={}",
+            std::env::var("ENTE_E2E_ONLY").unwrap_or_default()
+        );
+        return false;
     }
-    if let Some(skip) = env_list("ENTE_E2E_SKIP") {
-        if skip.contains(&normalized_stage) {
-            eprintln!(
-                "skipping {stage_name}: selected by ENTE_E2E_SKIP={}",
-                std::env::var("ENTE_E2E_SKIP").unwrap_or_default()
-            );
-            return false;
-        }
+    if let Some(skip) = env_list("ENTE_E2E_SKIP")
+        && skip.contains(&normalized_stage)
+    {
+        eprintln!(
+            "skipping {stage_name}: selected by ENTE_E2E_SKIP={}",
+            std::env::var("ENTE_E2E_SKIP").unwrap_or_default()
+        );
+        return false;
     }
     true
 }

@@ -246,6 +246,45 @@ pub fn srp_decrypt_secrets(
     })
 }
 
+pub fn derive_kek_for_login(
+    password: String,
+    kek_salt: String,
+    mem_limit: u32,
+    ops_limit: u32,
+) -> Result<Vec<u8>, EnsuError> {
+    let kek = auth::derive_kek(&password, &kek_salt, mem_limit, ops_limit)?;
+    Ok(kek.into_vec())
+}
+
+pub fn decrypt_secrets_with_kek(
+    kek: Vec<u8>,
+    key_attrs: KeyAttributes,
+    encrypted_token: Option<String>,
+    plain_token: Option<String>,
+) -> Result<AuthSecrets, EnsuError> {
+    let kek = crypto::SecretVec::new(kek);
+    let core_attrs = to_core_key_attrs(&key_attrs);
+
+    if let Some(token) = encrypted_token {
+        let result = auth::decrypt_secrets_with_kek(&kek, &core_attrs, &token)?;
+        return Ok(secrets_from_login_result(result));
+    }
+
+    if let Some(token) = plain_token {
+        let (master_key, secret_key) = auth::decrypt_keys_only(&kek, &core_attrs)?;
+        let token_bytes = decode_token(&token)?;
+        return Ok(AuthSecrets {
+            master_key: master_key.into_vec(),
+            secret_key: secret_key.into_vec(),
+            token: token_bytes,
+        });
+    }
+
+    Err(EnsuError::Message {
+        reason: "Missing auth token".to_string(),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -299,43 +338,4 @@ mod tests {
         assert_eq!(err.to_string(), "Missing server proof");
         assert!(SRP_STATE.lock().unwrap().is_none());
     }
-}
-
-pub fn derive_kek_for_login(
-    password: String,
-    kek_salt: String,
-    mem_limit: u32,
-    ops_limit: u32,
-) -> Result<Vec<u8>, EnsuError> {
-    let kek = auth::derive_kek(&password, &kek_salt, mem_limit, ops_limit)?;
-    Ok(kek.into_vec())
-}
-
-pub fn decrypt_secrets_with_kek(
-    kek: Vec<u8>,
-    key_attrs: KeyAttributes,
-    encrypted_token: Option<String>,
-    plain_token: Option<String>,
-) -> Result<AuthSecrets, EnsuError> {
-    let kek = crypto::SecretVec::new(kek);
-    let core_attrs = to_core_key_attrs(&key_attrs);
-
-    if let Some(token) = encrypted_token {
-        let result = auth::decrypt_secrets_with_kek(&kek, &core_attrs, &token)?;
-        return Ok(secrets_from_login_result(result));
-    }
-
-    if let Some(token) = plain_token {
-        let (master_key, secret_key) = auth::decrypt_keys_only(&kek, &core_attrs)?;
-        let token_bytes = decode_token(&token)?;
-        return Ok(AuthSecrets {
-            master_key: master_key.into_vec(),
-            secret_key: secret_key.into_vec(),
-            token: token_bytes,
-        });
-    }
-
-    Err(EnsuError::Message {
-        reason: "Missing auth token".to_string(),
-    })
 }

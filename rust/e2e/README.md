@@ -31,19 +31,19 @@ That runner:
 For a compile-only sanity check that does not hit a live server:
 
 ```sh
-cargo test --manifest-path rust/e2e/Cargo.toml
+cargo test --manifest-path rust/Cargo.toml -p ente-e2e
 ```
 
 For ad hoc runs against an already-running server:
 
 ```sh
-ENTE_E2E_ENDPOINT=http://localhost:8080 cargo test --manifest-path rust/e2e/Cargo.toml -- --ignored --nocapture
+ENTE_E2E_ENDPOINT=http://localhost:8080 cargo test --manifest-path rust/Cargo.toml -p ente-e2e -- --ignored --nocapture
 ```
 
 To run only one ignored stage:
 
 ```sh
-ENTE_E2E_ENDPOINT=http://localhost:8080 cargo test --manifest-path rust/e2e/Cargo.toml legacy_kit_recovery_e2e -- --ignored --nocapture
+ENTE_E2E_ENDPOINT=http://localhost:8080 cargo test --manifest-path rust/Cargo.toml -p ente-e2e legacy_kit_recovery_e2e -- --ignored --nocapture
 ```
 
 To skip or select stages during a full ignored run:

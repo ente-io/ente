@@ -337,7 +337,7 @@ fn run_generation_loop(
             break;
         }
 
-        let bytes = token_piece_bytes(&ctx.model, token)
+        let bytes = token_piece_bytes(ctx.model, token)
             .map_err(|err| format_error("Detokenize failed", err))?;
         let step = decoder.push_bytes(&bytes);
 
