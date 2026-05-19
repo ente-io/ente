@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import { useInitialStaffSession } from "../services/session";
 import { getCurrentAdminUser } from "../services/support";
+import { StatusBadge } from "./StatusBadge";
 
 interface TokenData {
     creationTime: number;
@@ -144,20 +145,9 @@ export const TokensTableComponent: React.FC = () => {
                             <TableCell>{token.ua || "-"}</TableCell>
                             <TableCell>{token.app}</TableCell>
                             <TableCell>
-                                <span
-                                    style={{
-                                        backgroundColor: token.isDeleted
-                                            ? "#494949"
-                                            : "transparent",
-                                        color: token.isDeleted
-                                            ? "white"
-                                            : "inherit",
-                                        padding: "4px 8px",
-                                        borderRadius: "10px",
-                                    }}
-                                >
+                                <StatusBadge highlighted={token.isDeleted}>
                                     {token.isDeleted ? "Yes" : "No"}
-                                </span>
+                                </StatusBadge>
                             </TableCell>
                         </TableRow>
                     ))}

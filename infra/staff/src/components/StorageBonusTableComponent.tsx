@@ -10,6 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useInitialStaffSession } from "../services/session";
 import { getCurrentAdminUser } from "../services/support";
+import { StatusBadge } from "./StatusBadge";
 
 interface BonusData {
     storage: number;
@@ -98,20 +99,9 @@ export const StorageBonusTableComponent: React.FC = () => {
                                 {formatValidTill(bonus.validTill)}
                             </TableCell>
                             <TableCell>
-                                <span
-                                    style={{
-                                        backgroundColor: bonus.isRevoked
-                                            ? "#494949"
-                                            : "transparent",
-                                        color: bonus.isRevoked
-                                            ? "white"
-                                            : "inherit",
-                                        padding: "4px 8px",
-                                        borderRadius: "10px",
-                                    }}
-                                >
+                                <StatusBadge highlighted={bonus.isRevoked}>
                                     {bonus.isRevoked ? "Yes" : "No"}
-                                </span>
+                                </StatusBadge>
                             </TableCell>
                         </TableRow>
                     ))}

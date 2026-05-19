@@ -14,6 +14,7 @@ import React, { useEffect, useState } from "react";
 import { useInitialStaffSession } from "../services/session";
 import { getCurrentAdminUser } from "../services/support";
 import { CloseFamily } from "./CloseFamily";
+import { StatusBadge } from "./StatusBadge";
 
 interface FamilyMember {
     id: string;
@@ -104,24 +105,14 @@ export const FamilyTableComponent: React.FC = () => {
                                 <TableCell>{member.id}</TableCell>
                                 <TableCell>{member.email}</TableCell>
                                 <TableCell>
-                                    <span
-                                        style={{
-                                            backgroundColor:
-                                                member.status === "SELF"
-                                                    ? "#00B33C"
-                                                    : "transparent",
-                                            color:
-                                                member.status === "SELF"
-                                                    ? "white"
-                                                    : "inherit",
-                                            padding: "4px 8px",
-                                            borderRadius: "10px",
-                                        }}
+                                    <StatusBadge
+                                        highlighted={member.status === "SELF"}
+                                        tone="success"
                                     >
                                         {member.status === "SELF"
                                             ? "ADMIN"
                                             : member.status}
-                                    </span>
+                                    </StatusBadge>
                                 </TableCell>
                                 <TableCell>
                                     {formatUsageToGB(member.usage)}
