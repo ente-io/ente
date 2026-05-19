@@ -64,6 +64,10 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
     const session = useStaffSession();
 
     useEffect(() => {
+        if (!open) {
+            return;
+        }
+
         const fetchData = async () => {
             try {
                 const subscription =
@@ -93,7 +97,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         fetchData().catch((error: unknown) => {
             console.error("Unhandled promise rejection:", error);
         });
-    }, [initialSession]);
+    }, [initialSession, open]);
 
     const handleCalendarClick = () => {
         setIsDatePickerOpen(true);

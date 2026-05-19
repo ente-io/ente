@@ -69,7 +69,7 @@ export const App: React.FC = () => {
             const delay = Math.max(3000 - elapsedTime, 0);
             setTimeout(() => {
                 setLoading(false);
-                setError("Invalid token or email/user id");
+                setError(fetchErrorMessage(error));
             }, delay);
         }
     }, []);
@@ -238,12 +238,17 @@ const readUrlCredentials = () => {
     return { email: urlParams.get("email"), token: urlParams.get("token") };
 };
 
+const subscriptionDataNotFoundMessage = "No subscription record for this user";
+
+const fetchErrorMessage = (error: unknown) =>
+    error instanceof Error ? error.message : "Invalid token or email/user id";
+
 const buildUserDetailsData = (
     userResponse: UserResponse,
     userSearchInput: string,
 ): UserDetailsData => {
     if (!userResponse.subscription) {
-        throw new Error("Subscription data not found");
+        throw new Error(subscriptionDataNotFoundMessage);
     }
 
     const { subscription } = userResponse;

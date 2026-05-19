@@ -119,6 +119,16 @@ export const getUser = async (
         apiURL("/admin/user", userSearchQuery(input)),
         { headers: staffJSONRequestHeaders(session) },
     );
+    if (response.status === 401) {
+        throw new Error("Invalid token");
+    }
+    if (response.status === 403) {
+        throw new Error("Insufficient permissions");
+    }
+    if (response.status === 404) {
+        throw new Error("User not found");
+    }
+
     await ensureOk(response, "Network response was not ok");
     return UserResponse.parse(await response.json());
 };

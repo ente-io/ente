@@ -18,7 +18,7 @@ export const TokensTableComponent: React.FC = () => {
     const [tokens, setTokens] = useState<TokenData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [order, setOrder] = useState<"asc" | "desc">("asc");
+    const [order, setOrder] = useState<"asc" | "desc">("desc");
     const [orderBy, setOrderBy] = useState<keyof TokenData>("lastUsedTime");
     const session = useInitialStaffSession();
 
