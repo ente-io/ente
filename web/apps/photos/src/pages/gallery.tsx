@@ -143,7 +143,10 @@ import {
     type SearchOption,
     type SidebarActionID,
 } from "ente-new/photos/services/search/types";
-import { initSettings } from "ente-new/photos/services/settings";
+import {
+    initSettings,
+    isDevBuildAndUser,
+} from "ente-new/photos/services/settings";
 import {
     redirectToCustomerPortal,
     savedUserDetailsOrTriggerPull,
@@ -252,7 +255,8 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
-    const { customDomain } = useSettingsSnapshot();
+    const { customDomain, isInternalUser } = useSettingsSnapshot();
+    const canUseSharedAlbumAdd = isInternalUser || isDevBuildAndUser();
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
 
@@ -972,13 +976,14 @@ const Page: React.FC = () => {
                         (f) => f.ownerID == user!.id,
                     );
                     /**
-                     * Basically earlier we used userFiles to performCollectionOp earlier
-                     * irrespective of the op, and userFiles only have files of which the current
-                     * user is the owner. Now as we support upload from shared albums also, in case
-                     * it's an upload(add) using selectedFiles instead of userFiles
+                     * The shared-album add/copy path can process non-owned
+                     * files, but keep the old owner-only behavior for users who
+                     * do not pass the shared-album add gate.
                      */
                     const filesToProcess =
-                        op == "add" ? selectedFiles : userFiles;
+                        canUseSharedAlbumAdd && op == "add"
+                            ? selectedFiles
+                            : userFiles;
                     const sourceCollectionID = selected.collectionID;
                     if (filesToProcess.length > 0) {
                         await performCollectionOp(
@@ -989,7 +994,7 @@ const Page: React.FC = () => {
                         );
                     }
                     if (
-                        op != "add" &&
+                        !(canUseSharedAlbumAdd && op == "add") &&
                         userFiles.length != selectedFiles.length
                     ) {
                         showMiniDialog(notifyOthersFilesDialogAttributes());

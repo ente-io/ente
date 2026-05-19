@@ -56,6 +56,7 @@ import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMa
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     addOrCopyToCollection,
@@ -69,6 +70,7 @@ import {
     savedNormalCollections,
     savedOrCreateUserUncategorizedCollection,
 } from "ente-new/photos/services/collection";
+import { isDevBuildAndUser } from "ente-new/photos/services/settings";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
@@ -178,6 +180,8 @@ export const Upload: React.FC<UploadProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showNotification, watchFolderView } = usePhotosAppContext();
+    const { isInternalUser } = useSettingsSnapshot();
+    const canUseSharedAlbumUpload = isInternalUser || isDevBuildAndUser();
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [
@@ -565,10 +569,12 @@ export const Upload: React.FC<UploadProps> = ({
 
         if (isDragAndDrop.current) {
             isDragAndDrop.current = false;
-            if (
+            const canUploadToActiveCollection =
                 props.activeCollection &&
-                canAddFilesToCollection(props.activeCollection)
-            ) {
+                (props.activeCollection.owner.id == user?.id ||
+                    (canUseSharedAlbumUpload &&
+                        canAddFilesToCollection(props.activeCollection)));
+            if (props.activeCollection && canUploadToActiveCollection) {
                 uploadFilesToExistingCollection(props.activeCollection);
                 return;
             }
@@ -650,7 +656,7 @@ export const Upload: React.FC<UploadProps> = ({
         try {
             const uploadCollection = canDirectlyUploadToCollection(collection)
                 ? collection
-                : canAddFilesToCollection(collection)
+                : canUseSharedAlbumUpload && canAddFilesToCollection(collection)
                   ? await savedOrCreateUserUncategorizedCollection()
                   : undefined;
 
