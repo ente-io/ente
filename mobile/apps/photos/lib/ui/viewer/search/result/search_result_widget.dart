@@ -78,7 +78,7 @@ class SearchResultWidget extends StatelessWidget {
               ),
         title: Text(
           searchResult.name(),
-          style: textTheme.bodyBold,
+          style: textTheme.body,
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: FutureBuilder<int>(
