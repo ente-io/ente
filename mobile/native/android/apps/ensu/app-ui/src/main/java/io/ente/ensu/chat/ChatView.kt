@@ -77,16 +77,39 @@ fun ChatView(
     var inputBarHeightDp by remember { mutableStateOf(0.dp) }
     val latestMessageText by rememberUpdatedState(chatState.messageText)
     val latestOnMessageChange by rememberUpdatedState(onMessageChange)
+    val sessionKey = chatState.currentSessionId ?: "new-session"
+    val latestSessionKey by rememberUpdatedState(sessionKey)
+    var pendingVoiceSessionKey by remember { mutableStateOf<String?>(null) }
     val voiceController = rememberVoiceTranscriptionController(
         onTranscript = { transcript ->
             latestOnMessageChange(appendVoiceTranscript(latestMessageText, transcript))
         }
     )
+
+    val editingMessage by remember(chatState.editingMessageId, chatState.messages) {
+        derivedStateOf {
+            chatState.editingMessageId?.let { editingId ->
+                chatState.messages.firstOrNull { it.id == editingId }
+            }
+        }
+    }
+    val canStartVoiceInput = !chatState.isGenerating &&
+        !chatState.isDownloading &&
+        !chatState.isAttachmentDownloadBlocked &&
+        editingMessage == null
+    val latestCanStartVoiceInput by rememberUpdatedState(canStartVoiceInput)
+
     val microphonePermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
+        val requestedSessionKey = pendingVoiceSessionKey
+        pendingVoiceSessionKey = null
         if (granted) {
-            voiceController.startRecording()
+            if (requestedSessionKey != null) {
+                voiceController.startRecording {
+                    latestSessionKey == requestedSessionKey && latestCanStartVoiceInput
+                }
+            }
         } else {
             voiceController.onPermissionDenied()
         }
@@ -142,14 +165,9 @@ fun ChatView(
         }
     }
 
-    val sessionKey = chatState.currentSessionId ?: "new-session"
-
-    val editingMessage by remember(chatState.editingMessageId, chatState.messages) {
-        derivedStateOf {
-            chatState.editingMessageId?.let { editingId ->
-                chatState.messages.firstOrNull { it.id == editingId }
-            }
-        }
+    LaunchedEffect(sessionKey) {
+        pendingVoiceSessionKey = null
+        voiceController.cancelActiveVoiceInput()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -241,15 +259,20 @@ fun ChatView(
                     onVoiceInput = {
                         if (voiceController.state.isRecording) {
                             voiceController.stopAndTranscribe()
-                        } else if (
-                            ContextCompat.checkSelfPermission(
+                        } else {
+                            val hasMicrophonePermission = ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.RECORD_AUDIO
                             ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-                            voiceController.startRecording()
-                        } else {
-                            microphonePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            if (canStartVoiceInput && hasMicrophonePermission) {
+                                val requestedSessionKey = sessionKey
+                                voiceController.startRecording {
+                                    latestSessionKey == requestedSessionKey && latestCanStartVoiceInput
+                                }
+                            } else if (canStartVoiceInput) {
+                                pendingVoiceSessionKey = sessionKey
+                                microphonePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            }
                         }
                     },
                     focusRequestId = focusRequestId

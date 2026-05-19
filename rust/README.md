@@ -2,7 +2,7 @@
 
 ```
                          ┌───────────────────────────────────────┐
-                         │            rust/core/                 │
+                         │            rust/crates/core/                 │
                          │        (ente-core crate)              │
                          │                                       │
                          │   Pure Rust - NO FFI annotations      │
@@ -14,8 +14,8 @@
               │                            │                            │
               ▼                            ▼                            ▼
 ┌───────────────────────────┐ ┌───────────────────────────┐ ┌────────────────────────┐
-│  mobile/packages/rust/    │ │   web/packages/wasm/      │ │      rust/cli/         │
-│    (ente_rust crate)      │ │    (ente-wasm crate)      │ │                        │
+│  mobile/packages/rust/    │ │ rust/bindings/wasm/      │ │    rust/apps/cli/      │
+│    (ente_rust crate)      │ │ ente-wasm/               │ │                        │
 │                           │ │                           │ │  CLI binary, depends   │
 │  Shared #[frb] wrappers   │ │  #[wasm_bindgen] wrappers │ │  on ente-core          │
 │  for all mobile apps      │ │  for all web apps         │ │                        │
@@ -40,21 +40,29 @@
 
 ## Contents (this repo)
 
-- `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
+- `rust/crates/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
 - `rust/photos/` (`ente_photos`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
-- `rust/cli/` (`ente-rs`) - Rust CLI.
+- `rust/apps/cli/` (`ente-rs`) - Rust CLI.
+- `rust/bindings/wasm/ente-wasm/` (`ente-wasm`) - wasm-bindgen bindings for web.
 - `rust/e2e/` (`ente-e2e`) - live Museum-backed Rust end-to-end tests.
-- `rust/ensu/` - LLM chat stack (see `rust/ensu/README.md`).
+- `rust/crates/ensu/` - LLM chat stack (see `rust/crates/ensu/README.md`).
 
 ## Directory Structure
 
 ```
 rust/
-├── cli/                          # CLI package (ente-rs)
-│   ├── src/
-│   │   └── main.rs
-│   ├── Cargo.toml
-│   └── Cargo.lock
+├── apps/
+│   ├── cli/                      # CLI package (ente-rs)
+│   │   ├── src/
+│   │   │   └── main.rs
+│   │   └── Cargo.toml
+│   │
+│   └── codegen/                  # Cargo-powered repo codegen helper
+│       ├── src/
+│       └── Cargo.toml
+│
+├── crates/
+│   └── image/                    # Shared image crate
 │
 ├── e2e/                          # Rust e2e tests requiring live Museum
 │   ├── src/
@@ -80,16 +88,18 @@ rust/
 │   │   └── vector_db.rs
 │   └── Cargo.toml
 │
-└── ensu/                         # LLM chat stack (see rust/ensu/README.md)
+└── ensu/                         # LLM chat stack (see rust/crates/ensu/README.md)
 
-rust/uniffi/                      # UniFFI bindings for core crypto/auth + ensu
+rust/bindings/uniffi/                      # UniFFI bindings for core crypto/auth + ensu
 ├── core/
 └── ensu/
 
-web/packages/wasm/                # WASM bindings (lives in web workspace)
+rust/bindings/wasm/ente-wasm/     # WASM bindings Rust crate
 ├── src/
 │   └── lib.rs                    # #[wasm_bindgen] wrappers around ente-core
-├── Cargo.toml                    # crate name: ente-wasm
+└── Cargo.toml                    # crate name: ente-wasm
+
+web/packages/wasm/                # JS package surface for ente-wasm
 ├── package.json                  # includes wasm-pack as devDependency
 └── pkg/                          # generated output (gitignored)
 
@@ -112,9 +122,9 @@ mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 **Crates:**
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
-  - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
+  - Docs: `rust/crates/core/docs/crypto.md`, `rust/crates/core/docs/auth.md`
 - `ente_photos` - shared Photos Rust logic
-- `ente-rs` - CLI binary
+- `ente-rs` - Rust CLI package (`ente-cli` binary)
 - `ente-e2e` - ignored Rust integration tests that run against a live Museum
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
@@ -153,7 +163,7 @@ Both depend on `ente-core` and use `#[frb]` annotations to generate Dart binding
 
 ### Commands
 
-**ente-core (rust/core/):**
+**ente-core (rust/crates/core/):**
 
 ```sh
 cargo fmt        # format
@@ -162,29 +172,29 @@ cargo build      # build
 cargo test       # test
 ```
 
-**ente-cli (rust/cli/):**
+**ente-cli (rust/apps/cli/):**
 
 ```sh
 cargo fmt        # format
 cargo clippy     # lint
 cargo build      # build
 cargo test       # test
-cargo run -- --help
+cargo run --bin ente-cli -- --help
 ```
 
 **ente-e2e (rust/e2e/):**
 
 ```sh
-cargo test --manifest-path rust/e2e/Cargo.toml                     # compile-only sanity check
+cargo test --manifest-path rust/Cargo.toml -p ente-e2e             # compile-only sanity check
 rust/e2e/scripts/run.sh                                            # starts Docker + runs ignored live suite
-cargo test --manifest-path rust/e2e/Cargo.toml -- --ignored --nocapture
+cargo test --manifest-path rust/Cargo.toml -p ente-e2e -- --ignored --nocapture
 ```
 
-**ente-wasm (web/packages/wasm/):**
+**ente-wasm (Rust source in rust/bindings/wasm/ente-wasm/, JS package in web/packages/wasm/):**
 
 ```sh
 yarn install     # installs wasm-pack
-yarn build       # runs wasm-pack build --target bundler
+yarn build       # runs wasm-pack against the Rust crate
 ```
 
 Or from web/ root:
@@ -200,7 +210,7 @@ yarn build:wasm  # builds the WASM package
 > ```sh
 > cargo install cargo-watch
 > cd web/
-> cargo watch -w ../rust/core -w packages/wasm/src -s "yarn build:wasm"
+> cargo watch -w ../rust/crates/core -w ../rust/bindings/wasm/ente-wasm/src -s "yarn build:wasm"
 > ```
 
 **ente_rust (mobile/packages/rust/):**

@@ -26,5 +26,5 @@ next-env.d.ts
 # Static export outputs
 apps/ensu/next/
 
+# Generated wasm build
 packages/wasm/pkg/
-packages/wasm/target/

@@ -262,6 +262,10 @@ void main() {
 
       expect(find.text("No callback"), findsOneWidget);
       expect(find.text("Disabled"), findsOneWidget);
+      expect(
+        _buttonContainerColor(tester, "Disabled"),
+        ColorTokens.light.fillDark,
+      );
       await tester.tap(find.text("Disabled"));
       await tester.pump();
 
@@ -320,6 +324,55 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(AnimatedContainer)).height, 52);
+  });
+
+  testWidgets("Secondary button foreground follows app-specific Figma tokens", (
+    tester,
+  ) async {
+    Future<void> pumpSecondary({
+      required String label,
+      required ComponentApp app,
+      Brightness brightness = Brightness.light,
+    }) {
+      return tester.pumpWidget(
+        _wrap(
+          ButtonComponent(
+            label: label,
+            variant: ButtonComponentVariant.secondary,
+            size: ButtonComponentSize.large,
+            onTap: () {},
+          ),
+          app: app,
+          brightness: brightness,
+        ),
+      );
+    }
+
+    await pumpSecondary(label: "Photos", app: ComponentApp.photos);
+    expect(_textColor(tester, "Photos"), greenDarkLight);
+
+    await pumpSecondary(label: "Locker", app: ComponentApp.locker);
+    expect(_textColor(tester, "Locker"), blueDefaultLight);
+
+    await pumpSecondary(label: "Auth", app: ComponentApp.auth);
+    expect(_textColor(tester, "Auth"), purpleDefaultLight);
+
+    await pumpSecondary(
+      label: "Auth dark",
+      app: ComponentApp.auth,
+      brightness: Brightness.dark,
+    );
+    expect(_textColor(tester, "Auth dark"), purpleDefaultDark);
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text("Auth dark")),
+    );
+    await tester.pump();
+
+    expect(_containerColor(tester), purpleLightPressedDark);
+    expect(_textColor(tester, "Auth dark"), purpleDefaultDark);
+
+    await gesture.up();
   });
 
   testWidgets("IconButtonComponent renders Figma size and pressed state", (
@@ -489,9 +542,14 @@ void main() {
   });
 }
 
-Widget _wrap(Widget child) {
+Widget _wrap(
+  Widget child, {
+  ComponentApp app = ComponentApp.photos,
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
-    theme: ComponentTheme.lightTheme(),
+    themeAnimationDuration: Duration.zero,
+    theme: ComponentTheme.themeForApp(app, brightness: brightness),
     home: Scaffold(body: Center(child: child)),
   );
 }
@@ -503,9 +561,24 @@ Color _containerColor(WidgetTester tester) {
   return (container.decoration! as BoxDecoration).color!;
 }
 
+Color _buttonContainerColor(WidgetTester tester, String label) {
+  final container = tester.widget<AnimatedContainer>(
+    find.ancestor(
+      of: find.text(label),
+      matching: find.byType(AnimatedContainer),
+    ),
+  );
+  return (container.decoration! as BoxDecoration).color!;
+}
+
 Color _iconButtonColor(WidgetTester tester) {
   final container = tester.widget<AnimatedContainer>(
     find.byKey(const ValueKey('icon-button-surface')),
   );
   return (container.decoration! as BoxDecoration).color!;
+}
+
+Color _textColor(WidgetTester tester, String label) {
+  final text = tester.widget<Text>(find.text(label));
+  return text.style!.color!;
 }

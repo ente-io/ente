@@ -249,6 +249,7 @@ final class InferenceRsProvider {
         let summary: GenerateSummary = try await withCheckedThrowingContinuation { continuation in
             Task.detached {
                 do {
+                    self.unloadTranscriptionModelIfLoaded()
                     let summary = try generateChatStream(context: context, request: request, callback: sink)
                     lock.lock()
                     let localError = error
@@ -297,6 +298,7 @@ final class InferenceRsProvider {
                         return
                     }
 
+                    self.unloadTranscriptionModelIfLoaded()
                     try prewarmMultimodalContext(
                         context: context,
                         mmprojPath: mmprojPath.path,
@@ -389,6 +391,10 @@ final class InferenceRsProvider {
         modelHandle = nil
         currentModelKey = nil
         currentContextLength = nil
+    }
+
+    private func unloadTranscriptionModelIfLoaded() {
+        try? unloadTranscriptionModel()
     }
 
     private func loadModelHandle(target: InferenceModelTarget, modelPath: URL) throws {
