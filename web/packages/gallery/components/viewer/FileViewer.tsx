@@ -1215,7 +1215,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const canModify =
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
 
-            const showFavorite = canModify;
+            const showFavorite =
+                !!user &&
+                !!favoriteFileIDs &&
+                !!pendingFavoriteUpdates &&
+                !!onToggleFavorite &&
+                !isInTrashSection &&
+                !isInHiddenSection;
 
             const showArchive = canModify;
 
@@ -1273,6 +1279,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             isInIncomingSharedCollection,
             isInTrashSection,
             isInHiddenSection,
+            favoriteFileIDs,
+            pendingFavoriteUpdates,
+            onToggleFavorite,
             onDownload,
             handleEditImage,
             handleConfirmDelete,

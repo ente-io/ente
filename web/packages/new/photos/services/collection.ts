@@ -1768,12 +1768,52 @@ export const savedUserFavoritesCollection = async () => {
  * Reads local state but does not modify it. The effects are on remote.
  */
 export const addToFavoritesCollection = async (files: EnteFile[]) =>
-    addToCollection(await savedOrCreateUserFavoritesCollection(), files);
+    addOrCopyToCollection(await savedOrCreateUserFavoritesCollection(), files);
 
-export const removeFromFavoritesCollection = async (files: EnteFile[]) =>
-    // Non-null assertion because if we get here and a favorites collection does
-    // not already exist, then something is wrong.
-    removeFromOwnCollection((await savedUserFavoritesCollection())!.id, files);
+export const removeFromFavoritesCollection = async (files: EnteFile[]) => {
+    const favoritesCollection = await savedUserFavoritesCollection();
+    if (!favoritesCollection) {
+        throw new Error("Favorites collection does not exist");
+    }
+
+    const resolvedFiles = await resolveFavoritesFilesForRemoval(
+        favoritesCollection,
+        files,
+    );
+    if (!resolvedFiles.length) return;
+
+    await removeFromOwnCollection(
+        favoritesCollection.id,
+        uniqueFilesByID(resolvedFiles),
+    );
+};
+
+const resolveFavoritesFilesForRemoval = async (
+    favoritesCollection: Collection,
+    files: EnteFile[],
+) => {
+    const userID = ensureLocalUser().id;
+    const favoriteFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
+        (await savedCollectionFiles()).filter(
+            (file) => file.collectionID == favoritesCollection.id,
+        ),
+        userID,
+    );
+
+    return files.flatMap((file) => {
+        if (
+            file.ownerID != userID &&
+            file.collectionID != favoritesCollection.id
+        ) {
+            const key = hashAndTypeKey(file);
+            const favoriteFile = key
+                ? favoriteFilesByHashAndType.get(key)
+                : undefined;
+            return favoriteFile ? [favoriteFile] : [];
+        }
+        return [file];
+    });
+};
 
 /**
  * Return the default hidden collection for the user if one is found in the

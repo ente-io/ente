@@ -1362,7 +1362,7 @@ const Page: React.FC = () => {
                 await action([file]);
                 dispatch({
                     type: "unsyncedFavoriteUpdate",
-                    fileID,
+                    file,
                     isFavorite: !isFavorite,
                 });
             } finally {

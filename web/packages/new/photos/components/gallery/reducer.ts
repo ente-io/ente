@@ -325,15 +325,15 @@ export interface GalleryState {
      * user action) that have already been made to applied to remote, but whose
      * effects on remote have not yet been synced back to our local DB.
      *
-     * Each entry from a file ID to its favorite status (`true` if it belongs to
-     * the user's favorites, false otherwise) which should be used for that file
-     * instead of what we get from our local DB.
+     * Each entry is keyed by file ID and includes the favorite status (`true`
+     * if it belongs to the user's favorites, false otherwise) which should be
+     * used instead of what we get from our local DB.
      *
      * The next time a remote pull completes, we clear this map since thereafter
      * just deriving {@link favoriteFileIDs} from our local files would reflect
      * the correct state on remote too.
      */
-    unsyncedFavoriteUpdates: Map<number, boolean>;
+    unsyncedFavoriteUpdates: Map<number, UnsyncedFavoriteUpdate>;
     /**
      * File (IDs) for which there is currently an in-flight archive / unarchive
      * operation.
@@ -481,7 +481,7 @@ export type GalleryAction =
     | { type: "clearTempHidden" }
     | { type: "addPendingFavoriteUpdate"; fileID: number }
     | { type: "removePendingFavoriteUpdate"; fileID: number }
-    | { type: "unsyncedFavoriteUpdate"; fileID: number; isFavorite: boolean }
+    | { type: "unsyncedFavoriteUpdate"; file: EnteFile; isFavorite: boolean }
     | { type: "addPendingVisibilityUpdate"; fileID: number }
     | { type: "removePendingVisibilityUpdate"; fileID: number }
     | {
@@ -885,7 +885,15 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const unsyncedFavoriteUpdates = new Map(
                 state.unsyncedFavoriteUpdates,
             );
-            unsyncedFavoriteUpdates.set(action.fileID, action.isFavorite);
+            const fileHashAndTypeKey =
+                action.file.ownerID == state.user!.id
+                    ? undefined
+                    : favoriteFileHashAndTypeKey(action.file);
+            unsyncedFavoriteUpdates.set(action.file.id, {
+                fileID: action.file.id,
+                fileHashAndTypeKey,
+                isFavorite: action.isFavorite,
+            });
 
             // Skipping a call to stateByUpdatingFilteredFiles since it
             // currently doesn't depend on favorites.
@@ -1285,22 +1293,59 @@ const deriveFavoriteFileIDs = (
     unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
 ) => {
     let favoriteFileIDs = new Set<number>();
+    let favoriteFileHashAndTypeKeys = new Set<string>();
     for (const collection of collections) {
         // See: [Note: User and shared favorites]
         if (collection.type == "favorites" && collection.owner.id == user.id) {
-            favoriteFileIDs = new Set(
-                collectionFiles
-                    .filter((file) => file.collectionID == collection.id)
-                    .map((file) => file.id),
+            const favoriteFiles = collectionFiles.filter(
+                (file) => file.collectionID == collection.id,
+            );
+            favoriteFileIDs = new Set(favoriteFiles.map((file) => file.id));
+            favoriteFileHashAndTypeKeys = new Set(
+                favoriteFiles.flatMap((file) => {
+                    const key = favoriteFileHashAndTypeKey(file);
+                    return key ? [key] : [];
+                }),
             );
             break;
         }
     }
-    for (const [fileID, isFavorite] of unsyncedFavoriteUpdates.entries()) {
-        if (isFavorite) favoriteFileIDs.add(fileID);
-        else favoriteFileIDs.delete(fileID);
+    for (const file of collectionFiles) {
+        if (file.ownerID == user.id) continue;
+
+        const key = favoriteFileHashAndTypeKey(file);
+        if (key && favoriteFileHashAndTypeKeys.has(key)) {
+            favoriteFileIDs.add(file.id);
+        }
+    }
+    for (const update of unsyncedFavoriteUpdates.values()) {
+        const updatedFileIDs = update.fileHashAndTypeKey
+            ? collectionFiles
+                  .filter(
+                      (file) =>
+                          file.ownerID != user.id &&
+                          favoriteFileHashAndTypeKey(file) ==
+                              update.fileHashAndTypeKey,
+                  )
+                  .map((file) => file.id)
+            : [update.fileID];
+        for (const fileID of updatedFileIDs) {
+            if (update.isFavorite) favoriteFileIDs.add(fileID);
+            else favoriteFileIDs.delete(fileID);
+        }
     }
     return favoriteFileIDs;
+};
+
+interface UnsyncedFavoriteUpdate {
+    fileID: number;
+    fileHashAndTypeKey?: string;
+    isFavorite: boolean;
+}
+
+const favoriteFileHashAndTypeKey = (file: EnteFile) => {
+    const hash = metadataHash(file.metadata);
+    return hash ? `${hash}:${file.metadata.fileType}` : undefined;
 };
 
 /**
