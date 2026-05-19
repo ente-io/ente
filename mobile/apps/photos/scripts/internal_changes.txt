@@ -1,15 +1,18 @@
 Latest changes:
-- Laurens: Add Android review intent (review take photos using ente on supported camera apps)
-- Laurens: Add Android gallery pick intent (e.g. pick whatsapp photos from ente gallery)
-- Ashil: Lazy load file types section to avoid blocking UI shortly after app start
-- Aman: Batch large free up space deletes to avoid oversized OS delete requests
+- Neeraj: Fix iOS crash when playing Pixel Long Shot (.LS) videos
+- Neeraj: Fix Android video preview/export generation by restoring ffmpeg x264 support
+- Neeraj: Fix video edit delete navigation
+- Neeraj: Fix grey screen after single-memory delete or favorite actions
+- Aman: Flutter upgrade
 
 Still behind internal flag:
 - Amrithesh: (I) ML/Pet recognition [Indexing]
 - Aman: (I) Use Rust HEIC decoder for Android photo viewer when dimensions are known
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use cloudflare worker for upload for internal users
+
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
+- Neeraj: (i) Save Contact
 - Prateek: (i) Enable BG sync notifications by default for internal users on iOS
 - Prateek: (i) Add internal sync recovery diagnostics to classify local discovery vs remote upload-prep misses
 

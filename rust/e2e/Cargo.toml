@@ -5,10 +5,10 @@ edition = "2024"
 publish = false
 
 [dependencies]
-ente-rs = { path = "../cli" }
-ente-accounts = { path = "../accounts" }
-ente-contacts = { path = "../contacts" }
-ente-core = { path = "../core", features = ["srp"] }
+ente-rs = { path = "../apps/cli" }
+ente-accounts = { path = "../crates/accounts" }
+ente-contacts = { path = "../crates/contacts" }
+ente-core = { path = "../crates/core", features = ["srp"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"] }
 reqwest = { version = "0.12", features = ["json", "rustls-tls-native-roots"] }
 zeroize = { version = "1.8", features = ["derive"] }

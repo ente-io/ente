@@ -103,6 +103,37 @@ void main() {
     expect(find.text('Default close'), findsNothing);
   });
 
+  testWidgets(
+    'showBottomSheetComponent blocks system back when not dismissible',
+    (tester) async {
+      await _pumpLauncher(
+        tester,
+        (context) => showBottomSheetComponent<void>(
+          context: context,
+          isDismissible: false,
+          builder: (_) => const BottomSheetComponent(
+            title: 'Locked sheet',
+            content: Text('Sheet body'),
+          ),
+        ),
+      );
+
+      await _openLauncher(tester);
+
+      expect(find.text('Locked sheet'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('Locked sheet'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Locked sheet'), findsNothing);
+    },
+  );
+
   testWidgets('BottomSheetComponent does not pop a newer route after onClose', (
     tester,
   ) async {

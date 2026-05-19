@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ente_components/models/component_execution_state.dart';
 import 'package:ente_components/src/components/menu_component_surface_style.dart';
 import 'package:ente_components/theme/colors.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -28,6 +29,8 @@ class MenuComponent extends StatefulWidget {
     this.trailing,
     this.selected = false,
     this.onTap,
+    this.onDoubleTap,
+    this.onLongPress,
     this.isDisabled = false,
     this.showOnlyLoadingState = false,
     this.shouldSurfaceExecutionStates = false,
@@ -44,6 +47,8 @@ class MenuComponent extends StatefulWidget {
   final Widget? trailing;
   final bool selected;
   final FutureOr<void> Function()? onTap;
+  final FutureOr<void> Function()? onDoubleTap;
+  final VoidCallback? onLongPress;
   final bool isDisabled;
   final bool showOnlyLoadingState;
   final bool shouldSurfaceExecutionStates;
@@ -83,7 +88,11 @@ class _MenuComponentState extends State<MenuComponent> {
           onEnter: enabled ? (_) => _setHovered(true) : null,
           onExit: enabled ? (_) => _setHovered(false) : null,
           child: InkWell(
-            onTap: enabled ? _handleTap : null,
+            onTap: enabled && widget.onTap != null ? _handleTap : null,
+            onDoubleTap: enabled && widget.onDoubleTap != null
+                ? _handleDoubleTap
+                : null,
+            onLongPress: enabled ? widget.onLongPress : null,
             onHighlightChanged: enabled ? _setPressed : null,
             borderRadius: borderRadius,
             child: AnimatedContainer(
@@ -120,7 +129,7 @@ class _MenuComponentState extends State<MenuComponent> {
                             child: IconTheme.merge(
                               data: IconThemeData(
                                 color: widget.iconColor ?? colors.textLight,
-                                size: 18,
+                                size: IconSizes.small,
                               ),
                               child: widget.leading!,
                             ),
@@ -194,10 +203,25 @@ class _MenuComponentState extends State<MenuComponent> {
   }
 
   bool get _canHandleGestures {
-    return !widget.isDisabled && widget.onTap != null && !_isBusy;
+    return !widget.isDisabled && _hasGestureCallbacks && !_isBusy;
+  }
+
+  bool get _hasGestureCallbacks {
+    return widget.onTap != null ||
+        widget.onDoubleTap != null ||
+        widget.onLongPress != null;
   }
 
   bool get _isBusy => _executionState == ComponentExecutionState.inProgress;
+
+  void _handleDoubleTap() {
+    final onDoubleTap = widget.onDoubleTap;
+    if (onDoubleTap == null) {
+      return;
+    }
+
+    unawaited(Future.sync(onDoubleTap));
+  }
 
   bool get _showsLoading =>
       _executionState == ComponentExecutionState.inProgress && _loadingVisible;
@@ -234,7 +258,7 @@ class _MenuComponentState extends State<MenuComponent> {
     if (_showsLoading && _shouldSurfaceExecutionState) {
       return SizedBox.square(
         key: const ValueKey('menu-item-loading'),
-        dimension: 18,
+        dimension: IconSizes.small,
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation(colors.textLight),
@@ -246,7 +270,7 @@ class _MenuComponentState extends State<MenuComponent> {
         key: const ValueKey('menu-item-success'),
         Icons.check_rounded,
         color: colors.primary,
-        size: 18,
+        size: IconSizes.small,
       );
     }
     return widget.trailing;

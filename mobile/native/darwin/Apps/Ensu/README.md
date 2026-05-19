@@ -21,7 +21,7 @@ That's it. Apart from the `cargo codegen`, this is a normal iOS project.
 
 > [!NOTE]
 >
-> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/uniffi` changes.
+> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/bindings/uniffi` changes.
 >
 > Xcode compiles and statically links the Rust libraries automatically when building the app.
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ente_components/components/buttons/icon_button_component.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
@@ -222,7 +223,9 @@ Future<T?> showBottomSheetComponent<T>({
     enableDrag: enableDrag,
     backgroundColor: Colors.transparent,
     barrierColor: barrierColor ?? colors.specialScrim.withValues(alpha: 0.55),
-    builder: builder,
+    builder: (context) {
+      return PopScope(canPop: isDismissible, child: builder(context));
+    },
   );
 }
 
@@ -286,7 +289,10 @@ class _BottomSheetCloseButton extends StatelessWidget {
       tooltip: tooltip,
       variant: IconButtonComponentVariant.circular,
       shouldSurfaceExecutionStates: false,
-      icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 18),
+      icon: const HugeIcon(
+        icon: HugeIcons.strokeRoundedCancel01,
+        size: IconSizes.small,
+      ),
       onTap: () => _handleClose(context),
     );
   }
@@ -299,7 +305,7 @@ class _BottomSheetCloseButton extends StatelessWidget {
 
     final route = ModalRoute.of(context);
     if (route == null || route.isCurrent) {
-      await Navigator.of(context).maybePop();
+      Navigator.of(context).pop();
     }
   }
 }

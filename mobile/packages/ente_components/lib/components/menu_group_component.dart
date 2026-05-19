@@ -1,4 +1,3 @@
-import 'package:ente_components/components/menu_component.dart';
 import 'package:ente_components/src/components/menu_component_surface_style.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/theme.dart';
@@ -17,7 +16,7 @@ class MenuGroupComponent extends StatelessWidget {
     this.clipBehavior = Clip.hardEdge,
   });
 
-  final List<MenuComponent> items;
+  final List<Widget> items;
   final Color? backgroundColor;
   final BorderRadius borderRadius;
   final Clip clipBehavior;
@@ -73,7 +72,7 @@ class MenuGroupComponent extends StatelessWidget {
   }
 
   Widget _groupedItem(
-    MenuComponent item, {
+    Widget item, {
     required int index,
     required int itemCount,
     required Color backgroundColor,

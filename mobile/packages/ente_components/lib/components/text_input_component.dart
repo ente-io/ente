@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ente_components/theme/colors.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
@@ -108,7 +109,7 @@ class TextInputComponent extends StatefulWidget {
 
 class _TextInputComponentState extends State<TextInputComponent> {
   static const _kHeight = 52.0;
-  static const _kIconContainerSize = 24.0;
+  static const _kIconContainerSize = IconSizes.medium;
 
   TextEditingController? _internalController;
   FocusNode? _internalFocusNode;
@@ -402,7 +403,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
           _obscureText
               ? Icons.visibility_off_outlined
               : Icons.visibility_outlined,
-          size: 20,
+          size: IconSizes.small,
           color: colors.textLighter,
         ),
       );
@@ -418,7 +419,11 @@ class _TextInputComponentState extends State<TextInputComponent> {
                   FocusScope.of(context).unfocus();
                 }
               },
-        child: Icon(Icons.close_rounded, size: 20, color: colors.textLighter),
+        child: Icon(
+          Icons.close_rounded,
+          size: IconSizes.small,
+          color: colors.textLighter,
+        ),
       );
     } else if (widget.suffix != null) {
       child = widget.suffix!;
@@ -431,17 +436,17 @@ class _TextInputComponentState extends State<TextInputComponent> {
 
   Widget? _messageIcon(Color color) {
     if (widget.messageIcon != null) {
-      return Icon(widget.messageIcon, size: 18, color: color);
+      return Icon(widget.messageIcon, size: IconSizes.small, color: color);
     }
     return switch (widget.messageType) {
       TextInputComponentMessageType.alert => Icon(
         Icons.warning_amber_rounded,
-        size: 18,
+        size: IconSizes.small,
         color: color,
       ),
       TextInputComponentMessageType.success => Icon(
         Icons.check_circle_outline_rounded,
-        size: 18,
+        size: IconSizes.small,
         color: color,
       ),
       TextInputComponentMessageType.error ||

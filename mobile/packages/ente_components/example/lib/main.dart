@@ -18,7 +18,7 @@ class ComponentsCatalogApp extends StatefulWidget {
 
 class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
   ThemeMode _themeMode = ThemeMode.light;
-  EnteApp _appTheme = EnteApp.photos;
+  ComponentApp _appTheme = ComponentApp.photos;
   Duration? _lastPointerUpAt;
   Offset? _lastPointerUpPosition;
 
@@ -64,9 +64,9 @@ class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
 
   void _cycleAppTheme() {
     final nextTheme = switch (_appTheme) {
-      EnteApp.photos => EnteApp.locker,
-      EnteApp.locker => EnteApp.auth,
-      EnteApp.auth => EnteApp.photos,
+      ComponentApp.photos => ComponentApp.locker,
+      ComponentApp.locker => ComponentApp.auth,
+      ComponentApp.auth => ComponentApp.photos,
     };
     setState(() => _appTheme = nextTheme);
   }
@@ -330,14 +330,12 @@ class CatalogSettingsDrawer extends StatelessWidget {
       width: _drawerWidth(context),
       shape: const RoundedRectangleBorder(),
       backgroundColor: colors.backgroundBase,
-      child: CustomScrollView(
-        slivers: [
-          HeaderAppBarComponent(
-            title: 'Settings',
-            subtitle: 'aman@example.com',
-            onBack: () => Navigator.of(context).pop(),
-          ),
-          const SliverPadding(
+      child: AppBarComponent(
+        title: 'Settings',
+        subtitle: 'aman@example.com',
+        onBack: () => Navigator.of(context).pop(),
+        slivers: const [
+          SliverPadding(
             padding: EdgeInsets.fromLTRB(
               Spacing.sm,
               Spacing.xs,
@@ -358,7 +356,7 @@ double _drawerWidth(BuildContext context) {
 }
 
 class _CatalogHugeIcon extends StatelessWidget {
-  const _CatalogHugeIcon(this.icon, {this.color, this.size = 24});
+  const _CatalogHugeIcon(this.icon, {this.color, this.size = IconSizes.medium});
 
   final HugeIconData icon;
   final Color? color;
@@ -385,7 +383,7 @@ class _CatalogTrailingIcon extends StatelessWidget {
     return _CatalogHugeIcon(
       icon,
       color: context.componentColors.textLight,
-      size: 18,
+      size: IconSizes.small,
     );
   }
 }
@@ -459,11 +457,11 @@ class _CatalogSectionTile extends StatelessWidget {
     return MenuComponent(
       key: ValueKey('catalog-section-${section.title}'),
       title: section.title,
-      leading: _CatalogHugeIcon(section.icon, size: 18),
+      leading: _CatalogHugeIcon(section.icon, size: IconSizes.small),
       trailing: _CatalogHugeIcon(
         HugeIcons.strokeRoundedArrowRight02,
         color: colors.textLight,
-        size: 18,
+        size: IconSizes.small,
       ),
       onTap: () {
         final routeBuilder = section.routeBuilder;
@@ -511,19 +509,17 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          HeaderAppBarComponent(
-            title: widget.section.title,
-            subtitle: widget.section.components.join(', '),
-            onBack: () => Navigator.of(context).pop(),
-            actions: [
-              _CatalogThemeCycleButton(
-                themeMode: _themeMode,
-                onChanged: _setThemeMode,
-              ),
-            ],
+      body: AppBarComponent(
+        title: widget.section.title,
+        subtitle: widget.section.components.join(', '),
+        onBack: () => Navigator.of(context).pop(),
+        actions: [
+          _CatalogThemeCycleButton(
+            themeMode: _themeMode,
+            onChanged: _setThemeMode,
           ),
+        ],
+        slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               Spacing.lg,
@@ -682,7 +678,7 @@ class _SettingsTrailingIcon extends StatelessWidget {
     return _CatalogHugeIcon(
       HugeIcons.strokeRoundedArrowRight02,
       color: color ?? context.componentColors.textLight,
-      size: 18,
+      size: IconSizes.small,
     );
   }
 }
@@ -697,13 +693,11 @@ class _SettingsExampleShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     return Scaffold(
-      body: CustomScrollView(
+      body: AppBarComponent(
+        title: title,
+        subtitle: 'Settings',
+        onBack: () => Navigator.of(context).pop(),
         slivers: [
-          HeaderAppBarComponent(
-            title: title,
-            subtitle: 'Settings',
-            onBack: () => Navigator.of(context).pop(),
-          ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               Spacing.lg,
@@ -878,7 +872,7 @@ class _SettingsThemeOption extends StatelessWidget {
           ? _CatalogHugeIcon(
               HugeIcons.strokeRoundedTick02,
               color: colors.primary,
-              size: 18,
+              size: IconSizes.small,
             )
           : null,
       onTap: onTap,
@@ -1453,7 +1447,10 @@ class _IconButtonStatePreview extends StatelessWidget {
           : state == 'Error'
           ? () => _runPreviewError(context)
           : () {},
-      icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01, size: 18),
+      icon: const _CatalogHugeIcon(
+        HugeIcons.strokeRoundedAdd01,
+        size: IconSizes.small,
+      ),
     );
   }
 
@@ -2127,7 +2124,7 @@ class _HeaderImage extends StatelessWidget {
         child: _CatalogHugeIcon(
           HugeIcons.strokeRoundedUser,
           color: colors.textLight,
-          size: 20,
+          size: IconSizes.small,
         ),
       ),
     );
@@ -2181,26 +2178,24 @@ class _HeaderAppBarDemoPageState extends State<HeaderAppBarDemoPage> {
     final colors = context.componentColors;
     return Scaffold(
       backgroundColor: colors.backgroundBase,
-      body: CustomScrollView(
-        slivers: [
-          HeaderAppBarComponent(
-            title: 'Menu items',
-            subtitle: 'Scroll to collapse into a single app bar row',
-            onBack: () => Navigator.of(context).pop(),
-            leading: const _HeaderAppBarDemoLeading(),
-            actions: [
-              IconButtonComponent(
-                tooltip: 'Add item',
-                variant: IconButtonComponentVariant.primary,
-                icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
-                onTap: () => _showAction('Add tapped'),
-              ),
-              _CatalogThemeCycleButton(
-                themeMode: _themeMode,
-                onChanged: _setThemeMode,
-              ),
-            ],
+      body: AppBarComponent(
+        title: 'Menu items',
+        subtitle: 'Scroll to collapse into a single app bar row',
+        onBack: () => Navigator.of(context).pop(),
+        leading: const _HeaderAppBarDemoLeading(),
+        actions: [
+          IconButtonComponent(
+            tooltip: 'Add item',
+            variant: IconButtonComponentVariant.primary,
+            icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
+            onTap: () => _showAction('Add tapped'),
           ),
+          _CatalogThemeCycleButton(
+            themeMode: _themeMode,
+            onChanged: _setThemeMode,
+          ),
+        ],
+        slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               Spacing.lg,
@@ -2236,7 +2231,7 @@ class _HeaderAppBarDemoLeading extends StatelessWidget {
         child: _CatalogHugeIcon(
           HugeIcons.strokeRoundedMenuCircle,
           color: colors.specialWhite,
-          size: 20,
+          size: IconSizes.small,
         ),
       ),
     );
@@ -2476,7 +2471,7 @@ class _MenuItemPreviewState extends State<_MenuItemPreview> {
                 leading: _CatalogHugeIcon(
                   HugeIcons.strokeRoundedDelete02,
                   color: colors.warning,
-                  size: 18,
+                  size: IconSizes.small,
                 ),
                 trailing: const _CatalogTrailingIcon(
                   HugeIcons.strokeRoundedArrowRight01,
@@ -2656,7 +2651,10 @@ class _MenuItemExample extends StatelessWidget {
       title: hasLeading ? 'Camera uploads' : 'Storage plan',
       subtitle: hasSubtitle ? '834 items' : null,
       leading: hasLeading
-          ? const _CatalogHugeIcon(HugeIcons.strokeRoundedUser, size: 18)
+          ? const _CatalogHugeIcon(
+              HugeIcons.strokeRoundedUser,
+              size: IconSizes.small,
+            )
           : null,
       trailing: _trailing(context),
       selected: selected,
@@ -2670,7 +2668,7 @@ class _MenuItemExample extends StatelessWidget {
       return _CatalogHugeIcon(
         HugeIcons.strokeRoundedCheckmarkCircle02,
         color: colors.primary,
-        size: 18,
+        size: IconSizes.small,
       );
     }
     return switch (trailingKind) {

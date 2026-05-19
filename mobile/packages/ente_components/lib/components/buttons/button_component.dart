@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ente_components/models/component_execution_state.dart';
 import 'package:ente_components/theme/colors.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -54,7 +55,7 @@ class ButtonComponent extends StatefulWidget {
 
 class _ButtonComponentState extends State<ButtonComponent>
     with SingleTickerProviderStateMixin {
-  static const double _executionIconSize = 24;
+  static const double _executionIconSize = IconSizes.medium;
   static const double _contentMinHeight = 24;
   static const double _verticalPadding = 14;
   static const Duration _loadingDelay = Duration(milliseconds: 300);
@@ -508,8 +509,10 @@ class _ButtonComponentState extends State<ButtonComponent>
     final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.specialWhite,
-      ButtonComponentVariant.secondary =>
-        isPressed ? colors.primaryDarker : colors.primaryDark,
+      ButtonComponentVariant.secondary => _secondaryForeground(
+        colors,
+        isPressed: isPressed,
+      ),
       ButtonComponentVariant.neutral => colors.textReverse,
       ButtonComponentVariant.critical => colors.specialWhite,
       ButtonComponentVariant.tertiaryCritical =>
@@ -525,6 +528,13 @@ class _ButtonComponentState extends State<ButtonComponent>
             ? colors.primaryDark
             : colors.primary,
     };
+  }
+
+  Color _secondaryForeground(ColorTokens colors, {required bool isPressed}) {
+    if (colors.primary == colors.blue || colors.primary == colors.purple) {
+      return colors.primary;
+    }
+    return isPressed ? colors.primaryDarker : colors.primaryDark;
   }
 
   ColorTokens _componentColors(BuildContext context) {

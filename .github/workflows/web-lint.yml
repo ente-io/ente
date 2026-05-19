@@ -5,7 +5,11 @@ on:
     pull_request:
         paths:
             - "web/**"
-            - "rust/core/**"
+            - "rust/bindings/wasm/ente-wasm/**"
+            - "rust/crates/contacts/**"
+            - "rust/crates/core/**"
+            - "rust/Cargo.lock"
+            - "rust/Cargo.toml"
             - ".github/workflows/web-lint.yml"
 
 permissions:
@@ -31,7 +35,7 @@ jobs:
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v6
               with:
-                  node-version: 22
+                  node-version: 24
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 

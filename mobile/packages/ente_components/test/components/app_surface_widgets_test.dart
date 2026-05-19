@@ -4,6 +4,7 @@ import 'package:ente_components/components/app_bar_component.dart';
 import 'package:ente_components/components/menu_component.dart';
 import 'package:ente_components/components/menu_group_component.dart';
 import 'package:ente_components/theme/colors.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,7 +47,7 @@ void main() {
         trailing: Icon(
           Icons.chevron_right,
           color: ColorTokens.light.textLight,
-          size: 18,
+          size: IconSizes.small,
         ),
         selected: true,
         titleColor: ColorTokens.light.warning,
@@ -224,6 +225,69 @@ void main() {
     expect(tapCount, 0);
   });
 
+  testWidgets('MenuComponent handles double tap gestures', (tester) async {
+    var doubleTapCount = 0;
+
+    await pumpComponent(
+      tester,
+      MenuComponent(
+        title: 'Verify email',
+        onDoubleTap: () => doubleTapCount += 1,
+      ),
+    );
+
+    await tester.tap(find.text('Verify email'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(find.text('Verify email'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(doubleTapCount, 1);
+  });
+
+  testWidgets('MenuComponent handles long press gestures', (tester) async {
+    var longPressCount = 0;
+
+    await pumpComponent(
+      tester,
+      MenuComponent(
+        title: 'Share logs',
+        onLongPress: () => longPressCount += 1,
+      ),
+    );
+
+    await tester.longPress(find.text('Share logs'));
+    await tester.pump();
+
+    expect(longPressCount, 1);
+  });
+
+  testWidgets('MenuComponent disables double tap and long press gestures', (
+    tester,
+  ) async {
+    var doubleTapCount = 0;
+    var longPressCount = 0;
+
+    await pumpComponent(
+      tester,
+      MenuComponent(
+        title: 'Disabled row',
+        isDisabled: true,
+        onDoubleTap: () => doubleTapCount += 1,
+        onLongPress: () => longPressCount += 1,
+      ),
+    );
+
+    await tester.tap(find.text('Disabled row'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(find.text('Disabled row'));
+    await tester.pump();
+    await tester.longPress(find.text('Disabled row'));
+    await tester.pump();
+
+    expect(doubleTapCount, 0);
+    expect(longPressCount, 0);
+  });
+
   testWidgets('MenuGroupComponent shapes a list of menu items', (tester) async {
     var tapped = false;
     var disabledTapped = false;
@@ -396,7 +460,7 @@ void main() {
     expect(tester.getSize(find.byType(MenuComponent)).height, greaterThan(60));
   });
 
-  testWidgets('HeaderAppBarComponent scrolls without narrow width overflow', (
+  testWidgets('SliverAppBarComponent scrolls without narrow width overflow', (
     tester,
   ) async {
     var addTapped = false;
@@ -406,7 +470,7 @@ void main() {
       tester,
       CustomScrollView(
         slivers: [
-          HeaderAppBarComponent(
+          SliverAppBarComponent(
             title: 'Menu items',
             subtitle: 'Scroll to collapse',
             onBack: () {},
@@ -484,7 +548,91 @@ void main() {
     expect(find.text('Menu items'), findsWidgets);
   });
 
-  testWidgets('HeaderAppBarComponent adapts vertical space for large text', (
+  testWidgets(
+    'SliverAppBarComponent collapse progress matches reserved space',
+    (tester) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await pumpComponent(
+        tester,
+        CustomScrollView(
+          controller: scrollController,
+          slivers: [
+            const SliverAppBarComponent(
+              title: 'Menu items',
+              subtitle: 'Scroll to collapse',
+              onBack: null,
+              actions: [Icon(Icons.add)],
+            ),
+            SliverList.builder(
+              itemCount: 24,
+              itemBuilder: (context, index) {
+                return SizedBox(height: 60, child: Text('Item $index'));
+              },
+            ),
+          ],
+        ),
+        width: 390,
+        height: 600,
+      );
+
+      scrollController.jumpTo(54);
+      await tester.pump();
+
+      final title = tester.widget<Text>(find.text('Menu items'));
+      expect(title.style?.fontSize, greaterThan(18));
+
+      scrollController.jumpTo(60);
+      await tester.pump();
+
+      final collapsedTitle = tester.widget<Text>(find.text('Menu items'));
+      expect(collapsedTitle.style?.fontSize, closeTo(18, 0.01));
+      expect(tester.getTopLeft(find.text('Item 0')).dy, closeTo(56, 1));
+    },
+  );
+
+  testWidgets('AppBarComponent lets short content stick collapsed', (
+    tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await pumpComponent(
+      tester,
+      AppBarComponent(
+        controller: scrollController,
+        title: 'Appearance',
+        subtitle: 'Settings',
+        actions: const [Icon(Icons.dark_mode)],
+        slivers: const [
+          SliverToBoxAdapter(
+            child: SizedBox(height: 80, child: Text('System theme')),
+          ),
+        ],
+      ),
+      width: 390,
+      height: 600,
+    );
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -40));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, closeTo(60, 1));
+    final collapsedTitle = tester.widget<Text>(find.text('Appearance'));
+    expect(collapsedTitle.style?.fontSize, closeTo(18, 0.01));
+    expect(tester.getTopLeft(find.text('System theme')).dy, closeTo(56, 1));
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 32));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, closeTo(60, 1));
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, closeTo(0, 1));
+  });
+
+  testWidgets('SliverAppBarComponent adapts vertical space for large text', (
     tester,
   ) async {
     const title = 'A very large header title that should stay constrained';
@@ -493,7 +641,7 @@ void main() {
       tester,
       CustomScrollView(
         slivers: [
-          const HeaderAppBarComponent(
+          const SliverAppBarComponent(
             title: title,
             subtitle: 'Large text subtitle',
             onBack: null,

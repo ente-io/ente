@@ -8,41 +8,38 @@ import 'package:flutter/material.dart';
 class ComponentTheme {
   const ComponentTheme._();
 
+  static ComponentApp _currentApp = ComponentApp.photos;
+
+  static void configure({required ComponentApp app}) {
+    _currentApp = app;
+  }
+
   static ColorTokens colorsOf(BuildContext context) {
     final theme = Theme.of(context);
     return theme.extension<ComponentColorTokens>()?.colors ??
-        colorsForApp(
-          EnteApp.photos,
-          brightness: theme.brightness,
-        );
+        colorsForApp(_currentApp, brightness: theme.brightness);
   }
 
   static ColorTokens colorsForApp(
-    EnteApp app, {
+    ComponentApp app, {
     Brightness brightness = Brightness.light,
   }) {
     return ColorTokens.forApp(app, brightness: brightness);
   }
 
-  static ThemeData lightTheme({EnteApp app = EnteApp.photos}) {
-    return _theme(
-      colorsForApp(app),
-      Brightness.light,
-    );
+  static ThemeData lightTheme({ComponentApp app = ComponentApp.photos}) {
+    return _theme(colorsForApp(app), Brightness.light);
   }
 
-  static ThemeData darkTheme({EnteApp app = EnteApp.photos}) {
+  static ThemeData darkTheme({ComponentApp app = ComponentApp.photos}) {
     return _theme(
-      colorsForApp(
-        app,
-        brightness: Brightness.dark,
-      ),
+      colorsForApp(app, brightness: Brightness.dark),
       Brightness.dark,
     );
   }
 
   static ThemeData themeForApp(
-    EnteApp app, {
+    ComponentApp app, {
     Brightness brightness = Brightness.light,
   }) {
     return brightness == Brightness.dark
@@ -72,9 +69,7 @@ class ComponentTheme {
         labelMedium: TextStyles.mini,
         labelSmall: TextStyles.tiny,
       ),
-      extensions: [
-        ComponentColorTokens(colors),
-      ],
+      extensions: [ComponentColorTokens(colors)],
     );
   }
 }

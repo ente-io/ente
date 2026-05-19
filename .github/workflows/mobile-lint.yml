@@ -7,8 +7,8 @@ on:
         paths:
             - "mobile/apps/photos/**"
             - "rust/photos/**"
-            - "rust/core/**"
-            - "rust/contacts/**"
+            - "rust/crates/core/**"
+            - "rust/crates/contacts/**"
             - "rust/crates/image/**"
             - ".github/workflows/mobile-lint.yml"
             - "mobile/scripts/check_source_arb_plurals.rb"
@@ -42,7 +42,7 @@ jobs:
 
                   while IFS= read -r file; do
                       case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/core/*|rust/contacts/*)
+                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/crates/core/*|rust/crates/contacts/*)
                               ente_rust=true
                               ;;
                       esac
