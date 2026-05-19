@@ -367,7 +367,7 @@ const renderTableCellContent = (
                     }}
                 >
                     <Typography sx={{ marginRight: "1px" }}>
-                        {enabledLabel(row.enabled)}
+                        {enabledLabel(securityControls.twoFactorEnabled)}
                     </Typography>
                     {row.enabled && (
                         <Switch
@@ -411,7 +411,7 @@ const renderTableCellContent = (
                     }}
                 >
                     <Typography sx={{ marginRight: "1px" }}>
-                        {enabledLabel(row.enabled)}
+                        {enabledLabel(securityControls.emailMFAEnabled)}
                     </Typography>
                     {securityControls.canDisableEmailMFA && (
                         <Switch
