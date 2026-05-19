@@ -262,7 +262,7 @@ const buildUserDetailsData = (
             {
                 kind: "text",
                 label: "User ID",
-                value: userResponse.user.ID || "None",
+                value: `${userResponse.user.ID}`,
             },
             {
                 kind: "email",

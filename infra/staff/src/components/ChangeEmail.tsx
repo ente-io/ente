@@ -20,7 +20,7 @@ interface ChangeEmailProps {
 
 export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
     const [newEmail, setNewEmail] = useState("");
-    const [userID, setUserID] = useState("");
+    const [userID, setUserID] = useState<number | undefined>(undefined);
     const sessionRef = useStaffSessionRef();
 
     useEffect(() => {
@@ -53,6 +53,9 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         event.preventDefault();
 
         try {
+            if (userID === undefined) {
+                throw new Error("User ID not found");
+            }
             await changeUserEmail(sessionRef.current, userID, newEmail);
             onClose();
         } catch (error) {

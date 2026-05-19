@@ -9,10 +9,10 @@ import {
 import type { StaffSession } from "./session";
 
 const UserProfileData = z.looseObject({
-    isEmailMFAEnabled: z.boolean().optional(),
-    isTwoFactorEnabled: z.boolean().optional(),
-    passkeyCount: z.number().optional(),
-    canDisableEmailMFA: z.boolean().optional(),
+    isEmailMFAEnabled: z.boolean(),
+    isTwoFactorEnabled: z.boolean(),
+    passkeyCount: z.number(),
+    canDisableEmailMFA: z.boolean(),
 });
 
 const FamilyMember = z.looseObject({
@@ -20,7 +20,7 @@ const FamilyMember = z.looseObject({
     email: z.string(),
     status: z.string(),
     usage: z.number(),
-    storageLimit: z.number(),
+    storageLimit: z.number().optional(),
 });
 
 export type FamilyMember = z.infer<typeof FamilyMember>;
@@ -38,7 +38,7 @@ export type StorageBonus = z.infer<typeof StorageBonus>;
 const TokenData = z.looseObject({
     creationTime: z.number(),
     lastUsedTime: z.number(),
-    ua: z.string().optional(),
+    ua: z.string(),
     isDeleted: z.boolean(),
     app: z.string(),
 });
@@ -46,26 +46,24 @@ const TokenData = z.looseObject({
 export type TokenData = z.infer<typeof TokenData>;
 
 const Subscription = z.looseObject({
-    productID: z.string().optional(),
-    paymentProvider: z.string().optional(),
+    productID: z.string(),
+    paymentProvider: z.string(),
     storage: z.number(),
-    originalTransactionID: z.string().optional(),
+    originalTransactionID: z.string(),
     expiryTime: z.number(),
-    userID: z.string().optional(),
-    attributes: z
-        .looseObject({
-            customerID: z.string().optional(),
-            stripeAccountCountry: z.string().optional(),
-        })
-        .optional(),
+    userID: z.number(),
+    attributes: z.looseObject({
+        customerID: z.string().optional(),
+        stripeAccountCountry: z.string().optional(),
+    }),
 });
 
 export type Subscription = z.infer<typeof Subscription>;
 
 const UserResponse = z.looseObject({
     user: z.looseObject({
-        ID: z.string().optional(),
-        email: z.string().optional(),
+        ID: z.number(),
+        email: z.string(),
         creationTime: z.number(),
     }),
     subscription: Subscription.nullable().optional(),
@@ -73,17 +71,15 @@ const UserResponse = z.looseObject({
     tokens: z.array(TokenData).optional(),
     details: z
         .looseObject({
-            usage: z.number().optional(),
-            storageBonus: z.number().optional(),
-            profileData: UserProfileData.optional(),
+            usage: z.number(),
+            storageBonus: z.number(),
+            profileData: UserProfileData.nullish(),
             familyData: z
-                .looseObject({ members: z.array(FamilyMember).optional() })
+                .looseObject({ members: z.array(FamilyMember) })
                 .optional(),
             bonusData: z
-                .looseObject({
-                    storageBonuses: z.array(StorageBonus).optional(),
-                })
-                .optional(),
+                .looseObject({ storageBonuses: z.array(StorageBonus) })
+                .nullish(),
         })
         .optional(),
 });
@@ -98,12 +94,12 @@ interface AddOTTRequest {
 }
 
 export interface UpdateSubscriptionRequest {
-    userId: string;
+    userID: number;
     storage: number;
-    expiryTime: number | null;
-    productId: string;
+    expiryTime: number;
+    productID: string;
     paymentProvider: string;
-    transactionId: string;
+    transactionID: string;
     attributes: { customerID: string; stripeAccountCountry: string };
 }
 
@@ -138,9 +134,9 @@ export const getSelectedUser = async (session: StaffSession) => {
 
 export const getSelectedUserID = async (session: StaffSession) => {
     const userData = await getSelectedUser(session);
-    const userId = userData.subscription?.userID;
-    if (!userId) throw new Error("User ID not found");
-    return userId;
+    const userID = userData.subscription?.userID;
+    if (userID === undefined) throw new Error("User ID not found");
+    return userID;
 };
 
 export const getSelectedSubscription = async (session: StaffSession) => {
@@ -180,7 +176,7 @@ export const addOTT = async (
 
 export const changeUserEmail = async (
     session: StaffSession,
-    userID: string,
+    userID: number,
     email: string,
 ) => {
     const response = await fetch(apiURL("/admin/user/change-email"), {
@@ -192,11 +188,11 @@ export const changeUserEmail = async (
 };
 
 export const closeFamily = async (session: StaffSession) => {
-    const userId = await getSelectedUserID(session);
+    const userID = await getSelectedUserID(session);
     const response = await fetch(apiURL("/admin/user/close-family"), {
         method: "POST",
         headers: staffJSONRequestHeaders(session),
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userID }),
     });
     await ensureOk(response, "Failed to close family");
 };
@@ -220,11 +216,11 @@ export const disable2FA = async (session: StaffSession) => {
 };
 
 export const disablePasskeys = async (session: StaffSession) => {
-    const userId = await getSelectedUserID(session);
+    const userID = await getSelectedUserID(session);
     const response = await fetch(apiURL("/admin/user/disable-passkeys"), {
         method: "POST",
         headers: staffJSONRequestHeaders(session),
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userID }),
     });
     await ensureOk(response, "Failed to disable passkeys");
 };

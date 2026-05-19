@@ -41,7 +41,7 @@ interface FormValues {
     storage: number;
     transactionId: string;
     expiryTime: Date | null;
-    userId: string;
+    userID: number | undefined;
     attributes: { customerID: string; stripeAccountCountry: string };
 }
 
@@ -55,7 +55,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         storage: 0,
         transactionId: "",
         expiryTime: null,
-        userId: "",
+        userID: undefined,
         attributes: { customerID: "", stripeAccountCountry: "" },
     });
 
@@ -78,11 +78,11 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                     storage: bytesToGB(subscription.storage) || 0,
                     transactionId: subscription.originalTransactionID || "",
                     expiryTime,
-                    userId: subscription.userID || "",
+                    userID: subscription.userID,
                     attributes: {
-                        customerID: subscription.attributes?.customerID || "",
+                        customerID: subscription.attributes.customerID || "",
                         stripeAccountCountry:
-                            subscription.attributes?.stripeAccountCountry || "",
+                            subscription.attributes.stripeAccountCountry || "",
                     },
                 });
             } catch (error) {
@@ -122,18 +122,20 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         event.preventDefault();
 
         try {
-            let expiryTime = null;
-            if (values.expiryTime) {
-                expiryTime = dateToMicroseconds(values.expiryTime);
+            if (values.userID === undefined) {
+                throw new Error("User ID not found");
+            }
+            if (!values.expiryTime) {
+                throw new Error("Expiry time not found");
             }
 
             await updateUserSubscription(session, {
-                userId: values.userId,
+                userID: values.userID,
                 storage: gbToBytes(values.storage),
-                expiryTime,
-                productId: values.productId,
+                expiryTime: dateToMicroseconds(values.expiryTime),
+                productID: values.productId,
                 paymentProvider: values.provider,
-                transactionId: values.transactionId,
+                transactionID: values.transactionId,
                 attributes: {
                     customerID: values.attributes.customerID,
                     stripeAccountCountry:
