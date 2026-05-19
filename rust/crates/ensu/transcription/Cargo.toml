@@ -14,7 +14,12 @@ reqwest = { version = "0.12", default-features = false, features = ["blocking", 
 rubato = "0.16"
 tar = "0.4"
 thiserror = "2"
-transcribe-rs = { version = "0.3.11", default-features = false, features = ["onnx", "vad-silero"] }
+transcribe-rs = { git = "https://github.com/ente-io/transcribe-rs.git", rev = "e859d2c4a32e374199c75630c651419a49b0b2d4", default-features = false, features = ["onnx", "vad-silero"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
-ort = { version = "=2.0.0-rc.12", default-features = false, features = ["load-dynamic"] }
+# Keep Ensu and Ente Photos on the same ort version when possible.
+# ort 2.0.0-rc.4 corresponds to ONNX Runtime 1.22. This is intentional
+# because https://github.com/microsoft/onnxruntime/issues/26361 is only fixed
+# in ONNX Runtime 1.24.3 via https://github.com/microsoft/onnxruntime/pull/27403.
+# Future ort upgrades must correspond to ONNX Runtime 1.24.3 or newer.
+ort = { version = "=2.0.0-rc.4", default-features = false, features = ["load-dynamic"] }

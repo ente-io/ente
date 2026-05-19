@@ -19,6 +19,11 @@ html-escape = "0.2.13"
 plsfix = "0.1.8"
 thiserror = "2.0.11"
 
+# Keep Ensu and Ente Photos on the same ort version when possible.
+# ort 2.0.0-rc.4 corresponds to ONNX Runtime 1.22. This is intentional
+# because https://github.com/microsoft/onnxruntime/issues/26361 is only fixed
+# in ONNX Runtime 1.24.3 via https://github.com/microsoft/onnxruntime/pull/27403.
+# Future ort upgrades must correspond to ONNX Runtime 1.24.3 or newer.
 [target.'cfg(target_os = "ios")'.dependencies]
 ort = { version = "=2.0.0-rc.4", default-features = false, features = [
     "ndarray",
