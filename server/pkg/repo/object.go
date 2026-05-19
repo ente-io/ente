@@ -13,8 +13,16 @@ import (
 )
 
 type ObjectRepository struct {
-	DB        *sql.DB
-	QueueRepo *QueueRepository
+	DB                 *sql.DB
+	LatencySensitiveDB *sql.DB
+	QueueRepo          *QueueRepository
+}
+
+func (repo *ObjectRepository) objectLookupDB() *sql.DB {
+	if repo.LatencySensitiveDB != nil {
+		return repo.LatencySensitiveDB
+	}
+	return repo.DB
 }
 
 func (repo *ObjectRepository) GetObjectsMissingInDC(dc string, limit int, random bool) ([]ente.S3ObjectKey, error) {
@@ -56,7 +64,7 @@ func (repo *ObjectRepository) GetObjectsForFileIDs(fileIDs []int64) ([]ente.S3Ob
 // GetObject returns the ente.S3ObjectKey key for a file id and type
 func (repo *ObjectRepository) GetObject(fileID int64, objType ente.ObjectType) (ente.S3ObjectKey, error) {
 	// todo: handling of deleted objects
-	row := repo.DB.QueryRow(`SELECT object_key, size, o_type FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
+	row := repo.objectLookupDB().QueryRow(`SELECT object_key, size, o_type FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
 		fileID, objType)
 	var s3ObjectKey ente.S3ObjectKey
 	s3ObjectKey.FileID = fileID
@@ -65,7 +73,7 @@ func (repo *ObjectRepository) GetObject(fileID int64, objType ente.ObjectType) (
 }
 
 func (repo *ObjectRepository) GetObjectWithDCs(fileID int64, objType ente.ObjectType) (ente.S3ObjectKey, []string, error) {
-	row := repo.DB.QueryRow(`SELECT object_key, size, o_type, datacenters FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
+	row := repo.objectLookupDB().QueryRow(`SELECT object_key, size, o_type, datacenters FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
 		fileID, objType)
 	var s3ObjectKey ente.S3ObjectKey
 	var datacenters []string

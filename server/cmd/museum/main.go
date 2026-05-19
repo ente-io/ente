@@ -138,6 +138,8 @@ func main() {
 
 	db := setupDatabase()
 	defer db.Close()
+	latencySensitiveDB := setupLatencySensitiveDatabase()
+	defer latencySensitiveDB.Close()
 
 	hostName, err := os.Hostname()
 	if err != nil {
@@ -181,7 +183,7 @@ func main() {
 
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
-	objectRepo := &repo.ObjectRepository{DB: db, QueueRepo: queueRepo}
+	objectRepo := &repo.ObjectRepository{DB: db, LatencySensitiveDB: latencySensitiveDB, QueueRepo: queueRepo}
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
 	contactRepository := &contactRepo.Repository{
 		DB:                  db,
@@ -203,6 +205,9 @@ func main() {
 
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
+	accessCollectionLinkRepo := public.NewCollectionLinkRepository(latencySensitiveDB, viper.GetString("apps.public-albums"))
+	accessCollectionRepo := &repo.CollectionRepository{DB: latencySensitiveDB, CollectionLinkRepo: accessCollectionLinkRepo}
+	accessFileRepo := &repo.FileRepository{DB: latencySensitiveDB}
 	pushRepo := &repo.PushTokenRepository{DB: db}
 	collectionActionRepo := &repo.CollectionActionsRepository{
 		DB: db,
@@ -288,7 +293,7 @@ func main() {
 		UploadResultCache: make(map[int64]bool),
 	}
 
-	accessCtrl := access.NewAccessController(collectionRepo, fileRepo)
+	accessCtrl := access.NewAccessController(accessCollectionRepo, accessFileRepo)
 	commentsRepo := &socialrepo.CommentsRepository{DB: db}
 	reactionsRepo := &socialrepo.ReactionsRepository{DB: db}
 	anonUsersRepo := &socialrepo.AnonUsersRepository{DB: db}
@@ -1152,6 +1157,31 @@ func setupDatabase() *sql.DB {
 	db.SetConnMaxIdleTime(10 * time.Minute)
 
 	log.Println("Database was configured successfully.")
+
+	return db
+}
+
+func setupLatencySensitiveDatabase() *sql.DB {
+	log.Println("Setting up latency sensitive db")
+	db, err := sql.Open("postgres", config.GetPGInfo())
+
+	if err != nil {
+		log.Panic(err)
+		panic(err)
+	}
+	log.Println("Connected to latency sensitive DB")
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Pinged latency sensitive DB")
+
+	db.SetMaxIdleConns(20)
+	db.SetMaxOpenConns(20)
+	db.SetConnMaxLifetime(30 * time.Minute)
+	db.SetConnMaxIdleTime(10 * time.Minute)
+
+	log.Println("Latency sensitive database was configured successfully.")
 
 	return db
 }
