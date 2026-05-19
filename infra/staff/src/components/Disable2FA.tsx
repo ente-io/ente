@@ -1,11 +1,6 @@
 import React, { useState } from "react";
+import { disable2FA } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
-import {
-    apiOrigin,
-    getCurrentAdminUserId,
-    requireToken,
-    responseErrorMessage,
-} from "../services/support";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 
 interface Disable2FAProps {
@@ -25,28 +20,7 @@ export const Disable2FA: React.FC<Disable2FAProps> = ({
     const handleDisable = async () => {
         try {
             setLoading(true);
-            const token = requireToken(session);
-            const userID = await getCurrentAdminUserId(session);
-            const response = await fetch(
-                `${apiOrigin}/admin/user/disable-2fa`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Auth-Token": token,
-                    },
-                    body: JSON.stringify({ userID }),
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    await responseErrorMessage(
-                        response,
-                        "Failed to disable 2FA",
-                    ),
-                );
-            }
+            await disable2FA(session);
             handleDisable2FA();
             handleClose();
         } catch (error) {

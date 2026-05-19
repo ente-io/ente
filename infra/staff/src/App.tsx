@@ -13,29 +13,8 @@ import { StorageBonusTableComponent } from "./components/StorageBonusTableCompon
 import { TokensTableComponent } from "./components/TokenTableComponent";
 import { UserComponent, type UserData } from "./components/UserComponent";
 import duckieimage from "./components/duckie.png";
+import { getUser } from "./services/admin-user";
 import { StaffSessionProvider } from "./services/session";
-import { apiOrigin } from "./services/support";
-
-interface UserResponse {
-    user: { ID: string; email: string; creationTime: number };
-    subscription: {
-        productID: string;
-        paymentProvider: string;
-        expiryTime: number;
-        storage: number;
-    };
-    authCodes?: number;
-    details?: {
-        usage?: number;
-        storageBonus?: number;
-        profileData: {
-            isEmailMFAEnabled: boolean;
-            isTwoFactorEnabled: boolean;
-            passkeyCount: number;
-            canDisableEmailMFA: boolean;
-        };
-    };
-}
 
 export const App: React.FC = () => {
     const [urlCredentials] = useState(readUrlCredentials);
@@ -67,30 +46,26 @@ export const App: React.FC = () => {
         const startTime = Date.now();
         try {
             const userSearchInput = input.trim();
-            const url = buildUserSearchUrl(userSearchInput);
-            const response = await fetch(url, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": authToken,
-                },
-            });
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
+            const userDataResponse = await getUser(
+                { token: authToken },
+                userSearchInput,
+            );
+            if (!userDataResponse.subscription) {
+                throw new Error("Subscription data not found");
             }
-            const userDataResponse: UserResponse =
-                (await response.json()) as UserResponse;
+            const { subscription } = userDataResponse;
             const userEmail = userDataResponse.user.email || userSearchInput;
             setSelectedUserEmail(userEmail);
             const emailMFAEnabled =
-                userDataResponse.details?.profileData.isEmailMFAEnabled ??
+                userDataResponse.details?.profileData?.isEmailMFAEnabled ??
                 false;
             const twoFactorEnabled =
-                userDataResponse.details?.profileData.isTwoFactorEnabled ??
+                userDataResponse.details?.profileData?.isTwoFactorEnabled ??
                 false;
             const passkeysEnabled =
-                (userDataResponse.details?.profileData.passkeyCount ?? 0) > 0;
+                (userDataResponse.details?.profileData?.passkeyCount ?? 0) > 0;
             const canDisableEmailMFA =
-                userDataResponse.details?.profileData.canDisableEmailMFA ??
+                userDataResponse.details?.profileData?.canDisableEmailMFA ??
                 false;
 
             const extractedUserData: UserData = {
@@ -119,10 +94,7 @@ export const App: React.FC = () => {
                     {
                         kind: "text",
                         label: "Total",
-                        value: formatStorage(
-                            userDataResponse.subscription.storage,
-                            true,
-                        ),
+                        value: formatStorage(subscription.storage, true),
                     },
                     {
                         kind: "text",
@@ -141,22 +113,19 @@ export const App: React.FC = () => {
                     {
                         kind: "text",
                         label: "Product ID",
-                        value:
-                            userDataResponse.subscription.productID || "None",
+                        value: subscription.productID || "None",
                     },
                     {
                         kind: "text",
                         label: "Provider",
-                        value:
-                            userDataResponse.subscription.paymentProvider ||
-                            "None",
+                        value: subscription.paymentProvider || "None",
                     },
                     {
                         kind: "expiry",
                         label: "Expiry time",
                         value:
                             new Date(
-                                userDataResponse.subscription.expiryTime / 1000,
+                                subscription.expiryTime / 1000,
                             ).toISOString() || "None",
                     },
                 ],
@@ -372,16 +341,6 @@ const readUrlCredentials = () => {
     const urlParams = new URLSearchParams(window.location.search);
     return { email: urlParams.get("email"), token: urlParams.get("token") };
 };
-
-const buildUserSearchUrl = (input: string): string => {
-    const trimmedInput = input.trim();
-    if (isNumericUserId(trimmedInput)) {
-        return `${apiOrigin}/admin/user?id=${encodeURIComponent(trimmedInput)}`;
-    }
-    return `${apiOrigin}/admin/user?email=${encodeURIComponent(trimmedInput)}`;
-};
-
-const isNumericUserId = (value: string): boolean => /^\d+$/.test(value);
 
 const formatStorage = (bytes: number | undefined, noneWhenZero = false) => {
     if (bytes === undefined || (noneWhenZero && bytes === 0)) {

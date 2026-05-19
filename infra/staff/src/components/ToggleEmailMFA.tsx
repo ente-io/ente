@@ -1,11 +1,6 @@
 import React, { useState } from "react";
+import { updateEmailMFA } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
-import {
-    apiOrigin,
-    getCurrentAdminUserId,
-    requireToken,
-    responseErrorMessage,
-} from "../services/support";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 
 interface ToggleEmailMFAProps {
@@ -25,28 +20,7 @@ export const ToggleEmailMFA: React.FC<ToggleEmailMFAProps> = ({
     const handleToggle = async (enable: boolean) => {
         try {
             setLoading(true);
-            const token = requireToken(session);
-            const userId = await getCurrentAdminUserId(session);
-
-            const toggleEmailMFAUrl = `${apiOrigin}/admin/user/update-email-mfa`;
-            const response = await fetch(toggleEmailMFAUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-                body: JSON.stringify({ userID: userId, emailMFA: enable }),
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    await responseErrorMessage(
-                        response,
-                        "Failed to update Email MFA",
-                    ),
-                );
-            }
-
+            await updateEmailMFA(session, enable);
             handleToggleEmailMFA(enable);
             handleClose();
         } catch (error) {

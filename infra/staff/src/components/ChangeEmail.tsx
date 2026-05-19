@@ -9,13 +9,8 @@ import {
     TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { changeUserEmail, getSelectedUserID } from "../services/admin-user";
 import { useStaffSessionRef } from "../services/session";
-import {
-    apiOrigin,
-    getCurrentAdminUserId,
-    requireToken,
-    responseErrorMessage,
-} from "../services/support";
 
 interface ChangeEmailProps {
     open: boolean;
@@ -34,7 +29,7 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
             setNewEmail(email);
 
             try {
-                setUserID(await getCurrentAdminUserId(session));
+                setUserID(await getSelectedUserID(session));
             } catch (error) {
                 console.error("Error fetching user ID:", error);
             }
@@ -57,27 +52,7 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({ open, onClose }) => {
         event.preventDefault();
 
         try {
-            const token = requireToken(sessionRef.current);
-            const url = `${apiOrigin}/admin/user/change-email`;
-            const body = { userID, email: newEmail };
-            const response = await fetch(url, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-                body: JSON.stringify(body),
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    await responseErrorMessage(
-                        response,
-                        "Network response was not ok",
-                    ),
-                );
-            }
-
+            await changeUserEmail(sessionRef.current, userID, newEmail);
             onClose();
         } catch (error) {
             console.error("Error updating email:", error);

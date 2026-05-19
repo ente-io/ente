@@ -11,18 +11,10 @@ import {
     TableRow,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { getFamilyMembers, type FamilyMember } from "../services/admin-user";
 import { useInitialStaffSession } from "../services/session";
-import { getCurrentAdminUser } from "../services/support";
 import { CloseFamily } from "./CloseFamily";
 import { StatusBadge } from "./StatusBadge";
-
-interface FamilyMember {
-    id: string;
-    email: string;
-    status: string;
-    usage: number;
-    storageLimit: number;
-}
 
 export const FamilyTableComponent: React.FC = () => {
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
@@ -34,12 +26,7 @@ export const FamilyTableComponent: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userData = await getCurrentAdminUser<{
-                    details?: { familyData?: { members?: FamilyMember[] } };
-                }>(session);
-                const members: FamilyMember[] =
-                    userData.details?.familyData?.members ?? [];
-                setFamilyMembers(members);
+                setFamilyMembers(await getFamilyMembers(session));
             } catch (error) {
                 console.error("Error fetching family data:", error);
                 setError("No family data");

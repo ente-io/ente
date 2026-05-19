@@ -1,11 +1,6 @@
 import React from "react";
+import { deleteAccount } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
-import {
-    apiOrigin,
-    requireEmail,
-    requireToken,
-    responseErrorMessage,
-} from "../services/support";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 
 interface DeleteAccountProps {
@@ -21,20 +16,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
 
     const handleDelete = async () => {
         try {
-            const email = requireEmail(session);
-            const token = requireToken(session);
-            const response = await fetch(
-                `${apiOrigin}/admin/user/delete?email=${encodeURIComponent(email)}`,
-                { method: "DELETE", headers: { "X-Auth-Token": token } },
-            );
-            if (!response.ok) {
-                throw new Error(
-                    await responseErrorMessage(
-                        response,
-                        "Failed to delete user account",
-                    ),
-                );
-            }
+            await deleteAccount(session);
             handleClose();
         } catch (error) {
             if (error instanceof Error) {

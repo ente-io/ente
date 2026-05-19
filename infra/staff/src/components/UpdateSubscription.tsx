@@ -17,27 +17,11 @@ import {
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { useInitialStaffSession, useStaffSession } from "../services/session";
 import {
-    apiOrigin,
-    getCurrentAdminUser,
-    requireToken,
-    responseErrorMessage,
-} from "../services/support";
-
-interface Subscription {
-    productID: string;
-    paymentProvider: string;
-    storage: number;
-    originalTransactionID: string;
-    expiryTime: number;
-    userID: string;
-    attributes: { customerID: string; stripeAccountCountry: string };
-}
-
-interface UserDataResponse {
-    subscription: Subscription | null;
-}
+    getSelectedSubscription,
+    updateUserSubscription,
+} from "../services/admin-user";
+import { useInitialStaffSession, useStaffSession } from "../services/session";
 
 interface UpdateSubscriptionProps {
     open: boolean;
@@ -75,36 +59,21 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userDataResponse =
-                    await getCurrentAdminUser<UserDataResponse>(initialSession);
-
-                if (!userDataResponse.subscription) {
-                    throw new Error("Subscription data not found");
-                }
-
-                const expiryTime = new Date(
-                    userDataResponse.subscription.expiryTime / 1000,
-                );
+                const subscription =
+                    await getSelectedSubscription(initialSession);
+                const expiryTime = new Date(subscription.expiryTime / 1000);
 
                 setValues({
-                    productId: userDataResponse.subscription.productID || "",
-                    provider:
-                        userDataResponse.subscription.paymentProvider || "",
-                    storage:
-                        userDataResponse.subscription.storage /
-                            (1024 * 1024 * 1024) || 0,
-                    transactionId:
-                        userDataResponse.subscription.originalTransactionID ||
-                        "",
+                    productId: subscription.productID || "",
+                    provider: subscription.paymentProvider || "",
+                    storage: subscription.storage / (1024 * 1024 * 1024) || 0,
+                    transactionId: subscription.originalTransactionID || "",
                     expiryTime,
-                    userId: userDataResponse.subscription.userID || "",
+                    userId: subscription.userID || "",
                     attributes: {
-                        customerID:
-                            userDataResponse.subscription.attributes
-                                .customerID || "",
+                        customerID: subscription.attributes?.customerID || "",
                         stripeAccountCountry:
-                            userDataResponse.subscription.attributes
-                                .stripeAccountCountry || "",
+                            subscription.attributes?.stripeAccountCountry || "",
                     },
                 });
             } catch (error) {
@@ -144,15 +113,12 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         event.preventDefault();
 
         try {
-            const token = requireToken(session);
-            const url = `${apiOrigin}/admin/user/subscription`;
-
             let expiryTime = null;
             if (values.expiryTime) {
                 expiryTime = values.expiryTime.getTime() * 1000;
             }
 
-            const body = {
+            await updateUserSubscription(session, {
                 userId: values.userId,
                 storage: values.storage * 1024 ** 3,
                 expiryTime,
@@ -164,25 +130,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                     stripeAccountCountry:
                         values.attributes.stripeAccountCountry,
                 },
-            };
-
-            const response = await fetch(url, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-                body: JSON.stringify(body),
             });
-
-            if (!response.ok) {
-                throw new Error(
-                    await responseErrorMessage(
-                        response,
-                        "Network response was not ok",
-                    ),
-                );
-            }
             onClose();
         } catch (error) {
             if (error instanceof Error) {

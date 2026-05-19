@@ -15,12 +15,8 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { addOTT } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
-import {
-    apiOrigin,
-    requireToken,
-    responseErrorMessage,
-} from "../services/support";
 
 const APP_OPTIONS = [
     { label: "Photos", value: "photos" },
@@ -72,34 +68,16 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
                 throw new Error("User email is unavailable");
             }
 
-            const token = requireToken(session);
-
             const otp = generateOTP();
             const expiryTime = computeExpiryTimeMicros();
             setExpiryPreview(expiryTime);
 
-            const response = await fetch(`${apiOrigin}/admin/user/add-ott`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-                body: JSON.stringify({
-                    email: userEmail,
-                    code: otp,
-                    app: selectedApp,
-                    expiryTime,
-                }),
+            await addOTT(session, {
+                email: userEmail,
+                code: otp,
+                app: selectedApp,
+                expiryTime,
             });
-
-            if (!response.ok) {
-                throw new Error(
-                    await responseErrorMessage(
-                        response,
-                        "Failed to create OTT",
-                    ),
-                );
-            }
 
             setCreatedOtp(otp);
         } catch (err) {

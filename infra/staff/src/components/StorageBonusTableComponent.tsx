@@ -8,20 +8,12 @@ import {
     TableRow,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { getStorageBonuses, type StorageBonus } from "../services/admin-user";
 import { useInitialStaffSession } from "../services/session";
-import { getCurrentAdminUser } from "../services/support";
 import { StatusBadge } from "./StatusBadge";
 
-interface BonusData {
-    storage: number;
-    type: string;
-    createdAt: number;
-    validTill: number;
-    isRevoked: boolean;
-}
-
 export const StorageBonusTableComponent: React.FC = () => {
-    const [storageBonuses, setStorageBonuses] = useState<BonusData[]>([]);
+    const [storageBonuses, setStorageBonuses] = useState<StorageBonus[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const session = useInitialStaffSession();
@@ -29,12 +21,7 @@ export const StorageBonusTableComponent: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userData = await getCurrentAdminUser<{
-                    details?: { bonusData?: { storageBonuses?: BonusData[] } };
-                }>(session);
-                const bonuses: BonusData[] =
-                    userData.details?.bonusData?.storageBonuses ?? [];
-                setStorageBonuses(bonuses);
+                setStorageBonuses(await getStorageBonuses(session));
             } catch (error) {
                 console.error("Error fetching bonus data:", error);
                 setError("No bonus data");

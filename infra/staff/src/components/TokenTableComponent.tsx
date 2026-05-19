@@ -9,17 +9,9 @@ import {
     TableSortLabel,
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
+import { getTokens, type TokenData } from "../services/admin-user";
 import { useInitialStaffSession } from "../services/session";
-import { getCurrentAdminUser } from "../services/support";
 import { StatusBadge } from "./StatusBadge";
-
-interface TokenData {
-    creationTime: number;
-    lastUsedTime: number;
-    ua: string;
-    isDeleted: boolean;
-    app: string;
-}
 
 export const TokensTableComponent: React.FC = () => {
     const [tokens, setTokens] = useState<TokenData[]>([]);
@@ -32,10 +24,7 @@ export const TokensTableComponent: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userData = await getCurrentAdminUser<{
-                    tokens?: TokenData[];
-                }>(session);
-                setTokens(userData.tokens ?? []);
+                setTokens(await getTokens(session));
             } catch (error) {
                 console.error("Error fetching token data:", error);
                 setError("No token data");

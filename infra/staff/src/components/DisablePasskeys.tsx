@@ -1,11 +1,6 @@
 import React, { useState } from "react";
+import { disablePasskeys } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
-import {
-    apiOrigin,
-    getCurrentAdminUserId,
-    requireToken,
-    responseErrorMessage,
-} from "../services/support";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 
 interface DisablePasskeysProps {
@@ -25,28 +20,7 @@ export const DisablePasskeys: React.FC<DisablePasskeysProps> = ({
     const handleDisabling = async () => {
         try {
             setLoading(true);
-            const token = requireToken(session);
-            const userId = await getCurrentAdminUserId(session);
-
-            const disablePasskeysUrl = `${apiOrigin}/admin/user/disable-passkeys`;
-            const response = await fetch(disablePasskeysUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-                body: JSON.stringify({ userId }),
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    await responseErrorMessage(
-                        response,
-                        "Failed to disable passkeys",
-                    ),
-                );
-            }
-
+            await disablePasskeys(session);
             handleDisablePasskeys();
             handleClose();
         } catch (error) {

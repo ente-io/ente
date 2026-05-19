@@ -1,11 +1,6 @@
 import React, { useState } from "react";
+import { closeFamily } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
-import {
-    apiOrigin,
-    getCurrentAdminUserId,
-    requireToken,
-    responseErrorMessage,
-} from "../services/support";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 
 interface CloseFamilyProps {
@@ -25,29 +20,7 @@ export const CloseFamily: React.FC<CloseFamilyProps> = ({
     const handleClosure = async () => {
         try {
             setLoading(true);
-            const token = requireToken(session);
-            const userId = await getCurrentAdminUserId(session);
-            const response = await fetch(
-                `${apiOrigin}/admin/user/close-family`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Auth-Token": token,
-                    },
-                    body: JSON.stringify({ userId }),
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    await responseErrorMessage(
-                        response,
-                        "Failed to close family",
-                    ),
-                );
-            }
-
+            await closeFamily(session);
             handleCloseFamily();
             handleClose();
         } catch (error) {
