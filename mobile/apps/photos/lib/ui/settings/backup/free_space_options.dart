@@ -15,6 +15,7 @@ import "package:photos/services/deduplication_service.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/tools/debug/app_storage_viewer.dart";
 import "package:photos/ui/tools/deduplicate_page.dart";
 import "package:photos/ui/tools/free_space_page.dart";
@@ -39,114 +40,62 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.componentColors;
+    final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: colors.backgroundBase,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: colors.iconColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.of(context).freeUpSpace,
-                style: TextStyles.h1Bold.copyWith(color: colors.textBase),
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildFreeSpaceOption(
-                        context,
-                        title: AppLocalizations.of(context).freeUpDeviceSpace,
-                        onTap: () async => _onFreeUpDeviceSpaceTapped(),
-                      ),
-                      _description(
-                        AppLocalizations.of(context).freeUpDeviceSpaceDesc +
-                            (Platform.isIOS
-                                ? " ${AppLocalizations.of(context).freeUpDeviceSpaceDescICloud}"
-                                : ""),
-                      ),
-                      _buildFreeSpaceOption(
-                        context,
-                        title: AppLocalizations.of(context).removeDuplicates,
-                        onTap: () async => _onRemoveDuplicatesTapped(),
-                      ),
-                      _description(
-                        AppLocalizations.of(context).removeDuplicatesDesc,
-                      ),
-                      if (flagService.enableVectorDb) ...[
-                        _buildFreeSpaceOption(
-                          context,
-                          title: AppLocalizations.of(context).similarImages,
-                          onTap: () async {
-                            await routeToPage(
-                              context,
-                              const SimilarImagesPage(
-                                debugScreen: kDebugMode,
-                              ),
-                            );
-                          },
-                        ),
-                        _description(
-                          AppLocalizations.of(context).useMLToFindSimilarImages,
-                        ),
-                      ],
-                      _buildFreeSpaceOption(
-                        context,
-                        title: AppLocalizations.of(context).viewLargeFiles,
-                        onTap: () async {
-                          await routeToPage(
-                            context,
-                            LargeFilesPagePage(),
-                          );
-                        },
-                      ),
-                      _description(
-                        AppLocalizations.of(context).viewLargeFilesDesc,
-                      ),
-                      _buildFreeSpaceOption(
-                        context,
-                        title: AppLocalizations.of(context).deleteSuggestions,
-                        onTap: () async => _onDeleteSuggestionsTapped(),
-                      ),
-                      _description(
-                        AppLocalizations.of(context).deleteSuggestionsDesc,
-                      ),
-                      _buildFreeSpaceOption(
-                        context,
-                        title: AppLocalizations.of(context).manageDeviceStorage,
-                        onTap: () async {
-                          await routeToPage(
-                            context,
-                            const AppStorageViewer(),
-                          );
-                        },
-                      ),
-                      _description(
-                        AppLocalizations.of(context).manageDeviceStorageDesc,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+    return SettingsPageScaffold(
+      title: l10n.freeUpSpace,
+      children: [
+        _buildFreeSpaceOption(
+          context,
+          title: l10n.freeUpDeviceSpace,
+          onTap: () async => _onFreeUpDeviceSpaceTapped(),
         ),
-      ),
+        _description(
+          l10n.freeUpDeviceSpaceDesc +
+              (Platform.isIOS ? " ${l10n.freeUpDeviceSpaceDescICloud}" : ""),
+        ),
+        _buildFreeSpaceOption(
+          context,
+          title: l10n.removeDuplicates,
+          onTap: () async => _onRemoveDuplicatesTapped(),
+        ),
+        _description(l10n.removeDuplicatesDesc),
+        if (flagService.enableVectorDb) ...[
+          _buildFreeSpaceOption(
+            context,
+            title: l10n.similarImages,
+            onTap: () async {
+              await routeToPage(
+                context,
+                const SimilarImagesPage(debugScreen: kDebugMode),
+              );
+            },
+          ),
+          _description(l10n.useMLToFindSimilarImages),
+        ],
+        _buildFreeSpaceOption(
+          context,
+          title: l10n.viewLargeFiles,
+          onTap: () async {
+            await routeToPage(context, LargeFilesPagePage());
+          },
+        ),
+        _description(l10n.viewLargeFilesDesc),
+        _buildFreeSpaceOption(
+          context,
+          title: l10n.deleteSuggestions,
+          onTap: () async => _onDeleteSuggestionsTapped(),
+        ),
+        _description(l10n.deleteSuggestionsDesc),
+        _buildFreeSpaceOption(
+          context,
+          title: l10n.manageDeviceStorage,
+          onTap: () async {
+            await routeToPage(context, const AppStorageViewer());
+          },
+        ),
+        _description(l10n.manageDeviceStorageDesc),
+      ],
     );
   }
 
@@ -251,8 +200,8 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
   Future<void> _onDeleteSuggestionsTapped() async {
     List<int> suggestionFileIDs;
     try {
-      suggestionFileIDs =
-          await CollectionsService.instance.fetchDeleteSuggestionFileIDs();
+      suggestionFileIDs = await CollectionsService.instance
+          .fetchDeleteSuggestionFileIDs();
     } catch (e) {
       await showGenericErrorDialog(
         context: context,
@@ -285,8 +234,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
       showChoiceDialog(
         context,
         title: AppLocalizations.of(context).success,
-        body: AppLocalizations.of(context)
-            .youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
+        body: AppLocalizations.of(
+          context,
+        ).youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
         firstButtonLabel: AppLocalizations.of(context).rateUs,
         firstButtonOnTap: () async {
           await updateService.launchReviewUrl();
