@@ -1,11 +1,10 @@
-import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 
-enum ThumbnailListItemBorderStyle {
-  solid,
-  dotted,
+Color thumbnailListItemBackgroundColor(BuildContext context) {
+  final colorScheme = getEnteColorScheme(context);
+  return EnteTheme.isDark(context) ? colorScheme.fill : colorScheme.fillDark;
 }
 
 class ThumbnailListItem extends StatefulWidget {
@@ -23,7 +22,6 @@ class ThumbnailListItem extends StatefulWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final bool isSelected;
-  final ThumbnailListItemBorderStyle borderStyle;
   final EdgeInsetsGeometry padding;
   final double leadingSize;
   final double borderRadius;
@@ -31,7 +29,6 @@ class ThumbnailListItem extends StatefulWidget {
   final Color? backgroundColor;
   final Color? borderColor;
   final Color? selectedBorderColor;
-  final Color? dottedBorderColor;
 
   const ThumbnailListItem({
     super.key,
@@ -42,7 +39,6 @@ class ThumbnailListItem extends StatefulWidget {
     this.onTap,
     this.onLongPress,
     this.isSelected = false,
-    this.borderStyle = ThumbnailListItemBorderStyle.solid,
     this.padding = defaultPadding,
     this.leadingSize = defaultLeadingSize,
     this.borderRadius = defaultBorderRadius,
@@ -50,7 +46,6 @@ class ThumbnailListItem extends StatefulWidget {
     this.backgroundColor,
     this.borderColor,
     this.selectedBorderColor,
-    this.dottedBorderColor,
   });
 
   @override
@@ -63,50 +58,45 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final child = _decorate(
-      context,
-      AnimatedContainer(
-        duration: ThumbnailListItem._stateTransitionDuration,
-        width: double.infinity,
-        padding: widget.padding,
-        decoration: BoxDecoration(
-          color: _backgroundColor(colorScheme),
-          borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
-          border: Border.all(
-            color: widget.borderStyle == ThumbnailListItemBorderStyle.solid
-                ? widget.isSelected
-                      ? widget.selectedBorderColor ?? colorScheme.greenBase
-                      : widget.borderColor ?? _backgroundColor(colorScheme)
-                : Colors.transparent,
+    final child = AnimatedContainer(
+      duration: ThumbnailListItem._stateTransitionDuration,
+      width: double.infinity,
+      padding: widget.padding,
+      decoration: BoxDecoration(
+        color: _backgroundColor(colorScheme),
+        borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
+        border: Border.all(
+          color: widget.isSelected
+              ? widget.selectedBorderColor ?? colorScheme.greenBase
+              : widget.borderColor ?? _backgroundColor(colorScheme),
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox.square(
+            dimension: widget.leadingSize,
+            child: widget.leading,
           ),
-        ),
-        child: Row(
-          children: [
-            SizedBox.square(
-              dimension: widget.leadingSize,
-              child: widget.leading,
-            ),
-            SizedBox(width: widget.contentSpacing),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  widget.title,
-                  if (widget.subtitle != null) ...[
-                    const SizedBox(height: 4),
-                    widget.subtitle!,
-                  ],
+          SizedBox(width: widget.contentSpacing),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                widget.title,
+                if (widget.subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  widget.subtitle!,
                 ],
-              ),
+              ],
             ),
-            if (widget.trailing != null) ...[
-              SizedBox(width: widget.contentSpacing),
-              widget.trailing!,
-            ],
+          ),
+          if (widget.trailing != null) ...[
+            SizedBox(width: widget.contentSpacing),
+            widget.trailing!,
           ],
-        ),
+        ],
       ),
     );
 
@@ -126,22 +116,6 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
         splashFactory: NoSplash.splashFactory,
         child: child,
       ),
-    );
-  }
-
-  Widget _decorate(BuildContext context, Widget child) {
-    if (widget.borderStyle != ThumbnailListItemBorderStyle.dotted) {
-      return child;
-    }
-    final colorScheme = getEnteColorScheme(context);
-    return DottedBorder(
-      dashPattern: const [4, 4],
-      color: widget.dottedBorderColor ?? colorScheme.strokeFaint,
-      strokeWidth: 1,
-      padding: EdgeInsets.zero,
-      borderType: BorderType.RRect,
-      radius: Radius.circular(widget.borderRadius),
-      child: child,
     );
   }
 

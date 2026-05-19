@@ -41,6 +41,7 @@ class SearchableItemWidget extends StatelessWidget {
         result.params.containsKey(kClusterParamId);
 
     return ThumbnailListItem(
+      backgroundColor: thumbnailListItemBackgroundColor(context),
       onTap: () {
         RecentSearches().add(searchResult.name());
         if (onResultTap != null) {
@@ -130,8 +131,7 @@ class SearchableItemPlaceholder extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return ThumbnailListItem(
-      borderStyle: ThumbnailListItemBorderStyle.dotted,
-      dottedBorderColor: colorScheme.strokeFainter,
+      backgroundColor: thumbnailListItemBackgroundColor(context),
       onTap: sectionType.ctaOnTap(context),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(

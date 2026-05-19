@@ -15,7 +15,7 @@ class NewAlbumListItemWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     return ThumbnailListItem(
-      borderStyle: ThumbnailListItemBorderStyle.dotted,
+      backgroundColor: thumbnailListItemBackgroundColor(context),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(
           ThumbnailListItem.defaultLeadingRadius,

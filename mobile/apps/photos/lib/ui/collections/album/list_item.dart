@@ -72,6 +72,7 @@ class AlbumListItemWidget extends StatelessWidget {
     final bool hasAnyStatus = isFavoriteAlbum || showPin || showArchive;
 
     return ThumbnailListItem(
+      backgroundColor: thumbnailListItemBackgroundColor(context),
       isSelected: isSelected,
       onTap: onTapCallback == null ? null : () => onTapCallback!(collection),
       onLongPress: onLongPressCallback == null

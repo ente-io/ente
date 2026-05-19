@@ -37,6 +37,7 @@ class SearchResultWidget extends StatelessWidget {
     return SizedBox(
       key: ValueKey(searchResult.hashCode),
       child: ThumbnailListItem(
+        backgroundColor: thumbnailListItemBackgroundColor(context),
         padding: padding,
         onTap: () {
           RecentSearches().add(searchResult.name());
