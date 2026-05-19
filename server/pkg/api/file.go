@@ -223,6 +223,19 @@ func (h *FileHandler) Get(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
+// GetUsingFusedLookup redirects the request to the file location using a temporary
+// fused access-check and object lookup path.
+func (h *FileHandler) GetUsingFusedLookup(c *gin.Context) {
+	userID, fileID := getUserAndFileIDs(c)
+	url, err := h.Controller.GetFileURLUsingFusedLookup(c, userID, fileID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	h.logBadRedirect(c)
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
 // GetV2 returns the URL of the file to client
 func (h *FileHandler) GetV2(c *gin.Context) {
 	userID, fileID := getUserAndFileIDs(c)
@@ -240,6 +253,19 @@ func (h *FileHandler) GetV2(c *gin.Context) {
 func (h *FileHandler) GetThumbnail(c *gin.Context) {
 	userID, fileID := getUserAndFileIDs(c)
 	url, err := h.Controller.GetThumbnailURL(c, userID, fileID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	h.logBadRedirect(c)
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+// GetThumbnailUsingFusedLookup redirects the request to the file's thumbnail
+// location using a temporary fused access-check and object lookup path.
+func (h *FileHandler) GetThumbnailUsingFusedLookup(c *gin.Context) {
+	userID, fileID := getUserAndFileIDs(c)
+	url, err := h.Controller.GetThumbnailURLUsingFusedLookup(c, userID, fileID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
