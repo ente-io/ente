@@ -12,7 +12,7 @@ CLAUDE.local.md
 .cargo/
 !rust/.cargo/
 !rust/.cargo/config.toml
-rust/cli/exports/
+rust/apps/cli/exports/
 
 # Node
 node_modules/
