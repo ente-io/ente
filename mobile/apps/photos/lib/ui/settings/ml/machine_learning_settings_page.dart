@@ -1,6 +1,8 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/notification_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -12,17 +14,12 @@ import "package:photos/services/machine_learning/ml_model_download_service.dart"
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
-import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/wake_lock_service.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/common/web_page.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/components/menu_section_description_widget.dart";
-import "package:photos/ui/components/menu_section_title.dart";
-import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/settings/ml/ml_user_dev_screen.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
@@ -89,133 +86,85 @@ class _MachineLearningSettingsPageState
   }
 
   Widget _buildEnabledMLScreen(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: colorScheme.backgroundColour,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.strokeBase),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+    return SettingsPageScaffold(
+      title: AppLocalizations.of(context).machineLearning,
+      onTitleTap: _handleEnabledTitleTap,
+      children: [
+        Text(
+          AppLocalizations.of(context).mlIndexingDescription,
+          textAlign: TextAlign.left,
+          style: TextStyles.mini.copyWith(color: colors.textLight),
         ),
-      ),
-      backgroundColor: colorScheme.backgroundColour,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  setState(() {
-                    _titleTapCount++;
-                    if (_titleTapCount >= 7) {
-                      _titleTapCount = 0;
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return const MLUserDeveloperOptions(
-                              mlIsEnabled: true,
-                            );
-                          },
-                        ),
-                      ).ignore();
-                    }
-                  });
-                },
-                child: Text(
-                  AppLocalizations.of(context).machineLearning,
-                  style: textTheme.h3Bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                AppLocalizations.of(context).mlIndexingDescription,
-                textAlign: TextAlign.left,
-                style: textTheme.small.copyWith(color: colorScheme.textMuted),
-              ),
-              const SizedBox(height: 20),
-              _getMlSettings(context),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
-      ),
+        const SizedBox(height: 20),
+        _getMlSettings(context),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
   Widget _buildDisabledMLScreen(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return Scaffold(
-      backgroundColor: colorScheme.backgroundColour,
-      appBar: AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: colorScheme.backgroundColour,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.strokeBase),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context).mlConsent,
-                style: textTheme.h3Bold,
-              ),
-              const SizedBox(height: 12),
-              _buildDisabledMLDescription(context),
-              const SizedBox(height: 20),
-              Center(
-                child: Image.asset(
-                  "assets/ducky_ml.png",
-                  height: 150,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              const SizedBox(height: 18),
-              _buildDisabledConsentAckRow(context),
-              const SizedBox(height: 20),
-              ButtonWidgetV2(
-                buttonType: ButtonTypeV2.primary,
-                labelText: AppLocalizations.of(context).mlConsent,
-                isDisabled: !_hasAcknowledgedMLConsent,
-                onTap: () async {
-                  if (!_hasAcknowledgedMLConsent) return;
-                  await toggleMlConsent();
-                },
-              ),
-              const SizedBox(height: 12),
-              ButtonWidgetV2(
-                buttonType: ButtonTypeV2.secondary,
-                labelText: AppLocalizations.of(context).cancel,
-                onTap: () async {
-                  await _handleDisabledScreenExit();
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-            ],
+    return SettingsPageScaffold(
+      title: AppLocalizations.of(context).mlConsent,
+      children: [
+        _buildDisabledMLDescription(context),
+        const SizedBox(height: 20),
+        Center(
+          child: Image.asset(
+            "assets/ducky_ml.png",
+            height: 150,
+            fit: BoxFit.contain,
           ),
         ),
-      ),
+        const SizedBox(height: 18),
+        _buildDisabledConsentAckRow(context),
+        const SizedBox(height: 20),
+        ButtonComponent(
+          label: AppLocalizations.of(context).mlConsent,
+          isDisabled: !_hasAcknowledgedMLConsent,
+          onTap: () async {
+            if (!_hasAcknowledgedMLConsent) return;
+            await toggleMlConsent();
+          },
+        ),
+        const SizedBox(height: 12),
+        ButtonComponent(
+          label: AppLocalizations.of(context).cancel,
+          variant: ButtonComponentVariant.secondary,
+          onTap: () async {
+            await _handleDisabledScreenExit();
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+      ],
     );
+  }
+
+  void _handleEnabledTitleTap() {
+    var shouldOpenDeveloperOptions = false;
+    setState(() {
+      _titleTapCount++;
+      if (_titleTapCount >= 7) {
+        _titleTapCount = 0;
+        shouldOpenDeveloperOptions = true;
+      }
+    });
+
+    if (!shouldOpenDeveloperOptions) {
+      return;
+    }
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const MLUserDeveloperOptions(mlIsEnabled: true);
+            },
+          ),
+        )
+        .ignore();
   }
 
   Future<void> _handleDisabledScreenExit() async {
@@ -256,8 +205,7 @@ class _MachineLearningSettingsPageState
   }
 
   Widget _buildDisabledMLDescription(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +213,7 @@ class _MachineLearningSettingsPageState
         Text(
           AppLocalizations.of(context).mlConsentDescription,
           textAlign: TextAlign.left,
-          style: textTheme.small.copyWith(color: colorScheme.textMuted),
+          style: TextStyles.mini.copyWith(color: colors.textLight),
         ),
         const SizedBox(height: 6),
         GestureDetector(
@@ -273,10 +221,10 @@ class _MachineLearningSettingsPageState
           child: Text(
             AppLocalizations.of(context).mlConsentPrivacy,
             textAlign: TextAlign.left,
-            style: textTheme.small.copyWith(
-              color: colorScheme.textMuted,
+            style: TextStyles.mini.copyWith(
+              color: colors.textLight,
               decoration: TextDecoration.underline,
-              decorationColor: colorScheme.textMuted,
+              decorationColor: colors.textLight,
             ),
           ),
         ),
@@ -285,8 +233,7 @@ class _MachineLearningSettingsPageState
   }
 
   Widget _buildDisabledConsentAckRow(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final accentColor = colorScheme.greenBase;
+    final colors = context.componentColors;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -298,28 +245,19 @@ class _MachineLearningSettingsPageState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: 18,
-            height: 18,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: accentColor),
-              color:
-                  _hasAcknowledgedMLConsent ? accentColor : Colors.transparent,
-            ),
-            alignment: Alignment.center,
-            child: _hasAcknowledgedMLConsent
-                ? Icon(Icons.check, size: 14, color: colorScheme.contentReverse)
-                : null,
+          CheckboxComponent(
+            selected: _hasAcknowledgedMLConsent,
+            onChanged: (_) {
+              setState(() {
+                _hasAcknowledgedMLConsent = !_hasAcknowledgedMLConsent;
+              });
+            },
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               AppLocalizations.of(context).mlConsentConfirmation,
-              style: getEnteTextTheme(
-                context,
-              ).small.copyWith(color: colorScheme.textMuted),
+              style: TextStyles.mini.copyWith(color: colors.textLight),
             ),
           ),
         ],
@@ -347,9 +285,13 @@ class _MachineLearningSettingsPageState
     }
     return Column(
       children: [
-        MenuItemWidgetNew(
+        MenuComponent(
           title: AppLocalizations.of(context).enabled,
-          trailingWidget: ToggleSwitchWidget(
+          leading: const HugeIcon(
+            icon: HugeIcons.strokeRoundedToggleOn,
+            size: IconSizes.small,
+          ),
+          trailing: ToggleSwitchComponent.async(
             value: () => hasEnabled,
             onChanged: () async {
               await toggleMlConsent();
@@ -357,9 +299,13 @@ class _MachineLearningSettingsPageState
           ),
         ),
         const SizedBox(height: 8),
-        MenuItemWidgetNew(
+        MenuComponent(
           title: AppLocalizations.of(context).localIndexing,
-          trailingWidget: ToggleSwitchWidget(
+          leading: const HugeIcon(
+            icon: HugeIcons.strokeRoundedCpu,
+            size: IconSizes.small,
+          ),
+          trailing: ToggleSwitchComponent.async(
             value: () => localSettings.isMLLocalIndexingEnabled,
             onChanged: () async {
               final oldMlEnabled =
@@ -446,33 +392,47 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return Column(
       children: [
-        MenuSectionTitle(title: AppLocalizations.of(context).status),
+        Padding(
+          padding: const EdgeInsets.only(left: Spacing.sm, top: 6, bottom: 6),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              AppLocalizations.of(context).status.toUpperCase(),
+              style: TextStyles.mini.copyWith(color: colors.textLight),
+            ),
+          ),
+        ),
         const SizedBox(height: 8),
         FutureBuilder(
           future: canUseHighBandwidth().then((v) => isLocalGalleryMode || v),
           builder: (context, snapshot) {
             String title = "";
+            List<List<dynamic>> leadingIcon = HugeIcons.strokeRoundedLoading03;
             if (snapshot.hasData) {
               if (snapshot.data!) {
                 MLModelDownloadService.instance.triggerModelsDownload(
                   onlyIndexingModels: false,
                 );
                 title = AppLocalizations.of(context).checkingModels;
+                leadingIcon = HugeIcons.strokeRoundedCloudDownload;
               } else {
                 title = AppLocalizations.of(context).waitingForWifi;
+                leadingIcon = HugeIcons.strokeRoundedWifi02;
               }
             }
-            return MenuItemWidgetNew(
+            return MenuComponent(
               title: title,
-              trailingWidget: EnteLoadingWidget(
-                size: 12,
-                color: colorScheme.fillMuted,
+              leading: HugeIcon(
+                icon: leadingIcon,
+                size: IconSizes.small,
               ),
-              isGestureDetectorDisabled: true,
+              trailing: EnteLoadingWidget(
+                size: 12,
+                color: colors.fillDark,
+              ),
             );
           },
         ),
@@ -480,14 +440,17 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
         ..._progressMap.entries.map((entry) {
           return Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: MenuItemWidgetNew(
+            child: MenuComponent(
               key: ValueKey(entry.value),
               title: entry.key,
-              trailingWidget: Text(
-                '${(entry.value.$1 * 100) ~/ entry.value.$2}%',
-                style: textTheme.small.copyWith(color: colorScheme.textMuted),
+              leading: const HugeIcon(
+                icon: HugeIcons.strokeRoundedCloudDownload,
+                size: IconSizes.small,
               ),
-              isGestureDetectorDisabled: true,
+              trailing: Text(
+                '${(entry.value.$1 * 100) ~/ entry.value.$2}%',
+                style: TextStyles.mini.copyWith(color: colors.textLight),
+              ),
             ),
           );
         }),
@@ -529,15 +492,23 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.componentColors;
     return Column(
       children: [
-        MenuSectionTitle(title: AppLocalizations.of(context).status),
+        Padding(
+          padding: const EdgeInsets.only(left: Spacing.sm, top: 6, bottom: 6),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              AppLocalizations.of(context).status.toUpperCase(),
+              style: TextStyles.mini.copyWith(color: colors.textLight),
+            ),
+          ),
+        ),
         const SizedBox(height: 8),
         FutureBuilder(
           future: _getIndexStatus(),
           builder: (context, snapshot) {
-            final colorScheme = getEnteColorScheme(context);
-            final textTheme = getEnteTextTheme(context);
             if (snapshot.hasData) {
               final int indexedFiles = snapshot.data!.indexedItems;
               final int pendingFiles = snapshot.data!.pendingItems;
@@ -545,50 +516,56 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
               final bool hasWifi = snapshot.data!.hasWifiEnabled!;
 
               if (!_isDeviceHealthy && pendingFiles > 0) {
-                return MenuSectionDescriptionWidget(
-                  content: AppLocalizations.of(
-                    context,
-                  ).indexingPausedStatusDescription,
+                return Text(
+                  AppLocalizations.of(context).indexingPausedStatusDescription,
+                  style: TextStyles.mini.copyWith(color: colors.textLight),
                 );
               }
 
               return Column(
                 children: [
-                  MenuItemWidgetNew(
+                  MenuComponent(
                     key: ValueKey("pending_items_$pendingFiles"),
                     title: AppLocalizations.of(context).processed,
-                    trailingWidget: Text(
+                    leading: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedClock01,
+                      size: IconSizes.small,
+                    ),
+                    trailing: Text(
                       total < 1
                           ? 'NA'
                           : pendingFiles == 0
-                              ? '100%'
-                              : '${(indexedFiles * 100.0 / total * 1.0).toStringAsFixed(2)}%',
-                      style: textTheme.small.copyWith(
-                        color: colorScheme.textMuted,
-                      ),
+                          ? '100%'
+                          : '${(indexedFiles * 100.0 / total * 1.0).toStringAsFixed(2)}%',
+                      style: TextStyles.mini.copyWith(color: colors.textLight),
                     ),
-                    isGestureDetectorDisabled: true,
                   ),
                   if (MLService.instance.showClusteringIsHappening)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: MenuItemWidgetNew(
+                      child: MenuComponent(
                         title: AppLocalizations.of(context).clusteringProgress,
-                        trailingWidget: Text(
+                        leading: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedSparkles,
+                          size: IconSizes.small,
+                        ),
+                        trailing: Text(
                           AppLocalizations.of(context).currentlyRunning,
-                          style: textTheme.small.copyWith(
-                            color: colorScheme.textMuted,
+                          style: TextStyles.mini.copyWith(
+                            color: colors.textLight,
                           ),
                         ),
-                        isGestureDetectorDisabled: true,
                       ),
                     )
                   else if (!hasWifi && pendingFiles > 0)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: MenuItemWidgetNew(
+                      child: MenuComponent(
                         title: AppLocalizations.of(context).waitingForWifi,
-                        isGestureDetectorDisabled: true,
+                        leading: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedWifi02,
+                          size: IconSizes.small,
+                        ),
                       ),
                     ),
                 ],

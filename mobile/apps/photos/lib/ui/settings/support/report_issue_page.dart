@@ -1,12 +1,10 @@
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
-import "package:photos/ui/components/text_input_widget_v2.dart";
-import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/settings/support/no_mail_app_sheet.dart";
 import "package:photos/utils/email_util.dart";
 
@@ -34,113 +32,54 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
-
-    return Scaffold(
-      backgroundColor: pageBackgroundColor,
-      body: SafeArea(
+    return SettingsPageScaffold(
+      title: l10n.reportAnIssue,
+      bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: colorScheme.strokeBase,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                l10n.reportAnIssue,
-                style: textTheme.h3Bold,
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextInputWidgetV2(
-                        label: l10n.subject,
-                        hintText: l10n.oneLineAboutTheIssue,
-                        textEditingController: _subjectController,
-                        textCapitalization: TextCapitalization.sentences,
-                        isClearable: true,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 16),
-                      TextInputWidgetV2(
-                        label: l10n.description,
-                        hintText: l10n.detailsAboutTheIssue,
-                        textEditingController: _descriptionController,
-                        textCapitalization: TextCapitalization.sentences,
-                        maxLines: 6,
-                        minLines: 6,
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: colorScheme.fill,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n.attachLogs,
-                                    style: textTheme.small,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    l10n.attachLogsHelper,
-                                    style: textTheme.miniMuted,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            ToggleSwitchWidget(
-                              value: () => _attachLogs,
-                              onChanged: () async {
-                                setState(() {
-                                  _attachLogs = !_attachLogs;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ButtonWidgetV2(
-                buttonType: ButtonTypeV2.primary,
-                labelText: l10n.continueInMailApp,
-                isDisabled: _isSending,
-                shouldSurfaceExecutionStates: false,
-                onTap: _onSend,
-              ),
-              const SizedBox(height: 12),
-            ],
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: ButtonComponent(
+            label: l10n.continueInMailApp,
+            isDisabled: _isSending,
+            shouldSurfaceExecutionStates: false,
+            onTap: _onSend,
           ),
         ),
       ),
+      children: [
+        TextInputComponent(
+          label: l10n.subject,
+          hintText: l10n.oneLineAboutTheIssue,
+          controller: _subjectController,
+          textCapitalization: TextCapitalization.sentences,
+          isClearable: true,
+          maxLines: 1,
+        ),
+        const SizedBox(height: 16),
+        TextInputComponent(
+          label: l10n.description,
+          hintText: l10n.detailsAboutTheIssue,
+          controller: _descriptionController,
+          textCapitalization: TextCapitalization.sentences,
+          maxLines: 6,
+          minLines: 6,
+        ),
+        const SizedBox(height: 16),
+        MenuComponent(
+          title: l10n.attachLogs,
+          subtitle: l10n.attachLogsHelper,
+          subtitleMaxLines: 2,
+          trailing: ToggleSwitchComponent(
+            selected: _attachLogs,
+            onChanged: (_) {
+              setState(() {
+                _attachLogs = !_attachLogs;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
     );
   }
 

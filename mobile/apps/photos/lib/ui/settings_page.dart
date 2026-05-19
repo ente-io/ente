@@ -24,6 +24,7 @@ import "package:photos/ui/settings/appearance/appearance_settings_page.dart";
 import "package:photos/ui/settings/backup/backup_settings_page.dart";
 import "package:photos/ui/settings/backup/free_space_options.dart";
 import "package:photos/ui/settings/components/settings_item.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/settings/debug/debug_settings_page.dart";
 import "package:photos/ui/settings/debug/ml_debug_settings_page.dart";
 import "package:photos/ui/settings/inherited_settings_state.dart";
@@ -47,10 +48,8 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SettingsStateContainer(
-        child: _SettingsBody(emailNotifier: emailNotifier),
-      ),
+    return SettingsStateContainer(
+      child: _SettingsBody(emailNotifier: emailNotifier),
     );
   }
 }
@@ -67,243 +66,174 @@ class _SettingsBody extends StatelessWidget {
     final hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
     final showLoginEntry = isLocalGalleryMode && !hasConfiguredAccount;
 
-    return Container(
-      color: colors.backgroundBase,
-      child: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTitleBar(context, colors),
-                if (hasLoggedIn)
-                  _buildEmailHeaderSection(context, colors)
-                else
-                  const SizedBox(height: 8),
-                if (showLoginEntry) ...[
-                  OfflineSettingsBanner(
-                    onGetStarted: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const EmailEntryPage(
-                            showReferralSourceField: false,
-                            referralSource: "Offline",
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildOfflineLoginCard(context, colors),
-                  const SizedBox(height: 8),
-                ],
-                if (hasLoggedIn && !isLocalGalleryMode) ...[
-                  // Account section
-                  const StorageCardWidget(),
-                  const SizedBox(height: 16),
-                  _buildMenuItem(
-                    title: AppLocalizations.of(context).account,
-                    icon: HugeIcons.strokeRoundedUser,
-                    onTap: () async {
-                      await routeToPage(context, const AccountSettingsPage());
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  _buildMenuItem(
-                    title: AppLocalizations.of(context).backup,
-                    icon: HugeIcons.strokeRoundedCloudUpload,
-                    onTap: () async {
-                      await routeToPage(context, const BackupSettingsPage());
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                // Privacy and personalization section
-                _buildMenuItem(
-                  title: AppLocalizations.of(context).security,
-                  icon: HugeIcons.strokeRoundedSecurityCheck,
-                  onTap: () async {
-                    await routeToPage(context, const SecuritySettingsPage());
-                  },
-                ),
-                const SizedBox(height: 8),
-                _buildMenuItem(
-                  title: AppLocalizations.of(context).appearance,
-                  icon: HugeIcons.strokeRoundedPaintBoard,
-                  onTap: () async {
-                    await routeToPage(context, const AppearanceSettingsPage());
-                  },
-                ),
-                const SizedBox(height: 8),
-                if (isLocalGalleryMode) ...[
-                  // Local gallery section
-                  _buildOfflineFeaturesCard(context),
-                  const SizedBox(height: 8),
-                ],
-                if (hasLoggedIn && !isLocalGalleryMode) ...[
-                  // Product features section
-                  _buildPersonalFeaturesCard(context),
-                  const SizedBox(height: 8),
-                  _buildFeaturesAndPlansCard(context),
-                  const SizedBox(height: 8),
-                ],
-                // Engagement section
-                _buildEngagementCard(context),
-                const SizedBox(height: 8),
-                // Support section
-                _buildMenuItem(
-                  title: AppLocalizations.of(context).helpAndSupport,
-                  icon: HugeIcons.strokeRoundedHelpCircle,
-                  onTap: () async {
-                    await routeToPage(context, const HelpSupportPage());
-                  },
-                ),
-                const SizedBox(height: 8),
-                _buildMenuItem(
-                  title: AppLocalizations.of(context).about,
-                  icon: HugeIcons.strokeRoundedInformationCircle,
-                  onTap: () async {
-                    await routeToPage(context, const AboutUsPage());
-                  },
-                ),
-                const SizedBox(height: 8),
-                if (hasLoggedIn && !isLocalGalleryMode) ...[
-                  // Account actions section
-                  _buildLogoutCard(context),
-                ],
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 28),
-                  child: SocialIconsRow(),
-                ),
-                const AppVersionWidget(),
-                if (hasLoggedIn &&
-                    !isLocalGalleryMode &&
-                    (flagService.flags.internalUser || kDebugMode)) ...[
-                  // Debug section
-                  _buildMenuItem(
-                    title: "Debug",
-                    icon: HugeIcons.strokeRoundedBug02,
-                    onTap: () async {
-                      await routeToPage(context, const DebugSettingsPage());
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  _buildMenuItem(
-                    title: "ML Debug",
-                    icon: HugeIcons.strokeRoundedAiBrain01,
-                    onTap: () async {
-                      await routeToPage(context, const MLDebugSettingsPage());
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                const SizedBox(height: 60),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    return AnimatedBuilder(
+      animation: emailNotifier,
+      builder: (context, _) {
+        final email = hasLoggedIn ? emailNotifier.value ?? "" : "";
 
-  Widget _buildTitleBar(BuildContext context, ColorTokens colors) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            child: Icon(
-              Icons.keyboard_double_arrow_left,
-              size: 24,
-              color: colors.iconColor,
-            ),
-          ),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        return SettingsPageScaffold(
+          title: email,
+          actions: _buildHeaderActions(context),
+          onTitleDoubleTap: email.isEmpty
+              ? null
+              : () => _showVerifyIdentityDialog(context),
+          onTitleLongPress: email.isEmpty
+              ? null
+              : () => _showVerifyIdentityDialog(context),
           children: [
-            IconButtonComponent(
-              variant: IconButtonComponentVariant.unfilled,
-              shouldSurfaceExecutionStates: false,
-              icon: const Icon(Icons.search_rounded),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsSearchPage(),
-                  ),
-                );
-              },
-            ),
-            if (localSettings.enableDatabaseLogging)
-              IconButtonComponent(
-                variant: IconButtonComponentVariant.unfilled,
-                shouldSurfaceExecutionStates: false,
-                icon: const Icon(Icons.bug_report),
-                onTap: () {
+            if (showLoginEntry) ...[
+              OfflineSettingsBanner(
+                onGetStarted: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const LogViewerPage(),
+                      builder: (_) => const EmailEntryPage(
+                        showReferralSourceField: false,
+                        referralSource: "Offline",
+                      ),
                     ),
                   );
                 },
               ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmailHeader(
-    BuildContext context,
-    ColorTokens colors,
-  ) {
-    return GestureDetector(
-      onDoubleTap: () => _showVerifyIdentityDialog(context),
-      onLongPress: () => _showVerifyIdentityDialog(context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: AnimatedBuilder(
-          animation: emailNotifier,
-          builder: (BuildContext context, Widget? child) {
-            return Text(
-              emailNotifier.value ?? "",
-              style: TextStyles.body.copyWith(
-                color: colors.textLight,
-                overflow: TextOverflow.ellipsis,
+              const SizedBox(height: 16),
+              _buildOfflineLoginCard(context, colors),
+              const SizedBox(height: 8),
+            ],
+            if (hasLoggedIn && !isLocalGalleryMode) ...[
+              // Account section
+              const StorageCardWidget(),
+              const SizedBox(height: 16),
+              _buildMenuItem(
+                title: AppLocalizations.of(context).account,
+                icon: HugeIcons.strokeRoundedUser,
+                onTap: () async {
+                  await routeToPage(context, const AccountSettingsPage());
+                },
               ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmailHeaderSection(
-    BuildContext context,
-    ColorTokens colors,
-  ) {
-    return AnimatedBuilder(
-      animation: emailNotifier,
-      builder: (BuildContext context, Widget? child) {
-        final email = emailNotifier.value ?? "";
-        if (email.isEmpty) {
-          return const SizedBox(height: 8);
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            _buildEmailHeader(context, colors),
-            const SizedBox(height: 16),
+              const SizedBox(height: 8),
+              _buildMenuItem(
+                title: AppLocalizations.of(context).backup,
+                icon: HugeIcons.strokeRoundedCloudUpload,
+                onTap: () async {
+                  await routeToPage(context, const BackupSettingsPage());
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+            // Privacy and personalization section
+            _buildMenuItem(
+              title: AppLocalizations.of(context).security,
+              icon: HugeIcons.strokeRoundedSecurityCheck,
+              onTap: () async {
+                await routeToPage(context, const SecuritySettingsPage());
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildMenuItem(
+              title: AppLocalizations.of(context).appearance,
+              icon: HugeIcons.strokeRoundedPaintBoard,
+              onTap: () async {
+                await routeToPage(context, const AppearanceSettingsPage());
+              },
+            ),
+            const SizedBox(height: 8),
+            if (isLocalGalleryMode) ...[
+              // Local gallery section
+              _buildOfflineFeaturesCard(context),
+              const SizedBox(height: 8),
+            ],
+            if (hasLoggedIn && !isLocalGalleryMode) ...[
+              // Product features section
+              _buildPersonalFeaturesCard(context),
+              const SizedBox(height: 8),
+              _buildFeaturesAndPlansCard(context),
+              const SizedBox(height: 8),
+            ],
+            // Engagement section
+            _buildEngagementCard(context),
+            const SizedBox(height: 8),
+            // Support section
+            _buildMenuItem(
+              title: AppLocalizations.of(context).helpAndSupport,
+              icon: HugeIcons.strokeRoundedHelpCircle,
+              onTap: () async {
+                await routeToPage(context, const HelpSupportPage());
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildMenuItem(
+              title: AppLocalizations.of(context).about,
+              icon: HugeIcons.strokeRoundedInformationCircle,
+              onTap: () async {
+                await routeToPage(context, const AboutUsPage());
+              },
+            ),
+            const SizedBox(height: 8),
+            if (hasLoggedIn && !isLocalGalleryMode) ...[
+              // Account actions section
+              _buildLogoutCard(context),
+            ],
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 28),
+              child: SocialIconsRow(),
+            ),
+            const AppVersionWidget(),
+            if (hasLoggedIn &&
+                !isLocalGalleryMode &&
+                (flagService.flags.internalUser || kDebugMode)) ...[
+              // Debug section
+              _buildMenuItem(
+                title: "Debug",
+                icon: HugeIcons.strokeRoundedBug02,
+                onTap: () async {
+                  await routeToPage(context, const DebugSettingsPage());
+                },
+              ),
+              const SizedBox(height: 8),
+              _buildMenuItem(
+                title: "ML Debug",
+                icon: HugeIcons.strokeRoundedAiBrain01,
+                onTap: () async {
+                  await routeToPage(context, const MLDebugSettingsPage());
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+            const SizedBox(height: 60),
           ],
         );
       },
     );
+  }
+
+  List<Widget> _buildHeaderActions(BuildContext context) {
+    return [
+      IconButtonComponent(
+        variant: IconButtonComponentVariant.primary,
+        shouldSurfaceExecutionStates: false,
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedSearch01),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const SettingsSearchPage(),
+            ),
+          );
+        },
+      ),
+      if (localSettings.enableDatabaseLogging) ...[
+        IconButtonComponent(
+          variant: IconButtonComponentVariant.primary,
+          shouldSurfaceExecutionStates: false,
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedBug02),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const LogViewerPage(),
+              ),
+            );
+          },
+        ),
+      ],
+    ];
   }
 
   SettingsItem _buildMenuItem({
