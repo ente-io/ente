@@ -143,10 +143,7 @@ import {
     type SearchOption,
     type SidebarActionID,
 } from "ente-new/photos/services/search/types";
-import {
-    initSettings,
-    isDevBuildAndUser,
-} from "ente-new/photos/services/settings";
+import { initSettings } from "ente-new/photos/services/settings";
 import {
     redirectToCustomerPortal,
     savedUserDetailsOrTriggerPull,
@@ -256,7 +253,7 @@ const Page: React.FC = () => {
         useState<CollectionSelectorAttributes | undefined>();
 
     const { customDomain, isInternalUser } = useSettingsSnapshot();
-    const canUseSharedAlbumAdd = isInternalUser || isDevBuildAndUser();
+    const canUseSharedAlbumAdd = isInternalUser;
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
 
