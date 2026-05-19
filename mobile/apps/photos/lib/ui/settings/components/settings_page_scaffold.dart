@@ -9,6 +9,7 @@ class SettingsPageScaffold extends StatelessWidget {
     this.subtitle,
     this.actions = const [],
     this.controller,
+    this.onTitleTap,
     this.padding = const EdgeInsets.fromLTRB(16, 0, 16, 16),
   });
 
@@ -17,6 +18,7 @@ class SettingsPageScaffold extends StatelessWidget {
   final List<Widget> actions;
   final List<Widget> children;
   final ScrollController? controller;
+  final VoidCallback? onTitleTap;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -30,6 +32,7 @@ class SettingsPageScaffold extends StatelessWidget {
         subtitle: subtitle,
         actions: actions,
         controller: controller,
+        onTitleTap: onTitleTap,
         slivers: [
           SliverSafeArea(
             top: false,
