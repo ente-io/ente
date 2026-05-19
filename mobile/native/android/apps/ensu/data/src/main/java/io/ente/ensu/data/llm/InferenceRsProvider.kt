@@ -31,6 +31,7 @@ import io.ente.labs.inference_rs.cancel
 import io.ente.labs.inference_rs.downloadLlmModelFiles
 import io.ente.labs.inference_rs.uniffiEnsureInitialized
 import io.ente.labs.inference_rs.InferenceException
+import io.ente.labs.ensu_transcription.unloadTranscriptionModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -150,6 +151,7 @@ class InferenceRsProvider(
             grammar = null
         )
 
+        unloadTranscriptionModelIfLoaded()
         val summary = generateStreamWithCallback(context, request, onToken)
         GenerationSummary(summary.jobId, summary.generatedTokens ?: 0, summary.totalTimeMs)
     }
@@ -165,6 +167,7 @@ class InferenceRsProvider(
                         ?: return@withLock
                     ensureModelReadyLocked(target) { }
                     val context = contextHandle ?: return@withLock
+                    unloadTranscriptionModelIfLoaded()
                     prewarmMultimodalContext(context, mmprojPath, null)
                 }
             }.onFailure { error ->
@@ -345,6 +348,14 @@ class InferenceRsProvider(
         modelHandle = null
         currentModelKey = null
         currentContextLength = null
+    }
+
+    private fun unloadTranscriptionModelIfLoaded() {
+        runCatching {
+            unloadTranscriptionModel()
+        }.onFailure { error ->
+            Log.d("InferenceRsProvider", "Transcription model unload skipped", error)
+        }
     }
 
     private suspend fun ensureModelReadyLocked(
