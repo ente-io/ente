@@ -143,7 +143,10 @@ import {
     type SearchOption,
     type SidebarActionID,
 } from "ente-new/photos/services/search/types";
-import { initSettings } from "ente-new/photos/services/settings";
+import {
+    initSettings,
+    isDevBuildAndUser,
+} from "ente-new/photos/services/settings";
 import {
     redirectToCustomerPortal,
     savedUserDetailsOrTriggerPull,
@@ -252,7 +255,8 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
-    const { customDomain } = useSettingsSnapshot();
+    const { customDomain, isInternalUser } = useSettingsSnapshot();
+    const canUseSharedAlbumAdd = isInternalUser || isDevBuildAndUser();
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
 
@@ -971,17 +975,28 @@ const Page: React.FC = () => {
                         // If a selection is happening, there must be a user.
                         (f) => f.ownerID == user!.id,
                     );
+                    /**
+                     * The shared-album add/copy path can process non-owned
+                     * files, but keep the old owner-only behavior for users who
+                     * do not pass the shared-album add gate.
+                     */
+                    const filesToProcess =
+                        canUseSharedAlbumAdd && op == "add"
+                            ? selectedFiles
+                            : userFiles;
                     const sourceCollectionID = selected.collectionID;
-                    if (userFiles.length > 0) {
+                    if (filesToProcess.length > 0) {
                         await performCollectionOp(
                             op,
                             selectedCollection,
-                            userFiles,
+                            filesToProcess,
                             sourceCollectionID,
                         );
                     }
-                    // See: [Note: Add and move of non-user files]
-                    if (userFiles.length != selectedFiles.length) {
+                    if (
+                        !(canUseSharedAlbumAdd && op == "add") &&
+                        userFiles.length != selectedFiles.length
+                    ) {
                         showMiniDialog(notifyOthersFilesDialogAttributes());
                     }
                     clearSelection();
@@ -1125,6 +1140,7 @@ const Page: React.FC = () => {
                             },
                         );
                     }
+
                     // Apart from download, the other operations currently only work
                     // on the user's own files.
                     //
