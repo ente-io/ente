@@ -10,6 +10,7 @@ class SettingsPageScaffold extends StatelessWidget {
     this.actions = const [],
     this.controller,
     this.onTitleTap,
+    this.bottomNavigationBar,
     this.padding = const EdgeInsets.fromLTRB(16, 0, 16, 16),
   });
 
@@ -19,6 +20,7 @@ class SettingsPageScaffold extends StatelessWidget {
   final List<Widget> children;
   final ScrollController? controller;
   final VoidCallback? onTitleTap;
+  final Widget? bottomNavigationBar;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -27,6 +29,7 @@ class SettingsPageScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.backgroundBase,
+      bottomNavigationBar: bottomNavigationBar,
       body: AppBarComponent(
         title: title,
         subtitle: subtitle,
