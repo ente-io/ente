@@ -17,6 +17,7 @@ import {
 import React, { useState } from "react";
 import { addOTT } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
+import { microsecondsFromNow } from "../utils";
 
 const APP_OPTIONS = [
     { label: "Photos", value: "photos" },
@@ -182,8 +183,7 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
     );
 };
 
-const computeExpiryTimeMicros = () =>
-    Date.now() * 1000 + 7 * 24 * 60 * 60 * 1_000_000;
+const computeExpiryTimeMicros = () => microsecondsFromNow(7);
 
 const generateOTP = () => {
     const values = new Uint32Array(1);

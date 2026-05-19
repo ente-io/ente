@@ -15,6 +15,11 @@ import { UserDetails, type UserDetailsData } from "./components/UserDetails";
 import duckieimage from "./components/duckie.png";
 import { getUser, type UserResponse } from "./services/admin-user";
 import { StaffSessionProvider } from "./services/session";
+import {
+    dateFromMicroseconds,
+    formatStorageSize,
+    SUCCESS_COLOR,
+} from "./utils";
 
 export const App: React.FC = () => {
     const [urlCredentials] = useState(readUrlCredentials);
@@ -176,7 +181,7 @@ export const App: React.FC = () => {
                                     centered
                                     sx={{
                                         "& .MuiTabs-indicator": {
-                                            backgroundColor: "#00B33C",
+                                            backgroundColor: SUCCESS_COLOR,
                                             height: "5px",
                                             borderRadius: "20px",
                                         },
@@ -268,8 +273,8 @@ const buildUserDetailsData = (
                 kind: "text",
                 label: "Creation time",
                 value:
-                    new Date(
-                        userResponse.user.creationTime / 1000,
+                    dateFromMicroseconds(
+                        userResponse.user.creationTime,
                     ).toLocaleString() || "None",
             },
         ],
@@ -277,17 +282,20 @@ const buildUserDetailsData = (
             {
                 kind: "text",
                 label: "Total",
-                value: formatStorage(subscription.storage, true),
+                value:
+                    subscription.storage === 0
+                        ? "None"
+                        : formatStorageSize(subscription.storage),
             },
             {
                 kind: "text",
                 label: "Consumed",
-                value: formatStorage(userResponse.details?.usage),
+                value: formatStorageSize(userResponse.details?.usage),
             },
             {
                 kind: "text",
                 label: "Bonus",
-                value: formatStorage(userResponse.details?.storageBonus),
+                value: formatStorageSize(userResponse.details?.storageBonus),
             },
         ],
         subscription: [
@@ -305,8 +313,9 @@ const buildUserDetailsData = (
                 kind: "expiry",
                 label: "Expiry time",
                 value:
-                    new Date(subscription.expiryTime / 1000).toISOString() ||
-                    "None",
+                    dateFromMicroseconds(
+                        subscription.expiryTime,
+                    ).toISOString() || "None",
             },
         ],
         security: [
@@ -329,14 +338,4 @@ const buildUserDetailsData = (
             canDisableEmailMFA,
         },
     };
-};
-
-const formatStorage = (bytes: number | undefined, noneWhenZero = false) => {
-    if (bytes === undefined || (noneWhenZero && bytes === 0)) {
-        return "None";
-    }
-    if (bytes >= 1024 ** 3) {
-        return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
-    }
-    return `${(bytes / 1024 ** 2).toFixed(2)} MB`;
 };

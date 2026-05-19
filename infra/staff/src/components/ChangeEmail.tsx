@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { changeUserEmail, getSelectedUserID } from "../services/admin-user";
 import { useStaffSessionRef } from "../services/session";
+import { SUCCESS_COLOR } from "../utils";
 
 interface ChangeEmailProps {
     open: boolean;
@@ -115,4 +116,4 @@ const dialogCloseButtonSx = { position: "absolute", right: 10, top: 10 };
 
 const fieldLabelSx = { display: "block", mb: "4px", textAlign: "left" };
 
-const submitSx = { bgcolor: "#00B33C", color: "white" };
+const submitSx = { bgcolor: SUCCESS_COLOR, color: "white" };

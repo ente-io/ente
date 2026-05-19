@@ -10,6 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { getStorageBonuses, type StorageBonus } from "../services/admin-user";
 import { useInitialStaffSession } from "../services/session";
+import { dateFromMicroseconds, formatBytesToGB } from "../utils";
 import { StatusBadge } from "./StatusBadge";
 
 export const StorageBonusTableComponent: React.FC = () => {
@@ -76,7 +77,7 @@ export const StorageBonusTableComponent: React.FC = () => {
                     {storageBonuses.map((bonus, index) => (
                         <TableRow key={index}>
                             <TableCell>
-                                {formatStorage(bonus.storage)}
+                                {formatBytesToGB(bonus.storage)}
                             </TableCell>
                             <TableCell>{bonus.type}</TableCell>
                             <TableCell>
@@ -99,14 +100,11 @@ export const StorageBonusTableComponent: React.FC = () => {
 };
 
 const formatCreatedAt = (createdAt: number): string =>
-    new Date(createdAt / 1000).toLocaleDateString();
+    dateFromMicroseconds(createdAt).toLocaleDateString();
 
 const formatValidTill = (validTill: number): string => {
     if (validTill === 0) {
         return "Forever";
     }
-    return new Date(validTill / 1000).toLocaleDateString();
+    return dateFromMicroseconds(validTill).toLocaleDateString();
 };
-
-const formatStorage = (storage: number): string =>
-    `${(storage / 1024 ** 3).toFixed(2)} GB`;

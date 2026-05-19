@@ -13,6 +13,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { getFamilyMembers, type FamilyMember } from "../services/admin-user";
 import { useInitialStaffSession } from "../services/session";
+import { formatBytesToGB } from "../utils";
 import { CloseFamily } from "./CloseFamily";
 import { StatusBadge } from "./StatusBadge";
 
@@ -102,12 +103,12 @@ export const FamilyTable: React.FC = () => {
                                     </StatusBadge>
                                 </TableCell>
                                 <TableCell>
-                                    {formatUsageToGB(member.usage)}
+                                    {formatBytesToGB(member.usage)}
                                 </TableCell>
                                 <TableCell>
                                     {member.status !== "SELF"
                                         ? (member.storageLimit &&
-                                              formatUsageToGB(
+                                              formatBytesToGB(
                                                   member.storageLimit,
                                               )) ||
                                           "NA"
@@ -138,6 +139,3 @@ export const FamilyTable: React.FC = () => {
         </>
     );
 };
-
-const formatUsageToGB = (usage: number): string =>
-    `${(usage / (1024 * 1024 * 1024)).toFixed(2)} GB`;

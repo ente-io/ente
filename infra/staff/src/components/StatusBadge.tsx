@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
+import { SUCCESS_COLOR } from "../utils";
 
 type StatusBadgeTone = "success" | "neutral";
 
@@ -29,4 +30,4 @@ export const StatusBadge = ({
 );
 
 const statusBadgeColor = (tone: StatusBadgeTone) =>
-    tone === "success" ? "#00B33C" : "#494949";
+    tone === "success" ? SUCCESS_COLOR : "#494949";

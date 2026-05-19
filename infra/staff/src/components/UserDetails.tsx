@@ -15,6 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { SUCCESS_COLOR } from "../utils";
 import { AddOTT } from "./AddOTT";
 import { ChangeEmail } from "./ChangeEmail";
 import { DeleteAccount } from "./DeleteAccount";
@@ -374,17 +375,7 @@ const renderTableCellContent = (
                             onChange={(e) =>
                                 actions.changeTwoFactor(e.target.checked)
                             }
-                            sx={{
-                                "& .MuiSwitch-switchBase.Mui-checked": {
-                                    color: "#00B33C",
-                                    "&:hover": {
-                                        backgroundColor:
-                                            "rgba(0, 179, 60, 0.08)",
-                                    },
-                                },
-                                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                                    { backgroundColor: "#00B33C" },
-                            }}
+                            sx={successSwitchSx}
                         />
                     )}
                 </Box>
@@ -398,7 +389,7 @@ const renderTableCellContent = (
                     sx={{
                         color:
                             isValidExpiryTime && expiryTime > currentTime
-                                ? "#00B33C"
+                                ? SUCCESS_COLOR
                                 : "red",
                     }}
                 >
@@ -426,17 +417,7 @@ const renderTableCellContent = (
                         <Switch
                             checked={securityControls.emailMFAEnabled}
                             onChange={actions.toggleEmailMFA}
-                            sx={{
-                                "& .MuiSwitch-switchBase.Mui-checked": {
-                                    color: "#00B33C",
-                                    "&:hover": {
-                                        backgroundColor:
-                                            "rgba(0, 179, 60, 0.08)",
-                                    },
-                                },
-                                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                                    { backgroundColor: "#00B33C" },
-                            }}
+                            sx={successSwitchSx}
                         />
                     )}
                 </Box>
@@ -447,3 +428,13 @@ const renderTableCellContent = (
 };
 
 const enabledLabel = (enabled: boolean) => (enabled ? "Enabled" : "Disabled");
+
+const successSwitchSx = {
+    "& .MuiSwitch-switchBase.Mui-checked": {
+        color: "#00B33C",
+        "&:hover": { backgroundColor: "rgba(0, 179, 60, 0.08)" },
+    },
+    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+        backgroundColor: "#00B33C",
+    },
+} as const;

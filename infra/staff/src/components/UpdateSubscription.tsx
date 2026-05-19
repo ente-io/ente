@@ -22,6 +22,13 @@ import {
     updateUserSubscription,
 } from "../services/admin-user";
 import { useInitialStaffSession, useStaffSession } from "../services/session";
+import {
+    bytesToGB,
+    dateFromMicroseconds,
+    dateToMicroseconds,
+    gbToBytes,
+    SUCCESS_COLOR,
+} from "../utils";
 
 interface UpdateSubscriptionProps {
     open: boolean;
@@ -61,12 +68,14 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
             try {
                 const subscription =
                     await getSelectedSubscription(initialSession);
-                const expiryTime = new Date(subscription.expiryTime / 1000);
+                const expiryTime = dateFromMicroseconds(
+                    subscription.expiryTime,
+                );
 
                 setValues({
                     productId: subscription.productID || "",
                     provider: subscription.paymentProvider || "",
-                    storage: subscription.storage / (1024 * 1024 * 1024) || 0,
+                    storage: bytesToGB(subscription.storage) || 0,
                     transactionId: subscription.originalTransactionID || "",
                     expiryTime,
                     userId: subscription.userID || "",
@@ -115,12 +124,12 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         try {
             let expiryTime = null;
             if (values.expiryTime) {
-                expiryTime = values.expiryTime.getTime() * 1000;
+                expiryTime = dateToMicroseconds(values.expiryTime);
             }
 
             await updateUserSubscription(session, {
                 userId: values.userId,
-                storage: values.storage * 1024 ** 3,
+                storage: gbToBytes(values.storage),
                 expiryTime,
                 productId: values.productId,
                 paymentProvider: values.provider,
@@ -315,4 +324,4 @@ const fieldWrapperSx = { mb: 1 };
 
 const fieldLabelSx = { display: "block", mb: "4px", textAlign: "left" };
 
-const submitSx = { bgcolor: "#00B33C", color: "white" };
+const submitSx = { bgcolor: SUCCESS_COLOR, color: "white" };

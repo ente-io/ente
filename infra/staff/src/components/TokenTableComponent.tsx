@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import { getTokens, type TokenData } from "../services/admin-user";
 import { useInitialStaffSession } from "../services/session";
+import { dateFromMicroseconds } from "../utils";
 import { StatusBadge } from "./StatusBadge";
 
 export const TokensTableComponent: React.FC = () => {
@@ -147,4 +148,4 @@ export const TokensTableComponent: React.FC = () => {
 };
 
 const formatDate = (timestamp: number): string =>
-    new Date(timestamp / 1000).toLocaleDateString();
+    dateFromMicroseconds(timestamp).toLocaleDateString();
