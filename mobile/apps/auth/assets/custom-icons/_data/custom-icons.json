@@ -2182,7 +2182,8 @@
     },
     {
       "title": "Trade Republic",
-      "slug": "trade_republic"
+      "slug": "trade_republic",
+      "hex": "000000"
     },
     {
       "title": "Trading 212"
