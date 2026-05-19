@@ -8,12 +8,12 @@ import {
 } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { FamilyTableComponent } from "./components/FamilyComponentTable";
+import { FamilyTable } from "./components/FamilyTable";
 import { StorageBonusTableComponent } from "./components/StorageBonusTableComponent";
 import { TokensTableComponent } from "./components/TokenTableComponent";
-import { UserComponent, type UserData } from "./components/UserComponent";
+import { UserDetails, type UserDetailsData } from "./components/UserDetails";
 import duckieimage from "./components/duckie.png";
-import { getUser } from "./services/admin-user";
+import { getUser, type UserResponse } from "./services/admin-user";
 import { StaffSessionProvider } from "./services/session";
 
 export const App: React.FC = () => {
@@ -29,7 +29,7 @@ export const App: React.FC = () => {
     const [error, setError] = useState("");
     const [fetchSuccess, setFetchSuccess] = useState(false);
     const [tabValue, setTabValue] = useState(0);
-    const [userData, setUserData] = useState<UserData | null>(null);
+    const [userData, setUserData] = useState<UserDetailsData | null>(null);
 
     useEffect(() => {
         if (authToken) {
@@ -46,124 +46,17 @@ export const App: React.FC = () => {
         const startTime = Date.now();
         try {
             const userSearchInput = input.trim();
-            const userDataResponse = await getUser(
-                { token: authToken },
+            const userDetailsData = buildUserDetailsData(
+                await getUser({ token: authToken }, userSearchInput),
                 userSearchInput,
             );
-            if (!userDataResponse.subscription) {
-                throw new Error("Subscription data not found");
-            }
-            const { subscription } = userDataResponse;
-            const userEmail = userDataResponse.user.email || userSearchInput;
-            setSelectedUserEmail(userEmail);
-            const emailMFAEnabled =
-                userDataResponse.details?.profileData?.isEmailMFAEnabled ??
-                false;
-            const twoFactorEnabled =
-                userDataResponse.details?.profileData?.isTwoFactorEnabled ??
-                false;
-            const passkeysEnabled =
-                (userDataResponse.details?.profileData?.passkeyCount ?? 0) > 0;
-            const canDisableEmailMFA =
-                userDataResponse.details?.profileData?.canDisableEmailMFA ??
-                false;
-
-            const extractedUserData: UserData = {
-                email: userEmail,
-                user: [
-                    {
-                        kind: "text",
-                        label: "User ID",
-                        value: userDataResponse.user.ID || "None",
-                    },
-                    {
-                        kind: "email",
-                        label: "Email",
-                        value: userDataResponse.user.email || "None",
-                    },
-                    {
-                        kind: "text",
-                        label: "Creation time",
-                        value:
-                            new Date(
-                                userDataResponse.user.creationTime / 1000,
-                            ).toLocaleString() || "None",
-                    },
-                ],
-                storage: [
-                    {
-                        kind: "text",
-                        label: "Total",
-                        value: formatStorage(subscription.storage, true),
-                    },
-                    {
-                        kind: "text",
-                        label: "Consumed",
-                        value: formatStorage(userDataResponse.details?.usage),
-                    },
-                    {
-                        kind: "text",
-                        label: "Bonus",
-                        value: formatStorage(
-                            userDataResponse.details?.storageBonus,
-                        ),
-                    },
-                ],
-                subscription: [
-                    {
-                        kind: "text",
-                        label: "Product ID",
-                        value: subscription.productID || "None",
-                    },
-                    {
-                        kind: "text",
-                        label: "Provider",
-                        value: subscription.paymentProvider || "None",
-                    },
-                    {
-                        kind: "expiry",
-                        label: "Expiry time",
-                        value:
-                            new Date(
-                                subscription.expiryTime / 1000,
-                            ).toISOString() || "None",
-                    },
-                ],
-                security: [
-                    {
-                        kind: "emailMFA",
-                        label: "Email MFA",
-                        value: emailMFAEnabled ? "Enabled" : "Disabled",
-                    },
-                    {
-                        kind: "twoFactor",
-                        label: "Two factor 2FA",
-                        value: twoFactorEnabled ? "Enabled" : "Disabled",
-                    },
-                    {
-                        kind: "passkeys",
-                        label: "Passkeys",
-                        value: passkeysEnabled ? "Enabled" : "Disabled",
-                    },
-                    {
-                        kind: "text",
-                        label: "AuthCodes",
-                        value: `${userDataResponse.authCodes ?? 0}`,
-                    },
-                ],
-                securityState: {
-                    emailMFAEnabled,
-                    twoFactorEnabled,
-                    canDisableEmailMFA,
-                },
-            };
-
+            setSelectedUserEmail(userDetailsData.email);
             const elapsedTime = Date.now() - startTime;
             const delay = Math.max(3000 - elapsedTime, 0);
             setTimeout(() => {
                 setLoading(false);
                 setFetchSuccess(true);
-                setUserData(extractedUserData);
+                setUserData(userDetailsData);
             }, delay);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -311,11 +204,9 @@ export const App: React.FC = () => {
                                 }}
                             >
                                 {tabValue === 0 && userData && (
-                                    <UserComponent userData={userData} />
+                                    <UserDetails userData={userData} />
                                 )}
-                                {tabValue === 1 && userData && (
-                                    <FamilyTableComponent />
-                                )}
+                                {tabValue === 1 && userData && <FamilyTable />}
                                 {tabValue === 2 && userData && (
                                     <StorageBonusTableComponent />
                                 )}
@@ -340,6 +231,104 @@ export const App: React.FC = () => {
 const readUrlCredentials = () => {
     const urlParams = new URLSearchParams(window.location.search);
     return { email: urlParams.get("email"), token: urlParams.get("token") };
+};
+
+const buildUserDetailsData = (
+    userResponse: UserResponse,
+    userSearchInput: string,
+): UserDetailsData => {
+    if (!userResponse.subscription) {
+        throw new Error("Subscription data not found");
+    }
+
+    const { subscription } = userResponse;
+    const emailMFAEnabled =
+        userResponse.details?.profileData?.isEmailMFAEnabled ?? false;
+    const twoFactorEnabled =
+        userResponse.details?.profileData?.isTwoFactorEnabled ?? false;
+    const passkeysEnabled =
+        (userResponse.details?.profileData?.passkeyCount ?? 0) > 0;
+    const canDisableEmailMFA =
+        userResponse.details?.profileData?.canDisableEmailMFA ?? false;
+
+    return {
+        email: userResponse.user.email || userSearchInput,
+        user: [
+            {
+                kind: "text",
+                label: "User ID",
+                value: userResponse.user.ID || "None",
+            },
+            {
+                kind: "email",
+                label: "Email",
+                value: userResponse.user.email || "None",
+            },
+            {
+                kind: "text",
+                label: "Creation time",
+                value:
+                    new Date(
+                        userResponse.user.creationTime / 1000,
+                    ).toLocaleString() || "None",
+            },
+        ],
+        storage: [
+            {
+                kind: "text",
+                label: "Total",
+                value: formatStorage(subscription.storage, true),
+            },
+            {
+                kind: "text",
+                label: "Consumed",
+                value: formatStorage(userResponse.details?.usage),
+            },
+            {
+                kind: "text",
+                label: "Bonus",
+                value: formatStorage(userResponse.details?.storageBonus),
+            },
+        ],
+        subscription: [
+            {
+                kind: "text",
+                label: "Product ID",
+                value: subscription.productID || "None",
+            },
+            {
+                kind: "text",
+                label: "Provider",
+                value: subscription.paymentProvider || "None",
+            },
+            {
+                kind: "expiry",
+                label: "Expiry time",
+                value:
+                    new Date(subscription.expiryTime / 1000).toISOString() ||
+                    "None",
+            },
+        ],
+        security: [
+            { kind: "emailMFA", label: "Email MFA", enabled: emailMFAEnabled },
+            {
+                kind: "twoFactor",
+                label: "Two factor 2FA",
+                enabled: twoFactorEnabled,
+            },
+            { kind: "passkeys", label: "Passkeys", enabled: passkeysEnabled },
+            {
+                kind: "text",
+                label: "AuthCodes",
+                value: `${userResponse.authCodes ?? 0}`,
+            },
+        ],
+        securityState: {
+            emailMFAEnabled,
+            twoFactorEnabled,
+            canDisableEmailMFA,
+        },
+    };
 };
 
 const formatStorage = (bytes: number | undefined, noneWhenZero = false) => {

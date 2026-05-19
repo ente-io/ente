@@ -16,7 +16,7 @@ import { useInitialStaffSession } from "../services/session";
 import { CloseFamily } from "./CloseFamily";
 import { StatusBadge } from "./StatusBadge";
 
-export const FamilyTableComponent: React.FC = () => {
+export const FamilyTable: React.FC = () => {
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [closeFamilyOpen, setCloseFamilyOpen] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -44,7 +44,7 @@ export const FamilyTableComponent: React.FC = () => {
         setCloseFamilyOpen(true);
     };
 
-    const handleCloseCloseFamily = () => {
+    const handleCloseFamilyDialog = () => {
         setCloseFamilyOpen(false);
     };
 
@@ -131,8 +131,8 @@ export const FamilyTableComponent: React.FC = () => {
             {closeFamilyOpen && (
                 <CloseFamily
                     open={closeFamilyOpen}
-                    handleClose={handleCloseCloseFamily}
-                    handleCloseFamily={handleCloseCloseFamily}
+                    handleClose={handleCloseFamilyDialog}
+                    handleCloseFamily={handleCloseFamilyDialog}
                 />
             )}
         </>
