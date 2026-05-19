@@ -132,6 +132,14 @@ Use the distribution channel as the profile name: `<App> App Store`.
 
 For another iOS app, reuse the same Apple Distribution certificate and App Store Connect API key, but create a separate App Store provisioning profile for that app's bundle ID.
 
+### Entitlements
+
+When adding new entitlements, the profile needs to be regenerated.
+
+1. Go to Apple Developer > Certificates, Identifiers & Profiles > Identifiers > `io.ente.<app>`.
+2. Enable the missing capability and save the App ID.
+3. Go to Profiles and regenerate/save the XXX App Store profile. Keep the profile name exactly the same.
+
 ## Profile rotation
 
 Provisioning profiles are tied to the Apple Distribution certificate selected when they are generated. When the Apple Distribution certificate changes, regenerate the App Store profiles for every app that should use the new certificate.
