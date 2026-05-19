@@ -1050,10 +1050,11 @@ func main() {
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
 		embeddingController, healthCheckHandler, castDb, inactiveUserOrchestrator)
 
-	// Create a new collector, the name will be used as a label on the metrics
-	collector := sqlstats.NewStatsCollector("prod_db", db)
-	// Register it with Prometheus
-	prometheus.MustRegister(collector)
+	// Create new collectors, the names will be used as labels on the metrics
+	primaryDBCollector := sqlstats.NewStatsCollector("prod_db", db)
+	latencySensitiveDBCollector := sqlstats.NewStatsCollector("latency_sensitive_db", latencySensitiveDB)
+	// Register them with Prometheus
+	prometheus.MustRegister(primaryDBCollector, latencySensitiveDBCollector)
 
 	http.Handle("/metrics", promhttp.Handler())
 	go http.ListenAndServe(":2112", nil)
