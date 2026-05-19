@@ -138,6 +138,8 @@ Jump to a category:
 - [Does Ente compress my photos during backup?](/photos/faq/backup-and-sync#does-ente-compress)
 - [How can I check my backup status?](/photos/faq/backup-and-sync#check-backup-status)
 - [Does Ente backup Live Photos from iPhone?](/photos/faq/backup-and-sync#live-photos-backup)
+- [Can I pick photos from Ente in other apps?](/photos/faq/backup-and-sync#pick-photos-in-other-apps)
+- [Can I open photos from my camera app in Ente?](/photos/faq/backup-and-sync#open-camera-photos-in-ente)
 
 ### Background Sync
 
