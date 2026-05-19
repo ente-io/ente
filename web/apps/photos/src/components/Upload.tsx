@@ -155,6 +155,11 @@ interface UploadProps {
 
 type UploadType = "files" | "folders" | "zips";
 
+interface UploadFilesOptions {
+    persistPendingUploads?: boolean;
+    postUploadTargetCollection?: Collection;
+}
+
 /**
  * Top level component that houses the infrastructure for handling uploads.
  */
@@ -762,10 +767,7 @@ export const Upload: React.FC<UploadProps> = ({
     const waitInQueueAndUploadFiles = async (
         uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
-        opts?: {
-            persistPendingUploads?: boolean;
-            postUploadTargetCollection?: Collection;
-        },
+        opts?: UploadFilesOptions,
     ) => {
         const currentPromise = currentUploadPromise.current;
         currentUploadPromise.current = (async () => {
@@ -791,10 +793,7 @@ export const Upload: React.FC<UploadProps> = ({
     const uploadFiles = async (
         uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
-        opts?: {
-            persistPendingUploads?: boolean;
-            postUploadTargetCollection?: Collection;
-        },
+        opts?: UploadFilesOptions,
     ) => {
         try {
             retrySharedAlbumUploadTarget.current =
@@ -817,6 +816,10 @@ export const Upload: React.FC<UploadProps> = ({
             const batchResult = await uploadManager.uploadItems(
                 uploadItemsWithCollection,
                 collections,
+                {
+                    skipDuplicateAddToUploadCollection:
+                        !!opts?.postUploadTargetCollection,
+                },
             );
             if (!batchResult.processedAny) closeUploadProgress();
             await handlePostUploadBatchResult(
@@ -850,6 +853,10 @@ export const Upload: React.FC<UploadProps> = ({
             const batchResult = await uploadManager.uploadItems(
                 items,
                 collections,
+                {
+                    skipDuplicateAddToUploadCollection:
+                        !!retrySharedAlbumUploadTarget.current,
+                },
             );
             if (!batchResult.processedAny) closeUploadProgress();
             await handlePostUploadBatchResult(

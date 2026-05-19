@@ -90,6 +90,10 @@ export interface UploadBatchResult {
     itemResults: UploadBatchItemResult[];
 }
 
+interface UploadItemsOptions {
+    skipDuplicateAddToUploadCollection?: boolean;
+}
+
 /**
  *
  * @param batchResult
@@ -374,6 +378,7 @@ class UploadManager {
     public async uploadItems(
         itemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
+        options?: UploadItemsOptions,
     ): Promise<UploadBatchResult> {
         if (this.uploadInProgress)
             throw new Error("Cannot run multiple uploads at once");
@@ -416,7 +421,7 @@ class UploadManager {
                     mediaItems.length != clusteredMediaItems.length,
                 );
 
-                await this.uploadMediaItems(clusteredMediaItems);
+                await this.uploadMediaItems(clusteredMediaItems, options);
             }
         } catch (e) {
             if (!isUploadCancelledError(e)) {
@@ -526,7 +531,10 @@ class UploadManager {
         }
     }
 
-    private async uploadMediaItems(mediaItems: ClusteredUploadItem[]) {
+    private async uploadMediaItems(
+        mediaItems: ClusteredUploadItem[],
+        options?: UploadItemsOptions,
+    ) {
         this.itemsToBeUploaded = [...this.itemsToBeUploaded, ...mediaItems];
         this.uiService.reset(mediaItems.length);
         await UploadService.setFileCount(mediaItems.length);
@@ -540,15 +548,20 @@ class UploadManager {
         ) {
             this.comlinkCryptoWorkers[i] = createComlinkCryptoWorker();
             const worker = await this.comlinkCryptoWorkers[i]!.remote;
-            uploadProcesses.push(this.uploadNextItemInQueue(worker));
+            uploadProcesses.push(this.uploadNextItemInQueue(worker, options));
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextItemInQueue(worker: CryptoWorker) {
+    private async uploadNextItemInQueue(
+        worker: CryptoWorker,
+        options?: UploadItemsOptions,
+    ) {
         const uiService = this.uiService;
         const uploadContext = {
             isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
+            skipDuplicateAddToUploadCollection:
+                options?.skipDuplicateAddToUploadCollection,
             abortIfCancelled: this.abortIfCancelled.bind(this),
             updateUploadProgress:
                 uiService.updateUploadProgress.bind(uiService),
