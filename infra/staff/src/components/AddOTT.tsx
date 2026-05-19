@@ -14,7 +14,7 @@ import {
     type SelectChangeEvent,
     Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { addOTT } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
 
@@ -42,15 +42,12 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
     );
     const session = useStaffSession();
 
-    useEffect(() => {
-        if (open) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect -- Dialog state intentionally resets whenever it opens.
-            setSelectedApp("photos");
-            setError(null);
-            setCreatedOtp(null);
-            setExpiryPreview(computeExpiryTimeMicros());
-        }
-    }, [open]);
+    const resetForm = () => {
+        setSelectedApp("photos");
+        setError(null);
+        setCreatedOtp(null);
+        setExpiryPreview(computeExpiryTimeMicros());
+    };
 
     const handleClose = () => {
         if (submitting) {
@@ -98,6 +95,7 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
             PaperComponent={Paper}
             maxWidth="xs"
             fullWidth
+            slotProps={{ transition: { onEnter: resetForm } }}
         >
             {createdOtp ? (
                 <>
