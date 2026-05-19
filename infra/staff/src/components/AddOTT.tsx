@@ -46,6 +46,7 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
 
     useEffect(() => {
         if (open) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- Dialog state intentionally resets whenever it opens.
             setSelectedApp("photos");
             setError(null);
             setCreatedOtp(null);

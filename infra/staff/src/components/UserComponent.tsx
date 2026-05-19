@@ -24,59 +24,87 @@ import { ToggleEmailMFA } from "./ToggleEmailMFA";
 import { UpdateSubscription } from "./UpdateSubscription";
 
 export interface UserData {
-    user: Record<string, string>;
-    storage: Record<string, string>;
-    subscription: Record<string, string>;
-    security: Record<string, string>;
+    email: string;
+    user: UserTableRow[];
+    storage: UserTableRow[];
+    subscription: UserTableRow[];
+    security: UserTableRow[];
+    securityState: {
+        emailMFAEnabled: boolean;
+        twoFactorEnabled: boolean;
+        canDisableEmailMFA: boolean;
+    };
 }
 
+type UserTableRow =
+    | { kind: "text"; label: string; value: string }
+    | { kind: "email"; label: string; value: string }
+    | { kind: "expiry"; label: string; value: string }
+    | { kind: "passkeys"; label: string; value: string }
+    | { kind: "twoFactor"; label: string; value: string }
+    | { kind: "emailMFA"; label: string; value: string };
+
+type UserSectionKey = "user" | "storage" | "subscription" | "security";
+
 interface UserComponentProps {
-    userData: UserData | null;
+    userData: UserData;
 }
 
 export const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
-    const [email2FAEnabled, setEmail2FAEnabled] = useState(false);
+    const [email2FAEnabled, setEmail2FAEnabled] = useState(
+        userData.securityState.emailMFAEnabled,
+    );
     const [email2FAOpen, setEmail2FAToggleOpen] = useState(false);
     const [disable2FAOpen, setDisable2FAOpen] = useState(false);
-    const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-    const [canDisableEmailMFA, setCanDisableEmailMFA] = useState(false);
+    const [twoFactorEnabled, setTwoFactorEnabled] = useState(
+        userData.securityState.twoFactorEnabled,
+    );
     const [updateSubscriptionOpen, setUpdateSubscriptionOpen] = useState(false);
     const [changeEmailOpen, setChangeEmailOpen] = useState(false);
     const [disablePasskeysOpen, setDisablePasskeysOpen] = useState(false);
     const [addOTTOpen, setAddOTTOpen] = useState(false);
+    const { canDisableEmailMFA } = userData.securityState;
 
     useEffect(() => {
-        setTwoFactorEnabled(userData?.security["Two factor 2FA"] === "Enabled");
-        setEmail2FAEnabled(userData?.security["Email MFA"] === "Enabled");
-        setCanDisableEmailMFA(
-            userData?.security["Can Disable EmailMFA"] === "Yes",
-        );
-    }, [userData]);
+        // These switches are local after successful mutations, but same-user
+        // refetches should still resync them with the server.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setEmail2FAEnabled(userData.securityState.emailMFAEnabled);
+        setTwoFactorEnabled(userData.securityState.twoFactorEnabled);
+    }, [
+        userData.securityState.emailMFAEnabled,
+        userData.securityState.twoFactorEnabled,
+    ]);
 
     const handleEditEmail = () => setChangeEmailOpen(true);
     const handleDeleteAccountClick = () => setDeleteAccountOpen(true);
     const handleEditSubscription = () => setUpdateSubscriptionOpen(true);
     const handleDisablePasskeys = () => setDisablePasskeysOpen(true);
 
-    if (!userData) {
-        return null;
-    }
-
-    const sections = [
-        { title: "user", data: userData.user },
-        { title: "storage", data: userData.storage },
-        { title: "subscription", data: userData.subscription },
-        { title: "security", data: userData.security },
+    const sections: {
+        key: UserSectionKey;
+        title: string;
+        rows: UserTableRow[];
+    }[] = [
+        { key: "user", title: "User", rows: userData.user },
+        { key: "storage", title: "Storage", rows: userData.storage },
+        {
+            key: "subscription",
+            title: "Subscription",
+            rows: userData.subscription,
+        },
+        { key: "security", title: "Security", rows: userData.security },
     ];
 
     return (
         <Grid container spacing={6} sx={{ justifyContent: "center" }}>
-            {sections.map(({ title, data }) => (
-                <Grid size={{ xs: 12, sm: 10, md: 6 }} key={title}>
+            {sections.map(({ key, title, rows }) => (
+                <Grid size={{ xs: 12, sm: 10, md: 6 }} key={key}>
                     <DataTable
+                        sectionKey={key}
                         title={title}
-                        data={data}
+                        rows={rows}
                         onEditEmail={handleEditEmail}
                         onDeleteAccount={handleDeleteAccountClick}
                         onEditSubscription={handleEditSubscription}
@@ -122,15 +150,16 @@ export const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
             <AddOTT
                 open={addOTTOpen}
                 onClose={() => setAddOTTOpen(false)}
-                userEmail={userData.user.Email ?? ""}
+                userEmail={userData.email}
             />
         </Grid>
     );
 };
 
 interface DataTableProps {
+    sectionKey: UserSectionKey;
     title: string;
-    data: Record<string, string>;
+    rows: UserTableRow[];
     onEditEmail: () => void;
     onDeleteAccount: () => void;
     onEditSubscription: () => void;
@@ -145,8 +174,9 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({
+    sectionKey,
     title,
-    data,
+    rows,
     onEditEmail,
     onDeleteAccount,
     onEditSubscription,
@@ -187,9 +217,9 @@ const DataTable: React.FC<DataTableProps> = ({
                 component="div"
                 sx={{ fontWeight: "bold", textAlign: "center", width: "100%" }}
             >
-                {title.charAt(0).toUpperCase() + title.slice(1)}
+                {title}
             </Typography>
-            {title === "user" && (
+            {sectionKey === "user" && (
                 <IconButton
                     edge="start"
                     aria-label="delete"
@@ -198,7 +228,7 @@ const DataTable: React.FC<DataTableProps> = ({
                     <DeleteIcon />
                 </IconButton>
             )}
-            {title === "subscription" && (
+            {sectionKey === "subscription" && (
                 <IconButton
                     edge="end"
                     aria-label="edit"
@@ -219,49 +249,46 @@ const DataTable: React.FC<DataTableProps> = ({
             aria-label={title}
         >
             <TableBody>
-                {Object.entries(data)
-                    .filter(([label]) => label !== "Can Disable EmailMFA")
-                    .map(([label, value], index) => (
-                        <TableRow key={label}>
-                            <TableCell
-                                component="th"
-                                scope="row"
-                                sx={{
-                                    p: "16px",
-                                    borderBottom:
-                                        index === 1 || index === 0
-                                            ? "1px solid rgba(224, 224, 224, 1)"
-                                            : "none",
-                                }}
-                            >
-                                {label}
-                            </TableCell>
-                            <TableCell
-                                align="right"
-                                sx={{
-                                    p: "10px",
-                                    borderBottom:
-                                        index === 1 || index === 0
-                                            ? "1px solid rgba(224, 224, 224, 1)"
-                                            : "none",
-                                }}
-                            >
-                                {renderTableCellContent(
-                                    label,
-                                    value,
-                                    onEditEmail,
-                                    onDisablePasskeys,
-                                    canDisableEmailMFA,
-                                    twoFactorEnabled,
-                                    setTwoFactorEnabled,
-                                    setDisable2FAOpen,
-                                    email2FAEnabled,
-                                    onToggleEmailMFA,
-                                )}
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                {title === "security" && (
+                {rows.map((row, index) => (
+                    <TableRow key={`${row.kind}:${row.label}`}>
+                        <TableCell
+                            component="th"
+                            scope="row"
+                            sx={{
+                                p: "16px",
+                                borderBottom:
+                                    index === 1 || index === 0
+                                        ? "1px solid rgba(224, 224, 224, 1)"
+                                        : "none",
+                            }}
+                        >
+                            {row.label}
+                        </TableCell>
+                        <TableCell
+                            align="right"
+                            sx={{
+                                p: "10px",
+                                borderBottom:
+                                    index === 1 || index === 0
+                                        ? "1px solid rgba(224, 224, 224, 1)"
+                                        : "none",
+                            }}
+                        >
+                            {renderTableCellContent(
+                                row,
+                                onEditEmail,
+                                onDisablePasskeys,
+                                canDisableEmailMFA,
+                                twoFactorEnabled,
+                                setTwoFactorEnabled,
+                                setDisable2FAOpen,
+                                email2FAEnabled,
+                                onToggleEmailMFA,
+                            )}
+                        </TableCell>
+                    </TableRow>
+                ))}
+                {sectionKey === "security" && (
                     <TableRow>
                         <TableCell
                             component="th"
@@ -290,8 +317,7 @@ const DataTable: React.FC<DataTableProps> = ({
 );
 
 const renderTableCellContent = (
-    label: string,
-    value: string,
+    row: UserTableRow,
     onEditEmail: () => void,
     onDisablePasskeys: () => void,
     canToggleEmailMFA: boolean,
@@ -301,8 +327,8 @@ const renderTableCellContent = (
     email2FAEnabled: boolean,
     onToggleEmailMFA: () => void,
 ) => {
-    switch (label) {
-        case "Email":
+    switch (row.kind) {
+        case "email":
             return (
                 <Box
                     sx={{
@@ -311,7 +337,7 @@ const renderTableCellContent = (
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Typography>{value}</Typography>
+                    <Typography>{row.value}</Typography>
                     <IconButton
                         edge="end"
                         aria-label="edit-email"
@@ -321,17 +347,17 @@ const renderTableCellContent = (
                     </IconButton>
                 </Box>
             );
-        case "Passkeys":
-            return value === "Enabled" ? (
+        case "passkeys":
+            return row.value === "Enabled" ? (
                 <Button variant="outlined" onClick={onDisablePasskeys}>
                     Remove Passkey
                 </Button>
             ) : (
                 <Typography sx={{ width: "100%", paddingLeft: "1px" }}>
-                    {value}
+                    {row.value}
                 </Typography>
             );
-        case "Two factor 2FA":
+        case "twoFactor":
             return (
                 <Box
                     sx={{
@@ -342,8 +368,10 @@ const renderTableCellContent = (
                         paddingRight: "50px",
                     }}
                 >
-                    <Typography sx={{ marginRight: "1px" }}>{value}</Typography>
-                    {value === "Enabled" && (
+                    <Typography sx={{ marginRight: "1px" }}>
+                        {row.value}
+                    </Typography>
+                    {row.value === "Enabled" && (
                         <Switch
                             checked={twoFactorEnabled}
                             onChange={(e) => {
@@ -368,8 +396,8 @@ const renderTableCellContent = (
                     )}
                 </Box>
             );
-        case "Expiry time": {
-            const expiryTime = new Date(value);
+        case "expiry": {
+            const expiryTime = new Date(row.value);
             const currentTime = new Date();
             const isValidExpiryTime = !Number.isNaN(expiryTime.getTime());
             return (
@@ -381,11 +409,13 @@ const renderTableCellContent = (
                                 : "red",
                     }}
                 >
-                    {isValidExpiryTime ? expiryTime.toLocaleString() : value}
+                    {isValidExpiryTime
+                        ? expiryTime.toLocaleString()
+                        : row.value}
                 </Typography>
             );
         }
-        case "Email MFA":
+        case "emailMFA":
             return (
                 <Box
                     sx={{
@@ -396,7 +426,9 @@ const renderTableCellContent = (
                         paddingRight: "50px",
                     }}
                 >
-                    <Typography sx={{ marginRight: "1px" }}>{value}</Typography>
+                    <Typography sx={{ marginRight: "1px" }}>
+                        {row.value}
+                    </Typography>
                     {canToggleEmailMFA && (
                         <Switch
                             checked={email2FAEnabled}
@@ -417,6 +449,6 @@ const renderTableCellContent = (
                 </Box>
             );
         default:
-            return <Typography>{value}</Typography>;
+            return <Typography>{row.value}</Typography>;
     }
 };
