@@ -1178,7 +1178,7 @@ func setupLatencySensitiveDatabase() *sql.DB {
 	log.Println("Pinged latency sensitive DB")
 
 	db.SetMaxIdleConns(20)
-	db.SetMaxOpenConns(20)
+	db.SetMaxOpenConns(40)
 	db.SetConnMaxLifetime(30 * time.Minute)
 	db.SetConnMaxIdleTime(10 * time.Minute)
 
