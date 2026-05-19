@@ -66,14 +66,14 @@ jobs:
                           exit 1
                       fi
                       release_tag="ensu-v${release_version}-rc"
-                      release_title="Ensu release candidate · ${release_version} (build ${build_number})"
+                      release_title="🤖  Ensu release candidate · ${release_version} (build ${build_number})"
                   else
                       if [[ "${version}" != "${release_version}-beta" ]]; then
                           echo "::error::${GITHUB_REF_NAME} is ${version}, expected ${release_version}-beta"
                           exit 1
                       fi
                       release_tag="ensu-v${release_version}-beta"
-                      release_title="Ensu nightly · ${version} (build ${build_number})"
+                      release_title="🤖  Ensu nightly · ${version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"
@@ -415,5 +415,5 @@ jobs:
                       --arg title "${{ needs.build-metadata.outputs.release_title }}" \
                       --arg body "${RELEASE_BODY}" \
                       --arg download_line "${download_line}" \
-                      '{embeds: [{title: $title, description: ($body + "\n" + $download_line), color: 16633363}]}' \
+                      '{embeds: [{title: $title, description: ($body + "\n\n" + $download_line), color: 16633363}]}' \
                       | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}"
