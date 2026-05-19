@@ -24,7 +24,7 @@ class AppBarComponent extends StatefulWidget {
     this.backButton,
     this.onBack,
     this.actions = const [],
-    this.expandedHeight = 116,
+    this.expandedHeight,
     this.collapsedHeight = 56,
     this.horizontalPadding = Spacing.lg,
     this.backgroundColor,
@@ -39,7 +39,7 @@ class AppBarComponent extends StatefulWidget {
   final Widget? backButton;
   final VoidCallback? onBack;
   final List<Widget> actions;
-  final double expandedHeight;
+  final double? expandedHeight;
   final double collapsedHeight;
   final double horizontalPadding;
   final Color? backgroundColor;
@@ -249,7 +249,7 @@ class SliverAppBarComponent extends StatelessWidget {
     this.backButton,
     this.onBack,
     this.actions = const [],
-    this.expandedHeight = 116,
+    this.expandedHeight,
     this.collapsedHeight = 56,
     this.horizontalPadding = Spacing.lg,
     this.backgroundColor,
@@ -262,7 +262,7 @@ class SliverAppBarComponent extends StatelessWidget {
   final Widget? backButton;
   final VoidCallback? onBack;
   final List<Widget> actions;
-  final double expandedHeight;
+  final double? expandedHeight;
   final double collapsedHeight;
   final double horizontalPadding;
   final Color? backgroundColor;
@@ -609,7 +609,10 @@ class _HeaderAppBarBackButton extends StatelessWidget {
 const _headerControlSize = 38.0;
 const _headerControlGap = Spacing.sm;
 const _defaultBackIconSize = IconSizes.medium;
+const _titleOnlyExpandedHeight = 92.0;
+const _subtitleExpandedHeight = 110.0;
 const _expandedContentTop = 48.0;
+const _expandedContentBottomGap = Spacing.lg;
 const _subtitleGap = 2.0;
 const _headerSnapTolerance = 1.0;
 const _headerSnapDuration = Duration(milliseconds: 160);
@@ -635,7 +638,7 @@ class _HeaderAppBarMetrics {
 _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
   BuildContext context, {
   required String? subtitle,
-  required double expandedHeight,
+  required double? expandedHeight,
   required double collapsedHeight,
 }) {
   final textScaler = MediaQuery.textScalerOf(context);
@@ -645,6 +648,9 @@ _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
   );
   final collapsedTitleLineHeight = _scaledLineHeight(textScaler, TextStyles.h2);
   final subtitleLineHeight = _scaledLineHeight(textScaler, TextStyles.mini);
+  final defaultExpandedHeight = subtitle == null
+      ? _titleOnlyExpandedHeight
+      : _subtitleExpandedHeight;
   final effectiveCollapsedHeight = _maxDouble(
     collapsedHeight,
     _maxDouble(_headerControlSize, collapsedTitleLineHeight),
@@ -653,9 +659,10 @@ _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
       expandedTitleLineHeight +
       (subtitle == null ? 0 : _subtitleGap + subtitleLineHeight);
   final effectiveExpandedHeight = _maxDouble(
-    expandedHeight,
+    expandedHeight ?? defaultExpandedHeight,
     _expandedContentTop +
-        _maxDouble(expandedTextBlockHeight, _headerControlSize),
+        _maxDouble(expandedTextBlockHeight, _headerControlSize) +
+        _expandedContentBottomGap,
   );
 
   return _HeaderAppBarMetrics(

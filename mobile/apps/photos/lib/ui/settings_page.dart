@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -10,16 +11,10 @@ import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/local_authentication_service.dart";
-import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
 import "package:photos/ui/account/email_entry_page.dart";
 import "package:photos/ui/account/login_page.dart";
 import "package:photos/ui/components/banners/offline_settings_banner.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/settings/social_icons_row.dart";
-import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/growth/referral_screen.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/settings/about/about_us_page.dart";
@@ -28,6 +23,7 @@ import "package:photos/ui/settings/app_version_widget.dart";
 import "package:photos/ui/settings/appearance/appearance_settings_page.dart";
 import "package:photos/ui/settings/backup/backup_settings_page.dart";
 import "package:photos/ui/settings/backup/free_space_options.dart";
+import "package:photos/ui/settings/components/settings_item.dart";
 import "package:photos/ui/settings/debug/debug_settings_page.dart";
 import "package:photos/ui/settings/debug/ml_debug_settings_page.dart";
 import "package:photos/ui/settings/inherited_settings_state.dart";
@@ -66,18 +62,13 @@ class _SettingsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.componentColors;
     final hasLoggedIn = Configuration.instance.isLoggedIn();
     final hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
     final showLoginEntry = isLocalGalleryMode && !hasConfiguredAccount;
 
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
-
     return Container(
-      color: pageBackgroundColor,
+      color: colors.backgroundBase,
       child: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -87,9 +78,9 @@ class _SettingsBody extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTitleBar(context, colorScheme),
+                _buildTitleBar(context, colors),
                 if (hasLoggedIn)
-                  _buildEmailHeaderSection(context, colorScheme, textTheme)
+                  _buildEmailHeaderSection(context, colors)
                 else
                   const SizedBox(height: 8),
                 if (showLoginEntry) ...[
@@ -106,39 +97,82 @@ class _SettingsBody extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 16),
-                  _buildOfflineLoginCard(context, colorScheme),
+                  _buildOfflineLoginCard(context, colors),
                   const SizedBox(height: 8),
                 ],
                 if (hasLoggedIn && !isLocalGalleryMode) ...[
+                  // Account section
                   const StorageCardWidget(),
                   const SizedBox(height: 16),
-                  _buildAccountCard(context, colorScheme),
+                  _buildMenuItem(
+                    title: AppLocalizations.of(context).account,
+                    icon: HugeIcons.strokeRoundedUser,
+                    onTap: () async {
+                      await routeToPage(context, const AccountSettingsPage());
+                    },
+                  ),
                   const SizedBox(height: 8),
-                  _buildBackupCard(context, colorScheme),
+                  _buildMenuItem(
+                    title: AppLocalizations.of(context).backup,
+                    icon: HugeIcons.strokeRoundedCloudUpload,
+                    onTap: () async {
+                      await routeToPage(context, const BackupSettingsPage());
+                    },
+                  ),
                   const SizedBox(height: 8),
                 ],
-                _buildSecurityCard(context, colorScheme),
+                // Privacy and personalization section
+                _buildMenuItem(
+                  title: AppLocalizations.of(context).security,
+                  icon: HugeIcons.strokeRoundedSecurityCheck,
+                  onTap: () async {
+                    await routeToPage(context, const SecuritySettingsPage());
+                  },
+                ),
                 const SizedBox(height: 8),
-                _buildAppearanceCard(context, colorScheme),
+                _buildMenuItem(
+                  title: AppLocalizations.of(context).appearance,
+                  icon: HugeIcons.strokeRoundedPaintBoard,
+                  onTap: () async {
+                    await routeToPage(context, const AppearanceSettingsPage());
+                  },
+                ),
                 const SizedBox(height: 8),
                 if (isLocalGalleryMode) ...[
-                  _buildOfflineFeaturesCard(context, colorScheme),
+                  // Local gallery section
+                  _buildOfflineFeaturesCard(context),
                   const SizedBox(height: 8),
                 ],
                 if (hasLoggedIn && !isLocalGalleryMode) ...[
-                  _buildPersonalFeaturesCard(context, colorScheme),
+                  // Product features section
+                  _buildPersonalFeaturesCard(context),
                   const SizedBox(height: 8),
-                  _buildFeaturesAndPlansCard(context, colorScheme),
+                  _buildFeaturesAndPlansCard(context),
                   const SizedBox(height: 8),
                 ],
-                _buildEngagementCard(context, colorScheme),
+                // Engagement section
+                _buildEngagementCard(context),
                 const SizedBox(height: 8),
-                _buildHelpSupportCard(context, colorScheme),
+                // Support section
+                _buildMenuItem(
+                  title: AppLocalizations.of(context).helpAndSupport,
+                  icon: HugeIcons.strokeRoundedHelpCircle,
+                  onTap: () async {
+                    await routeToPage(context, const HelpSupportPage());
+                  },
+                ),
                 const SizedBox(height: 8),
-                _buildAboutUsCard(context, colorScheme),
+                _buildMenuItem(
+                  title: AppLocalizations.of(context).about,
+                  icon: HugeIcons.strokeRoundedInformationCircle,
+                  onTap: () async {
+                    await routeToPage(context, const AboutUsPage());
+                  },
+                ),
                 const SizedBox(height: 8),
                 if (hasLoggedIn && !isLocalGalleryMode) ...[
-                  _buildLogoutCard(context, colorScheme),
+                  // Account actions section
+                  _buildLogoutCard(context),
                 ],
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 28),
@@ -148,9 +182,22 @@ class _SettingsBody extends StatelessWidget {
                 if (hasLoggedIn &&
                     !isLocalGalleryMode &&
                     (flagService.flags.internalUser || kDebugMode)) ...[
-                  _buildDebugCard(context, colorScheme),
+                  // Debug section
+                  _buildMenuItem(
+                    title: "Debug",
+                    icon: HugeIcons.strokeRoundedBug02,
+                    onTap: () async {
+                      await routeToPage(context, const DebugSettingsPage());
+                    },
+                  ),
                   const SizedBox(height: 8),
-                  _buildMLDebugCard(context, colorScheme),
+                  _buildMenuItem(
+                    title: "ML Debug",
+                    icon: HugeIcons.strokeRoundedAiBrain01,
+                    onTap: () async {
+                      await routeToPage(context, const MLDebugSettingsPage());
+                    },
+                  ),
                   const SizedBox(height: 16),
                 ],
                 const SizedBox(height: 60),
@@ -162,7 +209,7 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildTitleBar(BuildContext context, EnteColorScheme colorScheme) {
+  Widget _buildTitleBar(BuildContext context, ColorTokens colors) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -173,39 +220,37 @@ class _SettingsBody extends StatelessWidget {
             child: Icon(
               Icons.keyboard_double_arrow_left,
               size: 24,
-              color: colorScheme.textBase,
+              color: colors.iconColor,
             ),
           ),
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-              padding: const EdgeInsets.all(8),
-              iconSize: 20,
-              onPressed: () {
+            IconButtonComponent(
+              variant: IconButtonComponentVariant.unfilled,
+              shouldSurfaceExecutionStates: false,
+              icon: const Icon(Icons.search_rounded),
+              onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const SettingsSearchPage(),
                   ),
                 );
               },
-              icon: Icon(Icons.search_rounded, color: colorScheme.textMuted),
             ),
             if (localSettings.enableDatabaseLogging)
-              IconButton(
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                padding: const EdgeInsets.all(8),
-                iconSize: 20,
-                onPressed: () {
+              IconButtonComponent(
+                variant: IconButtonComponentVariant.unfilled,
+                shouldSurfaceExecutionStates: false,
+                icon: const Icon(Icons.bug_report),
+                onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => const LogViewerPage(),
                     ),
                   );
                 },
-                icon: Icon(Icons.bug_report, color: colorScheme.textMuted),
               ),
           ],
         ),
@@ -215,8 +260,7 @@ class _SettingsBody extends StatelessWidget {
 
   Widget _buildEmailHeader(
     BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
+    ColorTokens colors,
   ) {
     return GestureDetector(
       onDoubleTap: () => _showVerifyIdentityDialog(context),
@@ -228,8 +272,8 @@ class _SettingsBody extends StatelessWidget {
           builder: (BuildContext context, Widget? child) {
             return Text(
               emailNotifier.value ?? "",
-              style: textTheme.body.copyWith(
-                color: colorScheme.textMuted,
+              style: TextStyles.body.copyWith(
+                color: colors.textLight,
                 overflow: TextOverflow.ellipsis,
               ),
             );
@@ -241,8 +285,7 @@ class _SettingsBody extends StatelessWidget {
 
   Widget _buildEmailHeaderSection(
     BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
+    ColorTokens colors,
   ) {
     return AnimatedBuilder(
       animation: emailNotifier,
@@ -255,7 +298,7 @@ class _SettingsBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            _buildEmailHeader(context, colorScheme, textTheme),
+            _buildEmailHeader(context, colors),
             const SizedBox(height: 16),
           ],
         );
@@ -263,71 +306,46 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildIconWidget(
-    List<List<dynamic>> icon,
-    EnteColorScheme colorScheme, {
+  SettingsItem _buildMenuItem({
+    required String title,
+    required List<List<dynamic>> icon,
+    String? subtitle,
+    Widget? trailing,
+    Future<void> Function()? onTap,
+    bool showOnlyLoadingState = false,
+    bool shouldSurfaceExecutionStates = false,
     bool isDestructive = false,
   }) {
-    return HugeIcon(
+    return SettingsItem(
+      title: title,
+      subtitle: subtitle,
       icon: icon,
-      color: isDestructive
-          ? colorScheme.warning700
-          : colorScheme.menuItemIconStroke,
-      size: 20,
-    );
-  }
-
-  Widget _buildAccountCard(BuildContext context, EnteColorScheme colorScheme) {
-    return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).account,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedUser,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const AccountSettingsPage());
-      },
-    );
-  }
-
-  Widget _buildBackupCard(BuildContext context, EnteColorScheme colorScheme) {
-    return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).backup,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedCloudUpload,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const BackupSettingsPage());
-      },
+      trailing: trailing,
+      showOnlyLoadingState: showOnlyLoadingState,
+      shouldSurfaceExecutionStates: shouldSurfaceExecutionStates,
+      isDestructive: isDestructive,
+      onTap: onTap,
     );
   }
 
   Widget _buildOfflineLoginCard(
     BuildContext context,
-    EnteColorScheme colorScheme,
+    ColorTokens colors,
   ) {
-    return MenuItemWidgetNew(
+    return _buildMenuItem(
       title: AppLocalizations.of(context).alreadyHaveAnAccount,
-      subText: AppLocalizations.of(context).loginToEnte,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedLogin01,
-        colorScheme,
-      ),
-      trailingWidget: Container(
+      icon: HugeIcons.strokeRoundedLogin01,
+      subtitle: AppLocalizations.of(context).loginToEnte,
+      trailing: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: colorScheme.greenBase,
+          color: colors.green,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.arrow_forward_rounded,
-          color: contentReverseLight,
+          color: colors.specialWhite,
           size: 20,
         ),
       ),
@@ -339,123 +357,59 @@ class _SettingsBody extends StatelessWidget {
 
   Widget _buildOfflineFeaturesCard(
     BuildContext context,
-    EnteColorScheme colorScheme,
   ) {
-    return SettingsGroupedCard(
-      children: [
-        MenuItemWidgetNew(
+    return MenuGroupComponent(
+      items: [
+        _buildMenuItem(
           title: AppLocalizations.of(context).machineLearning,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedMagicWand01,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedMagicWand01,
           onTap: () async {
             await routeToPage(context, const MachineLearningSettingsPage());
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).memories,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedSparkles,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedSparkles,
           onTap: () async {
             await routeToPage(context, const MemoriesSettingsScreen());
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).notifications,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedNotification01,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedNotification01,
           onTap: () async {
             await routeToPage(context, const NotificationSettingsScreen());
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).widgets,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedAlignBoxBottomRight,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedAlignBoxBottomRight,
           onTap: () async {
             await routeToPage(context, const WidgetSettingsScreen());
           },
         ),
-        _buildMapsMenuItem(context, colorScheme),
+        _buildMapsMenuItem(context),
       ],
-    );
-  }
-
-  Widget _buildSecurityCard(BuildContext context, EnteColorScheme colorScheme) {
-    return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).security,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedSecurityCheck,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const SecuritySettingsPage());
-      },
-    );
-  }
-
-  Widget _buildAppearanceCard(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-  ) {
-    return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).appearance,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedPaintBoard,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const AppearanceSettingsPage());
-      },
     );
   }
 
   Widget _buildPersonalFeaturesCard(
     BuildContext context,
-    EnteColorScheme colorScheme,
   ) {
-    return SettingsGroupedCard(
-      children: [
-        MenuItemWidgetNew(
+    return MenuGroupComponent(
+      items: [
+        _buildMenuItem(
           title: AppLocalizations.of(context).legacy,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedFavourite,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedFavourite,
           showOnlyLoadingState: true,
           onTap: () async {
-            final hasAuthenticated = kDebugMode ||
+            final hasAuthenticated =
+                kDebugMode ||
                 await LocalAuthenticationService.instance
                     .requestLocalAuthentication(
-                  context,
-                  AppLocalizations.of(context).authToManageLegacy,
-                );
+                      context,
+                      AppLocalizations.of(context).authToManageLegacy,
+                    );
             if (hasAuthenticated) {
               await Navigator.of(context).push(
                 MaterialPageRoute(
@@ -467,17 +421,11 @@ class _SettingsBody extends StatelessWidget {
             }
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).familyPlans,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedUserMultiple,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedUserMultiple,
           showOnlyLoadingState: true,
-          surfaceExecutionStates: true,
+          shouldSurfaceExecutionStates: true,
           onTap: () async {
             late final UserDetails userDetails;
             try {
@@ -501,15 +449,9 @@ class _SettingsBody extends StatelessWidget {
             );
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).referrals,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedTicketStar,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedTicketStar,
           onTap: () async {
             await routeToPage(context, const ReferralScreen());
           },
@@ -520,103 +462,64 @@ class _SettingsBody extends StatelessWidget {
 
   Widget _buildFeaturesAndPlansCard(
     BuildContext context,
-    EnteColorScheme colorScheme,
   ) {
-    return SettingsGroupedCard(
-      children: [
-        MenuItemWidgetNew(
+    return MenuGroupComponent(
+      items: [
+        _buildMenuItem(
           title: AppLocalizations.of(context).freeUpSpace,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedRocket01,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedRocket01,
           showOnlyLoadingState: true,
           onTap: () async {
             await routeToPage(context, const FreeUpSpaceOptionsScreen());
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).machineLearning,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedMagicWand01,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedMagicWand01,
           onTap: () async {
             await routeToPage(context, const MachineLearningSettingsPage());
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).memories,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedSparkles,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedSparkles,
           onTap: () async {
             await routeToPage(context, const MemoriesSettingsScreen());
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).notifications,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedNotification01,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedNotification01,
           onTap: () async {
             await routeToPage(context, const NotificationSettingsScreen());
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).widgets,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedAlignBoxBottomRight,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedAlignBoxBottomRight,
           onTap: () async {
             await routeToPage(context, const WidgetSettingsScreen());
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).videoStreaming,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedVideoCameraAi,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedVideoCameraAi,
           onTap: () async {
             await routeToPage(context, const VideoStreamingSettingsPage());
           },
         ),
-        _buildMapsMenuItem(context, colorScheme),
+        _buildMapsMenuItem(context),
       ],
     );
   }
 
-  Widget _buildMapsMenuItem(BuildContext context, EnteColorScheme colorScheme) {
-    return MenuItemWidgetNew(
+  SettingsItem _buildMapsMenuItem(
+    BuildContext context,
+  ) {
+    return _buildMenuItem(
       title: AppLocalizations.of(context).maps,
-      borderRadius: 0,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedMaping,
-        colorScheme,
-      ),
-      trailingWidget: ToggleSwitchWidget(
+      icon: HugeIcons.strokeRoundedMaping,
+      trailing: ToggleSwitchComponent.async(
         value: () => mapEnabled,
         onChanged: () async {
           final isEnabled = mapEnabled;
@@ -636,19 +539,12 @@ class _SettingsBody extends StatelessWidget {
 
   Widget _buildEngagementCard(
     BuildContext context,
-    EnteColorScheme colorScheme,
   ) {
-    return SettingsGroupedCard(
-      children: [
-        MenuItemWidgetNew(
+    return MenuGroupComponent(
+      items: [
+        _buildMenuItem(
           title: AppLocalizations.of(context).merchandise,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedTShirt,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedTShirt,
           onTap: () async {
             await launchUrlString(
               "https://shop.ente.com",
@@ -656,15 +552,9 @@ class _SettingsBody extends StatelessWidget {
             );
           },
         ),
-        MenuItemWidgetNew(
+        _buildMenuItem(
           title: AppLocalizations.of(context).rateUs,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedStar,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
+          icon: HugeIcons.strokeRoundedStar,
           onTap: () async {
             final rateUrl = updateService.getRateDetails().item2;
             await launchUrlString(rateUrl);
@@ -674,50 +564,11 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildHelpSupportCard(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-  ) {
-    return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).helpAndSupport,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedHelpCircle,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const HelpSupportPage());
-      },
-    );
-  }
-
-  Widget _buildAboutUsCard(BuildContext context, EnteColorScheme colorScheme) {
-    return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).about,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedInformationCircle,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const AboutUsPage());
-      },
-    );
-  }
-
-  Widget _buildLogoutCard(BuildContext context, EnteColorScheme colorScheme) {
-    return MenuItemWidgetNew(
+  Widget _buildLogoutCard(BuildContext context) {
+    return _buildMenuItem(
       title: AppLocalizations.of(context).logout,
-      titleColor: colorScheme.warning700,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedLogout05,
-        colorScheme,
-        isDestructive: true,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
+      icon: HugeIcons.strokeRoundedLogout05,
+      isDestructive: true,
       onTap: () async {
         _onLogoutTapped(context);
       },
@@ -732,36 +583,6 @@ class _SettingsBody extends StatelessWidget {
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
-      },
-    );
-  }
-
-  Widget _buildDebugCard(BuildContext context, EnteColorScheme colorScheme) {
-    return MenuItemWidgetNew(
-      title: "Debug",
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedBug02,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const DebugSettingsPage());
-      },
-    );
-  }
-
-  Widget _buildMLDebugCard(BuildContext context, EnteColorScheme colorScheme) {
-    return MenuItemWidgetNew(
-      title: "ML Debug",
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedAiBrain01,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const MLDebugSettingsPage());
       },
     );
   }

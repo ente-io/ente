@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:ente_components/ente_components.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,11 +12,7 @@ import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
-import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/buttons/button_widget_v2.dart';
-import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -54,19 +51,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   static const _gridCrossSpacing = 8.0;
   static const _gridMainSpacing = 8.0;
   static const _thumbnailRadius = 12.0;
-  static const _titleFadeDistance = 72.0;
-
-  double _titleFadeProgress = 0;
 
   @override
   void initState() {
-    _treatAsOnboarding = widget.isOnboarding ||
+    _treatAsOnboarding =
+        widget.isOnboarding ||
         backupPreferenceService.hasSkippedOnboardingPermission;
-    FilesDB.instance
-        .getDeviceCollections(includeCoverThumbnail: true)
-        .then((files) async {
-      _pathIDToItemCount =
-          await FilesDB.instance.getDevicePathIDToImportedFileCount();
+    FilesDB.instance.getDeviceCollections(includeCoverThumbnail: true).then((
+      files,
+    ) async {
+      _pathIDToItemCount = await FilesDB.instance
+          .getDevicePathIDToImportedFileCount();
       if (!mounted) {
         return;
       }
@@ -84,8 +79,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         if (_treatAsOnboarding) {
           _selectedDevicePathIDs.addAll(_allDevicePathIDs);
         }
-        _selectedDevicePathIDs
-            .removeWhere((folder) => !_allDevicePathIDs.contains(folder));
+        _selectedDevicePathIDs.removeWhere(
+          (folder) => !_allDevicePathIDs.contains(folder),
+        );
       });
     });
     super.initState();
@@ -93,16 +89,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     return Scaffold(
-      backgroundColor: colorScheme.backgroundColour,
-      body: _treatAsOnboarding
-          ? SafeArea(
-              top: true,
-              bottom: false,
-              child: _buildScrollableBody(),
-            )
-          : _buildScrollableBody(),
+      backgroundColor: colors.backgroundBase,
+      body: _buildScrollableBody(),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
@@ -133,8 +123,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       // toggle to avoid recursive navigation back to backup settings.
       final onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
       if (onlyNewSinceEpoch != null && !widget.fromOnlyNewPhotosToggle) {
-        final shouldContinue =
-            await _showOnlyNewBackupWarning(onlyNewSinceEpoch);
+        final shouldContinue = await _showOnlyNewBackupWarning(
+          onlyNewSinceEpoch,
+        );
 
         if (!shouldContinue) return;
       }
@@ -155,32 +146,62 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     final locale = Localizations.localeOf(context).languageCode;
     final formattedDate = DateFormat.yMMMd(locale).format(date);
 
-    final result = await showChoiceDialog(
-      context,
-      title: l10n.warning,
-      body: l10n.backupOnlyNewPhotosWarningBody(formattedDate: formattedDate),
-      firstButtonLabel: l10n.updateSettings,
-      firstButtonOnTap: () async {
-        await routeToPage(
-          context,
-          const BackupSettingsScreen(),
-        );
-      },
-      firstButtonType: ButtonType.neutral,
-      secondButtonLabel: l10n.ok,
-      secondButtonAction: ButtonAction.second,
+    final result = await showBottomSheetComponent<_OnlyNewWarningAction>(
+      context: context,
+      builder: (sheetContext) => BottomSheetComponent(
+        title: l10n.warning,
+        message: l10n.backupOnlyNewPhotosWarningBody(
+          formattedDate: formattedDate,
+        ),
+        illustration: Image.asset("assets/warning-green.png"),
+        actions: [
+          ButtonComponent(
+            label: l10n.updateSettings,
+            variant: ButtonComponentVariant.neutral,
+            shouldSurfaceExecutionStates: false,
+            onTap: () async {
+              Navigator.of(sheetContext).pop(
+                _OnlyNewWarningAction.updateSettings,
+              );
+            },
+          ),
+          ButtonComponent(
+            label: l10n.ok,
+            shouldSurfaceExecutionStates: false,
+            onTap: () async {
+              Navigator.of(sheetContext).pop(
+                _OnlyNewWarningAction.continueBackup,
+              );
+            },
+          ),
+        ],
+      ),
     );
 
-    return result?.action == ButtonAction.second;
+    if (!context.mounted) {
+      return false;
+    }
+    if (result == _OnlyNewWarningAction.updateSettings) {
+      await routeToPage(
+        context,
+        const BackupSettingsScreen(),
+      );
+      return false;
+    }
+    if (result == _OnlyNewWarningAction.continueBackup) {
+      return true;
+    }
+
+    return false;
   }
 
   Widget _buildBottomNavigationBar() {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     final canSubmit = !(_treatAsOnboarding && _selectedDevicePathIDs.isEmpty);
 
     return Container(
-      color: colorScheme.backgroundColour,
+      color: colors.backgroundBase,
       child: SafeArea(
         top: false,
         child: Padding(
@@ -188,10 +209,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ButtonWidgetV2(
-                buttonType: ButtonTypeV2.primary,
-                labelText:
-                    widget.isFirstBackup ? l10n.startBackup : l10n.backup,
+              ButtonComponent(
+                label: widget.isFirstBackup ? l10n.startBackup : l10n.backup,
                 isDisabled: !canSubmit,
                 onTap: canSubmit
                     ? () async {
@@ -201,10 +220,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               ),
               if (_treatAsOnboarding) ...[
                 const SizedBox(height: 16),
-                ButtonWidgetV2(
+                ButtonComponent(
                   key: const ValueKey("skipBackupButton"),
-                  buttonType: ButtonTypeV2.link,
-                  labelText: l10n.skip,
+                  label: l10n.skip,
+                  variant: ButtonComponentVariant.link,
                   onTap: () async {
                     Navigator.of(context).pop(false);
                   },
@@ -219,131 +238,41 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   Widget _buildScrollableBody() {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
-      child: CustomScrollView(
-        primary: true,
-        slivers: [
-          if (_treatAsOnboarding) ...[
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  l10n.backupToEnte,
-                  style: textTheme.h3Bold,
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 4)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  l10n.selectAlbumsToBackUpToEnte,
-                  style: textTheme.smallMuted,
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          ] else ...[
-            SliverAppBar(
-              backgroundColor: colorScheme.backgroundColour,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              pinned: true,
-              automaticallyImplyLeading: false,
-              centerTitle: false,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.of(context).maybePop();
-                },
-              ),
-              titleSpacing: 0,
-              title: Opacity(
-                opacity: _titleFadeProgress,
-                child: Text(
-                  l10n.backupToEnte,
-                  style: textTheme.h3Bold,
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Opacity(
-                opacity: 1 - _titleFadeProgress,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        l10n.backupToEnte,
-                        style: textTheme.h3Bold,
+    return AppBarComponent(
+      title: l10n.backupToEnte,
+      subtitle: l10n.selectAlbumsToBackUpToEnte,
+      showExpandedBackButton: !_treatAsOnboarding,
+      slivers: [
+        if (_deviceCollections != null)
+          SliverToBoxAdapter(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _toggleSelectAll,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      _selectedDevicePathIDs.length == _allDevicePathIDs.length
+                          ? l10n.unselectAll
+                          : l10n.selectAll,
+                      style: TextStyles.body.copyWith(
+                        color: colors.textBase,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        l10n.selectAlbumsToBackUpToEnte,
-                        style: textTheme.smallMuted,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ),
             ),
-          ],
-          if (_deviceCollections != null)
-            SliverToBoxAdapter(
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: _toggleSelectAll,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        _selectedDevicePathIDs.length ==
-                                _allDevicePathIDs.length
-                            ? l10n.unselectAll
-                            : l10n.selectAll,
-                        style: textTheme.small.copyWith(
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                ),
-              ),
-            ),
-          _buildFoldersSliver(),
-        ],
-      ),
+          ),
+        _buildFoldersSliver(),
+      ],
     );
-  }
-
-  bool _handleScrollNotification(ScrollNotification notification) {
-    if (_treatAsOnboarding ||
-        notification.depth != 0 ||
-        notification.metrics.axis != Axis.vertical) {
-      return false;
-    }
-    final progress =
-        (notification.metrics.pixels / _titleFadeDistance).clamp(0.0, 1.0);
-    if ((progress - _titleFadeProgress).abs() > 0.01 && mounted) {
-      setState(() {
-        _titleFadeProgress = progress;
-      });
-    }
-    return false;
   }
 
   Widget _buildFoldersSliver() {
@@ -360,7 +289,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     final totalCrossAxisSpacing = (crossAxisCount - 1) * _gridCrossSpacing;
     final sideOfThumbnail =
         (screenWidth - totalCrossAxisSpacing - _gridHorizontalPadding) /
-            crossAxisCount;
+        crossAxisCount;
 
     return SliverPadding(
       padding: const EdgeInsets.symmetric(
@@ -390,8 +319,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     DeviceCollection deviceCollection,
     double sideOfThumbnail,
   ) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final isSelected = _selectedDevicePathIDs.contains(deviceCollection.id);
     final importedCount = _pathIDToItemCount?[deviceCollection.id];
     final formattedCount = NumberFormat().format(deviceCollection.count);
@@ -415,7 +343,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(_thumbnailRadius + 1),
                   child: Container(
-                    color: colorScheme.strokeFaint,
+                    color: colors.strokeFaint,
                     width: sideOfThumbnail,
                     height: sideOfThumbnail,
                   ),
@@ -439,7 +367,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                               ),
                             )
                           else
-                            ColoredBox(color: colorScheme.fillDark),
+                            ColoredBox(color: colors.fillDark),
                           if (isSelected)
                             ColoredBox(
                               color: Colors.black.withValues(alpha: 0.4),
@@ -456,12 +384,12 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     child: Container(
                       padding: const EdgeInsets.all(0.75),
                       decoration: BoxDecoration(
-                        color: colorScheme.backgroundColour,
+                        color: colors.backgroundBase,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.check_circle_rounded,
-                        color: colorScheme.greenBase,
+                        color: colors.green,
                         size: 22,
                       ),
                     ),
@@ -476,7 +404,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               deviceCollection.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: textTheme.small,
+              style: TextStyles.body.copyWith(color: colors.textBase),
             ),
           ),
           const SizedBox(height: 2),
@@ -486,7 +414,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               countText,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: textTheme.miniMuted,
+              style: TextStyles.mini.copyWith(color: colors.textLight),
             ),
           ),
         ],
@@ -532,4 +460,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       }
     });
   }
+}
+
+enum _OnlyNewWarningAction {
+  updateSettings,
+  continueBackup,
 }
