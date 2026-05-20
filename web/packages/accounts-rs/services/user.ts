@@ -559,21 +559,33 @@ export interface EmailOrSRPVerificationResponse {
  *
  * See: [Note: Duplicated Zod schema and TypeScript type]
  */
-const RemoteEmailOrSRPVerificationResponse = z
-    .object({
-        id: z.number(),
-        keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
-        encryptedToken: z.string().nullish().transform(nullToUndefined),
-        token: z.string().nullish().transform(nullToUndefined),
-        twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
-        passkeySessionID: z.string().nullish().transform(nullToUndefined),
-        accountsUrl: z.string().nullish().transform(nullToUndefined),
-        twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
-    })
-    .refine((r) => (r.passkeySessionID ? !!r.accountsUrl : true), {
-        path: ["accountsUrl"],
-        message: "accountsUrl is required when passkeySessionID is present",
-    });
+const RemoteEmailOrSRPVerificationResponseBase = z.object({
+    id: z.number(),
+    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
+    encryptedToken: z.string().nullish().transform(nullToUndefined),
+    token: z.string().nullish().transform(nullToUndefined),
+    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+    passkeySessionID: z.string().nullish().transform(nullToUndefined),
+    accountsUrl: z.string().nullish().transform(nullToUndefined),
+    twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
+});
+
+const requireAccountsUrlForPasskey = <
+    T extends { passkeySessionID?: string; accountsUrl?: string },
+>(
+    response: T,
+) => (response.passkeySessionID ? !!response.accountsUrl : true);
+
+const accountsUrlForPasskeyRefinement = {
+    path: ["accountsUrl"],
+    message: "accountsUrl is required when passkeySessionID is present",
+};
+
+const RemoteEmailOrSRPVerificationResponse =
+    RemoteEmailOrSRPVerificationResponseBase.refine(
+        requireAccountsUrlForPasskey,
+        accountsUrlForPasskeyRefinement,
+    );
 
 /**
  * A specialization of {@link RemoteEmailOrSRPVerificationResponse} for SRP
@@ -583,14 +595,17 @@ const RemoteEmailOrSRPVerificationResponse = z
  * The declaration conceptually belongs to `srp.ts`, but is here to avoid cyclic
  * dependencies.
  */
-export const RemoteSRPVerificationResponse = z.object({
-    ...RemoteEmailOrSRPVerificationResponse.shape,
-    /**
-     * The SRP M2 (evidence message), the proof that the server has the
-     * verifier.
-     */
-    srpM2: z.string(),
-});
+export const RemoteSRPVerificationResponse =
+    RemoteEmailOrSRPVerificationResponseBase.extend({
+        /**
+         * The SRP M2 (evidence message), the proof that the server has the
+         * verifier.
+         */
+        srpM2: z.string(),
+    }).refine(
+        requireAccountsUrlForPasskey,
+        accountsUrlForPasskeyRefinement,
+    );
 
 /**
  * Verify user's access to the given {@link email} by comparing the OTT that
