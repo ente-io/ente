@@ -552,6 +552,28 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn verify_srp_session_rejects_passkey_response_without_accounts_url() {
+        let mut server = Server::new_async().await;
+        let verify = server
+            .mock("POST", "/users/srp/verify-session")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{"id":1,"passkeySessionID":"passkey-session"}"#)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = make_client(server.url());
+        let error = client
+            .verify_srp_session(&uuid::Uuid::new_v4(), &uuid::Uuid::new_v4(), &[1u8; 32])
+            .await
+            .unwrap_err();
+
+        assert!(error.to_string().contains("accountsUrl is required"));
+        verify.assert_async().await;
+    }
+
+    #[tokio::test]
     async fn verify_email_does_not_retry_on_too_many_requests() {
         let mut server = Server::new_async().await;
         let verify = server
