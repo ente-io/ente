@@ -13,6 +13,8 @@ import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+const int _noSuchFileOrDirectoryErrorCode = 2;
+
 // LocalFileUpdateService tracks all the potential local file IDs which have
 // changed/modified on the device and needed to be uploaded again.
 class LocalFileUpdateService {
@@ -100,15 +102,13 @@ class LocalFileUpdateService {
     // invocation of this method. The limit act as a crude way to limit the
     // resource consumed by the method
     const int singleRunLimit = 10;
-    final localIDsToProcess =
-        await _fileUpdationDB.getLocalIDsForPotentialReUpload(
-      singleRunLimit,
-      FileUpdationDB.modificationTimeUpdated,
-    );
+    final localIDsToProcess = await _fileUpdationDB
+        .getLocalIDsForPotentialReUpload(
+          singleRunLimit,
+          FileUpdationDB.modificationTimeUpdated,
+        );
     if (localIDsToProcess.isNotEmpty) {
-      await _checkAndMarkFilesWithDifferentHashForFileUpdate(
-        localIDsToProcess,
-      );
+      await _checkAndMarkFilesWithDifferentHashForFileUpdate(localIDsToProcess);
       final eTime = DateTime.now().microsecondsSinceEpoch;
       final d = Duration(microseconds: eTime - sTime);
       _logger.info(
@@ -122,8 +122,9 @@ class LocalFileUpdateService {
     List<String> localIDsToProcess,
   ) async {
     final int userID = Configuration.instance.getUserID()!;
-    final List<EnteFile> result =
-        await FilesDB.instance.getLocalFiles(localIDsToProcess);
+    final List<EnteFile> result = await FilesDB.instance.getLocalFiles(
+      localIDsToProcess,
+    );
     final List<EnteFile> localFilesForUser = [];
     final Set<String> localIDsWithFile = {};
     for (EnteFile file in result) {
@@ -141,8 +142,10 @@ class LocalFileUpdateService {
         processedIDs.add(localID);
       }
     }
-    _logger.info("files to process ${localIDsToProcess.length} for reupload, "
-        "missing localFile cnt ${processedIDs.length}");
+    _logger.info(
+      "files to process ${localIDsToProcess.length} for reupload, "
+      "missing localFile cnt ${processedIDs.length}",
+    );
 
     for (EnteFile file in localFilesForUser) {
       if (processedIDs.contains(file.localID)) {
@@ -215,9 +218,7 @@ class LocalFileUpdateService {
     // delete the file from app's internal cache if it was copied to app
     // for upload. Shared Media should only be cleared when the upload
     // succeeds.
-    if (Platform.isIOS && mediaUploadData.sourceFile != null) {
-      await mediaUploadData.sourceFile?.delete();
-    }
+    await _deleteCopiedIOSUploadFile(mediaUploadData.sourceFile);
     return mediaUploadData;
   }
 
@@ -229,9 +230,27 @@ class LocalFileUpdateService {
     // delete the file from app's internal cache if it was copied to app
     // for upload. Shared Media should only be cleared when the upload
     // succeeds.
-    if (Platform.isIOS && mediaUploadData.sourceFile != null) {
-      await mediaUploadData.sourceFile?.delete();
-    }
+    await _deleteCopiedIOSUploadFile(mediaUploadData.sourceFile);
     return (mediaUploadData, size);
   }
+
+  Future<void> _deleteCopiedIOSUploadFile(File? sourceFile) async {
+    if (!Platform.isIOS || sourceFile == null) {
+      return;
+    }
+    try {
+      await sourceFile.delete();
+    } on FileSystemException catch (e) {
+      if (!_isPathMissing(e)) {
+        rethrow;
+      }
+      _logger.info(
+        "Copied upload temp file already missing: ${sourceFile.path}",
+      );
+    }
+  }
+
+  bool _isPathMissing(FileSystemException e) =>
+      e is PathNotFoundException ||
+      e.osError?.errorCode == _noSuchFileOrDirectoryErrorCode;
 }

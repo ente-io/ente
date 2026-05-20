@@ -296,11 +296,34 @@ If Ente isn't picking these up:
 2. If it isn't listed, move or copy the photos into the Camera folder, which Ente recognizes by default.
 3. New photos taken with the camera will continue to back up normally.
 
+### Can I pick photos from Ente in other apps? {#pick-photos-in-other-apps}
+
+On supported Android apps, yes. If an app (such as WhatsApp) opens the system photo picker, you can choose Ente Photos as the source and select photos or videos from your Ente library.
+
+A few details to keep in mind:
+
+- This works through Android's picker integration, so it depends on the third-party app using the standard picker flow.
+- Ente returns the files you select to that app for sending or attaching.
+- The picker shows the photos and videos available in your Ente gallery on that device.
+- On iPhone, iOS does not currently let Ente plug into other apps' photo pickers in the same way.
+
 ### Can Ente replace my default Photos or Camera gallery? {#ente-as-default-gallery}
 
-Not as a system gallery. On iOS, tapping a photo from the camera or another app will still open Apple Photos; the OS doesn't allow third-party apps to take that role. Android behaves similarly for most camera apps.
+Not as a full system gallery. On iPhone, tapping a photo from the camera or another app will still open Apple Photos because iOS does not allow third-party apps to replace that role.
+
+On supported Android devices, some camera apps can hand off the last photo you tapped to Ente for preview. But Ente still does not become the phone's universal default gallery for every app and camera flow.
 
 Ente runs alongside your native gallery and backs up new photos automatically in the background. See [How does background sync work?](#how-background-sync-works).
+
+### Can I open photos from my camera app in Ente? {#open-camera-photos-in-ente}
+
+On supported Android devices, yes. After taking a photo, tapping the preview thumbnail in the camera app can open that image directly in Ente Photos instead of the phone's default gallery.
+
+A few details to keep in mind:
+
+- This depends on your camera app and device supporting the Android handoff that Ente listens for.
+- It is for previewing the image you just tapped from the camera app; it does not make Ente the default gallery everywhere else.
+- On iPhone, the camera app still opens Apple Photos for this flow.
 
 ### On my iPhone, why are my photos not seen in the same albums as selected for backup? {#ios-album-assignment}
 
