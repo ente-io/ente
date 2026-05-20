@@ -1,5 +1,6 @@
 Latest changes:
 - Neeraj: Fix smart memories and ML lookup failures for large offline galleries [Sentry]
+- Neeraj: Stop reporting inline OCR pre-check timeouts as errors [Sentry]
 - Neeraj: Avoid repeated iOS reupload checks when copied temp files are already cleaned up [Sentry]
 - Neeraj: Fix incorrect upload dates for photos with ISO-like metadata timestamps [Sentry]
 - Neeraj: Skip image EXIF parsing for videos
