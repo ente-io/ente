@@ -1,7 +1,8 @@
+import "package:ente_components/theme/text_styles.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_animate/flutter_animate.dart";
-import 'package:photos/core/constants.dart';
+import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/dummy_file.dart";
 import "package:photos/models/file/file.dart";
@@ -46,8 +47,9 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
   @override
   void initState() {
     super.initState();
-    _areAllFromGroupSelectedNotifier =
-        ValueNotifier(_areAllFromGroupSelected());
+    _areAllFromGroupSelectedNotifier = ValueNotifier(
+      _areAllFromGroupSelected(),
+    );
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
   }
@@ -70,13 +72,13 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final textStyle =
-        widget.gridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
-    final double horizontalPadding =
-        widget.gridSize < photoGridSizeMax ? 12.0 : 8.0;
-    final double verticalPadding =
-        widget.gridSize < photoGridSizeMax ? 12.0 : 14.0;
+    const textStyle = TextStyles.body;
+    final double horizontalPadding = widget.gridSize < photoGridSizeMax
+        ? 12.0
+        : 8.0;
+    final double verticalPadding = widget.gridSize < photoGridSizeMax
+        ? 12.0
+        : 14.0;
 
     return SizedBox(
       height: widget.height,
@@ -92,7 +94,8 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
               alignment: Alignment.centerLeft,
               child: Text(
                 widget.title,
-                style: (widget.title == AppLocalizations.of(context).dayToday ||
+                style:
+                    (widget.title == AppLocalizations.of(context).dayToday ||
                         widget.title == AppLocalizations.of(context).thisWeek ||
                         widget.title ==
                             AppLocalizations.of(context).thisMonth ||
@@ -109,104 +112,107 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
           !widget.showSelectAll
               ? const SizedBox.shrink()
               : widget.showTrailingIcons
-                  ? GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: ValueListenableBuilder(
-                          valueListenable: _areAllFromGroupSelectedNotifier,
-                          builder: (context, dynamic value, _) {
-                            return value
-                                ? widget.fadeInTrailingIcons
-                                    ? const Icon(
-                                        Icons.check_circle,
-                                        size: 22,
-                                      ).animate().fadeIn(
-                                          duration: const Duration(
-                                            milliseconds: PinnedGroupHeader
-                                                .kTrailingIconsFadeInDurationMs,
-                                          ),
-                                          delay: const Duration(
-                                            milliseconds: PinnedGroupHeader
-                                                    .kScaleDurationInMilliseconds +
-                                                PinnedGroupHeader
-                                                    .kTrailingIconsFadeInDelayMs,
-                                          ),
-                                          curve: Curves.easeOut,
-                                        )
-                                    : const Icon(
-                                        Icons.check_circle,
-                                        size: 22,
-                                      )
-                                : widget.fadeInTrailingIcons
-                                    ? Icon(
-                                        Icons.check_circle_outlined,
-                                        color: colorScheme.strokeMuted,
-                                        size: 22,
-                                      ).animate().fadeIn(
-                                          duration: const Duration(
-                                            milliseconds: PinnedGroupHeader
-                                                .kTrailingIconsFadeInDurationMs,
-                                          ),
-                                          delay: const Duration(
-                                            milliseconds: PinnedGroupHeader
-                                                    .kScaleDurationInMilliseconds +
-                                                PinnedGroupHeader
-                                                    .kTrailingIconsFadeInDelayMs,
-                                          ),
-                                          curve: Curves.easeOut,
-                                        )
-                                    : Icon(
-                                        Icons.check_circle_outlined,
-                                        color: colorScheme.strokeMuted,
-                                        size: 22,
-                                      );
-                          },
-                        ),
-                      ),
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        widget.selectedFiles?.toggleGroupSelection(
-                          widget.filesInGroup.toSet(),
-                        );
+              ? GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: ValueListenableBuilder(
+                      valueListenable: _areAllFromGroupSelectedNotifier,
+                      builder: (context, dynamic value, _) {
+                        return value
+                            ? widget.fadeInTrailingIcons
+                                  ? const Icon(
+                                      Icons.check_circle,
+                                      size: 22,
+                                    ).animate().fadeIn(
+                                      duration: const Duration(
+                                        milliseconds: PinnedGroupHeader
+                                            .kTrailingIconsFadeInDurationMs,
+                                      ),
+                                      delay: const Duration(
+                                        milliseconds:
+                                            PinnedGroupHeader
+                                                .kScaleDurationInMilliseconds +
+                                            PinnedGroupHeader
+                                                .kTrailingIconsFadeInDelayMs,
+                                      ),
+                                      curve: Curves.easeOut,
+                                    )
+                                  : const Icon(
+                                      Icons.check_circle,
+                                      size: 22,
+                                    )
+                            : widget.fadeInTrailingIcons
+                            ? Icon(
+                                Icons.check_circle_outlined,
+                                color: colorScheme.strokeMuted,
+                                size: 22,
+                              ).animate().fadeIn(
+                                duration: const Duration(
+                                  milliseconds: PinnedGroupHeader
+                                      .kTrailingIconsFadeInDurationMs,
+                                ),
+                                delay: const Duration(
+                                  milliseconds:
+                                      PinnedGroupHeader
+                                          .kScaleDurationInMilliseconds +
+                                      PinnedGroupHeader
+                                          .kTrailingIconsFadeInDelayMs,
+                                ),
+                                curve: Curves.easeOut,
+                              )
+                            : Icon(
+                                Icons.check_circle_outlined,
+                                color: colorScheme.strokeMuted,
+                                size: 22,
+                              );
                       },
-                    )
-                  : const SizedBox.shrink(),
+                    ),
+                  ),
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    widget.selectedFiles?.toggleGroupSelection(
+                      widget.filesInGroup.toSet(),
+                    );
+                  },
+                )
+              : const SizedBox.shrink(),
           widget.showGalleryLayoutSettingCTA
               ? const SizedBox(width: 8)
               : const SizedBox.shrink(),
           widget.showGalleryLayoutSettingCTA
               ? widget.showTrailingIcons
-                  ? GestureDetector(
-                      onTap: () => _showLayoutSettingsOverflowMenu(context),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: widget.fadeInTrailingIcons
-                            ? Icon(
-                                Icons.more_vert_outlined,
-                                // color: colorScheme.blurStrokeBase,
-                                color: colorScheme.strokeMuted,
-                              ).animate().fadeIn(
+                    ? GestureDetector(
+                        onTap: () => _showLayoutSettingsOverflowMenu(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: widget.fadeInTrailingIcons
+                              ? Icon(
+                                  Icons.more_vert_outlined,
+                                  // color: colorScheme.blurStrokeBase,
+                                  color: colorScheme.strokeMuted,
+                                ).animate().fadeIn(
                                   duration: const Duration(
                                     milliseconds: PinnedGroupHeader
                                         .kTrailingIconsFadeInDurationMs,
                                   ),
                                   delay: const Duration(
-                                    milliseconds: PinnedGroupHeader
+                                    milliseconds:
+                                        PinnedGroupHeader
                                             .kScaleDurationInMilliseconds +
                                         PinnedGroupHeader
                                             .kTrailingIconsFadeInDelayMs,
                                   ),
                                   curve: Curves.easeOut,
                                 )
-                            : Icon(
-                                Icons.more_vert_outlined,
-                                // color: colorScheme.blurStrokeBase,
-                                color: colorScheme.strokeMuted,
-                              ),
-                      ),
-                    )
-                  : const SizedBox.shrink()
+                              : Icon(
+                                  Icons.more_vert_outlined,
+                                  // color: colorScheme.blurStrokeBase,
+                                  color: colorScheme.strokeMuted,
+                                ),
+                        ),
+                      )
+                    : const SizedBox.shrink()
               : const SizedBox.shrink(),
           SizedBox(width: horizontalPadding - 4.0),
         ],
@@ -217,16 +223,18 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
   void _selectedFilesListener() {
     if (widget.selectedFiles == null) return;
     // Filter out dummy files before checking selection state
-    final nonDummyFiles =
-        widget.filesInGroup.where((file) => file is! DummyFile).toSet();
-    _areAllFromGroupSelectedNotifier.value =
-        widget.selectedFiles!.files.containsAll(nonDummyFiles);
+    final nonDummyFiles = widget.filesInGroup
+        .where((file) => file is! DummyFile)
+        .toSet();
+    _areAllFromGroupSelectedNotifier.value = widget.selectedFiles!.files
+        .containsAll(nonDummyFiles);
   }
 
   bool _areAllFromGroupSelected() {
     // Filter out dummy files before checking selection state
-    final nonDummyFiles =
-        widget.filesInGroup.where((file) => file is! DummyFile).toSet();
+    final nonDummyFiles = widget.filesInGroup
+        .where((file) => file is! DummyFile)
+        .toSet();
     if (widget.selectedFiles != null &&
         widget.selectedFiles!.files.length >= nonDummyFiles.length) {
       return widget.selectedFiles!.files.containsAll(nonDummyFiles);
