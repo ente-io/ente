@@ -1,4 +1,5 @@
 import {
+    Box,
     Button,
     CircularProgress,
     Paper,
@@ -9,40 +10,24 @@ import {
     TableHead,
     TableRow,
 } from "@mui/material";
-import * as React from "react";
-import { useEffect, useState } from "react";
-import { getEmail, getToken } from "../App";
-import { apiOrigin } from "../services/support";
-import type { FamilyMember, UserData } from "../types";
-import { formatUsageToGB } from "../utils/";
-import CloseFamily from "./CloseFamily";
+import React, { useEffect, useState } from "react";
+import { getFamilyMembers, type FamilyMember } from "../services/admin-user";
+import { useInitialStaffSession } from "../services/session";
+import { formatBytesToGB } from "../utils";
+import { CloseFamily } from "./CloseFamily";
+import { StatusBadge } from "./StatusBadge";
 
-const FamilyTableComponent: React.FC = () => {
+export const FamilyTable: React.FC = () => {
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [closeFamilyOpen, setCloseFamilyOpen] = useState(false);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const session = useInitialStaffSession();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const encodedEmail = encodeURIComponent(getEmail());
-                const token = getToken();
-                const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Auth-Token": token,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const userData = (await response.json()) as UserData; // Typecast to UserData interface
-                const members: FamilyMember[] =
-                    userData.details?.familyData.members ?? [];
-                setFamilyMembers(members);
+                setFamilyMembers(await getFamilyMembers(session));
             } catch (error) {
                 console.error("Error fetching family data:", error);
                 setError("No family data");
@@ -54,19 +39,14 @@ const FamilyTableComponent: React.FC = () => {
         fetchData().catch((error: unknown) =>
             console.error("Fetch data error:", error),
         );
-    }, []);
+    }, [session]);
 
     const handleOpenCloseFamily = () => {
         setCloseFamilyOpen(true);
     };
 
-    const handleCloseCloseFamily = () => {
+    const handleCloseFamilyDialog = () => {
         setCloseFamilyOpen(false);
-    };
-
-    const handleCloseFamily = () => {
-        console.log("Close family action");
-        handleOpenCloseFamily();
     };
 
     if (loading) {
@@ -85,10 +65,7 @@ const FamilyTableComponent: React.FC = () => {
         <>
             <TableContainer
                 component={Paper}
-                style={{
-                    marginTop: "20px",
-                    backgroundColor: "#F1F1F3",
-                }}
+                sx={{ mt: "20px", bgcolor: "#F1F1F3" }}
             >
                 <Table aria-label="family-table">
                     <TableHead>
@@ -116,32 +93,22 @@ const FamilyTableComponent: React.FC = () => {
                                 <TableCell>{member.id}</TableCell>
                                 <TableCell>{member.email}</TableCell>
                                 <TableCell>
-                                    <span
-                                        style={{
-                                            backgroundColor:
-                                                member.status === "SELF"
-                                                    ? "#00B33C"
-                                                    : "transparent",
-                                            color:
-                                                member.status === "SELF"
-                                                    ? "white"
-                                                    : "inherit",
-                                            padding: "4px 8px",
-                                            borderRadius: "10px",
-                                        }}
+                                    <StatusBadge
+                                        highlighted={member.status === "SELF"}
+                                        tone="success"
                                     >
                                         {member.status === "SELF"
                                             ? "ADMIN"
                                             : member.status}
-                                    </span>
+                                    </StatusBadge>
                                 </TableCell>
                                 <TableCell>
-                                    {formatUsageToGB(member.usage)}
+                                    {formatBytesToGB(member.usage)}
                                 </TableCell>
                                 <TableCell>
                                     {member.status !== "SELF"
                                         ? (member.storageLimit &&
-                                              formatUsageToGB(
+                                              formatBytesToGB(
                                                   member.storageLimit,
                                               )) ||
                                           "NA"
@@ -152,25 +119,23 @@ const FamilyTableComponent: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <div style={{ marginTop: "20px" }}>
+            <Box sx={{ mt: "20px" }}>
                 <Button
                     variant="contained"
                     color="error"
-                    onClick={handleCloseFamily}
+                    onClick={handleOpenCloseFamily}
                 >
                     Close Family
                 </Button>
-            </div>
+            </Box>
 
             {closeFamilyOpen && (
                 <CloseFamily
                     open={closeFamilyOpen}
-                    handleClose={handleCloseCloseFamily}
-                    handleCloseFamily={handleCloseCloseFamily}
+                    handleClose={handleCloseFamilyDialog}
+                    handleCloseFamily={handleCloseFamilyDialog}
                 />
             )}
         </>
     );
 };
-
-export default FamilyTableComponent;

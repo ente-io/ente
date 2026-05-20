@@ -1,203 +1,85 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-import TextField from "@mui/material/TextField";
-import * as React from "react";
-import { useEffect, useState } from "react";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Tab,
+    Tabs,
+    TextField,
+} from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
-import FamilyTableComponent from "./components/FamilyComponentTable";
-import StorageBonusTableComponent from "./components/StorageBonusTableComponent";
-import TokensTableComponent from "./components/TokenTableComponent";
-import UserComponent from "./components/UserComponent";
+import { FamilyTable } from "./components/FamilyTable";
+import { StorageBonusTableComponent } from "./components/StorageBonusTableComponent";
+import { TokensTableComponent } from "./components/TokenTableComponent";
+import { UserDetails, type UserDetailsData } from "./components/UserDetails";
 import duckieimage from "./components/duckie.png";
-import { apiOrigin } from "./services/support";
-import type { UserData, UserResponse } from "./types";
+import { getUser, type UserResponse } from "./services/admin-user";
+import { StaffSessionProvider } from "./services/session";
+import {
+    dateFromMicroseconds,
+    formatStorageSize,
+    SUCCESS_COLOR,
+} from "./utils";
 
-export let email = "";
-export let token = "";
-
-export const setEmail = (newEmail: string) => {
-    email = newEmail;
-};
-
-export const setToken = (newToken: string) => {
-    token = newToken;
-};
-
-export const getEmail = () => email;
-export const getToken = () => token;
-
-const isNumericUserId = (value: string): boolean => /^\d+$/.test(value);
-
-const buildUserSearchUrl = (input: string): string => {
-    const trimmedInput = input.trim();
-    if (isNumericUserId(trimmedInput)) {
-        return `${apiOrigin}/admin/user?id=${encodeURIComponent(trimmedInput)}`;
-    }
-    return `${apiOrigin}/admin/user?email=${encodeURIComponent(trimmedInput)}`;
-};
-
-const App: React.FC = () => {
-    const [localEmail, setLocalEmail] = useState<string>("");
-    const [localToken, setLocalToken] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string>("");
-    const [fetchSuccess, setFetchSuccess] = useState<boolean>(false);
-    const [tabValue, setTabValue] = useState<number>(0);
-    const [userData, setUserData] = useState<UserData | null>(null);
+export const App: React.FC = () => {
+    const [urlCredentials] = useState(readUrlCredentials);
+    const [searchInput, setSearchInput] = useState(urlCredentials.email ?? "");
+    const [authToken] = useState(
+        () => urlCredentials.token ?? localStorage.getItem("token") ?? "",
+    );
+    const [selectedUserEmail, setSelectedUserEmail] = useState(
+        urlCredentials.email ?? "",
+    );
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [fetchSuccess, setFetchSuccess] = useState(false);
+    const [tabValue, setTabValue] = useState(0);
+    const [userData, setUserData] = useState<UserDetailsData | null>(null);
 
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
-        if (storedToken) {
-            setToken(storedToken);
-            setLocalToken(storedToken);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (localToken) {
-            setToken(localToken);
-            localStorage.setItem("token", localToken);
+        if (authToken) {
+            localStorage.setItem("token", authToken);
         } else {
             localStorage.removeItem("token");
         }
-    }, [localToken]);
+    }, [authToken]);
 
-    useEffect(() => {
-        if (localEmail) {
-            setEmail(localEmail);
-            localStorage.setItem("email", localEmail);
-        } else {
-            localStorage.removeItem("email");
-        }
-    }, [localEmail]);
-
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlEmail = urlParams.get("email");
-        const urlToken = urlParams.get("token");
-
-        if (urlEmail && urlToken) {
-            setLocalEmail(urlEmail);
-            setLocalToken(urlToken);
-            console.log(localEmail);
-            console.log(localToken);
-            setEmail(urlEmail);
-            setToken(urlToken);
-            fetchData().catch((error: unknown) =>
-                console.error("Fetch data error:", error),
-            );
-        }
-        console.log(email);
-        console.log(token);
-    }, []);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async (input: string, authToken: string) => {
         setLoading(true);
         setError("");
         setFetchSuccess(false);
-        const startTime = Date.now();
         try {
-            const userSearchInput = localEmail.trim() || email.trim();
-            const url = buildUserSearchUrl(userSearchInput);
-            const response = await fetch(url, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-AUTH-TOKEN": token,
-                },
-            });
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            const userDataResponse: UserResponse =
-                (await response.json()) as UserResponse;
-            console.log("API Response:", userDataResponse);
-            setEmail(userDataResponse.user.email || userSearchInput);
-
-            const extractedUserData: UserData = {
-                user: {
-                    "User ID": userDataResponse.user.ID || "None",
-                    Email: userDataResponse.user.email || "None",
-                    "Creation time":
-                        new Date(
-                            userDataResponse.user.creationTime / 1000,
-                        ).toLocaleString() || "None",
-                },
-                storage: {
-                    Total: userDataResponse.subscription.storage
-                        ? userDataResponse.subscription.storage >= 1024 ** 3
-                            ? `${(userDataResponse.subscription.storage / 1024 ** 3).toFixed(2)} GB`
-                            : `${(userDataResponse.subscription.storage / 1024 ** 2).toFixed(2)} MB`
-                        : "None",
-                    Consumed:
-                        userDataResponse.details?.usage !== undefined
-                            ? userDataResponse.details.usage >= 1024 ** 3
-                                ? `${(userDataResponse.details.usage / 1024 ** 3).toFixed(2)} GB`
-                                : `${(userDataResponse.details.usage / 1024 ** 2).toFixed(2)} MB`
-                            : "None",
-                    Bonus:
-                        userDataResponse.details?.storageBonus !== undefined
-                            ? userDataResponse.details.storageBonus >= 1024 ** 3
-                                ? `${(userDataResponse.details.storageBonus / 1024 ** 3).toFixed(2)} GB`
-                                : `${(userDataResponse.details.storageBonus / 1024 ** 2).toFixed(2)} MB`
-                            : "None",
-                },
-                subscription: {
-                    "Product ID":
-                        userDataResponse.subscription.productID || "None",
-                    Provider:
-                        userDataResponse.subscription.paymentProvider || "None",
-                    "Expiry time":
-                        new Date(
-                            userDataResponse.subscription.expiryTime / 1000,
-                        ).toLocaleString() || "None",
-                },
-                security: {
-                    "Email MFA": userDataResponse.details?.profileData
-                        .isEmailMFAEnabled
-                        ? "Enabled"
-                        : "Disabled",
-                    "Two factor 2FA": userDataResponse.details?.profileData
-                        .isTwoFactorEnabled
-                        ? "Enabled"
-                        : "Disabled",
-                    Passkeys:
-                        (userDataResponse.details?.profileData.passkeyCount ??
-                            0) > 0
-                            ? "Enabled"
-                            : "Disabled",
-                    "Can Disable EmailMFA": userDataResponse.details
-                        ?.profileData.canDisableEmailMFA
-                        ? "Yes"
-                        : "No",
-                    AuthCodes: `${userDataResponse.authCodes ?? 0}`,
-                },
-            };
-
-            const elapsedTime = Date.now() - startTime;
-            const delay = Math.max(3000 - elapsedTime, 0);
-            setTimeout(() => {
-                setLoading(false);
-                setFetchSuccess(true);
-                setUserData(extractedUserData);
-            }, delay);
+            const userSearchInput = input.trim();
+            const userDetailsData = buildUserDetailsData(
+                await getUser({ token: authToken }, userSearchInput),
+                userSearchInput,
+            );
+            setSelectedUserEmail(userDetailsData.email);
+            setUserData(userDetailsData);
+            setFetchSuccess(true);
         } catch (error) {
             console.error("Error fetching data:", error);
-            const elapsedTime = Date.now() - startTime;
-            const delay = Math.max(3000 - elapsedTime, 0);
-            setTimeout(() => {
-                setLoading(false);
-                setError("Invalid token or email/user id");
-            }, delay);
+            setError(fetchErrorMessage(error));
+        } finally {
+            setLoading(false);
         }
-    };
+    }, []);
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        const { email, token } = urlCredentials;
+        if (email && token) {
+            queueMicrotask(() => {
+                fetchData(email, token).catch((error: unknown) =>
+                    console.error("Fetch data error:", error),
+                );
+            });
+        }
+    }, [fetchData, urlCredentials]);
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
         if (event.key === "Enter") {
             event.preventDefault();
-            fetchData().catch((error: unknown) =>
+            fetchData(searchInput, authToken).catch((error: unknown) =>
                 console.error("Fetch data error:", error),
             );
         }
@@ -205,25 +87,20 @@ const App: React.FC = () => {
 
     const handleTabChange = (
         _event: React.SyntheticEvent,
-
         newValue: number,
     ) => {
         setTabValue(newValue);
     };
-    useEffect(() => {
-        const searchParam = new URLSearchParams(window.location.search);
-        const userToken = searchParam.get("token");
 
-        if (userToken) {
-            setLocalToken(userToken);
-            setToken(userToken);
-        }
-    }, []);
+    const session = useMemo(
+        () => ({ email: selectedUserEmail, token: authToken }),
+        [authToken, selectedUserEmail],
+    );
 
     return (
-        <div className="container">
-            <div>
-                <form className="input-form" onKeyPress={handleKeyPress}>
+        <StaffSessionProvider session={session}>
+            <div className="container">
+                <form className="input-form" onKeyDown={handleKeyDown}>
                     <div className="horizontal-group">
                         <a
                             href="https://staff.ente.sh"
@@ -231,129 +108,226 @@ const App: React.FC = () => {
                             rel="noopener"
                             className="link-text"
                         >
-                            staff.ente.io
+                            Ente Staff
                         </a>
                         <div className="text-fields">
                             <TextField
                                 label="Email"
-                                value={localEmail}
+                                value={searchInput}
                                 onChange={(e) => {
-                                    setLocalEmail(e.target.value);
-                                    setEmail(e.target.value);
+                                    setSearchInput(e.target.value);
                                 }}
                                 size="medium"
-                                className="text-field-email"
-                                style={{ width: "parent" }}
                             />
                         </div>
                         <div className="fetch-button-container">
                             <Button
                                 variant="contained"
                                 onClick={() => {
-                                    fetchData().catch((error: unknown) =>
-                                        console.error(
-                                            "Fetch data error:",
-                                            error,
-                                        ),
+                                    fetchData(searchInput, authToken).catch(
+                                        (error: unknown) =>
+                                            console.error(
+                                                "Fetch data error:",
+                                                error,
+                                            ),
                                     );
                                 }}
-                                className="fetch-button"
-                                style={{
-                                    padding: "0 16px",
-                                }}
+                                sx={{ px: 2 }}
                             >
                                 FETCH
                             </Button>
                         </div>
                     </div>
                 </form>
-            </div>
-            <div className="content-container">
-                {loading ? (
-                    <CircularProgress
-                        sx={{
-                            color: "black",
-                            top: "200px",
-                            position: "fixed",
-                        }}
-                    />
-                ) : error ? (
-                    <div className="error-message">{error}</div>
-                ) : fetchSuccess ? (
-                    <>
-                        <Box
+                <div className="content-container">
+                    {loading ? (
+                        <CircularProgress
                             sx={{
-                                width: "100%",
-                                maxWidth: "600px",
-                                bgcolor: "#FAFAFA",
-                                borderRadius: "7px",
-                                position: "relative",
-                                zIndex: 1000,
+                                color: "black",
+                                top: "200px",
+                                position: "fixed",
                             }}
-                        >
-                            <Tabs
-                                value={tabValue}
-                                onChange={handleTabChange}
-                                centered
+                        />
+                    ) : error ? (
+                        <div className="error-message">{error}</div>
+                    ) : fetchSuccess ? (
+                        <>
+                            <Box
                                 sx={{
-                                    "& .MuiTabs-indicator": {
-                                        backgroundColor: "#00B33C",
-                                        height: "5px",
-                                        borderRadius: "20px",
-                                    },
-                                    "& .MuiTab-root": {
-                                        textTransform: "none",
-                                    },
+                                    width: "100%",
+                                    maxWidth: "600px",
+                                    bgcolor: "#FAFAFA",
+                                    borderRadius: "7px",
+                                    position: "relative",
+                                    zIndex: 1000,
                                 }}
                             >
-                                <Tab label="User" />
-                                <Tab label="Family" />
-                                <Tab label="Bonuses" />
-                                <Tab label="Devices" />
-                            </Tabs>
-                        </Box>
-                        <Box
-                            sx={{
-                                width: "100%",
-                                maxWidth: "900px",
-                                bgcolor: "#FAFAFA",
-                                borderRadius: "7px",
-                                padding: "20px",
-                                position: "relative",
-                                zIndex: 999,
-                                marginTop: "16px",
-                            }}
-                        >
-                            {tabValue === 0 && userData && (
-                                <UserComponent userData={userData} />
-                            )}
-                            {tabValue === 1 && userData && (
-                                <div>
-                                    <FamilyTableComponent />
-                                </div>
-                            )}
-                            {tabValue === 2 && userData && (
-                                <div>
+                                <Tabs
+                                    value={tabValue}
+                                    onChange={handleTabChange}
+                                    centered
+                                    sx={{
+                                        "& .MuiTabs-indicator": {
+                                            backgroundColor: SUCCESS_COLOR,
+                                            height: "5px",
+                                            borderRadius: "20px",
+                                        },
+                                        "& .MuiTab-root": {
+                                            textTransform: "none",
+                                        },
+                                    }}
+                                >
+                                    <Tab label="User" />
+                                    <Tab label="Family" />
+                                    <Tab label="Bonuses" />
+                                    <Tab label="Devices" />
+                                </Tabs>
+                            </Box>
+                            <Box
+                                sx={{
+                                    width: "100%",
+                                    maxWidth: "900px",
+                                    bgcolor: "#FAFAFA",
+                                    borderRadius: "7px",
+                                    padding: "20px",
+                                    position: "relative",
+                                    zIndex: 999,
+                                    marginTop: "16px",
+                                }}
+                            >
+                                {tabValue === 0 && userData && (
+                                    <UserDetails userData={userData} />
+                                )}
+                                {tabValue === 1 && userData && <FamilyTable />}
+                                {tabValue === 2 && userData && (
                                     <StorageBonusTableComponent />
-                                </div>
-                            )}
-                            {tabValue === 3 && userData && (
-                                <div>
+                                )}
+                                {tabValue === 3 && userData && (
                                     <TokensTableComponent />
-                                </div>
-                            )}
-                        </Box>
-                    </>
-                ) : (
-                    <img
-                        src={duckieimage}
-                        alt="duckie"
-                        style={{ marginTop: "150px" }}
-                    />
-                )}
+                                )}
+                            </Box>
+                        </>
+                    ) : (
+                        <img
+                            src={duckieimage}
+                            alt="duckie"
+                            className="empty-state-image"
+                        />
+                    )}
+                </div>
             </div>
-        </div>
+        </StaffSessionProvider>
     );
 };
 
-export default App;
+const readUrlCredentials = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return { email: urlParams.get("email"), token: urlParams.get("token") };
+};
+
+const subscriptionDataNotFoundMessage = "No subscription record for this user";
+
+const fetchErrorMessage = (error: unknown) =>
+    error instanceof Error ? error.message : "Invalid token or email/user id";
+
+const buildUserDetailsData = (
+    userResponse: UserResponse,
+    userSearchInput: string,
+): UserDetailsData => {
+    if (!userResponse.subscription) {
+        throw new Error(subscriptionDataNotFoundMessage);
+    }
+
+    const { subscription } = userResponse;
+    const emailMFAEnabled =
+        userResponse.details?.profileData?.isEmailMFAEnabled ?? false;
+    const twoFactorEnabled =
+        userResponse.details?.profileData?.isTwoFactorEnabled ?? false;
+    const passkeysEnabled =
+        (userResponse.details?.profileData?.passkeyCount ?? 0) > 0;
+    const canDisableEmailMFA =
+        userResponse.details?.profileData?.canDisableEmailMFA ?? false;
+
+    return {
+        email: userResponse.user.email || userSearchInput,
+        user: [
+            {
+                kind: "text",
+                label: "User ID",
+                value: `${userResponse.user.ID}`,
+            },
+            {
+                kind: "email",
+                label: "Email",
+                value: userResponse.user.email || "None",
+            },
+            {
+                kind: "text",
+                label: "Creation time",
+                value:
+                    dateFromMicroseconds(
+                        userResponse.user.creationTime,
+                    ).toLocaleString() || "None",
+            },
+        ],
+        storage: [
+            {
+                kind: "text",
+                label: "Total",
+                value:
+                    subscription.storage === 0
+                        ? "None"
+                        : formatStorageSize(subscription.storage),
+            },
+            {
+                kind: "text",
+                label: "Consumed",
+                value: formatStorageSize(userResponse.details?.usage),
+            },
+            {
+                kind: "text",
+                label: "Bonus",
+                value: formatStorageSize(userResponse.details?.storageBonus),
+            },
+        ],
+        subscription: [
+            {
+                kind: "text",
+                label: "Product ID",
+                value: subscription.productID || "None",
+            },
+            {
+                kind: "text",
+                label: "Provider",
+                value: subscription.paymentProvider || "None",
+            },
+            {
+                kind: "expiry",
+                label: "Expiry time",
+                value:
+                    dateFromMicroseconds(
+                        subscription.expiryTime,
+                    ).toISOString() || "None",
+            },
+        ],
+        security: [
+            { kind: "emailMFA", label: "Email MFA", enabled: emailMFAEnabled },
+            {
+                kind: "twoFactor",
+                label: "Two factor 2FA",
+                enabled: twoFactorEnabled,
+            },
+            { kind: "passkeys", label: "Passkeys", enabled: passkeysEnabled },
+            {
+                kind: "text",
+                label: "AuthCodes",
+                value: `${userResponse.authCodes ?? 0}`,
+            },
+        ],
+        securityState: {
+            emailMFAEnabled,
+            twoFactorEnabled,
+            canDisableEmailMFA,
+        },
+    };
+};
