@@ -419,6 +419,18 @@ func (c *FileController) GetThumbnailURL(ctx *gin.Context, userID int64, fileID 
 	return url, nil
 }
 
+// GetFileURLUsingFusedLookup verifies permissions and returns a presigned URL
+// using the temporary fused access-check and object lookup path.
+func (c *FileController) GetFileURLUsingFusedLookup(ctx *gin.Context, userID int64, fileID int64) (string, error) {
+	return c.getSignedURLForAccessibleObject(ctx, userID, fileID, ente.FILE)
+}
+
+// GetThumbnailURLUsingFusedLookup verifies permissions and returns a presigned
+// URL using the temporary fused access-check and object lookup path.
+func (c *FileController) GetThumbnailURLUsingFusedLookup(ctx *gin.Context, userID int64, fileID int64) (string, error) {
+	return c.getSignedURLForAccessibleObject(ctx, userID, fileID, ente.THUMBNAIL)
+}
+
 func (c *FileController) CleanUpStaleCollectionFiles(userID int64, fileID int64) {
 	logger := log.WithFields(log.Fields{
 		"userID": userID,
@@ -485,6 +497,27 @@ func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, obj
 	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
 }
 
+func (c *FileController) getSignedURLForAccessibleObject(ctx *gin.Context, userID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	var url string
+	var err error
+	if isCliRequest(ctx) {
+		url, err = c.getWasabiSignedUrlForAccessibleObject(ctx, userID, fileID, objType)
+	} else {
+		var s3Object ente.S3ObjectKey
+		s3Object, err = c.ObjectRepo.GetAccessibleObject(ctx, fileID, userID, objType)
+		if err == nil {
+			url, err = c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+		}
+	}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			go c.CleanUpStaleCollectionFiles(userID, fileID)
+		}
+		return "", stacktrace.Propagate(err, "")
+	}
+	return url, nil
+}
+
 // ignore lint unused inspection
 func isCliRequest(ctx *gin.Context) bool {
 	// check if user-agent contains go-resty
@@ -496,6 +529,19 @@ func isCliRequest(ctx *gin.Context) bool {
 // if the file is not found in wasabi, it will return signed url from B2
 func (c *FileController) getWasabiSignedUrlIfAvailable(fileID int64, objType ente.ObjectType) (string, error) {
 	s3Object, dcs, err := c.ObjectRepo.GetObjectWithDCs(fileID, objType)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	for _, dc := range dcs {
+		if dc == c.S3Config.GetHotWasabiDC() {
+			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc, objType)
+		}
+	}
+	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+}
+
+func (c *FileController) getWasabiSignedUrlForAccessibleObject(ctx *gin.Context, userID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	s3Object, dcs, err := c.ObjectRepo.GetAccessibleObjectWithDCs(ctx, fileID, userID, objType)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}

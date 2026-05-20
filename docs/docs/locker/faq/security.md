@@ -58,9 +58,9 @@ We store 3 copies across 3 providers in 3 countries for reliability.
 Your recovery key is a 24-word phrase that can recover your account if you
 forget your password. It's generated when you create your account.
 
-**Critical**: Store your recovery key securely. Without it, you cannot
-recover your account if you forget your password and are logged out of all
-devices.
+**Critical**: Store your recovery key securely. Without it, you cannot recover
+your account if you forget your password and are logged out of all devices,
+unless you previously set up [Legacy recovery](/locker/features/legacy/).
 
 ### I forgot my password. How do I recover my account? {#locker-forgot-password}
 
@@ -78,8 +78,9 @@ devices.
 
 **If you've lost both your password and recovery key:**
 
-Unfortunately, your account cannot be recovered. This is by design - it
-ensures no one else can access your data either.
+Your account cannot be recovered unless you previously set up
+[Legacy recovery](/locker/features/legacy/). This is by design - it ensures no
+one else can access your data either.
 
 ### Does Locker support two-factor authentication? {#locker-2fa-support}
 

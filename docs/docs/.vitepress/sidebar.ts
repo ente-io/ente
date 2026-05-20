@@ -219,6 +219,10 @@ export const sidebar = [
                         collapsed: true,
                         items: [
                             {
+                                text: "Android gallery integration",
+                                link: "/photos/features/utilities/android-gallery",
+                            },
+                            {
                                 text: "Cast",
                                 link: "/photos/features/utilities/cast/",
                             },
@@ -503,6 +507,10 @@ export const sidebar = [
                             {
                                 text: "Overview",
                                 link: "/locker/features/legacy/",
+                            },
+                            {
+                                text: "Legacy Kits",
+                                link: "/locker/features/legacy/legacy-kits",
                             },
                         ],
                     },

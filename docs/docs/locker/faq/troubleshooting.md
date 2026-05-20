@@ -49,14 +49,16 @@ items easier to find.
 
 1. **Check credentials**: Verify your email and password are correct
 2. **Check email**: Ensure you're using the email registered with Ente
-3. **Reset password**: Use your recovery key if you forgot your password
+3. **Reset password**: Use your recovery key if you forgot your password, or
+   use Legacy recovery if you set it up earlier
 4. **Check 2FA**: If enabled, enter your 2FA code correctly
 5. **Try another device**: Test if you can log in elsewhere
 
 ### I'm locked out and don't have my recovery key {#locker-locked-out}
 
-Unfortunately, without your recovery key and password, your account cannot be
-recovered. This is an intentional security feature of end-to-end encryption.
+Without your recovery key and password, your account cannot be recovered unless
+you previously set up [Legacy recovery](/locker/features/legacy/). This is an
+intentional security feature of end-to-end encryption.
 
 To prevent this in the future, always save your recovery key in multiple secure
 locations when creating an account.

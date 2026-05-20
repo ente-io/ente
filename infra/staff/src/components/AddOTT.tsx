@@ -11,12 +11,13 @@ import {
     MenuItem,
     Paper,
     Select,
+    type SelectChangeEvent,
     Typography,
 } from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material/Select";
-import { useEffect, useState } from "react";
-import { getToken } from "../App";
-import { apiOrigin } from "../services/support";
+import React, { useState } from "react";
+import { addOTT } from "../services/admin-user";
+import { useStaffSession } from "../services/session";
+import { dateFromMicroseconds, microsecondsFromNow } from "../utils";
 
 const APP_OPTIONS = [
     { label: "Photos", value: "photos" },
@@ -26,37 +27,28 @@ const APP_OPTIONS = [
 
 type AppOption = (typeof APP_OPTIONS)[number]["value"];
 
-const computeExpiryTimeMicros = () =>
-    Date.now() * 1000 + 7 * 24 * 60 * 60 * 1_000_000;
-
-const generateOtp = () =>
-    Math.floor(Math.random() * 1_000_000)
-        .toString()
-        .padStart(6, "0");
-
-interface AddOttProps {
+interface AddOTTProps {
     open: boolean;
     onClose: () => void;
     userEmail: string;
 }
 
-const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
+export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
     const [selectedApp, setSelectedApp] = useState<AppOption>("photos");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [createdOtp, setCreatedOtp] = useState<string | null>(null);
-    const [expiryPreview, setExpiryPreview] = useState<number>(() =>
+    const [expiryPreview, setExpiryPreview] = useState(() =>
         computeExpiryTimeMicros(),
     );
+    const session = useStaffSession();
 
-    useEffect(() => {
-        if (open) {
-            setSelectedApp("photos");
-            setError(null);
-            setCreatedOtp(null);
-            setExpiryPreview(computeExpiryTimeMicros());
-        }
-    }, [open]);
+    const resetForm = () => {
+        setSelectedApp("photos");
+        setError(null);
+        setCreatedOtp(null);
+        setExpiryPreview(computeExpiryTimeMicros());
+    };
 
     const handleClose = () => {
         if (submitting) {
@@ -74,33 +66,16 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
                 throw new Error("User email is unavailable");
             }
 
-            const token = getToken();
-            if (!token) {
-                throw new Error("Auth token is unavailable");
-            }
-
-            const otp = generateOtp();
+            const otp = generateOTP();
             const expiryTime = computeExpiryTimeMicros();
             setExpiryPreview(expiryTime);
 
-            const response = await fetch(`${apiOrigin}/admin/user/add-ott`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Auth-Token": token,
-                },
-                body: JSON.stringify({
-                    email: userEmail,
-                    code: otp,
-                    app: selectedApp,
-                    expiryTime: expiryTime,
-                }),
+            await addOTT(session, {
+                email: userEmail,
+                code: otp,
+                app: selectedApp,
+                expiryTime,
             });
-
-            if (!response.ok) {
-                const message = await response.text();
-                throw new Error(message || "Failed to create OTT");
-            }
 
             setCreatedOtp(otp);
         } catch (err) {
@@ -121,6 +96,7 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
             PaperComponent={Paper}
             maxWidth="xs"
             fullWidth
+            slotProps={{ transition: { onEnter: resetForm } }}
         >
             {createdOtp ? (
                 <>
@@ -168,11 +144,7 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
                                 label="App type"
                                 onChange={(
                                     event: SelectChangeEvent<AppOption>,
-                                ) =>
-                                    setSelectedApp(
-                                        event.target.value as AppOption,
-                                    )
-                                }
+                                ) => setSelectedApp(event.target.value)}
                             >
                                 {APP_OPTIONS.map((option) => (
                                     <MenuItem
@@ -185,7 +157,7 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
                             </Select>
                         </FormControl>
                         <Typography variant="caption" color="text.secondary">
-                            Expiry (µs): {expiryPreview}
+                            Expires: {formatExpiryTime(expiryPreview)}
                         </Typography>
                         {error && (
                             <Alert severity="error" sx={{ mt: 2 }}>
@@ -211,4 +183,13 @@ const AddOtt = ({ open, onClose, userEmail }: AddOttProps) => {
     );
 };
 
-export default AddOtt;
+const computeExpiryTimeMicros = () => microsecondsFromNow(7);
+
+const formatExpiryTime = (expiryTime: number) =>
+    dateFromMicroseconds(expiryTime).toLocaleString();
+
+const generateOTP = () => {
+    const values = new Uint32Array(1);
+    crypto.getRandomValues(values);
+    return `${values[0]! % 1_000_000}`.padStart(6, "0");
+};

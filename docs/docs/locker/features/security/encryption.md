@@ -44,7 +44,8 @@ Your password protects your account. Choose a strong, unique password.
 ### Recovery key
 
 Your recovery key is a 24-word phrase that can recover your account if you
-forget your password. Store it securely - it's the only way to regain access.
+forget your password. Store it securely. If you lose it, you can recover the
+account only if you previously set up [Legacy recovery](/locker/features/legacy/).
 
 ### Collection keys
 
