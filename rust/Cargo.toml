@@ -9,6 +9,7 @@ members = [
     "bindings/uniffi/ensu/inference",
     "bindings/uniffi/ensu/sync",
     "bindings/uniffi/ensu/transcription",
+    "bindings/wasm/ente-wasm",
     "crates/accounts",
     "crates/contacts",
     "crates/core",
@@ -18,7 +19,5 @@ members = [
     "crates/ensu/transcription",
     "crates/image",
     "e2e",
-]
-exclude = [
     "photos",
 ]

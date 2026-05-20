@@ -1,6 +1,7 @@
 import "dart:io";
 
 import "package:adaptive_theme/adaptive_theme.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -8,9 +9,9 @@ import "package:hugeicons/hugeicons.dart";
 import "package:photos/app.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/settings/app_icon_selection_screen.dart";
+import "package:photos/ui/settings/components/settings_item.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/settings/gallery_settings_screen.dart";
 import "package:photos/ui/settings/language_picker.dart";
 
@@ -37,123 +38,58 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final l10n = AppLocalizations.of(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
-
-    return Scaffold(
-      backgroundColor: pageBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: colorScheme.strokeBase,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.of(context).appearance,
-                style: textTheme.h3Bold,
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      if (Platform.isAndroid || kDebugMode) ...[
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(context).theme,
-                          leadingIconWidget: _buildIconWidget(
-                            context,
-                            isDarkMode
-                                ? HugeIcons.strokeRoundedMoon02
-                                : HugeIcons.strokeRoundedSun03,
-                          ),
-                          trailingIcon: Icons.chevron_right_outlined,
-                          trailingIconIsMuted: true,
-                          onTap: () async => _showThemePicker(context),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      MenuItemWidgetNew(
-                        title: context.l10n.appIcon,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedImage02,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async {
-                          await routeToPage(
-                            context,
-                            const AppIconSelectionScreen(),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).language,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedTranslation,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async => _onLanguageTap(context),
-                      ),
-                      const SizedBox(height: 8),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).gallery,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedImage01,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async {
-                          await routeToPage(
-                            context,
-                            const GallerySettingsScreen(
-                              fromGalleryLayoutSettingsCTA: false,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+    return SettingsPageScaffold(
+      title: l10n.appearance,
+      children: [
+        if (Platform.isAndroid || kDebugMode) ...[
+          SettingsItem(
+            title: l10n.theme,
+            icon: isDarkMode
+                ? HugeIcons.strokeRoundedMoon02
+                : HugeIcons.strokeRoundedSun03,
+            onTap: () async => _showThemePicker(context),
           ),
+          const SizedBox(height: 8),
+        ],
+        SettingsItem(
+          title: context.l10n.appIcon,
+          icon: HugeIcons.strokeRoundedImage02,
+          onTap: () async {
+            await routeToPage(
+              context,
+              const AppIconSelectionScreen(),
+            );
+          },
         ),
-      ),
-    );
-  }
-
-  Widget _buildIconWidget(BuildContext context, List<List<dynamic>> icon) {
-    final colorScheme = getEnteColorScheme(context);
-    return HugeIcon(
-      icon: icon,
-      color: colorScheme.menuItemIconStroke,
-      size: 20,
+        const SizedBox(height: 8),
+        SettingsItem(
+          title: l10n.language,
+          icon: HugeIcons.strokeRoundedTranslation,
+          onTap: () async => _onLanguageTap(context),
+        ),
+        const SizedBox(height: 8),
+        SettingsItem(
+          title: l10n.gallery,
+          icon: HugeIcons.strokeRoundedImage01,
+          onTap: () async {
+            await routeToPage(
+              context,
+              const GallerySettingsScreen(
+                fromGalleryLayoutSettingsCTA: false,
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
   Future<void> _showThemePicker(BuildContext context) async {
-    await showModalBottomSheet(
+    await showBottomSheetComponent<void>(
       context: context,
-      backgroundColor: Colors.transparent,
       builder: (context) => _ThemePickerSheet(
         currentThemeMode: _currentThemeMode,
         onThemeChanged: (themeMode) {
@@ -193,95 +129,55 @@ class _ThemePickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final sheetColor =
-        isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFFFFFFF);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: sheetColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 8),
-          Container(
-            width: 36,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colorScheme.strokeMuted,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context).theme,
-            style: textTheme.largeBold,
-          ),
-          const SizedBox(height: 16),
-          _ThemeOption(
+    return BottomSheetComponent(
+      title: AppLocalizations.of(context).theme,
+      showCloseButton: false,
+      content: MenuGroupComponent(
+        items: [
+          _themeOption(
+            context,
             title: AppLocalizations.of(context).lightTheme,
             isSelected: currentThemeMode == AdaptiveThemeMode.light,
-            onTap: () {
-              onThemeChanged(AdaptiveThemeMode.light);
-              Navigator.pop(context);
-            },
+            onTap: () => _selectTheme(context, AdaptiveThemeMode.light),
           ),
-          _ThemeOption(
+          _themeOption(
+            context,
             title: AppLocalizations.of(context).darkTheme,
             isSelected: currentThemeMode == AdaptiveThemeMode.dark,
-            onTap: () {
-              onThemeChanged(AdaptiveThemeMode.dark);
-              Navigator.pop(context);
-            },
+            onTap: () => _selectTheme(context, AdaptiveThemeMode.dark),
           ),
-          _ThemeOption(
+          _themeOption(
+            context,
             title: AppLocalizations.of(context).systemTheme,
             isSelected: currentThemeMode == AdaptiveThemeMode.system,
-            onTap: () {
-              onThemeChanged(AdaptiveThemeMode.system);
-              Navigator.pop(context);
-            },
+            onTap: () => _selectTheme(context, AdaptiveThemeMode.system),
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
     );
   }
-}
 
-class _ThemeOption extends StatelessWidget {
-  final String title;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ThemeOption({
-    required this.title,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return ListTile(
-      title: Text(
-        title,
-        style: textTheme.body,
-      ),
+  MenuComponent _themeOption(
+    BuildContext context, {
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return MenuComponent(
+      title: title,
       trailing: isSelected
-          ? Icon(
-              Icons.check,
-              color: colorScheme.primary500,
+          ? HugeIcon(
+              icon: HugeIcons.strokeRoundedTick02,
+              color: context.componentColors.primary,
+              size: IconSizes.medium,
             )
           : null,
       onTap: onTap,
     );
+  }
+
+  void _selectTheme(BuildContext context, AdaptiveThemeMode themeMode) {
+    onThemeChanged(themeMode);
+    Navigator.pop(context);
   }
 }

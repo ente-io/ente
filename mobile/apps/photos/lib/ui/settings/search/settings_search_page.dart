@@ -1,10 +1,8 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
 import "package:photos/ui/settings/search/settings_search_item.dart";
 import "package:photos/ui/settings/search/settings_search_registry.dart";
 
@@ -131,23 +129,19 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+    final colors = context.componentColors;
 
     return Scaffold(
-      backgroundColor: pageBackgroundColor,
+      backgroundColor: colors.backgroundBase,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSearchBar(colorScheme, textTheme),
+            _buildSearchBar(),
             Expanded(
               child: _searchQuery.isEmpty
-                  ? _buildSuggestions(colorScheme, textTheme)
-                  : _buildSearchResults(colorScheme, textTheme),
+                  ? _buildSuggestions()
+                  : _buildSearchResults(),
             ),
           ],
         ),
@@ -155,76 +149,41 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     );
   }
 
-  Widget _buildSearchBar(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+  Widget _buildSearchBar() {
+    final colors = context.componentColors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: colorScheme.backgroundElevated,
-          borderRadius: BorderRadius.circular(16),
+      child: TextInputComponent(
+        controller: _searchController,
+        focusNode: _searchFocusNode,
+        hintText: AppLocalizations.of(context).searchSettings,
+        onChanged: _onSearchChanged,
+        prefix: HugeIcon(
+          icon: HugeIcons.strokeRoundedSearch01,
+          size: 20,
+          color: colors.textLight,
+          strokeWidth: 1.6,
         ),
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Icon(
-                Icons.search_rounded,
-                size: 24,
-                color: colorScheme.textMuted,
-              ),
+        suffix: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _searchQuery.isNotEmpty
+              ? _clearSearch
+              : () => Navigator.of(context).pop(),
+          child: SizedBox.square(
+            dimension: 24,
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedCancel01,
+              size: 18,
+              color: colors.textLight,
+              strokeWidth: 1.6,
             ),
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                onChanged: _onSearchChanged,
-                style: textTheme.small.copyWith(color: colorScheme.textBase),
-                cursorColor: colorScheme.textBase,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context).searchSettings,
-                  hintStyle: textTheme.small.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ),
-            if (_searchQuery.isNotEmpty)
-              IconButton(
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                onPressed: _clearSearch,
-                icon: Icon(
-                  Icons.cancel_rounded,
-                  color: colorScheme.textMuted,
-                ),
-              )
-            else
-              IconButton(
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(
-                  Icons.close_rounded,
-                  color: colorScheme.textMuted,
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSuggestions(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  Widget _buildSuggestions() {
     final suggestions = SettingsSearchRegistry.getSuggestions(
       context,
       (routeBuilder) => _navigateToSetting(routeBuilder),
@@ -238,9 +197,8 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           const SizedBox(height: 8),
           Text(
             AppLocalizations.of(context).suggestions,
-            style: textTheme.small.copyWith(
-              color: colorScheme.textBase,
-              fontWeight: FontWeight.w500,
+            style: TextStyles.bodyBold.copyWith(
+              color: context.componentColors.textBase,
             ),
           ),
           const SizedBox(height: 12),
@@ -249,10 +207,9 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
             runSpacing: 8,
             children: suggestions
                 .map(
-                  (suggestion) => _buildSuggestionChip(
-                    suggestion,
-                    colorScheme,
-                    textTheme,
+                  (suggestion) => FilterChipComponent(
+                    label: suggestion.title,
+                    onChanged: (_) => suggestion.onTap(),
                   ),
                 )
                 .toList(),
@@ -262,47 +219,22 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     );
   }
 
-  Widget _buildSuggestionChip(
-    SettingsSearchSuggestion suggestion,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
-    return GestureDetector(
-      onTap: suggestion.onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
-        decoration: BoxDecoration(
-          color: colorScheme.backgroundElevated,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          suggestion.title,
-          style: textTheme.mini.copyWith(
-            color: colorScheme.textMuted,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchResults(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  Widget _buildSearchResults() {
     if (_filteredItems.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Text(
             AppLocalizations.of(context).noResultsFound,
-            style: textTheme.body.copyWith(color: colorScheme.textMuted),
+            style: TextStyles.body.copyWith(
+              color: context.componentColors.textLight,
+            ),
           ),
         ),
       );
     }
 
-    final rows = _buildResultRows(colorScheme, textTheme);
+    final rows = _buildResultRows();
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: rows.length,
@@ -312,10 +244,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     );
   }
 
-  List<Widget> _buildResultRows(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  List<Widget> _buildResultRows() {
     final sectionCounts = <String, int>{};
     for (final entry in _filteredItems) {
       sectionCounts.update(
@@ -337,74 +266,42 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
             padding: const EdgeInsets.only(top: 12, bottom: 8),
             child: Text(
               entry.sectionKey,
-              style: textTheme.mini.copyWith(
-                color: colorScheme.textMuted,
-                fontWeight: FontWeight.w600,
+              style: TextStyles.mini.copyWith(
+                color: context.componentColors.textLight,
               ),
             ),
           ),
         );
       }
       rows.add(
-        _buildSearchResultItem(entry.item, colorScheme, textTheme),
+        _buildSearchResultItem(entry.item),
       );
     }
     return rows;
   }
 
-  Widget _buildSearchResultItem(
-    SettingsSearchItem item,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
-    return GestureDetector(
-      onTap: () => _navigateToSetting(item.routeBuilder),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: colorScheme.backgroundElevated,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            if (item.icon != null) ...[
-              HugeIcon(
+  Widget _buildSearchResultItem(SettingsSearchItem item) {
+    final colors = context.componentColors;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      child: MenuComponent(
+        title: item.title,
+        subtitle: item.sectionPath != item.title ? item.sectionPath : null,
+        leading: item.icon == null
+            ? null
+            : HugeIcon(
                 icon: item.icon!,
-                color: colorScheme.menuItemIconStroke,
-                size: 20,
+                color: colors.textLight,
+                size: 24,
+                strokeWidth: 1.6,
               ),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: textTheme.small.copyWith(
-                      color: colorScheme.textBase,
-                    ),
-                  ),
-                  if (item.sectionPath != item.title) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      item.sectionPath,
-                      style: textTheme.mini.copyWith(
-                        color: colorScheme.textMuted,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_outlined,
-              size: 20,
-              color: colorScheme.strokeMuted,
-            ),
-          ],
+        trailing: Icon(
+          Icons.chevron_right_outlined,
+          color: colors.textLight,
+          size: IconSizes.medium,
         ),
+        showOnlyLoadingState: true,
+        onTap: () async => _navigateToSetting(item.routeBuilder),
       ),
     );
   }

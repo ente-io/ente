@@ -3,7 +3,9 @@ import "dart:async";
 import "dart:collection";
 
 import "package:collection/collection.dart";
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/backup_updated_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
@@ -12,7 +14,6 @@ import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/settings/backup/backup_item_card.dart";
 import "package:photos/utils/file_uploader.dart";
 
@@ -56,8 +57,9 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
           (a, b) => (b.file.uploadedFileID!).compareTo(a.file.uploadedFileID!),
         )
         .toList();
-    _fileUploadedSubscription =
-        Bus.instance.on<FileUploadedEvent>().listen((event) {
+    _fileUploadedSubscription = Bus.instance.on<FileUploadedEvent>().listen((
+      event,
+    ) {
       result!.insert(
         0,
         BackupItem(
@@ -73,8 +75,9 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
   }
 
   void checkBackupUpdatedEvent() {
-    _backupUpdatedSubscription =
-        Bus.instance.on<BackupUpdatedEvent>().listen((event) {
+    _backupUpdatedSubscription = Bus.instance.on<BackupUpdatedEvent>().listen((
+      event,
+    ) {
       items = event.items;
       safeSetState();
     });
@@ -96,8 +99,8 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
   @override
   Widget build(BuildContext context) {
     final List<BackupItem> items = this.items.values.toList().sorted(
-          (a, b) => a.status.index.compareTo(b.status.index),
-        );
+      (a, b) => a.status.index.compareTo(b.status.index),
+    );
 
     final allItems = <BackupItem>[
       ...items.where(
@@ -107,54 +110,21 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        leadingWidth: 32,
-        title: TitleWidget(
-          title: AppLocalizations.of(context).backupStatus,
-          caption: null,
-          isTitleH2WithoutLeading: false,
-        ),
-      ),
-      body: allItems.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 60,
-                vertical: 12,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.cloud_upload_outlined,
-                    color: Theme.of(context).brightness == Brightness.light
-                        ? const Color.fromRGBO(0, 0, 0, 0.6)
-                        : const Color.fromRGBO(255, 255, 255, 0.6),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context).backupStatusDescription,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 20 / 16,
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? const Color(0xFF000000).withValues(alpha: 0.7)
-                          : const Color(0xFFFFFFFF).withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-                ],
-              ),
+      backgroundColor: context.componentColors.backgroundBase,
+      body: AppBarComponent(
+        title: AppLocalizations.of(context).backupStatus,
+        slivers: [
+          if (allItems.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: _EmptyBackupStatus(),
             )
-          : Scrollbar(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 20,
-                  horizontal: 16,
-                ),
-                shrinkWrap: false,
-                primary: true,
-                prototypeItem: Container(height: 70),
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.lg,
+              ),
+              sliver: SliverList.builder(
                 itemBuilder: (context, index) {
                   return BackupItemCard(
                     item: allItems[index],
@@ -164,6 +134,40 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                 itemCount: allItems.length,
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyBackupStatus extends StatelessWidget {
+  const _EmptyBackupStatus();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 60,
+        vertical: Spacing.md,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedCloudUpload,
+            color: colors.textLight,
+            size: IconSizes.medium,
+          ),
+          const SizedBox(height: Spacing.lg),
+          Text(
+            AppLocalizations.of(context).backupStatusDescription,
+            textAlign: TextAlign.center,
+            style: TextStyles.large.copyWith(color: colors.textLight),
+          ),
+          const SizedBox(height: 48),
+        ],
+      ),
     );
   }
 }

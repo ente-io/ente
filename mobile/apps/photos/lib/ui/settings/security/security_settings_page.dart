@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:typed_data";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
@@ -18,12 +19,11 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/passkey_service.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/local_authentication_service.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/account/request_pwd_verification_page.dart";
 import "package:photos/ui/account/sessions_page.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/settings/components/settings_item.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
 import "package:photos/utils/auth_util.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -43,12 +43,13 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   @override
   void initState() {
     super.initState();
-    _userDetailsChangedEvent =
-        Bus.instance.on<UserDetailsChangedEvent>().listen((event) async {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    _userDetailsChangedEvent = Bus.instance
+        .on<UserDetailsChangedEvent>()
+        .listen((event) async {
+          if (mounted) {
+            setState(() {});
+          }
+        });
     _refreshSecurityDetails().ignore();
   }
 
@@ -60,142 +61,70 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
     final showAccountSecurity =
         _config.hasConfiguredAccount() && !isLocalGalleryMode;
 
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
-
-    return Scaffold(
-      backgroundColor: pageBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: colorScheme.strokeBase,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.of(context).security,
-                style: textTheme.h3Bold,
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      if (showAccountSecurity) ...[
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(context).twofactor,
-                          leadingIconWidget: _buildIconWidget(
-                            context,
-                            HugeIcons.strokeRoundedSmartPhone01,
-                          ),
-                          trailingWidget: ToggleSwitchWidget(
-                            value: () =>
-                                UserService.instance.hasEnabledTwoFactor(),
-                            onChanged: () => _onTwoFactorToggle(context),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(
-                            context,
-                          ).emailVerificationToggle,
-                          leadingIconWidget: _buildIconWidget(
-                            context,
-                            HugeIcons.strokeRoundedMailSecure01,
-                          ),
-                          trailingWidget: ToggleSwitchWidget(
-                            value: () =>
-                                UserService.instance.hasEmailMFAEnabled(),
-                            onChanged: () => _onEmailMFAToggle(context),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        MenuItemWidgetNew(
-                          title: context.l10n.passkey,
-                          leadingIconWidget: _buildIconWidget(
-                            context,
-                            HugeIcons.strokeRoundedFingerAccess,
-                          ),
-                          trailingIcon: Icons.chevron_right_outlined,
-                          trailingIconIsMuted: true,
-                          onTap: () async => _onPasskeyTap(context),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).appLock,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedSquareLock02,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async => _onAppLockTap(context),
-                      ),
-                      const SizedBox(height: 8),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).crashReporting,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedBug02,
-                        ),
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () => SuperLogging.shouldReportCrashes(),
-                          onChanged: () async {
-                            await SuperLogging.setShouldReportCrashes(
-                              !SuperLogging.shouldReportCrashes(),
-                            );
-                            if (mounted) {
-                              setState(() {});
-                            }
-                          },
-                        ),
-                      ),
-                      if (showAccountSecurity) const SizedBox(height: 8),
-                      if (showAccountSecurity)
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(context).activeSessions,
-                          leadingIconWidget: _buildIconWidget(
-                            context,
-                            HugeIcons.strokeRoundedComputerPhoneSync,
-                          ),
-                          trailingIcon: Icons.chevron_right_outlined,
-                          trailingIconIsMuted: true,
-                          showOnlyLoadingState: true,
-                          onTap: () async => _onActiveSessionsTap(context),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+    return SettingsPageScaffold(
+      title: l10n.security,
+      children: [
+        if (showAccountSecurity) ...[
+          SettingsItem(
+            title: l10n.twofactor,
+            icon: HugeIcons.strokeRoundedSmartPhone01,
+            trailing: ToggleSwitchComponent.async(
+              value: () => UserService.instance.hasEnabledTwoFactor(),
+              onChanged: () => _onTwoFactorToggle(context),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SettingsItem(
+            title: l10n.emailVerificationToggle,
+            icon: HugeIcons.strokeRoundedMailSecure01,
+            trailing: ToggleSwitchComponent.async(
+              value: () => UserService.instance.hasEmailMFAEnabled(),
+              onChanged: () => _onEmailMFAToggle(context),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SettingsItem(
+            title: context.l10n.passkey,
+            icon: HugeIcons.strokeRoundedFingerAccess,
+            onTap: () async => _onPasskeyTap(context),
+          ),
+          const SizedBox(height: 8),
+        ],
+        SettingsItem(
+          title: l10n.appLock,
+          icon: HugeIcons.strokeRoundedSquareLock02,
+          onTap: () async => _onAppLockTap(context),
+        ),
+        const SizedBox(height: 8),
+        SettingsItem(
+          title: l10n.crashReporting,
+          icon: HugeIcons.strokeRoundedBug02,
+          trailing: ToggleSwitchComponent.async(
+            value: () => SuperLogging.shouldReportCrashes(),
+            onChanged: () async {
+              await SuperLogging.setShouldReportCrashes(
+                !SuperLogging.shouldReportCrashes(),
+              );
+              if (mounted) {
+                setState(() {});
+              }
+            },
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildIconWidget(BuildContext context, List<List<dynamic>> icon) {
-    final colorScheme = getEnteColorScheme(context);
-    return HugeIcon(
-      icon: icon,
-      color: colorScheme.menuItemIconStroke,
-      size: 20,
+        if (showAccountSecurity) ...[
+          const SizedBox(height: 8),
+          SettingsItem(
+            title: l10n.activeSessions,
+            icon: HugeIcons.strokeRoundedComputerPhoneSync,
+            showOnlyLoadingState: true,
+            onTap: () async => _onActiveSessionsTap(context),
+          ),
+        ],
+      ],
     );
   }
 
@@ -215,11 +144,11 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   Future<void> _onTwoFactorToggle(BuildContext context) async {
     final completer = Completer();
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      AppLocalizations.of(context).authToConfigureTwofactorAuthentication,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          AppLocalizations.of(context).authToConfigureTwofactorAuthentication,
+        );
     final isTwoFactorEnabled = UserService.instance.hasEnabledTwoFactor();
     if (hasAuthenticated) {
       if (isTwoFactorEnabled) {
@@ -233,47 +162,35 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   }
 
   Future<void> _disableTwoFactor() async {
-    final alert = AlertDialog(
-      title: Text(AppLocalizations.of(context).disableTwofactor),
-      content: Text(AppLocalizations.of(context).confirm2FADisable),
-      actions: [
-        TextButton(
-          child: Text(
-            AppLocalizations.of(context).no,
-            style: TextStyle(color: getEnteColorScheme(context).primary500),
-          ),
-          onPressed: () {
-            Navigator.of(context).pop("dialog");
-          },
-        ),
-        TextButton(
-          child: Text(
-            AppLocalizations.of(context).yes,
-            style: const TextStyle(color: Colors.red),
-          ),
-          onPressed: () async {
-            await UserService.instance.disableTwoFactor(context);
-            Navigator.of(context).pop("dialog");
-          },
-        ),
-      ],
-    );
-
-    await showDialog(
-      useRootNavigator: false,
+    final l10n = AppLocalizations.of(context);
+    await showBottomSheetComponent<void>(
       context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
+      builder: (sheetContext) => BottomSheetComponent(
+        title: l10n.disableTwofactor,
+        message: l10n.confirm2FADisable,
+        illustration: Image.asset("assets/warning-grey.png"),
+        actions: [
+          ButtonComponent(
+            label: l10n.yes,
+            variant: ButtonComponentVariant.critical,
+            onTap: () async {
+              await UserService.instance.disableTwoFactor(context);
+              if (sheetContext.mounted) {
+                Navigator.of(sheetContext).pop();
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 
   Future<void> _onEmailMFAToggle(BuildContext context) async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      AppLocalizations.of(context).authToChangeEmailVerificationSetting,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          AppLocalizations.of(context).authToChangeEmailVerificationSetting,
+        );
     final isEmailMFAEnabled = UserService.instance.hasEmailMFAEnabled();
     if (hasAuthenticated) {
       await _updateEmailMFA(!isEmailMFAEnabled);
@@ -305,11 +222,11 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   }
 
   Future<void> _onPasskeyTap(BuildContext context) async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      AppLocalizations.of(context).authToViewPasskey,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          AppLocalizations.of(context).authToViewPasskey,
+        );
     if (hasAuthenticated) {
       await _handlePasskeyClick(context);
     }
@@ -317,11 +234,11 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   Future<void> _handlePasskeyClick(BuildContext buildContext) async {
     try {
-      final isPassKeyResetEnabled =
-          await PasskeyService.instance.isPasskeyRecoveryEnabled();
+      final isPassKeyResetEnabled = await PasskeyService.instance
+          .isPasskeyRecoveryEnabled();
       if (!isPassKeyResetEnabled) {
-        final Uint8List recoveryKey =
-            await UserService.instance.getOrCreateRecoveryKey(context);
+        final Uint8List recoveryKey = await UserService.instance
+            .getOrCreateRecoveryKey(context);
         final resetKey = CryptoUtil.generateKey();
         final resetKeyBase64 = CryptoUtil.bin2base64(resetKey);
         final encryptionResult = CryptoUtil.encryptSync(resetKey, recoveryKey);
@@ -365,11 +282,11 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   }
 
   Future<void> _onActiveSessionsTap(BuildContext context) async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      AppLocalizations.of(context).authToViewYourActiveSessions,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          AppLocalizations.of(context).authToViewYourActiveSessions,
+        );
     if (hasAuthenticated) {
       unawaited(
         Navigator.of(context).push(

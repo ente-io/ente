@@ -805,10 +805,9 @@ class FileUploader {
           contentMd5: thumbnailMd5,
         );
       }
-      final ParsedExifDateTime? exifTime = await tryParseExifDateTime(
-        null,
-        mediaUploadData.exifData,
-      );
+      final ParsedExifDateTime? exifTime = mediaUploadData.exifData != null
+          ? await tryParseExifDateTime(null, mediaUploadData.exifData)
+          : null;
       file.metadataVersion = EnteFile.kCurrentMetadataVersion;
       final metadata =
           await file.getMetadataForUpload(mediaUploadData, exifTime);

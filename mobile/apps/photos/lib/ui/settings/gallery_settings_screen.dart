@@ -1,14 +1,14 @@
-import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/force_reload_home_gallery_event.dart";
 import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/ui/viewer/gallery/gallery_group_type_picker_page.dart";
-import "package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart";
+import "package:photos/ui/settings/components/settings_item.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 
 class GallerySettingsScreen extends StatefulWidget {
   final bool fromGalleryLayoutSettingsCTA;
@@ -34,113 +34,149 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+    return SettingsPageScaffold(
+      title: l10n.gallery,
+      children: [
+        SettingsItem(
+          title: l10n.photoGridSize,
+          trailing: _trailingLabel(context, _photoGridSize.toString()),
+          onTap: () async => _showPhotoGridSizeSheet(context),
+        ),
+        const SizedBox(height: 8),
+        SettingsItem(
+          title: l10n.groupBy,
+          trailing: _trailingLabel(context, _groupType),
+          onTap: () async => _showGroupTypeSheet(context),
+        ),
+        if (!widget.fromGalleryLayoutSettingsCTA && !isLocalGalleryMode) ...[
+          const SizedBox(height: 8),
+          SettingsItem(
+            title: l10n.hideSharedItemsFromHomeGallery,
+            showChevron: false,
+            trailing: ToggleSwitchComponent.async(
+              value: () => localSettings.hideSharedItemsFromHomeGallery,
+              onChanged: () async {
+                final prevSetting =
+                    localSettings.hideSharedItemsFromHomeGallery;
+                await localSettings.setHideSharedItemsFromHomeGallery(
+                  !prevSetting,
+                );
 
-    return Scaffold(
-      backgroundColor: pageBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: colorScheme.strokeBase,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.of(context).gallery,
-                style: textTheme.h3Bold,
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).photoGridSize,
-                        trailingWidget: Text(
-                          _photoGridSize.toString(),
-                          style: textTheme.small,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async {
-                          await routeToPage(
-                            context,
-                            const PhotoGridSizePickerPage(),
-                          );
-                          setState(() {
-                            _photoGridSize = localSettings.getPhotoGridSize();
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).groupBy,
-                        trailingWidget: Text(
-                          _groupType,
-                          style: textTheme.small,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async {
-                          await routeToPage(
-                            context,
-                            const GalleryGroupTypePickerPage(),
-                          );
-                          setState(() {
-                            _groupType =
-                                localSettings.getGalleryGroupType().name;
-                          });
-                        },
-                      ),
-                      if (!widget.fromGalleryLayoutSettingsCTA &&
-                          !isLocalGalleryMode) ...[
-                        const SizedBox(height: 8),
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(
-                            context,
-                          ).hideSharedItemsFromHomeGallery,
-                          trailingWidget: ToggleSwitchWidget(
-                            value: () =>
-                                localSettings.hideSharedItemsFromHomeGallery,
-                            onChanged: () async {
-                              final prevSetting =
-                                  localSettings.hideSharedItemsFromHomeGallery;
-                              await localSettings
-                                  .setHideSharedItemsFromHomeGallery(
-                                !prevSetting,
-                              );
-
-                              Bus.instance.fire(
-                                HideSharedItemsFromHomeGalleryEvent(
-                                  !prevSetting,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
+                Bus.instance.fire(
+                  HideSharedItemsFromHomeGalleryEvent(!prevSetting),
+                );
+              },
+            ),
           ),
+        ],
+      ],
+    );
+  }
+
+  Widget _trailingLabel(BuildContext context, String label) {
+    final colors = context.componentColors;
+    return Text(
+      label,
+      style: TextStyles.mini.copyWith(color: colors.textLight),
+    );
+  }
+
+  Future<void> _showPhotoGridSizeSheet(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (sheetContext) => BottomSheetComponent(
+        title: l10n.photoGridSize,
+        content: MenuGroupComponent(
+          items: [
+            for (
+              int gridSize = photoGridSizeMin;
+              gridSize <= photoGridSizeMax;
+              gridSize++
+            )
+              MenuComponent(
+                key: ValueKey(gridSize),
+                title: "$gridSize",
+                trailing: _photoGridSize == gridSize
+                    ? Icon(
+                        Icons.check,
+                        color: sheetContext.componentColors.primary,
+                      )
+                    : null,
+                onTap: () async {
+                  await _setPhotoGridSize(gridSize);
+                  if (sheetContext.mounted) {
+                    Navigator.of(sheetContext).pop();
+                  }
+                },
+              ),
+          ],
         ),
       ),
+    );
+  }
+
+  Future<void> _setPhotoGridSize(int gridSize) async {
+    await localSettings.setPhotoGridSize(gridSize);
+    if (mounted) {
+      setState(() {
+        _photoGridSize = gridSize;
+      });
+    }
+    Bus.instance.fire(
+      ForceReloadHomeGalleryEvent("grid size changed"),
+    );
+  }
+
+  Future<void> _showGroupTypeSheet(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final currentGroupType = localSettings.getGalleryGroupType();
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (sheetContext) => BottomSheetComponent(
+        title: l10n.groupBy,
+        content: MenuGroupComponent(
+          items: [
+            for (final groupType in _groupTypes)
+              MenuComponent(
+                key: ValueKey(groupType.name),
+                title: groupType.getLocalizedName(sheetContext),
+                trailing: currentGroupType == groupType
+                    ? Icon(
+                        Icons.check,
+                        color: sheetContext.componentColors.primary,
+                      )
+                    : null,
+                onTap: () async {
+                  await _setGroupType(groupType);
+                  if (sheetContext.mounted) {
+                    Navigator.of(sheetContext).pop();
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<GroupType> get _groupTypes {
+    return GroupType.values
+        .where((type) => type != GroupType.size && type != GroupType.none)
+        .toList();
+  }
+
+  Future<void> _setGroupType(GroupType groupType) async {
+    await localSettings.setGalleryGroupType(groupType);
+    if (mounted) {
+      setState(() {
+        _groupType = groupType.name;
+      });
+    }
+    Bus.instance.fire(
+      ForceReloadHomeGalleryEvent("group type changed"),
     );
   }
 }

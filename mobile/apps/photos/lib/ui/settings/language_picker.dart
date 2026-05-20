@@ -1,14 +1,9 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/divider_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
-import "package:photos/utils/separators_util.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 
 class LanguageSelectorPage extends StatelessWidget {
   final List<Locale> supportedLocales;
@@ -24,48 +19,16 @@ class LanguageSelectorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: context.l10n.selectLanguage,
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 20,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        child: ItemsWidget(
-                          supportedLocales,
-                          onLocaleChanged,
-                          currentLocale,
-                        ),
-                      ),
-                      // MenuSectionDescriptionWidget(
-                      //   content: context.l10n.maxDeviceLimitSpikeHandling(50),
-                      // )
-                    ],
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
-          ),
-          const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
-        ],
-      ),
+    return SettingsPageScaffold(
+      title: context.l10n.selectLanguage,
+      children: [
+        ItemsWidget(
+          supportedLocales,
+          onLocaleChanged,
+          currentLocale,
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 }
@@ -88,7 +51,6 @@ class ItemsWidget extends StatefulWidget {
 
 class _ItemsWidgetState extends State<ItemsWidget> {
   late Locale currentLocale;
-  List<Widget> items = [];
 
   @override
   void initState() {
@@ -98,52 +60,52 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    items.clear();
+    final items = <MenuComponent>[];
     bool foundMatch = false;
     for (Locale locale in widget.supportedLocales) {
       if (currentLocale == locale) {
         foundMatch = true;
       }
-      items.add(
-        _menuItemForPicker(locale),
-      );
+      items.add(_menuItemForPicker(locale));
     }
-    if (!foundMatch && kDebugMode) {
-      items.insert(
-        0,
-        Text("(i) Locale : ${currentLocale.toString()}"),
-      );
-    }
-    items = addSeparators(
-      items,
-      DividerWidget(
-        dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
-      ),
-    );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: items,
+    final debugLocaleText = !foundMatch && kDebugMode
+        ? Padding(
+            padding: const EdgeInsets.only(bottom: Spacing.md),
+            child: Text(
+              "(i) Locale : ${currentLocale.toString()}",
+              style: TextStyles.mini.copyWith(
+                color: context.componentColors.textLight,
+              ),
+            ),
+          )
+        : null;
+
+    final children = <Widget>[
+      if (debugLocaleText != null) debugLocaleText,
+      MenuGroupComponent(items: items),
+    ];
+    return Column(mainAxisSize: MainAxisSize.min, children: children);
+  }
+
+  MenuComponent _menuItemForPicker(Locale locale) {
+    final isSelected = currentLocale == locale;
+    return MenuComponent(
+      key: ValueKey(locale.toString()),
+      title: getLocaleDisplayName(locale) + (kDebugMode ? ' ($locale)' : ''),
+      trailing: isSelected
+          ? Icon(
+              Icons.check,
+              color: context.componentColors.primary,
+            )
+          : null,
+      showOnlyLoadingState: true,
+      onTap: () async => _selectLocale(locale),
     );
   }
 
-  Widget _menuItemForPicker(Locale locale) {
-    return MenuItemWidget(
-      key: ValueKey(locale.toString()),
-      menuItemColor: getEnteColorScheme(context).fillFaint,
-      captionedTextWidget: CaptionedTextWidget(
-        title: getLocaleDisplayName(locale) + (kDebugMode ? ' ($locale)' : ''),
-      ),
-      trailingIcon: currentLocale == locale ? Icons.check : null,
-      alignCaptionedTextToLeft: true,
-      isTopBorderRadiusRemoved: true,
-      isBottomBorderRadiusRemoved: true,
-      showOnlyLoadingState: true,
-      onTap: () async {
-        widget.onLocaleChanged(locale);
-        currentLocale = locale;
-        setState(() {});
-      },
-    );
+  void _selectLocale(Locale locale) {
+    widget.onLocaleChanged(locale);
+    currentLocale = locale;
+    setState(() {});
   }
 }
