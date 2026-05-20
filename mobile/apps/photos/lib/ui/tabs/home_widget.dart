@@ -21,8 +21,6 @@ import "package:photos/events/account_configured_event.dart";
 import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/christmas_banner_event.dart";
-import "package:photos/events/collection_updated_event.dart";
-import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
 import "package:photos/events/opened_settings_event.dart";
 import "package:photos/events/permission_granted_event.dart";
@@ -74,7 +72,6 @@ import "package:photos/ui/home/home_bottom_nav_bar.dart";
 import "package:photos/ui/home/home_gallery_widget.dart";
 import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
-import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
@@ -123,7 +120,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription? _intentDataStreamSubscription;
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
-  bool _showShowBackupHook = false;
   bool _mediaViewFallbackNavigationScheduled = false;
   bool _personSyncTriggered = false;
   bool _collectionsSyncTriggered = false;
@@ -141,7 +137,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
-  late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
   StreamSubscription? _publicAlbumLinkSubscription;
   StreamSubscription<Uri?>? _authDeepLinkSubscription;
   late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
@@ -262,18 +257,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _backupFoldersUpdatedEvent =
         Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) async {
       if (mounted) {
-        setState(() {});
-      }
-    });
-    _collectionUpdatedEvent = Bus.instance.on<CollectionUpdatedEvent>().listen((
-      event,
-    ) async {
-      // only reset state if backup hook is shown. This is to ensure that
-      // during first sync, we don't keep showing backup hook if user has
-      // files
-      if (mounted &&
-          _showShowBackupHook &&
-          event.type == EventType.addedOrUpdated) {
         setState(() {});
       }
     });
@@ -552,7 +535,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
     _intentDataStreamSubscription?.cancel();
-    _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
     _publicAlbumLinkSubscription?.cancel();
@@ -1010,8 +992,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    _showShowBackupHook = _shouldShowBackupHook();
-
     return Stack(
       children: [
         Builder(
@@ -1031,11 +1011,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ? const NeverScrollableScrollPhysics()
                       : const BouncingScrollPhysics(),
                   children: [
-                    _showShowBackupHook
-                        ? const StartBackupHookWidget(
-                            headerWidget: HeaderWidget(),
-                          )
-                        : child!,
+                    child!,
                     UserCollectionsTab(selectedAlbums: _selectedAlbums),
                     _sharedCollectionTab,
                     _searchTab,
@@ -1319,20 +1295,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     } else {
       return !LocalSyncService.instance.hasCompletedFirstImport();
     }
-  }
-
-  bool _shouldShowBackupHook() {
-    if (isLocalGalleryMode) {
-      return false;
-    }
-    final bool noFoldersSelected =
-        !backupPreferenceService.hasSelectedAnyBackupFolder;
-    final bool hasLimitedPermission =
-        permissionService.hasGrantedLimitedPermissions();
-    final bool hasActiveCollections =
-        CollectionsService.instance.getActiveCollections().isNotEmpty;
-
-    return !hasActiveCollections && noFoldersSelected && !hasLimitedPermission;
   }
 
   void _ensurePersonSync() {
