@@ -479,7 +479,9 @@ class _AlbumsTabState extends State<AlbumsTab>
                               : Text(
                                   strings.albums,
                                   key: const ValueKey("albums_title"),
-                                  style: textTheme.h4Bold,
+                                  style: TextStyles.h1Bold.copyWith(
+                                    color: textTheme.h4Bold.color,
+                                  ),
                                 ),
                         ),
                       ),

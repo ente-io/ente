@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -35,14 +36,17 @@ class FileTypeSection extends StatelessWidget {
                 children: [
                   Text(
                     SectionType.fileTypesAndExtension.sectionTitle(context),
-                    style: textTheme.largeBold,
+                    style: TextStyles.h2.copyWith(
+                      color: textTheme.largeBold.color,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
-                      SectionType.fileTypesAndExtension
-                          .getEmptyStateText(context),
+                      SectionType.fileTypesAndExtension.getEmptyStateText(
+                        context,
+                      ),
                       style: textTheme.smallMuted,
                     ),
                   ),
@@ -138,15 +142,15 @@ class _FileTypeTile {
     required this.assetKey,
     required this.name,
     required FileType type,
-  })  : fileType = type,
-        extension = null;
+  }) : fileType = type,
+       extension = null;
 
   const _FileTypeTile.extension({
     required this.assetKey,
     required this.name,
     required this.extension,
-  })  : fileType = null,
-        assert(extension != null);
+  }) : fileType = null,
+       assert(extension != null);
 
   Future<GenericSearchResult> resolve() {
     final type = fileType;
