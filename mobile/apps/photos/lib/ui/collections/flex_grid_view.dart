@@ -18,6 +18,7 @@ import "package:photos/ui/collections/album/new_list_item.dart";
 import "package:photos/ui/collections/album/new_row_item.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
+import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
@@ -71,18 +72,19 @@ class _CollectionsFlexiGridViewWidgetState
     extends State<CollectionsFlexiGridViewWidget> {
   bool isAnyAlbumSelected = false;
   late StreamSubscription<ClearAlbumSelectionsEvent>
-      _clearAlbumSelectionSubscription;
+  _clearAlbumSelectionSubscription;
 
   @override
   void initState() {
-    _clearAlbumSelectionSubscription =
-        Bus.instance.on<ClearAlbumSelectionsEvent>().listen((event) {
-      if (mounted) {
-        setState(() {
-          isAnyAlbumSelected = false;
+    _clearAlbumSelectionSubscription = Bus.instance
+        .on<ClearAlbumSelectionsEvent>()
+        .listen((event) {
+          if (mounted) {
+            setState(() {
+              isAnyAlbumSelected = false;
+            });
+          }
         });
-      }
-    });
     super.initState();
   }
 
@@ -103,7 +105,8 @@ class _CollectionsFlexiGridViewWidgetState
   Future<void> _navigateToCollectionPage(Collection c) async {
     final thumbnail = await CollectionsService.instance.getCover(c);
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
-    final String tagPrefix = (isOwner ? "collection" : "shared_collection") +
+    final String tagPrefix =
+        (isOwner ? "collection" : "shared_collection") +
         widget.tag +
         "_" +
         c.id.toString();
@@ -143,12 +146,16 @@ class _CollectionsFlexiGridViewWidgetState
 
   Widget _buildGridView(BuildContext context, Key key) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
-    final int albumsCountInCrossAxis =
-        max(screenWidth ~/ CollectionsFlexiGridViewWidget.maxThumbnailWidth, 3);
-    final double totalCrossAxisSpacing = (albumsCountInCrossAxis - 1) *
+    final int albumsCountInCrossAxis = max(
+      screenWidth ~/ CollectionsFlexiGridViewWidget.maxThumbnailWidth,
+      3,
+    );
+    final double totalCrossAxisSpacing =
+        (albumsCountInCrossAxis - 1) *
         CollectionsFlexiGridViewWidget.crossAxisSpacing;
 
-    final double sideOfThumbnail = (screenWidth -
+    final double sideOfThumbnail =
+        (screenWidth -
             totalCrossAxisSpacing -
             CollectionsFlexiGridViewWidget.horizontalPadding) /
         albumsCountInCrossAxis;
@@ -230,7 +237,9 @@ class _CollectionsFlexiGridViewWidgetState
       ),
       sliver: SliverPrototypeExtentList(
         prototypeItem: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(
+            vertical: ThumbnailListItem.defaultItemSpacing / 2,
+          ),
           child: showCreateAlbum
               ? const NewAlbumListItemWidget()
               : AlbumListItemWidget(
@@ -273,8 +282,9 @@ class _CollectionsFlexiGridViewWidgetState
                             );
                             Navigator.of(context).pop();
                           } catch (e, s) {
-                            Logger("CreateNewAlbumIcon")
-                                .severe("Failed to rename album", e, s);
+                            Logger(
+                              "CreateNewAlbumIcon",
+                            ).severe("Failed to rename album", e, s);
                             rethrow;
                           }
                         },
@@ -314,7 +324,9 @@ class _CollectionsFlexiGridViewWidgetState
             }
 
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: ThumbnailListItem.defaultItemSpacing / 2,
+              ),
               child: item,
             );
           },

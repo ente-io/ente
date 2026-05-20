@@ -38,6 +38,6 @@ Learn more in the [First item guide](/locker/getting-started/first-document).
 ## 4. Set up for your family
 
 Once you're comfortable with Locker, set it up for your whole family with shared
-collections and Legacy contacts.
+collections and Legacy recovery options.
 
 Learn more in the [Family setup guide](/locker/getting-started/family-setup).

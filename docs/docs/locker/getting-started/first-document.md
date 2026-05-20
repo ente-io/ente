@@ -13,10 +13,10 @@ learn how to add information and organize it into collections.
 1. Open Ente Locker
 2. Tap the **+** button at the bottom of the screen
 3. Select the type of item you want to add:
-   - **Document**: Upload PDFs, images, and scans
-   - **Note**: Free-form text for any secure notes
-   - **Secret**: Usernames and passwords
-   - **Thing**: Track where physical documents are stored
+    - **Document**: Upload PDFs, images, and scans
+    - **Note**: Free-form text for any secure notes
+    - **Secret**: Usernames and passwords
+    - **Thing**: Track where physical documents are stored
 
 ## Example: Uploading a document
 
@@ -32,10 +32,10 @@ learn how to add information and organize it into collections.
 1. Tap the **+** button
 2. Select **Secret**
 3. Fill in the fields:
-   - **Name**: A name for this entry (e.g., "Bank Account")
-   - **Username**: Your username or email
-   - **Password**: Your password
-   - **Notes**: Any additional information (optional)
+    - **Name**: A name for this entry (e.g., "Bank Account")
+    - **Username**: Your username or email
+    - **Password**: Your password
+    - **Notes**: Any additional information (optional)
 4. Select one or more collections to organize this item
 5. Tap **Save**
 
@@ -64,7 +64,7 @@ From the home screen:
 
 Now that you've created your first item,
 [set up Locker for your family](/locker/getting-started/family-setup) with
-shared collections and Legacy contacts.
+shared collections, trusted contacts, and Legacy Kits.
 
 ## Related FAQs
 

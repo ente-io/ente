@@ -17,8 +17,9 @@ already have an Ente account, you can use your existing credentials.
 5. Verify your email with the code sent to you
 6. **Important**: Save your recovery key when prompted
 
-> **Warning**: Your recovery key is the only way to access your account if you
-> forget your password. Store it securely in multiple locations.
+> **Warning**: Your recovery key is the primary way to access your account if
+> you forget your password. Store it securely in multiple locations, and set up
+> Legacy recovery if someone else may need to recover the account.
 
 ## Logging in
 

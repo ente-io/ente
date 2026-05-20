@@ -16,7 +16,8 @@ A typical family Locker setup includes:
 1. **Individual accounts** for each family member
 2. **Shared collections** for documents everyone needs access to
 3. **Private collections** for personal items
-4. **Legacy contacts** so family members can recover each other's accounts
+4. **Legacy recovery options** so family members can recover accounts when
+   needed
 
 ## Step 1: Set up accounts for family members
 
@@ -161,28 +162,47 @@ To share a single item (like a specific document), create a
 
 ## Step 5: Set up Legacy for account recovery
 
-Legacy ensures family members can recover each other's accounts if needed. This
-is essential for:
+Legacy helps family members recover accounts if needed. This is essential for:
 
 - Accessing a family member's account if they're incapacitated
 - Digital inheritance after death
 - Emergency account recovery
 
-### Setting up Legacy
+### Add trusted contacts
+
+Trusted contacts must already have Ente accounts.
 
 1. Open **Ente Locker**
-2. Open `Settings > Account > Legacy`
-3. Tap **Add Trusted Contact**
-4. Enter your family member's Ente email address
-5. They must accept the invite in their Ente app
+2. Open the Locker menu
+3. Tap **Legacy**
+4. Tap **Add Trusted Contact**
+5. Enter your family member's Ente email address
+6. They must accept the invite in their Ente app
+
+### Create Legacy Kits
+
+Legacy Kits create 3 physical recovery sheets. Any 2 sheets can start recovery,
+and the helper does not need an Ente account.
+
+1. Open **Ente Locker**
+2. Open the Locker menu
+3. Tap **Legacy**
+4. Open **Legacy kits**
+5. Tap **Create legacy kit**
+6. Name the 3 recovery sheets
+7. Select the recovery wait time
+8. Store the sheets separately
 
 ### Recommended Legacy setup for families
 
 - **Spouses**: Add each other as trusted contacts
 - **Parents**: Add adult children as trusted contacts
 - **Adult children**: Add parents or siblings as trusted contacts
+- **Inheritance planning**: Create a Legacy Kit with sheets stored in separate
+  trusted locations
 
-Learn more about [Legacy](/locker/features/legacy/).
+Learn more about [Legacy](/locker/features/legacy/) and
+[Legacy Kits](/locker/features/legacy/legacy-kits).
 
 ## Step 6: Create an emergency information sheet
 
@@ -241,8 +261,8 @@ Share this note with all adult family members.
 ### Communication
 
 - **Tell family members about Locker**: Make sure everyone knows it exists
-- **Explain Legacy**: Help family members understand they can recover your
-  account if needed
+- **Explain Legacy**: Help family members understand trusted contacts and
+  Legacy Kits before an emergency
 - **Keep emergency info current**: Review the emergency sheet annually
 
 ## Checklist
@@ -255,7 +275,7 @@ Use this checklist to ensure your family setup is complete:
 - [ ] Collections are organized by category
 - [ ] Essential documents are uploaded
 - [ ] Relevant collections are shared with family members
-- [ ] Legacy contacts are configured
+- [ ] Legacy recovery options are configured
 - [ ] Emergency information sheet is created and shared
 - [ ] Family members know how to access Locker in an emergency
 
@@ -264,5 +284,6 @@ Use this checklist to ensure your family setup is complete:
 - [Collections](/locker/features/organization/collections)
 - [Sharing with users](/locker/features/sharing/share-with-users)
 - [Legacy](/locker/features/legacy/)
+- [Legacy Kits](/locker/features/legacy/legacy-kits)
 - [Documents](/locker/features/information-types/documents)
 - [Family plans](/photos/features/account/family-plans)
