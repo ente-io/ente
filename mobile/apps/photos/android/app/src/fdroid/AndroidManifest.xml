@@ -6,6 +6,12 @@
     main/AndroidManifest.xml once
     https://github.com/flutter/flutter/issues/38965 is fixed. -->
     <application>
+        <meta-data android:name="io.sentry.dsn" tools:node="remove"/>
+        <meta-data
+            android:name="io.sentry.auto-init"
+            android:value="false"
+            tools:replace="android:value"/>
+
         <activity android:name=".MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/LaunchTheme"

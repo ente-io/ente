@@ -609,7 +609,10 @@ class _AlbumsTabState extends State<AlbumsTab>
                               Expanded(
                                 child: Text(
                                   strings.albums,
-                                  style: textTheme.h4Bold,
+                                  key: const ValueKey("albums_title"),
+                                  style: TextStyles.h1Bold.copyWith(
+                                    color: textTheme.h4Bold.color,
+                                  ),
                                 ),
                               ),
                               IconButtonComponent(
