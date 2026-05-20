@@ -4,9 +4,11 @@ import 'dart:math';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_album_selections_event.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/selected_albums.dart";
@@ -16,7 +18,9 @@ import "package:photos/ui/collections/album/new_list_item.dart";
 import "package:photos/ui/collections/album/new_row_item.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
+import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
 
 class CollectionsFlexiGridViewWidget extends StatefulWidget {
@@ -63,18 +67,19 @@ class _CollectionsFlexiGridViewWidgetState
     extends State<CollectionsFlexiGridViewWidget> {
   bool isAnyAlbumSelected = false;
   late StreamSubscription<ClearAlbumSelectionsEvent>
-      _clearAlbumSelectionSubscription;
+  _clearAlbumSelectionSubscription;
 
   @override
   void initState() {
-    _clearAlbumSelectionSubscription =
-        Bus.instance.on<ClearAlbumSelectionsEvent>().listen((event) {
-      if (mounted) {
-        setState(() {
-          isAnyAlbumSelected = false;
+    _clearAlbumSelectionSubscription = Bus.instance
+        .on<ClearAlbumSelectionsEvent>()
+        .listen((event) {
+          if (mounted) {
+            setState(() {
+              isAnyAlbumSelected = false;
+            });
+          }
         });
-      }
-    });
     super.initState();
   }
 
@@ -95,7 +100,8 @@ class _CollectionsFlexiGridViewWidgetState
   Future<void> _navigateToCollectionPage(Collection c) async {
     final thumbnail = await CollectionsService.instance.getCover(c);
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
-    final String tagPrefix = (isOwner ? "collection" : "shared_collection") +
+    final String tagPrefix =
+        (isOwner ? "collection" : "shared_collection") +
         widget.tag +
         "_" +
         c.id.toString();
@@ -110,6 +116,46 @@ class _CollectionsFlexiGridViewWidgetState
         hasVerifiedLock: hasVerifiedLock,
       ),
     );
+  }
+
+  Future<void> _createAlbum() async {
+    final result = await showTextInputDialog(
+      context,
+      title: AppLocalizations.of(context).newAlbum,
+      submitButtonLabel: AppLocalizations.of(context).create,
+      hintText: AppLocalizations.of(context).enterAlbumName,
+      alwaysShowSuccessState: false,
+      initialValue: "",
+      textCapitalization: TextCapitalization.words,
+      popnavAfterSubmission: false,
+      onSubmit: (String text) async {
+        text = text.trim();
+        if (text == "") {
+          return;
+        }
+
+        try {
+          final Collection c = await CollectionsService.instance.createAlbum(
+            text,
+          );
+          // ignore: unawaited_futures
+          await routeToPage(
+            context,
+            CollectionPage(CollectionWithThumbnail(c, null)),
+          );
+          Navigator.of(context).pop();
+        } catch (e, s) {
+          Logger(
+            "CollectionsFlexiGridViewWidget",
+          ).severe("Failed to create album", e, s);
+          rethrow;
+        }
+      },
+    );
+
+    if (result is Exception) {
+      await showGenericErrorDialog(context: context, error: result);
+    }
   }
 
   @override
@@ -135,12 +181,16 @@ class _CollectionsFlexiGridViewWidgetState
 
   Widget _buildGridView(BuildContext context, Key key) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
-    final int albumsCountInCrossAxis =
-        max(screenWidth ~/ CollectionsFlexiGridViewWidget.maxThumbnailWidth, 3);
-    final double totalCrossAxisSpacing = (albumsCountInCrossAxis - 1) *
+    final int albumsCountInCrossAxis = max(
+      screenWidth ~/ CollectionsFlexiGridViewWidget.maxThumbnailWidth,
+      3,
+    );
+    final double totalCrossAxisSpacing =
+        (albumsCountInCrossAxis - 1) *
         CollectionsFlexiGridViewWidget.crossAxisSpacing;
 
-    final double sideOfThumbnail = (screenWidth -
+    final double sideOfThumbnail =
+        (screenWidth -
             totalCrossAxisSpacing -
             CollectionsFlexiGridViewWidget.horizontalPadding) /
         albumsCountInCrossAxis;
@@ -219,7 +269,9 @@ class _CollectionsFlexiGridViewWidgetState
       ),
       sliver: SliverPrototypeExtentList(
         prototypeItem: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(
+            vertical: ThumbnailListItem.defaultItemSpacing / 2,
+          ),
           child: showCreateAlbum
               ? const NewAlbumListItemWidget()
               : AlbumListItemWidget(
@@ -233,7 +285,10 @@ class _CollectionsFlexiGridViewWidgetState
             Widget item;
 
             if (showCreateAlbum && index == 0) {
-              item = const NewAlbumListItemWidget();
+              item = GestureDetector(
+                onTap: _createAlbum,
+                child: const NewAlbumListItemWidget(),
+              );
             } else {
               final collectionIndex = showCreateAlbum ? index - 1 : index;
 
@@ -256,7 +311,9 @@ class _CollectionsFlexiGridViewWidgetState
             }
 
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: ThumbnailListItem.defaultItemSpacing / 2,
+              ),
               child: item,
             );
           },
