@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:math";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -41,7 +42,8 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   static const maxThumbnailWidth = 224.0;
   static const horizontalPadding = 16.0;
   static const crossAxisSpacing = 8.0;
-  static const gridItemTextHeight = 48.0;
+  static const _thumbnailToTextSpacing = 8.0;
+  static const _titleToSubtitleSpacing = 4.0;
 
   @override
   void initState() {
@@ -76,6 +78,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
     final double sideOfThumbnail =
         (screenWidth - totalCrossAxisSpacing - horizontalPadding) /
         albumsCountInCrossAxis;
+    final double gridItemTextHeight = _gridItemTextHeight(context);
 
     debugPrint("${(DeviceFoldersGridView).toString()} - $_loadReason");
 
@@ -177,6 +180,20 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
         ),
       ),
     );
+  }
+
+  double _gridItemTextHeight(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    return (_thumbnailToTextSpacing +
+            _scaledLineHeight(textScaler, TextStyles.body) +
+            _titleToSubtitleSpacing +
+            _scaledLineHeight(textScaler, TextStyles.mini))
+        .ceilToDouble();
+  }
+
+  double _scaledLineHeight(TextScaler textScaler, TextStyle style) {
+    final fontSize = style.fontSize ?? 14;
+    return textScaler.scale(fontSize) * (style.height ?? 1);
   }
 
   @override

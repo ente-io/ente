@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:math";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -80,6 +81,7 @@ class DeviceFolderVerticalGridSliver extends StatefulWidget {
   final double topPadding;
   final double bottomPadding;
   final Widget? sectionHeader;
+  final Widget? emptyStateSliver;
 
   const DeviceFolderVerticalGridSliver({
     required this.searchQuery,
@@ -88,6 +90,7 @@ class DeviceFolderVerticalGridSliver extends StatefulWidget {
     this.topPadding = 16,
     this.bottomPadding = 200,
     this.sectionHeader,
+    this.emptyStateSliver,
     super.key,
   });
 
@@ -101,6 +104,7 @@ class _DeviceFolderVerticalGridViewBodyState
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
+  late Future<List<DeviceCollection>> _deviceCollectionsFuture;
   final logger = Logger((_DeviceFolderVerticalGridViewBodyState).toString());
   final _debouncer = Debouncer(
     const Duration(milliseconds: 1500),
@@ -114,29 +118,42 @@ class _DeviceFolderVerticalGridViewBodyState
   static const horizontalPadding = 16.0;
   static const crossAxisSpacing = 8.0;
   static const listItemSpacing = 8.0;
-  static const gridItemTextHeight = 48.0;
+  static const _thumbnailToTextSpacing = 8.0;
+  static const _titleToSubtitleSpacing = 4.0;
 
   @override
   void initState() {
     super.initState();
+    _deviceCollectionsFuture = _loadDeviceCollections();
     _backupFoldersUpdatedEvent = Bus.instance
         .on<BackupFoldersUpdatedEvent>()
         .listen((event) {
           _loadReason = event.reason;
-          if (mounted) {
-            setState(() {});
-          }
+          _refreshDeviceCollections();
         });
     _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen(
       (event) {
         _debouncer.run(() async {
-          if (mounted) {
-            _loadReason = event.reason;
-            setState(() {});
-          }
+          _loadReason = event.reason;
+          _refreshDeviceCollections();
         });
       },
     );
+  }
+
+  Future<List<DeviceCollection>> _loadDeviceCollections() {
+    return FilesDB.instance.getDeviceCollections(
+      includeCoverThumbnail: true,
+    );
+  }
+
+  void _refreshDeviceCollections() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _deviceCollectionsFuture = _loadDeviceCollections();
+    });
   }
 
   @override
@@ -149,18 +166,14 @@ class _DeviceFolderVerticalGridViewBodyState
         hasScrollBody: false,
         child: OnDeviceSelectFoldersEmptyState(
           onFoldersSelected: () {
-            if (mounted) {
-              setState(() {});
-            }
+            _refreshDeviceCollections();
           },
         ),
       );
     }
 
     return FutureBuilder<List<DeviceCollection>>(
-      future: FilesDB.instance.getDeviceCollections(
-        includeCoverThumbnail: true,
-      ),
+      future: _deviceCollectionsFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<DeviceCollection> deviceCollections = snapshot.data!;
@@ -175,6 +188,9 @@ class _DeviceFolderVerticalGridViewBodyState
           }
 
           if (deviceCollections.isEmpty) {
+            if (widget.emptyStateSliver != null) {
+              return widget.emptyStateSliver!;
+            }
             return widget.showEmptyState
                 ? const SliverFillRemaining(
                     child: Padding(
@@ -229,6 +245,7 @@ class _DeviceFolderVerticalGridViewBodyState
     final double sideOfThumbnail =
         (screenWidth - totalCrossAxisSpacing - horizontalPadding) /
         albumsCountInCrossAxis;
+    final double gridItemTextHeight = _gridItemTextHeight(context);
 
     return SliverPadding(
       padding: EdgeInsets.only(
@@ -277,6 +294,20 @@ class _DeviceFolderVerticalGridViewBodyState
         itemCount: deviceCollections.length,
       ),
     );
+  }
+
+  double _gridItemTextHeight(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    return (_thumbnailToTextSpacing +
+            _scaledLineHeight(textScaler, TextStyles.body) +
+            _titleToSubtitleSpacing +
+            _scaledLineHeight(textScaler, TextStyles.mini))
+        .ceilToDouble();
+  }
+
+  double _scaledLineHeight(TextScaler textScaler, TextStyle style) {
+    final fontSize = style.fontSize ?? 14;
+    return textScaler.scale(fontSize) * (style.height ?? 1);
   }
 
   @override
