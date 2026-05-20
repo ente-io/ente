@@ -115,6 +115,10 @@ export const getUser = async (
     session: Pick<StaffSession, "token">,
     input: string,
 ) => {
+    if (!input.trim()) {
+        throw new Error("Enter an email or user ID");
+    }
+
     const response = await fetch(
         apiURL("/admin/user", userSearchQuery(input)),
         { headers: staffJSONRequestHeaders(session) },

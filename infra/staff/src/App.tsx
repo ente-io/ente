@@ -48,7 +48,6 @@ export const App: React.FC = () => {
         setLoading(true);
         setError("");
         setFetchSuccess(false);
-        const startTime = Date.now();
         try {
             const userSearchInput = input.trim();
             const userDetailsData = buildUserDetailsData(
@@ -56,21 +55,13 @@ export const App: React.FC = () => {
                 userSearchInput,
             );
             setSelectedUserEmail(userDetailsData.email);
-            const elapsedTime = Date.now() - startTime;
-            const delay = Math.max(3000 - elapsedTime, 0);
-            setTimeout(() => {
-                setLoading(false);
-                setFetchSuccess(true);
-                setUserData(userDetailsData);
-            }, delay);
+            setUserData(userDetailsData);
+            setFetchSuccess(true);
         } catch (error) {
             console.error("Error fetching data:", error);
-            const elapsedTime = Date.now() - startTime;
-            const delay = Math.max(3000 - elapsedTime, 0);
-            setTimeout(() => {
-                setLoading(false);
-                setError(fetchErrorMessage(error));
-            }, delay);
+            setError(fetchErrorMessage(error));
+        } finally {
+            setLoading(false);
         }
     }, []);
 
@@ -88,7 +79,7 @@ export const App: React.FC = () => {
     const handleKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
         if (event.key === "Enter") {
             event.preventDefault();
-            fetchData(selectedUserEmail, authToken).catch((error: unknown) =>
+            fetchData(searchInput, authToken).catch((error: unknown) =>
                 console.error("Fetch data error:", error),
             );
         }
@@ -117,16 +108,14 @@ export const App: React.FC = () => {
                             rel="noopener"
                             className="link-text"
                         >
-                            staff.ente.io
+                            Ente Staff
                         </a>
                         <div className="text-fields">
                             <TextField
                                 label="Email"
                                 value={searchInput}
                                 onChange={(e) => {
-                                    const email = e.target.value;
-                                    setSearchInput(email);
-                                    setSelectedUserEmail(email);
+                                    setSearchInput(e.target.value);
                                 }}
                                 size="medium"
                             />
@@ -135,14 +124,12 @@ export const App: React.FC = () => {
                             <Button
                                 variant="contained"
                                 onClick={() => {
-                                    fetchData(
-                                        selectedUserEmail,
-                                        authToken,
-                                    ).catch((error: unknown) =>
-                                        console.error(
-                                            "Fetch data error:",
-                                            error,
-                                        ),
+                                    fetchData(searchInput, authToken).catch(
+                                        (error: unknown) =>
+                                            console.error(
+                                                "Fetch data error:",
+                                                error,
+                                            ),
                                     );
                                 }}
                                 sx={{ px: 2 }}

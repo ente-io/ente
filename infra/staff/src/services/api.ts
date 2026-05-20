@@ -64,5 +64,5 @@ const responseErrorMessage = async (response: Response, fallback: string) => {
         return text;
     }
 
-    return text;
+    return fallback;
 };

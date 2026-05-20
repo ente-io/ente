@@ -17,7 +17,7 @@ import {
 import React, { useState } from "react";
 import { addOTT } from "../services/admin-user";
 import { useStaffSession } from "../services/session";
-import { microsecondsFromNow } from "../utils";
+import { dateFromMicroseconds, microsecondsFromNow } from "../utils";
 
 const APP_OPTIONS = [
     { label: "Photos", value: "photos" },
@@ -157,7 +157,7 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
                             </Select>
                         </FormControl>
                         <Typography variant="caption" color="text.secondary">
-                            Expiry (µs): {expiryPreview}
+                            Expires: {formatExpiryTime(expiryPreview)}
                         </Typography>
                         {error && (
                             <Alert severity="error" sx={{ mt: 2 }}>
@@ -184,6 +184,9 @@ export const AddOTT: React.FC<AddOTTProps> = ({ open, onClose, userEmail }) => {
 };
 
 const computeExpiryTimeMicros = () => microsecondsFromNow(7);
+
+const formatExpiryTime = (expiryTime: number) =>
+    dateFromMicroseconds(expiryTime).toLocaleString();
 
 const generateOTP = () => {
     const values = new Uint32Array(1);
