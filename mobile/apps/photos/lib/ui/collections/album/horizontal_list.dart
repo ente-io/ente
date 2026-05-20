@@ -111,12 +111,14 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: SizedBox(
-                    height: sideOfThumbnail + 46,
+                    height: sideOfThumbnail + 46 + horizontalPadding,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: allCollections.length,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: horizontalPadding / 2,
+                      padding: const EdgeInsets.only(
+                        left: horizontalPadding / 2,
+                        right: horizontalPadding / 2,
+                        top: horizontalPadding,
                       ),
                       itemBuilder: (context, index) {
                         final item = allCollections[index];

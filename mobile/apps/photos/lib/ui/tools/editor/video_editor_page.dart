@@ -144,7 +144,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
               _quarterTurnsForRotationCorrection != null;
 
           return Scaffold(
-            backgroundColor: colorScheme.backgroundBase,
+            backgroundColor: colorScheme.backgroundColour,
             appBar: VideoEditorAppBar(
               onCancel: () {
                 if (isExporting) return;

@@ -4,20 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/device_collection.dart';
 import "package:photos/service_locator.dart";
-import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/viewer/file/file_icons_widget.dart';
+import "package:photos/ui/components/collection_share_badge.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
 
-class DeviceFolderItem extends StatelessWidget {
+class DeviceFolderRowItem extends StatelessWidget {
   final DeviceCollection deviceCollection;
   final double sideOfThumbnail;
 
-  static const _cornerRadius = 12.0;
+  static const _cornerRadius = 20.0;
   static const _cornerSmoothing = 0.6;
-  static const _borderWidth = 1.0;
+  static const _overlayPadding = 8.0;
 
-  const DeviceFolderItem(
+  const DeviceFolderRowItem(
     this.deviceCollection, {
     ///120 is default for the 'on device' scrollview in albums section
     this.sideOfThumbnail = 120,
@@ -40,23 +39,12 @@ class DeviceFolderItem extends StatelessWidget {
               children: [
                 ClipSmoothRect(
                   radius: SmoothBorderRadius(
-                    cornerRadius: _cornerRadius + _borderWidth,
-                    cornerSmoothing: _cornerSmoothing,
-                  ),
-                  child: Container(
-                    color: getEnteColorScheme(context).strokeFaint,
-                    width: sideOfThumbnail,
-                    height: sideOfThumbnail,
-                  ),
-                ),
-                ClipSmoothRect(
-                  radius: SmoothBorderRadius(
                     cornerRadius: _cornerRadius,
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: SizedBox(
-                    height: sideOfThumbnail - _borderWidth * 2,
-                    width: sideOfThumbnail - _borderWidth * 2,
+                    height: sideOfThumbnail,
+                    width: sideOfThumbnail,
                     child: Hero(
                       tag: "device_folder:" +
                           deviceCollection.name +
@@ -74,7 +62,11 @@ class DeviceFolderItem extends StatelessWidget {
                             ),
                           ),
                           if (!isBackedUp && !isLocalGalleryMode)
-                            const UnSyncedIcon(),
+                            const Positioned(
+                              right: _overlayPadding,
+                              bottom: _overlayPadding,
+                              child: CollectionUnSyncedBadge(),
+                            ),
                         ],
                       ),
                     ),

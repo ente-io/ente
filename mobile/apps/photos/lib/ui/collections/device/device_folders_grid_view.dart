@@ -13,7 +13,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/collections/device/device_folder_item.dart";
+import "package:photos/ui/collections/device/device_folder_row_item.dart";
 import "package:photos/ui/common/backup_flow_helper.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
@@ -113,7 +113,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                             padding: const EdgeInsets.only(
                               right: horizontalPadding / 2,
                             ),
-                            child: DeviceFolderItem(
+                            child: DeviceFolderRowItem(
                               deviceCollection,
                               sideOfThumbnail: sideOfThumbnail,
                             ),

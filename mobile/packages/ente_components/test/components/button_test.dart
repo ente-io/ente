@@ -435,6 +435,30 @@ void main() {
     expect(tapCount, 1);
   });
 
+  testWidgets("IconButtonComponent can handle tap down without onTap", (
+    tester,
+  ) async {
+    TapDownDetails? tapDownDetails;
+
+    await tester.pumpWidget(
+      _wrap(
+        IconButtonComponent(
+          icon: const Icon(Icons.add),
+          onTapDown: (details) => tapDownDetails = details,
+        ),
+      ),
+    );
+
+    final surfaceFinder = find.byKey(const ValueKey('icon-button-surface'));
+    final gesture = await tester.startGesture(tester.getCenter(surfaceFinder));
+    await tester.pump();
+
+    expect(tapDownDetails, isNotNull);
+    expect(_iconButtonColor(tester), Colors.transparent);
+
+    await gesture.up();
+  });
+
   testWidgets("IconButtonComponent mutes disabled foreground", (tester) async {
     await tester.pumpWidget(
       _wrap(

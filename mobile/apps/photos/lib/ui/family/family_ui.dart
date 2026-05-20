@@ -5,9 +5,7 @@ import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/notification/toast.dart';
 
 Color familyPageBackgroundColor(BuildContext context) {
-  return Theme.of(context).brightness == Brightness.dark
-      ? const Color(0xFF161616)
-      : const Color(0xFFFAFAFA);
+  return getEnteColorScheme(context).backgroundColour;
 }
 
 class FamilyPageScaffold extends StatelessWidget {

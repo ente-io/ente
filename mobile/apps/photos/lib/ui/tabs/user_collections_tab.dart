@@ -64,7 +64,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     leading: true,
   );
 
-  static const int _kOnEnteItemLimitCount = 12;
   @override
   void initState() {
     super.initState();
@@ -120,17 +119,17 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   Widget build(BuildContext context) {
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
-    final bool localGalleryUiMode =
+    final bool localGalleryMode =
         isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
     return FutureBuilder<List<Collection>>(
-      future: localGalleryUiMode
+      future: localGalleryMode
           ? Future.value(<Collection>[])
           : CollectionsService.instance.getCollectionForOnEnteSection(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _getCollectionsGalleryWidget(
             snapshot.data!,
-            localGalleryUiMode: localGalleryUiMode,
+            localGalleryMode: localGalleryMode,
           );
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
@@ -143,7 +142,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
 
   Widget _getCollectionsGalleryWidget(
     List<Collection> collections, {
-    required bool localGalleryUiMode,
+    required bool localGalleryMode,
   }) {
     final TextStyle trashAndHiddenTextStyle =
         Theme.of(context).textTheme.titleMedium!.copyWith(
@@ -222,7 +221,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             const SliverToBoxAdapter(child: DeviceFoldersGridView()),
             SliverToBoxAdapter(
               child: SectionOptions(
-                onTap: localGalleryUiMode
+                onTap: localGalleryMode
                     ? null
                     : () {
                         unawaited(
@@ -239,7 +238,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         );
                       },
                 SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                trailingWidget: localGalleryUiMode
+                trailingWidget: localGalleryMode
                     ? null
                     : Row(
                         mainAxisSize: MainAxisSize.min,
@@ -274,19 +273,18 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               ),
             ),
             SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
-            localGalleryUiMode
+            localGalleryMode
                 ? const SliverToBoxAdapter(child: EmptyOnEnteSection())
                 : Configuration.instance.hasConfiguredAccount()
                     ? CollectionsFlexiGridViewWidget(
                         collections,
-                        displayLimitCount: _kOnEnteItemLimitCount,
                         selectedAlbums: widget.selectedAlbums,
                         shrinkWrap: true,
                         shouldShowCreateAlbum: true,
                         enableSelectionMode: true,
                       )
                     : const SliverToBoxAdapter(child: EmptyState()),
-            if (!localGalleryUiMode) ...[
+            if (!localGalleryMode) ...[
               SliverToBoxAdapter(
                 child: Divider(color: colorScheme.strokeFaint),
               ),

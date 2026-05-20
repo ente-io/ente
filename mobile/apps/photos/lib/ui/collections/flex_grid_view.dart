@@ -32,9 +32,8 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   static const maxThumbnailWidth = 224.0;
   static const crossAxisSpacing = 8.0;
   static const horizontalPadding = 16.0;
+  static const gridItemTextHeight = 48.0;
   final List<Collection>? collections;
-  // At max how many albums to display
-  final int displayLimitCount;
 
   // If true, the GridView will shrink-wrap its contents.
   final bool shrinkWrap;
@@ -44,13 +43,13 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   final bool enableSelectionMode;
   final bool shouldShowCreateAlbum;
   final SelectedAlbums? selectedAlbums;
-  final double scrollBottomSafeArea;
   final bool onlyAllowSelection;
   final UISectionType? sectionType;
+  final double topPadding;
+  final double bottomPadding;
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
-    this.displayLimitCount = 9,
     this.shrinkWrap = false,
     this.tag = "",
     this.enableSelectionMode = false,
@@ -58,9 +57,10 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
     this.albumViewType = AlbumViewType.grid,
     this.shouldShowCreateAlbum = false,
     this.selectedAlbums,
-    this.scrollBottomSafeArea = 8,
     this.onlyAllowSelection = false,
     this.sectionType,
+    this.topPadding = 16,
+    this.bottomPadding = 200,
   });
 
   @override
@@ -123,6 +123,46 @@ class _CollectionsFlexiGridViewWidgetState
     );
   }
 
+  Future<void> _createAlbum() async {
+    final result = await showTextInputDialog(
+      context,
+      title: AppLocalizations.of(context).newAlbum,
+      submitButtonLabel: AppLocalizations.of(context).create,
+      hintText: AppLocalizations.of(context).enterAlbumName,
+      alwaysShowSuccessState: false,
+      initialValue: "",
+      textCapitalization: TextCapitalization.words,
+      popnavAfterSubmission: false,
+      onSubmit: (String text) async {
+        text = text.trim();
+        if (text == "") {
+          return;
+        }
+
+        try {
+          final Collection c = await CollectionsService.instance.createAlbum(
+            text,
+          );
+          // ignore: unawaited_futures
+          await routeToPage(
+            context,
+            CollectionPage(CollectionWithThumbnail(c, null)),
+          );
+          Navigator.of(context).pop();
+        } catch (e, s) {
+          Logger(
+            "CollectionsFlexiGridViewWidget",
+          ).severe("Failed to create album", e, s);
+          rethrow;
+        }
+      },
+    );
+
+    if (result is Exception) {
+      await showGenericErrorDialog(context: context, error: result);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -159,19 +199,17 @@ class _CollectionsFlexiGridViewWidgetState
             totalCrossAxisSpacing -
             CollectionsFlexiGridViewWidget.horizontalPadding) /
         albumsCountInCrossAxis;
-
     final int totalCollections = widget.collections!.length;
     final bool showCreateAlbum = widget.shouldShowCreateAlbum;
-    final int totalItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
-    final int displayItemCount = min(totalItemCount, widget.displayLimitCount);
+    final int displayItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
 
     return SliverPadding(
       key: key,
       padding: EdgeInsets.only(
-        top: 8,
+        top: widget.topPadding,
         left: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
         right: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
-        bottom: widget.scrollBottomSafeArea,
+        bottom: widget.bottomPadding,
       ),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
@@ -209,9 +247,12 @@ class _CollectionsFlexiGridViewWidgetState
         ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInCrossAxis,
-          mainAxisSpacing: 8,
+          mainAxisSpacing: 24,
           crossAxisSpacing: CollectionsFlexiGridViewWidget.crossAxisSpacing,
-          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
+          childAspectRatio:
+              sideOfThumbnail /
+              (sideOfThumbnail +
+                  CollectionsFlexiGridViewWidget.gridItemTextHeight),
         ),
       ),
     );
@@ -221,8 +262,7 @@ class _CollectionsFlexiGridViewWidgetState
     final int totalCollections = widget.collections?.length ?? 0;
     final bool showCreateAlbum =
         widget.shouldShowCreateAlbum && !isAnyAlbumSelected;
-    final int totalItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
-    final int displayItemCount = min(totalItemCount, widget.displayLimitCount);
+    final int displayItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
     if (displayItemCount == 0) {
       return SliverToBoxAdapter(key: key, child: const SizedBox.shrink());
     }
@@ -230,10 +270,10 @@ class _CollectionsFlexiGridViewWidgetState
     return SliverPadding(
       key: key,
       padding: EdgeInsets.only(
-        top: 8,
+        top: widget.topPadding,
         left: 8,
         right: 8,
-        bottom: widget.scrollBottomSafeArea,
+        bottom: widget.bottomPadding,
       ),
       sliver: SliverPrototypeExtentList(
         prototypeItem: Padding(
@@ -253,54 +293,8 @@ class _CollectionsFlexiGridViewWidgetState
             Widget item;
 
             if (showCreateAlbum && index == 0) {
-              item = GestureDetector(
-                onTap: () async {
-                  GestureDetector(
-                    onTap: () async {
-                      final result = await showTextInputDialog(
-                        context,
-                        title: AppLocalizations.of(context).newAlbum,
-                        submitButtonLabel: AppLocalizations.of(context).create,
-                        hintText: AppLocalizations.of(context).enterAlbumName,
-                        alwaysShowSuccessState: false,
-                        initialValue: "",
-                        textCapitalization: TextCapitalization.words,
-                        popnavAfterSubmission: false,
-                        onSubmit: (String text) async {
-                          if (text.trim() == "") {
-                            return;
-                          }
-
-                          try {
-                            final Collection c = await CollectionsService
-                                .instance
-                                .createAlbum(text);
-                            // ignore: unawaited_futures
-                            await routeToPage(
-                              context,
-                              CollectionPage(CollectionWithThumbnail(c, null)),
-                            );
-                            Navigator.of(context).pop();
-                          } catch (e, s) {
-                            Logger(
-                              "CreateNewAlbumIcon",
-                            ).severe("Failed to rename album", e, s);
-                            rethrow;
-                          }
-                        },
-                      );
-
-                      if (result is Exception) {
-                        await showGenericErrorDialog(
-                          context: context,
-                          error: result,
-                        );
-                      }
-                    },
-                    child: const NewAlbumListItemWidget(),
-                  );
-                },
-                child: const NewAlbumListItemWidget(),
+              item = NewAlbumListItemWidget(
+                onTap: (_) => _createAlbum(),
               );
             } else {
               final collectionIndex = showCreateAlbum ? index - 1 : index;
