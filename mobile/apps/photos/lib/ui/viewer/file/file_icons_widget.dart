@@ -29,10 +29,7 @@ class UnSyncedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _BottomLeftOverlayIcon(
-      Icons.cloud_off_outlined,
-      baseSize: 18,
-    );
+    return const _BottomLeftOverlayIcon(Icons.cloud_off_outlined, baseSize: 18);
   }
 }
 
@@ -67,10 +64,7 @@ class FavoriteOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _BottomLeftOverlayIcon(
-      EnteIcons.favoriteFilled,
-      baseSize: 22,
-    );
+    return const _BottomLeftOverlayIcon(EnteIcons.favoriteFilled, baseSize: 22);
   }
 }
 
@@ -104,10 +98,7 @@ class LivePhotoOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _BottomRightOverlayIcon(
-      Icons.album_outlined,
-      baseSize: 18,
-    );
+    return const _BottomRightOverlayIcon(Icons.album_outlined, baseSize: 18);
   }
 }
 
@@ -197,7 +188,12 @@ class VideoOverlayDuration extends StatelessWidget {
 
 class OwnerAvatarOverlayIcon extends StatelessWidget {
   final User user;
-  const OwnerAvatarOverlayIcon(this.user, {super.key});
+  final AvatarType type;
+  const OwnerAvatarOverlayIcon(
+    this.user, {
+    super.key,
+    this.type = AvatarType.small,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -205,11 +201,7 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
       alignment: Alignment.topRight,
       child: Padding(
         padding: const EdgeInsets.only(right: 4, top: 4),
-        child: UserAvatarWidget(
-          user,
-          type: AvatarType.small,
-          thumbnailView: true,
-        ),
+        child: UserAvatarWidget(user, type: type, thumbnailView: true),
       ),
     );
   }
@@ -326,11 +318,7 @@ class _BottomLeftOverlayIcon extends StatelessWidget {
             alignment: Alignment.bottomLeft,
             child: Padding(
               padding: EdgeInsets.only(left: inset, bottom: inset),
-              child: Icon(
-                icon,
-                size: size,
-                color: color,
-              ),
+              child: Icon(icon, size: size, color: color),
             ),
           ),
         );
@@ -399,18 +387,10 @@ class _BottomRightOverlayIcon extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.only(bottom: inset, right: inset),
               child: rotationAngle == null
-                  ? Icon(
-                      icon,
-                      size: size,
-                      color: color,
-                    )
+                  ? Icon(icon, size: size, color: color)
                   : Transform.rotate(
                       angle: rotationAngle!, // rotate by 45 degrees
-                      child: Icon(
-                        icon,
-                        size: size,
-                        color: color,
-                      ),
+                      child: Icon(icon, size: size, color: color),
                     ),
             ),
           ),

@@ -23,6 +23,7 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import 'package:photos/ui/viewer/gallery/state/gallery_context_state.dart';
@@ -45,6 +46,7 @@ class ThumbnailWidget extends StatefulWidget {
   final int thumbnailSize;
   final bool useRequestedThumbnailSizeForLocalCache;
   final bool shouldShowOwnerAvatar;
+  final AvatarType ownerAvatarType;
   final bool shouldShowFavoriteIcon;
 
   ///On video thumbnails, shows the video duration if true. If false,
@@ -63,6 +65,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowPinIcon = false,
     this.showFavForAlbumOnly = false,
     this.shouldShowOwnerAvatar = false,
+    this.ownerAvatarType = AvatarType.small,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
     this.thumbnailSize = thumbnailSmallSize,
@@ -198,7 +201,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (widget.rawThumbnail) {
         return image;
       }
-      final shouldShowOwnerAvatar = widget.shouldShowOwnerAvatar &&
+      final shouldShowOwnerAvatar =
+          widget.shouldShowOwnerAvatar &&
           galleryContext?.galleryType != GalleryType.sharedPublicCollection;
       final List<Widget> contentChildren = [image];
       if (widget.shouldShowFavoriteIcon) {
@@ -221,12 +225,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
             widget.file.ownerID!,
             widget.file.collectionID,
           );
-          contentChildren.add(OwnerAvatarOverlayIcon(owner));
+          contentChildren.add(
+            OwnerAvatarOverlayIcon(owner, type: widget.ownerAvatarType),
+          );
         } else if (widget.file.isCollect) {
           contentChildren.add(
             // Use -1 as userID for enforcing black avatar color
             OwnerAvatarOverlayIcon(
               User(id: -1, email: '', name: widget.file.uploaderName),
+              type: widget.ownerAvatarType,
             ),
           );
         }
@@ -331,60 +338,62 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Future _getThumbnailFromDisk() async {
-    return _loadWithRetry().then((thumbData) async {
-      if (thumbData == null) {
-        if (widget.file.isUploaded) {
-          _logger.info("Removing localID reference for " + widget.file.tag);
-          widget.file.localID = null;
-          if (widget.file.isTrash) {
-            unawaited(TrashDB.instance.update(widget.file as TrashFile));
-          } else {
-            unawaited(FilesDB.instance.update(widget.file));
+    return _loadWithRetry()
+        .then((thumbData) async {
+          if (thumbData == null) {
+            if (widget.file.isUploaded) {
+              _logger.info("Removing localID reference for " + widget.file.tag);
+              widget.file.localID = null;
+              if (widget.file.isTrash) {
+                unawaited(TrashDB.instance.update(widget.file as TrashFile));
+              } else {
+                unawaited(FilesDB.instance.update(widget.file));
+              }
+              _loadNetworkImage();
+            } else {
+              if (await doesLocalFileExist(widget.file) == false) {
+                _logger.info("Deleting file " + widget.file.tag);
+                await FilesDB.instance.deleteLocalFile(widget.file);
+                Bus.instance.fire(
+                  LocalPhotosUpdatedEvent(
+                    [widget.file],
+                    type: EventType.deletedFromDevice,
+                    source: "thumbFileDeleted",
+                  ),
+                );
+              }
+            }
+            return;
           }
-          _loadNetworkImage();
-        } else {
-          if (await doesLocalFileExist(widget.file) == false) {
-            _logger.info("Deleting file " + widget.file.tag);
-            await FilesDB.instance.deleteLocalFile(widget.file);
-            Bus.instance.fire(
-              LocalPhotosUpdatedEvent(
-                [widget.file],
-                type: EventType.deletedFromDevice,
-                source: "thumbFileDeleted",
-              ),
+
+          if (mounted) {
+            final imageProvider = Image.memory(
+              thumbData,
+              cacheHeight: optimizedImageHeight,
+              cacheWidth: optimizedImageWidth,
+            ).image;
+            _cacheAndRender(imageProvider);
+          }
+          ThumbnailInMemoryLruCache.put(
+            widget.file,
+            thumbData,
+            _localCacheThumbnailSize,
+          );
+        })
+        .catchError((e) {
+          _errorLoadingLocalThumbnail = true;
+          if (e is WidgetUnmountedException) {
+            // Widget was unmounted - this is expected behavior
+            _logger.fine(
+              "Thumbnail loading cancelled: widget unmounted for localID: ${widget.file.localID}",
+            );
+          } else {
+            _logger.warning(
+              "Could not load thumbnail from disk for localID: ${widget.file.localID}",
+              e,
             );
           }
-        }
-        return;
-      }
-
-      if (mounted) {
-        final imageProvider = Image.memory(
-          thumbData,
-          cacheHeight: optimizedImageHeight,
-          cacheWidth: optimizedImageWidth,
-        ).image;
-        _cacheAndRender(imageProvider);
-      }
-      ThumbnailInMemoryLruCache.put(
-        widget.file,
-        thumbData,
-        _localCacheThumbnailSize,
-      );
-    }).catchError((e) {
-      _errorLoadingLocalThumbnail = true;
-      if (e is WidgetUnmountedException) {
-        // Widget was unmounted - this is expected behavior
-        _logger.fine(
-          "Thumbnail loading cancelled: widget unmounted for localID: ${widget.file.localID}",
-        );
-      } else {
-        _logger.warning(
-          "Could not load thumbnail from disk for localID: ${widget.file.localID}",
-          e,
-        );
-      }
-    });
+        });
   }
 
   Future<Uint8List?> _loadWithRetry() async {
