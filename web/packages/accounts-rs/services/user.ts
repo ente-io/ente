@@ -559,16 +559,21 @@ export interface EmailOrSRPVerificationResponse {
  *
  * See: [Note: Duplicated Zod schema and TypeScript type]
  */
-const RemoteEmailOrSRPVerificationResponse = z.object({
-    id: z.number(),
-    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
-    encryptedToken: z.string().nullish().transform(nullToUndefined),
-    token: z.string().nullish().transform(nullToUndefined),
-    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
-    passkeySessionID: z.string().nullish().transform(nullToUndefined),
-    accountsUrl: z.string().nullish().transform(nullToUndefined),
-    twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
-});
+const RemoteEmailOrSRPVerificationResponse = z
+    .object({
+        id: z.number(),
+        keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
+        encryptedToken: z.string().nullish().transform(nullToUndefined),
+        token: z.string().nullish().transform(nullToUndefined),
+        twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+        passkeySessionID: z.string().nullish().transform(nullToUndefined),
+        accountsUrl: z.string().nullish().transform(nullToUndefined),
+        twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
+    })
+    .refine((r) => (r.passkeySessionID ? !!r.accountsUrl : true), {
+        path: ["accountsUrl"],
+        message: "accountsUrl is required when passkeySessionID is present",
+    });
 
 /**
  * A specialization of {@link RemoteEmailOrSRPVerificationResponse} for SRP
