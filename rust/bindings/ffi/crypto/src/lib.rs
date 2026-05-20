@@ -1,5 +1,6 @@
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int};
+use std::panic::{self, AssertUnwindSafe};
 use std::ptr;
 
 use ente_core::crypto;
@@ -30,11 +31,16 @@ fn write_error(out_error: *mut *mut c_char, message: impl Into<String>) {
 fn run_ffi(out_error: *mut *mut c_char, f: impl FnOnce() -> Result<(), String>) -> c_int {
     clear_error(out_error);
 
-    if let Err(message) = f() {
-        write_error(out_error, message);
-        STATUS_ERROR
-    } else {
-        STATUS_OK
+    match panic::catch_unwind(AssertUnwindSafe(f)) {
+        Ok(Ok(())) => STATUS_OK,
+        Ok(Err(message)) => {
+            write_error(out_error, message);
+            STATUS_ERROR
+        }
+        Err(_) => {
+            write_error(out_error, "panic in Rust crypto FFI");
+            STATUS_ERROR
+        }
     }
 }
 
