@@ -283,6 +283,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                 style: TextStyles.mini.copyWith(
                                   color: componentColors.textLight,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           );

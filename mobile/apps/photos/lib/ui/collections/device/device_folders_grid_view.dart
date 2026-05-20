@@ -41,26 +41,29 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   static const maxThumbnailWidth = 224.0;
   static const horizontalPadding = 16.0;
   static const crossAxisSpacing = 8.0;
+  static const gridItemTextHeight = 48.0;
 
   @override
   void initState() {
     super.initState();
-    _backupFoldersUpdatedEvent =
-        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
-      _loadReason = event.reason;
-      if (mounted) {
-        setState(() {});
-      }
-    });
-    _localFilesSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _debouncer.run(() async {
-        if (mounted) {
+    _backupFoldersUpdatedEvent = Bus.instance
+        .on<BackupFoldersUpdatedEvent>()
+        .listen((event) {
           _loadReason = event.reason;
-          setState(() {});
-        }
-      });
-    });
+          if (mounted) {
+            setState(() {});
+          }
+        });
+    _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen(
+      (event) {
+        _debouncer.run(() async {
+          if (mounted) {
+            _loadReason = event.reason;
+            setState(() {});
+          }
+        });
+      },
+    );
   }
 
   @override
@@ -72,7 +75,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
         (albumsCountInCrossAxis - 1) * crossAxisSpacing;
     final double sideOfThumbnail =
         (screenWidth - totalCrossAxisSpacing - horizontalPadding) /
-            albumsCountInCrossAxis;
+        albumsCountInCrossAxis;
 
     debugPrint("${(DeviceFoldersGridView).toString()} - $_loadReason");
 
@@ -86,12 +89,13 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
     }
 
     return SizedBox(
-      height: sideOfThumbnail + 46,
+      height: sideOfThumbnail + gridItemTextHeight,
       child: Align(
         alignment: Alignment.centerLeft,
         child: FutureBuilder<List<DeviceCollection>>(
-          future: FilesDB.instance
-              .getDeviceCollections(includeCoverThumbnail: true),
+          future: FilesDB.instance.getDeviceCollections(
+            includeCoverThumbnail: true,
+          ),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return snapshot.data!.isEmpty
