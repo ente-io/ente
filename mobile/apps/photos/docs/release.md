@@ -30,3 +30,12 @@ Set "Previous tag" to the last release of auth and press "Generate release
 notes". The generated release note will contain all PRs and new contributors
 from all the releases in the monorepo, so you'll need to filter them to keep
 only the things that relate to the Photos mobile app.
+
+## F-Droid
+
+For F-Droid, create an `fdroid-v` tag with the same pubspec version.
+
+```sh
+./scripts/create_tag.sh fdroid-v1.2.3
+git push origin fdroid-v1.2.3
+```
