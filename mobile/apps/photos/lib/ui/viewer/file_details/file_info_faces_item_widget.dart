@@ -88,8 +88,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           _remainingFaces = result.remainingFaces;
           _manualPersons = result.manualPersons;
           _errorReason = result.errorReason;
-          _selectedFaceIDs
-              .removeWhere((faceID) => !currentFaceIDs.contains(faceID));
+          _selectedFaceIDs.removeWhere(
+            (faceID) => !currentFaceIDs.contains(faceID),
+          );
           if (!isRefresh) {
             _isLoading = false;
           }
@@ -343,7 +344,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
   Widget _buildNoFacesWidget() {
     final reason = _errorReason ?? NoFacesReason.noFacesFound;
-    final showManualTagOption = !isLocalGalleryMode &&
+    final showManualTagOption =
+        !isLocalGalleryMode &&
         flagService.manualTagFileToPerson &&
         reason == NoFacesReason.noFacesFound;
     final label = showManualTagOption
@@ -467,8 +469,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                     child: Text(
                       AppLocalizations.of(context).done,
                       style: getEnteTextTheme(context).small.copyWith(
-                            color: getEnteColorScheme(context).primary500,
-                          ),
+                        color: getEnteColorScheme(context).primary500,
+                      ),
                     ),
                   ),
                 ),
@@ -539,18 +541,29 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
     if (result?.action != ButtonAction.first) return;
 
-    final mlDataDB =
-        isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+    final mlDataDB = isLocalGalleryMode
+        ? MLDataDB.localGalleryInstance
+        : MLDataDB.instance;
     final faceIDToNewClusterID = <String, String>{};
     final createdPersonIDs = <String>[];
+
     try {
       final clusterIDs = <String>{};
-      for (final f in selectedFaces) {
-        var clusterID =
-            f.clusterID ?? await mlDataDB.getClusterIDForFaceID(f.face.faceID);
+
+      final faceIdToClusterIdResults = await Future.wait(
+        selectedFaces.map((f) async {
+          final clusterID =
+              f.clusterID ??
+              await mlDataDB.getClusterIDForFaceID(f.face.faceID);
+          return MapEntry(f.face.faceID, clusterID);
+        }),
+      );
+
+      for (final entry in faceIdToClusterIdResults) {
+        var clusterID = entry.value;
         if (clusterID == null) {
           clusterID = newClusterID();
-          faceIDToNewClusterID[f.face.faceID] = clusterID;
+          faceIDToNewClusterID[entry.key] = clusterID;
         }
         clusterIDs.add(clusterID);
       }
@@ -559,24 +572,26 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         await mlDataDB.updateFaceIdToClusterId(faceIDToNewClusterID);
       }
 
-      for (final clusterID in clusterIDs) {
-        try {
-          final ignoredPerson = await PersonService.instance.addPerson(
-            name: '',
-            clusterID: clusterID,
-            isHidden: true,
-          );
-          createdPersonIDs.add(ignoredPerson.remoteID);
-          // Try automatic merges for the ignored person but avoid firing events per cluster
-          await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(
-            ignoredPerson,
-            personClusterID: clusterID,
-            firePeopleChangedEvent: false,
-          );
-        } catch (e, s) {
-          _logger.warning('Error ignoring cluster $clusterID', e, s);
-        }
-      }
+      await Future.wait(
+        clusterIDs.map((clusterID) async {
+          try {
+            final ignoredPerson = await PersonService.instance.addPerson(
+              name: '',
+              clusterID: clusterID,
+              isHidden: true,
+            );
+            createdPersonIDs.add(ignoredPerson.remoteID);
+            // Try automatic merges for the ignored person but avoid firing events per cluster
+            await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(
+              ignoredPerson,
+              personClusterID: clusterID,
+              firePeopleChangedEvent: false,
+            );
+          } catch (e, s) {
+            _logger.warning('Error ignoring cluster $clusterID', e, s);
+          }
+        }),
+      );
 
       // Fire a single people changed event and reload faces
       Bus.instance.fire(PeopleChangedEvent());
@@ -621,8 +636,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ? <String, PersonEntity>{}
         : await PersonService.instance.getPersonsMap();
 
-    final mlDataDB =
-        isLocalGallery ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+    final mlDataDB = isLocalGallery
+        ? MLDataDB.localGalleryInstance
+        : MLDataDB.instance;
     final faces = await mlDataDB.getFacesForGivenFileID(fileKey);
 
     if (faces == null) {
@@ -633,8 +649,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         defaultFaces: [],
         remainingFaces: [],
         manualPersons: manualPersons,
-        errorReason:
-            manualPersons.isEmpty ? NoFacesReason.fileNotAnalyzed : null,
+        errorReason: manualPersons.isEmpty
+            ? NoFacesReason.fileNotAnalyzed
+            : null,
       );
     }
 
@@ -737,11 +754,11 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   void _toggleEditMode() => setState(() {
-        _isEditMode = !_isEditMode;
-        if (!_isEditMode) {
-          _selectedFaceIDs.clear();
-        }
-      });
+    _isEditMode = !_isEditMode;
+    if (!_isEditMode) {
+      _selectedFaceIDs.clear();
+    }
+  });
 
   void _toggleRemainingFaces() =>
       setState(() => _showRemainingFaces = !_showRemainingFaces);
@@ -756,15 +773,15 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     if (namedPersons != null && namedPersons.isEmpty) {
       return;
     }
-    final result =
-        await Navigator.of(context).push<ManualPersonAssignmentResult>(
-      MaterialPageRoute(
-        builder: (context) => AddFilesToPersonPage(
-          files: [widget.file],
-          initialPersons: namedPersons,
-        ),
-      ),
-    );
+    final result = await Navigator.of(context)
+        .push<ManualPersonAssignmentResult>(
+          MaterialPageRoute(
+            builder: (context) => AddFilesToPersonPage(
+              files: [widget.file],
+              initialPersons: namedPersons,
+            ),
+          ),
+        );
     if (result != null) {
       await loadFaces(isRefresh: true);
     }

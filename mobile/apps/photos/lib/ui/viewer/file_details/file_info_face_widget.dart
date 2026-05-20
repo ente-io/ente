@@ -83,10 +83,10 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
               onTap: isSelectionMode
                   ? widget.onSelected
                   : isEditMode
-                      ? hasPerson
-                          ? _onMinusIconTap
-                          : (isLocalGalleryMode ? null : _onPlusIconTap)
-                      : _routeToPersonOrClusterPage,
+                  ? hasPerson
+                        ? _onMinusIconTap
+                        : (isLocalGalleryMode ? null : _onPlusIconTap)
+                  : _routeToPersonOrClusterPage,
               onLongPress: isEditMode && !isSelectionMode
                   ? widget.onLongPressSelected
                   : null,
@@ -208,8 +208,9 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
   }
 
   Future<void> _routeToPersonOrClusterPage() async {
-    final mlDataDB =
-        isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+    final mlDataDB = isLocalGalleryMode
+        ? MLDataDB.localGalleryInstance
+        : MLDataDB.instance;
     if (!isLocalGalleryMode && widget.person != null) {
       await Navigator.of(context).push(
         MaterialPageRoute(
@@ -219,7 +220,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
       );
       return;
     }
-    final String? clusterID = widget.clusterID ??
+    final String? clusterID =
+        widget.clusterID ??
         await mlDataDB.getClusterIDForFaceID(widget.face.faceID);
     if (clusterID != null) {
       final fileIdsToClusterIds = await mlDataDB.getFileIdToClusterIds();
@@ -293,11 +295,11 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
 
   Future<void> _onPlusIconTap() async {
     try {
-      final newClusterIDValue =
-          await ClusterFeedbackService.instance.removeFaceFromCluster(
-        faceID: widget.face.faceID,
-        clusterID: widget.clusterID,
-      );
+      final newClusterIDValue = await ClusterFeedbackService.instance
+          .removeFaceFromCluster(
+            faceID: widget.face.faceID,
+            clusterID: widget.clusterID,
+          );
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => SaveOrEditPerson(
