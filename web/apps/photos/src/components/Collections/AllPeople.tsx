@@ -109,6 +109,10 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
         (CGroupPerson | ClusterPerson)[]
     >([]);
 
+    const clearMultiSelectedPeople = useCallback(
+        () => setMultiSelectedPeople([]),
+        [],
+    );
     const toggleMultiSelectPerson = useCallback(
         (person: CGroupPerson | ClusterPerson) => {
             if (multiSelectedPeople.find((p) => p.id === person.id)) {
@@ -230,6 +234,7 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
                     peopleSortBy={peopleSortBy}
                     onChangePeopleSortBy={onChangePeopleSortBy}
                     multiSelectedPeople={multiSelectedPeople}
+                    clearMultiSelectedPeople={clearMultiSelectedPeople}
                 />
                 <Divider />
                 <AllPeopleContent
@@ -335,6 +340,7 @@ type TitleProps = {
     peopleSortBy: PeopleSortBy;
     onChangePeopleSortBy: (by: PeopleSortBy) => void;
     multiSelectedPeople: (CGroupPerson | ClusterPerson)[];
+    clearMultiSelectedPeople: () => void;
 } & Pick<AllPeopleProps, "onClose">;
 
 const Title: React.FC<TitleProps> = ({
@@ -346,6 +352,7 @@ const Title: React.FC<TitleProps> = ({
     peopleSortBy,
     onChangePeopleSortBy,
     multiSelectedPeople,
+    clearMultiSelectedPeople,
 }) => {
     const multiSelectedClusterPeople = useMemo(
         () => multiSelectedPeople.filter((p) => p.type === "cluster"),
@@ -377,10 +384,11 @@ const Title: React.FC<TitleProps> = ({
                             ignoreCluster(person.cluster),
                         ),
                     );
+                    clearMultiSelectedPeople();
                 },
             },
         });
-    }, [multiSelectedClusterPeople, showMiniDialog]);
+    }, [multiSelectedClusterPeople, clearMultiSelectedPeople, showMiniDialog]);
 
     const handleResetMultiSelectedCGroupPersons = useCallback(() => {
         showMiniDialog({
@@ -401,10 +409,11 @@ const Title: React.FC<TitleProps> = ({
                             deleteCGroup(person.cgroup),
                         ),
                     );
+                    clearMultiSelectedPeople();
                 },
             },
         });
-    }, [multiSelectedCGroupPeople, showMiniDialog]);
+    }, [multiSelectedCGroupPeople, clearMultiSelectedPeople, showMiniDialog]);
 
     return (
         <DialogTitle>
