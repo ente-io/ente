@@ -81,13 +81,13 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
           children: [
             GestureDetector(
               onTap: isSelectionMode
-                  ? widget.onSelected
+                  ? (hasPerson ? null : widget.onSelected)
                   : isEditMode
                   ? hasPerson
                         ? _onMinusIconTap
                         : (isLocalGalleryMode ? null : _onPlusIconTap)
                   : _routeToPersonOrClusterPage,
-              onLongPress: isEditMode && !isSelectionMode
+              onLongPress: isEditMode && !isSelectionMode && !hasPerson
                   ? widget.onLongPressSelected
                   : null,
               child: Container(
