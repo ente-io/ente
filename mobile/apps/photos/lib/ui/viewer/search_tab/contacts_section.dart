@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
@@ -41,10 +42,12 @@ class _ContactsSectionState extends State<ContactsSection> {
       streamSubscriptions.add(
         stream.listen((event) async {
           _debouncer.run(() async {
-            _contactSearchResults = (await SectionType.contacts.getData(
-              context,
-              limit: kSearchSectionLimit,
-            )) as List<GenericSearchResult>;
+            _contactSearchResults =
+                (await SectionType.contacts.getData(
+                      context,
+                      limit: kSearchSectionLimit,
+                    ))
+                    as List<GenericSearchResult>;
             setState(() {});
           });
         }),
@@ -81,7 +84,9 @@ class _ContactsSectionState extends State<ContactsSection> {
                 children: [
                   Text(
                     SectionType.contacts.sectionTitle(context),
-                    style: textTheme.largeBold,
+                    style: TextStyles.h2.copyWith(
+                      color: textTheme.largeBold.color,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Padding(
@@ -180,8 +185,10 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
             minWidth: 100,
           ),
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 4.25, vertical: 10.5),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 4.25,
+              vertical: 10.5,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -241,8 +248,10 @@ class ContactCTA extends StatelessWidget {
             minWidth: 100,
           ),
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 4.25, vertical: 10.5),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 4.25,
+              vertical: 10.5,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

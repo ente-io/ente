@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -50,8 +51,9 @@ class FeedNavigationTarget {
     }
     final collectionID = int.tryParse(collectionRaw);
     if (collectionID == null) {
-      _logger
-          .warning("Invalid feed URI: invalid collectionID '$collectionRaw'");
+      _logger.warning(
+        "Invalid feed URI: invalid collectionID '$collectionRaw'",
+      );
       return null;
     }
     FeedItemType type;
@@ -66,8 +68,9 @@ class FeedNavigationTarget {
         ? int.tryParse(fileIDRaw)
         : null;
     final commentIDRaw = uri.queryParameters['commentID'];
-    final commentID =
-        commentIDRaw != null && commentIDRaw.isNotEmpty ? commentIDRaw : null;
+    final commentID = commentIDRaw != null && commentIDRaw.isNotEmpty
+        ? commentIDRaw
+        : null;
     return FeedNavigationTarget(
       type: type,
       collectionID: collectionID,
@@ -129,8 +132,9 @@ class _FeedScreenState extends State<FeedScreen> {
     if (widget.showBackButton) {
       _activateFeed();
     } else {
-      _tabChangedEventSubscription =
-          Bus.instance.on<TabChangedEvent>().listen((event) {
+      _tabChangedEventSubscription = Bus.instance.on<TabChangedEvent>().listen((
+        event,
+      ) {
         if (event.selectedIndex == _kFeedTabIndex) {
           _activateFeed();
         }
@@ -217,8 +221,8 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<void> _syncAndRefresh() async {
     try {
-      final hasNewSocialData =
-          await FeedDataProvider.instance.syncAllSharedCollections();
+      final hasNewSocialData = await FeedDataProvider.instance
+          .syncAllSharedCollections();
 
       if (!mounted) return;
       if (!hasNewSocialData) return;
@@ -235,7 +239,8 @@ class _FeedScreenState extends State<FeedScreen> {
         setState(() {
           _feedItems = freshItems;
           _anonDisplayNamesByCollection = freshAnonNames;
-          _hasMore = _currentLimit < _kMaxFeedLimit &&
+          _hasMore =
+              _currentLimit < _kMaxFeedLimit &&
               freshItems.length >= _currentLimit;
         });
       }
@@ -366,8 +371,9 @@ class _FeedScreenState extends State<FeedScreen> {
     }
     var fileID = target.fileID;
     if (fileID == null && target.commentID != null) {
-      final comment =
-          await SocialDataProvider.instance.getCommentById(target.commentID!);
+      final comment = await SocialDataProvider.instance.getCommentById(
+        target.commentID!,
+      );
       fileID = comment?.fileID;
     }
     if (fileID == null) return false;
@@ -570,91 +576,95 @@ class _FeedScreenState extends State<FeedScreen> {
                 AppLocalizations.of(context).feed,
                 style: widget.showBackButton
                     ? textTheme.bodyBold
-                    : textTheme.h4Bold,
+                    : TextStyles.h1Bold.copyWith(
+                        color: textTheme.h4Bold.color,
+                      ),
               ),
       ),
       body: _isLoading
           ? const Center(child: EnteLoadingWidget(size: 24))
           : _feedItems.isEmpty
-              ? FeedEmptyState(
-                  localGalleryMode: isLocalGalleryMode &&
-                      !Configuration.instance.hasConfiguredAccount(),
-                )
-              : RefreshIndicator(
-                  onRefresh: _onRefresh,
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: EdgeInsets.only(
-                      left: 15,
-                      right: 15,
-                      bottom: MediaQuery.paddingOf(context).bottom +
-                          (widget.showBackButton ? 0 : 88),
-                    ),
-                    itemCount: _feedItems.length + (_isLoadingMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index >= _feedItems.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: EnteLoadingWidget(size: 20),
-                          ),
-                        );
-                      }
-                      final item = _feedItems[index];
-                      final isLastItem = index == _feedItems.length - 1;
-                      final itemKey = _feedItemStableKey(item);
-                      final heroTagPrefix = _heroTagPrefixForFeedItem(item);
-                      final isForwardHeroSuppressed =
-                          _suppressedForwardHeroPrefixes.contains(
+          ? FeedEmptyState(
+              localGalleryMode:
+                  isLocalGalleryMode &&
+                  !Configuration.instance.hasConfiguredAccount(),
+            )
+          : RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: EdgeInsets.only(
+                  left: 15,
+                  right: 15,
+                  bottom:
+                      MediaQuery.paddingOf(context).bottom +
+                      (widget.showBackButton ? 0 : 88),
+                ),
+                itemCount: _feedItems.length + (_isLoadingMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index >= _feedItems.length) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: EnteLoadingWidget(size: 20),
+                      ),
+                    );
+                  }
+                  final item = _feedItems[index];
+                  final isLastItem = index == _feedItems.length - 1;
+                  final itemKey = _feedItemStableKey(item);
+                  final heroTagPrefix = _heroTagPrefixForFeedItem(item);
+                  final isForwardHeroSuppressed = _suppressedForwardHeroPrefixes
+                      .contains(
                         heroTagPrefix,
                       );
-                      final key = _shouldUseNavigationTargetKey(item)
-                          ? _navigationTargetItemKey
-                          : ValueKey(itemKey);
-                      return FeedItemWidget(
-                        key: key,
-                        feedItem: item,
-                        heroTagPrefix: heroTagPrefix,
-                        enableThumbnailHero: !isForwardHeroSuppressed,
-                        currentUserID: _currentUserID,
-                        anonDisplayNames:
-                            _anonDisplayNamesByCollection[item.collectionID] ??
-                                const {},
-                        isLastItem: isLastItem,
-                        onTap: () => _handleFeedItemTap(
-                          item,
-                          heroTagPrefix: heroTagPrefix,
-                        ),
-                        onSharedHeaderTap: () => _openSharedCollection(
-                          item,
-                          heroTagPrefix: heroTagPrefix,
-                          jumpToFileID: _jumpFileIDForSharedCollection(
-                            type: item.type,
-                            sharedFileIDs: item.sharedFileIDs,
-                          ),
-                        ),
-                        onSharedPhotoTap: (fileID) => _openSharedPhotos(
-                          item,
-                          initialFileID: fileID,
-                          heroTagPrefix: heroTagPrefix,
-                        ),
-                        onSharedExtraCountTap: () => _openSharedCollection(
-                          item,
-                          jumpToFileID: _jumpFileIDForSharedCollection(
-                            type: item.type,
-                            sharedFileIDs: item.sharedFileIDs,
-                          ),
-                        ),
-                        onPrimaryActorTap: (user) =>
-                            openSocialActorContactDestination(
+                  final key = _shouldUseNavigationTargetKey(item)
+                      ? _navigationTargetItemKey
+                      : ValueKey(itemKey);
+                  return FeedItemWidget(
+                    key: key,
+                    feedItem: item,
+                    heroTagPrefix: heroTagPrefix,
+                    enableThumbnailHero: !isForwardHeroSuppressed,
+                    currentUserID: _currentUserID,
+                    anonDisplayNames:
+                        _anonDisplayNamesByCollection[item.collectionID] ??
+                        const {},
+                    isLastItem: isLastItem,
+                    onTap: () => _handleFeedItemTap(
+                      item,
+                      heroTagPrefix: heroTagPrefix,
+                    ),
+                    onSharedHeaderTap: () => _openSharedCollection(
+                      item,
+                      heroTagPrefix: heroTagPrefix,
+                      jumpToFileID: _jumpFileIDForSharedCollection(
+                        type: item.type,
+                        sharedFileIDs: item.sharedFileIDs,
+                      ),
+                    ),
+                    onSharedPhotoTap: (fileID) => _openSharedPhotos(
+                      item,
+                      initialFileID: fileID,
+                      heroTagPrefix: heroTagPrefix,
+                    ),
+                    onSharedExtraCountTap: () => _openSharedCollection(
+                      item,
+                      jumpToFileID: _jumpFileIDForSharedCollection(
+                        type: item.type,
+                        sharedFileIDs: item.sharedFileIDs,
+                      ),
+                    ),
+                    onPrimaryActorTap: (user) =>
+                        openSocialActorContactDestination(
                           context,
                           user,
                           currentUserID: _currentUserID,
                         ),
-                      );
-                    },
-                  ),
-                ),
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -771,13 +781,15 @@ class _FeedScreenState extends State<FeedScreen> {
     var fileID = item.fileID;
 
     if (fileID == null && item.commentID != null) {
-      final comment =
-          await SocialDataProvider.instance.getCommentById(item.commentID!);
+      final comment = await SocialDataProvider.instance.getCommentById(
+        item.commentID!,
+      );
       fileID = comment?.fileID;
     }
 
     if (fileID == null) return;
-    final shouldDisableForwardHero = disableForwardHero &&
+    final shouldDisableForwardHero =
+        disableForwardHero &&
         heroTagPrefix != null &&
         !_suppressedForwardHeroPrefixes.contains(heroTagPrefix);
 
@@ -834,8 +846,9 @@ class _FeedScreenState extends State<FeedScreen> {
     var fileID = item.fileID;
 
     if (fileID == null && item.commentID != null) {
-      final comment =
-          await SocialDataProvider.instance.getCommentById(item.commentID!);
+      final comment = await SocialDataProvider.instance.getCommentById(
+        item.commentID!,
+      );
       fileID = comment?.fileID;
     }
 
@@ -882,8 +895,9 @@ class _FeedScreenState extends State<FeedScreen> {
 
     var initialIndex = 0;
     if (initialFileID != null) {
-      final tappedIndex =
-          files.indexWhere((file) => file.uploadedFileID == initialFileID);
+      final tappedIndex = files.indexWhere(
+        (file) => file.uploadedFileID == initialFileID,
+      );
       if (tappedIndex >= 0) {
         initialIndex = tappedIndex;
       }
