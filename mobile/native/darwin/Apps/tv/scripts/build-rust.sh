@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eu
 
+# This script is invoked from Xcode's "Run Script" build phase.
+# It builds the Rust crypto static lib for the current tvOS target.
+
 REPO_ROOT=$(cd "$SRCROOT/../../../../.." && pwd)
 OUT_DIR="$TARGET_TEMP_DIR/ente_crypto_rust"
 LIB=libente_crypto_ffi.a
@@ -8,6 +11,13 @@ LIB=libente_crypto_ffi.a
 export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 mkdir -p "$OUT_DIR"
+
+# Rust supports tvOS targets, but rustup does not ship precompiled std for them.
+# Building std from source requires nightly and rust-src.
+rustup toolchain list | grep -q '^nightly-' \
+    || rustup toolchain install nightly --profile minimal
+rustup component list --toolchain nightly --installed | grep -qx rust-src \
+    || rustup component add rust-src --toolchain nightly
 
 case "${CONFIGURATION:-Debug}" in
     Release) profile=release; release_flag=--release ;;
@@ -26,16 +36,12 @@ for arch in $ARCHS; do
         *) echo "unsupported arch: $PLATFORM_NAME/$arch" >&2; exit 1 ;;
     esac
 
-    rustflags="-C linker=$clang -C link-arg=-isysroot -C link-arg=$sdk"
-    if [ -n "${TVOS_DEPLOYMENT_TARGET:-}" ]; then
-        rustflags="$rustflags -C link-arg=$min_flag=$TVOS_DEPLOYMENT_TARGET"
-    fi
+    rustflags="-C linker=$clang -C link-arg=-isysroot -C link-arg=$sdk -C link-arg=$min_flag=$TVOS_DEPLOYMENT_TARGET"
 
     (
         cd "$REPO_ROOT/rust"
         CC="$clang" \
             CFLAGS="-isysroot $sdk" \
-            CARGO_TARGET_DIR="$REPO_ROOT/rust/target" \
             RUSTFLAGS="$rustflags" \
             cargo +nightly build -Z build-std --locked -p ente_crypto_ffi --target "$target" $release_flag
     )
