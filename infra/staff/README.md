@@ -16,7 +16,7 @@ Run the dev server:
 npm run dev
 ```
 
-By default, the app talks to `https://api.ente.io`. To point it at a local API:
+By default, the app talks to `https://api.ente.com`. To point it at a local API:
 
 ```sh
 VITE_ENTE_API_ORIGIN=http://localhost:8080 npm run dev

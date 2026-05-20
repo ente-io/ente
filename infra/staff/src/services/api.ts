@@ -1,7 +1,7 @@
 import type { StaffSession } from "./session";
 
 export const apiOrigin =
-    import.meta.env.VITE_ENTE_API_ORIGIN ?? "https://api.ente.io";
+    import.meta.env.VITE_ENTE_API_ORIGIN ?? "https://api.ente.com";
 
 type QueryParamValue = string | number | boolean;
 
