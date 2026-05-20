@@ -298,7 +298,7 @@ If Ente isn't picking these up:
 
 ### Can I pick photos from Ente in other apps? {#pick-photos-in-other-apps}
 
-On supported Android apps, yes. If an app such as WhatsApp or Signal opens the system photo picker, you can choose Ente Photos as the source and select photos or videos from your Ente library.
+On supported Android apps, yes. If an app (such as WhatsApp) opens the system photo picker, you can choose Ente Photos as the source and select photos or videos from your Ente library.
 
 A few details to keep in mind:
 
