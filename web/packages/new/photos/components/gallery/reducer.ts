@@ -1301,6 +1301,9 @@ const deriveFavoriteFileIDs = (
 ) => {
     let favoriteFileIDs = new Set<number>();
     let favoriteFileHashAndTypeKeys = new Set<string>();
+
+    // Find the user's Favorites collection and derive both the concrete
+    // favorite file IDs and the hash/type keys used to match shared copies.
     for (const collection of collections) {
         // See: [Note: User and shared favorites]
         if (collection.type == "favorites" && collection.owner.id == user.id) {
@@ -1317,6 +1320,9 @@ const deriveFavoriteFileIDs = (
             break;
         }
     }
+    // A shared file has a different ID from the user-owned copy in Favorites.
+    // If its hash/type key matches a favorite entry, mark the visible shared
+    // file ID as favorite so the UI can show the star in shared albums.
     for (const file of collectionFiles) {
         if (file.ownerID == user.id) continue;
 
@@ -1325,6 +1331,10 @@ const deriveFavoriteFileIDs = (
             favoriteFileIDs.add(file.id);
         }
     }
+
+    // Apply favorite changes that have succeeded on remote but have not been
+    // pulled into local collectionFiles yet. Hash/type updates apply to every
+    // matching shared file; ID-based updates apply only to the clicked file.
     for (const update of unsyncedFavoriteUpdates.values()) {
         const updatedFileIDs = update.fileHashAndTypeKey
             ? collectionFiles
@@ -1344,6 +1354,14 @@ const deriveFavoriteFileIDs = (
     return favoriteFileIDs;
 };
 
+/**
+ * Earlier the UnsyncedFavoriteUpdate was just an fileID
+ * because we only had the option to favorite the owner files.
+ * Now we can favorite the non-owned files as well.
+ *
+ * For which we need to do a fileHashAndTypeKey matching
+ * therefore this new interface.
+ */
 interface UnsyncedFavoriteUpdate {
     fileID: number;
     fileHashAndTypeKey?: string;
