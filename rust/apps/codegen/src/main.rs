@@ -6,6 +6,9 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use camino::Utf8PathBuf;
+use lib_flutter_rust_bridge_codegen::codegen::{
+    self as frb_codegen, Config as FrbConfig, MetaConfig as FrbMetaConfig,
+};
 use uniffi_bindgen::bindings::{self, GenerateOptions, TargetLanguage};
 
 type DynError = Box<dyn Error>;
@@ -31,10 +34,17 @@ fn main() {
 fn run() -> Result<(), DynError> {
     let mut args = env::args().skip(1);
     match (args.next().as_deref(), args.next()) {
+        (Some("ensu"), None) => generate_ensu(),
         (Some("ensu-ios"), None) => generate_ensu_ios(),
         (Some("ensu-android"), None) => generate_ensu_android(),
-        _ => Err("usage: cargo codegen <ensu-ios|ensu-android>".into()),
+        (Some("frb"), None) => generate_frb(),
+        _ => Err("usage: cargo codegen <ensu|ensu-ios|ensu-android|frb>".into()),
     }
+}
+
+fn generate_ensu() -> Result<(), DynError> {
+    generate_ensu_ios()?;
+    generate_ensu_android()
 }
 
 fn generate_ensu_ios() -> Result<(), DynError> {
@@ -148,6 +158,58 @@ fn generate_ensu_android() -> Result<(), DynError> {
             &crate_spec.uniffi,
         )?;
     }
+
+    Ok(())
+}
+
+fn generate_frb() -> Result<(), DynError> {
+    generate_frb_path("mobile/packages/rust")?;
+    generate_frb_path("mobile/apps/photos")
+}
+
+fn generate_frb_path(relative_package_dir: &str) -> Result<(), DynError> {
+    let rust_root = rust_root()?;
+    let repo_root = rust_root
+        .parent()
+        .ok_or("failed to resolve repo root from rust/apps/codegen")?;
+    let package_dir = repo_root.join(relative_package_dir);
+
+    generate_frb_package(&package_dir)?;
+
+    Ok(())
+}
+
+fn generate_frb_package(package_dir: &Path) -> Result<(), DynError> {
+    let previous_dir = env::current_dir().map_err(|error| {
+        format!("failed to capture current directory before generating FRB bindings: {error}")
+    })?;
+
+    env::set_current_dir(package_dir).map_err(|error| {
+        format!(
+            "failed to enter {} before generating FRB bindings: {error}",
+            package_dir.display()
+        )
+    })?;
+
+    let result = FrbConfig::from_files_auto().and_then(|config| {
+        let config = FrbConfig::merge(
+            FrbConfig {
+                dart_fix: Some(false),
+                ..Default::default()
+            },
+            config,
+        );
+        frb_codegen::generate(config, FrbMetaConfig { watch: false })
+    });
+
+    env::set_current_dir(&previous_dir).map_err(|error| {
+        format!(
+            "failed to restore current directory to {}: {error}",
+            previous_dir.display()
+        )
+    })?;
+
+    result?;
 
     Ok(())
 }
