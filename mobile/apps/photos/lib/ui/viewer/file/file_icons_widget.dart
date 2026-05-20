@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_icons/ente_icons.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
@@ -10,7 +11,6 @@ import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
-import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
@@ -137,14 +137,16 @@ class VideoOverlayDuration extends StatelessWidget {
         final bool iconFallback = (duration == null || duration == 0);
 
         double inset = 4;
-        double size = iconFallback ? 18 : 10;
+        double iconSize = 18;
+        TextStyle durationTextStyle = TextStyles.tiny;
         if (constraints.hasBoundedWidth) {
           final w = constraints.maxWidth;
           if (w > 120) {
-            size = iconFallback ? 24 : 14;
+            iconSize = 24;
+            durationTextStyle = TextStyles.mini;
           } else if (w < 75) {
             inset = 3;
-            size = iconFallback ? 16 : 8;
+            iconSize = 16;
           }
         }
 
@@ -152,7 +154,7 @@ class VideoOverlayDuration extends StatelessWidget {
           onDarkBackground = Icon(
             Icons.play_arrow,
             color: Colors.white,
-            size: size, //default 24
+            size: iconSize,
           );
         } else {
           final String formattedDuration = _getFormattedDuration(duration!);
@@ -160,10 +162,7 @@ class VideoOverlayDuration extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 1),
             child: Text(
               formattedDuration,
-              style: getEnteTextTheme(context).small.copyWith(
-                    color: Colors.white,
-                    fontSize: size, // Default font size is 14
-                  ),
+              style: durationTextStyle.copyWith(color: Colors.white),
             ),
           );
         }
@@ -188,8 +187,9 @@ class VideoOverlayDuration extends StatelessWidget {
   }
 
   String _getFormattedDuration(int duration) {
-    final String formattedDuration =
-        Duration(seconds: duration).toString().split('.').first;
+    final String formattedDuration = Duration(
+      seconds: duration,
+    ).toString().split('.').first;
     final List<String> separated = formattedDuration.split(':');
     final String hour = (separated[0] == '0') ? '' : separated[0] + ':';
     final String minute = int.parse(separated[1]).toString() + ':';
@@ -264,10 +264,9 @@ class FileOverlayText extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 5),
       child: Text(
         text,
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall!
-            .copyWith(color: Colors.white), //same for both themes
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+          color: Colors.white,
+        ), //same for both themes
       ),
     );
   }
