@@ -1,11 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:ente_components/theme/text_styles.dart';
+import 'package:ente_components/ente_components.dart';
 import 'package:ente_icons/ente_icons.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
@@ -20,7 +19,7 @@ class ThumbnailPlaceHolder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      color: Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      color: context.componentColors.fillDark,
     );
   }
 }
