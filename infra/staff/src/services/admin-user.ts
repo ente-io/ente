@@ -15,14 +15,14 @@ const nullishToEmpty = <T>(value: T[] | null | undefined): T[] => value ?? [];
 
 const nullishToZero = (value: number | null | undefined): number => value ?? 0;
 
-const UserProfileData = z.looseObject({
+const UserProfileData = z.object({
     isEmailMFAEnabled: z.boolean(),
     isTwoFactorEnabled: z.boolean(),
     passkeyCount: z.number(),
     canDisableEmailMFA: z.boolean(),
 });
 
-const FamilyMember = z.looseObject({
+const FamilyMember = z.object({
     id: z.string(),
     email: z.string(),
     status: z.string(),
@@ -32,7 +32,7 @@ const FamilyMember = z.looseObject({
 
 export type FamilyMember = z.infer<typeof FamilyMember>;
 
-const StorageBonus = z.looseObject({
+const StorageBonus = z.object({
     storage: z.number(),
     type: z.string(),
     createdAt: z.number(),
@@ -42,7 +42,7 @@ const StorageBonus = z.looseObject({
 
 export type StorageBonus = z.infer<typeof StorageBonus>;
 
-const TokenData = z.looseObject({
+const TokenData = z.object({
     creationTime: z.number(),
     lastUsedTime: z.number(),
     ua: z.string(),
@@ -52,14 +52,14 @@ const TokenData = z.looseObject({
 
 export type TokenData = z.infer<typeof TokenData>;
 
-const Subscription = z.looseObject({
+const Subscription = z.object({
     productID: z.string(),
     paymentProvider: z.string(),
     storage: z.number(),
     originalTransactionID: z.string(),
     expiryTime: z.number(),
     userID: z.number(),
-    attributes: z.looseObject({
+    attributes: z.object({
         customerID: z.string().optional(),
         stripeAccountCountry: z.string().optional(),
     }),
@@ -68,12 +68,12 @@ const Subscription = z.looseObject({
 export type Subscription = z.infer<typeof Subscription>;
 
 const FamilyData = z
-    .looseObject({ members: z.array(FamilyMember) })
+    .object({ members: z.array(FamilyMember) })
     .nullish()
     .transform(nullToUndefined);
 
 const BonusData = z
-    .looseObject({
+    .object({
         storageBonuses: z
             .array(StorageBonus)
             .nullish()
@@ -83,7 +83,7 @@ const BonusData = z
     .transform(nullToUndefined);
 
 const UserDetails = z
-    .looseObject({
+    .object({
         usage: z.number(),
         storageBonus: z.number().nullish().transform(nullishToZero),
         profileData: UserProfileData.nullish().transform(nullToUndefined),
@@ -93,8 +93,8 @@ const UserDetails = z
     .nullish()
     .transform(nullToUndefined);
 
-const UserResponse = z.looseObject({
-    user: z.looseObject({
+const UserResponse = z.object({
+    user: z.object({
         ID: z.number(),
         email: z.string(),
         creationTime: z.number(),
