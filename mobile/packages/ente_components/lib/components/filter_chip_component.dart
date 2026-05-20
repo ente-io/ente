@@ -1,5 +1,5 @@
+import 'package:ente_components/components/chip_surface.dart';
 import 'package:ente_components/theme/icon_sizes.dart';
-import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
@@ -46,41 +46,23 @@ class FilterChipComponent extends StatelessWidget {
     };
     final background = _selected ? colors.primaryLight : colors.fillLight;
 
-    Widget chip = MouseRegion(
-      cursor: _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _enabled ? () => onChanged!(!_selected) : null,
-        child: AnimatedContainer(
-          key: const ValueKey('filter-chip-surface'),
-          duration: Motion.quick,
-          curve: Curves.easeInOutCubic,
-          height: 40,
-          constraints: const BoxConstraints(minWidth: 40),
-          padding: _padding,
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: _children(textColor),
-          ),
-        ),
-      ),
-    );
-
-    if (tooltip != null) {
-      chip = Tooltip(message: tooltip!, child: chip);
-    }
-
-    return Semantics(
-      button: true,
+    return ChipSurface(
+      surfaceKey: const ValueKey('filter-chip-surface'),
       enabled: _enabled,
       selected: _selected,
-      label: tooltip ?? label,
-      child: chip,
+      semanticLabel: tooltip ?? label,
+      height: 40,
+      minWidth: 40,
+      padding: _padding,
+      background: background,
+      borderRadius: BorderRadius.circular(24),
+      onTap: _enabled ? () => onChanged!(!_selected) : null,
+      tooltip: tooltip,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: _children(textColor),
+      ),
     );
   }
 
@@ -105,7 +87,14 @@ class FilterChipComponent extends StatelessWidget {
 
     if (leading != null) {
       addGap();
-      children.add(_FilterChipIcon(color: color, child: leading!));
+      children.add(
+        ChipIconSlot(
+          color: color,
+          size: IconSizes.small,
+          slotSize: _iconSlotSize,
+          child: leading!,
+        ),
+      );
     }
 
     if (label != null) {
@@ -124,9 +113,12 @@ class FilterChipComponent extends StatelessWidget {
     if (trailing != null || selectedTrailing) {
       addGap();
       children.add(
-        _FilterChipIcon(
+        ChipIconSlot(
           color: color,
           size: selectedTrailing ? IconSizes.tiny : IconSizes.small,
+          slotSize: selectedTrailing
+              ? _selectedTrailingIconSlotSize
+              : _iconSlotSize,
           child: selectedTrailing ? const Icon(Icons.close_rounded) : trailing!,
         ),
       );
@@ -179,33 +171,6 @@ class FilterChipComponent extends StatelessWidget {
     }
 
     return const EdgeInsets.symmetric(horizontal: 18, vertical: Spacing.md);
-  }
-}
-
-class _FilterChipIcon extends StatelessWidget {
-  const _FilterChipIcon({
-    required this.color,
-    required this.child,
-    this.size = IconSizes.small,
-  });
-
-  final Color color;
-  final Widget child;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: size == IconSizes.tiny
-          ? _selectedTrailingIconSlotSize
-          : _iconSlotSize,
-      child: Center(
-        child: IconTheme.merge(
-          data: IconThemeData(color: color, size: size),
-          child: child,
-        ),
-      ),
-    );
   }
 }
 
