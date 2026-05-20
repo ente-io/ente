@@ -526,82 +526,93 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final selectedFaces = _selectedFaceInfos();
     if (selectedFaces.isEmpty) return;
 
+    final l10n = AppLocalizations.of(context);
+    final multiple = selectedFaces.length > 1;
     final result = await showChoiceActionSheet(
       context,
-      title: selectedFaces.length == 1
-          ? AppLocalizations.of(context).areYouSureYouWantToIgnoreThisPerson
-          : AppLocalizations.of(context).areYouSureYouWantToIgnoreThesePersons,
-      body: selectedFaces.length == 1
-          ? AppLocalizations.of(context).thePersonWillNotBeDisplayed
-          : AppLocalizations.of(context).thePersonGroupsWillNotBeDisplayed,
-      firstButtonLabel: AppLocalizations.of(context).yesIgnore,
+      title: multiple
+          ? l10n.areYouSureYouWantToIgnoreThesePersons
+          : l10n.areYouSureYouWantToIgnoreThisPerson,
+      body: multiple
+          ? l10n.thePersonGroupsWillNotBeDisplayed
+          : l10n.thePersonWillNotBeDisplayed,
+      firstButtonLabel: l10n.yesIgnore,
       firstButtonType: ButtonType.critical,
-      secondButtonLabel: AppLocalizations.of(context).cancel,
+      secondButtonLabel: l10n.cancel,
       isCritical: true,
     );
-    if (result?.action != ButtonAction.first) return;
+    if (!mounted || result?.action != ButtonAction.first) return;
 
-    final mlDataDB = isLocalGalleryMode
-        ? MLDataDB.localGalleryInstance
-        : MLDataDB.instance;
+    final mlDataDB = MLDataDB.instance;
+
     final faceIDToNewClusterID = <String, String>{};
-    final createdPersonIDs = <String>[];
-
-    try {
-      final clusterIDs = <String>{};
-
-      final faceIdToClusterIdResults = await Future.wait(
-        selectedFaces.map((f) async {
-          final clusterID =
-              f.clusterID ??
-              await mlDataDB.getClusterIDForFaceID(f.face.faceID);
-          return MapEntry(f.face.faceID, clusterID);
-        }),
-      );
-
-      for (final entry in faceIdToClusterIdResults) {
-        var clusterID = entry.value;
-        if (clusterID == null) {
-          clusterID = newClusterID();
-          faceIDToNewClusterID[entry.key] = clusterID;
-        }
-        clusterIDs.add(clusterID);
+    final clusterIDs = <String>{};
+    final faceIdToClusterIdResults = await Future.wait(
+      selectedFaces.map((f) async {
+        final clusterID =
+            f.clusterID ?? await mlDataDB.getClusterIDForFaceID(f.face.faceID);
+        return MapEntry(f.face.faceID, clusterID);
+      }),
+    );
+    for (final entry in faceIdToClusterIdResults) {
+      var clusterID = entry.value;
+      if (clusterID == null) {
+        clusterID = newClusterID();
+        faceIDToNewClusterID[entry.key] = clusterID;
       }
-
-      if (faceIDToNewClusterID.isNotEmpty) {
-        await mlDataDB.updateFaceIdToClusterId(faceIDToNewClusterID);
-      }
-
-      await Future.wait(
-        clusterIDs.map((clusterID) async {
-          try {
-            final ignoredPerson = await PersonService.instance.addPerson(
-              name: '',
-              clusterID: clusterID,
-              isHidden: true,
-            );
-            createdPersonIDs.add(ignoredPerson.remoteID);
-            // Try automatic merges for the ignored person but avoid firing events per cluster
-            await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(
-              ignoredPerson,
-              personClusterID: clusterID,
-              firePeopleChangedEvent: false,
-            );
-          } catch (e, s) {
-            _logger.warning('Error ignoring cluster $clusterID', e, s);
-          }
-        }),
-      );
-
-      // Fire a single people changed event and reload faces
-      Bus.instance.fire(PeopleChangedEvent());
-      if (mounted) {
-        _clearSelectionMode();
-        await loadFaces(isRefresh: true);
-      }
-    } catch (e, s) {
-      _logger.severe('Error while ignoring unlinked faces', e, s);
+      clusterIDs.add(clusterID);
     }
+    if (faceIDToNewClusterID.isNotEmpty) {
+      await mlDataDB.updateFaceIdToClusterId(faceIDToNewClusterID);
+    }
+
+    final total = clusterIDs.length;
+    final dialog = total > 1
+        ? createProgressDialog(
+            context,
+            _bulkIgnoreProgressMessage(l10n, 0, total),
+          )
+        : null;
+    if (dialog != null) {
+      await dialog.show();
+    }
+    var completed = 0;
+    var hasUpdates = false;
+    var completedAll = false;
+    try {
+      for (final clusterID in clusterIDs) {
+        await ClusterFeedbackService.instance.ignoreCluster(
+          clusterID,
+          firePeopleChangedEvent: false,
+        );
+        completed++;
+        hasUpdates = true;
+        dialog?.update(
+          message: _bulkIgnoreProgressMessage(l10n, completed, total),
+        );
+      }
+      completedAll = true;
+    } catch (e, s) {
+      _logger.severe('Error while ignoring selected face clusters', e, s);
+    } finally {
+      if (hasUpdates) {
+        Bus.instance.fire(PeopleChangedEvent());
+      }
+      if (dialog != null) {
+        await dialog.hide();
+      }
+      if (completedAll && mounted) {
+        _clearSelectionMode();
+      }
+    }
+  }
+
+  String _bulkIgnoreProgressMessage(
+    AppLocalizations l10n,
+    int completed,
+    int total,
+  ) {
+    return "${l10n.pleaseWait} ($completed/$total)";
   }
 
   Future<_FaceDataResult> _fetchFaceData() async {
