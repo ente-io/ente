@@ -36,7 +36,6 @@ import {
 } from "ente-base/components/OverflowMenu";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useBaseContext } from "ente-base/context";
-import { ensureMasterKeyFromSession } from "ente-base/session";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
 import {
     sortPeople,
@@ -53,6 +52,7 @@ import { useWrapAsyncOperation } from "ente-new/photos/components/utils/use-wrap
 import {
     addCGroup,
     addClusterToCGroup,
+    deleteCGroup,
     ignoreCluster,
     mlSync,
     pinCGroup,
@@ -65,8 +65,6 @@ import type {
     ClusterPerson,
     Person,
 } from "ente-new/photos/services/ml/people";
-import { addUserEntity } from "ente-new/photos/services/user-entity/index";
-import { deleteUserEntity } from "ente-new/photos/services/user-entity/remote";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, {
@@ -382,21 +380,9 @@ const Title: React.FC<TitleProps> = ({
                 color: "primary",
                 action: async () => {
                     await Promise.all(
-                        multiSelectedClusterPeople.map(async (person) => {
-                            const masterKey =
-                                await ensureMasterKeyFromSession();
-                            await addUserEntity(
-                                "cgroup",
-                                {
-                                    name: "",
-                                    assigned: [person.cluster],
-                                    isHidden: true,
-                                    isPinned: false,
-                                    hideFromMemories: false,
-                                },
-                                masterKey,
-                            );
-                        }),
+                        multiSelectedClusterPeople.map((person) =>
+                            ignoreCluster(person.cluster, true),
+                        ),
                     );
                     await mlSync();
                     clearMultiSelectedPeople();
@@ -421,7 +407,7 @@ const Title: React.FC<TitleProps> = ({
                 action: async () => {
                     await Promise.all(
                         multiSelectedCGroupPeople.map((person) =>
-                            deleteUserEntity(person.cgroup.id),
+                            deleteCGroup(person.cgroup, true),
                         ),
                     );
                     await mlSync();
