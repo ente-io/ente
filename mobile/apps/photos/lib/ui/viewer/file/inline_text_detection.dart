@@ -185,9 +185,14 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
             .hasText(imagePath: localFile.path)
             .timeout(const Duration(seconds: 5));
         _logger.info("hasText result: $hasText");
+      } on TimeoutException {
+        // A slow pre-check is expected on some devices. Fall back to the full
+        // detector path without reporting an app error.
+        hasText = true;
+        _logger.info("hasText timed out, falling back to optimistic");
       } catch (error, stackTrace) {
-        // On error or timeout, optimistically assume text may be present
-        // so the full detection pipeline can make the final determination.
+        // On error, optimistically assume text may be present so the full
+        // detection pipeline can make the final determination.
         hasText = true;
         _logger.warning(
           "hasText failed, falling back to optimistic",
