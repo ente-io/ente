@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -23,10 +24,7 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/components/buttons/filter_pill_widget.dart";
-import "package:photos/ui/components/buttons/soft_icon_button.dart";
 import "package:photos/ui/components/popup_menu/ente_popup_menu_button.dart";
-import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/ui/tabs/albums/albums_manage_sheet.dart";
 import "package:photos/ui/tabs/albums/empty_states/on_ente_empty_state.dart";
 import "package:photos/ui/tabs/albums/empty_states/shared_empty_state.dart";
@@ -48,19 +46,24 @@ class AlbumsTab extends StatefulWidget {
 
 class _AlbumsTabState extends State<AlbumsTab>
     with AutomaticKeepAliveClientMixin {
-  static const double _kHeaderToolbarHeight = 72;
+  static const double _kHeaderToolbarHeight = 60;
 
-  final ValueNotifier<_AlbumsFilter> _filter =
-      ValueNotifier(_AlbumsFilter.ente);
+  final ValueNotifier<_AlbumsFilter> _filter = ValueNotifier(
+    _AlbumsFilter.ente,
+  );
   final ValueNotifier<List<Collection>?> _enteCollections = ValueNotifier(null);
-  final ValueNotifier<List<Collection>?> _sharedCollections =
-      ValueNotifier(null);
-  late final ValueNotifier<AlbumViewType> _viewType =
-      ValueNotifier(localSettings.albumViewType());
-  late final ValueNotifier<AlbumSortKey> _sortKey =
-      ValueNotifier(localSettings.albumSortKey());
-  late final ValueNotifier<AlbumSortDirection> _sortDirection =
-      ValueNotifier(localSettings.albumSortDirection());
+  final ValueNotifier<List<Collection>?> _sharedCollections = ValueNotifier(
+    null,
+  );
+  late final ValueNotifier<AlbumViewType> _viewType = ValueNotifier(
+    localSettings.albumViewType(),
+  );
+  late final ValueNotifier<AlbumSortKey> _sortKey = ValueNotifier(
+    localSettings.albumSortKey(),
+  );
+  late final ValueNotifier<AlbumSortDirection> _sortDirection = ValueNotifier(
+    localSettings.albumSortDirection(),
+  );
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -68,17 +71,17 @@ class _AlbumsTabState extends State<AlbumsTab>
   String _searchQuery = "";
 
   late final StreamSubscription<CollectionMetaEvent>
-      _collectionMetaEventSubscription;
+  _collectionMetaEventSubscription;
   late final StreamSubscription<CollectionUpdatedEvent>
-      _collectionUpdatesSubscription;
+  _collectionUpdatesSubscription;
   late final StreamSubscription<LocalPhotosUpdatedEvent>
-      _localFilesSubscription;
+  _localFilesSubscription;
   late final StreamSubscription<FavoritesServiceInitCompleteEvent>
-      _favoritesInitComplete;
+  _favoritesInitComplete;
   late final StreamSubscription<AlbumSortOrderChangeEvent>
-      _albumSortOrderChangeEvent;
+  _albumSortOrderChangeEvent;
   late final StreamSubscription<BackupFoldersUpdatedEvent>
-      _backupFoldersUpdatedEvent;
+  _backupFoldersUpdatedEvent;
   late final StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   late final StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
 
@@ -93,34 +96,40 @@ class _AlbumsTabState extends State<AlbumsTab>
     super.initState();
     unawaited(_loadAll());
 
-    _collectionMetaEventSubscription =
-        Bus.instance.on<CollectionMetaEvent>().listen((_) {
-      _debouncer.run(_loadAll);
-    });
-    _collectionUpdatesSubscription =
-        Bus.instance.on<CollectionUpdatedEvent>().listen((_) {
-      _debouncer.run(_loadAll);
-    });
-    _localFilesSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((_) {
-      _debouncer.run(_loadAll);
-    });
-    _albumSortOrderChangeEvent =
-        Bus.instance.on<AlbumSortOrderChangeEvent>().listen((_) {
-      _syncSortState();
-      unawaited(_loadAll());
-    });
-    _favoritesInitComplete =
-        Bus.instance.on<FavoritesServiceInitCompleteEvent>().listen((_) {
-      _debouncer.run(_loadAll);
-    });
-    _backupFoldersUpdatedEvent =
-        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((_) {
-      if (mounted) {
-        setState(() {});
-      }
-      _debouncer.run(_loadAll);
-    });
+    _collectionMetaEventSubscription = Bus.instance
+        .on<CollectionMetaEvent>()
+        .listen((_) {
+          _debouncer.run(_loadAll);
+        });
+    _collectionUpdatesSubscription = Bus.instance
+        .on<CollectionUpdatedEvent>()
+        .listen((_) {
+          _debouncer.run(_loadAll);
+        });
+    _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen(
+      (_) {
+        _debouncer.run(_loadAll);
+      },
+    );
+    _albumSortOrderChangeEvent = Bus.instance
+        .on<AlbumSortOrderChangeEvent>()
+        .listen((_) {
+          _syncSortState();
+          unawaited(_loadAll());
+        });
+    _favoritesInitComplete = Bus.instance
+        .on<FavoritesServiceInitCompleteEvent>()
+        .listen((_) {
+          _debouncer.run(_loadAll);
+        });
+    _backupFoldersUpdatedEvent = Bus.instance
+        .on<BackupFoldersUpdatedEvent>()
+        .listen((_) {
+          if (mounted) {
+            setState(() {});
+          }
+          _debouncer.run(_loadAll);
+        });
     _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((_) {
       if (mounted) {
         setState(() {});
@@ -155,8 +164,8 @@ class _AlbumsTabState extends State<AlbumsTab>
   }
 
   Future<void> _loadEnteCollections() async {
-    final collections =
-        await CollectionsService.instance.getCollectionForOnEnteSection();
+    final collections = await CollectionsService.instance
+        .getCollectionForOnEnteSection();
     if (!mounted) return;
     _enteCollections.value = collections;
   }
@@ -262,8 +271,9 @@ class _AlbumsTabState extends State<AlbumsTab>
     final showSortActions = _effectiveFilter != _AlbumsFilter.onDevice;
     final currentSortKey = _sortKey.value;
     final currentSortDirection = _sortDirection.value;
-    final nameSortDirection =
-        currentSortKey == AlbumSortKey.albumName ? currentSortDirection : null;
+    final nameSortDirection = currentSortKey == AlbumSortKey.albumName
+        ? currentSortDirection
+        : null;
     final activeTrailingWidget = HugeIcon(
       icon: currentSortDirection == AlbumSortDirection.ascending
           ? HugeIcons.strokeRoundedArrowUp02
@@ -331,6 +341,20 @@ class _AlbumsTabState extends State<AlbumsTab>
     }
   }
 
+  Future<void> _showAlbumsOptionsMenu(TapDownDetails details) async {
+    final options = _buildAlbumsMenuOptions();
+    if (options.isEmpty) {
+      return;
+    }
+    final selected = await showEntePopupMenu<_AlbumsMenuAction>(
+      context: context,
+      details: details,
+      options: options,
+    );
+    if (selected == null || !mounted) return;
+    await _handleAlbumsMenuSelection(selected);
+  }
+
   @override
   void dispose() {
     _collectionMetaEventSubscription.cancel();
@@ -356,11 +380,19 @@ class _AlbumsTabState extends State<AlbumsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final colorScheme = getEnteColorScheme(context);
+    final componentColors = context.componentColors;
     final textTheme = getEnteTextTheme(context);
     final strings = AppLocalizations.of(context);
     final selectedAlbums = widget.selectedAlbums;
     final localGalleryMode = _isLocalGalleryMode;
+    final albumsOptionsButton = IconButtonComponent(
+      variant: IconButtonComponentVariant.primary,
+      shouldSurfaceExecutionStates: false,
+      icon: const HugeIcon(
+        icon: HugeIcons.strokeRoundedFilterHorizontal,
+      ),
+      onTapDown: (details) => unawaited(_showAlbumsOptionsMenu(details)),
+    );
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
@@ -369,7 +401,7 @@ class _AlbumsTabState extends State<AlbumsTab>
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: SizedBox(
                   height: _kHeaderToolbarHeight,
                   child: Row(
@@ -381,12 +413,12 @@ class _AlbumsTabState extends State<AlbumsTab>
                           switchOutCurve: Curves.easeInCubic,
                           layoutBuilder: (currentChild, previousChildren) =>
                               Stack(
-                            alignment: Alignment.centerLeft,
-                            children: [
-                              ...previousChildren,
-                              if (currentChild != null) currentChild,
-                            ],
-                          ),
+                                alignment: Alignment.centerLeft,
+                                children: [
+                                  ...previousChildren,
+                                  if (currentChild != null) currentChild,
+                                ],
+                              ),
                           transitionBuilder: (child, animation) {
                             final curvedAnimation = CurvedAnimation(
                               parent: animation,
@@ -395,8 +427,8 @@ class _AlbumsTabState extends State<AlbumsTab>
                             );
                             final beginOffset =
                                 child.key == const ValueKey("search_title")
-                                    ? const Offset(0.04, 0)
-                                    : const Offset(-0.04, 0);
+                                ? const Offset(0.04, 0)
+                                : const Offset(-0.04, 0);
                             return FadeTransition(
                               opacity: curvedAnimation,
                               child: SlideTransition(
@@ -413,48 +445,35 @@ class _AlbumsTabState extends State<AlbumsTab>
                                   key: const ValueKey("search_title"),
                                   children: [
                                     Expanded(
-                                      child: TextInputWidgetV2(
-                                        textEditingController:
-                                            _searchController,
+                                      child: TextInputComponent(
+                                        controller: _searchController,
                                         focusNode: _searchFocusNode,
                                         hintText: strings.searchAlbums,
-                                        autoFocus: true,
-                                        shouldSurfaceExecutionStates: false,
-                                        leadingWidget: HugeIcon(
+                                        autofocus: true,
+                                        prefix: HugeIcon(
                                           icon: HugeIcons.strokeRoundedSearch01,
                                           size: 18,
-                                          color: colorScheme.textMuted,
+                                          color: componentColors.textLight,
                                         ),
-                                        trailingWidget: GestureDetector(
+                                        suffix: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
                                           onTap: _deactivateSearch,
                                           child: HugeIcon(
                                             icon:
                                                 HugeIcons.strokeRoundedCancel01,
                                             size: 18,
-                                            color: colorScheme.textMuted,
+                                            color: componentColors.textLight,
                                           ),
                                         ),
-                                        onChange: (value) {
+                                        onChanged: (value) {
                                           setState(() {
                                             _searchQuery = value;
                                           });
                                         },
                                       ),
                                     ),
-                                    if (!localGalleryMode) ...[
-                                      const SizedBox(width: 20),
-                                      SoftIconButton(
-                                        icon: HugeIcon(
-                                          icon: HugeIcons
-                                              .strokeRoundedFilterHorizontal,
-                                          size: 18,
-                                          color: colorScheme.textBase,
-                                        ),
-                                        onTap: () => showAlbumsManageSheet(
-                                          context,
-                                        ),
-                                      ),
-                                    ],
+                                    const SizedBox(width: 20),
+                                    albumsOptionsButton,
                                   ],
                                 )
                               : Text(
@@ -465,32 +484,26 @@ class _AlbumsTabState extends State<AlbumsTab>
                         ),
                       ),
                       if (!_isSearchActive) ...[
-                        SoftIconButton(
-                          icon: HugeIcon(
+                        IconButtonComponent(
+                          variant: IconButtonComponentVariant.primary,
+                          shouldSurfaceExecutionStates: false,
+                          icon: const HugeIcon(
                             icon: HugeIcons.strokeRoundedSearch01,
-                            size: 18,
-                            color: colorScheme.textBase,
                           ),
                           onTap: _activateSearch,
                         ),
-                        if (!localGalleryMode) ...[
-                          const SizedBox(width: 6),
-                          SoftIconButton(
-                            icon: HugeIcon(
-                              icon: HugeIcons.strokeRoundedFilterHorizontal,
-                              size: 18,
-                              color: colorScheme.textBase,
-                            ),
-                            onTap: () => showAlbumsManageSheet(context),
-                          ),
-                        ],
+                        const SizedBox(width: 6),
+                        albumsOptionsButton,
                       ],
                     ],
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -500,44 +513,53 @@ class _AlbumsTabState extends State<AlbumsTab>
                           final effectiveFilter = localGalleryMode
                               ? _AlbumsFilter.onDevice
                               : selected;
-                          return Row(
-                            children: [
-                              if (!localGalleryMode) ...[
-                                FilterPillWidget(
-                                  label: strings.ente,
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            child: Row(
+                              children: [
+                                if (!localGalleryMode) ...[
+                                  _AlbumsFilterChip(
+                                    label: strings.ente,
+                                    selected:
+                                        effectiveFilter == _AlbumsFilter.ente,
+                                    onTap: () =>
+                                        _selectFilter(_AlbumsFilter.ente),
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                                _AlbumsFilterChip(
+                                  label: strings.onDevice,
                                   selected:
-                                      effectiveFilter == _AlbumsFilter.ente,
+                                      effectiveFilter == _AlbumsFilter.onDevice,
                                   onTap: () =>
-                                      _selectFilter(_AlbumsFilter.ente),
+                                      _selectFilter(_AlbumsFilter.onDevice),
                                 ),
-                                const SizedBox(width: 8),
+                                if (!localGalleryMode) ...[
+                                  const SizedBox(width: 8),
+                                  _AlbumsFilterChip(
+                                    label: strings.searchResultShared,
+                                    selected:
+                                        effectiveFilter == _AlbumsFilter.shared,
+                                    onTap: () =>
+                                        _selectFilter(_AlbumsFilter.shared),
+                                  ),
+                                ],
                               ],
-                              FilterPillWidget(
-                                label: strings.onDevice,
-                                selected:
-                                    effectiveFilter == _AlbumsFilter.onDevice,
-                                onTap: () =>
-                                    _selectFilter(_AlbumsFilter.onDevice),
-                              ),
-                              if (!localGalleryMode) ...[
-                                const SizedBox(width: 8),
-                                FilterPillWidget(
-                                  label: strings.searchResultShared,
-                                  selected:
-                                      effectiveFilter == _AlbumsFilter.shared,
-                                  onTap: () =>
-                                      _selectFilter(_AlbumsFilter.shared),
-                                ),
-                              ],
-                            ],
+                            ),
                           );
                         },
                       ),
                     ),
-                    EntePopupMenuButton<_AlbumsMenuAction>(
-                      optionsBuilder: _buildAlbumsMenuOptions,
-                      onSelected: _handleAlbumsMenuSelection,
-                    ),
+                    if (!localGalleryMode)
+                      IconButtonComponent(
+                        variant: IconButtonComponentVariant.primary,
+                        shouldSurfaceExecutionStates: false,
+                        icon: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedMoreVertical,
+                        ),
+                        onTap: () => showAlbumsManageSheet(context),
+                      ),
                   ],
                 ),
               ),
@@ -615,8 +637,9 @@ class _AlbumsTabState extends State<AlbumsTab>
                   return const SizedBox.shrink();
               }
               if (collections == null) return const SizedBox.shrink();
-              final filteredCollections =
-                  _filterCollectionsByQuery(collections);
+              final filteredCollections = _filterCollectionsByQuery(
+                collections,
+              );
               if (filteredCollections.isEmpty) return const SizedBox.shrink();
               return AlbumSelectionOverlayBar(
                 selectedAlbums,
@@ -632,4 +655,27 @@ class _AlbumsTabState extends State<AlbumsTab>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class _AlbumsFilterChip extends StatelessWidget {
+  const _AlbumsFilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TagChipComponent(
+      label: label,
+      state: selected
+          ? TagChipComponentState.selected
+          : TagChipComponentState.unselected,
+      onTap: onTap,
+    );
+  }
 }
