@@ -32,7 +32,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   static const maxThumbnailWidth = 224.0;
   static const crossAxisSpacing = 8.0;
   static const horizontalPadding = 16.0;
-  static const gridItemTextHeight = 42.0;
+  static const gridItemTextHeight = 48.0;
   final List<Collection>? collections;
 
   // If true, the GridView will shrink-wrap its contents.
@@ -45,6 +45,8 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   final SelectedAlbums? selectedAlbums;
   final bool onlyAllowSelection;
   final UISectionType? sectionType;
+  final double topPadding;
+  final double bottomPadding;
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
@@ -57,6 +59,8 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
     this.selectedAlbums,
     this.onlyAllowSelection = false,
     this.sectionType,
+    this.topPadding = 16,
+    this.bottomPadding = 200,
   });
 
   @override
@@ -201,11 +205,11 @@ class _CollectionsFlexiGridViewWidgetState
 
     return SliverPadding(
       key: key,
-      padding: const EdgeInsets.only(
-        top: 16,
+      padding: EdgeInsets.only(
+        top: widget.topPadding,
         left: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
         right: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
-        bottom: 200,
+        bottom: widget.bottomPadding,
       ),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
@@ -265,11 +269,11 @@ class _CollectionsFlexiGridViewWidgetState
 
     return SliverPadding(
       key: key,
-      padding: const EdgeInsets.only(
-        top: 16,
+      padding: EdgeInsets.only(
+        top: widget.topPadding,
         left: 8,
         right: 8,
-        bottom: 200,
+        bottom: widget.bottomPadding,
       ),
       sliver: SliverPrototypeExtentList(
         prototypeItem: Padding(
