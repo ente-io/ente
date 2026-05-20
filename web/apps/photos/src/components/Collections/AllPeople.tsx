@@ -4,6 +4,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
+import CheckIcon from "@mui/icons-material/Check";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import HideImageOutlinedIcon from "@mui/icons-material/HideImageOutlined";
@@ -50,6 +52,7 @@ import { useWrapAsyncOperation } from "ente-new/photos/components/utils/use-wrap
 import {
     addCGroup,
     addClusterToCGroup,
+    deleteCGroup,
     ignoreCluster,
     pinCGroup,
     renameCGroup,
@@ -63,7 +66,13 @@ import type {
 } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     VariableSizeList,
@@ -96,10 +105,27 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
     const [showingAllPeople, setShowingAllPeople] = useState(false);
     const [personToRename, setPersonToRename] = useState<CGroupPerson>();
     const [clusterToName, setClusterToName] = useState<ClusterPerson>();
+    const [multiSelectedPeople, setMultiSelectedPeople] = useState<
+        (CGroupPerson | ClusterPerson)[]
+    >([]);
+
+    const toggleMultiSelectPerson = useCallback(
+        (person: CGroupPerson | ClusterPerson) => {
+            if (multiSelectedPeople.find((p) => p.id === person.id)) {
+                setMultiSelectedPeople(
+                    multiSelectedPeople.filter((p) => p.id !== person.id),
+                );
+            } else {
+                setMultiSelectedPeople([...multiSelectedPeople, person]);
+            }
+        },
+        [multiSelectedPeople, setMultiSelectedPeople],
+    );
 
     const handleExited = () => {
         setSearchTerm("");
         setShowingAllPeople(false);
+        setMultiSelectedPeople([]);
     };
 
     const handleSelectPerson = (personID: string) => {
@@ -203,6 +229,7 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
                     onSearchChange={setSearchTerm}
                     peopleSortBy={peopleSortBy}
                     onChangePeopleSortBy={onChangePeopleSortBy}
+                    multiSelectedPeople={multiSelectedPeople}
                 />
                 <Divider />
                 <AllPeopleContent
@@ -219,6 +246,9 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
                     onPinPerson={handlePinPerson}
                     onAddName={setClusterToName}
                     onIgnorePerson={handleIgnorePerson}
+                    // isMultiSelectionActive={multiSelectedPeople.length > 0}
+                    multiSelectedPeople={multiSelectedPeople}
+                    toggleMultiSelectPerson={toggleMultiSelectPerson}
                 />
             </AllPeopleDialog>
             <SingleInputDialog
@@ -304,6 +334,7 @@ type TitleProps = {
     onSearchChange: (value: string) => void;
     peopleSortBy: PeopleSortBy;
     onChangePeopleSortBy: (by: PeopleSortBy) => void;
+    multiSelectedPeople: (CGroupPerson | ClusterPerson)[];
 } & Pick<AllPeopleProps, "onClose">;
 
 const Title: React.FC<TitleProps> = ({
@@ -314,36 +345,119 @@ const Title: React.FC<TitleProps> = ({
     onSearchChange,
     peopleSortBy,
     onChangePeopleSortBy,
-}) => (
-    <DialogTitle>
-        <Stack sx={{ gap: 1.5 }}>
-            <Stack direction="row" sx={{ gap: 1.5 }}>
-                <Stack sx={{ flex: 1 }}>
-                    <Box>
-                        <Typography variant="h5">{t("people")}</Typography>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted", fontWeight: "regular" }}
-                        >
-                            {searchTerm
-                                ? `${peopleCount} / ${totalCount} ${t("people")}`
-                                : `${peopleCount} ${t("people")}`}
-                        </Typography>
-                    </Box>
+    multiSelectedPeople,
+}) => {
+    const multiSelectedClusterPeople = useMemo(
+        () => multiSelectedPeople.filter((p) => p.type === "cluster"),
+        [multiSelectedPeople],
+    );
+    const multiSelectedCGroupPeople = useMemo(
+        () => multiSelectedPeople.filter((p) => p.type === "cgroup"),
+        [multiSelectedPeople],
+    );
+
+    const { showMiniDialog } = useBaseContext();
+
+    const handleIgnoreMultiSelectedClusterPersons = useCallback(() => {
+        showMiniDialog({
+            title:
+                multiSelectedClusterPeople.length > 1
+                    ? t("ignore_persons_confirm")
+                    : t("ignore_person_confirm"),
+            message:
+                multiSelectedClusterPeople.length > 1
+                    ? t("ignore_persons_confirm_message")
+                    : t("ignore_person_confirm_message"),
+            continue: {
+                text: t("ignore"),
+                color: "primary",
+                action: async () => {
+                    await Promise.all(
+                        multiSelectedClusterPeople.map((person) =>
+                            ignoreCluster(person.cluster),
+                        ),
+                    );
+                },
+            },
+        });
+    }, [multiSelectedClusterPeople, showMiniDialog]);
+
+    const handleResetMultiSelectedCGroupPersons = useCallback(() => {
+        showMiniDialog({
+            title:
+                multiSelectedCGroupPeople.length > 1
+                    ? t("reset_persons_confirm")
+                    : t("reset_person_confirm"),
+            message:
+                multiSelectedCGroupPeople.length > 1
+                    ? t("reset_persons_confirm_message")
+                    : t("reset_person_confirm_message"),
+            continue: {
+                text: t("reset"),
+                color: "primary",
+                action: async () => {
+                    await Promise.all(
+                        multiSelectedCGroupPeople.map((person) =>
+                            deleteCGroup(person.cgroup),
+                        ),
+                    );
+                },
+            },
+        });
+    }, [multiSelectedCGroupPeople, showMiniDialog]);
+
+    return (
+        <DialogTitle>
+            <Stack sx={{ gap: 1.5 }}>
+                <Stack direction="row" sx={{ gap: 1.5 }}>
+                    <Stack sx={{ flex: 1 }}>
+                        <Box>
+                            <Typography variant="h5">{t("people")}</Typography>
+                            <Typography
+                                variant="small"
+                                sx={{
+                                    color: "text.muted",
+                                    fontWeight: "regular",
+                                }}
+                            >
+                                {searchTerm
+                                    ? `${peopleCount} / ${totalCount} ${t("people")}`
+                                    : `${peopleCount} ${t("people")}`}
+                            </Typography>
+                        </Box>
+                    </Stack>
+                    {multiSelectedPeople.length > 0 && (
+                        <>
+                            <FilledIconButton
+                                onClick={handleResetMultiSelectedCGroupPersons}
+                                disabled={multiSelectedClusterPeople.length > 0}
+                            >
+                                <CloseIcon />
+                            </FilledIconButton>
+                            <FilledIconButton
+                                onClick={
+                                    handleIgnoreMultiSelectedClusterPersons
+                                }
+                                disabled={multiSelectedCGroupPeople.length > 0}
+                            >
+                                <HideImageOutlinedIcon />
+                            </FilledIconButton>
+                        </>
+                    )}
+                    <PeopleSortOptions
+                        activeSortBy={peopleSortBy}
+                        onChangeSortBy={onChangePeopleSortBy}
+                        nestedInDialog
+                    />
+                    <FilledIconButton onClick={onClose}>
+                        <CloseIcon />
+                    </FilledIconButton>
                 </Stack>
-                <PeopleSortOptions
-                    activeSortBy={peopleSortBy}
-                    onChangeSortBy={onChangePeopleSortBy}
-                    nestedInDialog
-                />
-                <FilledIconButton onClick={onClose}>
-                    <CloseIcon />
-                </FilledIconButton>
+                <SearchField value={searchTerm} onChange={onSearchChange} />
             </Stack>
-            <SearchField value={searchTerm} onChange={onSearchChange} />
-        </Stack>
-    </DialogTitle>
-);
+        </DialogTitle>
+    );
+};
 
 interface SearchFieldProps {
     value: string;
@@ -445,6 +559,9 @@ interface AllPeopleContentProps {
     onPinPerson: (person: CGroupPerson) => void | Promise<void>;
     onAddName: (person: ClusterPerson) => void;
     onIgnorePerson: (person: ClusterPerson) => void;
+    // isMultiSelectionActive: boolean;
+    multiSelectedPeople: (CGroupPerson | ClusterPerson)[];
+    toggleMultiSelectPerson: (person: CGroupPerson | ClusterPerson) => void;
 }
 
 type PeopleListItem =
@@ -461,8 +578,12 @@ interface ItemData
         | "onPinPerson"
         | "onAddName"
         | "onIgnorePerson"
+        // | "isMultiSelectionActive"
+        | "multiSelectedPeople"
+        | "toggleMultiSelectPerson"
     > {
     items: PeopleListItem[];
+    isMultiSelectionActive: boolean;
 }
 
 const createItemData = memoize(
@@ -475,6 +596,9 @@ const createItemData = memoize(
         onPinPerson: (person: CGroupPerson) => void | Promise<void>,
         onAddName: (person: ClusterPerson) => void,
         onIgnorePerson: (person: ClusterPerson) => void,
+        isMultiSelectionActive: boolean,
+        multiSelectedPeople: (CGroupPerson | ClusterPerson)[],
+        toggleMultiSelectPerson: (person: CGroupPerson | ClusterPerson) => void,
     ) => ({
         items,
         showingAllPeople,
@@ -484,6 +608,9 @@ const createItemData = memoize(
         onPinPerson,
         onAddName,
         onIgnorePerson,
+        isMultiSelectionActive,
+        multiSelectedPeople,
+        toggleMultiSelectPerson,
     }),
 );
 
@@ -526,6 +653,9 @@ const PeopleRow = React.memo(
             onPinPerson,
             onAddName,
             onIgnorePerson,
+            isMultiSelectionActive,
+            multiSelectedPeople,
+            toggleMultiSelectPerson,
         } = data;
         const item = items[index]!;
 
@@ -564,6 +694,13 @@ const PeopleRow = React.memo(
                             onPinPerson={onPinPerson}
                             onAddName={onAddName}
                             onIgnorePerson={onIgnorePerson}
+                            isMultiSelectionActive={isMultiSelectionActive}
+                            isPersonMultiSelected={
+                                multiSelectedPeople.find(
+                                    (p) => p.id === person.id,
+                                ) !== undefined
+                            }
+                            toggleMultiSelectPerson={toggleMultiSelectPerson}
                         />
                     ))}
                 </Stack>
@@ -585,6 +722,9 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
     onPinPerson,
     onAddName,
     onIgnorePerson,
+    // isMultiSelectionActive,
+    multiSelectedPeople,
+    toggleMultiSelectPerson,
 }) => {
     const isTwoColumn = useMediaQuery(`(width < ${Column3To2Breakpoint}px)`);
     const columns = isTwoColumn ? 2 : 3;
@@ -635,6 +775,10 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
         onPinPerson,
         onAddName,
         onIgnorePerson,
+        // isMultiSelectionActive,
+        multiSelectedPeople.length > 0,
+        multiSelectedPeople,
+        toggleMultiSelectPerson,
     );
 
     if (hasSearchQuery && primaryPeople.length === 0) {
@@ -743,6 +887,9 @@ interface PersonCardProps {
     onPinPerson: (person: CGroupPerson) => void | Promise<void>;
     onAddName: (person: ClusterPerson) => void;
     onIgnorePerson: (person: ClusterPerson) => void;
+    isMultiSelectionActive: boolean;
+    isPersonMultiSelected: boolean;
+    toggleMultiSelectPerson: (person: CGroupPerson | ClusterPerson) => void;
 }
 
 const PersonCard: React.FC<PersonCardProps> = ({
@@ -752,15 +899,55 @@ const PersonCard: React.FC<PersonCardProps> = ({
     onPinPerson,
     onAddName,
     onIgnorePerson,
+    isMultiSelectionActive,
+    isPersonMultiSelected,
+    toggleMultiSelectPerson,
 }) => (
     <PersonCardShell className={personCardShellClassName}>
         <ItemCard
             TileComponent={LargeTileButton}
             coverFile={person.displayFaceFile}
             coverFaceID={person.displayFaceID}
-            onClick={() => onSelectPerson(person.id)}
+            onClick={() =>
+                isMultiSelectionActive
+                    ? toggleMultiSelectPerson(person)
+                    : onSelectPerson(person.id)
+            }
         >
-            <LargeTileTextOverlay>
+            <LargeTileTextOverlay
+            /*sx={{
+                    // padding: isMultiSelectionActive
+                    //     ? !isPersonMultiSelected
+                    //         ? undefined
+                    //         : "12px"
+                    //     : undefined,
+                    border: isPersonMultiSelected
+                        ? "4px solid green"
+                        : undefined,
+                }}*/
+            >
+                {isPersonMultiSelected && (
+                    <>
+                        <div
+                            style={{
+                                position: "absolute",
+                                inset: 0,
+                                border: "4px solid",
+                                borderColor: "var(--mui-palette-accent-dark)",
+                            }}
+                        />
+                        <CheckCircleIcon
+                            color="accent"
+                            fontSize="medium"
+                            sx={{
+                                position: "absolute",
+                                top: "4px",
+                                right: "4px",
+                                // color: "var(--mui-palette-accent-main)",
+                            }}
+                        />
+                    </>
+                )}
                 {person.name && (
                     <Tooltip title={person.name} arrow>
                         <Typography
@@ -781,6 +968,18 @@ const PersonCard: React.FC<PersonCardProps> = ({
                 <Typography variant="small" sx={{ opacity: 0.7 }}>
                     {t("photos_count", { count: person.fileIDs.length })}
                 </Typography>
+                {isPersonMultiSelected && (
+                    <Typography
+                        variant="body"
+                        sx={{
+                            opacity: 0.8,
+                            position: "absolute",
+                            bottom: "6px",
+                        }}
+                    >
+                        Selected
+                    </Typography>
+                )}
             </LargeTileTextOverlay>
             {person.isPinned && (
                 <PinnedIconContainer>
@@ -788,13 +987,16 @@ const PersonCard: React.FC<PersonCardProps> = ({
                 </PinnedIconContainer>
             )}
         </ItemCard>
-        <PersonActionMenu
-            person={person}
-            onRenamePerson={onRenamePerson}
-            onPinPerson={onPinPerson}
-            onAddName={onAddName}
-            onIgnorePerson={onIgnorePerson}
-        />
+        {!isMultiSelectionActive && (
+            <PersonActionMenu
+                person={person}
+                onRenamePerson={onRenamePerson}
+                onPinPerson={onPinPerson}
+                onAddName={onAddName}
+                onIgnorePerson={onIgnorePerson}
+                toggleMultiSelectPerson={toggleMultiSelectPerson}
+            />
+        )}
     </PersonCardShell>
 );
 
@@ -815,6 +1017,7 @@ interface PersonActionMenuProps {
     onPinPerson: (person: CGroupPerson) => void | Promise<void>;
     onAddName: (person: ClusterPerson) => void;
     onIgnorePerson: (person: ClusterPerson) => void;
+    toggleMultiSelectPerson: (person: CGroupPerson | ClusterPerson) => void;
 }
 
 const PersonActionMenu: React.FC<PersonActionMenuProps> = ({
@@ -823,6 +1026,7 @@ const PersonActionMenu: React.FC<PersonActionMenuProps> = ({
     onPinPerson,
     onAddName,
     onIgnorePerson,
+    toggleMultiSelectPerson,
 }) => {
     const menuOptions =
         person.type === "cgroup"
@@ -873,6 +1077,16 @@ const PersonActionMenu: React.FC<PersonActionMenuProps> = ({
                       {t("ignore")}
                   </OverflowMenuOption>,
               ];
+    menuOptions.push(
+        <OverflowMenuOption
+            key="select"
+            compact
+            startIcon={<CheckIcon />}
+            onClick={() => toggleMultiSelectPerson(person)}
+        >
+            {t("select")}
+        </OverflowMenuOption>,
+    );
 
     return (
         <ActionMenuContainer>
