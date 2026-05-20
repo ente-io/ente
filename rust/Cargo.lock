@@ -2326,6 +2326,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente_crypto_ffi"
+version = "0.1.0"
+dependencies = [
+ "ente-core",
+]
+
+[[package]]
 name = "ente_image"
 version = "0.1.0"
 dependencies = [

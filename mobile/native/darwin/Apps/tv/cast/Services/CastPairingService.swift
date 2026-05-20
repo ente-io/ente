@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Foundation
-import EnteCrypto
 
 // MARK: - Cast Session Management
 
@@ -73,13 +72,8 @@ class RealCastPairingService {
         return newInterval
     }
     
-    // Generate real X25519 keypair using EnteCrypto
     private func generateKeyPair() throws -> (publicKey: Data, privateKey: Data) {
-        let keys = try EnteCrypto.generateCastKeyPair()
-        return (
-            publicKey: Data(base64Encoded: keys.publicKey)!,
-            privateKey: Data(base64Encoded: keys.privateKey)!
-        )
+        try Crypto.generateKeyPair()
     }
     
     func registerDevice() async throws -> CastDevice {
@@ -204,12 +198,15 @@ class RealCastPairingService {
     }
     
     private func decryptPayload(encryptedData: String, publicKey: Data, privateKey: Data) async throws -> CastPayload {
-        // Use EnteCrypto for cast payload decryption
         do {
-            let decryptedData = try EnteCrypto.decryptCastPayload(
-                encryptedPayload: encryptedData,
-                recipientPublicKey: publicKey.base64EncodedString(),
-                recipientPrivateKey: privateKey.base64EncodedString()
+            guard let encryptedBytes = Data(base64Encoded: encryptedData) else {
+                throw CastError.decryptionError("Invalid encrypted cast payload")
+            }
+
+            let decryptedData = try Crypto.sealedBoxOpen(
+                cipherText: encryptedBytes,
+                publicKey: publicKey,
+                secretKey: privateKey
             )
             
             // Handle potential base64 preprocessing from mobile client
@@ -225,7 +222,7 @@ class RealCastPairingService {
             return payload
         } catch {
             throw CastError.decryptionError(
-                "EnteCrypto cast payload decryption failed: \(error.localizedDescription)"
+                "Cast payload decryption failed: \(error.localizedDescription)"
             )
         }
     }

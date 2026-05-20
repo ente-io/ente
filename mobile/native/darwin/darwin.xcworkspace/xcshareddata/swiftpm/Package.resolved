@@ -1,15 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "bigint",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/attaswift/BigInt.git",
-      "state" : {
-        "revision" : "e07e00fa1fd435143a2dcf8b7eec9a7710b2fdfe",
-        "version" : "5.7.0"
-      }
-    },
-    {
       "identity" : "rive-ios",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/rive-app/rive-ios.git",
@@ -19,30 +10,12 @@
       }
     },
     {
-      "identity" : "swift-asn1",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-asn1.git",
-      "state" : {
-        "revision" : "f70225981241859eb4aa1a18a75531d26637c8cc",
-        "version" : "1.4.0"
-      }
-    },
-    {
       "identity" : "swift-cmark",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-cmark.git",
       "state" : {
         "revision" : "5d9bdaa4228b381639fff09403e39a04926e2dbe",
         "version" : "0.7.1"
-      }
-    },
-    {
-      "identity" : "swift-crypto",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-crypto.git",
-      "state" : {
-        "revision" : "d1c6b70f7c5f19fb0b8750cb8dcdf2ea6e2d8c34",
-        "version" : "3.15.0"
       }
     },
     {
