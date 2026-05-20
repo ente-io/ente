@@ -58,7 +58,13 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 > [!NOTE]
 >
-> Re-run `cargo codegen frb` whenever the Rust APIs exposed through Flutter Rust Bridge under `rust/bindings/frb` change.
+> Re-run `cargo codegen frb` whenever the FRB-exported surface under `rust/bindings/frb/` changes. Internal Rust changes (function bodies, private helpers) are picked up by the normal Flutter build.
+>
+> From anywhere in the repo:
+>
+> ```sh
+> (cd "$(git rev-parse --show-toplevel)/rust" && cargo codegen frb)
+> ```
 
 To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.
 
