@@ -126,22 +126,22 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
             ),
             if (widget.isSelected)
               Positioned(
-                left: -4,
-                top: -4,
+                left: -5,
+                top: -5,
                 child: Container(
-                  width: 16,
-                  height: 16,
+                  width: 20,
+                  height: 20,
                   decoration: BoxDecoration(
                     color: getEnteColorScheme(context).primary500,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: getEnteColorScheme(context).backgroundBase,
-                      width: 1.5,
+                      width: 2,
                     ),
                   ),
                   child: Icon(
                     Icons.check,
-                    size: 10,
+                    size: 12,
                     color: getEnteColorScheme(context).backgroundBase,
                   ),
                 ),
