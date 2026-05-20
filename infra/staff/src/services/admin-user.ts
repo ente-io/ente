@@ -8,6 +8,13 @@ import {
 } from "./api";
 import type { StaffSession } from "./session";
 
+const nullToUndefined = <T>(value: T | null | undefined): T | undefined =>
+    value === null ? undefined : value;
+
+const nullishToEmpty = <T>(value: T[] | null | undefined): T[] => value ?? [];
+
+const nullishToZero = (value: number | null | undefined): number => value ?? 0;
+
 const UserProfileData = z.looseObject({
     isEmailMFAEnabled: z.boolean(),
     isTwoFactorEnabled: z.boolean(),
@@ -19,8 +26,8 @@ const FamilyMember = z.looseObject({
     id: z.string(),
     email: z.string(),
     status: z.string(),
-    usage: z.number(),
-    storageLimit: z.number().optional(),
+    usage: z.number().nullish().transform(nullToUndefined),
+    storageLimit: z.number().nullish().transform(nullToUndefined),
 });
 
 export type FamilyMember = z.infer<typeof FamilyMember>;
@@ -60,28 +67,42 @@ const Subscription = z.looseObject({
 
 export type Subscription = z.infer<typeof Subscription>;
 
+const FamilyData = z
+    .looseObject({ members: z.array(FamilyMember) })
+    .nullish()
+    .transform(nullToUndefined);
+
+const BonusData = z
+    .looseObject({
+        storageBonuses: z
+            .array(StorageBonus)
+            .nullish()
+            .transform(nullishToEmpty),
+    })
+    .nullish()
+    .transform(nullToUndefined);
+
+const UserDetails = z
+    .looseObject({
+        usage: z.number(),
+        storageBonus: z.number().nullish().transform(nullishToZero),
+        profileData: UserProfileData.nullish().transform(nullToUndefined),
+        familyData: FamilyData,
+        bonusData: BonusData,
+    })
+    .nullish()
+    .transform(nullToUndefined);
+
 const UserResponse = z.looseObject({
     user: z.looseObject({
         ID: z.number(),
         email: z.string(),
         creationTime: z.number(),
     }),
-    subscription: Subscription.nullable().optional(),
-    authCodes: z.number().optional(),
-    tokens: z.array(TokenData).optional(),
-    details: z
-        .looseObject({
-            usage: z.number(),
-            storageBonus: z.number(),
-            profileData: UserProfileData.nullish(),
-            familyData: z
-                .looseObject({ members: z.array(FamilyMember) })
-                .optional(),
-            bonusData: z
-                .looseObject({ storageBonuses: z.array(StorageBonus) })
-                .nullish(),
-        })
-        .optional(),
+    subscription: Subscription.nullish().transform(nullToUndefined),
+    authCodes: z.number().nullish().transform(nullishToZero),
+    tokens: z.array(TokenData).nullish().transform(nullishToEmpty),
+    details: UserDetails,
 });
 
 export type UserResponse = z.infer<typeof UserResponse>;
@@ -173,7 +194,7 @@ export const getStorageBonuses = async (session: StaffSession) => {
 
 export const getTokens = async (session: StaffSession) => {
     const userData = await getSelectedUser(session);
-    return userData.tokens ?? [];
+    return userData.tokens;
 };
 
 export const addOTT = async (
