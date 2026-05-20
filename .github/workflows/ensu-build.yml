@@ -404,10 +404,12 @@ jobs:
               continue-on-error: true
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  GH_TOKEN: ${{ github.token }}
                   RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
-                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.ensu) | [TestFlight](https://appstoreconnect.apple.com/apps/6758197006/testflight/ios) | [GitHub Release](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG})"
+                  release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
+                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.ensu) | [TestFlight](https://appstoreconnect.apple.com/apps/6758197006/testflight/ios) | [GitHub Release](${release_url})"
                   release_body_discord="$(awk '
                       /^Previous changes:$/ { previous = 1 }
                       previous && NF { print "-# " $0; next }
