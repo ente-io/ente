@@ -321,7 +321,7 @@ const buildUserDetailsData = (
             {
                 kind: "text",
                 label: "AuthCodes",
-                value: `${userResponse.authCodes ?? 0}`,
+                value: `${userResponse.authCodes}`,
             },
         ],
         securityState: {
