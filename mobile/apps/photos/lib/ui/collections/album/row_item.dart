@@ -34,7 +34,7 @@ class AlbumRowItemWidget extends StatelessWidget {
   static const _cornerSmoothing = 0.6;
   static const _overlayPadding = 8.0;
   static const _thumbnailToTextSpacing = 8.0;
-  static const _titleToSubtitleSpacing = 1.0;
+  static const _titleToSubtitleSpacing = 4.0;
   static const _sharePillPadding = EdgeInsets.all(2);
   static const _sharedAvatarStrokeWidth = 2.0;
 
@@ -272,7 +272,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                             children: [
                               Text(
                                 c.displayName,
-                                style: TextStyles.mini.copyWith(
+                                style: TextStyles.body.copyWith(
                                   color: componentColors.textBase,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -280,7 +280,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                               const SizedBox(height: _titleToSubtitleSpacing),
                               Text(
                                 textCount,
-                                style: TextStyles.tiny.copyWith(
+                                style: TextStyles.mini.copyWith(
                                   color: componentColors.textLight,
                                 ),
                               ),
@@ -289,7 +289,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                         } else {
                           return Text(
                             c.displayName,
-                            style: TextStyles.mini.copyWith(
+                            style: TextStyles.body.copyWith(
                               color: componentColors.textBase,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -299,7 +299,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                     )
                   : Text(
                       c.displayName,
-                      style: TextStyles.mini.copyWith(
+                      style: TextStyles.body.copyWith(
                         color: componentColors.textBase,
                       ),
                       overflow: TextOverflow.ellipsis,
