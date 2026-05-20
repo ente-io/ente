@@ -292,6 +292,18 @@ When you join a family plan, your individual plan (including any referral bonuse
 
 (Example: If you were on the free 10 GB plan with an additional 10 GB from referrals - 20 GB total - and you join a family plan with 200 GB of storage, you will have access to 200 GB of shared family storage, not 220 GB.)
 
+### Can a family admin reset another family member's account? {#family-admin-reset-account}
+
+Ente accounts are end-to-end encrypted, so another family member or admin cannot reset an account or recover its contents directly.
+
+However, users can set up a trusted Legacy contact for emergency access.
+
+**On mobile:**
+
+Open `Settings > Legacy > Add trusted contact`.
+
+Learn more in the [Legacy contact guide](https://ente.com/help/photos/features/account/legacy/#legacy).
+
 ### Are duplicate photos deduplicated across family members? {#family-plan-deduplication}
 
 No. Family plans are a way to share storage, but each family member has their own separate account. Ente cannot deduplicate files across different accounts.
@@ -379,6 +391,14 @@ Earned storage will be accessible as long as your subscription is active, provid
 If you refer more paid customers than your current plan allows, the extra storage earned will be reserved. This reserved storage will become usable once you upgrade to a higher storage plan.
 
 For example, if you're on a 100 GB plan (max 100 GB earned storage) but refer 15 friends (150 GB worth), the extra 50 GB will be held in reserve until you upgrade to a plan that allows more referral storage.
+
+### Can referral credit be applied after signup? {#referral-credit-after-signup}
+
+No. Referral credits are only applied when a new account is created using the referral code during signup.
+
+If the person has not signed up yet, share your referral code before they create their account.
+
+Find your referral code in `Settings > Referrals`.
 
 ### What counts as abuse of the referral program? {#referral-abuse}
 
