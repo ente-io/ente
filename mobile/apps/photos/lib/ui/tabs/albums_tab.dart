@@ -47,6 +47,9 @@ class AlbumsTab extends StatefulWidget {
 class _AlbumsTabState extends State<AlbumsTab>
     with AutomaticKeepAliveClientMixin {
   static const double _kHeaderToolbarHeight = 60;
+  static const Duration _kSearchTransitionDuration = Duration(
+    milliseconds: 240,
+  );
 
   final ValueNotifier<_AlbumsFilter> _filter = ValueNotifier(
     _AlbumsFilter.ente,
@@ -157,6 +160,8 @@ class _AlbumsTabState extends State<AlbumsTab>
   _AlbumsFilter get _effectiveFilter =>
       _isLocalGalleryMode ? _AlbumsFilter.onDevice : _filter.value;
 
+  bool get _hasSearchQuery => _searchQuery.trim().isNotEmpty;
+
   void _syncSortState() {
     _sortKey.value = localSettings.albumSortKey();
     _sortDirection.value = localSettings.albumSortDirection();
@@ -185,6 +190,7 @@ class _AlbumsTabState extends State<AlbumsTab>
 
   void _activateSearch() {
     if (_isSearchActive) return;
+    widget.selectedAlbums?.clearAll();
     setState(() {
       _isSearchActive = true;
     });
@@ -232,8 +238,135 @@ class _AlbumsTabState extends State<AlbumsTab>
       albumViewType: _viewType.value,
       selectedAlbums: widget.selectedAlbums,
       shrinkWrap: true,
-      shouldShowCreateAlbum: showCreateAlbum && _searchQuery.trim().isEmpty,
-      enableSelectionMode: true,
+      shouldShowCreateAlbum: showCreateAlbum && !_hasSearchQuery,
+      enableSelectionMode: !_isSearchActive,
+    );
+  }
+
+  List<Widget> _buildCollectionSearchSectionSlivers({
+    required String title,
+    required String tag,
+    required List<Collection>? collections,
+  }) {
+    if (collections == null) {
+      return [
+        SliverToBoxAdapter(child: _buildSearchSectionHeader(title)),
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: EnteLoadingWidget(),
+          ),
+        ),
+      ];
+    }
+    final filteredCollections = _filterCollectionsByQuery(collections);
+    if (filteredCollections.isEmpty) {
+      return const [];
+    }
+    return [
+      SliverToBoxAdapter(child: _buildSearchSectionHeader(title)),
+      CollectionsFlexiGridViewWidget(
+        filteredCollections,
+        albumViewType: _viewType.value,
+        shrinkWrap: true,
+        shouldShowCreateAlbum: false,
+        enableSelectionMode: false,
+        tag: tag,
+        topPadding: 8,
+        bottomPadding: 0,
+      ),
+    ];
+  }
+
+  Widget _buildSearchSectionHeader(String title) {
+    final colors = context.componentColors;
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 16),
+      child: Text(
+        title,
+        style: TextStyles.large.copyWith(color: colors.textLight),
+      ),
+    );
+  }
+
+  Widget _buildGlobalSearchEmptyStateSliver(AppLocalizations strings) {
+    final colors = context.componentColors;
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            strings.noResultsFound,
+            textAlign: TextAlign.center,
+            style: TextStyles.body.copyWith(color: colors.textLight),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlobalSearchResultsSliver(AppLocalizations strings) {
+    if (_isLocalGalleryMode) {
+      return SliverMainAxisGroup(
+        slivers: [
+          DeviceFolderVerticalGridSliver(
+            key: const ValueKey("album_search_local_device_folders"),
+            searchQuery: _searchQuery.trim(),
+            albumViewType: _viewType.value,
+            showEmptyState: true,
+            topPadding: 8,
+            bottomPadding: 0,
+            sectionHeader: _buildSearchSectionHeader(strings.onDevice),
+            emptyStateSliver: _buildGlobalSearchEmptyStateSliver(strings),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 200)),
+        ],
+      );
+    }
+
+    final enteCollections = _enteCollections.value;
+    final sharedCollections = _sharedCollections.value;
+    final filteredEnteCollections = enteCollections == null
+        ? null
+        : _filterCollectionsByQuery(enteCollections);
+    final filteredSharedCollections = sharedCollections == null
+        ? null
+        : _filterCollectionsByQuery(sharedCollections);
+    final hasRemoteCollections =
+        (filteredEnteCollections?.isNotEmpty ?? false) ||
+        (filteredSharedCollections?.isNotEmpty ?? false);
+    final hasFinishedLoadingRemoteCollections =
+        enteCollections != null && sharedCollections != null;
+    final shouldShowDeviceSearchState =
+        hasFinishedLoadingRemoteCollections && !hasRemoteCollections;
+
+    return SliverMainAxisGroup(
+      slivers: [
+        ..._buildCollectionSearchSectionSlivers(
+          title: strings.ente,
+          tag: "album_search_ente",
+          collections: filteredEnteCollections,
+        ),
+        DeviceFolderVerticalGridSliver(
+          key: const ValueKey("album_search_device_folders"),
+          searchQuery: _searchQuery.trim(),
+          albumViewType: _viewType.value,
+          showEmptyState: shouldShowDeviceSearchState,
+          topPadding: 8,
+          bottomPadding: 0,
+          sectionHeader: _buildSearchSectionHeader(strings.onDevice),
+          emptyStateSliver: shouldShowDeviceSearchState
+              ? _buildGlobalSearchEmptyStateSliver(strings)
+              : null,
+        ),
+        ..._buildCollectionSearchSectionSlivers(
+          title: strings.searchResultShared,
+          tag: "album_search_shared",
+          collections: filteredSharedCollections,
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 200)),
+      ],
     );
   }
 
@@ -268,7 +401,8 @@ class _AlbumsTabState extends State<AlbumsTab>
     final colorScheme = getEnteColorScheme(context);
     final strings = AppLocalizations.of(context);
     final isListView = _viewType.value == AlbumViewType.list;
-    final showSortActions = _effectiveFilter != _AlbumsFilter.onDevice;
+    final showSortActions =
+        !_hasSearchQuery && _effectiveFilter != _AlbumsFilter.onDevice;
     final currentSortKey = _sortKey.value;
     final currentSortDirection = _sortDirection.value;
     final nameSortDirection = currentSortKey == AlbumSortKey.albumName
@@ -404,163 +538,176 @@ class _AlbumsTabState extends State<AlbumsTab>
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: SizedBox(
                   height: _kHeaderToolbarHeight,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 220),
-                          switchInCurve: Curves.easeOutCubic,
-                          switchOutCurve: Curves.easeInCubic,
-                          layoutBuilder: (currentChild, previousChildren) =>
-                              Stack(
-                                alignment: Alignment.centerLeft,
-                                children: [
-                                  ...previousChildren,
-                                  if (currentChild != null) currentChild,
-                                ],
-                              ),
-                          transitionBuilder: (child, animation) {
-                            final curvedAnimation = CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOutCubic,
-                              reverseCurve: Curves.easeInCubic,
-                            );
-                            final beginOffset =
-                                child.key == const ValueKey("search_title")
-                                ? const Offset(0.04, 0)
-                                : const Offset(-0.04, 0);
-                            return FadeTransition(
-                              opacity: curvedAnimation,
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: beginOffset,
-                                  end: Offset.zero,
-                                ).animate(curvedAnimation),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: _isSearchActive
-                              ? Row(
-                                  key: const ValueKey("search_title"),
-                                  children: [
-                                    Expanded(
-                                      child: TextInputComponent(
-                                        controller: _searchController,
-                                        focusNode: _searchFocusNode,
-                                        hintText: strings.searchAlbums,
-                                        autofocus: true,
-                                        prefix: HugeIcon(
-                                          icon: HugeIcons.strokeRoundedSearch01,
-                                          size: 18,
-                                          color: componentColors.textLight,
-                                        ),
-                                        suffix: GestureDetector(
-                                          behavior: HitTestBehavior.opaque,
-                                          onTap: _deactivateSearch,
-                                          child: HugeIcon(
-                                            icon:
-                                                HugeIcons.strokeRoundedCancel01,
-                                            size: 18,
-                                            color: componentColors.textLight,
-                                          ),
-                                        ),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _searchQuery = value;
-                                          });
-                                        },
-                                      ),
+                  child: AnimatedSwitcher(
+                    duration: _kSearchTransitionDuration,
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    layoutBuilder: (currentChild, previousChildren) => Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        ...previousChildren,
+                        if (currentChild != null) currentChild,
+                      ],
+                    ),
+                    transitionBuilder: (child, animation) {
+                      final curvedAnimation = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                        reverseCurve: Curves.easeInCubic,
+                      );
+                      final beginOffset =
+                          child.key == const ValueKey("albums_search_toolbar")
+                          ? const Offset(0.035, 0)
+                          : const Offset(-0.035, 0);
+                      return FadeTransition(
+                        opacity: curvedAnimation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: beginOffset,
+                            end: Offset.zero,
+                          ).animate(curvedAnimation),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _isSearchActive
+                        ? Row(
+                            key: const ValueKey("albums_search_toolbar"),
+                            children: [
+                              Expanded(
+                                child: TextInputComponent(
+                                  controller: _searchController,
+                                  focusNode: _searchFocusNode,
+                                  hintText: strings.searchAlbums,
+                                  autofocus: true,
+                                  prefix: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedSearch01,
+                                    size: 18,
+                                    color: componentColors.textLight,
+                                  ),
+                                  suffix: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: _deactivateSearch,
+                                    child: HugeIcon(
+                                      icon: HugeIcons.strokeRoundedCancel01,
+                                      size: 18,
+                                      color: componentColors.textLight,
                                     ),
-                                    const SizedBox(width: 20),
-                                    albumsOptionsButton,
-                                  ],
-                                )
-                              : Text(
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _searchQuery = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            key: const ValueKey("albums_title_toolbar"),
+                            children: [
+                              Expanded(
+                                child: Text(
                                   strings.albums,
-                                  key: const ValueKey("albums_title"),
                                   style: textTheme.h4Bold,
                                 ),
-                        ),
-                      ),
-                      if (!_isSearchActive) ...[
-                        IconButtonComponent(
-                          variant: IconButtonComponentVariant.primary,
-                          shouldSurfaceExecutionStates: false,
-                          icon: const HugeIcon(
-                            icon: HugeIcons.strokeRoundedSearch01,
+                              ),
+                              IconButtonComponent(
+                                variant: IconButtonComponentVariant.primary,
+                                shouldSurfaceExecutionStates: false,
+                                icon: const HugeIcon(
+                                  icon: HugeIcons.strokeRoundedSearch01,
+                                ),
+                                onTap: _activateSearch,
+                              ),
+                              const SizedBox(width: 6),
+                              albumsOptionsButton,
+                            ],
                           ),
-                          onTap: _activateSearch,
-                        ),
-                        const SizedBox(width: 6),
-                        albumsOptionsButton,
-                      ],
-                    ],
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ValueListenableBuilder<_AlbumsFilter>(
-                        valueListenable: _filter,
-                        builder: (context, selected, _) {
-                          final effectiveFilter = localGalleryMode
-                              ? _AlbumsFilter.onDevice
-                              : selected;
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            child: Row(
-                              children: [
-                                if (!localGalleryMode) ...[
-                                  _AlbumsFilterChip(
-                                    label: strings.ente,
-                                    selected:
-                                        effectiveFilter == _AlbumsFilter.ente,
-                                    onTap: () =>
-                                        _selectFilter(_AlbumsFilter.ente),
-                                  ),
-                                  const SizedBox(width: 8),
-                                ],
-                                _AlbumsFilterChip(
-                                  label: strings.onDevice,
-                                  selected:
-                                      effectiveFilter == _AlbumsFilter.onDevice,
-                                  onTap: () =>
-                                      _selectFilter(_AlbumsFilter.onDevice),
+              AnimatedSize(
+                duration: _kSearchTransitionDuration,
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.topCenter,
+                child: AnimatedSwitcher(
+                  duration: _kSearchTransitionDuration,
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  child: _isSearchActive
+                      ? const SizedBox.shrink(key: ValueKey("hidden_filters"))
+                      : Padding(
+                          key: const ValueKey("album_filters"),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ValueListenableBuilder<_AlbumsFilter>(
+                                  valueListenable: _filter,
+                                  builder: (context, selected, _) {
+                                    final effectiveFilter = localGalleryMode
+                                        ? _AlbumsFilter.onDevice
+                                        : selected;
+                                    return SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      physics: const BouncingScrollPhysics(),
+                                      child: Row(
+                                        children: [
+                                          if (!localGalleryMode) ...[
+                                            _AlbumsFilterChip(
+                                              label: strings.ente,
+                                              selected:
+                                                  effectiveFilter ==
+                                                  _AlbumsFilter.ente,
+                                              onTap: () => _selectFilter(
+                                                _AlbumsFilter.ente,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                          ],
+                                          _AlbumsFilterChip(
+                                            label: strings.onDevice,
+                                            selected:
+                                                effectiveFilter ==
+                                                _AlbumsFilter.onDevice,
+                                            onTap: () => _selectFilter(
+                                              _AlbumsFilter.onDevice,
+                                            ),
+                                          ),
+                                          if (!localGalleryMode) ...[
+                                            const SizedBox(width: 8),
+                                            _AlbumsFilterChip(
+                                              label: strings.searchResultShared,
+                                              selected:
+                                                  effectiveFilter ==
+                                                  _AlbumsFilter.shared,
+                                              onTap: () => _selectFilter(
+                                                _AlbumsFilter.shared,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
-                                if (!localGalleryMode) ...[
-                                  const SizedBox(width: 8),
-                                  _AlbumsFilterChip(
-                                    label: strings.searchResultShared,
-                                    selected:
-                                        effectiveFilter == _AlbumsFilter.shared,
-                                    onTap: () =>
-                                        _selectFilter(_AlbumsFilter.shared),
+                              ),
+                              if (!localGalleryMode)
+                                IconButtonComponent(
+                                  variant: IconButtonComponentVariant.primary,
+                                  shouldSurfaceExecutionStates: false,
+                                  icon: const HugeIcon(
+                                    icon: HugeIcons.strokeRoundedMoreVertical,
                                   ),
-                                ],
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    if (!localGalleryMode)
-                      IconButtonComponent(
-                        variant: IconButtonComponentVariant.primary,
-                        shouldSurfaceExecutionStates: false,
-                        icon: const HugeIcon(
-                          icon: HugeIcons.strokeRoundedMoreVertical,
+                                  onTap: () => showAlbumsManageSheet(context),
+                                ),
+                            ],
+                          ),
                         ),
-                        onTap: () => showAlbumsManageSheet(context),
-                      ),
-                  ],
                 ),
               ),
               Expanded(
@@ -577,6 +724,9 @@ class _AlbumsTabState extends State<AlbumsTab>
                         ],
                       ),
                       builder: (context, _) {
+                        if (_hasSearchQuery) {
+                          return _buildGlobalSearchResultsSliver(strings);
+                        }
                         final filter = _effectiveFilter;
                         final List<Collection>? collections;
                         final bool showCreateAlbum;
@@ -592,7 +742,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                             emptyState = const SharedEmptyState();
                           case _AlbumsFilter.onDevice:
                             return DeviceFolderVerticalGridSliver(
-                              searchQuery: _searchQuery,
+                              searchQuery: _searchQuery.trim(),
                               albumViewType: _viewType.value,
                             );
                         }
@@ -617,7 +767,7 @@ class _AlbumsTabState extends State<AlbumsTab>
             ],
           ),
         ),
-        if (selectedAlbums != null)
+        if (selectedAlbums != null && !_isSearchActive)
           AnimatedBuilder(
             animation: Listenable.merge(
               [_filter, _enteCollections, _sharedCollections],
