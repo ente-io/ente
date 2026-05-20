@@ -29,9 +29,9 @@ final _standardExifDateTimePattern = RegExp(
   r'^\d{4}:(0[1-9]|1[0-2]):(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$',
 );
 final _isoExifDateTimePattern = RegExp(
-  r'^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])[T ]([01]\d|2[0-3]):([0-5]\d):([0-5]\d)([\.:]\d+)?([Zz]|[+-](?:[01]\d|2[0-3]):[0-5]\d)?$',
+  r'^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])[T ]([01]\d|2[0-3]):([0-5]\d):([0-5]\d)([\.:]\d+)?([Zz]|[+-](?:[01]\d|2[0-3]):?[0-5]\d)?$',
 );
-final _offsetPattern = RegExp(r'^([Zz]|[+-](?:[01]\d|2[0-3]):[0-5]\d)$');
+final _offsetPattern = RegExp(r'^([Zz]|[+-](?:[01]\d|2[0-3]):?[0-5]\d)$');
 
 Future<Map<String, IfdTag>> getExif(EnteFile file) async {
   try {
@@ -231,10 +231,7 @@ ParsedExifDateTime _getIsoExifDateTimeInDeviceTimezone(
   );
 }
 
-String? _normalizeOffset(
-  String? offsetString, {
-  bool throwOnInvalid = false,
-}) {
+String? _normalizeOffset(String? offsetString, {bool throwOnInvalid = false}) {
   final offset = offsetString?.trim();
   if (offset == null || offset.isEmpty) {
     return null;
@@ -245,7 +242,11 @@ String? _normalizeOffset(
     }
     return null;
   }
-  return offset.toUpperCase();
+  final normalizedOffset = offset.toUpperCase();
+  if (normalizedOffset == "Z" || normalizedOffset.length == 6) {
+    return normalizedOffset;
+  }
+  return "${normalizedOffset.substring(0, 3)}:${normalizedOffset.substring(3)}";
 }
 
 DateTime _parseIsoDateTimeComponents(RegExpMatch match) {
