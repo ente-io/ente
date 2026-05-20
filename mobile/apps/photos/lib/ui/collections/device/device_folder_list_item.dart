@@ -54,6 +54,8 @@ class DeviceFolderListItem extends StatelessWidget {
       ),
       title: Text(
         deviceCollection.name,
+        maxLines: 1,
+        softWrap: false,
         overflow: TextOverflow.ellipsis,
         style: TextStyles.body.copyWith(
           color: componentColors.textBase,
@@ -63,6 +65,8 @@ class DeviceFolderListItem extends StatelessWidget {
         AppLocalizations.of(context).itemCount(
           count: deviceCollection.count,
         ),
+        maxLines: 1,
+        softWrap: false,
         overflow: TextOverflow.ellipsis,
         style: TextStyles.mini.copyWith(
           color: componentColors.textLight,
