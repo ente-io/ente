@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -18,7 +19,6 @@ import "package:photos/ui/components/buttons/button_widget.dart"
     show ButtonAction;
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/buttons/soft_icon_button.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/sharing/memory_link_details_sheet.dart";
 import "package:photos/ui/tabs/shared/memory_link_item.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
@@ -122,8 +122,9 @@ class _AllLinksPageState extends State<AllLinksPage> {
 
   Future<void> _deleteSelectedLinks() async {
     for (final link in List<Collection>.of(_selectedQuickLinks)) {
-      await CollectionActions(CollectionsService.instance)
-          .trashCollectionKeepingPhotos(link, context);
+      await CollectionActions(
+        CollectionsService.instance,
+      ).trashCollectionKeepingPhotos(link, context);
       if (!mounted) return;
       setState(() {
         widget.quickLinks.remove(link);
@@ -158,58 +159,35 @@ class _AllLinksPageState extends State<AllLinksPage> {
     final textTheme = getEnteTextTheme(context);
     final linkItems = <Object>[...widget.quickLinks, ...widget.memoryShares];
     final hasLinks = linkItems.isNotEmpty;
+    final linksCount = widget.quickLinks.length + widget.memoryShares.length;
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 48,
-        leadingWidth: 48,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_outlined),
-        ),
-      ),
-      body: CustomScrollView(
+      backgroundColor: context.componentColors.backgroundBase,
+      body: AppBarComponent(
+        title: AppLocalizations.of(context).links,
+        subtitle: AppLocalizations.of(context).itemCount(count: linksCount),
         physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TitleBarTitleWidget(
-                    title: AppLocalizations.of(context).links,
-                    heroTag: widget.titleHeroTag,
-                    trailingWidgets: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        switchInCurve: Curves.easeOut,
-                        switchOutCurve: Curves.easeIn,
-                        child: _hasSelection
-                            ? SoftIconButton(
-                                key: const ValueKey("delete_links"),
-                                icon: HugeIcon(
-                                  icon: HugeIcons.strokeRoundedDelete01,
-                                  size: 18,
-                                  color: colorScheme.warning500,
-                                ),
-                                onTap: _removeSelectedLinks,
-                              )
-                            : const SizedBox.shrink(
-                                key: ValueKey("no_selection_action"),
-                              ),
-                      ),
-                    ],
+        actions: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: _hasSelection
+                ? SoftIconButton(
+                    key: const ValueKey("delete_links"),
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedDelete01,
+                      size: 18,
+                      color: colorScheme.warning500,
+                    ),
+                    onTap: _removeSelectedLinks,
+                  )
+                : const SizedBox.shrink(
+                    key: ValueKey("no_selection_action"),
                   ),
-                  Text(
-                    (widget.quickLinks.length + widget.memoryShares.length)
-                        .toString(),
-                  ),
-                ],
-              ),
-            ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+        ],
+        slivers: [
           if (hasLinks) ...[
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -244,7 +222,7 @@ class _AllLinksPageState extends State<AllLinksPage> {
                   final share = item as MemoryShare;
                   final title =
                       MemoryShareService.instance.getMemoryShareTitle(share) ??
-                          AppLocalizations.of(context).memoryLink;
+                      AppLocalizations.of(context).memoryLink;
                   return MemoryLinkAlbumItem(
                     title: title,
                     fileCount: share.fileCount,
@@ -260,7 +238,7 @@ class _AllLinksPageState extends State<AllLinksPage> {
                     onLongPress: () => _toggleMemoryShareSelection(share),
                   );
                 },
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),

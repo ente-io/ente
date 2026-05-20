@@ -86,6 +86,8 @@ class AlbumListItemWidget extends StatelessWidget {
       title: Text(
         collection.displayName,
         style: TextStyles.body.copyWith(color: colors.textBase),
+        maxLines: 1,
+        softWrap: false,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: FutureBuilder<int>(
@@ -158,6 +160,8 @@ class AlbumListItemWidget extends StatelessWidget {
           child: Text(
             text,
             style: textStyle,
+            maxLines: 1,
+            softWrap: false,
             overflow: TextOverflow.ellipsis,
           ),
         ),

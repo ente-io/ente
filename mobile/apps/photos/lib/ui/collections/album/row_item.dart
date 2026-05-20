@@ -275,6 +275,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                                 style: TextStyles.body.copyWith(
                                   color: componentColors.textBase,
                                 ),
+                                maxLines: 1,
+                                softWrap: false,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: _titleToSubtitleSpacing),
@@ -283,6 +285,9 @@ class AlbumRowItemWidget extends StatelessWidget {
                                 style: TextStyles.mini.copyWith(
                                   color: componentColors.textLight,
                                 ),
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           );
@@ -292,6 +297,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                             style: TextStyles.body.copyWith(
                               color: componentColors.textBase,
                             ),
+                            maxLines: 1,
+                            softWrap: false,
                             overflow: TextOverflow.ellipsis,
                           );
                         }
@@ -302,6 +309,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                       style: TextStyles.body.copyWith(
                         color: componentColors.textBase,
                       ),
+                      maxLines: 1,
+                      softWrap: false,
                       overflow: TextOverflow.ellipsis,
                     ),
             ),
