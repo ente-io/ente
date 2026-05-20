@@ -565,6 +565,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     if (faceIDToNewClusterID.isNotEmpty) {
       await mlDataDB.updateFaceIdToClusterId(faceIDToNewClusterID);
     }
+    if (!mounted) return;
 
     final total = clusterIDs.length;
     final dialog = total > 1
@@ -579,12 +580,14 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     var completed = 0;
     var hasUpdates = false;
     var completedAll = false;
+    final changedPersons = <PersonEntity>[];
     try {
       for (final clusterID in clusterIDs) {
-        await ClusterFeedbackService.instance.ignoreCluster(
+        final ignoredPerson = await ClusterFeedbackService.instance.ignoreCluster(
           clusterID,
           firePeopleChangedEvent: false,
         );
+        changedPersons.add(ignoredPerson);
         completed++;
         hasUpdates = true;
         dialog?.update(
@@ -595,16 +598,25 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     } catch (e, s) {
       _logger.severe('Error while ignoring selected face clusters', e, s);
     } finally {
-      if (hasUpdates) {
-        Bus.instance.fire(PeopleChangedEvent());
-      }
       if (dialog != null) {
         await dialog.hide();
       }
       if (completedAll && mounted) {
         _clearSelectionMode();
       }
+      if (hasUpdates) {
+        _firePeopleChangedEvents(changedPersons);
+      }
     }
+  }
+
+  void _firePeopleChangedEvents(List<PersonEntity> changedPersons) {
+    Bus.instance.fire(
+      PeopleChangedEvent(
+        person: changedPersons.isEmpty ? null : changedPersons.first,
+        source: "file_details_bulk_ignore_faces",
+      ),
+    );
   }
 
   String _bulkIgnoreProgressMessage(
