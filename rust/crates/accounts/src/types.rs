@@ -9,9 +9,6 @@ use zeroize::Zeroize;
 /// Default base URL for Ente's public API.
 pub const DEFAULT_API_BASE_URL: &str = PRODUCTION_API_BASE_URL;
 
-/// Default base URL for Ente's accounts broker.
-pub const DEFAULT_ACCOUNTS_URL: &str = "https://accounts.ente.com";
-
 /// Boxed future returned by a configured sleep hook.
 pub type SleepFuture = Pin<Box<dyn Future<Output = ()> + 'static>>;
 

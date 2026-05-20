@@ -28,7 +28,7 @@ use crate::{
         TwoFactorAuthorizationResponse, TwoFactorRecoveryResponse, TwoFactorType,
         UpdateSrpAndKeysRequest, UpdatedKeyAttr,
     },
-    types::{AccountSecrets, DEFAULT_ACCOUNTS_URL},
+    types::AccountSecrets,
 };
 
 const SRP_A_LEN: usize = 512;
@@ -790,10 +790,8 @@ where
 
         let accounts_url = auth_response
             .accounts_url
-            .as_ref()
-            .filter(|url| !url.is_empty())
-            .map(String::as_str)
-            .unwrap_or(DEFAULT_ACCOUNTS_URL);
+            .as_deref()
+            .expect("accountsUrl is required when passkeySessionID is present");
 
         let verification_url = build_passkey_verification_url(
             accounts_url,
