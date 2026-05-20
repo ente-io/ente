@@ -137,12 +137,10 @@ class VideoOverlayDuration extends StatelessWidget {
 
         double inset = 4;
         double iconSize = 18;
-        TextStyle durationTextStyle = TextStyles.tiny;
         if (constraints.hasBoundedWidth) {
           final w = constraints.maxWidth;
           if (w > 120) {
             iconSize = 24;
-            durationTextStyle = TextStyles.mini;
           } else if (w < 75) {
             inset = 3;
             iconSize = 16;
@@ -161,7 +159,7 @@ class VideoOverlayDuration extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 1),
             child: Text(
               formattedDuration,
-              style: durationTextStyle.copyWith(color: Colors.white),
+              style: TextStyles.tiny.copyWith(color: Colors.white),
             ),
           );
         }
