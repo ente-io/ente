@@ -443,6 +443,7 @@
     "move": "Move",
     "add": "Add",
     "select": "Select",
+    "selected": "Selected",
     "remove": "Remove",
     "yes_remove": "Yes, remove",
     "remove_from_album": "Remove from album",

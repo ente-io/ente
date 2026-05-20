@@ -251,7 +251,6 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
                     onPinPerson={handlePinPerson}
                     onAddName={setClusterToName}
                     onIgnorePerson={handleIgnorePerson}
-                    // isMultiSelectionActive={multiSelectedPeople.length > 0}
                     multiSelectedPeople={multiSelectedPeople}
                     toggleMultiSelectPerson={toggleMultiSelectPerson}
                 />
@@ -568,7 +567,6 @@ interface AllPeopleContentProps {
     onPinPerson: (person: CGroupPerson) => void | Promise<void>;
     onAddName: (person: ClusterPerson) => void;
     onIgnorePerson: (person: ClusterPerson) => void;
-    // isMultiSelectionActive: boolean;
     multiSelectedPeople: (CGroupPerson | ClusterPerson)[];
     toggleMultiSelectPerson: (person: CGroupPerson | ClusterPerson) => void;
 }
@@ -587,7 +585,6 @@ interface ItemData
         | "onPinPerson"
         | "onAddName"
         | "onIgnorePerson"
-        // | "isMultiSelectionActive"
         | "multiSelectedPeople"
         | "toggleMultiSelectPerson"
     > {
@@ -731,7 +728,6 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
     onPinPerson,
     onAddName,
     onIgnorePerson,
-    // isMultiSelectionActive,
     multiSelectedPeople,
     toggleMultiSelectPerson,
 }) => {
@@ -784,7 +780,6 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
         onPinPerson,
         onAddName,
         onIgnorePerson,
-        // isMultiSelectionActive,
         multiSelectedPeople.length > 0,
         multiSelectedPeople,
         toggleMultiSelectPerson,
@@ -923,18 +918,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
                     : onSelectPerson(person.id)
             }
         >
-            <LargeTileTextOverlay
-            /*sx={{
-                    // padding: isMultiSelectionActive
-                    //     ? !isPersonMultiSelected
-                    //         ? undefined
-                    //         : "12px"
-                    //     : undefined,
-                    border: isPersonMultiSelected
-                        ? "4px solid green"
-                        : undefined,
-                }}*/
-            >
+            <LargeTileTextOverlay>
                 {isPersonMultiSelected && (
                     <>
                         <div
@@ -952,7 +936,6 @@ const PersonCard: React.FC<PersonCardProps> = ({
                                 position: "absolute",
                                 top: "4px",
                                 right: "4px",
-                                // color: "var(--mui-palette-accent-main)",
                             }}
                         />
                     </>
@@ -986,7 +969,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
                             bottom: "6px",
                         }}
                     >
-                        Selected
+                        {t("selected")}
                     </Typography>
                 )}
             </LargeTileTextOverlay>
