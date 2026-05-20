@@ -325,15 +325,18 @@ export interface GalleryState {
      * user action) that have already been made to applied to remote, but whose
      * effects on remote have not yet been synced back to our local DB.
      *
-     * Each entry is keyed by file ID and includes the favorite status (`true`
-     * if it belongs to the user's favorites, false otherwise) which should be
-     * used instead of what we get from our local DB.
+     * Each entry is keyed by file ID for owned files, and by hash/type for
+     * non-owned shared files. This keeps equivalent shared-file updates
+     * last-writer-wins before the next remote pull.
      *
      * The next time a remote pull completes, we clear this map since thereafter
      * just deriving {@link favoriteFileIDs} from our local files would reflect
      * the correct state on remote too.
      */
-    unsyncedFavoriteUpdates: Map<number, UnsyncedFavoriteUpdate>;
+    unsyncedFavoriteUpdates: Map<
+        UnsyncedFavoriteUpdateKey,
+        UnsyncedFavoriteUpdate
+    >;
     /**
      * File (IDs) for which there is currently an in-flight archive / unarchive
      * operation.
@@ -889,7 +892,11 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 action.file.ownerID == state.user!.id
                     ? undefined
                     : favoriteFileHashAndTypeKey(action.file);
-            unsyncedFavoriteUpdates.set(action.file.id, {
+            if (action.file.ownerID != state.user!.id && !fileHashAndTypeKey) {
+                return state;
+            }
+            const updateKey = fileHashAndTypeKey ?? action.file.id;
+            unsyncedFavoriteUpdates.set(updateKey, {
                 fileID: action.file.id,
                 fileHashAndTypeKey,
                 isFavorite: action.isFavorite,
@@ -1342,6 +1349,8 @@ interface UnsyncedFavoriteUpdate {
     fileHashAndTypeKey?: string;
     isFavorite: boolean;
 }
+
+type UnsyncedFavoriteUpdateKey = number | string;
 
 const favoriteFileHashAndTypeKey = (file: EnteFile) => {
     const hash = metadataHash(file.metadata);

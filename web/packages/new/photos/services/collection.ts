@@ -776,6 +776,50 @@ const userOwnedEquivalentFilesByHashAndType = (
 
     return equivalents;
 };
+
+interface AddOrCopyToCollectionResult {
+    addedFiles: EnteFile[];
+}
+
+const newAddOrCopyToCollectionResult = (): AddOrCopyToCollectionResult => ({
+    addedFiles: [],
+});
+
+// Bridges favorite undo before the remote add/copy has been pulled into local DB.
+const pendingFavoriteFilesByHashAndType = new Map<string, EnteFile>();
+let pendingUserFavoritesCollection: Collection | undefined;
+
+const rememberPendingFavoriteFiles = (
+    sourceFiles: EnteFile[],
+    favoriteFiles: EnteFile[],
+    userID: number,
+) => {
+    const favoriteFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
+        favoriteFiles,
+        userID,
+    );
+
+    for (const sourceFile of sourceFiles) {
+        if (sourceFile.ownerID == userID) continue;
+
+        const key = hashAndTypeKey(sourceFile);
+        const favoriteFile = key
+            ? favoriteFilesByHashAndType.get(key)
+            : undefined;
+        if (key && favoriteFile) {
+            pendingFavoriteFilesByHashAndType.set(key, favoriteFile);
+        }
+    }
+};
+
+const forgetPendingFavoriteFiles = (files: EnteFile[], userID: number) => {
+    for (const file of files) {
+        if (file.ownerID == userID) continue;
+
+        const key = hashAndTypeKey(file);
+        if (key) pendingFavoriteFilesByHashAndType.delete(key);
+    }
+};
 /**
  *
  * @param dstCollection
@@ -928,7 +972,8 @@ export const addOrCopyToCollection = async (
     dstCollection: Collection,
     files: EnteFile[],
 ) => {
-    if (!files.length) return;
+    const result = newAddOrCopyToCollectionResult();
+    if (!files.length) return result;
 
     /**
      * The user who is adding the files to the dstCollection must be
@@ -968,7 +1013,7 @@ export const addOrCopyToCollection = async (
 
     // If all the files, already exists then,
     // we have nothing pending so returning.
-    if (!filesMissingFromDestination.length) return;
+    if (!filesMissingFromDestination.length) return result;
 
     /**
      * Files which are owned by the current user and not owned
@@ -990,11 +1035,12 @@ export const addOrCopyToCollection = async (
     if (ownedFiles.length) {
         await addToCollection(dstCollection, ownedFiles);
         ownedFiles.forEach((file) => destinationFileIDs.add(file.id));
+        result.addedFiles.push(...ownedFiles);
     }
 
     // If there are no files which are owned but by others
     // then skipping the rest of the process.
-    if (!otherOwnedFiles.length) return;
+    if (!otherOwnedFiles.length) return result;
 
     /**
      * Say if user A uploaded a file X to a shared album and you
@@ -1064,9 +1110,10 @@ export const addOrCopyToCollection = async (
     if (reusableOwnedFiles.length) {
         await addToCollection(dstCollection, reusableOwnedFiles);
         reusableOwnedFiles.forEach((file) => destinationFileIDs.add(file.id));
+        result.addedFiles.push(...reusableOwnedFiles);
     }
 
-    if (!filesToCopy.length) return;
+    if (!filesToCopy.length) return result;
 
     /**
      * To directly upload to a collection, the currentUser must be the
@@ -1098,8 +1145,13 @@ export const addOrCopyToCollection = async (
             filesToAddAfterCopy.forEach((file) =>
                 destinationFileIDs.add(file.id),
             );
+            result.addedFiles.push(...filesToAddAfterCopy);
         }
+    } else {
+        result.addedFiles.push(...copiedFiles);
     }
+
+    return result;
 };
 
 /**
@@ -1743,19 +1795,25 @@ export const createUncategorizedCollection = () =>
  * Reads local state but does not modify it. The effects are on remote.
  */
 const savedOrCreateUserFavoritesCollection = async () =>
-    (await savedUserFavoritesCollection()) ?? createFavoritesCollection();
+    (await savedUserFavoritesCollection()) ??
+    (pendingUserFavoritesCollection = await createFavoritesCollection());
 
 /**
- * Return the user's own favorites collection, if any, present in the local
- * database.
+ * Return the user's own favorites collection if present in the local database,
+ * or one created during this session before the next remote pull.
  */
 export const savedUserFavoritesCollection = async () => {
     const userID = ensureLocalUser().id;
     const collections = await savedCollections();
-    return collections.find(
-        (collection) =>
-            // See: [Note: User and shared favorites]
-            collection.type == "favorites" && collection.owner.id == userID,
+    return (
+        collections.find(
+            (collection) =>
+                // See: [Note: User and shared favorites]
+                collection.type == "favorites" && collection.owner.id == userID,
+        ) ??
+        (pendingUserFavoritesCollection?.owner.id == userID
+            ? pendingUserFavoritesCollection
+            : undefined)
     );
 };
 
@@ -1767,10 +1825,24 @@ export const savedUserFavoritesCollection = async () => {
  *
  * Reads local state but does not modify it. The effects are on remote.
  */
-export const addToFavoritesCollection = async (files: EnteFile[]) =>
-    addOrCopyToCollection(await savedOrCreateUserFavoritesCollection(), files);
+export const addToFavoritesCollection = async (files: EnteFile[]) => {
+    const userID = ensureLocalUser().id;
+    const hashlessSharedFile = files.find(
+        (file) => file.ownerID != userID && !hashAndTypeKey(file),
+    );
+    if (hashlessSharedFile) {
+        throw new Error("Cannot favorite shared files without metadata hash");
+    }
+
+    const result = await addOrCopyToCollection(
+        await savedOrCreateUserFavoritesCollection(),
+        files,
+    );
+    rememberPendingFavoriteFiles(files, result.addedFiles, userID);
+};
 
 export const removeFromFavoritesCollection = async (files: EnteFile[]) => {
+    const userID = ensureLocalUser().id;
     const favoritesCollection = await savedUserFavoritesCollection();
     if (!favoritesCollection) {
         throw new Error("Favorites collection does not exist");
@@ -1786,6 +1858,7 @@ export const removeFromFavoritesCollection = async (files: EnteFile[]) => {
         favoritesCollection.id,
         uniqueFilesByID(resolvedFiles),
     );
+    forgetPendingFavoriteFiles(files, userID);
 };
 
 const resolveFavoritesFilesForRemoval = async (
@@ -1800,18 +1873,22 @@ const resolveFavoritesFilesForRemoval = async (
         userID,
     );
 
-    return files.flatMap((file) => {
+    return files.map((file) => {
         if (
             file.ownerID != userID &&
             file.collectionID != favoritesCollection.id
         ) {
             const key = hashAndTypeKey(file);
             const favoriteFile = key
-                ? favoriteFilesByHashAndType.get(key)
+                ? (favoriteFilesByHashAndType.get(key) ??
+                  pendingFavoriteFilesByHashAndType.get(key))
                 : undefined;
-            return favoriteFile ? [favoriteFile] : [];
+            if (!favoriteFile) {
+                throw new Error("Could not resolve favorite file for removal");
+            }
+            return favoriteFile;
         }
-        return [file];
+        return file;
     });
 };
 
