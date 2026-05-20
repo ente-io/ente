@@ -34,20 +34,18 @@ fn main() {
 fn run() -> Result<(), DynError> {
     let mut args = env::args().skip(1);
     match (args.next().as_deref(), args.next()) {
-        (Some("ensu"), None) => generate_ensu(),
-        (Some("ensu-ios"), None) => generate_ensu_ios(),
-        (Some("ensu-android"), None) => generate_ensu_android(),
+        (Some("native"), None) => generate_native(),
         (Some("frb"), None) => generate_frb(),
-        _ => Err("usage: cargo codegen <ensu|ensu-ios|ensu-android|frb>".into()),
+        _ => Err("usage: cargo codegen <native|frb>".into()),
     }
 }
 
-fn generate_ensu() -> Result<(), DynError> {
-    generate_ensu_ios()?;
-    generate_ensu_android()
+fn generate_native() -> Result<(), DynError> {
+    generate_native_ios()?;
+    generate_native_android()
 }
 
-fn generate_ensu_ios() -> Result<(), DynError> {
+fn generate_native_ios() -> Result<(), DynError> {
     let rust_root = rust_root()?;
     let repo_root = rust_root
         .parent()
@@ -94,7 +92,7 @@ fn generate_ensu_ios() -> Result<(), DynError> {
     Ok(())
 }
 
-fn generate_ensu_android() -> Result<(), DynError> {
+fn generate_native_android() -> Result<(), DynError> {
     let rust_root = rust_root()?;
     let repo_root = rust_root
         .parent()

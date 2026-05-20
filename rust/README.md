@@ -209,11 +209,13 @@ yarn build:wasm  # builds the WASM package
 > cargo watch -w ../rust/crates/core -w ../rust/bindings/wasm/ente-wasm/src -s "yarn build:wasm"
 > ```
 
-**Flutter Rust Bridge:**
+**Generated bindings:**
 
 ```sh
 cd rust
+cargo codegen native
 cargo codegen frb
 ```
 
-This regenerates both `ente_rust` and `ente_photos_rust`.
+`native` regenerates the UniFFI bindings used by native mobile apps.
+`frb` regenerates both `ente_rust` and `ente_photos_rust`.

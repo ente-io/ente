@@ -10,7 +10,7 @@ Source code for the Ensu iOS app.
 
     ```sh
     cd rust
-    cargo codegen ensu-ios
+    cargo codegen native
     ```
 
 3. Open `Ensu.xcodeproj` in Xcode and run the `Ensu` scheme.
@@ -19,7 +19,7 @@ That's it. Apart from the `cargo codegen`, this is a normal iOS project.
 
 > [!NOTE]
 >
-> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/bindings/uniffi` changes.
+> Re-run `cargo codegen native` whenever the UniFFI interface under `rust/bindings/uniffi` changes.
 >
 > Xcode compiles and statically links the Rust libraries automatically when building the app.
 
