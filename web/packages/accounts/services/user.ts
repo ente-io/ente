@@ -535,11 +535,10 @@ const RemoteEmailOrSRPVerificationResponseBase = z.object({
     twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
 });
 
-const requireAccountsUrlForPasskey = <
-    T extends { passkeySessionID?: string; accountsUrl?: string },
->(
-    response: T,
-) => (response.passkeySessionID ? !!response.accountsUrl : true);
+const requireAccountsUrlForPasskey = (response: {
+    passkeySessionID?: string;
+    accountsUrl?: string;
+}) => (response.passkeySessionID ? !!response.accountsUrl : true);
 
 const accountsUrlForPasskeyRefinement = {
     path: ["accountsUrl"],
@@ -567,10 +566,7 @@ export const RemoteSRPVerificationResponse =
          * verifier.
          */
         srpM2: z.string(),
-    }).refine(
-        requireAccountsUrlForPasskey,
-        accountsUrlForPasskeyRefinement,
-    );
+    }).refine(requireAccountsUrlForPasskey, accountsUrlForPasskeyRefinement);
 
 /**
  * Verify user's access to the given {@link email} by comparing the OTT that
