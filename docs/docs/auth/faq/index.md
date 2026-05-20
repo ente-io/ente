@@ -148,6 +148,20 @@ Due to E2EE, the server doesn't know anything about your codes. Everything is
 encrypted, including the tags, type, account, issuer, notes, pinned or trash
 status, etc.
 
+### Why do some Google Authenticator codes fail to import? {#google-authenticator-import-failed}
+
+Google Authenticator exports some codes in a format that other authenticator apps may not be able to read correctly. This can happen especially with Google account entries.
+
+If a code fails to import, re-add it directly from the original service:
+
+1. Open that service's security or 2FA settings.
+2. Remove the existing authenticator setup.
+3. Set it up again.
+4. Scan the new QR code using Ente Auth.
+5. Save the backup or recovery codes provided by the service.
+
+Codes that imported successfully continue working normally.
+
 ### What does it mean when I receive a message saying that my current device isn't powerful enough to verify my password?
 
 This means that the parameters that were used to derive your master-key on your
