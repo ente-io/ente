@@ -1,3 +1,6 @@
+import 'package:ente_components/theme/colors.dart' show ComponentApp;
+import 'package:ente_components/theme/theme.dart'
+    show ComponentColorTokens, ComponentTheme;
 import 'package:flutter/material.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -9,8 +12,11 @@ final lightThemeData = ThemeData(
   primaryColor: const Color.fromRGBO(255, 110, 64, 1),
   primaryColorLight: const Color.fromRGBO(0, 0, 0, 0.541),
   iconTheme: const IconThemeData(color: Colors.black),
-  primaryIconTheme:
-      const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  primaryIconTheme: const IconThemeData(
+    color: Colors.red,
+    opacity: 1.0,
+    size: 50.0,
+  ),
   colorScheme: const ColorScheme.light(
     primary: Colors.black,
     secondary: Color.fromARGB(255, 163, 163, 163),
@@ -82,6 +88,14 @@ final lightThemeData = ThemeData(
           : const Color.fromRGBO(0, 0, 0, 1);
     }),
   ),
+  extensions: [
+    ComponentColorTokens(
+      ComponentTheme.colorsForApp(
+        ComponentApp.photos,
+        brightness: Brightness.light,
+      ),
+    ),
+  ],
 );
 
 final darkThemeData = ThemeData(
@@ -89,8 +103,11 @@ final darkThemeData = ThemeData(
   brightness: Brightness.dark,
   primaryColorLight: const Color.fromRGBO(255, 255, 255, 0.702),
   iconTheme: const IconThemeData(color: Colors.white),
-  primaryIconTheme:
-      const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  primaryIconTheme: const IconThemeData(
+    color: Colors.red,
+    opacity: 1.0,
+    size: 50.0,
+  ),
   hintColor: const Color.fromRGBO(158, 158, 158, 1),
   colorScheme: const ColorScheme.dark(
     primary: Colors.white,
@@ -163,6 +180,14 @@ final darkThemeData = ThemeData(
       }
     }),
   ),
+  extensions: [
+    ComponentColorTokens(
+      ComponentTheme.colorsForApp(
+        ComponentApp.photos,
+        brightness: Brightness.dark,
+      ),
+    ),
+  ],
 );
 
 TextTheme _buildTextTheme(Color textColor) {
@@ -272,10 +297,10 @@ extension CustomColorScheme on ColorScheme {
 
   // todo: use brightness == Brightness.light for changing color for dark/light theme
   ButtonStyle? get optionalActionButtonStyle => buildElevatedButtonThemeData(
-        onPrimary: const Color(0xFF777777),
-        primary: const Color(0xFFF0F0F0),
-        elevation: 0,
-      ).style;
+    onPrimary: const Color(0xFF777777),
+    primary: const Color(0xFFF0F0F0),
+    elevation: 0,
+  ).style;
 
   Color get recoveryKeyBoxColor => brightness == Brightness.light
       ? const Color.fromRGBO(49, 155, 86, 0.2)
@@ -361,36 +386,37 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData({
   required Color fgEnabled,
 }) {
   return OutlinedButtonThemeData(
-    style: OutlinedButton.styleFrom(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      padding: const EdgeInsets.fromLTRB(50, 16, 50, 16),
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter-SemiBold',
-        fontSize: 18,
-      ),
-    ).copyWith(
-      backgroundColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.disabled)) {
-            return bgDisabled;
-          }
-          return bgEnabled;
-        },
-      ),
-      foregroundColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.disabled)) {
-            return fgDisabled;
-          }
-          return fgEnabled;
-        },
-      ),
-      alignment: Alignment.center,
-    ),
+    style:
+        OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.fromLTRB(50, 16, 50, 16),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Inter-SemiBold',
+            fontSize: 18,
+          ),
+        ).copyWith(
+          backgroundColor: WidgetStateProperty.resolveWith<Color>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
+                return bgDisabled;
+              }
+              return bgEnabled;
+            },
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
+                return fgDisabled;
+              }
+              return fgEnabled;
+            },
+          ),
+          alignment: Alignment.center,
+        ),
   );
 }
 
@@ -420,8 +446,9 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
 
 SwitchThemeData getSwitchThemeData(Color activeColor) {
   return SwitchThemeData(
-    thumbColor:
-        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+    thumbColor: WidgetStateProperty.resolveWith<Color?>((
+      Set<WidgetState> states,
+    ) {
       if (states.contains(WidgetState.disabled)) {
         return null;
       }
@@ -430,8 +457,9 @@ SwitchThemeData getSwitchThemeData(Color activeColor) {
       }
       return null;
     }),
-    trackColor:
-        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+    trackColor: WidgetStateProperty.resolveWith<Color?>((
+      Set<WidgetState> states,
+    ) {
       if (states.contains(WidgetState.disabled)) {
         return null;
       }

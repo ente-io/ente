@@ -261,7 +261,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
 );
 
 // Background
-const Color backgroundColorLight = Color.fromRGBO(250, 250, 250, 1);
+const Color backgroundColorLight = Color.fromRGBO(244, 244, 244, 1);
 const Color backgroundColorDark = Color.fromRGBO(22, 22, 22, 1);
 
 const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
