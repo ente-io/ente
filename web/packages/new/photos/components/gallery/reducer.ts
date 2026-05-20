@@ -321,9 +321,10 @@ export interface GalleryState {
      */
     pendingFavoriteUpdates: Set<number>;
     /**
-     * Updates to the favorite status of files (triggered by some interactive
-     * user action) that have already been made to applied to remote, but whose
-     * effects on remote have not yet been synced back to our local DB.
+     * Local favorite status overlay for updates triggered by an interactive
+     * user action. Some entries may still be pending remote mutation, while
+     * others may have succeeded remotely but not yet been synced back to our
+     * local DB.
      *
      * Each entry is keyed by file ID for owned files, and by hash/type for
      * non-owned shared files. This keeps equivalent shared-file updates
