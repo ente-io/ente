@@ -1,3 +1,4 @@
+import "package:ente_components/theme/colors.dart" as component_colors;
 import "package:flutter/material.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -13,6 +14,7 @@ class ThumbnailListItem extends StatefulWidget {
   static const defaultLeadingRadius = 12.0;
   static const defaultBorderRadius = 20.0;
   static const defaultContentSpacing = 12.0;
+  static const defaultItemSpacing = 4.0;
   static const _stateTransitionDuration = Duration(milliseconds: 120);
 
   final Widget leading;
@@ -67,7 +69,7 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
         borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
         border: Border.all(
           color: widget.isSelected
-              ? widget.selectedBorderColor ?? colorScheme.greenBase
+              ? _selectedBorderColor(context)
               : widget.borderColor ?? _backgroundColor(colorScheme),
         ),
       ),
@@ -124,6 +126,14 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
       return colorScheme.fillDarker;
     }
     return widget.backgroundColor ?? colorScheme.fill;
+  }
+
+  Color _selectedBorderColor(BuildContext context) {
+    return widget.selectedBorderColor ??
+        component_colors.ColorTokens.forApp(
+          component_colors.ComponentApp.photos,
+          brightness: Theme.of(context).brightness,
+        ).primaryStroke;
   }
 
   void _setPressed(bool value) {

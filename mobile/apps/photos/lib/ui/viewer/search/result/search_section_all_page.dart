@@ -14,6 +14,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
+import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/ui/viewer/search/result/searchable_item.dart";
@@ -174,7 +175,9 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       if (index.isOdd) {
-                        return const SizedBox(height: 10);
+                        return const SizedBox(
+                          height: ThumbnailListItem.defaultItemSpacing,
+                        );
                       }
                       final itemIndex = index ~/ 2;
                       if (showCTA && itemIndex == 0) {
@@ -214,8 +217,9 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                 name: result.name(),
                                 enableGrouping:
                                     result.params["enableGrouping"]! as bool,
-                                fileIdToPosMap: result.params["fileIdToPosMap"]
-                                    as Map<int, int>,
+                                fileIdToPosMap:
+                                    result.params["fileIdToPosMap"]
+                                        as Map<int, int>,
                                 heroTag: "searchable_item" + result.heroTag(),
                                 magicFilter:
                                     result.getHierarchicalSearchFilter()
