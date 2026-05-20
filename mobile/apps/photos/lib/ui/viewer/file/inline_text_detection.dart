@@ -45,6 +45,7 @@ class InlineTextDetection extends StatefulWidget {
 
 class _InlineTextDetectionState extends State<InlineTextDetection> {
   static const int _maxCacheSize = 200;
+  static const Duration _hasTextTimeout = Duration(seconds: 15);
   static const Duration _autoActivateDelay = Duration(seconds: 1);
   static const double _globalGestureSlop = 18.0;
   static final Map<String, _HasTextResult> _hasTextCache = {};
@@ -136,6 +137,23 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         file.fileType == FileType.livePhoto;
   }
 
+  Future<bool?> _checkHasText(File localFile) async {
+    _logger.info("running hasText check");
+    try {
+      final bool hasText = await _mobileOcr
+          .hasText(imagePath: localFile.path)
+          .timeout(_hasTextTimeout);
+      _logger.info("hasText result: $hasText");
+      return hasText;
+    } on TimeoutException {
+      _logger.info("hasText timed out");
+      return null;
+    } catch (error, stackTrace) {
+      _logger.warning("hasText failed", error, stackTrace);
+      return null;
+    }
+  }
+
   Future<void> _evaluateFile() async {
     final bool isEligible = _isFileEligible(widget.file);
     final int requestId = ++_requestId;
@@ -163,6 +181,9 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       if (!mounted || requestId != _requestId) return;
       setState(() {
         _localFilePath = cached.localPath;
+        if (!cached.hasText) {
+          _pendingLongPressPosition = null;
+        }
       });
       if (cached.hasText) _scheduleAutoActivate(requestId);
       return;
@@ -174,34 +195,20 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       if (!mounted || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
         _cacheResult(cacheKey, const _HasTextResult(hasText: false));
+        setState(() {
+          _pendingLongPressPosition = null;
+        });
         return;
       }
 
-      // Run fast hasText() check
-      _logger.info("running hasText check");
-      bool hasText = false;
-      try {
-        hasText = await _mobileOcr
-            .hasText(imagePath: localFile.path)
-            .timeout(const Duration(seconds: 5));
-        _logger.info("hasText result: $hasText");
-      } on TimeoutException {
-        // A slow pre-check is expected on some devices. Fall back to the full
-        // detector path without reporting an app error.
-        hasText = true;
-        _logger.info("hasText timed out, falling back to optimistic");
-      } catch (error, stackTrace) {
-        // On error, optimistically assume text may be present so the full
-        // detection pipeline can make the final determination.
-        hasText = true;
-        _logger.warning(
-          "hasText failed, falling back to optimistic",
-          error,
-          stackTrace,
-        );
-      }
-
+      final bool? hasText = await _checkHasText(localFile);
       if (!mounted || requestId != _requestId) return;
+      if (hasText == null) {
+        setState(() {
+          _pendingLongPressPosition = null;
+        });
+        return;
+      }
 
       final result = _HasTextResult(
         hasText: hasText,
@@ -211,13 +218,24 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
       setState(() {
         _localFilePath = result.localPath;
+        if (!hasText) {
+          _pendingLongPressPosition = null;
+        }
       });
 
-      if (hasText) _scheduleAutoActivate(requestId);
+      if (hasText) {
+        if (_pendingLongPressPosition != null) {
+          _activateOverlay();
+        } else {
+          _scheduleAutoActivate(requestId);
+        }
+      }
     } catch (error, stackTrace) {
       _logger.severe("Text detection pre-check failed", error, stackTrace);
       if (!mounted || requestId != _requestId) return;
-      _cacheResult(cacheKey, const _HasTextResult(hasText: false));
+      setState(() {
+        _pendingLongPressPosition = null;
+      });
     }
   }
 
@@ -238,19 +256,22 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     });
   }
 
-  void _handleLongPress(LongPressStartDetails details) {
+  void _handleLongPressAt(Offset globalPosition) {
     if (_overlayActive) return; // Already active, let overlay handle it
     _autoActivateTimer?.cancel();
     setState(() {
-      _pendingLongPressPosition = details.globalPosition;
+      _pendingLongPressPosition = globalPosition;
     });
     // If hasText already completed and file path is ready, activate now
     if (_localFilePath != null) {
-      setState(() {
-        _overlayActive = true;
-      });
+      _activateOverlay();
+      return;
     }
-    // Otherwise _evaluateFile will activate when hasText completes
+    unawaited(_evaluateFile());
+  }
+
+  void _handleLongPress(LongPressStartDetails details) {
+    _handleLongPressAt(details.globalPosition);
   }
 
   bool get _canTrackTapToClearSelection =>
@@ -261,6 +282,14 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       _isCurrentlyZoomed &&
       _zoomGestureSettled &&
       !_isPinching;
+
+  bool get _canRetryHasTextFromLongPress =>
+      _isEligible &&
+      !_overlayActive &&
+      _localFilePath == null &&
+      _pendingLongPressPosition == null &&
+      widget.file is! TrashFile &&
+      !widget.isGuestView;
 
   bool _isPrimaryGlobalPointer(PointerDownEvent event) {
     if (event.kind == PointerDeviceKind.mouse) {
@@ -289,13 +318,15 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     }
 
     final bool tapCanClearSelection = _canTrackTapToClearSelection;
-    final bool pointOnInteractiveUi =
-        _detectorController.isPointOnInteractiveSelectionUi(event.position);
-    final bool longPressCanSelect = _canTrackZoomedPanFirstLongPress &&
+    final bool pointOnInteractiveUi = _detectorController
+        .isPointOnInteractiveSelectionUi(event.position);
+    final bool longPressCanRetry = _canRetryHasTextFromLongPress;
+    final bool longPressCanSelect =
+        _canTrackZoomedPanFirstLongPress &&
         !pointOnInteractiveUi &&
         _detectorController.isPointOnSelectableText(event.position);
 
-    if (!tapCanClearSelection && !longPressCanSelect) {
+    if (!tapCanClearSelection && !longPressCanSelect && !longPressCanRetry) {
       return;
     }
 
@@ -309,7 +340,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     _trackedGlobalPointerMoved = false;
     _trackedGlobalLongPressTriggered = false;
 
-    if (longPressCanSelect) {
+    if (longPressCanSelect || longPressCanRetry) {
       final Offset position = event.position;
       final int pointer = event.pointer;
       _globalLongPressTimer = Timer(kLongPressTimeout, () {
@@ -317,11 +348,16 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
             _trackedGlobalPointer != pointer ||
             _trackedGlobalPointerMoved ||
             _globalActivePointers != 1 ||
-            !_canTrackZoomedPanFirstLongPress) {
+            (longPressCanSelect && !_canTrackZoomedPanFirstLongPress)) {
           return;
         }
-        _trackedGlobalLongPressTriggered =
-            _detectorController.selectTextAtPosition(position);
+        if (longPressCanSelect) {
+          _trackedGlobalLongPressTriggered = _detectorController
+              .selectTextAtPosition(position);
+        } else if (_canRetryHasTextFromLongPress) {
+          _trackedGlobalLongPressTriggered = true;
+          _handleLongPressAt(position);
+        }
       });
     }
   }
@@ -343,7 +379,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   void _handleGlobalPointerEnd(PointerEvent event) {
     if (event.pointer == _trackedGlobalPointer) {
-      final bool shouldClearSelection = !_trackedGlobalLongPressTriggered &&
+      final bool shouldClearSelection =
+          !_trackedGlobalLongPressTriggered &&
           !_trackedGlobalPointerMoved &&
           _canTrackTapToClearSelection &&
           !_detectorController.isPointOnInteractiveSelectionUi(event.position);
@@ -366,15 +403,17 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     }
 
     if (event is PointerUpEvent) {
-      _globalActivePointers =
-          _globalActivePointers > 0 ? _globalActivePointers - 1 : 0;
+      _globalActivePointers = _globalActivePointers > 0
+          ? _globalActivePointers - 1
+          : 0;
       _handleGlobalPointerEnd(event);
       return;
     }
 
     if (event is PointerCancelEvent) {
-      _globalActivePointers =
-          _globalActivePointers > 0 ? _globalActivePointers - 1 : 0;
+      _globalActivePointers = _globalActivePointers > 0
+          ? _globalActivePointers - 1
+          : 0;
       _handleGlobalPointerEnd(event);
     }
   }
@@ -388,9 +427,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     final detailState = InheritedDetailPageState.of(context);
     final isZoomedNotifier = detailState.isZoomedNotifier;
 
-    // During the wait period (hasText passed but 1s timer hasn't fired),
-    // show a transparent gesture layer to capture long press.
-    // Only show when we know text exists to avoid blocking motion photo gestures.
     if (_localFilePath == null) {
       return const SizedBox.shrink();
     }
@@ -522,8 +558,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       builder: (context, child) {
         final bool isProcessing =
             _detectorController.userAttemptedInteraction &&
-                _detectorController.isProcessing &&
-                !_detectorController.hasSelectableText;
+            _detectorController.isProcessing &&
+            !_detectorController.hasSelectableText;
         return IgnorePointer(
           ignoring: isProcessing,
           child: Stack(
