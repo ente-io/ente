@@ -401,7 +401,7 @@ class FileUploader {
               : null;
           if (lastAttemptTime == null ||
               DateTime.now().difference(lastAttemptTime).inDays > 1) {
-            await file.delete();
+            await _deleteStaleFileIfPresent(file);
           } else {
             _logger.info(
               'Skipping file $fileName as it was attempted recently on $lastAttemptTime',
@@ -429,13 +429,20 @@ class FileUploader {
           for (final file in sharedFiles) {
             if (!trackedSharedFilePaths.contains(file.path)) {
               _logger.info('Deleting stale shared media file ${file.path}');
-              await file.delete();
+              await _deleteStaleFileIfPresent(file);
             }
           }
         }
       }
     } catch (e, s) {
       _logger.severe("Failed to remove stale files", e, s);
+    }
+  }
+
+  Future<void> _deleteStaleFileIfPresent(FileSystemEntity file) async {
+    final deleted = await deleteFileSystemEntityIfPresent(file);
+    if (!deleted) {
+      _logger.info("Stale file already missing during cleanup: ${file.path}");
     }
   }
 
