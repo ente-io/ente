@@ -8,24 +8,31 @@ import {
 } from "./api";
 import type { StaffSession } from "./session";
 
-const UserProfileData = z.looseObject({
+const nullToUndefined = <T>(value: T | null | undefined): T | undefined =>
+    value === null ? undefined : value;
+
+const nullishToEmpty = <T>(value: T[] | null | undefined): T[] => value ?? [];
+
+const nullishToZero = (value: number | null | undefined): number => value ?? 0;
+
+const UserProfileData = z.object({
     isEmailMFAEnabled: z.boolean(),
     isTwoFactorEnabled: z.boolean(),
     passkeyCount: z.number(),
     canDisableEmailMFA: z.boolean(),
 });
 
-const FamilyMember = z.looseObject({
+const FamilyMember = z.object({
     id: z.string(),
     email: z.string(),
     status: z.string(),
-    usage: z.number(),
-    storageLimit: z.number().optional(),
+    usage: z.number().nullish().transform(nullToUndefined),
+    storageLimit: z.number().nullish().transform(nullToUndefined),
 });
 
 export type FamilyMember = z.infer<typeof FamilyMember>;
 
-const StorageBonus = z.looseObject({
+const StorageBonus = z.object({
     storage: z.number(),
     type: z.string(),
     createdAt: z.number(),
@@ -35,7 +42,7 @@ const StorageBonus = z.looseObject({
 
 export type StorageBonus = z.infer<typeof StorageBonus>;
 
-const TokenData = z.looseObject({
+const TokenData = z.object({
     creationTime: z.number(),
     lastUsedTime: z.number(),
     ua: z.string(),
@@ -45,14 +52,14 @@ const TokenData = z.looseObject({
 
 export type TokenData = z.infer<typeof TokenData>;
 
-const Subscription = z.looseObject({
+const Subscription = z.object({
     productID: z.string(),
     paymentProvider: z.string(),
     storage: z.number(),
     originalTransactionID: z.string(),
     expiryTime: z.number(),
     userID: z.number(),
-    attributes: z.looseObject({
+    attributes: z.object({
         customerID: z.string().optional(),
         stripeAccountCountry: z.string().optional(),
     }),
@@ -60,28 +67,42 @@ const Subscription = z.looseObject({
 
 export type Subscription = z.infer<typeof Subscription>;
 
-const UserResponse = z.looseObject({
-    user: z.looseObject({
+const FamilyData = z
+    .object({ members: z.array(FamilyMember) })
+    .nullish()
+    .transform(nullToUndefined);
+
+const BonusData = z
+    .object({
+        storageBonuses: z
+            .array(StorageBonus)
+            .nullish()
+            .transform(nullishToEmpty),
+    })
+    .nullish()
+    .transform(nullToUndefined);
+
+const UserDetails = z
+    .object({
+        usage: z.number(),
+        storageBonus: z.number().nullish().transform(nullishToZero),
+        profileData: UserProfileData.nullish().transform(nullToUndefined),
+        familyData: FamilyData,
+        bonusData: BonusData,
+    })
+    .nullish()
+    .transform(nullToUndefined);
+
+const UserResponse = z.object({
+    user: z.object({
         ID: z.number(),
         email: z.string(),
         creationTime: z.number(),
     }),
-    subscription: Subscription.nullable().optional(),
-    authCodes: z.number().optional(),
-    tokens: z.array(TokenData).optional(),
-    details: z
-        .looseObject({
-            usage: z.number(),
-            storageBonus: z.number(),
-            profileData: UserProfileData.nullish(),
-            familyData: z
-                .looseObject({ members: z.array(FamilyMember) })
-                .optional(),
-            bonusData: z
-                .looseObject({ storageBonuses: z.array(StorageBonus) })
-                .nullish(),
-        })
-        .optional(),
+    subscription: Subscription.nullish().transform(nullToUndefined),
+    authCodes: z.number().nullish().transform(nullishToZero),
+    tokens: z.array(TokenData).nullish().transform(nullishToEmpty),
+    details: UserDetails,
 });
 
 export type UserResponse = z.infer<typeof UserResponse>;
@@ -173,7 +194,7 @@ export const getStorageBonuses = async (session: StaffSession) => {
 
 export const getTokens = async (session: StaffSession) => {
     const userData = await getSelectedUser(session);
-    return userData.tokens ?? [];
+    return userData.tokens;
 };
 
 export const addOTT = async (

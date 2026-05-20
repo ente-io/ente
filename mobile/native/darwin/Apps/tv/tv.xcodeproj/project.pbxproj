@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DACC3DC92E618D6A00DAF993 /* EnteCrypto in Frameworks */ = {isa = PBXBuildFile; productRef = DACC3DC82E618D6A00DAF993 /* EnteCrypto */; };
 		DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
 /* End PBXBuildFile section */
 
@@ -60,7 +59,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DACC3DC92E618D6A00DAF993 /* EnteCrypto in Frameworks */,
 				DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -115,6 +113,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "cast" */;
 			buildPhases = (
+				DAEC00012F40000000CABA11 /* Build Rust (ente-crypto) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
 				DA72BC5E2E5F87A000D128FF /* Frameworks */,
 				DA72BC5F2E5F87A000D128FF /* Resources */,
@@ -128,7 +127,6 @@
 			);
 			name = cast;
 			packageProductDependencies = (
-				DACC3DC82E618D6A00DAF993 /* EnteCrypto */,
 				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 			);
 			productName = tv;
@@ -208,7 +206,6 @@
 			mainGroup = DA72BC582E5F87A000D128FF;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				DACC3DC62E618D5300DAF993 /* XCLocalSwiftPackageReference "../../Packages/EnteCrypto" */,
 				DAF584652E61BB6300F8A08F /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -246,6 +243,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		DAEC00012F40000000CABA11 /* Build Rust (ente-crypto) */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Rust (ente-crypto)";
+			outputPaths = (
+				"$(TARGET_TEMP_DIR)/ente_crypto_rust/libente_crypto_ffi.a",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sh \"${SRCROOT}/scripts/build-rust.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		DA72BC5D2E5F87A000D128FF /* Sources */ = {
@@ -418,6 +433,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = cast/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Ente Cast";
@@ -430,6 +446,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-force_load",
+					"$(TARGET_TEMP_DIR)/ente_crypto_rust/libente_crypto_ffi.a",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tv.cast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -449,6 +470,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = cast/Info.plist;
 				"INFOPLIST_FILE[sdk=appletvos*]" = "";
@@ -462,6 +484,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-force_load",
+					"$(TARGET_TEMP_DIR)/ente_crypto_rust/libente_crypto_ffi.a",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.tv.cast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -584,13 +611,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		DACC3DC62E618D5300DAF993 /* XCLocalSwiftPackageReference "../../Packages/EnteCrypto" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../Packages/EnteCrypto;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		DAF584652E61BB6300F8A08F /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -603,10 +623,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DACC3DC82E618D6A00DAF993 /* EnteCrypto */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = EnteCrypto;
-		};
 		DAF584662E61BB8300F8A08F /* ZIPFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DAF584652E61BB6300F8A08F /* XCRemoteSwiftPackageReference "ZIPFoundation" */;

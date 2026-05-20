@@ -103,7 +103,9 @@ export const FamilyTable: React.FC = () => {
                                     </StatusBadge>
                                 </TableCell>
                                 <TableCell>
-                                    {formatBytesToGB(member.usage)}
+                                    {member.usage === undefined
+                                        ? "NA"
+                                        : formatBytesToGB(member.usage)}
                                 </TableCell>
                                 <TableCell>
                                     {member.status !== "SELF"

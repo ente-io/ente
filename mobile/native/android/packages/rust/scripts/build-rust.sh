@@ -1,16 +1,7 @@
 #!/usr/bin/env bash
 
-# Build Ensu's UniFFI Rust JNI libs for the current Gradle build.
-# Invoked from Gradle's `buildRustJni` task (../build.gradle.kts).
-#
-# Inputs  (CLI args):   --toolchain DIR --out-dir DIR <abi>...
-#                       <abi> is one of arm64-v8a, armeabi-v7a, x86_64.
-# Outputs (to $OUT_DIR/<abi>):
-#           libcore.so  libdb.so  libsync.so  libinference.so
-#           libtranscription.so  libc++_shared.so
-#
-# UniFFI Kotlin bindings are generated out-of-band by `cargo codegen
-# ensu-android`; this script only builds the JNI libs.
+# This script is invoked from Gradle's `buildRustJni` task.
+# It builds the JNI libraries used by Ensu's generated UniFFI bindings.
 
 set -euo pipefail
 
