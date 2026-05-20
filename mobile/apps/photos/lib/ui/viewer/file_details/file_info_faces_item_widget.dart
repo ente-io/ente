@@ -445,7 +445,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
             children: [
               if (hasSelection)
                 IconButtonWidget(
-                  icon: Icons.person_off,
+                  icon: Icons.person_off_outlined,
                   iconButtonType: IconButtonType.secondary,
                   onTap: _onIgnoreSelectedFaces,
                 ),
