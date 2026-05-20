@@ -32,6 +32,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   static const maxThumbnailWidth = 224.0;
   static const crossAxisSpacing = 8.0;
   static const horizontalPadding = 16.0;
+  static const gridItemTextHeight = 42.0;
   final List<Collection>? collections;
 
   // If true, the GridView will shrink-wrap its contents.
@@ -201,7 +202,7 @@ class _CollectionsFlexiGridViewWidgetState
     return SliverPadding(
       key: key,
       padding: const EdgeInsets.only(
-        top: 8,
+        top: 16,
         left: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
         right: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
         bottom: 200,
@@ -242,9 +243,12 @@ class _CollectionsFlexiGridViewWidgetState
         ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInCrossAxis,
-          mainAxisSpacing: 8,
+          mainAxisSpacing: 24,
           crossAxisSpacing: CollectionsFlexiGridViewWidget.crossAxisSpacing,
-          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
+          childAspectRatio:
+              sideOfThumbnail /
+              (sideOfThumbnail +
+                  CollectionsFlexiGridViewWidget.gridItemTextHeight),
         ),
       ),
     );
@@ -262,7 +266,7 @@ class _CollectionsFlexiGridViewWidgetState
     return SliverPadding(
       key: key,
       padding: const EdgeInsets.only(
-        top: 8,
+        top: 16,
         left: 8,
         right: 8,
         bottom: 200,
@@ -285,9 +289,8 @@ class _CollectionsFlexiGridViewWidgetState
             Widget item;
 
             if (showCreateAlbum && index == 0) {
-              item = GestureDetector(
-                onTap: _createAlbum,
-                child: const NewAlbumListItemWidget(),
+              item = NewAlbumListItemWidget(
+                onTap: (_) => _createAlbum(),
               );
             } else {
               final collectionIndex = showCreateAlbum ? index - 1 : index;

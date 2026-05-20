@@ -1,6 +1,8 @@
+import "dart:async";
+
+import 'package:ente_components/ente_components.dart';
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/thumbnail_list_item.dart";
 
 class NewAlbumListItemWidget extends StatelessWidget {
@@ -13,27 +15,33 @@ class NewAlbumListItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     return ThumbnailListItem(
       backgroundColor: thumbnailListItemBackgroundColor(context),
+      onTap: onTap == null ? null : () => unawaited(onTap!(context)),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(
           ThumbnailListItem.defaultLeadingRadius,
         ),
         child: Container(
-          color: Theme.of(context).brightness == Brightness.light
-              ? colorScheme.backdropBase
-              : colorScheme.backdropFaint,
-          child: Icon(
-            Icons.add_outlined,
-            color: colorScheme.strokeMuted,
+          decoration: BoxDecoration(
+            border: Border.all(color: colors.strokeDark),
+            borderRadius: BorderRadius.circular(
+              ThumbnailListItem.defaultLeadingRadius,
+            ),
+          ),
+          child: Center(
+            child: Image.asset(
+              "assets/new_album_icon.png",
+              width: 20,
+              height: 20,
+            ),
           ),
         ),
       ),
       title: Text(
-        AppLocalizations.of(context).newAlbum,
-        style: textTheme.body.copyWith(color: colorScheme.textMuted),
+        AppLocalizations.of(context).addNew,
+        style: TextStyles.body.copyWith(color: colors.textLight),
       ),
     );
   }
