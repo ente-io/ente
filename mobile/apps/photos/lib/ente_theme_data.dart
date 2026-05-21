@@ -1,4 +1,5 @@
 import 'package:ente_components/theme/colors.dart' show ComponentApp;
+import 'package:ente_components/theme/text_styles.dart' as component;
 import 'package:ente_components/theme/theme.dart'
     show ComponentColorTokens, ComponentTheme;
 import 'package:flutter/material.dart';
@@ -204,48 +205,15 @@ TextTheme _buildTextTheme(Color textColor) {
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter',
     ),
-    titleLarge: TextStyle(
-      color: textColor,
-      fontSize: 18,
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-    ),
-    titleMedium: TextStyle(
-      color: textColor,
-      fontFamily: 'Inter',
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    ),
-    titleSmall: TextStyle(
-      color: textColor,
-      fontFamily: 'Inter',
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-    ),
-    bodyLarge: TextStyle(
-      fontFamily: 'Inter',
-      color: textColor,
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    ),
-    bodyMedium: TextStyle(
-      fontFamily: 'Inter',
-      color: textColor,
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-    ),
-    bodySmall: TextStyle(
+    titleLarge: component.TextStyles.h2.copyWith(color: textColor),
+    titleMedium: component.TextStyles.large.copyWith(color: textColor),
+    titleSmall: component.TextStyles.body.copyWith(color: textColor),
+    bodyLarge: component.TextStyles.large.copyWith(color: textColor),
+    bodyMedium: component.TextStyles.body.copyWith(color: textColor),
+    bodySmall: component.TextStyles.body.copyWith(
       color: textColor.withValues(alpha: 0.6),
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
     ),
-    labelSmall: TextStyle(
-      fontFamily: 'Inter',
-      color: textColor,
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      decoration: TextDecoration.underline,
-    ),
+    labelSmall: component.TextStyles.bodyLink.copyWith(color: textColor),
   );
 }
 
