@@ -56,7 +56,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     milliseconds: 240,
   );
   static const Duration _kContentTransitionDuration = Duration(
-    milliseconds: 260,
+    milliseconds: 150,
   );
 
   final ValueNotifier<_AlbumsFilter> _filter = ValueNotifier(
@@ -835,8 +835,8 @@ class _AlbumsTabState extends State<AlbumsTab>
                     return AnimatedSwitcher(
                       duration: _kContentTransitionDuration,
                       reverseDuration: _kContentTransitionDuration,
-                      switchInCurve: Curves.easeInOutCubic,
-                      switchOutCurve: Curves.linear,
+                      switchInCurve: Curves.easeInQuart,
+                      switchOutCurve: Curves.easeOutExpo,
                       layoutBuilder: (currentChild, previousChildren) {
                         return Stack(
                           fit: StackFit.expand,
