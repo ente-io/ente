@@ -152,7 +152,7 @@ sudo tee /root/var/config/rclone/copycat-db-rclone.conf
 
 Add the service definition, and start the service
 
-```sh
+```bash
 scp copycat-db.{service,timer} instance:
 
 sudo mv copycat-db.{service,timer} /etc/systemd/system

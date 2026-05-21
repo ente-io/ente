@@ -56,7 +56,7 @@ Or interact with the MinIO S3 API
 
 ```sh
 AWS_ACCESS_KEY_ID=changeme AWS_SECRET_ACCESS_KEY=changeme1234 \
-  aws s3 --endpoint-url http://localhost:3200 ls s3://b2-eu-cen
+    aws s3 --endpoint-url http://localhost:3200 ls s3://b2-eu-cen
 ```
 
 Or open the MinIO dashboard at http://localhost:3201
@@ -195,20 +195,20 @@ Create `museum.yaml` in `ente/server`.
 
 ```yaml
 db:
-  host: localhost
-  port: 5432
-  name: ente_db
-  user: pguser
-  password: pgpass
+    host: localhost
+    port: 5432
+    name: ente_db
+    user: pguser
+    password: pgpass
 
 s3:
-  are_local_buckets: true
-  b2-eu-cen:
-    key: minioadmin
-    secret: minioadmin
-    endpoint: localhost:9000
-    region: eu-central-2
-    bucket: b2-eu-cen
+    are_local_buckets: true
+    b2-eu-cen:
+        key: minioadmin
+        secret: minioadmin
+        endpoint: localhost:9000
+        region: eu-central-2
+        bucket: b2-eu-cen
 ```
 
 ### Start museum

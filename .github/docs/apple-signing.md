@@ -10,7 +10,6 @@ GitHub iOS builds are made using manual signing with the "-allowProvisioningUpda
 GitHub macOS builds are made by manually signing with an Apple Developer ID Application certificate and then notarized with Apple.
 
 - The Apple Developer ID Application certificate is also provided to the workflow as a secret. It has a longer expiry too.
-
 - For notarization, an Apple ID and an associated app-specific password are provided to the workflow.
 
 ## What you need

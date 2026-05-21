@@ -14,15 +14,15 @@ They also need some support packages, which come from the leaf `ente-build-confi
 
 - [@eslint/js](https://eslint.org/) provides JavaScript ESLint functionality, and provides the configuration recommended the by ESLint team.
 
-- [typescript-eslint](https://typescript-eslint.io/packages/typescript-eslint/) \- provides TypeScript ESLint functionality and provides a set of recommended configurations (`typescript-eslint` is the new entry point, our yet-unmigrated packages use the older method of separately including [@typescript-eslint/parser](https://typescript-eslint.io/packages/eslint-plugin/) \- which tells ESLint how to read TypeScript syntax - and [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/) \- which provides the TypeScript rules and presets).
+- [typescript-eslint](https://typescript-eslint.io/packages/typescript-eslint/) - provides TypeScript ESLint functionality and provides a set of recommended configurations (`typescript-eslint` is the new entry point, our yet-unmigrated packages use the older method of separately including [@typescript-eslint/parser](https://typescript-eslint.io/packages/eslint-plugin/) - which tells ESLint how to read TypeScript syntax - and [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/) - which provides the TypeScript rules and presets).
 
-- [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react), [eslint-plugin-react-hooks](https://reactjs.org/) \- Some React specific ESLint rules and configurations that are used by the workspaces that have React code.
+- [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react), [eslint-plugin-react-hooks](https://reactjs.org/) - Some React specific ESLint rules and configurations that are used by the workspaces that have React code.
 
-- [eslint-plugin-react-refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh) \- A plugin to ensure that React components are exported in a way that they can be HMR-ed.
+- [eslint-plugin-react-refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh) - A plugin to ensure that React components are exported in a way that they can be HMR-ed.
 
-- [prettier-plugin-organize-imports](https://github.com/simonhaenisch/prettier-plugin-organize-imports) \- A Prettier plugin to sort imports.
+- [prettier-plugin-organize-imports](https://github.com/simonhaenisch/prettier-plugin-organize-imports) - A Prettier plugin to sort imports.
 
-- [prettier-plugin-packagejson](https://github.com/matzkoh/prettier-plugin-packagejson) \- A Prettier plugin to also prettify `package.json`.
+- [prettier-plugin-packagejson](https://github.com/matzkoh/prettier-plugin-packagejson) - A Prettier plugin to also prettify `package.json`.
 
 The root `package.json` also has a convenience dev dependency:
 
