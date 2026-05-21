@@ -125,16 +125,12 @@ class _PeoplePageState extends State<PeoplePage> {
         _maybePrewarmMemoryLane();
       };
       _timelineNotifier!.addListener(_timelineListener!);
-      if (!MemoryLaneService.instance.hasReadyTimelineSync(
-        _person.remoteID,
-      )) {
-        MemoryLaneService.instance.schedulePersonRecompute(
+      unawaited(
+        MemoryLaneService.instance.ensureTimelineReachability(
           _person.remoteID,
           trigger: "people_page_visit",
-        );
-      } else {
-        _maybePrewarmMemoryLane();
-      }
+        ),
+      );
     }
   }
 

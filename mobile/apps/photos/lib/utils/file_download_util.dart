@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
+import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as file_path;
 import "package:photo_manager/photo_manager.dart";
@@ -406,17 +407,37 @@ Future<void> downloadToGallery(
         _logger.severe('Failed to save assert of type $type');
       }
     });
-  } catch (e) {
+  } catch (e, s) {
     if (forceResumableDownload && _isStorageError(e)) {
-      _logger.severe("Failed to save file due to storage limit", e);
+      _logger.severe("Failed to save file due to storage limit", e, s);
       throw DownloadNotEnoughStorageError();
     }
-    _logger.severe("Failed to save file", e);
+    if (_isApplePhotosUnsupportedResourceError(e)) {
+      _logger.warning(
+        "Failed to save file because Apple Photos rejected the resource",
+        e,
+        s,
+      );
+      throw DownloadFailedError(
+        DownloadManager.applePhotosUnsupportedResourceError,
+      );
+    }
+    _logger.severe("Failed to save file", e, s);
     rethrow;
   } finally {
     await PhotoManager.startChangeNotify();
     LocalSyncService.instance.checkAndSync().ignore();
   }
+}
+
+bool _isApplePhotosUnsupportedResourceError(Object error) {
+  if (error is! PlatformException) {
+    return false;
+  }
+  return error.code == "PHPhotosErrorDomain (3302)" ||
+      (error.code.contains("PHPhotosErrorDomain") &&
+          error.code.contains("3302")) ||
+      (error.message?.contains("PHPhotosErrorDomain error 3302") ?? false);
 }
 
 Future<void> _saveLivePhotoOnDroid(
