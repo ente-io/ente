@@ -3,7 +3,6 @@ import "dart:io";
 import "package:ente_components/ente_components.dart" as components;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -13,6 +12,7 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -313,13 +313,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
                   } else {
                     _allSelected = false;
                   }
-                  return HugeIcon(
-                    icon: _allSelected
-                        ? HugeIcons.strokeRoundedCheckmarkCircle01
-                        : HugeIcons.strokeRoundedCircle,
-                    color: colors.textBase,
-                    size: 18,
-                  );
+                  return SelectAllStatusIcon(isSelected: _allSelected);
                 },
               ),
             ],
