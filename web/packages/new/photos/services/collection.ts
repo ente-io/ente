@@ -778,15 +778,10 @@ const userOwnedEquivalentFilesByHashAndType = (
 };
 
 // Bridges shared favorite toggles before the remote add/move has been pulled
-// into local DB. The key is scoped by user to avoid cross-account reuse.
-const pendingFavoriteFilesByUserAndHashAndType = new Map<string, EnteFile>();
+// into local DB.
+const pendingFavoriteFilesByHashAndType = new Map<string, EnteFile>();
 let pendingUserFavoritesCollection: Collection | undefined;
 let pendingUserFavoritesCollectionPromise: Promise<Collection> | undefined;
-
-const userScopedHashAndTypeKey = (file: EnteFile, userID: number) => {
-    const key = hashAndTypeKey(file);
-    return key ? `${userID}:${key}` : undefined;
-};
 
 const rememberPendingFavoriteFiles = (
     sourceFiles: EnteFile[],
@@ -805,12 +800,8 @@ const rememberPendingFavoriteFiles = (
         const favoriteFile = hashAndType
             ? favoriteFilesByHashAndType.get(hashAndType)
             : undefined;
-        const pendingKey = userScopedHashAndTypeKey(sourceFile, userID);
-        if (pendingKey && favoriteFile) {
-            pendingFavoriteFilesByUserAndHashAndType.set(
-                pendingKey,
-                favoriteFile,
-            );
+        if (hashAndType && favoriteFile) {
+            pendingFavoriteFilesByHashAndType.set(hashAndType, favoriteFile);
         }
     }
 };
@@ -826,9 +817,9 @@ const splitPendingFavoriteFiles = (files: EnteFile[], userID: number) => {
             continue;
         }
 
-        const key = userScopedHashAndTypeKey(file, userID);
+        const key = hashAndTypeKey(file);
         const pendingFavoriteFile = key
-            ? pendingFavoriteFilesByUserAndHashAndType.get(key)
+            ? pendingFavoriteFilesByHashAndType.get(key)
             : undefined;
         if (pendingFavoriteFile) {
             if (!seenPendingFileIDs.has(pendingFavoriteFile.id)) {
@@ -850,9 +841,9 @@ const forgetPendingFavoriteFileIDs = (fileIDs: number[]) => {
     for (const [
         key,
         pendingFavoriteFile,
-    ] of pendingFavoriteFilesByUserAndHashAndType.entries()) {
+    ] of pendingFavoriteFilesByHashAndType.entries()) {
         if (deletedFileIDs.has(pendingFavoriteFile.id)) {
-            pendingFavoriteFilesByUserAndHashAndType.delete(key);
+            pendingFavoriteFilesByHashAndType.delete(key);
         }
     }
 };
@@ -1945,12 +1936,9 @@ const resolveFavoritesFilesForRemoval = async (
             file.collectionID != favoritesCollection.id
         ) {
             const key = hashAndTypeKey(file);
-            const pendingKey = userScopedHashAndTypeKey(file, userID);
             const favoriteFile = key
                 ? (favoriteFilesByHashAndType.get(key) ??
-                  (pendingKey
-                      ? pendingFavoriteFilesByUserAndHashAndType.get(pendingKey)
-                      : undefined))
+                  pendingFavoriteFilesByHashAndType.get(key))
                 : undefined;
             if (!favoriteFile) {
                 throw new Error("Could not resolve favorite file for removal");
