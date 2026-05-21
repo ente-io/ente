@@ -756,9 +756,9 @@ const hashAndTypeKey = (file: EnteFile) => {
  * @returns A Mapping which has a unique ${hash}:${file.metadata.fileType} key
  * for each of the file which is owned by the current user.
  *
- * This map is currently
- * used in the upload to shared album flow where we check if the current user
- * by any chance have a copy of the file which is being added.
+ * This map is currently used in flows where the current user performs actions
+ * on shared-files/shared albums, where we check if the current user by any chance
+ * have a copy of the files on which the action is being performed on.
  */
 const userOwnedEquivalentFilesByHashAndType = (
     files: EnteFile[],
@@ -783,16 +783,39 @@ const pendingFavoriteFilesByHashAndType = new Map<string, EnteFile>();
 let pendingUserFavoritesCollection: Collection | undefined;
 let pendingUserFavoritesCollectionPromise: Promise<Collection> | undefined;
 
+/**
+ *
+ * @param sourceFiles The files the user originally performed the actions on. It could be owned/non-owned files.
+ *
+ * @param favoriteFiles The actual files that were added/removed from the favorites. For shared files
+ * this maybe a different user-owned equivalent file.
+ *
+ * @param userID The userId of the current loggedIn user.
+ *
+ * If the user favorites a shared file X, the actual Favorites entry may be user-owned file Y.
+ * Before remote pull updates local DB, the UI may still only know about shared file X. This
+ * helper remembers:
+ *
+ * X hash:type -> Y
+ *
+ * Then if the user immediately unfavorites or favorites again, the code can resolve the real
+ * favorite file Y instead of trying to operate on shared file X.
+ *
+ */
 const rememberPendingFavoriteFiles = (
     sourceFiles: EnteFile[],
     favoriteFiles: EnteFile[],
     userID: number,
 ) => {
+    // Creating a map by hashAndType for the files which where favorited now
     const favoriteFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
         favoriteFiles,
         userID,
     );
 
+    // Iterating through the sourceFiles to check whether the non-owned files
+    // which where favorited have a hashAndType match in favoriteFilesByHashAndType
+    // if so storing the file in the pendingFavoriteFilesByHashAndType
     for (const sourceFile of sourceFiles) {
         if (sourceFile.ownerID == userID) continue;
 
@@ -806,11 +829,35 @@ const rememberPendingFavoriteFiles = (
     }
 };
 
+/**
+ *
+ * @param files The files which are to be favorited/un-favorited
+ * @param userID The userId of the current loggedIn user.
+ * @returns
+ *
+ *  remainingFiles: The files which doesn't have an user-owned copy yet and therefore considered
+ * as a shared-file/non-owned file
+ *
+ *  pendingFiles: The files which already have an owned copy. It could the file was
+ *  already owned by the user or because of a prior favoriting the file now has a owned copy.
+ */
 const splitPendingFavoriteFiles = (files: EnteFile[], userID: number) => {
     const pendingFiles: EnteFile[] = [];
+
+    // Files for which the current user is the owner.
     const remainingFiles: EnteFile[] = [];
     const seenPendingFileIDs = new Set<number>();
 
+    /**
+     * Iterating through the files and then pushing the file to the remainingFiles array
+     * if it's an owned file or if it's a shared file without an remembered user-owned equivalent
+     *
+     * For non-owned/shared files, getting the metadataKey of the file and checking
+     * if the pendingFavoriteFilesByHashAndType has it, if so it means the file already
+     * has a owned copy, like it was favorited before and the remote pull is yet to happen.
+     *
+     * If so then pushing the file to the pendingFiles else pushing it to the remainingFiles.
+     */
     for (const file of files) {
         if (file.ownerID == userID) {
             remainingFiles.push(file);
@@ -821,6 +868,7 @@ const splitPendingFavoriteFiles = (files: EnteFile[], userID: number) => {
         const pendingFavoriteFile = key
             ? pendingFavoriteFilesByHashAndType.get(key)
             : undefined;
+
         if (pendingFavoriteFile) {
             if (!seenPendingFileIDs.has(pendingFavoriteFile.id)) {
                 seenPendingFileIDs.add(pendingFavoriteFile.id);
@@ -1870,27 +1918,46 @@ export const savedUserFavoritesCollection = async () => {
  */
 export const addToFavoritesCollection = async (files: EnteFile[]) => {
     const userID = ensureLocalUser().id;
+
+    // Currenly we can only favorite shared files which have a proper metadataHash
+    // therefore filtering to check if there are files without this data.
     const hashlessSharedFile = files.find(
         (file) => file.ownerID != userID && !hashAndTypeKey(file),
     );
+
+    // If there are files without metadata hash to be favorited, then rejecting the change
     if (hashlessSharedFile) {
         throw new Error("Cannot favorite shared files without metadata hash");
     }
 
+    // Getting the favorites collection of the user, if there is no favorite collection
+    // for this particular user at the moment this function actaully creates one.
+
     const favoritesCollection = await savedOrCreateUserFavoritesCollection();
+
+    // Splitting the files based on their ownership.
     const { pendingFiles, remainingFiles } = splitPendingFavoriteFiles(
         files,
         userID,
     );
 
+    // Pending files need to be just added to the favorite collection,
+    // since they already have a user-owned copy so routing them that way.
     if (pendingFiles.length) {
         await addToCollection(favoritesCollection, pendingFiles);
     }
 
+    // Remaining files are those files which aren't owned by the current user
+    // right now, therefore they have to be copied to the Favorites album instead
+    // of adding. Therefore they are going to the addOrCopyToCollection.
     const addedFiles = await addOrCopyToCollection(
         favoritesCollection,
         remainingFiles,
     );
+
+    // This function update the local variable pendingFavoriteFilesByHashAndType which maintains a map
+    // of the files which were recently favorited/un-favorited to prevent
+    // duplicate copying of the shared files into the user's album
     rememberPendingFavoriteFiles(
         files,
         pendingFiles.concat(addedFiles),
