@@ -102,6 +102,18 @@ Ente's servers cannot see your location tags or where your photos were taken.
 
 ## Machine Learning and Face Recognition
 
+### What happens if I enable Machine Learning but turn off local processing? {#ml-local-processing-off}
+
+Machine Learning enables features like face recognition and magic search.
+
+Local processing controls whether the current device performs the indexing work itself. When local processing is on, the device downloads photos, runs the ML models, and builds indexes locally.
+
+If local processing is turned off, that device skips the heavy work and can instead use indexes created by another device, such as your desktop.
+
+This can be useful on phones with low memory or limited performance.
+
+Learn more in the [Machine learning guide](/photos/features/search-and-discovery/machine-learning#the-indexing-process).
+
 ### Why doesn't search work for me? {#search-not-working}
 
 If you're searching for objects (like "food", "car", "dog") or trying to find faces but nothing appears, you likely need to enable **Machine Learning (ML)**.

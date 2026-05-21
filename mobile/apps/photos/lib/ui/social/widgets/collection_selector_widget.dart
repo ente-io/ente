@@ -201,7 +201,7 @@ class _ThumbnailWithBadge extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               decoration: BoxDecoration(
-                color: colorScheme.backgroundBase,
+                color: colorScheme.backgroundColour,
                 borderRadius: const BorderRadius.all(Radius.circular(16)),
               ),
               child: Text(

@@ -71,8 +71,8 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           final sectionKey = _sectionKey(item.sectionPath);
           final intraSectionOrder =
               sectionKey == l10n.freeUpSpace && freeUpSpacePriority.isNotEmpty
-                  ? (freeUpSpacePriority[item.title] ?? 100 + i)
-                  : i;
+              ? (freeUpSpacePriority[item.title] ?? 100 + i)
+              : i;
           entries.add(
             _SearchResultEntry(
               item: item,
@@ -101,13 +101,15 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
             .toList();
 
         filteredEntries.sort((a, b) {
-          final matchPriority = _matchPriority(a.matchType)
-              .compareTo(_matchPriority(b.matchType));
+          final matchPriority = _matchPriority(
+            a.matchType,
+          ).compareTo(_matchPriority(b.matchType));
           if (matchPriority != 0) return matchPriority;
           final sectionPriority = a.sectionOrder.compareTo(b.sectionOrder);
           if (sectionPriority != 0) return sectionPriority;
-          final intraSection =
-              a.intraSectionOrder.compareTo(b.intraSectionOrder);
+          final intraSection = a.intraSectionOrder.compareTo(
+            b.intraSectionOrder,
+          );
           if (intraSection != 0) return intraSection;
           return a.itemOrder.compareTo(b.itemOrder);
         });
@@ -257,7 +259,8 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     final rows = <Widget>[];
     String? currentSectionKey;
     for (final entry in _filteredItems) {
-      final shouldShowHeader = sectionCounts[entry.sectionKey] != null &&
+      final shouldShowHeader =
+          sectionCounts[entry.sectionKey] != null &&
           sectionCounts[entry.sectionKey]! >= 2;
       if (shouldShowHeader && currentSectionKey != entry.sectionKey) {
         currentSectionKey = entry.sectionKey;

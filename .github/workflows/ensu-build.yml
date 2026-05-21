@@ -229,6 +229,8 @@ jobs:
         needs: build-metadata
         if: needs.build-metadata.outputs.should_build == 'true'
         runs-on: ubuntu-22.04
+        environment:
+            name: production
         env:
             COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
             BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}

@@ -104,10 +104,11 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     };
 
     widget.selectedFiles.addListener(_selectedFilesListener);
-    _userAuthEventSubscription =
-        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
-      setState(() {});
-    });
+    _userAuthEventSubscription = Bus.instance
+        .on<SubscriptionPurchasedEvent>()
+        .listen((event) {
+          setState(() {});
+        });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
@@ -116,24 +117,25 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           title: widget.title,
         );
 
-        _peopleChangedEventSubscription =
-            Bus.instance.on<PeopleChangedEvent>().listen(
-          (event) {
-            if (event.person != null &&
-                event.type == PeopleEventType.saveOrEditPerson &&
-                widget.person.remoteID == event.person!.remoteID &&
-                (event.source == "linkEmailToPerson" ||
-                    event.source == "reassignMe")) {
-              person = event.person!;
+        _peopleChangedEventSubscription = Bus.instance
+            .on<PeopleChangedEvent>()
+            .listen(
+              (event) {
+                if (event.person != null &&
+                    event.type == PeopleEventType.saveOrEditPerson &&
+                    widget.person.remoteID == event.person!.remoteID &&
+                    (event.source == "linkEmailToPerson" ||
+                        event.source == "reassignMe")) {
+                  person = event.person!;
 
-              _appBarTitle = _resolveAppBarTitle(
-                sourcePerson: person,
-                title: person.data.name,
-              );
-              setState(() {});
-            }
-          },
-        );
+                  _appBarTitle = _resolveAppBarTitle(
+                    sourcePerson: person,
+                    title: person.data.name,
+                  );
+                  setState(() {});
+                }
+              },
+            );
       });
     });
   }
@@ -163,14 +165,16 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final inheritedSearchFilterData =
-        InheritedSearchFilterData.maybeOf(context);
+    final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
+      context,
+    );
     final isHierarchicalSearchable =
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
     return isHierarchicalSearchable
         ? ValueListenableBuilder(
             valueListenable: inheritedSearchFilterData!
-                .searchFilterDataProvider!.isSearchingNotifier,
+                .searchFilterDataProvider!
+                .isSearchingNotifier,
             child: const PreferredSize(
               preferredSize: Size.fromHeight(0),
               child: Flexible(child: RecommendedFiltersForAppbar()),
@@ -187,10 +191,9 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                       )
                     : Text(
                         _appBarTitle ?? "",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall!
-                            .copyWith(fontSize: 16),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall!.copyWith(fontSize: 16),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -205,10 +208,9 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             centerTitle: false,
             title: Text(
               _appBarTitle ?? "",
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall!
-                  .copyWith(fontSize: 16),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall!.copyWith(fontSize: 16),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -373,7 +375,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             value: PeoplePopupAction.ignore,
             child: Row(
               children: [
-                const Icon(Icons.hide_image_outlined),
+                const Icon(Icons.person_off_outlined),
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),

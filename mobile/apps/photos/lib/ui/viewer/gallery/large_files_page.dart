@@ -243,7 +243,7 @@ class _FilterChip extends StatelessWidget {
                   icon,
                   size: 16,
                   color: isSelected
-                      ? colorScheme.backgroundBase
+                      ? colorScheme.backgroundColour
                       : colorScheme.textBase,
                 ),
                 const SizedBox(width: 4),
@@ -252,7 +252,7 @@ class _FilterChip extends StatelessWidget {
                 label,
                 style: textTheme.miniBold.copyWith(
                   color: isSelected
-                      ? colorScheme.backgroundBase
+                      ? colorScheme.backgroundColour
                       : colorScheme.textBase,
                 ),
               ),

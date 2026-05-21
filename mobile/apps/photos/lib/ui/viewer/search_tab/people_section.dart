@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
@@ -50,10 +51,12 @@ class _PeopleSectionState extends State<PeopleSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _examples = await widget.sectionType.getData(
-            context,
-            limit: kSearchSectionLimit,
-          ) as List<GenericSearchResult>;
+          _examples =
+              await widget.sectionType.getData(
+                    context,
+                    limit: kSearchSectionLimit,
+                  )
+                  as List<GenericSearchResult>;
           setState(() {});
         }),
       );
@@ -98,7 +101,9 @@ class _PeopleSectionState extends State<PeopleSection> {
                       padding: const EdgeInsets.all(12),
                       child: Text(
                         widget.sectionType.sectionTitle(context),
-                        style: textTheme.largeBold,
+                        style: TextStyles.h2.copyWith(
+                          color: textTheme.largeBold.color,
+                        ),
                       ),
                     ),
                     if (shouldShowMore)
@@ -133,7 +138,9 @@ class _PeopleSectionState extends State<PeopleSection> {
                         children: [
                           Text(
                             widget.sectionType.sectionTitle(context),
-                            style: textTheme.largeBold,
+                            style: TextStyles.h2.copyWith(
+                              color: textTheme.largeBold.color,
+                            ),
                           ),
                           const SizedBox(height: 24),
                           Text(
@@ -200,15 +207,17 @@ class PersonSearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCluster = searchResult.type() == ResultType.faces &&
+    final bool isCluster =
+        searchResult.type() == ResultType.faces &&
         searchResult.params.containsKey(kClusterParamId);
 
     return ListenableBuilder(
       listenable: selectedPeople ?? ValueNotifier(false),
       builder: (context, _) {
         final id = searchResult.params[kPersonParamID] as String?;
-        final bool isSelected =
-            id != null ? selectedPeople?.isPersonSelected(id) ?? false : false;
+        final bool isSelected = id != null
+            ? selectedPeople?.isPersonSelected(id) ?? false
+            : false;
 
         return GestureDetector(
           onTap: selectedPeople != null
@@ -296,49 +305,50 @@ class PersonSearchExample extends StatelessWidget {
               ),
               isCluster
                   ? isLocalGalleryMode
-                      ? const SizedBox.shrink()
-                      : GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () async {
-                            final clusterId =
-                                searchResult.params[kClusterParamId] as String?;
-                            final result = await showAssignPersonAction(
-                              context,
-                              clusterID: clusterId ?? searchResult.name(),
-                            );
-                            if (result != null &&
-                                result is (PersonEntity, EnteFile)) {
-                              // ignore: unawaited_futures
-                              routeToPage(
+                        ? const SizedBox.shrink()
+                        : GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () async {
+                              final clusterId =
+                                  searchResult.params[kClusterParamId]
+                                      as String?;
+                              final result = await showAssignPersonAction(
                                 context,
-                                PeoplePage(
-                                  person: result.$1,
-                                  searchResult: null,
-                                ),
+                                clusterID: clusterId ?? searchResult.name(),
                               );
-                            } else if (result != null &&
-                                result is PersonEntity) {
-                              // ignore: unawaited_futures
-                              routeToPage(
-                                context,
-                                PeoplePage(
-                                  person: result,
-                                  searchResult: null,
-                                ),
-                              );
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 6, bottom: 0),
-                            child: Text(
-                              AppLocalizations.of(context).addName,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              style: getEnteTextTheme(context).small,
+                              if (result != null &&
+                                  result is (PersonEntity, EnteFile)) {
+                                // ignore: unawaited_futures
+                                routeToPage(
+                                  context,
+                                  PeoplePage(
+                                    person: result.$1,
+                                    searchResult: null,
+                                  ),
+                                );
+                              } else if (result != null &&
+                                  result is PersonEntity) {
+                                // ignore: unawaited_futures
+                                routeToPage(
+                                  context,
+                                  PeoplePage(
+                                    person: result,
+                                    searchResult: null,
+                                  ),
+                                );
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 6, bottom: 0),
+                              child: Text(
+                                AppLocalizations.of(context).addName,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: getEnteTextTheme(context).small,
+                              ),
                             ),
-                          ),
-                        )
+                          )
                   : Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 0),
                       child: SizedBox(

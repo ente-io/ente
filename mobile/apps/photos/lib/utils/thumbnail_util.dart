@@ -5,6 +5,8 @@ import "dart:typed_data";
 
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart'
+    show isFileSystemPathMissing;
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -23,7 +25,6 @@ final _logger = Logger("ThumbnailUtil");
 final _uploadIDToDownloadItem = <int, FileDownloadItem>{};
 final _downloadQueue = Queue<int>();
 const int kMaximumConcurrentDownloads = 500;
-const int _noSuchFileOrDirectoryErrorCode = 2;
 
 class FileDownloadItem {
   final EnteFile file;
@@ -298,7 +299,7 @@ Future<Uint8List?> _readCachedThumbnailIfPresent(
     ThumbnailInMemoryLruCache.put(file, data, size);
     return data;
   } on FileSystemException catch (e) {
-    if (_isPathMissing(e)) {
+    if (isFileSystemPathMissing(e)) {
       _logger.info(
         "Thumbnail cache file missing during read; treating as cache miss: "
         "${cachedThumbnail.path}",
@@ -318,7 +319,7 @@ Future<bool> _writeCachedThumbnail(
     await cachedThumbnail.writeAsBytes(data, flush: flush);
     return true;
   } on FileSystemException catch (e) {
-    if (!_isPathMissing(e)) {
+    if (!isFileSystemPathMissing(e)) {
       rethrow;
     }
     _logger.info(
@@ -330,7 +331,7 @@ Future<bool> _writeCachedThumbnail(
       await cachedThumbnail.writeAsBytes(data, flush: flush);
       return true;
     } on FileSystemException catch (retryError) {
-      if (_isPathMissing(retryError)) {
+      if (isFileSystemPathMissing(retryError)) {
         _logger.info(
           "Thumbnail cache path still missing after recreate; skipping write: "
           "${cachedThumbnail.path}",
@@ -341,10 +342,6 @@ Future<bool> _writeCachedThumbnail(
     }
   }
 }
-
-bool _isPathMissing(FileSystemException e) =>
-    e is PathNotFoundException ||
-    e.osError?.errorCode == _noSuchFileOrDirectoryErrorCode;
 
 File cachedThumbnailPath(EnteFile file) {
   final thumbnailCacheDirectory =

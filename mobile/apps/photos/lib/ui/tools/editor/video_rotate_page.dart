@@ -20,7 +20,7 @@ class VideoRotatePage extends StatelessWidget {
     final rotation = controller.rotation;
     final colorScheme = getEnteColorScheme(context);
     return Scaffold(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: VideoEditorAppBar(
         onCancel: () {
           while (controller.rotation != rotation) {

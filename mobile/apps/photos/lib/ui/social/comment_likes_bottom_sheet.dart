@@ -113,7 +113,7 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: colorScheme.backgroundColour,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(24),
         ),
@@ -210,7 +210,7 @@ class _CommentLikeListItem extends StatelessWidget {
           UserAvatarWidget(
             user,
             currentUserID: currentUserID,
-            type: AvatarType.lg,
+            type: AvatarType.regular,
             addStroke: false,
           ),
           const SizedBox(width: 12),

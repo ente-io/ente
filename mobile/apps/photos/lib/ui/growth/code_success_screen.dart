@@ -20,15 +20,12 @@ class CodeSuccessScreen extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
     final cardColor =
         isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
     const greenColor = Color(0xFF08C225);
 
     return Scaffold(
-      backgroundColor: pageBackgroundColor,
+      backgroundColor: colorScheme.backgroundColour,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

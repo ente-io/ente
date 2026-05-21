@@ -709,10 +709,8 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
       Navigator.of(context).pop();
     }
 
-    final newAlbumRow = GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: createAlbum,
-      child: const NewAlbumListItemWidget(),
+    final newAlbumRow = NewAlbumListItemWidget(
+      onTap: (_) => createAlbum(),
     );
 
     Widget buildEmptyState() {
