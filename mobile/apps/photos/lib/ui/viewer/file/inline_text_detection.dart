@@ -15,11 +15,13 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
 import "package:photos/states/detail_page_state.dart";
+import "package:photos/ui/viewer/file/ocr/display_image_helper.dart";
 import "package:photos/ui/viewer/file/ocr/ocr_dot_wave_overlay.dart";
 import "package:photos/ui/viewer/file/ocr/text_detector_widget.dart";
 import "package:photos/ui/viewer/file/ocr/text_overlay_widget.dart"
     show ZoomedInteractionPolicy;
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/image_util.dart";
 
 /// Inline text detection widget that mimics Apple's Live Text behavior:
 ///
@@ -75,6 +77,9 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   bool _trackedGlobalPointerMoved = false;
   bool _trackedGlobalLongPressTriggered = false;
   Timer? _globalLongPressTimer;
+  String? _resolvedImageSizePath;
+  Size? _resolvedImageSize;
+  int _imageSizeRequestId = 0;
 
   @override
   void initState() {
@@ -109,10 +114,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   void _resetState() {
     _autoActivateTimer?.cancel();
     _cancelTrackedGlobalPointer();
+    _imageSizeRequestId++;
     setState(() {
       _localFilePath = null;
       _overlayActive = false;
       _pendingLongPressPosition = null;
+      _resolvedImageSizePath = null;
+      _resolvedImageSize = null;
     });
   }
 
@@ -189,7 +197,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
           _pendingLongPressPosition = null;
         }
       });
-      if (cached.hasText) _scheduleAutoActivate(requestId);
+      if (cached.hasText) {
+        final localPath = cached.localPath;
+        if (localPath != null) {
+          unawaited(_resolveDisplayImageSize(localPath));
+        }
+        _scheduleAutoActivate(requestId);
+      }
       return;
     }
 
@@ -228,6 +242,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       });
 
       if (hasText) {
+        unawaited(_resolveDisplayImageSize(localFile.path));
         if (_pendingLongPressPosition != null) {
           _activateOverlay();
         } else {
@@ -258,6 +273,57 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       if (_localFilePath == null || _overlayActive) return;
       _activateOverlay();
     });
+  }
+
+  Size? get _displayImageSize {
+    if (widget.file.hasDimensions &&
+        widget.file.width > 0 &&
+        widget.file.height > 0) {
+      return Size(
+        widget.file.width.toDouble(),
+        widget.file.height.toDouble(),
+      );
+    }
+    return _resolvedImageSize;
+  }
+
+  Future<void> _resolveDisplayImageSize(String localPath) async {
+    if (widget.file.hasDimensions) return;
+    if (_resolvedImageSizePath == localPath && _resolvedImageSize != null) {
+      return;
+    }
+
+    final int requestId = ++_imageSizeRequestId;
+    if (_resolvedImageSizePath != localPath || _resolvedImageSize != null) {
+      setState(() {
+        _resolvedImageSizePath = localPath;
+        _resolvedImageSize = null;
+      });
+    }
+
+    try {
+      final displayPath = await DisplayImageHelper.ensureDisplayablePath(
+        localPath,
+      );
+      final imageInfo = await getImageInfo(FileImage(File(displayPath)));
+      if (!mounted ||
+          requestId != _imageSizeRequestId ||
+          _localFilePath != localPath) {
+        return;
+      }
+      setState(() {
+        _resolvedImageSize = Size(
+          imageInfo.image.width.toDouble(),
+          imageInfo.image.height.toDouble(),
+        );
+      });
+    } catch (error, stackTrace) {
+      _logger.warning(
+        "Failed to resolve image dimensions for OCR overlay",
+        error,
+        stackTrace,
+      );
+    }
   }
 
   void _handleLongPressAt(Offset globalPosition) {
@@ -430,17 +496,19 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     }
   }
 
-  Rect _displayedPhotoRect(Size viewportSize) {
+  Rect _displayedPhotoRect(
+    Size viewportSize, {
+    bool allowViewportFallback = true,
+  }) {
     if (viewportSize.width <= 0 || viewportSize.height <= 0) {
       return Rect.zero;
     }
-    if (!widget.file.hasDimensions ||
-        widget.file.width <= 0 ||
-        widget.file.height <= 0) {
-      return Offset.zero & viewportSize;
+    final Size? imageSize = _displayImageSize;
+    if (imageSize == null || imageSize.width <= 0 || imageSize.height <= 0) {
+      return allowViewportFallback ? Offset.zero & viewportSize : Rect.zero;
     }
 
-    final double imageAspect = widget.file.width / widget.file.height;
+    final double imageAspect = imageSize.width / imageSize.height;
     final double viewportAspect = viewportSize.width / viewportSize.height;
     late final double displayWidth;
     late final double displayHeight;
@@ -574,6 +642,31 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     );
   }
 
+  Widget _buildImageBoundedProcessingOverlay() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final Rect photoRect = _displayedPhotoRect(
+          constraints.biggest,
+          allowViewportFallback: false,
+        );
+        if (photoRect.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fromRect(
+              rect: photoRect,
+              child: const IgnorePointer(
+                child: OcrDotWaveOverlay(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isEligible || widget.file is TrashFile || widget.isGuestView) {
@@ -687,17 +780,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
             fit: StackFit.expand,
             children: [
               child!,
-              if (isProcessing)
-                IgnorePointer(
-                  child: Center(
-                    child: widget.file.hasDimensions
-                        ? AspectRatio(
-                            aspectRatio: widget.file.width / widget.file.height,
-                            child: const OcrDotWaveOverlay(),
-                          )
-                        : const OcrDotWaveOverlay(),
-                  ),
-                ),
+              if (isProcessing) _buildImageBoundedProcessingOverlay(),
             ],
           ),
         );
