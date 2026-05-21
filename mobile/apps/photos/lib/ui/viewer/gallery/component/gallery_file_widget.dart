@@ -165,7 +165,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                     isSelected: true,
                     size: 16,
                     selectedFillColor: selectionColor, //same for both themes
-                    selectedTickColor: Colors.black,
+                    selectedTickCutsOut: true,
                   ),
                 ),
               ],
