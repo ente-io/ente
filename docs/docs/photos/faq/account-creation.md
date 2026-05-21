@@ -229,3 +229,15 @@ If you're not receiving verification codes:
 The recovery key does not bypass email verification. For security reasons, Ente does not disable or bypass email verification unless the account owner reaches out and successfully verifies their identity by providing account details.
 
 If you lose access to your email, contact [support@ente.com](mailto:support@ente.com).
+
+### Why does Ente say my email address is not registered? {#email-not-registered}
+
+This usually means the account was created with a different email address.
+
+Check whether you may have signed up using:
+
+- An email alias or hide-my-email service
+- A different personal email address
+- Apple Sign-In or another provider-linked email
+
+If you have a paid account, also check how the payment was made. App Store and Stripe payments can help identify which account was used.

@@ -1,4 +1,6 @@
 Latest changes:
+- Neeraj: Ignore missing files during stale upload cleanup [Sentry]
+- Neeraj: Fix blank gallery after switching from offline mode to online account
 - Neeraj: Fix smart memories and ML lookup failures for large offline galleries [Sentry]
 - Neeraj: Stop reporting inline OCR pre-check timeouts as errors [Sentry]
 - Neeraj: Avoid repeated iOS reupload checks when copied temp files are already cleaned up [Sentry]

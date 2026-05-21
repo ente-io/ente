@@ -13,6 +13,7 @@ export 'components/selection_controls/radio_component.dart';
 export 'components/selection_controls/toggle_switch_component.dart';
 export 'components/slider_component.dart';
 export 'components/stepper_component.dart';
+export 'components/tag_chip_component.dart';
 export 'components/text_input_component.dart';
 export 'models/component_execution_state.dart';
 export 'theme/colors.dart';

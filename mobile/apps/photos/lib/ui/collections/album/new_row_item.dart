@@ -1,4 +1,4 @@
-import "package:dotted_border/dotted_border.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -6,16 +6,17 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/services/collections_service.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class NewAlbumRowItemWidget extends StatelessWidget {
-  final Color? color;
+  static const _cornerRadius = 20.0;
+  static const _thumbnailToTextSpacing = 8.0;
+
   final double height;
   final double width;
+
   const NewAlbumRowItemWidget({
-    this.color,
     super.key,
     required this.height,
     required this.width,
@@ -23,7 +24,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     return GestureDetector(
       onTap: () async {
         final result = await showTextInputDialog(
@@ -42,8 +43,8 @@ class NewAlbumRowItemWidget extends StatelessWidget {
             }
 
             try {
-              final Collection c =
-                  await CollectionsService.instance.createAlbum(text);
+              final Collection c = await CollectionsService.instance
+                  .createAlbum(text);
 
               // Close the dialog now so that it does not flash when leaving the album again.
               Navigator.of(context).pop();
@@ -54,8 +55,9 @@ class NewAlbumRowItemWidget extends StatelessWidget {
                 CollectionPage(CollectionWithThumbnail(c, null)),
               );
             } catch (e, s) {
-              Logger("CreateNewAlbumRowItemWidget")
-                  .severe("Failed to rename album", e, s);
+              Logger(
+                "CreateNewAlbumRowItemWidget",
+              ).severe("Failed to rename album", e, s);
               rethrow;
             }
           },
@@ -69,33 +71,29 @@ class NewAlbumRowItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(_cornerRadius),
             child: Container(
               height: height,
               width: width,
-              color: Theme.of(context).brightness == Brightness.light
-                  ? colorScheme.backdropBase
-                  : colorScheme.backdropFaint,
-              child: DottedBorder(
-                borderType: BorderType.RRect,
-                strokeWidth: 1.75,
-                dashPattern: const [3.75, 3.75],
-                radius: const Radius.circular(12),
-                padding: EdgeInsets.zero,
-                color: colorScheme.strokeFaint,
-                child: Center(
-                  child: Icon(
-                    Icons.add,
-                    color: colorScheme.strokeFaint,
-                  ),
+              color: colors.fillLight,
+              child: Center(
+                child: Image.asset(
+                  "assets/new_album_icon.png",
+                  width: 34,
+                  height: 34,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: _thumbnailToTextSpacing),
           Text(
             AppLocalizations.of(context).addNew,
-            style: getEnteTextTheme(context).smallFaint,
+            style: TextStyles.body.copyWith(
+              color: colors.textLight,
+            ),
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

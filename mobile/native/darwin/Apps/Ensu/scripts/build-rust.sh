@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 
-# Build Ensu's UniFFI Rust static libs for the current Xcode build.
-# Invoked from an Xcode "Run Script" build phase.
-#
-# Inputs  (from Xcode):  SRCROOT, TARGET_TEMP_DIR, PLATFORM_NAME, ARCHS,
-#                        CONFIGURATION, IPHONEOS_DEPLOYMENT_TARGET,
-#                        ENTE_API_ENDPOINT.
-# Outputs (to $TARGET_TEMP_DIR/ensu_rust):
-#           libcore.a  libdb.a  libsync.a  libinference.a  libtranscription.a
-#
-# UniFFI Swift bindings under $SRCROOT/Ensu/Generated/ are generated
-# out-of-band by `cargo codegen ensu-ios`; this script only checks that
-# they exist.
+# This script is invoked from Xcode's "Run Script" build phase.
+# It builds the Rust static libraries used by Ensu's generated UniFFI bindings.
 
 set -euo pipefail
 

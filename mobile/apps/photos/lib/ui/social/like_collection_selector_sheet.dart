@@ -241,7 +241,7 @@ class _LikeCollectionSelectorSheetState
       ),
       decoration: BoxDecoration(
         color:
-            isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundBase,
+            isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundColour,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(28),
         ),
@@ -377,7 +377,7 @@ class _AlbumsHeader extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isDarkMode
                     ? const Color(0xFF0E0E0E)
-                    : colorScheme.backgroundBase,
+                    : colorScheme.backgroundColour,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -501,7 +501,7 @@ class _AlbumListItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDarkTheme
               ? const Color(0xFF0E0E0E)
-              : colorScheme.backgroundBase,
+              : colorScheme.backgroundColour,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(

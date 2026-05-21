@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart'
+    show deleteFileSystemEntityIfPresent;
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/errors.dart';
@@ -12,8 +14,6 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-const int _noSuchFileOrDirectoryErrorCode = 2;
 
 // LocalFileUpdateService tracks all the potential local file IDs which have
 // changed/modified on the device and needed to be uploaded again.
@@ -238,19 +238,11 @@ class LocalFileUpdateService {
     if (!Platform.isIOS || sourceFile == null) {
       return;
     }
-    try {
-      await sourceFile.delete();
-    } on FileSystemException catch (e) {
-      if (!_isPathMissing(e)) {
-        rethrow;
-      }
+    final deleted = await deleteFileSystemEntityIfPresent(sourceFile);
+    if (!deleted) {
       _logger.info(
         "Copied upload temp file already missing: ${sourceFile.path}",
       );
     }
   }
-
-  bool _isPathMissing(FileSystemException e) =>
-      e is PathNotFoundException ||
-      e.osError?.errorCode == _noSuchFileOrDirectoryErrorCode;
 }

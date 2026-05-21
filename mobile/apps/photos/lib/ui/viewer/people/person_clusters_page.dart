@@ -346,14 +346,14 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                                     color: colorScheme.warning500,
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: colorScheme.backgroundBase,
+                                      color: colorScheme.backgroundColour,
                                       width: 2,
                                     ),
                                   ),
                                   child: Icon(
                                     Icons.remove,
                                     size: 12,
-                                    color: colorScheme.backgroundBase,
+                                    color: colorScheme.backgroundColour,
                                   ),
                                 ),
                               ),

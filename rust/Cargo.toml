@@ -4,6 +4,7 @@ members = [
     "apps/cli",
     "apps/codegen",
     "apps/ensu/src-tauri",
+    "bindings/ffi/crypto",
     "bindings/uniffi/core",
     "bindings/uniffi/ensu/db",
     "bindings/uniffi/ensu/inference",
