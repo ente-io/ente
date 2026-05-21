@@ -785,7 +785,8 @@ const newAddOrCopyToCollectionResult = (): AddOrCopyToCollectionResult => ({
     addedFiles: [],
 });
 
-// Bridges favorite undo before the remote add/copy has been pulled into local DB.
+// Bridges shared favorite toggles before the remote add/move has been pulled
+// into local DB.
 const pendingFavoriteFilesByHashAndType = new Map<string, EnteFile>();
 let pendingUserFavoritesCollection: Collection | undefined;
 
@@ -812,12 +813,45 @@ const rememberPendingFavoriteFiles = (
     }
 };
 
-const forgetPendingFavoriteFiles = (files: EnteFile[], userID: number) => {
+const splitPendingFavoriteFiles = (files: EnteFile[], userID: number) => {
+    const pendingFiles: EnteFile[] = [];
+    const remainingFiles: EnteFile[] = [];
+    const seenPendingFileIDs = new Set<number>();
+
     for (const file of files) {
-        if (file.ownerID == userID) continue;
+        if (file.ownerID == userID) {
+            remainingFiles.push(file);
+            continue;
+        }
 
         const key = hashAndTypeKey(file);
-        if (key) pendingFavoriteFilesByHashAndType.delete(key);
+        const pendingFavoriteFile = key
+            ? pendingFavoriteFilesByHashAndType.get(key)
+            : undefined;
+        if (pendingFavoriteFile) {
+            if (!seenPendingFileIDs.has(pendingFavoriteFile.id)) {
+                seenPendingFileIDs.add(pendingFavoriteFile.id);
+                pendingFiles.push(pendingFavoriteFile);
+            }
+        } else {
+            remainingFiles.push(file);
+        }
+    }
+
+    return { pendingFiles, remainingFiles };
+};
+
+const forgetPendingFavoriteFileIDs = (fileIDs: number[]) => {
+    if (!fileIDs.length) return;
+
+    const deletedFileIDs = new Set(fileIDs);
+    for (const [
+        key,
+        pendingFavoriteFile,
+    ] of pendingFavoriteFilesByHashAndType.entries()) {
+        if (deletedFileIDs.has(pendingFavoriteFile.id)) {
+            pendingFavoriteFilesByHashAndType.delete(key);
+        }
     }
 };
 /**
@@ -1183,8 +1217,8 @@ const encryptWithCollectionKey = async (
  *
  * Remote only, does not modify local state.
  */
-export const moveToTrash = async (files: EnteFile[]) =>
-    batched(files, async (batchFiles) =>
+export const moveToTrash = async (files: EnteFile[]) => {
+    await batched(files, async (batchFiles) =>
         ensureOk(
             await fetch(await apiURL("/files/trash"), {
                 method: "POST",
@@ -1198,14 +1232,16 @@ export const moveToTrash = async (files: EnteFile[]) =>
             }),
         ),
     );
+    forgetPendingFavoriteFileIDs(files.map((file) => file.id));
+};
 
 /**
  * Make a remote request to delete the given {@link fileIDs} from trash.
  *
  * Remote only, does not modify local state.
  */
-export const deleteFromTrash = async (fileIDs: number[]) =>
-    batched(fileIDs, async (batchIDs) =>
+export const deleteFromTrash = async (fileIDs: number[]) => {
+    await batched(fileIDs, async (batchIDs) =>
         ensureOk(
             await fetch(await apiURL("/trash/delete"), {
                 method: "POST",
@@ -1214,6 +1250,8 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
             }),
         ),
     );
+    forgetPendingFavoriteFileIDs(fileIDs);
+};
 
 /**
  * Remove the given files from the specified collection owned by the user.
@@ -1834,11 +1872,25 @@ export const addToFavoritesCollection = async (files: EnteFile[]) => {
         throw new Error("Cannot favorite shared files without metadata hash");
     }
 
-    const result = await addOrCopyToCollection(
-        await savedOrCreateUserFavoritesCollection(),
+    const favoritesCollection = await savedOrCreateUserFavoritesCollection();
+    const { pendingFiles, remainingFiles } = splitPendingFavoriteFiles(
         files,
+        userID,
     );
-    rememberPendingFavoriteFiles(files, result.addedFiles, userID);
+
+    if (pendingFiles.length) {
+        await addToCollection(favoritesCollection, pendingFiles);
+    }
+
+    const result = await addOrCopyToCollection(
+        favoritesCollection,
+        remainingFiles,
+    );
+    rememberPendingFavoriteFiles(
+        files,
+        pendingFiles.concat(result.addedFiles),
+        userID,
+    );
 };
 
 export const removeFromFavoritesCollection = async (files: EnteFile[]) => {
@@ -1858,7 +1910,7 @@ export const removeFromFavoritesCollection = async (files: EnteFile[]) => {
         favoritesCollection.id,
         uniqueFilesByID(resolvedFiles),
     );
-    forgetPendingFavoriteFiles(files, userID);
+    rememberPendingFavoriteFiles(files, resolvedFiles, userID);
 };
 
 const resolveFavoritesFilesForRemoval = async (
