@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -171,7 +172,16 @@ class HomeWidgetService {
         await thumbnailFile.create(recursive: true);
       }
 
-      await thumbnailFile.writeAsBytes(thumbnail);
+      // Apply EXIF orientation correction so the widget host (which uses
+      // BitmapFactory on Android and does not respect EXIF orientation) always
+      // receives pixels that are already in the correct orientation.
+      final correctedThumbnail =
+          await FlutterImageCompress.compressWithList(
+        thumbnail,
+        quality: 100,
+        keepExif: false,
+      );
+      await thumbnailFile.writeAsBytes(correctedThumbnail);
       await setData(key, thumbnailPath);
 
       // Format date for display
