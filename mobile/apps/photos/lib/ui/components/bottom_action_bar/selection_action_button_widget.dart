@@ -1,13 +1,13 @@
-import 'dart:math' as math;
-
 import "package:ente_components/ente_components.dart" as components;
 import "package:flutter/material.dart";
 import "package:flutter_svg/svg.dart";
+import "package:hugeicons/hugeicons.dart";
 
 /// Pass icon or asset path of svg
 class SelectionActionButton extends StatelessWidget {
   final String labelText;
   final IconData? icon;
+  final List<List<dynamic>>? hugeIcon;
   final Widget? iconWidget;
   final String? svgAssetPath;
   final VoidCallback? onTap;
@@ -18,6 +18,7 @@ class SelectionActionButton extends StatelessWidget {
     required this.labelText,
     required this.onTap,
     this.icon,
+    this.hugeIcon,
     this.svgAssetPath,
     this.iconWidget,
     this.shouldShow = true,
@@ -27,7 +28,12 @@ class SelectionActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(icon != null || iconWidget != null || svgAssetPath != null);
+    assert(
+      icon != null ||
+          hugeIcon != null ||
+          iconWidget != null ||
+          svgAssetPath != null,
+    );
     return AnimatedSize(
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOutCirc,
@@ -37,6 +43,7 @@ class SelectionActionButton extends StatelessWidget {
             ? _Body(
                 labelText: labelText,
                 icon: icon,
+                hugeIcon: hugeIcon,
                 onTap: onTap,
                 svgAssetPath: svgAssetPath,
                 iconWidget: iconWidget,
@@ -53,6 +60,7 @@ class SelectionActionButton extends StatelessWidget {
 class _Body extends StatefulWidget {
   final String labelText;
   final IconData? icon;
+  final List<List<dynamic>>? hugeIcon;
   final String? svgAssetPath;
   final Widget? iconWidget;
   final VoidCallback? onTap;
@@ -62,6 +70,7 @@ class _Body extends StatefulWidget {
     required this.onTap,
     required this.isCritical,
     this.icon,
+    this.hugeIcon,
     this.svgAssetPath,
     this.iconWidget,
   });
@@ -72,6 +81,7 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   static const minWidth = 64.0;
+  static const iconSize = 22.0;
   late double widthOfButton;
   Color? backgroundColor;
 
@@ -115,14 +125,11 @@ class __BodyState extends State<_Body> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.icon == Icons.navigation_rounded)
-                  Transform.rotate(
-                    angle: math.pi / 2,
-                    child: Icon(
-                      widget.icon,
-                      size: 24,
-                      color: foregroundColor,
-                    ),
+                if (widget.hugeIcon != null)
+                  HugeIcon(
+                    icon: widget.hugeIcon!,
+                    size: iconSize,
+                    color: foregroundColor,
                   )
                 else if (widget.svgAssetPath != null)
                   SvgPicture.asset(
@@ -131,15 +138,15 @@ class __BodyState extends State<_Body> {
                       foregroundColor,
                       BlendMode.srcIn,
                     ),
-                    width: 24,
-                    height: 24,
+                    width: iconSize,
+                    height: iconSize,
                   )
                 else if (widget.iconWidget != null)
                   widget.iconWidget!
                 else
                   Icon(
                     widget.icon,
-                    size: 24,
+                    size: iconSize,
                     color: foregroundColor,
                   ),
                 const SizedBox(height: 4),
@@ -182,7 +189,7 @@ class __BodyState extends State<_Body> {
     return maxWidth;
   }
 
-//Todo: this doesn't give the correct width of the word, make it right
+  //Todo: this doesn't give the correct width of the word, make it right
   double computeWidthOfWord(String text, TextStyle style) {
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: style),
@@ -190,7 +197,7 @@ class __BodyState extends State<_Body> {
       textDirection: TextDirection.ltr,
       textScaler: MediaQuery.textScalerOf(context),
     )..layout();
-//buffer of 8 added as width is shorter than actual text width
+    //buffer of 8 added as width is shorter than actual text width
     return textPainter.size.width + 8;
   }
 }

@@ -3,6 +3,7 @@ import "dart:io";
 import "package:ente_components/ente_components.dart" as components;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -85,8 +86,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final inheritedSearchFilterData =
-        InheritedSearchFilterData.maybeOf(context);
+    final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
+      context,
+    );
     if (inheritedSearchFilterData?.isHierarchicalSearchable ?? false) {
       _searchFilterDataProvider =
           inheritedSearchFilterData!.searchFilterDataProvider;
@@ -224,8 +226,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
       if (initialFilter is FaceFilter) {
         for (HierarchicalSearchFilter filter in appliedFilters) {
           if (filter is OnlyThemFilter) {
-            if (filter.faceFilters
-                .any((faceFilter) => faceFilter.isSameFilter(initialFilter))) {
+            if (filter.faceFilters.any(
+              (faceFilter) => faceFilter.isSameFilter(initialFilter),
+            )) {
               initalFilterIsInAppliedFiters = true;
               break;
             }
@@ -310,10 +313,10 @@ class _SelectAllButtonState extends State<SelectAllButton> {
                   } else {
                     _allSelected = false;
                   }
-                  return Icon(
-                    _allSelected
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
+                  return HugeIcon(
+                    icon: _allSelected
+                        ? HugeIcons.strokeRoundedCheckmarkCircle01
+                        : HugeIcons.strokeRoundedCircle,
                     color: colors.textBase,
                     size: 18,
                   );

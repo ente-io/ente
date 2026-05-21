@@ -1,5 +1,6 @@
 import "package:ente_components/ente_components.dart" as components;
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
@@ -158,10 +159,10 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
                   } else {
                     _allSelected = false;
                   }
-                  return Icon(
-                    _allSelected
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
+                  return HugeIcon(
+                    icon: _allSelected
+                        ? HugeIcons.strokeRoundedCheckmarkCircle01
+                        : HugeIcons.strokeRoundedCircle,
                     color: colors.textBase,
                     size: 18,
                   );

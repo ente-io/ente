@@ -1,5 +1,6 @@
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -111,56 +112,61 @@ class _PeopleSelectionActionWidgetState
             .toList();
         final onlyIgnoredPersonsSelected =
             ignoredSelectedPersonIds.isNotEmpty &&
-                selectedClusterIds.isEmpty &&
-                ignoredSelectedPersonIds.length == selectedPersonIds.length;
-        final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
+            selectedClusterIds.isEmpty &&
+            ignoredSelectedPersonIds.length == selectedPersonIds.length;
+        final bool namedPersonsSelected =
+            selectedPersonIds.isNotEmpty &&
             selectedPersonIds.every(
               (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
             );
         final bool showEditAction = onlyOnePerson;
         final bool showReviewAction = onlyOnePerson;
-        final bool showMergeAction =
-            onlyIgnoredPersonsSelected ? false : selectedClusterIds.isNotEmpty;
-        final bool showResetAction =
-            onlyIgnoredPersonsSelected ? false : onlyOnePerson;
+        final bool showMergeAction = onlyIgnoredPersonsSelected
+            ? false
+            : selectedClusterIds.isNotEmpty;
+        final bool showResetAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyOnePerson;
         final bool showShowPersonAction = onlyIgnoredPersonsSelected;
-        final bool showAutoAddAction =
-            onlyIgnoredPersonsSelected ? false : onlyPersonSelected;
+        final bool showAutoAddAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected;
         final bool showPinAction = onlyIgnoredPersonsSelected
             ? false
             : onlyPersonSelected &&
-                namedPersonsSelected &&
-                selectedPersonIds.every(
-                  (id) => !(personMap[id]?.data.isPinned ?? false),
-                );
+                  namedPersonsSelected &&
+                  selectedPersonIds.every(
+                    (id) => !(personMap[id]?.data.isPinned ?? false),
+                  );
         final bool showUnpinAction = onlyIgnoredPersonsSelected
             ? false
             : onlyPersonSelected &&
-                namedPersonsSelected &&
-                selectedPersonIds.every(
-                  (id) => personMap[id]?.data.isPinned ?? false,
-                );
+                  namedPersonsSelected &&
+                  selectedPersonIds.every(
+                    (id) => personMap[id]?.data.isPinned ?? false,
+                  );
         final bool showHideFromMemoriesAction = onlyIgnoredPersonsSelected
             ? false
             : onlyPersonSelected &&
-                namedPersonsSelected &&
-                selectedPersonIds.every(
-                  (id) => !(personMap[id]?.data.hideFromMemories ?? false),
-                );
+                  namedPersonsSelected &&
+                  selectedPersonIds.every(
+                    (id) => !(personMap[id]?.data.hideFromMemories ?? false),
+                  );
         final bool showShowInMemoriesAction = onlyIgnoredPersonsSelected
             ? false
             : onlyPersonSelected &&
-                namedPersonsSelected &&
-                selectedPersonIds.every(
-                  (id) => personMap[id]?.data.hideFromMemories ?? false,
-                );
+                  namedPersonsSelected &&
+                  selectedPersonIds.every(
+                    (id) => personMap[id]?.data.hideFromMemories ?? false,
+                  );
         final bool hasNonIgnoredSelectedPerson = selectedPersonIds.any(
           (id) => !(personMap[id]?.data.isIgnored ?? true),
         );
         final bool showIgnoreAction = onlyIgnoredPersonsSelected
             ? false
             : selectedClusterIds.isNotEmpty || hasNonIgnoredSelectedPerson;
-        final bool hasVisibleAction = showEditAction ||
+        final bool hasVisibleAction =
+            showEditAction ||
             showReviewAction ||
             showIgnoreAction ||
             showMergeAction ||
@@ -179,7 +185,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).edit,
-            icon: Icons.edit_outlined,
+            hugeIcon: HugeIcons.strokeRoundedPencilEdit01,
             onTap: _onEditPerson,
             shouldShow: showEditAction,
           ),
@@ -187,7 +193,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).review,
-            icon: Icons.search_outlined,
+            hugeIcon: HugeIcons.strokeRoundedSearch01,
             onTap: _onReviewSuggestion,
             shouldShow: showReviewAction,
           ),
@@ -195,7 +201,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).ignore,
-            icon: Icons.hide_image_outlined,
+            hugeIcon: HugeIcons.strokeRoundedImageNotFound01,
             onTap: _onIgnore,
             shouldShow: showIgnoreAction,
           ),
@@ -203,7 +209,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).merge,
-            icon: Icons.merge_outlined,
+            hugeIcon: HugeIcons.strokeRoundedGitMerge,
             onTap: _onMerge,
             shouldShow: showMergeAction,
           ),
@@ -211,7 +217,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).reset,
-            icon: Icons.remove_outlined,
+            hugeIcon: HugeIcons.strokeRoundedRemove01,
             onTap: _onResetPerson,
             shouldShow: showResetAction,
           ),
@@ -219,7 +225,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).showPerson,
-            icon: Icons.visibility_outlined,
+            hugeIcon: HugeIcons.strokeRoundedView,
             onTap: _onShowPerson,
             shouldShow: showShowPersonAction,
           ),
@@ -227,7 +233,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).pin,
-            icon: Icons.push_pin_outlined,
+            hugeIcon: HugeIcons.strokeRoundedPin,
             onTap: () => _updatePinState(true),
             shouldShow: showPinAction,
           ),
@@ -235,7 +241,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).unpin,
-            icon: Icons.push_pin,
+            hugeIcon: HugeIcons.strokeRoundedPinOff,
             onTap: () => _updatePinState(false),
             shouldShow: showUnpinAction,
           ),
@@ -243,7 +249,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).hideFromMemories,
-            icon: Icons.visibility_off_outlined,
+            hugeIcon: HugeIcons.strokeRoundedViewOffSlash,
             onTap: () => _updateHideFromMemoriesState(true),
             shouldShow: showHideFromMemoriesAction,
           ),
@@ -251,7 +257,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: context.l10n.showInMemories,
-            icon: Icons.visibility_outlined,
+            hugeIcon: HugeIcons.strokeRoundedView,
             onTap: () => _updateHideFromMemoriesState(false),
             shouldShow: showShowInMemoriesAction,
           ),
@@ -261,8 +267,8 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).autoAddToAlbum,
             iconWidget: Image.asset(
               "assets/auto-add-people.png",
-              width: 24,
-              height: 24,
+              width: 22,
+              height: 22,
               color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
             ),
             onTap: _autoAddToAlbum,
@@ -541,10 +547,12 @@ class _PeopleSelectionActionWidgetState
     await showChoiceDialog(
       context,
       title: multiple
-          ? AppLocalizations.of(context)
-              .areYouSureYouWantToShowThesePeopleInPeopleSectionAgain
-          : AppLocalizations.of(context)
-              .areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
+          ? AppLocalizations.of(
+              context,
+            ).areYouSureYouWantToShowThesePeopleInPeopleSectionAgain
+          : AppLocalizations.of(
+              context,
+            ).areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
       firstButtonLabel: multiple
           ? AppLocalizations.of(context).yesShowPeople
           : AppLocalizations.of(context).yesShowPerson,
@@ -578,8 +586,10 @@ class _PeopleSelectionActionWidgetState
     if (selectedClusterIds.isEmpty) return;
 
     if (!mounted) return;
-    final namedSelectedPersonIds =
-        _getNamedSelectedPersonIds(selectedPersonIds, personMap);
+    final namedSelectedPersonIds = _getNamedSelectedPersonIds(
+      selectedPersonIds,
+      personMap,
+    );
 
     String? targetPersonId;
     PersonEntity? targetPerson;
