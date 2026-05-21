@@ -314,6 +314,8 @@ class _AlbumsTabState extends State<AlbumsTab>
             key: const ValueKey("album_search_local_device_folders"),
             searchQuery: _searchQuery.trim(),
             albumViewType: _viewType.value,
+            sortKey: _sortKey.value,
+            sortDirection: _sortDirection.value,
             showEmptyState: true,
             topPadding: 8,
             bottomPadding: 0,
@@ -352,6 +354,8 @@ class _AlbumsTabState extends State<AlbumsTab>
           key: const ValueKey("album_search_device_folders"),
           searchQuery: _searchQuery.trim(),
           albumViewType: _viewType.value,
+          sortKey: _sortKey.value,
+          sortDirection: _sortDirection.value,
           showEmptyState: shouldShowDeviceSearchState,
           topPadding: 8,
           bottomPadding: 0,
@@ -401,8 +405,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     final colorScheme = getEnteColorScheme(context);
     final strings = AppLocalizations.of(context);
     final isListView = _viewType.value == AlbumViewType.list;
-    final showSortActions =
-        !_hasSearchQuery && _effectiveFilter != _AlbumsFilter.onDevice;
+    final showSortActions = !_hasSearchQuery;
     final currentSortKey = _sortKey.value;
     final currentSortDirection = _sortDirection.value;
     final nameSortDirection = currentSortKey == AlbumSortKey.albumName
@@ -724,6 +727,8 @@ class _AlbumsTabState extends State<AlbumsTab>
                           _enteCollections,
                           _sharedCollections,
                           _viewType,
+                          _sortKey,
+                          _sortDirection,
                         ],
                       ),
                       builder: (context, _) {
@@ -747,6 +752,8 @@ class _AlbumsTabState extends State<AlbumsTab>
                             return DeviceFolderVerticalGridSliver(
                               searchQuery: _searchQuery.trim(),
                               albumViewType: _viewType.value,
+                              sortKey: _sortKey.value,
+                              sortDirection: _sortDirection.value,
                             );
                         }
                         if (collections == null) {
