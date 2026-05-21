@@ -10,8 +10,16 @@ object WhatsNewContent {
 
     val entries: List<WhatsNewEntry> = listOf(
         WhatsNewEntry(
-            title = "In-app release notes",
-            description = "Ensu can now show a short What's new note after updates, with platform-specific entries and a changelog version independent from the app build version."
+            title = "Talk to Ensu",
+            description = "On-device voice transcription is here — tap the mic and speak your prompt instead of typing. Nothing leaves your phone."
+        ),
+        WhatsNewEntry(
+            title = "Image queries, way faster",
+            description = "Under-the-hood improvements make asking Ensu about a picture feel noticeably quicker."
+        ),
+        WhatsNewEntry(
+            title = "Faster, smoother model downloads",
+            description = "Getting a new model onto your device is now dramatically quicker and more reliable."
         )
     )
 }

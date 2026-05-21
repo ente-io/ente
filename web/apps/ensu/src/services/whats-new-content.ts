@@ -7,8 +7,18 @@ export const whatsNewVersion = 1;
 
 export const whatsNewEntries: readonly WhatsNewEntry[] = [
     {
-        title: "In-app release notes",
+        title: "Meet Gemma 4, your new default",
         description:
-            "Ensu can now show a short What's new note after updates, with platform-specific entries and a changelog version independent from the app build version.",
+            "Ensu now ships with Gemma 4 out of the box, giving you sharper, more capable responses without changing a thing.",
+    },
+    {
+        title: "Image queries, way faster",
+        description:
+            "Under-the-hood improvements make asking Ensu about a picture feel nearly instant.",
+    },
+    {
+        title: "Faster, smoother model downloads",
+        description:
+            "Getting a new model onto your machine is now dramatically quicker and more reliable.",
     },
 ];
