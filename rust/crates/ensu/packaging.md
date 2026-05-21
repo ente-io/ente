@@ -14,6 +14,7 @@ A map of Ensu related paths in the monorepo.
 Core rust crate is in `rust/crates/core`.
 
 Ensu specific Rust crates are in `rust/crates/ensu`
+
 - Local chat database: `rust/crates/ensu/db`
 - Sync engine: `rust/crates/ensu/sync`
 - Inference runtime: `rust/crates/ensu/inference`
@@ -23,6 +24,7 @@ Ensu specific Rust crates are in `rust/crates/ensu`
 Web app depends on shared WASM bindings at `web/packages/wasm`.
 
 Android and Apple native apps use UniFFI + adapters.
+
 - Core UniFFI bindings: `rust/bindings/uniffi/core`
 - Ensu UniFFI bindings: `rust/bindings/uniffi/ensu`
 

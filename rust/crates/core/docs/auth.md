@@ -7,10 +7,7 @@ The `auth` module provides high-level authentication operations for Ente clients
 - **Recovery**: Account recovery with recovery key
 - **SRP Login**: Client-side SRP exchange using derived credentials
 
-SRP protocol exchange is orchestrated in the application layer (HTTP calls),
-but `ente-core` provides `SrpSession` (behind the `srp` feature) to compute
-SRP proofs and verify the server response. This module provides credential
-derivation, SRP session helpers, and secret decryption.
+SRP protocol exchange is orchestrated in the application layer (HTTP calls), but `ente-core` provides `SrpSession` (behind the `srp` feature) to compute SRP proofs and verify the server response. This module provides credential derivation, SRP session helpers, and secret decryption.
 
 ## Architecture
 
@@ -100,6 +97,7 @@ User                    App                     Server              ente-core
 ### Types
 
 #### `SrpAttributes`
+
 Server-provided attributes for SRP authentication.
 
 ```rust
@@ -113,10 +111,10 @@ pub struct SrpAttributes {
 }
 ```
 
-If `is_email_mfa_enabled` is missing, clients should fall back to the email OTP
-flow for safety (matching mobile/web behavior).
+If `is_email_mfa_enabled` is missing, clients should fall back to the email OTP flow for safety (matching mobile/web behavior).
 
 #### `KeyAttributes`
+
 Server-provided encrypted key material.
 
 ```rust
@@ -134,6 +132,7 @@ pub struct KeyAttributes {
 ```
 
 #### `SrpCredentials`
+
 Derived credentials for SRP authentication.
 
 ```rust
@@ -144,8 +143,8 @@ pub struct SrpCredentials {
 ```
 
 #### `SrpSession`
-Client-side SRP helper (requires the `srp` feature). It pads public values to
-the 4096-bit group length and derives proofs as:
+
+Client-side SRP helper (requires the `srp` feature). It pads public values to the 4096-bit group length and derives proofs as:
 
 - `M1 = H(A | B | S)`
 - `K = H(S)`
@@ -159,6 +158,7 @@ session.verify_m2(&srp_m2)?; // optional
 ```
 
 #### `DecryptedSecrets`
+
 Result of successful decryption.
 
 ```rust
@@ -172,6 +172,7 @@ pub struct DecryptedSecrets {
 ### Functions
 
 #### `derive_srp_credentials`
+
 Derive both KEK and login key from password.
 
 ```rust
@@ -181,10 +182,10 @@ pub fn derive_srp_credentials(
 ) -> Result<SrpCredentials>
 ```
 
-Use `login_key` with `auth::SrpSession` to compute srpA/srpM1 (and optionally
-verify srpM2). Keep `kek` for `decrypt_secrets`.
+Use `login_key` with `auth::SrpSession` to compute srpA/srpM1 (and optionally verify srpM2). Keep `kek` for `decrypt_secrets`.
 
 #### `derive_kek`
+
 Derive only the KEK (for email MFA flow).
 
 ```rust
@@ -197,6 +198,7 @@ pub fn derive_kek(
 ```
 
 #### `decrypt_secrets`
+
 Decrypt master key, secret key, and token.
 
 ```rust
@@ -226,15 +228,13 @@ pub enum AuthError {
 
 Ente uses Argon2id for password-based key derivation:
 
-| Strength | Memory | Ops | Use Case |
-|----------|--------|-----|----------|
-| Interactive | 64 MB | 2 | Normal login |
-| Moderate | 256 MB | 3 | Enhanced security |
-| Sensitive | 1 GB | 4 | Maximum security |
+| Strength    | Memory | Ops | Use Case          |
+| ----------- | ------ | --- | ----------------- |
+| Interactive | 64 MB  | 2   | Normal login      |
+| Moderate    | 256 MB | 3   | Enhanced security |
+| Sensitive   | 1 GB   | 4   | Maximum security  |
 
-Sensitive derivation uses an adaptive mem/ops fallback that preserves the
-same strength while reducing memory on constrained devices. The selected
-`mem_limit` and `ops_limit` are stored in key attributes for other clients.
+Sensitive derivation uses an adaptive mem/ops fallback that preserves the same strength while reducing memory on constrained devices. The selected `mem_limit` and `ops_limit` are stored in key attributes for other clients.
 
 The server specifies `mem_limit` and `ops_limit` in `SrpAttributes`.
 
@@ -253,17 +253,17 @@ use ente_core::{auth, crypto};
 async fn login(email: &str, password: &str, api: &ApiClient) -> Result<Secrets> {
     // 1. Get SRP attributes
     let srp_attrs = api.get_srp_attributes(email).await?;
-    
+
     // 2. Check auth method
     if srp_attrs.is_email_mfa_enabled {
         // Email MFA flow
         api.send_otp(email).await?;
         let otp = prompt_user("Enter OTP:")?;
         let auth_resp = api.verify_email(email, &otp).await?;
-        
+
         // Handle 2FA if required
         let auth_resp = handle_2fa_if_needed(auth_resp, api).await?;
-        
+
         // Derive KEK and decrypt
         let kek = auth::derive_kek(
             password,
@@ -271,10 +271,10 @@ async fn login(email: &str, password: &str, api: &ApiClient) -> Result<Secrets> 
             srp_attrs.mem_limit,
             srp_attrs.ops_limit,
         )?;
-        
+
         let key_attrs = auth_resp.key_attributes.unwrap();
         let encrypted_token = auth_resp.encrypted_token.unwrap();
-        
+
         auth::decrypt_secrets(&kek, &key_attrs, &encrypted_token)
     } else {
         // SRP flow

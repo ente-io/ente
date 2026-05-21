@@ -8,20 +8,11 @@ Fully open source end-to-end encrypted photos, authenticators and more.
 
 # Ente
 
-Ente is a service that provides a fully open source, end-to-end encrypted
-platform for you to store your data in the cloud without needing to trust the
-service provider. On top of this platform, we have built three apps so far:
-Ente Photos (an alternative to Apple and Google Photos), Ente Locker (a safe
-space for your most important documents and credentials), and Ente Auth (a 2FA
-alternative to the deprecated Authy).
+Ente is a service that provides a fully open source, end-to-end encrypted platform for you to store your data in the cloud without needing to trust the service provider. On top of this platform, we have built three apps so far: Ente Photos (an alternative to Apple and Google Photos), Ente Locker (a safe space for your most important documents and credentials), and Ente Auth (a 2FA alternative to the deprecated Authy).
 
-This monorepo contains all our source code - the client apps (iOS / Android /
-F-Droid / Web / Linux / macOS / Windows) for both the products (and more planned
-future ones!), and the server that powers them.
+This monorepo contains all our source code - the client apps (iOS / Android / F-Droid / Web / Linux / macOS / Windows) for both the products (and more planned future ones!), and the server that powers them.
 
-Our source code and cryptography have been externally audited by Cure53 (a
-German cybersecurity firm, arguably the world's best), Symbolic Software (French
-cryptography experts) and Fallible (an Indian penetration testing firm).
+Our source code and cryptography have been externally audited by Cure53 (a German cybersecurity firm, arguably the world's best), Symbolic Software (French cryptography experts) and Fallible (an Indian penetration testing firm).
 
 Learn more at [ente.com](https://ente.com).
 
@@ -31,13 +22,9 @@ Learn more at [ente.com](https://ente.com).
 
 ![Screenshots of Ente Photos](.github/assets/photos.png)
 
-Our flagship product. 3x data replication. Face detection. Semantic search.
-Private sharing. Collaborative albums. Family plans. Easy import, easier export.
-Background uploads. The list goes on. And of course, all of this, while being
-fully end-to-end encrypted across platforms.
+Our flagship product. 3x data replication. Face detection. Semantic search. Private sharing. Collaborative albums. Family plans. Easy import, easier export. Background uploads. The list goes on. And of course, all of this, while being fully end-to-end encrypted across platforms.
 
-Ente Photos is a paid service, but we offer 10GB of free storage.
-You can also clone this repository and choose to self-host.
+Ente Photos is a paid service, but we offer 10GB of free storage. You can also clone this repository and choose to self-host.
 
 <br />
 
@@ -58,12 +45,9 @@ You can also clone this repository and choose to self-host.
 
 ![Screenshots of Ente Photos](.github/assets/auth.png)
 
-Our labour of love. Two years ago, while building Ente Photos, we realized that
-there was no open source end-to-end encrypted authenticator app. We already had
-the building blocks, so we built one.
+Our labour of love. Two years ago, while building Ente Photos, we realized that there was no open source end-to-end encrypted authenticator app. We already had the building blocks, so we built one.
 
-Ente Auth is free, and will remain free forever. If you like the service and
-want to give back, please check out Ente Photos or spread the word.
+Ente Auth is free, and will remain free forever. If you like the service and want to give back, please check out Ente Photos or spread the word.
 
 <br />
 
@@ -84,13 +68,9 @@ want to give back, please check out Ente Photos or spread the word.
 
 ![Screenshots of Ente Locker](.github/assets/locker.png)
 
-Protect your most important documents, credentials, and notes with end-to-end
-encryption. Share privately with people you trust, and set up access for
-emergencies. Available for iOS and Android.
+Protect your most important documents, credentials, and notes with end-to-end encryption. Share privately with people you trust, and set up access for emergencies. Available for iOS and Android.
 
-Ente Locker is free for up to 100 items. If you're subscribed to Ente Photos,
-you can store up to 1000 items. Learn more at
-[ente.com/locker](https://ente.com/locker).
+Ente Locker is free for up to 100 items. If you're subscribed to Ente Photos, you can store up to 1000 items. Learn more at [ente.com/locker](https://ente.com/locker).
 
 <div align="center">
 
@@ -104,22 +84,18 @@ you can store up to 1000 items. Learn more at
 
 ## Contributing
 
-Want to get aboard the Ente hype train? Welcome along! Don't hesitate if you're
-not a developer, there are many other important ways in which [you can
-contribute](CONTRIBUTING.md).
+Want to get aboard the Ente hype train? Welcome along! Don't hesitate if you're not a developer, there are many other important ways in which [you can contribute](CONTRIBUTING.md).
 
 ## Support
 
-We are never more than an email away. For the various ways to ask for help,
-please see our [support guide](SUPPORT.md).
+We are never more than an email away. For the various ways to ask for help, please see our [support guide](SUPPORT.md).
 
 ## Community
 
 <img src=".github/assets/ente-ducky.png" width=200 alt="Ente's Mascot, Ducky,
     inviting people to Ente's source code repository" />
 
-Please visit the [community section](https://ente.com/about#community) for all the ways to
-connect with our community.
+Please visit the [community section](https://ente.com/about#community) for all the ways to connect with our community.
 
 [![Discord](https://img.shields.io/discord/948937918347608085?style=for-the-badge&logo=Discord&logoColor=white&label=Discord)](https://discord.gg/z2YVKkycX3)
 [![Ente's Blog RSS](https://img.shields.io/badge/blog-rss-F88900?style=for-the-badge&logo=rss&logoColor=white)](https://ente.com/blog/rss.xml)
@@ -130,8 +106,4 @@ connect with our community.
 
 ## Security
 
-If you believe you have found a security vulnerability, please responsibly
-disclose it by emailing security@ente.com or [using this
-link](https://github.com/ente-io/ente/security/advisories/new) instead of
-opening a public issue. We will investigate all legitimate reports. To know
-more, please see our [security policy](SECURITY.md).
+If you believe you have found a security vulnerability, please responsibly disclose it by emailing security@ente.com or [using this link](https://github.com/ente-io/ente/security/advisories/new) instead of opening a public issue. We will investigate all legitimate reports. To know more, please see our [security policy](SECURITY.md).

@@ -1,8 +1,6 @@
 # Mobile app for Ente Photos
 
-Source code for our flagship mobile app. For us, this is our most important
-client app. This is where Ente started. This is what had the [first
-commit](https://github.com/ente-io/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5d276e37).
+Source code for our flagship mobile app. For us, this is our most important client app. This is where Ente started. This is what had the [first commit](https://github.com/ente-io/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5d276e37).
 
     commit a8cdc811fd20ca4289d8e779c97f08ef5d276e37
     Author: Vishnu Mohandas <v****@****.***>
@@ -10,12 +8,9 @@ commit](https://github.com/ente-io/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5
 
         Hello world
 
-To know more about Ente, see [our main README](../../../README.md) or visit
-[ente.com](https://ente.com).
+To know more about Ente, see [our main README](../../../README.md) or visit [ente.com](https://ente.com).
 
-To use Ente Photos on the web, see [web](../../../web/README.md). To use Ente
-Photos on the desktop, see [desktop](../../../desktop/README.md). There is a also a
-[CLI tool](../../../cli/README.md) for easy / automated exports.
+To use Ente Photos on the web, see [web](../../../web/README.md). To use Ente Photos on the desktop, see [desktop](../../../desktop/README.md). There is a also a [CLI tool](../../../cli/README.md) for easy / automated exports.
 
 If you're looking for Ente Auth instead, see [auth](../auth/README.md).
 
@@ -23,11 +18,7 @@ If you're looking for Ente Auth instead, see [auth](../auth/README.md).
 
 ### Android
 
-The [GitHub
-releases](https://github.com/ente-io/ente/releases?q=photos-v1) contain
-APKs, built straight from source. The latest build is available at
-[ente.com/apk](https://ente.com/apk). These builds keep themselves updated,
-without relying on third party stores.
+The [GitHub releases](https://github.com/ente-io/ente/releases?q=photos-v1) contain APKs, built straight from source. The latest build is available at [ente.com/apk](https://ente.com/apk). These builds keep themselves updated, without relying on third party stores.
 
 You can alternatively install the build from PlayStore or F-Droid.
 
@@ -87,13 +78,9 @@ City coordinates from [Simple Maps](https://simplemaps.com/data/world-cities)
 
 [![Crowdin](https://badges.crowdin.net/ente-photos-app/localized.svg)](https://crowdin.com/project/ente-photos-app)
 
-If you're interested in helping out with translation, please visit our [Crowdin
-project](https://crowdin.com/project/ente-photos-app) to get started. Thank you
-for your support.
+If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-photos-app) to get started. Thank you for your support.
 
-If your language is not listed for translation, please [create a GitHub
-issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
-to have it added.
+If your language is not listed for translation, please [create a GitHub issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A) to have it added.
 
 ## 💚 Contribute
 

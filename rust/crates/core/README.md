@@ -4,12 +4,12 @@ Common Rust code for Ente apps.
 
 ## Modules
 
-| Module | Description |
-|--------|-------------|
-| `auth` | Authentication helpers (signup/login/recovery, SRP credentials) |
-| `crypto` | Cryptographic utilities (pure Rust, libsodium-wire-compatible) |
-| `http` | HTTP client for Ente API |
-| `urls` | URL construction utilities |
+| Module   | Description                                                     |
+| -------- | --------------------------------------------------------------- |
+| `auth`   | Authentication helpers (signup/login/recovery, SRP credentials) |
+| `crypto` | Cryptographic utilities (pure Rust, libsodium-wire-compatible)  |
+| `http`   | HTTP client for Ente API                                        |
+| `urls`   | URL construction utilities                                      |
 
 ## Auth
 
@@ -26,16 +26,16 @@ High-level authentication helpers for Ente clients:
 
 Pure Rust cryptography, byte-compatible with JS/Dart clients.
 
-| Submodule | Algorithm | Use Case |
-|-----------|-----------|----------|
-| `secretbox` | XSalsa20-Poly1305 | Encrypt keys, small data |
-| `blob` | XChaCha20-Poly1305 | Encrypt metadata |
-| `stream` | XChaCha20-Poly1305 | Encrypt large files (4MB chunks) |
-| `sealed` | X25519 + XSalsa20-Poly1305 | Anonymous public-key encryption |
-| `argon` | Argon2id | Password-based key derivation |
-| `kdf` | BLAKE2b | Subkey derivation |
-| `hash` | BLAKE2b | Cryptographic hashing |
-| `keys` | - | Key generation |
+| Submodule   | Algorithm                  | Use Case                         |
+| ----------- | -------------------------- | -------------------------------- |
+| `secretbox` | XSalsa20-Poly1305          | Encrypt keys, small data         |
+| `blob`      | XChaCha20-Poly1305         | Encrypt metadata                 |
+| `stream`    | XChaCha20-Poly1305         | Encrypt large files (4MB chunks) |
+| `sealed`    | X25519 + XSalsa20-Poly1305 | Anonymous public-key encryption  |
+| `argon`     | Argon2id                   | Password-based key derivation    |
+| `kdf`       | BLAKE2b                    | Subkey derivation                |
+| `hash`      | BLAKE2b                    | Cryptographic hashing            |
+| `keys`      | -                          | Key generation                   |
 
 ### Quick Start
 
@@ -53,7 +53,7 @@ let decrypted = crypto::secretbox::decrypt_box(&encrypted, &key).unwrap();
 
 ## Development
 
-```bash
+```sh
 cargo fmt      # format
 cargo clippy   # lint
 cargo build    # build
