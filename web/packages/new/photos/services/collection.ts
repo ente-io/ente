@@ -1967,11 +1967,17 @@ export const addToFavoritesCollection = async (files: EnteFile[]) => {
 
 export const removeFromFavoritesCollection = async (files: EnteFile[]) => {
     const userID = ensureLocalUser().id;
+
+    // Getting the saved Favorites collection of the user and if there is
+    // no such collection existing then we throw an error.
     const favoritesCollection = await savedUserFavoritesCollection();
     if (!favoritesCollection) {
         throw new Error("Favorites collection does not exist");
     }
 
+    // The files now might have files which are from shared-albums as well
+    // Before removing them from the favorites we need to resolve to a
+    // owned-equivalent of the same file.
     const resolvedFiles = await resolveFavoritesFilesForRemoval(
         favoritesCollection,
         files,
@@ -1985,11 +1991,35 @@ export const removeFromFavoritesCollection = async (files: EnteFile[]) => {
     rememberPendingFavoriteFiles(files, resolvedFiles, userID);
 };
 
+/**
+ *
+ * @param favoritesCollection
+ * @param files
+ * @returns
+ *
+ *
+ * If the user has marked a shared-file/non-owned file as favorite,
+ * every single instance of that file with the matching metadataHash key
+ * will be shown as favorite for the user
+ *
+ * This includes any files which are in the shared album as well.
+ * Such files owner as well as the collection id will be different.
+ *
+ * Therefore we are looping through the files which the user wants to unfavorite
+ * and then checking if there are any files like the above.
+ *
+ * if so then
+ */
+
 const resolveFavoritesFilesForRemoval = async (
     favoritesCollection: Collection,
     files: EnteFile[],
 ) => {
     const userID = ensureLocalUser().id;
+
+    // Looping through user's favorites and then creating a map with the user's
+    // favorite files and their metadataHash key. This is used below to resolve
+    // to the user-owned files which is to be unfavorited.
     const favoriteFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
         (await savedCollectionFiles()).filter(
             (file) => file.collectionID == favoritesCollection.id,
@@ -1997,6 +2027,15 @@ const resolveFavoritesFilesForRemoval = async (
         userID,
     );
 
+    /**
+     * Iterating through the files which are to be unfavorited
+     * and checking if they contain any files which belong to a
+     * shared album(i.e. their owner as well as collectionId will differ)
+     *
+     * if so then getting the user-owned
+     * equivalent of the file using it's metadataHash and favoriteFilesByHashAndType
+     * mapping and then returning it.
+     */
     return files.map((file) => {
         if (
             file.ownerID != userID &&
