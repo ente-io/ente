@@ -14,6 +14,7 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
+import 'package:photos/ui/viewer/actions/select_all_status_icon.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -387,10 +388,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         color: colors.backgroundBase,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.check_circle_rounded,
-                        color: colors.green,
-                        size: 22,
+                      child: SelectAllStatusIcon(
+                        isSelected: true,
+                        size: 18,
+                        selectedFillColor: colors.green,
+                        selectedTickColor: colors.backgroundBase,
                       ),
                     ),
                   ),

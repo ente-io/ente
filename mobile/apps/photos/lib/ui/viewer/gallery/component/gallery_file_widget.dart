@@ -14,6 +14,7 @@ import "package:photos/models/selected_files.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/touch_cross_detector.dart";
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
@@ -56,8 +57,9 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     _isFileSelected =
         widget.selectedFiles?.isFileSelected(widget.file) ?? false;
     widget.selectedFiles?.addListener(_selectedFilesListener);
-    _fileUploadedSubscription =
-        Bus.instance.on<FileUploadedEvent>().listen((event) {
+    _fileUploadedSubscription = Bus.instance.on<FileUploadedEvent>().listen((
+      event,
+    ) {
       if (event.file.generatedID != null &&
           event.file.generatedID == widget.file.generatedID &&
           mounted) {
@@ -138,14 +140,14 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                   borderRadius: borderRadius,
                   child: Hero(
                     tag: heroTag,
-                    flightShuttleBuilder: (
-                      flightContext,
-                      animation,
-                      flightDirection,
-                      fromHeroContext,
-                      toHeroContext,
-                    ) =>
-                        thumbnailWidget,
+                    flightShuttleBuilder:
+                        (
+                          flightContext,
+                          animation,
+                          flightDirection,
+                          fromHeroContext,
+                          toHeroContext,
+                        ) => thumbnailWidget,
                     transitionOnUserGestures: true,
                     child: thumbnailWidget,
                   ),
@@ -159,10 +161,11 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                 Positioned(
                   right: 4,
                   top: 4,
-                  child: Icon(
-                    Icons.check_circle_rounded,
-                    size: 20,
-                    color: selectionColor, //same for both themes
+                  child: SelectAllStatusIcon(
+                    isSelected: true,
+                    size: 16,
+                    selectedFillColor: selectionColor, //same for both themes
+                    selectedTickColor: Colors.black,
                   ),
                 ),
               ],
@@ -172,14 +175,14 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
               borderRadius: borderRadius,
               child: Hero(
                 tag: heroTag,
-                flightShuttleBuilder: (
-                  flightContext,
-                  animation,
-                  flightDirection,
-                  fromHeroContext,
-                  toHeroContext,
-                ) =>
-                    thumbnailWidget,
+                flightShuttleBuilder:
+                    (
+                      flightContext,
+                      animation,
+                      flightDirection,
+                      fromHeroContext,
+                      toHeroContext,
+                    ) => thumbnailWidget,
                 transitionOnUserGestures: true,
                 child: thumbnailWidget,
               ),
@@ -217,7 +220,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   void _onTapNoSelectionLimit(BuildContext context, EnteFile file) async {
     final bool shouldToggleSelection =
         (widget.selectedFiles?.files.isNotEmpty ?? false) ||
-            (GalleryContextState.of(context)?.inSelectionMode ?? false);
+        (GalleryContextState.of(context)?.inSelectionMode ?? false);
     if (shouldToggleSelection) {
       if (widget.selectedFiles == null) {
         return;

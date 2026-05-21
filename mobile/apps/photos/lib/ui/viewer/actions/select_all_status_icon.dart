@@ -7,10 +7,16 @@ class SelectAllStatusIcon extends StatelessWidget {
 
   final bool isSelected;
   final double size;
+  final Color? selectedFillColor;
+  final Color? selectedTickColor;
+  final Color? unselectedColor;
 
   const SelectAllStatusIcon({
     required this.isSelected,
     this.size = 18,
+    this.selectedFillColor,
+    this.selectedTickColor,
+    this.unselectedColor,
     super.key,
   });
 
@@ -18,6 +24,9 @@ class SelectAllStatusIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = components.ComponentTheme.colorsOf(context);
     final tickSize = size * _tickScale;
+    final selectedFill = selectedFillColor ?? colors.fillBase;
+    final selectedTick = selectedTickColor ?? colors.textReverse;
+    final unselected = unselectedColor ?? colors.textLight;
 
     if (isSelected) {
       return Container(
@@ -25,12 +34,12 @@ class SelectAllStatusIcon extends StatelessWidget {
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: colors.fillBase,
+          color: selectedFill,
           shape: BoxShape.circle,
         ),
         child: HugeIcon(
           icon: HugeIcons.strokeRoundedTick02,
-          color: colors.textReverse,
+          color: selectedTick,
           size: tickSize,
         ),
       );
@@ -42,11 +51,11 @@ class SelectAllStatusIcon extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: colors.textLight),
+        border: Border.all(color: unselected),
       ),
       child: HugeIcon(
         icon: HugeIcons.strokeRoundedTick02,
-        color: colors.textLight,
+        color: unselected,
         size: tickSize,
       ),
     );
