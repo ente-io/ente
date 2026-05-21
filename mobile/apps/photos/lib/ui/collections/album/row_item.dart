@@ -250,6 +250,8 @@ class AlbumRowItemWidget extends StatelessWidget {
               child: showFileCount
                   ? FutureBuilder<int>(
                       future: CollectionsService.instance.getFileCount(c),
+                      initialData: CollectionsService.instance
+                          .getCachedFileCount(c),
                       builder: (context, snapshot) {
                         int? cachedCount;
                         if (snapshot.hasData) {

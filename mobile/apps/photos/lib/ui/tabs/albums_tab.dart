@@ -55,6 +55,9 @@ class _AlbumsTabState extends State<AlbumsTab>
   static const Duration _kSearchTransitionDuration = Duration(
     milliseconds: 240,
   );
+  static const Duration _kContentTransitionDuration = Duration(
+    milliseconds: 260,
+  );
 
   final ValueNotifier<_AlbumsFilter> _filter = ValueNotifier(
     _AlbumsFilter.ente,
@@ -415,6 +418,63 @@ class _AlbumsTabState extends State<AlbumsTab>
     );
   }
 
+  Widget _buildContentSliver(AppLocalizations strings) {
+    if (_hasSearchQuery) {
+      return _buildGlobalSearchResultsSliver(strings);
+    }
+    final filter = _effectiveFilter;
+    final List<Collection>? collections;
+    final bool showCreateAlbum;
+    final Widget emptyState;
+    switch (filter) {
+      case _AlbumsFilter.ente:
+        collections = _enteCollections.value;
+        showCreateAlbum = true;
+        emptyState = const OnEnteEmptyState();
+      case _AlbumsFilter.shared:
+        collections = _sharedCollections.value;
+        showCreateAlbum = false;
+        emptyState = const SharedEmptyState();
+      case _AlbumsFilter.onDevice:
+        return DeviceFolderVerticalGridSliver(
+          searchQuery: _searchQuery.trim(),
+          albumViewType: _viewType.value,
+          sortKey: _sortKey.value,
+          sortDirection: _sortDirection.value,
+        );
+    }
+    if (collections == null) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: EnteLoadingWidget(),
+        ),
+      );
+    }
+    return _buildCollectionContentSliver(
+      collections: collections,
+      showCreateAlbum: showCreateAlbum,
+      emptyState: emptyState,
+    );
+  }
+
+  Key _contentStateKey() {
+    final contentPhase = switch (_effectiveFilter) {
+      _AlbumsFilter.ente =>
+        _enteCollections.value == null ? "ente_loading" : "ente_ready",
+      _AlbumsFilter.shared =>
+        _sharedCollections.value == null ? "shared_loading" : "shared_ready",
+      _AlbumsFilter.onDevice => "device",
+    };
+
+    return ValueKey<Object>((
+      _hasSearchQuery ? "search" : "filter",
+      _effectiveFilter,
+      _viewType.value,
+      contentPhase,
+    ));
+  }
+
   Future<void> _toggleViewMode() async {
     final next = _viewType.value == AlbumViewType.grid
         ? AlbumViewType.list
@@ -760,61 +820,47 @@ class _AlbumsTabState extends State<AlbumsTab>
                 ),
               ),
               Expanded(
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    AnimatedBuilder(
-                      animation: Listenable.merge(
-                        [
-                          _filter,
-                          _enteCollections,
-                          _sharedCollections,
-                          _viewType,
-                          _sortKey,
-                          _sortDirection,
-                        ],
-                      ),
-                      builder: (context, _) {
-                        if (_hasSearchQuery) {
-                          return _buildGlobalSearchResultsSliver(strings);
-                        }
-                        final filter = _effectiveFilter;
-                        final List<Collection>? collections;
-                        final bool showCreateAlbum;
-                        final Widget emptyState;
-                        switch (filter) {
-                          case _AlbumsFilter.ente:
-                            collections = _enteCollections.value;
-                            showCreateAlbum = true;
-                            emptyState = const OnEnteEmptyState();
-                          case _AlbumsFilter.shared:
-                            collections = _sharedCollections.value;
-                            showCreateAlbum = false;
-                            emptyState = const SharedEmptyState();
-                          case _AlbumsFilter.onDevice:
-                            return DeviceFolderVerticalGridSliver(
-                              searchQuery: _searchQuery.trim(),
-                              albumViewType: _viewType.value,
-                              sortKey: _sortKey.value,
-                              sortDirection: _sortDirection.value,
-                            );
-                        }
-                        if (collections == null) {
-                          return const SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 24),
-                              child: EnteLoadingWidget(),
-                            ),
-                          );
-                        }
-                        return _buildCollectionContentSliver(
-                          collections: collections,
-                          showCreateAlbum: showCreateAlbum,
-                          emptyState: emptyState,
+                child: AnimatedBuilder(
+                  animation: Listenable.merge(
+                    [
+                      _filter,
+                      _enteCollections,
+                      _sharedCollections,
+                      _viewType,
+                      _sortKey,
+                      _sortDirection,
+                    ],
+                  ),
+                  builder: (context, _) {
+                    return AnimatedSwitcher(
+                      duration: _kContentTransitionDuration,
+                      reverseDuration: _kContentTransitionDuration,
+                      switchInCurve: Curves.easeInOutCubic,
+                      switchOutCurve: Curves.linear,
+                      layoutBuilder: (currentChild, previousChildren) {
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            for (final previousChild in previousChildren)
+                              Positioned.fill(child: previousChild),
+                            if (currentChild != null)
+                              Positioned.fill(child: currentChild),
+                          ],
                         );
                       },
-                    ),
-                  ],
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
+                      child: CustomScrollView(
+                        key: _contentStateKey(),
+                        physics: const BouncingScrollPhysics(),
+                        slivers: [_buildContentSliver(strings)],
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

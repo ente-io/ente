@@ -106,6 +106,8 @@ class DeviceFolderVerticalGridSliver extends StatefulWidget {
 
 class _DeviceFolderVerticalGridViewBodyState
     extends State<DeviceFolderVerticalGridSliver> {
+  static List<DeviceCollection>? _cachedDeviceCollections;
+
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   late Future<List<DeviceCollection>> _deviceCollectionsFuture;
@@ -143,10 +145,12 @@ class _DeviceFolderVerticalGridViewBodyState
     );
   }
 
-  Future<List<DeviceCollection>> _loadDeviceCollections() {
-    return FilesDB.instance.getDeviceCollections(
+  Future<List<DeviceCollection>> _loadDeviceCollections() async {
+    final deviceCollections = await FilesDB.instance.getDeviceCollections(
       includeCoverThumbnail: true,
     );
+    _cachedDeviceCollections = deviceCollections;
+    return deviceCollections;
   }
 
   void _refreshDeviceCollections() {
@@ -173,6 +177,7 @@ class _DeviceFolderVerticalGridViewBodyState
 
     return FutureBuilder<List<DeviceCollection>>(
       future: _deviceCollectionsFuture,
+      initialData: _cachedDeviceCollections,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<DeviceCollection> deviceCollections = snapshot.data!.toList();
