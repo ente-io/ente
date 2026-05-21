@@ -178,6 +178,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_forever_outlined,
           labelText: AppLocalizations.of(context).permanentlyDelete,
           onTap: _permanentlyDelete,
+          isCritical: true,
         ),
       );
     } else if (widget.type == GalleryType.cleanupHiddenFromDevice) {
@@ -186,6 +187,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_outline,
           labelText: AppLocalizations.of(context).deleteFromDevice,
           onTap: _deleteSelectedFromDevice,
+          isCritical: true,
         ),
       );
     } else if (widget.type == GalleryType.deleteSuggestions) {
@@ -194,6 +196,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_outline,
           labelText: AppLocalizations.of(context).delete,
           onTap: split.ownedByCurrentUser.isNotEmpty ? _onDeleteClick : null,
+          isCritical: true,
         ),
       );
       items.add(
@@ -318,6 +321,7 @@ class _FileSelectionActionsWidgetState
             labelText: AppLocalizations.of(context).delete,
             onTap: anyOwnedFiles ? _onDeleteClick : null,
             shouldShow: allOwnedFiles,
+            isCritical: true,
           ),
         );
       }
@@ -457,6 +461,7 @@ class _FileSelectionActionsWidgetState
             icon: Icons.delete_forever_outlined,
             labelText: AppLocalizations.of(context).permanentlyDelete,
             onTap: _permanentlyDelete,
+            isCritical: true,
           ),
         );
       }

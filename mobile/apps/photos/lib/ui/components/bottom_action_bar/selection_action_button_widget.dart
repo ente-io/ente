@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
+import "package:ente_components/ente_components.dart" as components;
 import "package:flutter/material.dart";
 import "package:flutter_svg/svg.dart";
-import "package:photos/theme/ente_theme.dart";
 
 /// Pass icon or asset path of svg
 class SelectionActionButton extends StatelessWidget {
@@ -12,6 +12,7 @@ class SelectionActionButton extends StatelessWidget {
   final String? svgAssetPath;
   final VoidCallback? onTap;
   final bool shouldShow;
+  final bool isCritical;
 
   const SelectionActionButton({
     required this.labelText,
@@ -20,6 +21,7 @@ class SelectionActionButton extends StatelessWidget {
     this.svgAssetPath,
     this.iconWidget,
     this.shouldShow = true,
+    this.isCritical = false,
     super.key,
   });
 
@@ -38,6 +40,7 @@ class SelectionActionButton extends StatelessWidget {
                 onTap: onTap,
                 svgAssetPath: svgAssetPath,
                 iconWidget: iconWidget,
+                isCritical: isCritical,
               )
             : const SizedBox(
                 height: 60,
@@ -53,9 +56,11 @@ class _Body extends StatefulWidget {
   final String? svgAssetPath;
   final Widget? iconWidget;
   final VoidCallback? onTap;
+  final bool isCritical;
   const _Body({
     required this.labelText,
     required this.onTap,
+    required this.isCritical,
     this.icon,
     this.svgAssetPath,
     this.iconWidget,
@@ -73,12 +78,18 @@ class __BodyState extends State<_Body> {
   @override
   Widget build(BuildContext context) {
     widthOfButton = getWidthOfButton();
-    final colorScheme = getEnteColorScheme(context);
+    final colors = components.ComponentTheme.colorsOf(context);
+    final foregroundColor = widget.isCritical
+        ? colors.warning
+        : colors.textBase;
+    final labelStyle = components.TextStyles.mini.copyWith(
+      color: foregroundColor,
+    );
     return GestureDetector(
       onTap: widget.onTap,
       onTapDown: (details) {
         setState(() {
-          backgroundColor = colorScheme.fillFaintPressed;
+          backgroundColor = colors.fillDark;
         });
       },
       onTapUp: (details) {
@@ -110,34 +121,14 @@ class __BodyState extends State<_Body> {
                     child: Icon(
                       widget.icon,
                       size: 24,
-                      color: getEnteColorScheme(context).primary300,
-                      shadows: const [
-                        BoxShadow(
-                          color: Color.fromARGB(12, 0, 179, 60),
-                          offset: Offset(0, 2.51),
-                          blurRadius: 5.02,
-                          spreadRadius: 0,
-                        ),
-                        BoxShadow(
-                          color: Color.fromARGB(24, 0, 179, 60),
-                          offset: Offset(0, 1.25),
-                          blurRadius: 3.76,
-                          spreadRadius: 0,
-                        ),
-                        BoxShadow(
-                          color: Color.fromARGB(24, 0, 179, 60),
-                          offset: Offset(0, 0.63),
-                          blurRadius: 1.88,
-                          spreadRadius: 0,
-                        ),
-                      ],
+                      color: foregroundColor,
                     ),
                   )
                 else if (widget.svgAssetPath != null)
                   SvgPicture.asset(
                     widget.svgAssetPath!,
                     colorFilter: ColorFilter.mode(
-                      getEnteColorScheme(context).textMuted,
+                      foregroundColor,
                       BlendMode.srcIn,
                     ),
                     width: 24,
@@ -149,14 +140,14 @@ class __BodyState extends State<_Body> {
                   Icon(
                     widget.icon,
                     size: 24,
-                    color: getEnteColorScheme(context).textMuted,
+                    color: foregroundColor,
                   ),
                 const SizedBox(height: 4),
                 Text(
                   widget.labelText,
                   textAlign: TextAlign.center,
                   //textTheme in [getWidthOfLongestWord] should be same as this
-                  style: getEnteTextTheme(context).miniMuted,
+                  style: labelStyle,
                 ),
               ],
             ),
@@ -180,8 +171,10 @@ class __BodyState extends State<_Body> {
 
     double maxWidth = 0.0;
     for (String word in words) {
-      final width =
-          computeWidthOfWord(word, getEnteTextTheme(context).miniMuted);
+      final width = computeWidthOfWord(
+        word,
+        components.TextStyles.mini,
+      );
       if (width > maxWidth) {
         maxWidth = width;
       }

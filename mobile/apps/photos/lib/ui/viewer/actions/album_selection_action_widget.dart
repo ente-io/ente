@@ -100,6 +100,7 @@ class _AlbumSelectionActionWidgetState
           labelText: AppLocalizations.of(context).delete,
           icon: Icons.delete_outline,
           onTap: _trashCollection,
+          isCritical: true,
         ),
       );
       items.add(
@@ -125,6 +126,7 @@ class _AlbumSelectionActionWidgetState
           labelText: AppLocalizations.of(context).delete,
           icon: Icons.delete_outline,
           onTap: _trashCollection,
+          isCritical: true,
         ),
       );
     } else if (widget.sectionType == UISectionType.hiddenCollections) {
@@ -141,6 +143,7 @@ class _AlbumSelectionActionWidgetState
           labelText: AppLocalizations.of(context).delete,
           icon: Icons.delete_outline,
           onTap: _trashCollection,
+          isCritical: true,
         ),
       );
     } else {

@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:ente_components/ente_components.dart" as components;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:photos/generated/l10n.dart";
@@ -11,7 +12,6 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
-import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -272,7 +272,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
       selectionState != null,
       "SelectionState not found in context, SelectionState should be an ancestor of FileSelectionOverlayBar",
     );
-    final colorScheme = getEnteColorScheme(context);
+    final colors = components.ComponentTheme.colorsOf(context);
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
@@ -292,7 +292,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+            color: widget.backgroundColor ?? colors.fillLight,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -308,7 +308,9 @@ class _SelectAllButtonState extends State<SelectAllButton> {
             children: [
               Text(
                 AppLocalizations.of(context).selectAllShort,
-                style: getEnteTextTheme(context).miniMuted,
+                style: components.TextStyles.mini.copyWith(
+                  color: colors.textBase,
+                ),
               ),
               const SizedBox(width: 4),
               ListenableBuilder(
@@ -324,7 +326,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
                     _allSelected
                         ? Icons.check_circle
                         : Icons.check_circle_outline,
-                    color: _allSelected ? null : colorScheme.strokeMuted,
+                    color: colors.textBase,
                     size: 18,
                   );
                 },

@@ -1,7 +1,7 @@
+import "package:ente_components/ente_components.dart" as components;
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/selected_people.dart";
-import "package:photos/theme/ente_theme.dart";
 
 class PeopleActionBarWidget extends StatefulWidget {
   final SelectedPeople? selectedPeople;
@@ -34,7 +34,10 @@ class _PeopleActionBarWidgetState extends State<PeopleActionBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final colors = components.ComponentTheme.colorsOf(context);
+    final miniStyle = components.TextStyles.mini.copyWith(
+      color: colors.textBase,
+    );
     return SizedBox(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
@@ -49,7 +52,7 @@ class _PeopleActionBarWidgetState extends State<PeopleActionBarWidget> {
                   final count = widget.selectedPeople?.personIds.length ?? 0;
                   return Text(
                     AppLocalizations.of(context).selectedPhotos(count: count),
-                    style: textTheme.miniMuted,
+                    style: miniStyle,
                   );
                 },
               ),
@@ -67,7 +70,7 @@ class _PeopleActionBarWidgetState extends State<PeopleActionBarWidget> {
                     alignment: Alignment.centerRight,
                     child: Text(
                       AppLocalizations.of(context).cancel,
-                      style: textTheme.mini,
+                      style: miniStyle,
                     ),
                   ),
                 ),

@@ -1,9 +1,9 @@
+import "package:ente_components/ente_components.dart" as components;
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/theme/effects.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/components/bottom_action_bar/album_bottom_action_bar_widget.dart";
 
@@ -119,7 +119,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = components.ComponentTheme.colorsOf(context);
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -138,7 +138,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+            color: widget.backgroundColor ?? colors.fillLight,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -154,7 +154,9 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
             children: [
               Text(
                 AppLocalizations.of(context).selectAllShort,
-                style: getEnteTextTheme(context).miniMuted,
+                style: components.TextStyles.mini.copyWith(
+                  color: colors.textBase,
+                ),
               ),
               const SizedBox(width: 4),
               ListenableBuilder(
@@ -170,7 +172,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
                     _allSelected
                         ? Icons.check_circle
                         : Icons.check_circle_outline,
-                    color: _allSelected ? null : colorScheme.strokeMuted,
+                    color: colors.textBase,
                     size: 18,
                   );
                 },
