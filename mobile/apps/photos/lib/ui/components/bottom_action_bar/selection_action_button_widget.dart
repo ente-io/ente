@@ -114,7 +114,7 @@ class __BodyState extends State<_Body> {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           color: backgroundColor,
         ),
         child: Padding(
