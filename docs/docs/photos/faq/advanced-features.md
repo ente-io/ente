@@ -107,8 +107,7 @@ You can use our CLI tool or our desktop app to set up exports of your data to yo
 
 Open `Settings > Export data`, choose a destination folder, and enable "Continuous export" to automatically export new items.
 
-**CLI**:
-Use [Ente's CLI](https://github.com/ente-io/ente/tree/main/cli#export) to export your data in a cron job to a location of your choice. The exports are incremental, and will also gracefully handle interruptions.
+**CLI**: Use [Ente's CLI](https://github.com/ente-io/ente/tree/main/cli#export) to export your data in a cron job to a location of your choice. The exports are incremental, and will also gracefully handle interruptions.
 
 For complete details, see the [Export feature guide](/photos/features/backup-and-sync/export).
 

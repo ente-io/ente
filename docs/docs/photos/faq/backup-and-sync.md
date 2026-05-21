@@ -119,9 +119,7 @@ If you want to delete a photo from Ente, you must do it manually within the Ente
 
 **What you need to know:**
 
-✅ **Uploading**: Happens automatically for selected albums
-✅ **Re-upload protection**: Ente won't re-upload photos you've already uploaded, even if you delete them from Ente and they're still on your device
-❌ **Two-way sync**: Not supported - changes in Ente don't reflect on your device
+✅ **Uploading**: Happens automatically for selected albums ✅ **Re-upload protection**: Ente won't re-upload photos you've already uploaded, even if you delete them from Ente and they're still on your device ❌ **Two-way sync**: Not supported - changes in Ente don't reflect on your device
 
 **If you want to delete a photo everywhere:**
 
@@ -605,8 +603,7 @@ Yes! On desktop, you have two options:
 
 ### Can I pause and resume backups? {#pause-resume-backup}
 
-**On mobile:**
-You can effectively pause backups by:
+**On mobile:** You can effectively pause backups by:
 
 - Turning off WiFi/mobile data
 - Going to `Settings > Backup` and toggling off specific albums
@@ -648,9 +645,7 @@ This usually occurs due to a network connectivity issue:
 
 - Check your internet connection is active
 - Try switching networks (WiFi to mobile data or vice versa)
-- If network connection is fine and sync is still not occurring, please send us
-  your debug logs via **Settings > Help > View logs** so we can investigate
-  further. You can reach us at [support@ente.com](mailto:support@ente.com).
+- If network connection is fine and sync is still not occurring, please send us your debug logs via **Settings > Help > View logs** so we can investigate further. You can reach us at [support@ente.com](mailto:support@ente.com).
 
 ### Is there a way to filter photos that are backed up to Ente but no longer on my device? {#filter-cloud-only-photos}
 

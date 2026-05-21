@@ -5,24 +5,20 @@ description: Installing and setting up Ente without Docker
 
 # Manual setup (without Docker)
 
-If you wish to run Ente from source without using Docker, follow the steps
-described below:
+If you wish to run Ente from source without using Docker, follow the steps described below:
 
 ## Requirements
 
-1. **Go:** Install Go on your system. This is needed for building Museum (Ente's
-   server)
+1. **Go:** Install Go on your system. This is needed for building Museum (Ente's server)
 
     ```shell
     sudo apt update && sudo apt upgrade
     sudo apt install golang-go
     ```
 
-    Alternatively, you can also download the latest binaries from the
-    [official website](https://go.dev/dl/).
+    Alternatively, you can also download the latest binaries from the [official website](https://go.dev/dl/).
 
-2. **PostgreSQL and `libsodium`:** Install PostgreSQL (database) and `libsodium`
-   (high level API for encryption) via package manager.
+2. **PostgreSQL and `libsodium`:** Install PostgreSQL (database) and `libsodium` (high level API for encryption) via package manager.
 
     ```shell
     sudo apt install postgresql
@@ -56,17 +52,13 @@ described below:
     sudo apt install npm nodejs
     ```
 
-    Install yarn by following the
-    [official documentation](https://yarnpkg.com/getting-started/install)
+    Install yarn by following the [official documentation](https://yarnpkg.com/getting-started/install)
 
 5. **Git:** Needed for cloning the repository and pulling in latest changes
 
 6. **Caddy:** Used for setting reverse proxy and file servers
 
-7. **Object Storage:** Ensure you have an object storage configured for usage,
-   needed for storing files. You can choose to run MinIO or Garage locally
-   without Docker, however, an external bucket will be reliable and suited for
-   long-term storage.
+7. **Object Storage:** Ensure you have an object storage configured for usage, needed for storing files. You can choose to run MinIO or Garage locally without Docker, however, an external bucket will be reliable and suited for long-term storage.
 
 ## Step 1: Clone the repository
 
@@ -114,8 +106,7 @@ git clone https://github.com/ente-io/ente
     ALTER DATABASE <database name> OWNER TO <username>;
     ```
 
-Values you used for `database name` and `username` correspond to the values you have to set for
-`db.user` and `db.name` in `museum.yaml`.
+Values you used for `database name` and `username` correspond to the values you have to set for `db.user` and `db.name` in `museum.yaml`.
 
 ## Step 3: Configure Museum (Ente's server)
 
@@ -130,16 +121,13 @@ Values you used for `database name` and `username` correspond to the values you 
     go mod tidy
     ```
 
-2. Build the server. The server binary should be available as `./main` relative
-   to `server` directory
+2. Build the server. The server binary should be available as `./main` relative to `server` directory
 
     ```shell
     go build cmd/museum/main.go
     ```
 
-3. Create `museum.yaml` file inside `server` for configuring the needed
-   variables. You can copy the templated configuration file for editing with
-   ease.
+3. Create `museum.yaml` file inside `server` for configuring the needed variables. You can copy the templated configuration file for editing with ease.
 
     ```shell
     cp config/example.yaml ./museum.yaml
@@ -149,11 +137,9 @@ Values you used for `database name` and `username` correspond to the values you 
 
     Make sure to enter the correct values for the database and object storage.
 
-    You should consider generating values for JWT and encryption keys for emails
-    if you intend to use for long-term needs.
+    You should consider generating values for JWT and encryption keys for emails if you intend to use for long-term needs.
 
-    You can do by running the following command inside `ente/server`, assuming
-    you cloned the repository to `ente`:
+    You can do by running the following command inside `ente/server`, assuming you cloned the repository to `ente`:
 
     ```shell
     # Generate secrets
@@ -183,16 +169,14 @@ Museum should be accessible at `http://localhost:8080`
     yarn install --frozen-lockfile
     ```
 
-2. Configure the environment variables in your corresponding shell's
-   configuration file (`.bashrc`, `.zshrc`)
+2. Configure the environment variables in your corresponding shell's configuration file (`.bashrc`, `.zshrc`)
 
     ```shell
     # Replace this with actual endpoint for Museum
     export NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080
     ```
 
-3. Build the needed applications (Photos, Albums, Accounts, Auth, Cast, Public
-   Locker, Embed, Memories) as per your needs:
+3. Build the needed applications (Photos, Albums, Accounts, Auth, Cast, Public Locker, Embed, Memories) as per your needs:
 
     ```shell
     # These commands are executed inside web directory
@@ -244,8 +228,7 @@ Museum should be accessible at `http://localhost:8080`
     sudo cp -r apps/memories/out /var/www/ente/apps/memories
     ```
 
-5. Set up file server using Caddy by editing `Caddyfile`, present at
-   `/etc/caddy/Caddyfile`.
+5. Set up file server using Caddy by editing `Caddyfile`, present at `/etc/caddy/Caddyfile`.
 
     ```groovy
     # Replace the ports with domain names if you have subdomains configured and need HTTPS
@@ -304,14 +287,10 @@ Museum should be accessible at `http://localhost:8080`
 
     :::
 
-    The Ente Photos web app should be accessible at http://localhost:3000, and
-    the Ente Albums app at http://localhost:3002. Check out the
-    [default ports](/self-hosting/installation/env-var#ports) for more
-    information.
+    The Ente Photos web app should be accessible at http://localhost:3000, and the Ente Albums app at http://localhost:3002. Check out the [default ports](/self-hosting/installation/env-var#ports) for more information.
 
 ::: tip
 
-Check out [post-installations steps](/self-hosting/installation/post-install/)
-for further usage.
+Check out [post-installations steps](/self-hosting/installation/post-install/) for further usage.
 
 :::

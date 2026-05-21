@@ -110,6 +110,7 @@ Use consistent format with `>` separator:
 
 Use blockquotes with bold labels:
 
+<!-- prettier-ignore -->
 ```markdown
 > **Note**: Additional context here.
 > **Important**: Critical information.

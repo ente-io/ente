@@ -69,8 +69,7 @@ Alternatively, you can follow these manual steps:
 - **PlayStore, AppStore, F-Droid**: The stores handle updates based on your auto-update settings
 - **GitHub/Obtanium**: You'll get a notification to update and can download the latest APK
 
-**Desktop app:**
-You'll get an in-app notification to update. Ente desktop includes auto-update functionality - whenever updates are deployed, the app will automatically download and install them.
+**Desktop app:** You'll get an in-app notification to update. Ente desktop includes auto-update functionality - whenever updates are deployed, the app will automatically download and install them.
 
 ## Multi-Device Setup
 

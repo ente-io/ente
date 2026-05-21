@@ -5,11 +5,9 @@ description: Check the signing certificate fingerprints for the Ente Locker APK 
 
 # Verify the Ente Locker Android APK
 
-If you downloaded the Ente Locker APK directly from our GitHub releases, you can
-verify that it was signed with Ente's expected signing certificate.
+If you downloaded the Ente Locker APK directly from our GitHub releases, you can verify that it was signed with Ente's expected signing certificate.
 
-These fingerprints are for the direct APK download. Play Store and F-Droid
-packages may use different signing keys.
+These fingerprints are for the direct APK download. Play Store and F-Droid packages may use different signing keys.
 
 ## Certificate fingerprints
 
