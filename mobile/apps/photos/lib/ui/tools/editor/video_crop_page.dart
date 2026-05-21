@@ -65,7 +65,7 @@ class _VideoCropPageState extends State<VideoCropPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return Scaffold(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: VideoEditorAppBar(
         onCancel: () => Navigator.pop(context),
         primaryActionLabel: AppLocalizations.of(context).done,

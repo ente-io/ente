@@ -1,20 +1,24 @@
 [workspace]
 resolver = "2"
-members = ["apps/cli", "apps/codegen", "crates/image"]
-exclude = [
-    "accounts",
+members = [
+    "apps/cli",
+    "apps/codegen",
     "apps/ensu/src-tauri",
-    "contacts",
-    "core",
+    "bindings/ffi/crypto",
+    "bindings/uniffi/core",
+    "bindings/uniffi/ensu/db",
+    "bindings/uniffi/ensu/inference",
+    "bindings/uniffi/ensu/sync",
+    "bindings/uniffi/ensu/transcription",
+    "bindings/wasm/ente-wasm",
+    "crates/accounts",
+    "crates/contacts",
+    "crates/core",
+    "crates/ensu/db",
+    "crates/ensu/inference",
+    "crates/ensu/sync",
+    "crates/ensu/transcription",
+    "crates/image",
     "e2e",
-    "ensu/db",
-    "ensu/inference",
-    "ensu/sync",
-    "ensu/transcription",
     "photos",
-    "uniffi/core",
-    "uniffi/ensu/db",
-    "uniffi/ensu/inference",
-    "uniffi/ensu/sync",
-    "uniffi/ensu/transcription",
 ]

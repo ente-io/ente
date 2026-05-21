@@ -2,8 +2,6 @@
 
 Source code for the Ensu iOS app.
 
-To know more about Ente, see [our main README](../../../../../README.md) or visit [ente.com](https://ente.com).
-
 ## Building from source
 
 1. Install [Xcode](https://developer.apple.com/xcode/), [Rust](https://www.rust-lang.org/tools/install), and CMake (e.g. `brew install cmake`).
@@ -21,7 +19,7 @@ That's it. Apart from the `cargo codegen`, this is a normal iOS project.
 
 > [!NOTE]
 >
-> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/uniffi` changes.
+> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/bindings/uniffi` changes.
 >
 > Xcode compiles and statically links the Rust libraries automatically when building the app.
 

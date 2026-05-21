@@ -2093,8 +2093,7 @@ checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
 [[package]]
 name = "ort"
 version = "2.0.0-rc.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86d83095ae3c1258738d70ae7a06195c94d966a8e546f0d3609dc90885fb61f5"
+source = "git+https://github.com/pykeio/ort.git?tag=v2.0.0-rc.4#04da381f4da0127ce26e2f6ccab1e7e5a8cd1985"
 dependencies = [
  "half",
  "js-sys",
@@ -2109,8 +2108,7 @@ dependencies = [
 [[package]]
 name = "ort-sys"
 version = "2.0.0-rc.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f2f6427193c808010b126bef45ebd33f8dee43770223a1200f84d3734d6c656"
+source = "git+https://github.com/pykeio/ort.git?tag=v2.0.0-rc.4#04da381f4da0127ce26e2f6ccab1e7e5a8cd1985"
 dependencies = [
  "pkg-config",
 ]

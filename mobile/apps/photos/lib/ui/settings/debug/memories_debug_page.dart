@@ -62,9 +62,9 @@ class _MemoriesDebugPageState extends State<MemoriesDebugPage> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
-        backgroundColor: colorScheme.backgroundBase,
+        backgroundColor: colorScheme.backgroundColour,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         title: Text(
@@ -679,9 +679,9 @@ class _MemoryGalleryPageState extends State<_MemoryGalleryPage> {
     final textTheme = getEnteTextTheme(context);
     return GalleryFilesState(
       child: Scaffold(
-        backgroundColor: colorScheme.backgroundBase,
+        backgroundColor: colorScheme.backgroundColour,
         appBar: AppBar(
-          backgroundColor: colorScheme.backgroundBase,
+          backgroundColor: colorScheme.backgroundColour,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           title: Text(widget.title, style: textTheme.largeBold),

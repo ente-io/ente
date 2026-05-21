@@ -1,10 +1,9 @@
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/base_bottom_sheet.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/email_util.dart";
 
@@ -17,17 +16,18 @@ Future<void> showNoMailAppSheet(
   String? logsLabel,
   String? logsFilePath,
 }) async {
-  await showBaseBottomSheet<void>(
-    context,
-    title: AppLocalizations.of(context).noEmailAppFound,
-    headerSpacing: 16,
-    child: NoMailAppSheet(
-      toEmail: toEmail,
-      subject: subject,
-      message: message,
-      deviceInfo: deviceInfo,
-      logsLabel: logsLabel,
-      logsFilePath: logsFilePath,
+  await showBottomSheetComponent<void>(
+    context: context,
+    builder: (_) => BottomSheetComponent(
+      title: AppLocalizations.of(context).noEmailAppFound,
+      content: NoMailAppSheet(
+        toEmail: toEmail,
+        subject: subject,
+        message: message,
+        deviceInfo: deviceInfo,
+        logsLabel: logsLabel,
+        logsFilePath: logsFilePath,
+      ),
     ),
   );
 }
@@ -96,9 +96,11 @@ class NoMailAppSheet extends StatelessWidget {
                 children: [
                   Text(
                     l10n.noEmailAppBody(email: toEmail),
-                    style: getEnteTextTheme(context).smallMuted,
+                    style: TextStyles.mini.copyWith(
+                      color: context.componentColors.textLight,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: Spacing.lg),
                   for (int i = 0; i < copyFields.length; i++) ...[
                     _CopyField(
                       data: copyFields[i],
@@ -119,16 +121,16 @@ class NoMailAppSheet extends StatelessWidget {
                               );
                             },
                     ),
-                    if (i != copyFields.length - 1) const SizedBox(height: 12),
+                    if (i != copyFields.length - 1)
+                      const SizedBox(height: Spacing.md),
                   ],
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          ButtonWidgetV2(
-            buttonType: ButtonTypeV2.primary,
-            labelText: l10n.copyAllToClipboard,
+          const SizedBox(height: Spacing.lg),
+          ButtonComponent(
+            label: l10n.copyAllToClipboard,
             onTap: () async {
               await Clipboard.setData(
                 ClipboardData(text: _buildCopyAllPayload(l10n)),
@@ -186,8 +188,7 @@ class _CopyField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final isExportAction = onExport != null;
     final onTap = isExportAction ? onExport! : onCopy;
     return Column(
@@ -197,40 +198,46 @@ class _CopyField extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4, bottom: 4),
           child: Text(
             data.label,
-            style: textTheme.miniMuted,
+            style: TextStyles.mini.copyWith(color: colors.textLight),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: colorScheme.fillFaint,
-            borderRadius: BorderRadius.circular(16),
+            color: colors.fillBase,
+            borderRadius: BorderRadius.circular(Radii.lg),
           ),
-          padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+          padding: const EdgeInsets.fromLTRB(
+            Spacing.md,
+            10,
+            Spacing.sm,
+            10,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Text(
                   data.value,
-                  style: textTheme.small,
+                  style: TextStyles.mini.copyWith(color: colors.textBase),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: Spacing.sm),
               Material(
-                color: colorScheme.fillMuted,
-                borderRadius: BorderRadius.circular(8),
+                color: colors.fillDark,
+                borderRadius: BorderRadius.circular(Radii.sm),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(Radii.sm),
                   onTap: onTap,
                   child: SizedBox(
                     width: 32,
                     height: 32,
-                    child: Icon(
-                      isExportAction
-                          ? Icons.download_outlined
-                          : Icons.content_copy_outlined,
+                    child: HugeIcon(
+                      icon: isExportAction
+                          ? HugeIcons.strokeRoundedDownload04
+                          : HugeIcons.strokeRoundedCopy01,
                       size: 18,
-                      color: colorScheme.textMuted,
+                      color: colors.textLight,
+                      strokeWidth: 1.6,
                     ),
                   ),
                 ),
@@ -244,7 +251,7 @@ class _CopyField extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               data.note!,
-              style: textTheme.miniMuted,
+              style: TextStyles.mini.copyWith(color: colors.textLight),
             ),
           ),
         ],

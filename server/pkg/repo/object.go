@@ -13,8 +13,16 @@ import (
 )
 
 type ObjectRepository struct {
-	DB        *sql.DB
-	QueueRepo *QueueRepository
+	DB                 *sql.DB
+	LatencySensitiveDB *sql.DB
+	QueueRepo          *QueueRepository
+}
+
+func (repo *ObjectRepository) objectLookupDB() *sql.DB {
+	if repo.LatencySensitiveDB != nil {
+		return repo.LatencySensitiveDB
+	}
+	return repo.DB
 }
 
 func (repo *ObjectRepository) GetObjectsMissingInDC(dc string, limit int, random bool) ([]ente.S3ObjectKey, error) {
@@ -56,7 +64,7 @@ func (repo *ObjectRepository) GetObjectsForFileIDs(fileIDs []int64) ([]ente.S3Ob
 // GetObject returns the ente.S3ObjectKey key for a file id and type
 func (repo *ObjectRepository) GetObject(fileID int64, objType ente.ObjectType) (ente.S3ObjectKey, error) {
 	// todo: handling of deleted objects
-	row := repo.DB.QueryRow(`SELECT object_key, size, o_type FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
+	row := repo.objectLookupDB().QueryRow(`SELECT object_key, size, o_type FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
 		fileID, objType)
 	var s3ObjectKey ente.S3ObjectKey
 	s3ObjectKey.FileID = fileID
@@ -65,13 +73,79 @@ func (repo *ObjectRepository) GetObject(fileID int64, objType ente.ObjectType) (
 }
 
 func (repo *ObjectRepository) GetObjectWithDCs(fileID int64, objType ente.ObjectType) (ente.S3ObjectKey, []string, error) {
-	row := repo.DB.QueryRow(`SELECT object_key, size, o_type, datacenters FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
+	row := repo.objectLookupDB().QueryRow(`SELECT object_key, size, o_type, datacenters FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
 		fileID, objType)
 	var s3ObjectKey ente.S3ObjectKey
 	var datacenters []string
 	s3ObjectKey.FileID = fileID
 	err := row.Scan(&s3ObjectKey.ObjectKey, &s3ObjectKey.FileSize, &s3ObjectKey.Type, pq.Array(&datacenters))
 	return s3ObjectKey, datacenters, stacktrace.Propagate(err, "")
+}
+
+// GetAccessibleObject verifies actor access and returns the S3 object key in a
+// single latency-sensitive DB query.
+func (repo *ObjectRepository) GetAccessibleObject(ctx context.Context, fileID int64, actorUserID int64, objType ente.ObjectType) (ente.S3ObjectKey, error) {
+	s3ObjectKey, _, err := repo.GetAccessibleObjectWithDCs(ctx, fileID, actorUserID, objType)
+	return s3ObjectKey, err
+}
+
+// GetAccessibleObjectWithDCs verifies actor access and returns the S3 object
+// key along with replicated datacenters in a single latency-sensitive DB query.
+func (repo *ObjectRepository) GetAccessibleObjectWithDCs(ctx context.Context, fileID int64, actorUserID int64, objType ente.ObjectType) (ente.S3ObjectKey, []string, error) {
+	row := repo.objectLookupDB().QueryRowContext(ctx, `
+		SELECT
+			f.file_id,
+			CASE
+				WHEN f.owner_id = $2 THEN TRUE
+				ELSE EXISTS (
+					SELECT 1
+					FROM collection_files cf
+					JOIN collection_shares cs ON cs.collection_id = cf.collection_id
+					WHERE cf.file_id = f.file_id
+						AND cf.is_deleted = FALSE
+						AND cs.is_deleted = FALSE
+						AND (cs.to_user_id = $2 OR cs.from_user_id = $2)
+				)
+			END AS can_access,
+			ok.object_key,
+			ok.size,
+			ok.o_type::text,
+			COALESCE(ok.datacenters, '{}'::s3region[])
+		FROM files f
+		LEFT JOIN object_keys ok
+			ON ok.file_id = f.file_id
+			AND ok.o_type = $3::object_type
+			AND ok.is_deleted = FALSE
+		WHERE f.file_id = $1`,
+		fileID, actorUserID, objType)
+
+	var s3ObjectKey ente.S3ObjectKey
+	var canAccess bool
+	var objectKey sql.NullString
+	var fileSize sql.NullInt64
+	var objectType sql.NullString
+	datacenters := make([]string, 0)
+	err := row.Scan(
+		&s3ObjectKey.FileID,
+		&canAccess,
+		&objectKey,
+		&fileSize,
+		&objectType,
+		pq.Array(&datacenters),
+	)
+	if err != nil {
+		return s3ObjectKey, datacenters, stacktrace.Propagate(err, "")
+	}
+	if !canAccess {
+		return s3ObjectKey, datacenters, stacktrace.Propagate(ente.ErrPermissionDenied, "access denied")
+	}
+	if !objectKey.Valid || !fileSize.Valid || !objectType.Valid {
+		return s3ObjectKey, datacenters, stacktrace.Propagate(sql.ErrNoRows, "")
+	}
+	s3ObjectKey.ObjectKey = objectKey.String
+	s3ObjectKey.FileSize = fileSize.Int64
+	s3ObjectKey.Type = ente.ObjectType(objectType.String)
+	return s3ObjectKey, datacenters, nil
 }
 
 func (repo *ObjectRepository) GetAllFileObjectsByObjectKey(objectKey string) ([]ente.S3ObjectKey, error) {

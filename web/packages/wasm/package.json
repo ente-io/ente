@@ -15,7 +15,7 @@
     "module": "./pkg/ente_wasm.js",
     "types": "./pkg/ente_wasm.d.ts",
     "scripts": {
-        "build": "wasm-pack build --target bundler",
+        "build": "wasm-pack build ../../../rust/bindings/wasm/ente-wasm --target bundler --out-dir ../../../../web/packages/wasm/pkg",
         "test": "vitest --run"
     },
     "devDependencies": {

@@ -21,7 +21,7 @@ That's it. Apart from the `cargo codegen`, this is a normal Android project.
 
 > [!NOTE]
 >
-> Re-run `cargo codegen ensu-android` whenever the UniFFI interface under `rust/uniffi` changes.
+> Re-run `cargo codegen ensu-android` whenever the UniFFI interface under `rust/bindings/uniffi` changes.
 >
 > Gradle cross-compiles the Rust libraries to JNI `.so` files automatically when building the app.
 

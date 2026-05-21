@@ -1,15 +1,14 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/gateways/users/models/sessions.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/account/user_service.dart';
-import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
-import "package:photos/ui/components/alert_bottom_sheet.dart";
 import 'package:photos/ui/notification/toast.dart';
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import 'package:photos/utils/dialog_util.dart';
 
 class SessionsPage extends StatefulWidget {
@@ -36,34 +35,34 @@ class _SessionsPageState extends State<SessionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(AppLocalizations.of(context).activeSessions),
-      ),
-      body: _getBody(),
+    return SettingsPageScaffold(
+      title: AppLocalizations.of(context).activeSessions,
+      padding: EdgeInsets.zero,
+      children: _getBodyChildren(context),
     );
   }
 
-  Widget _getBody() {
+  List<Widget> _getBodyChildren(BuildContext context) {
     if (_sessions == null) {
-      return const Center(child: EnteLoadingWidget());
+      return [
+        SizedBox(
+          height: MediaQuery.sizeOf(context).height / 2,
+          child: const Center(child: EnteLoadingWidget()),
+        ),
+      ];
     }
-    final List<Widget> rows = [];
-    rows.add(const Padding(padding: EdgeInsets.all(4)));
-    for (final session in _sessions!.sessions) {
-      rows.add(_getSessionWidget(session));
-    }
-    return SingleChildScrollView(
-      child: Column(
-        children: rows,
-      ),
-    );
+
+    return [
+      const SizedBox(height: Spacing.xs),
+      for (final session in _sessions!.sessions) _getSessionWidget(session),
+    ];
   }
 
   Widget _getSessionWidget(Session session) {
-    final lastUsedTime =
-        DateTime.fromMicrosecondsSinceEpoch(session.lastUsedTime);
+    final colors = context.componentColors;
+    final lastUsedTime = DateTime.fromMicrosecondsSinceEpoch(
+      session.lastUsedTime,
+    );
     return Column(
       children: [
         InkWell(
@@ -83,12 +82,8 @@ class _SessionsPageState extends State<SessionsPage> {
                     Flexible(
                       child: Text(
                         session.ip,
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.8),
-                          fontSize: 14,
+                        style: TextStyles.body.copyWith(
+                          color: colors.textLight,
                         ),
                       ),
                     ),
@@ -96,12 +91,8 @@ class _SessionsPageState extends State<SessionsPage> {
                     Flexible(
                       child: Text(
                         getFormattedTime(lastUsedTime, context: context),
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.8),
-                          fontSize: 12,
+                        style: TextStyles.mini.copyWith(
+                          color: colors.textLight,
                         ),
                       ),
                     ),
@@ -112,15 +103,17 @@ class _SessionsPageState extends State<SessionsPage> {
           ),
         ),
         Divider(
-          color: getEnteColorScheme(context).strokeFaint,
+          color: colors.strokeFaint,
         ),
       ],
     );
   }
 
   Future<void> _terminateSession(Session session) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);
@@ -130,11 +123,11 @@ class _SessionsPageState extends State<SessionsPage> {
       await dialog.hide();
       _logger.severe('failed to terminate');
       // ignore: unawaited_futures
-      showAlertBottomSheet(
-        context,
+      showErrorBottomSheetComponent<void>(
+        context: context,
         title: AppLocalizations.of(context).oops,
         message: AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
-        assetPath: 'assets/warning-green.png',
+        illustration: Image.asset("assets/warning-grey.png"),
       );
     }
   }
@@ -155,85 +148,54 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   void _showSessionTerminationDialog(Session session) {
+    final l10n = AppLocalizations.of(context);
     final isLoggingOutFromThisDevice =
         session.token == Configuration.instance.getToken();
-    Widget text;
-    if (isLoggingOutFromThisDevice) {
-      text = Text(
-        AppLocalizations.of(context).thisWillLogYouOutOfThisDevice,
-      );
-    } else {
-      text = SingleChildScrollView(
-        child: Column(
-          children: [
-            Text(
-              AppLocalizations.of(context)
-                  .thisWillLogYouOutOfTheFollowingDevice,
-            ),
-            const Padding(padding: EdgeInsets.all(8)),
-            Text(
-              session.ua,
-              style: Theme.of(context).textTheme.bodySmall,
+    final message = isLoggingOutFromThisDevice
+        ? l10n.thisWillLogYouOutOfThisDevice
+        : "${l10n.thisWillLogYouOutOfTheFollowingDevice}\n\n${session.ua}";
+
+    showBottomSheetComponent<void>(
+      context: context,
+      builder: (sheetContext) {
+        return BottomSheetComponent(
+          title: l10n.terminateSession,
+          message: message,
+          illustration: Image.asset("assets/warning-grey.png"),
+          actions: [
+            ButtonComponent(
+              label: l10n.terminate,
+              variant: ButtonComponentVariant.critical,
+              onTap: () async {
+                Navigator.of(sheetContext).pop();
+                if (isLoggingOutFromThisDevice) {
+                  await UserService.instance.logout(context);
+                } else {
+                  await _terminateSession(session);
+                }
+              },
             ),
           ],
-        ),
-      );
-    }
-    final AlertDialog alert = AlertDialog(
-      title: Text(AppLocalizations.of(context).terminateSession),
-      content: text,
-      actions: [
-        TextButton(
-          child: Text(
-            AppLocalizations.of(context).terminate,
-            style: const TextStyle(
-              color: Colors.red,
-            ),
-          ),
-          onPressed: () async {
-            Navigator.of(context).pop('dialog');
-            if (isLoggingOutFromThisDevice) {
-              await UserService.instance.logout(context);
-            } else {
-              await _terminateSession(session);
-            }
-          },
-        ),
-        TextButton(
-          child: Text(
-            AppLocalizations.of(context).cancel,
-            style: TextStyle(
-              color: isLoggingOutFromThisDevice
-                  ? Theme.of(context).colorScheme.greenAlternative
-                  : Theme.of(context).colorScheme.defaultTextColor,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context).pop('dialog');
-          },
-        ),
-      ],
-    );
-
-    showDialog(
-      useRootNavigator: false,
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
+        );
       },
     );
   }
 
   Widget _getUAWidget(Session session) {
+    final colors = context.componentColors;
     if (session.token == Configuration.instance.getToken()) {
       return Text(
         AppLocalizations.of(context).thisDevice,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.greenAlternative,
+        style: TextStyles.bodyBold.copyWith(
+          color: colors.primary,
         ),
       );
     }
-    return Text(session.prettyUA);
+    return Text(
+      session.prettyUA,
+      style: TextStyles.bodyBold.copyWith(
+        color: colors.textBase,
+      ),
+    );
   }
 }

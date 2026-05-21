@@ -51,11 +51,11 @@ ButtonTheme _criticalPalette(EnteColorScheme c) => ButtonTheme(
     );
 
 ButtonTheme _secondaryPalette(EnteColorScheme c) => ButtonTheme(
-      defaultBg: c.fillDark,
+      defaultBg: c.greenLight,
       hoverBg: c.fillDarker,
       pressedBg: c.fillDarkest,
       disabledBg: c.fillDark,
-      foreground: c.content,
+      foreground: c.greenBase,
       disabledForeground: c.contentLighter,
       iconColor: c.content,
       disabledIconColor: c.contentLighter,

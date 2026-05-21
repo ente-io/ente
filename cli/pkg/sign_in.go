@@ -8,7 +8,6 @@ import (
 	eCrypto "github.com/ente-io/cli/internal/crypto"
 	"github.com/ente-io/cli/pkg/model"
 	"github.com/ente-io/cli/utils/browser"
-	"github.com/ente-io/cli/utils/constants"
 	"github.com/ente-io/cli/utils/encoding"
 	"log"
 
@@ -145,11 +144,7 @@ func (c *ClICtrl) verifyPassKey(ctx context.Context, authResp *api.Authorization
 	if !authResp.IsPasskeyRequired() {
 		return authResp, nil
 	}
-	baseAccountUrl := constants.EnteAccountUrl
-	if authResp.AccountsUrl != "" {
-		baseAccountUrl = authResp.AccountsUrl
-	}
-	passkeyAuthUrl := fmt.Sprintf("%s/passkeys/verify?passkeySessionID=%s&redirect=ente-cli://passkey&clientPackage=%s", baseAccountUrl, authResp.PassKeySessionID, app.ClientPkg())
+	passkeyAuthUrl := fmt.Sprintf("%s/passkeys/verify?passkeySessionID=%s&redirect=ente-cli://passkey&clientPackage=%s", authResp.AccountsUrl, authResp.PassKeySessionID, app.ClientPkg())
 	fmt.Printf("Open this url in browser to verify passkey: %s\n", passkeyAuthUrl)
 	err := browser.OpenURL(passkeyAuthUrl)
 	if err != nil {

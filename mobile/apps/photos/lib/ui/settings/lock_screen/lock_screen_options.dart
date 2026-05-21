@@ -1,13 +1,14 @@
 import "dart:io";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/settings/components/settings_item.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_auto_lock.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
@@ -44,8 +45,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _initializeSettings() async {
     final bool passwordEnabled = await _lockscreenSetting.isPasswordSet();
     final bool pinEnabled = await _lockscreenSetting.isPinSet();
-    final bool shouldShowAppContent =
-        _lockscreenSetting.getShouldHideAppContent();
+    final bool shouldShowAppContent = _lockscreenSetting
+        .getShouldHideAppContent();
 
     LockType lockType = LockType.device;
     if (pinEnabled) {
@@ -54,7 +55,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       lockType = LockType.password;
     }
 
-    final bool isAppLockEnabled = pinEnabled ||
+    final bool isAppLockEnabled =
+        pinEnabled ||
         passwordEnabled ||
         _configuration.shouldShowSystemLockScreen();
 
@@ -155,161 +157,110 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final colors = context.componentColors;
 
-    // Figma colors: Light #FAFAFA, Dark #161616
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
-
-    return Scaffold(
-      backgroundColor: pageBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: colorScheme.strokeBase,
-                  size: 24,
-                ),
+    return SettingsPageScaffold(
+      title: l10n.appLock,
+      children: [
+        SettingsItem(
+          title: l10n.appLock,
+          trailing: ToggleSwitchComponent.async(
+            value: () => appLock,
+            onChanged: _onToggleSwitch,
+          ),
+        ),
+        _description(l10n.appLockDescriptions),
+        if (appLock && _isInitialized) ...[
+          const SizedBox(height: Spacing.lg),
+          MenuGroupComponent(
+            items: [
+              _lockTypeItem(
+                title: l10n.deviceLock,
+                lockType: LockType.device,
+                onTap: _onSelectDeviceLock,
               ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.of(context).appLock,
-                style: textTheme.body.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
+              _lockTypeItem(
+                title: l10n.pinLock,
+                lockType: LockType.pin,
+                onTap: _onSelectPinLock,
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).appLock,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () => appLock,
-                          onChanged: () => _onToggleSwitch(),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          AppLocalizations.of(context).appLockDescriptions,
-                          style: textTheme.mini.copyWith(
-                            color: colorScheme.textMuted,
-                          ),
-                        ),
-                      ),
-                      if (appLock && _isInitialized) ...[
-                        const SizedBox(height: 16),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              MenuItemWidgetNew(
-                                title: AppLocalizations.of(context).deviceLock,
-                                borderRadius: 0,
-                                trailingIcon:
-                                    _currentLockType == LockType.device
-                                        ? Icons.check
-                                        : null,
-                                onTap: () async => _onSelectDeviceLock(),
-                              ),
-                              MenuItemWidgetNew(
-                                title: AppLocalizations.of(context).pinLock,
-                                borderRadius: 0,
-                                trailingIcon: _currentLockType == LockType.pin
-                                    ? Icons.check
-                                    : null,
-                                onTap: () async => _onSelectPinLock(),
-                              ),
-                              MenuItemWidgetNew(
-                                title:
-                                    AppLocalizations.of(context).passwordLock,
-                                borderRadius: 0,
-                                trailingIcon:
-                                    _currentLockType == LockType.password
-                                        ? Icons.check
-                                        : null,
-                                onTap: () async => _onSelectPasswordLock(),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(context).autoLock,
-                          trailingWidget: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _formatAutoLockTime(
-                                  _lockscreenSetting.getAutoLockTime(),
-                                ),
-                                style: textTheme.small.copyWith(
-                                  color: colorScheme.textMuted,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.chevron_right,
-                                color: colorScheme.strokeMuted,
-                              ),
-                            ],
-                          ),
-                          onTap: () async => _onAutoLockTap(),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            AppLocalizations.of(context)
-                                .autoLockFeatureDescription,
-                            style: textTheme.mini.copyWith(
-                              color: colorScheme.textMuted,
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).hideContent,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () => hideAppContent,
-                          onChanged: () => _tapHideContent(),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          Platform.isAndroid
-                              ? AppLocalizations.of(context)
-                                  .hideContentDescriptionAndroid
-                              : AppLocalizations.of(context)
-                                  .hideContentDescriptionIos,
-                          style: textTheme.mini.copyWith(
-                            color: colorScheme.textMuted,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              _lockTypeItem(
+                title: l10n.passwordLock,
+                lockType: LockType.password,
+                onTap: _onSelectPasswordLock,
               ),
             ],
           ),
+          const SizedBox(height: Spacing.lg),
+          SettingsItem(
+            title: l10n.autoLock,
+            showOnlyLoadingState: true,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _formatAutoLockTime(_lockscreenSetting.getAutoLockTime()),
+                  style: TextStyles.body.copyWith(color: colors.textLight),
+                ),
+                const SizedBox(width: Spacing.xs),
+                Icon(
+                  Icons.chevron_right_outlined,
+                  color: colors.textLight,
+                  size: IconSizes.medium,
+                ),
+              ],
+            ),
+            onTap: _onAutoLockTap,
+          ),
+          _description(l10n.autoLockFeatureDescription),
+        ],
+        const SizedBox(height: Spacing.lg),
+        SettingsItem(
+          title: l10n.hideContent,
+          trailing: ToggleSwitchComponent.async(
+            value: () => hideAppContent,
+            onChanged: _tapHideContent,
+          ),
+        ),
+        _description(
+          Platform.isAndroid
+              ? l10n.hideContentDescriptionAndroid
+              : l10n.hideContentDescriptionIos,
+        ),
+      ],
+    );
+  }
+
+  Widget _description(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: Spacing.sm),
+      child: Text(
+        text,
+        style: TextStyles.mini.copyWith(
+          color: context.componentColors.textLight,
         ),
       ),
+    );
+  }
+
+  MenuComponent _lockTypeItem({
+    required String title,
+    required LockType lockType,
+    required Future<void> Function() onTap,
+  }) {
+    final isSelected = _currentLockType == lockType;
+    return MenuComponent(
+      title: title,
+      trailing: isSelected
+          ? HugeIcon(
+              icon: HugeIcons.strokeRoundedTick02,
+              color: context.componentColors.primary,
+              size: IconSizes.medium,
+            )
+          : null,
+      showOnlyLoadingState: true,
+      onTap: onTap,
     );
   }
 }

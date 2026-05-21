@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:launcher_icon_switcher/launcher_icon_switcher.dart";
@@ -5,9 +6,7 @@ import "package:logging/logging.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
+import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 
 enum AppIcon {
   iconGreen("Default", "IconGreen", "assets/launcher_icon/icon-green.png"),
@@ -18,7 +17,8 @@ enum AppIcon {
     "Ducky",
     "IconDuckyHuggingE",
     "assets/launcher_icon/icon-ducky-hugging-e.png",
-  );
+  )
+  ;
 
   final String name;
   final String id;
@@ -45,74 +45,40 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
       AppIcon.values.map((e) => e.id).toList(),
       AppIcon.iconGreen.id,
     );
-    _iconSwitcher.getCurrentIcon().then(
-      (icon) {
-        _logger.info("Current icon is " + icon);
-        setState(() {
-          _currentIcon = icon;
+    _iconSwitcher
+        .getCurrentIcon()
+        .then((icon) {
+          _logger.info("Current icon is " + icon);
+          setState(() {
+            _currentIcon = icon;
+          });
+        })
+        .onError((error, stackTrace) {
+          _logger.severe("Error getting current icon", error, stackTrace);
         });
-      },
-    ).onError(
-      (error, stackTrace) {
-        _logger.severe("Error getting current icon", error, stackTrace);
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: context.l10n.appIcon,
-            ),
-            actionIcons: [
-              IconButtonWidget(
-                icon: Icons.close_outlined,
-                iconButtonType: IconButtonType.secondary,
-                onTap: () {
-                  // TODO: Implement Navigator.popUntil, else if we move the
-                  // screen to a different route, the button will not work as
-                  // expected
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-          _currentIcon != null
-              ? SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (delegateBuildContext, index) {
-                        final icon = AppIcon.values[index];
-                        final isCurrentIcon = icon.id == _currentIcon;
-                        return _AppIconTile(
-                          icon,
-                          isCurrentIcon,
-                          () {
-                            if (!isCurrentIcon) {
-                              _changeIcon(icon.id);
-                            }
-                          },
-                        );
-                      },
-                      childCount: AppIcon.values.length,
-                    ),
-                  ),
-                )
-              : SliverToBoxAdapter(
-                  child: EnteLoadingWidget(
-                    color: getEnteColorScheme(context).strokeMuted,
-                  ),
+    return SettingsPageScaffold(
+      title: context.l10n.appIcon,
+      children: _currentIcon == null
+          ? [
+              SizedBox(
+                height: MediaQuery.sizeOf(context).height / 2,
+                child: EnteLoadingWidget(
+                  color: context.componentColors.strokeDark,
                 ),
-        ],
-      ),
+              ),
+            ]
+          : [
+              for (final icon in AppIcon.values)
+                _AppIconTile(icon, icon.id == _currentIcon, () {
+                  if (icon.id != _currentIcon) {
+                    _changeIcon(icon.id);
+                  }
+                }),
+            ],
     );
   }
 
@@ -138,6 +104,7 @@ class _AppIconTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.componentColors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: GestureDetector(
@@ -146,10 +113,8 @@ class _AppIconTile extends StatelessWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            color: getEnteColorScheme(context).fillFaint,
-            borderRadius: const BorderRadius.all(
-              Radius.circular(8),
-            ),
+            color: colors.fillLight,
+            borderRadius: const BorderRadius.all(Radius.circular(Radii.sm)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
@@ -185,9 +150,7 @@ class _AppIconTile extends StatelessWidget {
                       child: Image(
                         width: 60,
                         height: 60,
-                        image: AssetImage(
-                          appIcon.path,
-                        ),
+                        image: AssetImage(appIcon.path),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -199,8 +162,10 @@ class _AppIconTile extends StatelessWidget {
                         key: ValueKey(isSelected),
                         appIcon.name,
                         style: isSelected
-                            ? getEnteTextTheme(context).bodyBold
-                            : getEnteTextTheme(context).bodyFaint,
+                            ? TextStyles.bodyBold.copyWith(
+                                color: colors.textBase,
+                              )
+                            : TextStyles.body.copyWith(color: colors.textLight),
                       ),
                     ),
                   ],

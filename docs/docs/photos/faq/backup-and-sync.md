@@ -296,11 +296,34 @@ If Ente isn't picking these up:
 2. If it isn't listed, move or copy the photos into the Camera folder, which Ente recognizes by default.
 3. New photos taken with the camera will continue to back up normally.
 
+### Can I pick photos from Ente in other apps? {#pick-photos-in-other-apps}
+
+On supported Android apps, yes. If an app (such as WhatsApp) opens the system photo picker, you can choose Ente Photos as the source and select photos or videos from your Ente library.
+
+A few details to keep in mind:
+
+- This works through Android's picker integration, so it depends on the third-party app using the standard picker flow.
+- Ente returns the files you select to that app for sending or attaching.
+- The picker shows the photos and videos available in your Ente gallery on that device.
+- On iPhone, iOS does not currently let Ente plug into other apps' photo pickers in the same way.
+
 ### Can Ente replace my default Photos or Camera gallery? {#ente-as-default-gallery}
 
-Not as a system gallery. On iOS, tapping a photo from the camera or another app will still open Apple Photos; the OS doesn't allow third-party apps to take that role. Android behaves similarly for most camera apps.
+Not as a full system gallery. On iPhone, tapping a photo from the camera or another app will still open Apple Photos because iOS does not allow third-party apps to replace that role.
+
+On supported Android devices, some camera apps can hand off the last photo you tapped to Ente for preview. But Ente still does not become the phone's universal default gallery for every app and camera flow.
 
 Ente runs alongside your native gallery and backs up new photos automatically in the background. See [How does background sync work?](#how-background-sync-works).
+
+### Can I open photos from my camera app in Ente? {#open-camera-photos-in-ente}
+
+On supported Android devices, yes. After taking a photo, tapping the preview thumbnail in the camera app can open that image directly in Ente Photos instead of the phone's default gallery.
+
+A few details to keep in mind:
+
+- This depends on your camera app and device supporting the Android handoff that Ente listens for.
+- It is for previewing the image you just tapped from the camera app; it does not make Ente the default gallery everywhere else.
+- On iPhone, the camera app still opens Apple Photos for this flow.
 
 ### On my iPhone, why are my photos not seen in the same albums as selected for backup? {#ios-album-assignment}
 
@@ -632,6 +655,34 @@ This usually occurs due to a network connectivity issue:
 ### Is there a way to filter photos that are backed up to Ente but no longer on my device? {#filter-cloud-only-photos}
 
 No. There is currently no way to filter cloud-only photos (photos that exist in Ente but are no longer on your device).
+
+### Can I view my photos in Ente without internet? {#offline-viewing}
+
+Yes, if the original photo is still available locally on your device or has already been cached by Ente.
+
+Photos that exist only in the cloud need an internet connection to load in full quality.
+
+## Exporting Your Data
+
+### How do I import an Ente export back into Ente? {#import-ente-export}
+
+Open the desktop app and upload the exported folder. You can also set up a Watch Folder from `Settings > Watch folders` if you want Ente to automatically upload files from a specific folder.
+
+There is no separate "Import from Ente" option.
+
+Learn more in the [Watch folders guide](/photos/features/backup-and-sync/watch-folders).
+
+### What happens to deleted photos in continuous export? {#continuous-export-deleted-photos}
+
+If you delete a photo from Ente, it moves to Trash in Ente. In your continuous export folder, the exported copy is similarly moved into a local export Trash folder.
+
+If you later permanently delete or empty Trash in Ente, Ente will not automatically delete the copy from your local export Trash folder. Manually delete those files from your device if you no longer need them.
+
+### Why is the Trash folder in my local export larger than my Ente Trash? {#local-export-trash-larger}
+
+Ente does not automatically remove files from your local filesystem export. This is intentional, so the export process does not unexpectedly delete local files from your device.
+
+If you are sure you no longer need those files, manually delete them from the local exported Trash folder.
 
 ## File Support & Upload Limits
 

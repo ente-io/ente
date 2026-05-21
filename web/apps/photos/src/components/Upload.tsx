@@ -56,14 +56,19 @@ import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMa
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
+    addOrCopyToCollection,
+    canAddFilesToCollection,
+    canDirectlyUploadToCollection,
     createAlbum,
     createHiddenAlbum,
     isHiddenCollection,
     savedAllCollections,
     savedHiddenCollections,
     savedNormalCollections,
+    savedOrCreateUserUncategorizedCollection,
 } from "ente-new/photos/services/collection";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -73,11 +78,15 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
+    UploadBatchResult,
     UploadCounter,
     UploadFileNames,
     UploadItemWithCollection,
 } from "services/upload-manager";
-import { uploadManager } from "services/upload-manager";
+import {
+    successfulFilesFromUploadBatchResult,
+    uploadManager,
+} from "services/upload-manager";
 import watcher from "services/watch";
 import { hasReliableCanvasReadback } from "utils/upload/canvas-integrity";
 import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
@@ -147,6 +156,11 @@ interface UploadProps {
 
 type UploadType = "files" | "folders" | "zips";
 
+interface UploadFilesOptions {
+    persistPendingUploads?: boolean;
+    postUploadTargetCollection?: Collection;
+}
+
 /**
  * Top level component that houses the infrastructure for handling uploads.
  */
@@ -165,6 +179,8 @@ export const Upload: React.FC<UploadProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showNotification, watchFolderView } = usePhotosAppContext();
+    const { isInternalUser } = useSettingsSnapshot();
+    const canUseSharedAlbumUpload = isInternalUser;
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [
@@ -272,6 +288,14 @@ export const Upload: React.FC<UploadProps> = ({
     const isDragAndDrop = useRef(false);
 
     /**
+     * Used to remember a deferred "real destination" collectionf or the current upload flow.
+     * So this ref remembers the original shared album target across failed uploads.
+     */
+    const retrySharedAlbumUploadTarget = useRef<Collection | undefined>(
+        undefined,
+    );
+
+    /**
      * `true` if we've activated one hidden {@link Inputs} that allow the user
      * to select items, and haven't heard back from the browser as to the
      * selection (or cancellation).
@@ -340,6 +364,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const handleCollectionSelectorCancel = () => {
         uploadRunning.current = false;
+        retrySharedAlbumUploadTarget.current = undefined;
     };
 
     useEffect(() => {
@@ -543,10 +568,12 @@ export const Upload: React.FC<UploadProps> = ({
 
         if (isDragAndDrop.current) {
             isDragAndDrop.current = false;
-            if (
+            const canUploadToActiveCollection =
                 props.activeCollection &&
-                props.activeCollection.owner.id == user?.id
-            ) {
+                (props.activeCollection.owner.id == user?.id ||
+                    (canUseSharedAlbumUpload &&
+                        canAddFilesToCollection(props.activeCollection)));
+            if (props.activeCollection && canUploadToActiveCollection) {
                 uploadFilesToExistingCollection(props.activeCollection);
                 return;
             }
@@ -580,20 +607,88 @@ export const Upload: React.FC<UploadProps> = ({
         uploadManager.showUploadProgressDialog();
     };
 
+    /**
+     *
+     * @param batchResult
+     * @param targetCollection
+     *
+     * This function actually receives the batchResult which is the post-upload
+     * object and the target collection of upload.
+     *
+     * the {@link successfulFilesFromUploadBatchResult} take the batchResult
+     * and then returns an array of files which is of the type {@link EnteFile}
+     * this file is then added to the corresponding shared album.
+     */
+    const handlePostUploadBatchResult = async (
+        batchResult: UploadBatchResult,
+        targetCollection: Collection | undefined,
+    ) => {
+        if (!targetCollection) return;
+
+        const uploadedFiles = successfulFilesFromUploadBatchResult(batchResult);
+        if (!uploadedFiles.length) return;
+
+        log.info(
+            `Adding ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+        );
+        try {
+            await addOrCopyToCollection(targetCollection, uploadedFiles);
+            log.info(
+                `Added ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+            );
+        } catch (e) {
+            log.error(
+                `Failed to add ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+                e,
+            );
+            throw e;
+        }
+    };
+
+    const resetUploadUIState = () => {
+        props.setShouldDisableDropzone(false);
+        uploadRunning.current = false;
+    };
+
     const uploadFilesToExistingCollection = async (collection: Collection) => {
         preCollectionCreationAction();
-        const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
-            ([uploadItem, path], index) => ({
-                uploadItem,
-                pathPrefix: uploadPathPrefix(path),
-                localID: index,
-                collectionID: collection.id,
-            }),
-        );
-        await waitInQueueAndUploadFiles(uploadItemsWithCollection, [
-            collection,
-        ]);
-        uploadItemsAndPaths.current = [];
+        try {
+            const uploadCollection = canDirectlyUploadToCollection(collection)
+                ? collection
+                : canUseSharedAlbumUpload && canAddFilesToCollection(collection)
+                  ? await savedOrCreateUserUncategorizedCollection()
+                  : undefined;
+
+            if (!uploadCollection) {
+                throw new Error("Upload not allowed for the selected album");
+            }
+
+            const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
+                ([uploadItem, path], index) => ({
+                    uploadItem,
+                    pathPrefix: uploadPathPrefix(path),
+                    localID: index,
+                    collectionID: uploadCollection.id,
+                }),
+            );
+            await waitInQueueAndUploadFiles(
+                uploadItemsWithCollection,
+                [uploadCollection],
+                {
+                    persistPendingUploads: uploadCollection.id == collection.id,
+                    postUploadTargetCollection:
+                        uploadCollection.id == collection.id
+                            ? undefined
+                            : collection,
+                },
+            );
+            uploadItemsAndPaths.current = [];
+        } catch (e) {
+            retrySharedAlbumUploadTarget.current = undefined;
+            closeUploadProgress();
+            resetUploadUIState();
+            onGenericError(e);
+        }
     };
 
     const uploadFilesToNewCollections = async (
@@ -657,22 +752,32 @@ export const Upload: React.FC<UploadProps> = ({
                 ];
             }
         } catch (e) {
+            retrySharedAlbumUploadTarget.current = undefined;
             closeUploadProgress();
+            resetUploadUIState();
             onGenericError(e);
             return;
         }
-        await waitInQueueAndUploadFiles(uploadItemsWithCollection, collections);
+        await waitInQueueAndUploadFiles(
+            uploadItemsWithCollection,
+            collections,
+            {
+                persistPendingUploads: true,
+                postUploadTargetCollection: undefined,
+            },
+        );
         uploadItemsAndPaths.current = [];
     };
 
     const waitInQueueAndUploadFiles = async (
         uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
+        opts?: UploadFilesOptions,
     ) => {
         const currentPromise = currentUploadPromise.current;
         currentUploadPromise.current = (async () => {
             if (currentPromise) await currentPromise;
-            return uploadFiles(uploadItemsWithCollection, collections);
+            return uploadFiles(uploadItemsWithCollection, collections, opts);
         })();
         await currentUploadPromise.current;
     };
@@ -686,18 +791,21 @@ export const Upload: React.FC<UploadProps> = ({
     };
 
     function postUploadAction() {
-        props.setShouldDisableDropzone(false);
-        uploadRunning.current = false;
+        resetUploadUIState();
         void onRemotePull();
     }
 
     const uploadFiles = async (
         uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
+        opts?: UploadFilesOptions,
     ) => {
         try {
-            preUploadAction();
+            retrySharedAlbumUploadTarget.current =
+                opts?.postUploadTargetCollection;
+            await preUploadAction();
             if (
+                opts?.persistPendingUploads &&
                 electron &&
                 !isPendingDesktopUpload.current &&
                 !watcher.isUploadRunning()
@@ -710,11 +818,19 @@ export const Upload: React.FC<UploadProps> = ({
                         .filter((x) => x !== undefined),
                 );
             }
-            const wereFilesProcessed = await uploadManager.uploadItems(
+            const batchResult = await uploadManager.uploadItems(
                 uploadItemsWithCollection,
                 collections,
+                {
+                    skipDuplicateAddToUploadCollection:
+                        !!opts?.postUploadTargetCollection,
+                },
             );
-            if (!wereFilesProcessed) closeUploadProgress();
+            if (!batchResult.processedAny) closeUploadProgress();
+            await handlePostUploadBatchResult(
+                batchResult,
+                opts?.postUploadTargetCollection,
+            );
             if (isDesktop) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(uploadItemsWithCollection);
@@ -739,7 +855,19 @@ export const Upload: React.FC<UploadProps> = ({
             const { items, collections, parsedMetadataJSONMap } =
                 uploadManager.failedItemState();
             await preUploadAction(parsedMetadataJSONMap);
-            await uploadManager.uploadItems(items, collections);
+            const batchResult = await uploadManager.uploadItems(
+                items,
+                collections,
+                {
+                    skipDuplicateAddToUploadCollection:
+                        !!retrySharedAlbumUploadTarget.current,
+                },
+            );
+            if (!batchResult.processedAny) closeUploadProgress();
+            await handlePostUploadBatchResult(
+                batchResult,
+                retrySharedAlbumUploadTarget.current,
+            );
         } catch (e) {
             log.error("Retrying failed uploads failed", e);
             closeUploadProgress();

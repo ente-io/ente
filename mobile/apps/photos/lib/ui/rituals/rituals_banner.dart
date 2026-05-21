@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math" as math;
 
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
@@ -64,9 +65,11 @@ class RitualsBanner extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      for (final (index, item)
-                          in _buildRowItems(context, rituals, summary)
-                              .indexed) ...[
+                      for (final (index, item) in _buildRowItems(
+                        context,
+                        rituals,
+                        summary,
+                      ).indexed) ...[
                         if (index != 0) const SizedBox(width: 10),
                         item,
                       ],
@@ -151,7 +154,9 @@ class _RitualsHeader extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Text(
               context.l10n.ritualsTitle,
-              style: textTheme.largeBold,
+              style: TextStyles.h2.copyWith(
+                color: textTheme.largeBold.color,
+              ),
             ),
           ),
           if (showChevron)
@@ -402,8 +407,9 @@ class _RitualCameraButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor =
-        isDark ? colorScheme.strokeFaint : Colors.black.withValues(alpha: 0.04);
+    final borderColor = isDark
+        ? colorScheme.strokeFaint
+        : Colors.black.withValues(alpha: 0.04);
     return Tooltip(
       message: tooltip,
       child: Material(

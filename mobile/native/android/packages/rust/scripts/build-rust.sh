@@ -1,24 +1,22 @@
 #!/usr/bin/env bash
 
-# Build Ensu's UniFFI Rust JNI libs for the current Gradle build.
-# Invoked from Gradle's `buildRustJni` task (../build.gradle.kts).
-#
-# Inputs  (CLI args):   --toolchain DIR --out-dir DIR <abi>...
-#                       <abi> is one of arm64-v8a, armeabi-v7a, x86_64.
-# Outputs (to $OUT_DIR/<abi>):
-#           libcore.so  libdb.so  libsync.so  libinference.so
-#           libtranscription.so  libc++_shared.so
-#
-# UniFFI Kotlin bindings are generated out-of-band by `cargo codegen
-# ensu-android`; this script only builds the JNI libs.
+# This script is invoked from Gradle's `buildRustJni` task.
+# It builds the JNI libraries used by Ensu's generated UniFFI bindings.
 
 set -euo pipefail
 
 REPO_ROOT=$(cd "$(dirname "$0")/../../../../../.." && pwd)
+TARGET_DIR="$REPO_ROOT/rust/target"
 TOOLCHAIN=""
 OUT_DIR=""
 
-CRATES=(uniffi/core uniffi/ensu/db uniffi/ensu/sync uniffi/ensu/inference uniffi/ensu/transcription)
+CRATES=(
+    bindings/uniffi/core
+    bindings/uniffi/ensu/db
+    bindings/uniffi/ensu/sync
+    bindings/uniffi/ensu/inference
+    bindings/uniffi/ensu/transcription
+)
 
 ABIS=()
 while [[ $# -gt 0 ]]; do
@@ -79,9 +77,9 @@ build_abi() {
     mkdir -p "$out"
     echo "==> $abi"
     for crate in "${CRATES[@]}"; do
-        (cd "$REPO_ROOT/rust/$crate" && cargo build --release --target "$target")
+        (cd "$REPO_ROOT/rust/$crate" && CARGO_TARGET_DIR="$TARGET_DIR" cargo build --release --target "$target")
         local name=${crate##*/}
-        cp "$REPO_ROOT/rust/$crate/target/$target/release/lib${name}.so" "$out/"
+        cp "$TARGET_DIR/$target/release/lib${name}.so" "$out/"
     done
     cp "$TOOLCHAIN/sysroot/usr/lib/$libcxx_dir/libc++_shared.so" "$out/"
 }

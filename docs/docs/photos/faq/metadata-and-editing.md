@@ -89,6 +89,12 @@ To fix this:
 
 ## Editing Metadata
 
+### What metadata is preserved when I edit a photo? {#metadata-preserved-after-edit}
+
+When Ente creates an edited copy, some metadata such as location, date, and time may be preserved. Other metadata may not be retained in the edited copy.
+
+The original photo remains untouched.
+
 ### How do I add descriptions or captions to photos? {#add-descriptions}
 
 You can add descriptions (captions) to your photos in Ente:

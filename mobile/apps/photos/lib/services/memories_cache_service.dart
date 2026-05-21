@@ -1387,7 +1387,7 @@ class MemoriesCacheService {
         initialIndex: 0,
         memories: personMemory.memories,
         child: Container(
-          color: backgroundBaseDark,
+          color: backgroundColorDark,
           width: double.infinity,
           height: double.infinity,
           child: FullScreenMemory(personMemory.title, 0),

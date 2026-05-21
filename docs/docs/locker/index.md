@@ -34,9 +34,9 @@ Life is unpredictable. Legacy ensures your family can access important documents
 and information if something happens to you - while protecting against
 unauthorized access.
 
-Designate trusted contacts who can recover your account after a waiting period.
-You're notified immediately if someone initiates recovery, and you can block it
-at any time.
+Add trusted contacts, or create Legacy Kits with physical recovery sheets that
+can be stored separately. You're notified when recovery starts, and you can
+block unauthorized attempts during the waiting period.
 
 **No other encrypted storage app offers this.**
 
