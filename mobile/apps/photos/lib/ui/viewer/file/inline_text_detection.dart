@@ -4,6 +4,7 @@ import "dart:io";
 import "package:flutter/foundation.dart";
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:mobile_ocr/mobile_ocr.dart" show MobileOcr;
@@ -49,6 +50,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   static const Duration _hasTextTimeout = Duration(seconds: 15);
   static const Duration _autoActivateDelay = Duration(seconds: 1);
   static const double _globalGestureSlop = 18.0;
+  static const double _photoGestureEdgeSlop = 8.0;
+  static const double _visibleBottomControlsHeight = 120.0;
   static final Map<String, _HasTextResult> _hasTextCache = {};
   final Logger _logger = Logger("InlineTextDetection");
   final MobileOcr _mobileOcr = MobileOcr();
@@ -259,6 +262,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   void _handleLongPressAt(Offset globalPosition) {
     if (_overlayActive) return; // Already active, let overlay handle it
+    if (!_isGlobalPointEligibleForOcrGesture(globalPosition)) return;
     _autoActivateTimer?.cancel();
     setState(() {
       _pendingLongPressPosition = globalPosition;
@@ -321,8 +325,15 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     final bool tapCanClearSelection = _canTrackTapToClearSelection;
     final bool pointOnInteractiveUi = _detectorController
         .isPointOnInteractiveSelectionUi(event.position);
-    final bool longPressCanRetry = _canRetryHasTextFromLongPress;
+    final bool pointEligibleForOcr = _isGlobalPointEligibleForOcrGesture(
+      event.position,
+    );
+    final bool longPressCanRetry =
+        pointEligibleForOcr &&
+        widget.enableFullScreenNotifier.value &&
+        _canRetryHasTextFromLongPress;
     final bool longPressCanSelect =
+        pointEligibleForOcr &&
         _canTrackZoomedPanFirstLongPress &&
         !pointOnInteractiveUi &&
         _detectorController.isPointOnSelectableText(event.position);
@@ -419,6 +430,150 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     }
   }
 
+  Rect _displayedPhotoRect(Size viewportSize) {
+    if (viewportSize.width <= 0 || viewportSize.height <= 0) {
+      return Rect.zero;
+    }
+    if (!widget.file.hasDimensions ||
+        widget.file.width <= 0 ||
+        widget.file.height <= 0) {
+      return Offset.zero & viewportSize;
+    }
+
+    final double imageAspect = widget.file.width / widget.file.height;
+    final double viewportAspect = viewportSize.width / viewportSize.height;
+    late final double displayWidth;
+    late final double displayHeight;
+    if (imageAspect > viewportAspect) {
+      displayWidth = viewportSize.width;
+      displayHeight = displayWidth / imageAspect;
+    } else {
+      displayHeight = viewportSize.height;
+      displayWidth = displayHeight * imageAspect;
+    }
+
+    return Rect.fromLTWH(
+      (viewportSize.width - displayWidth) / 2,
+      (viewportSize.height - displayHeight) / 2,
+      displayWidth,
+      displayHeight,
+    );
+  }
+
+  bool _isLocalPointInVisibleControls(
+    Offset localPosition,
+    Size viewportSize,
+  ) {
+    if (widget.enableFullScreenNotifier.value) {
+      return false;
+    }
+
+    final EdgeInsets padding =
+        MediaQuery.maybeOf(context)?.padding ?? EdgeInsets.zero;
+    final double topControlsHeight = padding.top + kToolbarHeight;
+    final double bottomControlsHeight =
+        padding.bottom + _visibleBottomControlsHeight;
+
+    return localPosition.dy < topControlsHeight ||
+        localPosition.dy > viewportSize.height - bottomControlsHeight;
+  }
+
+  bool _isLocalPointEligibleForOcrGesture(
+    Offset localPosition,
+    Size viewportSize,
+  ) {
+    if (viewportSize.width <= 0 || viewportSize.height <= 0) {
+      return false;
+    }
+    if (_isLocalPointInVisibleControls(localPosition, viewportSize)) {
+      return false;
+    }
+    return _displayedPhotoRect(
+      viewportSize,
+    ).inflate(_photoGestureEdgeSlop).contains(localPosition);
+  }
+
+  bool _isGlobalPointEligibleForOcrGesture(Offset globalPosition) {
+    final renderObject = context.findRenderObject();
+    if (renderObject is RenderBox &&
+        renderObject.hasSize &&
+        renderObject.size.width > 0 &&
+        renderObject.size.height > 0) {
+      return _isLocalPointEligibleForOcrGesture(
+        renderObject.globalToLocal(globalPosition),
+        renderObject.size,
+      );
+    }
+
+    final Size? viewportSize = MediaQuery.maybeOf(context)?.size;
+    if (viewportSize == null) {
+      return false;
+    }
+    return _isLocalPointEligibleForOcrGesture(globalPosition, viewportSize);
+  }
+
+  Widget _buildOcrGestureRegion(Widget child) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final Size viewportSize = constraints.biggest;
+        return _OcrGestureHitTestBox(
+          hitTest: (localPosition) => _isLocalPointEligibleForOcrGesture(
+            localPosition,
+            viewportSize,
+          ),
+          child: child,
+        );
+      },
+    );
+  }
+
+  Widget _buildInactiveGestureLayer() {
+    return Positioned.fill(
+      child: _buildOcrGestureRegion(
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onLongPressStart: _handleLongPress,
+          child: const SizedBox.expand(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveGestureLayer(Widget overlay, {required bool ignoring}) {
+    return Positioned.fill(
+      child: _buildOcrGestureRegion(
+        Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (_) {
+            _activePointers++;
+            if (_activePointers >= 2 && !_isPinching) {
+              setState(() {
+                _isPinching = true;
+                _zoomGestureSettled = false;
+              });
+            }
+          },
+          onPointerUp: (_) {
+            if (_activePointers > 0) _activePointers--;
+            if (_activePointers < 2 && _isPinching) {
+              setState(() => _isPinching = false);
+            }
+          },
+          onPointerCancel: (_) {
+            if (_activePointers > 0) _activePointers--;
+            if (_activePointers < 2 && _isPinching) {
+              setState(() => _isPinching = false);
+            }
+          },
+          child: IgnorePointer(
+            ignoring: ignoring,
+            child: overlay,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isEligible || widget.file is TrashFile || widget.isGuestView) {
@@ -432,13 +587,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       return const SizedBox.shrink();
     }
     if (!_overlayActive) {
-      return Positioned.fill(
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onLongPressStart: _handleLongPress,
-          child: const SizedBox.expand(),
-        ),
-      );
+      return _buildInactiveGestureLayer();
     }
 
     final zoomTransformNotifier = detailState.zoomTransformNotifier;
@@ -511,36 +660,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
             final shouldIgnore =
                 _isPinching || (isZoomed && !_zoomGestureSettled);
 
-            return Positioned.fill(
-              child: Listener(
-                behavior: HitTestBehavior.translucent,
-                onPointerDown: (_) {
-                  _activePointers++;
-                  if (_activePointers >= 2 && !_isPinching) {
-                    setState(() {
-                      _isPinching = true;
-                      _zoomGestureSettled = false;
-                    });
-                  }
-                },
-                onPointerUp: (_) {
-                  if (_activePointers > 0) _activePointers--;
-                  if (_activePointers < 2 && _isPinching) {
-                    setState(() => _isPinching = false);
-                  }
-                },
-                onPointerCancel: (_) {
-                  if (_activePointers > 0) _activePointers--;
-                  if (_activePointers < 2 && _isPinching) {
-                    setState(() => _isPinching = false);
-                  }
-                },
-                child: IgnorePointer(
-                  ignoring: shouldIgnore,
-                  child: overlay,
-                ),
-              ),
-            );
+            return _buildActiveGestureLayer(overlay, ignoring: shouldIgnore);
           },
         );
       },
@@ -632,4 +752,40 @@ class _HasTextResult {
   final String? localPath;
 
   const _HasTextResult({required this.hasText, this.localPath});
+}
+
+class _OcrGestureHitTestBox extends SingleChildRenderObjectWidget {
+  final bool Function(Offset localPosition) hitTest;
+
+  const _OcrGestureHitTestBox({
+    required this.hitTest,
+    required super.child,
+  });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderOcrGestureHitTestBox(hitTest);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderOcrGestureHitTestBox renderObject,
+  ) {
+    renderObject.hitTestCallback = hitTest;
+  }
+}
+
+class _RenderOcrGestureHitTestBox extends RenderProxyBox {
+  bool Function(Offset localPosition) hitTestCallback;
+
+  _RenderOcrGestureHitTestBox(this.hitTestCallback);
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (size.width <= 0 || size.height <= 0 || !hitTestCallback(position)) {
+      return false;
+    }
+    return super.hitTest(result, position: position);
+  }
 }
