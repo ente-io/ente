@@ -2,7 +2,14 @@ import "package:flutter/material.dart";
 
 /// White dot grid that pulses in a radial wave from center outward.
 class OcrDotWaveOverlay extends StatefulWidget {
-  const OcrDotWaveOverlay({super.key});
+  final Color backgroundColor;
+  final Color dotColor;
+
+  const OcrDotWaveOverlay({
+    super.key,
+    this.backgroundColor = const Color(0x66000000),
+    this.dotColor = Colors.white,
+  });
 
   @override
   State<OcrDotWaveOverlay> createState() => _OcrDotWaveOverlayState();
@@ -29,14 +36,20 @@ class _OcrDotWaveOverlayState extends State<OcrDotWaveOverlay>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return CustomPaint(
-          painter: _OcrDotWavePainter(progress: _controller.value),
-          size: Size.infinite,
-        );
-      },
+    return ColoredBox(
+      color: widget.backgroundColor,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return CustomPaint(
+            painter: _OcrDotWavePainter(
+              progress: _controller.value,
+              dotColor: widget.dotColor,
+            ),
+            size: Size.infinite,
+          );
+        },
+      ),
     );
   }
 }
@@ -46,8 +59,12 @@ class _OcrDotWavePainter extends CustomPainter {
   static const double _maxDelay = 0.85;
 
   final double progress;
+  final Color dotColor;
 
-  _OcrDotWavePainter({required this.progress});
+  _OcrDotWavePainter({
+    required this.progress,
+    required this.dotColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -83,7 +100,7 @@ class _OcrDotWavePainter extends CustomPainter {
         final double radius = 3.0 * t;
         final double opacity = 0.5 * t;
 
-        final paint = Paint()..color = Color.fromRGBO(255, 255, 255, opacity);
+        final paint = Paint()..color = dotColor.withValues(alpha: opacity);
         canvas.drawCircle(Offset(x, y), radius, paint);
       }
     }
@@ -95,5 +112,5 @@ class _OcrDotWavePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_OcrDotWavePainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.progress != progress || oldDelegate.dotColor != dotColor;
 }
