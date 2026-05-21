@@ -313,7 +313,11 @@ class _SelectAllButtonState extends State<SelectAllButton> {
                   } else {
                     _allSelected = false;
                   }
-                  return SelectAllStatusIcon(isSelected: _allSelected);
+                  return SelectAllStatusIcon(
+                    isSelected: _allSelected,
+                    size: 16,
+                    unselectedColor: colors.textLighter,
+                  );
                 },
               ),
             ],

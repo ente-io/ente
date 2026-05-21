@@ -159,7 +159,11 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
                   } else {
                     _allSelected = false;
                   }
-                  return SelectAllStatusIcon(isSelected: _allSelected);
+                  return SelectAllStatusIcon(
+                    isSelected: _allSelected,
+                    size: 16,
+                    unselectedColor: colors.textLighter,
+                  );
                 },
               ),
             ],

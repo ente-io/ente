@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart" as components;
 import "package:ente_components/theme/text_styles.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -75,6 +76,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final componentColors = components.ComponentTheme.colorsOf(context);
     const textStyle = TextStyles.body;
     final double horizontalPadding = widget.gridSize < photoGridSizeMax
         ? 12.0
@@ -147,7 +149,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                               ? Icon(
                                   Icons.more_vert_outlined,
                                   // color: colorScheme.blurStrokeBase,
-                                  color: colorScheme.strokeMuted,
+                                  color: componentColors.textLighter,
                                 ).animate().fadeIn(
                                   duration: const Duration(
                                     milliseconds: PinnedGroupHeader
@@ -165,7 +167,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                               : Icon(
                                   Icons.more_vert_outlined,
                                   // color: colorScheme.blurStrokeBase,
-                                  color: colorScheme.strokeMuted,
+                                  color: componentColors.textLighter,
                                 ),
                         ),
                       )
@@ -191,6 +193,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
     final icon = SelectAllStatusIcon(
       isSelected: isSelected,
       size: _selectionIconSize,
+      unselectedColor: components.ComponentTheme.colorsOf(context).textLighter,
     );
     if (!widget.fadeInTrailingIcons) {
       return icon;
