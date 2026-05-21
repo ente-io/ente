@@ -603,8 +603,7 @@ The same prorating calculation applies as described above.
 
 ### If I subscribed to a plan with a reference code and a discount, and then need to upgrade/downgrade, what happens to my discount and bonus? {#upgrade-discount-referral}
 
-The referral bonus remains, and the discount stays valid for 12 months even on
-an upgraded/downgraded plan. The amount is prorated.
+The referral bonus remains, and the discount stays valid for 12 months even on an upgraded/downgraded plan. The amount is prorated.
 
 ### How can I update my payment method? {#update-payment}
 
@@ -636,27 +635,20 @@ Use our [referral program](/photos/features/account/referral-program/). When fri
 
 ### Why did I receive this email? {#inactive-account-email-received}
 
-We recently sent an email to accounts that have not shown activity for 12
-months as part of our inactive-account policy. Free accounts with no active
-paid subscription are deleted after 12 consecutive months of inactivity.
+We recently sent an email to accounts that have not shown activity for 12 months as part of our inactive-account policy. Free accounts with no active paid subscription are deleted after 12 consecutive months of inactivity.
 
 ### I use Ente regularly. Why did I receive this email? {#inactive-but-active}
 
 The email includes the email address associated with the inactive account.
 
-If you are using Ente regularly, check the registered email address shown inside
-the app to confirm which account you are currently using.
+If you are using Ente regularly, check the registered email address shown inside the app to confirm which account you are currently using.
 
-Open Settings in the Ente app. The registered email address will appear at the
-very top.
+Open Settings in the Ente app. The registered email address will appear at the very top.
 
 ### What should I do if I received this email? {#inactive-account-action}
 
-Simply sign in to the account mentioned in the email before the date specified.
-This will mark the account as active.
+Simply sign in to the account mentioned in the email before the date specified. This will mark the account as active.
 
 ### I think this email was sent by mistake {#inactive-account-mistake}
 
-Contact support at [support@ente.com](mailto:support@ente.com) and share a
-screenshot of the Settings showing the registered email address at the top so we
-can verify the account.
+Contact support at [support@ente.com](mailto:support@ente.com) and share a screenshot of the Settings showing the registered email address at the top so we can verify the account.

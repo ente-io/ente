@@ -192,19 +192,18 @@ When someone adds a photo via a collect link:
 2. **Disable uploads**: Edit link settings and turn off "Allow adding photos"
 3. **Change to view-only**: Convert the collect link to a regular public link
 
-**View contributors:**
-Currently, you cannot see who added which photos to a collect link. All collected photos appear in the album without attribution. We're considering adding this feature based on user feedback.
+**View contributors:** Currently, you cannot see who added which photos to a collect link. All collected photos appear in the album without attribution. We're considering adding this feature based on user feedback.
 
 ## Comparison
 
-| Feature                            | Collaborative Albums                   | Collect Links                         |
-| ---------------------------------- | -------------------------------------- | ------------------------------------- |
-| **Participants need Ente account** | Yes                                    | No                                    |
-| **Access method**                  | Email invitation                       | Link                                  |
-| **Who pays for storage**           | Each uploader                          | Album owner                           |
-| **Best for**                       | Ongoing collaboration with Ente users  | One-time collection from large groups |
-| **Platform support**               | Mobile (full), Web/Desktop (view only) | All platforms via web browser         |
-| **Can set upload limits**          | No (trust-based)                       | Yes (password, expiry, device limits) |
+| Feature | Collaborative Albums | Collect Links |
+| --- | --- | --- |
+| **Participants need Ente account** | Yes | No |
+| **Access method** | Email invitation | Link |
+| **Who pays for storage** | Each uploader | Album owner |
+| **Best for** | Ongoing collaboration with Ente users | One-time collection from large groups |
+| **Platform support** | Mobile (full), Web/Desktop (view only) | All platforms via web browser |
+| **Can set upload limits** | No (trust-based) | Yes (password, expiry, device limits) |
 
 ## Related topics
 

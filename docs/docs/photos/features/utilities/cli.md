@@ -45,7 +45,7 @@ Ente's CLI is distributed directly over [GitHub](https://github.com/ente-io/ente
 
 Before using the CLI, you need to authenticate:
 
-```bash
+```sh
 ente account login
 ```
 
@@ -55,7 +55,7 @@ This will prompt for your email and password, then store your session securely.
 
 The CLI supports **incremental exports**, downloading only new or changed files. Set or change the destination directory per account, then run the export:
 
-```bash
+```sh
 # Configure the export directory for your account (run once)
 ente account update --app photos --email you@example.com --dir /path/to/backup
 
@@ -83,7 +83,7 @@ You can automate exports using cron (Linux/macOS) or Task Scheduler (Windows).
 
 Set the export directory for the account once (outside cron) and then schedule `ente export`:
 
-```bash
+```sh
 # Run once to set the directory the export job should use
 /usr/local/bin/ente account update --app photos --email you@example.com --dir /nas/ente-backup
 
@@ -111,7 +111,7 @@ The recommended approach for keeping NAS and Ente synced is to use the CLI to **
 
 **Example for daily NAS sync:**
 
-```bash
+```sh
 /usr/local/bin/ente account update --app photos --email you@example.com --dir /nas/ente-backup
 0 2 * * * /usr/local/bin/ente export
 ```

@@ -2,14 +2,11 @@
 
 Help and documentation for Ente's products.
 
-The live version of these is at
-**[ente.com/help](https://ente.com/help)**. The
-live site updates within a few minutes of a PR being merged.
+The live version of these is at **[ente.com/help](https://ente.com/help)**. The live site updates within a few minutes of a PR being merged.
 
 ## Quick edits
 
-For a typo or a small fix, just edit the file directly on GitHub and open a
-pull request.
+For a typo or a small fix, just edit the file directly on GitHub and open a pull request.
 
 ## Running locally
 
