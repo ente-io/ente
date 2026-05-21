@@ -46,8 +46,7 @@ yarn lint             # Check formatting, linting, and TypeScript types
 yarn lint:fix         # Auto-fix linting and formatting issues
 ```
 
-Use plain `yarn install` only when intentionally updating dependencies and
-reviewing the resulting `yarn.lock` changes.
+Use plain `yarn install` only when intentionally updating dependencies and reviewing the resulting `yarn.lock` changes.
 
 ## Structure
 

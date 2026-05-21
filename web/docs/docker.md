@@ -1,7 +1,6 @@
 # Docker
 
-Automated Docker images for the self-hosting web apps are created every
-Wednesday. You can fetch them from `ghcr.io/ente-io/web`.
+Automated Docker images for the self-hosting web apps are created every Wednesday. You can fetch them from `ghcr.io/ente-io/web`.
 
 These images expose 9 web apps on the following ports:
 
@@ -15,8 +14,7 @@ These images expose 9 web apps on the following ports:
 - `3008` - Paste
 - `3010` - Memories
 
-For example, for selectively exposing only the photos web app on your port 8000,
-you could:
+For example, for selectively exposing only the photos web app on your port 8000, you could:
 
 ```sh
 docker run -it --rm -p 8000:3000 ghcr.io/ente-io/web
@@ -24,11 +22,9 @@ docker run -it --rm -p 8000:3000 ghcr.io/ente-io/web
 
 These images accept one environment variable:
 
-- `ENTE_API_ORIGIN` - The API origin (scheme://host:port) for your API server.
-  Default: "http://localhost:8080".
+- `ENTE_API_ORIGIN` - The API origin (scheme://host:port) for your API server. Default: "http://localhost:8080".
 
-For example, if your API server is running at `https://api.example.org`, you can
-configure your Docker image to connect to it:
+For example, if your API server is running at `https://api.example.org`, you can configure your Docker image to connect to it:
 
 ```sh
 docker run -it --rm -e ENTE_API_ORIGIN=https://api.example.org ghcr.io/ente-io/web
