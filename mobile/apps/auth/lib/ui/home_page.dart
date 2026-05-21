@@ -1188,6 +1188,7 @@ class _HomePageState extends State<HomePage> {
       final List<Code> issuerMatch = [];
       final List<Code> accountMatch = [];
       final List<Code> noteMatch = [];
+      final List<Code> tagMatch = [];
 
       for (final Code codeState in _allCodes!) {
         if (codeState.hasError ||
@@ -1203,11 +1204,16 @@ class _HomePageState extends State<HomePage> {
           accountMatch.add(codeState);
         } else if (codeState.note.toLowerCase().contains(val)) {
           noteMatch.add(codeState);
+        } else if (codeState.display.tags.any(
+          (tag) => tag.toLowerCase().contains(val),
+        )) {
+          tagMatch.add(codeState);
         }
       }
       _filteredCodes = issuerMatch;
       _filteredCodes.addAll(accountMatch);
       _filteredCodes.addAll(noteMatch);
+      _filteredCodes.addAll(tagMatch);
     } else if (_isTrashOpen) {
       _filteredCodes = _allCodes
               ?.where(
