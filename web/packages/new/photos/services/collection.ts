@@ -880,6 +880,15 @@ const splitPendingFavoriteFiles = (files: EnteFile[], userID: number) => {
     return { pendingFiles, remainingFiles };
 };
 
+/**
+ *
+ * @param fileIDs
+ * @returns
+ *
+ * We had introduced a variable to store the files which
+ * where just favorited, so that they aren't copied again
+ * as the remotePull doesn't occur after the favoriting action.
+ */
 const forgetPendingFavoriteFileIDs = (fileIDs: number[]) => {
     if (!fileIDs.length) return;
 
@@ -893,6 +902,7 @@ const forgetPendingFavoriteFileIDs = (fileIDs: number[]) => {
         }
     }
 };
+
 /**
  *
  * @param dstCollection
