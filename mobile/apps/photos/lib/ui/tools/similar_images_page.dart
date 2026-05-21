@@ -924,7 +924,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                                 size: 18,
                                 selectedFillColor: Colors.white,
                                 selectedTickCutsOut: true,
-                                tickStrokeWidth: 2,
                               )
                             : null,
                       ),

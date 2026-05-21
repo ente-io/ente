@@ -4,7 +4,7 @@ import "package:hugeicons/hugeicons.dart";
 
 class SelectAllStatusIcon extends StatelessWidget {
   static const _tickScale = 14 / 18;
-  static const _defaultTickStrokeWidth = 1.5;
+  static const _defaultTickStrokeWidth = 2.0;
 
   final bool isSelected;
   final double size;

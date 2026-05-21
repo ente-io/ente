@@ -253,7 +253,6 @@ class SelectablePersonSearchExample extends StatelessWidget {
                               size: 18,
                               selectedFillColor: Colors.white,
                               selectedTickCutsOut: true,
-                              tickStrokeWidth: 2,
                             )
                           : null,
                     ),

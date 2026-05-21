@@ -351,7 +351,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   selectedFillColor: Theme.of(context).iconTheme.color,
                   selectedTickCutsOut: true,
                   unselectedColor: getEnteColorScheme(context).strokeMuted,
-                  tickStrokeWidth: 2,
                 ),
               ],
             ),
