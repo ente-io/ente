@@ -14,6 +14,8 @@ class DownloadManager {
   static const String noConnectionError = 'NO_CONNECTION';
   static const String notEnoughStorageError = 'NOT_ENOUGH_STORAGE';
   static const String unavailableError = 'UNAVAILABLE';
+  static const String applePhotosUnsupportedResourceError =
+      'APPLE_PHOTOS_UNSUPPORTED_RESOURCE';
 
   final Dio _dio;
 
