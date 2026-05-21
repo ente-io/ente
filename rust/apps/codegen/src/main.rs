@@ -161,21 +161,14 @@ fn generate_native_android() -> Result<(), DynError> {
 }
 
 fn generate_frb() -> Result<(), DynError> {
-    generate_frb_path("mobile/packages/rust")?;
-    generate_frb_path("mobile/apps/photos")?;
-    format_frb_bindings()
-}
-
-fn generate_frb_path(relative_package_dir: &str) -> Result<(), DynError> {
     let rust_root = rust_root()?;
     let repo_root = rust_root
         .parent()
         .ok_or("failed to resolve repo root from rust/apps/codegen")?;
-    let package_dir = repo_root.join(relative_package_dir);
 
-    generate_frb_package(&package_dir)?;
-
-    Ok(())
+    generate_frb_package(&repo_root.join("mobile/packages/rust"))?;
+    generate_frb_package(&repo_root.join("mobile/apps/photos"))?;
+    format_frb_bindings()
 }
 
 fn generate_frb_package(package_dir: &Path) -> Result<(), DynError> {

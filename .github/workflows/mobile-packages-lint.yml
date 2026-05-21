@@ -56,6 +56,7 @@ jobs:
                         - 'rust/Cargo.toml'
                         - 'rust/photos/**'
                         - 'rust/crates/core/**/*.rs'
+                        - 'rust/crates/contacts/**/*.rs'
                       workflow:
                         - '.github/workflows/mobile-packages-lint.yml'
                       analysis:
