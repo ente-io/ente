@@ -42,6 +42,9 @@ class NewAlbumListItemWidget extends StatelessWidget {
       title: Text(
         AppLocalizations.of(context).addNew,
         style: TextStyles.body.copyWith(color: colors.textLight),
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

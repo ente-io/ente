@@ -109,6 +109,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
+  final ValueNotifier<int> _selectedTabIndexNotifier = ValueNotifier<int>(0);
   final ValueNotifier<double> _christmasPullOffsetNotifier =
       ValueNotifier<double>(0);
   final ValueNotifier<bool> _christmasPullReleasedNotifier =
@@ -163,6 +164,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     ) {
       final previousTabIndex = _selectedTabIndex;
       _selectedTabIndex = event.selectedIndex;
+      _selectedTabIndexNotifier.value = event.selectedIndex;
 
       if (event.selectedIndex == 3) {
         isOnSearchTabNotifier.value = true;
@@ -210,6 +212,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       _logger.info('logged out, selectTab index to 0');
       _selectedTabIndex = 0;
+      _selectedTabIndexNotifier.value = 0;
       if (mounted) {
         setState(() {});
       }
@@ -546,6 +549,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _christmasBannerEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
+    _selectedTabIndexNotifier.dispose();
     _christmasPullOffsetNotifier.dispose();
     _christmasPullReleasedNotifier.dispose();
     super.dispose();
@@ -1007,23 +1011,44 @@ class _HomeWidgetState extends State<HomeWidget> {
             return ValueListenableBuilder(
               valueListenable: _swipeToSelectInProgressNotifier,
               builder: (context, inProgress, child) {
-                return ExtentsPageView(
-                  onPageChanged: (page) {
-                    Bus.instance.fire(
-                      TabChangedEvent(page, TabChangedEventSource.pageView),
+                return ValueListenableBuilder<int>(
+                  valueListenable: _selectedTabIndexNotifier,
+                  builder: (context, selectedTabIndex, _) {
+                    return ExtentsPageView(
+                      onPageChanged: (page) {
+                        Bus.instance.fire(
+                          TabChangedEvent(page, TabChangedEventSource.pageView),
+                        );
+                      },
+                      controller: _pageController,
+                      openDrawer: Scaffold.of(context).openDrawer,
+                      physics: inProgress
+                          ? const NeverScrollableScrollPhysics()
+                          : const BouncingScrollPhysics(),
+                      children: [
+                        _buildTabHeroMode(
+                          0,
+                          selectedTabIndex,
+                          child!,
+                        ),
+                        _buildTabHeroMode(
+                          1,
+                          selectedTabIndex,
+                          AlbumsTab(selectedAlbums: _selectedAlbums),
+                        ),
+                        _buildTabHeroMode(
+                          2,
+                          selectedTabIndex,
+                          _feedTab,
+                        ),
+                        _buildTabHeroMode(
+                          3,
+                          selectedTabIndex,
+                          _searchTab,
+                        ),
+                      ],
                     );
                   },
-                  controller: _pageController,
-                  openDrawer: Scaffold.of(context).openDrawer,
-                  physics: inProgress
-                      ? const NeverScrollableScrollPhysics()
-                      : const BouncingScrollPhysics(),
-                  children: [
-                    child!,
-                    AlbumsTab(selectedAlbums: _selectedAlbums),
-                    _feedTab,
-                    _searchTab,
-                  ],
                 );
               },
               child: NotificationListener<ScrollNotification>(
@@ -1091,6 +1116,13 @@ class _HomeWidgetState extends State<HomeWidget> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTabHeroMode(int tabIndex, int selectedTabIndex, Widget child) {
+    return HeroMode(
+      enabled: tabIndex == selectedTabIndex,
+      child: child,
     );
   }
 

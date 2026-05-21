@@ -8,8 +8,8 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 flutter_rust_bridge = "=2.12.0"
-ente-core = { path = "../../../../rust/crates/core" }
-ente-contacts = { path = "../../../../rust/crates/contacts" }
+ente-core = { path = "../../../crates/core" }
+ente-contacts = { path = "../../../crates/contacts" }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

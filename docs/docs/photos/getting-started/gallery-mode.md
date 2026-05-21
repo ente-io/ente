@@ -21,7 +21,7 @@ Ente scans your device for photos and videos and groups them by their native alb
 ## Feature comparison: gallery mode vs signed-in mode {#feature-comparison}
 
 | Feature | Gallery mode | Signed-in mode |
-|---|:---:|:---:|
+| --- | :-: | :-: |
 | Browse device photos and videos | Yes | Yes |
 | Device folder browsing (Camera, Screenshots, etc.) | Yes | Yes |
 | Full-screen photo and video viewer | Yes | Yes |

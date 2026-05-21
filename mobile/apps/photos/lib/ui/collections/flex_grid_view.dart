@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:math';
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
@@ -32,7 +33,8 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   static const maxThumbnailWidth = 224.0;
   static const crossAxisSpacing = 8.0;
   static const horizontalPadding = 16.0;
-  static const gridItemTextHeight = 48.0;
+  static const _thumbnailToTextSpacing = 8.0;
+  static const _titleToSubtitleSpacing = 4.0;
   final List<Collection>? collections;
 
   // If true, the GridView will shrink-wrap its contents.
@@ -199,6 +201,7 @@ class _CollectionsFlexiGridViewWidgetState
             totalCrossAxisSpacing -
             CollectionsFlexiGridViewWidget.horizontalPadding) /
         albumsCountInCrossAxis;
+    final double gridItemTextHeight = _gridItemTextHeight(context);
     final int totalCollections = widget.collections!.length;
     final bool showCreateAlbum = widget.shouldShowCreateAlbum;
     final int displayItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
@@ -250,12 +253,24 @@ class _CollectionsFlexiGridViewWidgetState
           mainAxisSpacing: 24,
           crossAxisSpacing: CollectionsFlexiGridViewWidget.crossAxisSpacing,
           childAspectRatio:
-              sideOfThumbnail /
-              (sideOfThumbnail +
-                  CollectionsFlexiGridViewWidget.gridItemTextHeight),
+              sideOfThumbnail / (sideOfThumbnail + gridItemTextHeight),
         ),
       ),
     );
+  }
+
+  double _gridItemTextHeight(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    return (CollectionsFlexiGridViewWidget._thumbnailToTextSpacing +
+            _scaledLineHeight(textScaler, TextStyles.body) +
+            CollectionsFlexiGridViewWidget._titleToSubtitleSpacing +
+            _scaledLineHeight(textScaler, TextStyles.mini))
+        .ceilToDouble();
+  }
+
+  double _scaledLineHeight(TextScaler textScaler, TextStyle style) {
+    final fontSize = style.fontSize ?? 14;
+    return textScaler.scale(fontSize) * (style.height ?? 1);
   }
 
   Widget _buildListView(BuildContext context, Key key) {
@@ -275,57 +290,43 @@ class _CollectionsFlexiGridViewWidgetState
         right: 8,
         bottom: widget.bottomPadding,
       ),
-      sliver: SliverPrototypeExtentList(
-        prototypeItem: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: ThumbnailListItem.defaultItemSpacing / 2,
-          ),
-          child: showCreateAlbum
-              ? const NewAlbumListItemWidget()
-              : AlbumListItemWidget(
-                  widget.collections![0],
-                  selectedAlbums: widget.selectedAlbums,
-                  onTapCallback: (c) {},
-                ),
-        ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            Widget item;
+      sliver: SliverList.builder(
+        itemBuilder: (context, index) {
+          Widget item;
 
-            if (showCreateAlbum && index == 0) {
-              item = NewAlbumListItemWidget(
-                onTap: (_) => _createAlbum(),
-              );
-            } else {
-              final collectionIndex = showCreateAlbum ? index - 1 : index;
-
-              item = AlbumListItemWidget(
-                widget.collections![collectionIndex],
-                selectedAlbums: widget.selectedAlbums,
-                onTapCallback: (c) {
-                  isAnyAlbumSelected
-                      ? _toggleAlbumSelection(c)
-                      : _navigateToCollectionPage(c);
-                },
-                onLongPressCallback: widget.enableSelectionMode
-                    ? (c) {
-                        isAnyAlbumSelected
-                            ? _navigateToCollectionPage(c)
-                            : _toggleAlbumSelection(c);
-                      }
-                    : null,
-              );
-            }
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: ThumbnailListItem.defaultItemSpacing / 2,
-              ),
-              child: item,
+          if (showCreateAlbum && index == 0) {
+            item = NewAlbumListItemWidget(
+              onTap: (_) => _createAlbum(),
             );
-          },
-          childCount: displayItemCount,
-        ),
+          } else {
+            final collectionIndex = showCreateAlbum ? index - 1 : index;
+
+            item = AlbumListItemWidget(
+              widget.collections![collectionIndex],
+              selectedAlbums: widget.selectedAlbums,
+              onTapCallback: (c) {
+                isAnyAlbumSelected
+                    ? _toggleAlbumSelection(c)
+                    : _navigateToCollectionPage(c);
+              },
+              onLongPressCallback: widget.enableSelectionMode
+                  ? (c) {
+                      isAnyAlbumSelected
+                          ? _navigateToCollectionPage(c)
+                          : _toggleAlbumSelection(c);
+                    }
+                  : null,
+            );
+          }
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: ThumbnailListItem.defaultItemSpacing / 2,
+            ),
+            child: item,
+          );
+        },
+        itemCount: displayItemCount,
       ),
     );
   }

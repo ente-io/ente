@@ -162,12 +162,6 @@ Ente accepts multiple payment methods:
 - Annual plans only
 - Email [paypal@ente.com](mailto:paypal@ente.com) to request an invoice
 
-**Cryptocurrency**:
-
-- Bitcoin (BTC), Ethereum (ETH), Dogecoin (DOGE)
-- Email [crypto@ente.com](mailto:crypto@ente.com) to request an invoice
-- Cannot be combined with discount codes
-
 **App Store payments**:
 
 - iOS App Store

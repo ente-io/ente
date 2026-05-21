@@ -1,4 +1,6 @@
 - Upgraded Auth to Flutter 3.38.10 and Android target SDK 36
+- Fixed saved theme selection being reset after unlocking Auth and improved password manager autofill detection for password fields
+- Focus newly added Auth codes so stale search or tag filters do not hide successful additions
 - Added custom icons for 1984 Hosting, Art Fight, BJ-Share, CatRealm, Cove Backup, eClinicalWorks, HaloPSA, JumpCloud, Patchmon, Racket Coach, RustDesk, Sherweb, Smogon, Sony, Zabbix, and Zyxel Nebula
 - Updated the Availity custom icon and fixed several multi-color custom icons rendering as single-color masks
 - Preserved maximized window state across desktop app launches

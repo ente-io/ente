@@ -15,6 +15,7 @@ import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/touch_cross_detector.dart";
 import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
@@ -118,6 +119,9 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
           ? thumbnailLargeSize
           : thumbnailSmallSize,
       shouldShowOwnerAvatar: !_isFileSelected,
+      ownerAvatarType: widget.photoGridSize < photoGridSizeMax
+          ? AvatarType.small
+          : AvatarType.xs,
       shouldShowVideoDuration: true,
     );
     return GestureDetector(

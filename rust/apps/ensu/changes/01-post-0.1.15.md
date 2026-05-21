@@ -1,3 +1,5 @@
+- Add in-app changelogs to desktop, android, and iOS
+- Balanced haptics on mobile to once at the start of response generation
 - Added local voice transcription for chat input on iOS and Android.
 - Improved image attachments with compression, thumbnails, full-screen previews, and cleaner composer previews.
 - Improved image prompt performance on native apps by resizing to model limits and caching multimodal context.

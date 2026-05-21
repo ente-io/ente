@@ -1080,7 +1080,7 @@
   "shareTheMoment": "Share the moment",
   "letFriendsAndFamilyReact": "Let friends and family react and comment on your photos.",
   "pleaseLoginAgain": "Please login again",
-  "autoLogoutMessage": "Due to technical glitch, you have been logged out. Our apologies for the inconvenience.",
+  "autoLogoutMessage": "Due to a technical glitch, you have been logged out. Our apologies for the inconvenience.",
   "yourSubscriptionHasExpired": "Your subscription has expired",
   "storageLimitExceeded": "Storage limit exceeded",
   "upgrade": "Upgrade",
@@ -1283,6 +1283,10 @@
   "fileSavedToGallery": "File saved to gallery",
   "filesSavedToGallery": "Files saved to gallery",
   "fileFailedToSaveToGallery": "Failed to save file to gallery",
+  "applePhotosUnsupportedResource": "This file could not be saved to Apple Photos. You can still view it in Ente.",
+  "@applePhotosUnsupportedResource": {
+    "description": "Shown when iOS Photos rejects a file while saving to gallery because the media resource is invalid or unsupported"
+  },
   "download": "Download",
   "downloadSkippedAlreadyAvailableOnDevice": "{fileName} is already available in the {albumName} album on your device",
   "@downloadSkippedAlreadyAvailableOnDevice": {

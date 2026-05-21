@@ -91,6 +91,9 @@ class NewAlbumRowItemWidget extends StatelessWidget {
             style: TextStyles.body.copyWith(
               color: colors.textLight,
             ),
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

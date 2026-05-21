@@ -349,8 +349,7 @@ Notifications work more reliably on Android, but can still be affected by:
 2. Disable battery optimization for Ente in system settings
 3. Don't force-close the app from recents
 
-**Alternative:**
-If you need real-time updates, keep the app open or check the shared album manually by opening it in the app.
+**Alternative:** If you need real-time updates, keep the app open or check the shared album manually by opening it in the app.
 
 - No platform restrictions for link recipients
 
@@ -397,6 +396,14 @@ When someone adds a photo via a collect link:
 - The storage counts against your plan's total storage limit
 
 Make sure you have sufficient storage available if you're expecting many people to add photos.
+
+### Can I let others view a shared album without allowing download of the photos? {#disable-downloads-public-link}
+
+Yes. When creating or managing a public link, you can turn off downloads.
+
+Open the album, create or manage the public link, and disable **Allow downloads**.
+
+This lets people view the album through the link without showing them a download option.
 
 ### Can I set limits on public links? {#link-limits}
 
@@ -495,6 +502,12 @@ We understand this uses extra storage in some use cases (like family photo shari
 ### Why don't photos added via a shared link appear in my feed? {#shared-link-photos-not-in-feed}
 
 Only photos added by Ente users who joined the album directly will appear in your feed. Photos added through a public link by someone without an Ente account are not shown in the feed.
+
+### Why do photos shared by others appear in my main gallery? {#shared-photos-in-gallery}
+
+By default, shared items can appear in your home gallery.
+
+To hide them, open `Settings > Appearance > Gallery` and enable **Hide shared items from home gallery**.
 
 ### Can I remove myself from a shared album? {#leave-shared-album}
 

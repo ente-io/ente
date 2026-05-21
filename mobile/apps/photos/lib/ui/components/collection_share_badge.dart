@@ -10,7 +10,7 @@ const double kCollectionBadgeStrokeWidth = 2.0;
 const double kCollectionBadgeBorderWidth = 1.0;
 
 class CollectionStatusBadge extends StatelessWidget {
-  static const Color backgroundColor = Color.fromRGBO(255, 255, 255, 0.14);
+  static const Color backgroundColor = Color.fromRGBO(0, 0, 0, 0.24);
 
   final Widget child;
 

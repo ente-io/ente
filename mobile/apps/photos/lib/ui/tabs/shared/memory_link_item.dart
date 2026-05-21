@@ -51,7 +51,7 @@ class MemoryLinkAlbumItem extends StatelessWidget {
       child: AnimatedContainer(
         curve: Curves.easeOut,
         duration: const Duration(milliseconds: 200),
-        height: _rowHeight,
+        constraints: const BoxConstraints(minHeight: _rowHeight),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: colorScheme.fill,
@@ -84,8 +84,9 @@ class MemoryLinkAlbumItem extends StatelessWidget {
                               return Hero(
                                 tag: heroTag,
                                 child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(_cornerRadius),
+                                  borderRadius: BorderRadius.circular(
+                                    _cornerRadius,
+                                  ),
                                   child: ThumbnailWidget(
                                     snapshot.data!,
                                     key: ValueKey(heroTag),
@@ -111,10 +112,13 @@ class MemoryLinkAlbumItem extends StatelessWidget {
                   Flexible(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           title,
+                          maxLines: 1,
+                          softWrap: false,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
@@ -123,6 +127,9 @@ class MemoryLinkAlbumItem extends StatelessWidget {
                             count: fileCount ?? 0,
                           ),
                           style: textTheme.smallMuted,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),

@@ -18,7 +18,7 @@ import "package:photos/utils/file_key.dart";
 // TODO: lau: neeraj: REMOVE this once the underlying issue is resolved and the user is unblocked.
 // Skip processing these fileIDs during diff for the given collection.
 // Used to unblock a specific user whose sync is failing on these files.
-const int _skipCollectionID = 1580559965692884;
+const int _skipCollectionID = 1580559966740107;
 const Set<int> _skipFileIDs = {
   588219655,
   588220428,

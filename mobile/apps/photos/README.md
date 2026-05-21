@@ -48,13 +48,23 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 1. Install [Flutter v3.38.10](https://flutter.dev/docs/get-started/install) and [Rust](https://www.rust-lang.org/tools/install).
 
-2. Install dependencies using one of these methods:
-   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos run codegen:rust`. This will install dependencies and generate Rust bindings.
-   - **Using Flutter directly:** Run `flutter pub get`, then install [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) with `cargo install flutter_rust_bridge_codegen` and run `flutter_rust_bridge_codegen generate` in both this folder and in `mobile/packages/rust`.
+2. Install dependencies and generate Rust bindings using one of these methods:
+   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap` and `melos run codegen:rust`.
+   - **Using Flutter directly:** Run `flutter pub get`, then from `rust/`, run `cargo codegen frb`.
 
 3. Run the app:
    - Android: `flutter run --flavor independent`
    - iOS: `flutter run`
+
+> [!NOTE]
+>
+> Re-run `cargo codegen frb` whenever the FRB-exported surface under `rust/bindings/frb/` changes. Internal Rust changes (function bodies, private helpers) are picked up by the normal Flutter build.
+>
+> From anywhere in the repo:
+>
+> ```sh
+> (cd "$(git rev-parse --show-toplevel)/rust" && cargo codegen frb)
+> ```
 
 To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.
 

@@ -1,5 +1,13 @@
 Latest changes:
+- Laurens: Generate and compress face thumbnails in rust
+- Laurens: More guards around Memory Lane for performance
+- Laurens + Rahul (contributor): Bulk ignore faces for file info sheet
+- Laurens: Support for .hif file in our rust decoder
+- Laurens: Better OCR animation and other minor improvements
+- Laurens: Remove old flickering onboarding widget
+- Laurens: Hash checks for downloaded ML models
 - Neeraj: Ignore missing files during stale upload cleanup [Sentry]
+- Neeraj: Fix blank gallery after switching from offline mode to online account
 - Neeraj: Fix smart memories and ML lookup failures for large offline galleries [Sentry]
 - Neeraj: Stop reporting inline OCR pre-check timeouts as errors [Sentry]
 - Neeraj: Avoid repeated iOS reupload checks when copied temp files are already cleaned up [Sentry]
@@ -14,7 +22,6 @@ Latest changes:
 Still behind internal flag:
 - Amrithesh: (I) ML/Pet recognition [Indexing]
 - Aman: (I) Use Rust HEIC decoder for Android photo viewer when dimensions are known
-- Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use cloudflare worker for upload for internal users
 
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates

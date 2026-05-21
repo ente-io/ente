@@ -1293,7 +1293,7 @@ class ClusterFeedbackService<T> {
     );
   }
 
-  Future<void> ignoreCluster(
+  Future<PersonEntity> ignoreCluster(
     String clusterID, {
     bool firePeopleChangedEvent = true,
   }) async {
@@ -1308,8 +1308,14 @@ class ClusterFeedbackService<T> {
       firePeopleChangedEvent: firePeopleChangedEvent,
     );
     if (!merged && firePeopleChangedEvent) {
-      Bus.instance.fire(PeopleChangedEvent());
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          person: ignoredPerson,
+          source: "ignore_cluster",
+        ),
+      );
     }
+    return ignoredPerson;
   }
 
   Future<List<(String, int)>> checkForMixedClusters() async {

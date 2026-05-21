@@ -601,6 +601,8 @@ const Color specialWhiteDark = Color.fromRGBO(255, 255, 255, 1);
 const Color specialWhiteOverlayLight = Color.fromRGBO(255, 255, 255, 0.14);
 const Color specialWhiteOverlayDark = Color.fromRGBO(255, 255, 255, 0.14);
 
+const Color avatarCyan = Color.fromRGBO(0, 184, 212, 1);
+
 const List<Color> avatarLight = [
   Color.fromRGBO(118, 84, 154, 1),
   Color.fromRGBO(223, 120, 97, 1),

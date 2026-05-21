@@ -5,6 +5,7 @@ import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/button_result.dart';
 import 'package:photos/models/typedefs.dart';
+import "package:photos/module/download/manager.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -108,6 +109,9 @@ String parseErrorForUI(
 }) {
   if (error == null) {
     return genericError;
+  }
+  if (error.toString() == DownloadManager.applePhotosUnsupportedResourceError) {
+    return AppLocalizations.of(context).applePhotosUnsupportedResource;
   }
   if (error is DioException) {
     final DioException dioError = error;
