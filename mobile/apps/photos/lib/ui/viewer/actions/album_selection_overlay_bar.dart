@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
-import "package:photos/theme/effects.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/components/bottom_action_bar/album_bottom_action_bar_widget.dart";
 
@@ -72,18 +71,15 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
                   ),
                 ),
               const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
-                child: AlbumBottomActionBarWidget(
-                  widget.selectedAlbums,
-                  widget.sectionType,
-                  onCancel: () {
-                    if (widget.selectedAlbums.albums.isNotEmpty) {
-                      widget.selectedAlbums.clearAll();
-                    }
-                  },
-                  backgroundColor: widget.backgroundColor,
-                ),
+              AlbumBottomActionBarWidget(
+                widget.selectedAlbums,
+                widget.sectionType,
+                onCancel: () {
+                  if (widget.selectedAlbums.albums.isNotEmpty) {
+                    widget.selectedAlbums.clearAll();
+                  }
+                },
+                backgroundColor: widget.backgroundColor,
               ),
             ],
           ),
@@ -138,15 +134,9 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: widget.backgroundColor ?? colors.fillLight,
+            color: widget.backgroundColor ?? colors.backgroundBase,
+            border: Border.all(color: colors.strokeDark),
             borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, -1),
-              ),
-            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,

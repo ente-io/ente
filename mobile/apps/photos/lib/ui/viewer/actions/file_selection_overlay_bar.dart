@@ -11,7 +11,6 @@ import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/theme/effects.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -157,23 +156,18 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    boxShadow: shadowFloatFaintLight,
-                  ),
-                  child: BottomActionBarWidget(
-                    selectedFiles: widget.selectedFiles,
-                    galleryType: _galleryType,
-                    collection: widget.collection,
-                    person: widget.person,
-                    clusterID: widget.clusterID,
-                    onCancel: () {
-                      if (widget.selectedFiles.files.isNotEmpty) {
-                        widget.selectedFiles.clearAll();
-                      }
-                    },
-                    backgroundColor: widget.backgroundColor,
-                  ),
+                BottomActionBarWidget(
+                  selectedFiles: widget.selectedFiles,
+                  galleryType: _galleryType,
+                  collection: widget.collection,
+                  person: widget.person,
+                  clusterID: widget.clusterID,
+                  onCancel: () {
+                    if (widget.selectedFiles.files.isNotEmpty) {
+                      widget.selectedFiles.clearAll();
+                    }
+                  },
+                  backgroundColor: widget.backgroundColor,
                 ),
               ],
             ),
@@ -292,15 +286,9 @@ class _SelectAllButtonState extends State<SelectAllButton> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: widget.backgroundColor ?? colors.fillLight,
+            color: widget.backgroundColor ?? colors.backgroundBase,
+            border: Border.all(color: colors.strokeDark),
             borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, -1),
-              ),
-            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,

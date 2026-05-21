@@ -28,7 +28,10 @@ class PeopleBottomActionBarWidget extends StatelessWidget {
         : 0;
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? colors.fillLight,
+        color: backgroundColor ?? colors.backgroundBase,
+        border: Border(
+          top: BorderSide(color: colors.strokeDark),
+        ),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
