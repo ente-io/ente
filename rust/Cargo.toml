@@ -21,6 +21,6 @@ members = [
     "crates/ensu/sync",
     "crates/ensu/transcription",
     "crates/image",
+    "crates/photos",
     "e2e",
-    "photos",
 ]

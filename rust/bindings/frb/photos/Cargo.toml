@@ -8,7 +8,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 flutter_rust_bridge = "=2.12.0"
-ente_photos = { path = "../../../photos" }
+ente_photos = { path = "../../../crates/photos" }
 ente_image = { path = "../../../crates/image" }
 
 [lints.rust]
