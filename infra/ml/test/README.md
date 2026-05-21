@@ -72,8 +72,7 @@ Useful optional filters:
 
 ## Ground-Truth Decode Visualizer
 
-Render the exact Python ground-truth decode output (including EXIF orientation handling)
-for every manifest fixture, then review the generated gallery.
+Render the exact Python ground-truth decode output (including EXIF orientation handling) for every manifest fixture, then review the generated gallery.
 
 ```sh
 uv run --project infra/ml --no-sync --with pillow-heif \
@@ -83,8 +82,7 @@ uv run --project infra/ml --no-sync --with pillow-heif \
   --open
 ```
 
-This script calls `ground_truth._runtime.decode_image_rgb` directly, so it tracks
-decode/orientation behavior changes in the Python reference pipeline.
+This script calls `ground_truth._runtime.decode_image_rgb` directly, so it tracks decode/orientation behavior changes in the Python reference pipeline.
 
 Outputs:
 
