@@ -842,6 +842,7 @@
   "advanced": "Advanced",
   "general": "General",
   "security": "Security",
+  "settings": "Settings",
   "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
   "twofactor": "Two-factor",
   "authToConfigureTwofactorAuthentication": "Please authenticate to configure two-factor authentication",
