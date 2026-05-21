@@ -3,24 +3,26 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 
 class SelectAllStatusIcon extends StatelessWidget {
-  static const _containerSize = 18.0;
-  static const _tickSize = 14.0;
+  static const _tickScale = 14 / 18;
 
   final bool isSelected;
+  final double size;
 
   const SelectAllStatusIcon({
     required this.isSelected,
+    this.size = 18,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = components.ComponentTheme.colorsOf(context);
+    final tickSize = size * _tickScale;
 
     if (isSelected) {
       return Container(
-        width: _containerSize,
-        height: _containerSize,
+        width: size,
+        height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: colors.fillBase,
@@ -29,14 +31,14 @@ class SelectAllStatusIcon extends StatelessWidget {
         child: HugeIcon(
           icon: HugeIcons.strokeRoundedTick02,
           color: colors.textReverse,
-          size: _tickSize,
+          size: tickSize,
         ),
       );
     }
 
     return Container(
-      width: _containerSize,
-      height: _containerSize,
+      width: size,
+      height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -45,7 +47,7 @@ class SelectAllStatusIcon extends StatelessWidget {
       child: HugeIcon(
         icon: HugeIcons.strokeRoundedTick02,
         color: colors.textLight,
-        size: _tickSize,
+        size: tickSize,
       ),
     );
   }
