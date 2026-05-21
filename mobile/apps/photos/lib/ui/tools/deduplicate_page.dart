@@ -348,7 +348,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 SelectAllStatusIcon(
                   isSelected: selectedGrids.contains(itemIndex),
                   size: 18,
+                  selectedFillColor: Theme.of(context).iconTheme.color,
+                  selectedTickCutsOut: true,
                   unselectedColor: getEnteColorScheme(context).strokeMuted,
+                  tickStrokeWidth: 2,
                 ),
               ],
             ),

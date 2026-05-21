@@ -4,6 +4,7 @@ import "package:hugeicons/hugeicons.dart";
 
 class SelectAllStatusIcon extends StatelessWidget {
   static const _tickScale = 14 / 18;
+  static const _defaultTickStrokeWidth = 1.5;
 
   final bool isSelected;
   final double size;
@@ -11,6 +12,7 @@ class SelectAllStatusIcon extends StatelessWidget {
   final Color? selectedTickColor;
   final Color? unselectedColor;
   final double? tickIconSize;
+  final double? tickStrokeWidth;
   final bool selectedTickCutsOut;
 
   const SelectAllStatusIcon({
@@ -20,6 +22,7 @@ class SelectAllStatusIcon extends StatelessWidget {
     this.selectedTickColor,
     this.unselectedColor,
     this.tickIconSize,
+    this.tickStrokeWidth,
     this.selectedTickCutsOut = false,
     super.key,
   });
@@ -28,6 +31,7 @@ class SelectAllStatusIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = components.ComponentTheme.colorsOf(context);
     final tickSize = tickIconSize ?? size * _tickScale;
+    final effectiveTickStrokeWidth = tickStrokeWidth ?? _defaultTickStrokeWidth;
     final selectedFill = selectedFillColor ?? colors.fillBase;
     final selectedTick = selectedTickColor ?? colors.textReverse;
     final unselected = unselectedColor ?? colors.textLight;
@@ -39,6 +43,7 @@ class SelectAllStatusIcon extends StatelessWidget {
           painter: _SelectedTickCutoutPainter(
             fillColor: selectedFill,
             tickSize: tickSize,
+            tickStrokeWidth: effectiveTickStrokeWidth,
           ),
         );
       }
@@ -55,6 +60,7 @@ class SelectAllStatusIcon extends StatelessWidget {
           icon: HugeIcons.strokeRoundedTick02,
           color: selectedTick,
           size: tickSize,
+          strokeWidth: effectiveTickStrokeWidth,
         ),
       );
     }
@@ -71,20 +77,21 @@ class SelectAllStatusIcon extends StatelessWidget {
         icon: HugeIcons.strokeRoundedTick02,
         color: unselected,
         size: tickSize,
+        strokeWidth: effectiveTickStrokeWidth,
       ),
     );
   }
 }
 
 class _SelectedTickCutoutPainter extends CustomPainter {
-  static const _tickStrokeWidth = 1.5;
-
   final Color fillColor;
   final double tickSize;
+  final double tickStrokeWidth;
 
   const _SelectedTickCutoutPainter({
     required this.fillColor,
     required this.tickSize,
+    required this.tickStrokeWidth,
   });
 
   @override
@@ -112,7 +119,7 @@ class _SelectedTickCutoutPainter extends CustomPainter {
       Paint()
         ..blendMode = BlendMode.clear
         ..style = PaintingStyle.stroke
-        ..strokeWidth = _tickStrokeWidth * scale
+        ..strokeWidth = tickStrokeWidth * scale
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
     );
@@ -122,6 +129,7 @@ class _SelectedTickCutoutPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SelectedTickCutoutPainter oldDelegate) {
     return oldDelegate.fillColor != fillColor ||
-        oldDelegate.tickSize != tickSize;
+        oldDelegate.tickSize != tickSize ||
+        oldDelegate.tickStrokeWidth != tickStrokeWidth;
   }
 }

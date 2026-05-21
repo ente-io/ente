@@ -35,10 +35,14 @@ class CollectionSelectedBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SelectAllStatusIcon(
+    final colorScheme = getEnteColorScheme(context);
+    return SelectAllStatusIcon(
       isSelected: true,
       size: 18,
       tickIconSize: kCollectionBadgeIconSize,
+      tickStrokeWidth: kCollectionBadgeStrokeWidth,
+      selectedFillColor: colorScheme.primary700,
+      selectedTickColor: Colors.white,
     );
   }
 }
