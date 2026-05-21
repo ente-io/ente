@@ -22,5 +22,8 @@ different signing keys.
 apksigner verify --print-certs <path_to_apk>
 ```
 
-Compare the `SHA1` or `SHA256` value printed by `apksigner` with the
-fingerprints above.
+Compare the `SHA1` or `SHA256` value printed by `apksigner` with the fingerprints above. Note that `apksigner` prints certificate fingerprints using lowercase letters and without colons:
+
+```text
+Signer #1 certificate SHA-256 digest: 6699cf8c42af427b552c962054e5d69589fa490996553a53045eb39cc34f2e66
+```
