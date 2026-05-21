@@ -60,6 +60,18 @@ String getDownloadSkipToastFileName(EnteFile file) {
   return title.isNotEmpty ? title : displayName;
 }
 
+String _getGallerySaveTitle(EnteFile file, String fallbackPath) {
+  final displayName = file.displayName;
+  if (displayName.trim().isNotEmpty) {
+    return displayName;
+  }
+  final title = file.title;
+  if (title != null && title.trim().isNotEmpty) {
+    return title;
+  }
+  return file_path.basename(fallbackPath);
+}
+
 Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
   EnteFile file,
 ) async {
@@ -342,6 +354,7 @@ Future<void> downloadToGallery(
     if (fileToSave == null) {
       throw DownloadFailedError("Unable to fetch file for gallery download");
     }
+    final galleryTitle = _getGallerySaveTitle(file, fileToSave.path);
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
@@ -351,10 +364,10 @@ Future<void> downloadToGallery(
       await PhotoManager.stopChangeNotify();
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
-            .saveImageWithPath(fileToSave.path, title: file.title!);
+            .saveImageWithPath(fileToSave.path, title: galleryTitle);
       } else if (type == FileType.video) {
         savedAsset =
-            await PhotoManager.editor.saveVideo(fileToSave, title: file.title!);
+            await PhotoManager.editor.saveVideo(fileToSave, title: galleryTitle);
       } else if (type == FileType.livePhoto) {
         final File? liveVideoFile = await getFileFromServer(
           file,
@@ -370,7 +383,7 @@ Future<void> downloadToGallery(
           savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
             imageFile: fileToSave,
             videoFile: liveVideoFile,
-            title: file.title!,
+            title: galleryTitle,
           );
         }
       }
@@ -412,8 +425,9 @@ Future<void> _saveLivePhotoOnDroid(
   EnteFile enteFile,
 ) async {
   debugPrint("Downloading LivePhoto on Droid");
+  final imageTitle = _getGallerySaveTitle(enteFile, image.path);
   AssetEntity? savedAsset = await (PhotoManager.editor
-          .saveImageWithPath(image.path, title: enteFile.title!))
+          .saveImageWithPath(image.path, title: imageTitle))
       .catchError((err) {
     throw Exception("Failed to save image of live photo: $err");
   });
@@ -424,7 +438,7 @@ Future<void> _saveLivePhotoOnDroid(
     "remoteDownload",
   );
   await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
-  final videoTitle = file_path.basenameWithoutExtension(enteFile.title!) +
+  final videoTitle = file_path.basenameWithoutExtension(imageTitle) +
       file_path.extension(video.path);
   savedAsset = (await (PhotoManager.editor.saveVideo(
     video,
