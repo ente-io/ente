@@ -136,6 +136,8 @@ EnteTextTheme _buildEnteTextStyle(
   Color textMuted,
   Color textFaint,
 ) {
+  // Text colors still come from the legacy Photos color tokens; this adapter
+  // only sources the matching typography styles from ente_components.
   return EnteTextTheme(
     h1: h1.copyWith(color: color),
     h1Bold: h1.copyWith(color: color, fontWeight: _boldWeight),
