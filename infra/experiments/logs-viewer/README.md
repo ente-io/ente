@@ -40,7 +40,7 @@ A web-based log viewer for analyzing Ente application logs. This tool provides s
 ### Starting the Application
 
 1. **Local Development**:
-   ```bash
+   ```sh
    cd infra/experiments/logs-viewer
    python3 -m http.server 8080
    ```

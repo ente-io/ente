@@ -28,7 +28,7 @@ The Photos app uses two types of packages:
 
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
 
-```bash
+```sh
 # 1. Format Dart code
 dart format .
 
@@ -62,7 +62,7 @@ flutter analyze
 ## Development Commands
 
 ### Using Melos (Monorepo Management)
-```bash
+```sh
 # From mobile/ directory - bootstrap all packages
 melos bootstrap
 
@@ -77,7 +77,7 @@ melos clean:photos
 ```
 
 ### Direct Flutter Commands
-```bash
+```sh
 # Development run
 flutter run --flavor independent
 
@@ -90,7 +90,7 @@ flutter build ios
 ```
 
 ### Code Quality
-```bash
+```sh
 # Static analysis and linting
 flutter analyze .
 

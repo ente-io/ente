@@ -20,7 +20,7 @@ Ente Locker is a Flutter application for securely storing important documents. I
 
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
 
-```bash
+```sh
 # 1. Format Dart code for ente/mobile/app/locker
 dart format .
 
@@ -55,7 +55,7 @@ flutter analyze
 
 ### Build & Run
 
-```bash
+```sh
 # From mobile/ directory - bootstrap all packages
 melos bootstrap
 
@@ -75,7 +75,7 @@ flutter build linux    # Linux
 
 ### Code Quality
 
-```bash
+```sh
 # Run linter
 flutter analyze
 
@@ -89,7 +89,7 @@ flutter analyze lib/path/to/file.dart
 ### Testing
 
 There are currently no tests in the `test/` directory. When adding tests:
-```bash
+```sh
 flutter test                    # Run all tests
 flutter test test/path/to/file_test.dart  # Run specific test
 ```

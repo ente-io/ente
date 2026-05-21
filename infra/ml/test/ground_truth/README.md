@@ -45,7 +45,7 @@ parity runs.
 
 ## Generate Goldens
 
-```bash
+```sh
 uv run --project infra/ml --no-sync --with pillow-heif python infra/ml/test/tools/generate_goldens.py \
   --manifest infra/ml/test/ground_truth/manifest.json \
   --output-dir infra/ml/test/out/parity/python
@@ -57,7 +57,7 @@ downloading fixtures, and then calling the generator.
 
 ## Compare Against Platforms
 
-```bash
+```sh
 uv run --project infra/ml python infra/ml/test/tools/compare_parity_outputs.py \
   --ground-truth infra/ml/test/out/parity/python/results.json \
   --platform-result android=infra/ml/test/out/parity/android/results.json \

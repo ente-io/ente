@@ -21,6 +21,6 @@ it (zipped up binaries for various OS and architecture combinations).
 Run the release script to build the binaries for the various OS and architecture
 cominations
 
-```shell
+```sh
 ./release.sh
 ```

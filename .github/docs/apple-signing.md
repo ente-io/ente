@@ -27,7 +27,7 @@ The Developer ID certificate and Apple Distribution certificate are different ce
 
 On macOS, copy a file's base64 value for a GitHub secret with:
 
-```bash
+```sh
 base64 -i path/to/file | pbcopy
 ```
 

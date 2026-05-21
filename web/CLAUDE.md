@@ -19,7 +19,7 @@ Format markdown files with Prettier for consistent styling
 
 ## Commands
 
-```bash
+```sh
 # Install dependencies from the committed lockfile (uses Yarn classic 1.22.22)
 yarn install --frozen-lockfile
 

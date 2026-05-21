@@ -53,7 +53,7 @@ let decrypted = crypto::secretbox::decrypt_box(&encrypted, &key).unwrap();
 
 ## Development
 
-```bash
+```sh
 cargo fmt      # format
 cargo clippy   # lint
 cargo build    # build
