@@ -28,5 +28,6 @@ yarn build
 ```
 
 ## Notes
+
 - The Tauri build uses the Ensu web app at `web/apps/ensu`.
 - Static export is enabled only when `ENTE_TAURI=1`.

@@ -4,9 +4,7 @@ Rust end-to-end tests that require a live Museum instance belong here.
 
 Current server-backed coverage in this crate:
 
-- ignored stage tests that reuse shared fixtures inside one test binary:
-  `auth_contacts_e2e`, `legacy_contact_recovery_e2e`, and
-  `legacy_kit_recovery_e2e`
+- ignored stage tests that reuse shared fixtures inside one test binary: `auth_contacts_e2e`, `legacy_contact_recovery_e2e`, and `legacy_kit_recovery_e2e`
 
 Detailed scenario coverage lives in [`COVERAGE.md`](COVERAGE.md).
 
@@ -16,15 +14,13 @@ Preferred local runner:
 rust/e2e/scripts/run.sh
 ```
 
-GitHub Actions uses the same runner via
-`.github/workflows/rust-e2e-test.yml`.
+GitHub Actions uses the same runner via `.github/workflows/rust-e2e-test.yml`.
 
 That runner:
 
 - starts Museum in Docker with Postgres only
 - enables deterministic OTT for `@ente-rust-test.org`
-- defaults to `http://localhost:18080` to avoid colliding with an already
-  running local Museum on `8080`
+- defaults to `http://localhost:18080` to avoid colliding with an already running local Museum on `8080`
 - waits for `GET /ping`
 - runs this crate's ignored tests
 
@@ -53,5 +49,4 @@ ENTE_E2E_SKIP=legacy_kit_recovery_e2e rust/e2e/scripts/run.sh
 ENTE_E2E_ONLY=legacy_contact_recovery_e2e rust/e2e/scripts/run.sh
 ```
 
-Attachment/object-store coverage can be added as a separate fixture later, but
-it is intentionally not part of the baseline auth/recovery suite.
+Attachment/object-store coverage can be added as a separate fixture later, but it is intentionally not part of the baseline auth/recovery suite.
