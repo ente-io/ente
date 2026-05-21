@@ -41,8 +41,8 @@ class BottomActionBarWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? colors.fillLight,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
       padding: EdgeInsets.only(

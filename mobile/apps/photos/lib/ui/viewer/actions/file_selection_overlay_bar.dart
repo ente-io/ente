@@ -293,7 +293,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: widget.backgroundColor ?? colors.fillLight,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
