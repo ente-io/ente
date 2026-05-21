@@ -128,7 +128,7 @@ impl TryFrom<AuthResponseWire> for AuthResponse {
             && value
                 .accounts_url
                 .as_ref()
-                .map_or(true, |accounts_url| accounts_url.is_empty())
+                .is_none_or(|accounts_url| accounts_url.is_empty())
         {
             return Err("accountsUrl is required when passkeySessionID is present".into());
         }
