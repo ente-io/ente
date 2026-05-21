@@ -37,11 +37,11 @@ in `museum.yaml` is read as `s3.b2-eu-cen.endpoint` by Museum.
 
 ### General Settings
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `credentials-file` | Path to optional credentials override file | `credentials.yaml` |
-| `credentials-dir` | Directory to look for credentials (TLS, service accounts) | `credentials/` |
-| `log-file` | Log output path. Required in production. | `""` |
+| Variable           | Description                                               | Default            |
+| ------------------ | --------------------------------------------------------- | ------------------ |
+| `credentials-file` | Path to optional credentials override file                | `credentials.yaml` |
+| `credentials-dir`  | Directory to look for credentials (TLS, service accounts) | `credentials/`     |
+| `log-file`         | Log output path. Required in production.                  | `""`               |
 
 ### HTTP
 
@@ -57,15 +57,15 @@ These endpoints are configurable in `museum.yaml` under the apps.\* section.
 
 Upon configuration, the application will start utilizing the specified endpoints instead of Ente's production instances or local endpoints (overridden values used for Compose and quickstart for ease of use.)
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `apps.public-albums` | Albums app base endpoint for public sharing | `https://albums.ente.com` |
-| `apps.public-locker` | Public Locker (share) app base endpoint | `https://share.ente.com` |
-| `apps.public-paste` | Ente Paste app base endpoint | `https://paste.ente.com` |
-| `apps.public-memories` | Memories app base endpoint for public memory shares | `https://memories.ente.com` |
-| `apps.cast` | Cast app base endpoint | `https://cast.ente.com` |
-| `apps.embed-albums` | Embed app base endpoint for embedded sharing | `https://embed.ente.com` |
-| `apps.accounts` | Accounts app base endpoint (used for passkey-based 2FA) | `https://accounts.ente.com` |
+| Variable               | Description                                             | Default                     |
+| ---------------------- | ------------------------------------------------------- | --------------------------- |
+| `apps.public-albums`   | Albums app base endpoint for public sharing             | `https://albums.ente.com`   |
+| `apps.public-locker`   | Public Locker (share) app base endpoint                 | `https://share.ente.com`    |
+| `apps.public-paste`    | Ente Paste app base endpoint                            | `https://paste.ente.com`    |
+| `apps.public-memories` | Memories app base endpoint for public memory shares     | `https://memories.ente.com` |
+| `apps.cast`            | Cast app base endpoint                                  | `https://cast.ente.com`     |
+| `apps.embed-albums`    | Embed app base endpoint for embedded sharing            | `https://embed.ente.com`    |
+| `apps.accounts`        | Accounts app base endpoint (used for passkey-based 2FA) | `https://accounts.ente.com` |
 
 ### Database
 
@@ -93,14 +93,14 @@ For more information on object storage configuration, check our [documentation](
 
 If you face any issues related to uploads then check out [CORS](/self-hosting/administration/object-storage#cors-cross-origin-resource-sharing) and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `s3.b2-eu-cen` | Primary hot storage bucket configuration |  |
-| `s3.wasabi-eu-central-2-v3.compliance` | Whether to disable compliance lock on delete | `true` |
-| `s3.scw-eu-fr-v3` | Cold storage bucket configuration |  |
-| `s3.wasabi-eu-central-2-v3` | Secondary hot storage configuration |  |
-| `s3.are_local_buckets` |  | `true` |
-| `s3.use_path_style_urls` | Enable path-style URLs for MinIO | `false` |
+| Variable                               | Description                                  | Default |
+| -------------------------------------- | -------------------------------------------- | ------- |
+| `s3.b2-eu-cen`                         | Primary hot storage bucket configuration     |         |
+| `s3.wasabi-eu-central-2-v3.compliance` | Whether to disable compliance lock on delete | `true`  |
+| `s3.scw-eu-fr-v3`                      | Cold storage bucket configuration            |         |
+| `s3.wasabi-eu-central-2-v3`            | Secondary hot storage configuration          |         |
+| `s3.are_local_buckets`                 |                                              | `true`  |
+| `s3.use_path_style_urls`               | Enable path-style URLs for MinIO             | `false` |
 
 ### Encryption Keys
 
@@ -166,25 +166,25 @@ smtp:
 
 ### WebAuthn Passkey Support
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `webauthn.rpid` | Relying Party ID | `localhost` |
+| Variable             | Description                  | Default                     |
+| -------------------- | ---------------------------- | --------------------------- |
+| `webauthn.rpid`      | Relying Party ID             | `localhost`                 |
 | `webauthn.rporigins` | Allowed origins for WebAuthn | `["http://localhost:3001"]` |
 
 ### Internal
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `internal.silent` | Suppress external effects (e.g. email alerts) | `false` |
-| `internal.trusted-client-ip-header` | Request header trusted by gin’s `TrustedPlatform` when the server runs behind a proxy (leave empty to use gin’s default order: X-Forwarded-For, X-Real-IP, remote addr) |  |
-| `internal.health-check-url` | External healthcheck URL |  |
-| `internal.hardcoded-ott` | Predefined OTPs for testing |  |
-| `internal.hardcoded-ott.emails` | E-mail addresses with hardcoded OTTs | `[]` |
-| `internal.hardcoded-ott.local-domain-suffix` | Suffix for which hardcoded OTT is to be used |  |
-| `internal.hardcoded-ott.local-domain-value` | Hardcoded OTT value for the above suffix |  |
-| `internal.admins` | List of admin user IDs | `[]` |
-| `internal.admin` | Single admin user ID |  |
-| `internal.disable-registration` | Disable user registration | `false` |
+| Variable                                     | Description                                                                                                                                                             | Default |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `internal.silent`                            | Suppress external effects (e.g. email alerts)                                                                                                                           | `false` |
+| `internal.trusted-client-ip-header`          | Request header trusted by gin’s `TrustedPlatform` when the server runs behind a proxy (leave empty to use gin’s default order: X-Forwarded-For, X-Real-IP, remote addr) |         |
+| `internal.health-check-url`                  | External healthcheck URL                                                                                                                                                |         |
+| `internal.hardcoded-ott`                     | Predefined OTPs for testing                                                                                                                                             |         |
+| `internal.hardcoded-ott.emails`              | E-mail addresses with hardcoded OTTs                                                                                                                                    | `[]`    |
+| `internal.hardcoded-ott.local-domain-suffix` | Suffix for which hardcoded OTT is to be used                                                                                                                            |         |
+| `internal.hardcoded-ott.local-domain-value`  | Hardcoded OTT value for the above suffix                                                                                                                                |         |
+| `internal.admins`                            | List of admin user IDs                                                                                                                                                  | `[]`    |
+| `internal.admin`                             | Single admin user ID                                                                                                                                                    |         |
+| `internal.disable-registration`              | Disable user registration                                                                                                                                               | `false` |
 
 ### Replication
 
@@ -192,20 +192,20 @@ By default, replication of objects (photos, thumbnails, videos) is disabled and 
 
 To enable replication, set `replication.enabled` to `true`. For this to work, 3 buckets have to be configured in total.
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `replication.enabled` | Enable replication across buckets | `false` |
-| `replication.worker-url` | Cloudflare Worker for replication |  |
-| `replication.worker-count` | Number of goroutines for replication | `6` |
-| `replication.tmp-storage` | Temp directory for replication | `tmp/replication` |
+| Variable                   | Description                          | Default           |
+| -------------------------- | ------------------------------------ | ----------------- |
+| `replication.enabled`      | Enable replication across buckets    | `false`           |
+| `replication.worker-url`   | Cloudflare Worker for replication    |                   |
+| `replication.worker-count` | Number of goroutines for replication | `6`               |
+| `replication.tmp-storage`  | Temp directory for replication       | `tmp/replication` |
 
 ### Background Jobs
 
 This configuration is for enabling background cron jobs for tasks such as sending mails, removing unused objects (clean up) and worker configuration for the same.
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `jobs.cron.skip` | Skip all cron jobs | `false` |
-| `jobs.remove-unreported-objects.worker-count` | Workers for removing unreported objects | `1` |
-| `jobs.clear-orphan-objects.enabled` | Enable orphan cleanup | `false` |
-| `jobs.clear-orphan-objects.prefix` | Prefix filter for orphaned objects |  |
+| Variable                                      | Description                             | Default |
+| --------------------------------------------- | --------------------------------------- | ------- |
+| `jobs.cron.skip`                              | Skip all cron jobs                      | `false` |
+| `jobs.remove-unreported-objects.worker-count` | Workers for removing unreported objects | `1`     |
+| `jobs.clear-orphan-objects.enabled`           | Enable orphan cleanup                   | `false` |
+| `jobs.clear-orphan-objects.prefix`            | Prefix filter for orphaned objects      |         |

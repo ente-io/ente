@@ -196,14 +196,14 @@ When someone adds a photo via a collect link:
 
 ## Comparison
 
-| Feature | Collaborative Albums | Collect Links |
-| --- | --- | --- |
-| **Participants need Ente account** | Yes | No |
-| **Access method** | Email invitation | Link |
-| **Who pays for storage** | Each uploader | Album owner |
-| **Best for** | Ongoing collaboration with Ente users | One-time collection from large groups |
-| **Platform support** | Mobile (full), Web/Desktop (view only) | All platforms via web browser |
-| **Can set upload limits** | No (trust-based) | Yes (password, expiry, device limits) |
+| Feature                            | Collaborative Albums                   | Collect Links                         |
+| ---------------------------------- | -------------------------------------- | ------------------------------------- |
+| **Participants need Ente account** | Yes                                    | No                                    |
+| **Access method**                  | Email invitation                       | Link                                  |
+| **Who pays for storage**           | Each uploader                          | Album owner                           |
+| **Best for**                       | Ongoing collaboration with Ente users  | One-time collection from large groups |
+| **Platform support**               | Mobile (full), Web/Desktop (view only) | All platforms via web browser         |
+| **Can set upload limits**          | No (trust-based)                       | Yes (password, expiry, device limits) |
 
 ## Related topics
 
