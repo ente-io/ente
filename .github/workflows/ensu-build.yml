@@ -419,5 +419,16 @@ jobs:
                       --arg title "${{ needs.build-metadata.outputs.release_title }}" \
                       --arg body "${release_body_discord}" \
                       --arg download_line "${download_line}" \
-                      '{embeds: [{title: $title, description: $body, fields: [{name: "\u200B", value: $download_line, inline: false}], color: 16633363}]}' \
-                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}"
+                      '{
+                          flags: 32768,
+                          components: [{
+                              type: 17,
+                              accent_color: 16633363,
+                              components: (
+                                  [{type: 10, content: ("## " + $title)}]
+                                  + (if $body == "" then [] else [{type: 10, content: $body}] end)
+                                  + [{type: 14}, {type: 10, content: $download_line}]
+                              )
+                          }]
+                      }' \
+                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}?with_components=true"
