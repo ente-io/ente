@@ -106,17 +106,6 @@ Use consistent format with `>` separator:
 - Use `1.` for numbered steps
 - Use sub-bullets for nested information
 
-### Notes and Warnings
-
-Use blockquotes with bold labels:
-
-<!-- prettier-ignore -->
-```markdown
-> **Note**: Additional context here.
-> **Important**: Critical information.
-> **Warning**: Something that could cause data loss.
-```
-
 ### Code Blocks
 
 Always specify language:

@@ -9,21 +9,13 @@ This guide aims to achieve self-hosting Ente photos or Ente-Auth with tailscale 
 
 Before getting start keep the following NOTE in mind.
 
-<!-- prettier-ignore -->
-> [!NOTE] If someone is behind double or triple CGNAT; must install tailscale
-> system wide by running `curl -fsSL https://tailscale.com/install.sh | sh` in
-> your linux terminal and `sudo tailscale up` otherwise dns resolver will fail
-> and uploading will not work. This is not necessary for those who are not
-> behing CGNAT. This guide also work on docker rootless and normal.
+> [!NOTE]
+>
+> If someone is behind double or triple CGNAT; must install tailscale system wide by running `curl -fsSL https://tailscale.com/install.sh | sh` in your linux terminal and `sudo tailscale up` otherwise dns resolver will fail and uploading will not work. This is not necessary for those who are not behing CGNAT. This guide also work on docker rootless and normal.
 
-<!-- prettier-ignore -->
-> [!IMPORTANT] For Docker rootless, the user must have local permissions for all
-> directories required by the Ente-photos self-hosted server. This can be
-> achieved by running `sudo chown -R 1000:1000 /home/ubuntu/docker/ente`. In the
-> Linux terminal, you can check the UID with `id -u` or simply `id`. The first
-> user typically has UID 1000. To allow listening and pinging on any port
-> without root privileges, create a file called `/etc/sysctl.d/99-rootless.conf`
-> with the following content:
+> [!IMPORTANT]
+>
+> For Docker rootless, the user must have local permissions for all directories required by the Ente-photos self-hosted server. This can be achieved by running `sudo chown -R 1000:1000 /home/ubuntu/docker/ente`. In the Linux terminal, you can check the UID with `id -u` or simply `id`. The first user typically has UID 1000. To allow listening and pinging on any port without root privileges, create a file called `/etc/sysctl.d/99-rootless.conf` with the following content:
 >
 > ```
 > net.ipv4.ip_unprivileged_port_start=0

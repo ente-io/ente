@@ -105,6 +105,6 @@ sudo systemctl reload caddy
 
 Ente Photos web app should be up on https://web.ente.yourdomain.tld and Museum at https://api.ente.yourdomain.tld.
 
-<!-- prettier-ignore -->
-> [!TIP] If you are using other reverse proxy servers such as NGINX, Traefik,
-> etc., please check out their documentation.
+> [!TIP]
+>
+> If you are using other reverse proxy servers such as NGINX, Traefik, etc., please check out their documentation.
