@@ -28,7 +28,12 @@ import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
   final Locale? locale;
-  const App({super.key, this.locale = const Locale("en")});
+  final AdaptiveThemeMode savedThemeMode;
+  const App({
+    super.key,
+    this.locale = const Locale("en"),
+    this.savedThemeMode = AdaptiveThemeMode.system,
+  });
 
   static void setLocale(BuildContext context, Locale newLocale) {
     _AppState state = context.findAncestorStateOfType<_AppState>()!;
@@ -124,31 +129,33 @@ class _AppState extends State<App>
       return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,
-        initial: AdaptiveThemeMode.system,
-        builder: (lightTheme, dartTheme) => MaterialApp(
-          title: "ente",
-          themeMode: ThemeMode.system,
-          theme: lightTheme,
-          darkTheme: dartTheme,
-          debugShowCheckedModeBanner: false,
-          locale: locale,
-          supportedLocales: appSupportedLocales,
-          localeListResolutionCallback: localResolutionCallBack,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            StringsLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          routes: _getRoutes,
-          builder: _materialAppBuilder,
+        initial: widget.savedThemeMode,
+        builder: (lightTheme, darkTheme) => Builder(
+          builder: (context) => MaterialApp(
+            title: "ente",
+            themeMode: _themeMode(AdaptiveTheme.of(context).mode),
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            debugShowCheckedModeBanner: false,
+            locale: locale,
+            supportedLocales: appSupportedLocales,
+            localeListResolutionCallback: localResolutionCallBack,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              StringsLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            routes: _getRoutes,
+            builder: _materialAppBuilder,
+          ),
         ),
       );
     } else {
       return MaterialApp(
         title: "ente",
-        themeMode: ThemeMode.system,
+        themeMode: _themeMode(widget.savedThemeMode),
         theme: lightThemeData,
         darkTheme: darkThemeData,
         debugShowCheckedModeBanner: false,
@@ -166,6 +173,12 @@ class _AppState extends State<App>
         builder: _materialAppBuilder,
       );
     }
+  }
+
+  ThemeMode _themeMode(AdaptiveThemeMode mode) {
+    if (mode.isLight) return ThemeMode.light;
+    if (mode.isDark) return ThemeMode.dark;
+    return ThemeMode.system;
   }
 
   Map<String, WidgetBuilder> get _getRoutes {
