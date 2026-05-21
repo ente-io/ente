@@ -14,6 +14,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
 import "package:photos/states/detail_page_state.dart";
+import "package:photos/ui/viewer/file/ocr/ocr_dot_wave_overlay.dart";
 import "package:photos/ui/viewer/file/ocr/text_detector_widget.dart";
 import "package:photos/ui/viewer/file/ocr/text_overlay_widget.dart"
     show ZoomedInteractionPolicy;
@@ -572,9 +573,9 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
                     child: widget.file.hasDimensions
                         ? AspectRatio(
                             aspectRatio: widget.file.width / widget.file.height,
-                            child: const _WhiteDotWaveOverlay(),
+                            child: const OcrDotWaveOverlay(),
                           )
-                        : const _WhiteDotWaveOverlay(),
+                        : const OcrDotWaveOverlay(),
                   ),
                 ),
             ],
@@ -631,103 +632,4 @@ class _HasTextResult {
   final String? localPath;
 
   const _HasTextResult({required this.hasText, this.localPath});
-}
-
-/// White dot grid that pulses in a radial wave from center outward.
-class _WhiteDotWaveOverlay extends StatefulWidget {
-  const _WhiteDotWaveOverlay();
-
-  @override
-  State<_WhiteDotWaveOverlay> createState() => _WhiteDotWaveOverlayState();
-}
-
-class _WhiteDotWaveOverlayState extends State<_WhiteDotWaveOverlay>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2500),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return CustomPaint(
-          painter: _WhiteDotWavePainter(progress: _controller.value),
-          size: Size.infinite,
-        );
-      },
-    );
-  }
-}
-
-class _WhiteDotWavePainter extends CustomPainter {
-  static const double _spacing = 16.0;
-  static const double _maxDelay = 0.85;
-
-  final double progress;
-
-  _WhiteDotWavePainter({required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double cx = size.width / 2;
-    final double cy = size.height / 2;
-    final double maxDist = Offset(cx, cy).distance;
-
-    final int cols = (size.width / _spacing).floor();
-    final int rows = (size.height / _spacing).floor();
-    final double offsetX = (size.width - (cols - 1) * _spacing) / 2;
-    final double offsetY = (size.height - (rows - 1) * _spacing) / 2;
-
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < cols; c++) {
-        final double x = offsetX + c * _spacing;
-        final double y = offsetY + r * _spacing;
-
-        final double dist = (Offset(x, y) - Offset(cx, cy)).distance;
-        final double delay = (dist / maxDist) * _maxDelay;
-
-        double phase = (progress - delay) % 1.0;
-        if (phase < 0) phase += 1.0;
-
-        // Ping-pong with ease-in-out in each half
-        double t;
-        if (phase < 0.5) {
-          t = _easeInOut(phase * 2);
-        } else {
-          t = _easeInOut((1.0 - phase) * 2);
-        }
-
-        if (t < 0.01) continue;
-
-        final double radius = 3.0 * t;
-        final double opacity = 0.5 * t;
-
-        final paint = Paint()..color = Color.fromRGBO(255, 255, 255, opacity);
-        canvas.drawCircle(Offset(x, y), radius, paint);
-      }
-    }
-  }
-
-  static double _easeInOut(double t) {
-    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-  }
-
-  @override
-  bool shouldRepaint(_WhiteDotWavePainter oldDelegate) =>
-      oldDelegate.progress != progress;
 }
