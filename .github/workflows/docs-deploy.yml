@@ -22,24 +22,22 @@ jobs:
                 working-directory: docs
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v6
+            - uses: actions/checkout@v6
 
-            - name: Setup node and enable npm caching
-              uses: actions/setup-node@v6
+            - uses: actions/setup-node@v6
               with:
                   node-version: 24
                   cache: "npm"
                   cache-dependency-path: "docs/package-lock.json"
 
-            - name: Install dependencies
-              run: npm ci
+            - run: npm ci
 
-            - name: Build production site
-              # Will create docs/.vitepress/dist
-              run: npm run build
+            - run: npm audit --audit-level=critical
 
-            - name: Prepare deployment with help subdirectory
+            # Will create docs/.vitepress/dist
+            - run: npm run build
+
+            - name: Prepare deployment
               run: |
                   mkdir -p deploy
                   mv docs/.vitepress/dist deploy/help
