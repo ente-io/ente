@@ -32,22 +32,22 @@ cd ente/docs
 Install dependencies
 
 ```sh
-yarn install --frozen-lockfile
+npm ci
 ```
 
-Use plain `yarn install` only when you are intentionally updating dependencies
-and reviewing the resulting `yarn.lock` changes.
+Use plain `npm install` only when you are intentionally updating dependencies
+and reviewing the resulting `package-lock.json` changes.
 
 Then start a local server
 
 ```sh
-yarn dev
+npm run dev
 ```
 
 For an editor, VSCode is a good choice. Also install the Prettier extension for
 VSCode, and set VSCode to format on save. This way the editor will automatically
 format and wrap the text using the project's standard, so you can just focus on
-the content. You can also format without VSCode by using the `yarn pretty`
+the content. You can also format without VSCode by using the `npm run pretty`
 command.
 
 ## Have fun!
