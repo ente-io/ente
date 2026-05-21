@@ -19,7 +19,7 @@ If you are using Linux for accessing Ente CLI with, you can install a system key
 
 For Ubuntu/Debian based distributions, you can install `gnome-keyring` via `apt`
 
-```shell
+```sh
 sudo apt install gnome-keyring
 ```
 
@@ -31,7 +31,7 @@ In case of using Ente CLI on server environment, you may not be able to install 
 
 Set `ENTE_CLI_SECRETS_PATH` environment variable in your shell's configuration file (`~/.bashrc`, `~/.zshrc`, or other corresponding file)
 
-```shell
+```sh
 # Replace ./secrets.txt with the path to secrets file
 # that you are using for saving.
 # IMPORTANT: Make sure it is stored in a secure place.

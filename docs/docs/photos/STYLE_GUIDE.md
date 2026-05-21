@@ -111,7 +111,7 @@ Use consistent format with `>` separator:
 Always specify language:
 
 ````markdown
-```bash
+```sh
 command here
 ```
 ````
@@ -136,7 +136,7 @@ Always use H3 with mandatory anchor for deep linking:
 
 **Testing for duplicates:**
 
-```bash
+```sh
 # Run this command to check for duplicate anchor IDs:
 grep -rh "{#[a-z0-9-]*}" docs/photos/faq/*.md | sed 's/.*{#\([^}]*\)}.*/\1/' | sort | uniq -d
 ```

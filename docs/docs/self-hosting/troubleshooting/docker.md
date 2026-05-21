@@ -9,7 +9,7 @@ description: Fixing Docker-related errors when trying to self-host Ente
 >
 > Remember to restart your cluster to ensure changes that you make in the `compose.yaml` and `museum.yaml` get picked up.
 >
-> ```shell
+> ```sh
 > docker compose down
 > docker compose up
 > ```

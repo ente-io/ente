@@ -36,7 +36,7 @@ Learn more in the [CLI installation guide](/photos/features/utilities/cli#instal
 
 The CLI supports incremental exports, which means it will only download new or changed files. Configure the export directory for the account once, then run exports whenever you need:
 
-```bash
+```sh
 # Configure where this account should export files
 ente account update --app photos --email you@example.com --dir /path/to/backup
 
@@ -61,7 +61,7 @@ The recommended approach is to use the CLI to pull data from Ente to your NAS:
 
 Example cron job for daily sync:
 
-```bash
+```sh
 # Run once to set up the export directory
 /usr/local/bin/ente account update --app photos --email you@example.com --dir /nas/ente-backup
 

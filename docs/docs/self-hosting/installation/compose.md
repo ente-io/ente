@@ -30,7 +30,7 @@ Copy the configuration files for modification by the following command inside `s
 
 This allows you to modify configuration without having to face hassle while pulling in latest changes.
 
-```shell
+```sh
 # Inside the cloned repository's directory (usually `ente`)
 cd server/config
 cp example.env .env
@@ -47,7 +47,7 @@ You should consider generating values for JWT and encryption keys for emails if 
 
 You can do by running the following command inside `ente/server`, assuming you cloned the repository to `ente`:
 
-```shell
+```sh
 # Change into the ente/server
 cd ente/server
 # Generate secrets

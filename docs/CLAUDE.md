@@ -4,7 +4,7 @@ Documentation for Ente's products published at [ente.com/help](https://ente.com/
 
 ## Development commands
 
-```bash
+```sh
 npm ci          # Install dependencies
 npm run dev     # Start local dev server
 npm run build   # Build for production
@@ -35,7 +35,7 @@ Platform instructions use bold headers: `**On mobile:**`, `**On desktop:**`, `**
 
 FAQ questions need unique anchor IDs: `### Question? {#descriptive-anchor-id}`. Use descriptive IDs (`{#enable-face-recognition-ml}`, not `{#faq1}`), and keep them unique across all FAQ files. Check for duplicates with:
 
-```bash
+```sh
 grep -rh "{#[a-z0-9-]*}" docs/photos/faq/*.md | sed 's/.*{#\([^}]*\)}.*/\1/' | sort | uniq -d
 ```
 

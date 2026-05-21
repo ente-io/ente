@@ -41,7 +41,7 @@ To create a new account, use Ente Photos (or Ente Auth) web application, desktop
 
 You can add your existing account using Ente CLI.
 
-```shell
+```sh
 ente account add
 ```
 
@@ -55,7 +55,7 @@ You can use `ente admin update-subscription` to increase storage quota and accou
 
 For infinite storage and validity, use the following command:
 
-```shell
+```sh
 ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit
 
 # Set a limit

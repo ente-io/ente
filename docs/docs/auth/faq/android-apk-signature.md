@@ -16,7 +16,7 @@ These fingerprints are for the direct APK download. Play Store and F-Droid packa
 
 ## Verify the APK
 
-```bash
+```sh
 apksigner verify --print-certs <path_to_apk>
 ```
 

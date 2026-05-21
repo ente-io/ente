@@ -56,7 +56,7 @@ If you have edited the Compose file or configuration file (`museum.yaml`), make 
 
 You can do this by the following command:
 
-```shell
+```sh
 docker compose down && docker compose up -d
 ```
 

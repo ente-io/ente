@@ -28,7 +28,7 @@ One way to migrate is to [use this tool by dyc3][releases] to simplify the proce
 1. Download the `.deb` from the [releases page][releases].
 2. Open a terminal and run this to install it:
 
-```bash
+```sh
 sudo dpkg -i ./steamguard-cli_<version>_amd64.deb
 ```
 
@@ -37,7 +37,7 @@ sudo dpkg -i ./steamguard-cli_<version>_amd64.deb
 1. Download `steamguard` from the [releases page][releases]
 2. Make it executable, and move `steamguard` to `/usr/local/bin` or any other directory in your `$PATH`.
 
-```bash
+```sh
 chmod +x ./steamguard
 sudo mv ./steamguard /usr/local/bin
 ```
@@ -48,7 +48,7 @@ sudo mv ./steamguard /usr/local/bin
 
 Set up a new account with steamguard-cli
 
-```bash
+```sh
 steamguard setup # set up a new account with steamguard-cli
 ```
 
@@ -56,7 +56,7 @@ steamguard setup # set up a new account with steamguard-cli
 
 steamguard-cli can then generate a QR code for your 2FA secret.
 
-```bash
+```sh
 steamguard qr # print QR code for the first account in your maFiles
 steamguard -u <account name> qr # print QR code for a specific account
 ```

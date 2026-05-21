@@ -26,7 +26,7 @@ This code can be found in the server logs, which should be shown in your termina
 
 If not, access the server logs inside the folder where Compose file resides.
 
-```shell
+```sh
 sudo docker compose logs
 ```
 
@@ -79,7 +79,7 @@ If you have edited the Compose file or configuration file (`museum.yaml`), make 
 
 You can do this by the following command:
 
-```shell
+```sh
 docker compose down && docker compose up -d
 ```
 

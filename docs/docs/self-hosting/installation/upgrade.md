@@ -13,7 +13,7 @@ Upgrading Ente depends on the method of installation you have chosen.
 
 You can free up some disk space by deleting older images that were used by obsolete containers.
 
-```shell
+```sh
 docker image prune
 ```
 
@@ -23,7 +23,7 @@ Pull in the latest images in the directory where the Compose file resides. Resta
 
 Run the following command inside `my-ente` directory (default name used in quickstart):
 
-```shell
+```sh
 docker compose pull && docker compose up -d
 ```
 

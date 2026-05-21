@@ -136,7 +136,7 @@ You may have to change the `AllowedOrigins` to allow only certain origins (your 
 
 Assuming you have AWS CLI on your system and that you have configured it with your access key and secret, you can execute the below command to set bucket CORS. Make sure to enter the right path for the `cors.json` file.
 
-```shell
+```sh
 aws s3api put-bucket-cors --bucket YOUR_S3_BUCKET --cors-configuration /path/to/cors.json
 ```
 
@@ -144,7 +144,7 @@ aws s3api put-bucket-cors --bucket YOUR_S3_BUCKET --cors-configuration /path/to/
 
 Assuming you have configured an alias for MinIO account using the command:
 
-```shell
+```sh
 mc alias set storage-account-alias minio-endpoint minio-key minio-secret
 ```
 
@@ -157,7 +157,7 @@ where,
 
 To set the `AllowedOrigins` Header, you can use the following command:.
 
-```shell
+```sh
 mc admin config set storage-account-alias api cors_allow_origin="*"
 ```
 

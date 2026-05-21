@@ -97,7 +97,7 @@ memories.ente.yourdomain.tld {
 
 Reload Caddy for changes to take effect.
 
-```shell
+```sh
 sudo systemctl reload caddy
 ```
 
