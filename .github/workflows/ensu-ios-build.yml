@@ -29,9 +29,8 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v6
 
-            - name: Generate UniFFI Swift bindings
+            - run: cargo codegen native
               working-directory: rust
-              run: cargo codegen ensu-ios
 
             # This pull_request workflow does not provide the inference fixtures,
             # so this step is only a build + startup smoke test.

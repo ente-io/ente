@@ -12,18 +12,22 @@ To know more about Ente, see [our main README](../../../../../README.md) or visi
 
     ```sh
     cd rust
-    cargo codegen ensu-android
+    cargo codegen native
     ```
 
 3. Open the project in Android Studio and run the `app-ui` module. If the Android NDK is missing, Android Studio will prompt to install it.
 
-That's it. Apart from the `cargo codegen`, this is a normal Android project.
+That's it. Apart from the `cargo codegen`, this is a normal Android project. Gradle cross-compiles the Rust libraries to JNI `.so` files automatically when building the app.
 
 > [!NOTE]
 >
-> Re-run `cargo codegen ensu-android` whenever the UniFFI interface under `rust/bindings/uniffi` changes.
+> Re-run `cargo codegen native` whenever the UniFFI-exported surface under `rust/bindings/uniffi/` changes. Internal Rust changes (function bodies, private helpers) are picked up by the normal Gradle build.
 >
-> Gradle cross-compiles the Rust libraries to JNI `.so` files automatically when building the app.
+> From anywhere in the repo:
+>
+> ```sh
+> (cd "$(git rev-parse --show-toplevel)/rust" && cargo codegen native)
+> ```
 
 A custom endpoint can be baked into the build via `./gradlew :app-ui:installDebug -PENTE_API_ENDPOINT=http://localhost:8080`, or by exporting `ENTE_API_ENDPOINT` before running Gradle.
 

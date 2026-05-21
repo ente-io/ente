@@ -155,8 +155,7 @@ lib/
 ## Development Setup Requirements
 
 1. Install Flutter v3.38.10 and Rust
-2. Install Flutter Rust Bridge: `cargo install flutter_rust_bridge_codegen`
-3. Generate Rust bindings: `flutter_rust_bridge_codegen generate`
+2. Generate Rust bindings from `rust/`: `cargo codegen frb`
 
 ## Critical Coding Requirements
 

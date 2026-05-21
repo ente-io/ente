@@ -264,10 +264,8 @@ jobs:
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
 
-            - name: Generate Android bindings
-              run: |
-                  cd ../../../../../rust
-                  cargo codegen ensu-android
+            - run: cargo codegen native
+              working-directory: rust
 
             - name: Setup signing keys
               run: |
@@ -334,9 +332,8 @@ jobs:
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
 
-            - name: Generate iOS bindings
+            - run: cargo codegen native
               working-directory: rust
-              run: cargo codegen ensu-ios
 
             - name: Import Apple Distribution certificate
               uses: Apple-Actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7.0.0
