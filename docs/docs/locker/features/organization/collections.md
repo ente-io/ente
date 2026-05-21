@@ -66,8 +66,8 @@ lets you organize the same item in different ways:
 2. Tap the menu icon
 3. Select **Delete collection**
 4. Choose whether to:
-   - **Keep items**: Items are removed from the collection but not deleted
-   - **Delete items**: Items are moved to Trash
+    - **Keep items**: Items are removed from the collection but not deleted
+    - **Delete items**: Items are moved to Trash
 
 ## Removing items from a collection
 

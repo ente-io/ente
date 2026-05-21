@@ -3,9 +3,9 @@ title: Subscription FAQ
 description: FAQ about Ente Photos plans, pricing, and payment options
 search: false
 head:
-  - - meta
-    - name: robots
-      content: noindex
+    - - meta
+      - name: robots
+        content: noindex
 ---
 
 # Subscription FAQ

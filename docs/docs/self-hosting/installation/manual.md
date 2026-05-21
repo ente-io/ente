@@ -80,39 +80,39 @@ git clone https://github.com/ente-io/ente
 
 1. Enter terminal-based front-end to PostgreSQL:
 
-   ```shell
-   psql
-   ```
+    ```shell
+    psql
+    ```
 
-   ::: tip
+    ::: tip
 
-   You may need to use `su <username>` before executing `psql`, where `<username>` is the user that starts PostgreSQL service.
+    You may need to use `su <username>` before executing `psql`, where `<username>` is the user that starts PostgreSQL service.
 
-   :::
+    :::
 
 2. Create a user in PostgreSQL for ente:
 
-   ```sql
-   CREATE USER <username> WITH ENCRYPTED PASSWORD '<password>';
-   ```
+    ```sql
+    CREATE USER <username> WITH ENCRYPTED PASSWORD '<password>';
+    ```
 
 3. Create a database:
 
-   ```sql
-   CREATE DATABASE <database name>;
-   ```
+    ```sql
+    CREATE DATABASE <database name>;
+    ```
 
 4. Grant all privileges to the user on that database:
 
-   ```sql
-   GRANT ALL PRIVILEGES ON DATABASE <database name> TO <username>;
-   ```
+    ```sql
+    GRANT ALL PRIVILEGES ON DATABASE <database name> TO <username>;
+    ```
 
 5. Make the user owner of the database:
 
-   ```sql
-   ALTER DATABASE <database name> OWNER TO <username>;
-   ```
+    ```sql
+    ALTER DATABASE <database name> OWNER TO <username>;
+    ```
 
 Values you used for `database name` and `username` correspond to the values you have to set for
 `db.user` and `db.name` in `museum.yaml`.
@@ -121,54 +121,54 @@ Values you used for `database name` and `username` correspond to the values you 
 
 1. Install all the needed dependencies for the server.
 
-   ```shell
-   # Change into server directory, where the source code for Museum is
-   # present inside the repo
-   cd ente/server
+    ```shell
+    # Change into server directory, where the source code for Museum is
+    # present inside the repo
+    cd ente/server
 
-   # Install the needed dependencies
-   go mod tidy
-   ```
+    # Install the needed dependencies
+    go mod tidy
+    ```
 
 2. Build the server. The server binary should be available as `./main` relative
    to `server` directory
 
-   ```shell
-   go build cmd/museum/main.go
-   ```
+    ```shell
+    go build cmd/museum/main.go
+    ```
 
 3. Create `museum.yaml` file inside `server` for configuring the needed
    variables. You can copy the templated configuration file for editing with
    ease.
 
-   ```shell
-   cp config/example.yaml ./museum.yaml
-   ```
+    ```shell
+    cp config/example.yaml ./museum.yaml
+    ```
 
-   ::: tip
+    ::: tip
 
-   Make sure to enter the correct values for the database and object storage.
+    Make sure to enter the correct values for the database and object storage.
 
-   You should consider generating values for JWT and encryption keys for emails
-   if you intend to use for long-term needs.
+    You should consider generating values for JWT and encryption keys for emails
+    if you intend to use for long-term needs.
 
-   You can do by running the following command inside `ente/server`, assuming
-   you cloned the repository to `ente`:
+    You can do by running the following command inside `ente/server`, assuming
+    you cloned the repository to `ente`:
 
-   ```shell
-   # Generate secrets
-   go run tools/gen-random-keys/main.go
-   ```
+    ```shell
+    # Generate secrets
+    go run tools/gen-random-keys/main.go
+    ```
 
-   :::
+    :::
 
 4. Run the server
 
-   ```shell
-   ./main
-   ```
+    ```shell
+    ./main
+    ```
 
-  Museum should be accessible at `http://localhost:8080`
+Museum should be accessible at `http://localhost:8080`
 
 ## Step 4: Configure Web Application
 

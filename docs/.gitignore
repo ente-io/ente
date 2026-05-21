@@ -4,7 +4,7 @@ node_modules/
 # macOS
 .DS_Store
 
-# VitePress' dev server cache
+# VitePress dev server cache
 docs/.vitepress/cache
-# VitePress' production build
+# VitePress production build
 docs/.vitepress/dist
