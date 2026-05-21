@@ -36,9 +36,14 @@ enum _AlbumsFilter { ente, onDevice, shared }
 enum _AlbumsMenuAction { toggleView, name, newest, updated }
 
 class AlbumsTab extends StatefulWidget {
-  const AlbumsTab({super.key, this.selectedAlbums});
+  const AlbumsTab({
+    super.key,
+    this.selectedAlbums,
+    this.isSearchActiveNotifier,
+  });
 
   final SelectedAlbums? selectedAlbums;
+  final ValueNotifier<bool>? isSearchActiveNotifier;
 
   @override
   State<AlbumsTab> createState() => _AlbumsTabState();
@@ -143,6 +148,33 @@ class _AlbumsTabState extends State<AlbumsTab>
       _enteCollections.value = null;
       _sharedCollections.value = null;
     });
+    widget.isSearchActiveNotifier?.addListener(_handleSearchStateChanged);
+    _syncSearchNotifier(_isSearchActive);
+  }
+
+  @override
+  void didUpdateWidget(covariant AlbumsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isSearchActiveNotifier == widget.isSearchActiveNotifier) {
+      return;
+    }
+    oldWidget.isSearchActiveNotifier?.removeListener(
+      _handleSearchStateChanged,
+    );
+    widget.isSearchActiveNotifier?.addListener(_handleSearchStateChanged);
+    _syncSearchNotifier(_isSearchActive);
+  }
+
+  void _handleSearchStateChanged() {
+    if (widget.isSearchActiveNotifier?.value == false && _isSearchActive) {
+      _deactivateSearch(syncNotifier: false);
+    }
+  }
+
+  void _syncSearchNotifier(bool isSearchActive) {
+    final notifier = widget.isSearchActiveNotifier;
+    if (notifier == null || notifier.value == isSearchActive) return;
+    notifier.value = isSearchActive;
   }
 
   Future<void> _loadAll() async {
@@ -194,6 +226,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     setState(() {
       _isSearchActive = true;
     });
+    _syncSearchNotifier(true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _searchFocusNode.requestFocus();
@@ -201,14 +234,22 @@ class _AlbumsTabState extends State<AlbumsTab>
     });
   }
 
-  void _deactivateSearch() {
+  void _deactivateSearch({bool syncNotifier = true}) {
     _searchController.clear();
     _searchFocusNode.unfocus();
-    if (!_isSearchActive && _searchQuery.isEmpty) return;
+    if (!_isSearchActive && _searchQuery.isEmpty) {
+      if (syncNotifier) {
+        _syncSearchNotifier(false);
+      }
+      return;
+    }
     setState(() {
       _isSearchActive = false;
       _searchQuery = "";
     });
+    if (syncNotifier) {
+      _syncSearchNotifier(false);
+    }
   }
 
   List<Collection> _filterCollectionsByQuery(List<Collection> collections) {
@@ -502,6 +543,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     _backupFoldersUpdatedEvent.cancel();
     _appModeChangedEvent.cancel();
     _loggedOutEvent.cancel();
+    widget.isSearchActiveNotifier?.removeListener(_handleSearchStateChanged);
     _debouncer.cancelDebounceTimer();
     _searchController.dispose();
     _searchFocusNode.dispose();
@@ -583,6 +625,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                   focusNode: _searchFocusNode,
                                   hintText: strings.searchAlbums,
                                   autofocus: true,
+                                  shouldUnfocusOnClearOrSubmit: true,
                                   prefix: HugeIcon(
                                     icon: HugeIcons.strokeRoundedSearch01,
                                     size: 18,

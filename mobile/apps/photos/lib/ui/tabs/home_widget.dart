@@ -125,6 +125,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _collectionsSyncTriggered = false;
   bool _isShowingChangeLog = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isAlbumsSearchActiveNotifier = ValueNotifier<bool>(
+    false,
+  );
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
 
@@ -543,6 +546,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _accountConfiguredEvent.cancel();
     _intentDataStreamSubscription?.cancel();
     isOnSearchTabNotifier.dispose();
+    _isAlbumsSearchActiveNotifier.dispose();
     _pageController.dispose();
     _publicAlbumLinkSubscription?.cancel();
     _authDeepLinkSubscription?.cancel();
@@ -839,6 +843,17 @@ class _HomeWidgetState extends State<HomeWidget> {
               _selectedAlbums.clearAll();
               return;
             }
+            if (_isAlbumsSearchActiveNotifier.value) {
+              if (MediaQuery.viewInsetsOf(context).bottom > 0) {
+                FocusManager.instance.primaryFocus?.unfocus();
+                return;
+              }
+              _isAlbumsSearchActiveNotifier.value = false;
+              Bus.instance.fire(
+                TabChangedEvent(0, TabChangedEventSource.backButton),
+              );
+              return;
+            }
           }
           Bus.instance.fire(
             TabChangedEvent(0, TabChangedEventSource.backButton),
@@ -1034,7 +1049,11 @@ class _HomeWidgetState extends State<HomeWidget> {
                         _buildTabHeroMode(
                           1,
                           selectedTabIndex,
-                          AlbumsTab(selectedAlbums: _selectedAlbums),
+                          AlbumsTab(
+                            selectedAlbums: _selectedAlbums,
+                            isSearchActiveNotifier:
+                                _isAlbumsSearchActiveNotifier,
+                          ),
                         ),
                         _buildTabHeroMode(
                           2,
