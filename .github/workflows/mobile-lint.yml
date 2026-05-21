@@ -10,6 +10,10 @@ on:
             - "rust/crates/core/**"
             - "rust/crates/contacts/**"
             - "rust/crates/image/**"
+            - "rust/bindings/frb/**"
+            - "rust/apps/codegen/**"
+            - "rust/Cargo.lock"
+            - "rust/Cargo.toml"
             - ".github/workflows/mobile-lint.yml"
             - "mobile/scripts/check_source_arb_plurals.rb"
 
@@ -42,13 +46,13 @@ jobs:
 
                   while IFS= read -r file; do
                       case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/crates/core/*|rust/crates/contacts/*)
+                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/bindings/frb/ente-rust/*|rust/crates/core/*|rust/crates/contacts/*|rust/apps/codegen/*|rust/Cargo.lock|rust/Cargo.toml)
                               ente_rust=true
                               ;;
                       esac
 
                       case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/apps/photos/rust/*|mobile/apps/photos/rust_builder/*|rust/photos/*|rust/crates/image/*)
+                          .github/workflows/mobile-lint.yml|mobile/apps/photos/rust_builder/*|rust/bindings/frb/photos/*|rust/photos/*|rust/crates/image/*|rust/apps/codegen/*|rust/Cargo.lock|rust/Cargo.toml)
                               ente_photos_rust=true
                               ;;
                       esac
@@ -90,21 +94,13 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      mobile/packages/rust/rust/target
-                      mobile/apps/photos/rust/target
-                  key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('mobile/**/Cargo.lock') }}
+                      rust/target
+                  key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('rust/Cargo.lock') }}
 
             - run: flutter pub get --enforce-lockfile
 
-            - name: Install Flutter Rust Bridge
-              run: cargo install flutter_rust_bridge_codegen
-
-            - name: Generate Rust bindings (Core)
-              run: flutter_rust_bridge_codegen generate
-              working-directory: mobile/packages/rust
-
-            - name: Generate Rust bindings
-              run: flutter_rust_bridge_codegen generate
+            - run: cargo codegen frb
+              working-directory: rust
 
             - run: flutter analyze --no-fatal-infos
 
@@ -113,40 +109,40 @@ jobs:
 
             - name: Check formatting (ente_rust)
               if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: mobile/packages/rust/rust
-              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+              working-directory: rust
+              run: cargo fmt --check -p ente_rust
 
             - name: Run clippy (ente_rust)
               if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: mobile/packages/rust/rust
-              run: cargo clippy --all-targets --all-features
+              working-directory: rust
+              run: cargo clippy -p ente_rust --all-targets --all-features
 
             - name: Build (ente_rust)
               if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: mobile/packages/rust/rust
-              run: cargo build
+              working-directory: rust
+              run: cargo build -p ente_rust
 
             - name: Test (ente_rust)
               if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: mobile/packages/rust/rust
-              run: cargo test
+              working-directory: rust
+              run: cargo test -p ente_rust
 
             - name: Check formatting (ente_photos_rust)
               if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+              working-directory: rust
+              run: cargo fmt --check -p ente_photos_rust
 
             - name: Run clippy (ente_photos_rust)
               if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo clippy --all-targets --all-features
+              working-directory: rust
+              run: cargo clippy -p ente_photos_rust --all-targets --all-features
 
             - name: Build (ente_photos_rust)
               if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo build
+              working-directory: rust
+              run: cargo build -p ente_photos_rust
 
             - name: Test (ente_photos_rust)
               if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo test
+              working-directory: rust
+              run: cargo test -p ente_photos_rust

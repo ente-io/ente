@@ -6,7 +6,9 @@ edition = "2024"
 [dependencies]
 ente_image = { path = "../crates/image" }
 quick-xml = "0.37"
-usearch = "2.21.3"
+# The FRB photos bridge calls the SimSIMD symbol exported by usearch 2.21.x.
+# Newer usearch releases switched that implementation to numkong symbols.
+usearch = "=2.21.4"
 fast_image_resize = { version = "5.5.0", features = ["image", "rayon"] }
 image = { version = "0.25.5", default-features = true }
 imageproc = "0.25.0"

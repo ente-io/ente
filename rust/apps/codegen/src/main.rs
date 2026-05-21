@@ -162,7 +162,8 @@ fn generate_native_android() -> Result<(), DynError> {
 
 fn generate_frb() -> Result<(), DynError> {
     generate_frb_path("mobile/packages/rust")?;
-    generate_frb_path("mobile/apps/photos")
+    generate_frb_path("mobile/apps/photos")?;
+    format_frb_bindings()
 }
 
 fn generate_frb_path(relative_package_dir: &str) -> Result<(), DynError> {
@@ -210,6 +211,20 @@ fn generate_frb_package(package_dir: &Path) -> Result<(), DynError> {
     result?;
 
     Ok(())
+}
+
+fn format_frb_bindings() -> Result<(), DynError> {
+    let rust_root = rust_root()?;
+    run_command(
+        Command::new("cargo")
+            .arg("fmt")
+            .arg("-p")
+            .arg("ente_rust")
+            .arg("-p")
+            .arg("ente_photos_rust")
+            .current_dir(rust_root),
+        "failed to format generated FRB Rust bindings".to_owned(),
+    )
 }
 
 fn rust_root() -> Result<PathBuf, DynError> {
