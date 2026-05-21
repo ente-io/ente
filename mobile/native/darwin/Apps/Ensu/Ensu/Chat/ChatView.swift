@@ -184,6 +184,13 @@ struct ChatView: View {
                 onDismiss: { viewState.showAttachmentDownloads = false }
             )
         }
+        .sheet(item: $viewState.pendingWhatsNew, onDismiss: {
+            markWhatsNewSeen()
+        }) { pending in
+            WhatsNewSheet(entries: pending.entries) {
+                markWhatsNewSeen()
+            }
+        }
         .alert(item: $viewState.deleteSession) { session in
             Alert(
                 title: Text("Delete Chat"),
@@ -219,6 +226,16 @@ struct ChatView: View {
                 ToastView(message: toastMessage.text)
                     .padding(.bottom, EnsuSpacing.xl)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .task {
+            do {
+                try await Task.sleep(nanoseconds: 600_000_000)
+            } catch {
+                return
+            }
+            if viewState.pendingWhatsNew == nil {
+                viewState.pendingWhatsNew = WhatsNewService.shared.pendingWhatsNew()
             }
         }
         #if os(iOS)
@@ -478,6 +495,11 @@ struct ChatView: View {
             viewState.showSignInComingSoon = true
         }
     }
+
+    private func markWhatsNewSeen() {
+        WhatsNewService.shared.markSeen()
+        viewState.pendingWhatsNew = nil
+    }
 }
 
 private final class ChatViewState: ObservableObject {
@@ -493,6 +515,7 @@ private final class ChatViewState: ObservableObject {
     @Published var wasDrawerOpen = false
     @Published var didDismissKeyboard = false
     @Published var sessionTransitionId = UUID()
+    @Published var pendingWhatsNew: PendingWhatsNew?
 
     var toastTask: Task<Void, Never>?
 }
