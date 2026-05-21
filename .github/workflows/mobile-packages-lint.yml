@@ -7,7 +7,7 @@ on:
             - "mobile/packages/**"
             - "mobile/**/pubspec*.yaml"
             - "mobile/**/pubspec.lock"
-            - "rust/photos/**"
+            - "rust/crates/photos/**"
             - "rust/bindings/frb/**"
             - "rust/apps/codegen/**"
             - "rust/Cargo.lock"
@@ -54,7 +54,7 @@ jobs:
                         - 'rust/apps/codegen/**'
                         - 'rust/Cargo.lock'
                         - 'rust/Cargo.toml'
-                        - 'rust/photos/**'
+                        - 'rust/crates/photos/**'
                         - 'rust/crates/core/**/*.rs'
                         - 'rust/crates/contacts/**/*.rs'
                       workflow:

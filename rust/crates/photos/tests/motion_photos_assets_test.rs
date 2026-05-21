@@ -7,11 +7,11 @@ fn fixture_dir() -> Option<PathBuf> {
         return Some(PathBuf::from(path).join("media/motion-photos/v1/files"));
     }
 
-    // CARGO_MANIFEST_DIR points to `<repo>/rust/photos`.
+    // CARGO_MANIFEST_DIR points to `<repo>/rust/crates/photos`.
     // We resolve `<repo>/..../test-fixtures/media/motion-photos/v1/files`,
     // where `test-fixtures` is expected to be a sibling of the main repo root.
     let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let repo_root = manifest_dir.parent()?.parent()?; // rust/photos -> rust -> <repo root>
+    let repo_root = manifest_dir.parent()?.parent()?.parent()?; // photos -> crates -> rust -> <repo root>
     let parent_of_repo = repo_root.parent()?;
     Some(
         parent_of_repo

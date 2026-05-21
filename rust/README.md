@@ -35,14 +35,14 @@
 │  (ente_photos_rust crate) │
 │                           │
 │  Thin app-specific #[frb] │
-│  wrappers for rust/photos │
+│ wrappers for crates/photos │
 └───────────────────────────┘
 ```
 
 ## Contents (this repo)
 
 - `rust/crates/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
-- `rust/photos/` (`ente_photos`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
+- `rust/crates/photos/` (`ente_photos`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
 - `rust/apps/cli/` (`ente-rs`) - Rust CLI.
 - `rust/bindings/frb/ente-rust/` (`ente_rust`) - shared Flutter Rust Bridge bindings for mobile.
 - `rust/bindings/frb/photos/` (`ente_photos_rust`) - Photos app-specific Flutter Rust Bridge bindings.
@@ -69,20 +69,13 @@ rust/
 │   ├── contacts/                 # Shared contacts logic
 │   ├── core/                     # Pure Rust shared logic (ente-core)
 │   ├── ensu/                     # LLM chat stack
-│   └── image/                    # Shared image crate
+│   ├── image/                    # Shared image crate
+│   └── photos/                   # Shared Photos Rust logic
 │
 ├── e2e/                          # Rust e2e tests requiring live Museum
 │   ├── src/
 │   │   └── lib.rs
 │   ├── tests/
-│   └── Cargo.toml
-│
-├── photos/                       # Shared Photos Rust logic
-│   ├── src/
-│   │   ├── lib.rs
-│   │   ├── image/
-│   │   ├── ml/
-│   │   └── vector_db.rs
 │   └── Cargo.toml
 │
 └── Cargo.toml                    # Rust workspace manifest
@@ -98,7 +91,7 @@ rust/bindings/frb/                         # Flutter Rust Bridge binding crates
 │   └── Cargo.toml                # crate name: ente_rust
 └── photos/
     ├── src/
-    │   └── api/                  # #[frb] thin wrappers over rust/photos
+    │   └── api/                  # #[frb] thin wrappers over rust/crates/photos
     └── Cargo.toml                # crate name: ente_photos_rust
 
 rust/bindings/wasm/ente-wasm/     # WASM bindings Rust crate
@@ -151,7 +144,7 @@ wasm-pack is installed via npm as a devDependency, so `yarn install` handles it.
 Used for Flutter integration. FRB is used on two crates:
 
 - **`ente_rust`** (`rust/bindings/frb/ente-rust/`) - Shared wrappers around `ente-core`, used by multiple mobile apps (Photos, Auth, etc.)
-- **`ente_photos_rust`** (`rust/bindings/frb/photos/`) - Thin Photos-specific wrappers around `rust/photos`
+- **`ente_photos_rust`** (`rust/bindings/frb/photos/`) - Thin Photos-specific wrappers around `rust/crates/photos`
 
 Both depend on `ente-core` and use `#[frb]` annotations to generate Dart bindings.
 

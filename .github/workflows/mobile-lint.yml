@@ -6,7 +6,7 @@ on:
     pull_request:
         paths:
             - "mobile/apps/photos/**"
-            - "rust/photos/**"
+            - "rust/crates/photos/**"
             - "rust/crates/core/**"
             - "rust/crates/contacts/**"
             - "rust/crates/image/**"
@@ -52,7 +52,7 @@ jobs:
                       esac
 
                       case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/apps/photos/rust_builder/*|rust/bindings/frb/photos/*|rust/photos/*|rust/crates/image/*|rust/apps/codegen/*|rust/Cargo.lock|rust/Cargo.toml)
+                          .github/workflows/mobile-lint.yml|mobile/apps/photos/rust_builder/*|rust/bindings/frb/photos/*|rust/crates/photos/*|rust/crates/image/*|rust/apps/codegen/*|rust/Cargo.lock|rust/Cargo.toml)
                               ente_photos_rust=true
                               ;;
                       esac
