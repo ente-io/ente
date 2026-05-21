@@ -400,7 +400,7 @@ Future<void> downloadToGallery(
       throw DownloadNotEnoughStorageError();
     }
     if (_isApplePhotosUnsupportedResourceError(e)) {
-      _logger.severe(
+      _logger.warning(
         "Failed to save file because Apple Photos rejected the resource",
         e,
         s,
