@@ -1,15 +1,12 @@
 import "package:ente_components/ente_components.dart" as components;
 import "package:flutter/material.dart";
-import "package:flutter_svg/svg.dart";
 import "package:hugeicons/hugeicons.dart";
 
-/// Pass icon or asset path of svg
+/// Pass [hugeIcon], or [iconWidget] for custom assets.
 class SelectionActionButton extends StatelessWidget {
   final String labelText;
-  final IconData? icon;
   final List<List<dynamic>>? hugeIcon;
   final Widget? iconWidget;
-  final String? svgAssetPath;
   final VoidCallback? onTap;
   final bool shouldShow;
   final bool isCritical;
@@ -17,9 +14,7 @@ class SelectionActionButton extends StatelessWidget {
   const SelectionActionButton({
     required this.labelText,
     required this.onTap,
-    this.icon,
     this.hugeIcon,
-    this.svgAssetPath,
     this.iconWidget,
     this.shouldShow = true,
     this.isCritical = false,
@@ -29,10 +24,7 @@ class SelectionActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(
-      icon != null ||
-          hugeIcon != null ||
-          iconWidget != null ||
-          svgAssetPath != null,
+      hugeIcon != null || iconWidget != null,
     );
     return AnimatedSize(
       duration: const Duration(milliseconds: 350),
@@ -42,10 +34,8 @@ class SelectionActionButton extends StatelessWidget {
         child: shouldShow
             ? _Body(
                 labelText: labelText,
-                icon: icon,
                 hugeIcon: hugeIcon,
                 onTap: onTap,
-                svgAssetPath: svgAssetPath,
                 iconWidget: iconWidget,
                 isCritical: isCritical,
               )
@@ -59,9 +49,7 @@ class SelectionActionButton extends StatelessWidget {
 
 class _Body extends StatefulWidget {
   final String labelText;
-  final IconData? icon;
   final List<List<dynamic>>? hugeIcon;
-  final String? svgAssetPath;
   final Widget? iconWidget;
   final VoidCallback? onTap;
   final bool isCritical;
@@ -69,9 +57,7 @@ class _Body extends StatefulWidget {
     required this.labelText,
     required this.onTap,
     required this.isCritical,
-    this.icon,
     this.hugeIcon,
-    this.svgAssetPath,
     this.iconWidget,
   });
 
@@ -131,24 +117,8 @@ class __BodyState extends State<_Body> {
                     size: iconSize,
                     color: foregroundColor,
                   )
-                else if (widget.svgAssetPath != null)
-                  SvgPicture.asset(
-                    widget.svgAssetPath!,
-                    colorFilter: ColorFilter.mode(
-                      foregroundColor,
-                      BlendMode.srcIn,
-                    ),
-                    width: iconSize,
-                    height: iconSize,
-                  )
-                else if (widget.iconWidget != null)
-                  widget.iconWidget!
                 else
-                  Icon(
-                    widget.icon,
-                    size: iconSize,
-                    color: foregroundColor,
-                  ),
+                  widget.iconWidget!,
                 const SizedBox(height: 4),
                 Text(
                   widget.labelText,
