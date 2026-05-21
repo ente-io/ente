@@ -5,7 +5,6 @@ import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/duplicate_files.dart";
 import "package:photos/models/freeable_space_info.dart";
@@ -124,11 +123,10 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
     final colors = context.componentColors;
     return MenuComponent(
       title: title,
-      trailing: HugeIcon(
-        icon: HugeIcons.strokeRoundedArrowRight02,
+      trailing: Icon(
+        Icons.chevron_right_outlined,
         color: colors.textLight,
-        size: 18,
-        strokeWidth: 1.6,
+        size: IconSizes.medium,
       ),
       showOnlyLoadingState: true,
       onTap: onTap,

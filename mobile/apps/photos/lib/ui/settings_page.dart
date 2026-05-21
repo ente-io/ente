@@ -70,9 +70,10 @@ class _SettingsBody extends StatelessWidget {
       animation: emailNotifier,
       builder: (context, _) {
         final email = hasLoggedIn ? emailNotifier.value ?? "" : "";
+        final title = email.isEmpty ? "Settings" : email;
 
         return SettingsPageScaffold(
-          title: email,
+          title: title,
           actions: _buildHeaderActions(context),
           onTitleDoubleTap: email.isEmpty
               ? null
