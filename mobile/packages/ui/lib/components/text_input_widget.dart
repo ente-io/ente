@@ -29,6 +29,7 @@ class TextInputWidget extends StatefulWidget {
   final bool shouldSurfaceExecutionStates;
   final TextCapitalization? textCapitalization;
   final bool isPasswordInput;
+  final Iterable<String>? autofillHints;
   final bool cancellable;
   final bool shouldUnfocusOnCancelOrSubmit;
   const TextInputWidget({
@@ -49,6 +50,7 @@ class TextInputWidget extends StatefulWidget {
     this.shouldSurfaceExecutionStates = true,
     this.textCapitalization = TextCapitalization.none,
     this.isPasswordInput = false,
+    this.autofillHints,
     this.cancellable = false,
     this.shouldUnfocusOnCancelOrSubmit = false,
     super.key,
@@ -124,6 +126,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             inputFormatters: widget.maxLength != null
                 ? [LengthLimitingTextInputFormatter(50)]
                 : null,
+            autofillHints:
+                widget.autofillHints ??
+                (widget.isPasswordInput
+                    ? const [AutofillHints.password]
+                    : null),
             obscureText: _obscureTextNotifier.value,
             decoration: InputDecoration(
               hintText: widget.hintText,

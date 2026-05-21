@@ -124,9 +124,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                       Container(
                                         decoration: BoxDecoration(
                                           color: componentColors.specialScrim
-                                              .withValues(
-                                                alpha: 0.4,
-                                              ),
+                                              .withValues(alpha: 0.4),
                                         ),
                                       ),
                                   ],
@@ -157,7 +155,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(40),
                                 ),
                                 child: SizedBox(
-                                  height: getAvatarSize(AvatarType.small),
+                                  height: getAvatarSize(AvatarType.xs),
                                   child: _AlbumRowSharePillContent(
                                     sharees: c.getSharees(),
                                     trailingWidget: linkIcon,
@@ -202,7 +200,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                               transitionOnUserGestures: true,
                               child: SizedBox.square(
                                 dimension:
-                                    getAvatarSize(AvatarType.small) +
+                                    getAvatarSize(AvatarType.xs) +
                                     _sharedAvatarStrokeWidth * 2,
                                 child: Stack(
                                   alignment: Alignment.center,
@@ -210,7 +208,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                     UserAvatarWidget(
                                       c.owner,
                                       thumbnailView: true,
-                                      type: AvatarType.small,
+                                      type: AvatarType.xs,
                                     ),
                                     Positioned.fill(
                                       child: IgnorePointer(
@@ -263,10 +261,9 @@ class AlbumRowItemWidget extends StatelessWidget {
                               .getCachedFileCount(c);
                         }
                         if (cachedCount != null && cachedCount > 0) {
-                          final String textCount = AppLocalizations.of(context)
-                              .itemCount(
-                                count: cachedCount,
-                              );
+                          final String textCount = AppLocalizations.of(
+                            context,
+                          ).itemCount(count: cachedCount);
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -372,16 +369,13 @@ class _AlbumRowSharePillContent extends StatelessWidget {
   final List<User> sharees;
   final Widget? trailingWidget;
 
-  const _AlbumRowSharePillContent({
-    required this.sharees,
-    this.trailingWidget,
-  });
+  const _AlbumRowSharePillContent({required this.sharees, this.trailingWidget});
 
   @override
   Widget build(BuildContext context) {
     final displayCount = min(sharees.length, _limitCountTo);
     final hasMore = sharees.length > _limitCountTo;
-    const type = AvatarType.small;
+    const type = AvatarType.xs;
     final double avatarSize = getAvatarSize(type);
     final double overlapPadding = getOverlapPadding(type);
     final trailingWidgetWidth = trailingWidget == null ? 0.0 : avatarSize;
@@ -422,9 +416,7 @@ class _AlbumRowSharePillContent extends StatelessWidget {
           left: visibleAvatarsWidth,
           child: SizedBox.square(
             dimension: avatarSize,
-            child: Center(
-              child: trailingWidget!,
-            ),
+            child: Center(child: trailingWidget!),
           ),
         ),
       );
@@ -433,10 +425,7 @@ class _AlbumRowSharePillContent extends StatelessWidget {
     return SizedBox(
       width: contentWidth,
       height: avatarSize,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: widgets,
-      ),
+      child: Stack(clipBehavior: Clip.none, children: widgets),
     );
   }
 }

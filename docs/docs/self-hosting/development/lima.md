@@ -1,7 +1,6 @@
 ---
 title: Using Lima for development
-description:
-    Running Museum (server + DB) and web apps in a Lima VM for local
+description: Running Museum (server + DB) and web apps in a Lima VM for local
     development
 ---
 

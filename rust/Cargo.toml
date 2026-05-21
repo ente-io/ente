@@ -5,6 +5,8 @@ members = [
     "apps/codegen",
     "apps/ensu/src-tauri",
     "bindings/ffi/crypto",
+    "bindings/frb/ente-rust",
+    "bindings/frb/photos",
     "bindings/uniffi/core",
     "bindings/uniffi/ensu/db",
     "bindings/uniffi/ensu/inference",
@@ -19,6 +21,6 @@ members = [
     "crates/ensu/sync",
     "crates/ensu/transcription",
     "crates/image",
+    "crates/photos",
     "e2e",
-    "photos",
 ]

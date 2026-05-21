@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
+import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as file_path;
 import "package:photo_manager/photo_manager.dart";
@@ -58,6 +59,18 @@ String getDownloadSkipToastFileName(EnteFile file) {
   final title = (file.title ?? "").trim();
   final displayName = file.displayName.trim();
   return title.isNotEmpty ? title : displayName;
+}
+
+String _getGallerySaveTitle(EnteFile file, String fallbackPath) {
+  final displayName = file.displayName;
+  if (displayName.trim().isNotEmpty) {
+    return displayName;
+  }
+  final title = file.title;
+  if (title != null && title.trim().isNotEmpty) {
+    return title;
+  }
+  return file_path.basename(fallbackPath);
 }
 
 Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
@@ -342,6 +355,7 @@ Future<void> downloadToGallery(
     if (fileToSave == null) {
       throw DownloadFailedError("Unable to fetch file for gallery download");
     }
+    final galleryTitle = _getGallerySaveTitle(file, fileToSave.path);
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
@@ -351,10 +365,10 @@ Future<void> downloadToGallery(
       await PhotoManager.stopChangeNotify();
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
-            .saveImageWithPath(fileToSave.path, title: file.title!);
+            .saveImageWithPath(fileToSave.path, title: galleryTitle);
       } else if (type == FileType.video) {
         savedAsset =
-            await PhotoManager.editor.saveVideo(fileToSave, title: file.title!);
+            await PhotoManager.editor.saveVideo(fileToSave, title: galleryTitle);
       } else if (type == FileType.livePhoto) {
         final File? liveVideoFile = await getFileFromServer(
           file,
@@ -370,7 +384,7 @@ Future<void> downloadToGallery(
           savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
             imageFile: fileToSave,
             videoFile: liveVideoFile,
-            title: file.title!,
+            title: galleryTitle,
           );
         }
       }
@@ -393,17 +407,37 @@ Future<void> downloadToGallery(
         _logger.severe('Failed to save assert of type $type');
       }
     });
-  } catch (e) {
+  } catch (e, s) {
     if (forceResumableDownload && _isStorageError(e)) {
-      _logger.severe("Failed to save file due to storage limit", e);
+      _logger.severe("Failed to save file due to storage limit", e, s);
       throw DownloadNotEnoughStorageError();
     }
-    _logger.severe("Failed to save file", e);
+    if (_isApplePhotosUnsupportedResourceError(e)) {
+      _logger.warning(
+        "Failed to save file because Apple Photos rejected the resource",
+        e,
+        s,
+      );
+      throw DownloadFailedError(
+        DownloadManager.applePhotosUnsupportedResourceError,
+      );
+    }
+    _logger.severe("Failed to save file", e, s);
     rethrow;
   } finally {
     await PhotoManager.startChangeNotify();
     LocalSyncService.instance.checkAndSync().ignore();
   }
+}
+
+bool _isApplePhotosUnsupportedResourceError(Object error) {
+  if (error is! PlatformException) {
+    return false;
+  }
+  return error.code == "PHPhotosErrorDomain (3302)" ||
+      (error.code.contains("PHPhotosErrorDomain") &&
+          error.code.contains("3302")) ||
+      (error.message?.contains("PHPhotosErrorDomain error 3302") ?? false);
 }
 
 Future<void> _saveLivePhotoOnDroid(
@@ -412,8 +446,9 @@ Future<void> _saveLivePhotoOnDroid(
   EnteFile enteFile,
 ) async {
   debugPrint("Downloading LivePhoto on Droid");
+  final imageTitle = _getGallerySaveTitle(enteFile, image.path);
   AssetEntity? savedAsset = await (PhotoManager.editor
-          .saveImageWithPath(image.path, title: enteFile.title!))
+          .saveImageWithPath(image.path, title: imageTitle))
       .catchError((err) {
     throw Exception("Failed to save image of live photo: $err");
   });
@@ -424,7 +459,7 @@ Future<void> _saveLivePhotoOnDroid(
     "remoteDownload",
   );
   await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
-  final videoTitle = file_path.basenameWithoutExtension(enteFile.title!) +
+  final videoTitle = file_path.basenameWithoutExtension(imageTitle) +
       file_path.extension(video.path);
   savedAsset = (await (PhotoManager.editor.saveVideo(
     video,

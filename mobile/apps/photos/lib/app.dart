@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:home_widget/home_widget.dart' as hw;
@@ -87,12 +86,13 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   void setupSubscription() {
-    _memoriesChangedSubscription =
-        Bus.instance.on<MemoriesChangedEvent>().listen(
-      (event) async {
-        await MemoryHomeWidgetService.instance.memoryChanged();
-      },
-    );
+    _memoriesChangedSubscription = Bus.instance
+        .on<MemoriesChangedEvent>()
+        .listen(
+          (event) async {
+            await MemoryHomeWidgetService.instance.memoryChanged();
+          },
+        );
     _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 1500));
     _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
       (event) async {
@@ -136,7 +136,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   Future<Widget> _resolveInitialAndroidHome() async {
-    final mediaExtentionAction = widget.initialMediaExtensionAction ??
+    final mediaExtentionAction =
+        widget.initialMediaExtensionAction ??
         (Platform.isAndroid
             ? await initIntentAction()
             : MediaExtentionAction(action: IntentAction.main));
@@ -215,45 +216,21 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isAndroid || kDebugMode) {
-      return Listener(
-        onPointerDown: (event) {
-          computeController.onUserInteraction();
-        },
-        child: AdaptiveTheme(
-          light: lightThemeData,
-          dark: darkThemeData,
-          initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
-          builder: (lightTheme, dartTheme) => MaterialApp(
-            navigatorKey: AppNavigationService.instance.navigatorKey,
-            title: "ente",
-            themeMode: ThemeMode.system,
-            theme: lightTheme,
-            darkTheme: dartTheme,
-            home: _buildHome(),
-            debugShowCheckedModeBanner: false,
-            builder: EasyLoading.init(),
-            locale: locale,
-            supportedLocales: appSupportedLocales,
-            localeListResolutionCallback: localResolutionCallBack,
-            localizationsDelegates: const [
-              ...AppLocalizations.localizationsDelegates,
-            ],
-          ),
-        ),
-      );
-    } else {
-      return Listener(
-        onPointerDown: (event) {
-          computeController.onUserInteraction();
-        },
-        child: MaterialApp(
+    return Listener(
+      onPointerDown: (event) {
+        computeController.onUserInteraction();
+      },
+      child: AdaptiveTheme(
+        light: lightThemeData,
+        dark: darkThemeData,
+        initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
+        builder: (lightTheme, dartTheme) => MaterialApp(
           navigatorKey: AppNavigationService.instance.navigatorKey,
           title: "ente",
           themeMode: ThemeMode.system,
-          theme: lightThemeData,
-          darkTheme: darkThemeData,
-          home: const HomeWidget(),
+          theme: lightTheme,
+          darkTheme: dartTheme,
+          home: _buildHome(),
           debugShowCheckedModeBanner: false,
           builder: EasyLoading.init(),
           locale: locale,
@@ -263,8 +240,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
             ...AppLocalizations.localizationsDelegates,
           ],
         ),
-      );
-    }
+      ),
+    );
   }
 
   @override
@@ -283,8 +260,9 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     final String stateChangeReason = 'app -> $state';
     if (state == AppLifecycleState.resumed) {
       final lastAppOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
-      AppLifecycleService.instance
-          .onAppInForeground(stateChangeReason + ': sync now');
+      AppLifecycleService.instance.onAppInForeground(
+        stateChangeReason + ': sync now',
+      );
       if (_isPickerLaunch) {
         return;
       }

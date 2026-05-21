@@ -10,18 +10,22 @@ Source code for the Ensu iOS app.
 
     ```sh
     cd rust
-    cargo codegen ensu-ios
+    cargo codegen native
     ```
 
 3. Open `Ensu.xcodeproj` in Xcode and run the `Ensu` scheme.
 
-That's it. Apart from the `cargo codegen`, this is a normal iOS project.
+That's it. Apart from the `cargo codegen`, this is a normal iOS project. Xcode compiles and statically links the Rust libraries automatically when building the app.
 
 > [!NOTE]
 >
-> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/bindings/uniffi` changes.
+> Re-run `cargo codegen native` whenever the UniFFI-exported surface under `rust/bindings/uniffi/` changes. Internal Rust changes (function bodies, private helpers) are picked up by the normal Xcode build.
 >
-> Xcode compiles and statically links the Rust libraries automatically when building the app.
+> From anywhere in the repo:
+>
+> ```sh
+> (cd "$(git rev-parse --show-toplevel)/rust" && cargo codegen native)
+> ```
 
 A custom endpoint can be baked into the build via `xcodebuild ENTE_API_ENDPOINT=http://localhost:8080 ...` or by editing the user-defined `ENTE_API_ENDPOINT` build setting in the `Ensu` target.
 

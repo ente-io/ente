@@ -43,7 +43,7 @@ yarn build:cast       # Cast app
 # 2. Before creating a commit (pre-commit)
 # DO NOT run automatically after file modifications
 yarn lint             # Check formatting, linting, and TypeScript types
-yarn lint-fix         # Auto-fix linting and formatting issues
+yarn lint:fix         # Auto-fix linting and formatting issues
 ```
 
 Use plain `yarn install` only when intentionally updating dependencies and

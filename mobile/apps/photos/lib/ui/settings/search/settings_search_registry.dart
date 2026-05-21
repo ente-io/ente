@@ -28,6 +28,7 @@ class SettingsSearchRegistry {
     final l10n = AppLocalizations.of(context);
     final hasLoggedIn = Configuration.instance.isLoggedIn();
     final isLocalGallery = isLocalGalleryMode;
+    final showThemeControls = Platform.isAndroid || kDebugMode;
     final items = <SettingsSearchItem>[];
 
     // Account settings
@@ -281,11 +282,13 @@ class SettingsSearchRegistry {
         sectionPath: l10n.appearance,
         icon: HugeIcons.strokeRoundedPaintBoard,
         routeBuilder: (_) => const AppearanceSettingsPage(),
-        keywords: ["theme", "dark mode", "light mode", "app icon"],
+        keywords: showThemeControls
+            ? ["theme", "dark mode", "light mode", "app icon"]
+            : ["app icon"],
       ),
     );
 
-    if (Platform.isAndroid || kDebugMode) {
+    if (showThemeControls) {
       items.add(
         SettingsSearchItem(
           title: l10n.theme,

@@ -39,7 +39,7 @@ dirs = "5.0"
 chrono = "0.4"
 uuid = { version = "1.11", features = ["serde", "v4"] }
 urlencoding = "2.1"
-indicatif = "0.17"
+indicatif = "0.18"
 dialoguer = "0.11"
 open = "5.0"
 
