@@ -1,11 +1,11 @@
 # CLAUDE.md
 
-Documentation for Ente's products (Photos, Auth, self-hosting), published at [ente.com/help](https://ente.com/help). Built with VitePress.
+Documentation for Ente's products published at [ente.com/help](https://ente.com/help). Built with VitePress.
 
 ## Development commands
 
 ```bash
-npm ci          # Install dependencies from the committed lockfile
+npm ci          # Install dependencies
 npm run dev     # Start local dev server
 npm run build   # Build for production
 npm run pretty  # Format all files with Prettier
