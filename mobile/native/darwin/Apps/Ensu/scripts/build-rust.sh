@@ -24,7 +24,7 @@ for name in core db sync inference transcription; do
     for ext in .swift FFI.h FFI.modulemap; do
         [[ -f "$GENERATED_DIR/$name$ext" ]] || {
             echo "error: missing $GENERATED_DIR/$name$ext" >&2
-            echo "  run: (cd $REPO_ROOT/rust && cargo codegen ensu-ios)" >&2
+            echo "  run: (cd $REPO_ROOT/rust && cargo codegen native)" >&2
             exit 1
         }
     done

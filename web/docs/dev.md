@@ -39,10 +39,10 @@ that can be then deployed to any web server.
 There is one `yarn build:foo` for each app, e.g. `yarn build:auth`. The output
 will be placed in `apps/<foo>/out`, e.g. `apps/auth/out`.
 
-### lint, lint-fix
+### lint, lint:fix
 
 Use `yarn lint` to check that your code formatting is as expected, and that
-there are no linter errors. Use `yarn lint-fix` to try and automatically fix the
+there are no linter errors. Use `yarn lint:fix` to try and automatically fix the
 issues.
 
 ## Monorepo

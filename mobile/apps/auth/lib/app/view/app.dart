@@ -28,7 +28,12 @@ import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
   final Locale? locale;
-  const App({super.key, this.locale = const Locale("en")});
+  final AdaptiveThemeMode savedThemeMode;
+  const App({
+    super.key,
+    this.locale = const Locale("en"),
+    this.savedThemeMode = AdaptiveThemeMode.system,
+  });
 
   static void setLocale(BuildContext context, Locale newLocale) {
     _AppState state = context.findAncestorStateOfType<_AppState>()!;
@@ -117,19 +122,16 @@ class _AppState extends State<App>
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isAndroid ||
-        Platform.isWindows ||
-        Platform.isLinux ||
-        kDebugMode) {
-      return AdaptiveTheme(
-        light: lightThemeData,
-        dark: darkThemeData,
-        initial: AdaptiveThemeMode.system,
-        builder: (lightTheme, dartTheme) => MaterialApp(
+    return AdaptiveTheme(
+      light: lightThemeData,
+      dark: darkThemeData,
+      initial: widget.savedThemeMode,
+      builder: (lightTheme, darkTheme) => Builder(
+        builder: (context) => MaterialApp(
           title: "ente",
-          themeMode: ThemeMode.system,
+          themeMode: _themeMode(AdaptiveTheme.of(context).mode),
           theme: lightTheme,
-          darkTheme: dartTheme,
+          darkTheme: darkTheme,
           debugShowCheckedModeBanner: false,
           locale: locale,
           supportedLocales: appSupportedLocales,
@@ -144,33 +146,20 @@ class _AppState extends State<App>
           routes: _getRoutes,
           builder: _materialAppBuilder,
         ),
-      );
-    } else {
-      return MaterialApp(
-        title: "ente",
-        themeMode: ThemeMode.system,
-        theme: lightThemeData,
-        darkTheme: darkThemeData,
-        debugShowCheckedModeBanner: false,
-        locale: locale,
-        supportedLocales: appSupportedLocales,
-        localeListResolutionCallback: localResolutionCallBack,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          StringsLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        routes: _getRoutes,
-        builder: _materialAppBuilder,
-      );
-    }
+      ),
+    );
+  }
+
+  ThemeMode _themeMode(AdaptiveThemeMode mode) {
+    if (mode.isLight) return ThemeMode.light;
+    if (mode.isDark) return ThemeMode.dark;
+    return ThemeMode.system;
   }
 
   Map<String, WidgetBuilder> get _getRoutes {
     return {
-      "/": (context) => Configuration.instance.hasConfiguredAccount() ||
+      "/": (context) =>
+          Configuration.instance.hasConfiguredAccount() ||
               Configuration.instance.hasOptedForOfflineMode()
           ? const HomePage()
           : const OnboardingPage(),
@@ -241,8 +230,8 @@ class _AppState extends State<App>
 
   @override
   void onWindowClose() {
-    final shouldMinimizeToTray =
-        PreferenceService.instance.shouldMinimizeToTrayOnClose();
+    final shouldMinimizeToTray = PreferenceService.instance
+        .shouldMinimizeToTrayOnClose();
     if (shouldMinimizeToTray) {
       windowManager.hide();
       windowManager.setSkipTaskbar(true);

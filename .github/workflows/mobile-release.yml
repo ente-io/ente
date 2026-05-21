@@ -79,15 +79,8 @@ jobs:
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - name: Install Flutter Rust Bridge
-              run: cargo install flutter_rust_bridge_codegen
-
-            - name: Generate Rust bindings (Core)
-              run: flutter_rust_bridge_codegen generate
-              working-directory: mobile/packages/rust
-
-            - name: Generate Rust bindings
-              run: flutter_rust_bridge_codegen generate
+            - run: cargo codegen frb
+              working-directory: rust
 
             - name: Add keystore
               run: echo "${{ secrets.SIGNING_KEY_PHOTOS }}" | base64 -d > "$RUNNER_TEMP/ente_photos_key.jks"

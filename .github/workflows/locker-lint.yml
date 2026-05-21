@@ -9,6 +9,10 @@ on:
             - "mobile/packages/legacy/**"
             - "mobile/packages/rust/**"
             - "mobile/packages/sharing/**"
+            - "rust/bindings/frb/ente-rust/**"
+            - "rust/apps/codegen/**"
+            - "rust/Cargo.lock"
+            - "rust/Cargo.toml"
             - ".github/workflows/locker-lint.yml"
             - "mobile/scripts/check_source_arb_plurals.rb"
 
@@ -48,6 +52,7 @@ jobs:
               uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
               with:
                   toolchain: ${{ env.RUST_VERSION }}
+                  components: rustfmt
 
             - name: Cache Rust dependencies
               uses: actions/cache@v4
@@ -55,15 +60,11 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      mobile/packages/rust/rust/target
-                  key: ${{ runner.os }}-cargo-locker-${{ hashFiles('mobile/packages/**/Cargo.lock') }}
+                      rust/target
+                  key: ${{ runner.os }}-cargo-locker-${{ hashFiles('rust/Cargo.lock') }}
 
-            - name: Install Flutter Rust Bridge
-              run: cargo install flutter_rust_bridge_codegen
-
-            - name: Generate Rust bindings (Core package)
-              run: flutter_rust_bridge_codegen generate
-              working-directory: mobile/packages/rust
+            - run: cargo codegen frb
+              working-directory: rust
 
             - name: Generate strings localizations
               run: flutter gen-l10n

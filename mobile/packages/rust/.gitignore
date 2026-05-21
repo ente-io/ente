@@ -34,4 +34,3 @@ build/
 
 # Generated rust bindings
 lib/src/rust/
-rust/src/frb_generated*

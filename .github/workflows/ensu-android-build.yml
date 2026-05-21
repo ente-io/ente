@@ -29,9 +29,8 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v6
 
-            - name: Generate UniFFI Kotlin bindings
+            - run: cargo codegen native
               working-directory: rust
-              run: cargo codegen ensu-android
 
             - name: Build Ensu
               working-directory: mobile/native/android/apps/ensu

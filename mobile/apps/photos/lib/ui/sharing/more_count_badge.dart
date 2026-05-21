@@ -3,7 +3,7 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:tuple/tuple.dart';
 
-enum MoreCountType { small, medium, regular, large, huge }
+enum MoreCountType { xs, small, medium, regular, large, huge }
 
 class MoreCountWidget extends StatelessWidget {
   final MoreCountType type;
@@ -75,6 +75,8 @@ class MoreCountWidget extends StatelessWidget {
       case MoreCountType.medium:
         return Tuple2(24.0, enteTextTheme.mini);
       case MoreCountType.small:
+        return Tuple2(20.0, enteTextTheme.tiny);
+      case MoreCountType.xs:
         return Tuple2(16.0, enteTextTheme.tiny);
     }
   }

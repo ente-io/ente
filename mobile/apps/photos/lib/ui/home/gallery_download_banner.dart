@@ -429,13 +429,13 @@ class _TaskStatus extends StatelessWidget {
       case DownloadStatus.error:
       case DownloadStatus.cancelled:
         return Text(
-          _errorMessage(task.error),
+          _errorMessage(context, task.error),
           style: textTheme.mini.copyWith(color: colorScheme.warning500),
         );
     }
   }
 
-  String _errorMessage(String? error) {
+  String _errorMessage(BuildContext context, String? error) {
     if (error == DownloadManager.noConnectionError) {
       return "No connection";
     }
@@ -444,6 +444,9 @@ class _TaskStatus extends StatelessWidget {
     }
     if (error == DownloadManager.unavailableError) {
       return "Unavailable";
+    }
+    if (error == DownloadManager.applePhotosUnsupportedResourceError) {
+      return AppLocalizations.of(context).applePhotosUnsupportedResource;
     }
     if (error == null || error.isEmpty) {
       return "Download failed";
