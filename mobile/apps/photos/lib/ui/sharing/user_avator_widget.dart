@@ -15,7 +15,7 @@ import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import 'package:tuple/tuple.dart';
 
-enum AvatarType { small, medium, regular, large, huge }
+enum AvatarType { xs, small, medium, regular, large, huge }
 
 class UserAvatarWidget extends StatefulWidget {
   final User user;
@@ -56,19 +56,21 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   void initState() {
     super.initState();
     _reload();
-    _peopleChangedSubscription =
-        Bus.instance.on<PeopleChangedEvent>().listen((event) {
+    _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen((
+      event,
+    ) {
       if (event.type == PeopleEventType.saveOrEditPerson ||
           event.type == PeopleEventType.syncDone) {
         _reload();
       }
     });
-    _contactsChangedSubscription =
-        Bus.instance.on<ContactsChangedEvent>().listen((event) {
-      if (event.matchesContactUserId(widget.user.id)) {
-        _reload();
-      }
-    });
+    _contactsChangedSubscription = Bus.instance
+        .on<ContactsChangedEvent>()
+        .listen((event) {
+          if (event.matchesContactUserId(widget.user.id)) {
+            _reload();
+          }
+        });
   }
 
   @override
@@ -93,7 +95,8 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
       if (!mounted) return;
       setState(() {
         final data = PersonService
-            .instance.emailToPartialPersonDataMapCache[widget.user.email];
+            .instance
+            .emailToPartialPersonDataMapCache[widget.user.email];
         if (data != null && data.containsKey(PersonService.kPersonIDKey)) {
           _canUsePersonFaceWidget = true;
           _personId = data[PersonService.kPersonIDKey] as String;
@@ -113,10 +116,8 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
         return;
       }
       final loadGeneration = ++_photoLoadGeneration;
-      final photoBytes =
-          await PhotosContactsService.instance.getProfilePictureBytesByUserId(
-        userId,
-      );
+      final photoBytes = await PhotosContactsService.instance
+          .getProfilePictureBytesByUserId(userId);
       if (!mounted ||
           loadGeneration != _photoLoadGeneration ||
           widget.user.id != userId) {
@@ -131,8 +132,8 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     final double size = getAvatarSize(widget.type);
-    final int cachedPixelWidth =
-        (size * MediaQuery.devicePixelRatioOf(context)).toInt();
+    final int cachedPixelWidth = (size * MediaQuery.devicePixelRatioOf(context))
+        .toInt();
     if (_contactPhotoBytes != null) {
       return SizedBox(
         height: size,
@@ -207,8 +208,8 @@ class _FirstLetterCircularAvatarState
     final resolvedDisplayName = resolveDisplayName(widget.user);
     final displayChar = resolvedDisplayName.isEmpty
         ? ((widget.user.email.isEmpty)
-            ? " "
-            : widget.user.email.substring(0, 1))
+              ? " "
+              : widget.user.email.substring(0, 1))
         : resolvedDisplayName.substring(0, 1);
     Color decorationColor;
     if (widget.user.email == Configuration.instance.getEmail()) {
@@ -253,14 +254,14 @@ class _FirstLetterCircularAvatarState
       case AvatarType.medium:
         return Tuple2(24.0, enteTextTheme.mini);
       case AvatarType.small:
+        return Tuple2(20.0, enteTextTheme.tiny);
+      case AvatarType.xs:
         return Tuple2(16.0, enteTextTheme.tiny);
     }
   }
 }
 
-double getAvatarSize(
-  AvatarType type,
-) {
+double getAvatarSize(AvatarType type) {
   switch (type) {
     case AvatarType.huge:
       return 56.0;
@@ -271,6 +272,8 @@ double getAvatarSize(
     case AvatarType.medium:
       return 24.0;
     case AvatarType.small:
+      return 20.0;
+    case AvatarType.xs:
       return 16.0;
   }
 }
