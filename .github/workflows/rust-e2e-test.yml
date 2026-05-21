@@ -32,14 +32,14 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v6
 
-            - name: Cache cargo artifacts
-              uses: actions/cache@v4
+            - name: Restore Rust cache
+              uses: actions/cache/restore@v4
               with:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
                       rust/target
-                  key: ${{ runner.os }}-cargo-rust-e2e-${{ hashFiles('rust/Cargo.lock') }}
+                  key: rust-ubuntu-latest-${{ runner.arch }}-
 
             - name: Run rust e2e suite
               env:

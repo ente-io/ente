@@ -46,6 +46,15 @@ jobs:
 
             - run: yarn install --frozen-lockfile
 
+            - name: Restore Rust cache
+              uses: actions/cache/restore@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      rust/target
+                  key: rust-ubuntu-latest-${{ runner.arch }}-
+
             - run: yarn build:wasm
 
             - run: yarn lint
