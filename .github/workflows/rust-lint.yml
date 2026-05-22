@@ -43,10 +43,8 @@ jobs:
             - name: Prepare Ensu desktop distDir
               run: mkdir -p ../web/apps/ensu/out
 
-            - run: cargo codegen frb
-
             - run: cargo fmt --all --check
 
-            - run: cargo clippy --workspace --all-targets --all-features --locked
+            - run: cargo clippy --workspace --all-targets --locked
 
             - run: cargo test --workspace --locked

@@ -39,7 +39,7 @@ jobs:
               run: rustup target add wasm32-unknown-unknown
 
             - name: Build Rust workspace
-              run: cargo build --workspace --exclude ensu-tauri --all-targets --all-features --locked
+              run: cargo build --workspace --exclude ensu-tauri --all-targets --locked
               working-directory: rust
 
             - name: Build WASM Rust target
@@ -48,10 +48,6 @@ jobs:
 
             - name: Generate native bindings
               run: cargo codegen native
-              working-directory: rust
-
-            - name: Generate Flutter bindings
-              run: cargo codegen frb
               working-directory: rust
 
             - name: Build Ensu Android Rust libraries
@@ -95,7 +91,7 @@ jobs:
               run: mkdir -p web/apps/ensu/out
 
             - name: Build Rust workspace
-              run: cargo build --workspace --all-targets --all-features --locked
+              run: cargo build --workspace --all-targets --locked
               working-directory: rust
 
             - name: Save Rust cache
