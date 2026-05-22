@@ -674,10 +674,9 @@ const Page: React.FC = () => {
         if (Array.isArray(value)) return value[0];
         return typeof value === "string" ? value : undefined;
     }, [router.isReady, router.query.session]);
-
-    const buildVersion = process.env.NEXT_PUBLIC_ENSU_VERSION
-        ? `v${process.env.NEXT_PUBLIC_ENSU_VERSION}`
-        : "dev";
+    const buildVersion = process.env.NEXT_PUBLIC_ENSU_DESKTOP_VERSION
+        ? `v${process.env.NEXT_PUBLIC_ENSU_DESKTOP_VERSION}`
+        : undefined;
 
     const lastRouteUpdateRef = useRef<{ sessionId?: string; at: number }>({
         sessionId: undefined,
