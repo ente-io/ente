@@ -349,8 +349,7 @@ Notifications work more reliably on Android, but can still be affected by:
 2. Disable battery optimization for Ente in system settings
 3. Don't force-close the app from recents
 
-**Alternative:**
-If you need real-time updates, keep the app open or check the shared album manually by opening it in the app.
+**Alternative:** If you need real-time updates, keep the app open or check the shared album manually by opening it in the app.
 
 - No platform restrictions for link recipients
 

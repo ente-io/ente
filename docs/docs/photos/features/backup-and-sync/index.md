@@ -32,8 +32,7 @@ You can choose which albums should be backed up when you first sign up for Ente.
 
 Open `Settings > Backup > Backed up folders` and select or deselect albums as needed.
 
-**On desktop:**
-Use the [watch folders](/photos/features/backup-and-sync/watch-folders) feature to select directories to sync.
+**On desktop:** Use the [watch folders](/photos/features/backup-and-sync/watch-folders) feature to select directories to sync.
 
 ## Background sync {#background-sync}
 

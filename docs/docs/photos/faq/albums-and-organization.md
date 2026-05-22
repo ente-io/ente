@@ -120,8 +120,7 @@ Alternatively, if you have the original photos on your device, you can delete th
 
 This will automatically remove all files from Uncategorized that are also present in another album that you own. Only files exclusive to Uncategorized will remain.
 
-**Manual cleanup:**
-You can also manually:
+**Manual cleanup:** You can also manually:
 
 - Add photos from Uncategorized to specific albums
 - Delete photos you don't need from Uncategorized

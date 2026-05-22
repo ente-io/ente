@@ -106,22 +106,12 @@ Use consistent format with `>` separator:
 - Use `1.` for numbered steps
 - Use sub-bullets for nested information
 
-### Notes and Warnings
-
-Use blockquotes with bold labels:
-
-```markdown
-> **Note**: Additional context here.
-> **Important**: Critical information.
-> **Warning**: Something that could cause data loss.
-```
-
 ### Code Blocks
 
 Always specify language:
 
 ````markdown
-```bash
+```sh
 command here
 ```
 ````
@@ -146,7 +136,7 @@ Always use H3 with mandatory anchor for deep linking:
 
 **Testing for duplicates:**
 
-```bash
+```sh
 # Run this command to check for duplicate anchor IDs:
 grep -rh "{#[a-z0-9-]*}" docs/photos/faq/*.md | sed 's/.*{#\([^}]*\)}.*/\1/' | sort | uniq -d
 ```

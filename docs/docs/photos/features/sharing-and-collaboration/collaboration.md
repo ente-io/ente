@@ -192,8 +192,7 @@ When someone adds a photo via a collect link:
 2. **Disable uploads**: Edit link settings and turn off "Allow adding photos"
 3. **Change to view-only**: Convert the collect link to a regular public link
 
-**View contributors:**
-Currently, you cannot see who added which photos to a collect link. All collected photos appear in the album without attribution. We're considering adding this feature based on user feedback.
+**View contributors:** Currently, you cannot see who added which photos to a collect link. All collected photos appear in the album without attribution. We're considering adding this feature based on user feedback.
 
 ## Comparison
 

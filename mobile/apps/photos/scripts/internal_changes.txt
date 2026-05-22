@@ -1,5 +1,6 @@
 Latest changes:
 - Aman: Album section redesign
+- Aman: Update Setting section UI
 - Laurens: Generate and compress face thumbnails in rust
 - Laurens: More guards around Memory Lane for performance
 - Laurens + Rahul (contributor): Bulk ignore faces for file info sheet

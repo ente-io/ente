@@ -1285,6 +1285,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  bool get _shouldFocusAddedCode {
+    if ((_showSearchBox && _searchText.isNotEmpty) ||
+        selectedTag.isNotEmpty ||
+        _isTrashOpen) {
+      return true;
+    }
+    return (_allCodes?.where((e) => !e.hasError).length ?? 0) > 2;
+  }
+
   Future<void> _importFromGalleryNative() async {
     if (_isImportingFromGallery) {
       return;
@@ -1299,7 +1308,7 @@ class _HomePageState extends State<HomePage> {
       }
       await CodeStore.instance.addCode(newCode, shouldSync: false);
       // Focus the new code by searching
-      if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
+      if (_shouldFocusAddedCode) {
         _focusNewCode(newCode);
       }
       LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
@@ -1322,7 +1331,7 @@ class _HomePageState extends State<HomePage> {
         shouldSync: result.fromGallery ? false : true,
       );
       // Focus the new code by searching
-      if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
+      if (_shouldFocusAddedCode) {
         _focusNewCode(result.code);
       }
       LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
@@ -1339,6 +1348,9 @@ class _HomePageState extends State<HomePage> {
     );
     if (code != null) {
       await CodeStore.instance.addCode(code);
+      if (_shouldFocusAddedCode) {
+        _focusNewCode(code);
+      }
       LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     }
   }
@@ -1990,6 +2002,8 @@ class _HomePageState extends State<HomePage> {
 
   void _focusNewCode(Code newCode) {
     _showSearchBox = true;
+    selectedTag = "";
+    _isTrashOpen = false;
     _textController.text = newCode.account;
     _searchText = newCode.account;
     _applyFilteringAndRefresh();

@@ -10,10 +10,10 @@ To know more about Ente, see [our main README](../../../../../README.md) or visi
 
 2. Generate the Kotlin bindings:
 
-    ```sh
-    cd rust
-    cargo codegen native
-    ```
+   ```sh
+   cd rust
+   cargo codegen native
+   ```
 
 3. Open the project in Android Studio and run the `app-ui` module. If the Android NDK is missing, Android Studio will prompt to install it.
 

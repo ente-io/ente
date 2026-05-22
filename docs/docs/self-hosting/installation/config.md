@@ -1,37 +1,27 @@
 ---
 title: Configuration - Self-hosting
-description:
-    "Information about all the configuration variables needed to run Ente with
-    museum.yaml"
+description: "Information about all the configuration variables needed to run Ente with museum.yaml"
 ---
 
 # Configuration
 
-Museum is designed to be configured either via environment variables or via
-YAML. We recommend using YAML for maintaining your configuration as it can be
-backed up easily, helping in restoration.
+Museum is designed to be configured either via environment variables or via YAML. We recommend using YAML for maintaining your configuration as it can be backed up easily, helping in restoration.
 
 ## Configuration File
 
-Museum's configuration file (`museum.yaml`) is responsible for making database
-configuration, bucket configuration, internal configuration, etc. accessible for
-other internal services.
+Museum's configuration file (`museum.yaml`) is responsible for making database configuration, bucket configuration, internal configuration, etc. accessible for other internal services.
 
-By default, Museum runs in local environment, thus `local.yaml` configuration is
-loaded.
+By default, Museum runs in local environment, thus `local.yaml` configuration is loaded.
 
-If `ENVIRONMENT` environment variable is set (say, to `production`), Museum will
-attempt to load `configurations/production.yaml`.
+If `ENVIRONMENT` environment variable is set (say, to `production`), Museum will attempt to load `configurations/production.yaml`.
 
 If `credentials-file` is defined and found, it overrides the defaults.
 
 Use `museum.yaml` file for declaring configuration over `local.yaml`.
 
-All configuration values can be overridden via environment variables using the
-`ENTE_` prefix and replacing dots (`.`) or hyphens (`-`) with underscores (`_`).
+All configuration values can be overridden via environment variables using the `ENTE_` prefix and replacing dots (`.`) or hyphens (`-`) with underscores (`_`).
 
-Museum reads configuration from `museum.yaml`. Any environment variables
-prefixed with `ENTE_` takes precedence.
+Museum reads configuration from `museum.yaml`. Any environment variables prefixed with `ENTE_` takes precedence.
 
 For example,
 
@@ -43,8 +33,7 @@ s3:
 
 in `museum.yaml` is read as `s3.b2-eu-cen.endpoint` by Museum.
 
-`ENTE_S3_B2_EU_CEN_ENDPOINT` declared as environment variable is same as the
-above and `ENTE_S3_B2_EU_CEN_ENDPOINT` overrides `s3.b2-eu-cen.endpoint`.
+`ENTE_S3_B2_EU_CEN_ENDPOINT` declared as environment variable is same as the above and `ENTE_S3_B2_EU_CEN_ENDPOINT` overrides `s3.b2-eu-cen.endpoint`.
 
 ### General Settings
 
@@ -62,14 +51,11 @@ above and `ENTE_S3_B2_EU_CEN_ENDPOINT` overrides `s3.b2-eu-cen.endpoint`.
 
 ### App Endpoints
 
-The web apps for Ente (Accounts, Cast, Albums, Share, Paste, Embed, Memories) use
-different endpoints.
+The web apps for Ente (Accounts, Cast, Albums, Share, Paste, Embed, Memories) use different endpoints.
 
 These endpoints are configurable in `museum.yaml` under the apps.\* section.
 
-Upon configuration, the application will start utilizing the specified endpoints
-instead of Ente's production instances or local endpoints (overridden values
-used for Compose and quickstart for ease of use.)
+Upon configuration, the application will start utilizing the specified endpoints instead of Ente's production instances or local endpoints (overridden values used for Compose and quickstart for ease of use.)
 
 | Variable               | Description                                             | Default                     |
 | ---------------------- | ------------------------------------------------------- | --------------------------- |
@@ -83,8 +69,7 @@ used for Compose and quickstart for ease of use.)
 
 ### Database
 
-The `db` section is used for configuring database connectivity. Ensure you
-provide correct credentials for proper connectivity within Museum.
+The `db` section is used for configuring database connectivity. Ensure you provide correct credentials for proper connectivity within Museum.
 
 | Variable      | Description                | Default     |
 | ------------- | -------------------------- | ----------- |
@@ -98,21 +83,15 @@ provide correct credentials for proper connectivity within Museum.
 
 ### Object Storage
 
-The `s3` section within `museum.yaml` is by default configured to use local
-MinIO buckets when using `quickstart.sh` or Docker Compose.
+The `s3` section within `museum.yaml` is by default configured to use local MinIO buckets when using `quickstart.sh` or Docker Compose.
 
-If you wish to use an external S3 provider with SSL, you can edit the configuration with
-your provider's credentials, and set `s3.are_local_buckets` to `false`. Additionally, you can configure this for specific buckets in the corresponding bucket sections in the Compose file.
+If you wish to use an external S3 provider with SSL, you can edit the configuration with your provider's credentials, and set `s3.are_local_buckets` to `false`. Additionally, you can configure this for specific buckets in the corresponding bucket sections in the Compose file.
 
-If you are using default MinIO, it is accessible at port `3200`. Web Console can
-be accessed by enabling port `3201` in the Compose file.
+If you are using default MinIO, it is accessible at port `3200`. Web Console can be accessed by enabling port `3201` in the Compose file.
 
-For more information on object storage configuration, check our
-[documentation](/self-hosting/administration/object-storage).
+For more information on object storage configuration, check our [documentation](/self-hosting/administration/object-storage).
 
-If you face any issues related to uploads then check out
-[CORS](/self-hosting/administration/object-storage#cors-cross-origin-resource-sharing)
-and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
+If you face any issues related to uploads then check out [CORS](/self-hosting/administration/object-storage#cors-cross-origin-resource-sharing) and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
 
 | Variable                               | Description                                  | Default |
 | -------------------------------------- | -------------------------------------------- | ------- |
@@ -125,17 +104,13 @@ and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
 
 ### Encryption Keys
 
-These values are used for encryption of user e-mails. Default values are
-provided by Museum.
+These values are used for encryption of user e-mails. Default values are provided by Museum.
 
-They are generated by random in quickstart script, so no intervention is
-necessary if using quickstart.
+They are generated by random in quickstart script, so no intervention is necessary if using quickstart.
 
-However, if you are using Ente for long-term needs and you have not installed
-Ente via quickstart, consider generating values for these along with [JWT](#jwt)
-by following the steps described below:
+However, if you are using Ente for long-term needs and you have not installed Ente via quickstart, consider generating values for these along with [JWT](#jwt) by following the steps described below:
 
-```shell
+```sh
 # If you have not cloned already
 git clone https://github.com/ente-io/ente
 
@@ -157,9 +132,7 @@ go run tools/gen-random-keys/main.go
 
 ### Email
 
-You may wish to send emails for verification codes instead of
-[hardcoding them](/self-hosting/administration/users#use-hardcoded-otts). In
-such cases, you can configure SMTP (or Zoho Transmail, for bulk emails).
+You may wish to send emails for verification codes instead of [hardcoding them](/self-hosting/administration/users#use-hardcoded-otts). In such cases, you can configure SMTP (or Zoho Transmail, for bulk emails).
 
 Set the host and port accordingly with your credentials in `museum.yaml`
 
@@ -215,11 +188,9 @@ smtp:
 
 ### Replication
 
-By default, replication of objects (photos, thumbnails, videos) is disabled and
-only one bucket is used.
+By default, replication of objects (photos, thumbnails, videos) is disabled and only one bucket is used.
 
-To enable replication, set `replication.enabled` to `true`. For this to work, 3
-buckets have to be configured in total.
+To enable replication, set `replication.enabled` to `true`. For this to work, 3 buckets have to be configured in total.
 
 | Variable                   | Description                          | Default           |
 | -------------------------- | ------------------------------------ | ----------------- |
@@ -230,9 +201,7 @@ buckets have to be configured in total.
 
 ### Background Jobs
 
-This configuration is for enabling background cron jobs for tasks such as
-sending mails, removing unused objects (clean up) and worker configuration for
-the same.
+This configuration is for enabling background cron jobs for tasks such as sending mails, removing unused objects (clean up) and worker configuration for the same.
 
 | Variable                                      | Description                             | Default |
 | --------------------------------------------- | --------------------------------------- | ------- |

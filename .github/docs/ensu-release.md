@@ -14,7 +14,7 @@ Nightly builds of `main` are automatically created every weekday morning (IST), 
 
 ## Start release
 
-```bash
+```sh
 gh workflow run ensu-release.yml \
   -f action=start \
   -f version=0.1.16
@@ -32,7 +32,7 @@ The workflow also opens a PR to move `main` to `0.1.17-beta`. Merge that PR afte
 
 Cherry pick fixes to the release branch and push to replace the current RC.
 
-```bash
+```sh
 git switch release/ensu-v0.1.16
 git cherry-pick <fix-sha>
 git push
@@ -40,7 +40,7 @@ git push
 
 ## Finalize release
 
-```bash
+```sh
 gh workflow run ensu-release.yml \
   -f action=finalize \
   -f version=0.1.16
