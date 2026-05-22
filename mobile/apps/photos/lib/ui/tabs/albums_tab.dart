@@ -77,6 +77,7 @@ class _AlbumsTabState extends State<AlbumsTab>
   );
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
 
   bool _isSearchActive = false;
   String _searchQuery = "";
@@ -219,6 +220,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     if (_filter.value == filter) return;
     widget.selectedAlbums?.clearAll();
     _filter.value = filter;
+    _resetScrollToTop();
   }
 
   void _activateSearch() {
@@ -248,9 +250,17 @@ class _AlbumsTabState extends State<AlbumsTab>
       _isSearchActive = false;
       _searchQuery = "";
     });
+    _resetScrollToTop();
     if (syncNotifier) {
       _syncSearchNotifier(false);
     }
+  }
+
+  void _resetScrollToTop() {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+    _scrollController.jumpTo(0);
   }
 
   List<Collection> _filterCollectionsByQuery(List<Collection> collections) {
@@ -602,6 +612,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     _debouncer.cancelDebounceTimer();
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _scrollController.dispose();
     _filter.dispose();
     _enteCollections.dispose();
     _sharedCollections.dispose();
@@ -694,9 +705,14 @@ class _AlbumsTabState extends State<AlbumsTab>
                                     ),
                                   ),
                                   onChanged: (value) {
+                                    final hadSearchQuery = _hasSearchQuery;
                                     setState(() {
                                       _searchQuery = value;
                                     });
+                                    if (!hadSearchQuery &&
+                                        value.trim().isNotEmpty) {
+                                      _resetScrollToTop();
+                                    }
                                   },
                                 ),
                               ),
@@ -791,6 +807,19 @@ class _AlbumsTabState extends State<AlbumsTab>
                                                 _AlbumsFilter.shared,
                                               ),
                                             ),
+                                            const SizedBox(width: 8),
+                                            _AlbumsFilterChip(
+                                              label: strings.more,
+                                              selected: false,
+                                              trailing: const Icon(
+                                                Icons.keyboard_arrow_down,
+                                                size: 18,
+                                              ),
+                                              onTap: () =>
+                                                  showAlbumsManageSheet(
+                                                    context,
+                                                  ),
+                                            ),
                                           ],
                                         ],
                                       ),
@@ -798,15 +827,6 @@ class _AlbumsTabState extends State<AlbumsTab>
                                   },
                                 ),
                               ),
-                              if (!localGalleryMode)
-                                IconButtonComponent(
-                                  variant: IconButtonComponentVariant.primary,
-                                  shouldSurfaceExecutionStates: false,
-                                  icon: const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedMoreVertical,
-                                  ),
-                                  onTap: () => showAlbumsManageSheet(context),
-                                ),
                             ],
                           ),
                         ),
@@ -844,6 +864,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                       },
                       child: CustomScrollView(
                         key: _contentStateKey(),
+                        controller: _scrollController,
                         physics: const BouncingScrollPhysics(),
                         slivers: [_buildContentSliver(strings)],
                       ),
@@ -901,16 +922,19 @@ class _AlbumsFilterChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.trailing,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return TagChipComponent(
       label: label,
+      trailing: trailing,
       state: selected
           ? TagChipComponentState.selected
           : TagChipComponentState.unselected,
