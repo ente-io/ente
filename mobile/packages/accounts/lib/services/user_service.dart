@@ -282,23 +282,28 @@ class UserService {
     try {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
-        await _config.logout();
-        unawaited(
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
-        );
+        await _logoutLocally(context);
       } else {
         throw Exception("Log out action failed");
       }
     } catch (e) {
-      _logger.severe(e);
-      // check if token is already invalid
-      if (e is DioException && e.response?.statusCode == 401) {
-        await _config.logout();
-        unawaited(
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
-        );
+      final bool shouldLogoutLocally =
+          (e is DioException && e.response?.statusCode == 401) ||
+              !_config.isEnteProduction();
+
+      if (shouldLogoutLocally) {
+        if (!_config.isEnteProduction()) {
+          _logger.info(
+            "Custom endpoint detected, proceeding with local logout despite server error",
+          );
+        } else {
+          _logger.info("Token already invalid, proceeding with local logout");
+        }
+        await _logoutLocally(context);
         return;
       }
+
+      _logger.severe(e);
       //This future is for waiting for the dialog from which logout() is called
       //to close and only then to show the error dialog.
       Future.delayed(
@@ -306,6 +311,15 @@ class UserService {
         () => showGenericErrorDialog(context: context, error: e),
       );
       rethrow;
+    }
+  }
+
+  Future<void> _logoutLocally(BuildContext context) async {
+    await _config.logout();
+    if (context.mounted) {
+      unawaited(
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
+      );
     }
   }
 

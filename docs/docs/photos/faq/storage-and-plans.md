@@ -292,6 +292,18 @@ When you join a family plan, your individual plan (including any referral bonuse
 
 (Example: If you were on the free 10 GB plan with an additional 10 GB from referrals - 20 GB total - and you join a family plan with 200 GB of storage, you will have access to 200 GB of shared family storage, not 220 GB.)
 
+### Can a family admin reset another family member's account? {#family-admin-reset-account}
+
+Ente accounts are end-to-end encrypted, so another family member or admin cannot reset an account or recover its contents directly.
+
+However, users can set up a trusted Legacy contact for emergency access.
+
+**On mobile:**
+
+Open `Settings > Legacy > Add trusted contact`.
+
+Learn more in the [Legacy contact guide](https://ente.com/help/photos/features/account/legacy/#legacy).
+
 ### Are duplicate photos deduplicated across family members? {#family-plan-deduplication}
 
 No. Family plans are a way to share storage, but each family member has their own separate account. Ente cannot deduplicate files across different accounts.
@@ -337,7 +349,6 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 
 - Discount codes only work for **NEW paying customers** (first-time purchases)
 - Cannot be applied to existing paid subscriptions
-- Cannot be combined with cryptocurrency payments
 - Must purchase from photos.ente.com or desktop app, NOT mobile app stores
 
 **If you already purchased without applying a code:**
@@ -380,6 +391,14 @@ If you refer more paid customers than your current plan allows, the extra storag
 
 For example, if you're on a 100 GB plan (max 100 GB earned storage) but refer 15 friends (150 GB worth), the extra 50 GB will be held in reserve until you upgrade to a plan that allows more referral storage.
 
+### Can referral credit be applied after signup? {#referral-credit-after-signup}
+
+No. Referral credits are only applied when a new account is created using the referral code during signup.
+
+If the person has not signed up yet, share your referral code before they create their account.
+
+Find your referral code in `Settings > Referrals`.
+
 ### What counts as abuse of the referral program? {#referral-abuse}
 
 In case our systems detect abuse, we may notify you and take back credited storage. Examples of abuse include:
@@ -398,7 +417,7 @@ On Web, Desktop and Android, Stripe helps us process payments from all major pre
 
 On iOS, we (have to) use the billing platforms provided by the app store.
 
-Apart from these, we also support PayPal and crypto currencies (more details below).
+Apart from these, we also support PayPal (more details below).
 
 ### Can I pay with PayPal? {#paypal-payment}
 
@@ -417,37 +436,6 @@ We support **annual** subscriptions over PayPal.
 - Only annual plans are available via PayPal (monthly plans not supported)
 - You must email from the same email address registered with your Ente account
 - Invoice generation is manual, so expect a response within 1-2 business days
-
-### Does Ente accept crypto payments? {#crypto-payment}
-
-Yes! We support _annual plans_ with crypto payments and accept the following cryptocurrencies:
-
-- **Bitcoin** (BTC)
-- **Ethereum** (ETH)
-- **Dogecoin** (DOGE)
-
-**How to purchase with cryptocurrency:**
-
-1. Email **crypto@ente.com** from your registered Ente email address
-2. In your email, specify:
-    - The [storage plan](https://ente.com#pricing) of your choice
-    - Your preferred cryptocurrency
-3. We will send you an invoice with payment instructions
-4. Complete the payment using your crypto wallet
-5. Your account will be upgraded once the transaction is confirmed
-
-**Important limitations:**
-
-⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through photos.ente.com instead.
-
-⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.com/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
-
-**Processing time:**
-
-- Invoice generation: 1-2 business days
-- Payment confirmation: Depends on blockchain confirmation times (varies by cryptocurrency)
-
-For questions about crypto payments, contact [support@ente.com](mailto:support@ente.com).
 
 ### Does Ente store my card details? {#card-security}
 
@@ -615,8 +603,7 @@ The same prorating calculation applies as described above.
 
 ### If I subscribed to a plan with a reference code and a discount, and then need to upgrade/downgrade, what happens to my discount and bonus? {#upgrade-discount-referral}
 
-The referral bonus remains, and the discount stays valid for 12 months even on
-an upgraded/downgraded plan. The amount is prorated.
+The referral bonus remains, and the discount stays valid for 12 months even on an upgraded/downgraded plan. The amount is prorated.
 
 ### How can I update my payment method? {#update-payment}
 
@@ -648,27 +635,20 @@ Use our [referral program](/photos/features/account/referral-program/). When fri
 
 ### Why did I receive this email? {#inactive-account-email-received}
 
-We recently sent an email to accounts that have not shown activity for 12
-months as part of our inactive-account policy. Free accounts with no active
-paid subscription are deleted after 12 consecutive months of inactivity.
+We recently sent an email to accounts that have not shown activity for 12 months as part of our inactive-account policy. Free accounts with no active paid subscription are deleted after 12 consecutive months of inactivity.
 
 ### I use Ente regularly. Why did I receive this email? {#inactive-but-active}
 
 The email includes the email address associated with the inactive account.
 
-If you are using Ente regularly, check the registered email address shown inside
-the app to confirm which account you are currently using.
+If you are using Ente regularly, check the registered email address shown inside the app to confirm which account you are currently using.
 
-Open Settings in the Ente app. The registered email address will appear at the
-very top.
+Open Settings in the Ente app. The registered email address will appear at the very top.
 
 ### What should I do if I received this email? {#inactive-account-action}
 
-Simply sign in to the account mentioned in the email before the date specified.
-This will mark the account as active.
+Simply sign in to the account mentioned in the email before the date specified. This will mark the account as active.
 
 ### I think this email was sent by mistake {#inactive-account-mistake}
 
-Contact support at [support@ente.com](mailto:support@ente.com) and share a
-screenshot of the Settings showing the registered email address at the top so we
-can verify the account.
+Contact support at [support@ente.com](mailto:support@ente.com) and share a screenshot of the Settings showing the registered email address at the top so we can verify the account.

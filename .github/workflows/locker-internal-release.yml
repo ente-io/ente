@@ -38,6 +38,7 @@ jobs:
               uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
               with:
                   toolchain: ${{ env.RUST_VERSION }}
+                  components: rustfmt
 
             - name: Generate strings localizations
               run: flutter gen-l10n
@@ -46,12 +47,8 @@ jobs:
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - name: Install Flutter Rust Bridge
-              run: cargo install flutter_rust_bridge_codegen
-
-            - name: Generate Rust bindings (Core package)
-              run: flutter_rust_bridge_codegen generate
-              working-directory: mobile/packages/rust
+            - run: cargo codegen frb
+              working-directory: rust
 
             - name: Increment version code for build
               run: |

@@ -84,7 +84,8 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
   void didUpdateWidget(covariant ButtonWidgetV2 oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final idleContentChanged = widget.buttonType != oldWidget.buttonType ||
+    final idleContentChanged =
+        widget.buttonType != oldWidget.buttonType ||
         widget.labelText != oldWidget.labelText ||
         widget.leadingWidget != oldWidget.leadingWidget ||
         widget.trailingWidget != oldWidget.trailingWidget;
@@ -114,17 +115,19 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
     final colorScheme = widget.shouldStickToLightTheme
         ? lightScheme
         : widget.shouldStickToDarkTheme
-            ? darkScheme
-            : getEnteColorScheme(context);
+        ? darkScheme
+        : getEnteColorScheme(context);
     final textTheme = widget.shouldStickToLightTheme
         ? lightTextTheme
         : widget.shouldStickToDarkTheme
-            ? darkTextTheme
-            : getEnteTextTheme(context);
+        ? darkTextTheme
+        : getEnteTextTheme(context);
 
-    final showLoading = _executionState == ExecutionState.inProgress &&
+    final showLoading =
+        _executionState == ExecutionState.inProgress &&
         widget.shouldSurfaceExecutionStates;
-    final showSuccess = _executionState == ExecutionState.successful &&
+    final showSuccess =
+        _executionState == ExecutionState.successful &&
         widget.shouldSurfaceExecutionStates;
 
     final palette = widget.buttonType.getColorPalette(colorScheme);
@@ -141,7 +144,9 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
     final isSmall = widget.buttonSize == ButtonSizeV2.small;
     final isScaledDown = _isFingerDown;
 
-    final double? height = isLink ? null : 52;
+    final BoxConstraints? constraints = isLink
+        ? null
+        : const BoxConstraints(minHeight: 52);
     final double borderRadius = isLink ? 0 : 20;
     final EdgeInsets padding = isLink
         ? const EdgeInsets.symmetric(vertical: 4)
@@ -165,7 +170,7 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeInOutCubic,
-            height: height,
+            constraints: constraints,
             width: isSmall ? _idleWidth : (isLink ? null : double.infinity),
             decoration: BoxDecoration(
               color: colors.backgroundColor,
@@ -213,8 +218,8 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
       child: showLoading
           ? _buildLoadingContent(colors, textTheme)
           : showSuccess
-              ? _buildSuccessContent(colors)
-              : _buildIdleContent(colors, textTheme),
+          ? _buildSuccessContent(colors)
+          : _buildIdleContent(colors, textTheme),
     );
   }
 
@@ -292,12 +297,12 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
     final isTertiaryCritical =
         widget.buttonType == ButtonTypeV2.tertiaryCritical;
     final hasUnderline = isLink || isTertiaryCritical;
-    final labelStyle =
-        (hasUnderline ? textTheme.body : textTheme.bodyBold).copyWith(
-      color: colors.textColor,
-      decoration: hasUnderline ? TextDecoration.underline : null,
-      decorationColor: hasUnderline ? colors.textColor : null,
-    );
+    final labelStyle = (hasUnderline ? textTheme.body : textTheme.bodyBold)
+        .copyWith(
+          color: colors.textColor,
+          decoration: hasUnderline ? TextDecoration.underline : null,
+          decorationColor: hasUnderline ? colors.textColor : null,
+        );
 
     final hasLeading = widget.leadingWidget != null;
     final hasLabel = widget.labelText != null;
@@ -359,6 +364,7 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
               child: Text(
                 widget.labelText!,
                 style: labelStyle,
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
               ),
@@ -532,7 +538,8 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
   }
 
   void _syncLoadingController() {
-    final shouldAnimate = _executionState == ExecutionState.inProgress &&
+    final shouldAnimate =
+        _executionState == ExecutionState.inProgress &&
         widget.shouldSurfaceExecutionStates;
 
     if (shouldAnimate) {

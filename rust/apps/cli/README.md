@@ -2,7 +2,7 @@ WIP Ente Rust CLI.
 
 ## Development
 
-```bash
+```sh
 cargo fmt        # format
 cargo clippy     # lint
 cargo build      # build

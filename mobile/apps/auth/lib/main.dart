@@ -103,7 +103,9 @@ void main() async {
 
 Future<void> _runInForeground() async {
   AppThemeConfig.initialize(EnteApp.auth);
-  final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
+  final adaptiveThemeMode =
+      await AdaptiveTheme.getThemeMode() ?? AdaptiveThemeMode.system;
+  final savedThemeMode = _themeMode(adaptiveThemeMode);
   final configuration = Configuration.instance;
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
@@ -117,7 +119,8 @@ Future<void> _runInForeground() async {
     unawaited(UpdateService.instance.showUpdateNotification());
     runApp(
       AppLock(
-        builder: (args) => App(locale: locale),
+        builder: (args) =>
+            App(locale: locale, savedThemeMode: adaptiveThemeMode),
         lockScreen: LockScreen(configuration),
         enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,

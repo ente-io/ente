@@ -10,7 +10,7 @@ on:
             - "rust/crates/contacts/**"
             - "rust/crates/image/**"
             - "rust/bindings/wasm/ente-wasm/**"
-            - "rust/photos/**"
+            - "rust/crates/photos/**"
             - "rust/Cargo.lock"
             - "rust/Cargo.toml"
             - ".github/workflows/rust-lint.yml"

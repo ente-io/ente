@@ -1,16 +1,15 @@
 import 'dart:math' as math;
 
+import 'package:ente_components/ente_components.dart';
 import 'package:ente_icons/ente_icons.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
-import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
@@ -20,7 +19,7 @@ class ThumbnailPlaceHolder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      color: Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      color: context.componentColors.fillDark,
     );
   }
 }
@@ -30,10 +29,7 @@ class UnSyncedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _BottomLeftOverlayIcon(
-      Icons.cloud_off_outlined,
-      baseSize: 18,
-    );
+    return const _BottomLeftOverlayIcon(Icons.cloud_off_outlined, baseSize: 18);
   }
 }
 
@@ -68,10 +64,7 @@ class FavoriteOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _BottomLeftOverlayIcon(
-      EnteIcons.favoriteFilled,
-      baseSize: 22,
-    );
+    return const _BottomLeftOverlayIcon(EnteIcons.favoriteFilled, baseSize: 22);
   }
 }
 
@@ -105,10 +98,7 @@ class LivePhotoOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _BottomRightOverlayIcon(
-      Icons.album_outlined,
-      baseSize: 18,
-    );
+    return const _BottomRightOverlayIcon(Icons.album_outlined, baseSize: 18);
   }
 }
 
@@ -137,14 +127,14 @@ class VideoOverlayDuration extends StatelessWidget {
         final bool iconFallback = (duration == null || duration == 0);
 
         double inset = 4;
-        double size = iconFallback ? 18 : 10;
+        double iconSize = 18;
         if (constraints.hasBoundedWidth) {
           final w = constraints.maxWidth;
           if (w > 120) {
-            size = iconFallback ? 24 : 14;
+            iconSize = 24;
           } else if (w < 75) {
             inset = 3;
-            size = iconFallback ? 16 : 8;
+            iconSize = 16;
           }
         }
 
@@ -152,7 +142,7 @@ class VideoOverlayDuration extends StatelessWidget {
           onDarkBackground = Icon(
             Icons.play_arrow,
             color: Colors.white,
-            size: size, //default 24
+            size: iconSize,
           );
         } else {
           final String formattedDuration = _getFormattedDuration(duration!);
@@ -160,10 +150,7 @@ class VideoOverlayDuration extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 1),
             child: Text(
               formattedDuration,
-              style: getEnteTextTheme(context).small.copyWith(
-                    color: Colors.white,
-                    fontSize: size, // Default font size is 14
-                  ),
+              style: TextStyles.tiny.copyWith(color: Colors.white),
             ),
           );
         }
@@ -188,8 +175,9 @@ class VideoOverlayDuration extends StatelessWidget {
   }
 
   String _getFormattedDuration(int duration) {
-    final String formattedDuration =
-        Duration(seconds: duration).toString().split('.').first;
+    final String formattedDuration = Duration(
+      seconds: duration,
+    ).toString().split('.').first;
     final List<String> separated = formattedDuration.split(':');
     final String hour = (separated[0] == '0') ? '' : separated[0] + ':';
     final String minute = int.parse(separated[1]).toString() + ':';
@@ -200,7 +188,12 @@ class VideoOverlayDuration extends StatelessWidget {
 
 class OwnerAvatarOverlayIcon extends StatelessWidget {
   final User user;
-  const OwnerAvatarOverlayIcon(this.user, {super.key});
+  final AvatarType type;
+  const OwnerAvatarOverlayIcon(
+    this.user, {
+    super.key,
+    this.type = AvatarType.small,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -208,11 +201,7 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
       alignment: Alignment.topRight,
       child: Padding(
         padding: const EdgeInsets.only(right: 4, top: 4),
-        child: UserAvatarWidget(
-          user,
-          type: AvatarType.sm,
-          thumbnailView: true,
-        ),
+        child: UserAvatarWidget(user, type: type, thumbnailView: true),
       ),
     );
   }
@@ -264,10 +253,9 @@ class FileOverlayText extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 5),
       child: Text(
         text,
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall!
-            .copyWith(color: Colors.white), //same for both themes
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+          color: Colors.white,
+        ), //same for both themes
       ),
     );
   }
@@ -330,11 +318,7 @@ class _BottomLeftOverlayIcon extends StatelessWidget {
             alignment: Alignment.bottomLeft,
             child: Padding(
               padding: EdgeInsets.only(left: inset, bottom: inset),
-              child: Icon(
-                icon,
-                size: size,
-                color: color,
-              ),
+              child: Icon(icon, size: size, color: color),
             ),
           ),
         );
@@ -403,18 +387,10 @@ class _BottomRightOverlayIcon extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.only(bottom: inset, right: inset),
               child: rotationAngle == null
-                  ? Icon(
-                      icon,
-                      size: size,
-                      color: color,
-                    )
+                  ? Icon(icon, size: size, color: color)
                   : Transform.rotate(
                       angle: rotationAngle!, // rotate by 45 degrees
-                      child: Icon(
-                        icon,
-                        size: size,
-                        color: color,
-                      ),
+                      child: Icon(icon, size: size, color: color),
                     ),
             ),
           ),

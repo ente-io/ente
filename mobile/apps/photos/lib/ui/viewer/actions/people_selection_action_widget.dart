@@ -111,56 +111,61 @@ class _PeopleSelectionActionWidgetState
             .toList();
         final onlyIgnoredPersonsSelected =
             ignoredSelectedPersonIds.isNotEmpty &&
-                selectedClusterIds.isEmpty &&
-                ignoredSelectedPersonIds.length == selectedPersonIds.length;
-        final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
+            selectedClusterIds.isEmpty &&
+            ignoredSelectedPersonIds.length == selectedPersonIds.length;
+        final bool namedPersonsSelected =
+            selectedPersonIds.isNotEmpty &&
             selectedPersonIds.every(
               (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
             );
         final bool showEditAction = onlyOnePerson;
         final bool showReviewAction = onlyOnePerson;
-        final bool showMergeAction =
-            onlyIgnoredPersonsSelected ? false : selectedClusterIds.isNotEmpty;
-        final bool showResetAction =
-            onlyIgnoredPersonsSelected ? false : onlyOnePerson;
+        final bool showMergeAction = onlyIgnoredPersonsSelected
+            ? false
+            : selectedClusterIds.isNotEmpty;
+        final bool showResetAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyOnePerson;
         final bool showShowPersonAction = onlyIgnoredPersonsSelected;
-        final bool showAutoAddAction =
-            onlyIgnoredPersonsSelected ? false : onlyPersonSelected;
+        final bool showAutoAddAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected;
         final bool showPinAction = onlyIgnoredPersonsSelected
             ? false
             : onlyPersonSelected &&
-                namedPersonsSelected &&
-                selectedPersonIds.every(
-                  (id) => !(personMap[id]?.data.isPinned ?? false),
-                );
+                  namedPersonsSelected &&
+                  selectedPersonIds.every(
+                    (id) => !(personMap[id]?.data.isPinned ?? false),
+                  );
         final bool showUnpinAction = onlyIgnoredPersonsSelected
             ? false
             : onlyPersonSelected &&
-                namedPersonsSelected &&
-                selectedPersonIds.every(
-                  (id) => personMap[id]?.data.isPinned ?? false,
-                );
+                  namedPersonsSelected &&
+                  selectedPersonIds.every(
+                    (id) => personMap[id]?.data.isPinned ?? false,
+                  );
         final bool showHideFromMemoriesAction = onlyIgnoredPersonsSelected
             ? false
             : onlyPersonSelected &&
-                namedPersonsSelected &&
-                selectedPersonIds.every(
-                  (id) => !(personMap[id]?.data.hideFromMemories ?? false),
-                );
+                  namedPersonsSelected &&
+                  selectedPersonIds.every(
+                    (id) => !(personMap[id]?.data.hideFromMemories ?? false),
+                  );
         final bool showShowInMemoriesAction = onlyIgnoredPersonsSelected
             ? false
             : onlyPersonSelected &&
-                namedPersonsSelected &&
-                selectedPersonIds.every(
-                  (id) => personMap[id]?.data.hideFromMemories ?? false,
-                );
+                  namedPersonsSelected &&
+                  selectedPersonIds.every(
+                    (id) => personMap[id]?.data.hideFromMemories ?? false,
+                  );
         final bool hasNonIgnoredSelectedPerson = selectedPersonIds.any(
           (id) => !(personMap[id]?.data.isIgnored ?? true),
         );
         final bool showIgnoreAction = onlyIgnoredPersonsSelected
             ? false
             : selectedClusterIds.isNotEmpty || hasNonIgnoredSelectedPerson;
-        final bool hasVisibleAction = showEditAction ||
+        final bool hasVisibleAction =
+            showEditAction ||
             showReviewAction ||
             showIgnoreAction ||
             showMergeAction ||
@@ -195,7 +200,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).ignore,
-            icon: Icons.hide_image_outlined,
+            icon: Icons.person_off_outlined,
             onTap: _onIgnore,
             shouldShow: showIgnoreAction,
           ),
@@ -541,10 +546,12 @@ class _PeopleSelectionActionWidgetState
     await showChoiceDialog(
       context,
       title: multiple
-          ? AppLocalizations.of(context)
-              .areYouSureYouWantToShowThesePeopleInPeopleSectionAgain
-          : AppLocalizations.of(context)
-              .areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
+          ? AppLocalizations.of(
+              context,
+            ).areYouSureYouWantToShowThesePeopleInPeopleSectionAgain
+          : AppLocalizations.of(
+              context,
+            ).areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
       firstButtonLabel: multiple
           ? AppLocalizations.of(context).yesShowPeople
           : AppLocalizations.of(context).yesShowPerson,
@@ -578,8 +585,10 @@ class _PeopleSelectionActionWidgetState
     if (selectedClusterIds.isEmpty) return;
 
     if (!mounted) return;
-    final namedSelectedPersonIds =
-        _getNamedSelectedPersonIds(selectedPersonIds, personMap);
+    final namedSelectedPersonIds = _getNamedSelectedPersonIds(
+      selectedPersonIds,
+      personMap,
+    );
 
     String? targetPersonId;
     PersonEntity? targetPerson;

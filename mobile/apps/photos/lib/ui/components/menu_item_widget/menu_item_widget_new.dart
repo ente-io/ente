@@ -47,6 +47,10 @@ class MenuItemWidgetNew extends StatefulWidget {
 
   /// Border radius for the menu item, defaults to 20
   final double borderRadius;
+
+  /// Inner padding for the menu item.
+  final EdgeInsetsGeometry padding;
+
   final Color? pressedColor;
 
   /// disable gesture detector if not used
@@ -84,6 +88,7 @@ class MenuItemWidgetNew extends StatefulWidget {
     this.onLongPress,
     this.menuItemColor,
     this.borderRadius = 20.0,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     this.pressedColor,
     this.isGestureDetectorDisabled = false,
     this.showOnlyLoadingState = false,
@@ -161,7 +166,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
       clipBehavior: Clip.none,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: widget.padding,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(circularRadius),
         color: effectiveMenuItemColor,

@@ -198,8 +198,7 @@ In collaborative albums, deletion permissions vary by role:
 - You can manage link settings
 - You can delete the entire album
 
-**When someone leaves:**
-When a participant leaves or is removed from a shared album, any photos they uploaded are also removed from that album (but remain in their personal library).
+**When someone leaves:** When a participant leaves or is removed from a shared album, any photos they uploaded are also removed from that album (but remain in their personal library).
 
 ### Suggest deletion
 

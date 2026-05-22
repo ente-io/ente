@@ -25,18 +25,18 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v6
 
-            - name: Setup node and enable yarn caching
+            - name: Setup node and enable npm caching
               uses: actions/setup-node@v6
               with:
                   node-version: 24
-                  cache: "yarn"
-                  cache-dependency-path: "infra/staff/yarn.lock"
+                  cache: "npm"
+                  cache-dependency-path: "infra/staff/package-lock.json"
 
             - name: Install dependencies
-              run: yarn install
+              run: npm ci
 
             - name: Build
-              run: yarn build
+              run: npm run build
 
             - name: Publish
               uses: cloudflare/wrangler-action@v3

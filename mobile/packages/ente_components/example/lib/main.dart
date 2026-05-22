@@ -1625,8 +1625,10 @@ class _AvatarPreview extends StatelessWidget {
   const _AvatarPreview();
 
   static const _sizes = [
-    (label: 'Default', size: AvatarComponentSize.normal),
+    (label: 'XS', size: AvatarComponentSize.xs),
     (label: 'Small', size: AvatarComponentSize.small),
+    (label: 'Default', size: AvatarComponentSize.defaultSize),
+    (label: 'Medium', size: AvatarComponentSize.medium),
     (label: 'Large', size: AvatarComponentSize.large),
     (label: 'Contact (huge)', size: AvatarComponentSize.contactHuge),
   ];
@@ -1637,6 +1639,7 @@ class _AvatarPreview extends StatelessWidget {
     (label: 'Pink', color: AvatarComponentColor.pink, initials: 'U'),
     (label: 'Purple', color: AvatarComponentColor.purple, initials: 'R'),
     (label: 'Blue', color: AvatarComponentColor.blue, initials: 'S'),
+    (label: 'Cyan', color: AvatarComponentColor.cyan, initials: 'C'),
   ];
 
   @override
@@ -1670,6 +1673,8 @@ class _AvatarPreview extends StatelessWidget {
                 const _AvatarTableRow(
                   label: 'Add icon',
                   children: [
+                    SizedBox.shrink(),
+                    SizedBox.shrink(),
                     SizedBox.shrink(),
                     SizedBox.shrink(),
                     SizedBox.shrink(),

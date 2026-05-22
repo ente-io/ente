@@ -82,8 +82,7 @@
 
 - Generate streams for videos (beta)
 
-    > Streamable videos can be enabled in Preferences. For more details, see the
-    > [video streaming FAQ](https://ente.com/help/photos/faq/video-streaming).
+    > Streamable videos can be enabled in Preferences. For more details, see the [video streaming FAQ](https://ente.com/help/photos/faq/video-streaming).
 
 - Support Turkish translations.
 
@@ -146,8 +145,7 @@
 
 ## v1.7.2
 
-- Significantly improve the speed of the metadata parsing step during imports of
-  Google takeouts.
+- Significantly improve the speed of the metadata parsing step during imports of Google takeouts.
 - Add a option to set and use a custom endpoint.
 - Fix an issue preventing subscription purchases and renewals.
 - Clear cached password after changing it on a different device.
@@ -158,20 +156,16 @@
 - Support for passkeys as a second factor authentication mechanism.
 - Remember the window size across app restarts.
 - Revert changes to the Linux icon.
-- Fix an issue causing deleted items in watched folders to not move to
-  uncategorized.
+- Fix an issue causing deleted items in watched folders to not move to uncategorized.
 - Fix duplicate file uploads when initializing a folder watch (sometimes).
 
 ## v1.7.0
 
-v1.7 is a major rewrite to improve the security of our app. In particular, the
-UI and the native parts of the app now run isolated from each other and
-communicate only using a predefined IPC boundary.
+v1.7 is a major rewrite to improve the security of our app. In particular, the UI and the native parts of the app now run isolated from each other and communicate only using a predefined IPC boundary.
 
 Other highlights:
 
-- View your photos on big screens and Chromecast devices by using the "Play
-  album on TV" option in the album menu.
+- View your photos on big screens and Chromecast devices by using the "Play album on TV" option in the album menu.
 - Support Brazilian Portuguese, German and Russian.
 - Provide a checkbox to select all photos in a day.
 - Fix a case where the dedup screen would not refresh after removing items.
@@ -307,8 +301,7 @@ Other highlights:
 
 ### Photo Editor
 
-Check out our [blog](https://ente.com/blog/introducing-web-desktop-photo-editor/)
-to know about feature and functionalities.
+Check out our [blog](https://ente.com/blog/introducing-web-desktop-photo-editor/) to know about feature and functionalities.
 
 ## v1.6.47
 
@@ -323,19 +316,15 @@ to know about feature and functionalities.
 
 ### Bug Fixes
 
-- Fixes OOM crashes during file upload
-  [#1379](https://github.com/ente-io/photos-web/pull/1379)
+- Fixes OOM crashes during file upload [#1379](https://github.com/ente-io/photos-web/pull/1379)
 
 ## v1.6.45
 
 ### Bug Fixes
 
-- Fixed app keeps reloading issue
-  [#235](https://github.com/ente-io/photos-desktop/pull/235)
-- Fixed dng and arw preview issue
-  [#1378](https://github.com/ente-io/photos-web/pull/1378)
-- Added view crash report option (help menu) for user to share electron crash
-  report locally
+- Fixed app keeps reloading issue [#235](https://github.com/ente-io/photos-desktop/pull/235)
+- Fixed dng and arw preview issue [#1378](https://github.com/ente-io/photos-web/pull/1378)
+- Added view crash report option (help menu) for user to share electron crash report locally
 
 ## v1.6.44
 
@@ -347,28 +336,23 @@ to know about feature and functionalities.
 
 - #### Check for update and changelog option
 
-    Added options to check for update manually and a view changelog via the app
-    menubar
+    Added options to check for update manually and a view changelog via the app menubar
 
 - #### Opt out of crash reporting
 
-    Added option to out of a crash reporting, it can accessed from the settings
-    -> preferences -> disable crash reporting
+    Added option to out of a crash reporting, it can accessed from the settings -> preferences -> disable crash reporting
 
 - #### Type search
 
-    Added new search option to search files based on file type i.e, image,
-    video, live-photo.
+    Added new search option to search files based on file type i.e, image, video, live-photo.
 
 - #### Manual Convert Button
 
-    In case the video is not playable, Now there is a convert button which can
-    be used to trigger conversion of the video to supported format.
+    In case the video is not playable, Now there is a convert button which can be used to trigger conversion of the video to supported format.
 
 - #### File Download Progress
 
-    The file loader now also shows the exact percentage download progress,
-    instead of just a simple loader.
+    The file loader now also shows the exact percentage download progress, instead of just a simple loader.
 
 - #### Bug fixes & other enhancements
 
@@ -384,19 +368,16 @@ to know about feature and functionalities.
 
 - #### Email verification
 
-    We have now made email verification optional, so you can sign in with just
-    your email address and password, without waiting for a verification code.
+    We have now made email verification optional, so you can sign in with just your email address and password, without waiting for a verification code.
 
     You can opt in / out of email verification from Settings > Security.
 
 - #### Download Album
 
-    You can now chose the download location for downloading albums. Along with
-    that we have also added progress bar for album download.
+    You can now chose the download location for downloading albums. Along with that we have also added progress bar for album download.
 
 - #### Bug fixes & other enhancements
 
     We have squashed a few pesky bugs that were reported by our community
 
-    If you would like to help us improve ente, come join the party @
-    ente.com/community!
+    If you would like to help us improve ente, come join the party @ ente.com/community!

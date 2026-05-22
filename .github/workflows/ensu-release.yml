@@ -28,6 +28,8 @@ concurrency:
 jobs:
     release:
         runs-on: ubuntu-latest
+        environment:
+            name: release-branch-push
         env:
             GH_TOKEN: ${{ github.token }}
             VERSION: ${{ inputs.version }}
@@ -53,8 +55,15 @@ jobs:
 
             - name: Start release
               if: inputs.action == 'start'
+              env:
+                  RELEASE_BRANCH_PUSH_TOKEN: ${{ secrets.RELEASE_BRANCH_PUSH_TOKEN }}
               run: |
                   set -euo pipefail
+
+                  git_push_release_branch() {
+                      git -c http.https://github.com/.extraheader= push \
+                          "https://x-access-token:${RELEASE_BRANCH_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
+                  }
 
                   release_branch="release/ensu-v${VERSION}"
                   beta_tag="ensu-v${VERSION}-beta"
@@ -71,7 +80,7 @@ jobs:
                   git switch -c "${release_branch}"
                   node .github/scripts/ensu-version.mjs set "${VERSION}"
                   git commit -am "Ensu v${VERSION}"
-                  git push -u origin "${release_branch}"
+                  git_push_release_branch "${release_branch}"
 
                   gh release delete "${beta_tag}" --yes || true
                   git push origin ":refs/tags/${beta_tag}" || true
@@ -86,8 +95,15 @@ jobs:
 
             - name: Finalize release
               if: inputs.action == 'finalize'
+              env:
+                  RELEASE_BRANCH_PUSH_TOKEN: ${{ secrets.RELEASE_BRANCH_PUSH_TOKEN }}
               run: |
                   set -euo pipefail
+
+                  git_push_release_branch() {
+                      git -c http.https://github.com/.extraheader= push \
+                          "https://x-access-token:${RELEASE_BRANCH_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
+                  }
 
                   release_branch="release/ensu-v${VERSION}"
                   rc_tag="ensu-v${VERSION}-rc"
@@ -112,4 +128,4 @@ jobs:
                   gh release edit "${rc_tag}" --tag "${final_tag}" --title "${final_tag}" --target "${release_sha}" --draft --verify-tag
 
                   git push origin ":refs/tags/${rc_tag}" || true
-                  git push origin ":refs/heads/${release_branch}"
+                  git_push_release_branch ":refs/heads/${release_branch}"

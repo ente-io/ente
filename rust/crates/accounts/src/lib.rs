@@ -20,4 +20,4 @@ pub use flow::{
     SecondFactorMethod, SessionValidity, SetupTwoFactorParams, SetupTwoFactorResult, TotpPurpose,
 };
 pub use models::KeyAttributes;
-pub use types::{AccountSecrets, AccountsClientConfig, DEFAULT_ACCOUNTS_URL};
+pub use types::{AccountSecrets, AccountsClientConfig};

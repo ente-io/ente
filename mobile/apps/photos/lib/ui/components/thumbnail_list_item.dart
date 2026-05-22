@@ -1,10 +1,8 @@
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
-import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
 
 Color thumbnailListItemBackgroundColor(BuildContext context) {
-  final colorScheme = getEnteColorScheme(context);
-  return EnteTheme.isDark(context) ? colorScheme.fill : colorScheme.fillDark;
+  return context.componentColors.fillLight;
 }
 
 class ThumbnailListItem extends StatefulWidget {
@@ -13,6 +11,7 @@ class ThumbnailListItem extends StatefulWidget {
   static const defaultLeadingRadius = 12.0;
   static const defaultBorderRadius = 20.0;
   static const defaultContentSpacing = 12.0;
+  static const defaultItemSpacing = 8.0;
   static const _stateTransitionDuration = Duration(milliseconds: 120);
 
   final Widget leading;
@@ -57,18 +56,18 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     final child = AnimatedContainer(
       duration: ThumbnailListItem._stateTransitionDuration,
       width: double.infinity,
       padding: widget.padding,
       decoration: BoxDecoration(
-        color: _backgroundColor(colorScheme),
+        color: _backgroundColor(colors),
         borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
         border: Border.all(
           color: widget.isSelected
-              ? widget.selectedBorderColor ?? colorScheme.greenBase
-              : widget.borderColor ?? _backgroundColor(colorScheme),
+              ? widget.selectedBorderColor ?? colors.primaryStroke
+              : widget.borderColor ?? _backgroundColor(colors),
         ),
       ),
       child: Row(
@@ -119,11 +118,11 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
     );
   }
 
-  Color _backgroundColor(EnteColorScheme colorScheme) {
+  Color _backgroundColor(ColorTokens colors) {
     if (_isPressed) {
-      return colorScheme.fillDarker;
+      return colors.fillDarker;
     }
-    return widget.backgroundColor ?? colorScheme.fill;
+    return widget.backgroundColor ?? colors.fillLight;
   }
 
   void _setPressed(bool value) {

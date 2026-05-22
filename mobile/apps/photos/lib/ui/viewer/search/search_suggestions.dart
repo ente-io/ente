@@ -14,6 +14,7 @@ import 'package:photos/models/search/search_result.dart';
 import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/device_folder_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
@@ -127,7 +128,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final resultsBackground = EnteTheme.isDark(context)
-        ? const Color.fromRGBO(22, 22, 22, 1)
+        ? colorScheme.backgroundColour
         : colorScheme.backgroundElevated2;
     final sectionWidgets = _buildSectionWidgets(context);
     if (_resultsCount > 0) {
@@ -379,7 +380,9 @@ class _SearchResultsSectionWidget extends StatelessWidget {
         ),
       );
       if (i != results.length - 1) {
-        children.add(const SizedBox(height: 4));
+        children.add(
+          const SizedBox(height: ThumbnailListItem.defaultItemSpacing),
+        );
       }
     }
 

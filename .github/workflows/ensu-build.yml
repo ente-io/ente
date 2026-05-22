@@ -33,6 +33,7 @@ jobs:
             release_tag: ${{ steps.prepare.outputs.release_tag }}
             release_title: ${{ steps.prepare.outputs.release_title }}
             release_body: ${{ steps.prepare.outputs.release_body }}
+            release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
 
         steps:
             - name: Checkout code
@@ -66,28 +67,25 @@ jobs:
                           exit 1
                       fi
                       release_tag="ensu-v${release_version}-rc"
-                      release_title="Ensu release candidate · ${release_version} (build ${build_number})"
+                      release_title="🤖   Ensu release candidate · ${release_version} (build ${build_number})"
                   else
                       if [[ "${version}" != "${release_version}-beta" ]]; then
                           echo "::error::${GITHUB_REF_NAME} is ${version}, expected ${release_version}-beta"
                           exit 1
                       fi
                       release_tag="ensu-v${release_version}-beta"
-                      release_title="Ensu nightly · ${version} (build ${build_number})"
+                      release_title="🤖   Ensu nightly · ${version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"
+                  git fetch --force --depth=1 --no-tags origin "refs/tags/${release_tag}:refs/tags/${release_tag}" || true
 
                   echo "should_build=true" >> "${GITHUB_OUTPUT}"
                   echo "commit_sha=${commit_sha}" >> "${GITHUB_OUTPUT}"
                   echo "build_number=${build_number}" >> "${GITHUB_OUTPUT}"
                   echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
                   echo "release_title=${release_title}" >> "${GITHUB_OUTPUT}"
-                  {
-                      echo "release_body<<EOF"
-                      find rust/apps/ensu/changes -maxdepth 1 -type f -name '*.md' ! -name README.md | sort | xargs awk 1
-                      echo "EOF"
-                  } >> "${GITHUB_OUTPUT}"
+                  node .github/scripts/release-notes.mjs rust/apps/ensu/changes "${release_tag}" >> "${GITHUB_OUTPUT}"
 
     build-desktop:
         needs: build-metadata
@@ -231,6 +229,8 @@ jobs:
         needs: build-metadata
         if: needs.build-metadata.outputs.should_build == 'true'
         runs-on: ubuntu-22.04
+        environment:
+            name: production
         env:
             COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
             BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
@@ -264,10 +264,8 @@ jobs:
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
 
-            - name: Generate Android bindings
-              run: |
-                  cd ../../../../../rust
-                  cargo codegen ensu-android
+            - run: cargo codegen native
+              working-directory: rust
 
             - name: Setup signing keys
               run: |
@@ -334,9 +332,8 @@ jobs:
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
 
-            - name: Generate iOS bindings
+            - run: cargo codegen native
               working-directory: rust
-              run: cargo codegen ensu-ios
 
             - name: Import Apple Distribution certificate
               uses: Apple-Actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7.0.0
@@ -406,14 +403,32 @@ jobs:
               continue-on-error: true
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
-                  RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+                  GH_TOKEN: ${{ github.token }}
+                  RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
-                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.ensu) | [TestFlight](https://appstoreconnect.apple.com/apps/6758197006/testflight/ios) | [GitHub Release](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG})"
+                  release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
+                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.ensu) | [TestFlight](https://appstoreconnect.apple.com/apps/6758197006/testflight/ios) | [GitHub Release](${release_url})"
+                  release_body_discord="$(awk '
+                      /^Previous changes:$/ { previous = 1 }
+                      previous && NF { print "-# " $0; next }
+                      { print }
+                  ' <<< "${RELEASE_BODY_GROUPED}")"
 
                   jq -n \
                       --arg title "${{ needs.build-metadata.outputs.release_title }}" \
-                      --arg body "${RELEASE_BODY}" \
+                      --arg body "${release_body_discord}" \
                       --arg download_line "${download_line}" \
-                      '{embeds: [{title: $title, description: ($body + "\n" + $download_line), color: 16633363}]}' \
-                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}"
+                      '{
+                          flags: 32768,
+                          components: [{
+                              type: 17,
+                              accent_color: 16633363,
+                              components: (
+                                  [{type: 10, content: ("## " + $title)}]
+                                  + (if $body == "" then [] else [{type: 10, content: $body}] end)
+                                  + [{type: 14}, {type: 10, content: $download_line}]
+                              )
+                          }]
+                      }' \
+                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}?with_components=true"

@@ -82,6 +82,72 @@ func (repo *ObjectRepository) GetObjectWithDCs(fileID int64, objType ente.Object
 	return s3ObjectKey, datacenters, stacktrace.Propagate(err, "")
 }
 
+// GetAccessibleObject verifies actor access and returns the S3 object key in a
+// single latency-sensitive DB query.
+func (repo *ObjectRepository) GetAccessibleObject(ctx context.Context, fileID int64, actorUserID int64, objType ente.ObjectType) (ente.S3ObjectKey, error) {
+	s3ObjectKey, _, err := repo.GetAccessibleObjectWithDCs(ctx, fileID, actorUserID, objType)
+	return s3ObjectKey, err
+}
+
+// GetAccessibleObjectWithDCs verifies actor access and returns the S3 object
+// key along with replicated datacenters in a single latency-sensitive DB query.
+func (repo *ObjectRepository) GetAccessibleObjectWithDCs(ctx context.Context, fileID int64, actorUserID int64, objType ente.ObjectType) (ente.S3ObjectKey, []string, error) {
+	row := repo.objectLookupDB().QueryRowContext(ctx, `
+		SELECT
+			f.file_id,
+			CASE
+				WHEN f.owner_id = $2 THEN TRUE
+				ELSE EXISTS (
+					SELECT 1
+					FROM collection_files cf
+					JOIN collection_shares cs ON cs.collection_id = cf.collection_id
+					WHERE cf.file_id = f.file_id
+						AND cf.is_deleted = FALSE
+						AND cs.is_deleted = FALSE
+						AND (cs.to_user_id = $2 OR cs.from_user_id = $2)
+				)
+			END AS can_access,
+			ok.object_key,
+			ok.size,
+			ok.o_type::text,
+			COALESCE(ok.datacenters, '{}'::s3region[])
+		FROM files f
+		LEFT JOIN object_keys ok
+			ON ok.file_id = f.file_id
+			AND ok.o_type = $3::object_type
+			AND ok.is_deleted = FALSE
+		WHERE f.file_id = $1`,
+		fileID, actorUserID, objType)
+
+	var s3ObjectKey ente.S3ObjectKey
+	var canAccess bool
+	var objectKey sql.NullString
+	var fileSize sql.NullInt64
+	var objectType sql.NullString
+	datacenters := make([]string, 0)
+	err := row.Scan(
+		&s3ObjectKey.FileID,
+		&canAccess,
+		&objectKey,
+		&fileSize,
+		&objectType,
+		pq.Array(&datacenters),
+	)
+	if err != nil {
+		return s3ObjectKey, datacenters, stacktrace.Propagate(err, "")
+	}
+	if !canAccess {
+		return s3ObjectKey, datacenters, stacktrace.Propagate(ente.ErrPermissionDenied, "access denied")
+	}
+	if !objectKey.Valid || !fileSize.Valid || !objectType.Valid {
+		return s3ObjectKey, datacenters, stacktrace.Propagate(sql.ErrNoRows, "")
+	}
+	s3ObjectKey.ObjectKey = objectKey.String
+	s3ObjectKey.FileSize = fileSize.Int64
+	s3ObjectKey.Type = ente.ObjectType(objectType.String)
+	return s3ObjectKey, datacenters, nil
+}
+
 func (repo *ObjectRepository) GetAllFileObjectsByObjectKey(objectKey string) ([]ente.S3ObjectKey, error) {
 	rows, err := repo.DB.Query(`SELECT file_id, o_type, object_key, size from object_keys where file_id in 
                                                                 (select file_id from object_keys where object_key= $1) 

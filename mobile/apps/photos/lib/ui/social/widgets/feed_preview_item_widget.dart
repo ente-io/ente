@@ -134,7 +134,7 @@ class _PreviewAvatarStack extends StatelessWidget {
         shape: BoxShape.circle,
         border: showBorder
             ? Border.all(
-                color: colorScheme.backgroundBase,
+                color: colorScheme.backgroundColour,
                 width: 1.5,
               )
             : null,
@@ -145,7 +145,7 @@ class _PreviewAvatarStack extends StatelessWidget {
         child: ClipOval(
           child: UserAvatarWidget(
             user,
-            type: AvatarType.xl,
+            type: AvatarType.large,
             currentUserID: currentUserID,
             addStroke: false,
           ),

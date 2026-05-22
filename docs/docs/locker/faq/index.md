@@ -5,9 +5,7 @@ description: Answers to common questions about secure document storage, sharing,
 
 # Ente Locker FAQ
 
-Welcome to the Ente Locker FAQ index. Browse questions by category below, or
-use the search function at the top of the page to find specific answers
-quickly.
+Welcome to the Ente Locker FAQ index. Browse questions by category below, or use the search function at the top of the page to find specific answers quickly.
 
 ## Quick Navigation
 
@@ -131,15 +129,26 @@ Jump to a category:
 
 - [What is Legacy?](/locker/faq/legacy#locker-legacy-what-is)
 - [What happens after the waiting period?](/locker/faq/legacy#locker-legacy-waiting-period)
-- [Can I customize the waiting period?](/locker/faq/legacy#locker-legacy-custom-waiting-period)
+- [What happens to 2FA during recovery?](/locker/faq/legacy#locker-legacy-2fa-recovery)
+- [Does Legacy work across all Ente apps?](/locker/faq/legacy#locker-legacy-all-apps)
+
+### Trusted Contacts
+
+- [Can I customize the trusted contact waiting period?](/locker/faq/legacy#locker-legacy-custom-waiting-period)
 - [Can I have multiple trusted contacts?](/locker/faq/legacy#locker-legacy-multiple-contacts)
-- [What data can trusted contacts access?](/locker/faq/legacy#locker-legacy-data-access)
-
-### Setup and Recovery
-
 - [How do I add a trusted contact?](/locker/faq/legacy#locker-legacy-add-contact)
 - [How does a trusted contact initiate recovery?](/locker/faq/legacy#locker-legacy-initiate-recovery)
 - [Can I block a recovery attempt?](/locker/faq/legacy#locker-legacy-block-recovery)
+
+### Legacy Kits
+
+- [What is a Legacy Kit?](/locker/faq/legacy#locker-legacy-kit-what-is)
+- [How is a Legacy Kit different from a trusted contact?](/locker/faq/legacy#locker-legacy-kit-vs-trusted-contact)
+- [Does a Legacy Kit helper need an Ente account?](/locker/faq/legacy#locker-legacy-kit-helper-account)
+- [Can one recovery sheet recover my account?](/locker/faq/legacy#locker-legacy-kit-one-sheet)
+- [Which waiting periods are available for Legacy Kits?](/locker/faq/legacy#locker-legacy-kit-waiting-periods)
+- [What happens if I delete a kit or block recovery?](/locker/faq/legacy#locker-legacy-kit-delete-block)
+- [Does a Legacy Kit work across all Ente apps?](/locker/faq/legacy#locker-legacy-kit-all-apps)
 
 ## Security
 

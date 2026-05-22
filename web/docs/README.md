@@ -7,8 +7,7 @@ yarn install --frozen-lockfile
 yarn dev
 ```
 
-The docs in this directory provide more details that some developers might find
-useful.
+The docs in this directory provide more details that some developers might find useful.
 
 > [!TIP]
 >

@@ -123,9 +123,10 @@ class _AllSectionsExamplesProviderState
         final hasAnySearchableFilesFuture =
             SearchService.instance.hasAnyFilesForSearch();
         for (SectionType sectionType in SectionType.values) {
-          // Contacts section has been moved to shared collections tab.
-          // File types are rendered as lazy placeholders in the search tab.
+          // Contacts moved to shared, albums moved to the Albums tab, and file
+          // types render as a lazy placeholder in Search.
           if (sectionType == SectionType.contacts ||
+              sectionType == SectionType.album ||
               sectionType == SectionType.fileTypesAndExtension) {
             allSectionsExamples.add(Future.value([]));
           } else {

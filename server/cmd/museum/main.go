@@ -591,9 +591,9 @@ func main() {
 	privateAPI.POST("/files/upload-url", fileHandler.GetUploadURLV2)
 	privateAPI.POST("/files/multipart-upload-url", fileHandler.GetMultipartUploadURLV2)
 	privateAPI.GET("/files/download/:fileID", fileHandler.Get)
-	privateAPI.GET("/files/download/v2/:fileID", fileHandler.Get)
+	privateAPI.GET("/files/download/v2/:fileID", fileHandler.GetUsingFusedLookup)
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
-	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
+	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnailUsingFusedLookup)
 
 	privateAPI.POST("/files/share-url", fileHandler.ShareUrl)
 	privateAPI.GET("/files/share-url", fileHandler.GetUrls)
@@ -1178,7 +1178,7 @@ func setupLatencySensitiveDatabase() *sql.DB {
 	log.Println("Pinged latency sensitive DB")
 
 	db.SetMaxIdleConns(20)
-	db.SetMaxOpenConns(20)
+	db.SetMaxOpenConns(40)
 	db.SetConnMaxLifetime(30 * time.Minute)
 	db.SetConnMaxIdleTime(10 * time.Minute)
 
