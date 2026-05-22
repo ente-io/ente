@@ -330,6 +330,16 @@ jobs:
               run: |
                   pip3 install codemagic-cli-tools --break-system-packages
 
+            - name: Add provisioning profiles
+              run: |
+                  PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+                  mkdir -p "$PROFILES_HOME"
+                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).provisionprofile)"
+                  echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
+                  echo "Saved provisioning profile $PROFILE_PATH"
+              env:
+                  CM_PROVISIONING_PROFILE: ${{ secrets.MAC_OS_BUILD_PROVISION_PROFILE_BASE64 }}
+
             - name: Add certificates
               run: |
                   # create variables
@@ -341,6 +351,9 @@ jobs:
                   # add certificate to keychain
                   keychain initialize
                   keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+
+                  # Use profile in current project
+                  xcode-project use-profiles --project=macos/**/*.xcodeproj
 
                   signing_settings="$RUNNER_TEMP/auth-macos-ci-signing.xcconfig"
                   printf '%s\n' \
