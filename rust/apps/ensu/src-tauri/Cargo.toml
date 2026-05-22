@@ -1,7 +1,6 @@
 [package]
-name = "ensu-tauri"
+name = "ensu-desktop"
 version = "0.1.17-beta"
-description = "Ensu Desktop (Tauri)"
 edition = "2021"
 
 [build-dependencies]

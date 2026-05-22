@@ -1,10 +1,8 @@
 [package]
 name = "inference"
-version = "0.1.0"
 edition = "2024"
 
 [lib]
-name = "inference"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]

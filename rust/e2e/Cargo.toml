@@ -1,8 +1,6 @@
 [package]
 name = "ente-e2e"
-version = "0.0.1"
 edition = "2024"
-publish = false
 
 [dependencies]
 ente-rs = { path = "../apps/cli" }

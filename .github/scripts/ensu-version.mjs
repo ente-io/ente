@@ -58,7 +58,7 @@ function check() {
 
     expect("tauri.conf.json", JSON.parse(read(files.tauri)).package?.version, version);
     expect("Cargo.toml", value(files.cargoToml, /\[package\][\s\S]*?^version = "([^"]+)"/m), version);
-    expect("Cargo.lock", value(files.cargoLock, /\[\[package\]\]\nname = "ensu-tauri"\nversion = "([^"]+)"/), version);
+    expect("Cargo.lock", value(files.cargoLock, /\[\[package\]\]\nname = "ensu-desktop"\nversion = "([^"]+)"/), version);
     expect("Android versionName", value(files.android, /versionName = "([^"]+)"/), releaseVersion);
     expect("Info.plist", value(files.plist, /<key>CFBundleShortVersionString<\/key>\s*<string>([^<]+)<\/string>/), releaseVersion);
 
@@ -78,7 +78,7 @@ function setVersion(version) {
 
     replace(files.tauri, /("package"\s*:\s*\{[\s\S]*?"version"\s*:\s*")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
     replace(files.cargoToml, /(\[package\][\s\S]*?^version = ")[^"]+(")/m, (_m, a, b) => `${a}${version}${b}`);
-    replace(files.cargoLock, /(\[\[package\]\]\nname = "ensu-tauri"\nversion = ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.cargoLock, /(\[\[package\]\]\nname = "ensu-desktop"\nversion = ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
     replace(files.android, /versionName = "[^"]+"/, `versionName = "${releaseVersion}"`);
     replace(files.xcode, /MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${releaseVersion};`);
     replace(files.plist, /(<key>CFBundleShortVersionString<\/key>\s*<string>)[^<]+(<\/string>)/, (_m, a, b) => `${a}${releaseVersion}${b}`);
