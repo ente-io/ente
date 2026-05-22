@@ -231,6 +231,7 @@ const IMAGE_SELECTOR_EXTENSIONS = [
 const IMAGE_SELECTOR_ACCEPT = IMAGE_SELECTOR_EXTENSIONS.map(
     (ext) => `.${ext}`,
 ).join(",");
+const MAX_IMAGE_ATTACHMENTS_PER_MESSAGE = 2;
 
 const buildPromptWithImages = (text: string, imageCount: number) => {
     if (imageCount <= 0) return text;
@@ -558,6 +559,7 @@ const Page: React.FC = () => {
         bgcolor: "transparent",
         color: "text.base",
         "&:hover": { bgcolor: "fill.faint" },
+        "&.Mui-disabled": { color: "text.faint" },
     } as const;
     const smallIconProps = { size: 24, strokeWidth: 2 } as const;
     const actionIconProps = { size: 24, strokeWidth: 2 } as const;
@@ -3561,10 +3563,16 @@ const Page: React.FC = () => {
         onSelect: handleDocumentSelect,
         onCancel: handleDocumentCancel,
     });
+    const imageAttachmentSlotsRemaining = Math.max(
+        0,
+        MAX_IMAGE_ATTACHMENTS_PER_MESSAGE - pendingImages.length,
+    );
+    const isImageAttachmentLimitReached = imageAttachmentSlotsRemaining === 0;
 
     const handleImageSelect = useCallback(
         (files: File[]) => {
             closeAttachmentMenu();
+            if (imageAttachmentSlotsRemaining <= 0) return;
             const images = files.map((file) => ({
                 id: createAttachmentId(),
                 name: file.name.replace(/\0/g, ""),
@@ -3572,10 +3580,17 @@ const Page: React.FC = () => {
                 file,
             }));
             if (images.length) {
-                setPendingImages((prev) => [...prev, ...images]);
+                setPendingImages((prev) => {
+                    const slotsRemaining = Math.max(
+                        0,
+                        MAX_IMAGE_ATTACHMENTS_PER_MESSAGE - prev.length,
+                    );
+                    if (slotsRemaining === 0) return prev;
+                    return [...prev, ...images.slice(0, slotsRemaining)];
+                });
             }
         },
-        [closeAttachmentMenu],
+        [closeAttachmentMenu, imageAttachmentSlotsRemaining],
     );
 
     const handleImageCancel = useCallback(() => {
@@ -3594,6 +3609,7 @@ const Page: React.FC = () => {
 
     const openTauriImageSelector = useCallback(async () => {
         closeAttachmentMenu();
+        if (imageAttachmentSlotsRemaining <= 0) return;
         try {
             const selection = await openFileDialog({
                 directory: false,
@@ -3616,12 +3632,16 @@ const Page: React.FC = () => {
                 handleImageCancel();
                 return;
             }
+            const pathsToProcess = selectedPaths.slice(
+                0,
+                imageAttachmentSlotsRemaining,
+            );
 
             let files: File[];
             try {
                 const { invoke } = await import("@tauri-apps/api/tauri");
                 files = await Promise.all(
-                    selectedPaths.map(async (selectedPath) => {
+                    pathsToProcess.map(async (selectedPath) => {
                         const normalized = selectedPath.replace(/\\/g, "/");
                         const name =
                             normalized.split("/").pop()?.replace(/\0/g, "") ||
@@ -3643,7 +3663,7 @@ const Page: React.FC = () => {
                     `Failed to process selected image attachment: ${formatImageProcessingErrorForLog(error)}`,
                 );
                 showMiniDialog(
-                    imageProcessingFailureDialog(error, selectedPaths.length),
+                    imageProcessingFailureDialog(error, pathsToProcess.length),
                 );
                 return;
             }
@@ -3670,6 +3690,7 @@ const Page: React.FC = () => {
         closeAttachmentMenu,
         handleImageCancel,
         handleImageSelect,
+        imageAttachmentSlotsRemaining,
         prewarmSelectedImageInference,
         showMiniDialog,
     ]);
@@ -3678,6 +3699,7 @@ const Page: React.FC = () => {
         (_event: React.MouseEvent<HTMLElement>) => {
             closeAttachmentMenu();
             if (showImageAttachment) {
+                if (isImageAttachmentLimitReached) return;
                 if (isTauriRuntime) {
                     void openTauriImageSelector();
                 } else {
@@ -3690,6 +3712,7 @@ const Page: React.FC = () => {
         [
             closeAttachmentMenu,
             isTauriRuntime,
+            isImageAttachmentLimitReached,
             openDocumentSelector,
             openImageSelector,
             openTauriImageSelector,
@@ -3699,15 +3722,20 @@ const Page: React.FC = () => {
 
     const handleAttachmentChoice = useCallback(
         (choice: "image" | "document") => {
+            closeAttachmentMenu();
             if (choice === "image") {
-                closeAttachmentMenu();
+                if (isImageAttachmentLimitReached) return;
                 openImageSelector();
             } else {
-                closeAttachmentMenu();
                 openDocumentSelector();
             }
         },
-        [closeAttachmentMenu, openDocumentSelector, openImageSelector],
+        [
+            closeAttachmentMenu,
+            isImageAttachmentLimitReached,
+            openDocumentSelector,
+            openImageSelector,
+        ],
     );
 
     const removePendingDocument = useCallback((id: string) => {
@@ -4262,6 +4290,9 @@ const Page: React.FC = () => {
                         closeAttachmentMenu={closeAttachmentMenu}
                         handleAttachmentChoice={handleAttachmentChoice}
                         showImageAttachment={showImageAttachment}
+                        isImageAttachmentLimitReached={
+                            isImageAttachmentLimitReached
+                        }
                         getDocumentInputProps={getDocumentInputProps}
                         getImageInputProps={getImageInputProps}
                         actionButtonSx={actionButtonSx}

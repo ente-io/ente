@@ -65,6 +65,7 @@ import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogEntry
+import io.ente.ensu.domain.model.MaxImageAttachmentsPerMessage
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
 import io.ente.ensu.utils.EnsuFeatureFlags
@@ -217,9 +218,13 @@ fun HomeView(
 
     val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
 
-    val handleAttachmentSelected: (AttachmentType) -> Unit = { type ->
+    val handleAttachmentSelected: (AttachmentType) -> Unit = handle@{ type ->
         when (type) {
             AttachmentType.Image -> {
+                val imageCount = appState.chat.attachments.count {
+                    it.type == AttachmentType.Image
+                }
+                if (imageCount >= MaxImageAttachmentsPerMessage) return@handle
                 imagePicker.launch("image/*")
             }
             AttachmentType.Document -> {

@@ -41,6 +41,10 @@ struct ChatAttachment: Identifiable, Equatable {
     }
 }
 
+enum ChatAttachmentLimits {
+    static let maxImagesPerMessage = 2
+}
+
 struct AttachmentDownloadItem: Identifiable, Equatable {
     enum Status {
         case queued

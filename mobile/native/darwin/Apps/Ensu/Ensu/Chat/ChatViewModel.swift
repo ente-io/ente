@@ -449,6 +449,10 @@ final class ChatViewModel: ObservableObject {
     @Published var isProcessingAttachments: Bool = false
     @Published var draftText: String = ""
     @Published var draftAttachments: [ChatAttachment] = []
+    private var draftImageAttachmentCount: Int {
+        draftAttachments.filter { $0.kind == .image }.count
+    }
+
     @Published var editingMessageId: UUID?
     @Published var downloadToast: DownloadToastState?
     @Published var isModelDownloaded: Bool = false
@@ -786,6 +790,8 @@ final class ChatViewModel: ObservableObject {
     }
 
     func startNewSession() {
+        guard !isDownloading else { return }
+
         resetGenerationState()
         cancelVoiceInput()
         draftText = ""
@@ -1096,7 +1102,10 @@ final class ChatViewModel: ObservableObject {
     }
 
     func addImageAttachment(data: Data, fileName: String?) {
-        guard !isGenerating && !isDownloading && !isAttachmentDownloadBlocked else { return }
+        guard !isGenerating,
+              !isDownloading,
+              !isAttachmentDownloadBlocked,
+              draftImageAttachmentCount < ChatAttachmentLimits.maxImagesPerMessage else { return }
         isProcessingAttachments = true
 
         Task.detached { [weak self] in
@@ -1114,6 +1123,11 @@ final class ChatViewModel: ObservableObject {
                     isUploading: false
                 )
                 await MainActor.run {
+                    if self.draftImageAttachmentCount >= ChatAttachmentLimits.maxImagesPerMessage {
+                        try? FileManager.default.removeItem(at: url)
+                        self.isProcessingAttachments = false
+                        return
+                    }
                     self.draftAttachments.append(attachment)
                     self.isProcessingAttachments = false
                     self.prewarmImageInferenceIfDownloaded()
@@ -1329,7 +1343,8 @@ final class ChatViewModel: ObservableObject {
                 if let progress {
                     self.handleProgress(progress)
                     self.startDownloadProgressMonitor(target: target)
-                } else if self.downloadToast?.phase == .downloading || self.downloadToast?.phase == .loading {
+                } else if self.sharedModelReadyTask == nil &&
+                    (self.downloadToast?.phase == .downloading || self.downloadToast?.phase == .loading) {
                     self.downloadToast = nil
                     self.isDownloading = false
                     self.clearDownloadProgressMemory()
@@ -1882,8 +1897,7 @@ final class ChatViewModel: ObservableObject {
             status: resolvedProgress.status,
             offerRetryDownload: false
         )
-        let visiblePercent = resolvedProgress.percent ?? progress.percent
-        isDownloading = visiblePercent >= 0 && visiblePercent < 100
+        isDownloading = true
     }
 
     private func startDownloadProgressMonitor(target: InferenceModelTarget) {
