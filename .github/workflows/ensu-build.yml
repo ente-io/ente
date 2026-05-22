@@ -141,16 +141,6 @@ jobs:
               if: matrix.platform.rust-target == 'x86_64-apple-darwin'
               run: rustup target add x86_64-apple-darwin
 
-            - name: Restore Rust cache
-              if: matrix.platform.os == 'ubuntu-22.04'
-              uses: actions/cache/restore@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: rust-ubuntu-22.04-${{ runner.arch }}-
-
             - name: Install web dependencies
               working-directory: web
               run: yarn install --frozen-lockfile
@@ -254,15 +244,6 @@ jobs:
               run: |
                   echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
                   echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-
-            - name: Restore Rust cache
-              uses: actions/cache/restore@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: rust-ubuntu-latest-${{ runner.arch }}-
 
             - run: cargo codegen native
               working-directory: rust

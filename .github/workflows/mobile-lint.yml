@@ -48,18 +48,12 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
-            - name: Restore Rust cache
-              uses: actions/cache/restore@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: rust-ubuntu-latest-${{ runner.arch }}-
-
             - run: flutter pub get --enforce-lockfile
 
             - run: cargo codegen frb
+              working-directory: rust
+
+            - run: cargo check -p ente_photos_rust --features flutter --locked
               working-directory: rust
 
             - run: flutter analyze --no-fatal-infos

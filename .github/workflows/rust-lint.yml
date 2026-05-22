@@ -31,15 +31,6 @@ jobs:
                   sudo apt-get update
                   sudo apt-get install -y libwebkit2gtk-4.0-dev libsoup2.4-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
-            - name: Restore Rust cache
-              uses: actions/cache/restore@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: rust-ubuntu-22.04-${{ runner.arch }}-
-
             - name: Prepare Ensu desktop distDir
               run: mkdir -p ../web/apps/ensu/out
 

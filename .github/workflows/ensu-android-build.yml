@@ -29,15 +29,6 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v6
 
-            - name: Restore Rust cache
-              uses: actions/cache/restore@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: rust-ubuntu-latest-${{ runner.arch }}-
-
             - run: cargo codegen native
               working-directory: rust
 
