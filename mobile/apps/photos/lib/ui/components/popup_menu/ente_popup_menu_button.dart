@@ -108,7 +108,7 @@ Future<T?> showEntePopupMenu<T>({
   double menuWidth = 196.0,
   double itemHeight = 52.0,
   double borderRadius = 20.0,
-  double elevation = 0.0,
+  double elevation = 8.0,
   double screenPadding = 16.0,
   double itemHorizontalPadding = 16.0,
   double menuVerticalOffset = 12.0,
@@ -181,10 +181,8 @@ double _getMenuLeft({
 }) {
   const trailingAnchorOffset = 32.0;
   final preferredLeft = tapX - menuWidth + trailingAnchorOffset;
-  final maxLeft = math.max(
-    screenPadding,
-    overlayWidth - menuWidth - screenPadding,
-  );
+  final maxLeft =
+      math.max(screenPadding, overlayWidth - menuWidth - screenPadding);
   return math.min(math.max(screenPadding, preferredLeft), maxLeft);
 }
 

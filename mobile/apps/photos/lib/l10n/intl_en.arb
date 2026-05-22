@@ -1108,7 +1108,7 @@
     "description": "The text displayed above folders/albums stored on device",
     "type": "text"
   },
-  "onDevice": "Device",
+  "onDevice": "On device",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"

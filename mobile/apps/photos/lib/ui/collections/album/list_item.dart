@@ -92,7 +92,6 @@ class AlbumListItemWidget extends StatelessWidget {
       ),
       subtitle: FutureBuilder<int>(
         future: CollectionsService.instance.getFileCount(collection),
-        initialData: CollectionsService.instance.getCachedFileCount(collection),
         builder: (context, snapshot) {
           String countText = "";
           if (snapshot.hasData) {
@@ -104,15 +103,6 @@ class AlbumListItemWidget extends StatelessWidget {
               "Failed to fetch file count of collection",
               snapshot.error,
             );
-          } else {
-            final cachedCount = CollectionsService.instance.getCachedFileCount(
-              collection,
-            );
-            if (cachedCount != null) {
-              countText = AppLocalizations.of(context).itemCount(
-                count: cachedCount,
-              );
-            }
           }
           return _buildSubtitle(
             context,

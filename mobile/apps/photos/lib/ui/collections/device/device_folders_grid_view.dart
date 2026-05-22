@@ -43,7 +43,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   static const horizontalPadding = 16.0;
   static const crossAxisSpacing = 8.0;
   static const _thumbnailToTextSpacing = 8.0;
-  static const _titleToSubtitleSpacing = 2.0;
+  static const _titleToSubtitleSpacing = 4.0;
 
   @override
   void initState() {

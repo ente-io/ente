@@ -211,25 +211,20 @@ extension DeviceFiles on FilesDB {
         final AssetPathEntity pathEntity = tup.item1;
         final assetCount = await pathEntity.assetCountAsync;
         final String localID = tup.item2;
-        final int modifiedAt =
-            pathEntity.lastModified?.microsecondsSinceEpoch ?? 0;
         final bool shouldUpdate = existingPathIds.contains(pathEntity.id);
         if (shouldUpdate) {
           final rowUpdated = await db.writeTransaction((tx) async {
             await tx.execute(
               "UPDATE device_collections SET name = ?, cover_id = ?, count"
-              " = ?, modified_at = ? where id = ? AND (name != ? OR "
-              "cover_id != ? OR count != ? OR modified_at != ?)",
+              " = ? where id = ? AND (name != ? OR cover_id != ? OR count != ?)",
               [
                 pathEntity.name,
                 localID,
                 assetCount,
-                modifiedAt,
                 pathEntity.id,
                 pathEntity.name,
                 localID,
                 assetCount,
-                modifiedAt,
               ],
             );
             final result = await tx.get("SELECT changes();");
@@ -244,15 +239,14 @@ extension DeviceFiles on FilesDB {
           hasUpdated = true;
           await db.execute(
             '''
-            INSERT INTO device_collections (id, name, count, cover_id, modified_at, should_backup)
-            VALUES (?, ?, ?, ?, ?, ?);
+            INSERT INTO device_collections (id, name, count, cover_id, should_backup)
+            VALUES (?, ?, ?, ?, ?);
           ''',
             [
               pathEntity.id,
               pathEntity.name,
               assetCount,
               localID,
-              modifiedAt,
               shouldBackup ? _sqlBoolTrue : _sqlBoolFalse,
             ],
           );
@@ -449,7 +443,6 @@ extension DeviceFiles on FilesDB {
           count: row['count'] as int,
           collectionID: (row["collection_id"] ?? -1) as int,
           coverId: row["cover_id"] as String?,
-          modifiedAt: (row["modified_at"] ?? 0) as int,
           shouldBackup: (row["should_backup"] ?? _sqlBoolFalse) == _sqlBoolTrue,
           uploadStrategy: getUploadType((row["upload_strategy"] ?? 0) as int),
         );
