@@ -24,10 +24,7 @@ import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 class TrashPage extends StatefulWidget {
   final List<TrashFile> trashFiles;
 
-  const TrashPage({
-    super.key,
-    required this.trashFiles,
-  });
+  const TrashPage({super.key, required this.trashFiles});
 
   @override
   State<TrashPage> createState() => _TrashPageState();
@@ -90,16 +87,10 @@ class _TrashPageState extends State<TrashPage> {
       setState(() {
         _trashFiles.clear();
       });
-      showToast(
-        context,
-        context.l10n.trashClearedSuccessfully,
-      );
+      showToast(context, context.l10n.trashClearedSuccessfully);
       Navigator.of(context).pop();
     } catch (error) {
-      await showGenericErrorBottomSheet(
-        context: context,
-        error: error,
-      );
+      await showGenericErrorBottomSheet(context: context, error: error);
     } finally {
       await dialog.hide();
     }

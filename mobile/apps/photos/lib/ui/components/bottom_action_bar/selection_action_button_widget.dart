@@ -23,9 +23,7 @@ class SelectionActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(
-      hugeIcon != null || iconWidget != null,
-    );
+    assert(hugeIcon != null || iconWidget != null);
     return AnimatedSize(
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOutCirc,
@@ -39,9 +37,7 @@ class SelectionActionButton extends StatelessWidget {
                 iconWidget: iconWidget,
                 isCritical: isCritical,
               )
-            : const SizedBox(
-                height: 60,
-              ),
+            : const SizedBox(height: 60),
       ),
     );
   }
@@ -135,9 +131,7 @@ class __BodyState extends State<_Body> {
   }
 
   getWidthOfButton() {
-    final widthOfWidestWord = getWidthOfWidestWord(
-      widget.labelText,
-    );
+    final widthOfWidestWord = getWidthOfWidestWord(widget.labelText);
     if (widthOfWidestWord > minWidth) return widthOfWidestWord;
     return minWidth;
   }
@@ -148,10 +142,7 @@ class __BodyState extends State<_Body> {
 
     double maxWidth = 0.0;
     for (String word in words) {
-      final width = computeWidthOfWord(
-        word,
-        components.TextStyles.mini,
-      );
+      final width = computeWidthOfWord(word, components.TextStyles.mini);
       if (width > maxWidth) {
         maxWidth = width;
       }

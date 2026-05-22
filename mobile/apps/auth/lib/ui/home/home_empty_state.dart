@@ -63,10 +63,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                                 height: 142,
                               ),
                             ),
-                            Image.asset(
-                              'assets/onboarding-2.png',
-                              height: 188,
-                            ),
+                            Image.asset('assets/onboarding-2.png', height: 188),
                           ],
                         ),
                       ),

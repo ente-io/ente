@@ -62,8 +62,9 @@ class UserDetails {
     if (familyData?.members == null) {
       return null;
     }
-    return familyData!.members!
-        .firstWhereOrNull((member) => member.email.trim() == email.trim());
+    return familyData!.members!.firstWhereOrNull(
+      (member) => member.email.trim() == email.trim(),
+    );
   }
 
   bool isFamilyAdmin() {
@@ -249,12 +250,7 @@ class FamilyData {
   final int expiryTime;
   final int adminBonus;
 
-  FamilyData(
-    this.members,
-    this.storage,
-    this.expiryTime,
-    this.adminBonus,
-  );
+  FamilyData(this.members, this.storage, this.expiryTime, this.adminBonus);
 
   int getTotalUsage() {
     return members

@@ -9,9 +9,9 @@ import "package:photos/service_locator.dart";
 
 class PhotosContactsService {
   PhotosContactsService._privateConstructor()
-      : _contactsServiceFactory = (() => contacts.ContactsService(
-              preferences: ServiceLocator.instance.prefs,
-            )) {
+    : _contactsServiceFactory = (() => contacts.ContactsService(
+        preferences: ServiceLocator.instance.prefs,
+      )) {
     _attachSessionResetListeners();
   }
 
@@ -19,9 +19,10 @@ class PhotosContactsService {
   PhotosContactsService.forTesting({
     contacts.ContactsService? contactsService,
     contacts.ContactsService Function()? contactsServiceFactory,
-  })  : _contacts = contactsService,
-        _contactsServiceFactory = contactsServiceFactory ??
-            (contactsService != null ? () => contactsService : null) {
+  }) : _contacts = contactsService,
+       _contactsServiceFactory =
+           contactsServiceFactory ??
+           (contactsService != null ? () => contactsService : null) {
     _attachSessionResetListeners();
   }
 
@@ -79,16 +80,14 @@ class PhotosContactsService {
     _sessionAuthToken = session.authToken;
     late final Future<void> readyFuture;
     final generation = _sessionGeneration;
-    readyFuture = _openAndSync(
-      currentContacts,
-      session,
-      generation,
-    ).catchError((Object error, StackTrace stackTrace) {
-      if (identical(_readyFuture, readyFuture)) {
-        _readyFuture = null;
-      }
-      throw error;
-    });
+    readyFuture = _openAndSync(currentContacts, session, generation).catchError(
+      (Object error, StackTrace stackTrace) {
+        if (identical(_readyFuture, readyFuture)) {
+          _readyFuture = null;
+        }
+        throw error;
+      },
+    );
     _readyFuture = readyFuture;
     return readyFuture;
   }
@@ -101,22 +100,19 @@ class PhotosContactsService {
     if (cached != null) {
       return cached;
     }
-    return _runReadSafely(
-      () async {
-        await ensureReady();
-        final contacts = _activeContactsOrNull();
-        if (contacts == null) {
-          return null;
-        }
-        final contact = await contacts.getContactByUserId(contactUserId);
-        if (contact == null || contact.isDeleted) {
-          return null;
-        }
-        _cacheContact(contact);
-        return contact;
-      },
-      description: "load contact for user $contactUserId",
-    );
+    return _runReadSafely(() async {
+      await ensureReady();
+      final contacts = _activeContactsOrNull();
+      if (contacts == null) {
+        return null;
+      }
+      final contact = await contacts.getContactByUserId(contactUserId);
+      if (contact == null || contact.isDeleted) {
+        return null;
+      }
+      _cacheContact(contact);
+      return contact;
+    }, description: "load contact for user $contactUserId");
   }
 
   contacts.ContactRecord? getCachedContactByUserId(int? contactUserId) {
@@ -218,8 +214,8 @@ class PhotosContactsService {
     final trimmedBirthDate = birthDate?.trim();
     final normalizedBirthDate =
         trimmedBirthDate == null || trimmedBirthDate.isEmpty
-            ? null
-            : trimmedBirthDate;
+        ? null
+        : trimmedBirthDate;
     final existing = await contactsService.getContactByUserId(
       contactUserId,
       includeDeleted: true,
@@ -408,8 +404,9 @@ class PhotosContactsService {
   }
 
   bool _isRustInitializationError(StateError error) {
-    return error.message
-        .contains("flutter_rust_bridge has not been initialized");
+    return error.message.contains(
+      "flutter_rust_bridge has not been initialized",
+    );
   }
 
   bool _isContactsDatabaseNotConfiguredError(StateError error) {
@@ -493,9 +490,7 @@ class PhotosContactsService {
     await ensureReady();
     final contacts = _activeContactsOrNull();
     if (contacts == null) {
-      throw StateError(
-        "Contacts are unavailable without an active session",
-      );
+      throw StateError("Contacts are unavailable without an active session");
     }
     return contacts;
   }

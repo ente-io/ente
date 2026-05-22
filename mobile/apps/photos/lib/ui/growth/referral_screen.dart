@@ -34,10 +34,11 @@ class _ReferralScreenState extends State<ReferralScreen> {
   }
 
   Future<Tuple2<ReferralView, UserDetails>> _fetchData() async {
-    UserDetails? cachedUserDetails =
-        UserService.instance.getCachedUserDetails();
-    cachedUserDetails ??=
-        await UserService.instance.getUserDetailsV2(memoryCount: false);
+    UserDetails? cachedUserDetails = UserService.instance
+        .getCachedUserDetails();
+    cachedUserDetails ??= await UserService.instance.getUserDetailsV2(
+      memoryCount: false,
+    );
     final referralView = await storageBonusService.getReferralView();
     return Tuple2(referralView, cachedUserDetails);
   }
@@ -76,8 +77,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     Expanded(
                       child: Center(
                         child: Text(
-                          AppLocalizations.of(context)
-                              .failedToFetchReferralDetails,
+                          AppLocalizations.of(
+                            context,
+                          ).failedToFetchReferralDetails,
                         ),
                       ),
                     ),
@@ -112,8 +114,9 @@ class ReferralWidget extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final bool isReferralEnabled = referralView.planInfo.isEnabled;
 
-    final cardColor =
-        isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
+    final cardColor = isDarkMode
+        ? const Color(0xFF212121)
+        : const Color(0xFFFFFFFF);
 
     return SingleChildScrollView(
       child: Padding(
@@ -200,16 +203,15 @@ class ReferralWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: colorScheme.strokeMuted,
-                      ),
+                      Icon(Icons.error_outline, color: colorScheme.strokeMuted),
                       const SizedBox(height: 12),
                       Text(
-                        AppLocalizations.of(context)
-                            .referralsAreCurrentlyPaused,
-                        style: textTheme.small
-                            .copyWith(color: colorScheme.textFaint),
+                        AppLocalizations.of(
+                          context,
+                        ).referralsAreCurrentlyPaused,
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textFaint,
+                        ),
                       ),
                     ],
                   ),
@@ -272,21 +274,15 @@ class ReferralWidget extends StatelessWidget {
     const greenColor = Color(0xFF08C225);
     final storageInGB = referralView.planInfo.storageInGB;
     final mutedStyle = textTheme.miniMuted.copyWith(height: 2);
-    final step3Text = AppLocalizations.of(context).referralStep3(
-      storageInGB: storageInGB,
-    );
+    final step3Text = AppLocalizations.of(
+      context,
+    ).referralStep3(storageInGB: storageInGB);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context).referralStep1,
-          style: mutedStyle,
-        ),
-        Text(
-          AppLocalizations.of(context).referralStep2,
-          style: mutedStyle,
-        ),
+        Text(AppLocalizations.of(context).referralStep1, style: mutedStyle),
+        Text(AppLocalizations.of(context).referralStep2, style: mutedStyle),
         RichText(
           text: TextSpan(
             style: mutedStyle,
@@ -294,14 +290,8 @@ class ReferralWidget extends StatelessWidget {
               step3Text,
               mutedStyle,
               greenColor,
-              [
-                "${storageInGB}GB free",
-                "$storageInGB GB free",
-              ],
-              [
-                "${storageInGB}GB",
-                "$storageInGB GB",
-              ],
+              ["${storageInGB}GB free", "$storageInGB GB free"],
+              ["${storageInGB}GB", "$storageInGB GB"],
             ),
           ),
         ),
@@ -319,8 +309,8 @@ class ReferralWidget extends StatelessWidget {
     final tokens = preferredTokens.any(text.contains)
         ? preferredTokens
         : fallbackTokens.any(text.contains)
-            ? fallbackTokens
-            : const <String>[];
+        ? fallbackTokens
+        : const <String>[];
 
     if (tokens.isEmpty) {
       return [TextSpan(text: text)];

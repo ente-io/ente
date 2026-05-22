@@ -25,7 +25,7 @@ class SearchWidget extends StatefulWidget {
 
 class SearchWidgetState extends State<SearchWidget> {
   static final ValueNotifier<Stream<List<SearchResult>>?>
-      searchResultsStreamNotifier = ValueNotifier(null);
+  searchResultsStreamNotifier = ValueNotifier(null);
 
   ///This stores the query that is being searched for. When going to other tabs
   ///when searching, this state gets disposed and when coming back to the
@@ -43,7 +43,7 @@ class SearchWidgetState extends State<SearchWidget> {
   GlobalKey widgetKey = GlobalKey();
   TextEditingController textController = TextEditingController();
   late final StreamSubscription<ClearAndUnfocusSearchBar>
-      _clearAndUnfocusSearchBar;
+  _clearAndUnfocusSearchBar;
   late final Logger _logger = Logger("SearchWidgetState");
 
   @override
@@ -63,8 +63,9 @@ class SearchWidgetState extends State<SearchWidget> {
         focusNode.unfocus();
       }
     });
-    _tabDoubleTapEvent =
-        Bus.instance.on<TabDoubleTapEvent>().listen((event) async {
+    _tabDoubleTapEvent = Bus.instance.on<TabDoubleTapEvent>().listen((
+      event,
+    ) async {
       debugPrint("Firing now ${event.selectedIndex}");
       if (mounted && event.selectedIndex == 3) {
         focusNode.requestFocus();
@@ -93,11 +94,12 @@ class SearchWidgetState extends State<SearchWidget> {
     //to the serach tab.
     textController.text = query;
 
-    _clearAndUnfocusSearchBar =
-        Bus.instance.on<ClearAndUnfocusSearchBar>().listen((event) {
-      textController.clear();
-      focusNode.unfocus();
-    });
+    _clearAndUnfocusSearchBar = Bus.instance
+        .on<ClearAndUnfocusSearchBar>()
+        .listen((event) {
+          textController.clear();
+          focusNode.unfocus();
+        });
   }
 
   @override
@@ -131,8 +133,10 @@ class SearchWidgetState extends State<SearchWidget> {
       if (mounted) {
         query = textController.text.trim();
         IndexOfStackNotifier().isSearchQueryEmpty = query.isEmpty;
-        searchResultsStreamNotifier.value =
-            _getSearchResultsStream(context, query);
+        searchResultsStreamNotifier.value = _getSearchResultsStream(
+          context,
+          query,
+        );
       }
     });
   }
@@ -143,7 +147,8 @@ class SearchWidgetState extends State<SearchWidget> {
     final textTheme = getEnteTextTheme(context);
     final mutedTextColor =
         textTheme.smallMuted.color ?? colorScheme.strokeMuted;
-    final shouldShowClearButton = focusNode.hasFocus ||
+    final shouldShowClearButton =
+        focusNode.hasFocus ||
         MediaQuery.viewInsetsOf(context).bottom > 0 ||
         textController.text.trim().isNotEmpty;
     return RepaintBoundary(
@@ -192,16 +197,17 @@ class SearchWidgetState extends State<SearchWidget> {
                       setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
                       ValueListenableBuilder(
                         valueListenable: isLoading,
-                        builder: (
-                          BuildContext context,
-                          bool isSearching,
-                          Widget? child,
-                        ) {
-                          return SearchSuffixIcon(
-                            isSearching,
-                            showClearButton: shouldShowClearButton,
-                          );
-                        },
+                        builder:
+                            (
+                              BuildContext context,
+                              bool isSearching,
+                              Widget? child,
+                            ) {
+                              return SearchSuffixIcon(
+                                isSearching,
+                                showClearButton: shouldShowClearButton,
+                              );
+                            },
                       ),
                     ],
                   ),
@@ -248,83 +254,67 @@ class SearchWidgetState extends State<SearchWidget> {
       });
     }
 
-    _searchService.getHolidaySearchResults(context, query).then(
-      (holidayResults) {
-        onResultsReceived(holidayResults);
-      },
-    );
+    _searchService.getHolidaySearchResults(context, query).then((
+      holidayResults,
+    ) {
+      onResultsReceived(holidayResults);
+    });
 
-    _searchService.getFileTypeResults(context, query).then(
-      (fileTypeSearchResults) {
-        onResultsReceived(fileTypeSearchResults);
-      },
-    );
+    _searchService.getFileTypeResults(context, query).then((
+      fileTypeSearchResults,
+    ) {
+      onResultsReceived(fileTypeSearchResults);
+    });
 
-    _searchService.getCaptionAndNameResults(query).then(
-      (captionAndDisplayNameResult) {
-        onResultsReceived(captionAndDisplayNameResult);
-      },
-    );
+    _searchService.getCaptionAndNameResults(query).then((
+      captionAndDisplayNameResult,
+    ) {
+      onResultsReceived(captionAndDisplayNameResult);
+    });
 
-    _searchService.getFileExtensionResults(query).then(
-      (fileExtnResult) {
-        onResultsReceived(fileExtnResult);
-      },
-    );
+    _searchService.getFileExtensionResults(query).then((fileExtnResult) {
+      onResultsReceived(fileExtnResult);
+    });
 
-    _searchService.getLocationResults(context, query).then(
-      (locationResult) {
-        onResultsReceived(locationResult);
-      },
-    );
+    _searchService.getLocationResults(context, query).then((locationResult) {
+      onResultsReceived(locationResult);
+    });
 
-    _searchService.getAllFace(null, minClusterSize: 10).then(
-      (faceResult) {
-        final List<GenericSearchResult> filteredResults = [];
-        for (final result in faceResult) {
-          if (result.name().toLowerCase().contains(query.toLowerCase())) {
-            filteredResults.add(result);
-          }
+    _searchService.getAllFace(null, minClusterSize: 10).then((faceResult) {
+      final List<GenericSearchResult> filteredResults = [];
+      for (final result in faceResult) {
+        if (result.name().toLowerCase().contains(query.toLowerCase())) {
+          filteredResults.add(result);
         }
-        onResultsReceived(filteredResults);
-      },
-    );
+      }
+      onResultsReceived(filteredResults);
+    });
 
-    _searchService.getCollectionSearchResults(query).then(
-      (collectionResults) {
-        onResultsReceived(collectionResults);
-      },
-    );
+    _searchService.getCollectionSearchResults(query).then((collectionResults) {
+      onResultsReceived(collectionResults);
+    });
 
-    _searchService.getDeviceCollectionSearchResults(query).then(
-      (deviceCollectionResults) {
-        onResultsReceived(deviceCollectionResults);
-      },
-    );
+    _searchService.getDeviceCollectionSearchResults(query).then((
+      deviceCollectionResults,
+    ) {
+      onResultsReceived(deviceCollectionResults);
+    });
 
-    _searchService.getMonthSearchResults(context, query).then(
-      (monthResults) {
-        onResultsReceived(monthResults);
-      },
-    );
+    _searchService.getMonthSearchResults(context, query).then((monthResults) {
+      onResultsReceived(monthResults);
+    });
 
-    _searchService.getDateResults(context, query).then(
-      (possibleEvents) {
-        onResultsReceived(possibleEvents);
-      },
-    );
+    _searchService.getDateResults(context, query).then((possibleEvents) {
+      onResultsReceived(possibleEvents);
+    });
 
-    _searchService.getMagicSearchResults(context, query).then(
-      (magicResults) {
-        onResultsReceived(magicResults);
-      },
-    );
+    _searchService.getMagicSearchResults(context, query).then((magicResults) {
+      onResultsReceived(magicResults);
+    });
 
-    _searchService.getContactSearchResults(query).then(
-      (contactResults) {
-        onResultsReceived(contactResults);
-      },
-    );
+    _searchService.getContactSearchResults(query).then((contactResults) {
+      onResultsReceived(contactResults);
+    });
 
     return streamController.stream.asBroadcastStream();
   }

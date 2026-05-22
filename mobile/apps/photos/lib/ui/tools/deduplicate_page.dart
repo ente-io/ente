@@ -101,10 +101,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: _getGridView(
-                        _duplicates[index],
-                        index,
-                      ),
+                      child: _getGridView(_duplicates[index], index),
                     );
                   },
                   itemCount: _duplicates.length,
@@ -155,10 +152,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           text = AppLocalizations.of(context).totalSize;
           break;
       }
-      return Text(
-        text,
-        style: textTheme.miniBold,
-      );
+      return Text(text, style: textTheme.miniBold);
     }
 
     return PopupMenuButton(

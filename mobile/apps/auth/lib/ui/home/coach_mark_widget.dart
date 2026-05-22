@@ -23,8 +23,9 @@ class CoachMarkWidget extends StatelessWidget {
           Expanded(
             child: Container(
               width: double.infinity,
-              color:
-                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.surface.withValues(alpha: 0.1),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                 child: Row(
@@ -34,22 +35,15 @@ class CoachMarkWidget extends StatelessWidget {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.info_outline,
-                          size: 42,
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
+                        const Icon(Icons.info_outline, size: 42),
+                        const SizedBox(height: 24),
                         Text(
                           PlatformDetector.isDesktop()
                               ? l10n.hintForDesktop
                               : l10n.hintForMobile,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
-                        const SizedBox(
-                          height: 36,
-                        ),
+                        const SizedBox(height: 36),
                         SizedBox(
                           width: 160,
                           child: OutlinedButton(

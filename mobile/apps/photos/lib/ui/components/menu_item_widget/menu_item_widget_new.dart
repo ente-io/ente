@@ -155,8 +155,9 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Figma colors: Light #FFFFFF, Dark #212121
-    final defaultMenuItemColor =
-        isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
+    final defaultMenuItemColor = isDarkMode
+        ? const Color(0xFF212121)
+        : const Color(0xFFFFFFFF);
 
     final effectiveMenuItemColor = menuItemColor ?? defaultMenuItemColor;
     final bool hasSubText =
@@ -201,7 +202,8 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
                         widget.subText!,
                         maxLines: widget.subTextMaxLines,
                         overflow: TextOverflow.ellipsis,
-                        style: widget.subTextStyle ??
+                        style:
+                            widget.subTextStyle ??
                             textTheme.tinyMuted.copyWith(height: 17 / 10),
                       ),
                     ],
@@ -243,14 +245,11 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     );
     final onTapResult = widget.onTap?.call();
     if (onTapResult != null) {
-      await onTapResult.then(
-        (value) {
-          widget.alwaysShowSuccessState
-              ? executionStateNotifier.value = ExecutionState.successful
-              : null;
-        },
-        onError: (error, stackTrace) => _debouncer.cancelDebounceTimer(),
-      );
+      await onTapResult.then((value) {
+        widget.alwaysShowSuccessState
+            ? executionStateNotifier.value = ExecutionState.successful
+            : null;
+      }, onError: (error, stackTrace) => _debouncer.cancelDebounceTimer());
     }
     _debouncer.cancelDebounceTimer();
     if (widget.alwaysShowSuccessState) {
@@ -282,8 +281,9 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
           final isDarkMode = Theme.of(context).brightness == Brightness.dark;
           // Pressed color: Light #F5F5F5, Dark #2C2C2C
           // These are the result of overlaying fillFaintPressed on the base color
-          menuItemColor =
-              isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF5F5F5);
+          menuItemColor = isDarkMode
+              ? const Color(0xFF2C2C2C)
+              : const Color(0xFFF5F5F5);
         } else {
           menuItemColor = widget.menuItemColor;
         }
@@ -304,16 +304,13 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
         executionStateNotifier.value == ExecutionState.successful) {
       return;
     }
-    Future.delayed(
-      const Duration(milliseconds: 100),
-      () {
-        if (mounted) {
-          setState(() {
-            menuItemColor = widget.menuItemColor;
-          });
-        }
-      },
-    );
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {
+          menuItemColor = widget.menuItemColor;
+        });
+      }
+    });
   }
 
   void _onCancel() {
@@ -321,15 +318,12 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
         executionStateNotifier.value == ExecutionState.successful) {
       return;
     }
-    Future.delayed(
-      const Duration(milliseconds: 100),
-      () {
-        if (mounted) {
-          setState(() {
-            menuItemColor = widget.menuItemColor;
-          });
-        }
-      },
-    );
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {
+          menuItemColor = widget.menuItemColor;
+        });
+      }
+    });
   }
 }

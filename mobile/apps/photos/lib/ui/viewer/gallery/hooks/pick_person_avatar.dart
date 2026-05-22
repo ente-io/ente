@@ -28,9 +28,7 @@ Future<dynamic> showPersonAvatarPhotoSheet(
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(5),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
     ),
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
@@ -42,10 +40,7 @@ Future<dynamic> showPersonAvatarPhotoSheet(
 class PickPersonCoverPhotoWidget extends StatelessWidget {
   final PersonEntity personEntity;
 
-  const PickPersonCoverPhotoWidget(
-    this.personEntity, {
-    super.key,
-  });
+  const PickPersonCoverPhotoWidget(this.personEntity, {super.key});
 
   Future<FileLoadResult> loadPersonFiles() async {
     final sortedFiles = await SearchService.instance.getFilesForPersonID(
@@ -84,16 +79,18 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                   Expanded(
                     child: GalleryFilesState(
                       child: Gallery(
-                        asyncLoader: (
-                          creationStartTime,
-                          creationEndTime, {
-                          limit,
-                          asc,
-                        }) async {
-                          final FileLoadResult result = await loadPersonFiles();
+                        asyncLoader:
+                            (
+                              creationStartTime,
+                              creationEndTime, {
+                              limit,
+                              asc,
+                            }) async {
+                              final FileLoadResult result =
+                                  await loadPersonFiles();
 
-                          return result;
-                        },
+                              return result;
+                            },
                         // reloadEvent: Bus.instance
                         //     .on<CollectionUpdatedEvent>()
                         //     .where(
@@ -138,15 +135,13 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                               key: ValueKey(value),
                               isDisabled: !value,
                               buttonType: ButtonType.neutral,
-                              labelText:
-                                  AppLocalizations.of(context).useSelectedPhoto,
+                              labelText: AppLocalizations.of(
+                                context,
+                              ).useSelectedPhoto,
                               onTap: () async {
                                 final selectedFile = selectedFiles.files.first;
-                                final result =
-                                    await PersonService.instance.updateAvatar(
-                                  personEntity,
-                                  selectedFile,
-                                );
+                                final result = await PersonService.instance
+                                    .updateAvatar(personEntity, selectedFile);
                                 Bus.instance.fire(
                                   PeopleChangedEvent(
                                     type: PeopleEventType.saveOrEditPerson,

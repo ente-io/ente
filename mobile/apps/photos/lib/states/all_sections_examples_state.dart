@@ -72,14 +72,16 @@ class _AllSectionsExamplesProviderState
     _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
       onDataUpdate();
     });
-    _onPeopleChangedEvent =
-        Bus.instance.on<PeopleChangedEvent>().listen((event) {
+    _onPeopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((
+      event,
+    ) {
       onDataUpdate();
     });
-    _peopleSortChangedEvent =
-        Bus.instance.on<PeopleSortOrderChangeEvent>().listen((event) {
-      onDataUpdate();
-    });
+    _peopleSortChangedEvent = Bus.instance
+        .on<PeopleSortOrderChangeEvent>()
+        .listen((event) {
+          onDataUpdate();
+        });
     _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source == TabChangedEventSource.pageView &&
           event.selectedIndex == 3) {
@@ -120,8 +122,8 @@ class _AllSectionsExamplesProviderState
       setState(() {
         _logger.info("'_debounceTimer: reloading all sections in search tab");
         final allSectionsExamples = <Future<List<SearchResult>>>[];
-        final hasAnySearchableFilesFuture =
-            SearchService.instance.hasAnyFilesForSearch();
+        final hasAnySearchableFilesFuture = SearchService.instance
+            .hasAnyFilesForSearch();
         for (SectionType sectionType in SectionType.values) {
           // Contacts moved to shared, albums moved to the Albums tab, and file
           // types render as a lazy placeholder in Search.

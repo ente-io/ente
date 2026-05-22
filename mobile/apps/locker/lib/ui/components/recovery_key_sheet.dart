@@ -17,10 +17,7 @@ import "package:share_plus/share_plus.dart";
 class RecoveryKeySheet extends StatefulWidget {
   final String recoveryKey;
 
-  const RecoveryKeySheet({
-    super.key,
-    required this.recoveryKey,
-  });
+  const RecoveryKeySheet({super.key, required this.recoveryKey});
 
   @override
   State<RecoveryKeySheet> createState() => _RecoveryKeySheetState();
@@ -54,8 +51,9 @@ class _RecoveryKeySheetState extends State<RecoveryKeySheet> {
     final textTheme = getEnteTextTheme(context);
 
     // Convert recovery key to mnemonic words
-    final String recoveryKeyMnemonic =
-        bip39.entropyToMnemonic(widget.recoveryKey);
+    final String recoveryKeyMnemonic = bip39.entropyToMnemonic(
+      widget.recoveryKey,
+    );
 
     if (recoveryKeyMnemonic.split(' ').length != mnemonicKeyWordCount) {
       throw AssertionError(
@@ -69,9 +67,7 @@ class _RecoveryKeySheetState extends State<RecoveryKeySheet> {
       children: [
         Text(
           context.strings.recoveryKeyOnForgotPassword,
-          style: textTheme.body.copyWith(
-            color: colorScheme.textMuted,
-          ),
+          style: textTheme.body.copyWith(color: colorScheme.textMuted),
         ),
         const SizedBox(height: 24),
         Container(
@@ -117,9 +113,7 @@ class _RecoveryKeySheetState extends State<RecoveryKeySheet> {
         const SizedBox(height: 16),
         Text(
           context.strings.recoveryKeySaveDescription,
-          style: textTheme.small.copyWith(
-            color: colorScheme.textMuted,
-          ),
+          style: textTheme.small.copyWith(color: colorScheme.textMuted),
         ),
         const SizedBox(height: 24),
         SizedBox(
@@ -136,10 +130,7 @@ class _RecoveryKeySheetState extends State<RecoveryKeySheet> {
   Future<void> _copyToClipboard(String recoveryKey) async {
     await Clipboard.setData(ClipboardData(text: recoveryKey));
     if (mounted) {
-      showShortToast(
-        context,
-        context.strings.recoveryKeyCopiedToClipboard,
-      );
+      showShortToast(context, context.strings.recoveryKeyCopiedToClipboard);
     }
   }
 
@@ -151,16 +142,11 @@ class _RecoveryKeySheetState extends State<RecoveryKeySheet> {
       _recoveryKeyFile.writeAsStringSync(recoveryKey);
 
       await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(_recoveryKeyFile.path)],
-        ),
+        ShareParams(files: [XFile(_recoveryKeyFile.path)]),
       );
     } catch (e) {
       if (mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }

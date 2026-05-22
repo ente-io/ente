@@ -43,29 +43,24 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon> {
               ),
             )
           : widget.showClearButton
-              ? IconButton(
-                  splashRadius: 1,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints.tightFor(
-                    width: _suffixContainerSize,
-                    height: _suffixContainerSize,
-                  ),
-                  alignment: Alignment.centerRight,
-                  visualDensity:
-                      const VisualDensity(horizontal: -1, vertical: -1),
-                  onPressed: () {
-                    Bus.instance.fire(ClearAndUnfocusSearchBar());
-                  },
-                  icon: Icon(
-                    Icons.close,
-                    color: colorScheme.strokeMuted,
-                    size: 16,
-                  ),
-                )
-              : const SizedBox(
-                  width: _suffixContainerSize,
-                  height: _suffixContainerSize,
-                ),
+          ? IconButton(
+              splashRadius: 1,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(
+                width: _suffixContainerSize,
+                height: _suffixContainerSize,
+              ),
+              alignment: Alignment.centerRight,
+              visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
+              onPressed: () {
+                Bus.instance.fire(ClearAndUnfocusSearchBar());
+              },
+              icon: Icon(Icons.close, color: colorScheme.strokeMuted, size: 16),
+            )
+          : const SizedBox(
+              width: _suffixContainerSize,
+              height: _suffixContainerSize,
+            ),
     );
   }
 }

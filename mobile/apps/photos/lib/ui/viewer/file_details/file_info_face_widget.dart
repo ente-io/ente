@@ -116,9 +116,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                         faceCrop: widget.faceCrop,
                       ),
                       if (widget.isSelected)
-                        Container(
-                          color: Colors.black.withValues(alpha: 0.12),
-                        ),
+                        Container(color: Colors.black.withValues(alpha: 0.12)),
                     ],
                   ),
                 ),

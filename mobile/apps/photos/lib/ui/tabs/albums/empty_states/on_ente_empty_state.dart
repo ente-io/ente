@@ -137,9 +137,6 @@ class OnEnteEmptyState extends StatelessWidget {
     if (collection == null || !context.mounted) {
       return;
     }
-    await routeToPage(
-      context,
-      SmartAlbumPeople(collectionId: collection.id),
-    );
+    await routeToPage(context, SmartAlbumPeople(collectionId: collection.id));
   }
 }

@@ -150,9 +150,9 @@ class TextOverlayWidget extends StatefulWidget {
     this.uiOffset = Offset.zero,
     this.zoomedInteractionPolicy = ZoomedInteractionPolicy.panFirst,
   }) : assert(
-          imageFile != null || imageSize != null,
-          'Either imageFile or imageSize must be provided',
-        );
+         imageFile != null || imageSize != null,
+         'Either imageFile or imageSize must be provided',
+       );
 
   @override
   State<TextOverlayWidget> createState() => _TextOverlayWidgetState();
@@ -384,19 +384,19 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
                   gaplessPlayback: true,
                   frameBuilder:
                       (context, child, frame, wasSynchronouslyLoaded) {
-                    if (frame != null) {
-                      _scheduleMetricsRebuild(constraints);
-                    }
-                    if (wasSynchronouslyLoaded) {
-                      return child;
-                    }
-                    return AnimatedOpacity(
-                      opacity: frame == null ? 0 : 1,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                      child: child,
-                    );
-                  },
+                        if (frame != null) {
+                          _scheduleMetricsRebuild(constraints);
+                        }
+                        if (wasSynchronouslyLoaded) {
+                          return child;
+                        }
+                        return AnimatedOpacity(
+                          opacity: frame == null ? 0 : 1,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          child: child,
+                        );
+                      },
                 ),
               ),
               ..._buildEditableBlockOverlays(),
@@ -470,19 +470,20 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
             gestures: <Type, GestureRecognizerFactory>{
               _TextRegionLongPressRecognizer:
                   GestureRecognizerFactoryWithHandlers<
-                      _TextRegionLongPressRecognizer>(
-                () => _TextRegionLongPressRecognizer(
-                  hitTestBlock: _isPositionOnGestureLayer,
-                ),
-                (_TextRegionLongPressRecognizer instance) {
-                  instance
-                    ..hitTestBlock = _isPositionOnGestureLayer
-                    ..onLongPressStart = (details) {
-                      if (_activePointerCount > 1) return;
-                      _onLongPressStart(details);
-                    };
-                },
-              ),
+                    _TextRegionLongPressRecognizer
+                  >(
+                    () => _TextRegionLongPressRecognizer(
+                      hitTestBlock: _isPositionOnGestureLayer,
+                    ),
+                    (_TextRegionLongPressRecognizer instance) {
+                      instance
+                        ..hitTestBlock = _isPositionOnGestureLayer
+                        ..onLongPressStart = (details) {
+                          if (_activePointerCount > 1) return;
+                          _onLongPressStart(details);
+                        };
+                    },
+                  ),
             },
             child: Listener(
               behavior: HitTestBehavior.translucent,
@@ -588,8 +589,9 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
 
     if (_selectionDragArmed && !_selectionDragInProgress) {
       final Offset? initial = _selectionPointerDownScenePoint;
-      final double delta =
-          initial == null ? 0.0 : (scenePoint - initial).distance;
+      final double delta = initial == null
+          ? 0.0
+          : (scenePoint - initial).distance;
       if (delta < _kDragStartSlop) {
         return;
       }
@@ -732,7 +734,8 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
     _lastConstraints = constraints;
     final metrics = _calculateMetrics(constraints);
 
-    final bool needsUpdate = _displaySize == null ||
+    final bool needsUpdate =
+        _displaySize == null ||
         !_roughlyEqualsSize(_displaySize!, metrics.size) ||
         _displayOffset == null ||
         !_roughlyEqualsOffset(_displayOffset!, metrics.offset);
@@ -888,7 +891,7 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
     final double sceneMargin = _toolbarViewportMargin / _effectiveUiScale;
     final double sceneSpacing =
         max(_toolbarMinVerticalSpacing, _handleVisualHeight + 12.0) /
-            _effectiveUiScale;
+        _effectiveUiScale;
 
     final double minLeft = viewportSceneRect.left + sceneMargin;
     final double maxLeft = max(
@@ -1063,8 +1066,9 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
         }
         final Rect expanded = _inflateSelectionRect(charRect);
         final Rect globalRect = expanded.shift(visual.bounds.topLeft);
-        bounds =
-            bounds == null ? globalRect : bounds.expandToInclude(globalRect);
+        bounds = bounds == null
+            ? globalRect
+            : bounds.expandToInclude(globalRect);
       }
     }
 
@@ -1158,16 +1162,11 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.horizontal(
-                  left: Radius.circular(8),
-                ),
+                borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
               ),
             ),
             onPressed: _copySelectedText,
-            child: Text(
-              localizations.copyButtonLabel,
-              style: buttonTextStyle,
-            ),
+            child: Text(localizations.copyButtonLabel, style: buttonTextStyle),
           ),
           Container(width: 1, color: Colors.white.withValues(alpha: 0.2)),
           TextButton(
@@ -1221,8 +1220,9 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
     required Offset anchorPoint,
     required bool isStart,
   }) {
-    final TextSelectionHandleType handleType =
-        isStart ? TextSelectionHandleType.left : TextSelectionHandleType.right;
+    final TextSelectionHandleType handleType = isStart
+        ? TextSelectionHandleType.left
+        : TextSelectionHandleType.right;
     final Rect hitbox = _handleHitboxRectForAnchor(anchorPoint, handleType);
 
     return Positioned(
@@ -1279,7 +1279,8 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
       type,
       _kMaterialTextLineHeight,
     );
-    final Offset hitboxTopLeft = anchorPoint -
+    final Offset hitboxTopLeft =
+        anchorPoint -
         handleAnchor -
         Offset(_handleHorizontalPadding, _handleVerticalPadding);
     return Rect.fromLTWH(
@@ -1408,8 +1409,9 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
 
   void _onHandlePanStart(DragStartDetails details, _HandleType type) {
     final bool isStart = type == _HandleType.base;
-    final _SelectionAnchor? activeAnchor =
-        isStart ? _baseAnchor : _extentAnchor;
+    final _SelectionAnchor? activeAnchor = isStart
+        ? _baseAnchor
+        : _extentAnchor;
     final Offset? anchorPoint = activeAnchor == null
         ? null
         : _handleAnchorPoint(activeAnchor, isStart: isStart);
@@ -1860,7 +1862,8 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
       return;
     }
 
-    final bool shouldSwap = baseOrder > extentOrder ||
+    final bool shouldSwap =
+        baseOrder > extentOrder ||
         (baseOrder == extentOrder &&
             _extentAnchor!.position.offset < _baseAnchor!.position.offset);
 
@@ -1900,8 +1903,9 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
       }
 
       final origin = bounds.topLeft;
-      final localPolygon =
-          scaledPoints.map((point) => point - origin).toList(growable: false);
+      final localPolygon = scaledPoints
+          .map((point) => point - origin)
+          .toList(growable: false);
       final geometry = _OrientedGeometry.fromPolygon(localPolygon);
       final characters = _buildCharacterVisuals(
         block,
@@ -1944,8 +1948,9 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
         if (scaled.length < 3) {
           continue;
         }
-        final localPolygon =
-            scaled.map((point) => point - origin).toList(growable: false);
+        final localPolygon = scaled
+            .map((point) => point - origin)
+            .toList(growable: false);
         if (localPolygon.isEmpty) {
           continue;
         }
@@ -2047,8 +2052,9 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
       final bottomEnd = _interpolateOffset(bottomLeft, bottomRight, endRatio);
 
       final polygon = <Offset>[topStart, topEnd, bottomEnd, bottomStart];
-      final localPolygon =
-          polygon.map((point) => point - origin).toList(growable: false);
+      final localPolygon = polygon
+          .map((point) => point - origin)
+          .toList(growable: false);
       final rect = _rectFromPoints(localPolygon);
       final _OrientedBounds? orientedBounds = geometry.isValid
           ? _orientedBoundsForPolygon(geometry, localPolygon)
@@ -2401,7 +2407,8 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
         final nextVisual = _blockVisuals[selectedIndices[i + 1]];
         if (nextVisual != null) {
           final nextRect = nextVisual.bounds;
-          final bool sameLine = (nextRect.top - currentRect.top).abs() <
+          final bool sameLine =
+              (nextRect.top - currentRect.top).abs() <
               min(currentRect.height, nextRect.height) * 0.6;
           buffer.write(sameLine ? ' ' : '\n');
         } else {
@@ -2512,7 +2519,8 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
       final xj = polygon[j].dx;
       final yj = polygon[j].dy;
 
-      final intersects = ((yi > point.dy) != (yj > point.dy)) &&
+      final intersects =
+          ((yi > point.dy) != (yj > point.dy)) &&
           (point.dx <
               (xj - xi) *
                       (point.dy - yi) /
@@ -2564,11 +2572,11 @@ class _OrientedBounds {
   Rect toRect() => Rect.fromLTRB(minU, minV, maxU, maxV);
 
   Rect inflate(double left, double right, double vertical) => Rect.fromLTRB(
-        minU - left,
-        minV - vertical,
-        maxU + right,
-        maxV + vertical,
-      );
+    minU - left,
+    minV - vertical,
+    maxU + right,
+    maxV + vertical,
+  );
 }
 
 class _OrientedGeometry {

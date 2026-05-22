@@ -10,8 +10,9 @@ class MethodChannelEnteQr extends EnteQrPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version =
-        await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await methodChannel.invokeMethod<String>(
+      'getPlatformVersion',
+    );
     return version;
   }
 
@@ -28,8 +29,9 @@ class MethodChannelEnteQr extends EnteQrPlatform {
       }
 
       // Convert to Map<String, dynamic> safely
-      final Map<String, dynamic> resultMap =
-          Map<String, dynamic>.from(result as Map);
+      final Map<String, dynamic> resultMap = Map<String, dynamic>.from(
+        result as Map,
+      );
 
       final bool success = resultMap['success'] as bool? ?? false;
       if (success) {
@@ -62,8 +64,9 @@ class MethodChannelEnteQr extends EnteQrPlatform {
         return QrScanResults.error('Failed to scan QR codes');
       }
 
-      final Map<String, dynamic> resultMap =
-          Map<String, dynamic>.from(result as Map);
+      final Map<String, dynamic> resultMap = Map<String, dynamic>.from(
+        result as Map,
+      );
 
       final bool success = resultMap['success'] as bool? ?? false;
       if (success) {

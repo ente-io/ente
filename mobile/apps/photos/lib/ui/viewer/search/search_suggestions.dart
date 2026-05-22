@@ -25,9 +25,7 @@ import "package:photos/ui/viewer/search/search_widget.dart";
 ///fast. Instead, we usi a queue to store the events and then generate the
 ///widgets from the queue at regular intervals.
 class SearchSuggestionsWidget extends StatefulWidget {
-  const SearchSuggestionsWidget({
-    super.key,
-  });
+  const SearchSuggestionsWidget({super.key});
 
   @override
   State<SearchSuggestionsWidget> createState() =>
@@ -137,9 +135,9 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
           child: Text(
-            AppLocalizations.of(context).searchResultCount(
-              count: _resultsCount,
-            ),
+            AppLocalizations.of(
+              context,
+            ).searchResultCount(count: _resultsCount),
             style: textTheme.smallBold.copyWith(color: colorScheme.textMuted),
           ),
         ),
@@ -406,10 +404,7 @@ class _SearchResultsSectionWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text(
-                title,
-                style: textTheme.bodyBold,
-              ),
+              Text(title, style: textTheme.bodyBold),
             ],
           ),
         ),

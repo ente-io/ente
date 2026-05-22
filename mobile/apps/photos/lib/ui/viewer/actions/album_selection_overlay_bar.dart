@@ -123,9 +123,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
           if (_allSelected) {
             widget.selectedAlbums.clearAll();
           } else {
-            widget.selectedAlbums.select(
-              widget.collections.toSet(),
-            );
+            widget.selectedAlbums.select(widget.collections.toSet());
           }
           _allSelected = !_allSelected;
         });

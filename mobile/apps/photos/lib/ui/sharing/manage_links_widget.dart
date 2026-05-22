@@ -165,8 +165,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       title: AppLocalizations.of(context).linkExpiry,
                       subTitle: (url.hasExpiry
                           ? (url.isExpired
-                              ? AppLocalizations.of(context).linkExpired
-                              : AppLocalizations.of(context).linkEnabled)
+                                ? AppLocalizations.of(context).linkExpired
+                                : AppLocalizations.of(context).linkEnabled)
                           : AppLocalizations.of(context).linkNeverExpires),
                       subTitleColor: url.isExpired ? warning500 : null,
                     ),
@@ -432,8 +432,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               shareText:
                                   'Scan this QR code to view my ${widget.collection!.displayName} album on ente',
                               dialogTitle: AppLocalizations.of(context).qrCode,
-                              shareButtonText:
-                                  AppLocalizations.of(context).share,
+                              shareButtonText: AppLocalizations.of(
+                                context,
+                              ).share,
                               logoAssetPath: 'assets/qr_logo.png',
                               branding: const QrTextBranding(
                                 text: 'ente',

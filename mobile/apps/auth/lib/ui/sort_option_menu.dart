@@ -38,9 +38,9 @@ class SortCodeMenuWidget extends StatelessWidget {
       return Text(
         text,
         style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.7),
-            ),
+          fontSize: 14,
+          color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.7),
+        ),
       );
     }
 
@@ -62,10 +62,7 @@ class SortCodeMenuWidget extends StatelessWidget {
                 children: [
                   sortOptionText(CodeSortKey.values[index]),
                   if (CodeSortKey.values[index] == currentKey)
-                    Icon(
-                      Icons.check,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
+                    Icon(Icons.check, color: Theme.of(context).iconTheme.color),
                 ],
               ),
             );

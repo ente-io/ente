@@ -61,9 +61,8 @@ Future<File?> getFile(
   EnteFile file, {
   bool liveVideo = false,
   bool isOrigin = false,
-  bool forGalleryDownload = false,
-} // only relevant for live photos
-    ) async {
+  bool forGalleryDownload = false, // only relevant for live photos
+}) async {
   try {
     if (file.isRemoteFile) {
       return getFileFromServer(
@@ -207,18 +206,21 @@ Future<File?> getFileFromServer(
       );
     }
     unawaited(
-      downloadFuture.then((downloadedFile) {
-        if (!completer.isCompleted) {
-          completer.complete(downloadedFile);
-        }
-      }).catchError((error, stackTrace) {
-        if (!completer.isCompleted) {
-          completer.completeError(error, stackTrace);
-        }
-      }).whenComplete(() {
-        _fileDownloadsInProgress.remove(downloadID);
-        _progressCallbacks.remove(downloadID);
-      }),
+      downloadFuture
+          .then((downloadedFile) {
+            if (!completer.isCompleted) {
+              completer.complete(downloadedFile);
+            }
+          })
+          .catchError((error, stackTrace) {
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
+          })
+          .whenComplete(() {
+            _fileDownloadsInProgress.remove(downloadID);
+            _progressCallbacks.remove(downloadID);
+          }),
     );
   }
   return _fileDownloadsInProgress[downloadID];
@@ -272,82 +274,84 @@ Future<_LivePhoto?> _downloadLivePhoto(
   bool forGalleryDownload = false,
 }) async {
   return downloadAndDecrypt(
-    file,
-    progressCallback: progressCallback,
-    forceResumableDownload: forGalleryDownload,
-    throwOnFailure: forGalleryDownload,
-  ).then((decryptedFile) async {
-    if (decryptedFile == null) {
-      return null;
-    }
-    _logger.info("Decoded zipped live photo from " + decryptedFile.path);
-    File? imageFileCache, videoFileCache;
-    final List<int> bytes = await decryptedFile.readAsBytes();
-    final Archive archive = ZipDecoder().decodeBytes(bytes);
-    final tempPath = Configuration.instance.getTempDirectory();
-    // Extract the contents of Zip compressed archive to disk
-    for (ArchiveFile archiveFile in archive) {
-      if (archiveFile.isFile) {
-        final String filename = archiveFile.name;
-        final String fileExtension = getExtension(archiveFile.name);
-        final String decodePath =
-            tempPath + file.uploadedFileID.toString() + filename;
-        final List<int> data = archiveFile.content;
-        if (filename.startsWith("image")) {
-          final imageFile = File(decodePath);
-          await imageFile.create(recursive: true);
-          await imageFile.writeAsBytes(data);
-          File imageConvertedFile = imageFile;
-          if ((fileExtension == "unknown") ||
-              (Platform.isAndroid && fileExtension == "heic")) {
-            final compressResult =
-                await FlutterImageCompress.compressAndGetFile(
-              decodePath,
-              decodePath + ".jpg",
-              keepExif: true,
-            );
-            await imageFile.delete();
-            if (compressResult == null) {
-              throw Exception("Failed to compress file");
-            } else {
-              imageConvertedFile = File(compressResult.path);
+        file,
+        progressCallback: progressCallback,
+        forceResumableDownload: forGalleryDownload,
+        throwOnFailure: forGalleryDownload,
+      )
+      .then((decryptedFile) async {
+        if (decryptedFile == null) {
+          return null;
+        }
+        _logger.info("Decoded zipped live photo from " + decryptedFile.path);
+        File? imageFileCache, videoFileCache;
+        final List<int> bytes = await decryptedFile.readAsBytes();
+        final Archive archive = ZipDecoder().decodeBytes(bytes);
+        final tempPath = Configuration.instance.getTempDirectory();
+        // Extract the contents of Zip compressed archive to disk
+        for (ArchiveFile archiveFile in archive) {
+          if (archiveFile.isFile) {
+            final String filename = archiveFile.name;
+            final String fileExtension = getExtension(archiveFile.name);
+            final String decodePath =
+                tempPath + file.uploadedFileID.toString() + filename;
+            final List<int> data = archiveFile.content;
+            if (filename.startsWith("image")) {
+              final imageFile = File(decodePath);
+              await imageFile.create(recursive: true);
+              await imageFile.writeAsBytes(data);
+              File imageConvertedFile = imageFile;
+              if ((fileExtension == "unknown") ||
+                  (Platform.isAndroid && fileExtension == "heic")) {
+                final compressResult =
+                    await FlutterImageCompress.compressAndGetFile(
+                      decodePath,
+                      decodePath + ".jpg",
+                      keepExif: true,
+                    );
+                await imageFile.delete();
+                if (compressResult == null) {
+                  throw Exception("Failed to compress file");
+                } else {
+                  imageConvertedFile = File(compressResult.path);
+                }
+              }
+              imageFileCache = await DefaultCacheManager().putFile(
+                file.downloadUrl,
+                await imageConvertedFile.readAsBytes(),
+                eTag: file.downloadUrl,
+                maxAge: const Duration(days: 365),
+                fileExtension: fileExtension,
+              );
+              await imageConvertedFile.delete();
+            } else if (filename.startsWith("video")) {
+              final videoFile = File(decodePath);
+              await videoFile.create(recursive: true);
+              await videoFile.writeAsBytes(data);
+              videoFileCache = await VideoCacheManager.instance.putFileStream(
+                file.downloadUrl,
+                videoFile.openRead(),
+                eTag: file.downloadUrl,
+                maxAge: const Duration(days: 365),
+                fileExtension: fileExtension,
+              );
+              await videoFile.delete();
             }
           }
-          imageFileCache = await DefaultCacheManager().putFile(
-            file.downloadUrl,
-            await imageConvertedFile.readAsBytes(),
-            eTag: file.downloadUrl,
-            maxAge: const Duration(days: 365),
-            fileExtension: fileExtension,
-          );
-          await imageConvertedFile.delete();
-        } else if (filename.startsWith("video")) {
-          final videoFile = File(decodePath);
-          await videoFile.create(recursive: true);
-          await videoFile.writeAsBytes(data);
-          videoFileCache = await VideoCacheManager.instance.putFileStream(
-            file.downloadUrl,
-            videoFile.openRead(),
-            eTag: file.downloadUrl,
-            maxAge: const Duration(days: 365),
-            fileExtension: fileExtension,
-          );
-          await videoFile.delete();
         }
-      }
-    }
-    if (imageFileCache != null && videoFileCache != null) {
-      return _LivePhoto(imageFileCache, videoFileCache);
-    } else {
-      debugPrint(
-        "Warning: ${file.tag} either image ${imageFileCache == null} or video ${videoFileCache == null} is missing from remoteLive",
-      );
-      return null;
-    }
-  }).catchError((e) {
-    _logger.warning("failed to download live photos : ${file.tag}", e);
-    throw e;
-  });
+        if (imageFileCache != null && videoFileCache != null) {
+          return _LivePhoto(imageFileCache, videoFileCache);
+        } else {
+          debugPrint(
+            "Warning: ${file.tag} either image ${imageFileCache == null} or video ${videoFileCache == null} is missing from remoteLive",
+          );
+          return null;
+        }
+      })
+      .catchError((e) {
+        _logger.warning("failed to download live photos : ${file.tag}", e);
+        throw e;
+      });
 }
 
 Future<File?> _downloadAndCache(
@@ -357,43 +361,45 @@ Future<File?> _downloadAndCache(
   bool forGalleryDownload = false,
 }) async {
   return downloadAndDecrypt(
-    file,
-    progressCallback: progressCallback,
-    forceResumableDownload: forGalleryDownload,
-    throwOnFailure: forGalleryDownload,
-  ).then((decryptedFile) async {
-    if (decryptedFile == null) {
-      return null;
-    }
-    final decryptedFilePath = decryptedFile.path;
-    final String fileExtension = getExtension(file.title ?? '');
-    File outputFile = decryptedFile;
-    if ((fileExtension == "unknown" && file.fileType == FileType.image)) {
-      final compressResult = await FlutterImageCompress.compressAndGetFile(
-        decryptedFilePath,
-        decryptedFilePath + ".jpg",
-        keepExif: true,
-      );
-      if (compressResult == null) {
-        throw Exception("Failed to convert heic to jpg");
-      } else {
-        outputFile = File(compressResult.path);
-      }
-      await decryptedFile.delete();
-    }
-    final cachedFile = await cacheManager.putFileStream(
-      file.downloadUrl,
-      outputFile.openRead(),
-      eTag: file.downloadUrl,
-      maxAge: const Duration(days: 365),
-      fileExtension: fileExtension,
-    );
-    await outputFile.delete();
-    return cachedFile;
-  }).catchError((e) {
-    _logger.warning("failed to download file : ${file.tag}", e);
-    throw e;
-  });
+        file,
+        progressCallback: progressCallback,
+        forceResumableDownload: forGalleryDownload,
+        throwOnFailure: forGalleryDownload,
+      )
+      .then((decryptedFile) async {
+        if (decryptedFile == null) {
+          return null;
+        }
+        final decryptedFilePath = decryptedFile.path;
+        final String fileExtension = getExtension(file.title ?? '');
+        File outputFile = decryptedFile;
+        if ((fileExtension == "unknown" && file.fileType == FileType.image)) {
+          final compressResult = await FlutterImageCompress.compressAndGetFile(
+            decryptedFilePath,
+            decryptedFilePath + ".jpg",
+            keepExif: true,
+          );
+          if (compressResult == null) {
+            throw Exception("Failed to convert heic to jpg");
+          } else {
+            outputFile = File(compressResult.path);
+          }
+          await decryptedFile.delete();
+        }
+        final cachedFile = await cacheManager.putFileStream(
+          file.downloadUrl,
+          outputFile.openRead(),
+          eTag: file.downloadUrl,
+          maxAge: const Duration(days: 365),
+          fileExtension: fileExtension,
+        );
+        await outputFile.delete();
+        return cachedFile;
+      })
+      .catchError((e) {
+        _logger.warning("failed to download file : ${file.tag}", e);
+        throw e;
+      });
 }
 
 String getExtension(String nameOrPath) {

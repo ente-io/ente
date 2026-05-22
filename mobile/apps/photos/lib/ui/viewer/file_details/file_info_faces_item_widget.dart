@@ -583,10 +583,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final changedPersons = <PersonEntity>[];
     try {
       for (final clusterID in clusterIDs) {
-        final ignoredPerson = await ClusterFeedbackService.instance.ignoreCluster(
-          clusterID,
-          firePeopleChangedEvent: false,
-        );
+        final ignoredPerson = await ClusterFeedbackService.instance
+            .ignoreCluster(clusterID, firePeopleChangedEvent: false);
         changedPersons.add(ignoredPerson);
         completed++;
         hasUpdates = true;
@@ -822,12 +820,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
     if (result?.action == ButtonAction.first) {
       try {
-        await ClusterFeedbackService.instance.removeFilesFromPerson(
-          [
-            widget.file,
-          ],
-          person,
-        );
+        await ClusterFeedbackService.instance.removeFilesFromPerson([
+          widget.file,
+        ], person);
         await loadFaces(isRefresh: true);
       } catch (e, s) {
         _logger.severe('Error removing manual person assignment', e, s);

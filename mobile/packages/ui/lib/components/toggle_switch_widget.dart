@@ -97,19 +97,17 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
       toggleValue = negationOfToggleValue;
       //start showing inProgress statu icons if toggle takes more than debounce time
       _debouncer.run(
-        () => Future(
-          () {
-            setState(() {
-              executionState = ExecutionState.inProgress;
-            });
-          },
-        ),
+        () => Future(() {
+          setState(() {
+            executionState = ExecutionState.inProgress;
+          });
+        }),
       );
     });
     final Stopwatch stopwatch = Stopwatch()..start();
     await widget.onChanged.call().onError(
-          (error, stackTrace) => _debouncer.cancelDebounce(),
-        );
+      (error, stackTrace) => _debouncer.cancelDebounce(),
+    );
     //for toggle feedback on short unsuccessful onChanged
     await _feedbackOnUnsuccessfulToggle(stopwatch);
     //debouncer gets canceled if onChanged takes less than debounce time
@@ -137,9 +135,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
     if (executionState == ExecutionState.idle) {
       return const SizedBox(width: 24);
     } else if (executionState == ExecutionState.inProgress) {
-      return EnteLoadingWidget(
-        color: enteColorScheme.strokeMuted,
-      );
+      return EnteLoadingWidget(color: enteColorScheme.strokeMuted);
     } else if (executionState == ExecutionState.successful) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 1),
@@ -157,9 +153,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   Future<void> _feedbackOnUnsuccessfulToggle(Stopwatch stopwatch) async {
     final timeElapsed = stopwatch.elapsedMilliseconds;
     if (timeElapsed < 200) {
-      await Future.delayed(
-        Duration(milliseconds: 200 - timeElapsed),
-      );
+      await Future.delayed(Duration(milliseconds: 200 - timeElapsed));
     }
   }
 }

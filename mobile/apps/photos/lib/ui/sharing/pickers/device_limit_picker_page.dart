@@ -33,27 +33,23 @@ class DeviceLimitPickerPage extends StatelessWidget {
             ),
           ),
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 20,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        child: ItemsWidget(collection),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      child: ItemsWidget(collection),
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: 1),
           ),
           const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
         ],
@@ -89,14 +85,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   Widget build(BuildContext context) {
     items.clear();
     if (isCustomLimit) {
-      items.add(
-        _menuItemForPicker(initialDeviceLimit),
-      );
+      items.add(_menuItemForPicker(initialDeviceLimit));
     }
     for (int deviceLimit in publicLinkDeviceLimits) {
-      items.add(
-        _menuItemForPicker(deviceLimit),
-      );
+      items.add(_menuItemForPicker(deviceLimit));
     }
     items = addSeparators(
       items,
@@ -105,10 +97,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         bgColor: getEnteColorScheme(context).fillFaint,
       ),
     );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: items,
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: items);
   }
 
   Widget _menuItemForPicker(int deviceLimit) {
@@ -126,9 +115,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       isBottomBorderRadiusRemoved: true,
       showOnlyLoadingState: true,
       onTap: () async {
-        await _updateUrlSettings(context, {
-          'deviceLimit': deviceLimit,
-        }).then(
+        await _updateUrlSettings(context, {'deviceLimit': deviceLimit}).then(
           (value) => setState(() {
             currentDeviceLimit = deviceLimit;
           }),

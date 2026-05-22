@@ -35,15 +35,17 @@ class TagChip extends StatelessWidget {
           color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
           borderRadius: const BorderRadius.all(Radius.circular(24.0)),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16)
-            .copyWith(right: 0),
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 16,
+        ).copyWith(right: 0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: const TextScaler.linear(1),
-              ),
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(1)),
               child: Row(
                 children: [
                   if (iconData != null)
@@ -57,20 +59,14 @@ class TagChip extends StatelessWidget {
                   if (label.isNotEmpty)
                     Text(
                       label,
-                      style: textTheme.small.copyWith(
-                        color: textColor,
-                      ),
+                      style: textTheme.small.copyWith(color: textColor),
                     ),
                 ],
               ),
             ),
             if (isSelected && action == TagChipAction.check) ...[
               const SizedBox(width: 16),
-              const Icon(
-                Icons.check,
-                size: 16,
-                color: Colors.white,
-              ),
+              const Icon(Icons.check, size: 16, color: Colors.white),
               const SizedBox(width: 16),
             ] else if (isSelected && action == TagChipAction.menu) ...[
               SizedBox(
@@ -88,8 +84,10 @@ class TagChip extends StatelessWidget {
                     if (value == 0) {
                       CodeDisplayStore.instance.showEditDialog(context, label);
                     } else if (value == 1) {
-                      CodeDisplayStore.instance
-                          .showDeleteTagDialog(context, label);
+                      CodeDisplayStore.instance.showDeleteTagDialog(
+                        context,
+                        label,
+                      );
                     }
                   },
                   itemBuilder: (BuildContext context) {

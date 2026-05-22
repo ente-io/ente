@@ -4,10 +4,7 @@ import "package:hugeicons/hugeicons.dart";
 import "package:locker/ui/settings/pages/settings_search_page.dart";
 
 class DrawerTitleBarWidget extends StatelessWidget {
-  const DrawerTitleBarWidget({
-    super.key,
-    required this.scaffoldKey,
-  });
+  const DrawerTitleBarWidget({super.key, required this.scaffoldKey});
 
   final GlobalKey<ScaffoldState> scaffoldKey;
 
@@ -47,8 +44,8 @@ class DrawerTitleBarWidget extends StatelessWidget {
   }
 
   void _openSearch(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const SettingsSearchPage()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const SettingsSearchPage()));
   }
 }

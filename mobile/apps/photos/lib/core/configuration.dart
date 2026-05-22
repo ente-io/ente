@@ -144,7 +144,7 @@ class Configuration {
         final PlatformException error = e;
         final bool isBadPaddingError =
             error.toString().contains('BadPaddingException') ||
-                (error.message ?? '').contains('BadPaddingException');
+            (error.message ?? '').contains('BadPaddingException');
         if (isBadPaddingError) {
           await logout(autoLogout: true);
           return;
@@ -201,8 +201,8 @@ class Configuration {
         SyncService.instance.stopSync();
         try {
           await SyncService.instance.existingSync().timeout(
-                const Duration(seconds: 5),
-              );
+            const Duration(seconds: 5),
+          );
         } catch (e) {
           // ignore
         }

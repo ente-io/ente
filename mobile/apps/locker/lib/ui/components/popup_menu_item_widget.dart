@@ -32,10 +32,7 @@ class PopupMenuItemWidget extends StatelessWidget {
           color: colorScheme.backdropBase,
           border: !isLast
               ? Border(
-                  bottom: BorderSide(
-                    color: colorScheme.strokeFaint,
-                    width: 1,
-                  ),
+                  bottom: BorderSide(color: colorScheme.strokeFaint, width: 1),
                 )
               : null,
           borderRadius: BorderRadius.only(

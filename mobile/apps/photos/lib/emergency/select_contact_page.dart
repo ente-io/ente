@@ -155,10 +155,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
             ),
           ],
           const SizedBox(height: 20),
-          Text(
-            context.l10n.chooseARecoveryTime,
-            style: textTheme.bodyMuted,
-          ),
+          Text(context.l10n.chooseARecoveryTime, style: textTheme.bodyMuted),
           const SizedBox(height: 12),
           RecoveryDateSelector(
             selectedDays: _selectedRecoveryDays,
@@ -335,8 +332,8 @@ class _AddContactSheetState extends State<AddContactSheet> {
     if (_textController.text.trim().isNotEmpty) {
       suggestedUsers.removeWhere(
         (element) => !element.email.toLowerCase().contains(
-              _textController.text.trim().toLowerCase(),
-            ),
+          _textController.text.trim().toLowerCase(),
+        ),
       );
     }
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));

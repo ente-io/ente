@@ -107,10 +107,7 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
         ] else ...[
           // Custom implementation for advanced features
           if (widget.labelText.isNotEmpty) ...[
-            Text(
-              widget.labelText,
-              style: textTheme.body,
-            ),
+            Text(widget.labelText, style: textTheme.body),
             const SizedBox(height: 8),
           ],
           ClipRRect(
@@ -132,8 +129,9 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
                 style: textTheme.body,
                 decoration: InputDecoration(
                   hintText: widget.hintText,
-                  hintStyle:
-                      textTheme.body.copyWith(color: colorScheme.textFaint),
+                  hintStyle: textTheme.body.copyWith(
+                    color: colorScheme.textFaint,
+                  ),
                   filled: true,
                   fillColor: colorScheme.fillFaint,
                   contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
@@ -191,9 +189,7 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               _errorText!,
-              style: textTheme.mini.copyWith(
-                color: colorScheme.warning500,
-              ),
+              style: textTheme.mini.copyWith(color: colorScheme.warning500),
             ),
           ),
         ],

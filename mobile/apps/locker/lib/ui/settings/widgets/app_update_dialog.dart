@@ -13,11 +13,13 @@ Future<void> showAppUpdateBottomSheet(
 }) async {
   final navigator = Navigator.of(context);
   final l10n = context.l10n;
-  final shouldForceUpdate =
-      UpdateService.instance.shouldForceUpdate(latestVersionInfo);
+  final shouldForceUpdate = UpdateService.instance.shouldForceUpdate(
+    latestVersionInfo,
+  );
   final updateMessage = l10n.aNewVersionOfEnteLockerIsAvailable;
-  final title =
-      shouldForceUpdate ? l10n.criticalUpdateAvailable : l10n.updateAvailable;
+  final title = shouldForceUpdate
+      ? l10n.criticalUpdateAvailable
+      : l10n.updateAvailable;
 
   await showAlertBottomSheet<void>(
     context,

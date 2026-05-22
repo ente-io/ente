@@ -86,19 +86,10 @@ Future<void> _initSystemTray() async {
   await trayManager.setIcon(path);
   final Menu menu = Menu(
     items: [
-      MenuItem(
-        key: 'hide_window',
-        label: 'Hide Window',
-      ),
-      MenuItem(
-        key: 'show_window',
-        label: 'Show Window',
-      ),
+      MenuItem(key: 'hide_window', label: 'Hide Window'),
+      MenuItem(key: 'show_window', label: 'Show Window'),
       MenuItem.separator(),
-      MenuItem(
-        key: 'exit_app',
-        label: 'Exit App',
-      ),
+      MenuItem(key: 'exit_app', label: 'Exit App'),
     ],
   );
   await trayManager.setContextMenu(menu);
@@ -190,9 +181,7 @@ Future<void> _init(bool bool, {String? via}) async {
 
     await LockerDB.instance.init();
 
-    await Configuration.instance.init([
-      LockerDB.instance,
-    ]);
+    await Configuration.instance.init([LockerDB.instance]);
 
     await Network.instance.init(Configuration.instance);
     await UserService.instance.init(

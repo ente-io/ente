@@ -7,19 +7,14 @@ import 'package:photos/ui/viewer/gallery/hidden_page.dart';
 class HiddenCollectionsButtonWidget extends StatelessWidget {
   final TextStyle textStyle;
 
-  const HiddenCollectionsButtonWidget(
-    this.textStyle, {
-    super.key,
-  });
+  const HiddenCollectionsButtonWidget(this.textStyle, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
@@ -74,15 +69,12 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
       onPressed: () async {
         final hasAuthenticated = await LocalAuthenticationService.instance
             .requestLocalAuthentication(
-          context,
-          AppLocalizations.of(context).authToViewYourHiddenFiles,
-        );
+              context,
+              AppLocalizations.of(context).authToViewYourHiddenFiles,
+            );
         if (hasAuthenticated) {
           // ignore: unawaited_futures
-          routeToPage(
-            context,
-            const HiddenPage(),
-          );
+          routeToPage(context, const HiddenPage());
         }
       },
     );

@@ -99,10 +99,7 @@ class GlacierFilterMatrix {
 }
 
 final filterList = [
-  const FilterModel(
-    name: "None",
-    filters: [],
-  ),
+  const FilterModel(name: "None", filters: []),
   FilterModel(
     name: 'Pop',
     filters: [
@@ -127,10 +124,7 @@ final filterList = [
   ),
   FilterModel(
     name: 'Carbon',
-    filters: [
-      ColorFilterAddons.contrast(0.2),
-      ColorFilterAddons.grayscale(),
-    ],
+    filters: [ColorFilterAddons.contrast(0.2), ColorFilterAddons.grayscale()],
   ),
   const FilterModel(
     name: 'Glacier',
@@ -150,9 +144,7 @@ final filterList = [
   ),
   FilterModel(
     name: 'Meadow',
-    filters: [
-      ColorFilterAddons.rgbScale(1.05, 1.1, 1),
-    ],
+    filters: [ColorFilterAddons.rgbScale(1.05, 1.1, 1)],
   ),
   FilterModel(
     name: 'Zest',

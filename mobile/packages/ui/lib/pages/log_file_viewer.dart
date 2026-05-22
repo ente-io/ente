@@ -27,10 +27,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: const Text("Today's logs"),
-      ),
+      appBar: AppBar(elevation: 0, title: const Text("Today's logs")),
       body: _getBody(),
     );
   }
@@ -47,14 +44,12 @@ class _LogFileViewerState extends State<LogFileViewer> {
           selectionControls: Platform.isAndroid
               ? materialTextSelectionControls
               : Platform.isIOS
-                  ? cupertinoTextSelectionControls
-                  : desktopTextSelectionControls,
+              ? cupertinoTextSelectionControls
+              : desktopTextSelectionControls,
           child: Text(
             _logs!,
             style: const TextStyle(
-              fontFeatures: [
-                FontFeature.tabularFigures(),
-              ],
+              fontFeatures: [FontFeature.tabularFigures()],
               height: 1.2,
             ),
           ),

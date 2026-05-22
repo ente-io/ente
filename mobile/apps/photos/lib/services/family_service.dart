@@ -7,19 +7,14 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/account/user_service.dart';
 
 class FamilyInviteFailure {
-  const FamilyInviteFailure({
-    required this.email,
-    required this.error,
-  });
+  const FamilyInviteFailure({required this.email, required this.error});
 
   final String email;
   final Object error;
 }
 
 class FamilyInviteResult {
-  const FamilyInviteResult({
-    required this.failures,
-  });
+  const FamilyInviteResult({required this.failures});
 
   final List<FamilyInviteFailure> failures;
 

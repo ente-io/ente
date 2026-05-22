@@ -84,9 +84,7 @@ class DrawerPage extends StatelessWidget {
 
     contents.addAll([
       SettingsWidget(hasLoggedIn: hasLoggedIn),
-      const Padding(
-        padding: EdgeInsets.only(bottom: 60),
-      ),
+      const Padding(padding: EdgeInsets.only(bottom: 60)),
     ]);
 
     return SafeArea(
@@ -95,14 +93,10 @@ class DrawerPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DrawerTitleBarWidget(
-              scaffoldKey: scaffoldKey,
-            ),
+            DrawerTitleBarWidget(scaffoldKey: scaffoldKey),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              child: Column(
-                children: contents,
-              ),
+              child: Column(children: contents),
             ),
           ],
         ),

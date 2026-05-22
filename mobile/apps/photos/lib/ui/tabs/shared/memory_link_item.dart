@@ -58,9 +58,7 @@ class MemoryLinkAlbumItem extends StatelessWidget {
           border: Border.all(
             color: isSelected ? colorScheme.greenStroke : colorScheme.fill,
           ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(_cardRadius),
-          ),
+          borderRadius: const BorderRadius.all(Radius.circular(_cardRadius)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -123,9 +121,9 @@ class MemoryLinkAlbumItem extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          AppLocalizations.of(context).itemCount(
-                            count: fileCount ?? 0,
-                          ),
+                          AppLocalizations.of(
+                            context,
+                          ).itemCount(count: fileCount ?? 0),
                           style: textTheme.smallMuted,
                           maxLines: 1,
                           softWrap: false,

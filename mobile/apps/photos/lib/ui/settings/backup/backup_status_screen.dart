@@ -40,19 +40,15 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
 
   Future<void> getAllFiles() async {
     result = (await SearchService.instance.getAllFilesForSearch())
-        .where(
-          (e) => e.uploadedFileID != null && e.isOwner,
-        )
-        .map(
-          (e) {
-            return BackupItem(
-              status: BackupItemStatus.uploaded,
-              file: e,
-              collectionID: e.collectionID ?? 0,
-              completer: null,
-            );
-          },
-        )
+        .where((e) => e.uploadedFileID != null && e.isOwner)
+        .map((e) {
+          return BackupItem(
+            status: BackupItemStatus.uploaded,
+            file: e,
+            collectionID: e.collectionID ?? 0,
+            completer: null,
+          );
+        })
         .sorted(
           (a, b) => (b.file.uploadedFileID!).compareTo(a.file.uploadedFileID!),
         )
@@ -103,9 +99,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
     );
 
     final allItems = <BackupItem>[
-      ...items.where(
-        (element) => element.status != BackupItemStatus.uploaded,
-      ),
+      ...items.where((element) => element.status != BackupItemStatus.uploaded),
       ...?result,
     ];
 
@@ -121,9 +115,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.lg,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
               sliver: SliverList.builder(
                 itemBuilder: (context, index) {
                   return BackupItemCard(
@@ -147,10 +139,7 @@ class _EmptyBackupStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 60,
-        vertical: Spacing.md,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: Spacing.md),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

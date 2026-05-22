@@ -6,11 +6,7 @@ import "package:photos/models/selected_people.dart";
 class PeopleActionBarWidget extends StatefulWidget {
   final SelectedPeople? selectedPeople;
   final VoidCallback? onCancel;
-  const PeopleActionBarWidget({
-    super.key,
-    this.selectedPeople,
-    this.onCancel,
-  });
+  const PeopleActionBarWidget({super.key, this.selectedPeople, this.onCancel});
 
   @override
   State<PeopleActionBarWidget> createState() => _PeopleActionBarWidgetState();

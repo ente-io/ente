@@ -262,8 +262,8 @@ class AlbumHomeWidgetService {
 
   Future<bool> _hasAnyBlockers([bool isBg = false]) async {
     // Check if first import is completed
-    final hasCompletedFirstImport =
-        LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
+    final hasCompletedFirstImport = LocalSyncService.instance
+        .hasCompletedFirstImportOrBypassed();
     if (!hasCompletedFirstImport) {
       return true;
     }
@@ -307,8 +307,9 @@ class AlbumHomeWidgetService {
 
       final rawUploadedFileID =
           metadata[HomeWidgetService.UPLOADED_FILE_ID_KEY];
-      final uploadedFileID =
-          rawUploadedFileID is num ? rawUploadedFileID.toInt() : null;
+      final uploadedFileID = rawUploadedFileID is num
+          ? rawUploadedFileID.toInt()
+          : null;
       if (uploadedFileID != null &&
           hiddenUploadedIDs.contains(uploadedFileID)) {
         return true;
@@ -393,8 +394,8 @@ class AlbumHomeWidgetService {
       if (isBg) {
         await FavoritesService.instance.initFav();
       }
-      final favoriteId =
-          await FavoritesService.instance.getFavoriteCollectionID();
+      final favoriteId = await FavoritesService.instance
+          .getFavoriteCollectionID();
       if (favoriteId != null) {
         await updateSelectedAlbums([favoriteId.toString()]);
         return [favoriteId];
@@ -539,16 +540,16 @@ class AlbumHomeWidgetService {
 
       final renderResult = await HomeWidgetService.instance
           .renderFile(
-        randomAlbumFile,
-        "albums_widget_$renderedCount",
-        albumName,
-        albumId.toString(),
-        uploadedFileID: randomAlbumFile.uploadedFileID,
-      )
+            randomAlbumFile,
+            "albums_widget_$renderedCount",
+            albumName,
+            albumId.toString(),
+            uploadedFileID: randomAlbumFile.uploadedFileID,
+          )
           .catchError((e, stackTrace) {
-        _logger.severe("Error rendering widget", e, stackTrace);
-        return null;
-      });
+            _logger.severe("Error rendering widget", e, stackTrace);
+            return null;
+          });
 
       if (renderResult != null) {
         // Check for blockers again before continuing

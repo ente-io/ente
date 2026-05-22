@@ -24,12 +24,7 @@ class SectionHeader extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (hasMore) {
-          routeToPage(
-            context,
-            SearchSectionAllPage(
-              sectionType: sectionType,
-            ),
-          );
+          routeToPage(context, SearchSectionAllPage(sectionType: sectionType));
         }
       },
       child: Row(
@@ -39,9 +34,7 @@ class SectionHeader extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Text(
               sectionType.sectionTitle(context),
-              style: TextStyles.h2.copyWith(
-                color: textTheme.largeBold.color,
-              ),
+              style: TextStyles.h2.copyWith(color: textTheme.largeBold.color),
             ),
           ),
           hasMore

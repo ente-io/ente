@@ -92,10 +92,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                 _showTimePicker
                     ? context.l10n.selectTime
                     : context.l10n.selectDate,
-                style: TextStyle(
-                  color: colorScheme.textBase,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: colorScheme.textBase, fontSize: 16),
               ),
             ),
           ),
@@ -177,10 +174,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                     _showTimePicker
                         ? context.l10n.previous
                         : context.l10n.cancel,
-                    style: TextStyle(
-                      color: colorScheme.textBase,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: colorScheme.textBase, fontSize: 14),
                   ),
                   onPressed: () {
                     if (_showTimePicker) {

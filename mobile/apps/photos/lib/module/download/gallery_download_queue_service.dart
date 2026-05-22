@@ -79,22 +79,22 @@ class GalleryDownloadQueueService {
       .length;
 
   bool get hasPausedDueToNoConnection => _tasks.values.any(
-        (task) =>
-            task.status == DownloadStatus.paused &&
-            task.error == DownloadManager.noConnectionError,
-      );
+    (task) =>
+        task.status == DownloadStatus.paused &&
+        task.error == DownloadManager.noConnectionError,
+  );
 
   bool get hasPausedDueToStorage => _tasks.values.any(
-        (task) =>
-            task.status == DownloadStatus.paused &&
-            task.error == DownloadManager.notEnoughStorageError,
-      );
+    (task) =>
+        task.status == DownloadStatus.paused &&
+        task.error == DownloadManager.notEnoughStorageError,
+  );
 
   bool get hasNonUnavailableErrors => _tasks.values.any(
-        (task) =>
-            task.status == DownloadStatus.error &&
-            task.error != DownloadManager.unavailableError,
-      );
+    (task) =>
+        task.status == DownloadStatus.error &&
+        task.error != DownloadManager.unavailableError,
+  );
 
   bool get isCompletionBannerVisible =>
       _showCompletionBanner &&
@@ -313,10 +313,7 @@ class GalleryDownloadQueueService {
       }
       if (task.status == DownloadStatus.downloading ||
           task.status == DownloadStatus.paused) {
-        task = task.copyWith(
-          status: DownloadStatus.pending,
-          error: null,
-        );
+        task = task.copyWith(status: DownloadStatus.pending, error: null);
       }
       _tasks[task.id] = task;
       final queuedFile = _deserializeQueuedFile(task.sourceFileJson);
@@ -341,10 +338,12 @@ class GalleryDownloadQueueService {
 
   void _listenToConnectivity() {
     _connectivitySubscription?.cancel();
-    _connectivitySubscription =
-        Connectivity().onConnectivityChanged.listen((results) {
-      final hasConnection =
-          results.any((result) => result != ConnectivityResult.none);
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
+      final hasConnection = results.any(
+        (result) => result != ConnectivityResult.none,
+      );
       if (!hasConnection) {
         return;
       }
@@ -403,26 +402,22 @@ class GalleryDownloadQueueService {
   void _startTask(DownloadTask task) {
     _activeDownloads.add(task.id);
     _updateTask(
-      task.copyWith(
-        status: DownloadStatus.downloading,
-        error: null,
-      ),
+      task.copyWith(status: DownloadStatus.downloading, error: null),
     ).ignore();
     _watchSubscriptions[task.id]?.cancel();
-    _watchSubscriptions[task.id] =
-        downloadManager.watchDownload(task.id).listen(
-      (downloadTask) {
-        final existing = _tasks[task.id];
-        if (existing == null) {
-          return;
-        }
-        final updatedTask = existing.copyWith(
-          bytesDownloaded: downloadTask.bytesDownloaded,
-          filePath: downloadTask.filePath,
-        );
-        _updateTask(updatedTask).ignore();
-      },
-    );
+    _watchSubscriptions[task.id] = downloadManager
+        .watchDownload(task.id)
+        .listen((downloadTask) {
+          final existing = _tasks[task.id];
+          if (existing == null) {
+            return;
+          }
+          final updatedTask = existing.copyWith(
+            bytesDownloaded: downloadTask.bytesDownloaded,
+            filePath: downloadTask.filePath,
+          );
+          _updateTask(updatedTask).ignore();
+        });
     _runTask(task.id).ignore();
   }
 
@@ -481,8 +476,9 @@ class GalleryDownloadQueueService {
       throw DownloadUnavailableError();
     }
     file.fileSize ??= _tasks[fileID]?.totalBytes;
-    final fileToDownload =
-        file.isRemoteFile ? file.copyWith() : (file.copyWith()..localID = null);
+    final fileToDownload = file.isRemoteFile
+        ? file.copyWith()
+        : (file.copyWith()..localID = null);
     await downloadToGallery(
       fileToDownload,
       forceResumableDownload: true,
@@ -498,10 +494,7 @@ class GalleryDownloadQueueService {
       return;
     }
     await _updateTask(
-      task.copyWith(
-        status: DownloadStatus.paused,
-        error: reason,
-      ),
+      task.copyWith(status: DownloadStatus.paused, error: reason),
     );
     _isBannerDismissedByUser = false;
     _showCompletionBanner = false;
@@ -513,10 +506,7 @@ class GalleryDownloadQueueService {
       return;
     }
     await _updateTask(
-      task.copyWith(
-        status: DownloadStatus.error,
-        error: reason,
-      ),
+      task.copyWith(status: DownloadStatus.error, error: reason),
     );
     _isBannerDismissedByUser = false;
     _showCompletionBanner = false;
@@ -588,8 +578,8 @@ class GalleryDownloadQueueService {
       if (await file.exists()) {
         await file.delete();
       }
-      final totalChunks =
-          (task.totalBytes / DownloadManager.downloadChunkSize).ceil();
+      final totalChunks = (task.totalBytes / DownloadManager.downloadChunkSize)
+          .ceil();
       for (int i = 1; i <= totalChunks; i++) {
         final chunk = File("$basePath.${i}_part");
         if (await chunk.exists()) {
@@ -605,10 +595,7 @@ class GalleryDownloadQueueService {
     Bus.instance.fire(GalleryDownloadsUpdatedEvent());
   }
 
-  String _serializeQueuedFile(
-    EnteFile file, {
-    required bool persistToFilesDB,
-  }) {
+  String _serializeQueuedFile(EnteFile file, {required bool persistToFilesDB}) {
     return jsonEncode({
       "uploadedFileID": file.uploadedFileID,
       "ownerID": file.ownerID,

@@ -132,10 +132,7 @@ class RitualsBanner extends StatelessWidget {
 }
 
 class _RitualsHeader extends StatelessWidget {
-  const _RitualsHeader({
-    required this.showChevron,
-    required this.onTap,
-  });
+  const _RitualsHeader({required this.showChevron, required this.onTap});
 
   final bool showChevron;
   final VoidCallback? onTap;
@@ -154,9 +151,7 @@ class _RitualsHeader extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Text(
               context.l10n.ritualsTitle,
-              style: TextStyles.h2.copyWith(
-                color: textTheme.largeBold.color,
-              ),
+              style: TextStyles.h2.copyWith(color: textTheme.largeBold.color),
             ),
           ),
           if (showChevron)
@@ -177,10 +172,7 @@ class _RitualsHeader extends StatelessWidget {
 }
 
 class _RitualSummaryCard extends StatelessWidget {
-  const _RitualSummaryCard({
-    required this.ritual,
-    required this.progress,
-  });
+  const _RitualSummaryCard({required this.ritual, required this.progress});
 
   final Ritual ritual;
   final RitualProgress? progress;
@@ -287,10 +279,7 @@ class _RitualIcon extends StatelessWidget {
 }
 
 class _StreakIndicator extends StatelessWidget {
-  const _StreakIndicator({
-    required this.streak,
-    required this.isDark,
-  });
+  const _StreakIndicator({required this.streak, required this.isDark});
 
   final int streak;
   final bool isDark;
@@ -309,10 +298,7 @@ class _StreakIndicator extends StatelessWidget {
 }
 
 class _StreakNumber extends StatelessWidget {
-  const _StreakNumber({
-    required this.streak,
-    required this.isDark,
-  });
+  const _StreakNumber({required this.streak, required this.isDark});
 
   final int streak;
   final bool isDark;
@@ -339,10 +325,7 @@ class _StreakNumber extends StatelessWidget {
 
     final gradient = _linearGradientFromCssAngle(
       degrees: 178,
-      colors: const [
-        Color(0xFF545454),
-        Color(0xFF000000),
-      ],
+      colors: const [Color(0xFF545454), Color(0xFF000000)],
       stops: const [0.1192, 0.8251],
     );
 
@@ -395,10 +378,7 @@ class _LightningIcon extends StatelessWidget {
 }
 
 class _RitualCameraButton extends StatelessWidget {
-  const _RitualCameraButton({
-    required this.onTap,
-    required this.tooltip,
-  });
+  const _RitualCameraButton({required this.onTap, required this.tooltip});
 
   final VoidCallback onTap;
   final String tooltip;

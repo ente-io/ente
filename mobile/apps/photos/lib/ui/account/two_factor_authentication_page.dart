@@ -117,8 +117,9 @@ class _TwoFactorAuthenticationPageState
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context)
-                  .enterThe6digitCodeFromnyourAuthenticatorApp,
+              AppLocalizations.of(
+                context,
+              ).enterThe6digitCodeFromnyourAuthenticatorApp,
               style: textTheme.body.copyWith(color: colorScheme.textMuted),
               textAlign: TextAlign.center,
             ),

@@ -61,10 +61,7 @@ class _OcrDotWavePainter extends CustomPainter {
   final double progress;
   final Color dotColor;
 
-  _OcrDotWavePainter({
-    required this.progress,
-    required this.dotColor,
-  });
+  _OcrDotWavePainter({required this.progress, required this.dotColor});
 
   @override
   void paint(Canvas canvas, Size size) {

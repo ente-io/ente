@@ -34,31 +34,27 @@ class LanguageSelectorPage extends StatelessWidget {
             ),
           ),
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 20,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        child: _LanguageItemsWidget(
-                          supportedLocales,
-                          onLocaleChanged,
-                          currentLocale,
-                        ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      child: _LanguageItemsWidget(
+                        supportedLocales,
+                        onLocaleChanged,
+                        currentLocale,
                       ),
-                    ],
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: 1),
           ),
           const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
         ],

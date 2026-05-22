@@ -138,10 +138,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
     try {
       status = await FilesService.instance.getFreeableSpaceInfo();
     } catch (e) {
-      await showGenericErrorDialog(
-        context: context,
-        error: e,
-      );
+      await showGenericErrorDialog(context: context, error: e);
       return;
     }
 
@@ -154,10 +151,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
         ),
       );
     } else {
-      final bool? result = await routeToPage(
-        context,
-        FreeSpacePage(status),
-      );
+      final bool? result = await routeToPage(context, FreeSpacePage(status));
       if (result == true) {
         _showSpaceFreedDialog(status);
       }
@@ -169,10 +163,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
     try {
       duplicates = await DeduplicationService.instance.getDuplicateFiles();
     } catch (e) {
-      await showGenericErrorDialog(
-        context: context,
-        error: e,
-      );
+      await showGenericErrorDialog(context: context, error: e);
       return;
     }
 
@@ -201,10 +192,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
       suggestionFileIDs = await CollectionsService.instance
           .fetchDeleteSuggestionFileIDs();
     } catch (e) {
-      await showGenericErrorDialog(
-        context: context,
-        error: e,
-      );
+      await showGenericErrorDialog(context: context, error: e);
       return;
     }
 
@@ -217,10 +205,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
         ),
       );
     } else {
-      await routeToPage(
-        context,
-        DeleteSuggestionsPage(),
-      );
+      await routeToPage(context, DeleteSuggestionsPage());
     }
   }
 
@@ -256,9 +241,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
         isDismissible: true,
         builder: (_) => BottomSheetComponent(
           title: AppLocalizations.of(context).success,
-          message: AppLocalizations.of(context).youHaveSuccessfullyFreedUp(
-            storageSaved: formatBytes(status.size),
-          ),
+          message: AppLocalizations.of(
+            context,
+          ).youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
           illustration: Icon(
             Icons.download_done_rounded,
             size: 64,

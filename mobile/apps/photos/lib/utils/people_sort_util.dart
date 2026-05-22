@@ -17,10 +17,7 @@ class PeopleSortConfig {
   });
 }
 
-void sortPeopleFaces(
-  List<GenericSearchResult> faces,
-  PeopleSortConfig config,
-) {
+void sortPeopleFaces(List<GenericSearchResult> faces, PeopleSortConfig config) {
   if (faces.isEmpty) {
     return;
   }

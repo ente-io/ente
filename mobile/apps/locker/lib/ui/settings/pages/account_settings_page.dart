@@ -71,11 +71,8 @@ class AccountSettingsPage extends StatelessWidget {
 
   Future<void> _onChangeEmailTapped(BuildContext context) async {
     final l10n = context.l10n;
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      l10n.authToChangeYourEmail,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(context, l10n.authToChangeYourEmail);
     if (hasAuthenticated) {
       // ignore: unawaited_futures
       showChangeEmailDialog(context);
@@ -84,38 +81,27 @@ class AccountSettingsPage extends StatelessWidget {
 
   Future<void> _onRecoveryKeyTapped(BuildContext context) async {
     final l10n = context.l10n;
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      l10n.authToViewYourRecoveryKey,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(context, l10n.authToViewYourRecoveryKey);
     if (hasAuthenticated) {
       String recoveryKey;
       try {
-        recoveryKey =
-            CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
+        recoveryKey = CryptoUtil.bin2hex(
+          Configuration.instance.getRecoveryKey(),
+        );
       } catch (e) {
         // ignore: unawaited_futures
-        showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        showGenericErrorBottomSheet(context: context, error: e);
         return;
       }
-      await showRecoveryKeySheet(
-        context,
-        recoveryKey: recoveryKey,
-      );
+      await showRecoveryKeySheet(context, recoveryKey: recoveryKey);
     }
   }
 
   Future<void> _onChangePasswordTapped(BuildContext context) async {
     final l10n = context.l10n;
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      l10n.authToChangeYourPassword,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(context, l10n.authToChangeYourPassword);
     if (hasAuthenticated) {
       // ignore: unawaited_futures
       Navigator.of(context).push(

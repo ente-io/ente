@@ -48,10 +48,10 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   final _logger = Logger((_UserCollectionsTabState).toString());
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   late StreamSubscription<CollectionUpdatedEvent>
-      _collectionUpdatesSubscription;
+  _collectionUpdatesSubscription;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   late StreamSubscription<FavoritesServiceInitCompleteEvent>
-      _favoritesServiceInitCompleteEvent;
+  _favoritesServiceInitCompleteEvent;
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
@@ -77,36 +77,40 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
         });
       },
     );
-    _collectionUpdatesSubscription =
-        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      _debouncer.run(() async {
-        if (mounted) {
-          _loadReason = event.reason;
-          setState(() {});
-        }
-      });
-    });
+    _collectionUpdatesSubscription = Bus.instance
+        .on<CollectionUpdatedEvent>()
+        .listen((event) {
+          _debouncer.run(() async {
+            if (mounted) {
+              _loadReason = event.reason;
+              setState(() {});
+            }
+          });
+        });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       _loadReason = event.reason;
       setState(() {});
     });
-    _favoritesServiceInitCompleteEvent =
-        Bus.instance.on<FavoritesServiceInitCompleteEvent>().listen((event) {
-      _debouncer.run(() async {
-        _loadReason = event.reason;
-        setState(() {});
-      });
-    });
-    _albumSortOrderChangeEvent =
-        Bus.instance.on<AlbumSortOrderChangeEvent>().listen((event) {
-      _loadReason = event.reason;
-      setState(() {});
-    });
-    _backupFoldersUpdatedEvent =
-        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
-      _loadReason = event.reason;
-      if (mounted) setState(() {});
-    });
+    _favoritesServiceInitCompleteEvent = Bus.instance
+        .on<FavoritesServiceInitCompleteEvent>()
+        .listen((event) {
+          _debouncer.run(() async {
+            _loadReason = event.reason;
+            setState(() {});
+          });
+        });
+    _albumSortOrderChangeEvent = Bus.instance
+        .on<AlbumSortOrderChangeEvent>()
+        .listen((event) {
+          _loadReason = event.reason;
+          setState(() {});
+        });
+    _backupFoldersUpdatedEvent = Bus.instance
+        .on<BackupFoldersUpdatedEvent>()
+        .listen((event) {
+          _loadReason = event.reason;
+          if (mounted) setState(() {});
+        });
     _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((_) {
       _loadReason = "AppModeChangedEvent";
       if (mounted) {
@@ -144,12 +148,14 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     List<Collection> collections, {
     required bool localGalleryMode,
   }) {
-    final TextStyle trashAndHiddenTextStyle =
-        Theme.of(context).textTheme.titleMedium!.copyWith(
-              color: Theme.of(
-                context,
-              ).textTheme.titleMedium!.color!.withValues(alpha: 0.5),
-            );
+    final TextStyle trashAndHiddenTextStyle = Theme.of(context)
+        .textTheme
+        .titleMedium!
+        .copyWith(
+          color: Theme.of(
+            context,
+          ).textTheme.titleMedium!.color!.withValues(alpha: 0.5),
+        );
     final colorScheme = getEnteColorScheme(context);
 
     return Stack(
@@ -184,38 +190,38 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 ),
                 trailingWidget:
                     backupPreferenceService.hasSkippedOnboardingPermission
-                        ? null
-                        : Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButtonWidget(
-                                icon: Icons.search,
-                                iconButtonType: IconButtonType.secondary,
-                                iconColor: colorScheme.blurStrokePressed,
-                                onTap: () {
-                                  unawaited(
-                                    routeToPage(
-                                      context,
-                                      DeviceFolderVerticalGridView(
-                                        appTitle: SectionTitle(
-                                          title: AppLocalizations.of(
-                                            context,
-                                          ).onDevice,
-                                        ),
-                                        tag: "OnDeviceAppTitle",
-                                        startInSearchMode: true,
-                                      ),
+                    ? null
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButtonWidget(
+                            icon: Icons.search,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokePressed,
+                            onTap: () {
+                              unawaited(
+                                routeToPage(
+                                  context,
+                                  DeviceFolderVerticalGridView(
+                                    appTitle: SectionTitle(
+                                      title: AppLocalizations.of(
+                                        context,
+                                      ).onDevice,
                                     ),
-                                  );
-                                },
-                              ),
-                              IconButtonWidget(
-                                icon: Icons.chevron_right,
-                                iconButtonType: IconButtonType.secondary,
-                                iconColor: colorScheme.blurStrokePressed,
-                              ),
-                            ],
+                                    tag: "OnDeviceAppTitle",
+                                    startInSearchMode: true,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
+                          IconButtonWidget(
+                            icon: Icons.chevron_right,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokePressed,
+                          ),
+                        ],
+                      ),
               ),
             ),
             const SliverToBoxAdapter(child: DeviceFoldersGridView()),
@@ -276,14 +282,14 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             localGalleryMode
                 ? const SliverToBoxAdapter(child: EmptyOnEnteSection())
                 : Configuration.instance.hasConfiguredAccount()
-                    ? CollectionsFlexiGridViewWidget(
-                        collections,
-                        selectedAlbums: widget.selectedAlbums,
-                        shrinkWrap: true,
-                        shouldShowCreateAlbum: true,
-                        enableSelectionMode: true,
-                      )
-                    : const SliverToBoxAdapter(child: EmptyState()),
+                ? CollectionsFlexiGridViewWidget(
+                    collections,
+                    selectedAlbums: widget.selectedAlbums,
+                    shrinkWrap: true,
+                    shouldShowCreateAlbum: true,
+                    enableSelectionMode: true,
+                  )
+                : const SliverToBoxAdapter(child: EmptyState()),
             if (!localGalleryMode) ...[
               SliverToBoxAdapter(
                 child: Divider(color: colorScheme.strokeFaint),

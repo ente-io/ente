@@ -61,16 +61,16 @@ Future<void> changeCollectionVisibility(
   bool isOwner = true,
   bool showProgressDialog = true,
 }) async {
-  final visibilityAction =
-      _getVisibilityAction(context, newVisibility, prevVisibility);
+  final visibilityAction = _getVisibilityAction(
+    context,
+    newVisibility,
+    prevVisibility,
+  );
   ProgressDialog? dialog;
   if (showProgressDialog) {
     dialog = createProgressDialog(
       context,
-      _visActionProgressDialogText(
-        context,
-        visibilityAction,
-      ),
+      _visActionProgressDialogText(context, visibilityAction),
     );
     await dialog.show();
   }
@@ -80,8 +80,10 @@ Future<void> changeCollectionVisibility(
     if (isOwner) {
       await CollectionsService.instance.updateMagicMetadata(collection, update);
     } else {
-      await CollectionsService.instance
-          .updateShareeMagicMetadata(collection, update);
+      await CollectionsService.instance.updateShareeMagicMetadata(
+        collection,
+        update,
+      );
     }
     // Force reload home gallery to pull in/remove the now visibility changed
     // files
@@ -93,10 +95,7 @@ Future<void> changeCollectionVisibility(
     if (showProgressDialog) {
       showShortToast(
         context,
-        _visActionSuccessfulText(
-          context,
-          visibilityAction,
-        ),
+        _visActionSuccessfulText(context, visibilityAction),
       );
     }
 
@@ -115,8 +114,10 @@ Future<void> changeSortOrder(
 ) async {
   try {
     final Map<String, dynamic> update = {"asc": sortedInAscOrder};
-    await CollectionsService.instance
-        .updatePublicMagicMetadata(collection, update);
+    await CollectionsService.instance.updatePublicMagicMetadata(
+      collection,
+      update,
+    );
     Bus.instance.fire(
       CollectionMetaEvent(collection.id, CollectionMetaEventType.sortChanged),
     );
@@ -133,9 +134,7 @@ Future<void> updateOrder(
   int order,
 ) async {
   try {
-    final Map<String, dynamic> update = {
-      orderKey: order,
-    };
+    final Map<String, dynamic> update = {orderKey: order};
     await CollectionsService.instance.updateMagicMetadata(collection, update);
     Bus.instance.fire(
       CollectionMetaEvent(collection.id, CollectionMetaEventType.orderChanged),
@@ -153,11 +152,11 @@ Future<void> updateShareeOrder(
   int order,
 ) async {
   try {
-    final Map<String, dynamic> update = {
-      orderKey: order,
-    };
-    await CollectionsService.instance
-        .updateShareeMagicMetadata(collection, update);
+    final Map<String, dynamic> update = {orderKey: order};
+    await CollectionsService.instance.updateShareeMagicMetadata(
+      collection,
+      update,
+    );
     Bus.instance.fire(
       CollectionMetaEvent(collection.id, CollectionMetaEventType.orderChanged),
     );
@@ -177,8 +176,10 @@ Future<void> changeCoverPhoto(
 ) async {
   try {
     final Map<String, dynamic> update = {"coverID": uploadedFileID};
-    await CollectionsService.instance
-        .updatePublicMagicMetadata(collection, update);
+    await CollectionsService.instance.updatePublicMagicMetadata(
+      collection,
+      update,
+    );
     Bus.instance.fire(
       CollectionUpdatedEvent(
         collection.id,
@@ -214,8 +215,10 @@ Future<bool> editTime(
       fileIdToTimeUpdate[file.uploadedFileID!] = {editTimeKey: editedTime};
     }
 
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       await FileMagicService.instance.updatePublicMagicMetadata(
@@ -242,10 +245,7 @@ Future<bool> editTime(
   }
 }
 
-Future<void> editFilename(
-  BuildContext context,
-  EnteFile file,
-) async {
+Future<void> editFilename(BuildContext context, EnteFile file) async {
   final fileName = file.displayName;
   final nameWithoutExt = basenameWithoutExtension(fileName);
   final extName = extension(fileName);
@@ -313,8 +313,10 @@ Future<void> _updatePublicMetadata(
   }
   ProgressDialog? dialog;
   if (context != null && showProgressDialogs) {
-    dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
   }
   try {

@@ -17,10 +17,8 @@ import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:share_plus/share_plus.dart";
 
-typedef LegacyKitAuthenticator = Future<bool> Function(
-  BuildContext context,
-  String reason,
-);
+typedef LegacyKitAuthenticator =
+    Future<bool> Function(BuildContext context, String reason);
 
 class LegacyKitPage extends StatefulWidget {
   final LegacyKit kit;
@@ -86,10 +84,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
                 const SizedBox(height: 20),
                 ..._buildPartRows(colorScheme),
                 const SizedBox(height: 20),
-                Text(
-                  context.strings.settings,
-                  style: textTheme.bodyBold,
-                ),
+                Text(context.strings.settings, style: textTheme.bodyBold),
                 const SizedBox(height: 8),
                 _RecoveryWaitTimeRow(
                   title: context.strings.recoveryWaitTime,
@@ -163,11 +158,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
   }
 
   Color _avatarColor(int index) {
-    const colors = [
-      Color(0xFF8A38F5),
-      Color(0xFFFFA939),
-      Color(0xFF1071FF),
-    ];
+    const colors = [Color(0xFF8A38F5), Color(0xFFFFA939), Color(0xFF1071FF)];
     return colors[index % colors.length];
   }
 
@@ -409,9 +400,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
                     child: GradientButton(
                       text: context.strings.delete,
                       height: 52,
-                      textStyle: textTheme.smallBold.copyWith(
-                        height: 20 / 14,
-                      ),
+                      textStyle: textTheme.smallBold.copyWith(height: 20 / 14),
                       backgroundColor: colorScheme.warning700,
                       onTap: () => Navigator.of(context).pop(true),
                     ),
@@ -458,8 +447,9 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
       builder: (context) {
         final colorScheme = getEnteColorScheme(context);
         final textTheme = getEnteTextTheme(context);
-        final sheetColor =
-            colorScheme.isLightTheme ? Colors.white : colorScheme.backdropBase;
+        final sheetColor = colorScheme.isLightTheme
+            ? Colors.white
+            : colorScheme.backdropBase;
         final borderColor = colorScheme.isLightTheme
             ? const Color(0xFFE0E0E0)
             : const Color(0xFF3E3E3E);
@@ -485,9 +475,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
                       Expanded(
                         child: Text(
                           context.strings.rejectRecovery,
-                          style: textTheme.largeBold.copyWith(
-                            height: 24 / 18,
-                          ),
+                          style: textTheme.largeBold.copyWith(height: 24 / 18),
                         ),
                       ),
                       GestureDetector(
@@ -549,15 +537,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     LegacyKit kit, {
     LegacyKitPart? part,
   }) {
-    return _sharePdfs(
-      [
-        (
-          bytes: bytes,
-          part: part,
-        ),
-      ],
-      kit: kit,
-    );
+    return _sharePdfs([(bytes: bytes, part: part)], kit: kit);
   }
 
   Future<ShareResult> _sharePdfs(
@@ -569,16 +549,11 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
       ShareParams(
         files: pdfs
             .map(
-              (pdf) => XFile.fromData(
-                pdf.bytes,
-                mimeType: "application/pdf",
-              ),
+              (pdf) => XFile.fromData(pdf.bytes, mimeType: "application/pdf"),
             )
             .toList(growable: false),
         fileNameOverrides: pdfs
-            .map(
-              (pdf) => "${_fileNameForKit(kit ?? _kit, part: pdf.part)}.pdf",
-            )
+            .map((pdf) => "${_fileNameForKit(kit ?? _kit, part: pdf.part)}.pdf")
             .toList(growable: false),
         sharePositionOrigin: Offset.zero & size,
       ),
@@ -611,10 +586,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
   String _fileNameForKit(LegacyKit kit, {LegacyKitPart? part}) {
     final name = part == null
         ? _fileNameComponent(kit.displayName, fallback: kit.id)
-        : _fileNameComponent(
-            part.name,
-            fallback: "part-${part.index}",
-          );
+        : _fileNameComponent(part.name, fallback: "part-${part.index}");
     return "ente-legacy-kit-$name";
   }
 
@@ -634,10 +606,7 @@ class _RecoveryBanner extends StatelessWidget {
   final LegacyKitRecoverySession session;
   final VoidCallback onBlockRecovery;
 
-  const _RecoveryBanner({
-    required this.session,
-    required this.onBlockRecovery,
-  });
+  const _RecoveryBanner({required this.session, required this.onBlockRecovery});
 
   @override
   Widget build(BuildContext context) {
@@ -667,9 +636,7 @@ class _RecoveryBanner extends StatelessWidget {
               const SizedBox(
                 width: 18,
                 height: 20,
-                child: Center(
-                  child: LegacyKitAlertIcon(),
-                ),
+                child: Center(child: LegacyKitAlertIcon()),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -772,9 +739,7 @@ class _LegacyKitPartRow extends StatelessWidget {
                   height: 40,
                   width: 40,
                   child: Center(
-                    child: LegacyKitShareIcon(
-                      color: colorScheme.textBase,
-                    ),
+                    child: LegacyKitShareIcon(color: colorScheme.textBase),
                   ),
                 ),
               ],
@@ -823,9 +788,7 @@ class _RecoveryWaitTimeRow extends StatelessWidget {
                   height: 36,
                   width: 36,
                   child: Center(
-                    child: LegacyKitClockIcon(
-                      color: colorScheme.primary700,
-                    ),
+                    child: LegacyKitClockIcon(color: colorScheme.primary700),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -856,9 +819,7 @@ class _RecoveryWaitTimeRow extends StatelessWidget {
                   width: 40,
                   child: canEdit
                       ? Center(
-                          child: LegacyKitEditIcon(
-                            color: colorScheme.textBase,
-                          ),
+                          child: LegacyKitEditIcon(color: colorScheme.textBase),
                         )
                       : const SizedBox.shrink(),
                 ),
@@ -889,10 +850,7 @@ class _PartInitial extends StatelessWidget {
         child: Container(
           width: 33,
           height: 33,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           child: Center(
             child: Text(
               initial,

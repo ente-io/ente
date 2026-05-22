@@ -46,8 +46,9 @@ class CollectionActions {
         }
 
         try {
-          createdCollection =
-              await CollectionService.instance.createCollection(text.trim());
+          createdCollection = await CollectionService.instance.createCollection(
+            text.trim(),
+          );
         } catch (e, s) {
           _logger.severe('Failed to create collection', e, s);
           rethrow;
@@ -57,10 +58,7 @@ class CollectionActions {
 
     if (result is Exception) {
       if (context.mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: result,
-        );
+        await showGenericErrorBottomSheet(context: context, error: result);
       }
       return null;
     } else if (createdCollection != null) {
@@ -90,18 +88,17 @@ class CollectionActions {
       onSubmit: (String newName) async {
         if (newName.isEmpty || newName == collection.name) return;
 
-        final progressDialog =
-            createProgressDialog(context, context.l10n.pleaseWait);
+        final progressDialog = createProgressDialog(
+          context,
+          context.l10n.pleaseWait,
+        );
         await progressDialog.show();
 
         try {
           await CollectionService.instance.rename(collection, newName);
           await progressDialog.hide();
 
-          showToast(
-            context,
-            context.l10n.collectionRenamedSuccessfully,
-          );
+          showToast(context, context.l10n.collectionRenamedSuccessfully);
 
           // Update the collection name locally
           collection.setName(newName);
@@ -111,10 +108,7 @@ class CollectionActions {
         } catch (error) {
           await progressDialog.hide();
 
-          await showGenericErrorBottomSheet(
-            context: context,
-            error: error,
-          );
+          await showGenericErrorBottomSheet(context: context, error: error);
         }
       },
     );
@@ -130,8 +124,9 @@ class CollectionActions {
     final dialogChoice = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
-      body:
-          context.l10n.deleteMultipleCollectionsDialogBody(collections.length),
+      body: context.l10n.deleteMultipleCollectionsDialogBody(
+        collections.length,
+      ),
       deleteButtonLabel: context.l10n.yesDeleteCollections(collections.length),
       assetPath: "assets/collection_delete_icon.png",
       showDeleteFromAllCollectionsOption: true,
@@ -139,8 +134,10 @@ class CollectionActions {
 
     if (dialogChoice?.buttonResult.action != ButtonAction.first) return;
 
-    final progressDialog =
-        createProgressDialog(context, context.l10n.pleaseWait);
+    final progressDialog = createProgressDialog(
+      context,
+      context.l10n.pleaseWait,
+    );
     await progressDialog.show();
 
     bool isFavoriteCollection = false;
@@ -159,8 +156,9 @@ class CollectionActions {
           continue;
         }
 
-        final fileCount =
-            await CollectionService.instance.getFileCount(collection);
+        final fileCount = await CollectionService.instance.getFileCount(
+          collection,
+        );
 
         if (fileCount == 0) {
           emptyCollections.add(collection);
@@ -214,20 +212,14 @@ class CollectionActions {
       );
 
       if (isFavoriteCollection) {
-        showToast(
-          context,
-          context.l10n.actionNotSupportedOnFavouritesAlbum,
-        );
+        showToast(context, context.l10n.actionNotSupportedOnFavouritesAlbum);
       }
 
       onSuccess?.call();
     } catch (error) {
       await progressDialog.hide();
 
-      await showGenericErrorBottomSheet(
-        context: context,
-        error: error,
-      );
+      await showGenericErrorBottomSheet(context: context, error: error);
     }
   }
 
@@ -239,10 +231,7 @@ class CollectionActions {
   }) async {
     final l10n = context.l10n;
     if (!collection.type.canDelete) {
-      showToast(
-        context,
-        l10n.collectionCannotBeDeleted,
-      );
+      showToast(context, l10n.collectionCannotBeDeleted);
       return;
     }
 
@@ -258,10 +247,7 @@ class CollectionActions {
         await progressDialog.hide();
 
         if (context.mounted) {
-          showToast(
-            context,
-            l10n.collectionDeletedSuccessfully,
-          );
+          showToast(context, l10n.collectionDeletedSuccessfully);
         }
 
         // Call success callback if provided
@@ -270,10 +256,7 @@ class CollectionActions {
         await progressDialog.hide();
 
         if (context.mounted) {
-          await showGenericErrorBottomSheet(
-            context: context,
-            error: error,
-          );
+          await showGenericErrorBottomSheet(context: context, error: error);
         }
       }
       return;
@@ -309,10 +292,7 @@ class CollectionActions {
       await progressDialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          l10n.collectionDeletedSuccessfully,
-        );
+        showToast(context, l10n.collectionDeletedSuccessfully);
       }
 
       // Call success callback if provided
@@ -321,10 +301,7 @@ class CollectionActions {
       await progressDialog.hide();
 
       if (context.mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: error,
-        );
+        await showGenericErrorBottomSheet(context: context, error: error);
       }
     }
   }
@@ -353,18 +330,12 @@ class CollectionActions {
         await CollectionApiClient.instance.leaveCollection(collection);
         if (context.mounted) {
           onSuccess?.call();
-          showToast(
-            context,
-            context.l10n.leaveCollectionSuccessfully,
-          );
+          showToast(context, context.l10n.leaveCollectionSuccessfully);
         }
       } catch (e) {
         _logger.severe("Failed to leave collection", e);
         if (context.mounted) {
-          await showGenericErrorBottomSheet(
-            context: context,
-            error: e,
-          );
+          await showGenericErrorBottomSheet(context: context, error: e);
         }
       }
     }
@@ -404,10 +375,7 @@ class CollectionActions {
       } catch (e) {
         _logger.severe("Failed to leave collections", e);
         if (context.mounted) {
-          await showGenericErrorBottomSheet(
-            context: context,
-            error: e,
-          );
+          await showGenericErrorBottomSheet(context: context, error: e);
         }
       }
     }
@@ -443,8 +411,9 @@ class CollectionActions {
     final shouldRemove = await showAlertBottomSheet<bool>(
       context,
       title: context.l10n.removePublicLink,
-      message: context.l10n
-          .removePublicLinkConfirmation(collection.name ?? "this collection"),
+      message: context.l10n.removePublicLinkConfirmation(
+        collection.name ?? "this collection",
+      ),
       assetPath: "assets/warning-grey.png",
       buttons: [
         GradientButton(
@@ -464,10 +433,7 @@ class CollectionActions {
       return true;
     } catch (e) {
       if (context.mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
       return false;
     }
@@ -561,8 +527,12 @@ class CollectionActions {
       return false;
     } else {
       try {
-        final newSharees = await CollectionApiClient.instance
-            .share(collection.id, email, publicKey, role);
+        final newSharees = await CollectionApiClient.instance.share(
+          collection.id,
+          email,
+          publicKey,
+          role,
+        );
         await dialog?.hide();
         collection.updateSharees(newSharees);
         return true;
@@ -586,8 +556,10 @@ class CollectionActions {
     User user,
   ) async {
     try {
-      final newSharees =
-          await CollectionApiClient.instance.unshare(collection.id, user.email);
+      final newSharees = await CollectionApiClient.instance.unshare(
+        collection.id,
+        user.email,
+      );
       collection.updateSharees(newSharees);
       return true;
     } catch (e) {

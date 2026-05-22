@@ -222,31 +222,32 @@ class _ClusterPageState extends State<ClusterPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
       initialFiles: files,
-      header: (_localGalleryUiMode || widget.showNamingBanner) &&
+      header:
+          (_localGalleryUiMode || widget.showNamingBanner) &&
               files.isNotEmpty &&
               !_isNamingBannerDismissed
           ? _localGalleryUiMode
-              ? const NameFaceBanner()
-              : SavePersonBanner(
-                  faceWidget: PersonFaceWidget(clusterID: widget.clusterID),
-                  text: AppLocalizations.of(context).savePerson,
-                  subText: AppLocalizations.of(context).findThemQuickly,
-                  primaryActionLabel: AppLocalizations.of(context).save,
-                  secondaryActionLabel: AppLocalizations.of(context).merge,
-                  onPrimaryTap: _handleSavePerson,
-                  onSecondaryTap: _handleMergePerson,
-                  onDismissed: () {
-                    if (!mounted) {
-                      return;
-                    }
-                    setState(() {
-                      _isNamingBannerDismissed = true;
-                    });
-                  },
-                  dismissibleKey: ValueKey(
-                    "save-person-banner-${widget.clusterID}",
-                  ),
-                )
+                ? const NameFaceBanner()
+                : SavePersonBanner(
+                    faceWidget: PersonFaceWidget(clusterID: widget.clusterID),
+                    text: AppLocalizations.of(context).savePerson,
+                    subText: AppLocalizations.of(context).findThemQuickly,
+                    primaryActionLabel: AppLocalizations.of(context).save,
+                    secondaryActionLabel: AppLocalizations.of(context).merge,
+                    onPrimaryTap: _handleSavePerson,
+                    onSecondaryTap: _handleMergePerson,
+                    onDismissed: () {
+                      if (!mounted) {
+                        return;
+                      }
+                      setState(() {
+                        _isNamingBannerDismissed = true;
+                      });
+                    },
+                    dismissibleKey: ValueKey(
+                      "save-person-banner-${widget.clusterID}",
+                    ),
+                  )
           : null,
     );
     return GalleryBoundariesProvider(

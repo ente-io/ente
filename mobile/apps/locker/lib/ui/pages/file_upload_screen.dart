@@ -96,9 +96,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TitleBarTitleWidget(
-                        title: context.l10n.uploadFiles,
-                      ),
+                      TitleBarTitleWidget(title: context.l10n.uploadFiles),
                       Text(
                         context.l10n.filesSelected(_files.length),
                         style: textTheme.smallMuted,
@@ -169,9 +167,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                         ),
                         const SizedBox(height: 24),
                       ],
-                      TitleBarTitleWidget(
-                        title: context.l10n.collectionLabel,
-                      ),
+                      TitleBarTitleWidget(title: context.l10n.collectionLabel),
                       const SizedBox(height: 16),
                       CollectionSelectionWidget(
                         collections: _availableCollections,

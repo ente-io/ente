@@ -6,10 +6,7 @@ import "package:locker/l10n/l10n.dart";
 class CopyButton extends StatefulWidget {
   final String url;
 
-  const CopyButton({
-    super.key,
-    required this.url,
-  });
+  const CopyButton({super.key, required this.url});
 
   @override
   State<CopyButton> createState() => _CopyButtonState();

@@ -13,11 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-enum ChangeLogAction {
-  skip,
-  consumeWithoutShowing,
-  show,
-}
+enum ChangeLogAction { skip, consumeWithoutShowing, show }
 
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
@@ -30,8 +26,8 @@ class UpdateService {
   final SharedPreferences _prefs;
 
   UpdateService(SharedPreferences prefs, PackageInfo packageInfo)
-      : _prefs = prefs,
-        _packageInfo = packageInfo {
+    : _prefs = prefs,
+      _packageInfo = packageInfo {
     debugPrint("UpdateService constructor");
   }
 
@@ -66,9 +62,9 @@ class UpdateService {
     }
 
     return ChangeLogStrings.hasContentForLocale(
-      locale,
-      isLocalGallery: isLocalGallery,
-    )
+          locale,
+          isLocalGallery: isLocalGallery,
+        )
         ? ChangeLogAction.show
         : ChangeLogAction.consumeWithoutShowing;
   }
@@ -124,7 +120,7 @@ class UpdateService {
     final now = DateTime.now().microsecondsSinceEpoch;
     final hasBeenThresholdDaysSinceLastNotification =
         (now - lastNotificationShownTime) >
-            ((_latestVersion!.shouldNotify ? 1 : 3) * microSecondsInDay);
+        ((_latestVersion!.shouldNotify ? 1 : 3) * microSecondsInDay);
 
     return shouldUpdate && hasBeenThresholdDaysSinceLastNotification;
   }
@@ -151,9 +147,9 @@ class UpdateService {
   }
 
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
-    final response = await NetworkClient.instance
-        .getDio()
-        .get("https://ente.com/release-info/independent.json");
+    final response = await NetworkClient.instance.getDio().get(
+      "https://ente.com/release-info/independent.json",
+    );
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
   }
 

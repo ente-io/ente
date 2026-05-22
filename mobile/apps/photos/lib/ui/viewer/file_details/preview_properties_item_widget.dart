@@ -47,26 +47,18 @@ class _PreviewPropertiesItemWidgetState
     final data = await VideoPreviewService.instance
         .getPlaylist(widget.file)
         .onError((error, stackTrace) {
-      if (!mounted) return;
-      return null;
-    });
+          if (!mounted) return;
+          return null;
+        });
 
     if (data!.width != null && data.height != null) {
       subSectionWidgets.add(
-        Text(
-          "${data.width!}x${data.height!}",
-          style: textStyle,
-        ),
+        Text("${data.width!}x${data.height!}", style: textStyle),
       );
     }
 
     if (data.size != null) {
-      subSectionWidgets.add(
-        Text(
-          formatBytes(data.size!),
-          style: textStyle,
-        ),
-      );
+      subSectionWidgets.add(Text(formatBytes(data.size!), style: textStyle));
     }
 
     if ((widget.file.fileType == FileType.video) &&
@@ -78,12 +70,7 @@ class _PreviewPropertiesItemWidgetState
         "b/s",
       );
       if (result != null) {
-        subSectionWidgets.add(
-          Text(
-            result,
-            style: textStyle,
-          ),
-        );
+        subSectionWidgets.add(Text(result, style: textStyle));
       }
     }
 

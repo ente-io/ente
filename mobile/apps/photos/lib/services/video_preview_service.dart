@@ -60,14 +60,14 @@ class VideoPreviewService {
   bool get _hasQueuedFile => fileQueue.isNotEmpty;
 
   VideoPreviewService._privateConstructor()
-      : serviceLocator = ServiceLocator.instance,
-        filesDB = FilesDB.instance,
-        uploadLocksDB = UploadLocksDB.instance,
-        ffmpegService = IsolatedFfmpegService.instance,
-        fileMagicService = FileMagicService.instance,
-        cacheManager = DefaultCacheManager(),
-        videoCacheManager = VideoCacheManager.instance,
-        config = Configuration.instance {
+    : serviceLocator = ServiceLocator.instance,
+      filesDB = FilesDB.instance,
+      uploadLocksDB = UploadLocksDB.instance,
+      ffmpegService = IsolatedFfmpegService.instance,
+      fileMagicService = FileMagicService.instance,
+      cacheManager = DefaultCacheManager(),
+      videoCacheManager = VideoCacheManager.instance,
+      config = Configuration.instance {
     if (flagService.stopStreamProcess) {
       _registerStopSafelyListeners();
     }
@@ -189,8 +189,9 @@ class VideoPreviewService {
       );
     }
 
-    final progressStr =
-        progress != null ? "${(progress * 100).toStringAsFixed(1)}%" : "N/A";
+    final progressStr = progress != null
+        ? "${(progress * 100).toStringAsFixed(1)}%"
+        : "N/A";
 
     // Don't interrupt upload or compression >= 75%, but clear queue
     if (status == PreviewItemStatus.uploading ||
@@ -348,8 +349,9 @@ class VideoPreviewService {
     // If total is empty then mark all as processed else compute the ratio
     // of processed files and total remote video files
     // netProcessedItems = processed / total
-    final double netProcessedItems =
-        total.isEmpty ? 1 : (processed.length / total.length).clamp(0, 1);
+    final double netProcessedItems = total.isEmpty
+        ? 1
+        : (processed.length / total.length).clamp(0, 1);
 
     // Store the data and return it
     final status = netProcessedItems;
@@ -378,6 +380,7 @@ class VideoPreviewService {
   Future<void> chunkAndUploadVideo(
     BuildContext? ctx,
     EnteFile enteFile, {
+
     /// Indicates this function is an continuation of a chunking thread
     bool continuation = false,
     // not used currently
@@ -470,8 +473,9 @@ class VideoPreviewService {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.compressing,
         file: enteFile,
-        retryCount:
-            forceUpload ? 0 : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
+        retryCount: forceUpload
+            ? 0
+            : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
         collectionID: enteFile.collectionID ?? 0,
       );
       _fireVideoPreviewStateChange(
@@ -502,9 +506,11 @@ class VideoPreviewService {
           ? (fileSize * 8) / props!.duration!.inSeconds
           : null;
 
-      final colorTransfer =
-          videoData["color_transfer"]?.toString().toLowerCase();
-      final isHDR = colorTransfer != null &&
+      final colorTransfer = videoData["color_transfer"]
+          ?.toString()
+          .toLowerCase();
+      final isHDR =
+          colorTransfer != null &&
           (colorTransfer == "smpte2084" || colorTransfer == "arib-std-b67");
 
       // create temp file & directory for preview generation
@@ -624,16 +630,16 @@ class VideoPreviewService {
           // Fetch resolution of generated stream by decrypting a single frame
           final playlistFrameResult = await ffmpegService
               .runFfmpeg(
-            '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
-          )
+                '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
+              )
               .onError((error, stackTrace) {
-            _logger.warning(
-              "FFmpeg command failed for frame",
-              error,
-              stackTrace,
-            );
-            return {};
-          });
+                _logger.warning(
+                  "FFmpeg command failed for frame",
+                  error,
+                  stackTrace,
+                );
+                return {};
+              });
           final playlistFrameReturnCode =
               playlistFrameResult["returnCode"] as int?;
           int? width, height;
@@ -835,16 +841,13 @@ class VideoPreviewService {
     try {
       final encryptionKey = getFileKey(file);
       final playlistContent = playlist.readAsStringSync();
-      final result = await gzipAndEncryptJson(
-        {
-          "playlist": playlistContent,
-          'type': 'hls_video',
-          'width': width,
-          'height': height,
-          'size': objectSize,
-        },
-        encryptionKey,
-      );
+      final result = await gzipAndEncryptJson({
+        "playlist": playlistContent,
+        'type': 'hls_video',
+        'width': width,
+        'height': height,
+        'size': objectSize,
+      }, encryptionKey);
       await _fileDataGateway.putVideoData(
         fileID: file.uploadedFileID!,
         objectID: objectId,
@@ -1025,14 +1028,14 @@ class VideoPreviewService {
       }
       final videoFile = (await videoCacheManager.getFileFromCache(
         _getVideoPreviewKey(objectID),
-      ))
-          ?.file;
+      ))?.file;
       final effectiveSize = size ?? previewInfo?.objectSize;
       final maxPreviewCacheSize =
           maxPreviewSizeBytes ?? _maxPreviewSizeLimitForCache;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
-        final canCachePreview = effectiveSize != null &&
+        final canCachePreview =
+            effectiveSize != null &&
             effectiveSize <= maxPreviewCacheSize &&
             (tryReserveBytes == null || tryReserveBytes(effectiveSize));
         if (canCachePreview) {
@@ -1120,8 +1123,8 @@ class VideoPreviewService {
     }
     final encryptionKey =
         collectionsService.isSharedPublicLink(file.collectionID!)
-            ? getPublicFileKey(file)
-            : getFileKey(file);
+        ? getPublicFileKey(file)
+        : getFileKey(file);
     final playlistData = await decryptAndUnzipJson(
       encryptionKey,
       encryptedData: fetchResult.encryptedData,
@@ -1149,8 +1152,9 @@ class VideoPreviewService {
   Future<(String, String)> _getPreviewUrl(EnteFile file) async {
     try {
       late String url;
-      final previewType =
-          file.fileType == FileType.video ? "vid_preview" : "img_preview";
+      final previewType = file.fileType == FileType.video
+          ? "vid_preview"
+          : "img_preview";
       if (collectionsService.isSharedPublicLink(file.collectionID!)) {
         url = await _fileDataGateway.getPublicPreview(
           baseUrl: endpointConfig.endpoint,
@@ -1301,8 +1305,9 @@ class VideoPreviewService {
       );
 
       // If not found in 60-day list, fetch it individually
-      queueFile ??=
-          await filesDB.getAnyUploadedFile(queueFileId).catchError((e) => null);
+      queueFile ??= await filesDB
+          .getAnyUploadedFile(queueFileId)
+          .catchError((e) => null);
 
       if (queueFile == null) {
         await uploadLocksDB
@@ -1460,7 +1465,8 @@ String _summarizeFfmpegOutput(String? output) {
     summary = summary.substring(summary.length - _maxFfmpegOutputChars);
   }
 
-  final wasTruncated = lines.length > summarizedLines.length ||
+  final wasTruncated =
+      lines.length > summarizedLines.length ||
       trimmedOutput.length > _maxFfmpegOutputChars;
   return wasTruncated
       ? "FFmpeg output (truncated):\n$summary"

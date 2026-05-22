@@ -65,14 +65,10 @@ class EmptyHiddenWidget extends StatelessWidget {
                               color: enteColorScheme.strokeBase,
                               size: 16,
                             ),
-                            const Padding(
-                              padding: EdgeInsets.all(4),
-                            ),
+                            const Padding(padding: EdgeInsets.all(4)),
                             Text(
                               AppLocalizations.of(context).hide,
-                              style: TextStyle(
-                                color: enteColorScheme.textBase,
-                              ),
+                              style: TextStyle(color: enteColorScheme.textBase),
                             ),
                           ],
                         ),
@@ -92,19 +88,14 @@ class EmptyHiddenWidget extends StatelessWidget {
 class EmptyHiddenTextWidget extends StatelessWidget {
   final String text;
 
-  const EmptyHiddenTextWidget(
-    this.text, {
-    super.key,
-  });
+  const EmptyHiddenTextWidget(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
       textAlign: TextAlign.center,
-      style: TextStyle(
-        color: getEnteColorScheme(context).textFaint,
-      ),
+      style: TextStyle(color: getEnteColorScheme(context).textFaint),
     );
   }
 }

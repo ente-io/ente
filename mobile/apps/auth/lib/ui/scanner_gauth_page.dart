@@ -36,9 +36,7 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.scan),
-      ),
+      appBar: AppBar(title: Text(l10n.scan)),
       body: Column(
         children: <Widget>[
           Expanded(

@@ -41,14 +41,14 @@ class UnCategorizedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final FileLoadResult result =
-            await FilesDB.instance.getFilesInCollection(
-          collection.id,
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
-        );
+        final FileLoadResult result = await FilesDB.instance
+            .getFilesInCollection(
+              collection.id,
+              creationStartTime,
+              creationEndTime,
+              limit: limit,
+              asc: asc,
+            );
         // hide ignored files from home page UI
         final ignoredIDs =
             await IgnoredFilesService.instance.idToIgnoreReasonMap;
@@ -59,9 +59,9 @@ class UnCategorizedPage extends StatelessWidget {
         );
         return result;
       },
-      reloadEvent: Bus.instance
-          .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == collection.id),
+      reloadEvent: Bus.instance.on<CollectionUpdatedEvent>().where(
+        (event) => event.collectionID == collection.id,
+      ),
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
@@ -69,10 +69,10 @@ class UnCategorizedPage extends StatelessWidget {
       },
       forceReloadEvents: [
         Bus.instance.on<CollectionMetaEvent>().where(
-              (event) =>
-                  event.id == collection.id &&
-                  event.type == CollectionMetaEventType.sortChanged,
-            ),
+          (event) =>
+              event.id == collection.id &&
+              event.type == CollectionMetaEventType.sortChanged,
+        ),
       ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
@@ -108,9 +108,9 @@ class UnCategorizedPage extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       return ValueListenableBuilder(
-                        valueListenable: InheritedSearchFilterData.of(context)
-                            .searchFilterDataProvider!
-                            .isSearchingNotifier,
+                        valueListenable: InheritedSearchFilterData.of(
+                          context,
+                        ).searchFilterDataProvider!.isSearchingNotifier,
                         builder: (context, isSearching, _) {
                           return isSearching
                               ? HierarchicalSearchGallery(

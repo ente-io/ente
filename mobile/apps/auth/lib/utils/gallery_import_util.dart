@@ -18,9 +18,7 @@ Future<Directory> _getPickedImagesDirectory({
 }) async {
   final documentsDirectory =
       await (documentsDirectoryProvider ?? getApplicationDocumentsDirectory)();
-  return Directory(
-    p.join(documentsDirectory.path, _pickedImagesDirectoryName),
-  );
+  return Directory(p.join(documentsDirectory.path, _pickedImagesDirectoryName));
 }
 
 Future<File?> _getManagedPickedGalleryImage(
@@ -75,9 +73,7 @@ Future<void> _cleanupPickedGalleryImageIfNeeded(
   }
 }
 
-Future<void> cleanupPickedImagesOnStartup({
-  Logger? logger,
-}) async {
+Future<void> cleanupPickedImagesOnStartup({Logger? logger}) async {
   if (!Platform.isIOS) {
     return;
   }

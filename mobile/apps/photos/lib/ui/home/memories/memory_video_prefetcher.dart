@@ -99,8 +99,9 @@ class MemoryVideoPrefetcher {
 
   bool _tryReserveDownloadBytes(int uploadedFileID, int bytes) {
     final existingReservation = _reservedDownloadBytesByID[uploadedFileID];
-    final additionalBytes =
-        existingReservation == null ? bytes : bytes - existingReservation;
+    final additionalBytes = existingReservation == null
+        ? bytes
+        : bytes - existingReservation;
     if (additionalBytes <= 0) {
       return true;
     }
@@ -123,15 +124,15 @@ class MemoryVideoPrefetcher {
       if (!await canUseHighBandwidth()) return;
       if (!_isActive(stillActive)) return;
 
-      final didWarmPreview =
-          await VideoPreviewService.instance.prefetchExistingPreview(
-        file,
-        maxPreviewSizeBytes: kMemoryVideoPreviewMaxBytes,
-        tryReserveBytes: (bytes) {
-          return _isActive(stillActive) &&
-              _tryReserveDownloadBytes(uploadedFileID, bytes);
-        },
-      );
+      final didWarmPreview = await VideoPreviewService.instance
+          .prefetchExistingPreview(
+            file,
+            maxPreviewSizeBytes: kMemoryVideoPreviewMaxBytes,
+            tryReserveBytes: (bytes) {
+              return _isActive(stillActive) &&
+                  _tryReserveDownloadBytes(uploadedFileID, bytes);
+            },
+          );
       if (!_isActive(stillActive)) return;
       if (!didWarmPreview) {
         final originalResult = await _prefetchSmallOriginal(

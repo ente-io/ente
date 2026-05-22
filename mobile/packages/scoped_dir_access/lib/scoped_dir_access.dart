@@ -19,11 +19,7 @@ final _logger = Logger('DirUtils');
 
 /// Represents a picked directory with platform-specific access credentials.
 class PickedDirectory {
-  const PickedDirectory({
-    required this.path,
-    this.bookmark,
-    this.treeUri,
-  });
+  const PickedDirectory({required this.path, this.bookmark, this.treeUri});
 
   /// The display path of the directory.
   final String path;
@@ -135,10 +131,7 @@ class DirUtils {
       );
       if (picked == null) return null;
 
-      return PickedDirectory(
-        path: picked.name,
-        treeUri: picked.uri,
-      );
+      return PickedDirectory(path: picked.name, treeUri: picked.uri);
     } catch (e) {
       _logger.severe('Android: Failed to pick directory: $e');
       return null;
@@ -243,10 +236,9 @@ class DirUtils {
     }
 
     try {
-      final result = await _channel.invokeMethod<bool>(
-        'stopAccess',
-        {'bookmark': dir.bookmark},
-      );
+      final result = await _channel.invokeMethod<bool>('stopAccess', {
+        'bookmark': dir.bookmark,
+      });
       return result ?? false;
     } on PlatformException catch (e) {
       _logger.severe('${Platform.operatingSystem}: Failed to stop access: $e');
@@ -331,10 +323,10 @@ class DirUtils {
       final basePath = subPath != null ? '${dir.path}/$subPath' : dir.path;
       final filePath = '$basePath/$fileName';
 
-      final result = await _channel.invokeMethod<bool>(
-        'writeFile',
-        {'path': filePath, 'content': content},
-      );
+      final result = await _channel.invokeMethod<bool>('writeFile', {
+        'path': filePath,
+        'content': content,
+      });
       return result ?? false;
     } on PlatformException catch (e) {
       _logger.severe(
@@ -402,10 +394,9 @@ class DirUtils {
   }) async {
     try {
       final basePath = subPath != null ? '${dir.path}/$subPath' : dir.path;
-      final result = await _channel.invokeMethod<List<dynamic>>(
-        'listFiles',
-        {'path': basePath},
-      );
+      final result = await _channel.invokeMethod<List<dynamic>>('listFiles', {
+        'path': basePath,
+      });
       if (result == null) return [];
 
       return result.map((e) {
@@ -479,10 +470,9 @@ class DirUtils {
   Future<bool> _deleteFileOther(String path) async {
     try {
       if (Platform.isIOS || Platform.isMacOS) {
-        final result = await _channel.invokeMethod<bool>(
-          'deleteFile',
-          {'path': path},
-        );
+        final result = await _channel.invokeMethod<bool>('deleteFile', {
+          'path': path,
+        });
         return result ?? false;
       } else {
         await File(path).delete();

@@ -91,18 +91,12 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
             FocusScope.of(context).unfocus();
             Navigator.of(context).pop(false);
           },
-          icon: Icon(
-            Icons.arrow_back,
-            color: colorTheme.textBase,
-          ),
+          icon: Icon(Icons.arrow_back, color: colorTheme.textBase),
         ),
         centerTitle: true,
         title: SvgPicture.asset(
           'assets/svg/app-logo.svg',
-          colorFilter: ColorFilter.mode(
-            colorTheme.primary700,
-            BlendMode.srcIn,
-          ),
+          colorFilter: ColorFilter.mode(colorTheme.primary700, BlendMode.srcIn),
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
@@ -210,9 +204,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
     } else {
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (BuildContext context) => LockScreenConfirmPassword(
-            password: _passwordController.text,
-          ),
+          builder: (BuildContext context) =>
+              LockScreenConfirmPassword(password: _passwordController.text),
         ),
       );
       _passwordController.clear();

@@ -166,10 +166,7 @@ class _PhysicalRecordsPageState
     }
     Clipboard.setData(ClipboardData(text: value));
     if (!mounted) return;
-    showToast(
-      context,
-      context.l10n.copiedToClipboard(label),
-    );
+    showToast(context, context.l10n.copiedToClipboard(label));
   }
 
   @override
@@ -181,9 +178,9 @@ class _PhysicalRecordsPageState
         onCopy: _locationController.text.trim().isEmpty
             ? null
             : () => _copyValue(
-                  _locationController.text,
-                  context.l10n.recordLocation,
-                ),
+                _locationController.text,
+                context.l10n.recordLocation,
+              ),
       ),
     ];
 
@@ -195,10 +192,8 @@ class _PhysicalRecordsPageState
           value: _notesController.text,
           maxLines: 6,
           lineHeight: 1.5,
-          onCopy: () => _copyValue(
-            _notesController.text,
-            context.l10n.recordNotes,
-          ),
+          onCopy: () =>
+              _copyValue(_notesController.text, context.l10n.recordNotes),
         ),
       ]);
     }

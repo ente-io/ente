@@ -36,9 +36,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
       builder: (context, constraints) {
         return Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFunctions(constraints),
-          ],
+          children: [_buildFunctions(constraints)],
         );
       },
     );
@@ -72,8 +70,8 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
           );
         },
         switchInCurve: Curves.ease,
-        child: widget.editor.isSubEditorOpen &&
-                !widget.editor.isSubEditorClosing
+        child:
+            widget.editor.isSubEditorOpen && !widget.editor.isSubEditorClosing
             ? const SizedBox.shrink()
             : Align(
                 alignment: Alignment.center,

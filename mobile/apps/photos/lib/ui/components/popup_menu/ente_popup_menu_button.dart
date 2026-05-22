@@ -75,10 +75,7 @@ class EntePopupMenuButton<T> extends StatelessWidget {
     );
   }
 
-  Future<void> _showMenu(
-    BuildContext context,
-    TapDownDetails details,
-  ) async {
+  Future<void> _showMenu(BuildContext context, TapDownDetails details) async {
     final options = optionsBuilder();
     if (options.isEmpty) {
       return;
@@ -141,12 +138,7 @@ Future<T?> showEntePopupMenu<T>({
       borderRadius: BorderRadius.circular(borderRadius),
       side: BorderSide(color: colorScheme.strokeFaint),
     ),
-    position: RelativeRect.fromLTRB(
-      left,
-      top,
-      right,
-      overlaySize.height - top,
-    ),
+    position: RelativeRect.fromLTRB(left, top, right, overlaySize.height - top),
     items: options
         .map(
           (option) => PopupMenuItem<T>(
@@ -155,14 +147,10 @@ Future<T?> showEntePopupMenu<T>({
             height: itemHeight,
             child: Container(
               height: itemHeight,
-              padding: EdgeInsets.symmetric(
-                horizontal: itemHorizontalPadding,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: itemHorizontalPadding),
               decoration: BoxDecoration(
                 border: option.showDivider
-                    ? Border(
-                        bottom: BorderSide(color: colorScheme.strokeFaint),
-                      )
+                    ? Border(bottom: BorderSide(color: colorScheme.strokeFaint))
                     : null,
               ),
               child: _EntePopupMenuRow(option: option),

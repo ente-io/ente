@@ -207,9 +207,7 @@ class SocialDB {
     return _rowToComment(rows.first);
   }
 
-  Future<Map<String, Comment>> getCommentsByIds(
-    Iterable<String> ids,
-  ) async {
+  Future<Map<String, Comment>> getCommentsByIds(Iterable<String> ids) async {
     final idList = ids.toList();
     if (idList.isEmpty) return {};
 
@@ -221,9 +219,7 @@ class SocialDB {
       whereArgs: idList,
     );
 
-    return {
-      for (final row in rows) (row['id'] as String): _rowToComment(row),
-    };
+    return {for (final row in rows) (row['id'] as String): _rowToComment(row)};
   }
 
   Future<List<Comment>> getCommentsForFilePaginated(
@@ -334,20 +330,18 @@ class SocialDB {
 
   Future<void> setCommentsSyncTime(int collectionID, int syncTime) async {
     final db = await database;
-    await db.insert(
-      _syncTimeTable,
-      {'collection_id': collectionID, 'comments_sync_time': syncTime},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(_syncTimeTable, {
+      'collection_id': collectionID,
+      'comments_sync_time': syncTime,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> setReactionsSyncTime(int collectionID, int syncTime) async {
     final db = await database;
-    await db.insert(
-      _syncTimeTable,
-      {'collection_id': collectionID, 'reactions_sync_time': syncTime},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(_syncTimeTable, {
+      'collection_id': collectionID,
+      'reactions_sync_time': syncTime,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> clearSyncTime(int collectionID) async {
@@ -379,10 +373,10 @@ class SocialDB {
       whereArgs: [collectionID],
     );
     if (rows.isEmpty) {
-      await db.insert(
-        _syncTimeTable,
-        {'collection_id': collectionID, 'anon_profiles_sync_time': syncTime},
-      );
+      await db.insert(_syncTimeTable, {
+        'collection_id': collectionID,
+        'anon_profiles_sync_time': syncTime,
+      });
     } else {
       await db.update(
         _syncTimeTable,
@@ -603,7 +597,8 @@ class SocialDB {
     final db = await database;
     final rows = await db.query(
       _reactionsTable,
-      where: 'file_id IS NOT NULL AND comment_id IS NULL '
+      where:
+          'file_id IS NOT NULL AND comment_id IS NULL '
           'AND is_deleted = 0 AND user_id != ? AND created_at > ?',
       whereArgs: [excludeUserID, sinceTime],
       orderBy: 'created_at DESC',
@@ -620,7 +615,8 @@ class SocialDB {
     final db = await database;
     final rows = await db.query(
       _commentsTable,
-      where: 'file_id IS NOT NULL AND parent_comment_id IS NULL '
+      where:
+          'file_id IS NOT NULL AND parent_comment_id IS NULL '
           'AND is_deleted = 0 AND user_id != ? AND created_at > ?',
       whereArgs: [excludeUserID, sinceTime],
       orderBy: 'created_at DESC',
@@ -637,7 +633,8 @@ class SocialDB {
     final db = await database;
     final rows = await db.query(
       _commentsTable,
-      where: 'parent_comment_id IS NOT NULL AND is_deleted = 0 '
+      where:
+          'parent_comment_id IS NOT NULL AND is_deleted = 0 '
           'AND user_id != ? AND created_at > ?',
       whereArgs: [excludeUserID, sinceTime],
       orderBy: 'created_at DESC',

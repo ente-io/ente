@@ -86,9 +86,7 @@ class _DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
             children: [
               const Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CloseIconButton(),
-                ],
+                children: [CloseIconButton()],
               ),
               const SizedBox(height: 12),
               Center(child: Image.asset(widget.assetPath)),
@@ -101,9 +99,7 @@ class _DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
               const SizedBox(height: 12),
               Text(
                 widget.body,
-                style: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
-                ),
+                style: textTheme.body.copyWith(color: colorScheme.textMuted),
                 textAlign: TextAlign.center,
               ),
               if (widget.showDeleteFromAllCollectionsOption) ...[

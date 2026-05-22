@@ -68,20 +68,20 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
     try {
       final List<Future> futures = [];
 
-      final regularCollections =
-          await CollectionService.instance.getCollectionsForUI();
+      final regularCollections = await CollectionService.instance
+          .getCollectionsForUI();
 
       // Navigate to upload screen to get collection selection
-      final uploadResult =
-          await Navigator.of(context).push<FileUploadSheetResult>(
-        MaterialPageRoute(
-          builder: (context) => FileUploadScreen(
-            files: files,
-            collections: regularCollections,
-            selectedCollection: selectedCollection,
-          ),
-        ),
-      );
+      final uploadResult = await Navigator.of(context)
+          .push<FileUploadSheetResult>(
+            MaterialPageRoute(
+              builder: (context) => FileUploadScreen(
+                files: files,
+                collections: regularCollections,
+                selectedCollection: selectedCollection,
+              ),
+            ),
+          );
 
       // Handle both regular collections and uncategorized (empty set)
       final isUncategorizedUpload =
@@ -102,52 +102,62 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
 
         int completedUploads = 0;
         for (final file in files) {
-          final fileUploadFuture = FileUploader.instance
-              .upload(file, uploadResult.selectedCollections.first);
+          final fileUploadFuture = FileUploader.instance.upload(
+            file,
+            uploadResult.selectedCollections.first,
+          );
           futures.add(
-            fileUploadFuture.then((enteFile) async {
-              completedUploads++;
-              if (!hasUploadError && progressDialog.isShowing()) {
-                progressDialog.update(
-                  message: context.l10n
-                      .uploadedFilesProgress(completedUploads, files.length),
-                );
-              }
-              // Add to additional collections if multiple were selected
-              for (int cIndex = 1;
-                  cIndex < uploadResult.selectedCollections.length;
-                  cIndex++) {
-                // Don't trigger a sync for each additional collection – do one
-                // sync at the end after all files are processed.
-                futures.add(
-                  CollectionService.instance.addToCollection(
-                    uploadResult.selectedCollections[cIndex],
-                    enteFile,
-                    runSync: false,
-                  ),
-                );
-              }
+            fileUploadFuture
+                .then((enteFile) async {
+                  completedUploads++;
+                  if (!hasUploadError && progressDialog.isShowing()) {
+                    progressDialog.update(
+                      message: context.l10n.uploadedFilesProgress(
+                        completedUploads,
+                        files.length,
+                      ),
+                    );
+                  }
+                  // Add to additional collections if multiple were selected
+                  for (
+                    int cIndex = 1;
+                    cIndex < uploadResult.selectedCollections.length;
+                    cIndex++
+                  ) {
+                    // Don't trigger a sync for each additional collection – do one
+                    // sync at the end after all files are processed.
+                    futures.add(
+                      CollectionService.instance.addToCollection(
+                        uploadResult.selectedCollections[cIndex],
+                        enteFile,
+                        runSync: false,
+                      ),
+                    );
+                  }
 
-              if (uploadResult.note.isNotEmpty) {
-                futures.add(
-                  MetadataUpdaterService.instance
-                      .editFileCaption(enteFile, uploadResult.note),
-                );
-              }
-            }).catchError((e) async {
-              completedUploads++;
-              _logger.severe('File upload failed', e);
-              if (hasUploadError) {
-                return;
-              }
-              hasUploadError = true;
-              if (progressDialog.isShowing()) {
-                await progressDialog.hide();
-              }
-              if (mounted) {
-                await _showUploadFailureError(e);
-              }
-            }),
+                  if (uploadResult.note.isNotEmpty) {
+                    futures.add(
+                      MetadataUpdaterService.instance.editFileCaption(
+                        enteFile,
+                        uploadResult.note,
+                      ),
+                    );
+                  }
+                })
+                .catchError((e) async {
+                  completedUploads++;
+                  _logger.severe('File upload failed', e);
+                  if (hasUploadError) {
+                    return;
+                  }
+                  hasUploadError = true;
+                  if (progressDialog.isShowing()) {
+                    await progressDialog.hide();
+                  }
+                  if (mounted) {
+                    await _showUploadFailureError(e);
+                  }
+                }),
           );
         }
 
@@ -208,10 +218,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       );
       return;
     }
-    await showGenericErrorBottomSheet(
-      context: context,
-      error: error,
-    );
+    await showGenericErrorBottomSheet(context: context, error: error);
   }
 
   Future<void> _showUploadErrorSheet(String title, String message) async {
@@ -225,11 +232,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
         GradientButton(
           text: context.l10n.contactSupport,
           onTap: () async {
-            await sendEmail(
-              context,
-              to: "support@ente.com",
-              body: message,
-            );
+            await sendEmail(context, to: "support@ente.com", body: message);
           },
         ),
       ],

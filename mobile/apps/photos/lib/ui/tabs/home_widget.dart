@@ -1041,11 +1041,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                           ? const NeverScrollableScrollPhysics()
                           : const BouncingScrollPhysics(),
                       children: [
-                        _buildTabHeroMode(
-                          0,
-                          selectedTabIndex,
-                          child!,
-                        ),
+                        _buildTabHeroMode(0, selectedTabIndex, child!),
                         _buildTabHeroMode(
                           1,
                           selectedTabIndex,
@@ -1055,16 +1051,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 _isAlbumsSearchActiveNotifier,
                           ),
                         ),
-                        _buildTabHeroMode(
-                          2,
-                          selectedTabIndex,
-                          _feedTab,
-                        ),
-                        _buildTabHeroMode(
-                          3,
-                          selectedTabIndex,
-                          _searchTab,
-                        ),
+                        _buildTabHeroMode(2, selectedTabIndex, _feedTab),
+                        _buildTabHeroMode(3, selectedTabIndex, _searchTab),
                       ],
                     );
                   },
@@ -1139,10 +1127,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _buildTabHeroMode(int tabIndex, int selectedTabIndex, Widget child) {
-    return HeroMode(
-      enabled: tabIndex == selectedTabIndex,
-      child: child,
-    );
+    return HeroMode(enabled: tabIndex == selectedTabIndex, child: child);
   }
 
   void _closeDrawerIfOpen(BuildContext context) {

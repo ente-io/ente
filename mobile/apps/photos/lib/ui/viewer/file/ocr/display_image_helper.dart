@@ -33,8 +33,9 @@ class DisplayImageHelper {
         'ensureImageIsDisplayable',
         {'imagePath': imagePath},
       );
-      final result =
-          (resolved == null || resolved.isEmpty) ? imagePath : resolved;
+      final result = (resolved == null || resolved.isEmpty)
+          ? imagePath
+          : resolved;
       _cache[imagePath] = result;
       return result;
     } catch (error, stack) {

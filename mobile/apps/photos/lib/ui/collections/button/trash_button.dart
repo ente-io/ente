@@ -10,10 +10,7 @@ import "package:photos/services/local_authentication_service.dart";
 import 'package:photos/ui/viewer/gallery/trash_page.dart';
 
 class TrashSectionButton extends StatefulWidget {
-  const TrashSectionButton(
-    this.textStyle, {
-    super.key,
-  });
+  const TrashSectionButton(this.textStyle, {super.key});
 
   final TextStyle textStyle;
 
@@ -27,12 +24,13 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
   @override
   void initState() {
     super.initState();
-    _trashUpdatedEventSubscription =
-        Bus.instance.on<TrashUpdatedEvent>().listen((event) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    _trashUpdatedEventSubscription = Bus.instance
+        .on<TrashUpdatedEvent>()
+        .listen((event) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
   }
 
   @override
@@ -46,9 +44,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
@@ -65,10 +61,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.delete,
-                    color: Theme.of(context).iconTheme.color,
-                  ),
+                  Icon(Icons.delete, color: Theme.of(context).iconTheme.color),
                   const Padding(padding: EdgeInsets.all(6)),
                   FutureBuilder<int>(
                     future: TrashDB.instance.count(),
@@ -83,9 +76,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
-                              TextSpan(
-                                text: snapshot.data.toString(),
-                              ),
+                              TextSpan(text: snapshot.data.toString()),
                               //need to query in db and bring this value
                             ],
                           ),
@@ -119,15 +110,12 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
       onPressed: () async {
         final hasAuthenticated = await LocalAuthenticationService.instance
             .requestLocalAuthentication(
-          context,
-          AppLocalizations.of(context).authToViewTrashedFiles,
-        );
+              context,
+              AppLocalizations.of(context).authToViewTrashedFiles,
+            );
         if (hasAuthenticated) {
           // ignore: unawaited_futures
-          routeToPage(
-            context,
-            TrashPage(),
-          );
+          routeToPage(context, TrashPage());
         }
       },
     );

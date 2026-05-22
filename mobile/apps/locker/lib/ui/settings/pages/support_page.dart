@@ -68,19 +68,12 @@ class SupportPage extends StatelessWidget {
 
   Future<void> _onHelpTapped(BuildContext context) async {
     final l10n = context.l10n;
-    await PlatformUtil.openWebView(
-      context,
-      l10n.help,
-      "https://ente.com/help",
-    );
+    await PlatformUtil.openWebView(context, l10n.help, "https://ente.com/help");
   }
 
   void _onSuggestFeaturesTapped() {
     // ignore: unawaited_futures
-    launchUrlString(
-      githubDiscussionsUrl,
-      mode: LaunchMode.externalApplication,
-    );
+    launchUrlString(githubDiscussionsUrl, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _onReportBugTapped(BuildContext context) async {

@@ -21,24 +21,15 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/utils/collection_actions.dart";
 
-enum ActionTypesToShow {
-  addViewer,
-  addCollaborator,
-}
+enum ActionTypesToShow { addViewer, addCollaborator }
 
 class AddParticipantPage extends StatefulWidget {
   /// Cannot be empty
   final List<ActionTypesToShow> actionTypesToShow;
   final List<Collection> collections;
 
-  AddParticipantPage(
-    this.collections,
-    this.actionTypesToShow, {
-    super.key,
-  }) : assert(
-          actionTypesToShow.isNotEmpty,
-          'actionTypesToShow cannot be empty',
-        );
+  AddParticipantPage(this.collections, this.actionTypesToShow, {super.key})
+    : assert(actionTypesToShow.isNotEmpty, 'actionTypesToShow cannot be empty');
 
   @override
   State<StatefulWidget> createState() => _AddParticipantPage();
@@ -76,27 +67,24 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     return ValueListenableBuilder<int>(
       valueListenable: ContactsDisplayService.instance.changes,
       builder: (context, __, ___) {
-        final filterSuggestedUsers = _suggestedUsers
-            .where(
-              (element) =>
-                  element.matchesResolvedNameOrEmail(_textController.text),
-            )
-            .toList()
-          ..sort(
-            (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
+        final filterSuggestedUsers =
+            _suggestedUsers
+                .where(
+                  (element) =>
+                      element.matchesResolvedNameOrEmail(_textController.text),
+                )
+                .toList()
+              ..sort(
+                (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
                   b.resolvedDisplayName.toLowerCase(),
                 ),
-          );
+              );
         isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
         final enteTextTheme = getEnteTextTheme(context);
         final enteColorScheme = getEnteColorScheme(context);
         return Scaffold(
           resizeToAvoidBottomInset: isKeypadOpen,
-          appBar: AppBar(
-            title: Text(
-              _getTitle(),
-            ),
-          ),
+          appBar: AppBar(title: Text(_getTitle())),
           body: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,8 +94,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
                   context.l10n.addANewEmail,
-                  style: enteTextTheme.small
-                      .copyWith(color: enteColorScheme.textMuted),
+                  style: enteTextTheme.small.copyWith(
+                    color: enteColorScheme.textMuted,
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
@@ -139,15 +128,17 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                   children: [
                                     filterSuggestedUsers.isNotEmpty
                                         ? MenuSectionDescriptionWidget(
-                                            content: context.l10n
+                                            content: context
+                                                .l10n
                                                 .longPressAnEmailToVerifyEndToEndEncryption,
                                           )
                                         : const SizedBox.shrink(),
                                     widget.actionTypesToShow.contains(
-                                      ActionTypesToShow.addCollaborator,
-                                    )
+                                          ActionTypesToShow.addCollaborator,
+                                        )
                                         ? MenuSectionDescriptionWidget(
-                                            content: context.l10n
+                                            content: context
+                                                .l10n
                                                 .collaboratorsCanAddFilesToTheSharedCollection,
                                           )
                                         : const SizedBox.shrink(),
@@ -171,18 +162,23 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                     type: AvatarType.mini,
                                     config: Configuration.instance,
                                   ),
-                                  menuItemColor:
-                                      getEnteColorScheme(context).fillFaint,
-                                  pressedColor:
-                                      getEnteColorScheme(context).fillFaint,
-                                  trailingIcon: (_selectedEmails
-                                          .contains(currentUser.email))
+                                  menuItemColor: getEnteColorScheme(
+                                    context,
+                                  ).fillFaint,
+                                  pressedColor: getEnteColorScheme(
+                                    context,
+                                  ).fillFaint,
+                                  trailingIcon:
+                                      (_selectedEmails.contains(
+                                        currentUser.email,
+                                      ))
                                       ? Icons.check
                                       : null,
                                   onTap: () async {
                                     textFieldFocusNode.unfocus();
-                                    if (_selectedEmails
-                                        .contains(currentUser.email)) {
+                                    if (_selectedEmails.contains(
+                                      currentUser.email,
+                                    )) {
                                       _selectedEmails.remove(currentUser.email);
                                     } else {
                                       _selectedEmails.add(currentUser.email);
@@ -206,8 +202,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                     ? const SizedBox.shrink()
                                     : DividerWidget(
                                         dividerType: DividerType.menu,
-                                        bgColor: getEnteColorScheme(context)
-                                            .fillFaint,
+                                        bgColor: getEnteColorScheme(
+                                          context,
+                                        ).fillFaint,
                                       ),
                               ],
                             );
@@ -283,15 +280,13 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ),
       );
     }
-    if (widget.actionTypesToShow.contains(
-      ActionTypesToShow.addCollaborator,
-    )) {
+    if (widget.actionTypesToShow.contains(ActionTypesToShow.addCollaborator)) {
       widgets.add(
         ButtonWidget(
           buttonType:
               widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)
-                  ? ButtonType.neutral
-                  : ButtonType.primary,
+              ? ButtonType.neutral
+              : ButtonType.primary,
           buttonSize: ButtonSize.large,
           labelText: context.l10n.addCollaborators(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
@@ -331,9 +326,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     }
     final widgetsWithSpaceBetween = addSeparators(
       widgets,
-      const SizedBox(
-        height: 8,
-      ),
+      const SizedBox(height: 8),
     );
     return widgetsWithSpaceBetween;
   }
@@ -357,8 +350,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             decoration: InputDecoration(
               focusedBorder: OutlineInputBorder(
                 borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-                borderSide:
-                    BorderSide(color: getEnteColorScheme(context).strokeMuted),
+                borderSide: BorderSide(
+                  color: getEnteColorScheme(context).strokeMuted,
+                ),
               ),
               fillColor: getEnteColorScheme(context).fillFaint,
               filled: true,
@@ -445,13 +439,13 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       }
     }
 
-    final List<User> suggestedUsers =
-        CollectionService.instance.getRelevantContacts();
+    final List<User> suggestedUsers = CollectionService.instance
+        .getRelevantContacts();
 
     suggestedUsers.sort(
       (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
-            b.resolvedDisplayName.toLowerCase(),
-          ),
+        b.resolvedDisplayName.toLowerCase(),
+      ),
     );
 
     return suggestedUsers;

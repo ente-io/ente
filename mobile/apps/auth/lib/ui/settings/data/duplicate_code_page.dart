@@ -13,10 +13,7 @@ import 'package:logging/logging.dart';
 
 class DuplicateCodePage extends StatefulWidget {
   final List<DuplicateCodes> duplicateCodes;
-  const DuplicateCodePage({
-    super.key,
-    required this.duplicateCodes,
-  });
+  const DuplicateCodePage({super.key, required this.duplicateCodes});
 
   @override
   State<DuplicateCodePage> createState() => _DuplicateCodePageState();
@@ -36,13 +33,8 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.deduplicateCodes),
-        elevation: 0,
-      ),
-      body: CenteredConstrainedWidget(
-        child: _getBody(),
-      ),
+      appBar: AppBar(title: Text(context.l10n.deduplicateCodes), elevation: 0),
+      body: CenteredConstrainedWidget(child: _getBody()),
     );
   }
 
@@ -57,10 +49,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -80,21 +69,17 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
                           selectedGrids.length == _duplicateCodes.length
                               ? l10n.deselectAll
                               : l10n.selectAll,
-                          style:
-                              Theme.of(context).textTheme.titleMedium!.copyWith(
-                                    fontSize: 14,
-                                    color: Theme.of(context)
-                                        .iconTheme
-                                        .color!
-                                        .withValues(alpha: 0.7),
-                                  ),
+                          style: Theme.of(context).textTheme.titleMedium!
+                              .copyWith(
+                                fontSize: 14,
+                                color: Theme.of(
+                                  context,
+                                ).iconTheme.color!.withValues(alpha: 0.7),
+                              ),
                         ),
                         const Padding(padding: EdgeInsets.only(left: 4)),
                         selectedGrids.length == _duplicateCodes.length
-                            ? const Icon(
-                                Icons.check_circle,
-                                size: 24,
-                              )
+                            ? const Icon(Icons.check_circle, size: 24)
                             : Icon(
                                 Icons.check_circle_outlined,
                                 color: getEnteColorScheme(context).strokeMuted,
@@ -114,10 +99,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 final List<Code> codes = _duplicateCodes[index].codes;
-                return _getGridView(
-                  codes,
-                  index,
-                );
+                return _getGridView(codes, index);
               },
             ),
           ),
@@ -132,10 +114,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 4,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: GestureDetector(
             onTap: () {
               if (selectedGrids.contains(itemIndex)) {
@@ -148,19 +127,14 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "${code[0].issuer}, ${code.length} items",
-                ),
+                Text("${code[0].issuer}, ${code.length} items"),
                 !selectedGrids.contains(itemIndex)
                     ? Icon(
                         Icons.check_circle_outlined,
                         color: getEnteColorScheme(context).strokeMuted,
                         size: 24,
                       )
-                    : const Icon(
-                        Icons.check_circle,
-                        size: 24,
-                      ),
+                    : const Icon(Icons.check_circle, size: 24),
               ],
             ),
           ),
@@ -200,9 +174,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
           onPressed: () async {
             await deleteDuplicates(selectedItemsCount);
           },
-          child: Text(
-            "Delete $selectedItemsCount items",
-          ),
+          child: Text("Delete $selectedItemsCount items"),
         ),
       ),
     );
@@ -220,11 +192,11 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
   }
 
   Future<void> deleteDuplicates(int itemCount) async {
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
     if (!isAuthSuccessful) {
       return;
     }

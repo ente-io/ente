@@ -144,9 +144,7 @@ class FileAppBarState extends State<FileAppBar> {
       _onThumbnailFallbackChanged,
     );
     _showingThumbnailFallbackNotifier = notifier;
-    _showingThumbnailFallbackNotifier?.addListener(
-      _onThumbnailFallbackChanged,
-    );
+    _showingThumbnailFallbackNotifier?.addListener(_onThumbnailFallbackChanged);
   }
 
   @override
@@ -301,7 +299,8 @@ class FileAppBarState extends State<FileAppBar> {
     final Collection? collection = collectionID != null
         ? CollectionsService.instance.getCollectionByID(collectionID)
         : null;
-    final isInSharedCollection = InheritedDetailPageState.maybeOf(
+    final isInSharedCollection =
+        InheritedDetailPageState.maybeOf(
           context,
         )?.isInSharedCollectionNotifier.value ??
         false;
@@ -661,13 +660,9 @@ class FileAppBarState extends State<FileAppBar> {
   Future<void> _toggleFileArchiveStatus(EnteFile file) async {
     final bool isArchived =
         widget.file.magicMetadata.visibility == archiveVisibility;
-    await changeVisibility(
-      context,
-      [
-        widget.file,
-      ],
-      isArchived ? visibleVisibility : archiveVisibility,
-    );
+    await changeVisibility(context, [
+      widget.file,
+    ], isArchived ? visibleVisibility : archiveVisibility);
     if (mounted) {
       setState(() {
         _reloadActions = true;
@@ -693,18 +688,16 @@ class FileAppBarState extends State<FileAppBar> {
       return;
     }
 
-    final fileToDownload =
-        !file.isRemoteFile ? (file.copyWith()..localID = null) : file;
+    final fileToDownload = !file.isRemoteFile
+        ? (file.copyWith()..localID = null)
+        : file;
     final persistToFilesDB =
         widget.galleryType != GalleryType.sharedPublicCollection;
     if (flagService.internalUser) {
       try {
-        await galleryDownloadQueueService.enqueueFiles(
-          [
-            fileToDownload,
-          ],
-          persistToFilesDB: persistToFilesDB,
-        );
+        await galleryDownloadQueueService.enqueueFiles([
+          fileToDownload,
+        ], persistToFilesDB: persistToFilesDB);
       } catch (e) {
         _logger.warning("Failed to save file", e);
         if (mounted) {
@@ -810,11 +803,11 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _requestAuthentication() async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      "Please authenticate to view more photos and videos.",
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          "Please authenticate to view more photos and videos.",
+        );
     if (hasAuthenticated) {
       Bus.instance.fire(GuestViewEvent(false, false));
       await localSettings.setOnGuestView(false);

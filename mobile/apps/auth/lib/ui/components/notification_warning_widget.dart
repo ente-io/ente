@@ -6,11 +6,7 @@ import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
 import 'package:flutter/material.dart';
 
 // CreateNotificationType enum
-enum NotificationType {
-  warning,
-  banner,
-  notice,
-}
+enum NotificationType { warning, banner, notice }
 
 class NotificationWidget extends StatelessWidget {
   final IconData startIcon;
@@ -69,9 +65,7 @@ class NotificationWidget extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(8),
-            ),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
             boxShadow: boxShadow,
             color: backgroundColor,
             gradient: backgroundGradient,
@@ -81,11 +75,7 @@ class NotificationWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  startIcon,
-                  size: 36,
-                  color: strokeColorScheme.strokeBase,
-                ),
+                Icon(startIcon, size: 36, color: strokeColorScheme.strokeBase),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -97,10 +87,7 @@ class NotificationWidget extends StatelessWidget {
                         textAlign: TextAlign.left,
                       ),
                       subText != null
-                          ? Text(
-                              subText!,
-                              style: subTextStyle,
-                            )
+                          ? Text(subText!, style: subTextStyle)
                           : const SizedBox.shrink(),
                     ],
                   ),

@@ -113,13 +113,17 @@ class BaseConfiguration {
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
+    final encryptedKeyData = CryptoUtil.encryptSync(
+      masterKey,
+      derivedKeyResult.key,
+    );
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = CryptoUtil.generateKeyPair();
-    final encryptedSecretKeyData =
-        CryptoUtil.encryptSync(keyPair.secretKey, masterKey);
+    final encryptedSecretKeyData = CryptoUtil.encryptSync(
+      keyPair.secretKey,
+      masterKey,
+    );
 
     final attributes = KeyAttributes(
       CryptoUtil.bin2base64(kekSalt),
@@ -159,8 +163,10 @@ class BaseConfiguration {
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey!, derivedKeyResult.key);
+    final encryptedKeyData = CryptoUtil.encryptSync(
+      masterKey!,
+      derivedKeyResult.key,
+    );
 
     final existingAttributes = getKeyAttributes();
 
@@ -218,9 +224,7 @@ class BaseConfiguration {
       secretKey,
     );
     _logger.info('appToken done');
-    await setToken(
-      CryptoUtil.bin2base64(token, urlSafe: true),
-    );
+    await setToken(CryptoUtil.bin2base64(token, urlSafe: true));
     return keyEncryptionKey;
   }
 
@@ -269,9 +273,7 @@ class BaseConfiguration {
       CryptoUtil.base642bin(attributes.publicKey),
       secretKey,
     );
-    await setToken(
-      CryptoUtil.bin2base64(token, urlSafe: true),
-    );
+    await setToken(CryptoUtil.bin2base64(token, urlSafe: true));
   }
 
   String getHttpEndpoint() {
@@ -348,18 +350,12 @@ class BaseConfiguration {
 
   Future<void> setKey(String key) async {
     _key = key;
-    await _secureStorage.write(
-      key: keyKey,
-      value: key,
-    );
+    await _secureStorage.write(key: keyKey, value: key);
   }
 
   Future<void> setSecretKey(String? secretKey) async {
     _secretKey = secretKey;
-    await _secureStorage.write(
-      key: secretKeyKey,
-      value: secretKey,
-    );
+    await _secureStorage.write(key: secretKeyKey, value: secretKey);
   }
 
   Uint8List? getKey() {
@@ -426,7 +422,7 @@ class BaseConfiguration {
         final PlatformException error = e;
         final bool isBadPaddingError =
             error.toString().contains('BadPaddingException') ||
-                (error.message ?? '').contains('BadPaddingException');
+            (error.message ?? '').contains('BadPaddingException');
         if (isBadPaddingError) {
           await logout(autoLogout: true);
           return;

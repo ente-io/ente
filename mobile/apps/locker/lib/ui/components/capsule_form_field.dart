@@ -25,8 +25,10 @@ class CapsuleFormField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.lineHeight,
-    this.contentPadding =
-        const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+    this.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 24,
+      vertical: 18,
+    ),
   });
 
   final TextEditingController controller;
@@ -137,18 +139,20 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
     final int effectiveMinLines = widget.obscureText
         ? 1
         : (widget.minLines ?? (isMultiline ? (widget.maxLines ?? 3) : 1));
-    final textInputType = widget.keyboardType ??
+    final textInputType =
+        widget.keyboardType ??
         (isMultiline ? TextInputType.multiline : TextInputType.text);
 
     final backgroundColor = !widget.enabled
         ? colorScheme.fillMuted
         : hasFocus
-            ? accentBlue.withValues(alpha: 0.14)
-            : colorScheme.fillFaint;
+        ? accentBlue.withValues(alpha: 0.14)
+        : colorScheme.fillFaint;
 
     final textLineHeight = widget.lineHeight ?? (isMultiline ? 1.5 : 1.25);
-    final textColor =
-        widget.enabled ? colorScheme.textBase : colorScheme.textFaint;
+    final textColor = widget.enabled
+        ? colorScheme.textBase
+        : colorScheme.textFaint;
 
     return FormField<String>(
       key: _fieldKey,
@@ -162,10 +166,7 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.labelText.isNotEmpty) ...[
-              Text(
-                widget.labelText,
-                style: textTheme.body,
-              ),
+              Text(widget.labelText, style: textTheme.body),
               const SizedBox(height: 8),
             ],
             AnimatedContainer(
@@ -234,9 +235,7 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
               const SizedBox(height: 6),
               Text(
                 errorText,
-                style: textTheme.mini.copyWith(
-                  color: colorScheme.warning500,
-                ),
+                style: textTheme.mini.copyWith(color: colorScheme.warning500),
               ),
             ],
           ],
@@ -255,8 +254,10 @@ class CapsuleDisplayField extends StatefulWidget {
     this.maxLines,
     this.lineHeight,
     this.onCopy,
-    this.contentPadding =
-        const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+    this.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 24,
+      vertical: 18,
+    ),
   });
 
   final String labelText;
@@ -288,10 +289,7 @@ class _CapsuleDisplayFieldState extends State<CapsuleDisplayField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.labelText.isNotEmpty) ...[
-          Text(
-            widget.labelText,
-            style: textTheme.body,
-          ),
+          Text(widget.labelText, style: textTheme.body),
           const SizedBox(height: 8),
         ],
         Container(
@@ -310,15 +308,17 @@ class _CapsuleDisplayFieldState extends State<CapsuleDisplayField> {
                   child: (widget.isSecret && !_isVisible)
                       ? Text(
                           displayValue,
-                          style:
-                              textTheme.body.copyWith(height: textLineHeight),
+                          style: textTheme.body.copyWith(
+                            height: textLineHeight,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.clip,
                         )
                       : SelectableText(
                           displayValue,
-                          style:
-                              textTheme.body.copyWith(height: textLineHeight),
+                          style: textTheme.body.copyWith(
+                            height: textLineHeight,
+                          ),
                           maxLines: widget.maxLines,
                         ),
                 ),
@@ -339,7 +339,9 @@ class _CapsuleDisplayFieldState extends State<CapsuleDisplayField> {
                       child: Icon(
                         _isVisible ? Icons.visibility : Icons.visibility_off,
                         size: 16,
-                         semanticLabel: _isVisible ? 'hide_password' : 'show_password',
+                        semanticLabel: _isVisible
+                            ? 'hide_password'
+                            : 'show_password',
                         color: colorScheme.textMuted,
                       ),
                     ),

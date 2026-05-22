@@ -37,8 +37,9 @@ class _RecommendedFiltersForAppbarState
     );
     _searchFilterDataProvider =
         inheritedSearchFilterData.searchFilterDataProvider!;
-    _recommendations =
-        getRecommendedFiltersForAppBar(_searchFilterDataProvider);
+    _recommendations = getRecommendedFiltersForAppBar(
+      _searchFilterDataProvider,
+    );
     _filtersUpdateCount++;
 
     _searchFilterDataProvider.removeListener(
@@ -90,8 +91,9 @@ class _RecommendedFiltersForAppbarState
                           ),
                         );
                       },
-                      backgroundColor:
-                          getEnteColorScheme(context).backgroundElevated2,
+                      backgroundColor: getEnteColorScheme(
+                        context,
+                      ).backgroundElevated2,
                     );
                   },
                   child: Padding(
@@ -109,10 +111,7 @@ class _RecommendedFiltersForAppbarState
                       ),
                       child: const Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.filter_list_rounded,
-                          size: 20,
-                        ),
+                        child: Icon(Icons.filter_list_rounded, size: 20),
                       ),
                     ),
                   ),
@@ -129,35 +128,38 @@ class _RecommendedFiltersForAppbarState
                           _searchFilterDataProvider.applyFilters([filter]);
                         },
                         remove: () {
-                          _searchFilterDataProvider
-                              .removeAppliedFilters([filter]);
+                          _searchFilterDataProvider.removeAppliedFilters([
+                            filter,
+                          ]);
                         },
                         isApplied: filter.isApplied,
                       )
                     : filter is OnlyThemFilter
-                        ? OnlyThemFilterChip(
-                            faceFilters: filter.faceFilters,
-                            apply: () {
-                              _searchFilterDataProvider.applyFilters([filter]);
-                            },
-                            remove: () {
-                              _searchFilterDataProvider
-                                  .removeAppliedFilters([filter]);
-                            },
-                            isApplied: filter.isApplied,
-                          )
-                        : GenericFilterChip(
-                            label: filter.name(),
-                            apply: () {
-                              _searchFilterDataProvider.applyFilters([filter]);
-                            },
-                            remove: () {
-                              _searchFilterDataProvider
-                                  .removeAppliedFilters([filter]);
-                            },
-                            leadingIcon: filter.icon(),
-                            isApplied: filter.isApplied,
-                          ),
+                    ? OnlyThemFilterChip(
+                        faceFilters: filter.faceFilters,
+                        apply: () {
+                          _searchFilterDataProvider.applyFilters([filter]);
+                        },
+                        remove: () {
+                          _searchFilterDataProvider.removeAppliedFilters([
+                            filter,
+                          ]);
+                        },
+                        isApplied: filter.isApplied,
+                      )
+                    : GenericFilterChip(
+                        label: filter.name(),
+                        apply: () {
+                          _searchFilterDataProvider.applyFilters([filter]);
+                        },
+                        remove: () {
+                          _searchFilterDataProvider.removeAppliedFilters([
+                            filter,
+                          ]);
+                        },
+                        leadingIcon: filter.icon(),
+                        isApplied: filter.isApplied,
+                      ),
               );
             },
             clipBehavior: Clip.none,
@@ -173,8 +175,9 @@ class _RecommendedFiltersForAppbarState
   void onRecommendedFiltersUpdate() {
     setState(() {
       _filtersUpdateCount++;
-      _recommendations =
-          getRecommendedFiltersForAppBar(_searchFilterDataProvider);
+      _recommendations = getRecommendedFiltersForAppBar(
+        _searchFilterDataProvider,
+      );
     });
   }
 }

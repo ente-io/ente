@@ -46,8 +46,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
-    final String urlValue =
-        CollectionService.instance.getPublicUrl(widget.collection!);
+    final String urlValue = CollectionService.instance.getPublicUrl(
+      widget.collection!,
+    );
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -68,12 +69,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       title: context.l10n.linkExpiry,
                       subTitle: url.hasExpiry
                           ? (url.isExpired
-                              ? context.l10n.linkExpired
-                              : getFormattedTime(
-                                  DateTime.fromMicrosecondsSinceEpoch(
-                                    url.validTill,
-                                  ),
-                                ))
+                                ? context.l10n.linkExpired
+                                : getFormattedTime(
+                                    DateTime.fromMicrosecondsSinceEpoch(
+                                      url.validTill,
+                                    ),
+                                  ))
                           : context.l10n.never,
                       subTitleColor: url.isExpired ? warning500 : null,
                     ),
@@ -148,8 +149,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               if (password.trim().isEmpty) {
                                 return;
                               }
-                              final propToUpdate =
-                                  await _getEncryptedPassword(password);
+                              final propToUpdate = await _getEncryptedPassword(
+                                password,
+                              );
                               await _updateUrlSettings(
                                 context,
                                 propToUpdate,
@@ -168,9 +170,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       },
                     ),
                   ),
-                  const SizedBox(
-                    height: 24,
-                  ),
+                  const SizedBox(height: 24),
                   if (url.isExpired)
                     MenuItemWidgetV2(
                       captionedTextWidget: CaptionedTextWidgetV2(

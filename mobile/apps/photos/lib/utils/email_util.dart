@@ -312,20 +312,12 @@ Future<bool> sendComposedEmail(
       return true;
     }
 
-    final emailContent = EmailContent(
-      to: [to],
-      subject: subject,
-      body: body,
-    );
+    final emailContent = EmailContent(to: [to], subject: subject, body: body);
 
     if (Platform.isAndroid) {
       // Special handling due to issue in proton mail android client
       // https://github.com/ente-io/photos-app/pull/253
-      final params = _buildMailtoUri(
-        to,
-        subject: subject,
-        body: body,
-      );
+      final params = _buildMailtoUri(to, subject: subject, body: body);
       if (!await canLaunchUrl(params)) {
         return false;
       }
@@ -376,11 +368,7 @@ Future<bool> sendComposedEmail(
   }
 }
 
-Uri _buildMailtoUri(
-  String to, {
-  String? subject,
-  String? body,
-}) {
+Uri _buildMailtoUri(String to, {String? subject, String? body}) {
   final queryParameters = <String, String>{};
   if (subject != null && subject.isNotEmpty) {
     queryParameters["subject"] = subject;
@@ -407,10 +395,7 @@ Future<String> getSupportDeviceInfo() async {
   return buffer.toString();
 }
 
-String buildSupportEmailBody({
-  required String message,
-  String? deviceInfo,
-}) {
+String buildSupportEmailBody({required String message, String? deviceInfo}) {
   final trimmedMessage = message.trim();
   final trimmedDeviceInfo = deviceInfo?.trim();
   if (trimmedDeviceInfo == null || trimmedDeviceInfo.isEmpty) {
@@ -449,9 +434,7 @@ Future<void> _showNoMailAppsSheet(BuildContext context, String toEmail) async {
 class _NoMailAppsSheet extends StatelessWidget {
   final String toEmail;
 
-  const _NoMailAppsSheet({
-    required this.toEmail,
-  });
+  const _NoMailAppsSheet({required this.toEmail});
 
   @override
   Widget build(BuildContext context) {
@@ -487,13 +470,13 @@ Future<void> _copyEmailAddress(BuildContext context, String toEmail) async {
 }
 
 Future<({String osVersion, String deviceModel})>
-    _getPlatformDeviceInfo() async {
+_getPlatformDeviceInfo() async {
   try {
     final deviceInfoPlugin = DeviceInfoPlugin();
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfoPlugin.androidInfo;
-      final deviceModel =
-          "${androidInfo.manufacturer} ${androidInfo.model}".trim();
+      final deviceModel = "${androidInfo.manufacturer} ${androidInfo.model}"
+          .trim();
       final osVersion = "Android ${androidInfo.version.release}";
       return (
         osVersion: osVersion,
@@ -511,8 +494,5 @@ Future<({String osVersion, String deviceModel})>
   } catch (e, s) {
     _logger.severe("Failed to fetch platform device info", e, s);
   }
-  return (
-    osVersion: Platform.operatingSystem,
-    deviceModel: "Unknown device",
-  );
+  return (osVersion: Platform.operatingSystem, deviceModel: "Unknown device");
 }

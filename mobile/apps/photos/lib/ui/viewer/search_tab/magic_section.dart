@@ -34,10 +34,12 @@ class _MagicSectionState extends State<MagicSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _magicSearchResults = (await SectionType.magic.getData(
-            context,
-            limit: kSearchSectionLimit,
-          )) as List<GenericSearchResult>;
+          _magicSearchResults =
+              (await SectionType.magic.getData(
+                    context,
+                    limit: kSearchSectionLimit,
+                  ))
+                  as List<GenericSearchResult>;
           setState(() {});
         }),
       );
@@ -139,7 +141,8 @@ class MagicRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = magicSearchResult.heroTag() +
+    final heroTag =
+        magicSearchResult.heroTag() +
         (magicSearchResult.previewThumbnail()?.tag ?? "");
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(
@@ -213,22 +216,14 @@ class MagicRecommendation extends StatelessWidget {
                               Colors.black.withValues(alpha: 0),
                               Colors.black.withValues(alpha: 0.5),
                             ],
-                            stops: const [
-                              0,
-                              0.1,
-                              1,
-                            ],
+                            stops: const [0, 0.1, 1],
                           ),
                         ),
                       ),
                       ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: 88,
-                        ),
+                        constraints: const BoxConstraints(maxWidth: 88),
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 8,
-                          ),
+                          padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
                             magicSearchResult.name(),
                             style: enteTextTheme.small.copyWith(

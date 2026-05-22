@@ -186,8 +186,9 @@ class _LoginPasswordVerificationPageState
           await _showContactSupportDialog(
             context,
             AppLocalizations.of(context).noInternetConnection,
-            AppLocalizations.of(context)
-                .pleaseCheckYourInternetConnectionAndTryAgain,
+            AppLocalizations.of(
+              context,
+            ).pleaseCheckYourInternetConnectionAndTryAgain,
           );
         } else {
           await _showContactSupportDialog(

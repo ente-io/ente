@@ -107,9 +107,6 @@ class AboutPage extends StatelessWidget {
       showShortToast(context, l10n.youAreOnTheLatestVersion);
       return;
     }
-    await showAppUpdateBottomSheet(
-      context,
-      latestVersionInfo: latestVersion,
-    );
+    await showAppUpdateBottomSheet(context, latestVersionInfo: latestVersion);
   }
 }

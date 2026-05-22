@@ -137,9 +137,7 @@ class AccountSettingsPage extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return const PasswordEntryPage(
-                mode: PasswordEntryMode.update,
-              );
+              return const PasswordEntryPage(mode: PasswordEntryMode.update);
             },
           ),
         ),

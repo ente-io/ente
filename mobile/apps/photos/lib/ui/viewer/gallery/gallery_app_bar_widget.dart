@@ -135,10 +135,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     };
     collectionActions = CollectionActions(CollectionsService.instance);
     widget.selectedFiles.addListener(_selectedFilesListener);
-    _userAuthEventSubscription =
-        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
-      setState(() {});
-    });
+    _userAuthEventSubscription = Bus.instance
+        .on<SubscriptionPurchasedEvent>()
+        .listen((event) {
+          setState(() {});
+        });
     _collectionMetaEventSubscription = Bus.instance
         .on<CollectionMetaEvent>()
         .where(
@@ -159,8 +160,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         widget.deviceCollection == null) {
       return;
     }
-    final sharedPathIDs =
-        await FilesService.instance.getICloudSharedAlbumPathIDs();
+    final sharedPathIDs = await FilesService.instance
+        .getICloudSharedAlbumPathIDs();
     if (mounted && sharedPathIDs.contains(widget.deviceCollection!.id)) {
       setState(() {
         _isICloudSharedAlbum = true;
@@ -183,60 +184,60 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final inheritedSearchFilterData =
-        InheritedSearchFilterData.maybeOf(context);
+    final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
+      context,
+    );
     final isHierarchicalSearchable =
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
 
     return galleryType == GalleryType.homepage
         ? const SizedBox.shrink()
         : isHierarchicalSearchable
-            ? ValueListenableBuilder(
-                valueListenable: inheritedSearchFilterData!
-                    .searchFilterDataProvider!.isSearchingNotifier,
-                child: const PreferredSize(
-                  preferredSize: Size.fromHeight(0),
-                  child: Flexible(child: RecommendedFiltersForAppbar()),
-                ),
-                builder: (context, isSearching, child) {
-                  return AppBar(
-                    elevation: 0,
-                    centerTitle: false,
-                    title: isSearching
-                        ? const SizedBox(
-                            // +1 to account for the filter's outer stroke width
-                            height: kFilterChipHeight + 1,
-                            child: AppliedFiltersForAppbar(),
-                          )
-                        : Text(
-                            _appBarTitle!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall!
-                                .copyWith(fontSize: 16),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                    actions: isSearching ? null : _getDefaultActions(context),
-                    bottom: child as PreferredSizeWidget,
-                    surfaceTintColor: Colors.transparent,
-                  );
-                },
-              )
-            : AppBar(
+        ? ValueListenableBuilder(
+            valueListenable: inheritedSearchFilterData!
+                .searchFilterDataProvider!
+                .isSearchingNotifier,
+            child: const PreferredSize(
+              preferredSize: Size.fromHeight(0),
+              child: Flexible(child: RecommendedFiltersForAppbar()),
+            ),
+            builder: (context, isSearching, child) {
+              return AppBar(
                 elevation: 0,
                 centerTitle: false,
-                title: Text(
-                  _appBarTitle!,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall!
-                      .copyWith(fontSize: 16),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                actions: _getDefaultActions(context),
+                title: isSearching
+                    ? const SizedBox(
+                        // +1 to account for the filter's outer stroke width
+                        height: kFilterChipHeight + 1,
+                        child: AppliedFiltersForAppbar(),
+                      )
+                    : Text(
+                        _appBarTitle!,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall!.copyWith(fontSize: 16),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                actions: isSearching ? null : _getDefaultActions(context),
+                bottom: child as PreferredSizeWidget,
+                surfaceTintColor: Colors.transparent,
               );
+            },
+          )
+        : AppBar(
+            elevation: 0,
+            centerTitle: false,
+            title: Text(
+              _appBarTitle!,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall!.copyWith(fontSize: 16),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            actions: _getDefaultActions(context),
+          );
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
@@ -245,8 +246,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         galleryType != GalleryType.quickLink) {
       showToast(
         context,
-        AppLocalizations.of(context)
-            .typeOfGallerGallerytypeIsNotSupportedForRename(
+        AppLocalizations.of(
+          context,
+        ).typeOfGallerGallerytypeIsNotSupportedForRename(
           galleryType: "$galleryType",
         ),
       );
@@ -317,8 +319,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       ],
       title: AppLocalizations.of(context).leaveSharedAlbum,
-      body: AppLocalizations.of(context)
-          .photosAddedByYouWillBeRemovedFromTheAlbum,
+      body: AppLocalizations.of(
+        context,
+      ).photosAddedByYouWillBeRemovedFromTheAlbum,
     );
     if (actionResult?.action != null && mounted) {
       if (actionResult!.action == ButtonAction.error) {
@@ -337,13 +340,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   // the space which can be claimed up. This code duplication should be removed
   // whenever we move to the new design for free up space.
   Future<dynamic> _deleteBackedUpFiles(BuildContext context) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).calculating);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).calculating,
+    );
     await dialog.show();
     FreeableSpaceInfo status;
     try {
-      status = await FilesService.instance
-          .getFreeableSpaceInfo(pathID: widget.deviceCollection!.id);
+      status = await FilesService.instance.getFreeableSpaceInfo(
+        pathID: widget.deviceCollection!.id,
+      );
     } catch (e) {
       await dialog.hide();
       unawaited(showGenericErrorDialog(context: context, error: e));
@@ -372,8 +378,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     showChoiceDialog(
       context,
       title: AppLocalizations.of(context).success,
-      body: AppLocalizations.of(context)
-          .youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
+      body: AppLocalizations.of(
+        context,
+      ).youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
       firstButtonLabel: AppLocalizations.of(context).rateUs,
       firstButtonOnTap: () async {
         await updateService.launchReviewUrl();
@@ -419,11 +426,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             },
             onSelected: (AlbumPopupAction value) {
               if (value == AlbumPopupAction.sortByMostRecent) {
-                Bus.instance
-                    .fire(MagicSortChangeEvent(MagicSortType.mostRecent));
+                Bus.instance.fire(
+                  MagicSortChangeEvent(MagicSortType.mostRecent),
+                );
               } else if (value == AlbumPopupAction.sortByMostRelevant) {
-                Bus.instance
-                    .fire(MagicSortChangeEvent(MagicSortType.mostRelevant));
+                Bus.instance.fire(
+                  MagicSortChangeEvent(MagicSortType.mostRelevant),
+                );
               }
             },
           ),
@@ -614,8 +623,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           value: isQuickLink
               ? AlbumPopupAction.removeLink
               : AlbumPopupAction.delete,
-          icon:
-              isQuickLink ? Icons.remove_circle_outline : Icons.delete_outline,
+          icon: isQuickLink
+              ? Icons.remove_circle_outline
+              : Icons.delete_outline,
         ),
       if (galleryType == GalleryType.sharedCollection)
         EntePopupMenuItem(
@@ -714,9 +724,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           } else if (value == AlbumPopupAction.autoAddPhotos) {
             await routeToPage(
               context,
-              SmartAlbumPeople(
-                collectionId: widget.collection!.id,
-              ),
+              SmartAlbumPeople(collectionId: widget.collection!.id),
             );
             setState(() {});
           } else if (value == AlbumPopupAction.freeUpSpace) {
@@ -727,10 +735,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             await _showSortOption(context);
           } else if (value == AlbumPopupAction.sharedArchive) {
             final hasShareeArchived = widget.collection!.hasShareeArchived();
-            final int prevVisiblity =
-                hasShareeArchived ? archiveVisibility : visibleVisibility;
-            final int newVisiblity =
-                hasShareeArchived ? visibleVisibility : archiveVisibility;
+            final int prevVisiblity = hasShareeArchived
+                ? archiveVisibility
+                : visibleVisibility;
+            final int newVisiblity = hasShareeArchived
+                ? visibleVisibility
+                : archiveVisibility;
 
             await changeCollectionVisibility(
               context,
@@ -744,10 +754,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             }
           } else if (value == AlbumPopupAction.sharedHide) {
             final hasShareeHidden = widget.collection!.hasShareeHidden();
-            final int prevVisiblity =
-                hasShareeHidden ? hiddenVisibility : visibleVisibility;
-            final int newVisiblity =
-                hasShareeHidden ? visibleVisibility : hiddenVisibility;
+            final int prevVisiblity = hasShareeHidden
+                ? hiddenVisibility
+                : visibleVisibility;
+            final int newVisiblity = hasShareeHidden
+                ? visibleVisibility
+                : hiddenVisibility;
 
             await changeCollectionVisibility(
               context,
@@ -930,8 +942,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
       await dialog.show();
       try {
-        await CollectionsService.instance
-            .trashEmptyCollection(widget.collection!);
+        await CollectionsService.instance.trashEmptyCollection(
+          widget.collection!,
+        );
         await dialog.hide();
         Navigator.of(context).pop();
       } catch (e, s) {
@@ -954,11 +967,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _removeQuickLink() async {
     try {
-      final bool result =
-          await CollectionActions(CollectionsService.instance).disableUrl(
-        context,
-        widget.collection!,
-      );
+      final bool result = await CollectionActions(
+        CollectionsService.instance,
+      ).disableUrl(context, widget.collection!);
       if (result && mounted) {
         Navigator.of(context).pop();
       }
@@ -977,9 +988,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               galleryType != GalleryType.hiddenOwnedCollection &&
               galleryType != GalleryType.favorite &&
               !isQuickLink)) {
-        throw Exception(
-          "Cannot share collection of type $galleryType",
-        );
+        throw Exception("Cannot share collection of type $galleryType");
       }
       final int? userID = Configuration.instance.getUserID();
       final bool isOwner = userID == collection.owner.id;
@@ -998,19 +1007,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ),
         );
       } else if (collection.hasLink) {
-        unawaited(
-          routeToPage(
-            context,
-            ShareCollectionPage(collection),
-          ),
-        );
+        unawaited(routeToPage(context, ShareCollectionPage(collection)));
       } else {
-        unawaited(
-          routeToPage(
-            context,
-            AlbumParticipantsPage(collection),
-          ),
-        );
+        unawaited(routeToPage(context, AlbumParticipantsPage(collection)));
       }
     } catch (e, s) {
       _logger.severe("Failed to open share collection dialog", e, s);
@@ -1023,10 +1022,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     try {
       if (galleryType == GalleryType.sharedPublicCollection &&
           collection!.isCollectEnabledForPublicLink()) {
-        final authToken = CollectionsService.instance
-            .getSharedPublicAlbumToken(collection.id);
-        final albumKey =
-            CollectionsService.instance.getSharedPublicAlbumKey(collection.id);
+        final authToken = CollectionsService.instance.getSharedPublicAlbumToken(
+          collection.id,
+        );
+        final albumKey = CollectionsService.instance.getSharedPublicAlbumKey(
+          collection.id,
+        );
 
         final res = await showChoiceDialog(
           context,
@@ -1071,8 +1072,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> archiveOrUnarchive() async {
     final isArchived = widget.collection!.isArchived();
-    final int prevVisiblity =
-        isArchived ? archiveVisibility : visibleVisibility;
+    final int prevVisiblity = isArchived
+        ? archiveVisibility
+        : visibleVisibility;
     final int newVisiblity = isArchived ? visibleVisibility : archiveVisibility;
 
     await changeCollectionVisibility(
@@ -1126,12 +1128,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           context: context,
           barrierDismissible: true,
           builder: (BuildContext bContext) {
-            return AutoCastDialog(
-              (device) async {
-                await _castPair(bContext, gw, device);
-                Navigator.pop(bContext);
-              },
-            );
+            return AutoCastDialog((device) async {
+              await _castPair(bContext, gw, device);
+              Navigator.pop(bContext);
+            });
           },
         );
       }
@@ -1145,9 +1145,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await showTextInputDialog(
       context,
       title: context.l10n.playOnTv,
-      body: AppLocalizations.of(context).castInstruction(
-        castUrl: flagService.castUrl,
-      ),
+      body: AppLocalizations.of(
+        context,
+      ).castInstruction(castUrl: flagService.castUrl),
       submitButtonLabel: AppLocalizations.of(context).pair,
       textInputType: TextInputType.streetAddress,
       hintText: context.l10n.deviceCodeHint,
@@ -1182,8 +1182,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         return false;
       }
       final String castToken = const Uuid().v4().toString();
-      final castPayload = CollectionsService.instance
-          .getCastData(castToken, widget.collection!, publicKey);
+      final castPayload = CollectionsService.instance.getCastData(
+        castToken,
+        widget.collection!,
+        publicKey,
+      );
       await gw.publishCastPayload(
         code,
         castPayload,
@@ -1233,10 +1236,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
 
       if (collectionFiles.isEmpty) {
-        showToast(
-          context,
-          AppLocalizations.of(context).nothingToSeeHere,
-        );
+        showToast(context, AppLocalizations.of(context).nothingToSeeHere);
         return;
       }
 

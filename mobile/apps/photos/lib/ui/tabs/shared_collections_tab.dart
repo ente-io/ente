@@ -47,7 +47,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   static const _feedPreviewStartupDelay = Duration(seconds: 5);
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   late StreamSubscription<CollectionUpdatedEvent>
-      _collectionUpdatesSubscription;
+  _collectionUpdatesSubscription;
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
@@ -88,21 +88,23 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         });
       },
     );
-    _collectionUpdatesSubscription =
-        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      _debouncer.run(() async {
-        if (mounted) {
-          debugPrint("SetState Shared Collections on ${event.reason}");
-          setState(() {});
-        }
-      });
-    });
-    _albumSortOrderChangeEvent =
-        Bus.instance.on<AlbumSortOrderChangeEvent>().listen((event) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    _collectionUpdatesSubscription = Bus.instance
+        .on<CollectionUpdatedEvent>()
+        .listen((event) {
+          _debouncer.run(() async {
+            if (mounted) {
+              debugPrint("SetState Shared Collections on ${event.reason}");
+              setState(() {});
+            }
+          });
+        });
+    _albumSortOrderChangeEvent = Bus.instance
+        .on<AlbumSortOrderChangeEvent>()
+        .listen((event) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
@@ -256,11 +258,13 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     final totalHorizontalPadding = (albumsCountInRow - 1) * crossAxisSpacing;
     final sideOfThumbnail =
         (screenWidth - totalHorizontalPadding - horizontalPadding) /
-            albumsCountInRow;
-    final SectionTitle sharedWithYou =
-        SectionTitle(title: AppLocalizations.of(context).sharedWithYou);
-    final SectionTitle sharedByYou =
-        SectionTitle(title: AppLocalizations.of(context).sharedByYou);
+        albumsCountInRow;
+    final SectionTitle sharedWithYou = SectionTitle(
+      title: AppLocalizations.of(context).sharedWithYou,
+    );
+    final SectionTitle sharedByYou = SectionTitle(
+      title: AppLocalizations.of(context).sharedByYou,
+    );
     final colorTheme = getEnteColorScheme(context);
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),

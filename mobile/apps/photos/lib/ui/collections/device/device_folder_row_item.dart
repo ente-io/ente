@@ -97,9 +97,9 @@ class DeviceFolderRowItem extends StatelessWidget {
           SizedBox(
             width: sideOfThumbnail,
             child: Text(
-              AppLocalizations.of(context).itemCount(
-                count: deviceCollection.count,
-              ),
+              AppLocalizations.of(
+                context,
+              ).itemCount(count: deviceCollection.count),
               textAlign: TextAlign.left,
               style: TextStyles.mini.copyWith(color: colors.textLight),
               maxLines: 1,

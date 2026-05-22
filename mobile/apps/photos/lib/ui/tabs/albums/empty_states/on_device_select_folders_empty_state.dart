@@ -7,10 +7,7 @@ import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
 
 class OnDeviceSelectFoldersEmptyState extends StatelessWidget {
-  const OnDeviceSelectFoldersEmptyState({
-    this.onFoldersSelected,
-    super.key,
-  });
+  const OnDeviceSelectFoldersEmptyState({this.onFoldersSelected, super.key});
 
   final VoidCallback? onFoldersSelected;
 
