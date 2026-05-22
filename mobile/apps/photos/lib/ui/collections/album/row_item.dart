@@ -36,7 +36,7 @@ class AlbumRowItemWidget extends StatelessWidget {
   static const _thumbnailToTextSpacing = 8.0;
   static const _titleToSubtitleSpacing = 2.0;
   static const _sharePillPadding = EdgeInsets.all(2);
-  static const _sharedAvatarStrokeWidth = 2.0;
+  static const _sharedAvatarStrokeWidth = 1.0;
 
   const AlbumRowItemWidget(
     this.c,
