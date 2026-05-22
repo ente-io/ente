@@ -533,8 +533,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (galleryType.canPin())
         EntePopupMenuItem(
           widget.collection!.isPinned
-              ? AppLocalizations.of(context).unpinAlbum
-              : AppLocalizations.of(context).pinAlbum,
+              ? AppLocalizations.of(context).unpin
+              : AppLocalizations.of(context).pin,
           value: AlbumPopupAction.pinAlbum,
           iconWidget: widget.collection!.isPinned
               ? const Icon(CupertinoIcons.pin_slash)
@@ -630,8 +630,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (galleryType == GalleryType.sharedCollection)
         EntePopupMenuItem(
           widget.collection!.hasShareePinned()
-              ? AppLocalizations.of(context).unpinAlbum
-              : AppLocalizations.of(context).pinAlbum,
+              ? AppLocalizations.of(context).unpin
+              : AppLocalizations.of(context).pin,
           value: AlbumPopupAction.shareePinAlbum,
           iconWidget: widget.collection!.hasShareePinned()
               ? const Icon(CupertinoIcons.pin_slash)
