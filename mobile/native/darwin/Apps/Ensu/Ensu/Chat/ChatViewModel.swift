@@ -790,6 +790,8 @@ final class ChatViewModel: ObservableObject {
     }
 
     func startNewSession() {
+        guard !isDownloading else { return }
+
         resetGenerationState()
         cancelVoiceInput()
         draftText = ""
