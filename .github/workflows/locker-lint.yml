@@ -50,7 +50,7 @@ jobs:
             - run: cargo codegen frb
               working-directory: rust
 
-            - run: cargo check -p ente_rust --features flutter --locked
+            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
             - name: Generate strings localizations

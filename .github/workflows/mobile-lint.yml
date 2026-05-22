@@ -53,7 +53,7 @@ jobs:
             - run: cargo codegen frb
               working-directory: rust
 
-            - run: cargo check -p ente_photos_rust --features flutter --locked
+            - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
             - run: flutter analyze --no-fatal-infos

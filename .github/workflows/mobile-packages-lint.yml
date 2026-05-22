@@ -97,7 +97,7 @@ jobs:
             - run: cargo codegen frb
               working-directory: rust
 
-            - run: cargo check -p ente_rust --features flutter --locked
+            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
             - name: Generate strings localizations
@@ -232,11 +232,11 @@ jobs:
               working-directory: rust
 
             - if: needs.detect-changes.outputs.lint_photos == 'true'
-              run: cargo check -p ente_photos_rust --features flutter --locked
+              run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
             - if: needs.detect-changes.outputs.lint_locker == 'true'
-              run: cargo check -p ente_rust --features flutter --locked
+              run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
             - name: Generate strings localizations
