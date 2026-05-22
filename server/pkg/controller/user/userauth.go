@@ -263,9 +263,12 @@ func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott 
 		}
 		return stacktrace.Propagate(ente.ErrIncorrectOTT, "")
 	}
-	err = c.UserAuthRepo.RemoveOTT(emailHash, ott, app)
+	removed, err := c.UserAuthRepo.RemoveOTT(emailHash, ott, app)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	if !removed {
+		return stacktrace.Propagate(ente.ErrExpiredOTT, "")
 	}
 	return nil
 }
