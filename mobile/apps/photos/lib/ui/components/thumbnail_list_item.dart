@@ -85,7 +85,7 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
               children: [
                 widget.title,
                 if (widget.subtitle != null) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   widget.subtitle!,
                 ],
               ],

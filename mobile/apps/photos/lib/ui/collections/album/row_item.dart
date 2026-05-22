@@ -34,7 +34,7 @@ class AlbumRowItemWidget extends StatelessWidget {
   static const _cornerSmoothing = 0.6;
   static const _overlayPadding = 8.0;
   static const _thumbnailToTextSpacing = 8.0;
-  static const _titleToSubtitleSpacing = 4.0;
+  static const _titleToSubtitleSpacing = 2.0;
   static const _sharePillPadding = EdgeInsets.all(2);
   static const _sharedAvatarStrokeWidth = 2.0;
 
@@ -250,6 +250,8 @@ class AlbumRowItemWidget extends StatelessWidget {
               child: showFileCount
                   ? FutureBuilder<int>(
                       future: CollectionsService.instance.getFileCount(c),
+                      initialData: CollectionsService.instance
+                          .getCachedFileCount(c),
                       builder: (context, snapshot) {
                         int? cachedCount;
                         if (snapshot.hasData) {

@@ -34,7 +34,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   static const crossAxisSpacing = 8.0;
   static const horizontalPadding = 16.0;
   static const _thumbnailToTextSpacing = 8.0;
-  static const _titleToSubtitleSpacing = 4.0;
+  static const _titleToSubtitleSpacing = 2.0;
   final List<Collection>? collections;
 
   // If true, the GridView will shrink-wrap its contents.
