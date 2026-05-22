@@ -58,7 +58,7 @@ import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { ItemVisibility } from "ente-media/file-metadata";
+import { ItemVisibility, metadataHash } from "ente-media/file-metadata";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import {
     CollectionSelector,
@@ -92,7 +92,10 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "ente-new/photos/components/gallery/reducer";
-import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/utils/dialog-attributes";
+import {
+    notifyOthersFilesDialogAttributes,
+    notifyUnsupportedSharedFavoritesDialogAttributes,
+} from "ente-new/photos/components/utils/dialog-attributes";
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import {
     usePeopleStateSnapshot,
@@ -1052,6 +1055,67 @@ const Page: React.FC = () => {
         [createOnSelectForCollectionOp, remotePull],
     );
 
+    const handleFavoriteFileOp = async (
+        op: Extract<FileOp, "favorite" | "unfavorite">,
+        selectedFiles: EnteFile[],
+    ) => {
+        const filesWithTargetState =
+            op == "unfavorite"
+                ? selectedFiles.filter((file) => favoriteFileIDs.has(file.id))
+                : selectedFiles;
+        const filesToProcess: EnteFile[] = [];
+        let skippedUnsupportedSharedFile = false;
+
+        for (const file of filesWithTargetState) {
+            if (file.ownerID == user!.id || metadataHash(file.metadata)) {
+                filesToProcess.push(file);
+            } else {
+                skippedUnsupportedSharedFile = true;
+            }
+        }
+
+        if (!filesToProcess.length) {
+            return { processed: false, skippedUnsupportedSharedFile };
+        }
+
+        const isFavorite = op == "favorite";
+        const previousFavoriteByFileID = new Map(
+            filesToProcess.map((file) => [
+                file.id,
+                favoriteFileIDs.has(file.id),
+            ]),
+        );
+
+        for (const file of filesToProcess) {
+            dispatch({ type: "addPendingFavoriteUpdate", fileID: file.id });
+            dispatch({ type: "unsyncedFavoriteUpdate", file, isFavorite });
+        }
+
+        try {
+            const action = isFavorite
+                ? addToFavoritesCollection
+                : removeFromFavoritesCollection;
+            await action(filesToProcess);
+            return { processed: true, skippedUnsupportedSharedFile };
+        } catch (e) {
+            for (const file of filesToProcess) {
+                dispatch({
+                    type: "unsyncedFavoriteUpdate",
+                    file,
+                    isFavorite: previousFavoriteByFileID.get(file.id)!,
+                });
+            }
+            throw e;
+        } finally {
+            for (const file of filesToProcess) {
+                dispatch({
+                    type: "removePendingFavoriteUpdate",
+                    fileID: file.id,
+                });
+            }
+        }
+    };
+
     const createFileOpHandler =
         (op: FileOp, options?: { suppressSelectionBar?: boolean }) => () => {
             void (async () => {
@@ -1108,6 +1172,21 @@ const Page: React.FC = () => {
                               )
                             : filteredFiles;
                     const selectedFiles = getSelectedFiles(selected, opFiles);
+                    if (op == "favorite" || op == "unfavorite") {
+                        const { processed, skippedUnsupportedSharedFile } =
+                            await handleFavoriteFileOp(op, selectedFiles);
+                        clearSelection();
+                        if (processed) {
+                            await remotePull({ silent: true });
+                        }
+                        if (skippedUnsupportedSharedFile) {
+                            showMiniDialog(
+                                notifyUnsupportedSharedFavoritesDialogAttributes(),
+                            );
+                        }
+                        return;
+                    }
+
                     const ownedSelectedFiles =
                         op == "download"
                             ? selectedFiles
@@ -1115,16 +1194,10 @@ const Page: React.FC = () => {
                                   // There'll be a user if files are being selected.
                                   (file) => file.ownerID == user!.id,
                               );
-                    const toProcessFiles =
-                        op == "unfavorite"
-                            ? ownedSelectedFiles.filter((file) =>
-                                  favoriteFileIDs.has(file.id),
-                              )
-                            : ownedSelectedFiles;
-                    if (toProcessFiles.length > 0) {
+                    if (ownedSelectedFiles.length > 0) {
                         await performFileOp(
                             op,
-                            toProcessFiles,
+                            ownedSelectedFiles,
                             onAddSaveGroup,
                             handleMarkTempDeleted,
                             () => dispatch({ type: "clearTempDeleted" }),

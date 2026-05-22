@@ -143,7 +143,7 @@ function getBaseActions(
 
     // Shared incoming actions
     if (collectionSummary?.attributes.has("sharedIncoming")) {
-        return ["download", "removeFromAlbum"];
+        return ["favorite", "download", "removeFromAlbum"];
     }
 
     // Hidden albums mode actions

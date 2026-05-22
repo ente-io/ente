@@ -956,16 +956,27 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
 
         case "clearUnsyncedState": {
+            const collectionFiles = state.lastSyncedCollectionFiles;
+            const syncedFavoriteFileIDs = deriveFavoriteFileIDs(
+                state.user!,
+                state.collections,
+                collectionFiles,
+                new Map(),
+            );
             const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
-                new Map();
+                preserveUnreflectedFavoriteUpdates(
+                    state.user!,
+                    collectionFiles,
+                    syncedFavoriteFileIDs,
+                    state.unsyncedFavoriteUpdates,
+                );
             const favoriteFileIDs = deriveFavoriteFileIDs(
                 state.user!,
                 state.collections,
-                state.collectionFiles,
+                collectionFiles,
                 unsyncedFavoriteUpdates,
             );
 
-            const collectionFiles = state.lastSyncedCollectionFiles;
             const unsyncedPrivateMagicMetadataUpdates: GalleryState["unsyncedPrivateMagicMetadataUpdates"] =
                 new Map();
 
@@ -979,7 +990,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                         pendingFavoriteUpdates: new Set(),
                         pendingVisibilityUpdates: new Set(),
                         unsyncedPrivateMagicMetadataUpdates,
-                        unsyncedFavoriteUpdates: new Map(),
+                        unsyncedFavoriteUpdates,
                     },
                     collectionFiles,
                 ),
@@ -1353,6 +1364,39 @@ const deriveFavoriteFileIDs = (
         }
     }
     return favoriteFileIDs;
+};
+
+const preserveUnreflectedFavoriteUpdates = (
+    user: LocalUser,
+    collectionFiles: GalleryState["collectionFiles"],
+    syncedFavoriteFileIDs: GalleryState["favoriteFileIDs"],
+    unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
+) => {
+    const preservedUpdates: GalleryState["unsyncedFavoriteUpdates"] = new Map();
+
+    for (const [key, update] of unsyncedFavoriteUpdates.entries()) {
+        const updatedFileIDs = update.fileHashAndTypeKey
+            ? collectionFiles
+                  .filter(
+                      (file) =>
+                          file.ownerID != user.id &&
+                          favoriteFileHashAndTypeKey(file) ==
+                              update.fileHashAndTypeKey,
+                  )
+                  .map((file) => file.id)
+            : [update.fileID];
+
+        if (
+            updatedFileIDs.some(
+                (fileID) =>
+                    syncedFavoriteFileIDs.has(fileID) != update.isFavorite,
+            )
+        ) {
+            preservedUpdates.set(key, update);
+        }
+    }
+
+    return preservedUpdates;
 };
 
 /**
