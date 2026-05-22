@@ -42,15 +42,9 @@ class GoToMap extends StatelessWidget {
           children: [
             Transform.scale(
               scale: 1.2,
-              child: Image.asset(
-                "assets/map_world.png",
-                width: 64,
-                height: 64,
-              ),
+              child: Image.asset("assets/map_world.png", width: 64, height: 64),
             ),
-            const SizedBox(
-              height: 11.5,
-            ),
+            const SizedBox(height: 11.5),
             Text(
               AppLocalizations.of(context).yourMap,
               maxLines: 2,

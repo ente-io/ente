@@ -14,12 +14,12 @@ void sortDeviceCollections(
   deviceCollections.sort((first, second) {
     var comparison = switch (sortKey) {
       AlbumSortKey.albumName => _compareByName(first, second),
-      AlbumSortKey.newestPhoto => _newestPhotoTime(second).compareTo(
-        _newestPhotoTime(first),
-      ),
-      AlbumSortKey.lastUpdated => _updatedTime(second).compareTo(
-        _updatedTime(first),
-      ),
+      AlbumSortKey.newestPhoto => _newestPhotoTime(
+        second,
+      ).compareTo(_newestPhotoTime(first)),
+      AlbumSortKey.lastUpdated => _updatedTime(
+        second,
+      ).compareTo(_updatedTime(first)),
     };
     if (comparison == 0) {
       comparison = _compareByName(first, second);

@@ -171,8 +171,8 @@ class PersonService {
     w?.start();
     await fetchRemoteClusterFeedback(skipClusterUpdateIfNoChange: false);
     w?.log("Stored remote feedback");
-    final dbPersonClusterInfo =
-        await faceMLDataDB.getPersonToClusterIdToFaceIds();
+    final dbPersonClusterInfo = await faceMLDataDB
+        .getPersonToClusterIdToFaceIds();
     w?.log("Got DB person cluster info");
     final persons = await getPersonsMap();
     w?.log("Got persons");
@@ -508,8 +508,8 @@ class PersonService {
     await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);
 
     if (shouldCheckRejectedFaces) {
-      final dbPeopleClusterInfo =
-          await faceMLDataDB.getPersonToClusterIdToFaceIds();
+      final dbPeopleClusterInfo = await faceMLDataDB
+          .getPersonToClusterIdToFaceIds();
       for (var e in entities) {
         final personData = PersonData.fromJson(json.decode(e.data));
         if (personData.rejectedFaceIDs.isNotEmpty) {
@@ -520,8 +520,9 @@ class PersonService {
             );
             continue;
           }
-          final personFaceIDs =
-              personClustersToFaceIDs.values.expand((e) => e).toSet();
+          final personFaceIDs = personClustersToFaceIDs.values
+              .expand((e) => e)
+              .toSet();
           final rejectedFaceIDsSet = personData.rejectedFaceIDs.toSet();
           final assignedAndRejectedFaceIDs = rejectedFaceIDsSet.intersection(
             personFaceIDs,

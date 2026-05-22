@@ -116,14 +116,13 @@ Future<bool?> _navigateToFolderSelection(
   BuildContext context, {
   required bool isFirstBackup,
   bool fromOnlyNewPhotosToggle = false,
-}) =>
-    routeToPage<bool>(
-      context,
-      BackupFolderSelectionPage(
-        isFirstBackup: isFirstBackup,
-        fromOnlyNewPhotosToggle: fromOnlyNewPhotosToggle,
-      ),
-    );
+}) => routeToPage<bool>(
+  context,
+  BackupFolderSelectionPage(
+    isFirstBackup: isFirstBackup,
+    fromOnlyNewPhotosToggle: fromOnlyNewPhotosToggle,
+  ),
+);
 
 Future<void> _showPermissionDeniedDialog(BuildContext context) =>
     showChoiceDialog(
@@ -137,16 +136,16 @@ Future<void> _showPermissionDeniedDialog(BuildContext context) =>
 Future<void> _showLimitedPermissionSheet(
   BuildContext context, {
   required bool hasGrantedLimit,
-}) =>
-    showChoiceActionSheet(
-      context,
-      title: context.l10n.preserveMore,
-      body: context.l10n.grantFullAccessPrompt,
-      firstButtonLabel: context.l10n.openSettings,
-      firstButtonOnTap: () async => PhotoManager.openSetting(),
-      secondButtonLabel:
-          hasGrantedLimit ? context.l10n.selectMorePhotos : context.l10n.cancel,
-      secondButtonOnTap: () async {
-        if (hasGrantedLimit) await PhotoManager.presentLimited();
-      },
-    );
+}) => showChoiceActionSheet(
+  context,
+  title: context.l10n.preserveMore,
+  body: context.l10n.grantFullAccessPrompt,
+  firstButtonLabel: context.l10n.openSettings,
+  firstButtonOnTap: () async => PhotoManager.openSetting(),
+  secondButtonLabel: hasGrantedLimit
+      ? context.l10n.selectMorePhotos
+      : context.l10n.cancel,
+  secondButtonOnTap: () async {
+    if (hasGrantedLimit) await PhotoManager.presentLimited();
+  },
+);

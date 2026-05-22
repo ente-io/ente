@@ -47,15 +47,14 @@ abstract class SuperIsolate {
 
       try {
         _isolate = isDartUiIsolate
-            ? await DartUiIsolate.spawn(
-                _isolateMain,
-                [_receivePort.sendPort, null],
-              )
-            : await Isolate.spawn(
-                _isolateMain,
-                [_receivePort.sendPort, rootToken],
-                debugName: isolateName,
-              );
+            ? await DartUiIsolate.spawn(_isolateMain, [
+                _receivePort.sendPort,
+                null,
+              ])
+            : await Isolate.spawn(_isolateMain, [
+                _receivePort.sendPort,
+                rootToken,
+              ], debugName: isolateName);
         _mainSendPort = await _receivePort.first as SendPort;
 
         if (shouldAutomaticDispose) _resetInactivityTimer();
@@ -96,10 +95,7 @@ abstract class SuperIsolate {
       try {
         data = await isolateFunction(function, args);
       } catch (e, stackTrace) {
-        data = {
-          'error': e.toString(),
-          'stackTrace': stackTrace.toString(),
-        };
+        data = {'error': e.toString(), 'stackTrace': stackTrace.toString()};
       }
       final logs = List<String>.from(isolateLogger.getLogStringsAndClear());
       sendPort.send({"taskID": taskID, "data": data, "logs": logs});
@@ -164,9 +160,7 @@ abstract class SuperIsolate {
 
   /// Clears specific data from the isolate's cache
   Future<void> clearCachedData(String key) async {
-    await runInIsolate(IsolateOperation.clearIsolateCache, {
-      'key': key,
-    });
+    await runInIsolate(IsolateOperation.clearIsolateCache, {'key': key});
   }
 
   Future<void> clearAllCachedData() async {

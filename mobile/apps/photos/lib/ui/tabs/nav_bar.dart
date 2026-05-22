@@ -92,10 +92,8 @@ class _GNavState extends State<GNav> {
                 activeBorder: t.activeBorder ?? widget.tabActiveBorder,
                 borderRadius:
                     t.borderRadius as bool? ?? widget.tabBorderRadius != null
-                        ? BorderRadius.all(
-                            Radius.circular(widget.tabBorderRadius!),
-                          )
-                        : const BorderRadius.all(Radius.circular(100.0)),
+                    ? BorderRadius.all(Radius.circular(widget.tabBorderRadius!))
+                    : const BorderRadius.all(Radius.circular(100.0)),
                 debug: widget.debug ?? false,
                 margin: t.margin ?? widget.tabMargin,
                 active: selectedIndex == widget.tabs!.indexOf(t),
@@ -311,7 +309,8 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
       expandController.forward();
     }
 
-    final Widget icon = widget.leading ??
+    final Widget icon =
+        widget.leading ??
         Icon(
           widget.icon,
           color: _expanded! ? widget.iconColor : widget.iconActiveColor,
@@ -342,18 +341,16 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
               color: _expanded!
                   ? widget.color!.withValues(alpha: 0)
                   : widget.debug!
-                      ? Colors.red
-                      : widget.gradient != null
-                          ? Colors.white
-                          : widget.color,
+                  ? Colors.red
+                  : widget.gradient != null
+                  ? Colors.white
+                  : widget.color,
               borderRadius: widget.borderRadius,
             ),
             child: FittedBox(
               fit: BoxFit.fitHeight,
               child: Stack(
-                children: [
-                  Align(alignment: Alignment.centerLeft, child: icon),
-                ],
+                children: [Align(alignment: Alignment.centerLeft, child: icon)],
               ),
             ),
           ),

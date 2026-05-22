@@ -57,10 +57,7 @@ class TrimConfigs {
   /// Example: TrimConfigs.fromDuration(Duration(minutes: 1, seconds: 30))
   static TrimConfig fromDuration(Duration duration) {
     final totalSeconds = duration.inSeconds;
-    return TrimConfig(
-      label: "trim-${totalSeconds}s",
-      duration: duration,
-    );
+    return TrimConfig(label: "trim-${totalSeconds}s", duration: duration);
   }
 
   /// Create a trim config from start offset and length
@@ -99,9 +96,7 @@ class ValidationFailure {
 class IterationResult {
   final List<ValidationFailure> validationFailures;
 
-  IterationResult({
-    required this.validationFailures,
-  });
+  IterationResult({required this.validationFailures});
 }
 
 /// Configuration for one or more files to test with the same combinations
@@ -207,8 +202,9 @@ void main() {
   ];
 
   group('Video Editor Integration Test', () {
-    testWidgets('Process videos with all trim/crop/rotate combinations',
-        (WidgetTester tester) async {
+    testWidgets('Process videos with all trim/crop/rotate combinations', (
+      WidgetTester tester,
+    ) async {
       // Initialize global singletons that the app normally sets up on startup.
       final prefs = await SharedPreferences.getInstance();
       final packageInfo = await PackageInfo.fromPlatform();
@@ -246,10 +242,14 @@ void main() {
       }
 
       // Calculate total files and iterations
-      final totalFiles =
-          testFiles.fold(0, (sum, config) => sum + config.fileIds.length);
-      final totalIterations =
-          testFiles.fold(0, (sum, config) => sum + config.totalIterations);
+      final totalFiles = testFiles.fold(
+        0,
+        (sum, config) => sum + config.fileIds.length,
+      );
+      final totalIterations = testFiles.fold(
+        0,
+        (sum, config) => sum + config.totalIterations,
+      );
       logger.info('═══════════════════════════════════════════════════════');
       logger.info(
         'Starting test with $totalFiles file(s), ${testFiles.length} configuration(s)',
@@ -280,9 +280,11 @@ void main() {
         );
 
         // Process each file in this configuration
-        for (int fileIndex = 0;
-            fileIndex < config.fileIds.length;
-            fileIndex++) {
+        for (
+          int fileIndex = 0;
+          fileIndex < config.fileIds.length;
+          fileIndex++
+        ) {
           final fileId = config.fileIds[fileIndex];
 
           logger.info('─────────────────────────────────────────────────────');
@@ -398,13 +400,15 @@ void main() {
 
         logger.info('═══════════════════════════════════════════════════════');
         logger.info('Config ${configIndex + 1}/${testFiles.length} completed');
-        logger
-            .info('═══════════════════════════════════════════════════════\n');
+        logger.info(
+          '═══════════════════════════════════════════════════════\n',
+        );
       }
 
       // Print final summary
-      logger
-          .info('\n╔═══════════════════════════════════════════════════════╗');
+      logger.info(
+        '\n╔═══════════════════════════════════════════════════════╗',
+      );
       logger.info('║ FINAL TEST SUMMARY');
       logger.info('╚═══════════════════════════════════════════════════════╝');
       logger.info('Total configurations: ${testFiles.length}');
@@ -505,8 +509,9 @@ Future<IterationResult> _processVideoIteration({
     final originalDuration = controller.videoDuration;
     final originalSize = controller.video.value.size;
     logger.info('  → Controller initialized');
-    logger
-        .info('     - Original duration: ${originalDuration.inMilliseconds}ms');
+    logger.info(
+      '     - Original duration: ${originalDuration.inMilliseconds}ms',
+    );
     logger.info(
       '     - Original size: ${originalSize.width.toInt()}x${originalSize.height.toInt()}',
     );
@@ -634,8 +639,9 @@ Future<IterationResult> _processVideoIteration({
     logger.info('  → Exporting video with native editor...');
 
     // Create temp output path
-    final tempDir =
-        Directory.systemTemp.createTempSync('ente_video_export_test');
+    final tempDir = Directory.systemTemp.createTempSync(
+      'ente_video_export_test',
+    );
     final outputPath = path_helper.join(
       tempDir.path,
       'export_${DateTime.now().millisecondsSinceEpoch}.mp4',
@@ -649,8 +655,9 @@ Future<IterationResult> _processVideoIteration({
       onProgress: (progress) {
         // Log progress at 25% intervals
         if ((progress * 100).round() % 25 == 0) {
-          logger
-              .info('     - Progress: ${(progress * 100).toStringAsFixed(0)}%');
+          logger.info(
+            '     - Progress: ${(progress * 100).toStringAsFixed(0)}%',
+          );
         }
       },
       onError: (e, s) {
@@ -679,7 +686,8 @@ Future<IterationResult> _processVideoIteration({
     }
 
     final baseName = path_helper.basenameWithoutExtension(sourceFile.title!);
-    final fileName = baseName +
+    final fileName =
+        baseName +
         suffixBuffer.toString() +
         '_edited_' +
         DateTime.now().microsecondsSinceEpoch.toString() +
@@ -726,16 +734,18 @@ Future<IterationResult> _processVideoIteration({
       // Step 8: Validate exported video
       logger.info('  → Validating exported video...');
       try {
-        final videoInfo =
-            await NativeVideoEditor.getVideoInfo(exportedFile.path);
+        final videoInfo = await NativeVideoEditor.getVideoInfo(
+          exportedFile.path,
+        );
         final actualDuration = Duration(
           milliseconds: (videoInfo['duration'] as num?)?.toInt() ?? 0,
         );
         final actualWidth = (videoInfo['width'] as num?)?.toInt() ?? 0;
         final actualHeight = (videoInfo['height'] as num?)?.toInt() ?? 0;
 
-        logger
-            .info('     - Actual duration: ${actualDuration.inMilliseconds}ms');
+        logger.info(
+          '     - Actual duration: ${actualDuration.inMilliseconds}ms',
+        );
         logger.info('     - Actual size: ${actualWidth}x$actualHeight');
 
         // Validate duration (allow 100ms tolerance for encoding variations)
@@ -852,8 +862,9 @@ Future<IterationResult> _processVideoIteration({
           // Don't fail the test if description update fails
         }
       } else {
-        logger
-            .info('     - Skipping description update (file not uploaded yet)');
+        logger.info(
+          '     - Skipping description update (file not uploaded yet)',
+        );
       }
 
       // Cleanup temp file
@@ -873,9 +884,7 @@ Future<IterationResult> _processVideoIteration({
     }
   }
 
-  return IterationResult(
-    validationFailures: failures,
-  );
+  return IterationResult(validationFailures: failures);
 }
 
 String? _buildSettingsToastMessage({

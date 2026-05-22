@@ -122,12 +122,12 @@ class _MultiAppThemeDemoState extends State<MultiAppThemeDemo> {
     (
       name: "E-commerce",
       light: ECommerceApp.lightTheme,
-      dark: ECommerceApp.darkTheme
+      dark: ECommerceApp.darkTheme,
     ),
     (
       name: "Social Media",
       light: SocialMediaApp.lightTheme,
-      dark: SocialMediaApp.darkTheme
+      dark: SocialMediaApp.darkTheme,
     ),
     (name: "Finance", light: FinanceApp.lightTheme, dark: FinanceApp.darkTheme),
     (name: "Gaming", light: GamingApp.lightTheme, dark: GamingApp.darkTheme),
@@ -334,11 +334,7 @@ class DemoHomePage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.warning,
-                    color: colorScheme.warning500,
-                    size: 20,
-                  ),
+                  Icon(Icons.warning, color: colorScheme.warning500, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -409,10 +405,7 @@ class DemoHomePage extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               color.$1,
-              style: TextStyle(
-                fontSize: 10,
-                color: colorScheme.textMuted,
-              ),
+              style: TextStyle(fontSize: 10, color: colorScheme.textMuted),
               textAlign: TextAlign.center,
             ),
           ],

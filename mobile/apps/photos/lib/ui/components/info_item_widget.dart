@@ -49,11 +49,7 @@ class InfoItemWidget extends StatelessWidget {
             if (snapshot.hasData) {
               final subtitle = snapshot.data as List<Widget>;
               if (subtitle.isNotEmpty) {
-                child = Wrap(
-                  runSpacing: 8,
-                  spacing: 8,
-                  children: subtitle,
-                );
+                child = Wrap(runSpacing: 8, spacing: 8, children: subtitle);
               } else {
                 child = const SizedBox.shrink();
               }
@@ -62,8 +58,9 @@ class InfoItemWidget extends StatelessWidget {
                 padding: biggerSpinner ? 6 : 3,
                 size: biggerSpinner ? 20 : 11,
                 color: getEnteColorScheme(context).strokeMuted,
-                alignment:
-                    biggerSpinner ? Alignment.center : Alignment.centerLeft,
+                alignment: biggerSpinner
+                    ? Alignment.center
+                    : Alignment.centerLeft,
               );
             }
             return AnimatedSwitcher(

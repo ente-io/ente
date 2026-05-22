@@ -114,17 +114,14 @@ class SettingsPage extends StatelessWidget {
                   final hasAuthenticated = await LocalAuthenticationService
                       .instance
                       .requestLocalAuthentication(
-                    context,
-                    context.l10n.authToInitiateSignIn,
-                  );
+                        context,
+                        context.l10n.authToInitiateSignIn,
+                      );
                   if (!hasAuthenticated) {
                     return;
                   }
                 }
-                await routeToPage(
-                  context,
-                  const OnboardingPage(),
-                );
+                await routeToPage(context, const OnboardingPage());
               }
             }
           },
@@ -144,10 +141,7 @@ class SettingsPage extends StatelessWidget {
         Platform.isWindows ||
         Platform.isLinux ||
         kDebugMode) {
-      contents.addAll([
-        const ThemeSwitchWidget(),
-        sectionSpacing,
-      ]);
+      contents.addAll([const ThemeSwitchWidget(), sectionSpacing]);
     }
 
     contents.addAll([
@@ -161,9 +155,7 @@ class SettingsPage extends StatelessWidget {
       const AppVersionWidget(),
       const DeveloperSettingsWidget(),
       const NotificationBannerWidget(),
-      const Padding(
-        padding: EdgeInsets.only(bottom: 60),
-      ),
+      const Padding(padding: EdgeInsets.only(bottom: 60)),
     ]);
 
     return SafeArea(
@@ -172,14 +164,10 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SettingsTitleBarWidget(
-              scaffoldKey: scaffoldKey,
-            ),
+            SettingsTitleBarWidget(scaffoldKey: scaffoldKey),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              child: Column(
-                children: contents,
-              ),
+              child: Column(children: contents),
             ),
           ],
         ),

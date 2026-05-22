@@ -25,8 +25,8 @@ class CustomIconPage extends StatefulWidget {
 class _CustomIconPageState extends State<CustomIconPage> {
   Map<String, AllIconData> _filteredIcons = {};
   bool _showSearchBox = false;
-  final bool _autoFocusSearch =
-      PreferenceService.instance.shouldAutoFocusOnSearchBar();
+  final bool _autoFocusSearch = PreferenceService.instance
+      .shouldAutoFocusOnSearchBar();
   final TextEditingController _textController = TextEditingController();
   String _searchText = "";
 
@@ -85,11 +85,11 @@ class _CustomIconPageState extends State<CustomIconPage> {
 
       final bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
           ? (pressed.contains(LogicalKeyboardKey.metaLeft) ||
-              pressed.contains(LogicalKeyboardKey.meta) ||
-              pressed.contains(LogicalKeyboardKey.metaRight))
+                pressed.contains(LogicalKeyboardKey.meta) ||
+                pressed.contains(LogicalKeyboardKey.metaRight))
           : (pressed.contains(LogicalKeyboardKey.controlLeft) ||
-              pressed.contains(LogicalKeyboardKey.control) ||
-              pressed.contains(LogicalKeyboardKey.controlRight));
+                pressed.contains(LogicalKeyboardKey.control) ||
+                pressed.contains(LogicalKeyboardKey.controlRight));
 
       if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) {
         setState(() {
@@ -166,21 +166,19 @@ class _CustomIconPageState extends State<CustomIconPage> {
                 : const Icon(Icons.search),
             tooltip: l10n.search,
             onPressed: () {
-              setState(
-                () {
-                  _showSearchBox = !_showSearchBox;
-                  if (!_showSearchBox) {
-                    _textController.clear();
-                    _searchText = "";
-                  } else {
-                    _searchText = _textController.text;
+              setState(() {
+                _showSearchBox = !_showSearchBox;
+                if (!_showSearchBox) {
+                  _textController.clear();
+                  _searchText = "";
+                } else {
+                  _searchText = _textController.text;
 
-                    // Request focus on the search box
-                    searchBoxFocusNode.requestFocus();
-                  }
-                  _applyFilteringAndRefresh();
-                },
-              );
+                  // Request focus on the search box
+                  searchBoxFocusNode.requestFocus();
+                }
+                _applyFilteringAndRefresh();
+              });
             },
           ),
         ],
@@ -247,10 +245,12 @@ class _CustomIconPageState extends State<CustomIconPage> {
                           decoration: BoxDecoration(
                             border: Border.all(
                               width: 1.5,
-                              color: title.toLowerCase() ==
+                              color:
+                                  title.toLowerCase() ==
                                       widget.currentIcon.toLowerCase()
-                                  ? getEnteColorScheme(context)
-                                      .tagChipSelectedColor
+                                  ? getEnteColorScheme(
+                                      context,
+                                    ).tagChipSelectedColor
                                   : Colors.transparent,
                             ),
                             borderRadius: const BorderRadius.all(
@@ -260,12 +260,11 @@ class _CustomIconPageState extends State<CustomIconPage> {
                           child: Column(
                             children: [
                               const SizedBox(height: 8),
-                              Expanded(
-                                child: iconWidget,
-                              ),
+                              Expanded(child: iconWidget),
                               const SizedBox(height: 12),
                               Padding(
-                                padding: title.toLowerCase() ==
+                                padding:
+                                    title.toLowerCase() ==
                                         widget.currentIcon.toLowerCase()
                                     ? const EdgeInsets.only(left: 2, right: 2)
                                     : const EdgeInsets.all(0.0),

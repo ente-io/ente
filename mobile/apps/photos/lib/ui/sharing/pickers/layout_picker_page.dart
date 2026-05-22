@@ -23,9 +23,7 @@ class LayoutPickerPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(
-          AppLocalizations.of(context).albumLayout,
-        ),
+        title: Text(AppLocalizations.of(context).albumLayout),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 3.0),
@@ -42,27 +40,23 @@ class LayoutPickerPage extends StatelessWidget {
         primary: false,
         slivers: <Widget>[
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 20,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        child: ItemsWidget(collection),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      child: ItemsWidget(collection),
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: 1),
           ),
           const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
         ],
@@ -72,8 +66,9 @@ class LayoutPickerPage extends StatelessWidget {
 
   Future<void> _openPublicAlbumPreview(BuildContext context) async {
     try {
-      final String publicUrl =
-          CollectionsService.instance.getPublicUrl(collection);
+      final String publicUrl = CollectionsService.instance.getPublicUrl(
+        collection,
+      );
       await routeToPage(
         context,
         WebPage(
@@ -116,9 +111,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   Widget build(BuildContext context) {
     List<Widget> items = [];
     for (Tuple2<String, String> layoutOption in _layoutOptions) {
-      items.add(
-        _menuItemForPicker(context, layoutOption),
-      );
+      items.add(_menuItemForPicker(context, layoutOption));
     }
     items = addSeparators(
       items,
@@ -136,10 +129,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       );
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: items,
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: items);
   }
 
   Widget _menuItemForPicker(
@@ -148,9 +138,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   ) {
     return MenuItemWidget(
       menuItemColor: getEnteColorScheme(context).fillFaint,
-      captionedTextWidget: CaptionedTextWidget(
-        title: layoutOption.item1,
-      ),
+      captionedTextWidget: CaptionedTextWidget(title: layoutOption.item1),
       trailingIcon: currentLayout == layoutOption.item2 ? Icons.check : null,
       trailingIconColor: currentLayout == layoutOption.item2
           ? getEnteColorScheme(context).primary500
@@ -166,10 +154,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   Future<void> updateLayout(String newLayout, BuildContext context) async {
-    await _updateLayoutSettings(
-      context,
-      {'layout': newLayout},
-    ).then(
+    await _updateLayoutSettings(context, {'layout': newLayout}).then(
       (value) => setState(() {
         currentLayout = newLayout;
       }),
@@ -181,8 +166,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     Map<String, dynamic> prop,
   ) async {
     try {
-      await CollectionsService.instance
-          .updatePublicMagicMetadata(widget.collection, prop);
+      await CollectionsService.instance.updatePublicMagicMetadata(
+        widget.collection,
+        prop,
+      );
     } catch (e) {
       await showGenericErrorDialog(context: context, error: e);
       rethrow;

@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 
-enum IconButtonType {
-  primary,
-  secondary,
-  rounded,
-}
+enum IconButtonType { primary, secondary, rounded }
 
 class IconButtonWidget extends StatefulWidget {
   final IconButtonType iconButtonType;
@@ -52,7 +48,8 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     final bool hasPressedState = widget.onTap != null;
     final colorTheme = getEnteColorScheme(context);
     iconStateColor ??
-        (iconStateColor = widget.defaultColor ??
+        (iconStateColor =
+            widget.defaultColor ??
             (widget.iconButtonType == IconButtonType.rounded
                 ? colorTheme.fillFaint
                 : null));
@@ -80,7 +77,8 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
               ),
               child: Icon(
                 widget.icon,
-                color: widget.iconColor ??
+                color:
+                    widget.iconColor ??
                     (widget.iconButtonType == IconButtonType.secondary
                         ? colorTheme.strokeMuted
                         : colorTheme.strokeBase),
@@ -89,7 +87,8 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
             )
           : Icon(
               widget.icon,
-              color: widget.iconColor ??
+              color:
+                  widget.iconColor ??
                   (widget.iconButtonType == IconButtonType.secondary
                       ? colorTheme.strokeMuted
                       : colorTheme.strokeBase),
@@ -101,7 +100,8 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
   _onTapDown(details) {
     final colorTheme = getEnteColorScheme(context);
     setState(() {
-      iconStateColor = widget.pressedColor ??
+      iconStateColor =
+          widget.pressedColor ??
           (widget.iconButtonType == IconButtonType.rounded
               ? colorTheme.fillMuted
               : colorTheme.fillFaint);

@@ -59,11 +59,12 @@ class NetworkClient {
     if (_endpointUpdatedSubscription != null) {
       await _endpointUpdatedSubscription!.cancel();
     }
-    _endpointUpdatedSubscription =
-        Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
-      _enteDio.options.baseUrl = event.endpoint;
-      _setupInterceptors(event.endpoint);
-    });
+    _endpointUpdatedSubscription = Bus.instance
+        .on<EndpointUpdatedEvent>()
+        .listen((event) {
+          _enteDio.options.baseUrl = event.endpoint;
+          _setupInterceptors(event.endpoint);
+        });
   }
 
   void _setupInterceptors(String endpoint) {
@@ -75,9 +76,7 @@ class NetworkClient {
     final fallbackAdapter = IOHttpClientAdapter();
     final fallbackPolicy = _http2FallbackPolicy;
     final http2Adapter = Http2Adapter(
-      ConnectionManager(
-        handshakeTimout: connectTimeout,
-      ),
+      ConnectionManager(handshakeTimout: connectTimeout),
       fallbackAdapter: fallbackAdapter,
       onNotSupported: (options, requestStream, cancelFuture, exception) {
         _logHttp2UnsupportedOriginOnce(
@@ -112,10 +111,10 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
     required HttpClientAdapter fallbackAdapter,
     required Logger logger,
     required _Http2FallbackPolicy fallbackPolicy,
-  })  : _http2Adapter = http2Adapter,
-        _fallbackAdapter = fallbackAdapter,
-        _logger = logger,
-        _fallbackPolicy = fallbackPolicy;
+  }) : _http2Adapter = http2Adapter,
+       _fallbackAdapter = fallbackAdapter,
+       _logger = logger,
+       _fallbackPolicy = fallbackPolicy;
 
   final HttpClientAdapter _http2Adapter;
   final HttpClientAdapter _fallbackAdapter;
@@ -221,8 +220,9 @@ class _Http2FallbackPolicy {
 
   String originForLog(Uri uri) {
     final scheme = uri.scheme.toLowerCase();
-    final port =
-        uri.hasPort && !_isDefaultPort(scheme, uri.port) ? ":${uri.port}" : "";
+    final port = uri.hasPort && !_isDefaultPort(scheme, uri.port)
+        ? ":${uri.port}"
+        : "";
     return "$scheme://${_formatHost(uri.host)}$port";
   }
 

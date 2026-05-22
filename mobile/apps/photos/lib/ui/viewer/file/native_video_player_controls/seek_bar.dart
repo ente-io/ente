@@ -37,8 +37,9 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     );
 
     Future.microtask(() {
-      _seekbarSubscription =
-          Bus.instance.on<SeekbarTriggeredEvent>().listen((event) {
+      _seekbarSubscription = Bus.instance.on<SeekbarTriggeredEvent>().listen((
+        event,
+      ) {
         if (!mounted || _animationController.value == event.position) return;
 
         _animationController.value = event.position.toDouble();
@@ -46,9 +47,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       });
     });
 
-    _eventsSubscription = widget.controller.events.listen(
-      _listen,
-    );
+    _eventsSubscription = widget.controller.events.listen(_listen);
 
     _startMovingSeekbar();
   }
@@ -178,8 +177,9 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     }
 
     final duration = widget.controller.videoInfo?.durationInMilliseconds;
-    final double fractionTarget =
-        duration == null || duration <= 0 ? 0 : target / duration;
+    final double fractionTarget = duration == null || duration <= 0
+        ? 0
+        : target / duration;
 
     final nudge = _durationNudge();
     unawaited(

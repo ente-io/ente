@@ -262,8 +262,11 @@ class _RitualOverviewCard extends StatelessWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
-    final dayKey =
-        DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
+    final dayKey = DateTime(
+      day.year,
+      day.month,
+      day.day,
+    ).millisecondsSinceEpoch;
     final file = progress?.recentFilesByDay[dayKey];
     final count =
         progress?.recentFileCountsByDay[dayKey] ?? (completed ? 1 : 0);
@@ -293,10 +296,10 @@ class _RitualOverviewCard extends StatelessWidget {
     final variant = completed
         ? RitualDayThumbnailVariant.photo
         : (isToday
-            ? RitualDayThumbnailVariant.camera
-            : (showFuturePreview && day.isAfter(today)
-                ? RitualDayThumbnailVariant.future
-                : RitualDayThumbnailVariant.empty));
+              ? RitualDayThumbnailVariant.camera
+              : (showFuturePreview && day.isAfter(today)
+                    ? RitualDayThumbnailVariant.future
+                    : RitualDayThumbnailVariant.empty));
 
     return RitualDayThumbnail(
       day: day,
@@ -333,8 +336,10 @@ class _StreakChip extends StatelessWidget {
         children: [
           Text(
             "$streak",
-            style: textTheme.small
-                .copyWith(color: colorScheme.textMuted, height: 1),
+            style: textTheme.small.copyWith(
+              color: colorScheme.textMuted,
+              height: 1,
+            ),
             textHeightBehavior: _tightTextHeightBehavior,
           ),
           const SizedBox(width: 4),
@@ -462,8 +467,11 @@ bool _isSameDay(DateTime a, DateTime b) {
   }
 
   final createdAt = ritual.createdAt.toLocal();
-  final createdDayMidnight =
-      DateTime(createdAt.year, createdAt.month, createdAt.day);
+  final createdDayMidnight = DateTime(
+    createdAt.year,
+    createdAt.month,
+    createdAt.day,
+  );
 
   final lookbackCount = count - 1;
   final daysBeforeCreation = _lastScheduledDaysInclusive(
@@ -471,8 +479,9 @@ bool _isSameDay(DateTime a, DateTime b) {
     todayMidnight: createdDayMidnight.subtract(const Duration(days: 1)),
     count: lookbackCount,
   );
-  final hadCompletionsBeforeCreation =
-      daysBeforeCreation.any(progress.hasCompleted);
+  final hadCompletionsBeforeCreation = daysBeforeCreation.any(
+    progress.hasCompleted,
+  );
   if (hadCompletionsBeforeCreation) {
     return (days: pastDays, showFuturePreview: false);
   }

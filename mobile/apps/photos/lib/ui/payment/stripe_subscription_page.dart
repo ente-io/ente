@@ -32,10 +32,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class StripeSubscriptionPage extends StatefulWidget {
   final bool isOnboarding;
 
-  const StripeSubscriptionPage({
-    this.isOnboarding = false,
-    super.key,
-  });
+  const StripeSubscriptionPage({this.isOnboarding = false, super.key});
 
   @override
   State<StripeSubscriptionPage> createState() => _StripeSubscriptionPageState();
@@ -62,9 +59,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   String? _selectedPlanProductID;
 
   Future<void> _fetchSub() async {
-    return _userService
-        .getUserDetailsV2(memoryCount: false)
-        .then((userDetails) async {
+    return _userService.getUserDetailsV2(memoryCount: false).then((
+      userDetails,
+    ) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
 
@@ -84,7 +81,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       _showYearlyPlan = _currentSubscription!.isYearlyPlan();
       _hideCurrentPlanSelection =
           (_currentSubscription?.attributes?.isCancelled ?? false) &&
-              userDetails.hasPaidAddon();
+          userDetails.hasPaidAddon();
       _hasActiveSubscription = _currentSubscription!.isValid();
       _isStripeSubscriber = _currentSubscription!.paymentProvider == stripe;
 
@@ -166,9 +163,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: _getBody()),
-        ],
+        children: [Expanded(child: _getBody())],
       ),
       bottomNavigationBar: widget.isOnboarding && _hasLoadedData
           ? Container(
@@ -229,7 +224,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
     final hasAddOnBonus =
         _userDetails.bonusData?.getAddOnBonuses().isNotEmpty ?? false;
-    final shouldShowValidity = _currentSubscription != null &&
+    final shouldShowValidity =
+        _currentSubscription != null &&
         (!_currentSubscription!.isFreePlan() || hasAddOnBonus);
     if (shouldShowValidity) {
       widgets.add(
@@ -242,9 +238,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
 
     if (_currentSubscription!.productID == freeProductID) {
-      widgets.add(
-        SubFaqWidget(isOnboarding: widget.isOnboarding),
-      );
+      widgets.add(SubFaqWidget(isOnboarding: widget.isOnboarding));
       if (!widget.isOnboarding) {
         widgets.add(const SizedBox(height: 8));
       }
@@ -265,8 +259,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             onTap: () async {
               late final UserDetails userDetails;
               try {
-                userDetails =
-                    await _userService.getUserDetailsV2(memoryCount: false);
+                userDetails = await _userService.getUserDetailsV2(
+                  memoryCount: false,
+                );
               } catch (error) {
                 if (!context.mounted) {
                   return;
@@ -357,8 +352,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         await showErrorDialog(
           context,
           AppLocalizations.of(context).sorry,
-          AppLocalizations.of(context)
-              .contactToManageSubscription(provider: capitalizedWord),
+          AppLocalizations.of(
+            context,
+          ).contactToManageSubscription(provider: capitalizedWord),
         );
     }
   }
@@ -368,13 +364,18 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     try {
       final String url = await _billingService.getStripeCustomerPortalUrl();
       await _dialog.hide();
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return WebPage(AppLocalizations.of(context).paymentDetails, url);
-          },
-        ),
-      ).then((value) => onWebPaymentGoBack);
+      await Navigator.of(context)
+          .push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return WebPage(
+                  AppLocalizations.of(context).paymentDetails,
+                  url,
+                );
+              },
+            ),
+          )
+          .then((value) => onWebPaymentGoBack);
     } catch (e) {
       await _dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
@@ -500,7 +501,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       if (productID.isEmpty) {
         continue;
       }
-      final isActive = _hasActiveSubscription &&
+      final isActive =
+          _hasActiveSubscription &&
           _currentSubscription!.productID == productID;
       planWidgets.add(
         GestureDetector(
@@ -551,8 +553,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               final result = await showChoiceDialog(
                 context,
                 title: AppLocalizations.of(context).confirmPlanChange,
-                body: AppLocalizations.of(context)
-                    .areYouSureYouWantToChangeYourPlan,
+                body: AppLocalizations.of(
+                  context,
+                ).areYouSureYouWantToChangeYourPlan,
                 firstButtonLabel: AppLocalizations.of(context).yes,
               );
               if (result!.action == ButtonAction.first) {
@@ -629,8 +632,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       _selectedPlanProductID = freeProductID;
       return;
     }
-    _selectedPlanProductID =
-        visibleProductIDs.isNotEmpty ? visibleProductIDs.first : null;
+    _selectedPlanProductID = visibleProductIDs.isNotEmpty
+        ? visibleProductIDs.first
+        : null;
   }
 
   Future<void> _onOnboardingContinueTap() async {
@@ -667,7 +671,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       return;
     }
 
-    final isActive = _hasActiveSubscription &&
+    final isActive =
+        _hasActiveSubscription &&
         _currentSubscription!.productID == selectedPlanProductID;
     if (isActive) {
       return;

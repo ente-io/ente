@@ -68,8 +68,10 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                 ),
               ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -77,16 +79,12 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                       AppLocalizations.of(context).collectPhotos,
                       style: textTheme.bodyBold,
                     ),
-                    const SizedBox(
-                      height: 16,
-                    ),
+                    const SizedBox(height: 16),
                     Text(
                       AppLocalizations.of(context).collectPhotosDescription,
                       style: textTheme.smallMuted,
                     ),
-                    const SizedBox(
-                      height: 34,
-                    ),
+                    const SizedBox(height: 34),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -114,8 +112,9 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
             height: 90,
             width: 90,
             decoration: BoxDecoration(
-              borderRadius:
-                  const BorderRadius.only(bottomLeft: Radius.circular(10)),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(10),
+              ),
               gradient: LinearGradient(
                 colors: [
                   colorTheme.primary700.withValues(alpha: 0.4),
@@ -131,9 +130,7 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
         Positioned(
           bottom: 25,
           left: 20,
-          child: SizedBox(
-            child: Image.asset('assets/create_new_album.png'),
-          ),
+          child: SizedBox(child: Image.asset('assets/create_new_album.png')),
         ),
       ],
     );

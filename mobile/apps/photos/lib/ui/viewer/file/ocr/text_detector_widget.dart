@@ -334,25 +334,30 @@ class _TextDetectorWidgetState extends State<TextDetectorWidget> {
   Future<void> _ensureModelsReady() async {
     if (_modelsReady) return;
 
-    _modelPreparation ??= _ocr.prepareModels().then((status) {
-      _modelsReady = status.isReady;
-    }).catchError((error, _) {
-      final errorStr = error.toString().toLowerCase();
-      _isNetworkError = errorStr.contains('network') ||
-          errorStr.contains('connection') ||
-          errorStr.contains('timeout') ||
-          errorStr.contains('failed to download') ||
-          errorStr.contains('http');
+    _modelPreparation ??= _ocr
+        .prepareModels()
+        .then((status) {
+          _modelsReady = status.isReady;
+        })
+        .catchError((error, _) {
+          final errorStr = error.toString().toLowerCase();
+          _isNetworkError =
+              errorStr.contains('network') ||
+              errorStr.contains('connection') ||
+              errorStr.contains('timeout') ||
+              errorStr.contains('failed to download') ||
+              errorStr.contains('http');
 
-      if (_isNetworkError) {
-        _errorMessage = widget.strings.modelsNetworkRequiredError;
-      } else {
-        _errorMessage = widget.strings.modelsPrepareFailed;
-      }
-      debugPrint('Model preparation error: $error');
-    }).whenComplete(() {
-      _modelPreparation = null;
-    });
+          if (_isNetworkError) {
+            _errorMessage = widget.strings.modelsNetworkRequiredError;
+          } else {
+            _errorMessage = widget.strings.modelsPrepareFailed;
+          }
+          debugPrint('Model preparation error: $error');
+        })
+        .whenComplete(() {
+          _modelPreparation = null;
+        });
 
     await _modelPreparation;
   }
@@ -447,7 +452,8 @@ class _TextDetectorWidgetState extends State<TextDetectorWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final bool showProcessingAnimation = _isProcessing &&
+    final bool showProcessingAnimation =
+        _isProcessing &&
         _detectedTextBlocks == null &&
         _userAttemptedInteraction;
 
@@ -593,13 +599,13 @@ class _TextDetectorWidgetState extends State<TextDetectorWidget> {
     final TextSelectionThemeData baseSelectionTheme = TextSelectionTheme.of(
       context,
     );
-    final TextSelectionThemeData overlaySelectionTheme =
-        baseSelectionTheme.copyWith(
-      selectionColor: _entePrimaryColor.withValues(
-        alpha: _enteSelectionHighlightOpacity,
-      ),
-      selectionHandleColor: _entePrimaryColor,
-    );
+    final TextSelectionThemeData overlaySelectionTheme = baseSelectionTheme
+        .copyWith(
+          selectionColor: _entePrimaryColor.withValues(
+            alpha: _enteSelectionHighlightOpacity,
+          ),
+          selectionHandleColor: _entePrimaryColor,
+        );
 
     final overlayWidget = TextOverlayWidget(
       imageFile: widget.overlayOnly ? null : imageFile,

@@ -215,12 +215,12 @@ class MLIndexingIsolate extends SuperIsolate {
     final List<String> modelPaths = [];
     if (loadFaces) {
       models.addAll([MLModels.faceDetection, MLModels.faceEmbedding]);
-      final faceDetection =
-          await FaceDetectionService.instance.getModelNameAndPath();
+      final faceDetection = await FaceDetectionService.instance
+          .getModelNameAndPath();
       modelNames.add(faceDetection.$1);
       modelPaths.add(faceDetection.$2);
-      final faceEmbedding =
-          await FaceEmbeddingService.instance.getModelNameAndPath();
+      final faceEmbedding = await FaceEmbeddingService.instance
+          .getModelNameAndPath();
       modelNames.add(faceEmbedding.$1);
       modelPaths.add(faceEmbedding.$2);
     }
@@ -234,9 +234,10 @@ class MLIndexingIsolate extends SuperIsolate {
     try {
       final addresses =
           await runInIsolate(IsolateOperation.loadIndexingModels, {
-        "modelNames": modelNames,
-        "modelPaths": modelPaths,
-      }) as List<int>;
+                "modelNames": modelNames,
+                "modelPaths": modelPaths,
+              })
+              as List<int>;
       for (int i = 0; i < models.length; i++) {
         final model = models[i].model;
         final address = addresses[i];
@@ -268,10 +269,12 @@ class MLIndexingIsolate extends SuperIsolate {
         );
         return;
       }
-      final address = await runInIsolate(IsolateOperation.loadModel, {
-        "modelName": modelName,
-        "modelPath": modelPath,
-      }) as int;
+      final address =
+          await runInIsolate(IsolateOperation.loadModel, {
+                "modelName": modelName,
+                "modelPath": modelPath,
+              })
+              as int;
       modelInstance.storeSessionAddress(address);
     });
   }
@@ -336,10 +339,10 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<Map<String, dynamic>> _buildRustRuntimeArgs() async {
-    final faceDetection =
-        await FaceDetectionService.instance.getModelNameAndPath();
-    final faceEmbedding =
-        await FaceEmbeddingService.instance.getModelNameAndPath();
+    final faceDetection = await FaceDetectionService.instance
+        .getModelNameAndPath();
+    final faceEmbedding = await FaceEmbeddingService.instance
+        .getModelNameAndPath();
     final clipImage = await ClipImageEncoder.instance.getModelNameAndPath();
 
     String petFaceDetectionPath = "";

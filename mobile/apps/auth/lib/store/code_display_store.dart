@@ -112,7 +112,8 @@ class CodeDisplayStore {
     AccountMode? accountMode,
     List<Code>? allCodes,
   }) async {
-    final codes = allCodes ??
+    final codes =
+        allCodes ??
         await _codeStore.getAllCodes(
           accountMode: accountMode,
           sortCodes: false,
@@ -147,9 +148,7 @@ class CodeDisplayStore {
           tags.remove(tag);
           tasks.add(
             _codeStore.addCode(
-              code.copyWith(
-                display: code.display.copyWith(tags: tags),
-              ),
+              code.copyWith(display: code.display.copyWith(tags: tags)),
               shouldSync: false,
             ),
           );
@@ -197,9 +196,7 @@ class CodeDisplayStore {
       tags.add(updatedTag);
       tasks.add(
         CodeStore.instance.addCode(
-          code.copyWith(
-            display: code.display.copyWith(tags: tags),
-          ),
+          code.copyWith(display: code.display.copyWith(tags: tags)),
           shouldSync: false,
         ),
       );

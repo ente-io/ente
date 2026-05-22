@@ -81,11 +81,7 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
           leadingIcon: Icons.adaptive.share,
           menuItemColor: enteColorScheme.fillFaint,
           onTap: () async {
-            await shareAlbumLink(
-              context,
-              url,
-              effectiveKey,
-            );
+            await shareAlbumLink(context, url, effectiveKey);
           },
           isTopBorderRadiusRemoved: true,
           isBottomBorderRadiusRemoved: true,

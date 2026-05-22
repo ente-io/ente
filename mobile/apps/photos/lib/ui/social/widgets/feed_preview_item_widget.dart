@@ -53,11 +53,7 @@ class FeedPreviewItemWidget extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           // Trailing chevron
-          Icon(
-            Icons.chevron_right,
-            color: colorScheme.strokeMuted,
-            size: 24,
-          ),
+          Icon(Icons.chevron_right, color: colorScheme.strokeMuted, size: 24),
         ],
       ),
     );
@@ -88,8 +84,9 @@ class _PreviewAvatarStack extends StatelessWidget {
 
     // Calculate total width needed
     final totalWidth = hasMultipleActors ? _avatarSize + _overlap : _avatarSize;
-    final totalHeight =
-        hasMultipleActors ? _avatarSize + _overlap : _avatarSize;
+    final totalHeight = hasMultipleActors
+        ? _avatarSize + _overlap
+        : _avatarSize;
 
     return SizedBox(
       width: totalWidth,
@@ -133,10 +130,7 @@ class _PreviewAvatarStack extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: showBorder
-            ? Border.all(
-                color: colorScheme.backgroundColour,
-                width: 1.5,
-              )
+            ? Border.all(color: colorScheme.backgroundColour, width: 1.5)
             : null,
       ),
       child: SizedBox(
@@ -165,15 +159,13 @@ class _PreviewAvatarStack extends StatelessWidget {
       if (userID <= 0 && anonID != null) {
         final displayName = anonDisplayNames[anonID] ?? anonID;
         users.add(
-          User(
-            id: userID,
-            email: "$anonID@unknown.com",
-            name: displayName,
-          ),
+          User(id: userID, email: "$anonID@unknown.com", name: displayName),
         );
       } else {
-        final user = CollectionsService.instance
-            .getFileOwner(userID, feedItem.collectionID);
+        final user = CollectionsService.instance.getFileOwner(
+          userID,
+          feedItem.collectionID,
+        );
         users.add(user);
       }
     }
@@ -187,10 +179,7 @@ class _FeedTypeIconBadge extends StatelessWidget {
   final double size;
   final EnteColorScheme colorScheme;
 
-  const _FeedTypeIconBadge({
-    required this.size,
-    required this.colorScheme,
-  });
+  const _FeedTypeIconBadge({required this.size, required this.colorScheme});
 
   @override
   Widget build(BuildContext context) {
@@ -200,10 +189,7 @@ class _FeedTypeIconBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.backgroundElevated,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: colorScheme.strokeMuted,
-          width: 1,
-        ),
+        border: Border.all(color: colorScheme.strokeMuted, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -405,14 +391,12 @@ class _PreviewTextContent extends StatelessWidget {
 
     if (userID <= 0 && anonID != null) {
       final displayName = anonDisplayNames[anonID] ?? anonID;
-      return User(
-        id: userID,
-        email: "$anonID@unknown.com",
-        name: displayName,
-      );
+      return User(id: userID, email: "$anonID@unknown.com", name: displayName);
     }
 
-    return CollectionsService.instance
-        .getFileOwner(userID, feedItem.collectionID);
+    return CollectionsService.instance.getFileOwner(
+      userID,
+      feedItem.collectionID,
+    );
   }
 }

@@ -242,9 +242,9 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     if (setting.onTap != null) {
       setting.onTap!();
     } else if (setting.page != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => setting.page!),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => setting.page!));
     }
   }
 
@@ -354,9 +354,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
         children: [
           Text(
             l10n.suggestions,
-            style: textTheme.small.copyWith(
-              color: colorScheme.textBase,
-            ),
+            style: textTheme.small.copyWith(color: colorScheme.textBase),
           ),
           const SizedBox(height: 13),
           Wrap(
@@ -384,9 +382,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       return Center(
         child: Text(
           context.l10n.noResultsFound,
-          style: textTheme.small.copyWith(
-            color: colorScheme.textMuted,
-          ),
+          style: textTheme.small.copyWith(color: colorScheme.textMuted),
         ),
       );
     }
@@ -430,10 +426,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: colorScheme.textMuted,
-                ),
+                Icon(Icons.chevron_right, color: colorScheme.textMuted),
               ],
             ),
           ),

@@ -88,22 +88,18 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   void setupSubscription() {
     _memoriesChangedSubscription = Bus.instance
         .on<MemoriesChangedEvent>()
-        .listen(
-          (event) async {
-            await MemoryHomeWidgetService.instance.memoryChanged();
-          },
-        );
+        .listen((event) async {
+          await MemoryHomeWidgetService.instance.memoryChanged();
+        });
     _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 1500));
-    _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
-      (event) async {
-        _changeCallbackDebouncer.run(
-          () async {
-            unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged());
-            unawaited(smartAlbumsService.syncSmartAlbums());
-          },
-        );
-      },
-    );
+    _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen((
+      event,
+    ) async {
+      _changeCallbackDebouncer.run(() async {
+        unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged());
+        unawaited(smartAlbumsService.syncSmartAlbums());
+      });
+    });
   }
 
   @override
@@ -200,9 +196,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       future: _initialAndroidHome,
       builder: (context, snapshot) {
         return snapshot.data ??
-            ColoredBox(
-              color: Theme.of(context).scaffoldBackgroundColor,
-            );
+            ColoredBox(color: Theme.of(context).scaffoldBackgroundColor);
       },
     );
   }

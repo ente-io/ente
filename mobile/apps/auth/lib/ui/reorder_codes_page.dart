@@ -72,15 +72,17 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
           buildDefaultDragHandles: false,
           proxyDecorator:
               (Widget child, int index, Animation<double> animation) {
-            return AnimatedBuilder(
-              animation: animation,
-              builder: (BuildContext context, _) {
-                final animValue = Curves.easeInOut.transform(animation.value);
-                final scale = lerpDouble(1, 1.05, animValue)!;
-                return Transform.scale(scale: scale, child: child);
+                return AnimatedBuilder(
+                  animation: animation,
+                  builder: (BuildContext context, _) {
+                    final animValue = Curves.easeInOut.transform(
+                      animation.value,
+                    );
+                    final scale = lerpDouble(1, 1.05, animValue)!;
+                    return Transform.scale(scale: scale, child: child);
+                  },
+                );
               },
-            );
-          },
           children: [
             for (final code in widget.codes)
               ReorderableDragStartListener(

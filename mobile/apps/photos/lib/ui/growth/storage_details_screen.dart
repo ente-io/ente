@@ -25,8 +25,9 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final cardColor =
-        isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
+    final cardColor = isDarkMode
+        ? const Color(0xFF212121)
+        : const Color(0xFFFFFFFF);
 
     return Scaffold(
       backgroundColor: colorScheme.backgroundColour,
@@ -49,9 +50,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                         size: 24,
                       ),
                     ),
-                    const Expanded(
-                      child: Center(child: EnteLoadingWidget()),
-                    ),
+                    const Expanded(child: Center(child: EnteLoadingWidget())),
                   ],
                 ),
               );
@@ -118,8 +117,9 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                             Expanded(
                               child: _StatCard(
                                 value: data.refCount.toString(),
-                                label:
-                                    AppLocalizations.of(context).usedYourCode,
+                                label: AppLocalizations.of(
+                                  context,
+                                ).usedYourCode,
                                 cardColor: cardColor,
                               ),
                             ),
@@ -141,8 +141,9 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                               Expanded(
                                 child: _StatCard(
                                   value: "1",
-                                  label:
-                                      AppLocalizations.of(context).claimedByYou,
+                                  label: AppLocalizations.of(
+                                    context,
+                                  ).claimedByYou,
                                   cardColor: cardColor,
                                 ),
                               ),
@@ -220,15 +221,9 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            value,
-            style: textTheme.h3Bold.copyWith(color: greenColor),
-          ),
+          Text(value, style: textTheme.h3Bold.copyWith(color: greenColor)),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: textTheme.smallMuted,
-          ),
+          Text(label, style: textTheme.smallMuted),
         ],
       ),
     );

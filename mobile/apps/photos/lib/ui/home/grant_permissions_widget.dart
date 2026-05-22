@@ -131,9 +131,9 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
             context.l10n.readyToBackupSubtitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.contentLight,
-                ),
+              fontWeight: FontWeight.w500,
+              color: colorScheme.contentLight,
+            ),
           ),
         ),
       ],
@@ -405,15 +405,15 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           'terms': StyledTextActionTag(
             (String? text, Map<String?, String?> attrs) =>
                 Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return WebPage(
-                    AppLocalizations.of(context).termsOfServicesTitle,
-                    "https://ente.com/terms",
-                  );
-                },
-              ),
-            ),
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return WebPage(
+                        AppLocalizations.of(context).termsOfServicesTitle,
+                        "https://ente.com/terms",
+                      );
+                    },
+                  ),
+                ),
             style: textTheme.bodyMuted.copyWith(
               decoration: TextDecoration.underline,
               decorationColor: textTheme.bodyMuted.color,
@@ -422,15 +422,15 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           'policy': StyledTextActionTag(
             (String? text, Map<String?, String?> attrs) =>
                 Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return WebPage(
-                    AppLocalizations.of(context).privacyPolicyTitle,
-                    "https://ente.com/privacy",
-                  );
-                },
-              ),
-            ),
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return WebPage(
+                        AppLocalizations.of(context).privacyPolicyTitle,
+                        "https://ente.com/privacy",
+                      );
+                    },
+                  ),
+                ),
             style: textTheme.bodyMuted.copyWith(
               decoration: TextDecoration.underline,
               decorationColor: textTheme.bodyMuted.color,

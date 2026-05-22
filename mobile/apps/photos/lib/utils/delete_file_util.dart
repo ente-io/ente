@@ -69,8 +69,7 @@ Future<void> deleteFilesFromEverywhere(
   try {
     deletedIDs = (await PhotoManager.editor.deleteWithIds(
       localAssetIDs,
-    ))
-        .toSet();
+    )).toSet();
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
@@ -103,8 +102,9 @@ Future<void> deleteFilesFromEverywhere(
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
     try {
-      final fileIDs =
-          uploadedFilesToBeTrashed.map((item) => item.fileID).toList();
+      final fileIDs = uploadedFilesToBeTrashed
+          .map((item) => item.fileID)
+          .toList();
       await trashSyncService.trashFilesOnServer(uploadedFilesToBeTrashed);
       await FilesDB.instance.deleteMultipleUploadedFiles(fileIDs);
     } catch (e) {
@@ -233,8 +233,7 @@ Future<List<EnteFile>> deleteFilesOnDeviceOnly(
   try {
     deletedIDs = (await PhotoManager.editor.deleteWithIds(
       localAssetIDs,
-    ))
-        .toSet();
+    )).toSet();
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
@@ -775,8 +774,9 @@ Future<void> showDeleteSheet(
     return;
   }
   if (isLocalGalleryMode) {
-    final localGalleryDeletableFiles =
-        deletableFiles.where((file) => file.localID != null).toList();
+    final localGalleryDeletableFiles = deletableFiles
+        .where((file) => file.localID != null)
+        .toList();
     if (localGalleryDeletableFiles.isEmpty) {
       showShortToast(
         context,

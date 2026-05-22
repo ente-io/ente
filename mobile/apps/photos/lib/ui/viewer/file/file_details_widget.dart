@@ -42,11 +42,7 @@ class FileDetailsWidget extends StatefulWidget {
   final EnteFile file;
   final ScrollController? scrollController;
 
-  const FileDetailsWidget(
-    this.file, {
-    this.scrollController,
-    super.key,
-  });
+  const FileDetailsWidget(this.file, {this.scrollController, super.key});
 
   @override
   State<FileDetailsWidget> createState() => _FileDetailsWidgetState();
@@ -75,15 +71,17 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   final ValueNotifier<Map<String, IfdTag>?> _exifNotifier = ValueNotifier(null);
   final ValueNotifier<bool> hasLocationData = ValueNotifier(false);
   final Logger _logger = Logger("_FileDetailsWidgetState");
-  final ValueNotifier<FFProbeProps?> _videoMetadataNotifier =
-      ValueNotifier(null);
+  final ValueNotifier<FFProbeProps?> _videoMetadataNotifier = ValueNotifier(
+    null,
+  );
 
   @override
   void initState() {
     debugPrint('file_details_sheet initState');
     _currentUserID = Configuration.instance.getUserIDV2();
     hasLocationData.value = widget.file.hasLocation;
-    _isImage = widget.file.fileType == FileType.image ||
+    _isImage =
+        widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
 
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
@@ -92,15 +90,17 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
 
     _exifNotifier.addListener(() {
       if (_exifNotifier.value != null && !widget.file.hasLocation) {
-        _updateLocationFromExif(locationFromExif(_exifNotifier.value!))
-            .ignore();
+        _updateLocationFromExif(
+          locationFromExif(_exifNotifier.value!),
+        ).ignore();
       }
     });
     _videoMetadataNotifier.addListener(() {
       if (_videoMetadataNotifier.value?.location != null &&
           !widget.file.hasLocation) {
-        _updateLocationFromExif(_videoMetadataNotifier.value?.location)
-            .ignore();
+        _updateLocationFromExif(
+          _videoMetadataNotifier.value?.location,
+        ).ignore();
       }
     });
 
@@ -109,7 +109,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         if (_exifNotifier.value != null) {
           _generateExifForDetails(_exifNotifier.value!);
         }
-        showExifListTile = _exifData["focalLength"] != null ||
+        showExifListTile =
+            _exifData["focalLength"] != null ||
             _exifData["fNumber"] != null ||
             _exifData["takenOnDevice"] != null ||
             _exifData["exposureTime"] != null ||
@@ -168,24 +169,18 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             ),
     );
     fileDetailsTiles.addAll([
-      CreationTimeItem(
-        file,
-        _currentUserID,
-      ),
+      CreationTimeItem(file, _currentUserID),
       const FileDetailsDivider(),
       ValueListenableBuilder(
         valueListenable: _exifNotifier,
-        builder: (context, _, __) => FilePropertiesItemWidget(
-          file,
-          _isImage,
-          _exifData,
-          _currentUserID,
-        ),
+        builder: (context, _, __) =>
+            FilePropertiesItemWidget(file, _isImage, _exifData, _currentUserID),
       ),
       const FileDetailsDivider(),
       if (widget.file.uploadedFileID != null &&
-          (fileDataService.previewIds
-              .containsKey(widget.file.uploadedFileID))) ...[
+          (fileDataService.previewIds.containsKey(
+            widget.file.uploadedFileID,
+          ))) ...[
         ValueListenableBuilder(
           valueListenable: _exifNotifier,
           builder: (context, _, __) => PreviewPropertiesItemWidget(
@@ -221,9 +216,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           return value
               ? Column(
                   children: [
-                    LocationTagsWidget(
-                      widget.file,
-                    ),
+                    LocationTagsWidget(widget.file),
                     const FileDetailsDivider(),
                   ],
                 )
@@ -315,12 +308,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
 
     if (file.uploadedFileID != null && file.updationTime != null) {
-      fileDetailsTiles.addAll(
-        [
-          BackedUpTimeItemWidget(file),
-          const FileDetailsDivider(),
-        ],
-      );
+      fileDetailsTiles.addAll([
+        BackedUpTimeItemWidget(file),
+        const FileDetailsDivider(),
+      ]);
     }
     if (!file.isTrash) {
       fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
@@ -352,12 +343,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ),
               SliverToBoxAdapter(child: AddedByWidget(widget.file)),
               SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return fileDetailsTiles[index];
-                  },
-                  childCount: fileDetailsTiles.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return fileDetailsTiles[index];
+                }, childCount: fileDetailsTiles.length),
               ),
             ],
           ),
@@ -382,12 +370,13 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       if (locationDataFromExif?.latitude != null &&
           locationDataFromExif?.longitude != null) {
         widget.file.location = locationDataFromExif;
-        await FileMagicService.instance.updatePublicMagicMetadata([
-          widget.file,
-        ], {
-          latKey: locationDataFromExif!.latitude,
-          longKey: locationDataFromExif.longitude,
-        });
+        await FileMagicService.instance.updatePublicMagicMetadata(
+          [widget.file],
+          {
+            latKey: locationDataFromExif!.latitude,
+            longKey: locationDataFromExif.longitude,
+          },
+        );
         hasLocationData.value = true;
       }
     } catch (e, s) {
@@ -399,34 +388,27 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     if (exif["EXIF FocalLength"] != null) {
       _exifData["focalLength"] =
           (exif["EXIF FocalLength"]!.values.toList()[0] as Ratio).numerator /
-              (exif["EXIF FocalLength"]!.values.toList()[0] as Ratio)
-                  .denominator;
+          (exif["EXIF FocalLength"]!.values.toList()[0] as Ratio).denominator;
     }
 
     if (exif["EXIF FNumber"] != null) {
       _exifData["fNumber"] =
           (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).numerator /
-              (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).denominator;
+          (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).denominator;
     }
-    final imageWidth = _firstPositiveDimensionTag(
-      exif,
-      const [
-        "EXIF ExifImageWidth",
-        "Image ImageWidth",
-      ],
-    );
-    final imageLength = _firstPositiveDimensionTag(
-      exif,
-      const [
-        "EXIF ExifImageLength",
-        "Image ImageLength",
-      ],
-    );
+    final imageWidth = _firstPositiveDimensionTag(exif, const [
+      "EXIF ExifImageWidth",
+      "Image ImageWidth",
+    ]);
+    final imageLength = _firstPositiveDimensionTag(exif, const [
+      "EXIF ExifImageLength",
+      "Image ImageLength",
+    ]);
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
       final double megaPixels =
           (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
-              1000000;
+          1000000;
       final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
       _exifData['megaPixels'] = roundedMegaPixels..toStringAsFixed(1);
     } else {
@@ -438,8 +420,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
 
     if (exif["EXIF ExposureTime"] != null) {
-      _exifData["exposureTime"] =
-          _formatExposureTime(exif["EXIF ExposureTime"]!);
+      _exifData["exposureTime"] = _formatExposureTime(
+        exif["EXIF ExposureTime"]!,
+      );
     }
     if (exif["EXIF ISOSpeedRatings"] != null) {
       _exifData['ISO'] = exif["EXIF ISOSpeedRatings"].toString();

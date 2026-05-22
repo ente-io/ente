@@ -189,7 +189,8 @@ class SuperLogging {
     }
 
     final enable = appConfig.enableInDebugMode || kReleaseMode;
-    sentryIsEnabled = enable &&
+    sentryIsEnabled =
+        enable &&
         appConfig.sentryDsn != null &&
         !isFDroidClient &&
         shouldReportCrashes();
@@ -252,8 +253,10 @@ class SuperLogging {
           options.dsn = appConfig!.sentryDsn;
           options.httpClient = http.Client();
           if (appConfig.tunnel != null) {
-            options.transport =
-                TunneledTransport(Uri.parse(appConfig.tunnel!), options);
+            options.transport = TunneledTransport(
+              Uri.parse(appConfig.tunnel!),
+              options,
+            );
           }
           // Filter out errors that should not be sent to Sentry
           options.beforeSend = (SentryEvent event, Hint hint) async {
@@ -285,33 +288,26 @@ class SuperLogging {
     final previousFlutterError = FlutterError.onError;
     FlutterError.onError = (details) {
       previousFlutterError?.call(details);
-      $.severe(
-        "Unhandled Flutter error",
-        details.exception,
-        details.stack,
-      );
+      $.severe("Unhandled Flutter error", details.exception, details.stack);
     };
-    WidgetsBinding.instance.platformDispatcher.onError = (
-      Object error,
-      StackTrace stack,
-    ) {
-      $.severe("Unhandled platform error", error, stack);
-      return false;
-    };
+    WidgetsBinding.instance.platformDispatcher.onError =
+        (Object error, StackTrace stack) {
+          $.severe("Unhandled platform error", error, stack);
+          return false;
+        };
 
-    await runZonedGuarded(
-      () async => body(),
-      (Object error, StackTrace stack) {
-        $.severe("Unhandled zone error", error, stack);
-      },
-    );
+    await runZonedGuarded(() async => body(), (Object error, StackTrace stack) {
+      $.severe("Unhandled zone error", error, stack);
+    });
   }
 
   static Future<void> setUserID(String userID) async {
     if (config.sentryDsn != null) {
       $.finest("setting sentry user ID to: $userID");
       Sentry.configureScope(
-        (scope) => scope.setUser(SentryUser(id: userID)).onError(
+        (scope) => scope
+            .setUser(SentryUser(id: userID))
+            .onError(
               (e, s) => $.warning("failed to configure scope user", e, s),
             ),
       );
@@ -322,7 +318,8 @@ class SuperLogging {
     if (error is DioException) {
       return true;
     }
-    final bool result = error is LocallyHandledError ||
+    final bool result =
+        error is LocallyHandledError ||
         error is TaskQueueTimeoutException ||
         error is TaskQueueOverflowException ||
         error is TaskQueueCancelledException;
@@ -356,9 +353,7 @@ class SuperLogging {
           error,
           stackTrace: stack,
           withScope: (scope) {
-            scope.setContexts('log_details', {
-              'message': rec.message,
-            });
+            scope.setContexts('log_details', {'message': rec.message});
             scope.setTag('logger', rec.loggerName);
             scope.setTag('level', rec.level.name);
             scope.setTag('execution_context', executionContext);
@@ -444,8 +439,11 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && error != null) {
-      _sendErrorToSentry(error, rec?.stackTrace ?? stackTrace, rec: rec)
-          .ignore();
+      _sendErrorToSentry(
+        error,
+        rec?.stackTrace ?? stackTrace,
+        rec: rec,
+      ).ignore();
     }
   }
 
@@ -488,9 +486,7 @@ class SuperLogging {
         if (_shouldSkipSentry(error)) {
           continue;
         }
-        await Sentry.captureException(
-          error,
-        );
+        await Sentry.captureException(error);
       } catch (e) {
         $.fine(
           "sentry upload failed; will retry after ${config.sentryRetryDelay}",
@@ -561,9 +557,7 @@ class SuperLogging {
 
       for (final file in toDelete) {
         try {
-          $.fine(
-            "deleting log file ${file.path}",
-          );
+          $.fine("deleting log file ${file.path}");
           await file.delete();
         } catch (_) {}
       }
@@ -596,9 +590,7 @@ class SuperLogging {
   static void showLogViewer(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const LogViewerPage(),
-      ),
+      MaterialPageRoute(builder: (context) => const LogViewerPage()),
     );
   }
 }

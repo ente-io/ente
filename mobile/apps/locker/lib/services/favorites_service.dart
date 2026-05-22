@@ -19,7 +19,7 @@ class FavoritesService {
   final Set<int> _cachedFavUploadedIDs = {};
   final Map<String, int> _cachedFavFileHashes = {};
   late StreamSubscription<CollectionsUpdatedEvent>
-      _collectionUpdatesSubscription;
+  _collectionUpdatesSubscription;
 
   FavoritesService._privateConstructor();
 
@@ -31,11 +31,12 @@ class FavoritesService {
     _config = Configuration.instance;
     _collectionService = CollectionService.instance;
     _db = LockerDB.instance;
-    _collectionUpdatesSubscription =
-        Bus.instance.on<CollectionsUpdatedEvent>().listen((event) {
-      // When collections are updated, refresh our cache
-      _warmUpCache();
-    });
+    _collectionUpdatesSubscription = Bus.instance
+        .on<CollectionsUpdatedEvent>()
+        .listen((event) {
+          // When collections are updated, refresh our cache
+          _warmUpCache();
+        });
     await _warmUpCache();
   }
 
@@ -141,8 +142,9 @@ class FavoritesService {
       _logger.severe("Cannot favorite file without uploadedFileID");
       throw AssertionError("Can only favorite uploaded items");
     } else {
-      final collection =
-          await _collectionService.getCollectionByID(collectionID);
+      final collection = await _collectionService.getCollectionByID(
+        collectionID,
+      );
 
       await _collectionService.addToCollection(collection!, files[0]);
     }
@@ -166,8 +168,9 @@ class FavoritesService {
     }
     final collectionID = await _getOrCreateFavoriteCollectionID();
     if (favFlag) {
-      final collection =
-          await _collectionService.getCollectionByID(collectionID);
+      final collection = await _collectionService.getCollectionByID(
+        collectionID,
+      );
       for (final file in files) {
         await _collectionService.addToCollection(collection!, file);
       }
@@ -175,8 +178,8 @@ class FavoritesService {
       final Collection? favCollection = await getFavoritesCollection();
       for (final file in files) {
         // Get current collections for file
-        final currentCollections =
-            await _collectionService.getCollectionsForFile(file);
+        final currentCollections = await _collectionService
+            .getCollectionsForFile(file);
 
         // If file is in multiple collections, move it to the first non-favorite one
         // Otherwise, move to uncategorized
@@ -189,23 +192,16 @@ class FavoritesService {
         }
 
         // If no other collection found, move to uncategorized
-        targetCollection ??=
-            await _collectionService.getOrCreateUncategorizedCollection();
+        targetCollection ??= await _collectionService
+            .getOrCreateUncategorizedCollection();
 
-        await _collectionService.move(
-          [file],
-          favCollection!,
-          targetCollection,
-        );
+        await _collectionService.move([file], favCollection!, targetCollection);
       }
     }
     _updateFavoriteFilesCache(files, favFlag: favFlag);
   }
 
-  Future<void> removeFromFavorites(
-    BuildContext context,
-    EnteFile file,
-  ) async {
+  Future<void> removeFromFavorites(BuildContext context, EnteFile file) async {
     final inUploadID = file.uploadedFileID;
     if (inUploadID == null) {
       // Do nothing, ignore
@@ -235,8 +231,9 @@ class FavoritesService {
       }
 
       // Get current collections for file
-      final currentCollections =
-          await _collectionService.getCollectionsForFile(file);
+      final currentCollections = await _collectionService.getCollectionsForFile(
+        file,
+      );
 
       // If file is in multiple collections, move it to the first non-favorite one
       // Otherwise, move to uncategorized
@@ -249,14 +246,10 @@ class FavoritesService {
       }
 
       // If no other collection found, move to uncategorized
-      targetCollection ??=
-          await _collectionService.getOrCreateUncategorizedCollection();
+      targetCollection ??= await _collectionService
+          .getOrCreateUncategorizedCollection();
 
-      await _collectionService.move(
-        [file],
-        favCollection,
-        targetCollection,
-      );
+      await _collectionService.move([file], favCollection, targetCollection);
     }
 
     _updateFavoriteFilesCache([file], favFlag: false);
@@ -289,8 +282,8 @@ class FavoritesService {
       return _cachedFavoritesCollectionID!;
     }
 
-    final collection =
-        await _collectionService.getOrCreateImportantCollection();
+    final collection = await _collectionService
+        .getOrCreateImportantCollection();
     _cachedFavoritesCollectionID = collection.id;
 
     return collection.id;

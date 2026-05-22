@@ -67,8 +67,9 @@ class _PasskeyPageState extends State<PasskeyPage> {
   Future<void> checkStatus() async {
     late dynamic response;
     try {
-      response = await UserService.instance
-          .getTokenForPasskeySession(widget.sessionID);
+      response = await UserService.instance.getTokenForPasskeySession(
+        widget.sessionID,
+      );
     } on PassKeySessionNotVerifiedError {
       showToast(context, context.l10n.passKeyPendingVerification);
       return;
@@ -201,8 +202,10 @@ class _PasskeyPageState extends State<PasskeyPage> {
                   await checkStatus();
                 } catch (e) {
                   debugPrint('failed to check status $e');
-                  showGenericErrorBottomSheet(context: context, error: e)
-                      .ignore();
+                  showGenericErrorBottomSheet(
+                    context: context,
+                    error: e,
+                  ).ignore();
                 }
               },
             ),
@@ -216,9 +219,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
                   // ignore: unawaited_futures
                   routeToPage(
                     context,
-                    TwoFactorAuthenticationPage(
-                      widget.totp2FASessionID,
-                    ),
+                    TwoFactorAuthenticationPage(widget.totp2FASessionID),
                   );
                 },
               ),

@@ -21,10 +21,7 @@ import "package:locker/ui/sharing/manage_album_participant.dart";
 class AlbumParticipantsPage extends StatefulWidget {
   final Collection collection;
 
-  const AlbumParticipantsPage(
-    this.collection, {
-    super.key,
-  });
+  const AlbumParticipantsPage(this.collection, {super.key});
 
   @override
   State<AlbumParticipantsPage> createState() => _AlbumParticipantsPageState();
@@ -81,19 +78,20 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
         if (owner.id == currentUserID && owner.email == "") {
           owner.email = Configuration.instance.getEmail()!;
         }
-        final splitResult =
-            widget.collection.getSharees().splitMatch((x) => x.isViewer);
+        final splitResult = widget.collection.getSharees().splitMatch(
+          (x) => x.isViewer,
+        );
         final List<User> viewers = splitResult.matched;
         viewers.sort(
           (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
-                b.resolvedDisplayName.toLowerCase(),
-              ),
+            b.resolvedDisplayName.toLowerCase(),
+          ),
         );
         final List<User> collaborators = splitResult.unmatched;
         collaborators.sort(
           (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
-                b.resolvedDisplayName.toLowerCase(),
-              ),
+            b.resolvedDisplayName.toLowerCase(),
+          ),
         );
 
         return Scaffold(
@@ -104,215 +102,211 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                 flexibleSpaceTitle: TitleBarTitleWidget(
                   title: widget.collection.displayName,
                 ),
-                flexibleSpaceCaption:
-                    context.l10n.albumParticipantsCount(participants),
+                flexibleSpaceCaption: context.l10n.albumParticipantsCount(
+                  participants,
+                ),
               ),
               SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return Padding(
-                      padding:
-                          const EdgeInsets.only(top: 20, left: 16, right: 16),
-                      child: Column(
-                        children: [
-                          Column(
-                            children: [
-                              MenuSectionTitle(
-                                title: context.l10n.albumOwner,
-                                iconData: Icons.admin_panel_settings_outlined,
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                      top: 20,
+                      left: 16,
+                      right: 16,
+                    ),
+                    child: Column(
+                      children: [
+                        Column(
+                          children: [
+                            MenuSectionTitle(
+                              title: context.l10n.albumOwner,
+                              iconData: Icons.admin_panel_settings_outlined,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: isOwner
+                                    ? context.l10n.you
+                                    : _resolvedNameOrEmail(
+                                        widget.collection.owner,
+                                      ),
+                                makeTextBold: isOwner,
                               ),
-                              MenuItemWidget(
-                                captionedTextWidget: CaptionedTextWidget(
-                                  title: isOwner
-                                      ? context.l10n.you
-                                      : _resolvedNameOrEmail(
-                                          widget.collection.owner,
-                                        ),
-                                  makeTextBold: isOwner,
-                                ),
-                                leadingIconWidget: UserAvatarWidget(
-                                  owner,
-                                  currentUserID: currentUserID,
-                                  config: Configuration.instance,
-                                ),
-                                leadingIconSize: 24,
-                                menuItemColor: colorScheme.fillFaint,
-                                singleBorderRadius: 8,
-                                isGestureDetectorDisabled: true,
+                              leadingIconWidget: UserAvatarWidget(
+                                owner,
+                                currentUserID: currentUserID,
+                                config: Configuration.instance,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  childCount: 1,
-                ),
+                              leadingIconSize: 24,
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              isGestureDetectorDisabled: true,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }, childCount: 1),
               ),
               SliverPadding(
                 padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index == 0 && (isOwner || collaborators.isNotEmpty)) {
-                        return MenuSectionTitle(
-                          title: context.l10n.collaborator,
-                          iconData: Icons.edit_outlined,
-                        );
-                      } else if (index > 0 && index <= collaborators.length) {
-                        final listIndex = index - 1;
-                        final currentUser = collaborators[listIndex];
-                        final isSameAsLoggedInUser =
-                            currentUserID == currentUser.id;
-                        final isLastItem =
-                            !isOwner && index == collaborators.length;
-                        return Column(
-                          children: [
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: isSameAsLoggedInUser
-                                    ? context.l10n.you
-                                    : _resolvedNameOrEmail(currentUser),
-                                makeTextBold: isSameAsLoggedInUser,
-                              ),
-                              leadingIconSize: 24.0,
-                              leadingIconWidget: UserAvatarWidget(
-                                currentUser,
-                                type: AvatarType.mini,
-                                currentUserID: currentUserID,
-                                config: Configuration.instance,
-                              ),
-                              menuItemColor:
-                                  getEnteColorScheme(context).fillFaint,
-                              trailingIcon:
-                                  isOwner ? Icons.chevron_right : null,
-                              trailingIconIsMuted: true,
-                              onTap: isOwner
-                                  ? () async {
-                                      if (isOwner) {
-                                        // ignore: unawaited_futures
-                                        _navigateToManageUser(currentUser);
-                                      }
-                                    }
-                                  : null,
-                              isTopBorderRadiusRemoved: listIndex > 0,
-                              isBottomBorderRadiusRemoved: !isLastItem,
-                              singleBorderRadius: 8,
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    if (index == 0 && (isOwner || collaborators.isNotEmpty)) {
+                      return MenuSectionTitle(
+                        title: context.l10n.collaborator,
+                        iconData: Icons.edit_outlined,
+                      );
+                    } else if (index > 0 && index <= collaborators.length) {
+                      final listIndex = index - 1;
+                      final currentUser = collaborators[listIndex];
+                      final isSameAsLoggedInUser =
+                          currentUserID == currentUser.id;
+                      final isLastItem =
+                          !isOwner && index == collaborators.length;
+                      return Column(
+                        children: [
+                          MenuItemWidget(
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: isSameAsLoggedInUser
+                                  ? context.l10n.you
+                                  : _resolvedNameOrEmail(currentUser),
+                              makeTextBold: isSameAsLoggedInUser,
                             ),
-                            isLastItem
-                                ? const SizedBox.shrink()
-                                : DividerWidget(
-                                    dividerType: DividerType.menu,
-                                    bgColor:
-                                        getEnteColorScheme(context).fillFaint,
-                                  ),
-                          ],
-                        );
-                      } else if (index == (1 + collaborators.length) &&
-                          isOwner) {
-                        return MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: collaborators.isNotEmpty
-                                ? context.l10n.addMore
-                                : context.l10n.addCollaborator,
-                            makeTextBold: true,
+                            leadingIconSize: 24.0,
+                            leadingIconWidget: UserAvatarWidget(
+                              currentUser,
+                              type: AvatarType.mini,
+                              currentUserID: currentUserID,
+                              config: Configuration.instance,
+                            ),
+                            menuItemColor: getEnteColorScheme(
+                              context,
+                            ).fillFaint,
+                            trailingIcon: isOwner ? Icons.chevron_right : null,
+                            trailingIconIsMuted: true,
+                            onTap: isOwner
+                                ? () async {
+                                    if (isOwner) {
+                                      // ignore: unawaited_futures
+                                      _navigateToManageUser(currentUser);
+                                    }
+                                  }
+                                : null,
+                            isTopBorderRadiusRemoved: listIndex > 0,
+                            isBottomBorderRadiusRemoved: !isLastItem,
+                            singleBorderRadius: 8,
                           ),
-                          leadingIcon: Icons.add_outlined,
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
-                          onTap: () async {
-                            // ignore: unawaited_futures
-                            _navigateToAddUser(false);
-                          },
-                          isTopBorderRadiusRemoved: collaborators.isNotEmpty,
-                          singleBorderRadius: 8,
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                    childCount: 1 + collaborators.length + 1,
-                  ),
+                          isLastItem
+                              ? const SizedBox.shrink()
+                              : DividerWidget(
+                                  dividerType: DividerType.menu,
+                                  bgColor: getEnteColorScheme(
+                                    context,
+                                  ).fillFaint,
+                                ),
+                        ],
+                      );
+                    } else if (index == (1 + collaborators.length) && isOwner) {
+                      return MenuItemWidget(
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: collaborators.isNotEmpty
+                              ? context.l10n.addMore
+                              : context.l10n.addCollaborator,
+                          makeTextBold: true,
+                        ),
+                        leadingIcon: Icons.add_outlined,
+                        menuItemColor: getEnteColorScheme(context).fillFaint,
+                        onTap: () async {
+                          // ignore: unawaited_futures
+                          _navigateToAddUser(false);
+                        },
+                        isTopBorderRadiusRemoved: collaborators.isNotEmpty,
+                        singleBorderRadius: 8,
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }, childCount: 1 + collaborators.length + 1),
                 ),
               ),
               SliverPadding(
                 padding: const EdgeInsets.only(top: 24, left: 16, right: 16),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index == 0 && (isOwner || viewers.isNotEmpty)) {
-                        return MenuSectionTitle(
-                          title: context.l10n.viewer,
-                          iconData: Icons.photo_outlined,
-                        );
-                      } else if (index > 0 && index <= viewers.length) {
-                        final listIndex = index - 1;
-                        final currentUser = viewers[listIndex];
-                        final isSameAsLoggedInUser =
-                            currentUserID == currentUser.id;
-                        final isLastItem = !isOwner && index == viewers.length;
-                        return Column(
-                          children: [
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: isSameAsLoggedInUser
-                                    ? context.l10n.you
-                                    : _resolvedNameOrEmail(currentUser),
-                                makeTextBold: isSameAsLoggedInUser,
-                              ),
-                              leadingIconSize: 24.0,
-                              leadingIconWidget: UserAvatarWidget(
-                                currentUser,
-                                type: AvatarType.mini,
-                                currentUserID: currentUserID,
-                                config: Configuration.instance,
-                              ),
-                              menuItemColor:
-                                  getEnteColorScheme(context).fillFaint,
-                              trailingIcon:
-                                  isOwner ? Icons.chevron_right : null,
-                              trailingIconIsMuted: true,
-                              onTap: isOwner
-                                  ? () async {
-                                      if (isOwner) {
-                                        // ignore: unawaited_futures
-                                        _navigateToManageUser(currentUser);
-                                      }
-                                    }
-                                  : null,
-                              isTopBorderRadiusRemoved: listIndex > 0,
-                              isBottomBorderRadiusRemoved: !isLastItem,
-                              singleBorderRadius: 8,
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    if (index == 0 && (isOwner || viewers.isNotEmpty)) {
+                      return MenuSectionTitle(
+                        title: context.l10n.viewer,
+                        iconData: Icons.photo_outlined,
+                      );
+                    } else if (index > 0 && index <= viewers.length) {
+                      final listIndex = index - 1;
+                      final currentUser = viewers[listIndex];
+                      final isSameAsLoggedInUser =
+                          currentUserID == currentUser.id;
+                      final isLastItem = !isOwner && index == viewers.length;
+                      return Column(
+                        children: [
+                          MenuItemWidget(
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: isSameAsLoggedInUser
+                                  ? context.l10n.you
+                                  : _resolvedNameOrEmail(currentUser),
+                              makeTextBold: isSameAsLoggedInUser,
                             ),
-                            isLastItem
-                                ? const SizedBox.shrink()
-                                : DividerWidget(
-                                    dividerType: DividerType.menu,
-                                    bgColor:
-                                        getEnteColorScheme(context).fillFaint,
-                                  ),
-                          ],
-                        );
-                      } else if (index == (1 + viewers.length) && isOwner) {
-                        return MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: viewers.isNotEmpty
-                                ? context.l10n.addMore
-                                : context.l10n.addViewer,
-                            makeTextBold: true,
+                            leadingIconSize: 24.0,
+                            leadingIconWidget: UserAvatarWidget(
+                              currentUser,
+                              type: AvatarType.mini,
+                              currentUserID: currentUserID,
+                              config: Configuration.instance,
+                            ),
+                            menuItemColor: getEnteColorScheme(
+                              context,
+                            ).fillFaint,
+                            trailingIcon: isOwner ? Icons.chevron_right : null,
+                            trailingIconIsMuted: true,
+                            onTap: isOwner
+                                ? () async {
+                                    if (isOwner) {
+                                      // ignore: unawaited_futures
+                                      _navigateToManageUser(currentUser);
+                                    }
+                                  }
+                                : null,
+                            isTopBorderRadiusRemoved: listIndex > 0,
+                            isBottomBorderRadiusRemoved: !isLastItem,
+                            singleBorderRadius: 8,
                           ),
-                          leadingIcon: Icons.add_outlined,
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
-                          onTap: () async {
-                            // ignore: unawaited_futures
-                            _navigateToAddUser(true);
-                          },
-                          isTopBorderRadiusRemoved: viewers.isNotEmpty,
-                          singleBorderRadius: 8,
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                    childCount: 1 + viewers.length + 1,
-                  ),
+                          isLastItem
+                              ? const SizedBox.shrink()
+                              : DividerWidget(
+                                  dividerType: DividerType.menu,
+                                  bgColor: getEnteColorScheme(
+                                    context,
+                                  ).fillFaint,
+                                ),
+                        ],
+                      );
+                    } else if (index == (1 + viewers.length) && isOwner) {
+                      return MenuItemWidget(
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: viewers.isNotEmpty
+                              ? context.l10n.addMore
+                              : context.l10n.addViewer,
+                          makeTextBold: true,
+                        ),
+                        leadingIcon: Icons.add_outlined,
+                        menuItemColor: getEnteColorScheme(context).fillFaint,
+                        onTap: () async {
+                          // ignore: unawaited_futures
+                          _navigateToAddUser(true);
+                        },
+                        isTopBorderRadiusRemoved: viewers.isNotEmpty,
+                        singleBorderRadius: 8,
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }, childCount: 1 + viewers.length + 1),
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 72)),

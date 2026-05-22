@@ -27,19 +27,12 @@ import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:styled_text/styled_text.dart";
 
-enum PasswordEntryMode {
-  set,
-  update,
-  reset,
-}
+enum PasswordEntryMode { set, update, reset }
 
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({
-    required this.mode,
-    super.key,
-  });
+  const PasswordEntryPage({required this.mode, super.key});
 
   @override
   State<PasswordEntryPage> createState() => _PasswordEntryPageState();
@@ -117,10 +110,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   Navigator.of(context).pop();
                 },
               ),
-        title: Text(
-          title,
-          style: textTheme.largeBold,
-        ),
+        title: Text(title, style: textTheme.largeBold),
         centerTitle: true,
       ),
       body: _volatilePassword != null
@@ -152,10 +142,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     );
   }
 
-  Widget _getBody(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
     final email = Configuration.instance.getEmail();
 
     String? passwordMessage;
@@ -185,8 +172,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         confirmPasswordMessage = AppLocalizations.of(context).passwordsMatch;
         confirmPasswordMessageType = TextInputMessageType.success;
       } else {
-        confirmPasswordMessage =
-            AppLocalizations.of(context).passwordsDontMatch;
+        confirmPasswordMessage = AppLocalizations.of(
+          context,
+        ).passwordsDontMatch;
         confirmPasswordMessageType = TextInputMessageType.error;
       }
     }
@@ -280,20 +268,18 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     _passwordInInputConfirmationBox = cnfPassword;
                     _showConfirmPasswordValidation = false;
                     if (_passwordInInputBox.isNotEmpty) {
-                      _passwordsMatch = _passwordInInputBox ==
+                      _passwordsMatch =
+                          _passwordInInputBox ==
                           _passwordInInputConfirmationBox;
                     }
                   });
-                  _confirmPasswordTimer = Timer(
-                    const Duration(seconds: 1),
-                    () {
-                      if (mounted) {
-                        setState(() {
-                          _showConfirmPasswordValidation = true;
-                        });
-                      }
-                    },
-                  );
+                  _confirmPasswordTimer = Timer(const Duration(seconds: 1), () {
+                    if (mounted) {
+                      setState(() {
+                        _showConfirmPasswordValidation = true;
+                      });
+                    }
+                  });
                 },
               ),
               const SizedBox(height: 16),
@@ -333,8 +319,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     );
     await dialog.show();
     try {
-      final result = await Configuration.instance
-          .getAttributesForNewPassword(_passwordController1.text);
+      final result = await Configuration.instance.getAttributesForNewPassword(
+        _passwordController1.text,
+      );
       await UserService.instance.updateKeyAttributes(
         result.item1,
         result.item2,
@@ -384,8 +371,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     );
     await dialog.show();
     try {
-      final KeyGenResult result =
-          await Configuration.instance.generateKey(password);
+      final KeyGenResult result = await Configuration.instance.generateKey(
+        password,
+      );
       Configuration.instance.resetVolatilePassword();
       await dialog.hide();
       onDone() async {
@@ -433,8 +421,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         showAlertBottomSheet(
           context,
           title: AppLocalizations.of(context).insecureDevice,
-          message: AppLocalizations.of(context)
-              .sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
+          message: AppLocalizations.of(
+            context,
+          ).sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
           assetPath: 'assets/warning-green.png',
         );
       } else {

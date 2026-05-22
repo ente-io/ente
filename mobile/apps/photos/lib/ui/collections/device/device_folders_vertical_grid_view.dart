@@ -66,9 +66,7 @@ class _DeviceFolderVerticalGridViewState
               }
             },
           ),
-          DeviceFolderVerticalGridSliver(
-            searchQuery: _searchQuery,
-          ),
+          DeviceFolderVerticalGridSliver(searchQuery: _searchQuery),
         ],
       ),
     );
@@ -271,16 +269,13 @@ class _DeviceFolderVerticalGridViewBodyState
           childAspectRatio:
               sideOfThumbnail / (sideOfThumbnail + gridItemTextHeight),
         ),
-        delegate: SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            final deviceCollection = deviceCollections[index];
-            return DeviceFolderRowItem(
-              deviceCollection,
-              sideOfThumbnail: sideOfThumbnail,
-            );
-          },
-          childCount: deviceCollections.length,
-        ),
+        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+          final deviceCollection = deviceCollections[index];
+          return DeviceFolderRowItem(
+            deviceCollection,
+            sideOfThumbnail: sideOfThumbnail,
+          );
+        }, childCount: deviceCollections.length),
       ),
     );
   }

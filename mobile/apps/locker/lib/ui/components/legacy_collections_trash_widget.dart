@@ -152,16 +152,8 @@ class _LegacyItem extends StatelessWidget {
               size: 24,
             ),
             const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                context.l10n.legacy,
-                style: textTheme.small,
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: colorScheme.textMuted,
-            ),
+            Expanded(child: Text(context.l10n.legacy, style: textTheme.small)),
+            Icon(Icons.chevron_right, color: colorScheme.textMuted),
           ],
         ),
       ),

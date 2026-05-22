@@ -43,8 +43,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
 
   Future<void> _refreshCollection() async {
     try {
-      final latest =
-          await collectionsService.fetchCollectionByID(widget.collection.id);
+      final latest = await collectionsService.fetchCollectionByID(
+        widget.collection.id,
+      );
       if (mounted) {
         setState(() {
           _collection = latest;
@@ -65,10 +66,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   }
 
   Future<void> _navigateToAddUser(List<ActionTypesToShow> actions) async {
-    await routeToPage(
-      context,
-      AddParticipantPage([_collection], actions),
-    );
+    await routeToPage(context, AddParticipantPage([_collection], actions));
     await _refreshCollection();
   }
 
@@ -79,7 +77,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     final bool isOwner = role == CollectionParticipantRole.owner;
     final bool isAdmin = role == CollectionParticipantRole.admin;
     final bool canManageParticipants = isOwner || isAdmin;
-    final bool hasActivePublicLink = _collection.hasLink &&
+    final bool hasActivePublicLink =
+        _collection.hasLink &&
         !(_collection.publicURLs.firstOrNull?.isExpired ?? true);
     final bool shouldShowPublicLink = !isOwner && hasActivePublicLink;
     final colorScheme = getEnteColorScheme(context);
@@ -148,287 +147,268 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
               ),
             ),
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
-                  child: Column(
-                    children: [
-                      Column(
-                        children: [
-                          MenuSectionTitle(
-                            title: AppLocalizations.of(context).albumOwner,
-                            iconData: Icons.admin_panel_settings_outlined,
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+                child: Column(
+                  children: [
+                    Column(
+                      children: [
+                        MenuSectionTitle(
+                          title: AppLocalizations.of(context).albumOwner,
+                          iconData: Icons.admin_panel_settings_outlined,
+                        ),
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: isOwner
+                                ? AppLocalizations.of(context).you
+                                : _nameIfAvailableElseEmail(_collection.owner),
+                            makeTextBold: isOwner,
                           ),
-                          MenuItemWidget(
-                            captionedTextWidget: CaptionedTextWidget(
-                              title: isOwner
-                                  ? AppLocalizations.of(context).you
-                                  : _nameIfAvailableElseEmail(
-                                      _collection.owner,
-                                    ),
-                              makeTextBold: isOwner,
-                            ),
-                            leadingIconWidget: UserAvatarWidget(
-                              owner,
-                              currentUserID: currentUserID,
-                            ),
-                            leadingIconSize: 24,
-                            menuItemColor: colorScheme.fillFaint,
-                            singleBorderRadius: 8,
-                            isGestureDetectorDisabled: true,
+                          leadingIconWidget: UserAvatarWidget(
+                            owner,
+                            currentUserID: currentUserID,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
+                          leadingIconSize: 24,
+                          menuItemColor: colorScheme.fillFaint,
+                          singleBorderRadius: 8,
+                          isGestureDetectorDisabled: true,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: 1),
           ),
           if (admins.isNotEmpty || canManageParticipants)
             SliverPadding(
               padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    if (index == 0 &&
-                        (canManageParticipants || admins.isNotEmpty)) {
-                      return MenuSectionTitle(
-                        title: AppLocalizations.of(context).admins,
-                        iconData: Icons.admin_panel_settings_outlined,
-                      );
-                    } else if (index > 0 && index <= admins.length) {
-                      final listIndex = index - 1;
-                      final currentUser = admins[listIndex];
-                      final isSameAsLoggedInUser =
-                          currentUserID == currentUser.id;
-                      final isLastItem =
-                          !canManageParticipants && index == admins.length;
-                      return Column(
-                        children: [
-                          MenuItemWidget(
-                            captionedTextWidget: CaptionedTextWidget(
-                              title: isSameAsLoggedInUser
-                                  ? AppLocalizations.of(context).you
-                                  : _nameIfAvailableElseEmail(currentUser),
-                              makeTextBold: isSameAsLoggedInUser,
-                            ),
-                            leadingIconSize: 24.0,
-                            leadingIconWidget: UserAvatarWidget(
-                              currentUser,
-                              type: AvatarType.medium,
-                              currentUserID: currentUserID,
-                            ),
-                            menuItemColor: colorScheme.fillFaint,
-                            trailingIcon:
-                                canManageParticipants && !isSameAsLoggedInUser
-                                    ? Icons.chevron_right
-                                    : null,
-                            trailingIconIsMuted: true,
-                            onTap: canManageParticipants &&
-                                    !isSameAsLoggedInUser
-                                ? () async {
-                                    await _navigateToManageUser(currentUser);
-                                  }
-                                : null,
-                            isTopBorderRadiusRemoved: listIndex > 0,
-                            isBottomBorderRadiusRemoved: !isLastItem,
-                            singleBorderRadius: 8,
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index == 0 &&
+                      (canManageParticipants || admins.isNotEmpty)) {
+                    return MenuSectionTitle(
+                      title: AppLocalizations.of(context).admins,
+                      iconData: Icons.admin_panel_settings_outlined,
+                    );
+                  } else if (index > 0 && index <= admins.length) {
+                    final listIndex = index - 1;
+                    final currentUser = admins[listIndex];
+                    final isSameAsLoggedInUser =
+                        currentUserID == currentUser.id;
+                    final isLastItem =
+                        !canManageParticipants && index == admins.length;
+                    return Column(
+                      children: [
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: isSameAsLoggedInUser
+                                ? AppLocalizations.of(context).you
+                                : _nameIfAvailableElseEmail(currentUser),
+                            makeTextBold: isSameAsLoggedInUser,
                           ),
-                          isLastItem
-                              ? const SizedBox.shrink()
-                              : DividerWidget(
-                                  dividerType: DividerType.menu,
-                                  bgColor: colorScheme.fillFaint,
-                                ),
-                        ],
-                      );
-                    } else if (index == (1 + admins.length) &&
-                        canManageParticipants) {
-                      return MenuItemWidget(
-                        captionedTextWidget: CaptionedTextWidget(
-                          title: admins.isNotEmpty
-                              ? AppLocalizations.of(context).addMoreAdmins
-                              : AppLocalizations.of(context).addAdmin,
-                          makeTextBold: true,
+                          leadingIconSize: 24.0,
+                          leadingIconWidget: UserAvatarWidget(
+                            currentUser,
+                            type: AvatarType.medium,
+                            currentUserID: currentUserID,
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          trailingIcon:
+                              canManageParticipants && !isSameAsLoggedInUser
+                              ? Icons.chevron_right
+                              : null,
+                          trailingIconIsMuted: true,
+                          onTap: canManageParticipants && !isSameAsLoggedInUser
+                              ? () async {
+                                  await _navigateToManageUser(currentUser);
+                                }
+                              : null,
+                          isTopBorderRadiusRemoved: listIndex > 0,
+                          isBottomBorderRadiusRemoved: !isLastItem,
+                          singleBorderRadius: 8,
                         ),
-                        leadingIcon: Icons.add_outlined,
-                        menuItemColor: colorScheme.fillFaint,
-                        onTap: () async {
-                          await _navigateToAddUser(
-                            [ActionTypesToShow.addAdmin],
-                          );
-                        },
-                        isTopBorderRadiusRemoved: admins.isNotEmpty,
-                        singleBorderRadius: 8,
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                  childCount: 1 + admins.length + 1,
-                ),
+                        isLastItem
+                            ? const SizedBox.shrink()
+                            : DividerWidget(
+                                dividerType: DividerType.menu,
+                                bgColor: colorScheme.fillFaint,
+                              ),
+                      ],
+                    );
+                  } else if (index == (1 + admins.length) &&
+                      canManageParticipants) {
+                    return MenuItemWidget(
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: admins.isNotEmpty
+                            ? AppLocalizations.of(context).addMoreAdmins
+                            : AppLocalizations.of(context).addAdmin,
+                        makeTextBold: true,
+                      ),
+                      leadingIcon: Icons.add_outlined,
+                      menuItemColor: colorScheme.fillFaint,
+                      onTap: () async {
+                        await _navigateToAddUser([ActionTypesToShow.addAdmin]);
+                      },
+                      isTopBorderRadiusRemoved: admins.isNotEmpty,
+                      singleBorderRadius: 8,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }, childCount: 1 + admins.length + 1),
               ),
             ),
           SliverPadding(
             padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == 0 &&
-                      (canManageParticipants || collaborators.isNotEmpty)) {
-                    return MenuSectionTitle(
-                      title: AppLocalizations.of(context).collaborator,
-                      iconData: Icons.edit_outlined,
-                    );
-                  } else if (index > 0 && index <= collaborators.length) {
-                    final listIndex = index - 1;
-                    final currentUser = collaborators[listIndex];
-                    final isSameAsLoggedInUser =
-                        currentUserID == currentUser.id;
-                    final isLastItem =
-                        !canManageParticipants && index == collaborators.length;
-                    return Column(
-                      children: [
-                        MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: isSameAsLoggedInUser
-                                ? AppLocalizations.of(context).you
-                                : _nameIfAvailableElseEmail(currentUser),
-                            makeTextBold: isSameAsLoggedInUser,
-                          ),
-                          leadingIconSize: 24.0,
-                          leadingIconWidget: UserAvatarWidget(
-                            currentUser,
-                            type: AvatarType.medium,
-                            currentUserID: currentUserID,
-                          ),
-                          menuItemColor: colorScheme.fillFaint,
-                          trailingIcon: canManageParticipants
-                              ? Icons.chevron_right
-                              : null,
-                          trailingIconIsMuted: true,
-                          onTap: canManageParticipants
-                              ? () async {
-                                  await _navigateToManageUser(currentUser);
-                                }
-                              : null,
-                          isTopBorderRadiusRemoved: listIndex > 0,
-                          isBottomBorderRadiusRemoved: !isLastItem,
-                          singleBorderRadius: 8,
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index == 0 &&
+                    (canManageParticipants || collaborators.isNotEmpty)) {
+                  return MenuSectionTitle(
+                    title: AppLocalizations.of(context).collaborator,
+                    iconData: Icons.edit_outlined,
+                  );
+                } else if (index > 0 && index <= collaborators.length) {
+                  final listIndex = index - 1;
+                  final currentUser = collaborators[listIndex];
+                  final isSameAsLoggedInUser = currentUserID == currentUser.id;
+                  final isLastItem =
+                      !canManageParticipants && index == collaborators.length;
+                  return Column(
+                    children: [
+                      MenuItemWidget(
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: isSameAsLoggedInUser
+                              ? AppLocalizations.of(context).you
+                              : _nameIfAvailableElseEmail(currentUser),
+                          makeTextBold: isSameAsLoggedInUser,
                         ),
-                        isLastItem
-                            ? const SizedBox.shrink()
-                            : DividerWidget(
-                                dividerType: DividerType.menu,
-                                bgColor: colorScheme.fillFaint,
-                              ),
-                      ],
-                    );
-                  } else if (index == (1 + collaborators.length) &&
-                      canManageParticipants) {
-                    return MenuItemWidget(
-                      captionedTextWidget: CaptionedTextWidget(
-                        title: collaborators.isNotEmpty
-                            ? AppLocalizations.of(context).addMore
-                            : AppLocalizations.of(context).addCollaborator,
-                        makeTextBold: true,
+                        leadingIconSize: 24.0,
+                        leadingIconWidget: UserAvatarWidget(
+                          currentUser,
+                          type: AvatarType.medium,
+                          currentUserID: currentUserID,
+                        ),
+                        menuItemColor: colorScheme.fillFaint,
+                        trailingIcon: canManageParticipants
+                            ? Icons.chevron_right
+                            : null,
+                        trailingIconIsMuted: true,
+                        onTap: canManageParticipants
+                            ? () async {
+                                await _navigateToManageUser(currentUser);
+                              }
+                            : null,
+                        isTopBorderRadiusRemoved: listIndex > 0,
+                        isBottomBorderRadiusRemoved: !isLastItem,
+                        singleBorderRadius: 8,
                       ),
-                      leadingIcon: Icons.add_outlined,
-                      menuItemColor: colorScheme.fillFaint,
-                      onTap: () async {
-                        await _navigateToAddUser([
-                          ActionTypesToShow.addCollaborator,
-                        ]);
-                      },
-                      isTopBorderRadiusRemoved: collaborators.isNotEmpty,
-                      singleBorderRadius: 8,
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-                childCount: 1 + collaborators.length + 1,
-              ),
+                      isLastItem
+                          ? const SizedBox.shrink()
+                          : DividerWidget(
+                              dividerType: DividerType.menu,
+                              bgColor: colorScheme.fillFaint,
+                            ),
+                    ],
+                  );
+                } else if (index == (1 + collaborators.length) &&
+                    canManageParticipants) {
+                  return MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: collaborators.isNotEmpty
+                          ? AppLocalizations.of(context).addMore
+                          : AppLocalizations.of(context).addCollaborator,
+                      makeTextBold: true,
+                    ),
+                    leadingIcon: Icons.add_outlined,
+                    menuItemColor: colorScheme.fillFaint,
+                    onTap: () async {
+                      await _navigateToAddUser([
+                        ActionTypesToShow.addCollaborator,
+                      ]);
+                    },
+                    isTopBorderRadiusRemoved: collaborators.isNotEmpty,
+                    singleBorderRadius: 8,
+                  );
+                }
+                return const SizedBox.shrink();
+              }, childCount: 1 + collaborators.length + 1),
             ),
           ),
           SliverPadding(
             padding: const EdgeInsets.only(top: 24, left: 16, right: 16),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == 0 &&
-                      (canManageParticipants || viewers.isNotEmpty)) {
-                    return MenuSectionTitle(
-                      title: AppLocalizations.of(context).viewer,
-                      iconData: Icons.photo_outlined,
-                    );
-                  } else if (index > 0 && index <= viewers.length) {
-                    final listIndex = index - 1;
-                    final currentUser = viewers[listIndex];
-                    final isSameAsLoggedInUser =
-                        currentUserID == currentUser.id;
-                    final isLastItem =
-                        !canManageParticipants && index == viewers.length;
-                    return Column(
-                      children: [
-                        MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: isSameAsLoggedInUser
-                                ? AppLocalizations.of(context).you
-                                : _nameIfAvailableElseEmail(currentUser),
-                            makeTextBold: isSameAsLoggedInUser,
-                          ),
-                          leadingIconSize: 24.0,
-                          leadingIconWidget: UserAvatarWidget(
-                            currentUser,
-                            type: AvatarType.medium,
-                            currentUserID: currentUserID,
-                          ),
-                          menuItemColor: colorScheme.fillFaint,
-                          trailingIcon: canManageParticipants
-                              ? Icons.chevron_right
-                              : null,
-                          trailingIconIsMuted: true,
-                          onTap: canManageParticipants
-                              ? () async {
-                                  await _navigateToManageUser(currentUser);
-                                }
-                              : null,
-                          isTopBorderRadiusRemoved: listIndex > 0,
-                          isBottomBorderRadiusRemoved: !isLastItem,
-                          singleBorderRadius: 8,
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index == 0 &&
+                    (canManageParticipants || viewers.isNotEmpty)) {
+                  return MenuSectionTitle(
+                    title: AppLocalizations.of(context).viewer,
+                    iconData: Icons.photo_outlined,
+                  );
+                } else if (index > 0 && index <= viewers.length) {
+                  final listIndex = index - 1;
+                  final currentUser = viewers[listIndex];
+                  final isSameAsLoggedInUser = currentUserID == currentUser.id;
+                  final isLastItem =
+                      !canManageParticipants && index == viewers.length;
+                  return Column(
+                    children: [
+                      MenuItemWidget(
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: isSameAsLoggedInUser
+                              ? AppLocalizations.of(context).you
+                              : _nameIfAvailableElseEmail(currentUser),
+                          makeTextBold: isSameAsLoggedInUser,
                         ),
-                        isLastItem
-                            ? const SizedBox.shrink()
-                            : DividerWidget(
-                                dividerType: DividerType.menu,
-                                bgColor: colorScheme.fillFaint,
-                              ),
-                      ],
-                    );
-                  } else if (index == (1 + viewers.length) &&
-                      canManageParticipants) {
-                    return MenuItemWidget(
-                      captionedTextWidget: CaptionedTextWidget(
-                        title: viewers.isNotEmpty
-                            ? AppLocalizations.of(context).addMore
-                            : AppLocalizations.of(context).addViewer,
-                        makeTextBold: true,
+                        leadingIconSize: 24.0,
+                        leadingIconWidget: UserAvatarWidget(
+                          currentUser,
+                          type: AvatarType.medium,
+                          currentUserID: currentUserID,
+                        ),
+                        menuItemColor: colorScheme.fillFaint,
+                        trailingIcon: canManageParticipants
+                            ? Icons.chevron_right
+                            : null,
+                        trailingIconIsMuted: true,
+                        onTap: canManageParticipants
+                            ? () async {
+                                await _navigateToManageUser(currentUser);
+                              }
+                            : null,
+                        isTopBorderRadiusRemoved: listIndex > 0,
+                        isBottomBorderRadiusRemoved: !isLastItem,
+                        singleBorderRadius: 8,
                       ),
-                      leadingIcon: Icons.add_outlined,
-                      menuItemColor: colorScheme.fillFaint,
-                      onTap: () async {
-                        await _navigateToAddUser([ActionTypesToShow.addViewer]);
-                      },
-                      isTopBorderRadiusRemoved: viewers.isNotEmpty,
-                      singleBorderRadius: 8,
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-                childCount: 1 + viewers.length + 1,
-              ),
+                      isLastItem
+                          ? const SizedBox.shrink()
+                          : DividerWidget(
+                              dividerType: DividerType.menu,
+                              bgColor: colorScheme.fillFaint,
+                            ),
+                    ],
+                  );
+                } else if (index == (1 + viewers.length) &&
+                    canManageParticipants) {
+                  return MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: viewers.isNotEmpty
+                          ? AppLocalizations.of(context).addMore
+                          : AppLocalizations.of(context).addViewer,
+                      makeTextBold: true,
+                    ),
+                    leadingIcon: Icons.add_outlined,
+                    menuItemColor: colorScheme.fillFaint,
+                    onTap: () async {
+                      await _navigateToAddUser([ActionTypesToShow.addViewer]);
+                    },
+                    isTopBorderRadiusRemoved: viewers.isNotEmpty,
+                    singleBorderRadius: 8,
+                  );
+                }
+                return const SizedBox.shrink();
+              }, childCount: 1 + viewers.length + 1),
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 72)),

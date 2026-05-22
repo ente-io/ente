@@ -49,9 +49,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
           child: Text(
             _logs!,
             style: const TextStyle(
-              fontFeatures: [
-                FontFeature.tabularFigures(),
-              ],
+              fontFeatures: [FontFeature.tabularFigures()],
               height: 1.2,
             ),
           ),

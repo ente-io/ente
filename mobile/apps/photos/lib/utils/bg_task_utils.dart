@@ -17,29 +17,26 @@ void callbackDispatcher() {
     Future<bool> result = Future.error("Task didn't run");
     final prefs = await SharedPreferences.getInstance();
 
-    await runWithLogs(
-      () async {
-        try {
-          BgTaskUtils.$.info('Task started $tlog');
-          await runBackgroundTask(taskName, tlog).timeout(
-            Platform.isIOS ? kBGTaskTimeout : const Duration(hours: 1),
-            onTimeout: () async {
-              BgTaskUtils.$.warning(
-                "TLE, committing seppuku for taskID: $taskName",
-              );
-              await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
-            },
-          );
-          BgTaskUtils.$.info('Task run successful $tlog');
-          result = Future.value(true);
-        } catch (e) {
-          BgTaskUtils.$.warning('Task error: $e');
-          await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
-          result = Future.error(e.toString());
-        }
-      },
-      prefix: "[bg]",
-    ).onError((_, __) {
+    await runWithLogs(() async {
+      try {
+        BgTaskUtils.$.info('Task started $tlog');
+        await runBackgroundTask(taskName, tlog).timeout(
+          Platform.isIOS ? kBGTaskTimeout : const Duration(hours: 1),
+          onTimeout: () async {
+            BgTaskUtils.$.warning(
+              "TLE, committing seppuku for taskID: $taskName",
+            );
+            await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+          },
+        );
+        BgTaskUtils.$.info('Task run successful $tlog');
+        result = Future.value(true);
+      } catch (e) {
+        BgTaskUtils.$.warning('Task error: $e');
+        await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+        result = Future.error(e.toString());
+      }
+    }, prefix: "[bg]").onError((_, __) {
       result = Future.error("Didn't finished correctly!");
       return;
     });
@@ -75,12 +72,11 @@ class BgTaskUtils {
     $.warning("Configuring Work Manager for background tasks");
     const iOSBackgroundAppRefresh = "io.ente.frame.iOSBackgroundAppRefresh";
     const androidPeriodicTask = "io.ente.photos.androidPeriodicTask";
-    final backgroundTaskIdentifier =
-        Platform.isIOS ? iOSBackgroundAppRefresh : androidPeriodicTask;
+    final backgroundTaskIdentifier = Platform.isIOS
+        ? iOSBackgroundAppRefresh
+        : androidPeriodicTask;
     try {
-      await workmanager.Workmanager().initialize(
-        callbackDispatcher,
-      );
+      await workmanager.Workmanager().initialize(callbackDispatcher);
       await workmanager.Workmanager().registerPeriodicTask(
         backgroundTaskIdentifier,
         backgroundTaskIdentifier,

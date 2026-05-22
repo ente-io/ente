@@ -70,13 +70,11 @@ extension DeviceFiles on FilesDB {
   Future<Map<String, int>> getDevicePathIDToImportedFileCount() async {
     try {
       final db = await sqliteAsyncDB;
-      final rows = await db.getAll(
-        '''
+      final rows = await db.getAll('''
       SELECT count(*) as count, path_id
       FROM device_files
       GROUP BY path_id
-    ''',
-      );
+    ''');
       final result = <String, int>{};
       for (final row in rows) {
         result[row['path_id'] as String] = row["count"] as int;
@@ -137,11 +135,9 @@ extension DeviceFiles on FilesDB {
 
   Future<Set<String>> getDevicePathIDs() async {
     final db = await sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
+    final rows = await db.getAll('''
       SELECT id FROM device_collections
-      ''',
-    );
+      ''');
     final Set<String> result = <String>{};
     for (final row in rows) {
       result.add(row['id'] as String);
@@ -164,8 +160,10 @@ extension DeviceFiles on FilesDB {
           pathIDToLocalIDsMap[localPathAsset.pathID] = localPathAsset.localIDs;
         }
         if (existingPathIds.contains(localPathAsset.pathID)) {
-          parameterSetsForUpdate
-              .add([localPathAsset.pathName, localPathAsset.pathID]);
+          parameterSetsForUpdate.add([
+            localPathAsset.pathName,
+            localPathAsset.pathID,
+          ]);
         } else if (localPathAsset.localIDs.isNotEmpty) {
           parameterSetsForInsert.add([
             localPathAsset.pathID,
@@ -175,19 +173,13 @@ extension DeviceFiles on FilesDB {
         }
       }
 
-      await db.executeBatch(
-        '''
+      await db.executeBatch('''
         INSERT OR IGNORE INTO device_collections (id, name, should_backup) VALUES (?, ?, ?);
-      ''',
-        parameterSetsForInsert,
-      );
+      ''', parameterSetsForInsert);
 
-      await db.executeBatch(
-        '''
+      await db.executeBatch('''
         UPDATE device_collections SET name = ? WHERE id = ?;
-      ''',
-        parameterSetsForUpdate,
-      );
+      ''', parameterSetsForUpdate);
 
       // add the mappings for localIDs
       if (pathIDToLocalIDsMap.isNotEmpty) {
@@ -297,13 +289,11 @@ extension DeviceFiles on FilesDB {
   // deviceCollections which are marked for auto-backup
   Future<Set<int>> getDeviceSyncCollectionIDs() async {
     final db = await sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
+    final rows = await db.getAll('''
       SELECT collection_id FROM device_collections where should_backup =
       $_sqlBoolTrue
       and collection_id != -1;
-      ''',
-    );
+      ''');
     final Set<int> result = <int>{};
     for (final row in rows) {
       result.add(row['collection_id'] as int);
@@ -311,9 +301,7 @@ extension DeviceFiles on FilesDB {
     return result;
   }
 
-  Future<void> updateDevicePathSyncStatus(
-    Map<String, bool> syncStatus,
-  ) async {
+  Future<void> updateDevicePathSyncStatus(Map<String, bool> syncStatus) async {
     final db = await sqliteAsyncDB;
     int batchCounter = 0;
     final parameterSets = <List<Object?>>[];
@@ -323,29 +311,20 @@ extension DeviceFiles on FilesDB {
       batchCounter++;
 
       if (batchCounter == 400) {
-        await db.executeBatch(
-          '''
+        await db.executeBatch('''
           UPDATE device_collections SET should_backup = ? WHERE id = ?;
-        ''',
-          parameterSets,
-        );
+        ''', parameterSets);
         parameterSets.clear();
         batchCounter = 0;
       }
     }
 
-    await db.executeBatch(
-      '''
+    await db.executeBatch('''
           UPDATE device_collections SET should_backup = ? WHERE id = ?;
-        ''',
-      parameterSets,
-    );
+        ''', parameterSets);
   }
 
-  Future<void> updateDeviceCollection(
-    String pathID,
-    int collectionID,
-  ) async {
+  Future<void> updateDeviceCollection(String pathID, int collectionID) async {
     final db = await sqliteAsyncDB;
     await db.execute(
       '''
@@ -366,7 +345,8 @@ extension DeviceFiles on FilesDB {
   }) async {
     final db = await sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    final String rawQuery = '''
+    final String rawQuery =
+        '''
     SELECT *
           FROM ${FilesDB.filesTable}
           WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
@@ -391,7 +371,8 @@ extension DeviceFiles on FilesDB {
     Set<String> excludeLocalIDs = const {},
   }) async {
     final db = await sqliteAsyncDB;
-    const String rawQuery = '''
+    const String rawQuery =
+        '''
     SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID},
     ${FilesDB.columnFileSize}
     FROM ${FilesDB.filesTable}
@@ -458,12 +439,11 @@ extension DeviceFiles on FilesDB {
             (element) => element.localID == deviceCollection.coverId,
           );
           if (deviceCollection.thumbnail == null) {
-            final EnteFile? result =
-                await getDeviceCollectionThumbnail(deviceCollection.id);
+            final EnteFile? result = await getDeviceCollectionThumbnail(
+              deviceCollection.id,
+            );
             if (result == null) {
-              _logger.info(
-                'Failed to find coverThumbnail for deviceFolder',
-              );
+              _logger.info('Failed to find coverThumbnail for deviceFolder');
               continue;
             } else {
               deviceCollection.thumbnail = result;
@@ -507,22 +487,16 @@ extension DeviceFiles on FilesDB {
     ConflictAlgorithm conflictAlgorithm,
   ) async {
     final db = await sqliteAsyncDB;
-    await db.executeBatch(
-      '''
+    await db.executeBatch('''
         INSERT OR ${conflictAlgorithm.name.toUpperCase()}
         INTO device_files (id, path_id) VALUES (?, ?);
-      ''',
-      parameterSets,
-    );
+      ''', parameterSets);
   }
 
   Future<void> _deleteBatch(List<List<Object?>> parameterSets) async {
     final db = await sqliteAsyncDB;
-    await db.executeBatch(
-      '''
+    await db.executeBatch('''
         DELETE FROM device_files WHERE id = ? AND path_id = ?;
-      ''',
-      parameterSets,
-    );
+      ''', parameterSets);
   }
 }

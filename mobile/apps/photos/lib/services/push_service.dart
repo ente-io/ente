@@ -33,9 +33,7 @@ class PushService {
     _prefs = await SharedPreferences.getInstance();
     await Firebase.initializeApp();
     if (onBackgroundPush != null) {
-      FirebaseMessaging.onBackgroundMessage(
-        onBackgroundPush,
-      );
+      FirebaseMessaging.onBackgroundMessage(onBackgroundPush);
     }
     if (_foregroundMessageSubscription != null) {
       await _foregroundMessageSubscription!.cancel();
@@ -92,14 +90,8 @@ class PushService {
     }
   }
 
-  Future<void> _setPushTokenOnServer(
-    String fcmToken,
-    String? apnsToken,
-  ) async {
-    await pushGateway.registerToken(
-      fcmToken: fcmToken,
-      apnsToken: apnsToken,
-    );
+  Future<void> _setPushTokenOnServer(String fcmToken, String? apnsToken) async {
+    await pushGateway.registerToken(fcmToken: fcmToken, apnsToken: apnsToken);
   }
 
   void _handleForegroundPushMessage(RemoteMessage message) {

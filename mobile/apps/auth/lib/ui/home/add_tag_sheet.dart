@@ -17,10 +17,7 @@ import 'package:flutter/material.dart';
 class AddTagSheet extends StatefulWidget {
   final List<Code> selectedCodes;
 
-  const AddTagSheet({
-    super.key,
-    required this.selectedCodes,
-  });
+  const AddTagSheet({super.key, required this.selectedCodes});
 
   @override
   State<AddTagSheet> createState() => _AddTagSheetState();
@@ -45,8 +42,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
     final initialTagsForSelection = widget.selectedCodes.isEmpty
         ? <String>{}
         : widget.selectedCodes
-            .map((code) => code.display.tags.toSet())
-            .reduce((a, b) => a.intersection(b));
+              .map((code) => code.display.tags.toSet())
+              .reduce((a, b) => a.intersection(b));
 
     if (mounted) {
       setState(() {
@@ -59,8 +56,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
   }
 
   Future<void> _onDonePressed() async {
-    final removedTags =
-        _initialIntersectionTags.difference(_selectedTagsInSheet);
+    final removedTags = _initialIntersectionTags.difference(
+      _selectedTagsInSheet,
+    );
     final addedTags = _selectedTagsInSheet.difference(_initialIntersectionTags);
 
     final updateFutures = widget.selectedCodes.map((code) {
@@ -117,8 +115,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
                         buttonType: ButtonType.primary,
                         labelText: context.l10n.create,
                         isDisabled: textController.text.trim().isEmpty,
-                        onTap: () async => Navigator.of(context)
-                            .pop(textController.text.trim()),
+                        onTap: () async => Navigator.of(
+                          context,
+                        ).pop(textController.text.trim()),
                       ),
                     ),
                   ],
@@ -164,8 +163,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
                 style: IconButton.styleFrom(
-                  backgroundColor:
-                      colorScheme.fillFaint.withValues(alpha: 0.025),
+                  backgroundColor: colorScheme.fillFaint.withValues(
+                    alpha: 0.025,
+                  ),
                 ),
               ),
             ],
@@ -194,13 +194,17 @@ class _AddTagSheetState extends State<AddTagSheet> {
                           width: 50,
                           height: 50,
                           decoration: BoxDecoration(
-                            color:
-                                colorScheme.fillFaint.withValues(alpha: 0.02),
+                            color: colorScheme.fillFaint.withValues(
+                              alpha: 0.02,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
-                            child: IconUtils.instance
-                                .getIcon(context, iconData.trim(), width: 28),
+                            child: IconUtils.instance.getIcon(
+                              context,
+                              iconData.trim(),
+                              width: 28,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),

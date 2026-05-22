@@ -18,10 +18,7 @@ import 'package:flutter/material.dart';
 class DeleteAccountPage extends StatelessWidget {
   final BaseConfiguration config;
 
-  const DeleteAccountPage(
-    this.config, {
-    super.key,
-  });
+  const DeleteAccountPage(this.config, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,22 +40,15 @@ class DeleteAccountPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/broken_heart.png',
-                width: 200,
-              ),
-              const SizedBox(
-                height: 24,
-              ),
+              Image.asset('assets/broken_heart.png', width: 200),
+              const SizedBox(height: 24),
               Center(
                 child: Text(
                   context.strings.deleteAccountQuery,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              const SizedBox(
-                height: 12,
-              ),
+              const SizedBox(height: 12),
               RichText(
                 // textAlign: TextAlign.center,
                 text: TextSpan(
@@ -68,16 +58,12 @@ class DeleteAccountPage extends StatelessWidget {
                       text: "feedback@ente.com",
                       style: TextStyle(color: Color.fromRGBO(29, 185, 84, 1)),
                     ),
-                    TextSpan(
-                      text: ", maybe there is a way we can help.",
-                    ),
+                    TextSpan(text: ", maybe there is a way we can help."),
                   ],
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              const SizedBox(
-                height: 24,
-              ),
+              const SizedBox(height: 24),
               GradientButton(
                 text: context.strings.yesSendFeedbackAction,
                 onTap: () async {
@@ -88,9 +74,7 @@ class DeleteAccountPage extends StatelessWidget {
                   );
                 },
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-              ),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 8)),
               InkWell(
                 child: SizedBox(
                   width: double.infinity,
@@ -99,9 +83,7 @@ class DeleteAccountPage extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      side: const BorderSide(
-                        color: Colors.redAccent,
-                      ),
+                      side: const BorderSide(color: Colors.redAccent),
                       padding: const EdgeInsets.symmetric(
                         vertical: 18,
                         horizontal: 10,
@@ -129,9 +111,9 @@ class DeleteAccountPage extends StatelessWidget {
                 child: Text(
                   context.strings.deleteAccountWarning,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.redAccent,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.w800,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -143,8 +125,8 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<void> _initiateDelete(BuildContext context) async {
-    final deleteChallengeResponse =
-        await UserService.instance.getDeleteChallenge(context);
+    final deleteChallengeResponse = await UserService.instance
+        .getDeleteChallenge(context);
     if (deleteChallengeResponse == null) {
       return;
     }
@@ -159,11 +141,11 @@ class DeleteAccountPage extends StatelessWidget {
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.strings.initiateAccountDeleteTitle,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.strings.initiateAccountDeleteTitle,
+        );
 
     if (hasAuthenticated) {
       final choice = await showChoiceDialogOld(
@@ -180,9 +162,7 @@ class DeleteAccountPage extends StatelessWidget {
       }
       final decryptChallenge = CryptoUtil.openSealSync(
         CryptoUtil.base642bin(response.encryptedChallenge),
-        CryptoUtil.base642bin(
-          config.getKeyAttributes()!.publicKey,
-        ),
+        CryptoUtil.base642bin(config.getKeyAttributes()!.publicKey),
         config.getSecretKey()!,
       );
       final challengeResponseStr = utf8.decode(decryptChallenge);
@@ -211,14 +191,10 @@ class DeleteAccountPage extends StatelessWidget {
             textAlign: TextAlign.center,
             text: TextSpan(
               children: [
-                const TextSpan(
-                  text: "Please send an email to ",
-                ),
+                const TextSpan(text: "Please send an email to "),
                 TextSpan(
                   text: "account-deletion@ente.com",
-                  style: TextStyle(
-                    color: Colors.orange[300],
-                  ),
+                  style: TextStyle(color: Colors.orange[300]),
                 ),
                 const TextSpan(
                   text:

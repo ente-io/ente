@@ -5,11 +5,7 @@ class FieldLabel extends StatelessWidget {
   final String label;
   final double width;
 
-  const FieldLabel(
-    this.label, {
-    super.key,
-    this.width = 80,
-  });
+  const FieldLabel(this.label, {super.key, this.width = 80});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +13,7 @@ class FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(right: 12.0),
       child: SizedBox(
         width: width,
-        child: Text(
-          label,
-          style: getEnteTextTheme(context).miniBoldMuted,
-        ),
+        child: Text(label, style: getEnteTextTheme(context).miniBoldMuted),
       ),
     );
   }

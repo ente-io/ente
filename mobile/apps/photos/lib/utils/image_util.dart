@@ -7,11 +7,9 @@ import 'package:image/image.dart' as img;
 Future<ImageInfo> getImageInfo(ImageProvider imageProvider) {
   final completer = Completer<ImageInfo>();
   final imageStream = imageProvider.resolve(const ImageConfiguration());
-  final listener = ImageStreamListener(
-    ((imageInfo, _) {
-      completer.complete(imageInfo);
-    }),
-  );
+  final listener = ImageStreamListener(((imageInfo, _) {
+    completer.complete(imageInfo);
+  }));
   imageStream.addListener(listener);
   completer.future.whenComplete(() => imageStream.removeListener(listener));
   return completer.future;
@@ -28,8 +26,9 @@ Future<ui.Image> convertImageToFlutterUi(img.Image image) async {
     }
   }
 
-  final ui.ImmutableBuffer buffer =
-      await ui.ImmutableBuffer.fromUint8List(image.toUint8List());
+  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(
+    image.toUint8List(),
+  );
 
   final ui.ImageDescriptor id = ui.ImageDescriptor.raw(
     buffer,

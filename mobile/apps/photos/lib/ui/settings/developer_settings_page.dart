@@ -33,9 +33,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final endpoint = endpointConfig.endpoint;
-    _logger.info(
-      "Current endpoint is: $endpoint",
-    );
+    _logger.info("Current endpoint is: $endpoint");
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
@@ -79,9 +77,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   final url = _urlController.text.trim();
                   _logger.info("Entered endpoint: $url");
                   final modeToggleMessage =
-                      await _maybeToggleLocalGalleryModeOption(
-                    url,
-                  );
+                      await _maybeToggleLocalGalleryModeOption(url);
                   if (modeToggleMessage != null) {
                     Bus.instance.fire(AppModeChangedEvent());
                     showToast(context, modeToggleMessage);
@@ -108,8 +104,8 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                       title: AppLocalizations.of(context).invalidEndpoint,
                       message:
                           AppLocalizations.of(context).invalidEndpointMessage +
-                              "\n" +
-                              e.toString(),
+                          "\n" +
+                          e.toString(),
                       assetPath: 'assets/warning-green.png',
                     );
                   }
@@ -125,8 +121,8 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   Future<void> _ping(String endpoint) async {
     try {
       final response = await NetworkClient.instance.getDio().get(
-            '$endpoint/ping',
-          );
+        '$endpoint/ping',
+      );
       if (response.data['message'] != 'pong') {
         throw Exception('Invalid response');
       }

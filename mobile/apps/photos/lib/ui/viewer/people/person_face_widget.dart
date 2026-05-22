@@ -47,9 +47,9 @@ class PersonFaceWidget extends StatefulWidget {
     this.cachedPixelWidth,
     super.key,
   }) : assert(
-          personId != null || clusterID != null,
-          "PersonFaceWidget requires either personId or clusterID to be non-null",
-        );
+         personId != null || clusterID != null,
+         "PersonFaceWidget requires either personId or clusterID to be non-null",
+       );
 
   @override
   State<PersonFaceWidget> createState() => _PersonFaceWidgetState();

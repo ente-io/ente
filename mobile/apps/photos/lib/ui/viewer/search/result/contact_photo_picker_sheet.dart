@@ -14,9 +14,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 
-Future<EnteFile?> showContactPhotoPickerSheet(
-  BuildContext context,
-) {
+Future<EnteFile?> showContactPhotoPickerSheet(BuildContext context) {
   return showBarModalBottomSheet<EnteFile>(
     context: context,
     builder: (context) => const _ContactPhotoPickerSheet(),
@@ -60,16 +58,17 @@ class _ContactPhotoPickerSheet extends StatelessWidget {
                   Expanded(
                     child: GalleryFilesState(
                       child: Gallery(
-                        asyncLoader: (
-                          creationStartTime,
-                          creationEndTime, {
-                          limit,
-                          asc,
-                        }) async {
-                          final files = await SearchService.instance
-                              .getAllFilesForContactPhotoPicker();
-                          return FileLoadResult(files, false);
-                        },
+                        asyncLoader:
+                            (
+                              creationStartTime,
+                              creationEndTime, {
+                              limit,
+                              asc,
+                            }) async {
+                              final files = await SearchService.instance
+                                  .getAllFilesForContactPhotoPicker();
+                              return FileLoadResult(files, false);
+                            },
                         tagPrefix: "pick_contact_photo_gallery",
                         selectedFiles: selectedFiles,
                         limitSelectionToOne: true,
@@ -103,8 +102,9 @@ class _ContactPhotoPickerSheet extends StatelessWidget {
                             key: ValueKey(value),
                             isDisabled: !value,
                             buttonType: ButtonType.neutral,
-                            labelText:
-                                AppLocalizations.of(context).useSelectedPhoto,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).useSelectedPhoto,
                             onTap: () async {
                               Navigator.pop(context, selectedFiles.files.first);
                             },

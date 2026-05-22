@@ -219,8 +219,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                             if (_emailIsValid !=
                                 EmailValidator.validate(_email!)) {
                               setState(() {
-                                _emailIsValid =
-                                    EmailValidator.validate(_email!);
+                                _emailIsValid = EmailValidator.validate(
+                                  _email!,
+                                );
                               });
                             }
                           },
@@ -281,20 +282,22 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                     },
                                   )
                                 : _passwordIsValid
-                                    ? Icon(
-                                        Icons.check,
-                                        color: colorScheme.primary700,
-                                      )
-                                    : null,
+                                ? Icon(
+                                    Icons.check,
+                                    color: colorScheme.primary700,
+                                  )
+                                : null,
                           ),
                           focusNode: _password1FocusNode,
                           onChanged: (password) {
                             if (password != _password) {
                               setState(() {
                                 _password = password;
-                                _passwordStrength =
-                                    estimatePasswordStrength(password);
-                                _passwordIsValid = _passwordStrength >=
+                                _passwordStrength = estimatePasswordStrength(
+                                  password,
+                                );
+                                _passwordIsValid =
+                                    _passwordStrength >=
                                     kMildPasswordStrengthThreshold;
                                 _passwordsMatch = _password == _cnfPassword;
                               });
@@ -359,11 +362,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                     },
                                   )
                                 : _passwordsMatch
-                                    ? Icon(
-                                        Icons.check,
-                                        color: colorScheme.primary700,
-                                      )
-                                    : null,
+                                ? Icon(
+                                    Icons.check,
+                                    color: colorScheme.primary700,
+                                  )
+                                : null,
                           ),
                           focusNode: _password2FocusNode,
                           onChanged: (cnfPassword) {
@@ -376,13 +379,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           },
                         ),
                         Opacity(
-                          opacity:
-                              (_password != '') && _password1InFocus ? 1 : 0,
+                          opacity: (_password != '') && _password1InFocus
+                              ? 1
+                              : 0,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Text(
-                              context.strings
-                                  .passwordStrength(passwordStrengthText),
+                              context.strings.passwordStrength(
+                                passwordStrengthText,
+                              ),
                               style: TextStyle(
                                 color: passwordStrengthColor,
                                 fontWeight: FontWeight.w500,
@@ -432,10 +437,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                   const SizedBox(height: 16),
                   Column(
-                    children: [
-                      _getTOSAgreement(),
-                      _getPasswordAgreement(),
-                    ],
+                    children: [_getTOSAgreement(), _getPasswordAgreement()],
                   ),
                 ],
               ),
@@ -485,24 +487,20 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 'u-terms': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
                       PlatformUtil.openWebView(
-                    context,
-                    context.strings.termsOfServicesTitle,
-                    "https://ente.com/terms",
-                  ),
-                  style: const TextStyle(
-                    decoration: TextDecoration.underline,
-                  ),
+                        context,
+                        context.strings.termsOfServicesTitle,
+                        "https://ente.com/terms",
+                      ),
+                  style: const TextStyle(decoration: TextDecoration.underline),
                 ),
                 'u-policy': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
                       PlatformUtil.openWebView(
-                    context,
-                    context.strings.privacyPolicyTitle,
-                    "https://ente.com/privacy",
-                  ),
-                  style: const TextStyle(
-                    decoration: TextDecoration.underline,
-                  ),
+                        context,
+                        context.strings.privacyPolicyTitle,
+                        "https://ente.com/privacy",
+                      ),
+                  style: const TextStyle(decoration: TextDecoration.underline),
                 ),
               },
             ),
@@ -551,13 +549,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 'underline': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
                       PlatformUtil.openWebView(
-                    context,
-                    context.strings.encryption,
-                    "https://ente.com/architecture",
-                  ),
-                  style: const TextStyle(
-                    decoration: TextDecoration.underline,
-                  ),
+                        context,
+                        context.strings.encryption,
+                        "https://ente.com/architecture",
+                      ),
+                  style: const TextStyle(decoration: TextDecoration.underline),
                 ),
               },
             ),

@@ -205,7 +205,8 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
   }
 
   void _syncLoadingController() {
-    final showLoading = _executionState == ExecutionState.inProgress &&
+    final showLoading =
+        _executionState == ExecutionState.inProgress &&
         widget.shouldSurfaceExecutionStates;
     if (showLoading) {
       if (!_loadingController.isAnimating) {
@@ -309,8 +310,9 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                 const SizedBox(width: 2),
                 Text(
                   '*',
-                  style:
-                      textTheme.smallBold.copyWith(color: colorScheme.redBase),
+                  style: textTheme.smallBold.copyWith(
+                    color: colorScheme.redBase,
+                  ),
                 ),
               ],
             ],
@@ -322,8 +324,9 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
           behavior: HitTestBehavior.opaque,
           child: Container(
             height: _isMultiline ? null : _kHeight,
-            constraints:
-                _isMultiline ? const BoxConstraints(minHeight: _kHeight) : null,
+            constraints: _isMultiline
+                ? const BoxConstraints(minHeight: _kHeight)
+                : null,
             padding: EdgeInsets.symmetric(
               horizontal: _kHorizontalPadding,
               vertical: _isMultiline ? 16 : 0,
@@ -335,10 +338,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
             ),
             child: Row(
               children: [
-                if (leading != null) ...[
-                  leading,
-                  const SizedBox(width: 8),
-                ],
+                if (leading != null) ...[leading, const SizedBox(width: 8)],
                 Expanded(
                   child: TextField(
                     controller: _textController,
@@ -352,11 +352,13 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                         ? 1
                         : widget.maxLines ?? (_isMultiline ? null : 1),
                     minLines: widget.isPasswordInput ? null : widget.minLines,
-                    autofillHints: widget.autofillHints ??
+                    autofillHints:
+                        widget.autofillHints ??
                         (widget.isPasswordInput
                             ? const [AutofillHints.password]
                             : const []),
-                    inputFormatters: widget.textInputFormatter ??
+                    inputFormatters:
+                        widget.textInputFormatter ??
                         (widget.maxLength != null
                             ? [
                                 LengthLimitingTextInputFormatter(
@@ -372,24 +374,19 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                       contentPadding: EdgeInsets.zero,
                       isDense: true,
                       hintText: widget.hintText,
-                      hintStyle:
-                          textTheme.body.copyWith(color: colors.hintColor),
+                      hintStyle: textTheme.body.copyWith(
+                        color: colors.hintColor,
+                      ),
                     ),
                     onEditingComplete: _handleEditingComplete,
                   ),
                 ),
-                if (trailing != null) ...[
-                  const SizedBox(width: 8),
-                  trailing,
-                ],
+                if (trailing != null) ...[const SizedBox(width: 8), trailing],
               ],
             ),
           ),
         ),
-        if (messageRow != null) ...[
-          const SizedBox(height: 8),
-          messageRow,
-        ],
+        if (messageRow != null) ...[const SizedBox(height: 8), messageRow],
       ],
     );
   }
@@ -479,10 +476,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (icon != null) ...[
-          icon,
-          const SizedBox(width: 8),
-        ],
+        if (icon != null) ...[icon, const SizedBox(width: 8)],
         Expanded(
           child: Text(
             widget.message!,
@@ -500,15 +494,15 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
 
     return switch (widget.messageType) {
       TextInputMessageType.alert => HugeIcon(
-          icon: HugeIcons.strokeRoundedAlert02,
-          size: 18,
-          color: color,
-        ),
+        icon: HugeIcons.strokeRoundedAlert02,
+        size: 18,
+        color: color,
+      ),
       TextInputMessageType.success => HugeIcon(
-          icon: HugeIcons.strokeRoundedTick02,
-          size: 18,
-          color: color,
-        ),
+        icon: HugeIcons.strokeRoundedTick02,
+        size: 18,
+        color: color,
+      ),
       TextInputMessageType.error || TextInputMessageType.guide => null,
     };
   }

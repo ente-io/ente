@@ -2,10 +2,7 @@ import "package:ente_auth/l10n/l10n.dart";
 import "package:flutter/material.dart";
 
 class AddTagDialog extends StatefulWidget {
-  const AddTagDialog({
-    super.key,
-    required this.onTap,
-  });
+  const AddTagDialog({super.key, required this.onTap});
 
   final void Function(String) onTap;
 
@@ -30,9 +27,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
               maxLength: 100,
               decoration: InputDecoration(
                 hintText: l10n.tag,
-                hintStyle: const TextStyle(
-                  color: Colors.white30,
-                ),
+                hintStyle: const TextStyle(color: Colors.white30),
                 contentPadding: const EdgeInsets.all(12),
               ),
               onChanged: (value) {
@@ -51,9 +46,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
         TextButton(
           child: Text(
             l10n.cancel,
-            style: const TextStyle(
-              color: Colors.redAccent,
-            ),
+            style: const TextStyle(color: Colors.redAccent),
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -62,9 +55,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
         TextButton(
           child: Text(
             l10n.create,
-            style: const TextStyle(
-              color: Colors.purple,
-            ),
+            style: const TextStyle(color: Colors.purple),
           ),
           onPressed: () {
             if (_tag.trim().isEmpty) return;

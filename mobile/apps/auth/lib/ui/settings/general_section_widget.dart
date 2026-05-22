@@ -44,9 +44,7 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.language,
-          ),
+          captionedTextWidget: CaptionedTextWidget(title: l10n.language),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -55,40 +53,29 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
             // ignore: unawaited_futures
             auth_nav.routeToPage(
               context,
-              LanguageSelectorPage(
-                appSupportedLocales,
-                (locale) async {
-                  await setLocale(locale);
-                  App.setLocale(context, locale);
-                },
-                locale,
-              ),
+              LanguageSelectorPage(appSupportedLocales, (locale) async {
+                await setLocale(locale);
+                App.setLocale(context, locale);
+              }, locale),
             );
           },
         ),
         sectionOptionSpacing,
         if (Platform.isIOS || Platform.isAndroid) ...[
           MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: l10n.appIcon,
-            ),
+            captionedTextWidget: CaptionedTextWidget(title: l10n.appIcon),
             pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIcon: Icons.chevron_right_outlined,
             trailingIconIsMuted: true,
             onTap: () async {
               // ignore: unawaited_futures
-              auth_nav.routeToPage(
-                context,
-                const AppIconSelectionScreen(),
-              );
+              auth_nav.routeToPage(context, const AppIconSelectionScreen());
             },
           ),
           sectionOptionSpacing,
         ],
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.showLargeIcons,
-          ),
+          captionedTextWidget: CaptionedTextWidget(title: l10n.showLargeIcons),
           trailingWidget: ToggleSwitchWidget(
             value: () => PreferenceService.instance.shouldShowLargeIcons(),
             onChanged: () async {
@@ -101,9 +88,7 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.compactMode,
-          ),
+          captionedTextWidget: CaptionedTextWidget(title: l10n.compactMode),
           trailingWidget: ToggleSwitchWidget(
             value: () => PreferenceService.instance.isCompactMode(),
             onChanged: () async {
@@ -117,9 +102,7 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.shouldHideCode,
-          ),
+          captionedTextWidget: CaptionedTextWidget(title: l10n.shouldHideCode),
           trailingWidget: ToggleSwitchWidget(
             value: () => PreferenceService.instance.shouldHideCodes(),
             onChanged: () async {

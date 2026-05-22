@@ -70,35 +70,38 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
                         _searchFilterDataProvider.applyFilters([filter]);
                       },
                       remove: () {
-                        _searchFilterDataProvider
-                            .removeAppliedFilters([filter]);
+                        _searchFilterDataProvider.removeAppliedFilters([
+                          filter,
+                        ]);
                       },
                       isApplied: filter.isApplied,
                     )
                   : filter is OnlyThemFilter
-                      ? OnlyThemFilterChip(
-                          faceFilters: filter.faceFilters,
-                          apply: () {
-                            _searchFilterDataProvider.applyFilters([filter]);
-                          },
-                          remove: () {
-                            _searchFilterDataProvider
-                                .removeAppliedFilters([filter]);
-                          },
-                          isApplied: filter.isApplied,
-                        )
-                      : GenericFilterChip(
-                          label: filter.name(),
-                          apply: () {
-                            _searchFilterDataProvider.applyFilters([filter]);
-                          },
-                          remove: () {
-                            _searchFilterDataProvider
-                                .removeAppliedFilters([filter]);
-                          },
-                          leadingIcon: filter.icon(),
-                          isApplied: filter.isApplied,
-                        ),
+                  ? OnlyThemFilterChip(
+                      faceFilters: filter.faceFilters,
+                      apply: () {
+                        _searchFilterDataProvider.applyFilters([filter]);
+                      },
+                      remove: () {
+                        _searchFilterDataProvider.removeAppliedFilters([
+                          filter,
+                        ]);
+                      },
+                      isApplied: filter.isApplied,
+                    )
+                  : GenericFilterChip(
+                      label: filter.name(),
+                      apply: () {
+                        _searchFilterDataProvider.applyFilters([filter]);
+                      },
+                      remove: () {
+                        _searchFilterDataProvider.removeAppliedFilters([
+                          filter,
+                        ]);
+                      },
+                      leadingIcon: filter.icon(),
+                      isApplied: filter.isApplied,
+                    ),
             );
           },
           scrollDirection: Axis.horizontal,

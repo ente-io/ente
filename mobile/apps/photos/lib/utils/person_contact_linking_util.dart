@@ -7,9 +7,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/dialog_util.dart";
 
-Future<bool> checkIfEmailAlreadyAssignedToAPerson(
-  String email,
-) async {
+Future<bool> checkIfEmailAlreadyAssignedToAPerson(String email) async {
   final persons = await PersonService.instance.getPersons();
   for (var person in persons) {
     if (person.data.email == email) {
@@ -39,10 +37,7 @@ Future<void> showAlreadyLinkedEmailDialog(
     firstButtonOnTap: () async {
       await routeToPage(
         context,
-        PeoplePage(
-          person: person,
-          searchResult: null,
-        ),
+        PeoplePage(person: person, searchResult: null),
       );
     },
     isCritical: false,

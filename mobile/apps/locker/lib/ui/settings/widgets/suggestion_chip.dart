@@ -6,11 +6,7 @@ class SuggestionChip extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
 
-  const SuggestionChip({
-    required this.label,
-    this.onTap,
-    super.key,
-  });
+  const SuggestionChip({required this.label, this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +33,7 @@ class SuggestionChip extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               label,
-              style: textTheme.small.copyWith(
-                color: colorScheme.textBase,
-              ),
+              style: textTheme.small.copyWith(color: colorScheme.textBase),
             ),
           ],
         ),

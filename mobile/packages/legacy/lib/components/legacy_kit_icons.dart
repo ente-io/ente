@@ -7,11 +7,7 @@ class LegacyKitDownloadIcon extends StatelessWidget {
   final Color color;
   final double size;
 
-  const LegacyKitDownloadIcon({
-    required this.color,
-    this.size = 18,
-    super.key,
-  });
+  const LegacyKitDownloadIcon({required this.color, this.size = 18, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +24,7 @@ class LegacyKitShareIcon extends StatelessWidget {
   final Color color;
   final double size;
 
-  const LegacyKitShareIcon({
-    required this.color,
-    this.size = 18,
-    super.key,
-  });
+  const LegacyKitShareIcon({required this.color, this.size = 18, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,11 +41,7 @@ class LegacyKitEditIcon extends StatelessWidget {
   final Color color;
   final double size;
 
-  const LegacyKitEditIcon({
-    required this.color,
-    this.size = 18,
-    super.key,
-  });
+  const LegacyKitEditIcon({required this.color, this.size = 18, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +58,7 @@ class LegacyKitClockIcon extends StatelessWidget {
   final Color color;
   final double size;
 
-  const LegacyKitClockIcon({
-    required this.color,
-    this.size = 18,
-    super.key,
-  });
+  const LegacyKitClockIcon({required this.color, this.size = 18, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -91,11 +75,7 @@ class LegacyKitRowIcon extends StatelessWidget {
   final Color color;
   final double size;
 
-  const LegacyKitRowIcon({
-    required this.color,
-    this.size = 18,
-    super.key,
-  });
+  const LegacyKitRowIcon({required this.color, this.size = 18, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -111,10 +91,7 @@ class LegacyKitRowIcon extends StatelessWidget {
 class LegacyKitAlertIcon extends StatelessWidget {
   final double size;
 
-  const LegacyKitAlertIcon({
-    this.size = 18,
-    super.key,
-  });
+  const LegacyKitAlertIcon({this.size = 18, super.key});
 
   @override
   Widget build(BuildContext context) {

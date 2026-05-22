@@ -21,15 +21,13 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   @override
   void initState() {
     super.initState();
-    AdaptiveTheme.getThemeMode().then(
-      (value) {
-        currentThemeMode = value ?? AdaptiveThemeMode.system;
-        debugPrint('theme value $value');
-        if (mounted) {
-          setState(() => {});
-        }
-      },
-    );
+    AdaptiveTheme.getThemeMode().then((value) {
+      currentThemeMode = value ?? AdaptiveThemeMode.system;
+      debugPrint('theme value $value');
+      if (mounted) {
+        setState(() => {});
+      }
+    });
   }
 
   @override

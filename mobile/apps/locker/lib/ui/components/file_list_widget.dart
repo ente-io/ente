@@ -40,7 +40,8 @@ class FileListWidget extends StatelessWidget {
         : null;
 
     final int? currentUserID = Configuration.instance.getUserID();
-    final bool isOwner = collection != null &&
+    final bool isOwner =
+        collection != null &&
         currentUserID != null &&
         collection.isOwner(currentUserID);
     final List<User> sharees =

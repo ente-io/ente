@@ -8,10 +8,7 @@ import "package:photos/ui/components/thumbnail_list_item.dart";
 class NewAlbumListItemWidget extends StatelessWidget {
   final Future<void> Function(BuildContext context)? onTap;
 
-  const NewAlbumListItemWidget({
-    super.key,
-    this.onTap,
-  });
+  const NewAlbumListItemWidget({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {

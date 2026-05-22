@@ -89,9 +89,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused &&
         (!this._isLocked && this._didUnlockForAppLaunch)) {
       this._backgroundLockLatencyTimer = Timer(
-        Duration(
-          milliseconds: LockScreenSettings.instance.getAutoLockTime(),
-        ),
+        Duration(milliseconds: LockScreenSettings.instance.getAutoLockTime()),
         () => this.showLockScreen(),
       );
     }
@@ -145,10 +143,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   }
 
   Widget get _lockScreen {
-    return PopScope(
-      canPop: false,
-      child: this.widget.lockScreen,
-    );
+    return PopScope(canPop: false, child: this.widget.lockScreen);
   }
 
   /// Causes `AppLock` to either pop the [lockScreen] if the app is already running
@@ -198,21 +193,27 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   /// Show the [lockScreen] for automatic locking (app launch, background resume).
   Future<void> showLockScreen() {
     this._isLocked = true;
-    return _navigatorKey.currentState!
-        .pushNamed('/lock-screen', arguments: {"manual": false});
+    return _navigatorKey.currentState!.pushNamed(
+      '/lock-screen',
+      arguments: {"manual": false},
+    );
   }
 
   /// Show the [lockScreen] for user-initiated manual lock (no auto-auth on first frame).
   Future<void> showManualLockScreen() {
     this._isLocked = true;
-    return _navigatorKey.currentState!
-        .pushNamed('/lock-screen', arguments: {"manual": true});
+    return _navigatorKey.currentState!.pushNamed(
+      '/lock-screen',
+      arguments: {"manual": true},
+    );
   }
 
   void _didUnlockOnAppLaunch(Object? args) {
     this._didUnlockForAppLaunch = true;
-    _navigatorKey.currentState!
-        .pushReplacementNamed('/unlocked', arguments: args);
+    _navigatorKey.currentState!.pushReplacementNamed(
+      '/unlocked',
+      arguments: args,
+    );
   }
 
   void _didUnlockOnAppPaused() {

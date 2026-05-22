@@ -21,10 +21,7 @@ import "package:locker/ui/settings/widgets/social_icons_row.dart";
 class SettingsWidget extends StatelessWidget {
   final bool hasLoggedIn;
 
-  const SettingsWidget({
-    required this.hasLoggedIn,
-    super.key,
-  });
+  const SettingsWidget({required this.hasLoggedIn, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -117,9 +114,7 @@ class SettingsWidget extends StatelessWidget {
   }
 
   void _navigateTo(BuildContext context, Widget page) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => page),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => page));
   }
 
   void _onGeneralTapped(BuildContext context) {

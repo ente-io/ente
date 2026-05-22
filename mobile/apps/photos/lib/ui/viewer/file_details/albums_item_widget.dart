@@ -18,19 +18,16 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 class AlbumsItemWidget extends StatelessWidget {
   final EnteFile file;
   final int currentUserID;
-  const AlbumsItemWidget(
-    this.file,
-    this.currentUserID, {
-    super.key,
-  });
+  const AlbumsItemWidget(this.file, this.currentUserID, {super.key});
 
   @override
   Widget build(BuildContext context) {
     final fileIsBackedup = file.uploadedFileID == null ? false : true;
     late Future<Set<int>> allCollectionIDsOfFile;
     //Typing this as Future<Set<T>> as it would be easier to implement showing multiple device folders for a file in the future
-    final Future<Set<String>> allDeviceFoldersOfFile =
-        Future.sync(() => {file.deviceFolder ?? ''});
+    final Future<Set<String>> allDeviceFoldersOfFile = Future.sync(
+      () => {file.deviceFolder ?? ''},
+    );
     if (fileIsBackedup) {
       allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
         file.uploadedFileID!,
@@ -56,18 +53,16 @@ class AlbumsItemWidget extends StatelessWidget {
   ) async {
     try {
       final chipButtons = <ChipButtonWidget>[];
-      final List<String> deviceFolders =
-          (await allDeviceFoldersOfFile).toList();
+      final List<String> deviceFolders = (await allDeviceFoldersOfFile)
+          .toList();
       for (var deviceFolder in deviceFolders) {
-        chipButtons.add(
-          ChipButtonWidget(
-            deviceFolder,
-          ),
-        );
+        chipButtons.add(ChipButtonWidget(deviceFolder));
       }
       return chipButtons;
     } catch (e, s) {
-      Logger("AlbumsItemWidget").info("Failed to build owned album chips", e, s);
+      Logger(
+        "AlbumsItemWidget",
+      ).info("Failed to build owned album chips", e, s);
       return [];
     }
   }
@@ -125,7 +120,9 @@ class AlbumsItemWidget extends StatelessWidget {
 
       return chipButtons;
     } catch (e, s) {
-      Logger("AlbumsItemWidget").info("Failed to build shared album chips", e, s);
+      Logger(
+        "AlbumsItemWidget",
+      ).info("Failed to build shared album chips", e, s);
       return [];
     }
   }

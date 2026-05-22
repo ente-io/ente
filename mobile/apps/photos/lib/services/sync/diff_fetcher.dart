@@ -19,12 +19,7 @@ import "package:photos/utils/file_key.dart";
 // Skip processing these fileIDs during diff for the given collection.
 // Used to unblock a specific user whose sync is failing on these files.
 const int _skipCollectionID = 1580559966740107;
-const Set<int> _skipFileIDs = {
-  588219655,
-  588220428,
-  588220482,
-  588220590,
-};
+const Set<int> _skipFileIDs = {588219655, 588220428, 588220482, 588220590};
 
 class DiffFetcher {
   final _logger = Logger("DiffFetcher");
@@ -37,10 +32,12 @@ class DiffFetcher {
     try {
       bool hasMore = false;
       final sharedFiles = <EnteFile>[];
-      final headers =
-          CollectionsService.instance.publicCollectionHeaders(collectionID);
-      final collectionKey =
-          CollectionsService.instance.getPublicCollectionKey(collectionID);
+      final headers = CollectionsService.instance.publicCollectionHeaders(
+        collectionID,
+      );
+      final collectionKey = CollectionsService.instance.getPublicCollectionKey(
+        collectionID,
+      );
       int sinceTime = 0;
 
       do {
@@ -79,8 +76,9 @@ class DiffFetcher {
             fileKey,
             CryptoUtil.base642bin(file.metadataDecryptionHeader!),
           );
-          final Map<String, dynamic> metadata =
-              jsonDecode(utf8.decode(encodedMetadata));
+          final Map<String, dynamic> metadata = jsonDecode(
+            utf8.decode(encodedMetadata),
+          );
           file.applyMetadata(metadata);
           if (item['pubMagicMetadata'] != null) {
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
@@ -90,8 +88,9 @@ class DiffFetcher {
             );
             file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
             file.pubMmdVersion = item['pubMagicMetadata']['version'];
-            file.pubMagicMetadata =
-                PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
+            file.pubMagicMetadata = PubMagicMetadata.fromEncodedJson(
+              file.pubMmdEncodedJson!,
+            );
           }
 
           // To avoid local file to be used as thumbnail or full file.
@@ -132,8 +131,9 @@ class DiffFetcher {
       final currentUserID = Configuration.instance.getUserID();
       late Set<int> existingUploadIDs;
       if (diff.isNotEmpty) {
-        existingUploadIDs =
-            await FilesDB.instance.getUploadedFileIDs(collectionID);
+        existingUploadIDs = await FilesDB.instance.getUploadedFileIDs(
+          collectionID,
+        );
       }
       final deletedFiles = <EnteFile>[];
       final updatedFiles = <EnteFile>[];
@@ -164,8 +164,10 @@ class DiffFetcher {
           continue;
         }
         if (existingUploadIDs.contains(file.uploadedFileID)) {
-          final existingFile = await FilesDB.instance
-              .getUploadedFile(file.uploadedFileID!, file.collectionID!);
+          final existingFile = await FilesDB.instance.getUploadedFile(
+            file.uploadedFileID!,
+            file.collectionID!,
+          );
           if (existingFile != null) {
             file.generatedID = existingFile.generatedID;
           }
@@ -186,8 +188,9 @@ class DiffFetcher {
           fileKey,
           CryptoUtil.base642bin(file.metadataDecryptionHeader!),
         );
-        final Map<String, dynamic> metadata =
-            jsonDecode(utf8.decode(encodedMetadata));
+        final Map<String, dynamic> metadata = jsonDecode(
+          utf8.decode(encodedMetadata),
+        );
         file.applyMetadata(metadata);
         if (item['magicMetadata'] != null) {
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
@@ -197,8 +200,9 @@ class DiffFetcher {
           );
           file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
           file.mMdVersion = item['magicMetadata']['version'];
-          file.magicMetadata =
-              MagicMetadata.fromEncodedJson(file.mMdEncodedJson!);
+          file.magicMetadata = MagicMetadata.fromEncodedJson(
+            file.mMdEncodedJson!,
+          );
         }
         if (item['pubMagicMetadata'] != null) {
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
@@ -208,13 +212,15 @@ class DiffFetcher {
           );
           file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
           file.pubMmdVersion = item['pubMagicMetadata']['version'];
-          file.pubMagicMetadata =
-              PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
+          file.pubMagicMetadata = PubMagicMetadata.fromEncodedJson(
+            file.pubMmdEncodedJson!,
+          );
         }
         if (collectionAddedAt != null && collectionAddedAt > 0) {
           final isShared =
               currentUserID != null && file.ownerID != currentUserID;
-          final isOwnCollect = currentUserID != null &&
+          final isOwnCollect =
+              currentUserID != null &&
               file.ownerID == currentUserID &&
               file.isCollect;
           if (isShared) {
@@ -249,8 +255,10 @@ class DiffFetcher {
         );
       }
 
-      _logger.info('[Collection-$collectionID] parsed ${diff.length} '
-          'diff items ( ${updatedFiles.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+      _logger.info(
+        '[Collection-$collectionID] parsed ${diff.length} '
+        'diff items ( ${updatedFiles.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms',
+      );
       return Diff(updatedFiles, deletedFiles, hasMore, latestUpdatedAtTime);
     } catch (e, s) {
       _logger.severe("Failed to parse collection diff", e, s);
@@ -262,7 +270,7 @@ class DiffFetcher {
     required int collectionID,
     required int currentUserID,
     required Map<int, List<_OwnCollectCandidate>>
-        ownCollectCandidatesByUploadID,
+    ownCollectCandidatesByUploadID,
   }) async {
     if (ownCollectCandidatesByUploadID.isEmpty) {
       return;
@@ -276,11 +284,11 @@ class DiffFetcher {
       incomingMinByUploadID[entry.key] = minIncoming;
     }
 
-    final dbMinByUploadID =
-        await FilesDB.instance.getMinPositiveAddedTimeForUploadedFiles(
-      incomingMinByUploadID.keys.toSet(),
-      currentUserID,
-    );
+    final dbMinByUploadID = await FilesDB.instance
+        .getMinPositiveAddedTimeForUploadedFiles(
+          incomingMinByUploadID.keys.toSet(),
+          currentUserID,
+        );
 
     var collectCandidatesCount = 0;
     var keptIncomingCount = 0;

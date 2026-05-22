@@ -45,8 +45,9 @@ class CodeStore {
 
       int newIndex = codes.indexOf(code);
       if (oldIndex != newIndex) {
-        Code updatedCode =
-            code.copyWith(display: code.display.copyWith(position: newIndex));
+        Code updatedCode = code.copyWith(
+          display: code.display.copyWith(position: newIndex),
+        );
         await addCode(
           updatedCode,
           shouldSync: false,
@@ -70,8 +71,9 @@ class CodeStore {
   }) async {
     _cacheCodes.clear();
     final mode = accountMode ?? _authenticatorService.getAccountMode();
-    final List<EntityResult> entities =
-        await _authenticatorService.getEntities(mode);
+    final List<EntityResult> entities = await _authenticatorService.getEntities(
+      mode,
+    );
     final List<Code> codes = [];
 
     for (final entity in entities) {
@@ -99,8 +101,10 @@ class CodeStore {
         if (secondCode.isPinned && !firstCode.isPinned) return 1;
         if (!secondCode.isPinned && firstCode.isPinned) return -1;
 
-        final issuerComparison =
-            compareAsciiLowerCaseNatural(firstCode.issuer, secondCode.issuer);
+        final issuerComparison = compareAsciiLowerCaseNatural(
+          firstCode.issuer,
+          secondCode.issuer,
+        );
         if (issuerComparison != 0) {
           return issuerComparison;
         }
@@ -184,10 +188,9 @@ class CodeStore {
       }
       logger.info('start import');
 
-      List<Code> offlineCodes = (await CodeStore.instance
-              .getAllCodes(accountMode: AccountMode.offline))
-          .where((element) => !element.hasError)
-          .toList();
+      List<Code> offlineCodes = (await CodeStore.instance.getAllCodes(
+        accountMode: AccountMode.offline,
+      )).where((element) => !element.hasError).toList();
       if (offlineCodes.isEmpty) {
         return;
       }
@@ -196,10 +199,9 @@ class CodeStore {
         logger.info("skip as online sync is not done");
         return;
       }
-      final List<Code> onlineCodes = (await CodeStore.instance
-              .getAllCodes(accountMode: AccountMode.online))
-          .where((element) => !element.hasError)
-          .toList();
+      final List<Code> onlineCodes = (await CodeStore.instance.getAllCodes(
+        accountMode: AccountMode.online,
+      )).where((element) => !element.hasError).toList();
       logger.info(
         'importing ${offlineCodes.length} offline codes with ${onlineCodes.length} online codes',
       );
@@ -248,8 +250,4 @@ class CodeStore {
   }
 }
 
-enum AddResult {
-  newCode,
-  duplicate,
-  updateCode,
-}
+enum AddResult { newCode, duplicate, updateCode }

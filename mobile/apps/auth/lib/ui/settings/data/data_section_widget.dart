@@ -41,9 +41,7 @@ class DataSectionWidget extends StatelessWidget {
     children.addAll([
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.importCodes,
-        ),
+        captionedTextWidget: CaptionedTextWidget(title: l10n.importCodes),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -53,9 +51,7 @@ class DataSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.exportCodes,
-        ),
+        captionedTextWidget: CaptionedTextWidget(title: l10n.exportCodes),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -65,15 +61,14 @@ class DataSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.duplicateCodes,
-        ),
+        captionedTextWidget: CaptionedTextWidget(title: l10n.duplicateCodes),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          final List<DuplicateCodes> duplicateCodes =
-              await DeduplicationService.instance.getDuplicateCodes();
+          final List<DuplicateCodes> duplicateCodes = await DeduplicationService
+              .instance
+              .getDuplicateCodes();
           if (duplicateCodes.isEmpty) {
             unawaited(
               showChoiceDialog(
@@ -108,8 +103,6 @@ class DataSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
       ],
     ]);
-    return Column(
-      children: children,
-    );
+    return Column(children: children);
   }
 }

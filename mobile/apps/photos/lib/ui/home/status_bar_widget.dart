@@ -43,7 +43,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
-  bool _showMlBanner = !hasGrantedMLConsent &&
+  bool _showMlBanner =
+      !hasGrantedMLConsent &&
       (isLocalGalleryMode || flagService.hasSyncedAccountFlags()) &&
       !localSettings.hasSeenMLEnablingBanner;
   Error? _syncError;
@@ -88,12 +89,13 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         setState(() {});
       }
     });
-    _christmasBannerSubscription =
-        Bus.instance.on<ChristmasBannerEvent>().listen((_) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    _christmasBannerSubscription = Bus.instance
+        .on<ChristmasBannerEvent>()
+        .listen((_) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
 
     super.initState();
   }
@@ -235,7 +237,8 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isNotOutdatedEvent = _event != null &&
+    final bool isNotOutdatedEvent =
+        _event != null &&
         (_event!.status == SyncStatus.completedBackup ||
             _event!.status == SyncStatus.completedFirstGalleryImport) &&
         (DateTime.now().microsecondsSinceEpoch - _event!.timestamp >

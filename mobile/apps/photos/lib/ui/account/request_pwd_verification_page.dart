@@ -88,15 +88,15 @@ class _RequestPasswordVerificationPageState
                   );
                   await dialog.show();
                   try {
-                    final attributes =
-                        Configuration.instance.getKeyAttributes()!;
+                    final attributes = Configuration.instance
+                        .getKeyAttributes()!;
                     final Uint8List keyEncryptionKey =
                         await CryptoUtil.deriveKey(
-                      utf8.encode(_passwordController.text),
-                      CryptoUtil.base642bin(attributes.kekSalt),
-                      attributes.memLimit!,
-                      attributes.opsLimit!,
-                    );
+                          utf8.encode(_passwordController.text),
+                          CryptoUtil.base642bin(attributes.kekSalt),
+                          attributes.memLimit!,
+                          attributes.opsLimit!,
+                        );
                     CryptoUtil.decryptSync(
                       CryptoUtil.base642bin(attributes.encryptedKey),
                       keyEncryptionKey,
@@ -160,9 +160,7 @@ class _RequestPasswordVerificationPageState
                   // password
                   visible: false,
                   child: TextFormField(
-                    autofillHints: const [
-                      AutofillHints.email,
-                    ],
+                    autofillHints: const [AutofillHints.email],
                     autocorrect: false,
                     keyboardType: TextInputType.emailAddress,
                     initialValue: email,
@@ -200,9 +198,7 @@ class _RequestPasswordVerificationPageState
                             )
                           : null,
                     ),
-                    style: const TextStyle(
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(fontSize: 14),
                     controller: _passwordController,
                     autofocus: true,
                     autocorrect: false,

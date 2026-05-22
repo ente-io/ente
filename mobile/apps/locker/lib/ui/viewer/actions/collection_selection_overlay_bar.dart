@@ -34,8 +34,9 @@ class _CollectionSelectionOverlayBarState
   int get _currentUserID => Configuration.instance.getUserID()!;
 
   List<Collection> _getOwnedCollections(List<Collection> collections) {
-    final ownedCollections =
-        collections.where((c) => c.isOwner(_currentUserID)).toList();
+    final ownedCollections = collections
+        .where((c) => c.isOwner(_currentUserID))
+        .toList();
 
     final sharedCount = collections.length - ownedCollections.length;
     if (sharedCount > 0 && mounted) {
@@ -112,7 +113,7 @@ class _CollectionSelectionOverlayBarState
                                 builder: (context, child) {
                                   final isAllSelected =
                                       widget.selectedCollections.count ==
-                                          widget.collections.length;
+                                      widget.collections.length;
                                   final buttonText = isAllSelected
                                       ? context.l10n.deselectAll
                                       : context.l10n.selectAll;
@@ -225,8 +226,9 @@ class _CollectionSelectionOverlayBarState
     final isSingleSelection = selectedCollections.length == 1;
     final collection = isSingleSelection ? selectedCollections.first : null;
 
-    final ownedCollections =
-        selectedCollections.where((c) => c.isOwner(_currentUserID)).toList();
+    final ownedCollections = selectedCollections
+        .where((c) => c.isOwner(_currentUserID))
+        .toList();
     final sharedIncomingCollections = _getSharedIncomingCollections(
       selectedCollections.toList(),
     );
@@ -237,17 +239,13 @@ class _CollectionSelectionOverlayBarState
     final primaryActions = <Widget>[
       if (isSingleSelection && hasOwnedCollections)
         SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedNavigation06,
-          ),
+          hugeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedNavigation06),
           label: context.l10n.share,
           onTap: () => _shareCollection(collection!),
         ),
       if (isSingleSelection && hasOwnedCollections)
         SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedPencilEdit02,
-          ),
+          hugeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit02),
           label: context.l10n.edit,
           onTap: () => _editCollection(collection!),
         ),
@@ -284,9 +282,7 @@ class _CollectionSelectionOverlayBarState
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(24),
       ),
-      child: Row(
-        children: _buildActionRow(primaryActions),
-      ),
+      child: Row(children: _buildActionRow(primaryActions)),
     );
   }
 
@@ -382,15 +378,9 @@ class _CollectionSelectionOverlayBarState
 
     try {
       if (collections.length == 1) {
-        await CollectionActions.leaveCollection(
-          context,
-          collections.first,
-        );
+        await CollectionActions.leaveCollection(context, collections.first);
       } else {
-        await CollectionActions.leaveMultipleCollection(
-          context,
-          collections,
-        );
+        await CollectionActions.leaveMultipleCollection(context, collections);
       }
     } catch (e, s) {
       _logger.severe(e, s);

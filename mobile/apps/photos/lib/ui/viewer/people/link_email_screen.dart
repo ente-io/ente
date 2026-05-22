@@ -71,11 +71,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context).linkEmail,
-        ),
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).linkEmail)),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,13 +93,14 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                 _filteredUsers = _suggestedUsers
                     .where(
                       (element) => element.email.toLowerCase().contains(
-                            _textController.text.trim().toLowerCase(),
-                          ),
+                        _textController.text.trim().toLowerCase(),
+                      ),
                     )
                     .toList();
 
-                final filterdFilesHaveSelectedEmail =
-                    _filteredUsers.any((user) => user.email == _selectedEmail);
+                final filterdFilesHaveSelectedEmail = _filteredUsers.any(
+                  (user) => user.email == _selectedEmail,
+                );
                 if (!filterdFilesHaveSelectedEmail) {
                   _selectedEmail = null;
                 }
@@ -126,8 +123,9 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                 children: [
                   _filteredUsers.isNotEmpty
                       ? MenuSectionTitle(
-                          title: AppLocalizations.of(context)
-                              .orPickFromYourContacts,
+                          title: AppLocalizations.of(
+                            context,
+                          ).orPickFromYourContacts,
                         )
                       : const SizedBox.shrink(),
                   Expanded(
@@ -147,14 +145,16 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                                 currentUser,
                                 type: AvatarType.medium,
                               ),
-                              menuItemColor:
-                                  getEnteColorScheme(context).fillFaint,
-                              pressedColor:
-                                  getEnteColorScheme(context).fillFaint,
+                              menuItemColor: getEnteColorScheme(
+                                context,
+                              ).fillFaint,
+                              pressedColor: getEnteColorScheme(
+                                context,
+                              ).fillFaint,
                               trailingIcon:
                                   (_selectedEmail == currentUser.email)
-                                      ? Icons.check
-                                      : null,
+                                  ? Icons.check
+                                  : null,
                               onTap: () async {
                                 textFieldFocusNode.unfocus();
                                 if (_selectedEmail == currentUser.email) {
@@ -172,8 +172,9 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                                 ? const SizedBox.shrink()
                                 : DividerWidget(
                                     dividerType: DividerType.menu,
-                                    bgColor:
-                                        getEnteColorScheme(context).fillFaint,
+                                    bgColor: getEnteColorScheme(
+                                      context,
+                                    ).fillFaint,
                                   ),
                           ],
                         );
@@ -237,26 +238,22 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
 
         Navigator.of(context).pop(newEmail);
       } catch (e) {
-        await showGenericErrorDialog(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorDialog(context: context, error: e);
         _logger.severe("Failed to link email to person", e);
       }
     }
   }
 
   List<User> _getContacts() {
-    final userEmailsToAviod =
-        PersonService.instance.emailToPartialPersonDataMapCache.keys.toSet();
+    final userEmailsToAviod = PersonService
+        .instance
+        .emailToPartialPersonDataMapCache
+        .keys
+        .toSet();
     final relevantUsers = UserService.instance.getRelevantContacts()
-      ..removeWhere(
-        (user) => userEmailsToAviod.contains(user.email),
-      );
+      ..removeWhere((user) => userEmailsToAviod.contains(user.email));
 
-    relevantUsers.sort(
-      (a, b) => (a.email).compareTo(b.email),
-    );
+    relevantUsers.sort((a, b) => (a.email).compareTo(b.email));
 
     final ownerEmail = Configuration.instance.getEmail();
     if (ownerEmail != null && !userEmailsToAviod.contains(ownerEmail)) {
@@ -368,8 +365,10 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
             "Cannot link email to non-existent person. First save the person",
           );
         } else {
-          updatedPerson = await PersonService.instance
-              .updateAttributes(personID, email: email);
+          updatedPerson = await PersonService.instance.updateAttributes(
+            personID,
+            email: email,
+          );
         }
 
         Bus.instance.fire(

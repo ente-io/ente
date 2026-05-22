@@ -100,8 +100,10 @@ class _FullScreenMemoryDataUpdaterState
   @override
   void initState() {
     super.initState();
-    final initialIndex =
-        _clampedMemoryIndex(widget.initialIndex, widget.memories.length);
+    final initialIndex = _clampedMemoryIndex(
+      widget.initialIndex,
+      widget.memories.length,
+    );
     indexNotifier = ValueNotifier(initialIndex ?? 0);
     if (initialIndex == null) return;
     memoriesCacheService.markMemoryAsSeen(
@@ -172,8 +174,10 @@ class _FullScreenMemoryDataUpdaterState
 
   void _warmThumbnailWindow(int fromIndex) {
     final start = fromIndex.clamp(0, widget.memories.length).toInt();
-    final end =
-        (start + _thumbnailLookaheadCap).clamp(0, widget.memories.length);
+    final end = (start + _thumbnailLookaheadCap).clamp(
+      0,
+      widget.memories.length,
+    );
     for (var i = start; i < end; i++) {
       _preloadThumbnailOwned(widget.memories[i].file);
     }
@@ -182,10 +186,7 @@ class _FullScreenMemoryDataUpdaterState
   void _warmVideoWindow(int fromIndex) {
     final start = fromIndex.clamp(0, widget.memories.length).toInt();
     final end = (start + kMemoryVideoLookaheadCap)
-        .clamp(
-          0,
-          widget.memories.length,
-        )
+        .clamp(0, widget.memories.length)
         .toInt();
     _videoPrefetcher.prefetchFiles(
       widget.memories.sublist(start, end).map((memory) => memory.file),
@@ -258,8 +259,10 @@ class _FullScreenMemoryDataUpdaterState
   }
 
   void removeCurrentMemory() {
-    final removeIndex =
-        _clampedMemoryIndex(indexNotifier.value, widget.memories.length);
+    final removeIndex = _clampedMemoryIndex(
+      indexNotifier.value,
+      widget.memories.length,
+    );
     if (removeIndex == null) return;
     widget.memories.removeAt(removeIndex);
     if (!mounted) return;
@@ -365,7 +368,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   bool isAtFirstOrLastFile = false;
 
   late final StreamSubscription<DetailsSheetEvent>
-      _detailSheetEventSubscription;
+  _detailSheetEventSubscription;
 
   @override
   void initState() {
@@ -646,9 +649,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                             child!,
                             GestureDetector(
                               onTap: () async {
-                                final fullScreenState =
-                                    context.findAncestorStateOfType<
-                                        _FullScreenMemoryState>();
+                                final fullScreenState = context
+                                    .findAncestorStateOfType<
+                                      _FullScreenMemoryState
+                                    >();
                                 fullScreenState?._toggleAnimation(pause: true);
                                 Bus.instance.fire(PauseVideoEvent());
                                 await routeToPage(
@@ -736,22 +740,25 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         inheritedData.memories.length,
                       );
                       if (safeIndex == null) return const SizedBox.shrink();
-                      for (var i = 1;
-                          i <=
-                              _FullScreenMemoryDataUpdaterState
-                                  ._thumbnailLookaheadCap;
-                          i++) {
+                      for (
+                        var i = 1;
+                        i <=
+                            _FullScreenMemoryDataUpdaterState
+                                ._thumbnailLookaheadCap;
+                        i++
+                      ) {
                         final j = safeIndex + i;
                         if (j >= inheritedData.memories.length) break;
                         inheritedData.preloadThumbnail(
                           inheritedData.memories[j].file,
                         );
                       }
-                      for (var i = 1;
-                          i <=
-                              _FullScreenMemoryDataUpdaterState
-                                  ._fileLookaheadCap;
-                          i++) {
+                      for (
+                        var i = 1;
+                        i <=
+                            _FullScreenMemoryDataUpdaterState._fileLookaheadCap;
+                        i++
+                      ) {
                         final j = safeIndex + i;
                         if (j >= inheritedData.memories.length) break;
                         preloadFile(inheritedData.memories[j].file);
@@ -816,11 +823,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 playbackCallback: (shouldEnable, _) {
                                   _toggleAnimation(pause: !shouldEnable);
                                 },
-                                onFinalFileLoad: ({
-                                  required int memoryDuration,
-                                }) {
-                                  onFinalFileLoad(memoryDuration);
-                                },
+                                onFinalFileLoad:
+                                    ({required int memoryDuration}) {
+                                      onFinalFileLoad(memoryDuration);
+                                    },
                               ),
                             ),
                           ),
@@ -862,8 +868,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                     ),
                                   )
                                 : showStepProgressIndicator
-                                    ? const SizedBox.shrink()
-                                    : const MemoryCounter(),
+                                ? const SizedBox.shrink()
+                                : const MemoryCounter(),
                           );
                         },
                       ),
@@ -889,11 +895,11 @@ class BottomIcons extends StatelessWidget {
     if (inheritedData == null || inheritedData.memories.isEmpty) {
       return const SizedBox.shrink();
     }
-    final fullScreenState =
-        context.findAncestorStateOfType<_FullScreenMemoryState>();
+    final fullScreenState = context
+        .findAncestorStateOfType<_FullScreenMemoryState>();
     final memoryTitle =
         context.findAncestorWidgetOfExactType<FullScreenMemory>()?.title ??
-            AppLocalizations.of(context).memories;
+        AppLocalizations.of(context).memories;
 
     return ValueListenableBuilder(
       valueListenable: inheritedData.indexNotifier,
@@ -918,7 +924,8 @@ class BottomIcons extends StatelessWidget {
           ),
         ];
 
-        final isOwner = currentFile.ownerID == null ||
+        final isOwner =
+            currentFile.ownerID == null ||
             (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID;
         if (isOwner) {
           rowChildren.addAll([
@@ -1193,7 +1200,8 @@ Future<void> _shareMemory(
   final shareSingleItemLabel = currentFile.isVideo
       ? _titleCase(l10n.videoSmallCase)
       : _titleCase(l10n.photoSmallCase);
-  final canShowMemoryShareLinkOption = flagService.enableMemoryShareLink &&
+  final canShowMemoryShareLinkOption =
+      flagService.enableMemoryShareLink &&
       !(isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount());
   final shouldShareLink = await showBaseBottomSheet<bool>(
     context,
@@ -1234,11 +1242,11 @@ Future<(String, int)?> _getOrCreateMemoryLink(
   await dialog.show();
   try {
     final normalizedTitle = memoryTitle.trim();
-    final shareLinkData =
-        await MemoryShareService.instance.getOrCreateMemoryLink(
-      memories: inheritedData.memories,
-      title: normalizedTitle.isNotEmpty ? normalizedTitle : l10n.memories,
-    );
+    final shareLinkData = await MemoryShareService.instance
+        .getOrCreateMemoryLink(
+          memories: inheritedData.memories,
+          title: normalizedTitle.isNotEmpty ? normalizedTitle : l10n.memories,
+        );
     await dialog.hide();
     return shareLinkData;
   } catch (e) {

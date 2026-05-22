@@ -128,16 +128,12 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
-            Center(
-              child: Image.asset(
-                'assets/ott.png',
-                height: 96,
-              ),
-            ),
+            Center(child: Image.asset('assets/ott.png', height: 96)),
             const SizedBox(height: 24),
             Text(
-              AppLocalizations.of(context)
-                  .weHaveSentCodeTo(email: widget.email),
+              AppLocalizations.of(
+                context,
+              ).weHaveSentCodeTo(email: widget.email),
               style: textTheme.body.copyWith(color: colorScheme.textBase),
               textAlign: TextAlign.center,
             ),

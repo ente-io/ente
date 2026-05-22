@@ -102,9 +102,7 @@ class _SessionsPageState extends State<SessionsPage> {
             ),
           ),
         ),
-        Divider(
-          color: colors.strokeFaint,
-        ),
+        Divider(color: colors.strokeFaint),
       ],
     );
   }
@@ -186,16 +184,12 @@ class _SessionsPageState extends State<SessionsPage> {
     if (session.token == Configuration.instance.getToken()) {
       return Text(
         AppLocalizations.of(context).thisDevice,
-        style: TextStyles.bodyBold.copyWith(
-          color: colors.primary,
-        ),
+        style: TextStyles.bodyBold.copyWith(color: colors.primary),
       );
     }
     return Text(
       session.prettyUA,
-      style: TextStyles.bodyBold.copyWith(
-        color: colors.textBase,
-      ),
+      style: TextStyles.bodyBold.copyWith(color: colors.textBase),
     );
   }
 }

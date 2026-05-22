@@ -68,16 +68,11 @@ final lightThemeData = ThemeData(
   ),
   inputDecorationTheme: const InputDecorationTheme().copyWith(
     focusedBorder: const UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: Color.fromRGBO(45, 194, 98, 1.0),
-      ),
+      borderSide: BorderSide(color: Color.fromRGBO(45, 194, 98, 1.0)),
     ),
   ),
   checkboxTheme: CheckboxThemeData(
-    side: const BorderSide(
-      color: Colors.black,
-      width: 2,
-    ),
+    side: const BorderSide(color: Colors.black, width: 2),
     fillColor: WidgetStateProperty.resolveWith((states) {
       return states.contains(WidgetState.selected)
           ? const Color.fromRGBO(0, 0, 0, 1)
@@ -156,16 +151,11 @@ final darkThemeData = ThemeData(
   ),
   inputDecorationTheme: const InputDecorationTheme().copyWith(
     focusedBorder: const UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: Color.fromRGBO(45, 194, 98, 1.0),
-      ),
+      borderSide: BorderSide(color: Color.fromRGBO(45, 194, 98, 1.0)),
     ),
   ),
   checkboxTheme: CheckboxThemeData(
-    side: const BorderSide(
-      color: Colors.grey,
-      width: 2,
-    ),
+    side: const BorderSide(color: Colors.grey, width: 2),
     fillColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(158, 158, 158, 1);
@@ -356,9 +346,7 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData({
   return OutlinedButtonThemeData(
     style:
         OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           alignment: Alignment.center,
           padding: const EdgeInsets.fromLTRB(50, 16, 50, 16),
           textStyle: const TextStyle(
@@ -367,22 +355,22 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData({
             fontSize: 18,
           ),
         ).copyWith(
-          backgroundColor: WidgetStateProperty.resolveWith<Color>(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.disabled)) {
-                return bgDisabled;
-              }
-              return bgEnabled;
-            },
-          ),
-          foregroundColor: WidgetStateProperty.resolveWith<Color>(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.disabled)) {
-                return fgDisabled;
-              }
-              return fgEnabled;
-            },
-          ),
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.disabled)) {
+              return bgDisabled;
+            }
+            return bgEnabled;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.disabled)) {
+              return fgDisabled;
+            }
+            return fgEnabled;
+          }),
           alignment: Alignment.center,
         ),
   );

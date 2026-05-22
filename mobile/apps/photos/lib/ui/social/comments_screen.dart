@@ -197,16 +197,15 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
     var sharedCollectionsList = collectionIDs
         .map((id) => CollectionsService.instance.getCollectionByID(id))
         .whereType<Collection>()
-        .where(
-          (c) => c.hasSharees || c.hasLink || !c.isOwner(_currentUserID),
-        )
+        .where((c) => c.hasSharees || c.hasLink || !c.isOwner(_currentUserID))
         .toList();
 
     // Filter out hidden collections unless viewing from a hidden collection
-    final hiddenCollectionIds =
-        CollectionsService.instance.getHiddenCollectionIds();
-    final isInitialCollectionHidden =
-        hiddenCollectionIds.contains(widget.collectionID);
+    final hiddenCollectionIds = CollectionsService.instance
+        .getHiddenCollectionIds();
+    final isInitialCollectionHidden = hiddenCollectionIds.contains(
+      widget.collectionID,
+    );
     if (!isInitialCollectionHidden) {
       sharedCollectionsList = sharedCollectionsList
           .where((c) => !hiddenCollectionIds.contains(c.id))
@@ -218,8 +217,9 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
       sharedCollectionsList.map((collection) async {
         final commentCount = await SocialDataProvider.instance
             .getCommentCountForFileInCollection(widget.fileID, collection.id);
-        final thumbnail =
-            await CollectionsService.instance.getCover(collection);
+        final thumbnail = await CollectionsService.instance.getCover(
+          collection,
+        );
         return CollectionCommentInfo(
           collection: collection,
           commentCount: commentCount,
@@ -264,8 +264,9 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
         limit: _pageSize,
         offset: 0,
       ),
-      SocialDataProvider.instance
-          .getAnonDisplayNamesForCollection(_selectedCollectionID),
+      SocialDataProvider.instance.getAnonDisplayNamesForCollection(
+        _selectedCollectionID,
+      ),
     ]);
 
     final comments = results[0] as List<Comment>;
@@ -332,13 +333,13 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
 
     setState(() => _isLoadingMore = true);
 
-    final comments =
-        await SocialDataProvider.instance.getCommentsForFilePaginated(
-      widget.fileID,
-      collectionID: _selectedCollectionID,
-      limit: _pageSize,
-      offset: _offset,
-    );
+    final comments = await SocialDataProvider.instance
+        .getCommentsForFilePaginated(
+          widget.fileID,
+          collectionID: _selectedCollectionID,
+          limit: _pageSize,
+          offset: _offset,
+        );
 
     setState(() {
       _comments.addAll(comments);
@@ -394,8 +395,10 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
       // Phase 1: Jump to approximate position to bring item into view
       const estimatedItemHeight = 120.0;
       final maxScroll = _scrollController.position.maxScrollExtent;
-      final scrollPosition =
-          (index * estimatedItemHeight).clamp(0.0, maxScroll);
+      final scrollPosition = (index * estimatedItemHeight).clamp(
+        0.0,
+        maxScroll,
+      );
 
       _scrollController.jumpTo(scrollPosition);
 
@@ -457,8 +460,10 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
       // Phase 1: Jump to approximate position
       const estimatedItemHeight = 120.0;
       final maxScroll = _scrollController.position.maxScrollExtent;
-      final scrollPosition =
-          (index * estimatedItemHeight).clamp(0.0, maxScroll);
+      final scrollPosition = (index * estimatedItemHeight).clamp(
+        0.0,
+        maxScroll,
+      );
       _scrollController.jumpTo(scrollPosition);
 
       // Phase 2: Precise scroll with ensureVisible
@@ -672,7 +677,8 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final selectedCollection = _currentCollection;
-    final canModerateComments = selectedCollection != null &&
+    final canModerateComments =
+        selectedCollection != null &&
         (selectedCollection.isOwner(_currentUserID) ||
             selectedCollection.isAdmin(_currentUserID));
 
@@ -681,9 +687,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
         color: isDarkMode
             ? const Color(0xFF0E0E0E)
             : colorScheme.backgroundElevated,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Padding(
         padding: EdgeInsets.only(bottom: keyboardHeight),
@@ -719,15 +723,15 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                             final comment = _comments[index];
                             final isHighlighted =
                                 comment.id == _highlightedCommentID ||
-                                    comment.id == _scrollTargetHighlightID;
+                                comment.id == _scrollTargetHighlightID;
                             // Use widget.highlightCommentID (not state) to keep key stable after dismiss
                             // Priority: highlightCommentID (deep link) > scrollTargetCommentID (tap)
                             final key =
                                 (comment.id == widget.highlightCommentID)
-                                    ? (_highlightedCommentKey ??= GlobalKey())
-                                    : (comment.id == _scrollTargetCommentID)
-                                        ? _scrollTargetKey
-                                        : ValueKey(comment.id);
+                                ? (_highlightedCommentKey ??= GlobalKey())
+                                : (comment.id == _scrollTargetCommentID)
+                                ? _scrollTargetKey
+                                : ValueKey(comment.id);
                             return CommentBubbleWidget(
                               key: key,
                               comment: comment,
@@ -739,8 +743,8 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                               isHighlighted: isHighlighted,
                               onFetchParent: comment.isReply
                                   ? () => _getParentComment(
-                                        comment.parentCommentID!,
-                                      )
+                                      comment.parentCommentID!,
+                                    )
                                   : null,
                               onFetchReactions: () =>
                                   _getReactionsForComment(comment.id),
@@ -767,17 +771,17 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                               },
                               onParentQuoteTap: comment.isReply
                                   ? () => _scrollToParentComment(
-                                        comment.parentCommentID!,
-                                      )
+                                      comment.parentCommentID!,
+                                    )
                                   : null,
                               onAuthorTap: () =>
                                   openSocialActorContactDestination(
-                                context,
-                                _getUserForComment(comment),
-                                currentUserID: _currentUserID,
-                                navigationContext: widget.launchContext,
-                                dismissCurrentRoute: true,
-                              ),
+                                    context,
+                                    _getUserForComment(comment),
+                                    currentUserID: _currentUserID,
+                                    navigationContext: widget.launchContext,
+                                    dismissCurrentRoute: true,
+                                  ),
                             );
                           },
                         ),

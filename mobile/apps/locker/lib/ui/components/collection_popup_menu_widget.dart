@@ -39,7 +39,8 @@ class CollectionPopupMenuWidget extends StatelessWidget {
       offset: const Offset(-24, 24),
       shadowColor: Colors.black.withValues(alpha: 0.08),
       constraints: const BoxConstraints(minWidth: 120),
-      child: child ??
+      child:
+          child ??
           HugeIcon(
             icon: HugeIcons.strokeRoundedMoreVertical,
             color: colorScheme.textBase,

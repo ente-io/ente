@@ -85,8 +85,9 @@ Future<String?> checkUsedFaceIDForPersonOrClusterId(
     personOrClusterID,
   );
   if (cachedFaceID != null) return cachedFaceID;
-  final mlDataDB =
-      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+  final mlDataDB = isLocalGalleryMode
+      ? MLDataDB.localGalleryInstance
+      : MLDataDB.instance;
   final String? faceIDFromDB = await mlDataDB.getFaceIdUsedForPersonOrCluster(
     personOrClusterID,
   );
@@ -100,8 +101,9 @@ Future<void> putFaceIdCachedForPersonOrCluster(
   String personOrClusterID,
   String faceID,
 ) async {
-  final mlDataDB =
-      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+  final mlDataDB = isLocalGalleryMode
+      ? MLDataDB.localGalleryInstance
+      : MLDataDB.instance;
   await mlDataDB.putFaceIdCachedForPersonOrCluster(personOrClusterID, faceID);
   _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceID);
 }
@@ -120,8 +122,9 @@ Future<void> _putCachedCropForFaceID(
 Future<void> checkRemoveCachedFaceIDForPersonOrClusterId(
   String personOrClusterID,
 ) async {
-  final mlDataDB =
-      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+  final mlDataDB = isLocalGalleryMode
+      ? MLDataDB.localGalleryInstance
+      : MLDataDB.instance;
   final String? cachedFaceID = await mlDataDB.getFaceIdUsedForPersonOrCluster(
     personOrClusterID,
   );
@@ -369,7 +372,8 @@ Future<String> _faceCropTaskId(
     }
     return "${file.hashCode}$suffix";
   }
-  final baseId = file.uploadedFileID?.toString() ??
+  final baseId =
+      file.uploadedFileID?.toString() ??
       file.generatedID?.toString() ??
       file.localID ??
       file.hashCode.toString();
@@ -403,12 +407,12 @@ Future<Map<String, Uint8List>?> _getFaceCrops(
     faceIds.add(e.key);
     faceBoxes.add(e.value);
   }
-  final List<Uint8List> faceCrop =
-      await FaceThumbnailGenerator.instance.generateFaceThumbnails(
-    // await generateJpgFaceThumbnails(
-    imagePath,
-    faceBoxes,
-  );
+  final List<Uint8List> faceCrop = await FaceThumbnailGenerator.instance
+      .generateFaceThumbnails(
+        // await generateJpgFaceThumbnails(
+        imagePath,
+        faceBoxes,
+      );
   final Map<String, Uint8List> result = {};
   for (int i = 0; i < faceCrop.length; i++) {
     result[faceIds[i]] = faceCrop[i];

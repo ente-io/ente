@@ -83,16 +83,16 @@ class _ManageIndividualParticipantState
               onTap: isAdmin
                   ? null
                   : () async {
-                      final result =
-                          await collectionActions.addEmailToCollection(
-                        context,
-                        widget.collection,
-                        widget.user.email,
-                        CollectionParticipantRole.admin,
-                      );
+                      final result = await collectionActions
+                          .addEmailToCollection(
+                            context,
+                            widget.collection,
+                            widget.user.email,
+                            CollectionParticipantRole.admin,
+                          );
                       if (result && mounted) {
-                        widget.user.role =
-                            CollectionParticipantRole.admin.toStringVal();
+                        widget.user.role = CollectionParticipantRole.admin
+                            .toStringVal();
                         setState(() => {});
                       }
                     },
@@ -112,13 +112,13 @@ class _ManageIndividualParticipantState
               onTap: isCollaborator
                   ? null
                   : () async {
-                      final result =
-                          await collectionActions.addEmailToCollection(
-                        context,
-                        widget.collection,
-                        widget.user.email,
-                        CollectionParticipantRole.collaborator,
-                      );
+                      final result = await collectionActions
+                          .addEmailToCollection(
+                            context,
+                            widget.collection,
+                            widget.user.email,
+                            CollectionParticipantRole.collaborator,
+                          );
                       if (result && mounted) {
                         widget.user.role = CollectionParticipantRole
                             .collaborator
@@ -153,20 +153,20 @@ class _ManageIndividualParticipantState
                         ).yesConvertToViewer,
                         body: AppLocalizations.of(context)
                             .cannotAddMorePhotosAfterBecomingViewer(
-                          user: resolvedName,
-                        ),
+                              user: resolvedName,
+                            ),
                         isCritical: true,
                       );
                       if (actionResult?.action != null) {
                         if (actionResult!.action == ButtonAction.first) {
                           try {
-                            isConvertToViewSuccess =
-                                await collectionActions.addEmailToCollection(
-                              context,
-                              widget.collection,
-                              widget.user.email,
-                              CollectionParticipantRole.viewer,
-                            );
+                            isConvertToViewSuccess = await collectionActions
+                                .addEmailToCollection(
+                                  context,
+                                  widget.collection,
+                                  widget.user.email,
+                                  CollectionParticipantRole.viewer,
+                                );
                           } catch (e) {
                             await showGenericErrorDialog(
                               context: context,
@@ -176,8 +176,8 @@ class _ManageIndividualParticipantState
                           if (isConvertToViewSuccess && mounted) {
                             // reset value
                             isConvertToViewSuccess = false;
-                            widget.user.role =
-                                CollectionParticipantRole.viewer.toStringVal();
+                            widget.user.role = CollectionParticipantRole.viewer
+                                .toStringVal();
                             setState(() => {});
                           }
                         }
@@ -186,8 +186,9 @@ class _ManageIndividualParticipantState
               isTopBorderRadiusRemoved: true,
             ),
             MenuSectionDescriptionWidget(
-              content: AppLocalizations.of(context)
-                  .adminsAndCollaboratorsCanAddPhotosDescription,
+              content: AppLocalizations.of(
+                context,
+              ).adminsAndCollaboratorsCanAddPhotosDescription,
             ),
             const SizedBox(height: 24),
             MenuSectionTitle(

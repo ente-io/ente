@@ -6,11 +6,7 @@ import "package:photos/models/selected_albums.dart";
 class AlbumActionBarWidget extends StatefulWidget {
   final SelectedAlbums? selectedAlbums;
   final VoidCallback? onCancel;
-  const AlbumActionBarWidget({
-    super.key,
-    this.selectedAlbums,
-    this.onCancel,
-  });
+  const AlbumActionBarWidget({super.key, this.selectedAlbums, this.onCancel});
 
   @override
   State<AlbumActionBarWidget> createState() => _AlbumActionBarWidgetState();

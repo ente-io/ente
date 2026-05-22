@@ -107,8 +107,9 @@ class FileViewerState extends State<FileViewer> {
 
       final videoFile = File(videoPath);
       if (!await videoFile.exists()) {
-        _logger
-            .warning("Video file does not exist, using default aspect ratio");
+        _logger.warning(
+          "Video file does not exist, using default aspect ratio",
+        );
         aspectRatio = 16 / 9;
         return;
       }
@@ -160,9 +161,7 @@ class FileViewerState extends State<FileViewer> {
     );
     controller!.addListener(() {
       if (!controller!.isFullScreen) {
-        SystemChrome.setPreferredOrientations(
-          [DeviceOrientation.portraitUp],
-        );
+        SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       }
     });
     if (mounted) {
@@ -224,8 +223,9 @@ class FileViewerState extends State<FileViewer> {
         return null;
       }
       final assets = await _reviewGalleryWindow(source);
-      var selectedIndex =
-          assets.indexWhere((asset) => asset.id == targetAsset.id);
+      var selectedIndex = assets.indexWhere(
+        (asset) => asset.id == targetAsset.id,
+      );
       if (selectedIndex < 0) {
         assets.insert(0, targetAsset);
         selectedIndex = 0;
@@ -279,9 +279,7 @@ class FileViewerState extends State<FileViewer> {
     );
   }
 
-  Future<List<AssetPathEntity>> _reviewGalleryPaths({
-    required bool hasAll,
-  }) {
+  Future<List<AssetPathEntity>> _reviewGalleryPaths({required bool hasAll}) {
     return PhotoManager.getAssetPathList(
       hasAll: hasAll,
       type: RequestType.common,
@@ -369,8 +367,10 @@ class FileViewerState extends State<FileViewer> {
     _ReviewGallerySource source,
   ) async {
     const halfWindow = _reviewGalleryWindowSize ~/ 2;
-    final initialEnd =
-        math.min(source.count, source.targetIndex + halfWindow + 1);
+    final initialEnd = math.min(
+      source.count,
+      source.targetIndex + halfWindow + 1,
+    );
     final start = math.max(
       0,
       math.min(

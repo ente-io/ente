@@ -18,10 +18,7 @@ class ChangeLogEntry {
 class ChangeLogEntryWidget extends StatelessWidget {
   final ChangeLogEntry entry;
 
-  const ChangeLogEntryWidget({
-    super.key,
-    required this.entry,
-  });
+  const ChangeLogEntryWidget({super.key, required this.entry});
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +47,7 @@ class ChangeLogEntryWidget extends StatelessWidget {
             child: Text(
               entry.description!,
               textAlign: TextAlign.left,
-              style: enteTheme.body.copyWith(
-                color: colorScheme.textMuted,
-              ),
+              style: enteTheme.body.copyWith(color: colorScheme.textMuted),
             ),
           ),
         ...entry.items.map(
@@ -63,9 +58,7 @@ class ChangeLogEntryWidget extends StatelessWidget {
               children: [
                 Text(
                   '•  ',
-                  style: enteTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
+                  style: enteTheme.body.copyWith(color: colorScheme.textMuted),
                 ),
                 Expanded(
                   child: Text(

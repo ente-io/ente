@@ -58,9 +58,7 @@ class _ImageEditorTuneBarState extends State<ImageEditorTuneBar>
       builder: (context, constraints) {
         return Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFunctions(constraints),
-          ],
+          children: [_buildFunctions(constraints)],
         );
       },
     );
@@ -84,18 +82,20 @@ class _ImageEditorTuneBarState extends State<ImageEditorTuneBar>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.min,
                   children: List.generate(
-                      tuneEditor.tuneAdjustmentMatrix.length, (index) {
-                    final item = tuneEditor.tuneAdjustmentList[index];
-                    return TuneItem(
-                      icon: item.icon,
-                      label: item.label,
-                      isSelected: tuneEditor.selectedIndex == index,
-                      value: tuneEditor.tuneAdjustmentMatrix[index].value,
-                      max: item.max,
-                      min: item.min,
-                      onTap: () => _handleTuneItemTap(index),
-                    );
-                  }),
+                    tuneEditor.tuneAdjustmentMatrix.length,
+                    (index) {
+                      final item = tuneEditor.tuneAdjustmentList[index];
+                      return TuneItem(
+                        icon: item.icon,
+                        label: item.label,
+                        isSelected: tuneEditor.selectedIndex == index,
+                        value: tuneEditor.tuneAdjustmentMatrix[index].value,
+                        max: item.max,
+                        min: item.min,
+                        onTap: () => _handleTuneItemTap(index),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -160,8 +160,9 @@ class TuneItem extends StatelessWidget {
               size: 60,
               icon: icon,
               isSelected: isSelected,
-              progressColor:
-                  Theme.of(context).colorScheme.imageEditorPrimaryColor,
+              progressColor: Theme.of(
+                context,
+              ).colorScheme.imageEditorPrimaryColor,
               svgPath:
                   "assets/image-editor/image-editor-${label.toLowerCase()}.svg",
             ),
@@ -220,14 +221,8 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
       animationBehavior: AnimationBehavior.preserve,
     );
 
-    _progressAnimation = Tween<double>(
-      begin: 0.0,
-      end: widget.value,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+    _progressAnimation = Tween<double>(begin: 0.0, end: widget.value).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
     _animationController.forward();
@@ -242,15 +237,13 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
     }
     if (oldWidget.value != widget.value) {
       _previousValue = oldWidget.value;
-      _progressAnimation = Tween<double>(
-        begin: _previousValue,
-        end: widget.value,
-      ).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: Curves.easeInOut,
-        ),
-      );
+      _progressAnimation =
+          Tween<double>(begin: _previousValue, end: widget.value).animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeInOut,
+            ),
+          );
       _animationController.forward(from: 0.0);
     }
   }
@@ -297,8 +290,11 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final displayValue =
-        _normalizeValueForDisplay(widget.value, widget.min, widget.max);
+    final displayValue = _normalizeValueForDisplay(
+      widget.value,
+      widget.min,
+      widget.max,
+    );
     final displayText = displayValue.toString();
     final prefix = displayValue > 0 ? "+" : "";
     final progressColor = widget.progressColor;
@@ -330,11 +326,15 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
           AnimatedBuilder(
             animation: _progressAnimation,
             builder: (context, child) {
-              final animatedValue =
-                  displayValue == 0 ? 0.0 : _progressAnimation.value;
+              final animatedValue = displayValue == 0
+                  ? 0.0
+                  : _progressAnimation.value;
 
-              final isClockwise =
-                  _isClockwise(animatedValue, widget.min, widget.max);
+              final isClockwise = _isClockwise(
+                animatedValue,
+                widget.min,
+                widget.max,
+              );
               final progressValue = _normalizeValueForProgress(
                 animatedValue,
                 widget.min,
@@ -357,26 +357,19 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
           Align(
             alignment: Alignment.center,
             child: showValue
-                ? Text(
-                    "$prefix$displayText",
-                    style: textTheme.smallBold,
-                  )
+                ? Text("$prefix$displayText", style: textTheme.smallBold)
                 : widget.svgPath != null
-                    ? SvgPicture.asset(
-                        widget.svgPath!,
-                        width: 22,
-                        height: 22,
-                        fit: BoxFit.scaleDown,
-                        colorFilter: ColorFilter.mode(
-                          colorTheme.tabIcon,
-                          BlendMode.srcIn,
-                        ),
-                      )
-                    : Icon(
-                        widget.icon,
-                        color: colorTheme.tabIcon,
-                        size: 20,
-                      ),
+                ? SvgPicture.asset(
+                    widget.svgPath!,
+                    width: 22,
+                    height: 22,
+                    fit: BoxFit.scaleDown,
+                    colorFilter: ColorFilter.mode(
+                      colorTheme.tabIcon,
+                      BlendMode.srcIn,
+                    ),
+                  )
+                : Icon(widget.icon, color: colorTheme.tabIcon, size: 20),
           ),
         ],
       ),
@@ -416,17 +409,17 @@ class _TuneAdjustWidget extends StatelessWidget {
           ),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(25)),
             child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 thumbShape: const _ColorPickerThumbShape(),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 0),
-                activeTrackColor:
-                    Theme.of(context).colorScheme.imageEditorPrimaryColor,
-                inactiveTrackColor:
-                    Theme.of(context).colorScheme.editorBackgroundColor,
+                activeTrackColor: Theme.of(
+                  context,
+                ).colorScheme.imageEditorPrimaryColor,
+                inactiveTrackColor: Theme.of(
+                  context,
+                ).colorScheme.editorBackgroundColor,
                 trackShape: const _CenterBasedTrackShape(),
                 trackHeight: 24,
               ),

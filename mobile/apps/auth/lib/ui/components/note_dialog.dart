@@ -6,10 +6,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-Future<void> showNotesDialog(
-  BuildContext context,
-  String note,
-) async {
+Future<void> showNotesDialog(BuildContext context, String note) async {
   final trimmedNote = note.trim();
   if (trimmedNote.isEmpty) {
     return;
@@ -22,8 +19,9 @@ Future<void> showNotesDialog(
       final theme = Theme.of(dialogContext);
       final colorScheme = getEnteColorScheme(dialogContext);
       final bool isDark = theme.brightness == Brightness.dark;
-      final Color noteBackground =
-          isDark ? const Color(0x29A75CFF) : const Color(0x0AA75CFF);
+      final Color noteBackground = isDark
+          ? const Color(0x29A75CFF)
+          : const Color(0x0AA75CFF);
       return Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -34,8 +32,10 @@ Future<void> showNotesDialog(
             child: GestureDetector(
               onTap: () {},
               child: Container(
-                constraints:
-                    const BoxConstraints(maxWidth: 360, maxHeight: 700),
+                constraints: const BoxConstraints(
+                  maxWidth: 360,
+                  maxHeight: 700,
+                ),
                 decoration: BoxDecoration(
                   color: colorScheme.backgroundElevated,
                   borderRadius: BorderRadius.circular(20),
@@ -92,34 +92,35 @@ Future<void> showNotesDialog(
                                   ),
                                   child: SelectableText(
                                     trimmedNote,
-                                    contextMenuBuilder: (
-                                      context,
-                                      EditableTextState state,
-                                    ) {
-                                      return AdaptiveTextSelectionToolbar
-                                          .buttonItems(
-                                        anchors: state.contextMenuAnchors,
-                                        buttonItems: <ContextMenuButtonItem>[
-                                          ContextMenuButtonItem(
-                                            onPressed: () {
-                                              state.copySelection(
-                                                SelectionChangedCause.toolbar,
-                                              );
-                                            },
-                                            type: ContextMenuButtonType.copy,
-                                          ),
-                                          ContextMenuButtonItem(
-                                            onPressed: () {
-                                              state.selectAll(
-                                                SelectionChangedCause.toolbar,
-                                              );
-                                            },
-                                            type:
-                                                ContextMenuButtonType.selectAll,
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                    contextMenuBuilder:
+                                        (context, EditableTextState state) {
+                                          return AdaptiveTextSelectionToolbar.buttonItems(
+                                            anchors: state.contextMenuAnchors,
+                                            buttonItems:
+                                                <ContextMenuButtonItem>[
+                                                  ContextMenuButtonItem(
+                                                    onPressed: () {
+                                                      state.copySelection(
+                                                        SelectionChangedCause
+                                                            .toolbar,
+                                                      );
+                                                    },
+                                                    type: ContextMenuButtonType
+                                                        .copy,
+                                                  ),
+                                                  ContextMenuButtonItem(
+                                                    onPressed: () {
+                                                      state.selectAll(
+                                                        SelectionChangedCause
+                                                            .toolbar,
+                                                      );
+                                                    },
+                                                    type: ContextMenuButtonType
+                                                        .selectAll,
+                                                  ),
+                                                ],
+                                          );
+                                        },
                                     style: TextStyle(
                                       color: colorScheme.textBase,
                                       fontSize: 14,

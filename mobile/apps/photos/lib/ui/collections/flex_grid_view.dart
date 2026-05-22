@@ -215,39 +215,36 @@ class _CollectionsFlexiGridViewWidgetState
         bottom: widget.bottomPadding,
       ),
       sliver: SliverGrid(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            if (showCreateAlbum && index == 0) {
-              return NewAlbumRowItemWidget(
-                height: sideOfThumbnail,
-                width: sideOfThumbnail,
-              );
-            }
-            final collectionIndex = showCreateAlbum ? index - 1 : index;
-            return AlbumRowItemWidget(
-              widget.collections![collectionIndex],
-              sideOfThumbnail,
-              key: ValueKey(
-                '${widget.tag}_${widget.collections![collectionIndex].id}',
-              ),
-              tag: widget.tag,
-              selectedAlbums: widget.selectedAlbums,
-              onTapCallback: (c) {
-                isAnyAlbumSelected || widget.onlyAllowSelection
-                    ? _toggleAlbumSelection(c)
-                    : _navigateToCollectionPage(c);
-              },
-              onLongPressCallback: widget.enableSelectionMode
-                  ? (c) {
-                      isAnyAlbumSelected || widget.onlyAllowSelection
-                          ? _navigateToCollectionPage(c)
-                          : _toggleAlbumSelection(c);
-                    }
-                  : null,
+        delegate: SliverChildBuilderDelegate((context, index) {
+          if (showCreateAlbum && index == 0) {
+            return NewAlbumRowItemWidget(
+              height: sideOfThumbnail,
+              width: sideOfThumbnail,
             );
-          },
-          childCount: displayItemCount,
-        ),
+          }
+          final collectionIndex = showCreateAlbum ? index - 1 : index;
+          return AlbumRowItemWidget(
+            widget.collections![collectionIndex],
+            sideOfThumbnail,
+            key: ValueKey(
+              '${widget.tag}_${widget.collections![collectionIndex].id}',
+            ),
+            tag: widget.tag,
+            selectedAlbums: widget.selectedAlbums,
+            onTapCallback: (c) {
+              isAnyAlbumSelected || widget.onlyAllowSelection
+                  ? _toggleAlbumSelection(c)
+                  : _navigateToCollectionPage(c);
+            },
+            onLongPressCallback: widget.enableSelectionMode
+                ? (c) {
+                    isAnyAlbumSelected || widget.onlyAllowSelection
+                        ? _navigateToCollectionPage(c)
+                        : _toggleAlbumSelection(c);
+                  }
+                : null,
+          );
+        }, childCount: displayItemCount),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInCrossAxis,
           mainAxisSpacing: 24,
@@ -295,9 +292,7 @@ class _CollectionsFlexiGridViewWidgetState
           Widget item;
 
           if (showCreateAlbum && index == 0) {
-            item = NewAlbumListItemWidget(
-              onTap: (_) => _createAlbum(),
-            );
+            item = NewAlbumListItemWidget(onTap: (_) => _createAlbum());
           } else {
             final collectionIndex = showCreateAlbum ? index - 1 : index;
 

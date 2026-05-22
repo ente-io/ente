@@ -1,7 +1,4 @@
-enum EnteApp {
-  auth,
-  locker;
-}
+enum EnteApp { auth, locker }
 
 class AppThemeConfig {
   static EnteApp? _currentApp;

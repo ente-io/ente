@@ -70,8 +70,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
     // Extract data from existing file if available
     if (widget.existingFile != null) {
-      final infoItem =
-          InfoFileService.instance.extractInfoFromFile(widget.existingFile!);
+      final infoItem = InfoFileService.instance.extractInfoFromFile(
+        widget.existingFile!,
+      );
       return infoItem?.data as T?;
     }
 
@@ -113,9 +114,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   @protected
   Widget buildAppBarTitle(BuildContext context) {
-    return TitleBarTitleWidget(
-      title: pageTitle,
-    );
+    return TitleBarTitleWidget(title: pageTitle);
   }
 
   @protected
@@ -152,8 +151,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
               selectedCollectionIds: _selectedCollectionIds,
               onToggleCollection: _onToggleCollection,
               onCollectionsUpdated: _onCollectionsUpdated,
-              title:
-                  showCollectionSelectionTitle ? context.l10n.collections : '',
+              title: showCollectionSelectionTitle
+                  ? context.l10n.collections
+                  : '',
             ),
           ],
         ),
@@ -191,16 +191,14 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _loadCollections() async {
     try {
-      final filteredCollections =
-          await CollectionService.instance.getCollectionsForUI();
+      final filteredCollections = await CollectionService.instance
+          .getCollectionsForUI();
 
       Set<int> initialSelection = _selectedCollectionIds;
 
       if (widget.existingFile != null) {
-        final fileCollections =
-            await CollectionService.instance.getCollectionsForFile(
-          widget.existingFile!,
-        );
+        final fileCollections = await CollectionService.instance
+            .getCollectionsForFile(widget.existingFile!);
         initialSelection = fileCollections
             .where((c) => c.type != CollectionType.uncategorized)
             .map((c) => c.id)
@@ -274,18 +272,12 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             _currentMode = InfoPageMode.view;
           });
 
-          showToast(
-            context,
-            context.l10n.recordSavedSuccessfully,
-          );
+          showToast(context, context.l10n.recordSavedSuccessfully);
         }
       }
     } on StorageLimitExceededError {
       if (mounted) {
-        showToast(
-          context,
-          context.l10n.uploadStorageLimitErrorBody,
-        );
+        showToast(context, context.l10n.uploadStorageLimitErrorBody);
       }
     } on NoActiveSubscriptionError {
       if (mounted) {
@@ -296,17 +288,11 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       }
     } on FileLimitReachedError {
       if (mounted) {
-        showToast(
-          context,
-          context.l10n.uploadFileCountLimitErrorToast,
-        );
+        showToast(context, context.l10n.uploadFileCountLimitErrorToast);
       }
     } catch (e) {
       if (mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     } finally {
       if (mounted) {
@@ -349,24 +335,23 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     if (widget.existingFile == null) return;
 
     // Get current collections for the file
-    final currentCollections =
-        await CollectionService.instance.getCollectionsForFile(
-      widget.existingFile!,
-    );
+    final currentCollections = await CollectionService.instance
+        .getCollectionsForFile(widget.existingFile!);
 
     // Fetch all collections to ensure we have the latest state
     final allCollections = await CollectionService.instance.getCollections();
 
     // Get the favorites/important collection for special handling
-    final favoriteCollection =
-        await CollectionService.instance.getOrCreateImportantCollection();
+    final favoriteCollection = await CollectionService.instance
+        .getOrCreateImportantCollection();
 
     final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
 
     // Check if favorites status changed
     final wasFavorite = currentCollectionIds.contains(favoriteCollection.id);
-    final isFavoriteNow =
-        _selectedCollectionIds.contains(favoriteCollection.id);
+    final isFavoriteNow = _selectedCollectionIds.contains(
+      favoriteCollection.id,
+    );
 
     if (wasFavorite && !isFavoriteNow) {
       await FavoritesService.instance.removeFromFavorites(
@@ -381,22 +366,25 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     }
 
     // Get regular (non-favorites, non-uncategorized) collection IDs
-    final regularCurrentIds =
-        currentCollectionIds.where((id) => id != favoriteCollection.id).toSet();
+    final regularCurrentIds = currentCollectionIds
+        .where((id) => id != favoriteCollection.id)
+        .toSet();
     final regularSelectedIds = _selectedCollectionIds
         .where((id) => id != favoriteCollection.id)
         .toSet();
 
     final collectionsToAdd = regularSelectedIds.difference(regularCurrentIds);
-    final collectionsToRemove =
-        regularCurrentIds.difference(regularSelectedIds);
+    final collectionsToRemove = regularCurrentIds.difference(
+      regularSelectedIds,
+    );
 
     // If all regular collections are deselected, move to uncategorized
     if (regularSelectedIds.isEmpty && collectionsToRemove.isNotEmpty) {
       for (final collectionId in collectionsToRemove) {
         try {
-          final collection =
-              allCollections.firstWhere((c) => c.id == collectionId);
+          final collection = allCollections.firstWhere(
+            (c) => c.id == collectionId,
+          );
           await CollectionService.instance.moveFilesFromCurrentCollection(
             context,
             collection,
@@ -412,25 +400,25 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       // Add to new collections
       for (final collectionId in collectionsToAdd) {
         try {
-          final collection =
-              allCollections.firstWhere((c) => c.id == collectionId);
+          final collection = allCollections.firstWhere(
+            (c) => c.id == collectionId,
+          );
           await CollectionService.instance.addToCollection(
             collection,
             widget.existingFile!,
             runSync: false,
           );
         } catch (e) {
-          _logger.severe(
-            'Failed to add file to collection $collectionId: $e',
-          );
+          _logger.severe('Failed to add file to collection $collectionId: $e');
         }
       }
 
       // Remove from deselected collections
       for (final collectionId in collectionsToRemove) {
         try {
-          final collection =
-              allCollections.firstWhere((c) => c.id == collectionId);
+          final collection = allCollections.firstWhere(
+            (c) => c.id == collectionId,
+          );
           await CollectionService.instance.moveFilesFromCurrentCollection(
             context,
             collection,
@@ -449,10 +437,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _createNewFile(InfoItem infoItem) async {
     if (_selectedCollectionIds.isEmpty) {
-      showToast(
-        context,
-        context.l10n.pleaseSelectAtLeastOneCollection,
-      );
+      showToast(context, context.l10n.pleaseSelectAtLeastOneCollection);
       return;
     }
 
@@ -495,10 +480,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     // Show success message after navigation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        showToast(
-          context,
-          message,
-        );
+        showToast(context, message);
       }
     });
   }
@@ -514,11 +496,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
         GradientButton(
           text: context.l10n.contactSupport,
           onTap: () async {
-            await sendEmail(
-              context,
-              to: "support@ente.com",
-              body: message,
-            );
+            await sendEmail(context, to: "support@ente.com", body: message);
           },
         ),
       ],
@@ -535,10 +513,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   void _copyToClipboard(String text, String fieldName) {
     Clipboard.setData(ClipboardData(text: text));
-    showToast(
-      context,
-      context.l10n.copiedToClipboard(fieldName),
-    );
+    showToast(context, context.l10n.copiedToClipboard(fieldName));
   }
 
   Widget buildViewField({
@@ -660,16 +635,12 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           title: buildAppBarTitle(context),
           leading: isEditMode && currentData != null
               ? IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_outlined,
-                  ),
+                  icon: const Icon(Icons.arrow_back_outlined),
                   onPressed: _handleBackNavigation,
                   tooltip: context.l10n.backToView,
                 )
               : IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_outlined,
-                  ),
+                  icon: const Icon(Icons.arrow_back_outlined),
                   onPressed: _handleBackNavigation,
                   tooltip: context.l10n.back,
                 ),

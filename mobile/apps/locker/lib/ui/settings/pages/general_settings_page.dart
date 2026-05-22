@@ -50,15 +50,12 @@ class GeneralSettingsPage extends StatelessWidget {
     final currentLocale = Localizations.localeOf(context);
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => LanguageSelectorPage(
-          appSupportedLocales,
-          (locale) {
-            App.setLocale(context, locale);
-            // ignore: unawaited_futures
-            setLocale(locale);
-          },
-          currentLocale,
-        ),
+        builder: (context) =>
+            LanguageSelectorPage(appSupportedLocales, (locale) {
+              App.setLocale(context, locale);
+              // ignore: unawaited_futures
+              setLocale(locale);
+            }, currentLocale),
       ),
     );
   }

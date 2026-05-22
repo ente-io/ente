@@ -17,10 +17,7 @@ import "package:photos/ui/viewer/search_tab/section_header.dart";
 class FileTypeSection extends StatelessWidget {
   final bool hasAnySearchableFiles;
 
-  const FileTypeSection({
-    required this.hasAnySearchableFiles,
-    super.key,
-  });
+  const FileTypeSection({required this.hasAnySearchableFiles, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -66,10 +63,7 @@ class FileTypeSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-            SectionType.fileTypesAndExtension,
-            hasMore: true,
-          ),
+          const SectionHeader(SectionType.fileTypesAndExtension, hasMore: true),
           const SizedBox(height: 2),
           SizedBox(
             child: SingleChildScrollView(
@@ -79,9 +73,7 @@ class FileTypeSection extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: tiles
-                    .map(
-                      (tile) => _FileTypeRecommendation(tile),
-                    )
+                    .map((tile) => _FileTypeRecommendation(tile))
                     .toList(),
               ),
             ),
@@ -203,10 +195,7 @@ class _FileTypeRecommendationState extends State<_FileTypeRecommendation> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 68),
-        child: GestureDetector(
-          onTap: _onTap,
-          child: Image.asset(assetPath),
-        ),
+        child: GestureDetector(onTap: _onTap, child: Image.asset(assetPath)),
       ),
     );
   }
@@ -218,12 +207,7 @@ class _FileTypeRecommendationState extends State<_FileTypeRecommendation> {
         return;
       }
       RecentSearches().add(searchResult.name());
-      unawaited(
-        routeToPage(
-          context,
-          SearchResultPage(searchResult),
-        ),
-      );
+      unawaited(routeToPage(context, SearchResultPage(searchResult)));
     } catch (e, s) {
       _logger.severe("Failed to resolve file type result", e, s);
     }

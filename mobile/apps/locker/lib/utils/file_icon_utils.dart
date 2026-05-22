@@ -77,11 +77,7 @@ class FileIconUtils {
   }) {
     final config = _getFileConfig(fileName);
 
-    final icon = HugeIcon(
-      icon: config.icon,
-      color: config.color,
-      size: size,
-    );
+    final icon = HugeIcon(icon: config.icon, color: config.color, size: size);
 
     if (!showBackground) {
       return icon;
@@ -92,10 +88,7 @@ class FileIconUtils {
         color: config.backgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: icon,
-      ),
+      child: Padding(padding: const EdgeInsets.all(8.0), child: icon),
     );
   }
 

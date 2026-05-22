@@ -25,40 +25,27 @@ class RecoveryDateSelector extends StatelessWidget {
 
     return switch (layout) {
       RecoveryDateSelectorLayout.chips => _buildChips(
-          context,
-          colorScheme,
-          textTheme,
-        ),
+        context,
+        colorScheme,
+        textTheme,
+      ),
       RecoveryDateSelectorLayout.list => Column(
-          children: [
-            for (var index = 0; index < dayOptions.length; index++) ...[
-              _buildListItem(
-                context,
-                dayOptions[index],
-                colorScheme,
-                textTheme,
-              ),
-              if (index < dayOptions.length - 1) const SizedBox(height: 8),
-            ],
+        children: [
+          for (var index = 0; index < dayOptions.length; index++) ...[
+            _buildListItem(context, dayOptions[index], colorScheme, textTheme),
+            if (index < dayOptions.length - 1) const SizedBox(height: 8),
           ],
-        ),
+        ],
+      ),
     };
   }
 
-  Widget _buildChip(
-    BuildContext context,
-    int days,
-    colorScheme,
-    textTheme,
-  ) {
+  Widget _buildChip(BuildContext context, int days, colorScheme, textTheme) {
     final isSelected = selectedDays == days;
     return GestureDetector(
       onTap: () => onDaysChanged(days),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 26.0,
-          vertical: 18.0,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 26.0, vertical: 18.0),
         decoration: BoxDecoration(
           color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
           borderRadius: BorderRadius.circular(14),
@@ -73,11 +60,7 @@ class RecoveryDateSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildChips(
-    BuildContext context,
-    colorScheme,
-    textTheme,
-  ) {
+  Widget _buildChips(BuildContext context, colorScheme, textTheme) {
     final chips = dayOptions
         .map((days) => _buildChip(context, days, colorScheme, textTheme))
         .toList(growable: false);
@@ -95,11 +78,7 @@ class RecoveryDateSelector extends StatelessWidget {
       );
     }
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: chips,
-    );
+    return Wrap(spacing: 12, runSpacing: 12, children: chips);
   }
 
   Widget _buildListItem(
@@ -125,8 +104,9 @@ class RecoveryDateSelector extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16, right: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border:
-                isSelected ? Border.all(color: colorScheme.primary700) : null,
+            border: isSelected
+                ? Border.all(color: colorScheme.primary700)
+                : null,
           ),
           child: Row(
             children: [

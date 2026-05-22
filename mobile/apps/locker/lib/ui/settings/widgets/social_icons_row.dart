@@ -69,23 +69,14 @@ class _SocialIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        launchUrlString(
-          url,
-          mode: LaunchMode.externalApplication,
-        );
+        launchUrlString(url, mode: LaunchMode.externalApplication);
       },
       child: Container(
         width: 32,
         height: 32,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
         child: Center(
-          child: HugeIcon(
-            icon: icon,
-            color: color,
-            size: 20,
-          ),
+          child: HugeIcon(icon: icon, color: color, size: 20),
         ),
       ),
     );

@@ -277,9 +277,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           if (_allSelected) {
             selectionState.selectedFiles.clearAll();
           } else {
-            selectionState.selectedFiles.selectAll(
-              allGalleryFiles.toSet(),
-            );
+            selectionState.selectedFiles.selectAll(allGalleryFiles.toSet());
           }
           _allSelected = !_allSelected;
         });

@@ -168,10 +168,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         // Shared header
         final sharedHeaderIndex = collectionsEndIndex;
         if (hasSharedCollections && adjustedIndex == sharedHeaderIndex) {
-          return _buildSectionHeader(
-            context,
-            "Shared with you",
-          );
+          return _buildSectionHeader(context, "Shared with you");
         }
 
         // Shared collections
@@ -184,9 +181,8 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
 
         return const SizedBox.shrink();
       },
-      separatorBuilder: (context, index) => const SizedBox(
-        height: ThumbnailListItem.defaultItemSpacing,
-      ),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: ThumbnailListItem.defaultItemSpacing),
       itemCount: totalItemCount,
       shrinkWrap: false,
       physics: const BouncingScrollPhysics(),
@@ -209,11 +205,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Divider(
-        height: 1,
-        thickness: 1,
-        color: colorScheme.strokeFaint,
-      ),
+      child: Divider(height: 1, thickness: 1, color: colorScheme.strokeFaint),
     );
   }
 
@@ -241,10 +233,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     );
   }
 
-  Future<void> _sharedAlbumOnTap(
-    BuildContext context,
-    Collection item,
-  ) async {
+  Future<void> _sharedAlbumOnTap(BuildContext context, Collection item) async {
     // Show dialog asking if user wants to add instead of move
     final result = await showChoiceActionSheet(
       context,
@@ -269,16 +258,11 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       }
     } else if (result?.action == ButtonAction.error &&
         result?.exception != null) {
-      await showGenericErrorDialog(
-        context: context,
-        error: result!.exception,
-      );
+      await showGenericErrorDialog(context: context, error: result!.exception);
     }
   }
 
-  Future<void> _toggleCollectionSelection(
-    Collection collection,
-  ) async {
+  Future<void> _toggleCollectionSelection(Collection collection) async {
     if (widget.selectedCollections.contains(collection)) {
       widget.selectedCollections.remove(collection);
     } else {
@@ -319,26 +303,14 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         popnavAfterSubmission: true,
       );
       if (result is Exception) {
-        await showGenericErrorDialog(
-          context: context,
-          error: result,
-        );
-        _logger.severe(
-          "Failed to name album",
-          result,
-        );
+        await showGenericErrorDialog(context: context, error: result);
+        _logger.severe("Failed to name album", result);
       }
     } else {
       Navigator.pop(context);
-      showToast(
-        context,
-        AppLocalizations.of(context).createAlbumActionHint,
-      );
+      showToast(context, AppLocalizations.of(context).createAlbumActionHint);
       Bus.instance.fire(
-        TabChangedEvent(
-          0,
-          TabChangedEventSource.collectionsPage,
-        ),
+        TabChangedEvent(0, TabChangedEventSource.collectionsPage),
       );
     }
   }
@@ -368,15 +340,9 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
             showProgressDialog: false,
           )) {
             if (widget.actionType == CollectionActionType.restoreFiles) {
-              showShortToast(
-                context,
-                'Restored files to album ' + albumName,
-              );
+              showShortToast(context, 'Restored files to album ' + albumName);
             } else {
-              showShortToast(
-                context,
-                "Album '" + albumName + "' created.",
-              );
+              showShortToast(context, "Album '" + albumName + "' created.");
             }
 
             Navigator.pop(context);
@@ -442,10 +408,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         toastMessage = "";
       }
       if (toastMessage.isNotEmpty) {
-        showShortToast(
-          context,
-          toastMessage,
-        );
+        showShortToast(context, toastMessage);
       }
       if (shouldNavigateToCollection) {
         Navigator.pop(context);
@@ -467,11 +430,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       case CollectionActionType.addFiles:
       case CollectionActionType.addToHiddenAlbum:
       case CollectionActionType.autoAddPeople:
-        return _addToCollection(
-          context,
-          collection.id,
-          showProgressDialog,
-        );
+        return _addToCollection(context, collection.id, showProgressDialog);
       case CollectionActionType.moveFiles:
         return _moveFilesToCollection(context, collection.id);
       case CollectionActionType.unHide:
@@ -504,12 +463,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     Collection collection,
   ) {
     if (Configuration.instance.getUserID() == collection.owner.id) {
-      unawaited(
-        routeToPage(
-          context,
-          ShareCollectionPage(collection),
-        ),
-      );
+      unawaited(routeToPage(context, ShareCollectionPage(collection)));
     } else {
       showGenericErrorDialog(
         context: context,

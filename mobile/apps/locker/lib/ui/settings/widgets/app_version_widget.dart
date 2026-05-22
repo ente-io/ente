@@ -57,9 +57,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
               child: Center(
                 child: Text(
                   "Version ${snapshot.data!}",
-                  style: textTheme.mini.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
+                  style: textTheme.mini.copyWith(color: colorScheme.textMuted),
                 ),
               ),
             );

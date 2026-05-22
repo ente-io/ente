@@ -103,10 +103,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   }
 
   Future<void> _onSelectPinLock() async {
-    final result = await routeToPage(
-      context,
-      const LockScreenPin(),
-    );
+    final result = await routeToPage(context, const LockScreenPin());
     if (result == true) {
       await _configuration.setSystemLockScreen(false);
       setState(() {
@@ -117,10 +114,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   }
 
   Future<void> _onSelectPasswordLock() async {
-    final result = await routeToPage(
-      context,
-      const LockScreenPassword(),
-    );
+    final result = await routeToPage(context, const LockScreenPassword());
     if (result == true) {
       await _configuration.setSystemLockScreen(false);
       setState(() {
@@ -139,9 +133,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       hideAppContent = !hideAppContent;
     });
-    await _lockscreenSetting.setHideAppContent(
-      hideAppContent,
-    );
+    await _lockscreenSetting.setHideAppContent(hideAppContent);
   }
 
   String _formatAutoLockTime(int milliseconds) {

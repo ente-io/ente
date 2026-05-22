@@ -133,10 +133,12 @@ Future<void> _pickEnteJsonFile(BuildContext context) async {
   }
 
   try {
-    final jsonString =
-        await readPickedImportFileAsString(result.files.single.path!);
-    EnteAuthExport exportedData =
-        EnteAuthExport.fromJson(jsonDecode(jsonString));
+    final jsonString = await readPickedImportFileAsString(
+      result.files.single.path!,
+    );
+    EnteAuthExport exportedData = EnteAuthExport.fromJson(
+      jsonDecode(jsonString),
+    );
     await _decryptExportData(context, exportedData);
   } catch (e) {
     await showErrorDialog(

@@ -70,8 +70,9 @@ List<Code> parseGoogleAuth(String qrCodeData) {
     List<Code> codes = <Code>[];
     final String payload = qrCodeData.substring(kGoogleAuthExportPrefix.length);
     final Uint8List base64Decoded = base64Decode(Uri.decodeComponent(payload));
-    final MigrationPayload mPayload =
-        MigrationPayload.fromBuffer(base64Decoded);
+    final MigrationPayload mPayload = MigrationPayload.fromBuffer(
+      base64Decoded,
+    );
     for (var otpParameter in mPayload.otpParameters) {
       // Build the OTP URL
       String otpUrl;
@@ -129,8 +130,9 @@ List<Code> parseGoogleAuth(String qrCodeData) {
     }
     return codes;
   } catch (e, s) {
-    Logger("GoogleAuthImport")
-        .severe("Error while parsing Google Auth QR code", e, s);
+    Logger(
+      "GoogleAuthImport",
+    ).severe("Error while parsing Google Auth QR code", e, s);
     throw Exception('Failed to parse Google Auth QR code \n ${e.toString()}');
   }
 }

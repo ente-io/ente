@@ -162,25 +162,16 @@ Future<void> shareLogs(
   }
 }
 
-Future<void> openSupportPage(
-  String? subject,
-  String? body,
-) async {
+Future<void> openSupportPage(String? subject, String? body) async {
   const url = "https://github.com/ente-io/ente/discussions/new?category=q-a";
   if (subject != null && body != null) {
-    await launchUrl(
-      Uri.parse(
-        "$url&title=$subject&body=$body",
-      ),
-    );
+    await launchUrl(Uri.parse("$url&title=$subject&body=$body"));
   } else {
     await launchUrl(Uri.parse(url));
   }
 }
 
-Future<String> getZippedLogsFile({
-  String logsSubPath = "logs",
-}) async {
+Future<String> getZippedLogsFile({String logsSubPath = "logs"}) async {
   final logsPath = (await getApplicationSupportDirectory()).path;
   final logsDirectory = Directory("$logsPath/$logsSubPath");
   final tempPath = (await pure_utils.DirectoryUtils.getTempsDir()).path;
@@ -204,17 +195,11 @@ Future<void> exportLogs(
         'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
 
     final bytes = await File(zipFilePath).readAsBytes();
-    await FileSaverUtil.saveFile(
-      logFileName,
-      'zip',
-      bytes,
-      MimeType.zip,
-    );
+    await FileSaverUtil.saveFile(logFileName, 'zip', bytes, MimeType.zip);
   } else {
-    await shareFiles(
-      [XFile(zipFilePath, mimeType: 'application/zip')],
-      context: context,
-    );
+    await shareFiles([
+      XFile(zipFilePath, mimeType: 'application/zip'),
+    ], context: context);
   }
 }
 

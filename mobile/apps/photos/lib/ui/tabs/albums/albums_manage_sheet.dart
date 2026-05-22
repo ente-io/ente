@@ -131,11 +131,7 @@ Widget _manageItem({
 }) {
   return MenuComponent(
     title: label,
-    leading: HugeIcon(
-      icon: icon,
-      size: 18,
-      color: iconColor,
-    ),
+    leading: HugeIcon(icon: icon, size: 18, color: iconColor),
     trailing: const Icon(Icons.chevron_right_rounded),
     onTap: onTap,
   );

@@ -8,10 +8,7 @@ import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
 
 class FeedEmptyState extends StatelessWidget {
-  const FeedEmptyState({
-    required this.localGalleryMode,
-    super.key,
-  });
+  const FeedEmptyState({required this.localGalleryMode, super.key});
 
   final bool localGalleryMode;
 
@@ -100,8 +97,9 @@ class FeedEmptyState extends StatelessWidget {
             const SizedBox(height: 32),
             ButtonWidgetV2(
               buttonType: ButtonTypeV2.primary,
-              labelText:
-                  localGalleryMode ? strings.getStarted : strings.shareAnAlbum,
+              labelText: localGalleryMode
+                  ? strings.getStarted
+                  : strings.shareAnAlbum,
               onTap: () async {
                 if (localGalleryMode) {
                   await Navigator.of(context).push(

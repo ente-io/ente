@@ -4,10 +4,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 
 class EditTagDialog extends StatefulWidget {
-  const EditTagDialog({
-    super.key,
-    required this.tag,
-  });
+  const EditTagDialog({super.key, required this.tag});
 
   final String tag;
 
@@ -32,9 +29,7 @@ class _EditTagDialogState extends State<EditTagDialog> {
               maxLength: 100,
               decoration: InputDecoration(
                 hintText: l10n.tag,
-                hintStyle: const TextStyle(
-                  color: Colors.white30,
-                ),
+                hintStyle: const TextStyle(color: Colors.white30),
                 contentPadding: const EdgeInsets.all(12),
               ),
               onChanged: (value) {
@@ -53,9 +48,7 @@ class _EditTagDialogState extends State<EditTagDialog> {
         TextButton(
           child: Text(
             l10n.cancel,
-            style: const TextStyle(
-              color: Colors.redAccent,
-            ),
+            style: const TextStyle(color: Colors.redAccent),
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -64,9 +57,7 @@ class _EditTagDialogState extends State<EditTagDialog> {
         TextButton(
           child: Text(
             l10n.saveAction,
-            style: const TextStyle(
-              color: Colors.purple,
-            ),
+            style: const TextStyle(color: Colors.purple),
           ),
           onPressed: () async {
             if (_tag.trim().isEmpty) return;

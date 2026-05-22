@@ -16,22 +16,16 @@ class SelectionActionButton extends StatelessWidget {
     required this.onTap,
     this.isDestructive = false,
   }) : assert(
-          icon != null || hugeIcon != null,
-          'Either icon or hugeIcon must be provided',
-        );
+         icon != null || hugeIcon != null,
+         'Either icon or hugeIcon must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final color = isDestructive ? colorScheme.warning500 : colorScheme.textBase;
-    final iconWidget =
-        hugeIcon ??
-        Icon(
-          icon!,
-          color: color,
-          size: 24,
-        );
+    final iconWidget = hugeIcon ?? Icon(icon!, color: color, size: 24);
 
     return GestureDetector(
       onTap: onTap,
@@ -45,17 +39,11 @@ class SelectionActionButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 28,
-              height: 28,
-              child: Center(child: iconWidget),
-            ),
+            SizedBox(width: 28, height: 28, child: Center(child: iconWidget)),
             const SizedBox(height: 8),
             Text(
               label,
-              style: textTheme.small.copyWith(
-                color: color,
-              ),
+              style: textTheme.small.copyWith(color: color),
               textAlign: TextAlign.center,
             ),
           ],

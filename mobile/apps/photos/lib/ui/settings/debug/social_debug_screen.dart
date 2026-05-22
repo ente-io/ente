@@ -32,10 +32,7 @@ class SocialDebugScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                "Social debug",
-                style: textTheme.h3Bold,
-              ),
+              Text("Social debug", style: textTheme.h3Bold),
               const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
@@ -77,8 +74,8 @@ class SocialDebugScreen extends StatelessWidget {
                         trailingIcon: Icons.chevron_right_outlined,
                         trailingIconIsMuted: true,
                         onTap: () async {
-                          final count =
-                              await SocialDB.instance.deleteAllComments();
+                          final count = await SocialDB.instance
+                              .deleteAllComments();
                           showShortToast(context, "Deleted $count comments");
                         },
                       ),
@@ -88,8 +85,8 @@ class SocialDebugScreen extends StatelessWidget {
                         trailingIcon: Icons.chevron_right_outlined,
                         trailingIconIsMuted: true,
                         onTap: () async {
-                          final count =
-                              await SocialDB.instance.deleteAllReactions();
+                          final count = await SocialDB.instance
+                              .deleteAllReactions();
                           showShortToast(context, "Deleted $count reactions");
                         },
                       ),

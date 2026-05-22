@@ -15,9 +15,7 @@ const _legacyKitAdvertBullets = [
 
 Future<bool> showLegacyKitAdvertPage(BuildContext context) async {
   return await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (context) => const LegacyKitAdvertPage(),
-        ),
+        MaterialPageRoute(builder: (context) => const LegacyKitAdvertPage()),
       ) ??
       false;
 }
@@ -118,9 +116,11 @@ class _LegacyKitAdvertContent extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 279),
           child: Column(
             children: [
-              for (var index = 0;
-                  index < _legacyKitAdvertBullets.length;
-                  index++) ...[
+              for (
+                var index = 0;
+                index < _legacyKitAdvertBullets.length;
+                index++
+              ) ...[
                 _LegacyKitAdvertBullet(
                   text: _legacyKitAdvertBullets[index],
                   colorScheme: colorScheme,

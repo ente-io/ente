@@ -100,10 +100,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   Future<void> updateFolderSettings() async {
     final l10n = AppLocalizations.of(context);
-    final dialog = createProgressDialog(
-      context,
-      l10n.updatingFolderSelection,
-    );
+    final dialog = createProgressDialog(context, l10n.updatingFolderSelection);
     await dialog.show();
     try {
       final Map<String, bool> syncStatus = {};
@@ -161,18 +158,18 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             variant: ButtonComponentVariant.neutral,
             shouldSurfaceExecutionStates: false,
             onTap: () async {
-              Navigator.of(sheetContext).pop(
-                _OnlyNewWarningAction.updateSettings,
-              );
+              Navigator.of(
+                sheetContext,
+              ).pop(_OnlyNewWarningAction.updateSettings);
             },
           ),
           ButtonComponent(
             label: l10n.ok,
             shouldSurfaceExecutionStates: false,
             onTap: () async {
-              Navigator.of(sheetContext).pop(
-                _OnlyNewWarningAction.continueBackup,
-              );
+              Navigator.of(
+                sheetContext,
+              ).pop(_OnlyNewWarningAction.continueBackup);
             },
           ),
         ],
@@ -183,10 +180,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       return false;
     }
     if (result == _OnlyNewWarningAction.updateSettings) {
-      await routeToPage(
-        context,
-        const BackupSettingsScreen(),
-      );
+      await routeToPage(context, const BackupSettingsScreen());
       return false;
     }
     if (result == _OnlyNewWarningAction.continueBackup) {
@@ -297,15 +291,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         horizontal: _gridHorizontalPadding / 2,
       ),
       sliver: SliverGrid(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            return _buildFolderItem(
-              _deviceCollections![index],
-              sideOfThumbnail,
-            );
-          },
-          childCount: _deviceCollections!.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return _buildFolderItem(_deviceCollections![index], sideOfThumbnail);
+        }, childCount: _deviceCollections!.length),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
           crossAxisSpacing: _gridCrossSpacing,
@@ -464,7 +452,4 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   }
 }
 
-enum _OnlyNewWarningAction {
-  updateSettings,
-  continueBackup,
-}
+enum _OnlyNewWarningAction { updateSettings, continueBackup }

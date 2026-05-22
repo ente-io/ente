@@ -8,36 +8,21 @@ const Object _personDataUnchanged = Object();
 class PersonEntity {
   final String remoteID;
   final PersonData data;
-  PersonEntity(
-    this.remoteID,
-    this.data,
-  );
+  PersonEntity(this.remoteID, this.data);
 
   // copyWith
-  PersonEntity copyWith({
-    String? remoteID,
-    PersonData? data,
-  }) {
-    return PersonEntity(
-      remoteID ?? this.remoteID,
-      data ?? this.data,
-    );
+  PersonEntity copyWith({String? remoteID, PersonData? data}) {
+    return PersonEntity(remoteID ?? this.remoteID, data ?? this.data);
   }
 }
 
 class ClusterInfo {
   final String id;
   final Set<String> faces;
-  ClusterInfo({
-    required this.id,
-    required this.faces,
-  });
+  ClusterInfo({required this.id, required this.faces});
 
   // toJson
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'faces': faces.toList(),
-      };
+  Map<String, dynamic> toJson() => {'id': id, 'faces': faces.toList()};
 
   // from Json
   factory ClusterInfo.fromJson(Map<String, dynamic> json) {
@@ -144,22 +129,23 @@ class PersonData {
 
   // toJson
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'assigned': assigned.map((e) => e.toJson()).toList(),
-        'rejectedFaceIDs': rejectedFaceIDs,
-        'avatarFaceID': avatarFaceID,
-        'isHidden': isHidden,
-        'isPinned': isPinned,
-        'hideFromMemories': hideFromMemories,
-        'birthDate': birthDate,
-        'email': email,
-        'userID': userID,
-        'manuallyAssigned': manuallyAssigned,
-      };
+    'name': name,
+    'assigned': assigned.map((e) => e.toJson()).toList(),
+    'rejectedFaceIDs': rejectedFaceIDs,
+    'avatarFaceID': avatarFaceID,
+    'isHidden': isHidden,
+    'isPinned': isPinned,
+    'hideFromMemories': hideFromMemories,
+    'birthDate': birthDate,
+    'email': email,
+    'userID': userID,
+    'manuallyAssigned': manuallyAssigned,
+  };
 
   // fromJson
   factory PersonData.fromJson(Map<String, dynamic> json) {
-    final assigned = (json['assigned'] == null ||
+    final assigned =
+        (json['assigned'] == null ||
             json['assigned'].length == 0 ||
             json['assigned'] is! Iterable)
         ? <ClusterInfo>[]
@@ -171,10 +157,8 @@ class PersonData {
 
     final List<String> rejectedFaceIDs =
         (json['rejectedFaceIDs'] == null || json['rejectedFaceIDs'].length == 0)
-            ? <String>[]
-            : List<String>.from(
-                json['rejectedFaceIDs'],
-              );
+        ? <String>[]
+        : List<String>.from(json['rejectedFaceIDs']);
     final manualAssignmentData = json['manuallyAssigned'];
     final manuallyAssigned = manualAssignmentData is Iterable
         ? List<int>.from(

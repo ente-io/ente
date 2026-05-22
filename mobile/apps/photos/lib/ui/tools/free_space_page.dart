@@ -40,19 +40,19 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     Logger("FreeSpacePage").info(
       "Number of uploaded files: " + widget.status.localIDs.length.toString(),
     );
-    Logger("FreeSpacePage")
-        .info("Space consumed: " + widget.status.size.toString());
-    return SingleChildScrollView(
-      child: _getWidget(widget.status),
-    );
+    Logger(
+      "FreeSpacePage",
+    ).info("Space consumed: " + widget.status.size.toString());
+    return SingleChildScrollView(child: _getWidget(widget.status));
   }
 
   Widget _getWidget(FreeableSpaceInfo status) {
     final count = status.localIDs.length;
     final formattedCount = NumberFormat().format(count);
     final String textMessage = widget.clearSpaceForFolder
-        ? AppLocalizations.of(context)
-            .filesBackedUpInAlbum(count: count, formattedNumber: formattedCount)
+        ? AppLocalizations.of(
+            context,
+          ).filesBackedUpInAlbum(count: count, formattedNumber: formattedCount)
         : AppLocalizations.of(context).filesBackedUpFromDevice(
             count: count,
             formattedNumber: formattedCount,
@@ -84,10 +84,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                   ),
             Padding(
               padding: const EdgeInsets.only(top: 16),
-              child: Image.asset(
-                "assets/gallery_locked.png",
-                height: 160,
-              ),
+              child: Image.asset("assets/gallery_locked.png", height: 160),
             ),
           ],
         ),
@@ -101,12 +98,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                 color: Color.fromRGBO(45, 194, 98, 1.0),
               ),
               const Padding(padding: EdgeInsets.all(10)),
-              Expanded(
-                child: Text(
-                  textMessage,
-                  style: informationTextStyle,
-                ),
-              ),
+              Expanded(child: Text(textMessage, style: informationTextStyle)),
             ],
           ),
         ),
@@ -144,8 +136,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
-                  AppLocalizations.of(context)
-                      .freeUpAccessPostDelete(count: count),
+                  AppLocalizations.of(
+                    context,
+                  ).freeUpAccessPostDelete(count: count),
                   style: informationTextStyle,
                 ),
               ),
@@ -155,16 +148,15 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
         const Padding(padding: EdgeInsets.all(24)),
         Container(
           width: double.infinity,
-          constraints: const BoxConstraints(
-            minHeight: 64,
-          ),
+          constraints: const BoxConstraints(minHeight: 64),
           padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
           child: GradientButton(
             onTap: () async {
               await _freeStorage(status);
             },
-            text: AppLocalizations.of(context)
-                .freeUpAmount(sizeInMBorGB: formatBytes(status.size)),
+            text: AppLocalizations.of(
+              context,
+            ).freeUpAmount(sizeInMBorGB: formatBytes(status.size)),
           ),
         ),
         const Padding(padding: EdgeInsets.all(24)),
@@ -183,8 +175,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     }
 
     if (isSuccess == false && Platform.isAndroid) {
-      isSuccess =
-          await retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(context);
+      isSuccess = await retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
+        context,
+      );
     }
 
     if (isSuccess) {

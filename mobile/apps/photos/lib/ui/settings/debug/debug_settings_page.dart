@@ -47,10 +47,7 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                "Debug",
-                style: textTheme.h3Bold,
-              ),
+              Text("Debug", style: textTheme.h3Bold),
               const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
@@ -69,8 +66,9 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                               onChanged: () async {
                                 final newValue =
                                     !localSettings.isInternalUserDisabled;
-                                await localSettings
-                                    .setInternalUserDisabled(newValue);
+                                await localSettings.setInternalUserDisabled(
+                                  newValue,
+                                );
                                 setState(() {});
                                 showShortToast(
                                   context,
@@ -95,8 +93,9 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                                 final newValue =
                                     !(localSettings.cfUploadProxyEnabled ??
                                         flagService.cloudflareUploadWorker);
-                                await localSettings
-                                    .setCFUploadProxyEnabled(newValue);
+                                await localSettings.setCFUploadProxyEnabled(
+                                  newValue,
+                                );
                                 setState(() {});
                                 showShortToast(
                                   context,
@@ -121,9 +120,7 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                                   final newValue = !localSettings
                                       .isBGDebugNotificationsEnabled;
                                   await localSettings
-                                      .setBGDebugNotificationsEnabled(
-                                    newValue,
-                                  );
+                                      .setBGDebugNotificationsEnabled(newValue);
                                   setState(() {});
                                   showShortToast(
                                     context,
@@ -145,8 +142,9 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                               onChanged: () async {
                                 final newValue =
                                     !localSettings.enableDatabaseLogging;
-                                await localSettings
-                                    .setEnableDatabaseLogging(newValue);
+                                await localSettings.setEnableDatabaseLogging(
+                                  newValue,
+                                );
                                 setState(() {});
                                 showShortToast(
                                   context,
@@ -169,8 +167,8 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                               onChanged: () async {
                                 await localSettings
                                     .setShowLocalIDOverThumbnails(
-                                  !localSettings.showLocalIDOverThumbnails,
-                                );
+                                      !localSettings.showLocalIDOverThumbnails,
+                                    );
                                 setState(() {});
                                 showShortToast(
                                   context,
@@ -291,10 +289,7 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
       content: SingleChildScrollView(
         child: Column(
           children: [
-            const Text(
-              "Key",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const Text("Key", style: TextStyle(fontWeight: FontWeight.bold)),
             Text(CryptoUtil.bin2base64(Configuration.instance.getKey()!)),
             const Padding(padding: EdgeInsets.all(12)),
             const Text(

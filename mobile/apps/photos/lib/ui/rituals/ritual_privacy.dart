@@ -22,8 +22,9 @@ bool isHiddenCollectionId(int? collectionId) {
   if (collectionId == null || collectionId <= 0) {
     return false;
   }
-  final collection =
-      CollectionsService.instance.getCollectionByID(collectionId);
+  final collection = CollectionsService.instance.getCollectionByID(
+    collectionId,
+  );
   return collection?.isHidden() ?? false;
 }
 

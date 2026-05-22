@@ -62,37 +62,33 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
         quality: 80,
       );
       _logger.info('Size after compression = ${compressedBytes.length}');
-      final fileName = "ente_collage_" +
+      final fileName =
+          "ente_collage_" +
           DateTime.now().microsecondsSinceEpoch.toString() +
           ".jpeg";
       final newAsset = await (PhotoManager.editor
           .saveImage(
-        compressedBytes,
-        filename: fileName,
-        relativePath: "ente Collages",
-      )
+            compressedBytes,
+            filename: fileName,
+            relativePath: "ente Collages",
+          )
           .onError((err, st) async {
-        return await (PhotoManager.editor.saveImage(
-          compressedBytes,
-          filename: fileName,
-        ));
-      }));
+            return await (PhotoManager.editor.saveImage(
+              compressedBytes,
+              filename: fileName,
+            ));
+          }));
       final newFile = await EnteFile.fromAsset("ente Collages", newAsset);
       SyncService.instance.sync().ignore();
       showShortToast(context, AppLocalizations.of(context).collageSaved);
       replacePage(
         context,
-        DetailPage(
-          DetailPageConfiguration([newFile], 0, "collage"),
-        ),
+        DetailPage(DetailPageConfiguration([newFile], 0, "collage")),
         result: true,
       );
     } catch (e, s) {
       _logger.severe("Failed to create collage", e, s);
-      showShortToast(
-        context,
-        AppLocalizations.of(context).somethingWentWrong,
-      );
+      showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
     } finally {
       if (mounted) {
         setState(() {
