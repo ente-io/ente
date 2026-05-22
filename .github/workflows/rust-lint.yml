@@ -41,4 +41,6 @@ jobs:
 
             - run: cargo clippy --workspace --all-targets --locked
 
-            - run: cargo test --workspace --locked
+            # ORT rc.12's Linux test binary links glibc 2.38 symbols that are
+            # unavailable on the Ubuntu 22.04 runner required by Tauri v1.
+            - run: cargo test --workspace --locked --exclude transcription --exclude ensu-transcription
