@@ -270,14 +270,18 @@ class _CollectionsFlexiGridViewWidgetState
       sliver: SliverList.builder(
         itemBuilder: (context, index) {
           Widget item;
+          Key itemKey;
 
           if (showCreateAlbum && index == 0) {
+            itemKey = ValueKey("${widget.tag}_new_album_list_item");
             item = NewAlbumListItemWidget(onTap: (_) => _createAlbum());
           } else {
             final collectionIndex = showCreateAlbum ? index - 1 : index;
+            final collection = widget.collections![collectionIndex];
+            itemKey = ValueKey("${widget.tag}_list_${collection.id}");
 
             item = AlbumListItemWidget(
-              widget.collections![collectionIndex],
+              collection,
               selectedAlbums: widget.selectedAlbums,
               onTapCallback: (c) {
                 isAnyAlbumSelected
@@ -295,6 +299,7 @@ class _CollectionsFlexiGridViewWidgetState
           }
 
           return Padding(
+            key: itemKey,
             padding: const EdgeInsets.symmetric(
               vertical: ThumbnailListItem.defaultItemSpacing / 2,
             ),

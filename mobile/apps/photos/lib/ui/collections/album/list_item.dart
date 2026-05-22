@@ -287,12 +287,20 @@ class _AlbumListItemCover extends StatelessWidget {
           child: SizedBox.expand(
             child: FutureBuilder<EnteFile?>(
               future: CollectionsService.instance.getCover(collection),
+              initialData: CollectionsService.instance.getCoverCache(
+                collection,
+              ),
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
+                final thumbnail =
+                    snapshot.data ??
+                    CollectionsService.instance.getCoverCache(collection);
+                if (thumbnail != null) {
                   return ThumbnailWidget(
-                    snapshot.data!,
+                    thumbnail,
                     shouldShowFavoriteIcon: false,
                     shouldShowOwnerAvatar: false,
+                    shouldShowSyncStatus: false,
+                    key: Key("album_list:${collection.id}:${thumbnail.tag}"),
                   );
                 }
                 return const NoThumbnailWidget(
