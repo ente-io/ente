@@ -1,11 +1,6 @@
 [package]
 name = "inference_rs"
-version = "0.1.0"
 edition = "2024"
-
-[lib]
-name = "inference_rs"
-crate-type = ["rlib"]
 
 [dependencies]
 futures-util = "0.3"

@@ -43,7 +43,7 @@ pub async fn run_sync(
     };
 
     if accounts.is_empty() {
-        println!("No accounts configured. Use 'ente-cli account add' first.");
+        println!("No accounts configured. Use 'ente-rs account add' first.");
         return Ok(());
     }
 
