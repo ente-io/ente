@@ -1343,7 +1343,8 @@ final class ChatViewModel: ObservableObject {
                 if let progress {
                     self.handleProgress(progress)
                     self.startDownloadProgressMonitor(target: target)
-                } else if self.downloadToast?.phase == .downloading || self.downloadToast?.phase == .loading {
+                } else if self.sharedModelReadyTask == nil &&
+                    (self.downloadToast?.phase == .downloading || self.downloadToast?.phase == .loading) {
                     self.downloadToast = nil
                     self.isDownloading = false
                     self.clearDownloadProgressMemory()
@@ -1896,8 +1897,7 @@ final class ChatViewModel: ObservableObject {
             status: resolvedProgress.status,
             offerRetryDownload: false
         )
-        let visiblePercent = resolvedProgress.percent ?? progress.percent
-        isDownloading = visiblePercent >= 0 && visiblePercent < 100
+        isDownloading = true
     }
 
     private func startDownloadProgressMonitor(target: InferenceModelTarget) {
