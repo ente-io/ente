@@ -34,6 +34,7 @@ struct DownloadOnboardingView: View {
 
                 Text(statusLine)
                     .font(EnsuTypography.body)
+                    .monospacedDigit()
                     .foregroundStyle(EnsuColor.textMuted)
                     .multilineTextAlignment(.center)
 

@@ -418,7 +418,7 @@ private fun DownloadOnboarding(
                 }
                 Text(
                     text = statusText ?: "Downloading...",
-                    style = EnsuTypography.body,
+                    style = EnsuTypography.body.copy(fontFeatureSettings = "tnum"),
                     color = EnsuColor.textMuted(),
                     textAlign = TextAlign.Center
                 )

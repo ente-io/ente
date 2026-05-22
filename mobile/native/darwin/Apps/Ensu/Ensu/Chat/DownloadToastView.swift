@@ -101,6 +101,7 @@ struct DownloadToastView: View {
             HStack {
                 Text(state.status)
                     .font(EnsuFont.message(size: 12, weight: .regular))
+                    .monospacedDigit()
                     .foregroundStyle(hasError ? EnsuColor.error : EnsuColor.textMuted)
 
                 Spacer()
