@@ -109,6 +109,68 @@ const ADVANCED_SETTINGS_UNLOCK_KEY = "ensu.advancedSettingsUnlocked";
 const MODEL_SETTINGS_STORAGE_KEY = "ensu.modelSettings";
 const SYSTEM_PROMPT_STORAGE_KEY = "ensu.systemPrompt";
 
+interface TauriCommandError {
+    code?: string;
+    message?: string;
+}
+
+const tauriCommandError = (error: unknown): TauriCommandError => {
+    if (!error || typeof error != "object") return {};
+    const record = error as Record<string, unknown>;
+    return {
+        code: typeof record.code == "string" ? record.code : undefined,
+        message: typeof record.message == "string" ? record.message : undefined,
+    };
+};
+
+const formatImageProcessingErrorForLog = (error: unknown) => {
+    const { code, message } = tauriCommandError(error);
+    if (code == "io") return "io: selected image file could not be read";
+    if (code && message) return `${code}: ${message}`;
+    if (message) return message;
+    if (error instanceof Error) return error.message;
+    if (typeof error == "string") return error;
+    return String(error);
+};
+
+const imageProcessingFailureDialog = (
+    error: unknown,
+    selectedImageCount: number,
+) => {
+    const { code, message } = tauriCommandError(error);
+    const lowerMessage = message?.toLowerCase() ?? "";
+    const subject =
+        selectedImageCount == 1
+            ? "The selected image"
+            : "One of the selected images";
+
+    if (code == "image" && lowerMessage.includes("memory limit")) {
+        return {
+            title: "Image too large",
+            message: `${subject} is too large for Ensu to process. Try resizing it or exporting a smaller copy, then attach it again.`,
+        };
+    }
+
+    if (code == "image") {
+        return {
+            title: "Image could not be attached",
+            message: `${subject} could not be decoded. Try converting it to a different image format, then attach it again.`,
+        };
+    }
+
+    if (code == "io") {
+        return {
+            title: "Image file could not be read",
+            message: `${subject} could not be read. Check that the file still exists and try again.`,
+        };
+    }
+
+    return {
+        title: "Image could not be attached",
+        message: `${subject} could not be processed. Try a different image or attach it again after resizing it.`,
+    };
+};
+
 const loadingPhraseVerbs = [
     "Generating",
     "Thinking through",
@@ -3575,25 +3637,36 @@ const Page: React.FC = () => {
                 imageAttachmentSlotsRemaining,
             );
 
-            const { invoke } = await import("@tauri-apps/api/tauri");
-            const files = await Promise.all(
-                pathsToProcess.map(async (selectedPath) => {
-                    const normalized = selectedPath.replace(/\\/g, "/");
-                    const name =
-                        normalized.split("/").pop()?.replace(/\0/g, "") ||
-                        "image";
-                    const compressed = await invoke<number[]>(
-                        "chat_db_compress_attachment_image_file",
-                        { path: selectedPath },
-                    );
-                    const bytes = new Uint8Array(compressed);
-                    return new File(
-                        [toSafeBlobPart(bytes)],
-                        normalizedJpegAttachmentName(name),
-                        { type: "image/jpeg" },
-                    );
-                }),
-            );
+            let files: File[];
+            try {
+                const { invoke } = await import("@tauri-apps/api/tauri");
+                files = await Promise.all(
+                    pathsToProcess.map(async (selectedPath) => {
+                        const normalized = selectedPath.replace(/\\/g, "/");
+                        const name =
+                            normalized.split("/").pop()?.replace(/\0/g, "") ||
+                            "image";
+                        const compressed = await invoke<number[]>(
+                            "chat_db_compress_attachment_image_file",
+                            { path: selectedPath },
+                        );
+                        const bytes = new Uint8Array(compressed);
+                        return new File(
+                            [toSafeBlobPart(bytes)],
+                            normalizedJpegAttachmentName(name),
+                            { type: "image/jpeg" },
+                        );
+                    }),
+                );
+            } catch (error) {
+                log.error(
+                    `Failed to process selected image attachment: ${formatImageProcessingErrorForLog(error)}`,
+                );
+                showMiniDialog(
+                    imageProcessingFailureDialog(error, pathsToProcess.length),
+                );
+                return;
+            }
 
             log.info("Compressed selected image attachments", {
                 count: files.length,
