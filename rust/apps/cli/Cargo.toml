@@ -7,10 +7,6 @@ homepage = "https://ente.com"
 repository = "https://github.com/ente-io/ente"
 license = "AGPL-3.0-only"
 
-[[bin]]
-name = "ente-cli"
-path = "src/main.rs"
-
 [dependencies]
 # CLI
 clap = { version = "4.5", features = ["derive", "env"] }

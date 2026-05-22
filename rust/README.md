@@ -10,7 +10,7 @@ cargo clippy     # Lint
 cargo build      # Build
 cargo test       # Test
 
-cargo run --bin ente-cli -- --help   # Run the Ente Rust CLI
+cargo run --bin ente-rs -- --help   # Run the Ente Rust CLI
 ```
 
 CI runs with `RUSTFLAGS="-D warnings"` so warnings will cause checks to fail.
