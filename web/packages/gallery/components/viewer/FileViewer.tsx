@@ -40,7 +40,11 @@ import {
     type FileInfoProps,
 } from "ente-gallery/components/FileInfo";
 import type { Collection } from "ente-media/collection";
-import { fileFileName, ItemVisibility } from "ente-media/file-metadata";
+import {
+    fileFileName,
+    ItemVisibility,
+    metadataHash,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
@@ -1207,15 +1211,25 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             : undefined;
     }, [onSaveEditedImageCopy, handleClose]);
 
+    const userID = user?.id;
+    const haveUser = userID != undefined;
+    const canShowFavorite =
+        haveUser &&
+        !!favoriteFileIDs &&
+        !!pendingFavoriteUpdates &&
+        !!onToggleFavorite &&
+        !isInTrashSection &&
+        !isInHiddenSection;
+
     const handleAnnotate = useCallback(
         (file: EnteFile, itemData: ItemData): FileViewerAnnotatedFile => {
             const fileID = file.id;
-            const isOwnFile = file.ownerID == user?.id;
+            const isOwnFile = file.ownerID == userID;
+            const canFavoriteFile =
+                canShowFavorite && (isOwnFile || !!metadataHash(file.metadata));
 
             const canModify =
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
-
-            const showFavorite = canModify;
 
             const showArchive = canModify;
 
@@ -1231,7 +1245,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const showDownload = (() => {
                 if (disableDownload) return undefined;
                 if (!onDownload) return undefined;
-                if (user) {
+                if (haveUser) {
                     // Logged in users see the download option in the more menu.
                     return "menu";
                 } else {
@@ -1255,7 +1269,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const annotation: FileViewerFileAnnotation = {
                 fileID,
                 isOwnFile,
-                showFavorite,
+                showFavorite: canFavoriteFile,
                 showDownload,
                 showDelete,
                 showArchive,
@@ -1268,11 +1282,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             return annotatedFile;
         },
         [
-            user,
+            userID,
+            haveUser,
             disableDownload,
             isInIncomingSharedCollection,
             isInTrashSection,
             isInHiddenSection,
+            canShowFavorite,
             onDownload,
             handleEditImage,
             handleConfirmDelete,
@@ -1296,8 +1312,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
               }
             : undefined;
     }, [onSelectPerson, handleClose]);
-
-    const haveUser = !!user;
 
     // Determine if social buttons (like, comment) should be shown.
     const showSocialButtons = useMemo(() => {
