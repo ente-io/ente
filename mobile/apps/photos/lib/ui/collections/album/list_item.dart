@@ -199,11 +199,10 @@ class AlbumListItemWidget extends StatelessWidget {
         if (hasStatus) ...[
           Text(" \u2022 ", style: textStyle),
           if (showPin)
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedPin,
+            ImageIcon(
+              const AssetImage("assets/collection_pin.png"),
               size: 12,
               color: colors.textLight,
-              strokeWidth: 2.0,
             ),
           if (showArchive)
             HugeIcon(

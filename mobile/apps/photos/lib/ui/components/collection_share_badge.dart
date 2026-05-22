@@ -68,11 +68,10 @@ class CollectionPinnedBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CollectionStatusBadge(
-      child: HugeIcon(
-        icon: HugeIcons.strokeRoundedPin,
+      child: ImageIcon(
+        AssetImage("assets/collection_pin.png"),
         size: kCollectionBadgeIconSize,
         color: Colors.white,
-        strokeWidth: kCollectionBadgeStrokeWidth,
       ),
     );
   }
