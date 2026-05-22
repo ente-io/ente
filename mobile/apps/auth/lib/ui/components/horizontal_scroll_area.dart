@@ -29,15 +29,16 @@ class _HorizontalScrollAreaState extends State<HorizontalScrollArea> {
       return;
     }
 
-    final scrollDelta = event.scrollDelta.dy;
+    final position = _controller.position;
+    final nextOffset = (_controller.offset + event.scrollDelta.dy)
+        .clamp(position.minScrollExtent, position.maxScrollExtent)
+        .toDouble();
+    if (nextOffset == _controller.offset) {
+      return;
+    }
+
     GestureBinding.instance.pointerSignalResolver.register(event, (_) {
-      final position = _controller.position;
-      final nextOffset = (_controller.offset + scrollDelta)
-          .clamp(position.minScrollExtent, position.maxScrollExtent)
-          .toDouble();
-      if (nextOffset != _controller.offset) {
-        _controller.jumpTo(nextOffset);
-      }
+      _controller.jumpTo(nextOffset);
     });
   }
 
