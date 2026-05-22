@@ -65,8 +65,8 @@ class AlbumRowItemWidget extends StatelessWidget {
             icon: HugeIcons.strokeRoundedLink02,
             color: c.publicURLs.first.isExpired
                 ? componentColors.warning
-                : backgroundBaseLight,
-            size: 10,
+                : componentColors.specialWhite,
+            size: 8,
             strokeWidth: 2,
           )
         : null;
@@ -433,8 +433,12 @@ class _AlbumRowSharePillContent extends StatelessWidget {
     const type = AvatarType.xs;
     final double avatarSize = getAvatarSize(type);
     final double overlapPadding = getOverlapPadding(type);
-    final trailingWidgetWidth = trailingWidget == null ? 0.0 : avatarSize;
     final visibleAvatarCount = displayCount + (hasMore ? 1 : 0);
+    final trailingWidgetWidth = trailingWidget == null
+        ? 0.0
+        : visibleAvatarCount == 0
+        ? avatarSize
+        : 14.0;
     final visibleAvatarsWidth = visibleAvatarCount == 0
         ? 0.0
         : avatarSize + (visibleAvatarCount - 1) * overlapPadding;
@@ -469,9 +473,12 @@ class _AlbumRowSharePillContent extends StatelessWidget {
       widgets.add(
         Positioned(
           left: visibleAvatarsWidth,
+          top: (avatarSize - trailingWidgetWidth) / 2,
           child: SizedBox.square(
-            dimension: avatarSize,
-            child: Center(child: trailingWidget!),
+            dimension: trailingWidgetWidth,
+            child: Center(
+              child: SizedBox.square(dimension: 8, child: trailingWidget!),
+            ),
           ),
         ),
       );
