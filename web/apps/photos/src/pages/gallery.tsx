@@ -1059,14 +1059,16 @@ const Page: React.FC = () => {
         op: Extract<FileOp, "favorite" | "unfavorite">,
         selectedFiles: EnteFile[],
     ) => {
-        const filesWithTargetState =
-            op == "unfavorite"
-                ? selectedFiles.filter((file) => favoriteFileIDs.has(file.id))
-                : selectedFiles;
         const filesToProcess: EnteFile[] = [];
         let skippedUnsupportedSharedFile = false;
 
-        for (const file of filesWithTargetState) {
+        /**
+         * We currently can only process files which either the currentUser is the owner
+         * or the file has a valid metadataHash with it, so checking if we have
+         * any unspported files and if so then setting the variable flag as true
+         * for showing the modal later on.
+         */
+        for (const file of selectedFiles) {
             if (file.ownerID == user!.id || metadataHash(file.metadata)) {
                 filesToProcess.push(file);
             } else {
@@ -1074,10 +1076,16 @@ const Page: React.FC = () => {
             }
         }
 
+        // if there are no files to process, like if every file
+        // we got to process was unsupported then returning the flag and state.
         if (!filesToProcess.length) {
             return { processed: false, skippedUnsupportedSharedFile };
         }
 
+        // if we have files to process then, checking what the op is
+        // favorite and then creating a map of the current state before
+        // doing anything.  So if the API call fails later, the code knows
+        // how to restore each file back to its old state.
         const isFavorite = op == "favorite";
         const previousFavoriteByFileID = new Map(
             filesToProcess.map((file) => [
@@ -1086,6 +1094,14 @@ const Page: React.FC = () => {
             ]),
         );
 
+        /**
+         * Looping through the filesToProcess to do two things
+         * - addPendingFavoriteUpdate: Let the UI know that this file currently have a request in progress.
+         * So that the user can't trigger simultaneous updates.
+         *
+         * - unsycnedFavoriteUpdate: This changes the visible favorite state immediately, for a faster user
+         * feedback.
+         */
         for (const file of filesToProcess) {
             dispatch({ type: "addPendingFavoriteUpdate", fileID: file.id });
             dispatch({ type: "unsyncedFavoriteUpdate", file, isFavorite });
