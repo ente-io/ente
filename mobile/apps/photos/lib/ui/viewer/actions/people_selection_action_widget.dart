@@ -1,5 +1,6 @@
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -184,7 +185,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).edit,
-            icon: Icons.edit_outlined,
+            hugeIcon: HugeIcons.strokeRoundedPencilEdit01,
             onTap: _onEditPerson,
             shouldShow: showEditAction,
           ),
@@ -192,7 +193,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).review,
-            icon: Icons.search_outlined,
+            hugeIcon: HugeIcons.strokeRoundedSearch01,
             onTap: _onReviewSuggestion,
             shouldShow: showReviewAction,
           ),
@@ -200,7 +201,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).ignore,
-            icon: Icons.person_off_outlined,
+            hugeIcon: HugeIcons.strokeRoundedImageNotFound01,
             onTap: _onIgnore,
             shouldShow: showIgnoreAction,
           ),
@@ -208,7 +209,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).merge,
-            icon: Icons.merge_outlined,
+            hugeIcon: HugeIcons.strokeRoundedGitMerge,
             onTap: _onMerge,
             shouldShow: showMergeAction,
           ),
@@ -216,7 +217,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).reset,
-            icon: Icons.remove_outlined,
+            hugeIcon: HugeIcons.strokeRoundedRemove01,
             onTap: _onResetPerson,
             shouldShow: showResetAction,
           ),
@@ -224,7 +225,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).showPerson,
-            icon: Icons.visibility_outlined,
+            hugeIcon: HugeIcons.strokeRoundedView,
             onTap: _onShowPerson,
             shouldShow: showShowPersonAction,
           ),
@@ -232,7 +233,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).pin,
-            icon: Icons.push_pin_outlined,
+            hugeIcon: HugeIcons.strokeRoundedPin,
             onTap: () => _updatePinState(true),
             shouldShow: showPinAction,
           ),
@@ -240,7 +241,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).unpin,
-            icon: Icons.push_pin,
+            hugeIcon: HugeIcons.strokeRoundedPinOff,
             onTap: () => _updatePinState(false),
             shouldShow: showUnpinAction,
           ),
@@ -248,7 +249,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).hideFromMemories,
-            icon: Icons.visibility_off_outlined,
+            hugeIcon: HugeIcons.strokeRoundedViewOffSlash,
             onTap: () => _updateHideFromMemoriesState(true),
             shouldShow: showHideFromMemoriesAction,
           ),
@@ -256,7 +257,7 @@ class _PeopleSelectionActionWidgetState
         items.add(
           SelectionActionButton(
             labelText: context.l10n.showInMemories,
-            icon: Icons.visibility_outlined,
+            hugeIcon: HugeIcons.strokeRoundedView,
             onTap: () => _updateHideFromMemoriesState(false),
             shouldShow: showShowInMemoriesAction,
           ),
@@ -266,8 +267,8 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).autoAddToAlbum,
             iconWidget: Image.asset(
               "assets/auto-add-people.png",
-              width: 24,
-              height: 24,
+              width: 22,
+              height: 22,
               color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
             ),
             onTap: _autoAddToAlbum,

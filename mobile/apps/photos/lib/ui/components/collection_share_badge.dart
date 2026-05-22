@@ -2,6 +2,7 @@ import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 
 const double kCollectionBadgeSize = 20.0;
 const double kCollectionBadgeIconSize = 12.0;
@@ -35,20 +36,13 @@ class CollectionSelectedBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return Container(
-      width: 18,
-      height: 18,
-      decoration: BoxDecoration(
-        color: colorScheme.primary700,
-        shape: BoxShape.circle,
-      ),
-      padding: const EdgeInsets.all(2),
-      child: const HugeIcon(
-        icon: HugeIcons.strokeRoundedTick02,
-        size: kCollectionBadgeIconSize,
-        color: Colors.white,
-        strokeWidth: kCollectionBadgeStrokeWidth,
-      ),
+    return SelectAllStatusIcon(
+      isSelected: true,
+      size: 18,
+      tickIconSize: kCollectionBadgeIconSize,
+      tickStrokeWidth: kCollectionBadgeStrokeWidth,
+      selectedFillColor: colorScheme.primary700,
+      selectedTickColor: Colors.white,
     );
   }
 }

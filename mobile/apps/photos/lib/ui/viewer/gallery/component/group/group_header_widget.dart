@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart" as components;
 import "package:ente_components/theme/text_styles.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -8,6 +9,7 @@ import "package:photos/models/file/dummy_file.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/layout_settings.dart";
 
@@ -42,6 +44,8 @@ class GroupHeaderWidget extends StatefulWidget {
 }
 
 class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
+  static const _selectionIconSize = 18.0;
+
   late final ValueNotifier<bool> _areAllFromGroupSelectedNotifier;
 
   @override
@@ -72,6 +76,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final componentColors = components.ComponentTheme.colorsOf(context);
     const textStyle = TextStyles.body;
     final double horizontalPadding = widget.gridSize < photoGridSizeMax
         ? 12.0
@@ -119,53 +124,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                     child: ValueListenableBuilder(
                       valueListenable: _areAllFromGroupSelectedNotifier,
                       builder: (context, dynamic value, _) {
-                        return value
-                            ? widget.fadeInTrailingIcons
-                                  ? const Icon(
-                                      Icons.check_circle,
-                                      size: 22,
-                                    ).animate().fadeIn(
-                                      duration: const Duration(
-                                        milliseconds: PinnedGroupHeader
-                                            .kTrailingIconsFadeInDurationMs,
-                                      ),
-                                      delay: const Duration(
-                                        milliseconds:
-                                            PinnedGroupHeader
-                                                .kScaleDurationInMilliseconds +
-                                            PinnedGroupHeader
-                                                .kTrailingIconsFadeInDelayMs,
-                                      ),
-                                      curve: Curves.easeOut,
-                                    )
-                                  : const Icon(
-                                      Icons.check_circle,
-                                      size: 22,
-                                    )
-                            : widget.fadeInTrailingIcons
-                            ? Icon(
-                                Icons.check_circle_outlined,
-                                color: colorScheme.strokeMuted,
-                                size: 22,
-                              ).animate().fadeIn(
-                                duration: const Duration(
-                                  milliseconds: PinnedGroupHeader
-                                      .kTrailingIconsFadeInDurationMs,
-                                ),
-                                delay: const Duration(
-                                  milliseconds:
-                                      PinnedGroupHeader
-                                          .kScaleDurationInMilliseconds +
-                                      PinnedGroupHeader
-                                          .kTrailingIconsFadeInDelayMs,
-                                ),
-                                curve: Curves.easeOut,
-                              )
-                            : Icon(
-                                Icons.check_circle_outlined,
-                                color: colorScheme.strokeMuted,
-                                size: 22,
-                              );
+                        return _buildSelectionIcon(value as bool);
                       },
                     ),
                   ),
@@ -190,7 +149,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                               ? Icon(
                                   Icons.more_vert_outlined,
                                   // color: colorScheme.blurStrokeBase,
-                                  color: colorScheme.strokeMuted,
+                                  color: componentColors.textLighter,
                                 ).animate().fadeIn(
                                   duration: const Duration(
                                     milliseconds: PinnedGroupHeader
@@ -208,7 +167,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                               : Icon(
                                   Icons.more_vert_outlined,
                                   // color: colorScheme.blurStrokeBase,
-                                  color: colorScheme.strokeMuted,
+                                  color: componentColors.textLighter,
                                 ),
                         ),
                       )
@@ -228,6 +187,29 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
         .toSet();
     _areAllFromGroupSelectedNotifier.value = widget.selectedFiles!.files
         .containsAll(nonDummyFiles);
+  }
+
+  Widget _buildSelectionIcon(bool isSelected) {
+    final icon = SelectAllStatusIcon(
+      isSelected: isSelected,
+      size: _selectionIconSize,
+      unselectedColor: components.ComponentTheme.colorsOf(context).textLighter,
+    );
+    if (!widget.fadeInTrailingIcons) {
+      return icon;
+    }
+
+    return icon.animate().fadeIn(
+      duration: const Duration(
+        milliseconds: PinnedGroupHeader.kTrailingIconsFadeInDurationMs,
+      ),
+      delay: const Duration(
+        milliseconds:
+            PinnedGroupHeader.kScaleDurationInMilliseconds +
+            PinnedGroupHeader.kTrailingIconsFadeInDelayMs,
+      ),
+      curve: Curves.easeOut,
+    );
   }
 
   bool _areAllFromGroupSelected() {
