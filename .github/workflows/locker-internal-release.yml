@@ -5,7 +5,6 @@ on:
 
 env:
     FLUTTER_VERSION: "3.38.10"
-    RUST_VERSION: "1.90.0"
 
 permissions:
     contents: write
@@ -33,12 +32,6 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
-
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
-              with:
-                  toolchain: ${{ env.RUST_VERSION }}
-                  components: rustfmt
 
             - name: Generate strings localizations
               run: flutter gen-l10n
