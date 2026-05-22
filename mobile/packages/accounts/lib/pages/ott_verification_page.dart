@@ -27,22 +27,39 @@ class OTTVerificationPage extends StatefulWidget {
 
 class _OTTVerificationPageState extends State<OTTVerificationPage> {
   final _pinController = TextEditingController();
+  bool _isSubmitting = false;
 
   Future<void> onPressed() async {
-    if (widget.isChangeEmail) {
-      await UserService.instance.changeEmail(
-        context,
-        widget.email,
-        _pinController.text,
-      );
-    } else {
-      await UserService.instance.verifyEmail(
-        context,
-        _pinController.text,
-        isResettingPasswordScreen: widget.isResetPasswordScreen,
-      );
+    if (_isSubmitting) {
+      return;
     }
-    FocusScope.of(context).unfocus();
+    setState(() {
+      _isSubmitting = true;
+    });
+    try {
+      if (widget.isChangeEmail) {
+        await UserService.instance.changeEmail(
+          context,
+          widget.email,
+          _pinController.text,
+        );
+      } else {
+        await UserService.instance.verifyEmail(
+          context,
+          _pinController.text,
+          isResettingPasswordScreen: widget.isResetPasswordScreen,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+    if (mounted) {
+      FocusScope.of(context).unfocus();
+    }
   }
 
   @override
@@ -114,7 +131,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             ),
           DynamicFAB(
             isKeypadOpen: isKeypadOpen,
-            isFormValid: _pinController.text.length == 6,
+            isFormValid: _pinController.text.length == 6 && !_isSubmitting,
             buttonText: context.strings.verify,
             onPressedFunction: onPressed,
           ),
