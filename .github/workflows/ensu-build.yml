@@ -131,27 +131,15 @@ jobs:
                   corepack enable
                   corepack prepare yarn@1.22.22 --activate
 
-            # Pin to 1.93.0: Rust 1.94.0 has a trait glob-import regression
-            # that breaks wry 0.24.x (SettingsExt not found via traits::*).
-            - name: Install Rust 1.93.0
-              uses: dtolnay/rust-toolchain@1.93.0
-              with:
-                  targets: ${{ matrix.platform.rust-target }}
-
             - name: Install dependencies (Ubuntu only)
               if: matrix.platform.os == 'ubuntu-22.04'
               run: |
                   sudo apt-get update
                   sudo apt-get install -y libwebkit2gtk-4.0-dev libsoup2.4-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
-            - name: Rust cache
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: ${{ runner.os }}-${{ matrix.platform.rust-target }}-cargo-ensu-release-${{ hashFiles('rust/Cargo.lock') }}
+            - name: Install macOS Intel Rust target
+              if: matrix.platform.rust-target == 'x86_64-apple-darwin'
+              run: rustup target add x86_64-apple-darwin
 
             - name: Install web dependencies
               working-directory: web
@@ -164,10 +152,6 @@ jobs:
             - name: Install Tauri dependencies
               working-directory: rust/apps/ensu
               run: yarn install --frozen-lockfile
-
-            - name: Fetch Rust dependencies
-              working-directory: rust
-              run: cargo fetch
 
             - name: Prepare Windows signing
               if: matrix.platform.os == 'windows-latest'
@@ -228,7 +212,7 @@ jobs:
     build-android:
         needs: build-metadata
         if: needs.build-metadata.outputs.should_build == 'true'
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-latest
         environment:
             name: production
         env:
@@ -260,9 +244,6 @@ jobs:
               run: |
                   echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
                   echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-
-            - name: Setup Rust
-              uses: dtolnay/rust-toolchain@stable
 
             - run: cargo codegen native
               working-directory: rust
@@ -328,9 +309,6 @@ jobs:
               uses: actions/checkout@v6
               with:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
-
-            - name: Setup Rust
-              uses: dtolnay/rust-toolchain@stable
 
             - run: cargo codegen native
               working-directory: rust
