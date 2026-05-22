@@ -28,48 +28,26 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           children: [
             _manageItem(
-              label: strings.trash,
-              icon: HugeIcons.strokeRoundedDelete01,
-              iconColor: const Color(0xFFE3505A),
+              label: strings.links,
+              icon: HugeIcons.strokeRoundedLink02,
+              iconColor: colors.blue,
               onTap: () async {
-                final ok = await LocalAuthenticationService.instance
-                    .requestLocalAuthentication(
-                      context,
-                      strings.authToViewTrashedFiles,
-                    );
-                if (!ok || !context.mounted) return;
+                final data = await CollectionsService.instance
+                    .getSharedCollectionsAndMemoryLinks();
+                if (!context.mounted) return;
                 if (sheetContext.mounted) {
                   Navigator.of(sheetContext).pop();
                 }
-                unawaited(routeToPage(context, TrashPage()));
-              },
-            ),
-            const SizedBox(height: 8),
-            _manageItem(
-              label: strings.archive,
-              icon: HugeIcons.strokeRoundedArchive03,
-              iconColor: colors.primary,
-              onTap: () async {
-                Navigator.of(sheetContext).pop();
-                unawaited(routeToPage(context, ArchivePage()));
-              },
-            ),
-            const SizedBox(height: 8),
-            _manageItem(
-              label: strings.hidden,
-              icon: HugeIcons.strokeRoundedViewOff,
-              iconColor: colors.accentOrange,
-              onTap: () async {
-                final ok = await LocalAuthenticationService.instance
-                    .requestLocalAuthentication(
-                      context,
-                      strings.authToViewYourHiddenFiles,
-                    );
-                if (!ok || !context.mounted) return;
-                if (sheetContext.mounted) {
-                  Navigator.of(sheetContext).pop();
-                }
-                unawaited(routeToPage(context, const HiddenPage()));
+                unawaited(
+                  routeToPage(
+                    context,
+                    AllLinksPage(
+                      quickLinks: data.collections.quickLinks,
+                      memoryShares: data.memoryLinks,
+                      titleHeroTag: "manage_links",
+                    ),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 8),
@@ -94,26 +72,48 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
             ),
             const SizedBox(height: 8),
             _manageItem(
-              label: strings.links,
-              icon: HugeIcons.strokeRoundedLink02,
-              iconColor: colors.blue,
+              label: strings.archive,
+              icon: HugeIcons.strokeRoundedArchive03,
+              iconColor: colors.primary,
               onTap: () async {
-                final data = await CollectionsService.instance
-                    .getSharedCollectionsAndMemoryLinks();
-                if (!context.mounted) return;
+                Navigator.of(sheetContext).pop();
+                unawaited(routeToPage(context, ArchivePage()));
+              },
+            ),
+            const SizedBox(height: 8),
+            _manageItem(
+              label: strings.hidden,
+              icon: HugeIcons.strokeRoundedViewOffSlash,
+              iconColor: colors.accentOrange,
+              onTap: () async {
+                final ok = await LocalAuthenticationService.instance
+                    .requestLocalAuthentication(
+                      context,
+                      strings.authToViewYourHiddenFiles,
+                    );
+                if (!ok || !context.mounted) return;
                 if (sheetContext.mounted) {
                   Navigator.of(sheetContext).pop();
                 }
-                unawaited(
-                  routeToPage(
-                    context,
-                    AllLinksPage(
-                      quickLinks: data.collections.quickLinks,
-                      memoryShares: data.memoryLinks,
-                      titleHeroTag: "manage_links",
-                    ),
-                  ),
-                );
+                unawaited(routeToPage(context, const HiddenPage()));
+              },
+            ),
+            const SizedBox(height: 8),
+            _manageItem(
+              label: strings.trash,
+              icon: HugeIcons.strokeRoundedDelete01,
+              iconColor: const Color(0xFFE3505A),
+              onTap: () async {
+                final ok = await LocalAuthenticationService.instance
+                    .requestLocalAuthentication(
+                      context,
+                      strings.authToViewTrashedFiles,
+                    );
+                if (!ok || !context.mounted) return;
+                if (sheetContext.mounted) {
+                  Navigator.of(sheetContext).pop();
+                }
+                unawaited(routeToPage(context, TrashPage()));
               },
             ),
           ],
