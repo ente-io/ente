@@ -1355,21 +1355,24 @@ const Page: React.FC = () => {
             const isFavorite = favoriteFileIDs.has(fileID);
 
             dispatch({ type: "addPendingFavoriteUpdate", fileID });
+            dispatch({
+                type: "unsyncedFavoriteUpdate",
+                file,
+                isFavorite: !isFavorite,
+            });
             try {
                 const action = isFavorite
                     ? removeFromFavoritesCollection
                     : addToFavoritesCollection;
                 await action([file]);
-                dispatch({
-                    type: "unsyncedFavoriteUpdate",
-                    fileID,
-                    isFavorite: !isFavorite,
-                });
+            } catch (e) {
+                dispatch({ type: "unsyncedFavoriteUpdate", file, isFavorite });
+                throw e;
             } finally {
                 dispatch({ type: "removePendingFavoriteUpdate", fileID });
             }
         },
-        [user, favoriteFileIDs],
+        [favoriteFileIDs],
     );
 
     const handleFileViewerFileVisibilityUpdate = useCallback(

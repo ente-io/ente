@@ -26,6 +26,7 @@ import "package:photos/ui/components/banners/save_faces_banner.dart";
 import "package:photos/ui/components/bottom_action_bar/people_bottom_action_bar_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
@@ -142,8 +143,9 @@ class SelectablePersonSearchExample extends StatelessWidget {
     final personId = searchResult.params[kPersonParamID] as String?;
     final clusterId = searchResult.params[kClusterParamId] as String?;
 
-    final idToUse =
-        (personId != null && personId.isNotEmpty) ? personId : clusterId;
+    final idToUse = (personId != null && personId.isNotEmpty)
+        ? personId
+        : clusterId;
 
     if (idToUse != null && idToUse.isNotEmpty) {
       selectedPeople.toggleSelection(idToUse);
@@ -161,7 +163,8 @@ class SelectablePersonSearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCluster = searchResult.type() == ResultType.faces &&
+    final bool isCluster =
+        searchResult.type() == ResultType.faces &&
         searchResult.params.containsKey(kClusterParamId);
     final bool isPinnedPerson =
         !isCluster && (searchResult.params[kPersonPinned] as bool? ?? false);
@@ -171,8 +174,9 @@ class SelectablePersonSearchExample extends StatelessWidget {
       builder: (context, _) {
         final personId = searchResult.params[kPersonParamID] as String?;
         final clusterId = searchResult.params[kClusterParamId] as String?;
-        final idToCheck =
-            (personId != null && personId.isNotEmpty) ? personId : clusterId;
+        final idToCheck = (personId != null && personId.isNotEmpty)
+            ? personId
+            : clusterId;
         final bool isSelected = idToCheck != null
             ? selectedPeople.isPersonSelected(idToCheck)
             : false;
@@ -244,10 +248,11 @@ class SelectablePersonSearchExample extends StatelessWidget {
                       switchInCurve: Curves.easeOut,
                       switchOutCurve: Curves.easeIn,
                       child: isSelected
-                          ? const Icon(
-                              Icons.check_circle_rounded,
-                              color: Colors.white,
-                              size: 22,
+                          ? const SelectAllStatusIcon(
+                              isSelected: true,
+                              size: 18,
+                              selectedFillColor: Colors.white,
+                              selectedTickCutsOut: true,
                             )
                           : null,
                     ),
@@ -484,8 +489,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       _prioritizeNamedIgnoredPeople(normalFaces);
     }
     final showAllFaces = _showingAllFaces || _showingIgnoredPeople;
-    final results =
-        showAllFaces ? [...normalFaces, ...extraFaces] : normalFaces;
+    final results = showAllFaces
+        ? [...normalFaces, ...extraFaces]
+        : normalFaces;
 
     if (widget.namedOnly) {
       results.removeWhere((element) => element.params[kPersonParamID] == null);
@@ -493,11 +499,13 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       if (init) {
         // sort widget.selectedPeople first
         results.sort((a, b) {
-          final aIndex = widget.selectedPeople?.personIds.contains(
+          final aIndex =
+              widget.selectedPeople?.personIds.contains(
                 a.params[kPersonParamID],
               ) ??
               false;
-          final bIndex = widget.selectedPeople?.personIds.contains(
+          final bIndex =
+              widget.selectedPeople?.personIds.contains(
                 b.params[kPersonParamID],
               ) ??
               false;
@@ -661,7 +669,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           final hasResults = _isSearching
               ? filteredNormalFaces.isNotEmpty || filteredExtraFaces.isNotEmpty
               : filteredNormalFaces.isNotEmpty ||
-                  (!widget.namedOnly && filteredExtraFaces.isNotEmpty);
+                    (!widget.namedOnly && filteredExtraFaces.isNotEmpty);
           if (_isLoaded && !hasResults) {
             slivers.add(
               SliverFillRemaining(
@@ -677,7 +685,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
 
-          final itemSize = (screenWidth -
+          final itemSize =
+              (screenWidth -
                   ((horizontalEdgePadding * 2) +
                       ((crossAxisCount - 1) * gridPadding))) /
               crossAxisCount;
@@ -948,8 +957,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         detail = _isSortAscending(key) ? l10n.sortAToZ : l10n.sortZToA;
         break;
       case PeopleSortKey.lastUpdated:
-        detail =
-            _isSortAscending(key) ? l10n.sortOldestFirst : l10n.sortNewestFirst;
+        detail = _isSortAscending(key)
+            ? l10n.sortOldestFirst
+            : l10n.sortNewestFirst;
         break;
     }
 

@@ -13,6 +13,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
@@ -237,8 +238,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                             await deleteDuplicates(totalSize);
                           } catch (e) {
                             log("Failed to delete duplicates", error: e);
-                            showGenericErrorDialog(context: context, error: e)
-                                .ignore();
+                            showGenericErrorDialog(
+                              context: context,
+                              error: e,
+                            ).ignore();
                           }
                         },
                       ),
@@ -289,7 +292,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       if (!mounted) {
         return;
       }
-      log("AddingNow ${collectionToFilesToAddMap[collectionID]!.length} files to $collectionID");
+      log(
+        "AddingNow ${collectionToFilesToAddMap[collectionID]!.length} files to $collectionID",
+      );
       await CollectionsService.instance.addSilentlyToCollection(
         collectionID,
         collectionToFilesToAddMap[collectionID]!,
@@ -304,8 +309,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     if (filesToDelele.isNotEmpty) {
       await deleteFilesFromRemoteOnly(context, filesToDelele);
       Bus.instance.fire(UserDetailsChangedEvent());
-      Navigator.of(context)
-          .pop(DeduplicationResult(filesToDelele.length, totalSize));
+      Navigator.of(
+        context,
+      ).pop(DeduplicationResult(filesToDelele.length, totalSize));
     }
   }
 
@@ -339,16 +345,13 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                !selectedGrids.contains(itemIndex)
-                    ? Icon(
-                        Icons.check_circle_outlined,
-                        color: getEnteColorScheme(context).strokeMuted,
-                        size: 24,
-                      )
-                    : const Icon(
-                        Icons.check_circle,
-                        size: 24,
-                      ),
+                SelectAllStatusIcon(
+                  isSelected: selectedGrids.contains(itemIndex),
+                  size: 18,
+                  selectedFillColor: Theme.of(context).iconTheme.color,
+                  selectedTickCutsOut: true,
+                  unselectedColor: getEnteColorScheme(context).strokeMuted,
+                ),
               ],
             ),
           ),
@@ -413,7 +416,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         children: [
           SizedBox(
             //the numerator will give the width of the screen excuding the whitespaces in the the grid row
-            height: (MediaQuery.of(context).size.width -
+            height:
+                (MediaQuery.of(context).size.width -
                     (crossAxisSpacing * crossAxisCount)) /
                 crossAxisCount,
             child: Hero(
@@ -438,8 +442,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               CollectionsService.instance
                   .getCollectionByID(file.collectionID!)!
                   .displayName,
-              style:
-                  Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 12),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),
