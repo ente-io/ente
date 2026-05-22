@@ -4,7 +4,9 @@ import io.ente.ensu.domain.chat.ChatSyncRepository
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentDownloadItem
 import io.ente.ensu.domain.model.AttachmentDownloadStatus
+import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
+import io.ente.ensu.domain.model.MaxImageAttachmentsPerMessage
 import io.ente.ensu.domain.state.AppState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,18 +41,27 @@ internal class AttachmentStoreActions(
     }
 
     fun addAttachment(attachment: Attachment) {
-        if (state.value.chat.isGenerating ||
-            state.value.chat.isDownloading ||
-            state.value.chat.isAttachmentDownloadBlocked
-        ) return
-
         state.update { appState ->
-            appState.copy(
-                chat = appState.chat.copy(
-                    attachments = appState.chat.attachments + attachment,
-                    isProcessingAttachments = false
+            val chat = appState.chat
+            val imageLimitReached = attachment.type == AttachmentType.Image &&
+                chat.attachments.count { it.type == AttachmentType.Image } >=
+                MaxImageAttachmentsPerMessage
+            if (chat.isGenerating ||
+                chat.isDownloading ||
+                chat.isAttachmentDownloadBlocked ||
+                imageLimitReached
+            ) {
+                appState.copy(
+                    chat = chat.copy(isProcessingAttachments = false)
                 )
-            )
+            } else {
+                appState.copy(
+                    chat = chat.copy(
+                        attachments = chat.attachments + attachment,
+                        isProcessingAttachments = false
+                    )
+                )
+            }
         }
     }
 
