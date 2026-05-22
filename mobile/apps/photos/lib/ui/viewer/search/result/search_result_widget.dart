@@ -46,19 +46,9 @@ class SearchResultWidget extends StatelessWidget {
             onResultTap!();
           } else {
             if (searchResult.type() == ResultType.shared) {
-              routeToPage(
-                context,
-                ContactResultPage(
-                  searchResult,
-                ),
-              );
+              routeToPage(context, ContactResultPage(searchResult));
             } else {
-              routeToPage(
-                context,
-                SearchResultPage(
-                  searchResult,
-                ),
-              );
+              routeToPage(context, SearchResultPage(searchResult));
             }
           }
         },
@@ -111,10 +101,7 @@ class SearchResultWidget extends StatelessWidget {
         ),
         trailing: Padding(
           padding: const EdgeInsets.only(right: 8),
-          child: Icon(
-            Icons.chevron_right,
-            color: colorScheme.strokeMuted,
-          ),
+          child: Icon(Icons.chevron_right, color: colorScheme.strokeMuted),
         ),
       ),
     );

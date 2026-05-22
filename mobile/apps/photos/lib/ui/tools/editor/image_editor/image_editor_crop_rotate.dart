@@ -87,9 +87,7 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
       builder: (context, constraints) {
         return Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFunctions(constraints),
-          ],
+          children: [_buildFunctions(constraints)],
         );
       },
     );
@@ -136,10 +134,7 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
                     final aspectRatio = CropAspectRatioType.values[index];
                     final isSelected = selectedAspectRatio == aspectRatio;
                     return Padding(
-                      padding: const EdgeInsets.only(
-                        left: 6.0,
-                        right: 6.0,
-                      ),
+                      padding: const EdgeInsets.only(left: 6.0, right: 6.0),
                       child: CropAspectChip(
                         label: aspectRatio.label,
                         svg: aspectRatio.svg,
@@ -148,8 +143,9 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
                           setState(() {
                             selectedAspectRatio = aspectRatio;
                           });
-                          widget.editor
-                              .updateAspectRatio(aspectRatio.ratio ?? -1);
+                          widget.editor.updateAspectRatio(
+                            aspectRatio.ratio ?? -1,
+                          );
                         },
                       ),
                     );

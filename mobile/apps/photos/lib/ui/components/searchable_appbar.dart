@@ -105,20 +105,17 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
         switchInCurve: Curves.easeOut,
         switchOutCurve: Curves.easeIn,
         transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
+          return FadeTransition(opacity: animation, child: child);
         },
         child: _isSearchActive
             ? _buildSearchField()
             : widget.heroTag.isNotEmpty
-                ? Hero(
-                    key: const ValueKey('titleBar'),
-                    tag: widget.heroTag,
-                    child: widget.title,
-                  )
-                : widget.title,
+            ? Hero(
+                key: const ValueKey('titleBar'),
+                tag: widget.heroTag,
+                child: widget.title,
+              )
+            : widget.title,
       ),
       actions: _isSearchActive
           ? null

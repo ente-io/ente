@@ -102,9 +102,7 @@ class AboutUsPage extends StatelessWidget {
         useRootNavigator: false,
         context: context,
         builder: (BuildContext context) {
-          return AppUpdateDialog(
-            updateService.getLatestVersionInfo(),
-          );
+          return AppUpdateDialog(updateService.getLatestVersionInfo());
         },
         barrierColor: Colors.black.withValues(alpha: 0.85),
       );

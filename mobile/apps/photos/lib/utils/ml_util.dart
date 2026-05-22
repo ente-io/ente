@@ -103,8 +103,9 @@ class _OnlineMLIndexingCandidates {
 
 Future<IndexStatus> getIndexStatus() async {
   try {
-    final MLMode mode =
-        isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery;
+    final MLMode mode = isLocalGalleryMode
+        ? MLMode.localGallery
+        : MLMode.enteGallery;
     final mlDataDB = mode == MLMode.localGallery
         ? MLDataDB.localGalleryInstance
         : MLDataDB.instance;
@@ -139,19 +140,21 @@ Future<IndexStatus> getIndexStatus() async {
 int _lastFetchTimeForOthersIndexed = 0;
 
 Future<_OnlineMLIndexingCandidates>
-    _getOnlineFilesForMlIndexingCandidates() async {
+_getOnlineFilesForMlIndexingCandidates() async {
   final mlDataDB = MLDataDB.instance;
   final time = DateTime.now();
   // Get indexed fileIDs for each ML service
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
-  final Map<int, int> clipIndexedFileIDs =
-      await mlDataDB.clipIndexedFileWithVersion();
-  final bool petEnabled = flagService.petEnabled &&
+  final Map<int, int> clipIndexedFileIDs = await mlDataDB
+      .clipIndexedFileWithVersion();
+  final bool petEnabled =
+      flagService.petEnabled &&
       localSettings.petRecognitionEnabled &&
       localSettings.isMLLocalIndexingEnabled &&
       (flagService.useRustForML || isLocalGalleryMode);
-  final Map<int, int> petIndexedFileIDs =
-      petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
+  final Map<int, int> petIndexedFileIDs = petEnabled
+      ? await mlDataDB.petIndexedFileIds()
+      : const {};
   final Set<int> queuedFiledIDs = {};
 
   final Set<int> filesWithFDStatus = await mlDataDB.getFileIDsWithFDData(
@@ -188,7 +191,8 @@ Future<_OnlineMLIndexingCandidates>
       clipIndexedFileIDs,
       clipMlVersion,
     );
-    final shouldRunPets = petEnabled &&
+    final shouldRunPets =
+        petEnabled &&
         _shouldRunIndexing(enteFile, petIndexedFileIDs, petMlVersion);
     if (!shouldRunFaces && !shouldRunClip && !shouldRunPets) {
       continue;
@@ -227,7 +231,8 @@ Future<_OnlineMLIndexingCandidates>
       clipIndexedFileIDs,
       clipMlVersion,
     );
-    final shouldRunPets = petEnabled &&
+    final shouldRunPets =
+        petEnabled &&
         _shouldRunIndexing(enteFile, petIndexedFileIDs, petMlVersion);
     if (!shouldRunFaces && !shouldRunClip && !shouldRunPets) {
       continue;
@@ -290,13 +295,15 @@ Future<List<FileMLInstruction>> getLocalGalleryFilesForMlIndexing() async {
   _logger.info('getLocalGalleryFilesForMlIndexing called');
   final mlDataDB = MLDataDB.localGalleryInstance;
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
-  final Map<int, int> clipIndexedFileIDs =
-      await mlDataDB.clipIndexedFileWithVersion();
-  final bool petEnabled = flagService.petEnabled &&
+  final Map<int, int> clipIndexedFileIDs = await mlDataDB
+      .clipIndexedFileWithVersion();
+  final bool petEnabled =
+      flagService.petEnabled &&
       localSettings.petRecognitionEnabled &&
       (flagService.useRustForML || isLocalGalleryMode);
-  final Map<int, int> petIndexedFileIDs =
-      petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
+  final Map<int, int> petIndexedFileIDs = petEnabled
+      ? await mlDataDB.petIndexedFileIds()
+      : const {};
   final Set<int> queuedFileIDs = {};
 
   final enteFiles = await SearchService.instance.getAllFilesForSearch();
@@ -341,7 +348,8 @@ Future<List<FileMLInstruction>> getLocalGalleryFilesForMlIndexing() async {
       clipIndexedFileIDs,
       clipMlVersion,
     );
-    final shouldRunPets = petEnabled &&
+    final shouldRunPets =
+        petEnabled &&
         _shouldRunIndexingWithFileId(
           localIntId,
           petIndexedFileIDs,
@@ -442,9 +450,11 @@ Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
   int hydratedFaces = 0;
   int hydratedClips = 0;
   int remainingLocalMl = 0;
-  for (int start = 0;
-      start < ownedCandidates.length;
-      start += embeddingFetchLimit) {
+  for (
+    int start = 0;
+    start < ownedCandidates.length;
+    start += embeddingFetchLimit
+  ) {
     final end = math.min(start + embeddingFetchLimit, ownedCandidates.length);
     final chunk = ownedCandidates.sublist(start, end);
     final facePendingBefore = chunk.where((i) => i.shouldRunFaces).length;
@@ -453,9 +463,11 @@ Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
       chunk,
       mlDataDB: mlDataDB,
     );
-    hydratedFaces += facePendingBefore -
+    hydratedFaces +=
+        facePendingBefore -
         pendingAfterHydration.where((i) => i.shouldRunFaces).length;
-    hydratedClips += clipPendingBefore -
+    hydratedClips +=
+        clipPendingBefore -
         pendingAfterHydration.where((i) => i.shouldRunClip).length;
     remainingLocalMl += pendingAfterHydration.length;
   }
@@ -1012,31 +1024,33 @@ Future<MLResult> analyzeImageRust(Map args) async {
 
     if (runFaces) {
       final rustFaces = rustResult.faces ?? const <rust_ml.RustFaceResult>[];
-      result.faces = rustFaces.map((face) {
-        final detection = FaceDetectionRelative(
-          score: face.detection.score,
-          box: face.detection.boxXyxy.toList(growable: false),
-          allKeypoints: face.detection.allKeypoints
-              .map((point) => point.toList(growable: false))
-              .toList(growable: false),
-        );
-        final alignment = AlignmentResult(
-          affineMatrix: face.alignment.affineMatrix
-              .map((row) => row.toList(growable: false))
-              .toList(growable: false),
-          center: face.alignment.center.toList(growable: false),
-          size: face.alignment.size,
-          rotation: face.alignment.rotation,
-        );
-        return FaceResult(
-          fileId: enteFileID,
-          faceId: face.faceId,
-          detection: detection,
-          blurValue: face.blurValue,
-          alignment: alignment,
-          embedding: face.embedding,
-        );
-      }).toList(growable: false);
+      result.faces = rustFaces
+          .map((face) {
+            final detection = FaceDetectionRelative(
+              score: face.detection.score,
+              box: face.detection.boxXyxy.toList(growable: false),
+              allKeypoints: face.detection.allKeypoints
+                  .map((point) => point.toList(growable: false))
+                  .toList(growable: false),
+            );
+            final alignment = AlignmentResult(
+              affineMatrix: face.alignment.affineMatrix
+                  .map((row) => row.toList(growable: false))
+                  .toList(growable: false),
+              center: face.alignment.center.toList(growable: false),
+              size: face.alignment.size,
+              rotation: face.alignment.rotation,
+            );
+            return FaceResult(
+              fileId: enteFileID,
+              faceId: face.faceId,
+              detection: detection,
+              blurValue: face.blurValue,
+              alignment: alignment,
+              embedding: face.embedding,
+            );
+          })
+          .toList(growable: false);
     }
 
     if (runClip) {
@@ -1052,42 +1066,46 @@ Future<MLResult> analyzeImageRust(Map args) async {
 
     if (runPets) {
       if (rustResult.petFaces != null) {
-        result.petFaces = rustResult.petFaces!.map((face) {
-          final detection = FaceDetectionRelative(
-            score: face.detection.score,
-            box: face.detection.boxXyxy.toList(growable: false),
-            allKeypoints: face.detection.keypoints
-                .map((point) => point.toList(growable: false))
-                .toList(growable: false),
-          );
-          final alignment = AlignmentResult(
-            // Pet alignment is done in Rust; no Dart-side affine matrix needed.
-            affineMatrix: const [],
-            center: face.alignment.center.toList(growable: false),
-            size: face.alignment.cropSize,
-            rotation: face.alignment.angle,
-          );
-          return PetFaceResult(
-            fileId: enteFileID,
-            petFaceId: face.petFaceId,
-            detection: detection,
-            alignment: alignment,
-            species: face.species,
-            embedding: Embedding.from(face.faceEmbedding),
-          );
-        }).toList(growable: false);
+        result.petFaces = rustResult.petFaces!
+            .map((face) {
+              final detection = FaceDetectionRelative(
+                score: face.detection.score,
+                box: face.detection.boxXyxy.toList(growable: false),
+                allKeypoints: face.detection.keypoints
+                    .map((point) => point.toList(growable: false))
+                    .toList(growable: false),
+              );
+              final alignment = AlignmentResult(
+                // Pet alignment is done in Rust; no Dart-side affine matrix needed.
+                affineMatrix: const [],
+                center: face.alignment.center.toList(growable: false),
+                size: face.alignment.cropSize,
+                rotation: face.alignment.angle,
+              );
+              return PetFaceResult(
+                fileId: enteFileID,
+                petFaceId: face.petFaceId,
+                detection: detection,
+                alignment: alignment,
+                species: face.species,
+                embedding: Embedding.from(face.faceEmbedding),
+              );
+            })
+            .toList(growable: false);
       }
 
       if (rustResult.petBodies != null) {
-        result.petBodies = rustResult.petBodies!.map((body) {
-          return PetBodyResult(
-            boxXyxy: body.boxXyxy.toList(growable: false),
-            score: body.score,
-            cocoClass: body.cocoClass,
-            petBodyId: body.petBodyId,
-            embedding: Embedding.from(body.bodyEmbedding),
-          );
-        }).toList(growable: false);
+        result.petBodies = rustResult.petBodies!
+            .map((body) {
+              return PetBodyResult(
+                boxXyxy: body.boxXyxy.toList(growable: false),
+                score: body.score,
+                cocoClass: body.cocoClass,
+                petBodyId: body.petBodyId,
+                embedding: Embedding.from(body.bodyEmbedding),
+              );
+            })
+            .toList(growable: false);
       }
     }
 

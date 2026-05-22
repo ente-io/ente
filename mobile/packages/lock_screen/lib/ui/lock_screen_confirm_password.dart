@@ -8,10 +8,7 @@ import "package:flutter/services.dart";
 import "package:flutter_svg/flutter_svg.dart";
 
 class LockScreenConfirmPassword extends StatefulWidget {
-  const LockScreenConfirmPassword({
-    super.key,
-    required this.password,
-  });
+  const LockScreenConfirmPassword({super.key, required this.password});
   final String password;
 
   @override
@@ -80,18 +77,12 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
             FocusScope.of(context).unfocus();
             Navigator.of(context).pop();
           },
-          icon: Icon(
-            Icons.arrow_back,
-            color: colorTheme.textBase,
-          ),
+          icon: Icon(Icons.arrow_back, color: colorTheme.textBase),
         ),
         centerTitle: true,
         title: SvgPicture.asset(
           'assets/svg/app-logo.svg',
-          colorFilter: ColorFilter.mode(
-            colorTheme.primary700,
-            BlendMode.srcIn,
-          ),
+          colorFilter: ColorFilter.mode(colorTheme.primary700, BlendMode.srcIn),
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(

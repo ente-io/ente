@@ -85,14 +85,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   bool _isCompletelyVisible = false;
   final _showControls = ValueNotifier(true);
   final _isSeeking = ValueNotifier(false);
-  final _debouncer = Debouncer(
-    const Duration(milliseconds: 2000),
-  );
+  final _debouncer = Debouncer(const Duration(milliseconds: 2000));
   StreamSubscription<PlaybackEvent>? _subscription;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
   StreamSubscription<DownloadTask>? downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
-      _captionUpdatedSubscription;
+  _captionUpdatedSubscription;
   int position = 0;
   final _transformationController = TransformationController();
   bool _isZooming = false;
@@ -114,48 +112,52 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       _controller?.pause();
     });
-    resumeVideoSubscription =
-        Bus.instance.on<ResumeVideoEvent>().listen((event) {
+    resumeVideoSubscription = Bus.instance.on<ResumeVideoEvent>().listen((
+      event,
+    ) {
       _controller?.play();
     });
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
+    _guestViewEventSubscription = Bus.instance.on<GuestViewEvent>().listen((
+      event,
+    ) {
       if (!mounted) return;
       setState(() {
         _isGuestView = event.isGuestView;
       });
     });
-    _streamSwitchedSubscription =
-        Bus.instance.on<StreamSwitchedEvent>().listen((event) {
-      if (event.type != PlayerType.nativeVideoPlayer) return;
-      _filePath = null;
-      if (event.selectedPreview) {
-        loadPreview(update: true);
-      } else {
-        loadOriginal(update: true);
-      }
-    });
-
-    _captionUpdatedSubscription =
-        Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
-      if (event.fileGeneratedID == widget.file.generatedID) {
-        if (mounted) {
-          setState(() {});
+    _streamSwitchedSubscription = Bus.instance.on<StreamSwitchedEvent>().listen(
+      (event) {
+        if (event.type != PlayerType.nativeVideoPlayer) return;
+        _filePath = null;
+        if (event.selectedPreview) {
+          loadPreview(update: true);
+        } else {
+          loadOriginal(update: true);
         }
-      }
-    });
+      },
+    );
+
+    _captionUpdatedSubscription = Bus.instance
+        .on<FileCaptionUpdatedEvent>()
+        .listen((event) {
+          if (event.fileGeneratedID == widget.file.generatedID) {
+            if (mounted) {
+              setState(() {});
+            }
+          }
+        });
     if (widget.file.isUploaded) {
       downloadTaskSubscription = downloadManager
-          .watchDownload(
-        widget.file.uploadedFileID!,
-      )
+          .watchDownload(widget.file.uploadedFileID!)
           .listen((event) {
-        _progressNotifier.value = event.progress;
-      });
+            _progressNotifier.value = event.progress;
+          });
     }
 
-    EnteWakeLockService.instance
-        .updateWakeLock(enable: true, wakeLockFor: WakeLockFor.videoPlayback);
+    EnteWakeLockService.instance.updateWakeLock(
+      enable: true,
+      wakeLockFor: WakeLockFor.videoPlayback,
+    );
   }
 
   Future<void> setVideoSource() async {
@@ -249,11 +251,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       /// Checking if exists to avoid observed PathNotFoundException. Didn't find
       /// root cause.
       if (file.existsSync()) {
-        file.delete().then(
-          (value) {
-            _logger.info("Cache cleared");
-          },
-        );
+        file.delete().then((value) {
+          _logger.info("Cache cleared");
+        });
       }
     }
     _streamSwitchedSubscription?.cancel();
@@ -270,8 +270,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _debouncer.cancelDebounceTimer();
     _captionUpdatedSubscription.cancel();
     _transformationController.dispose();
-    EnteWakeLockService.instance
-        .updateWakeLock(enable: false, wakeLockFor: WakeLockFor.videoPlayback);
+    EnteWakeLockService.instance.updateWakeLock(
+      enable: false,
+      wakeLockFor: WakeLockFor.videoPlayback,
+    );
     super.dispose();
   }
 
@@ -375,27 +377,31 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                 child: ValueListenableBuilder(
                                   builder:
                                       (BuildContext context, bool value, _) {
-                                    return value
-                                        ? ValueListenableBuilder(
-                                            builder: (context, bool value, _) {
-                                              return AnimatedOpacity(
-                                                duration: const Duration(
-                                                  milliseconds: 200,
-                                                ),
-                                                opacity: value ? 1 : 0,
-                                                curve: Curves.easeInOutQuad,
-                                                child: IgnorePointer(
-                                                  ignoring: !value,
-                                                  child: PlayPauseButton(
-                                                    _controller,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            valueListenable: _showControls,
-                                          )
-                                        : const SizedBox();
-                                  },
+                                        return value
+                                            ? ValueListenableBuilder(
+                                                builder:
+                                                    (context, bool value, _) {
+                                                      return AnimatedOpacity(
+                                                        duration:
+                                                            const Duration(
+                                                              milliseconds: 200,
+                                                            ),
+                                                        opacity: value ? 1 : 0,
+                                                        curve: Curves
+                                                            .easeInOutQuad,
+                                                        child: IgnorePointer(
+                                                          ignoring: !value,
+                                                          child:
+                                                              PlayPauseButton(
+                                                                _controller,
+                                                              ),
+                                                        ),
+                                                      );
+                                                    },
+                                                valueListenable: _showControls,
+                                              )
+                                            : const SizedBox();
+                                      },
                                   valueListenable: _isPlaybackReady,
                                 ),
                               ),
@@ -433,22 +439,24 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                       ),
                                       ValueListenableBuilder(
                                         valueListenable: _isPlaybackReady,
-                                        builder: (
-                                          BuildContext context,
-                                          bool value,
-                                          _,
-                                        ) {
-                                          return value
-                                              ? _SeekBarAndDuration(
-                                                  controller: _controller,
-                                                  duration: duration,
-                                                  showControls: _showControls,
-                                                  isSeeking: _isSeeking,
-                                                  position: position,
-                                                  file: widget.file,
-                                                )
-                                              : const SizedBox();
-                                        },
+                                        builder:
+                                            (
+                                              BuildContext context,
+                                              bool value,
+                                              _,
+                                            ) {
+                                              return value
+                                                  ? _SeekBarAndDuration(
+                                                      controller: _controller,
+                                                      duration: duration,
+                                                      showControls:
+                                                          _showControls,
+                                                      isSeeking: _isSeeking,
+                                                      position: position,
+                                                      file: widget.file,
+                                                    )
+                                                  : const SizedBox();
+                                            },
                                       ),
                                     ],
                                   ),
@@ -607,39 +615,41 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   void _loadNetworkVideo(bool update) {
     getFileFromServer(
-      widget.file,
-      progressCallback: (count, total) {
-        if (!mounted) {
-          return;
-        }
-        _progressNotifier.value = count / (widget.file.fileSize ?? total);
-        if (_progressNotifier.value == 1) {
-          if (mounted) {
-            showShortToast(
-              context,
-              AppLocalizations.of(context).decryptingVideo,
-            );
+          widget.file,
+          progressCallback: (count, total) {
+            if (!mounted) {
+              return;
+            }
+            _progressNotifier.value = count / (widget.file.fileSize ?? total);
+            if (_progressNotifier.value == 1) {
+              if (mounted) {
+                showShortToast(
+                  context,
+                  AppLocalizations.of(context).decryptingVideo,
+                );
+              }
+            }
+          },
+        )
+        .then((file) {
+          if (file != null) {
+            _setFilePathForNativePlayer(file.path, update);
           }
-        }
-      },
-    ).then((file) {
-      if (file != null) {
-        _setFilePathForNativePlayer(file.path, update);
-      }
-    }).onError((error, stackTrace) {
-      showErrorDialog(
-        context,
-        AppLocalizations.of(context).error,
-        AppLocalizations.of(context).failedToDownloadVideo,
-      );
-    });
+        })
+        .onError((error, stackTrace) {
+          showErrorDialog(
+            context,
+            AppLocalizations.of(context).error,
+            AppLocalizations.of(context).failedToDownloadVideo,
+          );
+        });
   }
 
   void _setFileSizeIfNull() {
     if (widget.file.fileSize == null && widget.file.canEditMetaInfo) {
-      FilesService.instance
-          .getFileSize(widget.file.uploadedFileID!)
-          .then((value) {
+      FilesService.instance.getFileSize(widget.file.uploadedFileID!).then((
+        value,
+      ) {
         widget.file.fileSize = value;
         if (mounted) {
           setState(() {});
@@ -684,10 +694,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
               color: Colors.black.withValues(alpha: 0.3),
-              border: Border.all(
-                color: strokeFaintDark,
-                width: 1,
-              ),
+              border: Border.all(color: strokeFaintDark, width: 1),
             ),
             child: ValueListenableBuilder(
               valueListenable: _progressNotifier,
@@ -712,9 +719,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                           Center(
                             child: Text(
                               "${(progress * 100).toStringAsFixed(0)}%",
-                              style: getEnteTextTheme(context).tiny.copyWith(
-                                    color: textBaseDark,
-                                  ),
+                              style: getEnteTextTheme(
+                                context,
+                              ).tiny.copyWith(color: textBaseDark),
                             ),
                           ),
                         ],
@@ -760,9 +767,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         if ((widget.file.duration ?? 0) > 0) {
           duration = secondsToDuration(widget.file.duration!);
         } else if (widget.playlistData!.durationInSeconds != null) {
-          duration = secondsToDuration(
-            widget.playlistData!.durationInSeconds!,
-          );
+          duration = secondsToDuration(widget.playlistData!.durationInSeconds!);
         }
       }
       _logger.info("Getting aspect ratio from preview video");
@@ -874,44 +879,25 @@ class _SeekBarAndDuration extends StatelessWidget {
       valueListenable: showControls,
       builder: (BuildContext context, bool value, _) {
         return AnimatedOpacity(
-          duration: const Duration(
-            milliseconds: 200,
-          ),
+          duration: const Duration(milliseconds: 200),
           curve: Curves.easeInQuad,
           opacity: value ? 1 : 0,
           child: IgnorePointer(
             ignoring: !value,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Container(
-                padding: const EdgeInsets.fromLTRB(
-                  16,
-                  4,
-                  16,
-                  4,
-                ),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.3),
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(8),
-                  ),
-                  border: Border.all(
-                    color: strokeFaintDark,
-                    width: 1,
-                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  border: Border.all(color: strokeFaintDark, width: 1),
                 ),
                 child: Column(
                   children: [
                     file.caption != null && file.caption!.isNotEmpty
                         ? Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              0,
-                              8,
-                              0,
-                              12,
-                            ),
+                            padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
                             child: GestureDetector(
                               onTap: () {
                                 showDetailsSheet(context, file);
@@ -920,9 +906,9 @@ class _SeekBarAndDuration extends StatelessWidget {
                                 file.caption!,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
-                                style: getEnteTextTheme(context)
-                                    .mini
-                                    .copyWith(color: textBaseDark),
+                                style: getEnteTextTheme(
+                                  context,
+                                ).mini.copyWith(color: textBaseDark),
                               ),
                             ),
                           )
@@ -930,17 +916,13 @@ class _SeekBarAndDuration extends StatelessWidget {
                     Row(
                       children: [
                         AnimatedSize(
-                          duration: const Duration(
-                            seconds: 5,
-                          ),
+                          duration: const Duration(seconds: 5),
                           curve: Curves.easeInOut,
                           child: Text(
                             secondsToDuration(position ~/ 1000),
                             style: getEnteTextTheme(
                               context,
-                            ).mini.copyWith(
-                                  color: textBaseDark,
-                                ),
+                            ).mini.copyWith(color: textBaseDark),
                           ),
                         ),
                         Expanded(
@@ -952,9 +934,9 @@ class _SeekBarAndDuration extends StatelessWidget {
                         ),
                         Text(
                           duration ?? "0:00",
-                          style: getEnteTextTheme(context).mini.copyWith(
-                                color: textBaseDark,
-                              ),
+                          style: getEnteTextTheme(
+                            context,
+                          ).mini.copyWith(color: textBaseDark),
                         ),
                       ],
                     ),

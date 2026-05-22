@@ -63,10 +63,12 @@ class _CollectionSelectorWidgetState extends State<CollectionSelectorWidget> {
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final containerColor =
-        isDarkMode ? const Color(0xFF212121) : const Color(0xFFF0F0F0);
-    final borderColor =
-        isDarkMode ? const Color(0x14FFFFFF) : const Color(0x14000000);
+    final containerColor = isDarkMode
+        ? const Color(0xFF212121)
+        : const Color(0xFFF0F0F0);
+    final borderColor = isDarkMode
+        ? const Color(0x14FFFFFF)
+        : const Color(0x14000000);
 
     return GestureDetector(
       onTap: () => _showCollectionMenu(context, containerColor, borderColor),
@@ -255,10 +257,12 @@ class _LikesCollectionSelectorWidgetState
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final containerColor =
-        isDarkMode ? const Color(0xFF212121) : const Color(0xFFF0F0F0);
-    final borderColor =
-        isDarkMode ? const Color(0x14FFFFFF) : const Color(0x14000000);
+    final containerColor = isDarkMode
+        ? const Color(0xFF212121)
+        : const Color(0xFFF0F0F0);
+    final borderColor = isDarkMode
+        ? const Color(0x14FFFFFF)
+        : const Color(0x14000000);
 
     return GestureDetector(
       onTap: () => _showCollectionMenu(context, containerColor, borderColor),

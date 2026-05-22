@@ -4,10 +4,7 @@ import "package:flutter/material.dart";
 import 'package:locker/l10n/l10n.dart';
 
 class HomeEmptyStateWidget extends StatelessWidget {
-  const HomeEmptyStateWidget({
-    this.isLoading = false,
-    super.key,
-  });
+  const HomeEmptyStateWidget({this.isLoading = false, super.key});
 
   final bool isLoading;
 
@@ -33,17 +30,12 @@ class HomeEmptyStateWidget extends StatelessWidget {
                 color: colorScheme.backdropBase,
                 borderRadius: BorderRadius.circular(24),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 42,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 42),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/upload_file.png',
-                  ),
+                  Image.asset('assets/upload_file.png'),
                   const SizedBox(height: 12),
                   Text(
                     context.l10n.homeLockerEmptyTitle,

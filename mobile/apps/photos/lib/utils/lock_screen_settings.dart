@@ -39,8 +39,9 @@ class LockScreenSettings {
       // So we need to re-enable it if the user had it enabled
       if (getShouldHideAppContent()) {
         setHideAppContent(true).onError((error, stackTrace) {
-          Logger("LockScreenSettings")
-              .severe("Error enabling PrivacyScreen", error, stackTrace);
+          Logger(
+            "LockScreenSettings",
+          ).severe("Error enabling PrivacyScreen", error, stackTrace);
           return null;
         });
       }
@@ -55,9 +56,7 @@ class LockScreenSettings {
               enablePrivacy: true,
               lockTrigger: IosLockTrigger.didEnterBackground,
             ),
-            androidOptions: const PrivacyAndroidOptions(
-              enableSecure: true,
-            ),
+            androidOptions: const PrivacyAndroidOptions(enableSecure: true),
             blurEffect: PrivacyBlurEffect.extraLight,
           );
     await _preferences.setBool(keyHideAppContent, hideContent);

@@ -49,8 +49,9 @@ void main() {
       ],
       syncError: StateError('boom'),
     );
-    service =
-        PhotosContactsService.forTesting(contactsService: contactsService);
+    service = PhotosContactsService.forTesting(
+      contactsService: contactsService,
+    );
     session = contacts.ContactsSession(
       baseUrl: 'http://localhost:8080',
       authToken: 'token',
@@ -77,31 +78,31 @@ void main() {
       contactsService.getContactsStarted = Completer<void>();
       contactsService.localContactsPages =
           Queue<List<contacts.ContactRecord>>.of([
-        const [
-          contacts.ContactRecord(
-            id: 'ct_old',
-            contactUserId: 7,
-            email: 'alice@test.test',
-            data: contacts.ContactData(contactUserId: 7, name: 'Alice'),
-            profilePictureAttachmentId: null,
-            isDeleted: false,
-            createdAt: 1,
-            updatedAt: 2,
-          ),
-        ],
-        const [
-          contacts.ContactRecord(
-            id: 'ct_new',
-            contactUserId: 9,
-            email: 'bob@test.test',
-            data: contacts.ContactData(contactUserId: 9, name: 'Bob'),
-            profilePictureAttachmentId: null,
-            isDeleted: false,
-            createdAt: 3,
-            updatedAt: 4,
-          ),
-        ],
-      ]);
+            const [
+              contacts.ContactRecord(
+                id: 'ct_old',
+                contactUserId: 7,
+                email: 'alice@test.test',
+                data: contacts.ContactData(contactUserId: 7, name: 'Alice'),
+                profilePictureAttachmentId: null,
+                isDeleted: false,
+                createdAt: 1,
+                updatedAt: 2,
+              ),
+            ],
+            const [
+              contacts.ContactRecord(
+                id: 'ct_new',
+                contactUserId: 9,
+                email: 'bob@test.test',
+                data: contacts.ContactData(contactUserId: 9, name: 'Bob'),
+                profilePictureAttachmentId: null,
+                isDeleted: false,
+                createdAt: 3,
+                updatedAt: 4,
+              ),
+            ],
+          ]);
       contactsService.syncPages = Queue<List<contacts.ContactRecord>>.of([
         const [],
         const [],
@@ -131,96 +132,92 @@ void main() {
     },
   );
 
-  test(
-    'session switch creates a fresh contacts service instance',
-    () async {
-      final firstService = FakeContactsService(
-        localContacts: const [
-          contacts.ContactRecord(
-            id: 'ct_old',
-            contactUserId: 7,
-            email: 'alice@test.test',
-            data: contacts.ContactData(contactUserId: 7, name: 'Alice'),
-            profilePictureAttachmentId: null,
-            isDeleted: false,
-            createdAt: 1,
-            updatedAt: 2,
-          ),
-        ],
-      );
-      final secondService = FakeContactsService(
-        localContacts: const [
-          contacts.ContactRecord(
-            id: 'ct_new',
-            contactUserId: 9,
-            email: 'bob@test.test',
-            data: contacts.ContactData(contactUserId: 9, name: 'Bob'),
-            profilePictureAttachmentId: null,
-            isDeleted: false,
-            createdAt: 3,
-            updatedAt: 4,
-          ),
-        ],
-      );
-      final services = Queue<FakeContactsService>.of([
-        firstService,
-        secondService,
-      ]);
-      service = PhotosContactsService.forTesting(
-        contactsServiceFactory: () => services.removeFirst(),
-      );
+  test('session switch creates a fresh contacts service instance', () async {
+    final firstService = FakeContactsService(
+      localContacts: const [
+        contacts.ContactRecord(
+          id: 'ct_old',
+          contactUserId: 7,
+          email: 'alice@test.test',
+          data: contacts.ContactData(contactUserId: 7, name: 'Alice'),
+          profilePictureAttachmentId: null,
+          isDeleted: false,
+          createdAt: 1,
+          updatedAt: 2,
+        ),
+      ],
+    );
+    final secondService = FakeContactsService(
+      localContacts: const [
+        contacts.ContactRecord(
+          id: 'ct_new',
+          contactUserId: 9,
+          email: 'bob@test.test',
+          data: contacts.ContactData(contactUserId: 9, name: 'Bob'),
+          profilePictureAttachmentId: null,
+          isDeleted: false,
+          createdAt: 3,
+          updatedAt: 4,
+        ),
+      ],
+    );
+    final services = Queue<FakeContactsService>.of([
+      firstService,
+      secondService,
+    ]);
+    service = PhotosContactsService.forTesting(
+      contactsServiceFactory: () => services.removeFirst(),
+    );
 
-      firstService.openBarrier = Completer<void>();
-      final oldOpenAndSync = service.debugOpenAndSync(session);
-      await firstService.openStarted!.future;
+    firstService.openBarrier = Completer<void>();
+    final oldOpenAndSync = service.debugOpenAndSync(session);
+    await firstService.openStarted!.future;
 
-      final nextSession = contacts.ContactsSession(
-        baseUrl: session.baseUrl,
-        authToken: 'token-2',
-        userId: 2,
-        accountKey: Uint8List.fromList([9, 9, 9]),
-      );
-      await service.debugOpenAndSync(nextSession);
+    final nextSession = contacts.ContactsSession(
+      baseUrl: session.baseUrl,
+      authToken: 'token-2',
+      userId: 2,
+      accountKey: Uint8List.fromList([9, 9, 9]),
+    );
+    await service.debugOpenAndSync(nextSession);
 
-      expect(service.getCachedSavedNameByUserId(9), 'Bob');
-      expect(service.getCachedSavedNameByUserId(7), isNull);
+    expect(service.getCachedSavedNameByUserId(9), 'Bob');
+    expect(service.getCachedSavedNameByUserId(7), isNull);
 
-      firstService.openBarrier!.complete();
-      await oldOpenAndSync;
+    firstService.openBarrier!.complete();
+    await oldOpenAndSync;
 
-      expect(firstService.openCalls, 1);
-      expect(secondService.openCalls, 1);
-      expect(service.getCachedSavedNameByUserId(9), 'Bob');
-      expect(service.getCachedSavedNameByUserId(7), isNull);
-    },
-  );
+    expect(firstService.openCalls, 1);
+    expect(secondService.openCalls, 1);
+    expect(service.getCachedSavedNameByUserId(9), 'Bob');
+    expect(service.getCachedSavedNameByUserId(7), isNull);
+  });
 
   test(
     'profile picture retry is restored when local hydration later adds an attachment',
     () async {
       contactsService = FakeContactsService(localContacts: const []);
-      service =
-          PhotosContactsService.forTesting(contactsService: contactsService);
+      service = PhotosContactsService.forTesting(
+        contactsService: contactsService,
+      );
 
       await service.debugOpenAndSync(session);
       expect(await service.getProfilePictureBytesByUserId(7), isNull);
 
       contactsService.profilePictureBytesByContactId['ct_1'] =
           Uint8List.fromList([1, 2, 3]);
-      service.debugHydrateContacts(
-        const [
-          contacts.ContactRecord(
-            id: 'ct_1',
-            contactUserId: 7,
-            email: 'alice@test.test',
-            data: contacts.ContactData(contactUserId: 7, name: 'Alice'),
-            profilePictureAttachmentId: 'att_1',
-            isDeleted: false,
-            createdAt: 1,
-            updatedAt: 2,
-          ),
-        ],
-      );
+      service.debugHydrateContacts(const [
+        contacts.ContactRecord(
+          id: 'ct_1',
+          contactUserId: 7,
+          email: 'alice@test.test',
+          data: contacts.ContactData(contactUserId: 7, name: 'Alice'),
+          profilePictureAttachmentId: 'att_1',
+          isDeleted: false,
+          createdAt: 1,
+          updatedAt: 2,
+        ),
+      ]);
 
       expect(
         await service.getProfilePictureBytesByUserId(7),
@@ -286,8 +283,9 @@ class FakeContactsService extends Fake implements contacts.ContactsService {
   }) async {
     getContactsCalls += 1;
     final pages = localContactsPages;
-    final response =
-        pages != null && pages.isNotEmpty ? pages.removeFirst() : localContacts;
+    final response = pages != null && pages.isNotEmpty
+        ? pages.removeFirst()
+        : localContacts;
     final started = getContactsStarted;
     if (started != null && !started.isCompleted) {
       started.complete();

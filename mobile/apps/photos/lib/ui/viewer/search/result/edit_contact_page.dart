@@ -75,13 +75,13 @@ class _EditContactPageState extends State<EditContactPage> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.existingContact?.data?.name ?? "",
-    )..addListener(() {
-        if (mounted) {
-          setState(() {});
-        }
-      });
+    _nameController =
+        TextEditingController(text: widget.existingContact?.data?.name ?? "")
+          ..addListener(() {
+            if (mounted) {
+              setState(() {});
+            }
+          });
     _selectedBirthDate = widget.existingContact?.data?.birthDate;
     _loadExistingPhoto();
     unawaited(_loadAutofillPeoplePreview());
@@ -140,10 +140,7 @@ class _EditContactPageState extends State<EditContactPage> {
           surfaceTintColor: Colors.transparent,
           title: Text(
             l10n.editContact,
-            style: textTheme.h3Bold.copyWith(
-              fontSize: 20,
-              height: 28 / 20,
-            ),
+            style: textTheme.h3Bold.copyWith(fontSize: 20, height: 28 / 20),
           ),
           centerTitle: false,
         ),
@@ -204,10 +201,7 @@ class _EditContactPageState extends State<EditContactPage> {
                         horizontal: 16,
                         vertical: 16,
                       ),
-                      child: Text(
-                        widget.email,
-                        style: textTheme.body,
-                      ),
+                      child: Text(widget.email, style: textTheme.body),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -271,8 +265,10 @@ class _EditContactPageState extends State<EditContactPage> {
         ? trimmedName.characters.first.toUpperCase()
         : widget.email.characters.first.toUpperCase();
     final avatarSeed = trimmedName.isNotEmpty ? trimmedName : widget.email;
-    final avatarColor = colorScheme.avatarColors[
-        avatarSeed.length.remainder(colorScheme.avatarColors.length)];
+    final avatarColor =
+        colorScheme.avatarColors[avatarSeed.length.remainder(
+          colorScheme.avatarColors.length,
+        )];
 
     if (_isLoadingPhoto) {
       return _ContactThumbnailShell(
@@ -285,10 +281,7 @@ class _EditContactPageState extends State<EditContactPage> {
     if (_draftPhotoBytes != null) {
       return _ContactThumbnailShell(
         size: size,
-        child: Image.memory(
-          _draftPhotoBytes!,
-          fit: BoxFit.cover,
-        ),
+        child: Image.memory(_draftPhotoBytes!, fit: BoxFit.cover),
       );
     }
 
@@ -317,10 +310,8 @@ class _EditContactPageState extends State<EditContactPage> {
     setState(() {
       _isLoadingPhoto = true;
     });
-    final bytes =
-        await PhotosContactsService.instance.getProfilePictureBytesByUserId(
-      widget.contactUserId,
-    );
+    final bytes = await PhotosContactsService.instance
+        .getProfilePictureBytesByUserId(widget.contactUserId);
     if (!mounted || loadGeneration != _photoLoadGeneration) {
       return;
     }
@@ -403,7 +394,8 @@ class _EditContactPageState extends State<EditContactPage> {
     if (!mounted) {
       return;
     }
-    final shouldReloadExistingPhoto = photoBytes == null &&
+    final shouldReloadExistingPhoto =
+        photoBytes == null &&
         _draftPhotoBytes == null &&
         widget.existingContact?.profilePictureAttachmentId != null;
     setState(() {
@@ -528,9 +520,9 @@ class _EditContactPageState extends State<EditContactPage> {
     PersonEntity person,
   ) async {
     try {
-      final hiddenFileIds = await SearchService.instance
-          .getHiddenFiles()
-          .then((files) => files.map((file) => file.uploadedFileID).toSet());
+      final hiddenFileIds = await SearchService.instance.getHiddenFiles().then(
+        (files) => files.map((file) => file.uploadedFileID).toSet(),
+      );
       final faceIds = await MLDataDB.instance.getFaceIDsForPersonOrderedByScore(
         person.remoteID,
       );
@@ -668,10 +660,7 @@ class _FieldLabel extends StatelessWidget {
   final String text;
   final bool isRequired;
 
-  const _FieldLabel({
-    required this.text,
-    this.isRequired = false,
-  });
+  const _FieldLabel({required this.text, this.isRequired = false});
 
   @override
   Widget build(BuildContext context) {
@@ -787,10 +776,7 @@ class _AvatarEditButton extends StatelessWidget {
   final double size;
   final VoidCallback onTap;
 
-  const _AvatarEditButton({
-    required this.size,
-    required this.onTap,
-  });
+  const _AvatarEditButton({required this.size, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -804,11 +790,7 @@ class _AvatarEditButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: const Center(
-          child: Icon(
-            Icons.edit_outlined,
-            color: Colors.white,
-            size: 12,
-          ),
+          child: Icon(Icons.edit_outlined, color: Colors.white, size: 12),
         ),
       ),
     );
@@ -849,10 +831,7 @@ class _AutofillLeadingWidget extends StatelessWidget {
   final PersonEntity? person;
   final List<PersonEntity> previewPeople;
 
-  const _AutofillLeadingWidget({
-    this.person,
-    this.previewPeople = const [],
-  });
+  const _AutofillLeadingWidget({this.person, this.previewPeople = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -949,10 +928,7 @@ class _AutofillLeadingWidget extends StatelessWidget {
 }
 
 class _SaveContactButton extends StatelessWidget {
-  const _SaveContactButton({
-    required this.isDisabled,
-    required this.onTap,
-  });
+  const _SaveContactButton({required this.isDisabled, required this.onTap});
 
   final bool isDisabled;
   final Future<void> Function()? onTap;
@@ -962,10 +938,12 @@ class _SaveContactButton extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final l10n = AppLocalizations.of(context);
-    final backgroundColor =
-        isDisabled ? colorScheme.fillFaint : colorScheme.primary500;
-    final textColor =
-        isDisabled ? colorScheme.textFaint : colorScheme.contentReverse;
+    final backgroundColor = isDisabled
+        ? colorScheme.fillFaint
+        : colorScheme.primary500;
+    final textColor = isDisabled
+        ? colorScheme.textFaint
+        : colorScheme.contentReverse;
 
     return Material(
       color: Colors.transparent,

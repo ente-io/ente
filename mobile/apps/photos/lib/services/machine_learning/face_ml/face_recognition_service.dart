@@ -64,8 +64,8 @@ class FaceRecognitionService {
         Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
         _shouldReconcilePeople = false;
       } else {
-        final bool didChange =
-            await PersonService.instance.fetchRemoteClusterFeedback();
+        final bool didChange = await PersonService.instance
+            .fetchRemoteClusterFeedback();
         if (didChange) {
           _logger.info("people: got remote data update ");
           Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
@@ -89,12 +89,12 @@ class FaceRecognitionService {
     // Get the faces
     final List<FaceDetectionRelative> faceDetectionResult =
         await _detectFacesSync(
-      enteFileID,
-      dim,
-      rawRgbaBytes,
-      faceDetectionAddress,
-      faceResults,
-    );
+          enteFileID,
+          dim,
+          rawRgbaBytes,
+          faceDetectionAddress,
+          faceResults,
+        );
     final detectFacesTime = DateTime.now();
     final detectFacesMs = detectFacesTime.difference(startTime).inMilliseconds;
 
@@ -114,8 +114,9 @@ class FaceRecognitionService {
       faceResults,
     );
     final alignFacesTime = DateTime.now();
-    final alignFacesMs =
-        alignFacesTime.difference(detectFacesTime).inMilliseconds;
+    final alignFacesMs = alignFacesTime
+        .difference(detectFacesTime)
+        .inMilliseconds;
 
     // Get the embeddings of the faces
     await _embedFacesSync(
@@ -124,8 +125,9 @@ class FaceRecognitionService {
       faceResults,
     );
     final embedFacesTime = DateTime.now();
-    final embedFacesMs =
-        embedFacesTime.difference(alignFacesTime).inMilliseconds;
+    final embedFacesMs = embedFacesTime
+        .difference(alignFacesTime)
+        .inMilliseconds;
     final totalMs = DateTime.now().difference(startTime).inMilliseconds;
 
     _logger.info(
@@ -147,10 +149,10 @@ class FaceRecognitionService {
       // Get the bounding boxes of the faces
       final List<FaceDetectionRelative> faces =
           await FaceDetectionService.predict(
-        dimensions,
-        rawRgbaBytes,
-        interpreterAddress,
-      );
+            dimensions,
+            rawRgbaBytes,
+            interpreterAddress,
+          );
 
       // Add detected faces to the faceResults
       for (var i = 0; i < faces.length; i++) {

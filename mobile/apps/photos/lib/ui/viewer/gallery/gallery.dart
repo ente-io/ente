@@ -40,12 +40,13 @@ import "package:photos/utils/hierarchical_search_util.dart";
 import "package:photos/utils/misc_util.dart";
 import "package:photos/utils/widget_util.dart";
 
-typedef GalleryLoader = Future<FileLoadResult> Function(
-  int creationStartTime,
-  int creationEndTime, {
-  int? limit,
-  bool? asc,
-});
+typedef GalleryLoader =
+    Future<FileLoadResult> Function(
+      int creationStartTime,
+      int creationEndTime, {
+      int? limit,
+      bool? asc,
+    });
 
 typedef SortAscFn = bool Function();
 
@@ -205,11 +206,13 @@ class GalleryState extends State<Gallery> {
           return;
         }
 
-        final isPriorityEvent = event is LocalPhotosUpdatedEvent &&
+        final isPriorityEvent =
+            event is LocalPhotosUpdatedEvent &&
             event.hasRecentNewLocalDiscovery;
 
-        final targetDebouncer =
-            isPriorityEvent ? _priorityDebouncer : _debouncer;
+        final targetDebouncer = isPriorityEvent
+            ? _priorityDebouncer
+            : _debouncer;
 
         targetDebouncer.run(() async {
           // In soft refresh, setState is called for entire gallery only when
@@ -228,8 +231,9 @@ class GalleryState extends State<Gallery> {
         });
       });
     }
-    _tabDoubleTapEvent =
-        Bus.instance.on<TabDoubleTapEvent>().listen((event) async {
+    _tabDoubleTapEvent = Bus.instance.on<TabDoubleTapEvent>().listen((
+      event,
+    ) async {
       // todo: Assign ID to Gallery and fire generic event with ID &
       //  target index/date
       if (mounted && event.selectedIndex == 0) {
@@ -246,8 +250,9 @@ class GalleryState extends State<Gallery> {
           event.listen((event) async {
             _debouncer.run(() async {
               _logger.info("Force refresh all files on ${event.reason}");
-              _sortOrderAsc =
-                  widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
+              _sortOrderAsc = widget.sortAsyncFn != null
+                  ? widget.sortAsyncFn!()
+                  : false;
               _setGroupType();
               final result = await _loadFiles();
               _setFilesAndReload(result.files);
@@ -398,7 +403,7 @@ class GalleryState extends State<Gallery> {
     widget.selectedFiles?.files.isEmpty ?? true
         ? scrollbarBottomPaddingNotifier.value = bottomInset + extra
         : scrollbarBottomPaddingNotifier.value =
-            FileSelectionOverlayBar.roughHeight + bottomInset;
+              FileSelectionOverlayBar.roughHeight + bottomInset;
   }
 
   void _setGroupType() {
@@ -611,8 +616,9 @@ class GalleryState extends State<Gallery> {
         groupHeaderExtent != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (mounted) {
-          final offset = galleryGroups
-              ?.getOffsetOfGroupContainingFile(widget.fileToJumpTo!);
+          final offset = galleryGroups?.getOffsetOfGroupContainingFile(
+            widget.fileToJumpTo!,
+          );
           if (offset != null) {
             _logger.info("Jumping to date at offset: $offset");
             _scrollController.jumpTo(offset - 50);
@@ -639,7 +645,7 @@ class GalleryState extends State<Gallery> {
       final photoGridSize = localSettings.getPhotoGridSize();
       final tileHeight =
           (widthAvailable - (photoGridSize - 1) * GalleryGroups.spacing) /
-              photoGridSize;
+          photoGridSize;
       return widget.initialFiles != null && widget.initialFiles!.isNotEmpty
           ? Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -729,8 +735,9 @@ class GalleryState extends State<Gallery> {
                     : scrollbarBottomPaddingNotifier,
                 child: NotificationListener<SizeChangedLayoutNotification>(
                   onNotification: (notification) {
-                    final renderBox = _headerKey.currentContext
-                        ?.findRenderObject() as RenderBox?;
+                    final renderBox =
+                        _headerKey.currentContext?.findRenderObject()
+                            as RenderBox?;
                     if (renderBox != null) {
                       _headerHeightNotifier.value = renderBox.size.height;
                     } else {
@@ -757,7 +764,8 @@ class GalleryState extends State<Gallery> {
                                 child: SizeChangedLayoutNotifier(
                                   child: SizedBox(
                                     key: _headerKey,
-                                    child: widget.header ??
+                                    child:
+                                        widget.header ??
                                         const SizedBox.shrink(),
                                   ),
                                 ),
@@ -765,9 +773,7 @@ class GalleryState extends State<Gallery> {
                               SectionedListSliver(
                                 sectionLayouts: groups.groupLayouts,
                               ),
-                              SliverToBoxAdapter(
-                                child: widget.footer,
-                              ),
+                              SliverToBoxAdapter(child: widget.footer),
                             ],
                           );
                         },
@@ -779,7 +785,8 @@ class GalleryState extends State<Gallery> {
                               galleryGroups: groups,
                               headerHeightNotifier: _headerHeightNotifier,
                               selectedFiles: widget.selectedFiles,
-                              showSelectAll: widget.showSelectAll &&
+                              showSelectAll:
+                                  widget.showSelectAll &&
                                   !widget.limitSelectionToOne,
                               scrollbarInUseNotifier: scrollBarInUseNotifier,
                               showGallerySettingsCTA:
@@ -906,12 +913,14 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
         }
       }
       if (currentGroupId ==
-          widget.galleryGroups
+          widget
+              .galleryGroups
               .scrollOffsetToGroupIdMap[groupScrollOffsets[floorIndex]]) {
         // No change in group ID, no need to call setState
         return;
       }
-      currentGroupId = widget.galleryGroups
+      currentGroupId = widget
+          .galleryGroups
           .scrollOffsetToGroupIdMap[groupScrollOffsets[floorIndex]];
     }
 
@@ -941,16 +950,19 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
         if (lastInUseState) {
           fadeInTrailingIcons = true;
           Future.delayed(
-              const Duration(
-                milliseconds: PinnedGroupHeader.kTrailingIconsFadeInDelayMs +
-                    PinnedGroupHeader.kTrailingIconsFadeInDurationMs +
-                    100,
-              ), () {
-            if (!mounted) return;
-            setState(() {
-              fadeInTrailingIcons = false;
-            });
-          });
+            const Duration(
+              milliseconds:
+                  PinnedGroupHeader.kTrailingIconsFadeInDelayMs +
+                  PinnedGroupHeader.kTrailingIconsFadeInDurationMs +
+                  100,
+            ),
+            () {
+              if (!mounted) return;
+              setState(() {
+                fadeInTrailingIcons = false;
+              });
+            },
+          );
         }
         lastInUseState = false;
       });
@@ -1002,17 +1014,22 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
                     child: boundaryWidget(
                       position: BoundaryPosition.top,
                       child: GroupHeaderWidget(
-                        title: widget.galleryGroups
-                            .groupIdToGroupDataMap[currentGroupId!]!.groupType
+                        title: widget
+                            .galleryGroups
+                            .groupIdToGroupDataMap[currentGroupId!]!
+                            .groupType
                             .getTitle(
-                          context,
-                          widget.galleryGroups
-                              .groupIDToFilesMap[currentGroupId]!.first,
-                        ),
+                              context,
+                              widget
+                                  .galleryGroups
+                                  .groupIDToFilesMap[currentGroupId]!
+                                  .first,
+                            ),
                         gridSize: localSettings.getPhotoGridSize(),
                         height: widget.galleryGroups.groupHeaderExtent,
                         filesInGroup: widget
-                            .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
+                            .galleryGroups
+                            .groupIDToFilesMap[currentGroupId!]!,
                         selectedFiles: widget.selectedFiles,
                         showSelectAll: widget.showSelectAll,
                         showGalleryLayoutSettingCTA:

@@ -51,9 +51,7 @@ class BackupSettingsScreen extends StatelessWidget {
         ),
         if (flagService.enableOnlyBackupFuturePhotos) ...[
           const SizedBox(height: 8),
-          _BackupOnlyNewPhotosToggle(
-            debouncer: _onlyNewToggleDebouncer,
-          ),
+          _BackupOnlyNewPhotosToggle(debouncer: _onlyNewToggleDebouncer),
         ],
         if (flagService.enableMobMultiPart) ...[
           const SizedBox(height: 8),
@@ -127,10 +125,7 @@ class BackupSettingsScreen extends StatelessWidget {
   }) {
     return MenuComponent(
       title: title,
-      trailing: ToggleSwitchComponent.async(
-        value: value,
-        onChanged: onChanged,
-      ),
+      trailing: ToggleSwitchComponent.async(value: value, onChanged: onChanged),
     );
   }
 }
@@ -167,9 +162,7 @@ class _BackupOnlyNewPhotosToggle extends StatelessWidget {
             await SyncService.instance.sync();
           });
           if (backupPreferenceService.hasSkippedOnboardingPermission) {
-            await backupPreferenceService.setOnboardingPermissionSkipped(
-              false,
-            );
+            await backupPreferenceService.setOnboardingPermissionSkipped(false);
           }
         },
       ),
@@ -292,7 +285,4 @@ Future<_FolderPromptAction?> _showOnlyNewBackupFolderPrompt({
   );
 }
 
-enum _FolderPromptAction {
-  selectFolders,
-  continueAnyway,
-}
+enum _FolderPromptAction { selectFolders, continueAnyway }

@@ -79,11 +79,11 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             onChanged: () async {
               final hasAuthenticated = await LocalAuthenticationService.instance
                   .requestLocalAuthentication(
-                context,
-                l10n.authToChangeEmailVerificationSetting,
-              );
-              final isEmailMFAEnabled =
-                  UserService.instance.hasEmailMFAEnabled();
+                    context,
+                    l10n.authToChangeEmailVerificationSetting,
+                  );
+              final isEmailMFAEnabled = UserService.instance
+                  .hasEmailMFAEnabled();
               if (hasAuthenticated) {
                 await updateEmailMFA(!isEmailMFAEnabled);
                 if (mounted) {
@@ -95,9 +95,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.passkey,
-          ),
+          captionedTextWidget: CaptionedTextWidget(title: l10n.passkey),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -116,9 +114,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
-              context,
-              context.l10n.authToViewYourActiveSessions,
-            );
+                  context,
+                  context.l10n.authToViewYourActiveSessions,
+                );
             if (hasAuthenticated) {
               // ignore: unawaited_futures
               Navigator.of(context).push(
@@ -138,9 +136,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     children.addAll([
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: context.l10n.appLock,
-        ),
+        captionedTextWidget: CaptionedTextWidget(title: context.l10n.appLock),
         surfaceExecutionStates: false,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -156,17 +152,18 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               firstButtonLabel: context.l10n.ok,
             );
             if (result?.action == ButtonAction.first) {
-              await LockScreenSettings.instance
-                  .setOfflineModeWarningStatus(false);
+              await LockScreenSettings.instance.setOfflineModeWarningStatus(
+                false,
+              );
             } else {
               return;
             }
           }
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
-            context,
-            context.l10n.authToChangeLockscreenSetting,
-          );
+                context,
+                context.l10n.authToChangeLockscreenSetting,
+              );
           if (hasAuthenticated) {
             await Navigator.of(context).push(
               MaterialPageRoute(
@@ -180,32 +177,27 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       ),
       sectionOptionSpacing,
     ]);
-    return Column(
-      children: children,
-    );
+    return Column(children: children);
   }
 
   Future<void> onPasskeyClick(BuildContext buildContext) async {
     try {
-      final hasAuthenticated =
-          await LocalAuthenticationService.instance.requestLocalAuthentication(
-        context,
-        context.l10n.authenticateGeneric,
-        refocusWindows: false,
-      );
+      final hasAuthenticated = await LocalAuthenticationService.instance
+          .requestLocalAuthentication(
+            context,
+            context.l10n.authenticateGeneric,
+            refocusWindows: false,
+          );
       if (!hasAuthenticated) {
         return;
       }
-      final isPassKeyResetEnabled =
-          await PasskeyService.instance.isPasskeyRecoveryEnabled();
+      final isPassKeyResetEnabled = await PasskeyService.instance
+          .isPasskeyRecoveryEnabled();
       if (!isPassKeyResetEnabled) {
         final Uint8List recoveryKey = Configuration.instance.getRecoveryKey();
         final resetKey = CryptoUtil.generateKey();
         final resetKeyBase64 = CryptoUtil.bin2base64(resetKey);
-        final encryptionResult = CryptoUtil.encryptSync(
-          resetKey,
-          recoveryKey,
-        );
+        final encryptionResult = CryptoUtil.encryptSync(resetKey, recoveryKey);
         await PasskeyService.instance.configurePasskeyRecovery(
           resetKeyBase64,
           CryptoUtil.bin2base64(encryptionResult.encryptedData!),
@@ -215,25 +207,24 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       await PasskeyService.instance.openPasskeyPage(buildContext);
     } catch (e, s) {
       _logger.severe("failed to open passkey page", e, s);
-      await showGenericErrorDialog(
-        context: context,
-        error: e,
-      );
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 
   Future<void> updateEmailMFA(bool enableEmailMFA) async {
     try {
-      final UserDetails details =
-          await UserService.instance.getUserDetailsV2(memoryCount: false);
+      final UserDetails details = await UserService.instance.getUserDetailsV2(
+        memoryCount: false,
+      );
       if (details.profileData?.canDisableEmailMFA == false) {
         await routeToPage(
           context,
           RequestPasswordVerificationPage(
             Configuration.instance,
             onPasswordVerified: (Uint8List keyEncryptionKey) async {
-              final Uint8List loginKey =
-                  await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+              final Uint8List loginKey = await CryptoUtil.deriveLoginKey(
+                keyEncryptionKey,
+              );
               await UserService.instance.registerOrUpdateSrp(loginKey);
             },
           ),

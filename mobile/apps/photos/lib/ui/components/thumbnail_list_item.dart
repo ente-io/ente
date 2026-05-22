@@ -72,10 +72,7 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
       ),
       child: Row(
         children: [
-          SizedBox.square(
-            dimension: widget.leadingSize,
-            child: widget.leading,
-          ),
+          SizedBox.square(dimension: widget.leadingSize, child: widget.leading),
           SizedBox(width: widget.contentSpacing),
           Expanded(
             child: Column(

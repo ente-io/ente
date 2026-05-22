@@ -49,12 +49,7 @@ class FamilyPageScaffold extends StatelessWidget {
                   ),
                   if (title != null) const SizedBox(width: 8),
                   if (title != null)
-                    Expanded(
-                      child: Text(
-                        title!,
-                        style: textTheme.largeBold,
-                      ),
-                    ),
+                    Expanded(child: Text(title!, style: textTheme.largeBold)),
                 ],
               ),
               const SizedBox(height: 16),
@@ -83,10 +78,7 @@ Future<bool> showFamilyConfirmationSheet(
     headerSpacing: 20,
     padding: const EdgeInsets.all(16),
     backgroundColor: getEnteColorScheme(context).backgroundColour,
-    child: _FamilyConfirmationContent(
-      body: body,
-      actionLabel: actionLabel,
-    ),
+    child: _FamilyConfirmationContent(body: body, actionLabel: actionLabel),
   );
 
   return confirmed == true;

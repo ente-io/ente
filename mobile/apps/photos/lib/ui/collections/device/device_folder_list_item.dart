@@ -12,10 +12,7 @@ import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
 class DeviceFolderListItem extends StatelessWidget {
   final DeviceCollection deviceCollection;
 
-  const DeviceFolderListItem(
-    this.deviceCollection, {
-    super.key,
-  });
+  const DeviceFolderListItem(this.deviceCollection, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,20 +54,14 @@ class DeviceFolderListItem extends StatelessWidget {
         maxLines: 1,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        style: TextStyles.body.copyWith(
-          color: componentColors.textBase,
-        ),
+        style: TextStyles.body.copyWith(color: componentColors.textBase),
       ),
       subtitle: Text(
-        AppLocalizations.of(context).itemCount(
-          count: deviceCollection.count,
-        ),
+        AppLocalizations.of(context).itemCount(count: deviceCollection.count),
         maxLines: 1,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        style: TextStyles.mini.copyWith(
-          color: componentColors.textLight,
-        ),
+        style: TextStyles.mini.copyWith(color: componentColors.textLight),
       ),
     );
   }

@@ -72,15 +72,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     final textTheme = getEnteTextTheme(context);
 
     Future<void> copy() async {
-      await Clipboard.setData(
-        ClipboardData(
-          text: recoveryKey,
-        ),
-      );
-      showShortToast(
-        context,
-        context.strings.recoveryKeyCopiedToClipboard,
-      );
+      await Clipboard.setData(ClipboardData(text: recoveryKey));
+      showShortToast(context, context.strings.recoveryKeyCopiedToClipboard);
       setState(() {
         _hasTriedToSave = true;
       });
@@ -251,9 +244,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         },
         child: Text(
           _hasTriedToSave ? widget.doneText : context.strings.continueLabel,
-          style: textTheme.bodyBold.copyWith(
-            color: colorScheme.primary700,
-          ),
+          style: textTheme.bodyBold.copyWith(color: colorScheme.primary700),
         ),
       ),
     );
@@ -273,10 +264,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     );
 
     if (mounted) {
-      showToast(
-        context,
-        context.strings.recoveryKeySaved,
-      );
+      showToast(context, context.strings.recoveryKeySaved);
       setState(() {
         _hasTriedToSave = true;
       });
@@ -288,15 +276,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
-    await shareFiles(
-      [
-        XFile(
-          _recoveryKeyFile.path,
-          mimeType: 'text/plain',
-        ),
-      ],
-      context: context,
-    );
+    await shareFiles([
+      XFile(_recoveryKeyFile.path, mimeType: 'text/plain'),
+    ], context: context);
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {

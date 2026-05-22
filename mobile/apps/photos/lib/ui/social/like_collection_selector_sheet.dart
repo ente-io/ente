@@ -24,10 +24,7 @@ class _CollectionLikeState {
   final Collection collection;
   bool isLiked;
 
-  _CollectionLikeState({
-    required this.collection,
-    required this.isLiked,
-  });
+  _CollectionLikeState({required this.collection, required this.isLiked});
 }
 
 /// Shows the like collection selector bottom sheet
@@ -121,10 +118,7 @@ class _LikeCollectionSelectorSheetState
           final isLiked = reactions.any(
             (r) => r.userID == widget.currentUserID && !r.isDeleted,
           );
-          return _CollectionLikeState(
-            collection: collection,
-            isLiked: isLiked,
-          );
+          return _CollectionLikeState(collection: collection, isLiked: isLiked);
         }),
       );
 
@@ -240,11 +234,10 @@ class _LikeCollectionSelectorSheetState
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color:
-            isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundColour,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(28),
-        ),
+        color: isDarkMode
+            ? const Color(0xFF0E0E0E)
+            : colorScheme.backgroundColour,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
         top: false,
@@ -366,10 +359,7 @@ class _AlbumsHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            l10n.albumsCount(count: albumCount),
-            style: textTheme.small,
-          ),
+          Text(l10n.albumsCount(count: albumCount), style: textTheme.small),
           GestureDetector(
             onTap: onLikeAll,
             child: Container(
@@ -411,8 +401,9 @@ class _TitleSection extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
-    final subtitle =
-        isVideo ? l10n.selectAlbumToLikeVideo : l10n.selectAlbumToLikePhoto;
+    final subtitle = isVideo
+        ? l10n.selectAlbumToLikeVideo
+        : l10n.selectAlbumToLikePhoto;
 
     return Padding(
       padding: const EdgeInsets.only(top: 27, bottom: 9),
@@ -435,10 +426,7 @@ class _FileThumbnail extends StatelessWidget {
   final EnteFile? file;
   final Color placeholderColor;
 
-  const _FileThumbnail({
-    required this.file,
-    required this.placeholderColor,
-  });
+  const _FileThumbnail({required this.file, required this.placeholderColor});
 
   @override
   Widget build(BuildContext context) {
@@ -477,11 +465,7 @@ class _AlbumListItem extends StatelessWidget {
   final _CollectionLikeState state;
   final VoidCallback onTap;
 
-  const _AlbumListItem({
-    required this.state,
-    required this.onTap,
-    super.key,
-  });
+  const _AlbumListItem({required this.state, required this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {

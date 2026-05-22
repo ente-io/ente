@@ -86,8 +86,9 @@ class SharedEmptyState extends StatelessWidget {
 
   Future<void> _addFamily(BuildContext context) async {
     try {
-      final userDetails =
-          await UserService.instance.getUserDetailsV2(memoryCount: false);
+      final userDetails = await UserService.instance.getUserDetailsV2(
+        memoryCount: false,
+      );
       if (!context.mounted) {
         return;
       }

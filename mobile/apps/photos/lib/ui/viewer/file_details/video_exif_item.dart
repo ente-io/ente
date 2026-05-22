@@ -12,11 +12,7 @@ import "package:photos/ui/viewer/file/video_exif_dialog.dart";
 class VideoExifRowItem extends StatefulWidget {
   final EnteFile file;
   final FFProbeProps? props;
-  const VideoExifRowItem(
-    this.file,
-    this.props, {
-    super.key,
-  });
+  const VideoExifRowItem(this.file, this.props, {super.key});
 
   @override
   State<VideoExifRowItem> createState() => _VideoProbeInfoState();
@@ -53,29 +49,25 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
     } else if (props!.propData!.isNotEmpty) {
       label = "${widget.props?.videoInfo ?? ''} ..";
       onTap = () => showBarModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) {
-              return VideoExifDialog(
-                props: props,
-              );
-            },
-            shape: const RoundedRectangleBorder(
-              side: BorderSide(width: 0),
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(5),
-              ),
-            ),
-            topControl: const SizedBox.shrink(),
-            backgroundColor: getEnteColorScheme(context).backgroundElevated,
-            barrierColor: backdropFaintDark,
-            enableDrag: true,
-          );
+        context: context,
+        builder: (BuildContext context) {
+          return VideoExifDialog(props: props);
+        },
+        shape: const RoundedRectangleBorder(
+          side: BorderSide(width: 0),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+        ),
+        topControl: const SizedBox.shrink(),
+        backgroundColor: getEnteColorScheme(context).backgroundElevated,
+        barrierColor: backdropFaintDark,
+        enableDrag: true,
+      );
     } else {
       label = AppLocalizations.of(context).noExifData;
       onTap = () => showShortToast(
-            context,
-            AppLocalizations.of(context).thisImageHasNoExifData,
-          );
+        context,
+        AppLocalizations.of(context).thisImageHasNoExifData,
+      );
     }
     setState(() {
       _onTap = onTap;

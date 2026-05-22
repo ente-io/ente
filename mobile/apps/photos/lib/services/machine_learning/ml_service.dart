@@ -358,8 +358,9 @@ class MLService {
       return;
     }
     try {
-      final MLMode mode =
-          isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery;
+      final MLMode mode = isLocalGalleryMode
+          ? MLMode.localGallery
+          : MLMode.enteGallery;
       final mlDataDB = _dbForMode(mode);
       if (force) {
         _mlControllerStatus = true;
@@ -373,8 +374,8 @@ class MLService {
         return;
       }
 
-      final int unclusteredFacesCount =
-          await mlDataDB.getUnclusteredFaceCount();
+      final int unclusteredFacesCount = await mlDataDB
+          .getUnclusteredFaceCount();
       if (unclusteredFacesCount > _forceClusteringFaceCountForMode(mode)) {
         _logger.info(
           "There are $unclusteredFacesCount unclustered faces, doing clustering first",
@@ -612,8 +613,8 @@ class MLService {
       );
 
       // Get the current cluster statistics
-      final Map<String, (Uint8List, int)> oldClusterSummaries =
-          await _mlDataDB.getAllClusterSummary();
+      final Map<String, (Uint8List, int)> oldClusterSummaries = await _mlDataDB
+          .getAllClusterSummary();
 
       if (clusterInBuckets) {
         const int bucketSize = 10000;
@@ -660,13 +661,13 @@ class MLService {
             }
           }
 
-          final clusteringResult =
-              await FaceClusteringService.instance.predictLinearIsolate(
-            faceInfoForClustering.toSet(),
-            fileIDToCreationTime: fileIDToCreationTime,
-            offset: offset,
-            oldClusterSummaries: oldClusterSummaries,
-          );
+          final clusteringResult = await FaceClusteringService.instance
+              .predictLinearIsolate(
+                faceInfoForClustering.toSet(),
+                fileIDToCreationTime: fileIDToCreationTime,
+                offset: offset,
+                oldClusterSummaries: oldClusterSummaries,
+              );
           if (clusteringResult == null) {
             _logger.warning("faceIdToCluster is null");
             return;
@@ -700,12 +701,12 @@ class MLService {
       } else {
         final clusterStartTime = DateTime.now();
         // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
-        final clusteringResult =
-            await FaceClusteringService.instance.predictLinearIsolate(
-          allFaceInfoForClustering.toSet(),
-          fileIDToCreationTime: fileIDToCreationTime,
-          oldClusterSummaries: oldClusterSummaries,
-        );
+        final clusteringResult = await FaceClusteringService.instance
+            .predictLinearIsolate(
+              allFaceInfoForClustering.toSet(),
+              fileIDToCreationTime: fileIDToCreationTime,
+              oldClusterSummaries: oldClusterSummaries,
+            );
         if (clusteringResult == null) {
           _logger.warning("faceIdToCluster is null");
           return;
@@ -777,10 +778,10 @@ class MLService {
       final FileDataEntity? dataEntity = isLocalGallery
           ? null
           : (instruction.existingRemoteFileML ??
-              FileDataEntity.empty(
-                instruction.file.uploadedFileID!,
-                DataType.mlData,
-              ));
+                FileDataEntity.empty(
+                  instruction.file.uploadedFileID!,
+                  DataType.mlData,
+                ));
       // Faces results
       final List<Face> faces = [];
       if (result.facesRan) {
@@ -1024,7 +1025,8 @@ class MLService {
   }
 
   void _logStatus() {
-    final String status = '''
+    final String status =
+        '''
     isInternalUser: ${flagService.internalUser}
     Local indexing: ${localSettings.isMLLocalIndexingEnabled}
     canRunMLController: $_mlControllerStatus

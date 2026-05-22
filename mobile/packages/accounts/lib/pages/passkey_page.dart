@@ -66,8 +66,9 @@ class _PasskeyPageState extends State<PasskeyPage> {
   Future<void> checkStatus() async {
     late dynamic response;
     try {
-      response = await UserService.instance
-          .getTokenForPasskeySession(widget.sessionID);
+      response = await UserService.instance.getTokenForPasskeySession(
+        widget.sessionID,
+      );
     } on PassKeySessionNotVerifiedError {
       showToast(context, context.strings.passKeyPendingVerification);
       return;
@@ -92,9 +93,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
     if (!context.mounted ||
         widget.config.hasConfiguredAccount() ||
         link == null) {
-      _logger.warning(
-        'ignored deeplink: contextMounted ${context.mounted}',
-      );
+      _logger.warning('ignored deeplink: contextMounted ${context.mounted}');
       return;
     }
     try {
@@ -184,15 +183,11 @@ class _PasskeyPageState extends State<PasskeyPage> {
             const SizedBox(height: 12),
             Text(
               context.strings.passkeyAuthTitle,
-              style: textTheme.h3Bold.copyWith(
-                color: colorScheme.textBase,
-              ),
+              style: textTheme.h3Bold.copyWith(color: colorScheme.textBase),
             ),
             Text(
               context.strings.waitingForVerification,
-              style: textTheme.body.copyWith(
-                color: colorScheme.textMuted,
-              ),
+              style: textTheme.body.copyWith(color: colorScheme.textMuted),
             ),
             const SizedBox(height: 24),
             GradientButton(

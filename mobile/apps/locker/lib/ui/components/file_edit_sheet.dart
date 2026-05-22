@@ -58,8 +58,8 @@ class _FileEditSheetState extends State<FileEditSheet> {
 
   Future<void> _initializeSelections() async {
     try {
-      final existingCollections =
-          await CollectionService.instance.getCollectionsForFile(widget.file);
+      final existingCollections = await CollectionService.instance
+          .getCollectionsForFile(widget.file);
 
       if (!mounted) {
         return;
@@ -102,8 +102,9 @@ class _FileEditSheetState extends State<FileEditSheet> {
   void _onCollectionsUpdated(List<Collection> updatedCollections) {
     setState(() {
       _availableCollections = _filterCollections(updatedCollections);
-      _selectedCollectionIds
-          .removeWhere((id) => !_availableCollections.any((c) => c.id == id));
+      _selectedCollectionIds.removeWhere(
+        (id) => !_availableCollections.any((c) => c.id == id),
+      );
     });
   }
 

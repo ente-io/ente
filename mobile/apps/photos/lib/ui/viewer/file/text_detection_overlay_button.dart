@@ -242,9 +242,9 @@ class _TextDetectionOverlayButtonState
                     const SizedBox(width: 8),
                     Text(
                       "Select text",
-                      style: getEnteTextTheme(context).mini.copyWith(
-                            color: Colors.white,
-                          ),
+                      style: getEnteTextTheme(
+                        context,
+                      ).mini.copyWith(color: Colors.white),
                     ),
                   ],
                 ),
@@ -267,10 +267,7 @@ class _TextDetectionOverlayButtonState
       }
       await routeToPage(
         context,
-        TextDetectionPage(
-          file: widget.file,
-          imagePath: path,
-        ),
+        TextDetectionPage(file: widget.file, imagePath: path),
       );
     } catch (error, stackTrace) {
       _logger.severe("Failed to start text detection", error, stackTrace);

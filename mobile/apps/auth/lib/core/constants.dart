@@ -9,9 +9,7 @@ const String sentryDSN =
 final Uri githubFeatureRequestUri = Uri.https(
   "github.com",
   "/ente-io/ente/discussions/categories/enhancements",
-  {
-    "discussions_q": "is:open label:\"- auth\" sort:top",
-  },
+  {"discussions_q": "is:open label:\"- auth\" sort:top"},
 );
 const int microSecondsInDay = 86400000000;
 const int android11SDKINT = 30;

@@ -22,9 +22,9 @@ class CircularIconButton extends StatelessWidget {
     this.size = 60,
     this.isSelected = false,
   }) : assert(
-          svgPath != null || icon != null || child != null,
-          'One of svgPath, icon or child must be provided',
-        );
+         svgPath != null || icon != null || child != null,
+         'One of svgPath, icon or child must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +58,8 @@ class CircularIconButton extends StatelessWidget {
               width: size,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context)
-                        .colorScheme
-                        .imageEditorPrimaryColor
-                        .withValues(alpha: 0.24)
+                    ? Theme.of(context).colorScheme.imageEditorPrimaryColor
+                          .withValues(alpha: 0.24)
                     : Theme.of(context).colorScheme.editorBackgroundColor,
                 shape: BoxShape.circle,
                 border: Border.all(

@@ -38,20 +38,23 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   @override
   void initState() {
     super.initState();
-    _memoriesSettingSubscription =
-        Bus.instance.on<MemoriesSettingChanged>().listen((event) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
-    _memoriesChangedSubscription =
-        Bus.instance.on<MemoriesChangedEvent>().listen((event) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
-    _memorySeenSubscription =
-        Bus.instance.on<MemorySeenEvent>().listen((event) {
+    _memoriesSettingSubscription = Bus.instance
+        .on<MemoriesSettingChanged>()
+        .listen((event) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
+    _memoriesChangedSubscription = Bus.instance
+        .on<MemoriesChangedEvent>()
+        .listen((event) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
+    _memorySeenSubscription = Bus.instance.on<MemorySeenEvent>().listen((
+      event,
+    ) {
       if (mounted) {
         setState(() {});
       }
@@ -106,16 +109,14 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
           key: ValueKey(identityHashCode(snapshot.data)),
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
             _buildMemories(collated),
             const SizedBox(height: 10),
           ],
         ).animate().fadeIn(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOutCirc,
-            );
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOutCirc,
+        );
       },
     );
   }
@@ -171,12 +172,13 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         .take(kMemoryCoverWarmCap)
         .where((memories) => memories.isNotEmpty)
         .map((memories) {
-      final file = memories[getNextMemoryIndex(memories)].file;
-      return '${file.uploadedFileID ?? ""}|'
-          '${file.generatedID ?? ""}|'
-          '${file.localID ?? ""}|'
-          '${file.fileType.name}';
-    }).join(',');
+          final file = memories[getNextMemoryIndex(memories)].file;
+          return '${file.uploadedFileID ?? ""}|'
+              '${file.generatedID ?? ""}|'
+              '${file.localID ?? ""}|'
+              '${file.fileType.name}';
+        })
+        .join(',');
   }
 
   // Kill any pending or in-flight warm pass: cancels the delay timer, bumps

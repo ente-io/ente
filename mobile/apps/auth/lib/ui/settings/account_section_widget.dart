@@ -36,18 +36,13 @@ class AccountSectionWidget extends StatelessWidget {
     children.addAll([
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.changeEmail,
-        ),
+        captionedTextWidget: CaptionedTextWidget(title: l10n.changeEmail),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
-              .requestLocalAuthentication(
-            context,
-            l10n.authToChangeYourEmail,
-          );
+              .requestLocalAuthentication(context, l10n.authToChangeYourEmail);
           if (hasAuthenticated) {
             // ignore: unawaited_futures
             showChangeEmailDialog(context);
@@ -56,18 +51,16 @@ class AccountSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.changePassword,
-        ),
+        captionedTextWidget: CaptionedTextWidget(title: l10n.changePassword),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
-            context,
-            l10n.authToChangeYourPassword,
-          );
+                context,
+                l10n.authToChangeYourPassword,
+              );
           if (hasAuthenticated) {
             // ignore: unawaited_futures
             Navigator.of(context).push(
@@ -86,44 +79,35 @@ class AccountSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.recoveryKey,
-        ),
+        captionedTextWidget: CaptionedTextWidget(title: l10n.recoveryKey),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
-            context,
-            l10n.authToViewYourRecoveryKey,
-          );
+                context,
+                l10n.authToViewYourRecoveryKey,
+              );
           if (hasAuthenticated) {
             String recoveryKey;
             try {
-              recoveryKey =
-                  CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
+              recoveryKey = CryptoUtil.bin2hex(
+                Configuration.instance.getRecoveryKey(),
+              );
             } catch (e) {
               // ignore: unawaited_futures
-              showGenericErrorDialog(
-                context: context,
-                error: e,
-              );
+              showGenericErrorDialog(context: context, error: e);
               return;
             }
             // ignore: unawaited_futures
-            showRecoveryKeySheet(
-              context,
-              recoveryKey: recoveryKey,
-            );
+            showRecoveryKeySheet(context, recoveryKey: recoveryKey);
           }
         },
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: context.l10n.logout,
-        ),
+        captionedTextWidget: CaptionedTextWidget(title: context.l10n.logout),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -147,9 +131,7 @@ class AccountSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
     ]);
-    return Column(
-      children: children,
-    );
+    return Column(children: children);
   }
 
   void _onLogoutTapped(BuildContext context) {

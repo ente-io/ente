@@ -44,10 +44,7 @@ class SharedPublicCollectionPage extends StatefulWidget {
     super.key,
     this.files,
     this.shouldShowJoinDialog = false,
-  }) : assert(
-          !(files == null),
-          'sharedLinkFiles cannot be empty',
-        );
+  }) : assert(!(files == null), 'sharedLinkFiles cannot be empty');
 
   @override
   State<SharedPublicCollectionPage> createState() =>
@@ -87,10 +84,13 @@ class _SharedPublicCollectionPageState
       );
       await dialog.show();
       try {
-        await RemoteSyncService.instance
-            .joinAndSyncCollection(context, widget.c.collection.id);
-        final c = CollectionsService.instance
-            .getCollectionByID(widget.c.collection.id);
+        await RemoteSyncService.instance.joinAndSyncCollection(
+          context,
+          widget.c.collection.id,
+        );
+        final c = CollectionsService.instance.getCollectionByID(
+          widget.c.collection.id,
+        );
         await dialog.hide();
         Navigator.of(context).pop();
         await routeToPage(
@@ -114,16 +114,18 @@ class _SharedPublicCollectionPageState
   @override
   Widget build(BuildContext context) {
     logger.info("Building SharedPublicCollectionPage");
-    final List<EnteFile>? initialFiles =
-        widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
+    final List<EnteFile>? initialFiles = widget.c.thumbnail != null
+        ? [widget.c.thumbnail!]
+        : null;
 
     // Determine groupType based on collection layout.
     // masonry/continuous (or unset) map to non-grouped rendering.
     final normalizedLayout = normalizePublicLinkLayout(
       widget.c.collection.pubMagicMetadata.layout,
     );
-    final GroupType groupType =
-        normalizedLayout == "masonry" ? GroupType.none : GroupType.day;
+    final GroupType groupType = normalizedLayout == "masonry"
+        ? GroupType.none
+        : GroupType.day;
 
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
@@ -133,15 +135,15 @@ class _SharedPublicCollectionPageState
 
         return FileLoadResult(widget.files!, false);
       },
-      reloadEvent: Bus.instance
-          .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == widget.c.collection.id),
+      reloadEvent: Bus.instance.on<CollectionUpdatedEvent>().where(
+        (event) => event.collectionID == widget.c.collection.id,
+      ),
       forceReloadEvents: [
         Bus.instance.on<CollectionMetaEvent>().where(
-              (event) =>
-                  event.id == widget.c.collection.id &&
-                  event.type == CollectionMetaEventType.sortChanged,
-            ),
+          (event) =>
+              event.id == widget.c.collection.id &&
+              event.type == CollectionMetaEventType.sortChanged,
+        ),
       ],
       removalEventTypes: const {
         EventType.deletedFromRemote,
@@ -154,7 +156,8 @@ class _SharedPublicCollectionPageState
       albumName: widget.c.collection.displayName,
       galleryType: galleryType,
       groupType: groupType,
-      header: widget.c.collection.isJoinEnabled &&
+      header:
+          widget.c.collection.isJoinEnabled &&
               Configuration.instance.isLoggedIn()
           ? Padding(
               padding: const EdgeInsets.all(8.0),
@@ -225,10 +228,13 @@ class _SharedPublicCollectionPageState
       );
       await dialog.show();
       try {
-        await RemoteSyncService.instance
-            .joinAndSyncCollection(context, widget.c.collection.id);
-        final c = CollectionsService.instance
-            .getCollectionByID(widget.c.collection.id);
+        await RemoteSyncService.instance.joinAndSyncCollection(
+          context,
+          widget.c.collection.id,
+        );
+        final c = CollectionsService.instance.getCollectionByID(
+          widget.c.collection.id,
+        );
         await dialog.hide();
         Navigator.of(context).pop();
         await routeToPage(

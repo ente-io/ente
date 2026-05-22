@@ -70,7 +70,9 @@ class _SettingsBody extends StatelessWidget {
       animation: emailNotifier,
       builder: (context, _) {
         final email = hasLoggedIn ? emailNotifier.value ?? "" : "";
-        final title = email.isEmpty ? AppLocalizations.of(context).settings : email;
+        final title = email.isEmpty
+            ? AppLocalizations.of(context).settings
+            : email;
 
         return SettingsPageScaffold(
           title: title,
@@ -214,9 +216,7 @@ class _SettingsBody extends StatelessWidget {
         icon: const HugeIcon(icon: HugeIcons.strokeRoundedSearch01),
         onTap: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const SettingsSearchPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const SettingsSearchPage()),
           );
         },
       ),
@@ -227,9 +227,7 @@ class _SettingsBody extends StatelessWidget {
           icon: const HugeIcon(icon: HugeIcons.strokeRoundedBug02),
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const LogViewerPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const LogViewerPage()),
             );
           },
         ),
@@ -259,10 +257,7 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildOfflineLoginCard(
-    BuildContext context,
-    ColorTokens colors,
-  ) {
+  Widget _buildOfflineLoginCard(BuildContext context, ColorTokens colors) {
     return _buildMenuItem(
       title: AppLocalizations.of(context).alreadyHaveAnAccount,
       icon: HugeIcons.strokeRoundedLogin01,
@@ -286,9 +281,7 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildOfflineFeaturesCard(
-    BuildContext context,
-  ) {
+  Widget _buildOfflineFeaturesCard(BuildContext context) {
     return MenuGroupComponent(
       items: [
         _buildMenuItem(
@@ -324,9 +317,7 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildPersonalFeaturesCard(
-    BuildContext context,
-  ) {
+  Widget _buildPersonalFeaturesCard(BuildContext context) {
     return MenuGroupComponent(
       items: [
         _buildMenuItem(
@@ -391,9 +382,7 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildFeaturesAndPlansCard(
-    BuildContext context,
-  ) {
+  Widget _buildFeaturesAndPlansCard(BuildContext context) {
     return MenuGroupComponent(
       items: [
         _buildMenuItem(
@@ -444,9 +433,7 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  SettingsItem _buildMapsMenuItem(
-    BuildContext context,
-  ) {
+  SettingsItem _buildMapsMenuItem(BuildContext context) {
     return _buildMenuItem(
       title: AppLocalizations.of(context).maps,
       icon: HugeIcons.strokeRoundedMaping,
@@ -468,9 +455,7 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildEngagementCard(
-    BuildContext context,
-  ) {
+  Widget _buildEngagementCard(BuildContext context) {
     return MenuGroupComponent(
       items: [
         _buildMenuItem(

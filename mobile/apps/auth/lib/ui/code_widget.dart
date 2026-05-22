@@ -170,10 +170,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                     duration: const Duration(milliseconds: 180),
                     switchInCurve: Curves.easeIn,
                     switchOutCurve: Curves.easeOut,
-                    transitionBuilder: (child, animation) => FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
+                    transitionBuilder: (child, animation) =>
+                        FadeTransition(opacity: animation, child: child),
                     child: isSelectionActive
                         ? const SizedBox.shrink()
                         : CodeTimerProgress(
@@ -485,8 +483,10 @@ class _CodeWidgetState extends State<CodeWidget> {
                         switchOutCurve: Curves.easeOut,
                         transitionBuilder: (child, animation) => FadeTransition(
                           opacity: animation,
-                          child:
-                              ScaleTransition(scale: animation, child: child),
+                          child: ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          ),
                         ),
                         child: isSelected
                             ? Align(
@@ -536,9 +536,9 @@ class _CodeWidgetState extends State<CodeWidget> {
                 Text(
                   safeDecode(widget.code.account).trim(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: isCompactMode ? 12 : 12,
-                        color: Colors.grey,
-                      ),
+                    fontSize: isCompactMode ? 12 : 12,
+                    color: Colors.grey,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -878,8 +878,8 @@ class _CodeWidgetState extends State<CodeWidget> {
     String content, {
     required String confirmationMessage,
   }) async {
-    final shouldMinimizeOnCopy =
-        PreferenceService.instance.shouldMinimizeOnCopy();
+    final shouldMinimizeOnCopy = PreferenceService.instance
+        .shouldMinimizeOnCopy();
 
     await FlutterClipboard.copy(content);
     showToast(context, confirmationMessage);
@@ -973,7 +973,9 @@ class _CodeWidgetState extends State<CodeWidget> {
       display: display.copyWith(pinned: !currentlyPinned),
     );
     unawaited(
-      CodeStore.instance.addCode(code).then(
+      CodeStore.instance
+          .addCode(code)
+          .then(
             (value) => showToast(
               context,
               !currentlyPinned
@@ -992,11 +994,11 @@ class _CodeWidgetState extends State<CodeWidget> {
       showToast(context, 'Code can only be deleted from trash');
       return;
     }
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
     if (!isAuthSuccessful) {
       return;
     }
@@ -1028,11 +1030,11 @@ class _CodeWidgetState extends State<CodeWidget> {
       showToast(context, 'Code is already trashed');
       return;
     }
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
     if (!isAuthSuccessful) {
       return;
     }

@@ -42,8 +42,11 @@ class SimilarityTransform {
   /// estimates the parameters by solving a least-squares problem using
   /// the Umeyama algorithm, via [_umeyama].
   static (AlignmentResult, bool) estimate(List<List<double>> src) {
-    final (params, center, size, rotation) =
-        _umeyama(src, mobilefacenetIdealNormalized5, true);
+    final (params, center, size, rotation) = _umeyama(
+      src,
+      mobilefacenetIdealNormalized5,
+      true,
+    );
     final alignmentResult = AlignmentResult(
       affineMatrix: params.to2DList(),
       center: center,
@@ -51,8 +54,9 @@ class SimilarityTransform {
       rotation: rotation,
     );
     // We check for NaN in the transformation matrix params.
-    final isNoNanInParam =
-        !params.asFlattenedList.any((element) => element.isNaN);
+    final isNoNanInParam = !params.asFlattenedList.any(
+      (element) => element.isNaN,
+    );
     return (alignmentResult, isNoNanInParam);
   }
 

@@ -104,9 +104,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                       color: getEnteColorScheme(context).strokeMuted,
                       width: 0.5,
                     ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(8 * scale),
-                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(8 * scale)),
                   ),
                   child: Icon(
                     Icons.close_rounded,

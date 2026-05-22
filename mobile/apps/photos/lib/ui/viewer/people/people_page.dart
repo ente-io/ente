@@ -113,8 +113,8 @@ class _PeoplePageState extends State<PeoplePage> {
     });
     _searchFilterDataProvider = widget.searchResult != null
         ? SearchFilterDataProvider(
-            initialGalleryFilter:
-                widget.searchResult!.getHierarchicalSearchFilter(),
+            initialGalleryFilter: widget.searchResult!
+                .getHierarchicalSearchFilter(),
           )
         : null;
     if (_memoryLaneEnabled) {
@@ -162,8 +162,8 @@ class _PeoplePageState extends State<PeoplePage> {
     if (_memoryLanePrewarmStarted || !_memoryLaneEnabled) {
       return;
     }
-    final bool memoryLaneReady =
-        MemoryLaneService.instance.hasReadyTimelineSync(_person.remoteID);
+    final bool memoryLaneReady = MemoryLaneService.instance
+        .hasReadyTimelineSync(_person.remoteID);
     if (!memoryLaneReady) {
       return;
     }
@@ -235,12 +235,11 @@ class _PeoplePageState extends State<PeoplePage> {
     _logger.info("Building for ${_person.data.name}");
     final bool featureEnabled = _memoryLaneEnabled;
     final bool memoryLaneReady = featureEnabled
-        ? MemoryLaneService.instance.hasReadyTimelineSync(
-            _person.remoteID,
-          )
+        ? MemoryLaneService.instance.hasReadyTimelineSync(_person.remoteID)
         : false;
-    final bool hasSeenMemoryLane =
-        localSettings.hasSeenMemoryLane(_person.remoteID);
+    final bool hasSeenMemoryLane = localSettings.hasSeenMemoryLane(
+      _person.remoteID,
+    );
     final bool showMemoryLaneBanner =
         featureEnabled && memoryLaneReady && !hasSeenMemoryLane;
 
@@ -299,10 +298,10 @@ class _PeoplePageState extends State<PeoplePage> {
                                               showMemoryLaneBanner,
                                           onTimelineTap:
                                               featureEnabled && memoryLaneReady
-                                                  ? () => unawaited(
-                                                        _openMemoryLanePage(),
-                                                      )
-                                                  : null,
+                                              ? () => unawaited(
+                                                  _openMemoryLanePage(),
+                                                )
+                                              : null,
                                         );
                                 },
                               )
@@ -315,9 +314,7 @@ class _PeoplePageState extends State<PeoplePage> {
                                 memoryLaneEnabled: featureEnabled,
                                 showTimelineBanner: showMemoryLaneBanner,
                                 onTimelineTap: featureEnabled && memoryLaneReady
-                                    ? () => unawaited(
-                                          _openMemoryLanePage(),
-                                        )
+                                    ? () => unawaited(_openMemoryLanePage())
                                     : null,
                               ),
                         FileSelectionOverlayBar(
@@ -406,8 +403,9 @@ class _GalleryState extends State<_Gallery> {
       },
       tagPrefix: widget.tagPrefix + widget.tagPrefix,
       selectedFiles: widget.selectedFiles,
-      initialFiles:
-          widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
+      initialFiles: widget.personFiles.isNotEmpty
+          ? [widget.personFiles.first]
+          : [],
       header: Column(
         children: [
           (widget.personEntity.data.email != null &&

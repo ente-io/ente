@@ -53,30 +53,32 @@ class _HiddenPageState extends State<HiddenPage> {
   bool _hasFilesNeedingCleanup = false;
   bool _hasHiddenFilesOnDevice = false;
   late StreamSubscription<CollectionUpdatedEvent>
-      _collectionUpdatesSubscription;
+  _collectionUpdatesSubscription;
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
 
   @override
   void initState() {
     super.initState();
-    _collectionUpdatesSubscription =
-        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      unawaited(_refreshHiddenCollections());
-      _checkForCleanupNeeded();
-      _checkForDeviceCleanupNeeded();
-    });
-    _albumSortOrderChangeEvent =
-        Bus.instance.on<AlbumSortOrderChangeEvent>().listen((event) {
-      unawaited(_refreshHiddenCollections());
-    });
+    _collectionUpdatesSubscription = Bus.instance
+        .on<CollectionUpdatedEvent>()
+        .listen((event) {
+          unawaited(_refreshHiddenCollections());
+          _checkForCleanupNeeded();
+          _checkForDeviceCleanupNeeded();
+        });
+    _albumSortOrderChangeEvent = Bus.instance
+        .on<AlbumSortOrderChangeEvent>()
+        .listen((event) {
+          unawaited(_refreshHiddenCollections());
+        });
     unawaited(_refreshHiddenCollections());
     _checkForCleanupNeeded();
     _checkForDeviceCleanupNeeded();
   }
 
   Future<void> _checkForCleanupNeeded() async {
-    final hasCleanup =
-        await CollectionsService.instance.hasFilesNeedingHiddenCleanup();
+    final hasCleanup = await CollectionsService.instance
+        .hasFilesNeedingHiddenCleanup();
     if (mounted && hasCleanup != _hasFilesNeedingCleanup) {
       setState(() {
         _hasFilesNeedingCleanup = hasCleanup;
@@ -85,8 +87,8 @@ class _HiddenPageState extends State<HiddenPage> {
   }
 
   Future<void> _checkForDeviceCleanupNeeded() async {
-    final hasDeviceFiles =
-        await CollectionsService.instance.hasHiddenFilesOnDevice();
+    final hasDeviceFiles = await CollectionsService.instance
+        .hasHiddenFilesOnDevice();
     if (mounted && hasDeviceFiles != _hasHiddenFilesOnDevice) {
       setState(() {
         _hasHiddenFilesOnDevice = hasDeviceFiles;
@@ -95,10 +97,10 @@ class _HiddenPageState extends State<HiddenPage> {
   }
 
   Future<void> _refreshHiddenCollections() async {
-    final hiddenCollections =
-        CollectionsService.instance.getHiddenCollections();
-    final defaultHiddenCollection =
-        await CollectionsService.instance.getDefaultHiddenCollection();
+    final hiddenCollections = CollectionsService.instance
+        .getHiddenCollections();
+    final defaultHiddenCollection = await CollectionsService.instance
+        .getDefaultHiddenCollection();
     final hiddenCollectionsExcludingDefault = hiddenCollections
         .where((c) => c.id != defaultHiddenCollection.id)
         .toList();
@@ -127,8 +129,8 @@ class _HiddenPageState extends State<HiddenPage> {
 
     Map<int, int>? collectionIDToNewestPhotoTime;
     if (currentSortKey == AlbumSortKey.newestPhoto) {
-      collectionIDToNewestPhotoTime =
-          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+      collectionIDToNewestPhotoTime = await CollectionsService.instance
+          .getCollectionIDToNewestFileTime();
     }
 
     collectionsToSort.sort((first, second) {
@@ -142,8 +144,8 @@ class _HiddenPageState extends State<HiddenPage> {
         comparison =
             (collectionIDToNewestPhotoTime?[second.id] ?? -1 * intMaxValue)
                 .compareTo(
-          collectionIDToNewestPhotoTime?[first.id] ?? -1 * intMaxValue,
-        );
+                  collectionIDToNewestPhotoTime?[first.id] ?? -1 * intMaxValue,
+                );
       } else {
         comparison = second.updationTime.compareTo(first.updationTime);
       }
@@ -179,12 +181,12 @@ class _HiddenPageState extends State<HiddenPage> {
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
-            (event) =>
-                event.updatedFiles.firstWhereOrNull(
-                  (element) => element.uploadedFileID != null,
-                ) !=
-                null,
-          ),
+        (event) =>
+            event.updatedFiles.firstWhereOrNull(
+              (element) => element.uploadedFileID != null,
+            ) !=
+            null,
+      ),
       removalEventTypes: const {
         EventType.unhide,
         EventType.deletedFromEverywhere,
@@ -192,12 +194,12 @@ class _HiddenPageState extends State<HiddenPage> {
       },
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(
-              (event) =>
-                  event.updatedFiles.firstWhereOrNull(
-                    (element) => element.uploadedFileID != null,
-                  ) !=
-                  null,
-            ),
+          (event) =>
+              event.updatedFiles.firstWhereOrNull(
+                (element) => element.uploadedFileID != null,
+              ) !=
+              null,
+        ),
       ],
       tagPrefix: widget.tagPrefix,
       selectedFiles: _selectedFiles,
@@ -274,10 +276,7 @@ class _HiddenPageState extends State<HiddenPage> {
               alignment: Alignment.bottomCenter,
               children: [
                 gallery,
-                FileSelectionOverlayBar(
-                  widget.overlayType,
-                  _selectedFiles,
-                ),
+                FileSelectionOverlayBar(widget.overlayType, _selectedFiles),
               ],
             ),
           ),

@@ -86,8 +86,8 @@ class _HomePageState extends State<HomePage> {
   late FocusNode searchBoxFocusNode;
 
   final TextEditingController _textController = TextEditingController();
-  final bool _autoFocusSearch =
-      PreferenceService.instance.shouldAutoFocusOnSearchBar();
+  final bool _autoFocusSearch = PreferenceService.instance
+      .shouldAutoFocusOnSearchBar();
   bool _showSearchBox = false;
   String _searchText = "";
   List<Code>? _allCodes;
@@ -98,7 +98,7 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
   StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
   StreamSubscription<MultiSelectActionRequestedEvent>?
-      _multiSelectActionSubscription;
+  _multiSelectActionSubscription;
   String selectedTag = "";
   bool _isTrashOpen = false;
   bool hasTrashedCodes = false;
@@ -123,8 +123,9 @@ class _HomePageState extends State<HomePage> {
     _multiSelectActionSubscription = Bus.instance
         .on<MultiSelectActionRequestedEvent>()
         .listen(_handleMultiSelectAction);
-    _triggerLogoutEvent =
-        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+    _triggerLogoutEvent = Bus.instance.on<TriggerLogoutEvent>().listen((
+      event,
+    ) async {
       await autoLogoutAlert(context);
     });
 
@@ -144,7 +145,8 @@ class _HomePageState extends State<HomePage> {
 
   void _onAddTagPressed() {
     final selectedIds = _codeDisplayStore.selectedCodeIds.value;
-    final selectedCodes = _allCodes
+    final selectedCodes =
+        _allCodes
             ?.where((c) => selectedIds.contains(c.selectionKey))
             .toList() ??
         [];
@@ -183,7 +185,8 @@ class _HomePageState extends State<HomePage> {
     FocusScope.of(context).requestFocus();
 
     try {
-      final codesToRestore = _allCodes
+      final codesToRestore =
+          _allCodes
               ?.where((c) => selectedIds.contains(c.selectionKey))
               .toList() ??
           [];
@@ -208,11 +211,11 @@ class _HomePageState extends State<HomePage> {
     final selectedIds = _codeDisplayStore.selectedCodeIds.value;
     if (selectedIds.isEmpty) return;
 
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
 
     if (!isAuthSuccessful) return;
 
@@ -225,7 +228,8 @@ class _HomePageState extends State<HomePage> {
       isCritical: true,
       firstButtonOnTap: () async {
         try {
-          final codesToDelete = _allCodes
+          final codesToDelete =
+              _allCodes
                   ?.where((c) => selectedIds.contains(c.selectionKey))
                   .toList() ??
               [];
@@ -297,7 +301,8 @@ class _HomePageState extends State<HomePage> {
     final selectedIds = _codeDisplayStore.selectedCodeIds.value;
     if (selectedIds.isEmpty) return;
 
-    final codesToUpdate = _allCodes
+    final codesToUpdate =
+        _allCodes
             ?.where((c) => selectedIds.contains(c.selectionKey))
             .toList() ??
         [];
@@ -359,7 +364,8 @@ class _HomePageState extends State<HomePage> {
     final selectedIds = _codeDisplayStore.selectedCodeIds.value;
     if (selectedIds.isEmpty) return;
 
-    final codesToUpdate = _allCodes
+    final codesToUpdate =
+        _allCodes
             ?.where((c) => selectedIds.contains(c.selectionKey))
             .toList() ??
         [];
@@ -404,11 +410,11 @@ class _HomePageState extends State<HomePage> {
     final selectedIds = _codeDisplayStore.selectedCodeIds.value;
     if (selectedIds.isEmpty) return;
 
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
     if (!isAuthSuccessful) return;
 
     FocusScope.of(context).requestFocus();
@@ -417,8 +423,9 @@ class _HomePageState extends State<HomePage> {
       title: l10n.trashCode,
       body: (() {
         if (selectedIds.length == 1) {
-          final code =
-              _allCodes!.firstWhere((c) => c.selectionKey == selectedIds.first);
+          final code = _allCodes!.firstWhere(
+            (c) => c.selectionKey == selectedIds.first,
+          );
           final issuerAccount = code.account.isNotEmpty
               ? '${code.issuer} (${code.account})'
               : code.issuer;
@@ -431,7 +438,8 @@ class _HomePageState extends State<HomePage> {
       isCritical: true,
       firstButtonOnTap: () async {
         try {
-          final codesToTrash = _allCodes
+          final codesToTrash =
+              _allCodes
                   ?.where((c) => selectedIds.contains(c.selectionKey))
                   .toList() ??
               [];
@@ -541,8 +549,10 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: textTheme.small
-                    .copyWith(color: colorScheme.textBase, fontSize: 11),
+                style: textTheme.small.copyWith(
+                  color: colorScheme.textBase,
+                  fontSize: 11,
+                ),
               ),
             ],
           ),
@@ -608,15 +618,17 @@ class _HomePageState extends State<HomePage> {
                   if (selectedIds.isEmpty) {
                     return const Expanded(child: SizedBox.shrink());
                   }
-                  final selectedCodes = _allCodes
+                  final selectedCodes =
+                      _allCodes
                           ?.where((c) => selectedIds.contains(c.selectionKey))
                           .toList() ??
                       [];
                   if (selectedCodes.isEmpty) {
                     return const Expanded(child: SizedBox.shrink());
                   }
-                  final bool allArePinned =
-                      selectedCodes.every((code) => code.isPinned);
+                  final bool allArePinned = selectedCodes.every(
+                    (code) => code.isPinned,
+                  );
 
                   return _buildClearActionButton(
                     allArePinned
@@ -673,14 +685,16 @@ class _HomePageState extends State<HomePage> {
         builder: (context, selectedIds, child) {
           if (selectedIds.isEmpty) return const SizedBox.shrink();
 
-          final selectedCodes = _allCodes
+          final selectedCodes =
+              _allCodes
                   ?.where((c) => selectedIds.contains(c.selectionKey))
                   .toList() ??
               [];
           if (selectedCodes.isEmpty) return const SizedBox.shrink();
 
-          final bool allArePinned =
-              selectedCodes.every((code) => code.isPinned);
+          final bool allArePinned = selectedCodes.every(
+            (code) => code.isPinned,
+          );
           final bool isMixed =
               !allArePinned && !selectedCodes.every((code) => !code.isPinned);
 
@@ -800,8 +814,10 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 8),
                 Text(
                   label,
-                  style: textTheme.small
-                      .copyWith(color: colorScheme.textBase, fontSize: 11),
+                  style: textTheme.small.copyWith(
+                    color: colorScheme.textBase,
+                    fontSize: 11,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -909,8 +925,9 @@ class _HomePageState extends State<HomePage> {
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: () {
-                          final allVisibleCodeIds =
-                              _filteredCodes.map((c) => c.selectionKey).toSet();
+                          final allVisibleCodeIds = _filteredCodes
+                              .map((c) => c.selectionKey)
+                              .toSet();
                           _codeDisplayStore.selectedCodeIds.value =
                               allVisibleCodeIds;
                         },
@@ -946,7 +963,8 @@ class _HomePageState extends State<HomePage> {
                           if (selectedIds.isEmpty) {
                             return const SizedBox.shrink();
                           }
-                          final selectedCodes = _allCodes
+                          final selectedCodes =
+                              _allCodes
                                   ?.where(
                                     (c) => selectedIds.contains(c.selectionKey),
                                   )
@@ -1032,8 +1050,9 @@ class _HomePageState extends State<HomePage> {
                 ValueListenableBuilder<Set<String>>(
                   valueListenable: _codeDisplayStore.selectedCodeIds,
                   builder: (context, selectedIds, _) {
-                    final Code? code =
-                        _getSingleSelectedCodeWithNote(selectedIds);
+                    final Code? code = _getSingleSelectedCodeWithNote(
+                      selectedIds,
+                    );
                     if (code == null) {
                       return const SizedBox.shrink();
                     }
@@ -1094,16 +1113,16 @@ class _HomePageState extends State<HomePage> {
 
       final bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
           ? (pressed.contains(LogicalKeyboardKey.metaLeft) ||
-              pressed.contains(LogicalKeyboardKey.meta) ||
-              pressed.contains(LogicalKeyboardKey.metaRight))
+                pressed.contains(LogicalKeyboardKey.meta) ||
+                pressed.contains(LogicalKeyboardKey.metaRight))
           : (pressed.contains(LogicalKeyboardKey.controlLeft) ||
-              pressed.contains(LogicalKeyboardKey.control) ||
-              pressed.contains(LogicalKeyboardKey.controlRight));
+                pressed.contains(LogicalKeyboardKey.control) ||
+                pressed.contains(LogicalKeyboardKey.controlRight));
 
       final bool isShiftPressed =
           pressed.contains(LogicalKeyboardKey.shiftLeft) ||
-              pressed.contains(LogicalKeyboardKey.shiftRight) ||
-              pressed.contains(LogicalKeyboardKey.shift);
+          pressed.contains(LogicalKeyboardKey.shiftRight) ||
+          pressed.contains(LogicalKeyboardKey.shift);
 
       if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyW) {
         if (PlatformDetector.isDesktop()) {
@@ -1139,43 +1158,48 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _loadCodes() {
-    CodeStore.instance.getAllCodes().then((codes) {
-      _allCodes = codes;
-      CodeDisplayStore.instance.reconcileSelections(codes);
-      hasTrashedCodes = false;
-      hasNonTrashedCodes = false;
+    CodeStore.instance
+        .getAllCodes()
+        .then((codes) {
+          _allCodes = codes;
+          CodeDisplayStore.instance.reconcileSelections(codes);
+          hasTrashedCodes = false;
+          hasNonTrashedCodes = false;
 
-      for (final c in _allCodes ?? []) {
-        if (c.isTrashed) {
-          hasTrashedCodes = true;
-        } else {
-          hasNonTrashedCodes = true;
-        }
+          for (final c in _allCodes ?? []) {
+            if (c.isTrashed) {
+              hasTrashedCodes = true;
+            } else {
+              hasNonTrashedCodes = true;
+            }
 
-        if (hasTrashedCodes && hasNonTrashedCodes) {
-          break;
-        }
-      }
-      if (!hasTrashedCodes) {
-        _isTrashOpen = false;
-      }
-      if (!hasNonTrashedCodes && hasTrashedCodes) {
-        _isTrashOpen = true;
-      }
-
-      CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
-        tags = value;
-        if (mounted) {
-          if (!tags.contains(selectedTag)) {
-            selectedTag = "";
+            if (hasTrashedCodes && hasNonTrashedCodes) {
+              break;
+            }
           }
-          _hasLoaded = true;
-          _applyFilteringAndRefresh();
-        }
-      });
-    }).onError((error, stackTrace) {
-      _logger.severe('Error while loading codes', error, stackTrace);
-    });
+          if (!hasTrashedCodes) {
+            _isTrashOpen = false;
+          }
+          if (!hasNonTrashedCodes && hasTrashedCodes) {
+            _isTrashOpen = true;
+          }
+
+          CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((
+            value,
+          ) {
+            tags = value;
+            if (mounted) {
+              if (!tags.contains(selectedTag)) {
+                selectedTag = "";
+              }
+              _hasLoaded = true;
+              _applyFilteringAndRefresh();
+            }
+          });
+        })
+        .onError((error, stackTrace) {
+          _logger.severe('Error while loading codes', error, stackTrace);
+        });
   }
 
   void _applyFilteringAndRefresh() {
@@ -1209,14 +1233,14 @@ class _HomePageState extends State<HomePage> {
       _filteredCodes.addAll(accountMatch);
       _filteredCodes.addAll(noteMatch);
     } else if (_isTrashOpen) {
-      _filteredCodes = _allCodes
-              ?.where(
-                (element) => !element.hasError && element.isTrashed,
-              )
+      _filteredCodes =
+          _allCodes
+              ?.where((element) => !element.hasError && element.isTrashed)
               .toList() ??
           [];
     } else {
-      _filteredCodes = _allCodes
+      _filteredCodes =
+          _allCodes
               ?.where(
                 (element) =>
                     !element.hasError &&
@@ -1257,8 +1281,9 @@ class _HomePageState extends State<HomePage> {
         codes.sort((a, b) => compareAsciiLowerCaseNatural(a.issuer, b.issuer));
         break;
       case CodeSortKey.accountName:
-        codes
-            .sort((a, b) => compareAsciiLowerCaseNatural(a.account, b.account));
+        codes.sort(
+          (a, b) => compareAsciiLowerCaseNatural(a.account, b.account),
+        );
         break;
       case CodeSortKey.mostFrequentlyUsed:
         codes.sort((a, b) => b.display.tapCount.compareTo(a.display.tapCount));
@@ -1356,8 +1381,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> navigateToLockScreen() async {
-    final bool shouldShowLockScreen =
-        await LockScreenSettings.instance.shouldShowLockScreen();
+    final bool shouldShowLockScreen = await LockScreenSettings.instance
+        .shouldShowLockScreen();
     if (shouldShowLockScreen) {
       // Manual lock: do not auto-prompt Touch ID; wait for user tap
       await AppLock.of(context)!.showManualLockScreen();
@@ -1382,23 +1407,27 @@ class _HomePageState extends State<HomePage> {
     List<Code> sortCandidate = allCodes
         .where((element) => !element.hasError && !element.isTrashed)
         .toList();
-    sortCandidate
-        .sort((a, b) => a.display.position.compareTo(b.display.position));
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return ReorderCodesPage(codes: sortCandidate);
-        },
-      ),
-    ).then((value) {
-      setState(() {});
-    });
+    sortCandidate.sort(
+      (a, b) => a.display.position.compareTo(b.display.position),
+    );
+    await Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return ReorderCodesPage(codes: sortCandidate);
+            },
+          ),
+        )
+        .then((value) {
+          setState(() {});
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    LockScreenSettings.instance
-        .setLightMode(getEnteColorScheme(context).isLightTheme);
+    LockScreenSettings.instance.setLightMode(
+      getEnteColorScheme(context).isLightTheme,
+    );
     final l10n = context.l10n;
     isCompactMode = PreferenceService.instance.isCompactMode();
 
@@ -1438,10 +1467,7 @@ class _HomePageState extends State<HomePage> {
           child: Scaffold(
             key: scaffoldKey,
             drawerEnableOpenDragGesture: !Platform.isAndroid,
-            drawer: Drawer(
-              width: 428,
-              child: _settingsPage,
-            ),
+            drawer: Drawer(width: 428, child: _settingsPage),
             onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
             body: SafeArea(
               bottom: false,
@@ -1461,18 +1487,18 @@ class _HomePageState extends State<HomePage> {
             ),
             bottomNavigationBar: isSelecting
                 ? (isDesktop && _currentGridColumns > 1
-                    ? _buildDesktopSelectionBottomBar()
-                    : _buildSelectionActionBar())
+                      ? _buildDesktopSelectionBottomBar()
+                      : _buildSelectionActionBar())
                 : null,
             resizeToAvoidBottomInset: false,
             appBar: appBar,
             floatingActionButton: isSelecting
                 ? null
                 : (!_hasLoaded ||
-                        (_allCodes?.isEmpty ?? true) ||
-                        !PreferenceService.instance.hasShownCoachMark()
-                    ? null
-                    : _getFab()),
+                          (_allCodes?.isEmpty ?? true) ||
+                          !PreferenceService.instance.hasShownCoachMark()
+                      ? null
+                      : _getFab()),
           ),
         );
       },
@@ -1662,10 +1688,9 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(width: 8),
                   Text(
                     '${selectedIds.length} ${l10n.selected}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const Spacer(),
                   AnimatedSwitcher(
@@ -1724,7 +1749,8 @@ class _HomePageState extends State<HomePage> {
         final bool showTrashChip = hasTrashedCodes;
         final int itemCount =
             (showAllChip ? 1 : 0) + tags.length + (showTrashChip ? 1 : 0);
-        final bool showAllEmptyHint = showAllChip &&
+        final bool showAllEmptyHint =
+            showAllChip &&
             selectedTag.isEmpty &&
             !_isTrashOpen &&
             _filteredCodes.isEmpty &&
@@ -1740,8 +1766,10 @@ class _HomePageState extends State<HomePage> {
                 height: 48,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 2,
+                  ),
                   separatorBuilder: (context, index) =>
                       const SizedBox(width: 8),
                   itemCount: itemCount,
@@ -1812,7 +1840,8 @@ class _HomePageState extends State<HomePage> {
               child: Builder(
                 builder: (context) {
                   if (showAllEmptyHint) {
-                    final textStyle = Theme.of(context).textTheme.bodyLarge ??
+                    final textStyle =
+                        Theme.of(context).textTheme.bodyLarge ??
                         Theme.of(context).textTheme.bodyMedium ??
                         const TextStyle();
                     return Padding(
@@ -1836,7 +1865,8 @@ class _HomePageState extends State<HomePage> {
                     itemBuilder: ((context, index) {
                       if (index == 0 && anyCodeHasError) {
                         return CodeErrorWidget(
-                          errors: _allCodes
+                          errors:
+                              _allCodes
                                   ?.where((element) => element.hasError)
                                   .toList() ??
                               [],
@@ -1866,7 +1896,9 @@ class _HomePageState extends State<HomePage> {
                       behavior: HitTestBehavior.translucent,
                       onTapUp: (_) {
                         if (_codeDisplayStore
-                            .selectedCodeIds.value.isNotEmpty) {
+                            .selectedCodeIds
+                            .value
+                            .isNotEmpty) {
                           _codeDisplayStore.clearSelection();
                         }
                       },
@@ -1961,7 +1993,7 @@ class _HomePageState extends State<HomePage> {
     bool isAccountConfigured = Configuration.instance.hasConfiguredAccount();
     bool isOfflineModeEnabled =
         Configuration.instance.hasOptedForOfflineMode() &&
-            Configuration.instance.getOfflineSecretKey() != null;
+        Configuration.instance.getOfflineSecretKey() != null;
     if (!(isAccountConfigured || isOfflineModeEnabled) || link == null) {
       return;
     }
@@ -1991,10 +2023,7 @@ class _HomePageState extends State<HomePage> {
         CodeStore.instance.addCode(newCode, shouldSync: false);
         _focusNewCode(newCode);
       } catch (e, s) {
-        showGenericErrorDialog(
-          context: context,
-          error: e,
-        );
+        showGenericErrorDialog(context: context, error: e);
         _logger.severe("error while handling deeplink", e, s);
       }
     }
@@ -2115,10 +2144,7 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: actionButtons,
-    );
+    return Row(mainAxisSize: MainAxisSize.min, children: actionButtons);
   }
 
   Widget _buildSelectionIconButton({
@@ -2142,8 +2168,9 @@ class _HomePageState extends State<HomePage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          customBorder:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          customBorder: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           onTap: onPressed,
           child: Container(
             decoration: BoxDecoration(
@@ -2166,11 +2193,7 @@ class _HomePageState extends State<HomePage> {
         Icon(Icons.push_pin_outlined, size: 24, color: colorScheme.textBase),
         Transform.rotate(
           angle: 0.785398, // 45 degrees in radians
-          child: Container(
-            width: 18,
-            height: 2,
-            color: colorScheme.textBase,
-          ),
+          child: Container(width: 18, height: 2, color: colorScheme.textBase),
         ),
       ],
     );
@@ -2187,9 +2210,7 @@ class _HomePageState extends State<HomePage> {
         : colorScheme.textMuted.withValues(alpha: 0.6);
     return Material(
       shape: StadiumBorder(
-        side: BorderSide(
-          color: colorScheme.strokeMuted.withValues(alpha: 0.5),
-        ),
+        side: BorderSide(color: colorScheme.strokeMuted.withValues(alpha: 0.5)),
       ),
       clipBehavior: Clip.antiAlias,
       color: colorScheme.backgroundElevated2,
@@ -2205,11 +2226,7 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 12, color: textColor),
               ),
               const SizedBox(width: 6),
-              Icon(
-                Icons.done_all,
-                size: 18,
-                color: textColor,
-              ),
+              Icon(Icons.done_all, size: 18, color: textColor),
             ],
           ),
         ),
@@ -2222,8 +2239,9 @@ class _HomePageState extends State<HomePage> {
       return null;
     }
     final String key = selectedIds.first;
-    final Code? code =
-        _allCodes?.firstWhereOrNull((element) => element.selectionKey == key);
+    final Code? code = _allCodes?.firstWhereOrNull(
+      (element) => element.selectionKey == key,
+    );
     if (code == null || code.note.trim().isEmpty) {
       return null;
     }
@@ -2241,8 +2259,9 @@ class _HomePageState extends State<HomePage> {
     final colorScheme = getEnteColorScheme(context);
     final theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    final Color backgroundColor =
-        isDark ? const Color(0x29A75CFF) : const Color(0xFFFBF8FF);
+    final Color backgroundColor = isDark
+        ? const Color(0x29A75CFF)
+        : const Color(0xFFFBF8FF);
     final Color textColor = colorScheme.textBase;
     final double maxWidth = isDesktop ? 420 : 360;
     final Widget chip = Material(
@@ -2275,11 +2294,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    return Align(
-      alignment: Alignment.center,
-      heightFactor: 1,
-      child: chip,
-    );
+    return Align(alignment: Alignment.center, heightFactor: 1, child: chip);
   }
 
   void _onSelectedNoteTapped(String note) {
@@ -2344,9 +2359,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _handleMultiSelectAction(
-    MultiSelectActionRequestedEvent event,
-  ) {
+  void _handleMultiSelectAction(MultiSelectActionRequestedEvent event) {
     switch (event.action) {
       case MultiSelectAction.pinToggle:
         unawaited(_onPinSelectedPressed());

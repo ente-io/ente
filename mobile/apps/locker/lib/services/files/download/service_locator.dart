@@ -29,8 +29,6 @@ class ServiceLocator {
 
 DownloadManager? _downloadManager;
 DownloadManager get downloadManager {
-  _downloadManager ??= DownloadManager(
-    ServiceLocator.instance.nonEnteDio,
-  );
+  _downloadManager ??= DownloadManager(ServiceLocator.instance.nonEnteDio);
   return _downloadManager!;
 }

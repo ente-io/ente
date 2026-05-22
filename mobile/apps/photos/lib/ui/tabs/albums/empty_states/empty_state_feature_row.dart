@@ -28,12 +28,7 @@ class EmptyStateFeatureRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: textTheme.small,
-          ),
-        ),
+        Expanded(child: Text(label, style: textTheme.small)),
       ],
     );
   }

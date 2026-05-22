@@ -15,10 +15,7 @@ Future<T?> showEmailActionSheet<T>(
     headerSpacing: 20,
     padding: const EdgeInsets.all(16),
     backgroundColor: getEnteColorScheme(context).backgroundColour,
-    child: EmailActionSheetContent(
-      message: message,
-      buttons: buttons,
-    ),
+    child: EmailActionSheetContent(message: message, buttons: buttons),
   );
 }
 

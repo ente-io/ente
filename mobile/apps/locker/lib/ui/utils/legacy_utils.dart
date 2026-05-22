@@ -37,10 +37,7 @@ Future<void> openLegacyPage(BuildContext context) async {
   );
 }
 
-Future<bool> _authenticateForLegacyFlow(
-  BuildContext context,
-  String reason,
-) {
+Future<bool> _authenticateForLegacyFlow(BuildContext context, String reason) {
   return LocalAuthenticationService.instance.requestLocalAuthentication(
     context,
     reason,

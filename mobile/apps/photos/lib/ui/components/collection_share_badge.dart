@@ -97,10 +97,7 @@ class CollectionArchivedBadge extends StatelessWidget {
 class CollectionShareBadge extends StatelessWidget {
   final bool isOutgoing;
 
-  const CollectionShareBadge({
-    super.key,
-    required this.isOutgoing,
-  });
+  const CollectionShareBadge({super.key, required this.isOutgoing});
 
   @override
   Widget build(BuildContext context) {
@@ -164,10 +161,7 @@ class CollectionUnSyncedBadge extends StatelessWidget {
 
   final bool showBorder;
 
-  const CollectionUnSyncedBadge({
-    super.key,
-    this.showBorder = false,
-  });
+  const CollectionUnSyncedBadge({super.key, this.showBorder = false});
 
   @override
   Widget build(BuildContext context) {

@@ -43,10 +43,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     _volatilePassword = Configuration.instance.getVolatilePassword();
     if (_volatilePassword != null) {
       _passwordController.text = _volatilePassword!;
-      Future.delayed(
-        Duration.zero,
-        () => verifyPassword(_volatilePassword!),
-      );
+      Future.delayed(Duration.zero, () => verifyPassword(_volatilePassword!));
     }
   }
 
@@ -104,8 +101,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   Future<void> verifyPassword(String password) async {
     FocusScope.of(context).unfocus();
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       final kek = await Configuration.instance.decryptSecretsAndGetKeyEncKey(
@@ -203,9 +202,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                 // password
                 visible: false,
                 child: TextFormField(
-                  autofillHints: const [
-                    AutofillHints.email,
-                  ],
+                  autofillHints: const [AutofillHints.email],
                   autocorrect: false,
                   keyboardType: TextInputType.emailAddress,
                   initialValue: email,

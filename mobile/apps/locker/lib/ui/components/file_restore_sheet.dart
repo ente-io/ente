@@ -10,9 +10,7 @@ import "package:locker/ui/components/gradient_button.dart";
 class FileRestoreSheetResult {
   final List<Collection> selectedCollections;
 
-  const FileRestoreSheetResult({
-    required this.selectedCollections,
-  });
+  const FileRestoreSheetResult({required this.selectedCollections});
 }
 
 class FileRestoreSheet extends StatefulWidget {
@@ -61,16 +59,13 @@ class _FileRestoreSheetState extends State<FileRestoreSheet> {
         .toList();
 
     if (selectedCollections.isEmpty) {
-      showToast(
-        context,
-        context.l10n.pleaseSelectAtLeastOneCollection,
-      );
+      showToast(context, context.l10n.pleaseSelectAtLeastOneCollection);
       return;
     }
 
-    Navigator.of(context).pop(
-      FileRestoreSheetResult(selectedCollections: selectedCollections),
-    );
+    Navigator.of(
+      context,
+    ).pop(FileRestoreSheetResult(selectedCollections: selectedCollections));
   }
 
   @override
@@ -90,10 +85,7 @@ class _FileRestoreSheetState extends State<FileRestoreSheet> {
         const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
-          child: GradientButton(
-            onTap: _onRestore,
-            text: context.l10n.restore,
-          ),
+          child: GradientButton(onTap: _onRestore, text: context.l10n.restore),
         ),
       ],
     );
@@ -109,9 +101,6 @@ Future<FileRestoreSheetResult?> showFileRestoreSheet(
     context,
     title: context.l10n.restore,
     headerSpacing: 20,
-    child: FileRestoreSheet(
-      file: file,
-      collections: collections,
-    ),
+    child: FileRestoreSheet(file: file, collections: collections),
   );
 }

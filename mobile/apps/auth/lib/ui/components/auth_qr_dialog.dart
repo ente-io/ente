@@ -46,8 +46,9 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
       if (boundary == null) return;
 
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
       if (byteData == null) return;
 
       final Uint8List pngBytes = byteData.buffer.asUint8List();
@@ -56,8 +57,9 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
       await file.writeAsBytes(pngBytes);
 
       final box = context.findRenderObject() as RenderBox?;
-      final shareOrigin =
-          box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+      final shareOrigin = box != null
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
 
       await SharePlus.instance.share(
         ShareParams(
@@ -82,10 +84,12 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
     // QR text color - always black for scanability
     const qrTextColor = textBaseLight;
 
-    final dialogBackgroundColor =
-        isDark ? const Color(0xFF212121) : theme.colorScheme.surface;
-    final closeBgColor =
-        isDark ? const Color(0xFF292929) : const Color(0xFFF5F5F7);
+    final dialogBackgroundColor = isDark
+        ? const Color(0xFF212121)
+        : theme.colorScheme.surface;
+    final closeBgColor = isDark
+        ? const Color(0xFF292929)
+        : const Color(0xFFF5F5F7);
     final closeIconColor = isDark ? theme.colorScheme.onSurface : qrTextColor;
 
     final dialogTitleStyle = theme.textTheme.titleLarge?.copyWith(
@@ -100,9 +104,7 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
     );
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       shadowColor: isDark
           ? Colors.black.withValues(alpha: 0.7)
           : Colors.grey.withValues(alpha: 0.5),
@@ -156,9 +158,7 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                     borderRadius: BorderRadius.circular(22),
                     child: Container(
                       width: double.infinity,
-                      decoration: const BoxDecoration(
-                        color: qrBoxColor,
-                      ),
+                      decoration: const BoxDecoration(color: qrBoxColor),
                       child: Stack(
                         clipBehavior: Clip.none,
                         alignment: Alignment.center,
@@ -210,8 +210,9 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                                     child: Text(
                                       widget.subtitle!,
                                       style: enteTextTheme.small.copyWith(
-                                        color:
-                                            qrTextColor.withValues(alpha: 0.7),
+                                        color: qrTextColor.withValues(
+                                          alpha: 0.7,
+                                        ),
                                         fontSize: 14,
                                       ),
                                       textAlign: TextAlign.center,

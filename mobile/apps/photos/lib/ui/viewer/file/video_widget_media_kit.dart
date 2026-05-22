@@ -73,7 +73,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
   StreamSubscription<DownloadTask>? _downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
-      _captionUpdatedSubscription;
+  _captionUpdatedSubscription;
   final _transformationController = TransformationController();
   bool _isZooming = false;
 
@@ -94,12 +94,14 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       player.pause();
     });
-    resumeVideoSubscription =
-        Bus.instance.on<ResumeVideoEvent>().listen((event) {
+    resumeVideoSubscription = Bus.instance.on<ResumeVideoEvent>().listen((
+      event,
+    ) {
       player.play();
     });
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
+    _guestViewEventSubscription = Bus.instance.on<GuestViewEvent>().listen((
+      event,
+    ) {
       setState(() {
         _isGuestView = event.isGuestView;
       });
@@ -108,34 +110,38 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
       _downloadTaskSubscription = downloadManager
           .watchDownload(widget.file.uploadedFileID!)
           .listen((event) {
-        if (mounted) {
-          setState(() {
-            _progressNotifier.value = event.progress;
+            if (mounted) {
+              setState(() {
+                _progressNotifier.value = event.progress;
+              });
+            }
           });
-        }
-      });
     }
 
-    _streamSwitchedSubscription =
-        Bus.instance.on<StreamSwitchedEvent>().listen((event) {
-      if (event.type != PlayerType.mediaKit || !mounted) return;
-      if (event.selectedPreview) {
-        loadPreview();
-      } else {
-        loadOriginal();
-      }
-    });
-
-    _captionUpdatedSubscription =
-        Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
-      if (event.fileGeneratedID == widget.file.generatedID) {
-        if (mounted) {
-          setState(() {});
+    _streamSwitchedSubscription = Bus.instance.on<StreamSwitchedEvent>().listen(
+      (event) {
+        if (event.type != PlayerType.mediaKit || !mounted) return;
+        if (event.selectedPreview) {
+          loadPreview();
+        } else {
+          loadOriginal();
         }
-      }
-    });
-    EnteWakeLockService.instance
-        .updateWakeLock(enable: true, wakeLockFor: WakeLockFor.videoPlayback);
+      },
+    );
+
+    _captionUpdatedSubscription = Bus.instance
+        .on<FileCaptionUpdatedEvent>()
+        .listen((event) {
+          if (event.fileGeneratedID == widget.file.generatedID) {
+            if (mounted) {
+              setState(() {});
+            }
+          }
+        });
+    EnteWakeLockService.instance.updateWakeLock(
+      enable: true,
+      wakeLockFor: WakeLockFor.videoPlayback,
+    );
   }
 
   void loadPreview() {
@@ -270,10 +276,9 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
                               Center(
                                 child: Text(
                                   "${(progress * 100).toStringAsFixed(0)}%",
-                                  style:
-                                      getEnteTextTheme(context).tiny.copyWith(
-                                            color: textBaseDark,
-                                          ),
+                                  style: getEnteTextTheme(
+                                    context,
+                                  ).tiny.copyWith(color: textBaseDark),
                                 ),
                               ),
                             ],
@@ -287,39 +292,41 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
   void _loadNetworkVideo() {
     getFileFromServer(
-      widget.file,
-      progressCallback: (count, total) {
-        if (!mounted) {
-          return;
-        }
-        _progressNotifier.value = count / (widget.file.fileSize ?? total);
-        if (_progressNotifier.value == 1) {
-          if (mounted) {
-            showShortToast(
-              context,
-              AppLocalizations.of(context).decryptingVideo,
-            );
+          widget.file,
+          progressCallback: (count, total) {
+            if (!mounted) {
+              return;
+            }
+            _progressNotifier.value = count / (widget.file.fileSize ?? total);
+            if (_progressNotifier.value == 1) {
+              if (mounted) {
+                showShortToast(
+                  context,
+                  AppLocalizations.of(context).decryptingVideo,
+                );
+              }
+            }
+          },
+        )
+        .then((file) {
+          if (file != null) {
+            _setVideoController(file.path);
           }
-        }
-      },
-    ).then((file) {
-      if (file != null) {
-        _setVideoController(file.path);
-      }
-    }).onError((error, stackTrace) {
-      showErrorDialog(
-        context,
-        AppLocalizations.of(context).error,
-        AppLocalizations.of(context).failedToDownloadVideo,
-      );
-    });
+        })
+        .onError((error, stackTrace) {
+          showErrorDialog(
+            context,
+            AppLocalizations.of(context).error,
+            AppLocalizations.of(context).failedToDownloadVideo,
+          );
+        });
   }
 
   void _setFileSizeIfNull() {
     if (widget.file.fileSize == null && widget.file.canEditMetaInfo) {
-      FilesService.instance
-          .getFileSize(widget.file.uploadedFileID!)
-          .then((value) {
+      FilesService.instance.getFileSize(widget.file.uploadedFileID!).then((
+        value,
+      ) {
         widget.file.fileSize = value;
         if (mounted) {
           setState(() {});
@@ -345,9 +352,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
       if (duration == 0) {
         duration = 10;
       }
-      widget.onFinalFileLoad?.call(
-        memoryDuration: duration,
-      );
+      widget.onFinalFileLoad?.call(memoryDuration: duration);
     }
   }
 }

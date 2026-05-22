@@ -58,9 +58,7 @@ class MLModelDownloadService {
 
   void triggerModelsDownload({required bool onlyIndexingModels}) {
     if (!areModelsDownloaded(onlyIndexingModels: onlyIndexingModels)) {
-      unawaited(
-        ensureModelsDownloaded(onlyIndexingModels: onlyIndexingModels),
-      );
+      unawaited(ensureModelsDownloaded(onlyIndexingModels: onlyIndexingModels));
     }
   }
 
@@ -180,19 +178,19 @@ class MLModelDownloadService {
     _logger.info(
       "Listening for high bandwidth connectivity to retry ML model download",
     );
-    _modelDownloadRetrySubscription =
-        Connectivity().onConnectivityChanged.listen(
-      (connections) {
-        unawaited(_retryModelDownloadIfHighBandwidth(connections));
-      },
-      onError: (Object e, StackTrace s) {
-        _logger.warning(
-          "Connectivity listener for ML model download retry failed",
-          e,
-          s,
+    _modelDownloadRetrySubscription = Connectivity().onConnectivityChanged
+        .listen(
+          (connections) {
+            unawaited(_retryModelDownloadIfHighBandwidth(connections));
+          },
+          onError: (Object e, StackTrace s) {
+            _logger.warning(
+              "Connectivity listener for ML model download retry failed",
+              e,
+              s,
+            );
+          },
         );
-      },
-    );
   }
 
   Future<void> _retryModelDownloadIfHighBandwidth(

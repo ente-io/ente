@@ -28,9 +28,7 @@ class ContactsSection extends StatefulWidget {
 class _ContactsSectionState extends State<ContactsSection> {
   late List<GenericSearchResult> _contactSearchResults;
   final streamSubscriptions = <StreamSubscription>[];
-  final _debouncer = Debouncer(
-    const Duration(milliseconds: 1500),
-  );
+  final _debouncer = Debouncer(const Duration(milliseconds: 1500));
 
   @override
   void initState() {
@@ -109,9 +107,7 @@ class _ContactsSectionState extends State<ContactsSection> {
         ..._contactSearchResults.map(
           (contactSearchResult) => ContactRecommendation(
             contactSearchResult,
-            key: ValueKey(
-              contactSearchResult.name(),
-            ),
+            key: ValueKey(contactSearchResult.name()),
           ),
         ),
         const ContactCTA(),
@@ -171,10 +167,7 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
           if (widget.contactSearchResult.onResultTap != null) {
             widget.contactSearchResult.onResultTap!(context);
           } else {
-            routeToPage(
-              context,
-              ContactResultPage(widget.contactSearchResult),
-            );
+            routeToPage(context, ContactResultPage(widget.contactSearchResult));
           }
         },
         child: ConstrainedBox(

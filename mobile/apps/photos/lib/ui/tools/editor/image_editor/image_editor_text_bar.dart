@@ -46,9 +46,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
       builder: (context, constraints) {
         return Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFunctions(constraints),
-          ],
+          children: [_buildFunctions(constraints)],
         );
       },
     );
@@ -62,10 +60,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         duration: fadeInDuration,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            _buildMainActionButtons(),
-            _buildHelperWidget(),
-          ],
+          children: <Widget>[_buildMainActionButtons(), _buildHelperWidget()],
         ),
       ),
     );
@@ -122,16 +117,16 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
       switchOutCurve: Curves.easeInOut,
       child: switch (selectedActionIndex) {
         0 => ImageEditorColorPicker(
-            value: colorSliderValue,
-            onChanged: (value) {
-              setState(() {
-                colorSliderValue = value;
-              });
-              final hue = value * 360;
-              final color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
-              widget.editor.primaryColor = color;
-            },
-          ),
+          value: colorSliderValue,
+          onChanged: (value) {
+            setState(() {
+              colorSliderValue = value;
+            });
+            final hue = value * 360;
+            final color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
+            widget.editor.primaryColor = color;
+          },
+        ),
         1 => _FontPickerWidget(editor: widget.editor),
         2 => _BackgroundPickerWidget(editor: widget.editor),
         3 => _AlignPickerWidget(editor: widget.editor),
@@ -155,10 +150,9 @@ class _FontPickerWidget extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: editor.textEditorConfigs.customTextStyles!
-          .asMap()
-          .entries
-          .map((entry) {
+      children: editor.textEditorConfigs.customTextStyles!.asMap().entries.map((
+        entry,
+      ) {
         final item = entry.value;
         final selected = editor.selectedTextStyle;
         final bool isSelected = selected.hashCode == item.hashCode;
@@ -208,8 +202,9 @@ class _BackgroundPickerWidget extends StatelessWidget {
     final backgroundStyles = {
       LayerBackgroundMode.background: {
         'text': 'Aa',
-        'selectedBackgroundColor':
-            isLightMode ? colorScheme.fillFaint : Colors.white,
+        'selectedBackgroundColor': isLightMode
+            ? colorScheme.fillFaint
+            : Colors.white,
         'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.white,
@@ -218,8 +213,9 @@ class _BackgroundPickerWidget extends StatelessWidget {
       },
       LayerBackgroundMode.backgroundAndColor: {
         'text': 'Aa',
-        'selectedBackgroundColor':
-            isLightMode ? colorScheme.fillFaint : Colors.white,
+        'selectedBackgroundColor': isLightMode
+            ? colorScheme.fillFaint
+            : Colors.white,
         'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
@@ -228,8 +224,9 @@ class _BackgroundPickerWidget extends StatelessWidget {
       },
       LayerBackgroundMode.backgroundAndColorWithOpacity: {
         'text': 'Aa',
-        'selectedBackgroundColor':
-            isLightMode ? colorScheme.fillFaint : Colors.white,
+        'selectedBackgroundColor': isLightMode
+            ? colorScheme.fillFaint
+            : Colors.white,
         'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
@@ -240,11 +237,13 @@ class _BackgroundPickerWidget extends StatelessWidget {
       },
       LayerBackgroundMode.onlyColor: {
         'text': 'Aa',
-        'selectedBackgroundColor':
-            isLightMode ? colorScheme.fillFaint : Colors.black,
+        'selectedBackgroundColor': isLightMode
+            ? colorScheme.fillFaint
+            : Colors.black,
         'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
-        'border':
-            isLightMode ? null : Border.all(color: Colors.white, width: 2),
+        'border': isLightMode
+            ? null
+            : Border.all(color: Colors.white, width: 2),
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.white,
         'innerBackgroundColor': Colors.white.withValues(alpha: 0.6),
@@ -327,11 +326,11 @@ class _AlignPickerWidget extends StatelessWidget {
       (TextAlign.left, "assets/image-editor/image-editor-text-align-left.svg"),
       (
         TextAlign.center,
-        "assets/image-editor/image-editor-text-align-center.svg"
+        "assets/image-editor/image-editor-text-align-center.svg",
       ),
       (
         TextAlign.right,
-        "assets/image-editor/image-editor-text-align-right.svg"
+        "assets/image-editor/image-editor-text-align-right.svg",
       ),
     ];
 

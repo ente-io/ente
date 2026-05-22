@@ -20,8 +20,9 @@ class CodeSuccessScreen extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final cardColor =
-        isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
+    final cardColor = isDarkMode
+        ? const Color(0xFF212121)
+        : const Color(0xFFFFFFFF);
     const greenColor = Color(0xFF08C225);
 
     return Scaffold(
@@ -161,8 +162,9 @@ class CodeSuccessScreen extends StatelessWidget {
                               ),
                               child: Text(
                                 referralView.code,
-                                style:
-                                    textTheme.small.copyWith(color: greenColor),
+                                style: textTheme.small.copyWith(
+                                  color: greenColor,
+                                ),
                               ),
                             ),
                           ),

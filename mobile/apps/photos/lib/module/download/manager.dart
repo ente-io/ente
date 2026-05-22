@@ -60,12 +60,9 @@ class DownloadManager {
 
     // Get or create task
     final existingTask = _tasks[fileId];
-    final task = existingTask ??
-        DownloadTask(
-          id: fileId,
-          filename: filename,
-          totalBytes: totalBytes,
-        );
+    final task =
+        existingTask ??
+        DownloadTask(id: fileId, filename: filename, totalBytes: totalBytes);
 
     // Store task in memory
     _tasks[fileId] = task;
@@ -193,8 +190,11 @@ class DownloadManager {
 
       // Check existing chunks and calculate progress
       final totalChunks = (task.totalBytes / downloadChunkSize).ceil();
-      final existingChunks =
-          await _validateExistingChunks(basePath, task.totalBytes, totalChunks);
+      final existingChunks = await _validateExistingChunks(
+        basePath,
+        task.totalBytes,
+        totalChunks,
+      );
 
       task = task.copyWith(
         bytesDownloaded: _calculateDownloadedBytes(
@@ -342,9 +342,7 @@ class DownloadManager {
       downloadUrl,
       chunkPath,
       options: Options(
-        headers: {
-          HttpHeaders.rangeHeader: "bytes=$startByte-$endByte",
-        },
+        headers: {HttpHeaders.rangeHeader: "bytes=$startByte-$endByte"},
       ),
       cancelToken: cancelToken,
       onReceiveProgress: (received, total) async {
@@ -371,9 +369,7 @@ class DownloadManager {
       options: Options(
         followRedirects: false,
         receiveDataWhenStatusError: false,
-        headers: {
-          "X-Auth-Token": Configuration.instance.getToken(),
-        },
+        headers: {"X-Auth-Token": Configuration.instance.getToken()},
         validateStatus: (status) {
           return status != null &&
               status >= HttpStatus.multipleChoices &&

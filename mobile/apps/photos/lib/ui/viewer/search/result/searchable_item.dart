@@ -50,18 +50,12 @@ class SearchableItemWidget extends StatelessWidget {
           if (searchResult.type() == ResultType.shared) {
             routeToPage(
               context,
-              ContactResultPage(
-                searchResult,
-                tagPrefix: additionalPrefix,
-              ),
+              ContactResultPage(searchResult, tagPrefix: additionalPrefix),
             );
           } else {
             routeToPage(
               context,
-              SearchResultPage(
-                searchResult,
-                tagPrefix: additionalPrefix,
-              ),
+              SearchResultPage(searchResult, tagPrefix: additionalPrefix),
             );
           }
         }
@@ -139,16 +133,10 @@ class SearchableItemPlaceholder extends StatelessWidget {
         ),
         child: Container(
           color: colorScheme.fillFaint,
-          child: Icon(
-            sectionType.getCTAIcon(),
-            color: colorScheme.strokeMuted,
-          ),
+          child: Icon(sectionType.getCTAIcon(), color: colorScheme.strokeMuted),
         ),
       ),
-      title: Text(
-        sectionType.getCTAText(context),
-        style: textTheme.body,
-      ),
+      title: Text(sectionType.getCTAText(context), style: textTheme.body),
     );
   }
 }

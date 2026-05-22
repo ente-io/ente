@@ -156,7 +156,8 @@ class _DatePickerFieldState extends State<DatePickerField> {
         ),
         fillColor: getEnteColorScheme(context).fillFaint,
         filled: true,
-        hintText: widget.hintText ??
+        hintText:
+            widget.hintText ??
             "Enter date (DD/MM/YYYY)${widget.isRequired ? '' : ' (optional)'}",
         hintStyle: getEnteTextTheme(context).bodyFaint,
         contentPadding: const EdgeInsets.symmetric(

@@ -77,12 +77,12 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
                                 widget.labelText!,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
-                                style:
-                                    getEnteTextTheme(context).bodyBold.copyWith(
-                                          color: isDisabled
-                                              ? colorScheme.textFaint
-                                              : colorScheme.blurTextBase,
-                                        ),
+                                style: getEnteTextTheme(context).bodyBold
+                                    .copyWith(
+                                      color: isDisabled
+                                          ? colorScheme.textFaint
+                                          : colorScheme.blurTextBase,
+                                    ),
                               ),
                             ),
                           ],

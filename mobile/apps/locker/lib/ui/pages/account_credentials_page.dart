@@ -216,10 +216,7 @@ class _AccountCredentialsPageState
           value: notesText,
           maxLines: 6,
           lineHeight: 1.5,
-          onCopy: () => _copyValue(
-            notesText,
-            context.l10n.credentialNotes,
-          ),
+          onCopy: () => _copyValue(notesText, context.l10n.credentialNotes),
         ),
       ]);
     }
@@ -239,9 +236,6 @@ class _AccountCredentialsPageState
     }
     Clipboard.setData(ClipboardData(text: value));
     if (!mounted) return;
-    showToast(
-      context,
-      context.l10n.copiedToClipboard(label),
-    );
+    showToast(context, context.l10n.copiedToClipboard(label));
   }
 }

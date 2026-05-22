@@ -9,9 +9,7 @@ import "package:locker/services/configuration.dart";
 import "package:locker/states/user_details_state.dart";
 
 class UsageCardWidget extends StatelessWidget {
-  const UsageCardWidget({
-    super.key,
-  });
+  const UsageCardWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +35,7 @@ class UsageCardWidget extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(
-                painter: _DotsPainter(),
-                size: Size.infinite,
-              ),
+              child: CustomPaint(painter: _DotsPainter(), size: Size.infinite),
             ),
             Padding(
               padding: const EdgeInsets.all(16),
@@ -90,10 +85,7 @@ class _UsageContent extends StatelessWidget {
   final UserDetails? userDetails;
   final bool isLoading;
 
-  const _UsageContent({
-    required this.userDetails,
-    required this.isLoading,
-  });
+  const _UsageContent({required this.userDetails, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
@@ -107,11 +99,12 @@ class _UsageContent extends StatelessWidget {
 
     final showFamilyBreakup = _shouldShowFamilyBreakup();
 
-    final userProgress =
-        isLoading ? 0.0 : (userFileCount / maxFileCount).clamp(0.0, 1.0);
+    final userProgress = isLoading
+        ? 0.0
+        : (userFileCount / maxFileCount).clamp(0.0, 1.0);
     final familyProgress = showFamilyBreakup && !isLoading
         ? (userDetails!.lockerFamilyUsage!.familyFileCount / maxFileCount)
-            .clamp(0.0, 1.0)
+              .clamp(0.0, 1.0)
         : 0.0;
 
     final formattedUsed = NumberFormat().format(userFileCount);

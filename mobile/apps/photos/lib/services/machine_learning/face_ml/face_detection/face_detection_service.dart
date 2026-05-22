@@ -68,8 +68,9 @@ class FaceDetectionService extends MlModel {
       rawRgbaBytes,
     );
     final preprocessingTime = DateTime.now();
-    final preprocessingMs =
-        preprocessingTime.difference(startTime).inMilliseconds;
+    final preprocessingMs = preprocessingTime
+        .difference(startTime)
+        .inMilliseconds;
 
     // Run inference
     List<List<List<double>>>? nestedResults = [];
@@ -77,14 +78,12 @@ class FaceDetectionService extends MlModel {
       if (MlModel.usePlatformPlugin) {
         nestedResults = await _runPlatformPluginPredict(inputImageList);
       } else {
-        nestedResults = _runFFIBasedPredict(
-          sessionAddress,
-          inputImageList,
-        );
+        nestedResults = _runFFIBasedPredict(sessionAddress, inputImageList);
       }
       final inferenceTime = DateTime.now();
-      final inferenceMs =
-          inferenceTime.difference(preprocessingTime).inMilliseconds;
+      final inferenceMs = inferenceTime
+          .difference(preprocessingTime)
+          .inMilliseconds;
       _logger.info(
         'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)',
       );
@@ -97,8 +96,10 @@ class FaceDetectionService extends MlModel {
       throw YOLOFaceInterpreterRunException();
     }
     try {
-      final relativeDetections =
-          _yoloPostProcessOutputs(nestedResults!, scaledSize);
+      final relativeDetections = _yoloPostProcessOutputs(
+        nestedResults!,
+        scaledSize,
+      );
       return relativeDetections;
     } catch (e, s) {
       _logger.severe('Error while post processing', e, s);
@@ -110,12 +111,7 @@ class FaceDetectionService extends MlModel {
     int sessionAddress,
     Float32List inputImageList,
   ) {
-    const inputShape = [
-      1,
-      3,
-      kInputHeight,
-      kInputWidth,
-    ];
+    const inputShape = [1, 3, kInputHeight, kInputWidth];
     final inputOrt = OrtValueTensor.createTensorWithDataList(
       inputImageList,
       inputShape,
@@ -139,10 +135,7 @@ class FaceDetectionService extends MlModel {
     Float32List inputImageList,
   ) async {
     final OnnxDart plugin = OnnxDart();
-    final result = await plugin.predict(
-      inputImageList,
-      _modelName,
-    );
+    final result = await plugin.predict(inputImageList, _modelName);
 
     final int resultLength = result!.length;
     assert(resultLength % 25200 * 16 == 0);
@@ -175,10 +168,7 @@ class FaceDetectionService extends MlModel {
     // Account for the fact that the aspect ratio was maintained
     for (final faceDetection in relativeDetections) {
       faceDetection.correctForMaintainedAspectRatio(
-        const Dimensions(
-          width: kInputWidth,
-          height: kInputHeight,
-        ),
+        const Dimensions(width: kInputWidth, height: kInputHeight),
         scaledSize,
       );
     }
@@ -237,26 +227,11 @@ List<FaceDetectionRelative> _yoloOnnxFilterExtractDetections(
 
     // Get the keypoints coordinates in format [x, y]
     final allKeypoints = <List<double>>[
-      [
-        rawDetection[5] / inputWidth,
-        rawDetection[6] / inputHeight,
-      ],
-      [
-        rawDetection[7] / inputWidth,
-        rawDetection[8] / inputHeight,
-      ],
-      [
-        rawDetection[9] / inputWidth,
-        rawDetection[10] / inputHeight,
-      ],
-      [
-        rawDetection[11] / inputWidth,
-        rawDetection[12] / inputHeight,
-      ],
-      [
-        rawDetection[13] / inputWidth,
-        rawDetection[14] / inputHeight,
-      ],
+      [rawDetection[5] / inputWidth, rawDetection[6] / inputHeight],
+      [rawDetection[7] / inputWidth, rawDetection[8] / inputHeight],
+      [rawDetection[9] / inputWidth, rawDetection[10] / inputHeight],
+      [rawDetection[11] / inputWidth, rawDetection[12] / inputHeight],
+      [rawDetection[13] / inputWidth, rawDetection[14] / inputHeight],
     ];
 
     // Get the score

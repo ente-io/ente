@@ -78,10 +78,7 @@ bool _stopHearBeat = false;
 bool _isRustInitialized = false;
 Future<void>? _rustInitFuture;
 
-enum ForegroundStartupMode {
-  normal,
-  picker,
-}
+enum ForegroundStartupMode { normal, picker }
 
 void main() async {
   debugRepaintRainbowEnabled = false;
@@ -639,24 +636,21 @@ Future<void> _handleBackgroundPush(Object message) async {
     }
   } else {
     // App is dead or FG is not active
-    runWithLogs(
-      () async {
-        _logger.info("Background push received, no active foreground");
+    runWithLogs(() async {
+      _logger.info("Background push received, no active foreground");
 
-        // Mark BG as active before starting
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(
-          kLastBGTaskHeartBeatTime,
-          DateTime.now().microsecondsSinceEpoch,
-        );
+      // Mark BG as active before starting
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(
+        kLastBGTaskHeartBeatTime,
+        DateTime.now().microsecondsSinceEpoch,
+      );
 
-        await _init(true, via: 'firebasePush');
-        if (PushService.shouldSync(message)) {
-          await _sync('firebaseBgSyncNoActiveProcess');
-        }
-      },
-      prefix: "[fbg]",
-    ).ignore();
+      await _init(true, via: 'firebasePush');
+      if (PushService.shouldSync(message)) {
+        await _sync('firebaseBgSyncNoActiveProcess');
+      }
+    }, prefix: "[fbg]").ignore();
   }
 }
 

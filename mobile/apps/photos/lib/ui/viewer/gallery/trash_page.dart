@@ -47,15 +47,13 @@ class TrashPage extends StatelessWidget {
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
-            (event) =>
-                event.updatedFiles.firstWhereOrNull(
-                  (element) => element.uploadedFileID != null,
-                ) !=
-                null,
-          ),
-      forceReloadEvents: [
-        Bus.instance.on<ForceReloadTrashPageEvent>(),
-      ],
+        (event) =>
+            event.updatedFiles.firstWhereOrNull(
+              (element) => element.uploadedFileID != null,
+            ) !=
+            null,
+      ),
+      forceReloadEvents: [Bus.instance.on<ForceReloadTrashPageEvent>()],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       header: _headerWidget(),
@@ -79,9 +77,7 @@ class TrashPage extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               children: [
                 gallery,
-                const BottomShadowWidget(
-                  offsetDy: 20,
-                ),
+                const BottomShadowWidget(offsetDy: 20),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
@@ -116,10 +112,12 @@ class TrashPage extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              AppLocalizations.of(context)
-                  .itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion,
-              style:
-                  Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 16),
+              AppLocalizations.of(
+                context,
+              ).itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(fontSize: 16),
             ),
           );
         } else {
@@ -158,8 +156,8 @@ class BottomButtonsWidget extends StatelessWidget {
                     child: Text(
                       AppLocalizations.of(context).deleteAll,
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            color: const Color.fromRGBO(255, 101, 101, 1),
-                          ),
+                        color: const Color.fromRGBO(255, 101, 101, 1),
+                      ),
                     ),
                   ),
                 ),

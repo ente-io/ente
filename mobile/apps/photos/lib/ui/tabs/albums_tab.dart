@@ -161,9 +161,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     if (oldWidget.isSearchActiveNotifier == widget.isSearchActiveNotifier) {
       return;
     }
-    oldWidget.isSearchActiveNotifier?.removeListener(
-      _handleSearchStateChanged,
-    );
+    oldWidget.isSearchActiveNotifier?.removeListener(_handleSearchStateChanged);
     widget.isSearchActiveNotifier?.addListener(_handleSearchStateChanged);
     _syncSearchNotifier(_isSearchActive);
   }
@@ -271,10 +269,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     required Widget emptyState,
   }) {
     if (collections.isEmpty && _searchQuery.trim().isEmpty) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: emptyState,
-      );
+      return SliverFillRemaining(hasScrollBody: false, child: emptyState);
     }
 
     return CollectionsFlexiGridViewWidget(
@@ -627,9 +622,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     final albumsOptionsButton = IconButtonComponent(
       variant: IconButtonComponentVariant.primary,
       shouldSurfaceExecutionStates: false,
-      icon: const HugeIcon(
-        icon: HugeIcons.strokeRoundedFilterHorizontal,
-      ),
+      icon: const HugeIcon(icon: HugeIcons.strokeRoundedFilterHorizontal),
       onTapDown: (details) => unawaited(_showAlbumsOptionsMenu(details)),
     );
     return Stack(
@@ -821,16 +814,14 @@ class _AlbumsTabState extends State<AlbumsTab>
               ),
               Expanded(
                 child: AnimatedBuilder(
-                  animation: Listenable.merge(
-                    [
-                      _filter,
-                      _enteCollections,
-                      _sharedCollections,
-                      _viewType,
-                      _sortKey,
-                      _sortDirection,
-                    ],
-                  ),
+                  animation: Listenable.merge([
+                    _filter,
+                    _enteCollections,
+                    _sharedCollections,
+                    _viewType,
+                    _sortKey,
+                    _sortDirection,
+                  ]),
                   builder: (context, _) {
                     return AnimatedSwitcher(
                       duration: _kContentTransitionDuration,
@@ -849,10 +840,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                         );
                       },
                       transitionBuilder: (child, animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: child,
-                        );
+                        return FadeTransition(opacity: animation, child: child);
                       },
                       child: CustomScrollView(
                         key: _contentStateKey(),
@@ -868,9 +856,11 @@ class _AlbumsTabState extends State<AlbumsTab>
         ),
         if (selectedAlbums != null && !_isSearchActive)
           AnimatedBuilder(
-            animation: Listenable.merge(
-              [_filter, _enteCollections, _sharedCollections],
-            ),
+            animation: Listenable.merge([
+              _filter,
+              _enteCollections,
+              _sharedCollections,
+            ]),
             builder: (context, _) {
               final filter = _effectiveFilter;
               final UISectionType sectionType;

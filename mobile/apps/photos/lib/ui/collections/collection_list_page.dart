@@ -54,7 +54,7 @@ class CollectionListPage extends StatefulWidget {
 
 class _CollectionListPageState extends State<CollectionListPage> {
   late StreamSubscription<CollectionUpdatedEvent>
-      _collectionUpdatesSubscription;
+  _collectionUpdatesSubscription;
   List<Collection>? collections;
   late AlbumSortKey sortKey;
   AlbumViewType? albumViewType;
@@ -67,10 +67,11 @@ class _CollectionListPageState extends State<CollectionListPage> {
   void initState() {
     super.initState();
     collections = widget.collections;
-    _collectionUpdatesSubscription =
-        Bus.instance.on<CollectionUpdatedEvent>().listen((event) async {
-      unawaited(refreshCollections());
-    });
+    _collectionUpdatesSubscription = Bus.instance
+        .on<CollectionUpdatedEvent>()
+        .listen((event) async {
+          unawaited(refreshCollections());
+        });
     sortKey = localSettings.albumSortKey();
     albumViewType = localSettings.albumViewType();
     albumSortDirection = localSettings.albumSortDirection();
@@ -91,10 +92,10 @@ class _CollectionListPageState extends State<CollectionListPage> {
   Widget build(BuildContext context) {
     final bool enableSelectionMode =
         widget.sectionType == UISectionType.homeCollections ||
-            widget.sectionType == UISectionType.outgoingCollections ||
-            widget.sectionType == UISectionType.incomingCollections ||
-            widget.sectionType == UISectionType.archivedCollections ||
-            widget.sectionType == UISectionType.hiddenCollections;
+        widget.sectionType == UISectionType.outgoingCollections ||
+        widget.sectionType == UISectionType.incomingCollections ||
+        widget.sectionType == UISectionType.archivedCollections ||
+        widget.sectionType == UISectionType.hiddenCollections;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -121,13 +122,9 @@ class _CollectionListPageState extends State<CollectionListPage> {
                       _searchQuery = '';
                       unawaited(refreshCollections());
                     },
-                    actions: [
-                      _sortMenu(),
-                    ],
+                    actions: [_sortMenu()],
                   ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 16),
-                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
                   CollectionsFlexiGridViewWidget(
                     collections,
                     tag: widget.tag,
@@ -168,8 +165,9 @@ class _CollectionListPageState extends State<CollectionListPage> {
     final isListView = currentViewType == AlbumViewType.list;
     final currentSortKey = sortKey;
     final currentSortDirection = albumSortDirection;
-    final nameSortDirection =
-        currentSortKey == AlbumSortKey.albumName ? currentSortDirection : null;
+    final nameSortDirection = currentSortKey == AlbumSortKey.albumName
+        ? currentSortDirection
+        : null;
     final activeTrailingWidget = HugeIcon(
       icon: currentSortDirection == AlbumSortDirection.ascending
           ? HugeIcons.strokeRoundedArrowUp02
@@ -237,8 +235,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
   Future<void> _toggleViewMode() async {
     final next =
         (albumViewType ?? localSettings.albumViewType()) == AlbumViewType.grid
-            ? AlbumViewType.list
-            : AlbumViewType.grid;
+        ? AlbumViewType.list
+        : AlbumViewType.grid;
     setState(() {
       albumViewType = next;
     });
@@ -268,28 +266,30 @@ class _CollectionListPageState extends State<CollectionListPage> {
   Future<void> refreshCollections() async {
     if (widget.sectionType == UISectionType.incomingCollections ||
         widget.sectionType == UISectionType.outgoingCollections) {
-      final SharedCollections sharedCollections =
-          await CollectionsService.instance.getSharedCollections();
+      final SharedCollections sharedCollections = await CollectionsService
+          .instance
+          .getSharedCollections();
       if (widget.sectionType == UISectionType.incomingCollections) {
         collections = sharedCollections.incoming;
       } else {
         collections = sharedCollections.outgoing;
       }
     } else if (widget.sectionType == UISectionType.homeCollections) {
-      collections =
-          await CollectionsService.instance.getCollectionForOnEnteSection();
+      collections = await CollectionsService.instance
+          .getCollectionForOnEnteSection();
     } else if (widget.sectionType == UISectionType.archivedCollections) {
       collections = await CollectionsService.instance.getArchivedCollection();
     } else if (widget.sectionType == UISectionType.hiddenCollections) {
-      collections = CollectionsService.instance
-          .getHiddenCollections(includeDefaultHidden: false);
+      collections = CollectionsService.instance.getHiddenCollections(
+        includeDefaultHidden: false,
+      );
     }
     if (_searchQuery.isNotEmpty) {
       collections = collections
           ?.where(
-            (c) => c.displayName
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()),
+            (c) => c.displayName.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ),
           )
           .toList();
     }
@@ -314,8 +314,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
 
     Map<int, int>? collectionIDToNewestPhotoTime;
     if (currentSortKey == AlbumSortKey.newestPhoto) {
-      collectionIDToNewestPhotoTime =
-          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+      collectionIDToNewestPhotoTime = await CollectionsService.instance
+          .getCollectionIDToNewestFileTime();
     }
 
     collectionsToSort.sort((first, second) {
@@ -329,8 +329,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
         comparison =
             (collectionIDToNewestPhotoTime?[second.id] ?? -1 * intMaxValue)
                 .compareTo(
-          collectionIDToNewestPhotoTime?[first.id] ?? -1 * intMaxValue,
-        );
+                  collectionIDToNewestPhotoTime?[first.id] ?? -1 * intMaxValue,
+                );
       } else {
         comparison = second.updationTime.compareTo(first.updationTime);
       }

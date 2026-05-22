@@ -46,12 +46,8 @@ class SearchThumbnailWidget extends StatelessWidget {
                         clusterID: (searchResult as GenericSearchResult)
                             .params[kClusterParamId],
                       )
-                    : ThumbnailWidget(
-                        file!,
-                      )
-              : const NoThumbnailWidget(
-                  addBorder: false,
-                ),
+                    : ThumbnailWidget(file!)
+              : const NoThumbnailWidget(addBorder: false),
         ),
       ),
     );
@@ -127,9 +123,7 @@ class _ContactSearchThumbnailWidgetState
                   }
                 },
               )
-            : NoFaceForContactWidget(
-                user: User(email: _email),
-              ),
+            : NoFaceForContactWidget(user: User(email: _email)),
       ),
     );
   }
@@ -151,10 +145,7 @@ class NoFaceForContactWidget extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: addBorder
-            ? Border.all(
-                color: enteColorScheme.strokeFaint,
-                width: 1,
-              )
+            ? Border.all(color: enteColorScheme.strokeFaint, width: 1)
             : null,
         color: enteColorScheme.fillFaint,
       ),

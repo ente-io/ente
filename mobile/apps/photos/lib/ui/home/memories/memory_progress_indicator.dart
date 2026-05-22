@@ -47,8 +47,10 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
       animationBehavior: AnimationBehavior.preserve,
     );
 
-    _animation =
-        Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+    _animation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(_animationController);
 
     if (widget.animationController != null) {
       widget.animationController!(_animationController);
@@ -103,27 +105,27 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
                     ),
                   )
                 : index == widget.currentIndex
-                    ? AnimatedBuilder(
-                        animation: _animation,
-                        builder: (context, child) {
-                          return LinearProgressIndicator(
-                            value: _animation.value,
-                            backgroundColor: widget.unselectedColor,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              widget.selectedColor,
-                            ),
-                            minHeight: widget.height,
-                            borderRadius: BorderRadius.circular(12),
-                          );
-                        },
-                      )
-                    : Container(
-                        height: widget.height,
-                        decoration: BoxDecoration(
-                          color: widget.unselectedColor,
-                          borderRadius: BorderRadius.circular(12),
+                ? AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, child) {
+                      return LinearProgressIndicator(
+                        value: _animation.value,
+                        backgroundColor: widget.unselectedColor,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          widget.selectedColor,
                         ),
-                      ),
+                        minHeight: widget.height,
+                        borderRadius: BorderRadius.circular(12),
+                      );
+                    },
+                  )
+                : Container(
+                    height: widget.height,
+                    decoration: BoxDecoration(
+                      color: widget.unselectedColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
           ),
         );
       }),

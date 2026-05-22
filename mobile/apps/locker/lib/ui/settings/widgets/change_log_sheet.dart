@@ -32,17 +32,18 @@ class _ChangeLogSheetBody extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final maxHeight = MediaQuery.sizeOf(context).height * 0.5;
-    final entries = <_ChangeLogEntry>[
-      _ChangeLogEntry(strings.title1, strings.desc1),
-      _ChangeLogEntry(strings.title2, strings.desc2),
-      _ChangeLogEntry(strings.title3, strings.desc3),
-    ]
-        .where(
-          (entry) =>
-              entry.title.trim().isNotEmpty ||
-              entry.description.trim().isNotEmpty,
-        )
-        .toList(growable: false);
+    final entries =
+        <_ChangeLogEntry>[
+              _ChangeLogEntry(strings.title1, strings.desc1),
+              _ChangeLogEntry(strings.title2, strings.desc2),
+              _ChangeLogEntry(strings.title3, strings.desc3),
+            ]
+            .where(
+              (entry) =>
+                  entry.title.trim().isNotEmpty ||
+                  entry.description.trim().isNotEmpty,
+            )
+            .toList(growable: false);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

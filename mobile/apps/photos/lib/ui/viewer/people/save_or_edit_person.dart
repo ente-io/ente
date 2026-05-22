@@ -50,9 +50,9 @@ class SaveOrEditPerson extends StatefulWidget {
     this.person,
     this.isEditing = false,
   }) : assert(
-          !isEditing || person != null,
-          'Person cannot be null when editing',
-        );
+         !isEditing || person != null,
+         'Person cannot be null when editing',
+       );
 
   @override
   State<SaveOrEditPerson> createState() => _SaveOrEditPersonState();
@@ -183,12 +183,12 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                     height: 28,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(8.0),
-                                      boxShadow: Theme.of(context)
-                                          .colorScheme
-                                          .enteTheme
-                                          .shadowMenu,
-                                      color: getEnteColorScheme(context)
-                                          .backgroundElevated2,
+                                      boxShadow: Theme.of(
+                                        context,
+                                      ).colorScheme.enteTheme.shadowMenu,
+                                      color: getEnteColorScheme(
+                                        context,
+                                      ).backgroundElevated2,
                                     ),
                                     child: IconButton(
                                       icon: const Icon(Icons.edit),
@@ -199,13 +199,11 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                       onPressed: () async {
                                         final result =
                                             await showPersonAvatarPhotoSheet(
-                                          context,
-                                          person!,
-                                        );
+                                              context,
+                                              person!,
+                                            );
                                         if (result != null) {
-                                          _logger.info(
-                                            'Person avatar updated',
-                                          );
+                                          _logger.info('Person avatar updated');
                                           setState(() {
                                             person = result;
                                           });
@@ -233,9 +231,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                   ? PersonFaceWidget(
                                       clusterID: widget.clusterID,
                                     )
-                                  : const NoThumbnailWidget(
-                                      addBorder: false,
-                                    ),
+                                  : const NoThumbnailWidget(addBorder: false),
                             ),
                           ),
                         const SizedBox(height: 36),
@@ -248,18 +244,21 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                             if (_debounce?.isActive ?? false) {
                               _debounce?.cancel();
                             }
-                            _debounce =
-                                Timer(const Duration(milliseconds: 300), () {
-                              setState(() {
-                                _inputName = value;
-                              });
-                            });
+                            _debounce = Timer(
+                              const Duration(milliseconds: 300),
+                              () {
+                                setState(() {
+                                  _inputName = value;
+                                });
+                              },
+                            );
                           },
                           initialValue: _inputName,
                           decoration: InputDecoration(
                             focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(8.0)),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(8.0),
+                              ),
                               borderSide: BorderSide(
                                 color: getEnteColorScheme(context).strokeMuted,
                               ),
@@ -301,8 +300,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           onChanged: (date) {
                             setState(() {
                               // format date to yyyy-MM-dd
-                              _selectedDate =
-                                  date?.toIso8601String().split("T").first;
+                              _selectedDate = date
+                                  ?.toIso8601String()
+                                  .split("T")
+                                  .first;
                             });
                           },
                         ),
@@ -319,22 +320,27 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           isDisabled: !changed || _inputName.isEmpty,
                           onTap: () async {
                             if (widget.isEditing) {
-                              final updatedPersonEntity =
-                                  await updatePerson(context);
+                              final updatedPersonEntity = await updatePerson(
+                                context,
+                              );
                               if (updatedPersonEntity != null) {
                                 Navigator.pop(context, updatedPersonEntity);
                               }
                             } else {
-                              final newPersonEntity = await addNewPerson(
-                                context,
-                                text: _inputName,
-                                clusterID: widget.clusterID!,
-                                birthdate: _selectedDate,
-                                email: _email,
-                              ).catchError((e) {
-                                _logger.severe("Error adding new person", e);
-                                return null;
-                              });
+                              final newPersonEntity =
+                                  await addNewPerson(
+                                    context,
+                                    text: _inputName,
+                                    clusterID: widget.clusterID!,
+                                    birthdate: _selectedDate,
+                                    email: _email,
+                                  ).catchError((e) {
+                                    _logger.severe(
+                                      "Error adding new person",
+                                      e,
+                                    );
+                                    return null;
+                                  });
                               if (newPersonEntity != null) {
                                 Navigator.pop(context, newPersonEntity);
                               }
@@ -374,8 +380,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                             ),
                           ),
                           Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: 12.0, top: 24.0),
+                            padding: const EdgeInsets.only(
+                              bottom: 12.0,
+                              top: 24.0,
+                            ),
                             child: PersonClustersWidget(person!),
                           ),
                         ],
@@ -454,21 +462,20 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     if (query.isEmpty || _allPersons.isEmpty) {
       return [];
     }
-    final suggestions = _allPersons.where((personEntity) {
-      final name = personEntity.data.name.trim();
-      if (name.isEmpty) {
-        return false;
-      }
-      if (widget.isEditing && personEntity.remoteID == person?.remoteID) {
-        return false;
-      }
-      return name.toLowerCase().contains(query);
-    }).toList()
-      ..sort(
-        (a, b) => a.data.name.toLowerCase().compareTo(
-              b.data.name.toLowerCase(),
-            ),
-      );
+    final suggestions =
+        _allPersons.where((personEntity) {
+          final name = personEntity.data.name.trim();
+          if (name.isEmpty) {
+            return false;
+          }
+          if (widget.isEditing && personEntity.remoteID == person?.remoteID) {
+            return false;
+          }
+          return name.toLowerCase().contains(query);
+        }).toList()..sort(
+          (a, b) =>
+              a.data.name.toLowerCase().compareTo(b.data.name.toLowerCase()),
+        );
 
     if (suggestions.length > _maxSuggestedPersons) {
       return suggestions.sublist(0, _maxSuggestedPersons);
@@ -513,10 +520,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _MergePersonConfirmationSheet(
-        person: person,
-        clusterId: clusterId,
-      ),
+      builder: (context) =>
+          _MergePersonConfirmationSheet(person: person, clusterId: clusterId),
     );
   }
 
@@ -611,11 +616,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         birthdate: birthdate,
         email: email,
       );
-      final bool extraPhotosFound =
-          await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(
-        personEntity,
-        personClusterID: clusterID,
-      );
+      final bool extraPhotosFound = await ClusterFeedbackService.instance
+          .checkAndDoAutomaticMerges(personEntity, personClusterID: clusterID);
       if (extraPhotosFound) {
         showShortToast(context, AppLocalizations.of(context).extraPhotosFound);
       }
@@ -637,10 +639,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
   bool get changed => widget.isEditing
       ? (_inputName.trim() != person!.data.name ||
-          _selectedDate != person!.data.birthDate ||
-          _email != person!.data.email ||
-          _isPinned != person!.data.isPinned ||
-          _hideFromMemories != person!.data.hideFromMemories)
+            _selectedDate != person!.data.birthDate ||
+            _email != person!.data.email ||
+            _isPinned != person!.data.isPinned ||
+            _hideFromMemories != person!.data.hideFromMemories)
       : _inputName.trim().isNotEmpty;
 
   Future<PersonEntity?> updatePerson(BuildContext context) async {
@@ -870,10 +872,7 @@ class _MergeFacePair extends StatelessWidget {
   final String clusterId;
   final String personId;
 
-  const _MergeFacePair({
-    required this.clusterId,
-    required this.personId,
-  });
+  const _MergeFacePair({required this.clusterId, required this.personId});
 
   @override
   Widget build(BuildContext context) {
@@ -929,9 +928,9 @@ class _MergeFaceThumbnail extends StatelessWidget {
     this.personId,
     this.clusterId,
   }) : assert(
-          personId != null || clusterId != null,
-          "Merge face thumbnail requires personId or clusterId",
-        );
+         personId != null || clusterId != null,
+         "Merge face thumbnail requires personId or clusterId",
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -954,10 +953,7 @@ class _MergeSheetActionButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _MergeSheetActionButton({
-    required this.label,
-    required this.onTap,
-  });
+  const _MergeSheetActionButton({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -992,9 +988,7 @@ class _MergeSheetActionButton extends StatelessWidget {
 class _MergeSheetCloseButton extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _MergeSheetCloseButton({
-    required this.onTap,
-  });
+  const _MergeSheetCloseButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1010,11 +1004,7 @@ class _MergeSheetCloseButton extends StatelessWidget {
           color: colorScheme.fillFaint,
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          Icons.close,
-          size: 20,
-          color: colorScheme.textBase,
-        ),
+        child: Icon(Icons.close, size: 20, color: colorScheme.textBase),
       ),
     );
   }
@@ -1064,112 +1054,118 @@ class _EmailSectionState extends State<_EmailSection> {
         curve: Curves.easeInOutQuad,
         child: Padding(
           padding: const EdgeInsets.only(top: 20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
-            decoration: BoxDecoration(
-              color: getEnteColorScheme(context).fillFaint,
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (_contacts.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                      height: 32 + 2 * UserAvatarWidget.strokeWidth,
-                      width: ((avatarSize) * (limitCountTo + 1)) -
-                          (((avatarSize) - overlapPadding) * limitCountTo) +
-                          (2 * UserAvatarWidget.strokeWidth),
-                      child: AlbumSharesIcons(
-                        sharees: _contacts,
-                        limitCountTo: limitCountTo,
-                        type: AvatarType.large,
-                        padding: EdgeInsets.zero,
-                        stackAlignment: Alignment.center,
+          child:
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: getEnteColorScheme(context).fillFaint,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (_contacts.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                          height: 32 + 2 * UserAvatarWidget.strokeWidth,
+                          width:
+                              ((avatarSize) * (limitCountTo + 1)) -
+                              (((avatarSize) - overlapPadding) * limitCountTo) +
+                              (2 * UserAvatarWidget.strokeWidth),
+                          child: AlbumSharesIcons(
+                            sharees: _contacts,
+                            limitCountTo: limitCountTo,
+                            type: AvatarType.large,
+                            padding: EdgeInsets.zero,
+                            stackAlignment: Alignment.center,
+                          ),
+                        ),
+                      ),
+                    if (_contacts.isNotEmpty) const SizedBox(height: 38),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: FutureBuilder<bool>(
+                        future: isMeAssigned(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final isMeAssigned = snapshot.data!;
+                            if (!isMeAssigned || _initialEmailIsUserEmail) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: ButtonWidget(
+                                      buttonType: ButtonType.secondary,
+                                      labelText:
+                                          context.l10n.thisIsMeExclamation,
+                                      onTap: () async {
+                                        _updateEmailField(
+                                          Configuration.instance.getEmail(),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: ButtonWidget(
+                                      buttonType: ButtonType.primary,
+                                      labelText: context.l10n.linkEmail,
+                                      shouldSurfaceExecutionStates: false,
+                                      onTap: () async {
+                                        final newEmail = await routeToPage(
+                                          context,
+                                          LinkEmailScreen(
+                                            widget.personID,
+                                            isFromSaveOrEditPerson: true,
+                                          ),
+                                        );
+                                        if (newEmail != null) {
+                                          _updateEmailField(newEmail as String);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return ButtonWidget(
+                                buttonType: ButtonType.primary,
+                                labelText: context.l10n.linkEmail,
+                                shouldSurfaceExecutionStates: false,
+                                onTap: () async {
+                                  final newEmail = await routeToPage(
+                                    context,
+                                    LinkEmailScreen(
+                                      widget.personID,
+                                      isFromSaveOrEditPerson: true,
+                                    ),
+                                  );
+                                  if (newEmail != null) {
+                                    _updateEmailField(newEmail as String);
+                                  }
+                                },
+                              );
+                            }
+                          } else if (snapshot.hasError) {
+                            _logger.severe(
+                              "Error getting isMeAssigned",
+                              snapshot.error,
+                            );
+                            return const EnteLoadingWidget();
+                          } else {
+                            return const EnteLoadingWidget();
+                          }
+                        },
                       ),
                     ),
-                  ),
-                if (_contacts.isNotEmpty) const SizedBox(height: 38),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: FutureBuilder<bool>(
-                    future: isMeAssigned(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final isMeAssigned = snapshot.data!;
-                        if (!isMeAssigned || _initialEmailIsUserEmail) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: ButtonWidget(
-                                  buttonType: ButtonType.secondary,
-                                  labelText: context.l10n.thisIsMeExclamation,
-                                  onTap: () async {
-                                    _updateEmailField(
-                                      Configuration.instance.getEmail(),
-                                    );
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ButtonWidget(
-                                  buttonType: ButtonType.primary,
-                                  labelText: context.l10n.linkEmail,
-                                  shouldSurfaceExecutionStates: false,
-                                  onTap: () async {
-                                    final newEmail = await routeToPage(
-                                      context,
-                                      LinkEmailScreen(
-                                        widget.personID,
-                                        isFromSaveOrEditPerson: true,
-                                      ),
-                                    );
-                                    if (newEmail != null) {
-                                      _updateEmailField(newEmail as String);
-                                    }
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return ButtonWidget(
-                            buttonType: ButtonType.primary,
-                            labelText: context.l10n.linkEmail,
-                            shouldSurfaceExecutionStates: false,
-                            onTap: () async {
-                              final newEmail = await routeToPage(
-                                context,
-                                LinkEmailScreen(
-                                  widget.personID,
-                                  isFromSaveOrEditPerson: true,
-                                ),
-                              );
-                              if (newEmail != null) {
-                                _updateEmailField(newEmail as String);
-                              }
-                            },
-                          );
-                        }
-                      } else if (snapshot.hasError) {
-                        _logger.severe(
-                          "Error getting isMeAssigned",
-                          snapshot.error,
-                        );
-                        return const EnteLoadingWidget();
-                      } else {
-                        return const EnteLoadingWidget();
-                      }
-                    },
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ).animate().fadeIn(
+              ).animate().fadeIn(
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOutQuad,
               ),
@@ -1203,15 +1199,15 @@ class _EmailSectionState extends State<_EmailSection> {
           ),
         ),
       ).animate().fadeIn(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOutQuad,
-          );
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOutQuad,
+      );
     }
   }
 
   void _updateEmailField(String? newEmail) {
-    final saveOrEditPersonState =
-        context.findAncestorStateOfType<_SaveOrEditPersonState>()!;
+    final saveOrEditPersonState = context
+        .findAncestorStateOfType<_SaveOrEditPersonState>()!;
     saveOrEditPersonState.setState(() {
       saveOrEditPersonState._email = newEmail;
     });
@@ -1223,13 +1219,9 @@ class _EmailSectionState extends State<_EmailSection> {
     final ownerEmail = Configuration.instance.getEmail();
     final relevantUsers = UserService.instance.getRelevantContacts()
       ..add(User(email: ownerEmail!))
-      ..removeWhere(
-        (user) => userEmailsToAviod.contains(user.email),
-      );
+      ..removeWhere((user) => userEmailsToAviod.contains(user.email));
 
-    relevantUsers.sort(
-      (a, b) => (a.email).compareTo(b.email),
-    );
+    relevantUsers.sort((a, b) => (a.email).compareTo(b.email));
 
     return relevantUsers;
   }

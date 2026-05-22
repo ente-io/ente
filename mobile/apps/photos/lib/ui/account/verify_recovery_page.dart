@@ -56,8 +56,9 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
             await showAlertBottomSheet(
               context,
               title: AppLocalizations.of(context).noInternetConnection,
-              message: AppLocalizations.of(context)
-                  .pleaseCheckYourInternetConnectionAndTryAgain,
+              message: AppLocalizations.of(
+                context,
+              ).pleaseCheckYourInternetConnectionAndTryAgain,
               assetPath: 'assets/warning-green.png',
             );
           } else {
@@ -96,11 +97,11 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
   }
 
   Future<void> _onViewRecoveryKeyClick() async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      "Please authenticate to view your recovery key",
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          "Please authenticate to view your recovery key",
+        );
     if (hasAuthenticated) {
       String recoveryKey;
       try {
@@ -165,16 +166,18 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       const SizedBox(height: 18),
                       Text(
                         AppLocalizations.of(context).recoveryKeyVerifyReason,
-                        style: enteTheme.textTheme.small
-                            .copyWith(color: enteTheme.colorScheme.textMuted),
+                        style: enteTheme.textTheme.small.copyWith(
+                          color: enteTheme.colorScheme.textMuted,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: getEnteColorScheme(context).fillFaint,
-                          hintText:
-                              AppLocalizations.of(context).enterYourRecoveryKey,
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).enterYourRecoveryKey,
                           contentPadding: const EdgeInsets.all(20),
                           border: UnderlineInputBorder(
                             borderSide: BorderSide.none,

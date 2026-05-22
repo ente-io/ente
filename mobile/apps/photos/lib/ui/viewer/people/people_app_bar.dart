@@ -119,23 +119,21 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
         _peopleChangedEventSubscription = Bus.instance
             .on<PeopleChangedEvent>()
-            .listen(
-              (event) {
-                if (event.person != null &&
-                    event.type == PeopleEventType.saveOrEditPerson &&
-                    widget.person.remoteID == event.person!.remoteID &&
-                    (event.source == "linkEmailToPerson" ||
-                        event.source == "reassignMe")) {
-                  person = event.person!;
+            .listen((event) {
+              if (event.person != null &&
+                  event.type == PeopleEventType.saveOrEditPerson &&
+                  widget.person.remoteID == event.person!.remoteID &&
+                  (event.source == "linkEmailToPerson" ||
+                      event.source == "reassignMe")) {
+                person = event.person!;
 
-                  _appBarTitle = _resolveAppBarTitle(
-                    sourcePerson: person,
-                    title: person.data.name,
-                  );
-                  setState(() {});
-                }
-              },
-            );
+                _appBarTitle = _resolveAppBarTitle(
+                  sourcePerson: person,
+                  title: person.data.name,
+                );
+                setState(() {});
+              }
+            });
       });
     });
   }
@@ -257,9 +255,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           child: Row(
             children: [
               const Icon(Icons.auto_awesome_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
+              const Padding(padding: EdgeInsets.all(8)),
               Text(
                 context.l10n.facesTimelineAppBarTitle,
                 style: textTheme.bodyBold,
@@ -271,188 +267,159 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     }
 
     if (!isIgnored) {
-      items.addAll(
-        [
-          PopupMenuItem(
-            value: PeoplePopupAction.rename,
-            child: Row(
-              children: [
-                const Icon(Icons.edit),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  AppLocalizations.of(context).edit,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
-          ),
-          PopupMenuItem(
-            value: PeoplePopupAction.reviewSuggestions,
-            child: Row(
-              children: [
-                const Icon(Icons.search_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  AppLocalizations.of(context).review,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
-          ),
-          PopupMenuItem(
-            value: PeoplePopupAction.setCover,
-            child: Row(
-              children: [
-                const Icon(Icons.image_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  AppLocalizations.of(context).setCover,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
-          ),
-          PopupMenuItem(
-            value: PeoplePopupAction.pinPerson,
-            child: Row(
-              children: [
-                Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  isPinned ? context.l10n.unpinPerson : context.l10n.pinPerson,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
-          ),
-          PopupMenuItem(
-            value: PeoplePopupAction.hideFromMemories,
-            child: Row(
-              children: [
-                Icon(
-                  hideFromMemories
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  hideFromMemories
-                      ? context.l10n.showInMemories
-                      : context.l10n.hideFromMemories,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
-          ),
-          if (currentPerson.data.email != null &&
-              (currentPerson.data.email == Configuration.instance.getEmail()))
-            PopupMenuItem(
-              value: PeoplePopupAction.reassignMe,
-              child: Row(
-                children: [
-                  const Icon(Icons.person_2_outlined),
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(
-                    context.l10n.reassignMe,
-                    style: textTheme.bodyBold,
-                  ),
-                ],
+      items.addAll([
+        PopupMenuItem(
+          value: PeoplePopupAction.rename,
+          child: Row(
+            children: [
+              const Icon(Icons.edit),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                AppLocalizations.of(context).edit,
+                style: textTheme.bodyBold,
               ),
-            ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: PeoplePopupAction.reviewSuggestions,
+          child: Row(
+            children: [
+              const Icon(Icons.search_outlined),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                AppLocalizations.of(context).review,
+                style: textTheme.bodyBold,
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: PeoplePopupAction.setCover,
+          child: Row(
+            children: [
+              const Icon(Icons.image_outlined),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                AppLocalizations.of(context).setCover,
+                style: textTheme.bodyBold,
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: PeoplePopupAction.pinPerson,
+          child: Row(
+            children: [
+              Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                isPinned ? context.l10n.unpinPerson : context.l10n.pinPerson,
+                style: textTheme.bodyBold,
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: PeoplePopupAction.hideFromMemories,
+          child: Row(
+            children: [
+              Icon(
+                hideFromMemories
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                hideFromMemories
+                    ? context.l10n.showInMemories
+                    : context.l10n.hideFromMemories,
+                style: textTheme.bodyBold,
+              ),
+            ],
+          ),
+        ),
+        if (currentPerson.data.email != null &&
+            (currentPerson.data.email == Configuration.instance.getEmail()))
           PopupMenuItem(
-            value: PeoplePopupAction.ignore,
+            value: PeoplePopupAction.reassignMe,
             child: Row(
               children: [
-                const Icon(Icons.person_off_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  AppLocalizations.of(context).ignore,
-                  style: textTheme.bodyBold,
-                ),
+                const Icon(Icons.person_2_outlined),
+                const Padding(padding: EdgeInsets.all(8)),
+                Text(context.l10n.reassignMe, style: textTheme.bodyBold),
               ],
             ),
           ),
-          PopupMenuItem(
-            value: PeoplePopupAction.removeLabel,
-            child: Row(
-              children: [
-                const Icon(Icons.delete_outline),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  AppLocalizations.of(context).remove,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
+        PopupMenuItem(
+          value: PeoplePopupAction.ignore,
+          child: Row(
+            children: [
+              const Icon(Icons.person_off_outlined),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                AppLocalizations.of(context).ignore,
+                style: textTheme.bodyBold,
+              ),
+            ],
           ),
-        ],
-      );
+        ),
+        PopupMenuItem(
+          value: PeoplePopupAction.removeLabel,
+          child: Row(
+            children: [
+              const Icon(Icons.delete_outline),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                AppLocalizations.of(context).remove,
+                style: textTheme.bodyBold,
+              ),
+            ],
+          ),
+        ),
+      ]);
     } else {
-      items.addAll(
-        [
-          PopupMenuItem(
-            value: PeoplePopupAction.rename,
-            child: Row(
-              children: [
-                const Icon(Icons.edit),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  AppLocalizations.of(context).edit,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
+      items.addAll([
+        PopupMenuItem(
+          value: PeoplePopupAction.rename,
+          child: Row(
+            children: [
+              const Icon(Icons.edit),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                AppLocalizations.of(context).edit,
+                style: textTheme.bodyBold,
+              ),
+            ],
           ),
-          PopupMenuItem(
-            value: PeoplePopupAction.reviewSuggestions,
-            child: Row(
-              children: [
-                const Icon(Icons.search_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  AppLocalizations.of(context).review,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
+        ),
+        PopupMenuItem(
+          value: PeoplePopupAction.reviewSuggestions,
+          child: Row(
+            children: [
+              const Icon(Icons.search_outlined),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                AppLocalizations.of(context).review,
+                style: textTheme.bodyBold,
+              ),
+            ],
           ),
-          PopupMenuItem(
-            value: PeoplePopupAction.unignore,
-            child: Row(
-              children: [
-                const Icon(Icons.visibility_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  AppLocalizations.of(context).showPerson,
-                  style: textTheme.bodyBold,
-                ),
-              ],
-            ),
+        ),
+        PopupMenuItem(
+          value: PeoplePopupAction.unignore,
+          child: Row(
+            children: [
+              const Icon(Icons.visibility_outlined),
+              const Padding(padding: EdgeInsets.all(8)),
+              Text(
+                AppLocalizations.of(context).showPerson,
+                style: textTheme.bodyBold,
+              ),
+            ],
           ),
-        ],
-      );
+        ),
+      ]);
     }
 
     if (items.isNotEmpty) {
@@ -661,14 +628,9 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {
-    final result = await showPersonAvatarPhotoSheet(
-      context,
-      person,
-    );
+    final result = await showPersonAvatarPhotoSheet(context, person);
     if (result != null) {
-      _logger.info(
-        'Person avatar updated',
-      );
+      _logger.info('Person avatar updated');
       setState(() {
         person = result;
       });
@@ -685,9 +647,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   Future<void> _reassignMe(BuildContext context) async {
     await routeToPage(
       context,
-      ReassignMeSelectionPage(
-        currentMeId: widget.person.remoteID,
-      ),
+      ReassignMeSelectionPage(currentMeId: widget.person.remoteID),
     );
   }
 }

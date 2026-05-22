@@ -35,10 +35,7 @@ class ChipButtonWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               leadingIcon != null
-                  ? Icon(
-                      leadingIcon,
-                      size: iconSize,
-                    )
+                  ? Icon(leadingIcon, size: iconSize)
                   : const SizedBox.shrink(),
               if (label != null && leadingIcon != null)
                 const SizedBox(width: 4),

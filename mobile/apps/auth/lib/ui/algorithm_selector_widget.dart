@@ -38,10 +38,7 @@ class AlgorithmSelectorWidget extends StatelessWidget {
                 children: [
                   algorithmOptionText(Algorithm.values[index]),
                   if (Algorithm.values[index] == currentAlgorithm)
-                    Icon(
-                      Icons.check,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
+                    Icon(Icons.check, color: Theme.of(context).iconTheme.color),
                 ],
               ),
             );

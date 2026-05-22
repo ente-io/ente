@@ -43,11 +43,7 @@ class RemoteAssetsService {
 
       final tempFile = File(_tempPath(path));
       await _downloadFile(remotePath, tempFile.path);
-      await _validateDownloadedFileSha256(
-        tempFile,
-        remotePath,
-        expectedSha256,
-      );
+      await _validateDownloadedFileSha256(tempFile, remotePath, expectedSha256);
       await _replaceFile(tempFile, file);
       await _deleteResumeMetadata(tempFile.path);
       return file;
@@ -163,9 +159,9 @@ class RemoteAssetsService {
         useResumable
             ? "Using resumable download for $url (${probe.totalBytes} bytes)"
             : "Using single-shot download for $url despite resumable "
-                "downloads being enabled (size: ${probe.totalBytes} bytes, "
-                "acceptsRanges: ${probe.acceptsRanges}, "
-                "strongEtag: ${probe.ifRangeValidator != null})",
+                  "downloads being enabled (size: ${probe.totalBytes} bytes, "
+                  "acceptsRanges: ${probe.acceptsRanges}, "
+                  "strongEtag: ${probe.ifRangeValidator != null})",
       );
     }
     if (useResumable) {
@@ -210,7 +206,8 @@ class RemoteAssetsService {
   Future<void> cleanupSelectedModels(List<String> modelRemotePaths) async {
     for (final remotePath in modelRemotePaths) {
       final localPath = await _getLocalPath(remotePath);
-      final hasArtifacts = await File(localPath).exists() ||
+      final hasArtifacts =
+          await File(localPath).exists() ||
           await File(_tempPath(localPath)).exists() ||
           await File(_resumeMetadataPath(_tempPath(localPath))).exists();
       if (hasArtifacts) {
@@ -255,7 +252,7 @@ class RemoteAssetsService {
       if (_shouldLogProbeDiagnosticsFor(url)) {
         final contentLength =
             response.headers.value(HttpHeaders.contentLengthHeader) ??
-                "missing";
+            "missing";
         final acceptRanges =
             response.headers.value("accept-ranges")?.trim() ?? "missing";
         final etag = response.headers.value(HttpHeaders.etagHeader)?.trim();
@@ -294,9 +291,9 @@ class RemoteAssetsService {
         _logger.warning(
           _isConnectionFailure(e)
               ? "HEAD probe connection failed for $url without complete "
-                  "resume artifacts, falling back to single-shot download"
+                    "resume artifacts, falling back to single-shot download"
               : "HEAD probe failed for $url, falling back to single-shot "
-                  "download",
+                    "download",
           e,
           s,
         );

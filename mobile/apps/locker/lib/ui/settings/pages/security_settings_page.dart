@@ -97,11 +97,11 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   }
 
   Future<void> _onEmailMFAToggle(BuildContext context) async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.authToChangeEmailVerificationSetting,
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.authToChangeEmailVerificationSetting,
+        );
     final isEmailMFAEnabled = UserService.instance.hasEmailMFAEnabled();
     if (hasAuthenticated) {
       await _updateEmailMFA(!isEmailMFAEnabled);
@@ -123,9 +123,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       onTap: () async {
         final hasAuthenticated = await LocalAuthenticationService.instance
             .requestLocalAuthentication(
-          context,
-          l10n.authToViewYourActiveSessions,
-        );
+              context,
+              l10n.authToViewYourActiveSessions,
+            );
         if (hasAuthenticated) {
           // ignore: unawaited_futures
           Navigator.of(context).push(
@@ -151,11 +151,11 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   Future<void> _onAppLockTapped(BuildContext context) async {
     final l10n = context.l10n;
     if (await LockScreenSettings.instance.isDeviceSupported()) {
-      final hasAuthenticated =
-          await LocalAuthenticationService.instance.requestLocalAuthentication(
-        context,
-        l10n.authToChangeLockscreenSetting,
-      );
+      final hasAuthenticated = await LocalAuthenticationService.instance
+          .requestLocalAuthentication(
+            context,
+            l10n.authToChangeLockscreenSetting,
+          );
       if (hasAuthenticated) {
         await Navigator.of(context).push(
           MaterialPageRoute(
@@ -185,25 +185,22 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   Future<void> _onPasskeyClick(BuildContext buildContext) async {
     try {
-      final hasAuthenticated =
-          await LocalAuthenticationService.instance.requestLocalAuthentication(
-        context,
-        context.l10n.authToViewPasskey,
-        refocusWindows: false,
-      );
+      final hasAuthenticated = await LocalAuthenticationService.instance
+          .requestLocalAuthentication(
+            context,
+            context.l10n.authToViewPasskey,
+            refocusWindows: false,
+          );
       if (!hasAuthenticated) {
         return;
       }
-      final isPassKeyResetEnabled =
-          await PasskeyService.instance.isPasskeyRecoveryEnabled();
+      final isPassKeyResetEnabled = await PasskeyService.instance
+          .isPasskeyRecoveryEnabled();
       if (!isPassKeyResetEnabled) {
         final Uint8List recoveryKey = Configuration.instance.getRecoveryKey();
         final resetKey = CryptoUtil.generateKey();
         final resetKeyBase64 = CryptoUtil.bin2base64(resetKey);
-        final encryptionResult = CryptoUtil.encryptSync(
-          resetKey,
-          recoveryKey,
-        );
+        final encryptionResult = CryptoUtil.encryptSync(resetKey, recoveryKey);
         await PasskeyService.instance.configurePasskeyRecovery(
           resetKeyBase64,
           CryptoUtil.bin2base64(encryptionResult.encryptedData!),
@@ -213,17 +210,15 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       await PasskeyService.instance.openPasskeyPage(buildContext);
     } catch (e, s) {
       _logger.severe("failed to open passkey page", e, s);
-      await showGenericErrorBottomSheet(
-        context: context,
-        error: e,
-      );
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 
   Future<void> _updateEmailMFA(bool isEnabled) async {
     try {
-      final UserDetails details =
-          await UserService.instance.getUserDetailsV2(memoryCount: false);
+      final UserDetails details = await UserService.instance.getUserDetailsV2(
+        memoryCount: false,
+      );
       if ((details.profileData?.canDisableEmailMFA ?? false) == false) {
         final result = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
@@ -231,8 +226,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               return RequestPasswordVerificationPage(
                 Configuration.instance,
                 onPasswordVerified: (Uint8List keyEncryptionKey) async {
-                  final Uint8List loginKey =
-                      await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+                  final Uint8List loginKey = await CryptoUtil.deriveLoginKey(
+                    keyEncryptionKey,
+                  );
                   await UserService.instance.registerOrUpdateSrp(loginKey);
                 },
               );
@@ -245,10 +241,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       }
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {
-      await showGenericErrorBottomSheet(
-        context: context,
-        error: e,
-      );
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 }

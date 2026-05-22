@@ -109,9 +109,7 @@ class _InputSheetState extends State<InputSheet> {
           autocorrect: !widget.isPasswordInput,
           decoration: InputDecoration(
             hintText: widget.hintText,
-            hintStyle: textTheme.body.copyWith(
-              color: colorScheme.textMuted,
-            ),
+            hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
             filled: true,
             fillColor: colorScheme.fillFaint,
             contentPadding: const EdgeInsets.symmetric(
@@ -124,9 +122,7 @@ class _InputSheetState extends State<InputSheet> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: colorScheme.strokeFaint,
-              ),
+              borderSide: BorderSide(color: colorScheme.strokeFaint),
             ),
             suffixIcon: widget.isPasswordInput
                 ? IconButton(
@@ -145,9 +141,7 @@ class _InputSheetState extends State<InputSheet> {
                 : null,
             counterText: "",
           ),
-          style: textTheme.body.copyWith(
-            color: colorScheme.textBase,
-          ),
+          style: textTheme.body.copyWith(color: colorScheme.textBase),
           onSubmitted: (_) => _onSubmit(),
         ),
         const SizedBox(height: 28),

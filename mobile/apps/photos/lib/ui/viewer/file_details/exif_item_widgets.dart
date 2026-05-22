@@ -21,25 +21,16 @@ class BasicExifItemWidget extends StatelessWidget {
       title: exifData["takenOnDevice"] ?? "--",
       subtitleSection: Future.value([
         if (exifData["fNumber"] != null)
-          Text(
-            'ƒ/' + exifData["fNumber"].toString(),
-            style: subtitleTextTheme,
-          ),
+          Text('ƒ/' + exifData["fNumber"].toString(), style: subtitleTextTheme),
         if (exifData["exposureTime"] != null)
-          Text(
-            exifData["exposureTime"],
-            style: subtitleTextTheme,
-          ),
+          Text(exifData["exposureTime"], style: subtitleTextTheme),
         if (exifData["focalLength"] != null)
           Text(
             exifData["focalLength"].toString() + "mm",
             style: subtitleTextTheme,
           ),
         if (exifData["ISO"] != null)
-          Text(
-            "ISO" + exifData["ISO"].toString(),
-            style: subtitleTextTheme,
-          ),
+          Text("ISO" + exifData["ISO"].toString(), style: subtitleTextTheme),
       ]),
     );
   }
@@ -48,11 +39,7 @@ class BasicExifItemWidget extends StatelessWidget {
 class AllExifItemWidget extends StatefulWidget {
   final EnteFile file;
   final Map<String, IfdTag>? exif;
-  const AllExifItemWidget(
-    this.file,
-    this.exif, {
-    super.key,
-  });
+  const AllExifItemWidget(this.file, this.exif, {super.key});
 
   @override
   State<AllExifItemWidget> createState() => _AllExifItemWidgetState();
@@ -89,19 +76,19 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
     } else if (exif.isNotEmpty) {
       label = AppLocalizations.of(context).viewAllExifData;
       onTap = () => showDialog(
-            useRootNavigator: false,
-            context: context,
-            builder: (BuildContext context) {
-              return ExifInfoDialog(file);
-            },
-            barrierColor: backdropFaintDark,
-          );
+        useRootNavigator: false,
+        context: context,
+        builder: (BuildContext context) {
+          return ExifInfoDialog(file);
+        },
+        barrierColor: backdropFaintDark,
+      );
     } else {
       label = AppLocalizations.of(context).noExifData;
       onTap = () => showShortToast(
-            context,
-            AppLocalizations.of(context).thisImageHasNoExifData,
-          );
+        context,
+        AppLocalizations.of(context).thisImageHasNoExifData,
+      );
     }
     setState(() {
       _onTap = onTap;

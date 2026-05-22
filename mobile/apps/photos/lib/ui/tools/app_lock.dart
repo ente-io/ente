@@ -141,10 +141,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   }
 
   Widget get _lockScreen {
-    return PopScope(
-      canPop: false,
-      child: this.widget.lockScreen,
-    );
+    return PopScope(canPop: false, child: this.widget.lockScreen);
   }
 
   /// Causes `AppLock` to either pop the [lockScreen] if the app is already running
@@ -199,8 +196,10 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
 
   void _didUnlockOnAppLaunch(Object? args) {
     this._didUnlockForAppLaunch = true;
-    _navigatorKey.currentState!
-        .pushReplacementNamed('/unlocked', arguments: args);
+    _navigatorKey.currentState!.pushReplacementNamed(
+      '/unlocked',
+      arguments: args,
+    );
   }
 
   void _didUnlockOnAppPaused() {

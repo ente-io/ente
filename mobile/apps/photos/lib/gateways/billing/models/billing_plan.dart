@@ -4,10 +4,7 @@ class BillingPlans {
   final List<BillingPlan> plans;
   final FreePlan freePlan;
 
-  BillingPlans({
-    required this.plans,
-    required this.freePlan,
-  });
+  BillingPlans({required this.plans, required this.freePlan});
 
   Map<String, dynamic> toMap() {
     return {
@@ -42,11 +39,7 @@ class FreePlan {
   });
 
   Map<String, dynamic> toMap() {
-    return {
-      'storage': storage,
-      'duration': duration,
-      'period': period,
-    };
+    return {'storage': storage, 'duration': duration, 'period': period};
   }
 
   static fromMap(Map<String, dynamic>? map) {

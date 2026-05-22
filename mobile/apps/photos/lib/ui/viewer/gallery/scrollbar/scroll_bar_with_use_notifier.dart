@@ -207,12 +207,12 @@ class _MaterialScrollbar extends RawScrollbar {
     super.interactive,
     super.scrollbarOrientation,
   }) : super(
-          fadeDuration: _kScrollbarFadeDuration,
-          timeToFade: _kScrollbarTimeToFade,
-          pressDuration: Duration.zero,
-          notificationPredicate:
-              notificationPredicate ?? defaultScrollNotificationPredicate,
-        );
+         fadeDuration: _kScrollbarFadeDuration,
+         timeToFade: _kScrollbarTimeToFade,
+         pressDuration: Duration.zero,
+         notificationPredicate:
+             notificationPredicate ?? defaultScrollNotificationPredicate,
+       );
 
   @override
   _MaterialScrollbarState createState() => _MaterialScrollbarState();
@@ -247,9 +247,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       });
 
   Set<WidgetState> get _states => <WidgetState>{
-        if (_dragIsActive) WidgetState.dragged,
-        if (_hoverIsActive) WidgetState.hovered,
-      };
+    if (_dragIsActive) WidgetState.dragged,
+    if (_hoverIsActive) WidgetState.hovered,
+  };
 
   WidgetStateProperty<Color> get _thumbColor {
     if (widget.showThumb == false) {
@@ -383,10 +383,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness.resolve(_states)
-      ..radius = widget.radius ??
+      ..radius =
+          widget.radius ??
           _scrollbarTheme.radius ??
           (_useAndroidScrollbar ? null : _kScrollbarRadius)
-      ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ??
+      ..crossAxisMargin =
+          _scrollbarTheme.crossAxisMargin ??
           (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = widget.minScrollbarLength

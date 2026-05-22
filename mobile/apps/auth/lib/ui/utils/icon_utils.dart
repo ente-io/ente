@@ -33,10 +33,12 @@ class IconUtils {
       final simpleIterator = _simpleIcons.entries.iterator;
       final customIterator = _customIcons.entries.iterator;
 
-      var simpleEntry =
-          simpleIterator.moveNext() ? simpleIterator.current : null;
-      var customEntry =
-          customIterator.moveNext() ? customIterator.current : null;
+      var simpleEntry = simpleIterator.moveNext()
+          ? simpleIterator.current
+          : null;
+      var customEntry = customIterator.moveNext()
+          ? customIterator.current
+          : null;
 
       String simpleIconPath, customIconPath;
 
@@ -51,8 +53,9 @@ class IconUtils {
             );
             processedIconPaths.add(simpleIconPath);
           }
-          simpleEntry =
-              simpleIterator.moveNext() ? simpleIterator.current : null;
+          simpleEntry = simpleIterator.moveNext()
+              ? simpleIterator.current
+              : null;
         } else {
           customIconPath =
               "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
@@ -66,8 +69,9 @@ class IconUtils {
             );
             processedIconPaths.add(customIconPath);
           }
-          customEntry =
-              customIterator.moveNext() ? customIterator.current : null;
+          customEntry = customIterator.moveNext()
+              ? customIterator.current
+              : null;
         }
       }
 
@@ -108,11 +112,7 @@ class IconUtils {
     }
   }
 
-  Widget getIcon(
-    BuildContext context,
-    String provider, {
-    double width = 24,
-  }) {
+  Widget getIcon(BuildContext context, String provider, {double width = 24}) {
     try {
       final providerTitle = _getProviderTitle(provider);
       final List<String> titlesList = [providerTitle];
@@ -147,11 +147,9 @@ class IconUtils {
         return const SizedBox.shrink();
       }
     } catch (e, s) {
-      Logger("IconUtils").warning(
-        "Failed to get icon for provider '$provider'",
-        e,
-        s,
-      );
+      Logger(
+        "IconUtils",
+      ).warning("Failed to get icon for provider '$provider'", e, s);
       return _fallbackAvatar(provider, width, context);
     }
   }
@@ -170,23 +168,19 @@ class IconUtils {
         width: width,
         semanticsLabel: title,
         colorFilter: iconColor != null
-            ? ColorFilter.mode(
-                iconColor,
-                BlendMode.srcIn,
-              )
+            ? ColorFilter.mode(iconColor, BlendMode.srcIn)
             : null,
         errorBuilder: (context, error, stackTrace) {
-          Logger("IconUtils")
-              .warning("Failed to load icon $path", error, stackTrace);
+          Logger(
+            "IconUtils",
+          ).warning("Failed to load icon $path", error, stackTrace);
           return _fallbackAvatar(title, width, context);
         },
       );
     } catch (e, s) {
-      Logger("IconUtils").warning(
-        "Failed to create SVG icon for '$title' at path '$path'",
-        e,
-        s,
-      );
+      Logger(
+        "IconUtils",
+      ).warning("Failed to create SVG icon for '$title' at path '$path'", e, s);
       return _fallbackAvatar(title, width, context);
     }
   }
@@ -197,18 +191,18 @@ class IconUtils {
     final bool showLargeIcon = width > 24;
     return CircleAvatar(
       radius: width / 2,
-      backgroundColor: getEnteColorScheme(context).avatarColors[
-          providerTitle.hashCode %
+      backgroundColor:
+          getEnteColorScheme(context).avatarColors[providerTitle.hashCode %
               getEnteColorScheme(context).avatarColors.length],
       child: Text(
         providerTitle.toUpperCase()[0],
         style: showLargeIcon
-            ? getEnteTextTheme(context)
-                .h3Bold
-                .copyWith(color: Colors.white, fontSize: width * 0.6)
-            : getEnteTextTheme(context)
-                .body
-                .copyWith(color: Colors.white, fontSize: width * 0.6),
+            ? getEnteTextTheme(
+                context,
+              ).h3Bold.copyWith(color: Colors.white, fontSize: width * 0.6)
+            : getEnteTextTheme(
+                context,
+              ).body.copyWith(color: Colors.white, fontSize: width * 0.6),
       ),
     );
   }
@@ -241,17 +235,20 @@ class IconUtils {
 
   Future<void> _loadJson() async {
     try {
-      final simpleIconData = await rootBundle
-          .loadString('assets/simple-icons/_data/simple-icons.json');
+      final simpleIconData = await rootBundle.loadString(
+        'assets/simple-icons/_data/simple-icons.json',
+      );
       final simpleIcons = json.decode(simpleIconData);
       for (final icon in simpleIcons) {
         _simpleIcons[icon["title"]
-            .toString()
-            .replaceAll(' ', '')
-            .toLowerCase()] = icon["hex"];
+                .toString()
+                .replaceAll(' ', '')
+                .toLowerCase()] =
+            icon["hex"];
       }
-      final customIconData = await rootBundle
-          .loadString('assets/custom-icons/_data/custom-icons.json');
+      final customIconData = await rootBundle.loadString(
+        'assets/custom-icons/_data/custom-icons.json',
+      );
       final customIcons = json.decode(customIconData);
       for (final icon in customIcons["icons"]) {
         _customIcons[icon["title"]
@@ -263,8 +260,10 @@ class IconUtils {
         );
         if (icon["altNames"] != null) {
           for (final name in icon["altNames"]) {
-            _customIcons[name.toString().replaceAll(' ', '').toLowerCase()] =
-                CustomIconData(
+            _customIcons[name
+                .toString()
+                .replaceAll(' ', '')
+                .toLowerCase()] = CustomIconData(
               icon["slug"] ?? ((icon["title"] as String).toLowerCase()),
               icon["hex"],
             );

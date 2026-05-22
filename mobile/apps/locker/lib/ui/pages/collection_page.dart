@@ -46,7 +46,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     with SearchMixin {
   final _logger = Logger("CollectionPage");
   late StreamSubscription<CollectionsUpdatedEvent>
-      _collectionUpdateSubscription;
+  _collectionUpdateSubscription;
 
   late Collection _collection;
   List<EnteFile> _files = [];
@@ -115,8 +115,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   void initState() {
     super.initState();
     _initializeData(widget.collection);
-    _collectionUpdateSubscription =
-        Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+    _collectionUpdateSubscription = Bus.instance.on<CollectionsUpdatedEvent>().listen((
+      event,
+    ) async {
       _logger.info(
         "CollectionsUpdatedEvent received on CollectionPage (${widget.collection.id}): ${event.source}",
       );
@@ -167,9 +168,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           collectionViewType != CollectionViewType.hiddenOwnedCollection &&
           collectionViewType != CollectionViewType.favorite &&
           !isQuickLink)) {
-        throw Exception(
-          "Cannot share collection of type $collectionViewType",
-        );
+        throw Exception("Cannot share collection of type $collectionViewType");
       }
 
       await showShareCollectionSheet(context, collection: _collection);
@@ -200,9 +199,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             onTap: () {
               Navigator.pop(context);
             },
-            child: const Icon(
-              Icons.arrow_back_outlined,
-            ),
+            child: const Icon(Icons.arrow_back_outlined),
           ),
         ),
         backgroundColor: colorScheme.backgroundBase,
@@ -226,7 +223,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     if (isFavorite) {
       return const SizedBox.shrink();
     }
-    final canShare = collectionViewType == CollectionViewType.ownedCollection ||
+    final canShare =
+        collectionViewType == CollectionViewType.ownedCollection ||
         collectionViewType == CollectionViewType.hiddenOwnedCollection ||
         collectionViewType == CollectionViewType.sharedCollectionViewer ||
         collectionViewType == CollectionViewType.sharedCollectionCollaborator ||
@@ -256,8 +254,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     if (isFavorite) {
       return SizedBox.fromSize();
     }
-    final canManageCollection = collectionViewType ==
-            CollectionViewType.ownedCollection ||
+    final canManageCollection =
+        collectionViewType == CollectionViewType.ownedCollection ||
         collectionViewType == CollectionViewType.hiddenOwnedCollection ||
         collectionViewType == CollectionViewType.sharedCollectionViewer ||
         collectionViewType == CollectionViewType.sharedCollectionCollaborator ||

@@ -78,45 +78,42 @@ class ImportCodePage extends StatelessWidget {
               actionIcons: const [],
             ),
             SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (delegateBuildContext, index) {
-                  final type = importOptions[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        if (index == 0)
-                          const SizedBox(
-                            height: 24,
-                          ),
-                        MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: getTitle(context, type),
-                          ),
-                          alignCaptionedTextToLeft: true,
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
-                          pressedColor: getEnteColorScheme(context).fillFaint,
-                          trailingIcon: Icons.chevron_right_outlined,
-                          isBottomBorderRadiusRemoved:
-                              index != importOptions.length - 1,
-                          isTopBorderRadiusRemoved: index != 0,
-                          onTap: () async {
-                            await ImportService().initiateImport(context, type);
-                            // routeToPage(context, ImportCodePage());
-                            // _showImportInstructionDialog(context);
-                          },
+              delegate: SliverChildBuilderDelegate((
+                delegateBuildContext,
+                index,
+              ) {
+                final type = importOptions[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      if (index == 0) const SizedBox(height: 24),
+                      MenuItemWidget(
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: getTitle(context, type),
                         ),
-                        if (index != importOptions.length - 1)
-                          DividerWidget(
-                            dividerType: DividerType.menu,
-                            bgColor: getEnteColorScheme(context).fillFaint,
-                          ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: importOptions.length,
-              ),
+                        alignCaptionedTextToLeft: true,
+                        menuItemColor: getEnteColorScheme(context).fillFaint,
+                        pressedColor: getEnteColorScheme(context).fillFaint,
+                        trailingIcon: Icons.chevron_right_outlined,
+                        isBottomBorderRadiusRemoved:
+                            index != importOptions.length - 1,
+                        isTopBorderRadiusRemoved: index != 0,
+                        onTap: () async {
+                          await ImportService().initiateImport(context, type);
+                          // routeToPage(context, ImportCodePage());
+                          // _showImportInstructionDialog(context);
+                        },
+                      ),
+                      if (index != importOptions.length - 1)
+                        DividerWidget(
+                          dividerType: DividerType.menu,
+                          bgColor: getEnteColorScheme(context).fillFaint,
+                        ),
+                    ],
+                  ),
+                );
+              }, childCount: importOptions.length),
             ),
           ],
         ),

@@ -31,23 +31,11 @@ import "package:photos/utils/dialog_util.dart";
 import 'package:rive/rive.dart' as rive;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-enum SimilarImagesPageState {
-  setup,
-  loading,
-  results,
-}
+enum SimilarImagesPageState { setup, loading, results }
 
-enum SortKey {
-  size,
-  recent,
-  count,
-}
+enum SortKey { size, recent, count }
 
-enum TabFilter {
-  close,
-  similar,
-  related,
-}
+enum TabFilter { close, similar, related }
 
 class SimilarImagesPage extends StatefulWidget {
   final bool debugScreen;
@@ -253,22 +241,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
-          Text(
-            "Similarity threshold",
-            style: textTheme.bodyBold,
-          ),
+          Text("Similarity threshold", style: textTheme.bodyBold),
           const SizedBox(height: 8),
-          Text(
-            "Lower values mean a closer match.",
-            style: textTheme.miniMuted,
-          ),
+          Text("Lower values mean a closer match.", style: textTheme.miniMuted),
           const SizedBox(height: 16),
           Row(
             children: [
-              Text(
-                "0.01",
-                style: textTheme.mini,
-              ),
+              Text("0.01", style: textTheme.mini),
               Expanded(
                 child: Slider(
                   value: _distanceThreshold,
@@ -283,10 +262,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                   },
                 ),
               ),
-              Text(
-                "0.15",
-                style: textTheme.mini,
-              ),
+              Text("0.15", style: textTheme.mini),
             ],
           ),
           Text(
@@ -298,10 +274,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Exact search",
-                style: textTheme.bodyBold,
-              ),
+              Text("Exact search", style: textTheme.bodyBold),
               ToggleSwitchWidget(
                 value: () => _exactSearch,
                 onChanged: () async {
@@ -317,10 +290,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Full refresh",
-                style: textTheme.bodyBold,
-              ),
+              Text("Full refresh", style: textTheme.bodyBold),
               ToggleSwitchWidget(
                 value: () => _fullRefresh,
                 onChanged: () async {
@@ -415,9 +385,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                     return Column(
                       children: [
                         if (index == 0) const SizedBox(height: 16),
-                        RepaintBoundary(
-                          child: _buildSimilarFilesGroup(group),
-                        ),
+                        RepaintBoundary(child: _buildSimilarFilesGroup(group)),
                       ],
                     );
                   },
@@ -684,9 +652,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         exact: _exactSearch,
         forceRefresh: _fullRefresh,
       );
-      _logger.info(
-        "Found ${similarFiles.length} groups of similar images",
-      );
+      _logger.info("Found ${similarFiles.length} groups of similar images");
 
       _similarFilesList = similarFiles;
       _pageState = SimilarImagesPageState.results;
@@ -939,10 +905,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
-              Text(
-                formatBytes(file.fileSize!),
-                style: textTheme.miniMuted,
-              ),
+              Text(formatBytes(file.fileSize!), style: textTheme.miniMuted),
               const SizedBox(height: 16),
             ],
           ),
@@ -977,11 +940,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.delete_outline,
-              size: 12,
-              color: colorScheme.warning500,
-            ),
+            Icon(Icons.delete_outline, size: 12, color: colorScheme.warning500),
             const SizedBox(width: 4),
             Text(
               AppLocalizations.of(context).deleteWithCount(count: files.length),
@@ -1064,13 +1023,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
       } else {
         final visiblePositions =
             _itemPositionsListener.itemPositions.value
-                .where(
-                  (p) => p.index >= 0 && p.index < beforeFiltered.length,
-                )
+                .where((p) => p.index >= 0 && p.index < beforeFiltered.length)
                 .toList()
-              ..sort(
-                (a, b) => a.itemLeadingEdge.compareTo(b.itemLeadingEdge),
-              );
+              ..sort((a, b) => a.itemLeadingEdge.compareTo(b.itemLeadingEdge));
         int? lastVisibleIndex;
         for (final position in visiblePositions) {
           final idx = position.index;
@@ -1211,32 +1166,25 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
       barrierDismissible: true,
       builder: (context) => AlertDialog(
         backgroundColor: colorScheme.backgroundElevated,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.all(24),
         content: SizedBox(
           width: screenWidth - (crossAxisSpacing),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(
-                "assets/ducky_cleaning_static.svg",
-                height: 160,
-              ),
+              SvgPicture.asset("assets/ducky_cleaning_static.svg", height: 160),
               const SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context).hoorayyyy,
-                style: textTheme.h2Bold.copyWith(
-                  color: colorScheme.primary500,
-                ),
+                style: textTheme.h2Bold.copyWith(color: colorScheme.primary500),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                AppLocalizations.of(context).cleanedUpSimilarImages(
-                  size: formatBytes(totalSize),
-                ),
+                AppLocalizations.of(
+                  context,
+                ).cleanedUpSimilarImages(size: formatBytes(totalSize)),
                 style: textTheme.body,
                 textAlign: TextAlign.center,
               ),
@@ -1273,21 +1221,14 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
           text = AppLocalizations.of(context).count;
           break;
       }
-      return Text(
-        text,
-        style: textTheme.miniBold,
-      );
+      return Text(text, style: textTheme.miniBold);
     }
 
     return PopupMenuButton(
       initialValue: _sortKey.index,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
-        child: Icon(
-          Icons.sort,
-          color: colorScheme.strokeBase,
-          size: 20,
-        ),
+        child: Icon(Icons.sort, color: colorScheme.strokeBase, size: 20),
       ),
       onSelected: (int index) {
         if (_isDisposed) return;

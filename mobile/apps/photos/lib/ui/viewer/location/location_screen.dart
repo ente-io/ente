@@ -44,8 +44,9 @@ class _LocationScreenState extends State<LocationScreen> {
   Widget build(BuildContext context) {
     final heightOfStatusBar = MediaQuery.of(context).viewPadding.top;
     const heightOfAppBar = 90.0;
-    final locationTag =
-        InheritedLocationScreenState.of(context).locationTagEntity.item;
+    final locationTag = InheritedLocationScreenState.of(
+      context,
+    ).locationTagEntity.item;
 
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
@@ -68,7 +69,8 @@ class _LocationScreenState extends State<LocationScreen> {
             body: Column(
               children: <Widget>[
                 SizedBox(
-                  height: MediaQuery.of(context).size.height -
+                  height:
+                      MediaQuery.of(context).size.height -
                       (heightOfAppBar + heightOfStatusBar),
                   width: double.infinity,
                   child: LocationGalleryWidget(
@@ -108,37 +110,38 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   void initState() {
     super.initState();
 
-    final collectionsToHide =
-        CollectionsService.instance.getHiddenCollectionIds();
+    final collectionsToHide = CollectionsService.instance
+        .getHiddenCollectionIds();
     fileLoadResult = FilesDB.instance
         .fetchAllUploadedAndSharedFilesWithLocation(
-      galleryLoadStartTime,
-      galleryLoadEndTime,
-      limit: null,
-      asc: false,
-      filterOptions: DBFilterOptions(
-        ignoredCollectionIDs: collectionsToHide,
-        hideIgnoredForUpload: true,
-      ),
-    )
+          galleryLoadStartTime,
+          galleryLoadEndTime,
+          limit: null,
+          asc: false,
+          filterOptions: DBFilterOptions(
+            ignoredCollectionIDs: collectionsToHide,
+            hideIgnoredForUpload: true,
+          ),
+        )
         .then((value) {
-      allFilesWithLocation = value.files;
-      _filesUpdateEvent =
-          Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-        if (event.type == EventType.deletedFromDevice ||
-            event.type == EventType.deletedFromEverywhere ||
-            event.type == EventType.deletedFromRemote ||
-            event.type == EventType.hide) {
-          for (var updatedFile in event.updatedFiles) {
-            allFilesWithLocation.remove(updatedFile);
-          }
-          if (mounted) {
-            setState(() {});
-          }
-        }
-      });
-      return value;
-    });
+          allFilesWithLocation = value.files;
+          _filesUpdateEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen(
+            (event) {
+              if (event.type == EventType.deletedFromDevice ||
+                  event.type == EventType.deletedFromEverywhere ||
+                  event.type == EventType.deletedFromRemote ||
+                  event.type == EventType.hide) {
+                for (var updatedFile in event.updatedFiles) {
+                  allFilesWithLocation.remove(updatedFile);
+                }
+                if (mounted) {
+                  setState(() {});
+                }
+              }
+            },
+          );
+          return value;
+        });
   }
 
   @override
@@ -150,12 +153,12 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedRadius =
-        InheritedLocationScreenState.of(context).locationTagEntity.item.radius;
-    final centerPoint = InheritedLocationScreenState.of(context)
-        .locationTagEntity
-        .item
-        .centerPoint;
+    final selectedRadius = InheritedLocationScreenState.of(
+      context,
+    ).locationTagEntity.item.radius;
+    final centerPoint = InheritedLocationScreenState.of(
+      context,
+    ).locationTagEntity.item.centerPoint;
 
     Future<FileLoadResult> filterFiles() async {
       //waiting for allFilesWithLocation to be initialized
@@ -176,12 +179,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       InheritedLocationScreenState.memoryCountNotifier.value =
           filesInLocation.length;
 
-      return Future.value(
-        FileLoadResult(
-          filesInLocation,
-          false,
-        ),
-      );
+      return Future.value(FileLoadResult(filesInLocation, false));
     }
 
     return FutureBuilder(
@@ -197,9 +195,9 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                 Builder(
                   builder: (context) {
                     return ValueListenableBuilder(
-                      valueListenable: InheritedSearchFilterData.of(context)
-                          .searchFilterDataProvider!
-                          .isSearchingNotifier,
+                      valueListenable: InheritedSearchFilterData.of(
+                        context,
+                      ).searchFilterDataProvider!.isSearchingNotifier,
                       builder: (context, value, _) {
                         return value
                             ? HierarchicalSearchGallery(
@@ -210,21 +208,23 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                                 loadingWidget: Column(
                                   children: [
                                     EnteLoadingWidget(
-                                      color: getEnteColorScheme(context)
-                                          .strokeMuted,
+                                      color: getEnteColorScheme(
+                                        context,
+                                      ).strokeMuted,
                                     ),
                                   ],
                                 ),
-                                asyncLoader: (
-                                  creationStartTime,
-                                  creationEndTime, {
-                                  limit,
-                                  asc,
-                                }) async {
-                                  return snapshot.data as FileLoadResult;
-                                },
-                                reloadEvent:
-                                    Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                                asyncLoader:
+                                    (
+                                      creationStartTime,
+                                      creationEndTime, {
+                                      limit,
+                                      asc,
+                                    }) async {
+                                      return snapshot.data as FileLoadResult;
+                                    },
+                                reloadEvent: Bus.instance
+                                    .on<LocalPhotosUpdatedEvent>(),
                                 removalEventTypes: const {
                                   EventType.deletedFromRemote,
                                   EventType.deletedFromEverywhere,
@@ -244,13 +244,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             ),
           );
         } else {
-          return const Column(
-            children: [
-              Expanded(
-                child: EnteLoadingWidget(),
-              ),
-            ],
-          );
+          return const Column(children: [Expanded(child: EnteLoadingWidget())]);
         }
       },
       future: filterFiles(),

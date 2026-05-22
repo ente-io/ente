@@ -33,19 +33,11 @@ class EnteCryptoDartAdapter implements CryptoApi {
       _mapEncryptionResult(dart_impl.CryptoUtil.encryptSync(source, key));
 
   @override
-  Future<Uint8List> decrypt(
-    Uint8List cipher,
-    Uint8List key,
-    Uint8List nonce,
-  ) =>
+  Future<Uint8List> decrypt(Uint8List cipher, Uint8List key, Uint8List nonce) =>
       dart_impl.CryptoUtil.decrypt(cipher, key, nonce);
 
   @override
-  Uint8List decryptSync(
-    Uint8List cipher,
-    Uint8List key,
-    Uint8List nonce,
-  ) =>
+  Uint8List decryptSync(Uint8List cipher, Uint8List key, Uint8List nonce) =>
       dart_impl.CryptoUtil.decryptSync(cipher, key, nonce);
 
   @override
@@ -59,8 +51,7 @@ class EnteCryptoDartAdapter implements CryptoApi {
     Uint8List source,
     Uint8List key,
     Uint8List header,
-  ) =>
-      dart_impl.CryptoUtil.decryptData(source, key, header);
+  ) => dart_impl.CryptoUtil.decryptData(source, key, header);
 
   @override
   Future<EncryptionResult> encryptFile(
@@ -98,13 +89,12 @@ class EnteCryptoDartAdapter implements CryptoApi {
     String destinationFilePath,
     Uint8List header,
     Uint8List key,
-  ) =>
-      dart_impl.CryptoUtil.decryptFile(
-        sourceFilePath,
-        destinationFilePath,
-        header,
-        key,
-      );
+  ) => dart_impl.CryptoUtil.decryptFile(
+    sourceFilePath,
+    destinationFilePath,
+    header,
+    key,
+  );
 
   @override
   Uint8List generateKey() => dart_impl.CryptoUtil.generateKey();
@@ -123,8 +113,7 @@ class EnteCryptoDartAdapter implements CryptoApi {
     Uint8List input,
     Uint8List publicKey,
     Uint8List secretKey,
-  ) =>
-      dart_impl.CryptoUtil.openSealSync(input, publicKey, secretKey);
+  ) => dart_impl.CryptoUtil.openSealSync(input, publicKey, secretKey);
 
   @override
   Uint8List sealSync(Uint8List input, Uint8List publicKey) =>
@@ -160,8 +149,7 @@ class EnteCryptoDartAdapter implements CryptoApi {
     Uint8List salt,
     int memLimit,
     int opsLimit,
-  ) =>
-      dart_impl.CryptoUtil.deriveKey(password, salt, memLimit, opsLimit);
+  ) => dart_impl.CryptoUtil.deriveKey(password, salt, memLimit, opsLimit);
 
   @override
   Future<Uint8List> deriveLoginKey(Uint8List key) =>
@@ -176,14 +164,13 @@ class EnteCryptoDartAdapter implements CryptoApi {
     Uint8List salt,
     int memLimit,
     int opsLimit,
-  ) =>
-      dart_impl.cryptoPwHash(
-        password,
-        salt,
-        memLimit,
-        opsLimit,
-        dart_impl.sodium,
-      );
+  ) => dart_impl.cryptoPwHash(
+    password,
+    salt,
+    memLimit,
+    opsLimit,
+    dart_impl.sodium,
+  );
 
   @override
   int get pwhashMemLimitInteractive =>
@@ -204,9 +191,7 @@ class EnteCryptoDartAdapter implements CryptoApi {
   @override
   Future<Uint8List> getHash(File source) => dart_impl.getHash(source);
 
-  EncryptionResult _mapEncryptionResult(
-    dart_models.EncryptionResult result,
-  ) {
+  EncryptionResult _mapEncryptionResult(dart_models.EncryptionResult result) {
     return EncryptionResult(
       encryptedData: result.encryptedData,
       key: result.key,

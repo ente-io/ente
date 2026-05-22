@@ -172,74 +172,71 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                   horizontal: horizontalEdgePadding,
                 ),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index.isOdd) {
-                        return const SizedBox(
-                          height: ThumbnailListItem.defaultItemSpacing,
-                        );
-                      }
-                      final itemIndex = index ~/ 2;
-                      if (showCTA && itemIndex == 0) {
-                        return SearchableItemPlaceholder(widget.sectionType);
-                      }
-                      final adjustedIndex = showCTA ? itemIndex - 1 : itemIndex;
-                      final result = filteredResults[adjustedIndex];
-                      if (result is AlbumSearchResult) {
-                        return SearchableItemWidget(
-                          result,
-                          resultCount: CollectionsService.instance.getFileCount(
-                            result.collectionWithThumbnail.collection,
-                          ),
-                          onResultTap: () {
-                            RecentSearches().add(result.name());
-                            routeToPage(
-                              context,
-                              CollectionPage(
-                                result.collectionWithThumbnail,
-                                tagPrefix: "searchable_item" + result.heroTag(),
-                              ),
-                            );
-                          },
-                        );
-                      }
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    if (index.isOdd) {
+                      return const SizedBox(
+                        height: ThumbnailListItem.defaultItemSpacing,
+                      );
+                    }
+                    final itemIndex = index ~/ 2;
+                    if (showCTA && itemIndex == 0) {
+                      return SearchableItemPlaceholder(widget.sectionType);
+                    }
+                    final adjustedIndex = showCTA ? itemIndex - 1 : itemIndex;
+                    final result = filteredResults[adjustedIndex];
+                    if (result is AlbumSearchResult) {
+                      return SearchableItemWidget(
+                        result,
+                        resultCount: CollectionsService.instance.getFileCount(
+                          result.collectionWithThumbnail.collection,
+                        ),
+                        onResultTap: () {
+                          RecentSearches().add(result.name());
+                          routeToPage(
+                            context,
+                            CollectionPage(
+                              result.collectionWithThumbnail,
+                              tagPrefix: "searchable_item" + result.heroTag(),
+                            ),
+                          );
+                        },
+                      );
+                    }
 
-                      if (widget.sectionType == SectionType.magic &&
-                          result is GenericSearchResult) {
-                        return SearchableItemWidget(
-                          result,
-                          onResultTap: () {
-                            RecentSearches().add(result.name());
-                            routeToPage(
-                              context,
-                              MagicResultScreen(
-                                result.resultFiles(),
-                                name: result.name(),
-                                enableGrouping:
-                                    result.params["enableGrouping"]! as bool,
-                                fileIdToPosMap:
-                                    result.params["fileIdToPosMap"]
-                                        as Map<int, int>,
-                                heroTag: "searchable_item" + result.heroTag(),
-                                magicFilter:
-                                    result.getHierarchicalSearchFilter()
-                                        as MagicFilter,
-                              ),
-                            );
-                          },
-                        );
-                      } else if (result is GenericSearchResult) {
-                        return SearchableItemWidget(
-                          result,
-                          onResultTap: result.onResultTap != null
-                              ? () => result.onResultTap!(context)
-                              : null,
-                        );
-                      }
-                      return SearchableItemWidget(result);
-                    },
-                    childCount: totalItems * 2 - 1,
-                  ),
+                    if (widget.sectionType == SectionType.magic &&
+                        result is GenericSearchResult) {
+                      return SearchableItemWidget(
+                        result,
+                        onResultTap: () {
+                          RecentSearches().add(result.name());
+                          routeToPage(
+                            context,
+                            MagicResultScreen(
+                              result.resultFiles(),
+                              name: result.name(),
+                              enableGrouping:
+                                  result.params["enableGrouping"]! as bool,
+                              fileIdToPosMap:
+                                  result.params["fileIdToPosMap"]
+                                      as Map<int, int>,
+                              heroTag: "searchable_item" + result.heroTag(),
+                              magicFilter:
+                                  result.getHierarchicalSearchFilter()
+                                      as MagicFilter,
+                            ),
+                          );
+                        },
+                      );
+                    } else if (result is GenericSearchResult) {
+                      return SearchableItemWidget(
+                        result,
+                        onResultTap: result.onResultTap != null
+                            ? () => result.onResultTap!(context)
+                            : null,
+                      );
+                    }
+                    return SearchableItemWidget(result);
+                  }, childCount: totalItems * 2 - 1),
                 ),
               ),
             );

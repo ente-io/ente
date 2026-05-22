@@ -32,10 +32,10 @@ void main() {
 
 class _TestFilter extends HierarchicalSearchFilter {
   _TestFilter()
-      : super(
-          filterTypeName: "topLevelGenericFilter",
-          matchedUploadedIDs: <int>{},
-        );
+    : super(
+        filterTypeName: "topLevelGenericFilter",
+        matchedUploadedIDs: <int>{},
+      );
 
   @override
   IconData? icon() => null;

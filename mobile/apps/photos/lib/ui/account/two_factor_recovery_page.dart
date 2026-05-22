@@ -127,9 +127,9 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                   showAlertBottomSheet(
                     context,
                     title: AppLocalizations.of(context).contactSupport,
-                    message: AppLocalizations.of(context).dropSupportEmail(
-                      supportEmail: "support@ente.com",
-                    ),
+                    message: AppLocalizations.of(
+                      context,
+                    ).dropSupportEmail(supportEmail: "support@ente.com"),
                     assetPath: 'assets/warning-green.png',
                   );
                 },

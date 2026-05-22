@@ -51,10 +51,7 @@ class AlbumListItemWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(
-    BuildContext context, {
-    required bool isSelected,
-  }) {
+  Widget _buildItem(BuildContext context, {required bool isSelected}) {
     final bool isOwner = collection.isOwner(
       Configuration.instance.getUserID() ?? -1,
     );
@@ -96,9 +93,9 @@ class AlbumListItemWidget extends StatelessWidget {
         builder: (context, snapshot) {
           String countText = "";
           if (snapshot.hasData) {
-            countText = AppLocalizations.of(context).itemCount(
-              count: snapshot.data!,
-            );
+            countText = AppLocalizations.of(
+              context,
+            ).itemCount(count: snapshot.data!);
           } else if (snapshot.hasError) {
             Logger("AlbumListItemWidget").severe(
               "Failed to fetch file count of collection",
@@ -109,9 +106,9 @@ class AlbumListItemWidget extends StatelessWidget {
               collection,
             );
             if (cachedCount != null) {
-              countText = AppLocalizations.of(context).itemCount(
-                count: cachedCount,
-              );
+              countText = AppLocalizations.of(
+                context,
+              ).itemCount(count: cachedCount);
             }
           }
           return _buildSubtitle(
@@ -192,11 +189,7 @@ class AlbumListItemWidget extends StatelessWidget {
               strokeWidth: 2.0,
             ),
           if (isFavoriteAlbum)
-            Icon(
-              EnteIcons.favoriteFilled,
-              size: 12,
-              color: colors.primary,
-            ),
+            Icon(EnteIcons.favoriteFilled, size: 12, color: colors.primary),
         ],
       ],
     );
@@ -211,9 +204,7 @@ class AlbumListItemWidget extends StatelessWidget {
     final double slotOverlap = getOverlapPadding(AvatarType.medium);
 
     if (isSelected) {
-      return const CollectionSelectedBadge(
-        key: ValueKey("selected"),
-      );
+      return const CollectionSelectedBadge(key: ValueKey("selected"));
     }
     if (!isOwner) {
       return UserAvatarWidget(

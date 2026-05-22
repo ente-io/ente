@@ -174,8 +174,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             dotsCount: _featureCount,
                             position: _activeDotIndex,
                             animate: true,
-                            animationDuration:
-                                const Duration(milliseconds: 300),
+                            animationDuration: const Duration(
+                              milliseconds: 300,
+                            ),
                             decorator: DotsDecorator(
                               activeColor: Colors.white,
                               color: Colors.white.withValues(alpha: 0.32),
@@ -212,15 +213,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               child: Text.rich(
                                 TextSpan(
                                   text: "${l10n.dontHaveAccount} ",
-                                  style:
-                                      getEnteTextTheme(context).body.copyWith(
-                                            color: Colors.white,
-                                          ),
+                                  style: getEnteTextTheme(
+                                    context,
+                                  ).body.copyWith(color: Colors.white),
                                   children: [
                                     TextSpan(
                                       text: l10n.signUp,
-                                      style: getEnteTextTheme(context)
-                                          .bodyBold
+                                      style: getEnteTextTheme(context).bodyBold
                                           .copyWith(
                                             color: Colors.white,
                                             decoration:
@@ -260,10 +259,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         controller: _pageController,
         itemBuilder: (context, index) {
           final feature = features[index % features.length];
-          return FeatureItemWidget(
-            feature.$1,
-            feature.$2,
-          );
+          return FeatureItemWidget(feature.$1, feature.$2);
         },
         onPageChanged: (index) {
           setState(() {
@@ -291,10 +287,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         );
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
-        page = PasswordReentryPage(
-          Configuration.instance,
-          const HomePage(),
-        );
+        page = PasswordReentryPage(Configuration.instance, const HomePage());
       } else {
         // All is well
         page = const HomePage();
@@ -324,10 +317,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         );
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
-        page = PasswordReentryPage(
-          Configuration.instance,
-          const HomePage(),
-        );
+        page = PasswordReentryPage(Configuration.instance, const HomePage());
       } else {
         // All is well, user just has not subscribed
         // page = getSubscriptionPage(isOnBoarding: true);
@@ -360,10 +350,7 @@ class FeatureItemWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Image.asset(
-          assetPath,
-          height: 200,
-        ),
+        Image.asset(assetPath, height: 200),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

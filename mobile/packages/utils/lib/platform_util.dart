@@ -9,8 +9,8 @@ class PlatformUtil {
   static TextSelectionControls get selectionControls => Platform.isAndroid
       ? materialTextSelectionControls
       : Platform.isIOS
-          ? cupertinoTextSelectionControls
-          : desktopTextSelectionControls;
+      ? cupertinoTextSelectionControls
+      : desktopTextSelectionControls;
 
   static openWebView(BuildContext context, String title, String url) async {
     // For desktop, always open in external browser

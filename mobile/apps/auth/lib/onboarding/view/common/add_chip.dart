@@ -4,10 +4,7 @@ import "package:flutter/material.dart";
 class AddChip extends StatelessWidget {
   final VoidCallback? onTap;
 
-  const AddChip({
-    super.key,
-    this.onTap,
-  });
+  const AddChip({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {

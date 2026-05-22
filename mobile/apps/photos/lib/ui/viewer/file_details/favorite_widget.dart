@@ -12,10 +12,7 @@ import "package:rive/rive.dart" as rive;
 class FavoriteWidget extends StatefulWidget {
   final EnteFile file;
 
-  const FavoriteWidget(
-    this.file, {
-    super.key,
-  });
+  const FavoriteWidget(this.file, {super.key});
 
   @override
   State<StatefulWidget> createState() => _FavoriteWidgetState();
@@ -178,9 +175,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
         height: 30,
         child: rive.RiveWidgetBuilder(
           fileLoader: _riveFileLoader,
-          stateMachineSelector: const rive.StateMachineNamed(
-            "State Machine 1",
-          ),
+          stateMachineSelector: const rive.StateMachineNamed("State Machine 1"),
           onLoaded: _handleRiveLoaded,
           builder: (BuildContext context, rive.RiveState state) {
             if (state is rive.RiveLoaded) {
@@ -190,9 +185,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
               );
             }
             if (state is rive.RiveFailed) {
-              _logger.warning(
-                "Failed to load Rive file: ${state.error}",
-              );
+              _logger.warning("Failed to load Rive file: ${state.error}");
             }
             // Loading state
             return const SizedBox.shrink();

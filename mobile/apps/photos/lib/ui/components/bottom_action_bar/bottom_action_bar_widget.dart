@@ -40,9 +40,7 @@ class BottomActionBarWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? colors.backgroundBase,
-        border: Border(
-          top: BorderSide(color: colors.strokeDark),
-        ),
+        border: Border(top: BorderSide(color: colors.strokeDark)),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -66,10 +64,7 @@ class BottomActionBarWidget extends StatelessWidget {
             clusterID: clusterID,
           ),
           const DividerWidget(dividerType: DividerType.bottomBar),
-          ActionBarWidget(
-            selectedFiles: selectedFiles,
-            onCancel: onCancel,
-          ),
+          ActionBarWidget(selectedFiles: selectedFiles, onCancel: onCancel),
           // const SizedBox(height: 2)
         ],
       ),

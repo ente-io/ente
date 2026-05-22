@@ -5,9 +5,7 @@ import "package:photos/ui/account/email_entry_page.dart";
 import "package:photos/ui/components/banners/banner_action_button.dart";
 
 class EmptyOnEnteSection extends StatelessWidget {
-  const EmptyOnEnteSection({
-    super.key,
-  });
+  const EmptyOnEnteSection({super.key});
 
   @override
   Widget build(BuildContext context) {

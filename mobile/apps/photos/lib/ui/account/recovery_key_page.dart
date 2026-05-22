@@ -78,9 +78,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 },
               ),
       ),
-      body: SafeArea(
-        child: _getBody(recoveryKey, colorScheme, textTheme),
-      ),
+      body: SafeArea(child: _getBody(recoveryKey, colorScheme, textTheme)),
     );
   }
 
@@ -109,18 +107,14 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                   widget.text ??
                       AppLocalizations.of(context).recoveryKeyOnForgotPassword,
                   textAlign: TextAlign.center,
-                  style: textTheme.body.copyWith(
-                    color: colorScheme.textBase,
-                  ),
+                  style: textTheme.body.copyWith(color: colorScheme.textBase),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   widget.subText ??
                       AppLocalizations.of(context).recoveryKeySaveDescription,
                   textAlign: TextAlign.center,
-                  style: textTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
+                  style: textTheme.body.copyWith(color: colorScheme.textMuted),
                 ),
                 const SizedBox(height: 20),
                 Container(
@@ -152,8 +146,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                               );
                               showShortToast(
                                 context,
-                                AppLocalizations.of(context)
-                                    .recoveryKeyCopiedToClipboard,
+                                AppLocalizations.of(
+                                  context,
+                                ).recoveryKeyCopiedToClipboard,
                               );
                             },
                             child: const HugeIcon(
@@ -183,10 +178,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         ),
         if (widget.isOnboarding)
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 18,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
             child: ButtonWidgetV2(
               buttonType: ButtonTypeV2.primary,
               labelText: widget.doneText,

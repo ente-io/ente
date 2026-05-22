@@ -56,10 +56,7 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 widget.leadingIcon != null
-                    ? Icon(
-                        widget.leadingIcon,
-                        size: 16,
-                      )
+                    ? Icon(widget.leadingIcon, size: 16)
                     : const SizedBox.shrink(),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),

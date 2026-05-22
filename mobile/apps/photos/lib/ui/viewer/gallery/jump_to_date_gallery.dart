@@ -132,8 +132,9 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
                   color: getEnteColorScheme(context).strokeMuted,
                 )
               : AnimatedOpacity(
-                  opacity:
-                      _loadState == GalleryLoadState.galleryReady ? 1.0 : 0.0,
+                  opacity: _loadState == GalleryLoadState.galleryReady
+                      ? 1.0
+                      : 0.0,
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeOutQuad,
                   child: SelectionState(
@@ -142,28 +143,30 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         Gallery(
-                          asyncLoader: (
-                            creationStartTime,
-                            creationEndTime, {
-                            limit,
-                            asc,
-                          }) {
-                            final result = files
-                                .where(
-                                  (file) =>
-                                      file.creationTime! >= creationStartTime &&
-                                      file.creationTime! <= creationEndTime,
-                                )
-                                .toList();
-                            return Future.value(
-                              FileLoadResult(
-                                result,
-                                result.length < files.length,
-                              ),
-                            );
-                          },
-                          reloadEvent:
-                              Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                          asyncLoader:
+                              (
+                                creationStartTime,
+                                creationEndTime, {
+                                limit,
+                                asc,
+                              }) {
+                                final result = files
+                                    .where(
+                                      (file) =>
+                                          file.creationTime! >=
+                                              creationStartTime &&
+                                          file.creationTime! <= creationEndTime,
+                                    )
+                                    .toList();
+                                return Future.value(
+                                  FileLoadResult(
+                                    result,
+                                    result.length < files.length,
+                                  ),
+                                );
+                              },
+                          reloadEvent: Bus.instance
+                              .on<LocalPhotosUpdatedEvent>(),
                           removalEventTypes: const {
                             EventType.deletedFromRemote,
                             EventType.deletedFromEverywhere,

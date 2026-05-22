@@ -88,9 +88,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
           const SizedBox(height: _thumbnailToTextSpacing),
           Text(
             AppLocalizations.of(context).addNew,
-            style: TextStyles.body.copyWith(
-              color: colors.textLight,
-            ),
+            style: TextStyles.body.copyWith(color: colors.textLight),
             maxLines: 1,
             softWrap: false,
             overflow: TextOverflow.ellipsis,

@@ -6,9 +6,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 
 class CastChooseDialog extends StatefulWidget {
-  const CastChooseDialog({
-    super.key,
-  });
+  const CastChooseDialog({super.key});
 
   @override
   State<CastChooseDialog> createState() => _CastChooseDialogState();
@@ -21,10 +19,7 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context);
     final AlertDialog alert = AlertDialog(
-      title: Text(
-        context.l10n.playOnTv,
-        style: textStyle.largeBold,
-      ),
+      title: Text(context.l10n.playOnTv, style: textStyle.largeBold),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

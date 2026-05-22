@@ -59,10 +59,7 @@ class SettingsItem extends StatelessWidget {
             ),
             if (trailing != null) trailing!,
             if (trailing == null && showChevron)
-              Icon(
-                Icons.chevron_right,
-                color: colorScheme.textMuted,
-              ),
+              Icon(Icons.chevron_right, color: colorScheme.textMuted),
           ],
         ),
       ),

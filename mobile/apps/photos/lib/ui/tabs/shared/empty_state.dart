@@ -27,8 +27,10 @@ class SharedEmptyStateWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 16,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,13 +45,15 @@ class SharedEmptyStateWidget extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         EmptyStateItemWidget(
-                          AppLocalizations.of(context)
-                              .shareOnlyWithThePeopleYouWant,
+                          AppLocalizations.of(
+                            context,
+                          ).shareOnlyWithThePeopleYouWant,
                         ),
                         const SizedBox(height: 12),
                         EmptyStateItemWidget(
-                          AppLocalizations.of(context)
-                              .usePublicLinksForPeopleNotOnEnte,
+                          AppLocalizations.of(
+                            context,
+                          ).usePublicLinksForPeopleNotOnEnte,
                         ),
                         const SizedBox(height: 12),
                         EmptyStateItemWidget(
@@ -80,8 +84,9 @@ class SharedEmptyStateWidget extends StatelessWidget {
                     const SizedBox(height: 6),
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
-                      labelText:
-                          AppLocalizations.of(context).collectEventPhotos,
+                      labelText: AppLocalizations.of(
+                        context,
+                      ).collectEventPhotos,
                       icon: Icons.add_photo_alternate_outlined,
                       onTap: () async {
                         await onTapCollectEventPhotos(context);
@@ -95,8 +100,9 @@ class SharedEmptyStateWidget extends StatelessWidget {
                       onTap: () async {
                         // ignore: unawaited_futures
                         shareText(
-                          AppLocalizations.of(context)
-                              .shareTextRecommendUsingEnte,
+                          AppLocalizations.of(
+                            context,
+                          ).shareTextRecommendUsingEnte,
                         );
                       },
                     ),
@@ -144,10 +150,7 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
             labelText: AppLocalizations.of(context).shareYourFirstAlbum,
             icon: Icons.add,
             onTap: () async {
-              showToast(
-                context,
-                AppLocalizations.of(context).shareAlbumHint,
-              );
+              showToast(context, AppLocalizations.of(context).shareAlbumHint);
               Bus.instance.fire(
                 TabChangedEvent(1, TabChangedEventSource.collectionsPage),
               );

@@ -19,12 +19,17 @@ import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 const _manifestB64 = String.fromEnvironment("ML_PARITY_MANIFEST_B64");
-const _codeRevision =
-    String.fromEnvironment("ML_PARITY_CODE_REVISION", defaultValue: "local");
-const _localMirrorBaseUrl =
-    String.fromEnvironment("ML_PARITY_LOCAL_MIRROR_BASE_URL");
-const _internalUserRoute =
-    bool.fromEnvironment("ML_PARITY_INTERNAL_USER", defaultValue: false);
+const _codeRevision = String.fromEnvironment(
+  "ML_PARITY_CODE_REVISION",
+  defaultValue: "local",
+);
+const _localMirrorBaseUrl = String.fromEnvironment(
+  "ML_PARITY_LOCAL_MIRROR_BASE_URL",
+);
+const _internalUserRoute = bool.fromEnvironment(
+  "ML_PARITY_INTERNAL_USER",
+  defaultValue: false,
+);
 const _localModelMirrorRelativeDir = ".cache/local_model_mirror";
 
 const _parityReportDataKey = "ml_parity_results_json";
@@ -53,10 +58,7 @@ class _ModelSpec {
   final String schemaName;
   final MlModel model;
 
-  const _ModelSpec({
-    required this.schemaName,
-    required this.model,
-  });
+  const _ModelSpec({required this.schemaName, required this.model});
 }
 
 void runMLParityIntegrationTest({required String expectedPlatform}) {
@@ -74,8 +76,9 @@ void runMLParityIntegrationTest({required String expectedPlatform}) {
         }
 
         final appSupportDir = await getApplicationSupportDirectory();
-        final fixtureRoot =
-            Directory("${appSupportDir.path}/ml_parity/fixtures");
+        final fixtureRoot = Directory(
+          "${appSupportDir.path}/ml_parity/fixtures",
+        );
         await fixtureRoot.create(recursive: true);
         await _stageFixturesFromLocalMirror(
           manifestItems: manifestItems,
@@ -141,9 +144,7 @@ void runMLParityIntegrationTest({required String expectedPlatform}) {
           if (errors.isNotEmpty) "errors": errors,
         };
 
-        binding.reportData = {
-          _parityReportDataKey: jsonEncode(outputPayload),
-        };
+        binding.reportData = {_parityReportDataKey: jsonEncode(outputPayload)};
       });
     },
   );
@@ -168,21 +169,25 @@ List<_ManifestItem> _loadManifestItems() {
   final manifest =
       jsonDecode(utf8.decode(manifestBytes)) as Map<String, dynamic>;
   final items = manifest["items"] as List<dynamic>? ?? const [];
-  return items.map((dynamic rawItem) {
-    final item = rawItem as Map<String, dynamic>;
-    final sourceURL = (item["source_url"] as String?)?.trim() ?? "";
-    if (sourceURL.isEmpty) {
-      throw StateError("Manifest item ${item["file_id"]} missing source_url");
-    }
-    final sourceSHA = (item["source_sha256"] as String?)?.trim();
-    final sourcePath = (item["source"] as String?)?.trim();
-    return _ManifestItem(
-      fileID: item["file_id"] as String,
-      sourceURL: sourceURL,
-      sourceSHA256: sourceSHA?.isEmpty == true ? null : sourceSHA,
-      sourcePath: sourcePath?.isEmpty == true ? null : sourcePath,
-    );
-  }).toList(growable: false);
+  return items
+      .map((dynamic rawItem) {
+        final item = rawItem as Map<String, dynamic>;
+        final sourceURL = (item["source_url"] as String?)?.trim() ?? "";
+        if (sourceURL.isEmpty) {
+          throw StateError(
+            "Manifest item ${item["file_id"]} missing source_url",
+          );
+        }
+        final sourceSHA = (item["source_sha256"] as String?)?.trim();
+        final sourcePath = (item["source"] as String?)?.trim();
+        return _ManifestItem(
+          fileID: item["file_id"] as String,
+          sourceURL: sourceURL,
+          sourceSHA256: sourceSHA?.isEmpty == true ? null : sourceSHA,
+          sourcePath: sourcePath?.isEmpty == true ? null : sourcePath,
+        );
+      })
+      .toList(growable: false);
 }
 
 List<_ModelSpec> _modelSpecs() {
@@ -195,10 +200,7 @@ List<_ModelSpec> _modelSpecs() {
       schemaName: "face_embedding",
       model: FaceEmbeddingService.instance,
     ),
-    _ModelSpec(
-      schemaName: "clip",
-      model: ClipImageEncoder.instance,
-    ),
+    _ModelSpec(schemaName: "clip", model: ClipImageEncoder.instance),
   ];
 }
 
@@ -253,13 +255,12 @@ Future<_LoadedModels> _downloadAndLoadModels({
     );
   }
 
-  final loadedAddressesRaw = await MLIndexingIsolate.instance.runInIsolate(
-    IsolateOperation.loadIndexingModels,
-    {
-      "modelNames": modelNames,
-      "modelPaths": modelPaths,
-    },
-  ) as List<dynamic>;
+  final loadedAddressesRaw =
+      await MLIndexingIsolate.instance.runInIsolate(
+            IsolateOperation.loadIndexingModels,
+            {"modelNames": modelNames, "modelPaths": modelPaths},
+          )
+          as List<dynamic>;
 
   final modelAddresses = loadedAddressesRaw
       .map((address) => (address as num).toInt())
@@ -302,13 +303,11 @@ Future<void> _releaseModels(_LoadedModels loadedModels) async {
   if (loadedModels.modelAddresses.isEmpty) {
     return;
   }
-  await MLIndexingIsolate.instance.runInIsolate(
-    IsolateOperation.releaseIndexingModels,
-    {
-      "modelNames": loadedModels.modelNames,
-      "modelAddresses": loadedModels.modelAddresses,
-    },
-  );
+  await MLIndexingIsolate.instance
+      .runInIsolate(IsolateOperation.releaseIndexingModels, {
+        "modelNames": loadedModels.modelNames,
+        "modelAddresses": loadedModels.modelAddresses,
+      });
 }
 
 Future<void> _stageFixturesFromLocalMirror({
@@ -420,8 +419,9 @@ Future<String> _downloadFixture({
     fixtureFile = await ensureFixture();
   }
 
-  final fileNameFromURL =
-      uri.pathSegments.isNotEmpty ? uri.pathSegments.last : "";
+  final fileNameFromURL = uri.pathSegments.isNotEmpty
+      ? uri.pathSegments.last
+      : "";
   if (fileNameFromURL.isEmpty) {
     return fixtureFile.path;
   }
@@ -532,10 +532,12 @@ Future<MLResult> _analyzeImage({
     });
   }
 
-  final resultJSONString = await MLIndexingIsolate.instance.runInIsolate(
-    IsolateOperation.analyzeImage,
-    args,
-  ) as String;
+  final resultJSONString =
+      await MLIndexingIsolate.instance.runInIsolate(
+            IsolateOperation.analyzeImage,
+            args,
+          )
+          as String;
   return MLResult.fromJsonString(resultJSONString);
 }
 
@@ -552,37 +554,30 @@ Map<String, dynamic> _toParityResult({
     throw StateError("Missing CLIP result for $fileID");
   }
 
-  final faces = (mlResult.faces ?? const <FaceResult>[]).map((face) {
-    final box = face.detection.box;
-    return {
-      "box": [
-        box[0],
-        box[1],
-        box[2] - box[0],
-        box[3] - box[1],
-      ],
-      "landmarks": face.detection.allKeypoints
-          .map((point) => [point[0], point[1]])
-          .toList(growable: false),
-      "score": face.detection.score,
-      "embedding": List<double>.from(face.embedding, growable: false),
-    };
-  }).toList(growable: false);
+  final faces = (mlResult.faces ?? const <FaceResult>[])
+      .map((face) {
+        final box = face.detection.box;
+        return {
+          "box": [box[0], box[1], box[2] - box[0], box[3] - box[1]],
+          "landmarks": face.detection.allKeypoints
+              .map((point) => [point[0], point[1]])
+              .toList(growable: false),
+          "score": face.detection.score,
+          "embedding": List<double>.from(face.embedding, growable: false),
+        };
+      })
+      .toList(growable: false);
 
   return {
     "file_id": fileID,
-    "clip": {
-      "embedding": List<double>.from(clip.embedding, growable: false),
-    },
+    "clip": {"embedding": List<double>.from(clip.embedding, growable: false)},
     "faces": faces,
     "runner_metadata": {
       "platform": expectedPlatform,
       "runtime": runtime,
       "models": models,
       "code_revision": _codeRevision,
-      "timing_ms": {
-        "total": totalMS.toDouble(),
-      },
+      "timing_ms": {"total": totalMS.toDouble()},
     },
   };
 }

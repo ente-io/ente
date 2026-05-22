@@ -25,10 +25,7 @@ import "package:photos/utils/dialog_util.dart";
 class PeopleSelectionActionWidget extends StatefulWidget {
   final SelectedPeople selectedPeople;
 
-  const PeopleSelectionActionWidget(
-    this.selectedPeople, {
-    super.key,
-  });
+  const PeopleSelectionActionWidget(this.selectedPeople, {super.key});
 
   @override
   State<PeopleSelectionActionWidget> createState() =>
@@ -334,10 +331,7 @@ class _PeopleSelectionActionWidgetState
     final person = personMap[personID];
     if (person == null) return;
 
-    await routeToPage(
-      context,
-      PersonReviewClusterSuggestion(person),
-    );
+    await routeToPage(context, PersonReviewClusterSuggestion(person));
     widget.selectedPeople.clearAll();
   }
 

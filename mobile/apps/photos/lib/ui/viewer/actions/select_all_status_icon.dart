@@ -52,10 +52,7 @@ class SelectAllStatusIcon extends StatelessWidget {
         width: size,
         height: size,
         alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selectedFill,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: selectedFill, shape: BoxShape.circle),
         child: HugeIcon(
           icon: HugeIcons.strokeRoundedTick02,
           color: selectedTick,

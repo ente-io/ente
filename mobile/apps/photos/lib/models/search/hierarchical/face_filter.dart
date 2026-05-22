@@ -18,9 +18,9 @@ class FaceFilter extends HierarchicalSearchFilter {
     super.filterTypeName = "faceFilter",
     super.matchedUploadedIDs,
   }) : assert(
-          personId != null || clusterId != null,
-          "personId or clusterId must be provided",
-        );
+         personId != null || clusterId != null,
+         "personId or clusterId must be provided",
+       );
 
   @override
   String name() {
