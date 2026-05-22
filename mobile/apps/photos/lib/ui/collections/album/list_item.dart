@@ -58,6 +58,7 @@ class AlbumListItemWidget extends StatelessWidget {
     final bool isOutgoing = isOwner && collection.hasSharees;
     final bool isIncoming = !isOwner;
     final bool showSharingIndicator = isOutgoing || isIncoming;
+    final bool showLinkIndicator = isOwner && collection.hasLink;
     final bool isFavoriteAlbum = collection.type == CollectionType.favorites;
     final bool showPin = isOwner
         ? collection.isPinned
@@ -80,6 +81,7 @@ class AlbumListItemWidget extends StatelessWidget {
         context,
         showSharingIndicator: showSharingIndicator,
         isOutgoing: isOutgoing,
+        showLinkIndicator: showLinkIndicator,
       ),
       subtitle: FutureBuilder<int>(
         future: CollectionsService.instance.getFileCount(collection),
@@ -147,6 +149,7 @@ class AlbumListItemWidget extends StatelessWidget {
     BuildContext context, {
     required bool showSharingIndicator,
     required bool isOutgoing,
+    required bool showLinkIndicator,
   }) {
     final colors = context.componentColors;
 
@@ -166,6 +169,12 @@ class AlbumListItemWidget extends StatelessWidget {
           const SizedBox(width: 6),
           CollectionShareBadge(
             isOutgoing: isOutgoing,
+            variant: CollectionShareBadgeVariant.outlined,
+          ),
+        ],
+        if (showLinkIndicator) ...[
+          const SizedBox(width: 4),
+          const CollectionLinkBadge(
             variant: CollectionShareBadgeVariant.outlined,
           ),
         ],
