@@ -50,12 +50,3 @@ let decrypted = crypto::secretbox::decrypt_box(&encrypted, &key).unwrap();
 ```
 
 📖 **[Full Crypto Docs](docs/crypto.md)**
-
-## Development
-
-```sh
-cargo fmt      # format
-cargo clippy   # lint
-cargo build    # build
-cargo test     # test
-```
