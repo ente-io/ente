@@ -6,4 +6,4 @@ edition = "2024"
 crate-type = ["staticlib"]
 
 [dependencies]
-ente-core = { path = "../../../crates/core" }
+ente-core.workspace = true
