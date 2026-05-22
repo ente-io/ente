@@ -94,23 +94,31 @@ class CollectionArchivedBadge extends StatelessWidget {
   }
 }
 
+enum CollectionShareBadgeVariant { filled, outlined }
+
 class CollectionShareBadge extends StatelessWidget {
   final bool isOutgoing;
+  final CollectionShareBadgeVariant variant;
 
-  const CollectionShareBadge({super.key, required this.isOutgoing});
+  const CollectionShareBadge({
+    super.key,
+    required this.isOutgoing,
+    this.variant = CollectionShareBadgeVariant.filled,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final isOutlined = variant == CollectionShareBadgeVariant.outlined;
     return Container(
-      width: kCollectionBadgeSize,
-      height: kCollectionBadgeSize,
+      width: 12,
+      height: 12,
       decoration: BoxDecoration(
-        color: colorScheme.greenBase,
+        color: isOutlined ? Colors.transparent : colorScheme.greenBase,
         shape: BoxShape.circle,
         border: Border.all(
-          color: colorScheme.fill,
-          width: kCollectionBadgeBorderWidth,
+          color: isOutlined ? colorScheme.greenBase : colorScheme.fill,
+          width: isOutlined ? 1.0 : kCollectionBadgeBorderWidth,
         ),
       ),
       child: Center(
@@ -119,8 +127,8 @@ class CollectionShareBadge extends StatelessWidget {
               ? HugeIcons.strokeRoundedArrowUpRight01
               : HugeIcons.strokeRoundedArrowDownLeft01,
           strokeWidth: kCollectionBadgeStrokeWidth,
-          color: Colors.white,
-          size: kCollectionBadgeIconSize,
+          color: isOutlined ? colorScheme.greenBase : Colors.white,
+          size: 8,
         ),
       ),
     );

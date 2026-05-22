@@ -75,17 +75,11 @@ class AlbumListItemWidget extends StatelessWidget {
       onLongPress: onLongPressCallback == null
           ? null
           : () => onLongPressCallback!(collection),
-      leading: _AlbumListItemCover(
-        collection: collection,
+      leading: _AlbumListItemCover(collection: collection),
+      title: _buildTitle(
+        context,
         showSharingIndicator: showSharingIndicator,
         isOutgoing: isOutgoing,
-      ),
-      title: Text(
-        collection.displayName,
-        style: TextStyles.body.copyWith(color: colors.textBase),
-        maxLines: 1,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
       ),
       subtitle: FutureBuilder<int>(
         future: CollectionsService.instance.getFileCount(collection),
@@ -146,6 +140,36 @@ class AlbumListItemWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTitle(
+    BuildContext context, {
+    required bool showSharingIndicator,
+    required bool isOutgoing,
+  }) {
+    final colors = context.componentColors;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Flexible(
+          child: Text(
+            collection.displayName,
+            style: TextStyles.body.copyWith(color: colors.textBase),
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (showSharingIndicator) ...[
+          const SizedBox(width: 6),
+          CollectionShareBadge(
+            isOutgoing: isOutgoing,
+            variant: CollectionShareBadgeVariant.outlined,
+          ),
+        ],
+      ],
     );
   }
 
@@ -240,14 +264,8 @@ class AlbumListItemWidget extends StatelessWidget {
 
 class _AlbumListItemCover extends StatelessWidget {
   final Collection collection;
-  final bool showSharingIndicator;
-  final bool isOutgoing;
 
-  const _AlbumListItemCover({
-    required this.collection,
-    required this.showSharingIndicator,
-    required this.isOutgoing,
-  });
+  const _AlbumListItemCover({required this.collection});
 
   @override
   Widget build(BuildContext context) {
@@ -277,12 +295,6 @@ class _AlbumListItemCover extends StatelessWidget {
             ),
           ),
         ),
-        if (showSharingIndicator)
-          Positioned(
-            right: -4,
-            bottom: -4,
-            child: CollectionShareBadge(isOutgoing: isOutgoing),
-          ),
       ],
     );
   }
