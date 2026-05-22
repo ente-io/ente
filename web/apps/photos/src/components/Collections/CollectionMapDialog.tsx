@@ -26,6 +26,7 @@ import {
     fileCreationPhotoSortTime,
     fileLocation,
     ItemVisibility,
+    metadataHash,
 } from "ente-media/file-metadata";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
@@ -303,6 +304,39 @@ function useCurrentUser() {
         }
     }, []);
 }
+
+const favoriteFileHashAndTypeKey = (file: EnteFile) => {
+    const hash = metadataHash(file.metadata);
+    return hash ? `${hash}:${file.metadata.fileType}` : undefined;
+};
+
+const deriveFavoriteFileIDs = (
+    userID: number,
+    favoritesCollectionID: number,
+    collectionFiles: EnteFile[],
+) => {
+    const favoriteFiles = collectionFiles.filter(
+        (file) => file.collectionID == favoritesCollectionID,
+    );
+    const favoriteFileIDs = new Set(favoriteFiles.map((file) => file.id));
+    const favoriteFileHashAndTypeKeys = new Set(
+        favoriteFiles.flatMap((file) => {
+            const key = favoriteFileHashAndTypeKey(file);
+            return key ? [key] : [];
+        }),
+    );
+
+    for (const file of collectionFiles) {
+        if (file.ownerID == userID) continue;
+
+        const key = favoriteFileHashAndTypeKey(file);
+        if (key && favoriteFileHashAndTypeKeys.has(key)) {
+            favoriteFileIDs.add(file.id);
+        }
+    }
+
+    return favoriteFileIDs;
+};
 
 /**
  *
@@ -842,12 +876,13 @@ function useFavorites(
                     collection.type === "favorites" &&
                     collection.owner.id === user.id
                 ) {
-                    const favoriteIDs = new Set(
-                        collectionFiles
-                            .filter((f) => f.collectionID === collection.id)
-                            .map((f) => f.id),
+                    setFavoriteFileIDs(
+                        deriveFavoriteFileIDs(
+                            user.id,
+                            collection.id,
+                            collectionFiles,
+                        ),
                     );
-                    setFavoriteFileIDs(favoriteIDs);
                     break;
                 }
             }
