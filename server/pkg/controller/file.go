@@ -431,6 +431,18 @@ func (c *FileController) GetThumbnailURLUsingFusedLookup(ctx *gin.Context, userI
 	return c.getSignedURLForAccessibleObject(ctx, userID, fileID, ente.THUMBNAIL)
 }
 
+// GetFileURLForOwner verifies ownership and returns a presigned URL using a
+// fused ownership-check and object lookup path.
+func (c *FileController) GetFileURLForOwner(ctx *gin.Context, ownerID int64, fileID int64) (string, error) {
+	return c.getSignedURLForOwnedObject(ctx, ownerID, fileID, ente.FILE)
+}
+
+// GetThumbnailURLForOwner verifies ownership and returns a presigned URL using
+// a fused ownership-check and object lookup path.
+func (c *FileController) GetThumbnailURLForOwner(ctx *gin.Context, ownerID int64, fileID int64) (string, error) {
+	return c.getSignedURLForOwnedObject(ctx, ownerID, fileID, ente.THUMBNAIL)
+}
+
 func (c *FileController) CleanUpStaleCollectionFiles(userID int64, fileID int64) {
 	logger := log.WithFields(log.Fields{
 		"userID": userID,
@@ -462,11 +474,7 @@ func (c *FileController) CleanUpStaleCollectionFiles(userID int64, fileID int64)
 
 // GetPublicOrCastFileURL verifies permissions and returns a presigned url to the requested file
 func (c *FileController) GetPublicOrCastFileURL(ctx *gin.Context, fileID int64, objType ente.ObjectType, collectionID int64) (string, error) {
-	// validate that the given fileID is present in the corresponding collection for public album or cast session
-	if err := c.DoesFileExistInCollection(ctx, fileID, collectionID); err != nil {
-		return "", stacktrace.Propagate(err, "")
-	}
-	return c.getSignedURLForType(ctx, fileID, objType)
+	return c.getSignedURLForCollectionObject(ctx, collectionID, fileID, objType)
 }
 
 func (c *FileController) DoesFileExistInCollection(ctx *gin.Context, fileID int64, collectionID int64) error {
@@ -518,6 +526,64 @@ func (c *FileController) getSignedURLForAccessibleObject(ctx *gin.Context, userI
 	return url, nil
 }
 
+func (c *FileController) getSignedURLForOwnedObject(ctx *gin.Context, ownerID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	var url string
+	var err error
+	if isCliRequest(ctx) {
+		var s3Object ente.S3ObjectKey
+		var dcs []string
+		s3Object, dcs, err = c.ObjectRepo.GetOwnedObjectWithDCs(ctx, fileID, ownerID, objType)
+		if err == nil {
+			url, err = c.getSignedURLFromObjectAndDCs(s3Object, dcs, objType)
+		}
+	} else {
+		var s3Object ente.S3ObjectKey
+		s3Object, err = c.ObjectRepo.GetOwnedObject(ctx, fileID, ownerID, objType)
+		if err == nil {
+			url, err = c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+		}
+	}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			go c.CleanUpStaleCollectionFiles(ownerID, fileID)
+		}
+		return "", stacktrace.Propagate(err, "")
+	}
+	return url, nil
+}
+
+func (c *FileController) getSignedURLForCollectionObject(ctx *gin.Context, collectionID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	var url string
+	var err error
+	if isCliRequest(ctx) {
+		var s3Object ente.S3ObjectKey
+		var dcs []string
+		s3Object, dcs, err = c.ObjectRepo.GetCollectionObjectWithDCs(ctx, collectionID, fileID, objType)
+		if err == nil {
+			url, err = c.getSignedURLFromObjectAndDCs(s3Object, dcs, objType)
+		}
+	} else {
+		var s3Object ente.S3ObjectKey
+		s3Object, err = c.ObjectRepo.GetCollectionObject(ctx, collectionID, fileID, objType)
+		if err == nil {
+			url, err = c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+		}
+	}
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	return url, nil
+}
+
+func (c *FileController) getSignedURLFromObjectAndDCs(s3Object ente.S3ObjectKey, dcs []string, objType ente.ObjectType) (string, error) {
+	for _, dc := range dcs {
+		if dc == c.S3Config.GetHotWasabiDC() {
+			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc, objType)
+		}
+	}
+	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+}
+
 // ignore lint unused inspection
 func isCliRequest(ctx *gin.Context) bool {
 	// check if user-agent contains go-resty
@@ -545,12 +611,7 @@ func (c *FileController) getWasabiSignedUrlForAccessibleObject(ctx *gin.Context,
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	for _, dc := range dcs {
-		if dc == c.S3Config.GetHotWasabiDC() {
-			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc, objType)
-		}
-	}
-	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+	return c.getSignedURLFromObjectAndDCs(s3Object, dcs, objType)
 }
 
 // Trash deletes file and move them to trash
