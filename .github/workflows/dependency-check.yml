@@ -1,0 +1,152 @@
+name: "Dependency check"
+
+on:
+    pull_request:
+        paths-ignore:
+            - "docs/**"
+            - "_docs/**"
+            - "**.md"
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    go-dependencies:
+        name: "Check Go dependencies"
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: server
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Setup go
+              uses: actions/setup-go@v5
+              with:
+                  go-version-file: server/go.mod
+                  cache-dependency-path: server/go.sum
+                  cache: true
+
+            - name: Check Go dependencies
+              run: |
+                  go mod tidy
+                  git diff --exit-code go.mod go.sum
+
+    web-dependencies:
+        name: "Check Web dependencies"
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: web
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: "yarn"
+                  cache-dependency-path: "web/yarn.lock"
+
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
+
+            - name: Check Web dependencies
+              run: |
+                  yarn install --frozen-lockfile
+
+            - name: Audit Web dependencies
+              run: |
+                  yarn audit --level critical || exit_code=$?
+                  if [[ $exit_code -ge 16 ]]; then
+                      echo "::error::Yarn audit found critical issues"
+                      exit 1
+                  fi
+
+    desktop-dependencies:
+        name: "Check Desktop dependencies"
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: desktop
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: "yarn"
+                  cache-dependency-path: "desktop/yarn.lock"
+
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
+
+            - name: Check Desktop dependencies
+              run: |
+                  yarn install --frozen-lockfile
+
+            - name: Audit Desktop dependencies
+              run: |
+                  yarn audit --level critical || exit_code=$?
+                  if [[ $exit_code -ge 16 ]]; then
+                      echo "::error::Yarn audit found critical issues"
+                      exit 1
+                  fi
+
+    mobile-dependencies:
+        name: "Check Mobile dependencies"
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+              env:
+                  FLUTTER_VERSION: "3.38.10"
+
+            - name: Check photos dependencies
+              run: flutter pub get --enforce-lockfile
+              working-directory: mobile/apps/photos
+
+            - name: Check auth dependencies
+              run: flutter pub get --enforce-lockfile
+              working-directory: mobile/apps/auth
+
+    rust-dependencies:
+        name: "Check Rust dependencies"
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: rust
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Setup Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: stable
+
+            - name: Check Rust dependencies
+              run: |
+                  cargo fetch
+                  cargo update --dry-run
