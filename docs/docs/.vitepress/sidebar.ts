@@ -565,6 +565,12 @@ export const sidebar = [
         ],
     },
     {
+        text: "Development",
+        items: [
+            { text: "Guide", link: "/development/" },
+        ],
+    },
+    {
         text: "Self-hosting",
         collapsed: true,
         items: [
