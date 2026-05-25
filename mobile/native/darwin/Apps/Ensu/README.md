@@ -8,10 +8,10 @@ Source code for the Ensu iOS app.
 
 2. Generate the Swift bindings:
 
-    ```sh
-    cd rust
-    cargo codegen native
-    ```
+   ```sh
+   cd rust
+   cargo codegen native
+   ```
 
 3. Open `Ensu.xcodeproj` in Xcode and run the `Ensu` scheme.
 

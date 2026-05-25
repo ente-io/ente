@@ -106,7 +106,12 @@ Future<void> _requestForEncryptionPassword(
             ),
           );
           // get json value of data
-          await _exportCodes(context, jsonEncode(data.toJson()), "encrypted", "json");
+          await _exportCodes(
+            context,
+            jsonEncode(data.toJson()),
+            "encrypted",
+            "json",
+          );
         } catch (e) {
           showToast(context, "Error while exporting codes.");
         }
@@ -174,11 +179,13 @@ Future<void> _exportCodes(
         final Size size = MediaQuery.of(context).size;
         await SharePlus.instance.share(
           ShareParams(
-            files: <XFile>[
-              XFile(codeFile.path, mimeType: 'text/plain'),
-            ],
-            sharePositionOrigin:
-                Rect.fromLTWH(0, 0, size.width, size.height / 2),
+            files: <XFile>[XFile(codeFile.path, mimeType: 'text/plain')],
+            sharePositionOrigin: Rect.fromLTWH(
+              0,
+              0,
+              size.width,
+              size.height / 2,
+            ),
           ),
         );
         Future.delayed(const Duration(seconds: 30), () async {

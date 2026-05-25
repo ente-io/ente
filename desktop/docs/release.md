@@ -6,23 +6,17 @@ Conceptually, the release is straightforward:
 
 2. When ready, we make that release the latest.
 
-3. The download links on our website, and existing apps already check the latest
-   GitHub release and update automatically.
+3. The download links on our website, and existing apps already check the latest GitHub release and update automatically.
 
-The complication comes from the fact that electron-builder's auto updater (the
-mechanism that we use for auto updates) doesn't work with monorepos. So we need
-to keep a separate repository just for holding the releases.
+The complication comes from the fact that electron-builder's auto updater (the mechanism that we use for auto updates) doesn't work with monorepos. So we need to keep a separate repository just for holding the releases.
 
 - Source code lives here, in [ente-io/ente](https://github.com/ente-io/ente).
 
-- Releases are done from
-  [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop).
+- Releases are done from [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop).
 
 ## Nightly builds
 
-Nightly builds of `main` are published by a scheduled workflow automatically.
-Each such workflow run will update the artifacts attached to the same
-(pre-existing) pre-release.
+Nightly builds of `main` are published by a scheduled workflow automatically. Each such workflow run will update the artifacts attached to the same (pre-existing) pre-release.
 
 If needed, this workflow can also be manually triggered:
 
@@ -110,12 +104,9 @@ gh workflow run desktop-release.yml --source=<branch>
 
 To create extra one-off pre-releases in addition to the nightly `1.x.x-beta`s,
 
-1. In your branch in the source repository, set the version in `package.json` to
-   something different, say `1.x.x-foo`.
+1. In your branch in the source repository, set the version in `package.json` to something different, say `1.x.x-foo`.
 
-2. Create a new pre-release in the release repo with title `1.x.x-foo`. In the
-   tag input enter `v1.x.x-foo` and select the option to "Create a new tag on
-   publish".
+2. Create a new pre-release in the release repo with title `1.x.x-foo`. In the tag input enter `v1.x.x-foo` and select the option to "Create a new tag on publish".
 
 3. Trigger the workflow in the release repo:
 
@@ -125,29 +116,18 @@ To create extra one-off pre-releases in addition to the nightly `1.x.x-beta`s,
 
 ## Details
 
-The GitHub Action runs on Windows, Linux and macOS. It produces the artifacts
-defined in the `build` value in `package.json`.
+The GitHub Action runs on Windows, Linux and macOS. It produces the artifacts defined in the `build` value in `package.json`.
 
 - Windows - An NSIS installer.
 - Linux - An AppImage, and 3 other packages (`.rpm`, `.deb`, `.pacman`)
 - macOS - A universal DMG
 
-Additionally, the GitHub action notarizes and signs the macOS DMG (For this it
-uses credentials provided via GitHub secrets).
+Additionally, the GitHub action notarizes and signs the macOS DMG (For this it uses credentials provided via GitHub secrets).
 
-To rollout the build, we need to publish the draft release. Thereafter,
-everything is automated:
+To rollout the build, we need to publish the draft release. Thereafter, everything is automated:
 
-- The website automatically redirects to the latest release on GitHub when
-  people try to download.
+- The website automatically redirects to the latest release on GitHub when people try to download.
 
-- The file formats with support auto update (Windows `exe`, the Linux AppImage
-  and the macOS DMG) also check the latest GitHub release automatically to
-  download and apply the update (the rest of the formats don't support auto
-  updates yet).
+- The file formats with support auto update (Windows `exe`, the Linux AppImage and the macOS DMG) also check the latest GitHub release automatically to download and apply the update (the rest of the formats don't support auto updates yet).
 
-- We're not putting the desktop app in other stores currently. It is available
-  as a `brew cask`, but we only had to open a PR to add the initial formula, now
-  their maintainers automatically bump the SHA, version number and the (derived
-  from the version) URL in the formula when their tools notice a new release on
-  our GitHub.
+- We're not putting the desktop app in other stores currently. It is available as a `brew cask`, but we only had to open a PR to add the initial formula, now their maintainers automatically bump the SHA, version number and the (derived from the version) URL in the formula when their tools notice a new release on our GitHub.

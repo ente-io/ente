@@ -51,16 +51,14 @@ class AlbumListItemWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(
-    BuildContext context, {
-    required bool isSelected,
-  }) {
+  Widget _buildItem(BuildContext context, {required bool isSelected}) {
     final bool isOwner = collection.isOwner(
       Configuration.instance.getUserID() ?? -1,
     );
     final bool isOutgoing = isOwner && collection.hasSharees;
     final bool isIncoming = !isOwner;
     final bool showSharingIndicator = isOutgoing || isIncoming;
+    final bool showLinkIndicator = isOwner && collection.hasLink;
     final bool isFavoriteAlbum = collection.type == CollectionType.favorites;
     final bool showPin = isOwner
         ? collection.isPinned
@@ -78,31 +76,36 @@ class AlbumListItemWidget extends StatelessWidget {
       onLongPress: onLongPressCallback == null
           ? null
           : () => onLongPressCallback!(collection),
-      leading: _AlbumListItemCover(
-        collection: collection,
+      leading: _AlbumListItemCover(collection: collection),
+      title: _buildTitle(
+        context,
         showSharingIndicator: showSharingIndicator,
         isOutgoing: isOutgoing,
-      ),
-      title: Text(
-        collection.displayName,
-        style: TextStyles.body.copyWith(color: colors.textBase),
-        maxLines: 1,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
+        showLinkIndicator: showLinkIndicator,
       ),
       subtitle: FutureBuilder<int>(
         future: CollectionsService.instance.getFileCount(collection),
+        initialData: CollectionsService.instance.getCachedFileCount(collection),
         builder: (context, snapshot) {
           String countText = "";
           if (snapshot.hasData) {
-            countText = AppLocalizations.of(context).itemCount(
-              count: snapshot.data!,
-            );
+            countText = AppLocalizations.of(
+              context,
+            ).itemCount(count: snapshot.data!);
           } else if (snapshot.hasError) {
             Logger("AlbumListItemWidget").severe(
               "Failed to fetch file count of collection",
               snapshot.error,
             );
+          } else {
+            final cachedCount = CollectionsService.instance.getCachedFileCount(
+              collection,
+            );
+            if (cachedCount != null) {
+              countText = AppLocalizations.of(
+                context,
+              ).itemCount(count: cachedCount);
+            }
           }
           return _buildSubtitle(
             context,
@@ -142,6 +145,43 @@ class AlbumListItemWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildTitle(
+    BuildContext context, {
+    required bool showSharingIndicator,
+    required bool isOutgoing,
+    required bool showLinkIndicator,
+  }) {
+    final colors = context.componentColors;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Flexible(
+          child: Text(
+            collection.displayName,
+            style: TextStyles.body.copyWith(color: colors.textBase),
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (showSharingIndicator) ...[
+          const SizedBox(width: 6),
+          CollectionShareBadge(
+            isOutgoing: isOutgoing,
+            variant: CollectionShareBadgeVariant.outlined,
+          ),
+        ],
+        if (showLinkIndicator) ...[
+          const SizedBox(width: 4),
+          const CollectionLinkBadge(
+            variant: CollectionShareBadgeVariant.outlined,
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildSubtitle(
     BuildContext context, {
     required String text,
@@ -168,11 +208,10 @@ class AlbumListItemWidget extends StatelessWidget {
         if (hasStatus) ...[
           Text(" \u2022 ", style: textStyle),
           if (showPin)
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedPin,
+            ImageIcon(
+              const AssetImage("assets/collection_pin.png"),
               size: 12,
               color: colors.textLight,
-              strokeWidth: 2.0,
             ),
           if (showArchive)
             HugeIcon(
@@ -182,11 +221,7 @@ class AlbumListItemWidget extends StatelessWidget {
               strokeWidth: 2.0,
             ),
           if (isFavoriteAlbum)
-            Icon(
-              EnteIcons.favoriteFilled,
-              size: 12,
-              color: colors.primary,
-            ),
+            Icon(EnteIcons.favoriteFilled, size: 12, color: colors.primary),
         ],
       ],
     );
@@ -201,9 +236,7 @@ class AlbumListItemWidget extends StatelessWidget {
     final double slotOverlap = getOverlapPadding(AvatarType.medium);
 
     if (isSelected) {
-      return const CollectionSelectedBadge(
-        key: ValueKey("selected"),
-      );
+      return const CollectionSelectedBadge(key: ValueKey("selected"));
     }
     if (!isOwner) {
       return UserAvatarWidget(
@@ -239,14 +272,8 @@ class AlbumListItemWidget extends StatelessWidget {
 
 class _AlbumListItemCover extends StatelessWidget {
   final Collection collection;
-  final bool showSharingIndicator;
-  final bool isOutgoing;
 
-  const _AlbumListItemCover({
-    required this.collection,
-    required this.showSharingIndicator,
-    required this.isOutgoing,
-  });
+  const _AlbumListItemCover({required this.collection});
 
   @override
   Widget build(BuildContext context) {
@@ -260,12 +287,20 @@ class _AlbumListItemCover extends StatelessWidget {
           child: SizedBox.expand(
             child: FutureBuilder<EnteFile?>(
               future: CollectionsService.instance.getCover(collection),
+              initialData: CollectionsService.instance.getCoverCache(
+                collection,
+              ),
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
+                final thumbnail =
+                    snapshot.data ??
+                    CollectionsService.instance.getCoverCache(collection);
+                if (thumbnail != null) {
                   return ThumbnailWidget(
-                    snapshot.data!,
+                    thumbnail,
                     shouldShowFavoriteIcon: false,
                     shouldShowOwnerAvatar: false,
+                    shouldShowSyncStatus: false,
+                    key: Key("album_list:${collection.id}:${thumbnail.tag}"),
                   );
                 }
                 return const NoThumbnailWidget(
@@ -276,12 +311,6 @@ class _AlbumListItemCover extends StatelessWidget {
             ),
           ),
         ),
-        if (showSharingIndicator)
-          Positioned(
-            right: -4,
-            bottom: -4,
-            child: CollectionShareBadge(isOutgoing: isOutgoing),
-          ),
       ],
     );
   }

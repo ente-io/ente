@@ -82,9 +82,7 @@ class _LockScreenState extends State<LockScreen>
           decoration: BoxDecoration(
             image: DecorationImage(
               opacity: _platformBrightness == Brightness.light ? 0.08 : 0.12,
-              image: const ExactAssetImage(
-                'assets/lock_screen_background.png',
-              ),
+              image: const ExactAssetImage('assets/lock_screen_background.png'),
               fit: BoxFit.cover,
             ),
           ),
@@ -137,11 +135,11 @@ class _LockScreenState extends State<LockScreen>
                           duration: const Duration(seconds: 1),
                           builder: (context, value, _) =>
                               CircularProgressIndicator(
-                            backgroundColor: colorTheme.fillFaintPressed,
-                            value: value,
-                            color: colorTheme.primary400,
-                            strokeWidth: 1.5,
-                          ),
+                                backgroundColor: colorTheme.fillFaintPressed,
+                                value: value,
+                                color: colorTheme.primary400,
+                                strokeWidth: 1.5,
+                              ),
                         ),
                       ),
                       IconButtonWidget(
@@ -159,10 +157,11 @@ class _LockScreenState extends State<LockScreen>
                         alignment: Alignment.center,
                         children: [
                           Text(
-                            AppLocalizations.of(context)
-                                .tooManyIncorrectAttempts,
-                            style: textTheme.small,
-                          )
+                                AppLocalizations.of(
+                                  context,
+                                ).tooManyIncorrectAttempts,
+                                style: textTheme.small,
+                              )
                               .animate(
                                 delay: const Duration(milliseconds: 2000),
                               )
@@ -171,9 +170,9 @@ class _LockScreenState extends State<LockScreen>
                                 curve: Curves.easeInOutCirc,
                               ),
                           Text(
-                            _formatTime(remainingTimeInSeconds),
-                            style: textTheme.small,
-                          )
+                                _formatTime(remainingTimeInSeconds),
+                                style: textTheme.small,
+                              )
                               .animate(
                                 delay: const Duration(milliseconds: 2250),
                               )
@@ -190,9 +189,7 @@ class _LockScreenState extends State<LockScreen>
                           style: textTheme.small,
                         ),
                       ),
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 24),
-                ),
+                const Padding(padding: EdgeInsets.only(bottom: 24)),
               ],
             ),
           ),
@@ -225,8 +222,10 @@ class _LockScreenState extends State<LockScreen>
   Future<void> _autoLogoutOnMaxInvalidAttempts() async {
     _logger.info("Auto logout on max invalid attempts");
     Navigator.of(context).popUntil((route) => route.isFirst);
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).loggingOut);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).loggingOut,
+    );
     await dialog.show();
     await Configuration.instance.logout();
     await dialog.hide();
@@ -237,7 +236,8 @@ class _LockScreenState extends State<LockScreen>
     _logger.info(state.toString());
     if (state == AppLifecycleState.resumed && !_isShowingLockScreen) {
       _hasPlacedAppInBackground = false;
-      final bool didAuthInLast5Seconds = lastAuthenticatingTime != null &&
+      final bool didAuthInLast5Seconds =
+          lastAuthenticatingTime != null &&
           DateTime.now().millisecondsSinceEpoch - lastAuthenticatingTime! <
               5000;
 
@@ -245,17 +245,15 @@ class _LockScreenState extends State<LockScreen>
         if (_lockscreenSetting.getlastInvalidAttemptTime() >
                 DateTime.now().millisecondsSinceEpoch &&
             !_isShowingLockScreen) {
-          final int time = (_lockscreenSetting.getlastInvalidAttemptTime() -
+          final int time =
+              (_lockscreenSetting.getlastInvalidAttemptTime() -
                   DateTime.now().millisecondsSinceEpoch) ~/
               1000;
 
-          Future.delayed(
-            Duration.zero,
-            () {
-              startLockTimer(time);
-              _showLockScreen(source: "lifeCycle");
-            },
-          );
+          Future.delayed(Duration.zero, () {
+            startLockTimer(time);
+            _showLockScreen(source: "lifeCycle");
+          });
         }
       } else {
         _hasAuthenticationFailed = false;
@@ -299,8 +297,8 @@ class _LockScreenState extends State<LockScreen>
   }
 
   double _getFractionOfTimeElapsed() {
-    final int totalLockedTime =
-        lockedTimeInSeconds = pow(2, invalidAttemptCount - 5).toInt() * 30;
+    final int totalLockedTime = lockedTimeInSeconds =
+        pow(2, invalidAttemptCount - 5).toInt() * 30;
     if (remainingTimeInSeconds == 0) return 1;
 
     return 1 - remainingTimeInSeconds / totalLockedTime;
@@ -328,8 +326,8 @@ class _LockScreenState extends State<LockScreen>
           !_isShowingLockScreen) {
         final int remainingTime =
             (_lockscreenSetting.getlastInvalidAttemptTime() -
-                    currentTimestamp) ~/
-                1000;
+                currentTimestamp) ~/
+            1000;
 
         await startLockTimer(remainingTime);
       }

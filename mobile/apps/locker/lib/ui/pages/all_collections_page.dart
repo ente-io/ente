@@ -49,8 +49,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   void initState() {
     super.initState();
     _loadCollections(showLoading: true);
-    _collectionsUpdatedSub =
-        Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+    _collectionsUpdatedSub = Bus.instance.on<CollectionsUpdatedEvent>().listen((
+      event,
+    ) async {
       if (!mounted) return;
       await _loadCollections(showLoading: false);
     });
@@ -81,8 +82,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
         collections = await CollectionService.instance.getCollections();
       } else if (widget.viewType == UISectionType.outgoingCollections ||
           widget.viewType == UISectionType.incomingCollections) {
-        final sharedCollections =
-            await CollectionService.instance.getSharedCollections();
+        final sharedCollections = await CollectionService.instance
+            .getSharedCollections();
         if (widget.viewType == UISectionType.outgoingCollections) {
           collections = sharedCollections.outgoing;
         } else if (widget.viewType == UISectionType.incomingCollections) {
@@ -106,13 +107,14 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       _sortedCollections = List.from(regularCollections);
       _uncategorizedCollection =
           widget.viewType == UISectionType.homeCollections
-              ? uncategorized
-              : null;
-      _uncategorizedFileCount = uncategorized != null &&
+          ? uncategorized
+          : null;
+      _uncategorizedFileCount =
+          uncategorized != null &&
               widget.viewType == UISectionType.homeCollections
-          ? (await CollectionService.instance
-                  .getFilesInCollection(uncategorized))
-              .length
+          ? (await CollectionService.instance.getFilesInCollection(
+              uncategorized,
+            )).length
           : 0;
 
       if (mounted) {
@@ -152,9 +154,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           onTap: () {
             Navigator.pop(context);
           },
-          child: const Icon(
-            Icons.arrow_back_outlined,
-          ),
+          child: const Icon(Icons.arrow_back_outlined),
         ),
       ),
       body: Stack(
@@ -176,9 +176,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     final bottomPadding = safeBottomInset + 24.0;
 
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
@@ -195,10 +193,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
                 showBorder: false,
               ),
               const SizedBox(height: 20),
-              GradientButton(
-                onTap: _loadCollections,
-                text: context.l10n.retry,
-              ),
+              GradientButton(onTap: _loadCollections, text: context.l10n.retry),
             ],
           ),
         ),
@@ -228,12 +223,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     }
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16.0,
-        16.0,
-        16.0,
-        bottomPadding,
-      ),
+      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, bottomPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -244,9 +234,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TitleBarTitleWidget(
-                    title: _getTitle(context),
-                  ),
+                  TitleBarTitleWidget(title: _getTitle(context)),
                   Text(
                     _sortedCollections.length.toString() + " items",
                     style: textTheme.smallMuted,
@@ -314,8 +302,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
             children: [
               HugeIcon(
                 icon: HugeIcons.strokeRoundedFolderUnknown,
-                color:
-                    Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.color?.withAlpha(70),
                 size: 22,
               ),
               const SizedBox(width: 12),
@@ -333,22 +322,18 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
                       Text(
                         '•',
                         style: textTheme.small.copyWith(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.color
-                              ?.withAlpha(50),
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.color?.withAlpha(50),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '${_uncategorizedFileCount!}',
                         style: textTheme.small.copyWith(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.color
-                              ?.withAlpha(70),
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.color?.withAlpha(70),
                         ),
                       ),
                     ],
@@ -357,11 +342,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
               ),
               Icon(
                 Icons.chevron_right,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withAlpha(60),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withAlpha(60),
                 size: 20,
               ),
             ],

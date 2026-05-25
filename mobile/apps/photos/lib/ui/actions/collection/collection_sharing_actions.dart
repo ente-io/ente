@@ -92,8 +92,9 @@ class CollectionActions {
       title: AppLocalizations.of(context).removePublicLink,
       body:
           //'This will remove the public link for accessing "${collection.name}".',
-          AppLocalizations.of(context)
-              .disableLinkMessage(albumName: collection.displayName),
+          AppLocalizations.of(
+            context,
+          ).disableLinkMessage(albumName: collection.displayName),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -127,15 +128,13 @@ class CollectionActions {
         fileWithMinCreationTime.creationTime!,
         fileWithMaxCreationTime.creationTime!,
       );
-      final CreateRequest req =
-          await collectionsService.buildCollectionCreateRequest(
-        dummyName,
-        visibility: visibleVisibility,
-        subType: subTypeSharedFilesCollection,
-      );
-      final collection = await collectionsService.createAndCacheCollection(
-        req,
-      );
+      final CreateRequest req = await collectionsService
+          .buildCollectionCreateRequest(
+            dummyName,
+            visibility: visibleVisibility,
+            subType: subTypeSharedFilesCollection,
+          );
+      final collection = await collectionsService.createAndCacheCollection(req);
       newCollection = collection;
       logger.info("adding files to share to new album");
       await collectionsService.addOrCopyToCollection(collection.id, files);
@@ -180,8 +179,10 @@ class CollectionActions {
           shouldSurfaceExecutionStates: true,
           labelText: AppLocalizations.of(context).yesRemove,
           onTap: () async {
-            final newSharees = await CollectionsService.instance
-                .unshare(collection.id, user.email);
+            final newSharees = await CollectionsService.instance.unshare(
+              collection.id,
+              user.email,
+            );
             collection.updateSharees(newSharees);
           },
         ),
@@ -194,8 +195,9 @@ class CollectionActions {
         ),
       ],
       title: AppLocalizations.of(context).removeWithQuestionMark,
-      body: AppLocalizations.of(context)
-          .removeParticipantBody(userEmail: resolveDisplayName(user)),
+      body: AppLocalizations.of(
+        context,
+      ).removeParticipantBody(userEmail: resolveDisplayName(user)),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -317,8 +319,12 @@ class CollectionActions {
       return false;
     } else {
       try {
-        final newSharees = await CollectionsService.instance
-            .share(collection.id, email, publicKey, role);
+        final newSharees = await CollectionsService.instance.share(
+          collection.id,
+          email,
+          publicKey,
+          role,
+        );
         await dialog?.hide();
         collection.updateSharees(newSharees);
         return true;
@@ -393,8 +399,9 @@ class CollectionActions {
         ),
       ],
       bodyWidget: StyledText(
-        text: AppLocalizations.of(context)
-            .deleteMultipleAlbumDialog(count: collections.length),
+        text: AppLocalizations.of(
+          context,
+        ).deleteMultipleAlbumDialog(count: collections.length),
         style: textTheme.body.copyWith(color: textMutedDark),
         tags: {
           'bold': StyledTextTag(
@@ -431,8 +438,10 @@ class CollectionActions {
       throw AssertionError("Can not delete album owned by others");
     }
     if (collection.hasSharees) {
-      final bool confirmDelete =
-          await _confirmSharedAlbumDeletion(bContext, collection);
+      final bool confirmDelete = await _confirmSharedAlbumDeletion(
+        bContext,
+        collection,
+      );
       if (!confirmDelete) {
         return false;
       }
@@ -512,8 +521,9 @@ class CollectionActions {
     Collection collection,
     BuildContext bContext,
   ) async {
-    final List<EnteFile> files =
-        await FilesDB.instance.getAllFilesCollection(collection.id);
+    final List<EnteFile> files = await FilesDB.instance.getAllFilesCollection(
+      collection.id,
+    );
     await moveFilesFromCurrentCollection(
       bContext,
       collection,
@@ -529,8 +539,9 @@ class CollectionActions {
     BuildContext bContext,
   ) async {
     try {
-      final List<EnteFile> files =
-          await FilesDB.instance.getAllFilesCollection(collection.id);
+      final List<EnteFile> files = await FilesDB.instance.getAllFilesCollection(
+        collection.id,
+      );
       await moveFilesFromCurrentCollection(bContext, collection, files);
     } catch (e) {
       logger.severe("Failed to remove files from uncategorized", e);
@@ -583,8 +594,8 @@ class CollectionActions {
   }) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     final isCollectionOwner = collection.owner.id == currentUserID;
-    final bool canRemoveAllParticipants =
-        collectionsService.canRemoveFilesFromAllParticipants(collection);
+    final bool canRemoveAllParticipants = collectionsService
+        .canRemoveFilesFromAllParticipants(collection);
     final bool isCollectionAdmin =
         canRemoveAllParticipants && !isCollectionOwner;
     final FilesSplit split = FilesSplit.split(
@@ -643,8 +654,8 @@ class CollectionActions {
       }
     }
 
-    final Map<int, List<EnteFile>> collectionToFilesMap =
-        await FilesDB.instance.getAllFilesGroupByCollectionID(uploadedIDs);
+    final Map<int, List<EnteFile>> collectionToFilesMap = await FilesDB.instance
+        .getAllFilesGroupByCollectionID(uploadedIDs);
 
     // Fix files in pendingAssignMap with correct collectionID entries.
     // This is needed when files are selected after filtering by another album,
@@ -677,8 +688,9 @@ class CollectionActions {
           if (!destCollectionToFilesMap.containsKey(targetCollection.id)) {
             destCollectionToFilesMap[targetCollection.id] = <EnteFile>[];
           }
-          destCollectionToFilesMap[targetCollection.id]!
-              .add(pendingAssignMap[file.uploadedFileID!]!);
+          destCollectionToFilesMap[targetCollection.id]!.add(
+            pendingAssignMap[file.uploadedFileID!]!,
+          );
           pendingAssignMap.remove(file.uploadedFileID);
         }
       }
@@ -689,8 +701,8 @@ class CollectionActions {
       if (isHidden) {
         toCollectionID = collectionsService.cachedDefaultHiddenCollection!.id;
       } else {
-        final Collection uncategorizedCollection =
-            await collectionsService.getUncategorizedCollection();
+        final Collection uncategorizedCollection = await collectionsService
+            .getUncategorizedCollection();
         toCollectionID = uncategorizedCollection.id;
       }
 
@@ -700,8 +712,9 @@ class CollectionActions {
           if (!destCollectionToFilesMap.containsKey(toCollectionID)) {
             destCollectionToFilesMap[toCollectionID] = <EnteFile>[];
           }
-          destCollectionToFilesMap[toCollectionID]!
-              .add(pendingAssignMap[file.uploadedFileID!]!);
+          destCollectionToFilesMap[toCollectionID]!.add(
+            pendingAssignMap[file.uploadedFileID!]!,
+          );
         }
       }
     }
@@ -746,8 +759,9 @@ class CollectionActions {
     if (fromCollectionID == toCollectionID) {
       return false;
     }
-    final Collection? targetCollection =
-        collectionsService.getCollectionByID(toCollectionID);
+    final Collection? targetCollection = collectionsService.getCollectionByID(
+      toCollectionID,
+    );
     // ignore non-cached, deleted, uncategorized and favorite collections,
     // and collections ignored by others
     if (targetCollection == null ||
@@ -763,9 +777,7 @@ class CollectionActions {
   Future<void> _showUnSupportedAlert(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
       title: Text(AppLocalizations.of(context).sorry),
-      content: Text(
-        AppLocalizations.of(context).subscribeToEnableSharing,
-      ),
+      content: Text(AppLocalizations.of(context).subscribeToEnableSharing),
       actions: [
         ButtonWidget(
           buttonType: ButtonType.primary,
@@ -776,13 +788,15 @@ class CollectionActions {
           labelText: AppLocalizations.of(context).subscribe,
           onTap: () async {
             // for quickLink collection, we need to trash the collection
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return getSubscriptionPage();
-                },
-              ),
-            ).ignore();
+            Navigator.of(context)
+                .push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return getSubscriptionPage();
+                    },
+                  ),
+                )
+                .ignore();
           },
         ),
         Padding(

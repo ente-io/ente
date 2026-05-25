@@ -61,9 +61,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context).subscription),
-        ),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).subscription)),
         body: Column(
           children: <Widget>[
             (progress != 1.0)
@@ -74,10 +72,10 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                 initialUrlRequest: URLRequest(url: initPaymentUrl),
                 onProgressChanged:
                     (InAppWebViewController controller, int progress) {
-                  setState(() {
-                    this.progress = progress / 100;
-                  });
-                },
+                      setState(() {
+                        this.progress = progress / 100;
+                      });
+                    },
                 initialSettings: InAppWebViewSettings(
                   useShouldOverrideUrlLoading: true,
                 ),
@@ -102,8 +100,8 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                 },
                 onReceivedHttpError:
                     (controller, navigationAction, code) async {
-                  _logger.info("onHttpError with $code");
-                },
+                      _logger.info("onHttpError with $code");
+                    },
                 onLoadStop: (controller, navigationAction) async {
                   _logger.info("onLoadStop $navigationAction");
                 },
@@ -150,9 +148,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
           TextButton(
             child: Text(
               AppLocalizations.of(context).yes,
-              style: const TextStyle(
-                color: Colors.redAccent,
-              ),
+              style: const TextStyle(color: Colors.redAccent),
             ),
             onPressed: () => Navigator.of(context).pop(true),
           ),
@@ -244,8 +240,9 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       _logger.severe(error);
       await _showExitPageDialog(
         title: AppLocalizations.of(context).failedToVerifyPaymentStatus,
-        content:
-            AppLocalizations.of(context).pleaseWaitForSometimeBeforeRetrying,
+        content: AppLocalizations.of(
+          context,
+        ).pleaseWaitForSometimeBeforeRetrying,
       );
     }
   }

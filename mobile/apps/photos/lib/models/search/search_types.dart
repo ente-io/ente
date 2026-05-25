@@ -216,8 +216,8 @@ extension SectionTypeExtensions on SectionType {
                 return;
               }
               try {
-                final Collection c =
-                    await CollectionsService.instance.createAlbum(text);
+                final Collection c = await CollectionsService.instance
+                    .createAlbum(text);
 
                 // Close the dialog now so that it does not flash when leaving the album again.
                 Navigator.of(context).pop();
@@ -228,8 +228,9 @@ extension SectionTypeExtensions on SectionType {
                   CollectionPage(CollectionWithThumbnail(c, null)),
                 );
               } catch (e, s) {
-                Logger("CreateNewAlbumIcon")
-                    .severe("Failed to create a new album", e, s);
+                Logger(
+                  "CreateNewAlbumIcon",
+                ).severe("Failed to create a new album", e, s);
                 rethrow;
               }
             },
@@ -247,10 +248,7 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  Future<List<SearchResult>> getData(
-    BuildContext? context, {
-    int? limit,
-  }) {
+  Future<List<SearchResult>> getData(BuildContext? context, {int? limit}) {
     switch (this) {
       case SectionType.face:
         return SearchService.instance.getAllFace(
@@ -275,8 +273,10 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllCollectionSearchResults(limit);
 
       case SectionType.fileTypesAndExtension:
-        return SearchService.instance
-            .getAllFileTypesAndExtensionsResults(context!, limit);
+        return SearchService.instance.getAllFileTypesAndExtensionsResults(
+          context!,
+          limit,
+        );
     }
   }
 

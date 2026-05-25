@@ -40,14 +40,16 @@ class _FeedPreviewWidgetState extends State<FeedPreviewWidget> {
     _loadLatestItem();
 
     // Listen for social data updates (comments/reactions synced)
-    _socialDataSubscription =
-        Bus.instance.on<SocialDataUpdatedEvent>().listen((event) {
+    _socialDataSubscription = Bus.instance.on<SocialDataUpdatedEvent>().listen((
+      event,
+    ) {
       _refreshDebouncer.run(() => _loadLatestItem());
     });
 
     // Listen for people changes (user names updated)
-    _peopleChangedSubscription =
-        Bus.instance.on<PeopleChangedEvent>().listen((event) {
+    _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen((
+      event,
+    ) {
       // Refresh if a person was saved/edited and matches the current actor
       if (event.type == PeopleEventType.saveOrEditPerson &&
           _latestItem != null) {
@@ -108,10 +110,7 @@ class _FeedPreviewWidgetState extends State<FeedPreviewWidget> {
         decoration: BoxDecoration(
           color: colorScheme.backgroundElevated2,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: colorScheme.strokeFainter,
-            width: 1,
-          ),
+          border: Border.all(color: colorScheme.strokeFainter, width: 1),
         ),
         child: Material(
           color: Colors.transparent,

@@ -132,7 +132,11 @@ internal fun DownloadToastOverlay(
             )
             Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = statusText, style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Text(
+                    text = statusText,
+                    style = EnsuTypography.small.copy(fontFeatureSettings = "tnum"),
+                    color = EnsuColor.textMuted()
+                )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = "$clamped%", style = EnsuTypography.mini, color = EnsuColor.textMuted())
             }

@@ -48,24 +48,15 @@ Future<void> initSystemTray() async {
   String path = Platform.isWindows
       ? 'assets/icons/auth-icon-monochrome.ico'
       : Platform.isMacOS
-          ? 'assets/icons/auth-icon-monochrome-padded.png'
-          : 'assets/icons/auth-icon-monochrome.png';
+      ? 'assets/icons/auth-icon-monochrome-padded.png'
+      : 'assets/icons/auth-icon-monochrome.png';
   await trayManager.setIcon(path, isTemplate: true);
   Menu menu = Menu(
     items: [
-      MenuItem(
-        key: 'hide_window',
-        label: 'Hide Window',
-      ),
-      MenuItem(
-        key: 'show_window',
-        label: 'Show Window',
-      ),
+      MenuItem(key: 'hide_window', label: 'Hide Window'),
+      MenuItem(key: 'show_window', label: 'Show Window'),
       MenuItem.separator(),
-      MenuItem(
-        key: 'exit_app',
-        label: 'Exit App',
-      ),
+      MenuItem(key: 'exit_app', label: 'Exit App'),
     ],
   );
   await trayManager.setContextMenu(menu);
@@ -167,8 +158,11 @@ void _registerWindowsProtocol() {
   const kWindowsScheme = 'enteauth';
   // Register our protocol only on Windows platform
   if (!kIsWeb && Platform.isWindows) {
-    WindowsProtocolHandler()
-        .register(kWindowsScheme, executable: null, arguments: null);
+    WindowsProtocolHandler().register(
+      kWindowsScheme,
+      executable: null,
+      arguments: null,
+    );
   }
 }
 

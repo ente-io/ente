@@ -78,7 +78,7 @@ export interface ChatDialogsProps {
     openLoginFromChat: () => void;
     openPasskeysFromChat: () => void;
     advancedUnlocked: boolean;
-    buildVersion: string;
+    buildVersion?: string;
     handleBuildVersionTap: () => void;
     openModelSettings: () => void;
     openSystemPromptSettings: () => void;
@@ -774,19 +774,21 @@ export const ChatDialogs = memo(
                                 </Stack>
                             )}
 
-                            <Typography
-                                variant="mini"
-                                onClick={handleBuildVersionTap}
-                                sx={{
-                                    color: "text.muted",
-                                    textAlign: "center",
-                                    cursor: "pointer",
-                                    userSelect: "none",
-                                    py: 1,
-                                }}
-                            >
-                                Build {buildVersion}
-                            </Typography>
+                            {buildVersion && (
+                                <Typography
+                                    variant="mini"
+                                    onClick={handleBuildVersionTap}
+                                    sx={{
+                                        color: "text.muted",
+                                        textAlign: "center",
+                                        cursor: "pointer",
+                                        userSelect: "none",
+                                        py: 1,
+                                    }}
+                                >
+                                    Build {buildVersion}
+                                </Typography>
+                            )}
                         </Stack>
                     </DialogContent>
                 </Dialog>

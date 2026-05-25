@@ -13,6 +13,7 @@ use tokio::time::sleep;
 const TOKEN_HEADER: &str = "X-Auth-Token";
 const CLIENT_PKG_HEADER: &str = "X-Client-Package";
 const DEFAULT_CLIENT_PACKAGE: &str = "io.ente.photos";
+pub(crate) const USER_AGENT: &str = concat!("ente-rs/", env!("CARGO_PKG_VERSION"));
 
 /// Maximum number of retry attempts for failed requests
 const MAX_RETRIES: u32 = 3;
@@ -83,14 +84,14 @@ impl ApiClient {
     {
         let client = Client::builder()
             .timeout(Duration::from_secs(30))
-            .user_agent(format!("ente-cli-rust/{}", env!("CARGO_PKG_VERSION")))
+            .user_agent(USER_AGENT)
             .build()?;
 
         let download_client = Client::builder()
             .timeout(Duration::from_secs(300))
             .pool_idle_timeout(Duration::from_secs(90))
             .pool_max_idle_per_host(10)
-            .user_agent(format!("ente-cli-rust/{}", env!("CARGO_PKG_VERSION")))
+            .user_agent(USER_AGENT)
             .build()?;
 
         Ok(Self {

@@ -42,27 +42,25 @@ class VideoWidget extends StatefulWidget {
 class _VideoWidgetState extends State<VideoWidget> {
   final showControlsNotifier = ValueNotifier<bool>(true);
   static const double verticalMargin = 64;
-  final _hideControlsDebouncer = Debouncer(
-    const Duration(milliseconds: 2000),
-  );
+  final _hideControlsDebouncer = Debouncer(const Duration(milliseconds: 2000));
   final _isSeekingNotifier = ValueNotifier<bool>(false);
   late final StreamSubscription<bool> _isPlayingStreamSubscription;
 
   @override
   void initState() {
     super.initState();
-    _isPlayingStreamSubscription =
-        widget.controller.player.stream.playing.listen((isPlaying) {
-      if (isPlaying && !_isSeekingNotifier.value) {
-        _hideControlsDebouncer.run(() async {
-          showControlsNotifier.value = false;
-          widget.playbackCallback?.call(
-            true,
-            FullScreenRequestReason.playbackStateChange,
-          );
+    _isPlayingStreamSubscription = widget.controller.player.stream.playing
+        .listen((isPlaying) {
+          if (isPlaying && !_isSeekingNotifier.value) {
+            _hideControlsDebouncer.run(() async {
+              showControlsNotifier.value = false;
+              widget.playbackCallback?.call(
+                true,
+                FullScreenRequestReason.playbackStateChange,
+              );
+            });
+          }
         });
-      }
-    });
 
     _isSeekingNotifier.addListener(isSeekingListener);
   }
@@ -216,10 +214,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
 class PlayPauseButtonMediaKit extends StatefulWidget {
   final VideoController? controller;
-  const PlayPauseButtonMediaKit(
-    this.controller, {
-    super.key,
-  });
+  const PlayPauseButtonMediaKit(this.controller, {super.key});
 
   @override
   State<PlayPauseButtonMediaKit> createState() => _PlayPauseButtonState();
@@ -235,17 +230,15 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
   void initState() {
     super.initState();
 
-    isPlayingStreamSubscription =
-        widget.controller?.player.stream.playing.listen((isPlaying) {
-      setState(() {
-        _isPlaying = isPlaying;
-      });
-    });
+    isPlayingStreamSubscription = widget.controller?.player.stream.playing
+        .listen((isPlaying) {
+          setState(() {
+            _isPlaying = isPlaying;
+          });
+        });
 
-    _bufferStateSubscription =
-        widget.controller?.player.stream.buffering.listen(
-      (event) => setState(() => buffering = event),
-    );
+    _bufferStateSubscription = widget.controller?.player.stream.buffering
+        .listen((event) => setState(() => buffering = event));
   }
 
   @override
@@ -274,10 +267,7 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.3),
           shape: BoxShape.circle,
-          border: Border.all(
-            color: strokeFaintDark,
-            width: 1,
-          ),
+          border: Border.all(color: strokeFaintDark, width: 1),
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
@@ -320,36 +310,19 @@ class SeekBarAndDuration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(
-          16,
-          4,
-          16,
-          4,
-        ),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.3),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(8),
-          ),
-          border: Border.all(
-            color: strokeFaintDark,
-            width: 1,
-          ),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          border: Border.all(color: strokeFaintDark, width: 1),
         ),
         child: Column(
           children: [
             file.caption != null && file.caption!.isNotEmpty
                 ? Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      0,
-                      8,
-                      0,
-                      12,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
                     child: GestureDetector(
                       onTap: () {
                         showDetailsSheet(context, file);
@@ -358,9 +331,9 @@ class SeekBarAndDuration extends StatelessWidget {
                         file.caption!,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context)
-                            .mini
-                            .copyWith(color: textBaseDark),
+                        style: getEnteTextTheme(
+                          context,
+                        ).mini.copyWith(color: textBaseDark),
                       ),
                     ),
                   )
@@ -375,36 +348,25 @@ class SeekBarAndDuration extends StatelessWidget {
                         "0:00",
                         style: getEnteTextTheme(
                           context,
-                        ).mini.copyWith(
-                              color: textBaseDark,
-                            ),
+                        ).mini.copyWith(color: textBaseDark),
                       );
                     }
                     return Text(
                       secondsToDuration(snapshot.data!.inSeconds),
                       style: getEnteTextTheme(
                         context,
-                      ).mini.copyWith(
-                            color: textBaseDark,
-                          ),
+                      ).mini.copyWith(color: textBaseDark),
                     );
                   },
                 ),
-                Expanded(
-                  child: SeekBar(
-                    controller!,
-                    isSeekingNotifier,
-                  ),
-                ),
+                Expanded(child: SeekBar(controller!, isSeekingNotifier)),
                 Text(
                   _secondsToDuration(
                     controller!.player.state.duration.inSeconds,
                   ),
                   style: getEnteTextTheme(
                     context,
-                  ).mini.copyWith(
-                        color: textBaseDark,
-                      ),
+                  ).mini.copyWith(color: textBaseDark),
                 ),
               ],
             ),
@@ -431,11 +393,7 @@ class SeekBarAndDuration extends StatelessWidget {
 class SeekBar extends StatefulWidget {
   final VideoController controller;
   final ValueNotifier<bool> isSeekingNotifier;
-  const SeekBar(
-    this.controller,
-    this.isSeekingNotifier, {
-    super.key,
-  });
+  const SeekBar(this.controller, this.isSeekingNotifier, {super.key});
 
   @override
   State<SeekBar> createState() => _SeekBarState();
@@ -451,20 +409,26 @@ class _SeekBarState extends State<SeekBar> {
   @override
   void initState() {
     super.initState();
-    _positionStreamSubscription =
-        widget.controller.player.stream.position.listen((event) {
-      if (widget.isSeekingNotifier.value) return;
-      if (mounted) {
-        setState(() {
-          _sliderValue = (event.inMilliseconds /
-                  widget.controller.player.state.duration.inMilliseconds)
-              .clamp(0, 1);
-          if (_sliderValue.isNaN) {
-            _sliderValue = 0.0;
+    _positionStreamSubscription = widget.controller.player.stream.position
+        .listen((event) {
+          if (widget.isSeekingNotifier.value) return;
+          if (mounted) {
+            setState(() {
+              _sliderValue =
+                  (event.inMilliseconds /
+                          widget
+                              .controller
+                              .player
+                              .state
+                              .duration
+                              .inMilliseconds)
+                      .clamp(0, 1);
+              if (_sliderValue.isNaN) {
+                _sliderValue = 0.0;
+              }
+            });
           }
         });
-      }
-    });
   }
 
   @override
@@ -507,9 +471,15 @@ class _SeekBarState extends State<SeekBar> {
           _debouncer.run(() async {
             await widget.controller.player.seek(
               Duration(
-                milliseconds: (value *
-                        widget.controller.player.state.duration.inMilliseconds)
-                    .round(),
+                milliseconds:
+                    (value *
+                            widget
+                                .controller
+                                .player
+                                .state
+                                .duration
+                                .inMilliseconds)
+                        .round(),
               ),
             );
           });
@@ -518,9 +488,15 @@ class _SeekBarState extends State<SeekBar> {
         onChangeEnd: (value) async {
           await widget.controller.player.seek(
             Duration(
-              milliseconds: (value *
-                      widget.controller.player.state.duration.inMilliseconds)
-                  .round(),
+              milliseconds:
+                  (value *
+                          widget
+                              .controller
+                              .player
+                              .state
+                              .duration
+                              .inMilliseconds)
+                      .round(),
             ),
           );
           if (mounted) {

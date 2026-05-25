@@ -44,25 +44,24 @@ class EmptyAlbumState extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      "assets/albums-widget-static.png",
-                      height: 160,
-                    ),
+                    Image.asset("assets/albums-widget-static.png", height: 160),
                     const SizedBox(height: 16),
                     Text.rich(
                       TextSpan(
                         text: AppLocalizations.of(context).addSomePhotosDesc1,
                         children: [
                           TextSpan(
-                            text:
-                                AppLocalizations.of(context).addSomePhotosDesc2,
+                            text: AppLocalizations.of(
+                              context,
+                            ).addSomePhotosDesc2,
                             style: TextStyle(
                               color: getEnteColorScheme(context).primary500,
                             ),
                           ),
                           TextSpan(
-                            text:
-                                AppLocalizations.of(context).addSomePhotosDesc3,
+                            text: AppLocalizations.of(
+                              context,
+                            ).addSomePhotosDesc3,
                           ),
                         ],
                       ),

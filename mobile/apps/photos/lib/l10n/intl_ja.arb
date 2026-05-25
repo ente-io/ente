@@ -831,7 +831,6 @@
   "continueWithoutAccount": "アカウントなしで続ける",
   "loginToExistingAccount": "既存のアカウントでログイン",
   "pleaseLoginAgain": "もう一度試してください",
-  "autoLogoutMessage": "技術的な不具合により、ログアウトしました。ご不便をおかけして申し訳ございません。",
   "yourSubscriptionHasExpired": "サブスクリプションの有効期限が終了しました",
   "storageLimitExceeded": "ストレージの上限を超えました",
   "upgrade": "アップグレード",
@@ -852,11 +851,6 @@
   "collectEventPhotos": "イベントの写真を集めよう",
   "sessionExpired": "セッション切れ",
   "loggingOut": "ログアウト中...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "デバイス上",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1325,8 +1319,6 @@
   "noPhotosFoundHere": "写真が見つかりません",
   "zoomOutToSeePhotos": "ズームアウトして写真を表示",
   "noImagesWithLocation": "位置情報のある画像がありません",
-  "unpinAlbum": "アルバムのピン留めを解除",
-  "pinAlbum": "アルバムをピンする",
   "pin": "固定",
   "pinToTop": "トップに固定",
   "showInMemories": "思い出を表示",

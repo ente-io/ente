@@ -81,10 +81,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          title,
-          style: textTheme.largeBold,
-        ),
+        title: Text(title, style: textTheme.largeBold),
         centerTitle: true,
       ),
       body: _getBody(colorScheme, textTheme),
@@ -106,10 +103,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
     );
   }
 
-  Widget _getBody(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
     final email = widget.sessions.user.email;
     String? passwordMessage;
     TextInputMessageType passwordMessageType = TextInputMessageType.guide;
@@ -134,8 +128,9 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
         confirmPasswordMessage = AppLocalizations.of(context).passwordsMatch;
         confirmPasswordMessageType = TextInputMessageType.success;
       } else {
-        confirmPasswordMessage =
-            AppLocalizations.of(context).passwordsDontMatch;
+        confirmPasswordMessage = AppLocalizations.of(
+          context,
+        ).passwordsDontMatch;
         confirmPasswordMessageType = TextInputMessageType.error;
       }
     }
@@ -181,7 +176,8 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                       _passwordStrength = estimatePasswordStrength(password);
                       _isPasswordValid =
                           _passwordStrength >= kMildPasswordStrengthThreshold;
-                      _passwordsMatch = _passwordInInputBox ==
+                      _passwordsMatch =
+                          _passwordInInputBox ==
                           _passwordInInputConfirmationBox;
                       _showPasswordStrength = false;
                     });
@@ -214,7 +210,8 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                   setState(() {
                     _passwordInInputConfirmationBox = confirmPassword;
                     if (_passwordInInputBox.isNotEmpty) {
-                      _passwordsMatch = _passwordInInputBox ==
+                      _passwordsMatch =
+                          _passwordInInputBox ==
                           _passwordInInputConfirmationBox;
                     }
                   });
@@ -259,8 +256,10 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
       );
       final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
       // Encrypt the key with this derived key
-      final encryptedKeyData =
-          CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
+      final encryptedKeyData = CryptoUtil.encryptSync(
+        masterKey,
+        derivedKeyResult.key,
+      );
 
       final updatedAttributes = attributes.copyWith(
         kekSalt: CryptoUtil.bin2base64(kekSalt),

@@ -237,12 +237,14 @@ class UserService {
         final bool currentEmailMFAStatus =
             userDetails.profileData!.isEmailMFAEnabled;
         await _preferences.setBool(kIsEmailMFAEnabled, currentEmailMFAStatus);
-        hasSecurityStatusChanged = hasSecurityStatusChanged ||
+        hasSecurityStatusChanged =
+            hasSecurityStatusChanged ||
             previousEmailMFAStatus != currentEmailMFAStatus;
         final bool currentTwoFactorStatus =
             userDetails.profileData!.isTwoFactorEnabled;
         await setTwoFactor(value: currentTwoFactorStatus);
-        hasSecurityStatusChanged = hasSecurityStatusChanged ||
+        hasSecurityStatusChanged =
+            hasSecurityStatusChanged ||
             previousTwoFactorStatus != currentTwoFactorStatus;
       }
       if (hasSecurityStatusChanged) {
@@ -283,8 +285,8 @@ class UserService {
       final bool silentlyIgnoreError =
           // Token is already invalid (401 response)
           (e is DioException && e.response?.statusCode == 401) ||
-              // Custom endpoints where server might be non-existent or unavailable
-              !endpointConfig.isProduction;
+          // Custom endpoints where server might be non-existent or unavailable
+          !endpointConfig.isProduction;
 
       if (silentlyIgnoreError) {
         if (!endpointConfig.isProduction) {
@@ -1154,8 +1156,9 @@ class UserService {
   }
 
   Future<Uint8List> getOrCreateRecoveryKey(BuildContext context) async {
-    final String? encryptedRecoveryKey =
-        _config.getKeyAttributes()!.recoveryKeyEncryptedWithMasterKey;
+    final String? encryptedRecoveryKey = _config
+        .getKeyAttributes()!
+        .recoveryKeyEncryptedWithMasterKey;
     if (encryptedRecoveryKey == null || encryptedRecoveryKey.isEmpty) {
       final dialog = createProgressDialog(
         context,

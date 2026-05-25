@@ -27,8 +27,9 @@ class ReferralCodeWidget extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     const greenColor = Color(0xFF08C225);
-    final cardColor =
-        isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
+    final cardColor = isDarkMode
+        ? const Color(0xFF212121)
+        : const Color(0xFFFFFFFF);
 
     // The edit button is 24px (6px padding + 12px icon + 6px padding)
     // Plus 12px tap padding on each side = 48px total tap area
@@ -82,8 +83,8 @@ class ReferralCodeWidget extends StatelessWidget {
                     title: AppLocalizations.of(context).error,
                     body: AppLocalizations.of(context)
                         .onlyFamilyAdminCanChangeCode(
-                      familyAdminEmail: familyAdmin,
-                    ),
+                          familyAdminEmail: familyAdmin,
+                        ),
                     icon: Icons.error,
                   );
                 } else {

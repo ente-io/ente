@@ -37,10 +37,12 @@ class DynamicFAB extends StatelessWidget {
           children: [
             FloatingActionButton(
               heroTag: 'FAB',
-              backgroundColor:
-                  Theme.of(context).colorScheme.dynamicFABBackgroundColor,
-              foregroundColor:
-                  Theme.of(context).colorScheme.dynamicFABTextColor,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.dynamicFABBackgroundColor,
+              foregroundColor: Theme.of(
+                context,
+              ).colorScheme.dynamicFABTextColor,
               onPressed: isFormValid!
                   ? onPressedFunction as void Function()?
                   : () {
@@ -48,10 +50,7 @@ class DynamicFAB extends StatelessWidget {
                     },
               child: Transform.rotate(
                 angle: isFormValid! ? 0 : math.pi / 2,
-                child: const Icon(
-                  Icons.chevron_right,
-                  size: 36,
-                ),
+                child: const Icon(Icons.chevron_right, size: 36),
               ), //keypad down here
             ),
           ],
@@ -63,8 +62,9 @@ class DynamicFAB extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: OutlinedButton(
-          onPressed:
-              isFormValid! ? onPressedFunction as void Function()? : null,
+          onPressed: isFormValid!
+              ? onPressedFunction as void Function()?
+              : null,
           child: Text(buttonText!),
         ),
       );

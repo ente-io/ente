@@ -56,13 +56,16 @@ Future<void> showAegisImportInstruction(BuildContext context) async {
 
 Future<void> _pickAegisJsonFile(BuildContext context) async {
   final l10n = context.l10n;
-  FilePickerResult? result = await FilePicker.platform
-      .pickFiles(dialogTitle: l10n.importSelectJsonFile);
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    dialogTitle: l10n.importSelectJsonFile,
+  );
   if (result == null) {
     return;
   }
-  final ProgressDialog progressDialog =
-      createProgressDialog(context, l10n.pleaseWait);
+  final ProgressDialog progressDialog = createProgressDialog(
+    context,
+    l10n.pleaseWait,
+  );
   await progressDialog.show();
   try {
     String path = result.files.single.path!;
@@ -112,8 +115,9 @@ Future<int?> _processAegisExportFile(
       final content = decryptAegisVault(decodedJson, password: password!);
       aegisDB = jsonDecode(content);
     } catch (e, s) {
-      Logger("AegisImport")
-          .warning("exception while decrypting aegis vault", e, s);
+      Logger(
+        "AegisImport",
+      ).warning("exception while decrypting aegis vault", e, s);
       await dialog.hide();
       if (password != null) {
         await showErrorDialog(
@@ -172,7 +176,9 @@ Future<int?> _processAegisExportFile(
     }
 
     Code code = Code.fromOTPAuthUrl(otpUrl);
-    code = code.copyWith(display: CodeDisplay(pinned: isFavorite, tags: tags));
+    code = code.copyWith(
+      display: CodeDisplay(pinned: isFavorite, tags: tags),
+    );
     parsedCodes.add(code);
   }
 
@@ -186,8 +192,9 @@ Future<int?> _processAegisExportFile(
 
 String decryptAegisVault(dynamic data, {required String password}) {
   final header = data["header"];
-  final slots =
-      (header["slots"] as List).where((slot) => slot["type"] == 1).toList();
+  final slots = (header["slots"] as List)
+      .where((slot) => slot["type"] == 1)
+      .toList();
 
   Uint8List? masterKey;
   for (final slot in slots) {
@@ -197,22 +204,15 @@ String decryptAegisVault(dynamic data, {required String password}) {
     final int p = slot["p"];
     const int derivedKeyLength = 32;
     final script = Scrypt()
-      ..init(
-        ScryptParameters(
-          iterations,
-          r,
-          p,
-          derivedKeyLength,
-          salt,
-        ),
-      );
+      ..init(ScryptParameters(iterations, r, p, derivedKeyLength, salt));
 
     final key = script.process(Uint8List.fromList(utf8.encode(password)));
 
     final params = slot["key_params"];
     final nonce = Uint8List.fromList(hex.decode(params["nonce"]));
-    final encryptedKeyWithTag =
-        Uint8List.fromList(hex.decode(slot["key"]) + hex.decode(params["tag"]));
+    final encryptedKeyWithTag = Uint8List.fromList(
+      hex.decode(slot["key"]) + hex.decode(params["tag"]),
+    );
 
     final cipher = GCMBlockCipher(AESEngine())
       ..init(

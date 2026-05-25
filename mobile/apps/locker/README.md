@@ -1,7 +1,6 @@
 # Ente Locker
 
-Ente's secure document storage app. An end-to-end encrypted app for storing
-important documents in the cloud with secure sharing capabilities.
+Ente's secure document storage app. An end-to-end encrypted app for storing important documents in the cloud with secure sharing capabilities.
 
 ## 🧑‍💻 Build from source
 
@@ -21,10 +20,6 @@ To build a release APK, [setup your keystore](https://docs.flutter.dev/deploymen
 
 [![Crowdin](https://badges.crowdin.net/ente-locker/localized.svg)](https://crowdin.com/project/ente-locker)
 
-If you're interested in helping out with translation, please visit our [Crowdin
-project](https://crowdin.com/project/ente-locker) to get started. Thank you for
-your support.
+If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-locker) to get started. Thank you for your support.
 
-If your language is not listed for translation, please [create a GitHub
-issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
-to have it added.
+If your language is not listed for translation, please [create a GitHub issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A) to have it added.

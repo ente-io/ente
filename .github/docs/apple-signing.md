@@ -2,32 +2,32 @@
 
 GitHub iOS builds are made using manual signing with the "-allowProvisioningUpdates" flag that makes xcodebuild pull any relevant provisioning profiles from the Apple Developer Portal.
 
-* The builds are signed using a manually created Apple Distribution certificate that is supplied to the workflow as a secret
-* The provisioning profiles are fetched automatically, but they do need to be precreated (one per bundle ID).
-* To fetch these, and for uploading the build, an App Store Connect API key needs to also be made available to the workflow.
-* The Apple Distribution cert has a one year expiry, and needs to be manually recreated and updated in the secrets. The provisioning profiles are tied to a certificate, and so they also need to be recreated.
+- The builds are signed using a manually created Apple Distribution certificate that is supplied to the workflow as a secret.
+- The provisioning profiles are fetched automatically, but they do need to be precreated (one per bundle ID).
+- To fetch these, and for uploading the build, an App Store Connect API key needs to also be made available to the workflow.
+- The Apple Distribution cert has a one year expiry, and needs to be manually recreated and updated in the secrets. The provisioning profiles are tied to a certificate, and so they also need to be recreated.
 
 GitHub macOS builds are made by manually signing with an Apple Developer ID Application certificate and then notarized with Apple.
 
-* The Apple Developer ID Application certificate is also provided to the workflow as a secret. It has a longer expiry too.
-* For notarization, an Apple ID and an associated app-specific password are provided to the workflow.
+- The Apple Developer ID Application certificate is also provided to the workflow as a secret. It has a longer expiry too.
+- For notarization, an Apple ID and an associated app-specific password are provided to the workflow.
 
 ## What you need
 
-| Artifact | Scope | Where it lives |
-| --- | --- | --- |
-| Developer ID Application certificate | Team-wide | GitHub secret as a base64 `.p12`, plus its export password |
-| Apple Distribution certificate | Team-wide | GitHub secret as a base64 `.p12`, plus its export password |
-| App Store Connect API key | Team-wide | GitHub secrets for the `.p8`, key ID, and issuer ID |
-| App ID | Per iOS app | Apple Developer portal |
-| App Store Connect app | Per iOS app | App Store Connect |
-| App Store provisioning profile | Per iOS app | Apple Developer portal |
+| Artifact                             | Scope       | Where it lives                                             |
+| ------------------------------------ | ----------- | ---------------------------------------------------------- |
+| Developer ID Application certificate | Team-wide   | GitHub secret as a base64 `.p12`, plus its export password |
+| Apple Distribution certificate       | Team-wide   | GitHub secret as a base64 `.p12`, plus its export password |
+| App Store Connect API key            | Team-wide   | GitHub secrets for the `.p8`, key ID, and issuer ID        |
+| App ID                               | Per iOS app | Apple Developer portal                                     |
+| App Store Connect app                | Per iOS app | App Store Connect                                          |
+| App Store provisioning profile       | Per iOS app | Apple Developer portal                                     |
 
 The Developer ID certificate and Apple Distribution certificate are different certificates. Developer ID is for distributing notarized macOS apps outside the Mac App Store. Apple Distribution is for App Store/TestFlight distribution.
 
 On macOS, copy a file's base64 value for a GitHub secret with:
 
-```bash
+```sh
 base64 -i path/to/file | pbcopy
 ```
 

@@ -81,10 +81,7 @@ class _FileUploadSheetState extends State<FileUploadSheet> {
         .toList();
 
     if (selectedCollections.isEmpty) {
-      showToast(
-        context,
-        context.l10n.pleaseSelectAtLeastOneCollection,
-      );
+      showToast(context, context.l10n.pleaseSelectAtLeastOneCollection);
       return;
     }
 
@@ -137,9 +134,7 @@ class _FileUploadSheetState extends State<FileUploadSheet> {
         const SizedBox(height: 16),
         Text(
           context.l10n.note,
-          style: textTheme.small.copyWith(
-            color: colorScheme.textBase,
-          ),
+          style: textTheme.small.copyWith(color: colorScheme.textBase),
         ),
         const SizedBox(height: 8),
         TextInputWidget(

@@ -209,15 +209,11 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         unawaited(
           routeToPage(
             context,
-            LanguageSelectorPage(
-              appSupportedLocales,
-              (locale) async {
-                await setLocale(locale);
-                EnteApp.setLocale(context, locale);
-                unawaited(AppLocalizations.delegate.load(locale));
-              },
-              locale,
-            ),
+            LanguageSelectorPage(appSupportedLocales, (locale) async {
+              await setLocale(locale);
+              EnteApp.setLocale(context, locale);
+              unawaited(AppLocalizations.delegate.load(locale));
+            }, locale),
           ).then((value) {
             setState(() {});
           }),

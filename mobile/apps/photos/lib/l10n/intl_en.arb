@@ -842,6 +842,7 @@
   "advanced": "Advanced",
   "general": "General",
   "security": "Security",
+  "settings": "Settings",
   "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
   "twofactor": "Two-factor",
   "authToConfigureTwofactorAuthentication": "Please authenticate to configure two-factor authentication",
@@ -1122,7 +1123,7 @@
     "description": "The text displayed above folders/albums stored on device",
     "type": "text"
   },
-  "onDevice": "On device",
+  "onDevice": "Device",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1695,8 +1696,6 @@
   "noPhotosFoundHere": "No photos found here",
   "zoomOutToSeePhotos": "Zoom out to see photos",
   "noImagesWithLocation": "No images with location",
-  "unpinAlbum": "Unpin album",
-  "pinAlbum": "Pin album",
   "pin": "Pin",
   "pinPerson": "Pin person",
   "pinToTop": "Pin to top",
@@ -1873,6 +1872,7 @@
   },
   "enable": "Enable",
   "enabled": "Enabled",
+  "more": "More",
   "moreDetails": "More details",
   "enableMLIndexingDesc": "Ente supports on-device machine learning for face recognition, magic search and other advanced search features",
   "magicSearchHint": "Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identity documents'",

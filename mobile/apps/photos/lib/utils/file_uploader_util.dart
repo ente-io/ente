@@ -117,13 +117,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   final asset = await file.getAsset
       .timeout(const Duration(seconds: 3))
       .catchError((e) async {
-    if (e is TimeoutException) {
-      _logger.info("Asset fetch timed out for " + file.toString());
-      return await file.getAsset;
-    } else {
-      throw e;
-    }
-  });
+        if (e is TimeoutException) {
+          _logger.info("Asset fetch timed out for " + file.toString());
+          return await file.getAsset;
+        } else {
+          throw e;
+        }
+      });
   if (asset == null) {
     throw InvalidFileError("", InvalidReason.assetDeleted);
   }
@@ -134,13 +134,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   sourceFile = await asset.originFile
       .timeout(const Duration(seconds: 15))
       .catchError((e) async {
-    if (e is TimeoutException) {
-      _logger.info("Origin file fetch timed out for " + file.tag);
-      return await asset.originFile;
-    } else {
-      throw e;
-    }
-  });
+        if (e is TimeoutException) {
+          _logger.info("Origin file fetch timed out for " + file.tag);
+          return await asset.originFile;
+        } else {
+          throw e;
+        }
+      });
   if (sourceFile == null || !sourceFile.existsSync()) {
     throw InvalidFileError(
       "id: ${file.localID}",
@@ -166,8 +166,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
       _logger.severe(errMsg);
       throw InvalidFileError(errMsg, InvalidReason.livePhotoVideoMissing);
     }
-    final String livePhotoVideoHash =
-        CryptoUtil.bin2base64(await CryptoUtil.getHash(videoUrl));
+    final String livePhotoVideoHash = CryptoUtil.bin2base64(
+      await CryptoUtil.getHash(videoUrl),
+    );
     // imgHash:vidHash
     fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';
     final tempPath = Configuration.instance.getTempDirectory();
@@ -206,8 +207,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   int? motionPhotoStartingIndex;
   if (Platform.isAndroid && asset.type == AssetType.image) {
     try {
-      motionPhotoStartingIndex =
-          await motionVideoIndex({'path': sourceFile.path});
+      motionPhotoStartingIndex = await motionVideoIndex({
+        'path': sourceFile.path,
+      });
     } catch (e) {
       _logger.severe('error while detecthing motion photo start index', e);
     }
@@ -256,11 +258,7 @@ Future<void> zip({
 }) {
   return Computer.shared().compute(
     _computeZip,
-    param: {
-      'zipPath': zipPath,
-      'imagePath': imagePath,
-      'videoPath': videoPath,
-    },
+    param: {'zipPath': zipPath, 'imagePath': imagePath, 'videoPath': videoPath},
     taskName: 'zip',
   );
 }
@@ -289,8 +287,9 @@ Future<Uint8List?> _getThumbnailForUpload(
         compressionAttempts < kMaximumThumbnailCompressionAttempts) {
       _logger.info("Thumbnail size " + thumbnailData.length.toString());
       thumbnailData = await compressThumbnail(thumbnailData);
-      _logger
-          .info("Compressed thumbnail size " + thumbnailData.length.toString());
+      _logger.info(
+        "Compressed thumbnail size " + thumbnailData.length.toString(),
+      );
       compressionAttempts++;
     }
     return thumbnailData;
@@ -343,8 +342,10 @@ Future<void> _decorateEnteFileData(
   if (file.location == null ||
       (file.location!.latitude == 0 && file.location!.longitude == 0)) {
     final latLong = await asset.latlngAsync();
-    file.location =
-        Location(latitude: latLong.latitude, longitude: latLong.longitude);
+    file.location = Location(
+      latitude: latLong.latitude,
+      longitude: latLong.longitude,
+    );
   }
   if (!file.hasLocation && file.isVideo && Platform.isAndroid) {
     final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
@@ -377,8 +378,9 @@ Future<MetadataRequest> getPubMetadataRequest(
   Map<String, dynamic> newData,
   Uint8List fileKey,
 ) async {
-  final Map<String, dynamic> jsonToUpdate =
-      jsonDecode(file.pubMmdEncodedJson ?? '{}');
+  final Map<String, dynamic> jsonToUpdate = jsonDecode(
+    file.pubMmdEncodedJson ?? '{}',
+  );
   newData.forEach((key, value) {
     jsonToUpdate[key] = value;
   });
@@ -419,8 +421,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   }
   try {
     thumbnailData = await getThumbnailFromInAppCacheFile(file);
-    final fileHash =
-        CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+    final fileHash = CryptoUtil.bin2base64(
+      await CryptoUtil.getHash(sourceFile),
+    );
     Map<String, int>? dimensions;
     if (file.fileType == FileType.image) {
       dimensions = await getImageHeightAndWith(imagePath: localPath);
@@ -493,10 +496,7 @@ Future<Map<String, int>?> getImageHeightAndWith({
     if (frameInfo.image.width == 0 || frameInfo.image.height == 0) {
       return null;
     } else {
-      return {
-        "width": frameInfo.image.width,
-        "height": frameInfo.image.height,
-      };
+      return {"width": frameInfo.image.width, "height": frameInfo.image.height};
     }
   } catch (e) {
     _logger.severe("Failed to get image size", e);
@@ -530,8 +530,9 @@ Future<Uint8List?> getThumbnailFromInAppCacheFile(EnteFile file) async {
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {
     _logger.info("Thumbnail size " + thumbnailData.length.toString());
     thumbnailData = await compressThumbnail(thumbnailData);
-    _logger
-        .info("Compressed thumbnail size " + thumbnailData.length.toString());
+    _logger.info(
+      "Compressed thumbnail size " + thumbnailData.length.toString(),
+    );
     compressionAttempts++;
   }
   return thumbnailData;

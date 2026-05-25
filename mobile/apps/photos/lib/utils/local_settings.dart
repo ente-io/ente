@@ -165,8 +165,8 @@ class LocalSettings {
   }
 
   AlbumSortDirection albumSortDirection() {
-    return AlbumSortDirection
-        .values[_prefs.getInt(kCollectionSortDirection) ?? 1];
+    return AlbumSortDirection.values[_prefs.getInt(kCollectionSortDirection) ??
+        1];
   }
 
   Future<bool> setAlbumSortDirection(AlbumSortDirection direction) {
@@ -381,8 +381,9 @@ class LocalSettings {
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
   Future<bool> toggleLocalMLIndexing() async {
-    final nextValue = !(_prefs.getBool(_mlLocalIndexingKey) ??
-        _defaultMLLocalIndexingEnabled);
+    final nextValue =
+        !(_prefs.getBool(_mlLocalIndexingKey) ??
+            _defaultMLLocalIndexingEnabled);
     await _prefs.setBool(_mlLocalIndexingKey, nextValue);
     return nextValue;
   }

@@ -70,9 +70,7 @@ class AlertBottomSheet<T> extends StatelessWidget {
               if (showCloseButton)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    BottomSheetCloseButton(onTap: onClose),
-                  ],
+                  children: [BottomSheetCloseButton(onTap: onClose)],
                 ),
               SizedBox(height: showCloseButton ? 4 : 24),
               if (assetPath != null) ...[

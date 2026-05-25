@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalBottomSheet
@@ -35,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,11 +65,16 @@ import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogEntry
+import io.ente.ensu.domain.model.MaxImageAttachmentsPerMessage
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
 import io.ente.ensu.utils.EnsuFeatureFlags
+import io.ente.ensu.whatsnew.PendingWhatsNew
+import io.ente.ensu.whatsnew.WhatsNewDialog
+import io.ente.ensu.whatsnew.WhatsNewService
 import io.ente.labs.ensu_db.compressAttachmentImage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -105,6 +110,8 @@ fun HomeView(
     var showLogShareDialog by remember { mutableStateOf(false) }
     var showSignInComingSoon by remember { mutableStateOf(false) }
     var imagePreviewAttachment by remember { mutableStateOf<Attachment?>(null) }
+    val whatsNewService = remember(context) { WhatsNewService(context.applicationContext) }
+    var pendingWhatsNew by remember { mutableStateOf<PendingWhatsNew?>(null) }
 
     val handleSignInRequest: () -> Unit = handle@{
         if (!EnsuFeatureFlags.enableSignIn) {
@@ -201,14 +208,23 @@ fun HomeView(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    LaunchedEffect(whatsNewService) {
+        delay(600)
+        pendingWhatsNew = whatsNewService.getPendingWhatsNew()
+    }
+
     // Note: Drawer close is handled in navigation callbacks (onOpenSettings, onAccount, etc.)
     // to avoid race conditions with route changes during navigation transitions.
 
     val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
 
-    val handleAttachmentSelected: (AttachmentType) -> Unit = { type ->
+    val handleAttachmentSelected: (AttachmentType) -> Unit = handle@{ type ->
         when (type) {
             AttachmentType.Image -> {
+                val imageCount = appState.chat.attachments.count {
+                    it.type == AttachmentType.Image
+                }
+                if (imageCount >= MaxImageAttachmentsPerMessage) return@handle
                 imagePicker.launch("image/*")
             }
             AttachmentType.Document -> {
@@ -335,6 +351,16 @@ fun HomeView(
             downloads = appState.chat.attachmentDownloads,
             onCancel = { store.cancelAttachmentDownload(it) },
             onDismiss = { showAttachmentDownloads = false }
+        )
+    }
+
+    pendingWhatsNew?.let { pending ->
+        WhatsNewDialog(
+            entries = pending.entries,
+            onDismiss = {
+                whatsNewService.markSeen()
+                pendingWhatsNew = null
+            }
         )
     }
 

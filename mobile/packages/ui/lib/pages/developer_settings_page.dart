@@ -41,9 +41,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.strings.developerSettings),
-      ),
+      appBar: AppBar(title: Text(context.strings.developerSettings)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -66,10 +64,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   if ((uri.scheme == "http" || uri.scheme == "https")) {
                     await _ping(url);
                     await widget.setEndpoint(url);
-                    showToast(
-                      context,
-                      context.strings.endpointUpdatedMessage,
-                    );
+                    showToast(context, context.strings.endpointUpdatedMessage);
                     Navigator.of(context).pop();
                   } else {
                     throw const FormatException();

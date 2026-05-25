@@ -87,10 +87,7 @@ class _QrTapRegionState extends State<_QrTapRegion> {
   Future<void> _onLongPress() async {
     await HapticFeedback.lightImpact();
     if (!mounted) return;
-    await showQrCodeContentSheet(
-      context,
-      detections: [widget.detection],
-    );
+    await showQrCodeContentSheet(context, detections: [widget.detection]);
   }
 
   @override
@@ -100,9 +97,11 @@ class _QrTapRegionState extends State<_QrTapRegion> {
     const double minTapTarget = 48.0;
     final screenW = rawW < minTapTarget ? minTapTarget : rawW;
     final screenH = rawH < minTapTarget ? minTapTarget : rawH;
-    final centerX = widget.offsetX +
+    final centerX =
+        widget.offsetX +
         (widget.detection.x + widget.detection.width / 2) * widget.displayWidth;
-    final centerY = widget.offsetY +
+    final centerY =
+        widget.offsetY +
         (widget.detection.y + widget.detection.height / 2) *
             widget.displayHeight;
 

@@ -25,12 +25,8 @@ class PlainTextImport extends StatelessWidget {
 
     return Column(
       children: [
-        Text(
-          l10n.importInstruction,
-        ),
-        const SizedBox(
-          height: 20,
-        ),
+        Text(l10n.importInstruction),
+        const SizedBox(height: 20),
         Container(
           color: Theme.of(context).colorScheme.gNavBackgroundColor,
           child: Padding(
@@ -45,9 +41,7 @@ class PlainTextImport extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         Text(l10n.importCodeDelimiterInfo),
       ],
     );
@@ -62,17 +56,10 @@ Future<void> showImportInstructionDialog(BuildContext context) async {
       l10n.importCodes,
       style: Theme.of(context).textTheme.titleLarge,
     ),
-    content: const SingleChildScrollView(
-      child: PlainTextImport(),
-    ),
+    content: const SingleChildScrollView(child: PlainTextImport()),
     actions: [
       TextButton(
-        child: Text(
-          l10n.cancel,
-          style: const TextStyle(
-            color: Colors.red,
-          ),
-        ),
+        child: Text(l10n.cancel, style: const TextStyle(color: Colors.red)),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop('dialog');
         },

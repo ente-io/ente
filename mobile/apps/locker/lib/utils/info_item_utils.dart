@@ -50,11 +50,7 @@ class InfoItemUtils {
   }) {
     final config = _getInfoConfig(type);
 
-    final icon = HugeIcon(
-      icon: config.icon,
-      color: config.color,
-      size: size,
-    );
+    final icon = HugeIcon(icon: config.icon, color: config.color, size: size);
 
     if (!showBackground) {
       return icon;
@@ -65,10 +61,7 @@ class InfoItemUtils {
         color: config.backgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: icon,
-      ),
+      child: Padding(padding: const EdgeInsets.all(8.0), child: icon),
     );
   }
 }

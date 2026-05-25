@@ -642,9 +642,7 @@
   "referrals": "Arkadaşını davet et",
   "notifications": "Bildirimler",
   "sharedPhotoNotifications": "Yeni paylaşılan fotoğraf ve albümler",
-  "sharedPhotoNotificationsExplanation": "Sizinle paylaşılan albümlerdeki yeni fotoğraflar ve sizinle paylaşılan yeni albümler için bildirim alın.",
   "socialNotifications": "Beğeni ve yorumlar",
-  "socialNotificationsExplanation": "Dahil olduğunuz albümlere gelen beğeni ve yorumlardan bildirim alın",
   "advanced": "Gelişmiş",
   "general": "Genel",
   "security": "Güvenlik",
@@ -873,7 +871,6 @@
   "shareTheMoment": "Bu anı paylaş",
   "letFriendsAndFamilyReact": "Aile ve arkadaşlarınızın fotoğraflara tepki vermesine ve yorum yapmasına izin verin.",
   "pleaseLoginAgain": "Lütfen tekrar giriş yapın",
-  "autoLogoutMessage": "Teknik aksaklık nedeniyle oturumunuz kapatıldı. Verdiğimiz rahatsızlıktan dolayı özür dileriz.",
   "yourSubscriptionHasExpired": "Aboneliğinizin süresi doldu",
   "storageLimitExceeded": "Depolama sınırı aşıldı",
   "upgrade": "Yükselt",
@@ -896,11 +893,6 @@
   "collectEventPhotos": "Etkinlik fotoğraflarını topla",
   "sessionExpired": "Oturum süresi doldu",
   "loggingOut": "Çıkış yapılıyor...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Cihazda",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1345,8 +1337,6 @@
   "noPhotosFoundHere": "Burada fotoğraf bulunamadı",
   "zoomOutToSeePhotos": "Fotoğrafları görmek için uzaklaştırın",
   "noImagesWithLocation": "Konum içeren resim yok",
-  "unpinAlbum": "Albümün sabitlemesini kaldır",
-  "pinAlbum": "Albümü sabitle",
   "pin": "Sabitle",
   "pinPerson": "Kişiyi sabitle",
   "pinToTop": "Üste sabitle",
@@ -1917,9 +1907,7 @@
   "newPhotosEmoji": " yeni 📸",
   "sorryWeHadToPauseYourBackups": "Üzgünüm, yedeklemenizi duraklatmak zorunda kaldık",
   "clickToInstallOurBestVersionYet": "Bugüne kadarki en iyi sürümümüzü yüklemek için tıklayın",
-  "onThisDayNotificationExplanation": "Önceki yıllarda bu günden anılar hakkında hatırlatıcılar alın.",
   "birthdayNotifications": "Doğum günü bildirimleri",
-  "receiveRemindersOnBirthdays": "Birinin doğum günü olduğunda hatırlatıcılar alın. Bildirime dokunmak sizi doğum günü kişisinin fotoğraflarına götürecektir.",
   "happyBirthday": "Doğum günün kutlu olsun! 🥳",
   "birthdays": "Doğum Günleri",
   "wishThemAHappyBirthday": "{name} doğum günü kutlu olsun! 🎉",

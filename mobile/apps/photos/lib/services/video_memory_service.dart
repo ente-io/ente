@@ -17,14 +17,8 @@ import "package:photos/utils/file_util.dart";
 
 final _logger = Logger("VideoMemoryService");
 
-Future<void> createSlideshow(
-  BuildContext context,
-  List<EnteFile> files,
-) async {
-  final dialog = createProgressDialog(
-    context,
-    "Creating video...",
-  );
+Future<void> createSlideshow(BuildContext context, List<EnteFile> files) async {
+  final dialog = createProgressDialog(context, "Creating video...");
 
   try {
     await dialog.show();
@@ -55,9 +49,7 @@ Future<void> createSlideshow(
   }
 }
 
-Future<ImageProcessingResult> _prepareImageFiles(
-  List<EnteFile> files,
-) async {
+Future<ImageProcessingResult> _prepareImageFiles(List<EnteFile> files) async {
   final List<String> paths = [];
   final List<double> heights = [];
   final List<double> widths = [];
@@ -85,8 +77,9 @@ Future<ImageProcessingResult> _prepareImageFiles(
       } else {
         processedPath =
             '$tempPath/${DateTime.now().millisecondsSinceEpoch}.jpg';
-        File(processedPath)
-            .writeAsBytesSync(img.encodeJpg(decodedImage, quality: 95));
+        File(
+          processedPath,
+        ).writeAsBytesSync(img.encodeJpg(decodedImage, quality: 95));
       }
 
       paths.add(processedPath);
@@ -95,11 +88,7 @@ Future<ImageProcessingResult> _prepareImageFiles(
     }
   }
 
-  return ImageProcessingResult(
-    paths: paths,
-    heights: heights,
-    widths: widths,
-  );
+  return ImageProcessingResult(paths: paths, heights: heights, widths: widths);
 }
 
 bool _isJpegFile(String path) {
@@ -166,10 +155,7 @@ Future<void> _executeFFmpegProcess({
   }
 }
 
-void _completeOperation(
-  Completer<void> completer,
-  Function onComplete,
-) {
+void _completeOperation(Completer<void> completer, Function onComplete) {
   onComplete();
   if (!completer.isCompleted) {
     completer.complete();
@@ -237,9 +223,11 @@ String _buildFFmpegCommand(
     }
   }
 
-  command.write('" -map "[f${imagePaths.length - 2}]" '
-      '-c:v libx264 -crf 18 -preset slow -movflags +faststart -pix_fmt yuv420p -r 60 '
-      '-t ${imagePaths.length * 2} "$outputPath"');
+  command.write(
+    '" -map "[f${imagePaths.length - 2}]" '
+    '-c:v libx264 -crf 18 -preset slow -movflags +faststart -pix_fmt yuv420p -r 60 '
+    '-t ${imagePaths.length * 2} "$outputPath"',
+  );
 
   return command.toString();
 }

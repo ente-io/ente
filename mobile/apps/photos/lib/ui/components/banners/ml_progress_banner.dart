@@ -32,7 +32,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
   bool _isOnSearchTab = true;
   late final StreamSubscription<TabChangedEvent> _tabChangedSubscription;
   late final StreamSubscription<LocalPhotosUpdatedEvent>
-      _localPhotosUpdatedSubscription;
+  _localPhotosUpdatedSubscription;
   late final StreamSubscription<NotificationEvent> _notificationSubscription;
 
   @override
@@ -49,12 +49,13 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
         _stopPolling();
       }
     });
-    _localPhotosUpdatedSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((_) {
-      _indexStatus = null;
-      _indexingComplete = false;
-      _ensurePolling();
-    });
+    _localPhotosUpdatedSubscription = Bus.instance
+        .on<LocalPhotosUpdatedEvent>()
+        .listen((_) {
+          _indexStatus = null;
+          _indexingComplete = false;
+          _ensurePolling();
+        });
     _notificationSubscription = Bus.instance.on<NotificationEvent>().listen((
       _,
     ) {

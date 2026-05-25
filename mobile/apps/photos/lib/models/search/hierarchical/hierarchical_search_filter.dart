@@ -26,15 +26,15 @@ abstract class HierarchicalSearchFilter {
   bool isApplied = false;
 
   HierarchicalSearchFilter({required this.filterTypeName, matchedUploadedIDs})
-      : matchedUploadedIDs = matchedUploadedIDs ?? {},
-        //Check to ensure that when a new filter extends HierarchicalSearchFilter,
-        //it's filterTypeName is added to FilterTypeNames enum.
-        assert(
-          FilterTypeNames.values
-              .map((e) => e.toString().split(".").last)
-              .contains(filterTypeName),
-          "filterTypeName = $filterTypeName is not a valid filter type in FilterTypeNames enum. Please add it to the enum if it's missing or else, cross check spelling ",
-        );
+    : matchedUploadedIDs = matchedUploadedIDs ?? {},
+      //Check to ensure that when a new filter extends HierarchicalSearchFilter,
+      //it's filterTypeName is added to FilterTypeNames enum.
+      assert(
+        FilterTypeNames.values
+            .map((e) => e.toString().split(".").last)
+            .contains(filterTypeName),
+        "filterTypeName = $filterTypeName is not a valid filter type in FilterTypeNames enum. Please add it to the enum if it's missing or else, cross check spelling ",
+      );
 
   String name();
   IconData? icon();

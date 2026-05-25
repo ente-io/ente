@@ -77,8 +77,9 @@ class UserDetails {
 
   bool isFamilyAdmin() {
     assert(isPartOfFamily(), "verify user is part of family before calling");
-    final FamilyMember currentUserMember = familyData!.members!
-        .firstWhere((element) => element.email.trim() == email.trim());
+    final FamilyMember currentUserMember = familyData!.members!.firstWhere(
+      (element) => element.email.trim() == email.trim(),
+    );
     return currentUserMember.isAdmin;
   }
 
@@ -109,8 +110,9 @@ class UserDetails {
   int? familyMemberStorageLimit() {
     if (isPartOfFamily()) {
       try {
-        final FamilyMember currentUserMember = familyData!.members!
-            .firstWhere((element) => element.email.trim() == email.trim());
+        final FamilyMember currentUserMember = familyData!.members!.firstWhere(
+          (element) => element.email.trim() == email.trim(),
+        );
         return currentUserMember.storageLimit;
       } catch (e) {
         return null;
@@ -242,11 +244,7 @@ class FamilyData {
   final int storage;
   final int expiryTime;
 
-  FamilyData(
-    this.members,
-    this.storage,
-    this.expiryTime,
-  );
+  FamilyData(this.members, this.storage, this.expiryTime);
 
   int getTotalUsage() {
     return members!
@@ -269,11 +267,7 @@ class FamilyData {
     final members = List<FamilyMember>.from(
       map['members'].map((x) => FamilyMember.fromMap(x)),
     );
-    return FamilyData(
-      members,
-      map['storage'] as int,
-      map['expiryTime'] as int,
-    );
+    return FamilyData(members, map['storage'] as int, map['expiryTime'] as int);
   }
 
   Map<String, dynamic> toMap() {
@@ -296,14 +290,10 @@ class LockerFamilyUsage {
   const LockerFamilyUsage(this.familyFileCount);
 
   factory LockerFamilyUsage.fromJson(Map<String, dynamic>? json) {
-    return LockerFamilyUsage(
-      (json?['familyFileCount'] ?? 0) as int,
-    );
+    return LockerFamilyUsage((json?['familyFileCount'] ?? 0) as int);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'familyFileCount': familyFileCount,
-    };
+    return {'familyFileCount': familyFileCount};
   }
 }

@@ -35,11 +35,11 @@ Learn more about [Ente Paste](/locker/features/sharing/ente-paste).
 
 ## What you can share
 
-| Content | Share with Ente users | Share via public link | Share via Ente Paste |
-| --- | --- | --- | --- |
-| Collections | Yes | Yes | No |
-| Items | No | Yes | No |
-| Text | No | No | Yes |
+| Content     | Share with Ente users | Share via public link | Share via Ente Paste |
+| ----------- | --------------------- | --------------------- | -------------------- |
+| Collections | Yes                   | Yes                   | No                   |
+| Items       | No                    | Yes                   | No                   |
+| Text        | No                    | No                    | Yes                  |
 
 To share with other Ente users, organize items into a collection and share the collection. To share items or collections with anyone (including non-Ente users), create a public link.
 

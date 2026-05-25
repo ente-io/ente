@@ -54,6 +54,7 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Stack(
       alignment: Alignment.centerLeft,
       children: [
@@ -70,35 +71,38 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
                         _searchFilterDataProvider.applyFilters([filter]);
                       },
                       remove: () {
-                        _searchFilterDataProvider
-                            .removeAppliedFilters([filter]);
+                        _searchFilterDataProvider.removeAppliedFilters([
+                          filter,
+                        ]);
                       },
                       isApplied: filter.isApplied,
                     )
                   : filter is OnlyThemFilter
-                      ? OnlyThemFilterChip(
-                          faceFilters: filter.faceFilters,
-                          apply: () {
-                            _searchFilterDataProvider.applyFilters([filter]);
-                          },
-                          remove: () {
-                            _searchFilterDataProvider
-                                .removeAppliedFilters([filter]);
-                          },
-                          isApplied: filter.isApplied,
-                        )
-                      : GenericFilterChip(
-                          label: filter.name(),
-                          apply: () {
-                            _searchFilterDataProvider.applyFilters([filter]);
-                          },
-                          remove: () {
-                            _searchFilterDataProvider
-                                .removeAppliedFilters([filter]);
-                          },
-                          leadingIcon: filter.icon(),
-                          isApplied: filter.isApplied,
-                        ),
+                  ? OnlyThemFilterChip(
+                      faceFilters: filter.faceFilters,
+                      apply: () {
+                        _searchFilterDataProvider.applyFilters([filter]);
+                      },
+                      remove: () {
+                        _searchFilterDataProvider.removeAppliedFilters([
+                          filter,
+                        ]);
+                      },
+                      isApplied: filter.isApplied,
+                    )
+                  : GenericFilterChip(
+                      label: filter.name(),
+                      apply: () {
+                        _searchFilterDataProvider.applyFilters([filter]);
+                      },
+                      remove: () {
+                        _searchFilterDataProvider.removeAppliedFilters([
+                          filter,
+                        ]);
+                      },
+                      leadingIcon: filter.icon(),
+                      isApplied: filter.isApplied,
+                    ),
             );
           },
           scrollDirection: Axis.horizontal,
@@ -110,8 +114,8 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                getEnteColorScheme(context).backdropBase,
-                getEnteColorScheme(context).backdropBase.withValues(alpha: 0),
+                colorScheme.backgroundColour,
+                colorScheme.backgroundColour.withValues(alpha: 0),
               ],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,

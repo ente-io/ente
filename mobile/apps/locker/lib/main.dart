@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
+import 'package:ente_components/ente_components.dart' as components;
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_crypto_dart_adapter/ente_crypto_dart_adapter.dart';
 import "package:ente_legacy/services/emergency_service.dart";
@@ -86,19 +87,10 @@ Future<void> _initSystemTray() async {
   await trayManager.setIcon(path);
   final Menu menu = Menu(
     items: [
-      MenuItem(
-        key: 'hide_window',
-        label: 'Hide Window',
-      ),
-      MenuItem(
-        key: 'show_window',
-        label: 'Show Window',
-      ),
+      MenuItem(key: 'hide_window', label: 'Hide Window'),
+      MenuItem(key: 'show_window', label: 'Show Window'),
       MenuItem.separator(),
-      MenuItem(
-        key: 'exit_app',
-        label: 'Exit App',
-      ),
+      MenuItem(key: 'exit_app', label: 'Exit App'),
     ],
   );
   await trayManager.setContextMenu(menu);
@@ -106,6 +98,7 @@ Future<void> _initSystemTray() async {
 
 Future<void> _runInForeground() async {
   AppThemeConfig.initialize(EnteApp.locker);
+  components.ComponentTheme.configure(app: components.ComponentApp.locker);
   final adaptiveThemeMode = await AdaptiveTheme.getThemeMode();
   final savedThemeMode = _themeMode(adaptiveThemeMode);
   return await _runWithLogs(() async {
@@ -190,9 +183,7 @@ Future<void> _init(bool bool, {String? via}) async {
 
     await LockerDB.instance.init();
 
-    await Configuration.instance.init([
-      LockerDB.instance,
-    ]);
+    await Configuration.instance.init([LockerDB.instance]);
 
     await Network.instance.init(Configuration.instance);
     await UserService.instance.init(

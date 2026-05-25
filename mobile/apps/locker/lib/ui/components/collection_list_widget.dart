@@ -188,9 +188,9 @@ class CollectionListWidget extends StatelessWidget {
                                 size: 24,
                               )
                             : showSharingIndicator
-                                ? (isIncoming
-                                    ? _buildOwnerAvatar(collection.owner)
-                                    : (hasSharees
+                            ? (isIncoming
+                                  ? _buildOwnerAvatar(collection.owner)
+                                  : (hasSharees
                                         ? _buildShareesAvatars(
                                             collection.sharees
                                                 .whereType<User>()
@@ -199,9 +199,7 @@ class CollectionListWidget extends StatelessWidget {
                                         : const SizedBox(
                                             key: ValueKey("unselected"),
                                           )))
-                                : const SizedBox(
-                                    key: ValueKey("unselected"),
-                                  ),
+                            : const SizedBox(key: ValueKey("unselected")),
                       ),
                     ),
                   ),
@@ -247,8 +245,9 @@ class CollectionListWidget extends StatelessWidget {
 
     final hasMore = sharees.length > limitCountTo;
 
-    final double totalWidth =
-        hasMore ? avatarSize + overlapPadding : avatarSize;
+    final double totalWidth = hasMore
+        ? avatarSize + overlapPadding
+        : avatarSize;
 
     return SizedBox(
       height: avatarSize,

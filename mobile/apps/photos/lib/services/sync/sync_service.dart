@@ -197,21 +197,15 @@ class SyncService {
   }
 
   void onDeviceCollectionSet(Set<int> collectionIDs) {
-    _uploader.removeFromQueueWhere(
-      (file) {
-        return !collectionIDs.contains(file.collectionID);
-      },
-      UserCancelledUploadError(),
-    );
+    _uploader.removeFromQueueWhere((file) {
+      return !collectionIDs.contains(file.collectionID);
+    }, UserCancelledUploadError());
   }
 
   void onVideoBackupPaused() {
-    _uploader.removeFromQueueWhere(
-      (file) {
-        return file.fileType == FileType.video;
-      },
-      UserCancelledUploadError(),
-    );
+    _uploader.removeFromQueueWhere((file) {
+      return file.fileType == FileType.video;
+    }, UserCancelledUploadError());
   }
 
   Future<void> _doSync() async {
@@ -237,7 +231,7 @@ class SyncService {
 
     final bool allowRemoteSync =
         _localSyncService.hasCompletedFirstImportOrBypassed() &&
-            !isLocalGalleryMode;
+        !isLocalGalleryMode;
 
     if (allowRemoteSync) {
       _logger.info("[SYNC] Starting remote sync");

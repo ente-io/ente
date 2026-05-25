@@ -174,8 +174,9 @@ class FileUtil {
 
         final String? savedPath = await _saveRegularFile(
           file: file,
-          targetFileName:
-              fileExtension.isEmpty ? baseName : "$baseName.$fileExtension",
+          targetFileName: fileExtension.isEmpty
+              ? baseName
+              : "$baseName.$fileExtension",
           context: context,
           progressDialog: dialog,
           currentIndex: index,
@@ -449,7 +450,8 @@ class FileUtil {
       lockerFile: lockerFile,
       contentExtension: contentExtension,
     );
-    final fileDirectoryName = lockerFile?.uploadedFileID?.toString() ??
+    final fileDirectoryName =
+        lockerFile?.uploadedFileID?.toString() ??
         file.path.hashCode.toUnsigned(32).toRadixString(16);
     final launchDir = Directory(
       p.join(
@@ -489,8 +491,8 @@ class FileUtil {
     final rawName = displayName != null && displayName.trim().isNotEmpty
         ? displayName
         : lockerFile?.uploadedFileID != null
-            ? "file-${lockerFile!.uploadedFileID}"
-            : "file";
+        ? "file-${lockerFile!.uploadedFileID}"
+        : "file";
     final sanitizedName = _sanitizeFileName(p.basename(rawName));
     final sanitizedExtension = p.extension(sanitizedName);
     if (contentExtension.isEmpty ||
@@ -509,11 +511,7 @@ class FileUtil {
     await showAlertBottomSheet(
       context,
       title: context.l10n.oops,
-      message: _openFileErrorMessage(
-        context,
-        error,
-        resultType: resultType,
-      ),
+      message: _openFileErrorMessage(context, error, resultType: resultType),
       assetPath: "assets/warning-grey.png",
       buttons: [
         GradientButton(

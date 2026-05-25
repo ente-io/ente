@@ -36,10 +36,7 @@ Future<void> showShareCollectionSheet(
 class ShareCollectionSheet extends StatefulWidget {
   final Collection collection;
 
-  const ShareCollectionSheet({
-    super.key,
-    required this.collection,
-  });
+  const ShareCollectionSheet({super.key, required this.collection});
 
   @override
   State<ShareCollectionSheet> createState() => _ShareCollectionSheetState();
@@ -133,8 +130,9 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
                   final user = allUsers[index];
                   final isFirst = index == 0;
                   final isLast = index == allUsers.length - 1;
-                  final role =
-                      CollectionParticipantRoleExtn.fromString(user.role);
+                  final role = CollectionParticipantRoleExtn.fromString(
+                    user.role,
+                  );
 
                   return Column(
                     children: [
@@ -171,11 +169,7 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
         ),
         if (showScrollbar) ...[
           const SizedBox(width: 4),
-          _buildCustomScrollbar(
-            allUsers.length,
-            maxVisibleHeight,
-            colorScheme,
-          ),
+          _buildCustomScrollbar(allUsers.length, maxVisibleHeight, colorScheme),
         ],
       ],
     );
@@ -202,8 +196,9 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
         const SizedBox(width: 16),
         _ShareActionOption(
           icon: HugeIcons.strokeRoundedLink02,
-          label:
-              _hasPublicLink ? context.l10n.manageLink : context.l10n.linkLabel,
+          label: _hasPublicLink
+              ? context.l10n.manageLink
+              : context.l10n.linkLabel,
           onTap: () async {
             if (!_hasPublicLink) {
               await _createAndSharePublicLink();
@@ -307,11 +302,7 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(8),
-      child: HugeIcon(
-        icon: icon,
-        color: colorScheme.textMuted,
-        size: 20,
-      ),
+      child: HugeIcon(icon: icon, color: colorScheme.textMuted, size: 20),
     );
   }
 
@@ -505,11 +496,7 @@ class _ShareActionOption extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              HugeIcon(
-                icon: icon,
-                color: colorScheme.textBase,
-                size: 24,
-              ),
+              HugeIcon(icon: icon, color: colorScheme.textBase, size: 24),
               const SizedBox(height: 8),
               Text(
                 label,

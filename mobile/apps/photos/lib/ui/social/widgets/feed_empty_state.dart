@@ -8,6 +8,7 @@ import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart"
 
 class FeedEmptyState extends StatelessWidget {
   const FeedEmptyState({required this.localGalleryMode, super.key});
+  const FeedEmptyState({required this.localGalleryMode, super.key});
 
   final bool localGalleryMode;
 

@@ -21,15 +21,13 @@ Future<void> autoLogoutAlert(BuildContext context) async {
         TextButton(
           child: Text(
             l10n.ok,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+            style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             Navigator.of(context).popUntil((route) => route.isFirst);
-            int pendingSyncCount =
-                await AuthenticatorDB.instance.getNeedSyncCount();
+            int pendingSyncCount = await AuthenticatorDB.instance
+                .getNeedSyncCount();
             if (pendingSyncCount > 0) {
               // ignore: unawaited_futures
               showChoiceActionSheet(

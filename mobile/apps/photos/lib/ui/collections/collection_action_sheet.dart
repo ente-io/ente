@@ -35,7 +35,7 @@ enum CollectionActionType {
   shareCollection,
   addToHiddenAlbum,
   moveToHiddenCollection,
-  autoAddPeople;
+  autoAddPeople,
 }
 
 extension CollectionActionTypeExtension on CollectionActionType {
@@ -99,8 +99,8 @@ void showCollectionActionSheet(
   final filesCount = sharedFiles != null
       ? sharedFiles.length
       : selectedPeople != null
-          ? selectedPeople.length
-          : selectedFiles?.files.length ?? 0;
+      ? selectedPeople.length
+      : selectedFiles?.files.length ?? 0;
 
   showBaseBottomSheet<void>(
     context,
@@ -154,19 +154,20 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   void initState() {
     super.initState();
     _showOnlyHiddenCollections = widget.actionType.isHiddenAction;
-    _enableSelection = (widget.actionType ==
-                CollectionActionType.autoAddPeople &&
+    _enableSelection =
+        (widget.actionType == CollectionActionType.autoAddPeople &&
             widget.selectedPeople != null) ||
         ((widget.actionType == CollectionActionType.addFiles ||
                 widget.actionType == CollectionActionType.addToHiddenAlbum) &&
             (widget.sharedFiles == null || widget.sharedFiles!.isEmpty));
-    _createNewAlbumSubscription =
-        Bus.instance.on<CreateNewAlbumEvent>().listen((event) {
-      setState(() {
-        _recentlyCreatedCollections.insert(0, event.collection);
-        _selectedCollections.add(event.collection);
-      });
-    });
+    _createNewAlbumSubscription = Bus.instance.on<CreateNewAlbumEvent>().listen(
+      (event) {
+        setState(() {
+          _recentlyCreatedCollections.insert(0, event.collection);
+          _selectedCollections.add(event.collection);
+        });
+      },
+    );
   }
 
   @override
@@ -181,12 +182,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final colorScheme = getEnteColorScheme(context);
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardUp = bottomInset > 100;
-    final double bottomPadding =
-        max(0, bottomInset - (_enableSelection ? okButtonSize : 0));
+    final double bottomPadding = max(
+      0,
+      bottomInset - (_enableSelection ? okButtonSize : 0),
+    );
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: isKeyboardUp ? bottomPadding : 0,
-      ),
+      padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomPadding : 0),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 428),
@@ -197,8 +198,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                 child: Column(
                   children: [
                     TextInputWidgetV2(
-                      hintText:
-                          AppLocalizations.of(context).searchByAlbumNameHint,
+                      hintText: AppLocalizations.of(
+                        context,
+                      ).searchByAlbumNameHint,
                       leadingWidget: HugeIcon(
                         icon: HugeIcons.strokeRoundedSearch01,
                         size: 18,
@@ -219,11 +221,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               SafeArea(
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Column(
-                    children: [
-                      ..._actionButtons(),
-                    ],
-                  ),
+                  child: Column(children: [..._actionButtons()]),
                 ),
               ),
             ],
@@ -270,8 +268,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               await dialog.hide();
               return;
             }
-            final CollectionActions collectionActions =
-                CollectionActions(CollectionsService.instance);
+            final CollectionActions collectionActions = CollectionActions(
+              CollectionsService.instance,
+            );
             final result = await collectionActions.addToMultipleCollections(
               context,
               _selectedCollections,
@@ -281,8 +280,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
             if (result) {
               showShortToast(
                 context,
-                AppLocalizations.of(context)
-                    .addedToAlbums(count: _selectedCollections.length),
+                AppLocalizations.of(
+                  context,
+                ).addedToAlbums(count: _selectedCollections.length),
               );
               widget.selectedFiles?.clearAll();
             }
@@ -333,9 +333,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                 if (_searchQuery.isNotEmpty) {
                   sharedCollections = sharedCollections
                       .where(
-                        (c) => c.displayName
-                            .toLowerCase()
-                            .contains(_searchQuery.toLowerCase()),
+                        (c) => c.displayName.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        ),
                       )
                       .toList();
                 }
@@ -343,12 +343,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
 
               final searchResults = _searchQuery.isNotEmpty
                   ? collections
-                      .where(
-                        (element) => element.displayName
-                            .toLowerCase()
-                            .contains(_searchQuery.toLowerCase()),
-                      )
-                      .toList()
+                        .where(
+                          (element) => element.displayName
+                              .toLowerCase()
+                              .contains(_searchQuery.toLowerCase()),
+                        )
+                        .toList()
                   : collections;
               return LayoutBuilder(
                 builder: (context, constraints) {
@@ -441,8 +441,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       });
       return recentlyCreated + hidden;
     } else {
-      final List<Collection> collections =
-          CollectionsService.instance.getCollectionsForUI(
+      final List<Collection>
+      collections = CollectionsService.instance.getCollectionsForUI(
         // in collections where user is a collaborator, only addTo and remove
         // action can to be performed
         includeCollab: widget.actionType == CollectionActionType.addFiles,
@@ -490,9 +490,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   void _removeIncomingCollections(List<Collection> items) {
     if (widget.actionType == CollectionActionType.shareCollection) {
       final ownerID = Configuration.instance.getUserID();
-      items.removeWhere(
-        (e) => !e.isOwner(ownerID!),
-      );
+      items.removeWhere((e) => !e.isOwner(ownerID!));
     }
   }
 }

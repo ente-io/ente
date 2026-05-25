@@ -370,6 +370,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
+  code_assets:
+    dependency: transitive
+    description:
+      name: code_assets
+      sha256: dad6bf6b9f4f378b0a69edbf42584d336efd1a9ce15deb1ba591cbb1b5ff440f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   code_builder:
     dependency: transitive
     description:
@@ -428,7 +436,7 @@ packages:
     source: hosted
     version: "1.15.0"
   cronet_http:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: cronet_http
       sha256: "07bfb4c6158aef72f8004631826abaeecdeaa2b6042f5f8916b8db20e1d01b4a"
@@ -459,6 +467,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  cupertino_http:
+    dependency: transitive
+    description:
+      name: cupertino_http
+      sha256: "82cbec60c90bf785a047a9525688b6dacac444e177e1d5a5876963d3c50369e8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -1321,6 +1337,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.8.0"
+  hooks:
+    dependency: transitive
+    description:
+      name: hooks
+      sha256: a41af4e8fc687cd6d33de9751eb936c8c0204ebe2bcb6c15ecf707504bf47f31
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   html:
     dependency: transitive
     description:
@@ -1894,6 +1918,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  native_dio_adapter:
+    dependency: "direct main"
+    description:
+      name: native_dio_adapter
+      sha256: "9bbfa5221fd287eb063962bbe6534290e5f87933e576fac210149fb80253b89a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.1"
   native_video_editor:
     dependency: "direct main"
     description:
@@ -1933,6 +1965,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  objective_c:
+    dependency: transitive
+    description:
+      name: objective_c
+      sha256: "6cb691c686fa2838c6deb34980d426145c2a5d537491cb83d463c33cdbc726ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.4.1"
   octo_image:
     dependency: transitive
     description:
@@ -2322,6 +2362,14 @@ packages:
       url: "https://github.com/KasemJaffer/receive_sharing_intent.git"
     source: git
     version: "1.8.1"
+  record_use:
+    dependency: transitive
+    description:
+      name: record_use
+      sha256: "2551bd8eecfe95d14ae75f6021ad0248be5c27f138c2ec12fcb52b500b3ba1ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   rive:
     dependency: "direct main"
     description:

@@ -15,10 +15,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:scoped_dir_access/scoped_dir_access.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-typedef LocalBackupVariantBuilder = Widget Function(
-  BuildContext context,
-  LocalBackupExperienceController controller,
-);
+typedef LocalBackupVariantBuilder =
+    Widget Function(
+      BuildContext context,
+      LocalBackupExperienceController controller,
+    );
 
 class LocalBackupExperience extends StatefulWidget {
   const LocalBackupExperience({super.key, required this.builder});
@@ -111,30 +112,25 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<void> _handleToggle(bool shouldEnable) async {
-    await _withBusyGuard(
-      () async {
-        if (shouldEnable) {
-          final success = await _startEnableFlow();
-          if (!success) {
-            return;
-          }
-        } else {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isAutoBackupEnabled', false);
-          if (!mounted) return;
-          setState(() {
-            _isBackupEnabled = false;
-          });
+    await _withBusyGuard(() async {
+      if (shouldEnable) {
+        final success = await _startEnableFlow();
+        if (!success) {
+          return;
         }
-      },
-      showOverlay: false,
-    );
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isAutoBackupEnabled', false);
+        if (!mounted) return;
+        setState(() {
+          _isBackupEnabled = false;
+        });
+      }
+    }, showOverlay: false);
   }
 
   Future<bool> _startEnableFlow() async {
-    final hasPassword = await _ensurePasswordConfigured(
-      disableOnCancel: true,
-    );
+    final hasPassword = await _ensurePasswordConfigured(disableOnCancel: true);
     // We only require a password to exist; re-enabling skips re-entry if already set.
     if (!hasPassword) {
       return false;
@@ -169,8 +165,9 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     });
 
     try {
-      final hasPassword =
-          await _ensurePasswordConfigured(disableOnCancel: false);
+      final hasPassword = await _ensurePasswordConfigured(
+        disableOnCancel: false,
+      );
       if (!hasPassword) {
         _logger.info('Manual backup cancelled: no password configured');
         return;
@@ -323,10 +320,10 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<bool> _updatePassword(BuildContext context) async => _promptPassword(
-        forcePrompt: true,
-        disableOnCancel: false,
-        isUpdateFlow: true,
-      );
+    forcePrompt: true,
+    disableOnCancel: false,
+    isUpdateFlow: true,
+  );
 
   Future<bool> _promptPassword({
     required bool forcePrompt,
@@ -479,9 +476,9 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               errorText!,
-                              style: getEnteTextTheme(context)
-                                  .mini
-                                  .copyWith(color: Colors.redAccent),
+                              style: getEnteTextTheme(
+                                context,
+                              ).mini.copyWith(color: Colors.redAccent),
                             ),
                           ),
                   ),
@@ -534,16 +531,11 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       final dialogBody = StringBuffer()
         ..writeln(l10n.backupLocationChoiceDescription)
         ..writeln()
-        ..writeln(
-          l10n.enableBackupsIosInstruction,
-        )
+        ..writeln(l10n.enableBackupsIosInstruction)
         ..writeln()
         ..writeAll(
           _backupPath != null && _backupPath!.isNotEmpty
-              ? [
-                  l10n.currentBackupFolder,
-                  _simplifyPath(_backupPath!),
-                ]
+              ? [l10n.currentBackupFolder, _simplifyPath(_backupPath!)]
               : const [],
           '\n',
         );
@@ -681,8 +673,10 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
           if (afterMarker.isNotEmpty) {
             return afterMarker;
           }
-          final fallbackSegments =
-              marker.split('/').where((segment) => segment.isNotEmpty).toList();
+          final fallbackSegments = marker
+              .split('/')
+              .where((segment) => segment.isNotEmpty)
+              .toList();
           if (fallbackSegments.isNotEmpty) {
             return fallbackSegments.last;
           }
@@ -690,8 +684,10 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         }
       }
 
-      final segments =
-          simplified.split('/').where((segment) => segment.isNotEmpty).toList();
+      final segments = simplified
+          .split('/')
+          .where((segment) => segment.isNotEmpty)
+          .toList();
       if (segments.length >= 2) {
         return segments.sublist(segments.length - 2).join('/');
       }
@@ -833,10 +829,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     }
   }
 
-  Future<bool> _persistLocation(
-    String path, {
-    String? successMessage,
-  }) async {
+  Future<bool> _persistLocation(String path, {String? successMessage}) async {
     final prefs = await SharedPreferences.getInstance();
     Future<bool> savePath(String target) async {
       try {

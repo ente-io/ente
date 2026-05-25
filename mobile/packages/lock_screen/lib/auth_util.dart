@@ -24,12 +24,12 @@ Future<bool> requestAuthentication(
   if (savedPassword != null || savedPin != null) {
     return await LocalAuthenticationService.instance
         .requestEnteAuthForLockScreen(
-      context,
-      savedPin,
-      savedPassword,
-      isAuthenticatingOnAppLaunch: isOpeningApp,
-      isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
-    );
+          context,
+          savedPin,
+          savedPassword,
+          isAuthenticatingOnAppLaunch: isOpeningApp,
+          isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
+        );
   }
   if (Platform.isLinux) {
     // Linux uses flutter_local_authentication

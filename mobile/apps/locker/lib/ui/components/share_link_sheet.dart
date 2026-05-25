@@ -26,11 +26,7 @@ Future<void> showShareLinkSheet(
     context,
     title: context.l10n.share,
     headerSpacing: 20,
-    child: ShareLinkSheet(
-      url: url,
-      file: file,
-      rootContext: rootContext,
-    ),
+    child: ShareLinkSheet(url: url, file: file, rootContext: rootContext),
   );
 }
 
@@ -63,9 +59,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
       children: [
         Text(
           l10n.shareThisLink,
-          style: textTheme.body.copyWith(
-            color: colorScheme.textMuted,
-          ),
+          style: textTheme.body.copyWith(color: colorScheme.textMuted),
         ),
         const SizedBox(height: 24),
         Container(
@@ -119,10 +113,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
           child: GradientButton(
             onTap: () async {
               Navigator.of(context).pop();
-              await shareText(
-                widget.url,
-                context: widget.rootContext,
-              );
+              await shareText(widget.url, context: widget.rootContext);
             },
             text: l10n.shareLink,
           ),
@@ -161,9 +152,8 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         GradientButton(
           text: l10n.delete,
           backgroundColor: colorScheme.warning400,
-          onTap: () => Navigator.of(context).pop(
-            ButtonResult(ButtonAction.first),
-          ),
+          onTap: () =>
+              Navigator.of(context).pop(ButtonResult(ButtonAction.first)),
         ),
       ],
     );
@@ -187,10 +177,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         await dialog.hide();
 
         if (context.mounted) {
-          await showGenericErrorBottomSheet(
-            context: context,
-            error: e,
-          );
+          await showGenericErrorBottomSheet(context: context, error: e);
         }
       }
     }
@@ -199,10 +186,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
   Future<void> _copyToClipboard() async {
     await Clipboard.setData(ClipboardData(text: widget.url));
     if (mounted) {
-      showShortToast(
-        context,
-        'Link copied to clipboard',
-      );
+      showShortToast(context, 'Link copied to clipboard');
     }
   }
 }

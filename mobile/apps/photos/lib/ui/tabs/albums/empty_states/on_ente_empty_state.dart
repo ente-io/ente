@@ -41,9 +41,7 @@ class OnEnteEmptyState extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      "assets/on_ente.png",
-                    ),
+                    Image.asset("assets/on_ente.png"),
                     const SizedBox(height: _sectionSpacing),
                     SizedBox(
                       width: _contentWidth,

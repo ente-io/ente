@@ -5,11 +5,7 @@ class CollectionFileItem {
   final String encryptedKey;
   final String keyDecryptionNonce;
 
-  CollectionFileItem(
-    this.id,
-    this.encryptedKey,
-    this.keyDecryptionNonce,
-  );
+  CollectionFileItem(this.id, this.encryptedKey, this.keyDecryptionNonce);
 
   CollectionFileItem copyWith({
     int? id,

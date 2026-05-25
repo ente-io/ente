@@ -47,10 +47,7 @@ class SharedEmptyState extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Image.asset(
-                            "assets/shared.png",
-                            fit: BoxFit.contain,
-                          ),
+                          Image.asset("assets/shared.png", fit: BoxFit.contain),
                           const SizedBox(height: _sectionSpacing),
                           Text(
                             strings.albumsSharedEmptyTitle,

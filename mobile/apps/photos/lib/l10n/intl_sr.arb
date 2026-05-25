@@ -600,7 +600,6 @@
   "existingUser": "Постојећи корисник",
   "newToEnte": "Нови на Енте",
   "pleaseLoginAgain": "Молимо, улогујте се поново",
-  "autoLogoutMessage": "Излоговани сте услед техничке грешке. Извињавамо се за непријатност.",
   "yourSubscriptionHasExpired": "Ваша претплата је истекла",
   "storageLimitExceeded": "Расположив простор је прекорачен",
   "upgrade": "Ажурирај",
@@ -620,11 +619,6 @@
   "allowPeopleToAddPhotos": "Дозволи људима да додају фотографије",
   "shareAnAlbumNow": "Подели албум сада",
   "collectEventPhotos": "Прикупи фотографије са догађаја",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "На уређају",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"

@@ -220,10 +220,10 @@ class Collection {
         : List<User>.from(map['sharees'].map((x) => User.fromMap(x)));
     final publicURLs =
         (map['publicURLs'] == null || map['publicURLs'].length == 0)
-            ? <PublicURL>[]
-            : List<PublicURL>.from(
-                map['publicURLs'].map((x) => PublicURL.fromMap(x)),
-              );
+        ? <PublicURL>[]
+        : List<PublicURL>.from(
+            map['publicURLs'].map((x) => PublicURL.fromMap(x)),
+          );
     return Collection(
       map['id'],
       User.fromMap(map['owner']),
@@ -254,13 +254,7 @@ class Collection {
   }
 }
 
-enum CollectionType {
-  folder,
-  favorites,
-  uncategorized,
-  album,
-  unknown,
-}
+enum CollectionType { folder, favorites, uncategorized, album, unknown }
 
 CollectionType typeFromString(String type) {
   switch (type) {
@@ -305,12 +299,7 @@ extension CollectionTypeExtn on CollectionType {
       this != CollectionType.favorites && this != CollectionType.uncategorized;
 }
 
-enum CollectionParticipantRole {
-  unknown,
-  viewer,
-  collaborator,
-  owner,
-}
+enum CollectionParticipantRole { unknown, viewer, collaborator, owner }
 
 extension CollectionParticipantRoleExtn on CollectionParticipantRole {
   static CollectionParticipantRole fromString(String? val) {

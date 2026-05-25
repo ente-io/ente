@@ -17,10 +17,7 @@ class NoThumbnailWidget extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
         border: addBorder
-            ? Border.all(
-                color: enteColorScheme.strokeFaint,
-                width: 1,
-              )
+            ? Border.all(color: enteColorScheme.strokeFaint, width: 1)
             : null,
         color: enteColorScheme.fillFaint,
       ),

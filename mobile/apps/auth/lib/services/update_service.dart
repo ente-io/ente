@@ -89,9 +89,9 @@ class UpdateService {
   }
 
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
-    final response = await Network.instance
-        .getDio()
-        .get("https://ente.com/release-info/auth-independent.json");
+    final response = await Network.instance.getDio().get(
+      "https://ente.com/release-info/auth-independent.json",
+    );
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
   }
 
@@ -101,10 +101,7 @@ class UpdateService {
       // Note: in auth, currently we don't have a way to identify if the
       // app was installed from play store, f-droid or github based on pkg name
       if (flavor == "playstore") {
-        return const Tuple2(
-          "Play Store",
-          "market://details?id=io.ente.auth",
-        );
+        return const Tuple2("Play Store", "market://details?id=io.ente.auth");
       }
       return const Tuple2(
         "AlternativeTo",

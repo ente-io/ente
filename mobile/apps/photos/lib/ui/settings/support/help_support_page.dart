@@ -44,9 +44,7 @@ class HelpSupportPage extends StatelessWidget {
           showOnlyLoadingState: true,
           onTap: () async {
             await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const ReportIssuePage(),
-              ),
+              MaterialPageRoute(builder: (context) => const ReportIssuePage()),
             );
           },
         ),
@@ -187,17 +185,12 @@ class HelpSupportPage extends StatelessWidget {
   Future<void> _viewLogs(BuildContext context) async {
     final logFile = SuperLogging.logFile;
     if (logFile == null) {
-      showShortToast(
-        context,
-        AppLocalizations.of(context).somethingWentWrong,
-      );
+      showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
       return;
     }
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => LogFileViewer(logFile),
-      ),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => LogFileViewer(logFile)));
   }
 
   Future<void> _exportLogs(BuildContext context) async {
@@ -220,10 +213,7 @@ class _SupportLink extends StatelessWidget {
   final String label;
   final Future<void> Function() onTap;
 
-  const _SupportLink({
-    required this.label,
-    required this.onTap,
-  });
+  const _SupportLink({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

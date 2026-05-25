@@ -124,9 +124,7 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
         .toList();
   }
 
-  List<GenericSearchResult> _filterPersons(
-    List<GenericSearchResult> persons,
-  ) {
+  List<GenericSearchResult> _filterPersons(List<GenericSearchResult> persons) {
     final query = _searchQuery.trim().toLowerCase();
     if (query.isEmpty) {
       return persons;
@@ -155,10 +153,7 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
     if (seedClusterId == null || seedClusterId.isEmpty) {
       return;
     }
-    final result = await routeToPage(
-      context,
-      SaveOrEditPerson(seedClusterId),
-    );
+    final result = await routeToPage(context, SaveOrEditPerson(seedClusterId));
     if (!mounted) {
       return;
     }
@@ -304,7 +299,8 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
           final screenWidth = MediaQuery.of(context).size.width;
           final estimatedCount = (screenWidth / 100).floor();
           final crossAxisCount = estimatedCount > 0 ? estimatedCount : 1;
-          final itemSize = (screenWidth -
+          final itemSize =
+              (screenWidth -
                   ((horizontalEdgePadding * 2) +
                       ((crossAxisCount - 1) * gridPadding))) /
               crossAxisCount;
@@ -375,17 +371,14 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
           final sortKeys = _canUseSimilaritySort
               ? _MergeSortKey.values
               : _MergeSortKey.values
-                  .where((key) => key != _MergeSortKey.similar)
-                  .toList();
+                    .where((key) => key != _MergeSortKey.similar)
+                    .toList();
           final _MergeSortKey? selectedKey = await showMenu<_MergeSortKey>(
             color: colorScheme.backgroundElevated,
             context: context,
             elevation: 0,
             shape: RoundedRectangleBorder(
-              side: BorderSide(
-                width: 0.5,
-                color: colorScheme.strokeFaint,
-              ),
+              side: BorderSide(width: 0.5, color: colorScheme.strokeFaint),
               borderRadius: BorderRadius.circular(_sortMenuCornerRadius),
             ),
             position: RelativeRect.fromLTRB(
@@ -511,10 +504,7 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: textTheme.mini,
-            ),
+            Text(label, style: textTheme.mini),
             if (isSelected) ...[
               const SizedBox(width: 8),
               Container(
@@ -526,17 +516,10 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
                 ),
               ),
               const SizedBox(width: 6),
-              Text(
-                detail,
-                style: textTheme.miniMuted,
-              ),
+              Text(detail, style: textTheme.miniMuted),
               if (directionIcon != null) ...[
                 const SizedBox(width: 4),
-                Icon(
-                  directionIcon,
-                  size: 16,
-                  color: colorScheme.textMuted,
-                ),
+                Icon(directionIcon, size: 16, color: colorScheme.textMuted),
               ],
             ],
           ],
@@ -550,17 +533,13 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
     if (personId == null || personId.isEmpty) {
       return;
     }
-    Navigator.of(context).pop(
-      MergePersonSelectionResult(
-        personId: personId,
-      ),
-    );
+    Navigator.of(context).pop(MergePersonSelectionResult(personId: personId));
   }
 
   _MergeSortKey get _selectedMergeSortKey =>
       _useSimilaritySort && _canUseSimilaritySort
-          ? _MergeSortKey.similar
-          : _mergeSortKeyFromPeopleSortKey(_sortKey);
+      ? _MergeSortKey.similar
+      : _mergeSortKeyFromPeopleSortKey(_sortKey);
 
   _MergeSortKey _mergeSortKeyFromPeopleSortKey(PeopleSortKey key) {
     switch (key) {
@@ -593,18 +572,17 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
     persons.sort((a, b) {
       final personIdA = a.params[kPersonParamID] as String?;
       final personIdB = b.params[kPersonParamID] as String?;
-      final similarityA =
-          personIdA != null ? _personToMaxSimilarity[personIdA] ?? 0 : 0;
-      final similarityB =
-          personIdB != null ? _personToMaxSimilarity[personIdB] ?? 0 : 0;
+      final similarityA = personIdA != null
+          ? _personToMaxSimilarity[personIdA] ?? 0
+          : 0;
+      final similarityB = personIdB != null
+          ? _personToMaxSimilarity[personIdB] ?? 0
+          : 0;
       final compareValue = similarityB.compareTo(similarityA);
       if (compareValue != 0) {
         return compareValue;
       }
-      return compareAsciiLowerCaseNatural(
-        a.name(),
-        b.name(),
-      );
+      return compareAsciiLowerCaseNatural(a.name(), b.name());
     });
   }
 
@@ -636,8 +614,9 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
 
     final clusterToPerson = await MLDataDB.instance.getClusterIDToPersonID();
     clusterToPerson.removeWhere((_, personId) => !personIds.contains(personId));
-    allClusterSummary
-        .removeWhere((key, value) => !clusterToPerson.containsKey(key));
+    allClusterSummary.removeWhere(
+      (key, value) => !clusterToPerson.containsKey(key),
+    );
     final Map<String, ml.Vector> allClusterEmbeddings = allClusterSummary.map(
       (key, value) => MapEntry(
         key,
@@ -660,12 +639,7 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
   }
 }
 
-enum _MergeSortKey {
-  similar,
-  mostPhotos,
-  name,
-  lastUpdated,
-}
+enum _MergeSortKey { similar, mostPhotos, name, lastUpdated }
 
 class _AddNewPersonGridTile extends StatelessWidget {
   final double size;

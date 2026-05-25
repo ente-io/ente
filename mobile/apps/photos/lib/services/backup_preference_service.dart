@@ -7,10 +7,7 @@ import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BackupPreferenceService {
-  BackupPreferenceService(
-    this._prefs,
-    this._flagService,
-  );
+  BackupPreferenceService(this._prefs, this._flagService);
 
   static const String _keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
@@ -133,8 +130,8 @@ class BackupPreferenceService {
   }
 
   Future<void> _setAllFoldersShouldBackup(bool shouldBackup) async {
-    final List<DeviceCollection> deviceCollections =
-        await FilesDB.instance.getDeviceCollections();
+    final List<DeviceCollection> deviceCollections = await FilesDB.instance
+        .getDeviceCollections();
     if (deviceCollections.isEmpty) {
       return;
     }

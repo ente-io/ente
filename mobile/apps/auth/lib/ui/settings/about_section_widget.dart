@@ -62,11 +62,13 @@ class AboutSectionWidget extends StatelessWidget {
                     trailingIcon: Icons.chevron_right_outlined,
                     trailingIconIsMuted: true,
                     onTap: () async {
-                      final dialog =
-                          createProgressDialog(context, context.l10n.checking);
+                      final dialog = createProgressDialog(
+                        context,
+                        context.l10n.checking,
+                      );
                       await dialog.show();
-                      final shouldUpdate =
-                          await UpdateService.instance.shouldUpdate();
+                      final shouldUpdate = await UpdateService.instance
+                          .shouldUpdate();
                       await dialog.hide();
                       if (shouldUpdate) {
                         // ignore: unawaited_futures
@@ -110,9 +112,7 @@ class AboutMenuItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MenuItemWidget(
-      captionedTextWidget: CaptionedTextWidget(
-        title: title,
-      ),
+      captionedTextWidget: CaptionedTextWidget(title: title),
       pressedColor: getEnteColorScheme(context).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,

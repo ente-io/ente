@@ -171,10 +171,12 @@ GenericSearchResult? toGenericSearchResult(
   }
   if (!prompt.recentFirst) {
     enteFilesInMagicCache.sort((a, b) {
-      final idA =
-          localIdToIntId != null ? localIdToIntId[a.localID] : _magicFileId(a);
-      final idB =
-          localIdToIntId != null ? localIdToIntId[b.localID] : _magicFileId(b);
+      final idA = localIdToIntId != null
+          ? localIdToIntId[a.localID]
+          : _magicFileId(a);
+      final idB = localIdToIntId != null
+          ? localIdToIntId[b.localID]
+          : _magicFileId(b);
       final posA = idA != null ? fileIdToPositionMap[idA] : null;
       final posB = idB != null ? fileIdToPositionMap[idB] : null;
       if (posA == null && posB == null) return 0;
@@ -398,8 +400,9 @@ class MagicCacheService {
     BuildContext context,
   ) async {
     try {
-      final EnteWatch? w =
-          kDebugMode ? EnteWatch("magicGenericSearchResult") : null;
+      final EnteWatch? w = kDebugMode
+          ? EnteWatch("magicGenericSearchResult")
+          : null;
       w?.start();
       final magicCaches = await getMagicCache();
       final List<Prompt> prompts = await getPrompts();
@@ -414,8 +417,8 @@ class MagicCacheService {
       for (final prompt in prompts) {
         promptByTitle[prompt.title] = prompt;
       }
-      final List<EnteFile> files =
-          await SearchService.instance.getAllFilesForSearch();
+      final List<EnteFile> files = await SearchService.instance
+          .getAllFilesForSearch();
 
       if (!isLocalGalleryMode) {
         final Map<String, List<EnteFile>> magicIdToFiles = {};

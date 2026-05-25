@@ -17,6 +17,7 @@ import "package:photos/models/selected_people.dart";
 import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
@@ -293,10 +294,11 @@ class PersonSearchExample extends StatelessWidget {
                       switchInCurve: Curves.easeOut,
                       switchOutCurve: Curves.easeIn,
                       child: isSelected
-                          ? const Icon(
-                              Icons.check_circle_rounded,
-                              color: Colors.white,
-                              size: 22,
+                          ? const SelectAllStatusIcon(
+                              isSelected: true,
+                              size: 18,
+                              selectedFillColor: Colors.white,
+                              selectedTickCutsOut: true,
                             )
                           : null,
                     ),

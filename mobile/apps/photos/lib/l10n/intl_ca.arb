@@ -615,7 +615,6 @@
   "referrals": "Referències",
   "notifications": "Notificacions",
   "socialNotifications": "M'agrada i comentaris",
-  "socialNotificationsExplanation": "Rep notificacions de m'agrada a les teves fotos i comentaris als àlbums dels quals formes part",
   "advanced": "Avançat",
   "general": "General",
   "security": "Seguretat",
@@ -761,7 +760,6 @@
   "existingUser": "Usuari existent",
   "newToEnte": "Nou a Ente",
   "pleaseLoginAgain": "Si us plau, inicia sessió de nou",
-  "autoLogoutMessage": "A causa d'un error tècnic, s'ha tancat la teva sessió. Les nostres disculpes per les molèsties.",
   "yourSubscriptionHasExpired": "La teva subscripció ha caducat",
   "storageLimitExceeded": "Límit d'emmagatzematge superat",
   "upgrade": "Millora",
@@ -783,11 +781,6 @@
   "collectEventPhotos": "Recull fotos d'esdeveniments",
   "sessionExpired": "Sessió caducada",
   "loggingOut": "Tancant sessió...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Al dispositiu",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1243,8 +1236,6 @@
   "noPhotosFoundHere": "No s'han trobat fotos aquí",
   "zoomOutToSeePhotos": "Allunya per veure fotos",
   "noImagesWithLocation": "No hi ha imatges amb ubicació",
-  "unpinAlbum": "Desfixa àlbum",
-  "pinAlbum": "Fixa àlbum",
   "pin": "Fixa",
   "pinPerson": "Fixa la persona",
   "pinToTop": "Fixa a dalt",
@@ -1828,9 +1819,7 @@
   "newPhotosEmoji": " noves 📸",
   "sorryWeHadToPauseYourBackups": "Ho sentim, hem hagut de pausar les teves còpies de seguretat",
   "clickToInstallOurBestVersionYet": "Fes clic per instal·lar la nostra millor versió fins ara",
-  "onThisDayNotificationExplanation": "Rep recordatoris sobre records d'aquest dia en anys anteriors.",
   "birthdayNotifications": "Notificacions d'aniversari",
-  "receiveRemindersOnBirthdays": "Rep recordatoris quan sigui l'aniversari d'algú. Tocar la notificació et portarà a fotos de la persona que fa anys.",
   "happyBirthday": "Per molts anys! 🥳",
   "birthdays": "Aniversaris",
   "wishThemAHappyBirthday": "Desitja a {name} un feliç aniversari! 🎉",

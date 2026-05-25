@@ -372,7 +372,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   }
 
   Future<({bool clipDone, bool clusterCentroidDone})>
-      _getVectorDbMigrationStatus() async {
+  _getVectorDbMigrationStatus() async {
     final clipVectorDB = isLocalGalleryMode
         ? ClipVectorDB.localGalleryInstance
         : ClipVectorDB.instance;
@@ -890,8 +890,8 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       firstButtonLabel: "Yes, confirm",
       firstButtonOnTap: () async {
         try {
-          final List<PersonEntity> persons =
-              await PersonService.instance.getPersons();
+          final List<PersonEntity> persons = await PersonService.instance
+              .getPersons();
           for (final PersonEntity p in persons) {
             await PersonService.instance.deletePerson(p.remoteID);
           }

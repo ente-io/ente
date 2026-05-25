@@ -46,8 +46,11 @@ Future<void> openSocialActorContactDestination(
     return;
   }
 
-  final destination =
-      await _buildDestination(user, userId: userId, email: email);
+  final destination = await _buildDestination(
+    user,
+    userId: userId,
+    email: email,
+  );
   if (destination == null) {
     return;
   }
@@ -98,8 +101,8 @@ Future<Widget?> _buildDestination(
 }
 
 Future<Widget?> _contactResultPageForUser(User user) async {
-  final GenericSearchResult? searchResult =
-      await SearchService.instance.buildContactSearchResultForUser(user);
+  final GenericSearchResult? searchResult = await SearchService.instance
+      .buildContactSearchResultForUser(user);
   if (searchResult == null) {
     return null;
   }

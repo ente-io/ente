@@ -10,12 +10,7 @@ class User {
   String? name;
   String? role;
 
-  User({
-    this.id,
-    required this.email,
-    this.name,
-    this.role,
-  });
+  User({this.id, required this.email, this.name, this.role});
 
   bool get isViewer => role == null || role?.toUpperCase() == 'VIEWER';
 

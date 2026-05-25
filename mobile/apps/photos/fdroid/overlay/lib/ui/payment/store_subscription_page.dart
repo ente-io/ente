@@ -3,10 +3,7 @@ import "package:flutter/widgets.dart";
 class StoreSubscriptionPage extends StatefulWidget {
   final bool isOnboarding;
 
-  const StoreSubscriptionPage({
-    this.isOnboarding = false,
-    super.key,
-  });
+  const StoreSubscriptionPage({this.isOnboarding = false, super.key});
 
   @override
   State<StoreSubscriptionPage> createState() => _StoreSubscriptionPageState();

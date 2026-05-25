@@ -235,8 +235,9 @@ class _AddContactSheetState extends State<AddContactSheet> {
                       ),
                       menuItemColor: colorScheme.fillFaint,
                       pressedColor: colorScheme.fillFaintPressed,
-                      trailingIcon:
-                          (selectedEmail == user.email) ? Icons.check : null,
+                      trailingIcon: (selectedEmail == user.email)
+                          ? Icons.check
+                          : null,
                       trailingIconColor: colorScheme.primary500,
                       surfaceExecutionStates: false,
                       onTap: () async {
@@ -430,8 +431,8 @@ class _AddContactSheetState extends State<AddContactSheet> {
     }
     suggestedUsers.sort(
       (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
-            b.resolvedDisplayName.toLowerCase(),
-          ),
+        b.resolvedDisplayName.toLowerCase(),
+      ),
     );
 
     return suggestedUsers;

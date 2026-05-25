@@ -182,9 +182,7 @@ class _AllLinksPageState extends State<AllLinksPage> {
                     ),
                     onTap: _removeSelectedLinks,
                   )
-                : const SizedBox.shrink(
-                    key: ValueKey("no_selection_action"),
-                  ),
+                : const SizedBox.shrink(key: ValueKey("no_selection_action")),
           ),
         ],
         slivers: [

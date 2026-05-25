@@ -45,7 +45,8 @@ class ChangeLogStrings {
         ? '${locale.languageCode}_${locale.countryCode}'
         : locale.languageCode;
     final translations = isLocalGallery ? _offlineTranslations : _translations;
-    final strings = translations[key] ??
+    final strings =
+        translations[key] ??
         translations[locale.languageCode] ??
         translations['en'];
 
@@ -59,11 +60,7 @@ class ChangeLogStrings {
     Locale locale, {
     bool isLocalGallery = false,
   }) {
-    return maybeForLocale(
-          locale,
-          isLocalGallery: isLocalGallery,
-        ) !=
-        null;
+    return maybeForLocale(locale, isLocalGallery: isLocalGallery) != null;
   }
 
   static const Map<String, ChangeLogStrings> _translations = {

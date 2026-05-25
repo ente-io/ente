@@ -1,6 +1,5 @@
 [package]
 name = "ente-core"
-version = "0.0.1"
 edition = "2024"
 
 [dependencies]
@@ -60,8 +59,6 @@ default = ["blob-require-final-tag"]
 # Without this feature, you can still derive KEK/login keys and decrypt secrets,
 # but cannot perform the SRP handshake (i.e. create/use `auth::SrpSession`).
 #
-# Example:
-# ente-core = { version = "0.0.1", features = ["srp"] }
 srp = ["dep:srp", "dep:sha2"]
 
 # Enforce TAG_FINAL on blob decrypt (reject non-final chunks).

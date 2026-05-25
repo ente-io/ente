@@ -14,10 +14,7 @@ class _RawCodesViewerState extends State<RawCodesViewer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(context.l10n.rawCodeData),
-      ),
+      appBar: AppBar(elevation: 0, title: Text(context.l10n.rawCodeData)),
       body: _getBody(),
     );
   }
@@ -32,9 +29,7 @@ class _RawCodesViewerState extends State<RawCodesViewer> {
           child: Text(
             widget.rawData,
             style: const TextStyle(
-              fontFeatures: [
-                FontFeature.tabularFigures(),
-              ],
+              fontFeatures: [FontFeature.tabularFigures()],
               height: 1.2,
             ),
           ),

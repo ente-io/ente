@@ -287,8 +287,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
 
     final filteredFiles = <EnteFile>[];
     final filteredFileCollections = <int, List<Collection>>{};
-    final selectedCollectionIds =
-        _selectedCollections.map((collection) => collection.id).toSet();
+    final selectedCollectionIds = _selectedCollections
+        .map((collection) => collection.id)
+        .toSet();
 
     for (final file in widget.recentFiles) {
       final fileId = file.uploadedFileID;
@@ -297,8 +298,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
           : const <Collection>[];
 
       if (hasCollectionFilters) {
-        final collectionIdsForFile =
-            collectionsForFile.map((collection) => collection.id).toSet();
+        final collectionIdsForFile = collectionsForFile
+            .map((collection) => collection.id)
+            .toSet();
 
         if (!selectedCollectionIds.every(collectionIdsForFile.contains)) {
           continue;
@@ -357,11 +359,13 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       final existingRequest = _fileCollectionsRequests[fileId];
       if (existingRequest != null) {
         pending.add(
-          existingRequest.then((collections) {
-            _fileCollectionsCache[fileId] = collections;
-          }).whenComplete(() {
-            _fileCollectionsRequests.remove(fileId);
-          }),
+          existingRequest
+              .then((collections) {
+                _fileCollectionsCache[fileId] = collections;
+              })
+              .whenComplete(() {
+                _fileCollectionsRequests.remove(fileId);
+              }),
         );
         continue;
       }
@@ -369,11 +373,13 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       final request = CollectionService.instance.getCollectionsForFile(file);
       _fileCollectionsRequests[fileId] = request;
       pending.add(
-        request.then((collections) {
-          _fileCollectionsCache[fileId] = collections;
-        }).whenComplete(() {
-          _fileCollectionsRequests.remove(fileId);
-        }),
+        request
+            .then((collections) {
+              _fileCollectionsCache[fileId] = collections;
+            })
+            .whenComplete(() {
+              _fileCollectionsRequests.remove(fileId);
+            }),
       );
     }
 
@@ -546,19 +552,14 @@ class _FilterChipsRow extends StatelessWidget {
             switchOutCurve: Curves.easeIn,
             transitionBuilder: (Widget child, Animation<double> animation) {
               return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(1.0, 0.0),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOut,
-                  ),
-                ),
-                child: FadeTransition(
-                  opacity: animation,
-                  child: child,
-                ),
+                position:
+                    Tween<Offset>(
+                      begin: const Offset(1.0, 0.0),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                    ),
+                child: FadeTransition(opacity: animation, child: child),
               );
             },
             child: showClearButton
@@ -580,10 +581,7 @@ class _FilterChipsRow extends StatelessWidget {
 }
 
 class _FilterIconButton extends StatelessWidget {
-  const _FilterIconButton({
-    required this.onTap,
-    required this.colorScheme,
-  });
+  const _FilterIconButton({required this.onTap, required this.colorScheme});
 
   final VoidCallback onTap;
   final EnteColorScheme colorScheme;
@@ -710,9 +708,7 @@ class _FilterBottomSheet extends StatelessWidget {
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
-            border: Border(
-              top: BorderSide(color: colorScheme.strokeFaint),
-            ),
+            border: Border(top: BorderSide(color: colorScheme.strokeFaint)),
           ),
           child: SafeArea(
             top: false,
@@ -725,10 +721,7 @@ class _FilterBottomSheet extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        context.l10n.filters,
-                        style: textTheme.largeBold,
-                      ),
+                      Text(context.l10n.filters, style: textTheme.largeBold),
                       const CloseIconButton(),
                     ],
                   ),
@@ -787,19 +780,10 @@ class _ActionPillButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.backgroundElevated2,
           borderRadius: BorderRadius.circular(50),
-          border: Border.all(
-            color: colorScheme.strokeFaint,
-            width: 1,
-          ),
+          border: Border.all(color: colorScheme.strokeFaint, width: 1),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12.0,
-          vertical: 8.0,
-        ),
-        child: Text(
-          label,
-          style: textTheme.small,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        child: Text(label, style: textTheme.small),
       ),
     );
   }

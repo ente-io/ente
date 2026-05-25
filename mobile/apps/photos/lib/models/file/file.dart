@@ -239,7 +239,8 @@ class EnteFile {
         // This is done because many times the fileTimeStamp will only give us
         // the date, not time value but the photo_manager's creation time will
         // contain the time.
-        final bool useFileTimeStamp = creationTime == null ||
+        final bool useFileTimeStamp =
+            creationTime == null ||
             !areFromSameDay(
               creationTime!,
               timeFromFileName.microsecondsSinceEpoch,

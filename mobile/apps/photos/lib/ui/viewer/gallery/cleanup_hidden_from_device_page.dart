@@ -28,10 +28,7 @@ import "package:photos/utils/dialog_util.dart";
 class CleanupHiddenFromDevicePage extends StatefulWidget {
   final VoidCallback? onCleanupComplete;
 
-  const CleanupHiddenFromDevicePage({
-    this.onCleanupComplete,
-    super.key,
-  });
+  const CleanupHiddenFromDevicePage({this.onCleanupComplete, super.key});
 
   @override
   State<CleanupHiddenFromDevicePage> createState() =>
@@ -66,8 +63,8 @@ class _CleanupHiddenFromDevicePageState
 
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final files =
-            await CollectionsService.instance.getHiddenFilesOnDevice();
+        final files = await CollectionsService.instance
+            .getHiddenFilesOnDevice();
         return FileLoadResult(files, false);
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -97,9 +94,7 @@ class _CleanupHiddenFromDevicePageState
               alignment: Alignment.bottomCenter,
               children: [
                 gallery,
-                const BottomShadowWidget(
-                  offsetDy: 20,
-                ),
+                const BottomShadowWidget(offsetDy: 20),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
@@ -154,8 +149,8 @@ class _CleanupHiddenFromDevicePageState
                     child: Text(
                       AppLocalizations.of(context).deleteAll,
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            color: const Color.fromRGBO(255, 101, 101, 1),
-                          ),
+                        color: const Color.fromRGBO(255, 101, 101, 1),
+                      ),
                     ),
                   ),
                 ),

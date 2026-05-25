@@ -276,9 +276,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           ),
         );
       }
-      rows.add(
-        _buildSearchResultItem(entry.item),
-      );
+      rows.add(_buildSearchResultItem(entry.item));
     }
     return rows;
   }

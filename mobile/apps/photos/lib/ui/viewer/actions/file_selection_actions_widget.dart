@@ -1,9 +1,9 @@
 import "dart:async";
 
-import 'package:ente_icons/ente_icons.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:hugeicons/hugeicons.dart";
 import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
@@ -134,7 +134,8 @@ class _FileSelectionActionsWidgetState
     final ownedAndPendingUploadFilesCount =
         ownedFilesCount + split.pendingUploads.length;
     final bool canRemoveOthersFiles = _canRemoveOthersFiles;
-    final int removeCount = split.ownedByCurrentUser.length +
+    final int removeCount =
+        split.ownedByCurrentUser.length +
         (canRemoveOthersFiles ? split.ownedByOtherUsers.length : 0);
 
     final bool anyOwnedFiles =
@@ -148,18 +149,19 @@ class _FileSelectionActionsWidgetState
     );
     final showCollageOption =
         CollageCreatorPage.isValidCount(widget.selectedFiles.files.length) &&
-            !widget.selectedFiles.files.any(
-              (element) => element.fileType == FileType.video,
-            );
+        !widget.selectedFiles.files.any(
+          (element) => element.fileType == FileType.video,
+        );
     final showDownloadOption = hasUploadedFileIDs;
-    final bool isCollectionOwnerOrAdmin = widget.collection != null &&
+    final bool isCollectionOwnerOrAdmin =
+        widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
     final bool canSuggestDeleteAction =
         (widget.type == GalleryType.sharedCollection ||
-                widget.type == GalleryType.ownedCollection) &&
-            isCollectionOwnerOrAdmin &&
-            split.ownedByOtherUsers.isNotEmpty;
+            widget.type == GalleryType.ownedCollection) &&
+        isCollectionOwnerOrAdmin &&
+        split.ownedByOtherUsers.isNotEmpty;
 
     //To animate adding and removing of [SelectedActionButton], add all items
     //and set [shouldShow] to false for items that should not be shown and true
@@ -168,37 +170,40 @@ class _FileSelectionActionsWidgetState
     if (widget.type == GalleryType.trash) {
       items.add(
         SelectionActionButton(
-          icon: Icons.restore_outlined,
+          hugeIcon: HugeIcons.strokeRoundedRestoreBin,
           labelText: AppLocalizations.of(context).restore,
           onTap: _restore,
         ),
       );
       items.add(
         SelectionActionButton(
-          icon: Icons.delete_forever_outlined,
+          hugeIcon: HugeIcons.strokeRoundedDelete01,
           labelText: AppLocalizations.of(context).permanentlyDelete,
           onTap: _permanentlyDelete,
+          isCritical: true,
         ),
       );
     } else if (widget.type == GalleryType.cleanupHiddenFromDevice) {
       items.add(
         SelectionActionButton(
-          icon: Icons.delete_outline,
+          hugeIcon: HugeIcons.strokeRoundedDelete01,
           labelText: AppLocalizations.of(context).deleteFromDevice,
           onTap: _deleteSelectedFromDevice,
+          isCritical: true,
         ),
       );
     } else if (widget.type == GalleryType.deleteSuggestions) {
       items.add(
         SelectionActionButton(
-          icon: Icons.delete_outline,
+          hugeIcon: HugeIcons.strokeRoundedDelete01,
           labelText: AppLocalizations.of(context).delete,
           onTap: split.ownedByCurrentUser.isNotEmpty ? _onDeleteClick : null,
+          isCritical: true,
         ),
       );
       items.add(
         SelectionActionButton(
-          icon: Icons.clear,
+          hugeIcon: HugeIcons.strokeRoundedCancel01,
           labelText: AppLocalizations.of(context).rejectSuggestions,
           onTap: widget.selectedFiles.files.isNotEmpty
               ? _rejectDeleteSuggestions
@@ -210,7 +215,7 @@ class _FileSelectionActionsWidgetState
         if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
           items.add(
             SelectionActionButton(
-              icon: Icons.copy_outlined,
+              hugeIcon: HugeIcons.strokeRoundedCopy01,
               labelText: AppLocalizations.of(context).copyLink,
               onTap: anyUploadedFiles ? _sendLink : null,
             ),
@@ -218,7 +223,7 @@ class _FileSelectionActionsWidgetState
         } else {
           items.add(
             SelectionActionButton(
-              icon: Icons.navigation_rounded,
+              hugeIcon: HugeIcons.strokeRoundedNavigation03,
               labelText: AppLocalizations.of(context).sendLink,
               onTap: anyUploadedFiles ? _onSendLinkTapped : null,
               shouldShow: ownedFilesCount > 0,
@@ -230,7 +235,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type == GalleryType.peopleTag && widget.person != null) {
         items.add(
           SelectionActionButton(
-            icon: Icons.remove_circle_outline,
+            hugeIcon: HugeIcons.strokeRoundedUserRemove01,
             labelText: AppLocalizations.of(
               context,
             ).notPersonLabel(name: widget.person!.data.name),
@@ -240,7 +245,7 @@ class _FileSelectionActionsWidgetState
         if (ownedFilesCount == 1) {
           items.add(
             SelectionActionButton(
-              icon: Icons.image_outlined,
+              hugeIcon: HugeIcons.strokeRoundedImage01,
               labelText: AppLocalizations.of(context).useAsCover,
               onTap: anyUploadedFiles ? _setPersonCover : null,
             ),
@@ -252,19 +257,20 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).notThisPerson,
-            icon: Icons.remove_circle_outline,
+            hugeIcon: HugeIcons.strokeRoundedUserRemove01,
             onTap: _onRemoveFromClusterClicked,
           ),
         );
       }
 
-      final showUploadIcon = widget.type == GalleryType.localFolder &&
+      final showUploadIcon =
+          widget.type == GalleryType.localFolder &&
           split.ownedByCurrentUser.isEmpty;
       if (widget.type.showAddToAlbum() && !isLocalGalleryMode) {
         if (showUploadIcon) {
           items.add(
             SelectionActionButton(
-              icon: Icons.cloud_upload_outlined,
+              hugeIcon: HugeIcons.strokeRoundedCloudUpload,
               labelText: AppLocalizations.of(context).addToEnte,
               onTap: _addToAlbum,
             ),
@@ -272,7 +278,7 @@ class _FileSelectionActionsWidgetState
         } else {
           items.add(
             SelectionActionButton(
-              icon: Icons.add_outlined,
+              hugeIcon: HugeIcons.strokeRoundedImageAdd01,
               labelText: AppLocalizations.of(context).addToAlbum,
               onTap: _addToAlbum,
             ),
@@ -283,7 +289,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showAddtoHiddenAlbum()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.add_outlined,
+            hugeIcon: HugeIcons.strokeRoundedImageAdd01,
             labelText: AppLocalizations.of(context).addToAlbum,
             onTap: _addToHiddenAlbum,
           ),
@@ -293,7 +299,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showMoveToAlbum()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.arrow_forward_outlined,
+            hugeIcon: HugeIcons.strokeRoundedArrowRight01,
             labelText: AppLocalizations.of(context).moveToAlbum,
             onTap: anyUploadedFiles ? _moveFiles : null,
             shouldShow: ownedFilesCount > 0,
@@ -304,7 +310,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showMovetoHiddenAlbum()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.arrow_forward_outlined,
+            hugeIcon: HugeIcons.strokeRoundedArrowRight01,
             labelText: AppLocalizations.of(context).moveToAlbum,
             onTap: _moveFilesToHiddenAlbum,
           ),
@@ -314,10 +320,11 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showDeleteOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.delete_outline,
+            hugeIcon: HugeIcons.strokeRoundedDelete01,
             labelText: AppLocalizations.of(context).delete,
             onTap: anyOwnedFiles ? _onDeleteClick : null,
             shouldShow: allOwnedFiles,
+            isCritical: true,
           ),
         );
       }
@@ -325,7 +332,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showRemoveFromAlbum()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.remove_outlined,
+            hugeIcon: HugeIcons.strokeRoundedRemove01,
             labelText: AppLocalizations.of(context).removeFromAlbum,
             onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
             shouldShow: removeCount > 0,
@@ -336,7 +343,7 @@ class _FileSelectionActionsWidgetState
       if (canSuggestDeleteAction) {
         items.add(
           SelectionActionButton(
-            icon: Icons.flag_outlined,
+            hugeIcon: HugeIcons.strokeRoundedFlag01,
             labelText: AppLocalizations.of(context).suggestDeletion,
             onTap: _onSuggestDelete,
           ),
@@ -346,7 +353,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showRemoveFromHiddenAlbum()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.remove_outlined,
+            hugeIcon: HugeIcons.strokeRoundedRemove01,
             labelText: AppLocalizations.of(context).removeFromAlbum,
             onTap: _removeFilesFromHiddenAlbum,
           ),
@@ -356,7 +363,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showFavoriteOption()) {
         items.add(
           SelectionActionButton(
-            icon: EnteIcons.favoriteStroke,
+            hugeIcon: HugeIcons.strokeRoundedFavourite,
             labelText: AppLocalizations.of(context).favorite,
             onTap: anyUploadedFiles ? _onFavoriteClick : null,
             shouldShow: ownedFilesCount > 0,
@@ -365,7 +372,7 @@ class _FileSelectionActionsWidgetState
       } else if (widget.type.showUnFavoriteOption()) {
         items.add(
           SelectionActionButton(
-            icon: EnteIcons.favoriteFilled,
+            hugeIcon: HugeIcons.strokeRoundedHeartRemove,
             labelText: AppLocalizations.of(context).removeFromFavorite,
             onTap: _onUnFavoriteClick,
             shouldShow: ownedFilesCount > 0,
@@ -374,7 +381,7 @@ class _FileSelectionActionsWidgetState
       }
       items.add(
         SelectionActionButton(
-          svgAssetPath: "assets/icons/guest_view_icon.svg",
+          hugeIcon: HugeIcons.strokeRoundedIncognito,
           labelText: AppLocalizations.of(context).guestView,
           onTap: _onGuestViewClick,
         ),
@@ -384,7 +391,7 @@ class _FileSelectionActionsWidgetState
           widget.type.showAddToPersonOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.person_add_alt_1_outlined,
+            hugeIcon: HugeIcons.strokeRoundedUserAdd01,
             labelText: AppLocalizations.of(context).addToPerson,
             onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
             shouldShow: hasUploadedFileIDs,
@@ -394,7 +401,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type != GalleryType.sharedPublicCollection) {
         items.add(
           SelectionActionButton(
-            icon: Icons.grid_view_outlined,
+            hugeIcon: HugeIcons.strokeRoundedGridView,
             labelText: AppLocalizations.of(context).createCollage,
             onTap: _onCreateCollageClicked,
             shouldShow: showCollageOption,
@@ -405,7 +412,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showHideOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.visibility_off_outlined,
+            hugeIcon: HugeIcons.strokeRoundedViewOffSlash,
             labelText: AppLocalizations.of(context).hide,
             onTap: anyUploadedFiles ? _onHideClick : null,
             shouldShow: ownedFilesCount > 0,
@@ -414,7 +421,7 @@ class _FileSelectionActionsWidgetState
       } else if (widget.type.showUnHideOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.visibility_outlined,
+            hugeIcon: HugeIcons.strokeRoundedView,
             labelText: AppLocalizations.of(context).unhide,
             onTap: _onUnhideClick,
             shouldShow: ownedFilesCount > 0,
@@ -424,7 +431,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showArchiveOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.archive_outlined,
+            hugeIcon: HugeIcons.strokeRoundedArchive03,
             labelText: AppLocalizations.of(context).archive,
             onTap: anyUploadedFiles ? _onArchiveClick : null,
             shouldShow: ownedFilesCount > 0,
@@ -433,7 +440,7 @@ class _FileSelectionActionsWidgetState
       } else if (widget.type.showUnArchiveOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.unarchive,
+            hugeIcon: HugeIcons.strokeRoundedUnarchive03,
             labelText: AppLocalizations.of(context).unarchive,
             onTap: _onUnArchiveClick,
             shouldShow: ownedFilesCount > 0,
@@ -444,7 +451,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showRestoreOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.restore_outlined,
+            hugeIcon: HugeIcons.strokeRoundedRestoreBin,
             labelText: AppLocalizations.of(context).restore,
             onTap: _restore,
           ),
@@ -454,9 +461,10 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showPermanentlyDeleteOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.delete_forever_outlined,
+            hugeIcon: HugeIcons.strokeRoundedDelete01,
             labelText: AppLocalizations.of(context).permanentlyDelete,
             onTap: _permanentlyDelete,
+            isCritical: true,
           ),
         );
       }
@@ -468,7 +476,7 @@ class _FileSelectionActionsWidgetState
               (element) => (element.ownerID == currentUserID),
             ),
             labelText: AppLocalizations.of(context).editTime,
-            icon: Icons.edit_calendar_outlined,
+            hugeIcon: HugeIcons.strokeRoundedDateTime,
             onTap: () async {
               final newDate = await showEditDateSheet(
                 context,
@@ -489,7 +497,7 @@ class _FileSelectionActionsWidgetState
               (element) => (element.ownerID == currentUserID),
             ),
             labelText: AppLocalizations.of(context).editLocation,
-            icon: Icons.edit_location_alt_outlined,
+            hugeIcon: HugeIcons.strokeRoundedMapsEditing,
             onTap: _editLocation,
           ),
         );
@@ -499,7 +507,7 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).download,
-            icon: Icons.cloud_download_outlined,
+            hugeIcon: HugeIcons.strokeRoundedDownload01,
             onTap: () => _download(widget.selectedFiles.files.toList()),
           ),
         );
@@ -508,7 +516,7 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).share,
-            icon: Icons.adaptive.share_outlined,
+            hugeIcon: HugeIcons.strokeRoundedShare03,
             key: shareButtonKey,
             onTap: _shareSelectedFiles,
           ),
@@ -1157,7 +1165,8 @@ class _FileSelectionActionsWidgetState
                 );
                 downloadedFiles++;
                 dialog.update(
-                  message: AppLocalizations.of(context).downloading +
+                  message:
+                      AppLocalizations.of(context).downloading +
                       " ($downloadedFiles/$totalFiles)",
                 );
               }),

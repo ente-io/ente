@@ -40,9 +40,7 @@ class SearchSectionCTAIcon extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 8.5,
-              ),
+              const SizedBox(height: 8.5),
               Text(
                 sectionType.getCTAText(context),
                 maxLines: 2,
@@ -91,9 +89,7 @@ class SearchSectionEmptyCTAIcon extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             Text(
               sectionType.getCTAText(context),
               maxLines: 2,

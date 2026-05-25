@@ -55,18 +55,19 @@ class CollectionPage extends StatelessWidget {
       c.collection,
       Configuration.instance.getUserID()!,
     );
-    final List<EnteFile>? initialFiles =
-        c.thumbnail != null ? [c.thumbnail!] : null;
+    final List<EnteFile>? initialFiles = c.thumbnail != null
+        ? [c.thumbnail!]
+        : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final FileLoadResult result =
-            await FilesDB.instance.getFilesInCollection(
-          c.collection.id,
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
-        );
+        final FileLoadResult result = await FilesDB.instance
+            .getFilesInCollection(
+              c.collection.id,
+              creationStartTime,
+              creationEndTime,
+              limit: limit,
+              asc: asc,
+            );
         // hide ignored files from home page UI
         final ignoredIDs =
             await IgnoredFilesService.instance.idToIgnoreReasonMap;
@@ -77,15 +78,15 @@ class CollectionPage extends StatelessWidget {
         );
         return result;
       },
-      reloadEvent: Bus.instance
-          .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == c.collection.id),
+      reloadEvent: Bus.instance.on<CollectionUpdatedEvent>().where(
+        (event) => event.collectionID == c.collection.id,
+      ),
       forceReloadEvents: [
         Bus.instance.on<CollectionMetaEvent>().where(
-              (event) =>
-                  event.id == c.collection.id &&
-                  event.type == CollectionMetaEventType.sortChanged,
-            ),
+          (event) =>
+              event.id == c.collection.id &&
+              event.type == CollectionMetaEventType.sortChanged,
+        ),
       ],
       removalEventTypes: const {
         EventType.deletedFromRemote,
@@ -154,9 +155,9 @@ class CollectionPage extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       return ValueListenableBuilder(
-                        valueListenable: InheritedSearchFilterData.of(context)
-                            .searchFilterDataProvider!
-                            .isSearchingNotifier,
+                        valueListenable: InheritedSearchFilterData.of(
+                          context,
+                        ).searchFilterDataProvider!.isSearchingNotifier,
                         builder: (context, value, _) {
                           return value
                               ? HierarchicalSearchGallery(
@@ -168,9 +169,7 @@ class CollectionPage extends StatelessWidget {
                       );
                     },
                   ),
-                  SmartAlbumsStatusWidget(
-                    collection: c.collection,
-                  ),
+                  SmartAlbumsStatusWidget(collection: c.collection),
                   FileSelectionOverlayBar(
                     galleryType,
                     _selectedFiles,

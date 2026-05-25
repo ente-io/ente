@@ -425,14 +425,8 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
             }
             return MenuComponent(
               title: title,
-              leading: HugeIcon(
-                icon: leadingIcon,
-                size: IconSizes.small,
-              ),
-              trailing: EnteLoadingWidget(
-                size: 12,
-                color: colors.fillDark,
-              ),
+              leading: HugeIcon(icon: leadingIcon, size: IconSizes.small),
+              trailing: EnteLoadingWidget(size: 12, color: colors.fillDark),
             );
           },
         ),

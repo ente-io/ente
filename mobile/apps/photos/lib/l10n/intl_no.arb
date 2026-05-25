@@ -670,7 +670,6 @@
   "existingUser": "Eksisterende bruker",
   "newToEnte": "Ny til Ente",
   "pleaseLoginAgain": "Vennligst logg inn igjen",
-  "autoLogoutMessage": "Du har blitt logget ut på grunn av en teknisk feil. Vi beklager ulempen.",
   "yourSubscriptionHasExpired": "Abonnementet har utløpt",
   "storageLimitExceeded": "Lagringsplassen er full",
   "upgrade": "Oppgrader",
@@ -692,11 +691,6 @@
   "collectEventPhotos": "Samle arrangementbilder",
   "sessionExpired": "Økten har utløpt",
   "loggingOut": "Logger ut...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "På enhet",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1108,8 +1102,6 @@
   "noPhotosFoundHere": "Ingen bilder funnet her",
   "zoomOutToSeePhotos": "Zoom ut for å se bilder",
   "noImagesWithLocation": "Ingen bilder med plassering",
-  "unpinAlbum": "Løsne album",
-  "pinAlbum": "Fest album",
   "create": "Opprett",
   "viewAll": "Vis alle",
   "nothingSharedWithYouYet": "Ingenting delt med deg enda",

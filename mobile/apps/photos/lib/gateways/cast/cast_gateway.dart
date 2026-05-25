@@ -7,9 +7,7 @@ class CastGateway {
 
   Future<String?> getPublicKey(String deviceCode) async {
     try {
-      final response = await _enteDio.get(
-        "/cast/device-info/$deviceCode",
-      );
+      final response = await _enteDio.get("/cast/device-info/$deviceCode");
       return response.data["publicKey"];
     } catch (e) {
       if (e is DioException && e.response != null) {
@@ -44,9 +42,7 @@ class CastGateway {
 
   Future<void> revokeAllTokens() async {
     try {
-      await _enteDio.delete(
-        "/cast/revoke-all-tokens",
-      );
+      await _enteDio.delete("/cast/revoke-all-tokens");
     } catch (e) {
       // swallow error
     }

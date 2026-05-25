@@ -23,9 +23,7 @@ Future<LegacyKitCreateInput?> showCreateLegacyKitSheet(BuildContext context) {
 
 Future<LegacyKitCreateInput?> showCreateLegacyKitPage(BuildContext context) {
   return Navigator.of(context).push<LegacyKitCreateInput>(
-    MaterialPageRoute(
-      builder: (context) => const CreateLegacyKitPage(),
-    ),
+    MaterialPageRoute(builder: (context) => const CreateLegacyKitPage()),
   );
 }
 
@@ -138,8 +136,9 @@ class _CreateLegacyKitPageState extends State<CreateLegacyKitPage> {
               controller: _controllers[index],
               focusNode: _focusNodes[index],
               hintText: _hintForIndex(context, index),
-              textInputAction:
-                  index == 2 ? TextInputAction.done : TextInputAction.next,
+              textInputAction: index == 2
+                  ? TextInputAction.done
+                  : TextInputAction.next,
               onSubmitted: (_) {
                 if (index < 2) {
                   _focusNodes[index + 1].requestFocus();
@@ -274,9 +273,7 @@ class _RecoveryWaitTimeRow extends StatelessWidget {
                   height: 36,
                   width: 36,
                   child: Center(
-                    child: LegacyKitClockIcon(
-                      color: colorScheme.primary700,
-                    ),
+                    child: LegacyKitClockIcon(color: colorScheme.primary700),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -306,9 +303,7 @@ class _RecoveryWaitTimeRow extends StatelessWidget {
                   height: 40,
                   width: 40,
                   child: Center(
-                    child: LegacyKitEditIcon(
-                      color: colorScheme.textBase,
-                    ),
+                    child: LegacyKitEditIcon(color: colorScheme.textBase),
                   ),
                 ),
               ],
@@ -523,17 +518,15 @@ class _CreateLegacyKitSheetState extends State<CreateLegacyKitSheet> {
                   ),
                 ),
                 textCapitalization: TextCapitalization.words,
-                textInputAction:
-                    index == 2 ? TextInputAction.done : TextInputAction.next,
+                textInputAction: index == 2
+                    ? TextInputAction.done
+                    : TextInputAction.next,
                 onChanged: (_) => setState(() {}),
               ),
             );
           }),
           const SizedBox(height: 20),
-          Text(
-            context.strings.recoveryWaitTime,
-            style: textTheme.bodyMuted,
-          ),
+          Text(context.strings.recoveryWaitTime, style: textTheme.bodyMuted),
           const SizedBox(height: 12),
           RecoveryDateSelector(
             selectedDays: _selectedDays,

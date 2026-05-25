@@ -10,10 +10,7 @@ import 'package:photos/ui/viewer/gallery/uncategorized_page.dart';
 class UnCategorizedCollections extends StatelessWidget {
   final TextStyle textStyle;
 
-  const UnCategorizedCollections(
-    this.textStyle, {
-    super.key,
-  });
+  const UnCategorizedCollections(this.textStyle, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +24,7 @@ class UnCategorizedCollections extends StatelessWidget {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
@@ -62,14 +57,13 @@ class UnCategorizedCollections extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text:
-                                    AppLocalizations.of(context).uncategorized,
+                                text: AppLocalizations.of(
+                                  context,
+                                ).uncategorized,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
-                              TextSpan(
-                                text: snapshot.data.toString(),
-                              ),
+                              TextSpan(text: snapshot.data.toString()),
                               //need to query in db and bring this value
                             ],
                           ),
@@ -80,8 +74,9 @@ class UnCategorizedCollections extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text:
-                                    AppLocalizations.of(context).uncategorized,
+                                text: AppLocalizations.of(
+                                  context,
+                                ).uncategorized,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value
@@ -104,10 +99,7 @@ class UnCategorizedCollections extends StatelessWidget {
       onPressed: () async {
         if (collection != null) {
           // ignore: unawaited_futures
-          routeToPage(
-            context,
-            UnCategorizedPage(collection),
-          );
+          routeToPage(context, UnCategorizedPage(collection));
         }
       },
     );

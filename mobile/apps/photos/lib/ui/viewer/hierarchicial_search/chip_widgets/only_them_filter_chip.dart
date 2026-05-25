@@ -47,9 +47,7 @@ class OnlyThemFilterChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _OnlyThemFilterThumbnail(
-                faceFilters: faceFilters,
-              ),
+              _OnlyThemFilterThumbnail(faceFilters: faceFilters),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
@@ -75,9 +73,8 @@ class OnlyThemFilterChip extends StatelessWidget {
 
 class _OnlyThemFilterThumbnail extends StatelessWidget {
   final List<FaceFilter> faceFilters;
-  const _OnlyThemFilterThumbnail({
-    required this.faceFilters,
-  }) : assert(faceFilters.length > 0 && faceFilters.length <= 4);
+  const _OnlyThemFilterThumbnail({required this.faceFilters})
+    : assert(faceFilters.length > 0 && faceFilters.length <= 4);
 
   @override
   Widget build(BuildContext context) {

@@ -8,10 +8,7 @@ import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/utils/lock_screen_settings.dart";
 
 class LockScreenConfirmPassword extends StatefulWidget {
-  const LockScreenConfirmPassword({
-    super.key,
-    required this.password,
-  });
+  const LockScreenConfirmPassword({super.key, required this.password});
   final String password;
 
   @override
@@ -68,10 +65,7 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
             FocusScope.of(context).unfocus();
             Navigator.of(context).pop();
           },
-          icon: Icon(
-            Icons.arrow_back,
-            color: colorTheme.tabIcon,
-          ),
+          icon: Icon(Icons.arrow_back, color: colorTheme.tabIcon),
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(

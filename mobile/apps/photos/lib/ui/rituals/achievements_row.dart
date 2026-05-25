@@ -3,11 +3,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/rituals/ritual_models.dart";
 
 class AchievementsRow extends StatelessWidget {
-  const AchievementsRow({
-    required this.progress,
-    this.onBadgeTap,
-    super.key,
-  });
+  const AchievementsRow({required this.progress, this.onBadgeTap, super.key});
 
   final RitualProgress? progress;
   final void Function(int days)? onBadgeTap;
@@ -21,8 +17,9 @@ class AchievementsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final longest = progress?.longestStreakOverall ?? 0;
-    final unlocked =
-        _badgeAssets.keys.where((days) => longest >= days).toList();
+    final unlocked = _badgeAssets.keys
+        .where((days) => longest >= days)
+        .toList();
 
     if (unlocked.isEmpty) {
       return const SizedBox.shrink();
@@ -45,8 +42,9 @@ class AchievementsRow extends StatelessWidget {
                   .map(
                     (days) => _BadgeTile(
                       days: days,
-                      onTap:
-                          onBadgeTap != null ? () => onBadgeTap!(days) : null,
+                      onTap: onBadgeTap != null
+                          ? () => onBadgeTap!(days)
+                          : null,
                     ),
                   )
                   .toList(growable: false),
@@ -74,12 +72,7 @@ class _BadgeTile extends StatelessWidget {
       padding: const EdgeInsets.only(right: 16),
       child: GestureDetector(
         onTap: onTap,
-        child: Image.asset(
-          asset,
-          width: 92,
-          height: 92,
-          fit: BoxFit.cover,
-        ),
+        child: Image.asset(asset, width: 92, height: 92, fit: BoxFit.cover),
       ),
     );
   }

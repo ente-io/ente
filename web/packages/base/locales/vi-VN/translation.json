@@ -805,6 +805,7 @@
     "shared_favorites": "Những mục thích đã chia sẻ",
     "added_by_name": "Được thêm bởi {{name}}",
     "unowned_files_not_processed": "Các tệp được thêm bởi người dùng khác không được xử lý",
+    "unsupported_shared_favorites_not_processed": "Một số tệp được chia sẻ không thể cập nhật vì thiếu metadata.",
     "custom_domains": "Tùy chỉnh tên miền",
     "custom_domains_desc": "Dùng tên miền của bạn khi chia sẻ",
     "link_your_domain": "Liên kết với tên miền",

@@ -12,10 +12,7 @@ class AutoCastDialog extends StatefulWidget {
   // async method that takes string as input
   // and returns void
   final void Function(String) onConnect;
-  const AutoCastDialog(
-    this.onConnect, {
-    super.key,
-  });
+  const AutoCastDialog(this.onConnect, {super.key});
 
   @override
   State<AutoCastDialog> createState() => _AutoCastDialogState();
@@ -52,9 +49,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
             builder: (_, snapshot) {
               if (snapshot.hasError) {
                 return Center(
-                  child: Text(
-                    'Error: ${snapshot.error.toString()}',
-                  ),
+                  child: Text('Error: ${snapshot.error.toString()}'),
                 );
               } else if (!snapshot.hasData) {
                 return const EnteLoadingWidget();
@@ -86,8 +81,10 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
                           setState(() {
                             _isDeviceTapInProgress.remove(device);
                           });
-                          showGenericErrorDialog(context: context, error: e)
-                              .ignore();
+                          showGenericErrorDialog(
+                            context: context,
+                            error: e,
+                          ).ignore();
                         }
                       }
                     },

@@ -34,27 +34,23 @@ class LinkExpiryPickerPage extends StatelessWidget {
             ),
           ),
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 20,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        child: ItemsWidget(collection),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      child: ItemsWidget(collection),
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: 1),
           ),
           const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
         ],
@@ -103,9 +99,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   Widget build(BuildContext context) {
     List<Widget> items = [];
     for (Tuple2<String, int> expiryOpiton in _expiryOptions) {
-      items.add(
-        _menuItemForPicker(context, expiryOpiton),
-      );
+      items.add(_menuItemForPicker(context, expiryOpiton));
     }
     items = addSeparators(
       items,
@@ -114,10 +108,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         bgColor: getEnteColorScheme(context).fillFaint,
       ),
     );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: items,
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: items);
   }
 
   Widget _menuItemForPicker(
@@ -126,9 +117,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   ) {
     return MenuItemWidget(
       menuItemColor: getEnteColorScheme(context).fillFaint,
-      captionedTextWidget: CaptionedTextWidget(
-        title: expiryOpiton.item1,
-      ),
+      captionedTextWidget: CaptionedTextWidget(title: expiryOpiton.item1),
       alignCaptionedTextToLeft: true,
       isTopBorderRadiusRemoved: true,
       isBottomBorderRadiusRemoved: true,
@@ -167,10 +156,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   Future<void> updateTime(int newValidTill, BuildContext context) async {
-    await _updateUrlSettings(
-      context,
-      {'validTill': newValidTill},
-    );
+    await _updateUrlSettings(context, {'validTill': newValidTill});
   }
 
   Future<void> _updateUrlSettings(

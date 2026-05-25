@@ -10,10 +10,7 @@ import "package:photos/utils/hierarchical_search_util.dart";
 
 class FilterOptionsBottomSheet extends StatefulWidget {
   final SearchFilterDataProvider searchFilterDataProvider;
-  const FilterOptionsBottomSheet(
-    this.searchFilterDataProvider, {
-    super.key,
-  });
+  const FilterOptionsBottomSheet(this.searchFilterDataProvider, {super.key});
 
   @override
   State<FilterOptionsBottomSheet> createState() =>
@@ -59,8 +56,9 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                             clusterId: filter.clusterId,
                             isInAllFiltersView: true,
                             apply: () {
-                              widget.searchFilterDataProvider
-                                  .applyFilters([filter]);
+                              widget.searchFilterDataProvider.applyFilters([
+                                filter,
+                              ]);
                               Navigator.of(context).pop();
                             },
                             remove: () {
@@ -74,8 +72,9 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                           OnlyThemFilterChip(
                             faceFilters: filter.faceFilters,
                             apply: () {
-                              widget.searchFilterDataProvider
-                                  .applyFilters([filter]);
+                              widget.searchFilterDataProvider.applyFilters([
+                                filter,
+                              ]);
                               Navigator.of(context).pop();
                             },
                             remove: () {
@@ -91,8 +90,9 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                             label: filter.name(),
                             leadingIcon: filter.icon(),
                             apply: () {
-                              widget.searchFilterDataProvider
-                                  .applyFilters([filter]);
+                              widget.searchFilterDataProvider.applyFilters([
+                                filter,
+                              ]);
                               Navigator.of(context).pop();
                             },
                             remove: () {

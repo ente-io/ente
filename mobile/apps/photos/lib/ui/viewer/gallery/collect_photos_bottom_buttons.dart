@@ -14,11 +14,7 @@ import "package:photos/utils/share_util.dart";
 class CollectPhotosBottomButtons extends StatefulWidget {
   final Collection c;
   final SelectedFiles? selectedFiles;
-  const CollectPhotosBottomButtons(
-    this.c, {
-    super.key,
-    this.selectedFiles,
-  });
+  const CollectPhotosBottomButtons(this.c, {super.key, this.selectedFiles});
 
   @override
   State<CollectPhotosBottomButtons> createState() => _EmptyAlbumStateNewState();
@@ -45,11 +41,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
 
   Future<void> _shareAlbumUrl() async {
     final String url = CollectionsService.instance.getPublicUrl(widget.c);
-    await shareAlbumLink(
-      context,
-      url,
-      shareLinkAlbumButtonKey,
-    );
+    await shareAlbumLink(context, url, shareLinkAlbumButtonKey);
   }
 
   Future<void> _generateAlbumUrl() async {
@@ -108,8 +100,9 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
                     Container(
                       decoration: BoxDecoration(
                         color: getEnteColorScheme(context).backgroundElevated2,
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(4)),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(4),
+                        ),
                       ),
                       child: ButtonWidget(
                         buttonType: ButtonType.secondary,

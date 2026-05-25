@@ -8,10 +8,7 @@ import "package:pro_image_editor/pro_image_editor.dart";
 class ContactPhotoAdjustPage extends StatefulWidget {
   final Uint8List imageBytes;
 
-  const ContactPhotoAdjustPage({
-    required this.imageBytes,
-    super.key,
-  });
+  const ContactPhotoAdjustPage({required this.imageBytes, super.key});
 
   @override
   State<ContactPhotoAdjustPage> createState() => _ContactPhotoAdjustPageState();
@@ -62,13 +59,12 @@ class _ContactPhotoAdjustPageState extends State<ContactPhotoAdjustPage> {
               showAspectRatioButton: false,
               showResetButton: false,
               initAspectRatio: 1.0,
-              aspectRatios: const [
-                AspectRatioItem(text: "1*1", value: 1.0),
-              ],
+              aspectRatios: const [AspectRatioItem(text: "1*1", value: 1.0)],
               style: CropRotateEditorStyle(
                 background: colorScheme.backgroundColour,
-                cropCornerColor:
-                    Theme.of(context).colorScheme.imageEditorPrimaryColor,
+                cropCornerColor: Theme.of(
+                  context,
+                ).colorScheme.imageEditorPrimaryColor,
               ),
               widgets: CropRotateEditorWidgets(
                 appBar: (editor, rebuildStream) => ReactiveAppbar(
@@ -102,9 +98,9 @@ class _ContactPhotoAdjustPageState extends State<ContactPhotoAdjustPage> {
                             style: textTheme.body.copyWith(
                               color: _isReturningBytes
                                   ? colorScheme.textMuted
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .imageEditorPrimaryColor,
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.imageEditorPrimaryColor,
                             ),
                           ),
                         ),

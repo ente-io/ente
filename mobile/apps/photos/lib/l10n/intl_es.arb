@@ -737,7 +737,6 @@
   "notifications": "Notificaciones",
   "sharedPhotoNotifications": "Nuevas fotos y álbumes compartidos",
   "socialNotifications": "Me gusta y comentarios",
-  "socialNotificationsExplanation": "Recibe notificaciones de likes en tus fotos y comentarios en álbumes de los que formas parte",
   "advanced": "Avanzado",
   "general": "General",
   "security": "Seguridad",
@@ -928,7 +927,6 @@
   "shareTheMoment": "Compartir este momento",
   "letFriendsAndFamilyReact": "Permitir que amigos y familiares reaccionen y comenten tus fotos.",
   "pleaseLoginAgain": "Por favor, vuelve a iniciar sesión",
-  "autoLogoutMessage": "Debido a un fallo técnico, has sido desconectado. Nuestras disculpas por las molestias.",
   "yourSubscriptionHasExpired": "Tu suscripción ha caducado",
   "storageLimitExceeded": "Límite de datos excedido",
   "upgrade": "Mejorar",
@@ -950,11 +948,6 @@
   "collectEventPhotos": "Recopilar fotos del evento",
   "sessionExpired": "La sesión ha expirado",
   "loggingOut": "Cerrando sesión...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "En el dispositivo",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1465,8 +1458,6 @@
   "noPhotosFoundHere": "No se encontró ninguna foto aquí",
   "zoomOutToSeePhotos": "Alejar para ver las fotos",
   "noImagesWithLocation": "No hay imágenes con ubicación",
-  "unpinAlbum": "Dejar de fijar álbum",
-  "pinAlbum": "Fijar álbum",
   "pin": "Anclar",
   "pinPerson": "Anclar persona",
   "pinToTop": "Anclar al principio",
@@ -2158,9 +2149,7 @@
   "newPhotosEmoji": " nuevo 📸",
   "sorryWeHadToPauseYourBackups": "Lo sentimos, tuvimos que pausar tus copias de seguridad",
   "clickToInstallOurBestVersionYet": "Haz clic para instalar nuestra mejor versión hasta la fecha",
-  "onThisDayNotificationExplanation": "Recibe recordatorios sobre recuerdos de este día en años anteriores.",
   "birthdayNotifications": "Notificaciones de cumpleaños",
-  "receiveRemindersOnBirthdays": "Recibe recordatorios cuando es el cumpleaños de alguien. Pulsar en la notificación te llevará a las fotos de la persona que cumple años.",
   "happyBirthday": "¡Feliz cumpleaños! 🥳",
   "birthdays": "Cumpleaños",
   "wishThemAHappyBirthday": "¡Desea a {name} un cumpleaños feliz! 🎉",

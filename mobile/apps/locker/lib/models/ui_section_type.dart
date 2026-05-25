@@ -1,5 +1,1 @@
-enum UISectionType {
-  incomingCollections,
-  outgoingCollections,
-  homeCollections,
-}
+enum UISectionType { incomingCollections, outgoingCollections, homeCollections }

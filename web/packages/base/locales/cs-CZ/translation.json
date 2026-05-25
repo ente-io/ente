@@ -805,6 +805,7 @@
     "shared_favorites": "Sdílené oblíbené položky",
     "added_by_name": "Přidáno uživatelem {{name}}",
     "unowned_files_not_processed": "Soubory přidané jinými uživateli nebyly zpracovány",
+    "unsupported_shared_favorites_not_processed": "",
     "custom_domains": "Vlastní domény",
     "custom_domains_desc": "Při sdílení používejte vlastní doménu",
     "link_your_domain": "Propojte svou doménu",

@@ -805,6 +805,7 @@
     "shared_favorites": "Favorits compartits",
     "added_by_name": "Afegit per {{name}}",
     "unowned_files_not_processed": "Els fitxers afegits per altres usuaris no s'han processat",
+    "unsupported_shared_favorites_not_processed": "",
     "custom_domains": "Dominis personalitzats",
     "custom_domains_desc": "Utilitza el teu propi domini quan comparteixis",
     "link_your_domain": "Vincula el teu domini",

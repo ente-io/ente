@@ -805,6 +805,7 @@
     "shared_favorites": "Favoritos compartidos",
     "added_by_name": "Añadido por {{name}}",
     "unowned_files_not_processed": "Los archivos añadidos por otros usuarios no han sido procesados",
+    "unsupported_shared_favorites_not_processed": "",
     "custom_domains": "Dominios personalizados",
     "custom_domains_desc": "Utilice su propio dominio al compartir",
     "link_your_domain": "Vincula tu dominio",

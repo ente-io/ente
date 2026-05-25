@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Philosophy
 
 Ente is focused on privacy, transparency and trust. It's a fully open-source, end-to-end encrypted platform for storing data in the cloud. When contributing, always prioritize:
+
 - User privacy and data security
 - End-to-end encryption integrity
 - Transparent, auditable code
@@ -20,7 +21,7 @@ Ente Locker is a Flutter application for securely storing important documents. I
 
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
 
-```bash
+```sh
 # 1. Format Dart code for ente/mobile/app/locker
 dart format .
 
@@ -55,7 +56,7 @@ flutter analyze
 
 ### Build & Run
 
-```bash
+```sh
 # From mobile/ directory - bootstrap all packages
 melos bootstrap
 
@@ -75,7 +76,7 @@ flutter build linux    # Linux
 
 ### Code Quality
 
-```bash
+```sh
 # Run linter
 flutter analyze
 
@@ -89,7 +90,8 @@ flutter analyze lib/path/to/file.dart
 ### Testing
 
 There are currently no tests in the `test/` directory. When adding tests:
-```bash
+
+```sh
 flutter test                    # Run all tests
 flutter test test/path/to/file_test.dart  # Run specific test
 ```
@@ -101,6 +103,7 @@ flutter test test/path/to/file_test.dart  # Run specific test
 Locker is one of multiple apps in `/apps/` that share common packages from `/packages/`:
 
 **Shared Packages:**
+
 - `ente_accounts` - User authentication and account management
 - `ente_base` - Base utilities and common code
 - `ente_configuration` - App configuration (extended by local `services/configuration.dart`)
@@ -143,6 +146,7 @@ All major services follow the singleton pattern with `instance` getters:
 ### Database Layer
 
 SQLite databases managed via `sqflite`:
+
 - **CollectionDB** (`lib/services/collections/collections_db.dart`) - Collections and files
 - **TrashDB** (`lib/services/trash/trash_db.dart`) - Deleted items
 
@@ -153,6 +157,7 @@ Both databases track sync times to enable incremental syncing.
 The app uses an event bus (`ente_events` package) for cross-component communication:
 
 **Key Events:**
+
 - `SignedInEvent` / `SignedOutEvent` - Authentication state changes
 - `CollectionsUpdatedEvent` - Triggers UI refresh when collections change
 - `BackupUpdatedEvent` - File upload progress/completion
@@ -162,6 +167,7 @@ The app uses an event bus (`ente_events` package) for cross-component communicat
 ### UI Structure
 
 **Main Pages:**
+
 - `HomePage` - Main dashboard with collections grid, recents, and FAB
 - `CollectionPage` - Single collection view with files
 - `AllCollectionsPage` - Full collection list (by type: home/incoming/outgoing)
@@ -169,6 +175,7 @@ The app uses an event bus (`ente_events` package) for cross-component communicat
 - `InformationPage` - Add/edit structured information (notes, credentials, contacts, etc.)
 
 **Key UI Patterns:**
+
 - Pages extend `StatefulWidget` with mixins for reusable behavior (e.g., `SearchMixin`)
 - `UploaderPage`/`UploaderPageState` - Base class for pages that handle file uploads
 - Collections use `CollectionFlexGridView` for responsive grid layouts
@@ -185,6 +192,7 @@ The app uses an event bus (`ente_events` package) for cross-component communicat
 ### Crypto & Encryption
 
 Files and collections are end-to-end encrypted:
+
 - **Collection keys:** Encrypted with user's master key
 - **File keys:** Encrypted with collection key
 - `CryptoHelper` (`utils/crypto_helper.dart`) provides key derivation utilities
@@ -193,11 +201,13 @@ Files and collections are end-to-end encrypted:
 ### Platform-Specific Code
 
 **Desktop (Windows/Linux/macOS):**
+
 - Window management via `window_manager` package
 - System tray support via `tray_manager` package
 - Initialized in `main.dart` before `runApp()`
 
 **Mobile (iOS/Android):**
+
 - Share intent handling via `listen_sharing_intent` package
 - `HomePage.initializeSharing()` processes shared files from other apps
 - High refresh rate support on Android via `flutter_displaymode`
@@ -215,6 +225,7 @@ Files and collections are end-to-end encrypted:
 The project uses strict linting rules defined in `ente/mobile/analysis_options.yaml`:
 
 **Key enforced rules:**
+
 - `require_trailing_commas` (ERROR) - All function/constructor calls must have trailing commas
 - `always_use_package_imports` (WARNING) - Use `package:` imports, not relative
 - `prefer_final_fields` (ERROR) - Prefer `final` for non-reassigned fields
@@ -230,6 +241,7 @@ The project uses strict linting rules defined in `ente/mobile/analysis_options.y
 ### Service Initialization
 
 Services are initialized in `main.dart` in a specific order:
+
 1. Crypto initialization (`CryptoUtil.init()`)
 2. Database initialization (CollectionDB, TrashDB)
 3. Configuration with databases
@@ -239,6 +251,7 @@ Services are initialized in `main.dart` in a specific order:
 ### Sync Pattern
 
 Many operations follow this pattern:
+
 ```dart
 // 1. Call API
 await _apiClient.someOperation(params);
@@ -255,6 +268,7 @@ Bus.instance.fire(CollectionsUpdatedEvent());
 ### File References
 
 When referencing code locations in messages, use the format:
+
 ```
 lib/services/collections/collections_service.dart:123
 ```
@@ -262,6 +276,7 @@ lib/services/collections/collections_service.dart:123
 ## Known TODOs
 
 From README.md:
+
 - Verify `PackageInfoUtil.getPackageName()` correctness on Linux and Windows
 - Update `file_url.dart` to download only via CF worker when necessary
 
@@ -276,7 +291,9 @@ From README.md:
 ## Critical Coding Requirements
 
 ### 1. Code Quality - MANDATORY
+
 **Every code change MUST pass `dart format .` and `flutter analyze` with zero issues**
+
 - Run `dart format .` first to format all Dart code
 - Run `flutter analyze` after EVERY code modification
 - Resolve ALL issues (info, warning, error) - no exceptions
@@ -284,13 +301,17 @@ From README.md:
 - DO NOT commit or consider work complete until both commands pass cleanly
 
 ### 2. Component Reuse - MANDATORY
+
 **Always try to reuse existing components**
+
 - Use a subagent to search for existing components before creating new ones
 - Only create new components if none exist that meet the requirements
 - Check both UI components in `lib/ui/` and shared components in `../../packages/`
 
 ### 3. Design System - MANDATORY
+
 **Never hardcode colors or text styles**
+
 - Always use the Ente design system for colors and typography
 - Use a subagent to find the appropriate design tokens
 - Access colors via theme: `getEnteColorScheme(context)`
@@ -299,6 +320,8 @@ From README.md:
 - If you MUST use custom colors/styles (extremely rare), explicitly inform the user with a clear warning
 
 ### 4. Database Methods - BEST PRACTICE
+
 **Prioritize readability in database methods**
+
 - For small result sets (e.g., 1-2 stale entries), prefer filtering in Dart for cleaner, more readable code
 - For large datasets, use SQL WHERE clauses for performance - they're much more efficient in SQLite

@@ -19,6 +19,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/searchable_appbar.dart';
 import "package:photos/ui/tabs/albums/empty_states/on_device_empty_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
+import "package:photos/utils/device_collection_sort_util.dart";
 import "package:photos/utils/local_settings.dart";
 
 class DeviceFolderVerticalGridView extends StatefulWidget {
@@ -65,9 +66,7 @@ class _DeviceFolderVerticalGridViewState
               }
             },
           ),
-          DeviceFolderVerticalGridSliver(
-            searchQuery: _searchQuery,
-          ),
+          DeviceFolderVerticalGridSliver(searchQuery: _searchQuery),
         ],
       ),
     );
@@ -77,6 +76,8 @@ class _DeviceFolderVerticalGridViewState
 class DeviceFolderVerticalGridSliver extends StatefulWidget {
   final String searchQuery;
   final AlbumViewType albumViewType;
+  final AlbumSortKey sortKey;
+  final AlbumSortDirection sortDirection;
   final bool showEmptyState;
   final double topPadding;
   final double bottomPadding;
@@ -86,6 +87,8 @@ class DeviceFolderVerticalGridSliver extends StatefulWidget {
   const DeviceFolderVerticalGridSliver({
     required this.searchQuery,
     this.albumViewType = AlbumViewType.grid,
+    this.sortKey = AlbumSortKey.newestPhoto,
+    this.sortDirection = AlbumSortDirection.ascending,
     this.showEmptyState = true,
     this.topPadding = 16,
     this.bottomPadding = 200,
@@ -101,9 +104,10 @@ class DeviceFolderVerticalGridSliver extends StatefulWidget {
 
 class _DeviceFolderVerticalGridViewBodyState
     extends State<DeviceFolderVerticalGridSliver> {
+  static List<DeviceCollection>? _cachedDeviceCollections;
+
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
-  String _loadReason = "init";
   late Future<List<DeviceCollection>> _deviceCollectionsFuture;
   final logger = Logger((_DeviceFolderVerticalGridViewBodyState).toString());
   final _debouncer = Debouncer(
@@ -127,24 +131,24 @@ class _DeviceFolderVerticalGridViewBodyState
     _deviceCollectionsFuture = _loadDeviceCollections();
     _backupFoldersUpdatedEvent = Bus.instance
         .on<BackupFoldersUpdatedEvent>()
-        .listen((event) {
-          _loadReason = event.reason;
+        .listen((_) {
           _refreshDeviceCollections();
         });
     _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen(
-      (event) {
+      (_) {
         _debouncer.run(() async {
-          _loadReason = event.reason;
           _refreshDeviceCollections();
         });
       },
     );
   }
 
-  Future<List<DeviceCollection>> _loadDeviceCollections() {
-    return FilesDB.instance.getDeviceCollections(
+  Future<List<DeviceCollection>> _loadDeviceCollections() async {
+    final deviceCollections = await FilesDB.instance.getDeviceCollections(
       includeCoverThumbnail: true,
     );
+    _cachedDeviceCollections = deviceCollections;
+    return deviceCollections;
   }
 
   void _refreshDeviceCollections() {
@@ -158,9 +162,6 @@ class _DeviceFolderVerticalGridViewBodyState
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-      "${(DeviceFolderVerticalGridSliver).toString()} - $_loadReason",
-    );
     if (backupPreferenceService.hasSkippedOnboardingPermission) {
       return SliverFillRemaining(
         hasScrollBody: false,
@@ -174,9 +175,10 @@ class _DeviceFolderVerticalGridViewBodyState
 
     return FutureBuilder<List<DeviceCollection>>(
       future: _deviceCollectionsFuture,
+      initialData: _cachedDeviceCollections,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          List<DeviceCollection> deviceCollections = snapshot.data!;
+          List<DeviceCollection> deviceCollections = snapshot.data!.toList();
           if (widget.searchQuery.isNotEmpty) {
             final String query = widget.searchQuery.toLowerCase();
             deviceCollections = deviceCollections
@@ -186,6 +188,11 @@ class _DeviceFolderVerticalGridViewBodyState
                 )
                 .toList();
           }
+          sortDeviceCollections(
+            deviceCollections,
+            widget.sortKey,
+            widget.sortDirection,
+          );
 
           if (deviceCollections.isEmpty) {
             if (widget.emptyStateSliver != null) {
@@ -269,16 +276,13 @@ class _DeviceFolderVerticalGridViewBodyState
           childAspectRatio:
               sideOfThumbnail / (sideOfThumbnail + gridItemTextHeight),
         ),
-        delegate: SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            final deviceCollection = deviceCollections[index];
-            return DeviceFolderRowItem(
-              deviceCollection,
-              sideOfThumbnail: sideOfThumbnail,
-            );
-          },
-          childCount: deviceCollections.length,
-        ),
+        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+          final deviceCollection = deviceCollections[index];
+          return DeviceFolderRowItem(
+            deviceCollection,
+            sideOfThumbnail: sideOfThumbnail,
+          );
+        }, childCount: deviceCollections.length),
       ),
     );
   }

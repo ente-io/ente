@@ -249,8 +249,8 @@ class SemanticSearchService {
       queryResults.map((e) => e.id).toList(),
     );
 
-    final ignoredCollections =
-        CollectionsService.instance.getHiddenCollectionIds();
+    final ignoredCollections = CollectionsService.instance
+        .getHiddenCollectionIds();
 
     final deletedEntries = <int>[];
     final results = <EnteFile>[];
@@ -288,8 +288,8 @@ class SemanticSearchService {
       queryResults.map((e) => e.id),
     );
     final allFiles = await SearchService.instance.getAllFilesForSearch();
-    final ignoredCollections =
-        CollectionsService.instance.getHiddenCollectionIds();
+    final ignoredCollections = CollectionsService.instance
+        .getHiddenCollectionIds();
     final localIdToFile = <String, EnteFile>{};
     for (final file in allFiles) {
       final localId = file.localID;
@@ -440,11 +440,11 @@ class SemanticSearchService {
     if (_shouldUseRustExactSearch) {
       final startTime = DateTime.now();
       try {
-        final queryResults =
-            await MLComputer.instance.computeBulkSimilaritiesWithRust(
-          textQueryToEmbeddingMap,
-          minimumSimilarityMap,
-        );
+        final queryResults = await MLComputer.instance
+            .computeBulkSimilaritiesWithRust(
+              textQueryToEmbeddingMap,
+              minimumSimilarityMap,
+            );
         final endTime = DateTime.now();
         _logger.info(
           "computingSimilarities (rust simsimd exact) took for ${textQueryToEmbeddingMap.length} queries " +

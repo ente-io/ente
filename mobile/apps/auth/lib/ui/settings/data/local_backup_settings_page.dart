@@ -140,27 +140,27 @@ class LocalBackupSettingsPage extends StatelessWidget {
                           ],
                         )
                       : (kDebugMode
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Column(
-                                children: [
-                                  _BackupButton(
-                                    onPressed: controller.resetBackupLocation,
-                                    label: l10n.clearBackupFolder,
-                                    colorScheme: colorScheme,
-                                    textTheme: textTheme,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  _BackupButton(
-                                    onPressed: controller.clearBackupPassword,
-                                    label: l10n.clearBackupPassword,
-                                    colorScheme: colorScheme,
-                                    textTheme: textTheme,
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const SizedBox.shrink()),
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Column(
+                                  children: [
+                                    _BackupButton(
+                                      onPressed: controller.resetBackupLocation,
+                                      label: l10n.clearBackupFolder,
+                                      colorScheme: colorScheme,
+                                      textTheme: textTheme,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    _BackupButton(
+                                      onPressed: controller.clearBackupPassword,
+                                      label: l10n.clearBackupPassword,
+                                      colorScheme: colorScheme,
+                                      textTheme: textTheme,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox.shrink()),
                 ),
               ],
             ),
@@ -195,18 +195,16 @@ class _LocalBackupVariantShell extends StatelessWidget {
                   ? ConstrainedCustomScrollView(
                       slivers: <Widget>[
                         TitleBarWidget(
-                          flexibleSpaceTitle: TitleBarTitleWidget(
-                            title: title,
-                          ),
+                          flexibleSpaceTitle: TitleBarTitleWidget(title: title),
                           actionIcons: const [],
                         ),
                         SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              return body;
-                            },
-                            childCount: 1,
-                          ),
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            return body;
+                          }, childCount: 1),
                         ),
                       ],
                     )
@@ -285,10 +283,7 @@ class _BackupButton extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
-        child: Text(
-          label,
-          style: textTheme.bodyBold,
-        ),
+        child: Text(label, style: textTheme.bodyBold),
       ),
     );
   }

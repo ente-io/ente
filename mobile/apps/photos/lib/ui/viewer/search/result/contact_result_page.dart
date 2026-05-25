@@ -85,8 +85,9 @@ class _ContactResultPageState extends State<ContactResultPage> {
     _searchResultName = widget.searchResult.name();
     _contactEmail = params[kContactEmail] as String? ?? _searchResultName;
     _contactUserId = params[kContactUserId] as int?;
-    _filesUpdatedEvent =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((
+      event,
+    ) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere ||
           event.type == EventType.deletedFromRemote ||
@@ -104,8 +105,9 @@ class _ContactResultPageState extends State<ContactResultPage> {
 
     if (flagService.enableContact && _contactUserId != null) {
       _refreshSavedContact();
-      _contactsChangedEvent =
-          Bus.instance.on<ContactsChangedEvent>().listen((event) {
+      _contactsChangedEvent = Bus.instance.on<ContactsChangedEvent>().listen((
+        event,
+      ) {
         if (event.matchesContactUserId(_contactUserId)) {
           _refreshSavedContact();
         }
@@ -132,10 +134,7 @@ class _ContactResultPageState extends State<ContactResultPage> {
             )
             .toList();
         return Future.value(
-          FileLoadResult(
-            result,
-            result.length < files.length,
-          ),
+          FileLoadResult(result, result.length < files.length),
         );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -169,9 +168,7 @@ class _ContactResultPageState extends State<ContactResultPage> {
                 ),
               ),
               child: widget.enableGrouping
-                  ? const _ContactResultAppBar(
-                      isHierarchicalSearchable: true,
-                    )
+                  ? const _ContactResultAppBar(isHierarchicalSearchable: true)
                   : const _AppBarWithBoundary(
                       child: _ContactResultAppBar(
                         isHierarchicalSearchable: true,
@@ -186,9 +183,9 @@ class _ContactResultPageState extends State<ContactResultPage> {
                   Builder(
                     builder: (context) {
                       return ValueListenableBuilder(
-                        valueListenable: InheritedSearchFilterData.of(context)
-                            .searchFilterDataProvider!
-                            .isSearchingNotifier,
+                        valueListenable: InheritedSearchFilterData.of(
+                          context,
+                        ).searchFilterDataProvider!.isSearchingNotifier,
                         builder: (context, value, _) {
                           return value
                               ? HierarchicalSearchGallery(
@@ -239,8 +236,10 @@ class _ContactResultPageState extends State<ContactResultPage> {
             ContactAvatarWidget(
               contactUserId: _contactUserId,
               email: _contactEmail,
-              personId: (widget.searchResult as GenericSearchResult)
-                  .params[kPersonParamID] as String?,
+              personId:
+                  (widget.searchResult as GenericSearchResult)
+                          .params[kPersonParamID]
+                      as String?,
               size: 36,
             ),
             const SizedBox(width: 12),
@@ -282,9 +281,7 @@ class _ContactResultPageState extends State<ContactResultPage> {
           onTap: () async {
             final PersonEntity? updatedPerson = await routeToPage(
               context,
-              LinkContactToPersonSelectionPage(
-                emailToLink: _searchResultName,
-              ),
+              LinkContactToPersonSelectionPage(emailToLink: _searchResultName),
             );
             if (updatedPerson != null && mounted) {
               setState(() {
@@ -357,18 +354,17 @@ class _ContactResultPageState extends State<ContactResultPage> {
   }
 
   TextStyle _contactHeaderTitleStyle(BuildContext context) {
-    return getEnteTextTheme(context).largeBold.copyWith(
-          fontSize: 20,
-          height: 28 / 20,
-        );
+    return getEnteTextTheme(
+      context,
+    ).largeBold.copyWith(fontSize: 20, height: 28 / 20);
   }
 
   TextStyle _contactHeaderSubtitleStyle(BuildContext context) {
     return getEnteTextTheme(context).mini.copyWith(
-          color: getEnteColorScheme(context).textMuted,
-          height: 16 / 12,
-          fontWeight: FontWeight.w500,
-        );
+      color: getEnteColorScheme(context).textMuted,
+      height: 16 / 12,
+      fontWeight: FontWeight.w500,
+    );
   }
 }
 
@@ -415,10 +411,7 @@ class _ContactHeaderOverflowButton extends StatelessWidget {
 }
 
 class _AlbumsSection extends StatelessWidget {
-  const _AlbumsSection({
-    required this.context,
-    required this.collections,
-  });
+  const _AlbumsSection({required this.context, required this.collections});
 
   final BuildContext context;
   final List<Collection> collections;
@@ -487,10 +480,7 @@ class _UnsavedContactHeader extends StatelessWidget {
         children: [
           Text(
             email,
-            style: textTheme.largeBold.copyWith(
-              fontSize: 20,
-              height: 28 / 20,
-            ),
+            style: textTheme.largeBold.copyWith(fontSize: 20, height: 28 / 20),
           ),
           const SizedBox(height: 20),
           MenuItemWidgetNew(
@@ -591,9 +581,7 @@ class _ContactResultAppBar extends StatelessWidget
 
   final bool isHierarchicalSearchable;
 
-  const _ContactResultAppBar({
-    required this.isHierarchicalSearchable,
-  });
+  const _ContactResultAppBar({required this.isHierarchicalSearchable});
 
   static double preferredHeight({required bool isHierarchicalSearchable}) {
     return isHierarchicalSearchable
@@ -603,8 +591,8 @@ class _ContactResultAppBar extends StatelessWidget
 
   @override
   Size get preferredSize => Size.fromHeight(
-        preferredHeight(isHierarchicalSearchable: isHierarchicalSearchable),
-      );
+    preferredHeight(isHierarchicalSearchable: isHierarchicalSearchable),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -669,9 +657,6 @@ class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
     with BoundaryReporter {
   @override
   Widget build(BuildContext context) {
-    return boundaryWidget(
-      position: BoundaryPosition.top,
-      child: widget.child,
-    );
+    return boundaryWidget(position: BoundaryPosition.top, child: widget.child);
   }
 }

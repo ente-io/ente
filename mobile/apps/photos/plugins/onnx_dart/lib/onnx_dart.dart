@@ -12,8 +12,11 @@ class OnnxDart {
     String modelPath, {
     int sessionsCount = 1,
   }) {
-    return OnnxDartPlatform.instance
-        .init(modelType, modelPath, sessionsCount: sessionsCount);
+    return OnnxDartPlatform.instance.init(
+      modelType,
+      modelPath,
+      sessionsCount: sessionsCount,
+    );
   }
 
   Future<bool?> release(String modelType) {

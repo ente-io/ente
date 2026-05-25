@@ -2,10 +2,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class SettingsTitleBarWidget extends StatelessWidget {
-  const SettingsTitleBarWidget({
-    super.key,
-    required this.scaffoldKey,
-  });
+  const SettingsTitleBarWidget({super.key, required this.scaffoldKey});
 
   final GlobalKey<ScaffoldState> scaffoldKey;
 

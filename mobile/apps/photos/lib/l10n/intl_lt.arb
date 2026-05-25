@@ -779,7 +779,6 @@
   "existingUser": "Esamas naudotojas",
   "newToEnte": "Naujas platformoje „Ente“",
   "pleaseLoginAgain": "Prisijunkite iš naujo.",
-  "autoLogoutMessage": "Dėl techninio trikdžio buvote atjungti. Atsiprašome už nepatogumus.",
   "yourSubscriptionHasExpired": "Jūsų prenumerata baigėsi.",
   "storageLimitExceeded": "Viršyta saugyklos riba.",
   "upgrade": "Keisti planą",
@@ -801,11 +800,6 @@
   "collectEventPhotos": "Rinkti įvykių nuotraukas",
   "sessionExpired": "Seansas baigėsi",
   "loggingOut": "Atsijungiama...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Įrenginyje",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1242,8 +1236,6 @@
   "noPhotosFoundHere": "Nuotraukų čia nerasta",
   "zoomOutToSeePhotos": "Padidinkite mastelį, kad matytumėte nuotraukas",
   "noImagesWithLocation": "Nėra vaizdų su vietove",
-  "unpinAlbum": "Atsegti albumą",
-  "pinAlbum": "Prisegti albumą",
   "pin": "Prisegti",
   "pinPerson": "Prisegti asmenį",
   "create": "Kurti",
@@ -1770,10 +1762,8 @@
   "newPhotosEmoji": " naujas 📸",
   "sorryWeHadToPauseYourBackups": "Atsiprašome, turėjome pristabdyti jūsų atsarginių kopijų kūrimą.",
   "clickToInstallOurBestVersionYet": "Spustelėkite, kad įdiegtumėte geriausią mūsų versiją iki šiol",
-  "onThisDayNotificationExplanation": "Gaukite priminimus apie praėjusių metų šios dienos prisiminimus.",
   "showTextOnWidget": "Rodyti tekstą valdiklyje",
   "birthdayNotifications": "Gimtadienio pranešimai",
-  "receiveRemindersOnBirthdays": "Gaukite priminimus, kai yra kažkieno gimtadienis. Paliesdami pranešimą, pateksite į gimtadienio šventės asmens nuotraukas.",
   "happyBirthday": "Su gimtadieniu! 🥳",
   "birthdays": "Gimtadieniai",
   "wishThemAHappyBirthday": "Palinkėkite {name} su gimtadieniu! 🎉",

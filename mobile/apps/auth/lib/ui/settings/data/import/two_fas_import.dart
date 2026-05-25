@@ -52,13 +52,16 @@ Future<void> show2FasImportInstruction(BuildContext context) async {
 
 Future<void> _pick2FasFile(BuildContext context) async {
   final l10n = context.l10n;
-  FilePickerResult? result = await FilePicker.platform
-      .pickFiles(dialogTitle: l10n.importSelectJsonFile);
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    dialogTitle: l10n.importSelectJsonFile,
+  );
   if (result == null) {
     return;
   }
-  final ProgressDialog progressDialog =
-      createProgressDialog(context, l10n.pleaseWait);
+  final ProgressDialog progressDialog = createProgressDialog(
+    context,
+    l10n.pleaseWait,
+  );
 
   try {
     String path = result.files.single.path!;
@@ -198,11 +201,7 @@ String decrypt2FasVault(dynamic data, {required String password}) {
   final iv = base64.decode(split[2]);
   // derive 256 key using PBKDF2WithHmacSHA256 and 10000 iterations and above salt
   final pbkdf2 = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64));
-  final params = Pbkdf2Parameters(
-    salt,
-    iterationCount,
-    keySize ~/ 8,
-  );
+  final params = Pbkdf2Parameters(salt, iterationCount, keySize ~/ 8);
   pbkdf2.init(params);
   Uint8List key = Uint8List(keySize ~/ 8);
   pbkdf2.deriveKey(Uint8List.fromList(utf8.encode(password)), 0, key, 0);
@@ -215,12 +214,7 @@ Uint8List decrypt(Uint8List key, Uint8List iv, Uint8List data) {
   final cipher = GCMBlockCipher(AESEngine())
     ..init(
       false,
-      AEADParameters(
-        KeyParameter(key),
-        128,
-        iv,
-        Uint8List.fromList(<int>[]),
-      ),
+      AEADParameters(KeyParameter(key), 128, iv, Uint8List.fromList(<int>[])),
     );
 
   final dbBytes = cipher.process(data);

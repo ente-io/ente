@@ -32,10 +32,11 @@ struct DownloadOnboardingView: View {
                     return "Downloading..."
                 }()
 
-                Text(statusLine)
-                    .font(EnsuTypography.body)
-                    .foregroundStyle(EnsuColor.textMuted)
-                    .multilineTextAlignment(.center)
+                StableDownloadStatusText(
+                    text: statusLine,
+                    font: EnsuTypography.body,
+                    color: EnsuColor.textMuted
+                )
 
                 progressView
             } else {

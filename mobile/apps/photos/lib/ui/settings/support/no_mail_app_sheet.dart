@@ -56,19 +56,10 @@ class NoMailAppSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final copyFields = <_CopyFieldData>[
-      _CopyFieldData(
-        label: l10n.subject,
-        value: subject,
-      ),
-      _CopyFieldData(
-        label: l10n.message,
-        value: message,
-      ),
+      _CopyFieldData(label: l10n.subject, value: subject),
+      _CopyFieldData(label: l10n.message, value: message),
       if (deviceInfo != null && deviceInfo!.trim().isNotEmpty)
-        _CopyFieldData(
-          label: l10n.deviceInfo,
-          value: deviceInfo!,
-        ),
+        _CopyFieldData(label: l10n.deviceInfo, value: deviceInfo!),
       if (logsLabel != null && logsLabel!.trim().isNotEmpty)
         _CopyFieldData(
           label: l10n.logs,
@@ -146,7 +137,8 @@ class NoMailAppSheet extends StatelessWidget {
   }
 
   String _buildCopyAllPayload(AppLocalizations l10n) {
-    final shouldIncludeLogsInCopyAll = logsFilePath == null &&
+    final shouldIncludeLogsInCopyAll =
+        logsFilePath == null &&
         logsLabel != null &&
         logsLabel!.trim().isNotEmpty;
     final items = <String>[
@@ -180,11 +172,7 @@ class _CopyField extends StatelessWidget {
   final Future<void> Function() onCopy;
   final Future<void> Function()? onExport;
 
-  const _CopyField({
-    required this.data,
-    required this.onCopy,
-    this.onExport,
-  });
+  const _CopyField({required this.data, required this.onCopy, this.onExport});
 
   @override
   Widget build(BuildContext context) {
@@ -206,12 +194,7 @@ class _CopyField extends StatelessWidget {
             color: colors.fillBase,
             borderRadius: BorderRadius.circular(Radii.lg),
           ),
-          padding: const EdgeInsets.fromLTRB(
-            Spacing.md,
-            10,
-            Spacing.sm,
-            10,
-          ),
+          padding: const EdgeInsets.fromLTRB(Spacing.md, 10, Spacing.sm, 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

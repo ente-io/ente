@@ -188,6 +188,7 @@ dependencies:
       url: https://github.com/ente-io/move_to_background.git
       ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
   nanoid: 1.0.0
+  native_dio_adapter: 1.5.1
   native_video_editor:
     path: ../../packages/native_video_editor
   native_video_player: 4.0.0
@@ -263,7 +264,6 @@ dependencies:
   xml: 6.5.0
 
 dependency_overrides:
-  cronet_http: 1.6.0
   # Remove this after removing dependency from flutter_sodium.
   # Newer flutter packages depends on ffi > 2.0.0 while flutter_sodium depends on ffi < 2.0.0
   ffi: 2.1.0

@@ -30,10 +30,7 @@ Future<void> showAddEmailSheet(
     title: context.l10n.addNewEmail,
     headerSpacing: 20,
     isKeyboardAware: true,
-    child: AddEmailSheet(
-      collection: collection,
-      onShareAdded: onShareAdded,
-    ),
+    child: AddEmailSheet(collection: collection, onShareAdded: onShareAdded),
   );
 }
 
@@ -160,16 +157,17 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
   }
 
   Widget _buildExistingContactsSection(colorScheme, textTheme) {
-    final filteredUsers = _suggestedUsers
-        .where(
-          (user) => user.matchesResolvedNameOrEmail(_textController.text),
-        )
-        .toList()
-      ..sort(
-        (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
+    final filteredUsers =
+        _suggestedUsers
+            .where(
+              (user) => user.matchesResolvedNameOrEmail(_textController.text),
+            )
+            .toList()
+          ..sort(
+            (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
               b.resolvedDisplayName.toLowerCase(),
             ),
-      );
+          );
 
     if (filteredUsers.isEmpty) {
       return const SizedBox.shrink();
@@ -193,8 +191,9 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  constraints:
-                      const BoxConstraints(maxHeight: maxVisibleHeight),
+                  constraints: const BoxConstraints(
+                    maxHeight: maxVisibleHeight,
+                  ),
                   child: ListView.builder(
                     controller: _scrollController,
                     shrinkWrap: true,
@@ -393,10 +392,8 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
   }
 
   Future<void> _selectDate() async {
-    final initialDate = _scheduledDate ??
-        DateTime.now().add(
-          const Duration(days: 1),
-        );
+    final initialDate =
+        _scheduledDate ?? DateTime.now().add(const Duration(days: 1));
     final pickedDate = await showDatePickerSheet(
       context,
       initialDate: initialDate,
@@ -425,8 +422,9 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
   Widget _buildShareButton() {
     final bool canShare =
         _emailIsValid && (!_shareLater || _isScheduledDateTimeValid());
-    final buttonText =
-        _shareLater ? context.l10n.scheduleShare : context.l10n.share;
+    final buttonText = _shareLater
+        ? context.l10n.scheduleShare
+        : context.l10n.share;
     return SizedBox(
       width: double.infinity,
       child: GradientButton(
@@ -492,8 +490,8 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
     suggestedUsers.sort(
       (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
-            b.resolvedDisplayName.toLowerCase(),
-          ),
+        b.resolvedDisplayName.toLowerCase(),
+      ),
     );
     return suggestedUsers;
   }

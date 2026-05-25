@@ -261,10 +261,7 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
       );
     }
 
-    return Center(
-      key: const ValueKey('loading'),
-      child: spinner,
-    );
+    return Center(key: const ValueKey('loading'), child: spinner);
   }
 
   Widget _buildSuccessContent(ButtonColors colors) {
@@ -323,9 +320,7 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
           if (hasLabel)
             Flexible(
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: hasLeading ? 0 : 8,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: hasLeading ? 0 : 8),
                 child: Text(
                   widget.labelText!,
                   style: labelStyle,

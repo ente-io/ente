@@ -64,7 +64,8 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   bool get _showsDashboard => _showsAdminDashboard || _showsMemberDashboard;
 
   int get _remainingSlots {
-    final memberCount = _userDetails.familyData?.members
+    final memberCount =
+        _userDetails.familyData?.members
             ?.where(
               (member) => member.email.trim() != _userDetails.email.trim(),
             )
@@ -89,10 +90,10 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     final content = _showsAdminDashboard
         ? _buildDashboard(context, isAdminView: true)
         : _showsMemberDashboard
-            ? _buildDashboard(context, isAdminView: false)
-            : _isFreeUser
-                ? _buildFreeAdvert(context)
-                : _buildPaidAdvert(context);
+        ? _buildDashboard(context, isAdminView: false)
+        : _isFreeUser
+        ? _buildFreeAdvert(context)
+        : _buildPaidAdvert(context);
 
     return FamilyPageScaffold(
       title: _showsDashboard ? AppLocalizations.of(context).family : null,
@@ -210,10 +211,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
 
         return Column(
           children: [
-            Expanded(
-              flex: 9,
-              child: Center(child: heroSection),
-            ),
+            Expanded(flex: 9, child: Center(child: heroSection)),
             Expanded(
               flex: 5,
               child: Align(
@@ -303,10 +301,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     );
   }
 
-  Widget _buildDashboard(
-    BuildContext context, {
-    required bool isAdminView,
-  }) {
+  Widget _buildDashboard(BuildContext context, {required bool isAdminView}) {
     final l10n = AppLocalizations.of(context);
     final members = _sortedMembersForDashboard(isAdminView: isAdminView);
     final activeMembers = members.where((member) => member.isActive).toList();
@@ -431,9 +426,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     if (result?.invitesSent ?? false) {
       showFamilySnackBar(
         context,
-        AppLocalizations.of(context).invitesSentCount(
-          count: result!.sentCount,
-        ),
+        AppLocalizations.of(context).invitesSentCount(count: result!.sentCount),
       );
     }
   }
@@ -447,9 +440,9 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     final l10n = AppLocalizations.of(context);
     final colorScheme = getEnteColorScheme(context);
     final colorMap = _memberColorMap(
-      _sortedMembersForDashboard(isAdminView: true)
-          .where((member) => member.isActive)
-          .toList(),
+      _sortedMembersForDashboard(
+        isAdminView: true,
+      ).where((member) => member.isActive).toList(),
     );
     await showBaseBottomSheet<void>(
       context,
@@ -498,14 +491,16 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
                         Navigator.of(context).pop();
                         final updatedUserDetails =
                             await routeToPage<UserDetails>(
-                          context,
-                          EditStorageLimitPage(
-                            member: member,
-                            totalStorageInBytes: _userDetails.getTotalStorage(),
-                            avatarColor:
-                                colorMap[member.email] ?? colorScheme.greenBase,
-                          ),
-                        );
+                              context,
+                              EditStorageLimitPage(
+                                member: member,
+                                totalStorageInBytes: _userDetails
+                                    .getTotalStorage(),
+                                avatarColor:
+                                    colorMap[member.email] ??
+                                    colorScheme.greenBase,
+                              ),
+                            );
                         if (!mounted) {
                           return;
                         }
@@ -550,9 +545,9 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     final confirmed = await showFamilyConfirmationSheet(
       context,
       title: AppLocalizations.of(context).removeMemberConfirmTitle,
-      body: AppLocalizations.of(context).removeMemberConfirmBody(
-        email: member.email,
-      ),
+      body: AppLocalizations.of(
+        context,
+      ).removeMemberConfirmBody(email: member.email),
       actionLabel: AppLocalizations.of(context).remove,
     );
     if (!confirmed || !mounted) {
@@ -573,9 +568,9 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     final confirmed = await showFamilyConfirmationSheet(
       context,
       title: AppLocalizations.of(context).revokeInviteConfirmTitle,
-      body: AppLocalizations.of(context).revokeInviteConfirmBody(
-        email: member.email,
-      ),
+      body: AppLocalizations.of(
+        context,
+      ).revokeInviteConfirmBody(email: member.email),
       actionLabel: AppLocalizations.of(context).revoke,
     );
     if (!confirmed || !mounted) {
@@ -637,9 +632,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     }
   }
 
-  List<FamilyMember> _sortedMembersForDashboard({
-    required bool isAdminView,
-  }) {
+  List<FamilyMember> _sortedMembersForDashboard({required bool isAdminView}) {
     final members = List<FamilyMember>.from(
       _userDetails.familyData?.members ?? const <FamilyMember>[],
     );
@@ -730,10 +723,7 @@ class _AdvertBody extends StatelessWidget {
 }
 
 class _BenefitItem extends StatelessWidget {
-  const _BenefitItem({
-    required this.icon,
-    required this.text,
-  });
+  const _BenefitItem({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
@@ -751,10 +741,9 @@ class _BenefitItem extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: getEnteTextTheme(context).body.copyWith(
-                    fontSize: 15,
-                    height: 21 / 15,
-                  ),
+              style: getEnteTextTheme(
+                context,
+              ).body.copyWith(fontSize: 15, height: 21 / 15),
             ),
           ),
         ],
@@ -798,10 +787,7 @@ class _FamilyStorageOverviewCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                l10n.storage,
-                style: textTheme.bodyBold,
-              ),
+              Text(l10n.storage, style: textTheme.bodyBold),
               Text(
                 l10n.storageUsedOfTotal(
                   used: convertBytesToReadableFormat(totalUsed),
@@ -1122,8 +1108,9 @@ class _FamilyMemberRow extends StatelessWidget {
     final backgroundColor = member.isPending
         ? colorScheme.fillMuted
         : avatarColor ?? colorScheme.greenBase;
-    final foregroundColor =
-        member.isPending ? colorScheme.contentLight : Colors.white;
+    final foregroundColor = member.isPending
+        ? colorScheme.contentLight
+        : Colors.white;
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -1166,10 +1153,7 @@ class _FamilyMemberRow extends StatelessWidget {
             if (member.isAdmin) _BadgeChip(label: l10n.admin),
             if (!isAdminView && isCurrentUser) ...[
               if (member.isAdmin) const SizedBox(width: 8),
-              _BadgeChip(
-                label: l10n.you,
-                isMuted: true,
-              ),
+              _BadgeChip(label: l10n.you, isMuted: true),
             ],
             if (member.isPending) ...[
               if (member.isAdmin || (!isAdminView && isCurrentUser))
@@ -1192,10 +1176,7 @@ class _FamilyMemberRow extends StatelessWidget {
 }
 
 class _BadgeChip extends StatelessWidget {
-  const _BadgeChip({
-    required this.label,
-    this.isMuted = false,
-  });
+  const _BadgeChip({required this.label, this.isMuted = false});
 
   final String label;
   final bool isMuted;
@@ -1274,8 +1255,9 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final foregroundColor =
-        isDestructive ? colorScheme.redBase : colorScheme.content;
+    final foregroundColor = isDestructive
+        ? colorScheme.redBase
+        : colorScheme.content;
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -1299,10 +1281,7 @@ class _ActionTile extends StatelessWidget {
                     ),
                     if (subtitle != null) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        style: textTheme.smallMuted,
-                      ),
+                      Text(subtitle!, style: textTheme.smallMuted),
                     ],
                   ],
                 ),

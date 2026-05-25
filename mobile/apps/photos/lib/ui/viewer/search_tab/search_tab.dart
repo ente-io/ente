@@ -60,8 +60,9 @@ class _SearchTabState extends State<SearchTab> {
     final resultsBackground = EnteTheme.isDark(context)
         ? colorScheme.backgroundColour
         : colorScheme.backgroundElevated2;
-    final headerColor =
-        index == 1 ? resultsBackground : colorScheme.backgroundColour;
+    final headerColor = index == 1
+        ? resultsBackground
+        : colorScheme.backgroundColour;
     return Column(
       children: [
         ColoredBox(
@@ -134,77 +135,81 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   );
                 }
                 final faceSectionIndex = searchTypes.indexOf(SectionType.face);
-                final hasSurfacedOfflineFaces = isLocalGalleryMode &&
+                final hasSurfacedOfflineFaces =
+                    isLocalGalleryMode &&
                     faceSectionIndex >= 0 &&
                     faceSectionIndex < sectionResultsByType.length &&
                     sectionResultsByType.elementAt(faceSectionIndex).isNotEmpty;
                 return ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 180),
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: searchTypes.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      if (!isLocalGalleryMode) {
-                        return const SizedBox.shrink();
-                      }
-                      if (hasSurfacedOfflineFaces) {
-                        return const SizedBox.shrink();
-                      }
-                      return const MLProgressBanner();
-                    }
-                    final sectionIndex = index - 1;
-                    final sectionType = searchTypes[sectionIndex];
-                    switch (sectionType) {
-                      case SectionType.face:
-                        if (!hasGrantedMLConsent) {
-                          return const SizedBox.shrink();
+                      padding: const EdgeInsets.only(bottom: 180),
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: searchTypes.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          if (!isLocalGalleryMode) {
+                            return const SizedBox.shrink();
+                          }
+                          if (hasSurfacedOfflineFaces) {
+                            return const SizedBox.shrink();
+                          }
+                          return const MLProgressBanner();
                         }
-                        return PeopleSection(
-                          examples: sectionResultsByType.elementAt(sectionIndex)
-                              as List<GenericSearchResult>,
-                        );
-                      case SectionType.album:
-                        return const SizedBox.shrink();
-                      case SectionType.ritual:
-                        if (isLocalGalleryMode) {
-                          return const SizedBox.shrink();
-                        }
-                        return const _RitualsDiscoverySection();
-                      case SectionType.wrapped:
-                        return ValueListenableBuilder<WrappedEntryState>(
-                          valueListenable: wrappedService.stateListenable,
-                          builder: (
-                            BuildContext context,
-                            WrappedEntryState state,
-                            Widget? child,
-                          ) {
-                            if (!wrappedService.shouldShowDiscoveryEntry) {
+                        final sectionIndex = index - 1;
+                        final sectionType = searchTypes[sectionIndex];
+                        switch (sectionType) {
+                          case SectionType.face:
+                            if (!hasGrantedMLConsent) {
                               return const SizedBox.shrink();
                             }
-                            return WrappedDiscoverySection(
-                              state: state,
+                            return PeopleSection(
+                              examples:
+                                  sectionResultsByType.elementAt(sectionIndex)
+                                      as List<GenericSearchResult>,
                             );
-                          },
-                        );
-                      case SectionType.location:
-                        return LocationsSection(
-                          sectionResultsByType.elementAt(sectionIndex)
-                              as List<GenericSearchResult>,
-                        );
-                      case SectionType.contacts:
-                        return const SizedBox.shrink();
-                      case SectionType.fileTypesAndExtension:
-                        return FileTypeSection(
-                          hasAnySearchableFiles: hasAnySearchableFiles,
-                        );
-                      case SectionType.magic:
-                        return MagicSection(
-                          sectionResultsByType.elementAt(sectionIndex)
-                              as List<GenericSearchResult>,
-                        );
-                    }
-                  },
-                )
+                          case SectionType.album:
+                            return const SizedBox.shrink();
+                          case SectionType.ritual:
+                            if (isLocalGalleryMode) {
+                              return const SizedBox.shrink();
+                            }
+                            return const _RitualsDiscoverySection();
+                          case SectionType.wrapped:
+                            return ValueListenableBuilder<WrappedEntryState>(
+                              valueListenable: wrappedService.stateListenable,
+                              builder:
+                                  (
+                                    BuildContext context,
+                                    WrappedEntryState state,
+                                    Widget? child,
+                                  ) {
+                                    if (!wrappedService
+                                        .shouldShowDiscoveryEntry) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return WrappedDiscoverySection(
+                                      state: state,
+                                    );
+                                  },
+                            );
+                          case SectionType.location:
+                            return LocationsSection(
+                              sectionResultsByType.elementAt(sectionIndex)
+                                  as List<GenericSearchResult>,
+                            );
+                          case SectionType.contacts:
+                            return const SizedBox.shrink();
+                          case SectionType.fileTypesAndExtension:
+                            return FileTypeSection(
+                              hasAnySearchableFiles: hasAnySearchableFiles,
+                            );
+                          case SectionType.magic:
+                            return MagicSection(
+                              sectionResultsByType.elementAt(sectionIndex)
+                                  as List<GenericSearchResult>,
+                            );
+                        }
+                      },
+                    )
                     .animate(delay: const Duration(milliseconds: 150))
                     .slide(
                       begin: const Offset(0, -0.015),

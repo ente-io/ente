@@ -10,10 +10,7 @@ import "package:locker/ui/pages/collection_page.dart";
 
 class CollectionFlexGridViewWidget extends StatelessWidget {
   final List<Collection> collections;
-  const CollectionFlexGridViewWidget({
-    super.key,
-    required this.collections,
-  });
+  const CollectionFlexGridViewWidget({super.key, required this.collections});
 
   @override
   Widget build(BuildContext context) {

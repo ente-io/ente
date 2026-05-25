@@ -38,10 +38,7 @@ class ToptSelectorWidget extends StatelessWidget {
                 children: [
                   toptOptionText(Type.values[index]),
                   if (Type.values[index] == currentTopt)
-                    Icon(
-                      Icons.check,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
+                    Icon(Icons.check, color: Theme.of(context).iconTheme.color),
                 ],
               ),
             );

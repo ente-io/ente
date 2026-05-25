@@ -69,9 +69,7 @@ class LogViewer {
 
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const LogViewerPage(),
-      ),
+      MaterialPageRoute(builder: (context) => const LogViewerPage()),
     );
   }
 

@@ -27,6 +27,7 @@ struct MessageListView: View {
     @State private var lastScrollChange = ScrollChange()
     @State private var didInitialScroll = false
     @State private var streamingTextStorageId = UUID().uuidString
+    @State private var didPerformStreamingStartHaptic = false
 
     var body: some View {
         let content = GeometryReader { proxy in
@@ -128,8 +129,18 @@ struct MessageListView: View {
             scheduleInitialScroll(scrollProxy)
         }
 
+        if newValue.isGenerating != previous.isGenerating {
+            didPerformStreamingStartHaptic = false
+            if newValue.isGenerating {
+                autoScrollEnabled = true
+                scrollToBottom(scrollProxy, force: true, animated: false)
+                performStreamingStartHapticIfNeeded()
+            }
+        }
+
         if newValue.streamingLength != previous.streamingLength {
             scrollToBottom(scrollProxy, animated: false)
+            performStreamingStartHapticIfNeeded()
         }
 
         if newValue.keyboardHeight != previous.keyboardHeight {
@@ -142,13 +153,6 @@ struct MessageListView: View {
             }
             if newValue.keyboardHeight == 0 {
                 wasAtBottomBeforeKeyboard = false
-            }
-        }
-
-        if newValue.isGenerating != previous.isGenerating {
-            if newValue.isGenerating {
-                autoScrollEnabled = true
-                scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
 
@@ -316,6 +320,18 @@ struct MessageListView: View {
         }
     }
 
+    private func performStreamingStartHapticIfNeeded() {
+        #if os(iOS)
+        guard isGenerating,
+              !didPerformStreamingStartHaptic,
+              hasVisibleStreamingContent(streamingResponse) else {
+            return
+        }
+        hapticTap()
+        didPerformStreamingStartHaptic = true
+        #endif
+    }
+
     private func openAttachment(_ attachment: ChatAttachment) {
         guard let url = attachment.url else { return }
         guard FileManager.default.fileExists(atPath: url.path) else { return }
@@ -348,6 +364,33 @@ struct MessageListView: View {
         let invalidCharacters = CharacterSet(charactersIn: "/\\:")
         let sanitized = baseName.components(separatedBy: invalidCharacters).joined(separator: "-")
         return sanitized.isEmpty ? attachment.id.uuidString : sanitized
+    }
+
+    private func hasVisibleStreamingContent(_ text: String) -> Bool {
+        let textWithoutUnclosedThink = removingUnclosedStreamingTag("think", from: text)
+        let visibleText = removingUnclosedStreamingTag("todo_list", from: textWithoutUnclosedThink)
+        let parsed = ParsedMessage(text: visibleText)
+        return !parsed.todoBlocks.isEmpty ||
+            !parsed.markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func removingUnclosedStreamingTag(_ tag: String, from text: String) -> String {
+        let openingTag = "<\(tag)>"
+        let closingTag = "</\(tag)>"
+        var result = ""
+        var cursor = text.startIndex
+
+        while let openRange = text.range(of: openingTag, range: cursor..<text.endIndex) {
+            result.append(contentsOf: text[cursor..<openRange.lowerBound])
+            guard let closeRange = text.range(of: closingTag, range: openRange.upperBound..<text.endIndex) else {
+                return result
+            }
+            result.append(contentsOf: text[openRange.lowerBound..<closeRange.upperBound])
+            cursor = closeRange.upperBound
+        }
+
+        result.append(contentsOf: text[cursor..<text.endIndex])
+        return result
     }
 }
 

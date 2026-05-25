@@ -21,9 +21,7 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:styled_text/styled_text.dart";
 
 class DeviceFoldersGridView extends StatefulWidget {
-  const DeviceFoldersGridView({
-    super.key,
-  });
+  const DeviceFoldersGridView({super.key});
 
   @override
   State<DeviceFoldersGridView> createState() => _DeviceFoldersGridViewState();
@@ -43,7 +41,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   static const horizontalPadding = 16.0;
   static const crossAxisSpacing = 8.0;
   static const _thumbnailToTextSpacing = 8.0;
-  static const _titleToSubtitleSpacing = 4.0;
+  static const _titleToSubtitleSpacing = 2.0;
 
   @override
   void initState() {
@@ -151,11 +149,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              "assets/ducky_folders.png",
-              width: 138,
-              height: 120,
-            ),
+            Image.asset("assets/ducky_folders.png", width: 138, height: 120),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -169,9 +163,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                       await handleFolderSelectionBackupFlow(context);
                       if (mounted) setState(() {});
                     },
-                    style: textTheme.small.copyWith(
-                      color: selectFoldersGreen,
-                    ),
+                    style: textTheme.small.copyWith(color: selectFoldersGreen),
                   ),
                 },
               ),

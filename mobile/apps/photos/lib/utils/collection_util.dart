@@ -30,8 +30,9 @@ Future<void> onTapCollectEventPhotos(BuildContext context) async {
       }
 
       try {
-        final Collection c =
-            await CollectionsService.instance.createAlbum(text);
+        final Collection c = await CollectionsService.instance.createAlbum(
+          text,
+        );
         await routeToPage(
           context,
           CollectionPage(
@@ -41,8 +42,9 @@ Future<void> onTapCollectEventPhotos(BuildContext context) async {
         );
         Navigator.of(context).pop();
       } catch (e, s) {
-        Logger("Collect event photos from CollectPhotosCardWidget")
-            .severe("Failed to rename album", e, s);
+        Logger(
+          "Collect event photos from CollectPhotosCardWidget",
+        ).severe("Failed to rename album", e, s);
         rethrow;
       }
     },

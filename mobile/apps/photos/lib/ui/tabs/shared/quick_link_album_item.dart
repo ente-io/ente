@@ -108,9 +108,9 @@ class QuickLinkAlbumItem extends StatelessWidget {
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             return Text(
-                              AppLocalizations.of(context).itemCount(
-                                count: snapshot.data!,
-                              ),
+                              AppLocalizations.of(
+                                context,
+                              ).itemCount(count: snapshot.data!),
                               style: textTheme.smallMuted,
                               maxLines: 1,
                               softWrap: false,

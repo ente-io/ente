@@ -42,8 +42,8 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final backgroundColor =
         MediaQuery.of(context).platformBrightness == Brightness.light
-            ? enteColorScheme.backgroundElevated2
-            : enteColorScheme.backgroundElevated;
+        ? enteColorScheme.backgroundElevated2
+        : enteColorScheme.backgroundElevated;
     return AnimatedContainer(
       curve: Curves.ease,
       duration: const Duration(milliseconds: 200),

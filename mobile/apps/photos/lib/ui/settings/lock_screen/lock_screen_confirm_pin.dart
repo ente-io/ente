@@ -65,10 +65,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
           onPressed: () {
             Navigator.of(context).pop(false);
           },
-          icon: Icon(
-            Icons.arrow_back,
-            color: colorTheme.tabIcon,
-          ),
+          icon: Icon(Icons.arrow_back, color: colorTheme.tabIcon),
         ),
       ),
       body: OrientationBuilder(
@@ -135,11 +132,11 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
                         duration: const Duration(milliseconds: 250),
                         builder: (context, value, _) =>
                             CircularProgressIndicator(
-                          backgroundColor: colorTheme.fillFaintPressed,
-                          value: value,
-                          color: colorTheme.primary400,
-                          strokeWidth: 1.5,
-                        ),
+                              backgroundColor: colorTheme.fillFaintPressed,
+                              value: value,
+                              color: colorTheme.primary400,
+                              strokeWidth: 1.5,
+                            ),
                       );
                     },
                   ),
@@ -168,26 +165,20 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
               textStyle: textTheme.h3Bold,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(
-                  color: colorTheme.fillBase,
-                ),
+                border: Border.all(color: colorTheme.fillBase),
               ),
             ),
             followingPinTheme: _pinPutDecoration.copyWith(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(
-                  color: colorTheme.fillMuted,
-                ),
+                border: Border.all(color: colorTheme.fillMuted),
               ),
             ),
             focusedPinTheme: _pinPutDecoration,
             errorPinTheme: _pinPutDecoration.copyWith(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(
-                  color: colorTheme.warning400,
-                ),
+                border: Border.all(color: colorTheme.warning400),
               ),
             ),
             errorText: '',

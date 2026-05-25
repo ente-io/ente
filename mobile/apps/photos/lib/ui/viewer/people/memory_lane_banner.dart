@@ -39,8 +39,9 @@ class MemoryLaneBanner extends StatelessWidget {
       fontSize: 16,
       height: 20 / 16,
       letterSpacing: -0.32,
-      color:
-          brightness == Brightness.dark ? colorScheme.textBase : Colors.black,
+      color: brightness == Brightness.dark
+          ? colorScheme.textBase
+          : Colors.black,
     );
     return GestureDetector(
       onTap: onTap,
@@ -53,10 +54,7 @@ class MemoryLaneBanner extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _FaceThumbnail(
-              image: thumbnail,
-              backgroundColor: backgroundColor,
-            ),
+            _FaceThumbnail(image: thumbnail, backgroundColor: backgroundColor),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
@@ -99,10 +97,7 @@ class _FaceThumbnail extends StatelessWidget {
             ),
             clipBehavior: Clip.hardEdge,
             child: image != null
-                ? Image(
-                    image: image!,
-                    fit: BoxFit.cover,
-                  )
+                ? Image(image: image!, fit: BoxFit.cover)
                 : Center(
                     child: Icon(
                       Icons.person_outline,
@@ -233,7 +228,7 @@ class MemoryLaneBannerSection extends StatefulWidget {
   final PersonEntity person;
   final VoidCallback? onTap;
   final Future<MemoryLanePersonTimeline?> Function(String personId)?
-      loadTimeline;
+  loadTimeline;
 
   const MemoryLaneBannerSection({
     required this.showBanner,

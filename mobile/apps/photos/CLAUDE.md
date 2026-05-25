@@ -5,6 +5,7 @@ This file provides guidance to Claude, Codex, and any other agent when working w
 ## Project Philosophy
 
 Ente is focused on privacy, transparency and trust. It's a fully open-source, end-to-end encrypted platform for storing data in the cloud. When contributing, always prioritize:
+
 - User privacy and data security
 - End-to-end encryption integrity
 - Transparent, auditable code
@@ -13,12 +14,15 @@ Ente is focused on privacy, transparency and trust. It's a fully open-source, en
 ## Monorepo Context
 
 This is the Ente Photos mobile app within the Ente monorepo. The monorepo contains:
+
 - Mobile apps (Photos, Auth, Locker) at `mobile/apps/`
 - Shared packages at `mobile/packages/`
 - Web, desktop, CLI, and server components in parent directories
 
 ### Package Architecture
+
 The Photos app uses two types of packages:
+
 - **Shared packages** (`../../packages/`): Common code shared across multiple Ente apps (Photos, Auth, Locker)
 - **Photos-specific plugins** (`./plugins/`): Custom Flutter plugins specific to Photos app for separation and testability
 
@@ -28,7 +32,7 @@ The Photos app uses two types of packages:
 
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
 
-```bash
+```sh
 # 1. Format Dart code
 dart format .
 
@@ -62,7 +66,8 @@ flutter analyze
 ## Development Commands
 
 ### Using Melos (Monorepo Management)
-```bash
+
+```sh
 # From mobile/ directory - bootstrap all packages
 melos bootstrap
 
@@ -77,7 +82,8 @@ melos clean:photos
 ```
 
 ### Direct Flutter Commands
-```bash
+
+```sh
 # Development run
 flutter run --flavor independent
 
@@ -90,7 +96,8 @@ flutter build ios
 ```
 
 ### Code Quality
-```bash
+
+```sh
 # Static analysis and linting
 flutter analyze .
 
@@ -101,7 +108,9 @@ flutter test
 ## Architecture Overview
 
 ### Service-Oriented Architecture
+
 The app uses a service layer pattern with 28+ specialized services:
+
 - **collections_service.dart**: Album and collection management
 - **search_service.dart**: Search functionality with ML support
 - **smart_memories_service.dart**: AI-powered memory curation
@@ -109,12 +118,14 @@ The app uses a service layer pattern with 28+ specialized services:
 - **Machine Learning Services**: Face recognition, semantic search, similar images
 
 ### Key Patterns
+
 - **Service Locator**: Dependency injection via `lib/service_locator.dart`
 - **Event Bus**: Loose coupling via `lib/core/event_bus.dart`
 - **Repository Pattern**: Database abstraction in `lib/db/`
 - **Rust Integration**: Performance-critical operations via Flutter Rust Bridge
 
 ### Security Architecture
+
 - End-to-end encryption with `ente_crypto` package
 - BIP39 mnemonic-based key generation (24 words)
 - Secure storage using platform-specific implementations
@@ -160,7 +171,9 @@ lib/
 ## Critical Coding Requirements
 
 ### 1. Code Quality - MANDATORY
+
 **Every code change MUST pass `dart format .` and `flutter analyze` with zero issues**
+
 - Run `dart format .` first to format all Dart code
 - Run `flutter analyze` after EVERY code modification
 - Resolve ALL issues (info, warning, error) - no exceptions
@@ -168,13 +181,17 @@ lib/
 - DO NOT commit or consider work complete until both commands pass cleanly
 
 ### 2. Component Reuse - MANDATORY
+
 **Always try to reuse existing components**
+
 - Use a subagent to search for existing components before creating new ones
 - Only create new components if none exist that meet the requirements
 - Check both UI components in `lib/ui/` and shared components in `../../packages/`
 
 ### 3. Design System - MANDATORY
+
 **Never hardcode colors or text styles**
+
 - Always use the Ente design system for colors and typography
 - Use a subagent to find the appropriate design tokens
 - Access colors via theme: `getEnteColorScheme(context)`
@@ -183,14 +200,18 @@ lib/
 - If you MUST use custom colors/styles (extremely rare), explicitly inform the user with a clear warning
 
 ### 4. Documentation Sync - MANDATORY
+
 **Keep spec documents synchronized with code changes**
+
 - When modifying code, also update any associated spec documents
 - Check for related spec files in `docs/` or project directories
 - Ensure documentation reflects the current implementation
 - Update examples in specs if behavior changes
 
 ### 5. Database Methods - BEST PRACTICE
+
 **Prioritize readability in database methods**
+
 - For small result sets (e.g., 1-2 stale entries), prefer filtering in Dart for cleaner, more readable code
 - For large datasets, use SQL WHERE clauses for performance - they're much more efficient in SQLite
 
@@ -203,4 +224,5 @@ lib/
 - Always follow existing code conventions and patterns in neighboring files
 
 # Individual Preferences
+
 - @~/.claude/ente-photos-instructions.md

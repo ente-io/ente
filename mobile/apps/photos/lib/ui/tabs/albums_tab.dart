@@ -19,6 +19,7 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/sync/remote_sync_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
@@ -29,6 +30,7 @@ import "package:photos/ui/tabs/albums/albums_manage_sheet.dart";
 import "package:photos/ui/tabs/albums/empty_states/on_ente_empty_state.dart";
 import "package:photos/ui/tabs/albums/empty_states/shared_empty_state.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
+import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
 import "package:photos/utils/local_settings.dart";
 
 enum _AlbumsFilter { ente, onDevice, shared }
@@ -36,9 +38,14 @@ enum _AlbumsFilter { ente, onDevice, shared }
 enum _AlbumsMenuAction { toggleView, name, newest, updated }
 
 class AlbumsTab extends StatefulWidget {
-  const AlbumsTab({super.key, this.selectedAlbums});
+  const AlbumsTab({
+    super.key,
+    this.selectedAlbums,
+    this.isSearchActiveNotifier,
+  });
 
   final SelectedAlbums? selectedAlbums;
+  final ValueNotifier<bool>? isSearchActiveNotifier;
 
   @override
   State<AlbumsTab> createState() => _AlbumsTabState();
@@ -50,6 +57,9 @@ class _AlbumsTabState extends State<AlbumsTab>
   static const Duration _kSearchTransitionDuration = Duration(
     milliseconds: 240,
   );
+  static const Duration _kContentTransitionDuration = Duration(
+    milliseconds: 150,
+  );
 
   final ValueNotifier<_AlbumsFilter> _filter = ValueNotifier(
     _AlbumsFilter.ente,
@@ -58,6 +68,7 @@ class _AlbumsTabState extends State<AlbumsTab>
   final ValueNotifier<List<Collection>?> _sharedCollections = ValueNotifier(
     null,
   );
+  final ValueNotifier<bool> _shouldShowDeleteEmptyAlbums = ValueNotifier(false);
   late final ValueNotifier<AlbumViewType> _viewType = ValueNotifier(
     localSettings.albumViewType(),
   );
@@ -69,6 +80,8 @@ class _AlbumsTabState extends State<AlbumsTab>
   );
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  ScrollController _scrollController = ScrollController();
+  final List<ScrollController> _retiredScrollControllers = [];
 
   bool _isSearchActive = false;
   String _searchQuery = "";
@@ -143,12 +156,38 @@ class _AlbumsTabState extends State<AlbumsTab>
       _enteCollections.value = null;
       _sharedCollections.value = null;
     });
+    widget.isSearchActiveNotifier?.addListener(_handleSearchStateChanged);
+    _syncSearchNotifier(_isSearchActive);
+  }
+
+  @override
+  void didUpdateWidget(covariant AlbumsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isSearchActiveNotifier == widget.isSearchActiveNotifier) {
+      return;
+    }
+    oldWidget.isSearchActiveNotifier?.removeListener(_handleSearchStateChanged);
+    widget.isSearchActiveNotifier?.addListener(_handleSearchStateChanged);
+    _syncSearchNotifier(_isSearchActive);
+  }
+
+  void _handleSearchStateChanged() {
+    if (widget.isSearchActiveNotifier?.value == false && _isSearchActive) {
+      _deactivateSearch(syncNotifier: false);
+    }
+  }
+
+  void _syncSearchNotifier(bool isSearchActive) {
+    final notifier = widget.isSearchActiveNotifier;
+    if (notifier == null || notifier.value == isSearchActive) return;
+    notifier.value = isSearchActive;
   }
 
   Future<void> _loadAll() async {
     if (!Configuration.instance.hasConfiguredAccount()) {
       _enteCollections.value = <Collection>[];
       _sharedCollections.value = <Collection>[];
+      _shouldShowDeleteEmptyAlbums.value = false;
       return;
     }
     await Future.wait([_loadEnteCollections(), _loadSharedCollections()]);
@@ -171,8 +210,27 @@ class _AlbumsTabState extends State<AlbumsTab>
   Future<void> _loadEnteCollections() async {
     final collections = await CollectionsService.instance
         .getCollectionForOnEnteSection();
+    final shouldShowDeleteEmptyAlbums = await _shouldShowDeleteEmptyAlbumsFor(
+      collections,
+    );
     if (!mounted) return;
+    _shouldShowDeleteEmptyAlbums.value = shouldShowDeleteEmptyAlbums;
     _enteCollections.value = collections;
+  }
+
+  Future<bool> _shouldShowDeleteEmptyAlbumsFor(
+    List<Collection> collections,
+  ) async {
+    if (!RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+      return false;
+    }
+    final collectionIDToLatestTimeCount = await CollectionsService.instance
+        .getCollectionIDToNewestFileTime();
+    final emptyAlbumCount = collections.where((collection) {
+      final latestTimeCount = collectionIDToLatestTimeCount[collection.id];
+      return latestTimeCount == null;
+    }).length;
+    return emptyAlbumCount > 2;
   }
 
   Future<void> _loadSharedCollections() async {
@@ -185,6 +243,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     if (_isLocalGalleryMode && filter != _AlbumsFilter.onDevice) return;
     if (_filter.value == filter) return;
     widget.selectedAlbums?.clearAll();
+    _resetScrollForNextContent();
     _filter.value = filter;
   }
 
@@ -194,6 +253,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     setState(() {
       _isSearchActive = true;
     });
+    _syncSearchNotifier(true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _searchFocusNode.requestFocus();
@@ -201,14 +261,38 @@ class _AlbumsTabState extends State<AlbumsTab>
     });
   }
 
-  void _deactivateSearch() {
+  void _deactivateSearch({bool syncNotifier = true}) {
     _searchController.clear();
     _searchFocusNode.unfocus();
-    if (!_isSearchActive && _searchQuery.isEmpty) return;
+    if (!_isSearchActive && _searchQuery.isEmpty) {
+      if (syncNotifier) {
+        _syncSearchNotifier(false);
+      }
+      return;
+    }
+    _resetScrollForNextContent();
     setState(() {
       _isSearchActive = false;
       _searchQuery = "";
     });
+    if (syncNotifier) {
+      _syncSearchNotifier(false);
+    }
+  }
+
+  void _resetScrollForNextContent() {
+    final oldController = _scrollController;
+    _retiredScrollControllers.add(oldController);
+    _scrollController = ScrollController();
+    Future<void>.delayed(
+      _kContentTransitionDuration + const Duration(milliseconds: 50),
+      () {
+        if (!_retiredScrollControllers.remove(oldController)) {
+          return;
+        }
+        oldController.dispose();
+      },
+    );
   }
 
   List<Collection> _filterCollectionsByQuery(List<Collection> collections) {
@@ -225,21 +309,47 @@ class _AlbumsTabState extends State<AlbumsTab>
     required List<Collection> collections,
     required bool showCreateAlbum,
     required Widget emptyState,
+    Widget? leadingSliver,
   }) {
     if (collections.isEmpty && _searchQuery.trim().isEmpty) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: emptyState,
-      );
+      return SliverFillRemaining(hasScrollBody: false, child: emptyState);
     }
 
-    return CollectionsFlexiGridViewWidget(
-      _filterCollectionsByQuery(collections),
-      albumViewType: _viewType.value,
-      selectedAlbums: widget.selectedAlbums,
-      shrinkWrap: true,
-      shouldShowCreateAlbum: showCreateAlbum && !_hasSearchQuery,
-      enableSelectionMode: !_isSearchActive,
+    final filteredCollections = _filterCollectionsByQuery(collections);
+
+    return SliverMainAxisGroup(
+      slivers: [
+        if (leadingSliver != null) leadingSliver,
+        CollectionsFlexiGridViewWidget(
+          filteredCollections,
+          albumViewType: _viewType.value,
+          selectedAlbums: widget.selectedAlbums,
+          shrinkWrap: true,
+          shouldShowCreateAlbum: showCreateAlbum && !_hasSearchQuery,
+          enableSelectionMode: !_isSearchActive,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeleteEmptyAlbumsActionSlot() {
+    return AnimatedSize(
+      duration: _kContentTransitionDuration,
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: _kContentTransitionDuration,
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        child: _shouldShowDeleteEmptyAlbums.value
+            ? DeleteEmptyAlbums(
+                key: const ValueKey("delete_empty_albums_action"),
+                onDeleted: () => _loadEnteCollections(),
+              )
+            : const SizedBox.shrink(
+                key: ValueKey("delete_empty_albums_hidden"),
+              ),
+      ),
     );
   }
 
@@ -314,6 +424,8 @@ class _AlbumsTabState extends State<AlbumsTab>
             key: const ValueKey("album_search_local_device_folders"),
             searchQuery: _searchQuery.trim(),
             albumViewType: _viewType.value,
+            sortKey: _sortKey.value,
+            sortDirection: _sortDirection.value,
             showEmptyState: true,
             topPadding: 8,
             bottomPadding: 0,
@@ -352,6 +464,8 @@ class _AlbumsTabState extends State<AlbumsTab>
           key: const ValueKey("album_search_device_folders"),
           searchQuery: _searchQuery.trim(),
           albumViewType: _viewType.value,
+          sortKey: _sortKey.value,
+          sortDirection: _sortDirection.value,
           showEmptyState: shouldShowDeviceSearchState,
           topPadding: 8,
           bottomPadding: 0,
@@ -368,6 +482,66 @@ class _AlbumsTabState extends State<AlbumsTab>
         const SliverToBoxAdapter(child: SizedBox(height: 200)),
       ],
     );
+  }
+
+  Widget _buildContentSliver(AppLocalizations strings) {
+    if (_hasSearchQuery) {
+      return _buildGlobalSearchResultsSliver(strings);
+    }
+    final filter = _effectiveFilter;
+    final List<Collection>? collections;
+    final bool showCreateAlbum;
+    final Widget emptyState;
+    switch (filter) {
+      case _AlbumsFilter.ente:
+        collections = _enteCollections.value;
+        showCreateAlbum = true;
+        emptyState = const OnEnteEmptyState();
+      case _AlbumsFilter.shared:
+        collections = _sharedCollections.value;
+        showCreateAlbum = false;
+        emptyState = const SharedEmptyState();
+      case _AlbumsFilter.onDevice:
+        return DeviceFolderVerticalGridSliver(
+          searchQuery: _searchQuery.trim(),
+          albumViewType: _viewType.value,
+          sortKey: _sortKey.value,
+          sortDirection: _sortDirection.value,
+        );
+    }
+    if (collections == null) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: EnteLoadingWidget(),
+        ),
+      );
+    }
+    return _buildCollectionContentSliver(
+      collections: collections,
+      showCreateAlbum: showCreateAlbum,
+      emptyState: emptyState,
+      leadingSliver: filter == _AlbumsFilter.ente && !_hasSearchQuery
+          ? SliverToBoxAdapter(child: _buildDeleteEmptyAlbumsActionSlot())
+          : null,
+    );
+  }
+
+  Key _contentStateKey() {
+    final contentPhase = switch (_effectiveFilter) {
+      _AlbumsFilter.ente =>
+        _enteCollections.value == null ? "ente_loading" : "ente_ready",
+      _AlbumsFilter.shared =>
+        _sharedCollections.value == null ? "shared_loading" : "shared_ready",
+      _AlbumsFilter.onDevice => "device",
+    };
+
+    return ValueKey<Object>((
+      _hasSearchQuery ? "search" : "filter",
+      _effectiveFilter,
+      _viewType.value,
+      contentPhase,
+    ));
   }
 
   Future<void> _toggleViewMode() async {
@@ -401,8 +575,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     final colorScheme = getEnteColorScheme(context);
     final strings = AppLocalizations.of(context);
     final isListView = _viewType.value == AlbumViewType.list;
-    final showSortActions =
-        !_hasSearchQuery && _effectiveFilter != _AlbumsFilter.onDevice;
+    final showSortActions = !_hasSearchQuery;
     final currentSortKey = _sortKey.value;
     final currentSortDirection = _sortDirection.value;
     final nameSortDirection = currentSortKey == AlbumSortKey.albumName
@@ -499,12 +672,19 @@ class _AlbumsTabState extends State<AlbumsTab>
     _backupFoldersUpdatedEvent.cancel();
     _appModeChangedEvent.cancel();
     _loggedOutEvent.cancel();
+    widget.isSearchActiveNotifier?.removeListener(_handleSearchStateChanged);
     _debouncer.cancelDebounceTimer();
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _scrollController.dispose();
+    for (final controller in _retiredScrollControllers) {
+      controller.dispose();
+    }
+    _retiredScrollControllers.clear();
     _filter.dispose();
     _enteCollections.dispose();
     _sharedCollections.dispose();
+    _shouldShowDeleteEmptyAlbums.dispose();
     _viewType.dispose();
     _sortKey.dispose();
     _sortDirection.dispose();
@@ -522,9 +702,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     final albumsOptionsButton = IconButtonComponent(
       variant: IconButtonComponentVariant.primary,
       shouldSurfaceExecutionStates: false,
-      icon: const HugeIcon(
-        icon: HugeIcons.strokeRoundedFilterHorizontal,
-      ),
+      icon: const HugeIcon(icon: HugeIcons.strokeRoundedFilterHorizontal),
       onTapDown: (details) => unawaited(_showAlbumsOptionsMenu(details)),
     );
     return Stack(
@@ -580,6 +758,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                   focusNode: _searchFocusNode,
                                   hintText: strings.searchAlbums,
                                   autofocus: true,
+                                  shouldUnfocusOnClearOrSubmit: true,
                                   prefix: HugeIcon(
                                     icon: HugeIcons.strokeRoundedSearch01,
                                     size: 18,
@@ -595,6 +774,11 @@ class _AlbumsTabState extends State<AlbumsTab>
                                     ),
                                   ),
                                   onChanged: (value) {
+                                    final hadSearchQuery = _hasSearchQuery;
+                                    if (!hadSearchQuery &&
+                                        value.trim().isNotEmpty) {
+                                      _resetScrollForNextContent();
+                                    }
                                     setState(() {
                                       _searchQuery = value;
                                     });
@@ -692,6 +876,19 @@ class _AlbumsTabState extends State<AlbumsTab>
                                                 _AlbumsFilter.shared,
                                               ),
                                             ),
+                                            const SizedBox(width: 8),
+                                            _AlbumsFilterChip(
+                                              label: strings.more,
+                                              selected: false,
+                                              trailing: const Icon(
+                                                Icons.keyboard_arrow_down,
+                                                size: 18,
+                                              ),
+                                              onTap: () =>
+                                                  showAlbumsManageSheet(
+                                                    context,
+                                                  ),
+                                            ),
                                           ],
                                         ],
                                       ),
@@ -699,72 +896,54 @@ class _AlbumsTabState extends State<AlbumsTab>
                                   },
                                 ),
                               ),
-                              if (!localGalleryMode)
-                                IconButtonComponent(
-                                  variant: IconButtonComponentVariant.primary,
-                                  shouldSurfaceExecutionStates: false,
-                                  icon: const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedMoreVertical,
-                                  ),
-                                  onTap: () => showAlbumsManageSheet(context),
-                                ),
                             ],
                           ),
                         ),
                 ),
               ),
               Expanded(
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    AnimatedBuilder(
-                      animation: Listenable.merge(
-                        [
-                          _filter,
-                          _enteCollections,
-                          _sharedCollections,
-                          _viewType,
-                        ],
-                      ),
-                      builder: (context, _) {
-                        if (_hasSearchQuery) {
-                          return _buildGlobalSearchResultsSliver(strings);
-                        }
-                        final filter = _effectiveFilter;
-                        final List<Collection>? collections;
-                        final bool showCreateAlbum;
-                        final Widget emptyState;
-                        switch (filter) {
-                          case _AlbumsFilter.ente:
-                            collections = _enteCollections.value;
-                            showCreateAlbum = true;
-                            emptyState = const OnEnteEmptyState();
-                          case _AlbumsFilter.shared:
-                            collections = _sharedCollections.value;
-                            showCreateAlbum = false;
-                            emptyState = const SharedEmptyState();
-                          case _AlbumsFilter.onDevice:
-                            return DeviceFolderVerticalGridSliver(
-                              searchQuery: _searchQuery.trim(),
-                              albumViewType: _viewType.value,
-                            );
-                        }
-                        if (collections == null) {
-                          return const SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 24),
-                              child: EnteLoadingWidget(),
-                            ),
-                          );
-                        }
-                        return _buildCollectionContentSliver(
-                          collections: collections,
-                          showCreateAlbum: showCreateAlbum,
-                          emptyState: emptyState,
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([
+                    _filter,
+                    _enteCollections,
+                    _sharedCollections,
+                    _shouldShowDeleteEmptyAlbums,
+                    _viewType,
+                    _sortKey,
+                    _sortDirection,
+                  ]),
+                  builder: (context, _) {
+                    return AnimatedSwitcher(
+                      duration: _kContentTransitionDuration,
+                      reverseDuration: _kContentTransitionDuration,
+                      switchInCurve: Curves.easeInQuart,
+                      switchOutCurve: Curves.easeOutExpo,
+                      layoutBuilder: (currentChild, previousChildren) {
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            for (final previousChild in previousChildren)
+                              Positioned.fill(child: previousChild),
+                            if (currentChild != null)
+                              Positioned.fill(child: currentChild),
+                          ],
                         );
                       },
-                    ),
-                  ],
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                      child: Scrollbar(
+                        key: _contentStateKey(),
+                        controller: _scrollController,
+                        interactive: true,
+                        child: CustomScrollView(
+                          controller: _scrollController,
+                          physics: const BouncingScrollPhysics(),
+                          slivers: [_buildContentSliver(strings)],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -772,9 +951,11 @@ class _AlbumsTabState extends State<AlbumsTab>
         ),
         if (selectedAlbums != null && !_isSearchActive)
           AnimatedBuilder(
-            animation: Listenable.merge(
-              [_filter, _enteCollections, _sharedCollections],
-            ),
+            animation: Listenable.merge([
+              _filter,
+              _enteCollections,
+              _sharedCollections,
+            ]),
             builder: (context, _) {
               final filter = _effectiveFilter;
               final UISectionType sectionType;
@@ -815,16 +996,19 @@ class _AlbumsFilterChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.trailing,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return TagChipComponent(
       label: label,
+      trailing: trailing,
       state: selected
           ? TagChipComponentState.selected
           : TagChipComponentState.unselected,

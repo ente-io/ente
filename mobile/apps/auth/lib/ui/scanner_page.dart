@@ -14,10 +14,7 @@ class ScannerPageResult {
   final Code code;
   final bool fromGallery;
 
-  const ScannerPageResult({
-    required this.code,
-    required this.fromGallery,
-  });
+  const ScannerPageResult({required this.code, required this.fromGallery});
 }
 
 class ScannerPage extends StatefulWidget {
@@ -60,9 +57,7 @@ class ScannerPageState extends State<ScannerPage> {
         : Colors.white.withValues(alpha: 0.26);
     final Color galleryIconColor = isLight ? Colors.black : Colors.white;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.scan),
-      ),
+      appBar: AppBar(title: Text(l10n.scan)),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -77,8 +72,10 @@ class ScannerPageState extends State<ScannerPage> {
             flex: 1,
             child: Center(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: showGalleryImport
                     ? Row(
                         children: [
@@ -86,8 +83,9 @@ class ScannerPageState extends State<ScannerPage> {
                             child: totp != null
                                 ? Text(
                                     totp!,
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium,
                                   )
                                 : const SizedBox.shrink(),
                           ),
@@ -138,9 +136,9 @@ class ScannerPageState extends State<ScannerPage> {
       try {
         final code = Code.fromOTPAuthUrl(scanData.code!);
         controller.dispose();
-        Navigator.of(context).pop(
-          ScannerPageResult(code: code, fromGallery: false),
-        );
+        Navigator.of(
+          context,
+        ).pop(ScannerPageResult(code: code, fromGallery: false));
       } catch (e) {
         // Log
         showToast(context, context.l10n.invalidQRCode);
@@ -164,9 +162,9 @@ class ScannerPageState extends State<ScannerPage> {
       if (!mounted) {
         return;
       }
-      Navigator.of(context).pop(
-        ScannerPageResult(code: code, fromGallery: true),
-      );
+      Navigator.of(
+        context,
+      ).pop(ScannerPageResult(code: code, fromGallery: true));
     } finally {
       if (mounted) {
         setState(() {

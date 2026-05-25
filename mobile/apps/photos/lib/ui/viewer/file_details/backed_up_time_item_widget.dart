@@ -11,13 +11,15 @@ class BackedUpTimeItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateTimeForUpdationTime =
-        DateTime.fromMicrosecondsSinceEpoch(file.updationTime!);
+    final dateTimeForUpdationTime = DateTime.fromMicrosecondsSinceEpoch(
+      file.updationTime!,
+    );
     return InfoItemWidget(
       key: const ValueKey("Backedup date"),
       leadingIcon: Icons.backup_outlined,
-      title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
-          .format(dateTimeForUpdationTime),
+      title: DateFormat.yMMMEd(
+        Localizations.localeOf(context).languageCode,
+      ).format(dateTimeForUpdationTime),
       subtitleSection: Future.value([
         Text(
           getTimeIn12hrFormat(dateTimeForUpdationTime) +

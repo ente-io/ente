@@ -279,10 +279,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     if (widget.file.hasDimensions &&
         widget.file.width > 0 &&
         widget.file.height > 0) {
-      return Size(
-        widget.file.width.toDouble(),
-        widget.file.height.toDouble(),
-      );
+      return Size(widget.file.width.toDouble(), widget.file.height.toDouble());
     }
     return _resolvedImageSize;
   }
@@ -528,10 +525,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     );
   }
 
-  bool _isLocalPointInVisibleControls(
-    Offset localPosition,
-    Size viewportSize,
-  ) {
+  bool _isLocalPointInVisibleControls(Offset localPosition, Size viewportSize) {
     if (widget.enableFullScreenNotifier.value) {
       return false;
     }
@@ -585,10 +579,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       builder: (context, constraints) {
         final Size viewportSize = constraints.biggest;
         return _OcrGestureHitTestBox(
-          hitTest: (localPosition) => _isLocalPointEligibleForOcrGesture(
-            localPosition,
-            viewportSize,
-          ),
+          hitTest: (localPosition) =>
+              _isLocalPointEligibleForOcrGesture(localPosition, viewportSize),
           child: child,
         );
       },
@@ -633,10 +625,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
               setState(() => _isPinching = false);
             }
           },
-          child: IgnorePointer(
-            ignoring: ignoring,
-            child: overlay,
-          ),
+          child: IgnorePointer(ignoring: ignoring, child: overlay),
         ),
       ),
     );
@@ -657,9 +646,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
           children: [
             Positioned.fromRect(
               rect: photoRect,
-              child: const IgnorePointer(
-                child: OcrDotWaveOverlay(),
-              ),
+              child: const IgnorePointer(child: OcrDotWaveOverlay()),
             ),
           ],
         );
@@ -840,10 +827,7 @@ class _HasTextResult {
 class _OcrGestureHitTestBox extends SingleChildRenderObjectWidget {
   final bool Function(Offset localPosition) hitTest;
 
-  const _OcrGestureHitTestBox({
-    required this.hitTest,
-    required super.child,
-  });
+  const _OcrGestureHitTestBox({required this.hitTest, required super.child});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
