@@ -34,7 +34,7 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
     final filterGroups = _filterGroups(context);
 
     return BottomSheetComponent(
-      title: l10n.filter,
+      title: l10n.filters,
       closeTooltip: l10n.close,
       content: ConstrainedBox(
         constraints: BoxConstraints(
