@@ -101,13 +101,13 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
     final peopleFilters = _peopleFilters;
     final groups = [
       _FilterGroup(l10n.people, peopleFilters),
-      _FilterGroup("Smart suggestions", [
+      _FilterGroup(l10n.smartSuggestions, [
         ..._filters("magicFilters"),
         ..._filters("topLevelGenericFilter"),
       ]),
       _FilterGroup(l10n.contacts, _filters("contactsFilters")),
       _FilterGroup(l10n.searchResultUploadedBy, _filters("uploaderFilters")),
-      _FilterGroup("Camera", _filters("cameraFilters")),
+      _FilterGroup(l10n.camera, _filters("cameraFilters")),
       _FilterGroup(l10n.albums, _filters("albumFilters")),
       _FilterGroup(l10n.locations, _filters("locationFilters")),
       _FilterGroup(l10n.fileTypes, _filters("fileTypeFilters")),
