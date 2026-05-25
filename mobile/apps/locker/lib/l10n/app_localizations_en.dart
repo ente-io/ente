@@ -637,19 +637,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpAndSupport => 'Help and Support';
 
   @override
+  String get getInTouch => 'Get in touch';
+
+  @override
+  String get browseHelpPages => 'Browse help pages';
+
+  @override
   String get contactSupport => 'Contact support';
 
   @override
   String get help => 'Help';
 
   @override
+  String get askAQuestion => 'Ask a question';
+
+  @override
   String get suggestFeatures => 'Suggest features';
+
+  @override
+  String get requestAFeature => 'Request a feature';
 
   @override
   String get reportABug => 'Report a bug';
 
   @override
+  String get reportAnIssue => 'Report an issue';
+
+  @override
   String get reportBug => 'Report bug';
+
+  @override
+  String get viewAllHelpTopics => 'View all help topics';
+
+  @override
+  String get gettingStarted => 'Getting started';
+
+  @override
+  String get gettingStartedDesc =>
+      'Install Locker, create an account, and save your first item';
+
+  @override
+  String get informationTypes => 'Information types';
+
+  @override
+  String get informationTypesDesc =>
+      'Documents, notes, cards, passwords, and other item types';
+
+  @override
+  String get organization => 'Organization';
+
+  @override
+  String get organizationDesc =>
+      'Collections, favorites, search, and ways to keep items organized';
+
+  @override
+  String get legacyDesc =>
+      'Trusted contacts, Legacy Kit, and account recovery planning';
+
+  @override
+  String get securityDesc =>
+      'Encryption, recovery keys, app lock, and account protection';
+
+  @override
+  String get troubleshooting => 'Troubleshooting';
+
+  @override
+  String get troubleshootingDesc => 'Common issues and their solutions';
 
   @override
   String get logsDialogBodyLocker =>
