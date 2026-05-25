@@ -39,17 +39,6 @@ class HelpSupportPage extends StatelessWidget {
       children: [
         _sectionTitle(context, l10n.getInTouch),
         SettingsItem(
-          title: l10n.reportAnIssue,
-          icon: HugeIcons.strokeRoundedBug01,
-          showOnlyLoadingState: true,
-          onTap: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const ReportIssuePage()),
-            );
-          },
-        ),
-        const SizedBox(height: 8),
-        SettingsItem(
           title: l10n.askAQuestion,
           icon: HugeIcons.strokeRoundedHelpCircle,
           showOnlyLoadingState: true,
@@ -69,10 +58,21 @@ class HelpSupportPage extends StatelessWidget {
             );
           },
         ),
+        const SizedBox(height: 8),
+        SettingsItem(
+          title: l10n.reportAnIssue,
+          icon: HugeIcons.strokeRoundedBug01,
+          showOnlyLoadingState: true,
+          onTap: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const ReportIssuePage()),
+            );
+          },
+        ),
         if (flagService.internalUser || kDebugMode) ...[
           const SizedBox(height: 8),
           SettingsItem(
-            title: l10n.viewLogs,
+            title: "(i) ${l10n.viewLogs}",
             icon: HugeIcons.strokeRoundedNote01,
             showOnlyLoadingState: true,
             onTap: () async {
