@@ -17,6 +17,8 @@ class FilterOptionsBottomSheet extends StatefulWidget {
 }
 
 class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
+  static const _maxContentHeightFactor = 0.68;
+
   late final Map<String, List<HierarchicalSearchFilter>> _filtersByType;
 
   @override
@@ -27,44 +29,35 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final filterGroups = _filterGroups(context);
 
-    return SingleChildScrollView(
-      clipBehavior: Clip.none,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SizedBox(
-          width: double.infinity,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              const SizedBox(height: 24),
-              for (final group in filterGroups) ...[
-                _buildFilterGroup(context, group),
-                if (group != filterGroups.last) const SizedBox(height: 24),
+    return BottomSheetComponent(
+      title: l10n.filter,
+      closeTooltip: l10n.close,
+      contentSpacing: 24,
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight:
+              MediaQuery.sizeOf(context).height * _maxContentHeightFactor,
+        ),
+        child: SingleChildScrollView(
+          clipBehavior: Clip.none,
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final group in filterGroups) ...[
+                  _buildFilterGroup(context, group),
+                  if (group != filterGroups.last) const SizedBox(height: 24),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(l10n.filter, style: getEnteTextTheme(context).largeBold),
-        IconButtonComponent(
-          icon: const Icon(Icons.close_rounded),
-          variant: IconButtonComponentVariant.circular,
-          shouldSurfaceExecutionStates: false,
-          tooltip: l10n.close,
-          onTap: () => Navigator.of(context).pop(),
-        ),
-      ],
     );
   }
 

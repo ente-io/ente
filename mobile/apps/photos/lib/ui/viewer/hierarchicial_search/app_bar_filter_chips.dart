@@ -1,6 +1,5 @@
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
-import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -124,14 +123,10 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
             variant: IconButtonComponentVariant.primary,
             shouldSurfaceExecutionStates: false,
             tooltip: AppLocalizations.of(context).filter,
-            onTap: () => showBarModalBottomSheet(
+            onTap: () => showBottomSheetComponent(
               context: context,
-              builder: (context) {
-                return SafeArea(
-                  child: FilterOptionsBottomSheet(searchFilterDataProvider),
-                );
-              },
-              backgroundColor: context.componentColors.backgroundBase,
+              builder: (_) =>
+                  FilterOptionsBottomSheet(searchFilterDataProvider),
             ),
           ),
         ),
