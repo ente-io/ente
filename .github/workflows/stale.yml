@@ -47,7 +47,7 @@ jobs:
                       }
 
             - name: Mark and close stale pull requests
-              uses: actions/stale@v9
+              uses: actions/stale@v10
               with:
                   days-before-pr-stale: 30
                   days-before-pr-close: 7
