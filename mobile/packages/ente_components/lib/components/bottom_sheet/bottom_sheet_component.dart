@@ -170,6 +170,7 @@ class BottomSheetComponent extends StatelessWidget {
       curve: Curves.easeOutCubic,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: backgroundColor ?? colors.backgroundBase,
           borderRadius: const BorderRadius.only(
