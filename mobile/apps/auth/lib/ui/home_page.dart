@@ -32,6 +32,7 @@ import 'package:ente_auth/ui/components/horizontal_scroll_area.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/add_tag_sheet.dart';
+import 'package:ente_auth/ui/home/android_search_autofocus.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/shortcuts.dart';
@@ -1530,27 +1531,31 @@ class _HomePageState extends State<HomePage> {
       ),
       title: !_showSearchBox
           ? const AuthLogoWidget(height: 18)
-          : TextField(
-              autocorrect: false,
-              enableSuggestions: false,
-              autofocus: _autoFocusSearch,
-              controller: _textController,
-              onChanged: (val) {
-                _searchText = val;
-                _applyFilteringAndRefresh();
-              },
-              onSubmitted: (_) {
-                if (_filteredCodes.isNotEmpty) {
-                  // Move focus to the first item in the grid
-                  _firstItemFocusNode.requestFocus();
-                }
-              },
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-              ),
+          : AndroidSearchAutofocus(
+              enabled: _autoFocusSearch,
               focusNode: searchBoxFocusNode,
+              child: TextField(
+                autocorrect: false,
+                enableSuggestions: false,
+                autofocus: _autoFocusSearch && !Platform.isAndroid,
+                controller: _textController,
+                onChanged: (val) {
+                  _searchText = val;
+                  _applyFilteringAndRefresh();
+                },
+                onSubmitted: (_) {
+                  if (_filteredCodes.isNotEmpty) {
+                    // Move focus to the first item in the grid
+                    _firstItemFocusNode.requestFocus();
+                  }
+                },
+                decoration: InputDecoration(
+                  hintText: l10n.searchHint,
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+                focusNode: searchBoxFocusNode,
+              ),
             ),
       centerTitle: true,
       actions: <Widget>[
