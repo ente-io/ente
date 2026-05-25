@@ -3,8 +3,8 @@ import "dart:io";
 import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/button_result.dart';
-import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/components/buttons/button_component_adapter.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 
@@ -23,9 +23,10 @@ Future<ButtonResult?> showActionSheet({
   String? body,
   String? bodyHighlight,
 }) {
+  final colors = context.componentColors;
   return showMaterialModalBottomSheet(
     backgroundColor: Colors.transparent,
-    barrierColor: backdropFaintDark,
+    barrierColor: colors.specialScrim.withValues(alpha: 0.55),
     // On iOS setting it to false causes previous page to shift
     // So we're explicitly setting it to true
     useRootNavigator: Platform.isIOS,
@@ -76,6 +77,14 @@ class ActionSheetWidget extends StatelessWidget {
         hasDefaultContent ||
         actionSheetType == ActionSheetType.iconOnly;
     final colors = context.componentColors;
+    final cancelButtonIndex = sheetCancelButtonIndex(context, actionButtons);
+    final cancelButton = cancelButtonIndex == -1
+        ? null
+        : actionButtons[cancelButtonIndex];
+    final visibleButtons = [
+      for (var index = 0; index < actionButtons.length; index++)
+        if (index != cancelButtonIndex) actionButtons[index],
+    ];
 
     return BottomSheetComponent(
       title: title,
@@ -94,10 +103,15 @@ class ActionSheetWidget extends StatelessWidget {
             )
           : null,
       actions: [
-        for (final button in actionButtons)
+        for (final button in visibleButtons)
           ButtonComponentAdapter(button: button),
       ],
-      showCloseButton: false,
+      showCloseButton: cancelButton != null,
+      closeTooltip: AppLocalizations.of(context).close,
+      closeResult: cancelButton == null ? null : sheetCloseResult(cancelButton),
+      onClose: cancelButton == null
+          ? null
+          : () => sheetCloseAction(context, cancelButton),
       actionsTopSpacing: hasContent ? Spacing.lg : 0,
     );
   }

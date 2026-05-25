@@ -8,7 +8,6 @@ import 'package:photos/models/button_result.dart';
 import 'package:photos/models/typedefs.dart';
 import "package:photos/module/download/manager.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -369,7 +368,6 @@ Future<dynamic> showTextInputDialog(
   bool popnavAfterSubmission = true,
 }) {
   return showBottomSheetComponent<dynamic>(
-    barrierColor: backdropFaintDark,
     context: context,
     useRootNavigator: useRootNavigator,
     builder: (_) {

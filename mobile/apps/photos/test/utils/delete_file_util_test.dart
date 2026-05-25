@@ -62,13 +62,13 @@ void main() {
           find.text('They will be deleted from all albums.'),
           findsOneWidget,
         );
-        expect(find.byType(ButtonComponent), findsNWidgets(4));
-        expect(find.byTooltip('Close'), findsNothing);
+        expect(find.byType(ButtonComponent), findsNWidgets(3));
+        expect(find.byTooltip('Close'), findsOneWidget);
+        expect(find.text('Cancel'), findsNothing);
         _expectVisibleButtonsInOrder(tester, [
           'Delete from Ente',
           'Delete from device',
           'Delete from both',
-          'Cancel',
         ]);
       },
     );
@@ -96,11 +96,13 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('They will be deleted from all albums.'), findsNothing);
-      expect(find.byType(ButtonComponent), findsNWidgets(2));
+      expect(find.byType(ButtonComponent), findsOneWidget);
       expect(find.text('Delete from Ente'), findsNothing);
       expect(find.text('Delete from device'), findsNothing);
       expect(find.text('Delete from both'), findsNothing);
-      _expectVisibleButtonsInOrder(tester, ['Yes, delete', 'Cancel']);
+      expect(find.byTooltip('Close'), findsOneWidget);
+      expect(find.text('Cancel'), findsNothing);
+      _expectVisibleButtonsInOrder(tester, ['Yes, delete']);
     });
 
     testWidgets('matches the legacy local-only delete action sheet', (
@@ -124,11 +126,13 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('They will be deleted from all albums.'), findsNothing);
-      expect(find.byType(ButtonComponent), findsNWidgets(2));
+      expect(find.byType(ButtonComponent), findsOneWidget);
       expect(find.text('Delete from Ente'), findsNothing);
       expect(find.text('Delete from device'), findsNothing);
       expect(find.text('Delete from both'), findsNothing);
-      _expectVisibleButtonsInOrder(tester, ['Yes, delete', 'Cancel']);
+      expect(find.byTooltip('Close'), findsOneWidget);
+      expect(find.text('Cancel'), findsNothing);
+      _expectVisibleButtonsInOrder(tester, ['Yes, delete']);
     });
 
     testWidgets('cancel clears the selection like the legacy action sheet', (
@@ -147,7 +151,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
 
       expect(find.byType(BottomSheetComponent), findsNothing);

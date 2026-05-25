@@ -44,13 +44,16 @@ void main() {
       await _openLauncher(tester);
 
       expect(find.byType(BottomSheetComponent), findsOneWidget);
-      expect(find.byType(ButtonComponent), findsNWidgets(2));
+      _expectComponentScrim(tester);
+      expect(find.byType(ButtonComponent), findsOneWidget);
       expect(find.byType(ButtonWidget), findsNothing);
       expect(find.byType(Dialog), findsNothing);
       expect(find.text("Invite"), findsOneWidget);
       expect(find.text("Share this invite with a friend."), findsOneWidget);
       expect(find.byIcon(Icons.info_outline), findsOneWidget);
       expect(find.byIcon(Icons.share_outlined), findsOneWidget);
+      expect(find.byTooltip("Close"), findsOneWidget);
+      expect(find.text("Cancel"), findsNothing);
       final button = tester.widget<ButtonComponent>(
         find.widgetWithText(ButtonComponent, "Send invite"),
       );
@@ -81,6 +84,41 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(result?.action, ButtonAction.first);
+      expect(result?.exception, isNull);
+      expect(find.byType(BottomSheetComponent), findsNothing);
+    });
+
+    testWidgets("returns the cancel action from the close button", (
+      tester,
+    ) async {
+      ButtonResult? result;
+
+      await _pumpLauncher(tester, (context) async {
+        result = await showDialogWidget(
+          context: context,
+          title: "Confirm",
+          buttons: const [
+            ButtonWidget(
+              buttonType: ButtonType.neutral,
+              labelText: "Continue",
+              isInAlert: true,
+              buttonAction: ButtonAction.first,
+            ),
+            ButtonWidget(
+              buttonType: ButtonType.secondary,
+              labelText: "Cancel",
+              isInAlert: true,
+              buttonAction: ButtonAction.second,
+            ),
+          ],
+        );
+      });
+
+      await _openLauncher(tester);
+      await tester.tap(find.byTooltip("Close"));
+      await tester.pumpAndSettle();
+
+      expect(result?.action, ButtonAction.second);
       expect(result?.exception, isNull);
       expect(find.byType(BottomSheetComponent), findsNothing);
     });
@@ -143,6 +181,38 @@ void main() {
       expect(find.byType(BottomSheetComponent), findsNothing);
     });
 
+    testWidgets("returns an error result when the close callback throws", (
+      tester,
+    ) async {
+      ButtonResult? result;
+
+      await _pumpLauncher(tester, (context) async {
+        result = await showDialogWidget(
+          context: context,
+          title: "Failure",
+          buttons: [
+            ButtonWidget(
+              buttonType: ButtonType.secondary,
+              labelText: "Cancel",
+              isInAlert: true,
+              buttonAction: ButtonAction.cancel,
+              onTap: () async {
+                throw StateError("boom");
+              },
+            ),
+          ],
+        );
+      });
+
+      await _openLauncher(tester);
+      await tester.tap(find.byTooltip("Close"));
+      await tester.pumpAndSettle();
+
+      expect(result?.action, ButtonAction.error);
+      expect(result?.exception, isA<Exception>());
+      expect(find.byType(BottomSheetComponent), findsNothing);
+    });
+
     testWidgets("returns an error result when a button callback throws", (
       tester,
     ) async {
@@ -195,6 +265,7 @@ void main() {
     await _openLauncher(tester);
 
     expect(find.byType(BottomSheetComponent), findsOneWidget);
+    expect(find.byTooltip("Close"), findsNothing);
     final removeButton = tester.widget<ButtonComponent>(
       find.widgetWithText(ButtonComponent, "Remove"),
     );
@@ -230,8 +301,9 @@ void main() {
       await _openLauncher(tester);
 
       expect(find.byType(BottomSheetComponent), findsOneWidget);
+      _expectComponentScrim(tester);
       expect(find.byType(TextInputComponent), findsOneWidget);
-      expect(find.byType(ButtonComponent), findsNWidgets(2));
+      expect(find.byType(ButtonComponent), findsOneWidget);
       expect(find.byType(TextInputWidget), findsNothing);
       expect(find.byType(Dialog), findsNothing);
       expect(find.text("Rename file"), findsOneWidget);
@@ -240,6 +312,8 @@ void main() {
       expect(find.text(".JPG"), findsOneWidget);
       expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
       expect(find.byIcon(Icons.drive_file_rename_outline), findsOneWidget);
+      expect(find.byTooltip("Close"), findsOneWidget);
+      expect(find.text("Cancel"), findsNothing);
 
       final input = tester.widget<TextField>(find.byType(TextField));
       expect(input.controller?.text, "IMG_001");
@@ -325,7 +399,7 @@ void main() {
       });
 
       await _openLauncher(tester);
-      await tester.tap(find.text("Cancel"));
+      await tester.tap(find.byTooltip("Close"));
       await tester.pumpAndSettle();
 
       expect(result, isA<ButtonResult>());
@@ -486,4 +560,11 @@ Future<void> _pumpLauncher(
 Future<void> _openLauncher(WidgetTester tester) async {
   await tester.tap(find.text("Open dialog"));
   await tester.pumpAndSettle();
+}
+
+void _expectComponentScrim(WidgetTester tester) {
+  final barrierColors = tester
+      .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+      .map((barrier) => barrier.color);
+  expect(barrierColors, contains(const Color.fromRGBO(0, 0, 0, 0.55)));
 }

@@ -6,7 +6,6 @@ import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/button_result.dart';
 import 'package:photos/models/typedefs.dart';
-import 'package:photos/theme/colors.dart';
 import "package:photos/ui/components/buttons/button_component_adapter.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 
@@ -21,7 +20,6 @@ Future<ButtonResult?> showDialogWidget({
   bool useRootNavigator = false,
 }) {
   return showBottomSheetComponent<ButtonResult>(
-    barrierColor: backdropFaintDark,
     context: context,
     isDismissible: isDismissible,
     enableDrag: isDismissible,
@@ -56,6 +54,14 @@ class DialogWidget extends StatelessWidget {
     final hasTitle = title.isNotEmpty;
     final hasBody = body?.isNotEmpty == true;
     final hasContent = hasTitle || hasBody || icon != null;
+    final cancelButtonIndex = sheetCancelButtonIndex(context, buttons);
+    final cancelButton = cancelButtonIndex == -1
+        ? null
+        : buttons[cancelButtonIndex];
+    final visibleButtons = [
+      for (var index = 0; index < buttons.length; index++)
+        if (index != cancelButtonIndex) buttons[index],
+    ];
 
     return BottomSheetComponent(
       title: hasTitle ? title : null,
@@ -64,9 +70,15 @@ class DialogWidget extends StatelessWidget {
           : Icon(icon, size: 48, color: colors.iconColor),
       content: hasBody ? _DialogBody(body!) : null,
       actions: [
-        for (final button in buttons) ButtonComponentAdapter(button: button),
+        for (final button in visibleButtons)
+          ButtonComponentAdapter(button: button),
       ],
-      showCloseButton: false,
+      showCloseButton: cancelButton != null,
+      closeTooltip: AppLocalizations.of(context).close,
+      closeResult: cancelButton == null ? null : sheetCloseResult(cancelButton),
+      onClose: cancelButton == null
+          ? null
+          : () => sheetCloseAction(context, cancelButton),
       actionsTopSpacing: hasContent ? Spacing.xl : 0,
     );
   }
@@ -226,12 +238,6 @@ class _TextInputDialogState extends State<TextInputDialog> {
       ),
       actions: [
         ButtonComponent(
-          label: AppLocalizations.of(context).cancel,
-          variant: ButtonComponentVariant.secondary,
-          shouldSurfaceExecutionStates: false,
-          onTap: () => Navigator.of(context).pop(ButtonResult()),
-        ),
-        ButtonComponent(
           label: widget.submitButtonLabel,
           isDisabled: !_hasInput,
           shouldShowSuccessState: !widget.showOnlyLoadingState,
@@ -241,7 +247,9 @@ class _TextInputDialogState extends State<TextInputDialog> {
         ),
       ],
       isKeyboardAware: true,
-      showCloseButton: false,
+      showCloseButton: true,
+      closeTooltip: AppLocalizations.of(context).close,
+      closeResult: ButtonResult(),
     );
   }
 

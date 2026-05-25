@@ -2,6 +2,7 @@ import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:photos/ente_theme_data.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/button_result.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -39,18 +40,19 @@ void main() {
       await _openLauncher(tester);
 
       expect(find.byType(BottomSheetComponent), findsOneWidget);
-      expect(find.byType(ButtonComponent), findsNWidgets(2));
+      _expectComponentScrim(tester);
+      expect(find.byType(ButtonComponent), findsOneWidget);
       expect(find.byType(ButtonWidget), findsNothing);
       final buttonComponents = tester
           .widgetList<ButtonComponent>(find.byType(ButtonComponent))
           .toList();
       expect(buttonComponents[0].variant, ButtonComponentVariant.neutral);
       expect(buttonComponents[0].size, ButtonComponentSize.large);
-      expect(buttonComponents[1].variant, ButtonComponentVariant.secondary);
       expect(find.text("Delete files?"), findsOneWidget);
       expect(find.text("Files will be moved to trash."), findsOneWidget);
       expect(find.text("This applies to all albums."), findsOneWidget);
-      expect(find.byTooltip("Close"), findsNothing);
+      expect(find.byTooltip("Close"), findsOneWidget);
+      expect(find.text("Cancel"), findsNothing);
     });
 
     testWidgets("returns the tapped button action", (tester) async {
@@ -82,6 +84,68 @@ void main() {
 
       expect(result?.action, ButtonAction.first);
       expect(result?.exception, isNull);
+      expect(find.byType(BottomSheetComponent), findsNothing);
+    });
+
+    testWidgets("returns the cancel action from the close button", (
+      tester,
+    ) async {
+      ButtonResult? result;
+
+      await _pumpLauncher(tester, (context) async {
+        result = await showActionSheet(
+          context: context,
+          buttons: const [
+            ButtonWidget(
+              buttonType: ButtonType.neutral,
+              labelText: "Confirm",
+              isInAlert: true,
+              buttonAction: ButtonAction.first,
+            ),
+            ButtonWidget(
+              buttonType: ButtonType.secondary,
+              labelText: "Cancel",
+              isInAlert: true,
+              buttonAction: ButtonAction.third,
+            ),
+          ],
+        );
+      });
+
+      await _openLauncher(tester);
+      await tester.tap(find.byTooltip("Close"));
+      await tester.pumpAndSettle();
+
+      expect(result?.action, ButtonAction.third);
+      expect(result?.exception, isNull);
+      expect(find.byType(BottomSheetComponent), findsNothing);
+    });
+
+    testWidgets("returns null when dismissed", (tester) async {
+      ButtonResult? result;
+      var completed = false;
+
+      await _pumpLauncher(tester, (context) async {
+        result = await showActionSheet(
+          context: context,
+          buttons: const [
+            ButtonWidget(
+              buttonType: ButtonType.secondary,
+              labelText: "Cancel",
+              isInAlert: true,
+              buttonAction: ButtonAction.cancel,
+            ),
+          ],
+        );
+        completed = true;
+      });
+
+      await _openLauncher(tester);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+
+      expect(completed, isTrue);
+      expect(result, isNull);
       expect(find.byType(BottomSheetComponent), findsNothing);
     });
 
@@ -185,6 +249,7 @@ void main() {
       expect(find.text("Done"), findsOneWidget);
       expect(find.text("Custom body"), findsNothing);
       expect(find.text("Close"), findsOneWidget);
+      expect(find.byTooltip("Close"), findsNothing);
     });
   });
 }
@@ -196,6 +261,8 @@ Future<void> _pumpLauncher(
   await tester.pumpWidget(
     MaterialApp(
       theme: darkThemeData,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: Builder(
           builder: (context) {
@@ -213,4 +280,11 @@ Future<void> _pumpLauncher(
 Future<void> _openLauncher(WidgetTester tester) async {
   await tester.tap(find.text("Open sheet"));
   await tester.pumpAndSettle();
+}
+
+void _expectComponentScrim(WidgetTester tester) {
+  final barrierColors = tester
+      .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+      .map((barrier) => barrier.color);
+  expect(barrierColors, contains(const Color.fromRGBO(0, 0, 0, 0.55)));
 }
