@@ -92,6 +92,8 @@ jobs:
     build-desktop:
         needs: build-metadata
         if: needs.build-metadata.outputs.should_build == 'true'
+        environment:
+            name: production
         strategy:
             fail-fast: false
             matrix:
@@ -165,7 +167,7 @@ jobs:
                   AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                   AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
               run: |
-                  cargo install --locked trusted-signing-cli
+                  cargo install --locked trusted-signing-cli --version 0.11.0
                   echo "$(cygpath -w "$HOME/.cargo/bin")" >> $GITHUB_PATH
                   SIGNTOOL_PATH=$(powershell -NoProfile -Command "Get-ChildItem 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe' -ErrorAction Stop | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName" | tr -d '\r')
                   test -n "$SIGNTOOL_PATH"
@@ -254,14 +256,19 @@ jobs:
               working-directory: rust
 
             - name: Setup signing keys
+              env:
+                  SIGNING_KEY_ENSU: ${{ secrets.SIGNING_KEY_ENSU }}
+                  SIGNING_STORE_PASSWORD_ENSU: ${{ secrets.SIGNING_STORE_PASSWORD_ENSU }}
+                  SIGNING_KEY_ALIAS_ENSU: ${{ secrets.SIGNING_KEY_ALIAS_ENSU }}
+                  SIGNING_KEY_PASSWORD_ENSU: ${{ secrets.SIGNING_KEY_PASSWORD_ENSU }}
               run: |
                   KEYSTORE_PATH=$(pwd)/ensu-release.keystore
-                  echo "${{ secrets.SIGNING_KEY_ENSU }}" | base64 -d > "$KEYSTORE_PATH"
+                  printf '%s' "${SIGNING_KEY_ENSU}" | base64 -d > "$KEYSTORE_PATH"
                   cat > key.properties << EOF
                   storeFile=$KEYSTORE_PATH
-                  storePassword=${{ secrets.SIGNING_STORE_PASSWORD_ENSU }}
-                  keyAlias=${{ secrets.SIGNING_KEY_ALIAS_ENSU }}
-                  keyPassword=${{ secrets.SIGNING_KEY_PASSWORD_ENSU }}
+                  storePassword=${SIGNING_STORE_PASSWORD_ENSU}
+                  keyAlias=${SIGNING_KEY_ALIAS_ENSU}
+                  keyPassword=${SIGNING_KEY_PASSWORD_ENSU}
                   EOF
 
             - name: Build signed Android artifacts
@@ -270,7 +277,7 @@ jobs:
             - name: Prepare whatsnew
               run: |
                   mkdir -p whatsnew
-                  echo "${RELEASE_BODY}" | head -c 500 > whatsnew/whatsnew-en-US
+                  printf '%s' "${RELEASE_BODY}" | head -c 500 > whatsnew/whatsnew-en-US
 
             - name: Prepare Android APK for GitHub release
               run: |
@@ -304,6 +311,8 @@ jobs:
         needs: build-metadata
         if: needs.build-metadata.outputs.should_build == 'true'
         runs-on: macos-26
+        environment:
+            name: production
 
         defaults:
             run:
