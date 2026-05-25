@@ -91,30 +91,25 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
       padding: const EdgeInsets.only(bottom: AppBarFilterChips.bottomPadding),
       child: SizedBox(
         height: AppBarFilterChips.chipHeight,
-        child: ListView.builder(
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return _buildAllFiltersButton(context, searchFilterDataProvider);
-            }
-
-            if (index <= appliedFilters.length) {
-              final filter = appliedFilters[index - 1];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: _buildFilterChip(filter),
-              );
-            }
-
-            final filter = recommendations[index - appliedFilters.length - 1];
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: _buildFilterChip(filter),
-            );
-          },
+        child: SingleChildScrollView(
           clipBehavior: Clip.none,
           scrollDirection: Axis.horizontal,
-          itemCount: appliedFilters.length + recommendations.length + 1,
           padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            children: [
+              _buildAllFiltersButton(context, searchFilterDataProvider),
+              for (final filter in appliedFilters)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: _buildFilterChip(filter),
+                ),
+              for (final filter in recommendations)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: _buildFilterChip(filter),
+                ),
+            ],
+          ),
         ),
       ),
     );
