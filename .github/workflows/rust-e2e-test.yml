@@ -24,6 +24,28 @@ env:
     RUSTFLAGS: -D warnings
 
 jobs:
+    cli-integration:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        defaults:
+            run:
+                working-directory: rust/apps/cli
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-go@v5
+              with:
+                  go-version-file: server/go.mod
+
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+
+            - run: npm ci --prefix tests/pglite
+
+            - run: cargo test --features museum,pglite --locked
+
     test:
         runs-on: ubuntu-latest
         timeout-minutes: 30
