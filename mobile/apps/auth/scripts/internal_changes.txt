@@ -1,4 +1,5 @@
 - Upgraded Auth to Flutter 3.38.10 and Android target SDK 36
+- Worked around Android search autofocus not reliably opening the keyboard on app start
 - Made overflowing Auth tag strips scrollable with desktop mouse wheel and drag interactions
 - Made Auth tag chips reachable by keyboard Tab and selectable with Enter or Space
 - Fixed saved theme selection being reset after unlocking Auth and improved password manager autofill detection for password fields
