@@ -11,11 +11,63 @@ import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/service_locator.dart"
+    show flagService, isLocalGalleryMode;
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/contact_avatar_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
+
+class ContactsSectionLoader extends StatefulWidget {
+  const ContactsSectionLoader({super.key});
+
+  @override
+  State<ContactsSectionLoader> createState() => _ContactsSectionLoaderState();
+}
+
+class _ContactsSectionLoaderState extends State<ContactsSectionLoader> {
+  Future<List<GenericSearchResult>>? _contactsFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLocalGalleryMode || !flagService.enableContact) {
+      return const SizedBox.shrink();
+    }
+    _contactsFuture ??= SearchService.instance.getAllContactsSearchResults(
+      kSearchSectionLimit,
+    );
+    return FutureBuilder<List<GenericSearchResult>>(
+      future: _contactsFuture!,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return ContactsSection(snapshot.data!);
+        }
+        return const ContactsLoadingSection();
+      },
+    );
+  }
+}
+
+class ContactsLoadingSection extends StatelessWidget {
+  const ContactsLoadingSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionHeader(SectionType.contacts, hasMore: false),
+          SizedBox(height: 80, child: EnteLoadingWidget()),
+        ],
+      ),
+    );
+  }
+}
 
 class ContactsSection extends StatefulWidget {
   final List<GenericSearchResult> contactSearchResults;
