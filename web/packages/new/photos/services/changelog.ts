@@ -26,7 +26,7 @@ import type { Electron } from "ente-base/types/ipc";
  * The what's new dialog sets the saved version to the current one whenever it
  * is shown.
  */
-const changelogVersion = 10;
+const changelogVersion = 11;
 
 /**
  * Return true if we should show the {@link WhatsNew} dialog.
