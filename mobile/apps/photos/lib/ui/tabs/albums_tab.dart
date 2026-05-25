@@ -19,6 +19,7 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/sync/remote_sync_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
@@ -29,6 +30,7 @@ import "package:photos/ui/tabs/albums/albums_manage_sheet.dart";
 import "package:photos/ui/tabs/albums/empty_states/on_ente_empty_state.dart";
 import "package:photos/ui/tabs/albums/empty_states/shared_empty_state.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
+import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
 import "package:photos/utils/local_settings.dart";
 
 enum _AlbumsFilter { ente, onDevice, shared }
@@ -66,6 +68,7 @@ class _AlbumsTabState extends State<AlbumsTab>
   final ValueNotifier<List<Collection>?> _sharedCollections = ValueNotifier(
     null,
   );
+  final ValueNotifier<bool> _shouldShowDeleteEmptyAlbums = ValueNotifier(false);
   late final ValueNotifier<AlbumViewType> _viewType = ValueNotifier(
     localSettings.albumViewType(),
   );
@@ -77,6 +80,8 @@ class _AlbumsTabState extends State<AlbumsTab>
   );
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  ScrollController _scrollController = ScrollController();
+  final List<ScrollController> _retiredScrollControllers = [];
 
   bool _isSearchActive = false;
   String _searchQuery = "";
@@ -182,6 +187,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     if (!Configuration.instance.hasConfiguredAccount()) {
       _enteCollections.value = <Collection>[];
       _sharedCollections.value = <Collection>[];
+      _shouldShowDeleteEmptyAlbums.value = false;
       return;
     }
     await Future.wait([_loadEnteCollections(), _loadSharedCollections()]);
@@ -204,8 +210,27 @@ class _AlbumsTabState extends State<AlbumsTab>
   Future<void> _loadEnteCollections() async {
     final collections = await CollectionsService.instance
         .getCollectionForOnEnteSection();
+    final shouldShowDeleteEmptyAlbums = await _shouldShowDeleteEmptyAlbumsFor(
+      collections,
+    );
     if (!mounted) return;
+    _shouldShowDeleteEmptyAlbums.value = shouldShowDeleteEmptyAlbums;
     _enteCollections.value = collections;
+  }
+
+  Future<bool> _shouldShowDeleteEmptyAlbumsFor(
+    List<Collection> collections,
+  ) async {
+    if (!RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+      return false;
+    }
+    final collectionIDToLatestTimeCount = await CollectionsService.instance
+        .getCollectionIDToNewestFileTime();
+    final emptyAlbumCount = collections.where((collection) {
+      final latestTimeCount = collectionIDToLatestTimeCount[collection.id];
+      return latestTimeCount == null;
+    }).length;
+    return emptyAlbumCount > 2;
   }
 
   Future<void> _loadSharedCollections() async {
@@ -218,6 +243,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     if (_isLocalGalleryMode && filter != _AlbumsFilter.onDevice) return;
     if (_filter.value == filter) return;
     widget.selectedAlbums?.clearAll();
+    _resetScrollForNextContent();
     _filter.value = filter;
   }
 
@@ -244,6 +270,7 @@ class _AlbumsTabState extends State<AlbumsTab>
       }
       return;
     }
+    _resetScrollForNextContent();
     setState(() {
       _isSearchActive = false;
       _searchQuery = "";
@@ -251,6 +278,21 @@ class _AlbumsTabState extends State<AlbumsTab>
     if (syncNotifier) {
       _syncSearchNotifier(false);
     }
+  }
+
+  void _resetScrollForNextContent() {
+    final oldController = _scrollController;
+    _retiredScrollControllers.add(oldController);
+    _scrollController = ScrollController();
+    Future<void>.delayed(
+      _kContentTransitionDuration + const Duration(milliseconds: 50),
+      () {
+        if (!_retiredScrollControllers.remove(oldController)) {
+          return;
+        }
+        oldController.dispose();
+      },
+    );
   }
 
   List<Collection> _filterCollectionsByQuery(List<Collection> collections) {
@@ -267,18 +309,47 @@ class _AlbumsTabState extends State<AlbumsTab>
     required List<Collection> collections,
     required bool showCreateAlbum,
     required Widget emptyState,
+    Widget? leadingSliver,
   }) {
     if (collections.isEmpty && _searchQuery.trim().isEmpty) {
       return SliverFillRemaining(hasScrollBody: false, child: emptyState);
     }
 
-    return CollectionsFlexiGridViewWidget(
-      _filterCollectionsByQuery(collections),
-      albumViewType: _viewType.value,
-      selectedAlbums: widget.selectedAlbums,
-      shrinkWrap: true,
-      shouldShowCreateAlbum: showCreateAlbum && !_hasSearchQuery,
-      enableSelectionMode: !_isSearchActive,
+    final filteredCollections = _filterCollectionsByQuery(collections);
+
+    return SliverMainAxisGroup(
+      slivers: [
+        if (leadingSliver != null) leadingSliver,
+        CollectionsFlexiGridViewWidget(
+          filteredCollections,
+          albumViewType: _viewType.value,
+          selectedAlbums: widget.selectedAlbums,
+          shrinkWrap: true,
+          shouldShowCreateAlbum: showCreateAlbum && !_hasSearchQuery,
+          enableSelectionMode: !_isSearchActive,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeleteEmptyAlbumsActionSlot() {
+    return AnimatedSize(
+      duration: _kContentTransitionDuration,
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: _kContentTransitionDuration,
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        child: _shouldShowDeleteEmptyAlbums.value
+            ? DeleteEmptyAlbums(
+                key: const ValueKey("delete_empty_albums_action"),
+                onDeleted: () => _loadEnteCollections(),
+              )
+            : const SizedBox.shrink(
+                key: ValueKey("delete_empty_albums_hidden"),
+              ),
+      ),
     );
   }
 
@@ -450,6 +521,9 @@ class _AlbumsTabState extends State<AlbumsTab>
       collections: collections,
       showCreateAlbum: showCreateAlbum,
       emptyState: emptyState,
+      leadingSliver: filter == _AlbumsFilter.ente && !_hasSearchQuery
+          ? SliverToBoxAdapter(child: _buildDeleteEmptyAlbumsActionSlot())
+          : null,
     );
   }
 
@@ -602,9 +676,15 @@ class _AlbumsTabState extends State<AlbumsTab>
     _debouncer.cancelDebounceTimer();
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _scrollController.dispose();
+    for (final controller in _retiredScrollControllers) {
+      controller.dispose();
+    }
+    _retiredScrollControllers.clear();
     _filter.dispose();
     _enteCollections.dispose();
     _sharedCollections.dispose();
+    _shouldShowDeleteEmptyAlbums.dispose();
     _viewType.dispose();
     _sortKey.dispose();
     _sortDirection.dispose();
@@ -694,6 +774,11 @@ class _AlbumsTabState extends State<AlbumsTab>
                                     ),
                                   ),
                                   onChanged: (value) {
+                                    final hadSearchQuery = _hasSearchQuery;
+                                    if (!hadSearchQuery &&
+                                        value.trim().isNotEmpty) {
+                                      _resetScrollForNextContent();
+                                    }
                                     setState(() {
                                       _searchQuery = value;
                                     });
@@ -791,6 +876,19 @@ class _AlbumsTabState extends State<AlbumsTab>
                                                 _AlbumsFilter.shared,
                                               ),
                                             ),
+                                            const SizedBox(width: 8),
+                                            _AlbumsFilterChip(
+                                              label: strings.more,
+                                              selected: false,
+                                              trailing: const Icon(
+                                                Icons.keyboard_arrow_down,
+                                                size: 18,
+                                              ),
+                                              onTap: () =>
+                                                  showAlbumsManageSheet(
+                                                    context,
+                                                  ),
+                                            ),
                                           ],
                                         ],
                                       ),
@@ -798,15 +896,6 @@ class _AlbumsTabState extends State<AlbumsTab>
                                   },
                                 ),
                               ),
-                              if (!localGalleryMode)
-                                IconButtonComponent(
-                                  variant: IconButtonComponentVariant.primary,
-                                  shouldSurfaceExecutionStates: false,
-                                  icon: const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedMoreVertical,
-                                  ),
-                                  onTap: () => showAlbumsManageSheet(context),
-                                ),
                             ],
                           ),
                         ),
@@ -818,6 +907,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                     _filter,
                     _enteCollections,
                     _sharedCollections,
+                    _shouldShowDeleteEmptyAlbums,
                     _viewType,
                     _sortKey,
                     _sortDirection,
@@ -842,10 +932,15 @@ class _AlbumsTabState extends State<AlbumsTab>
                       transitionBuilder: (child, animation) {
                         return FadeTransition(opacity: animation, child: child);
                       },
-                      child: CustomScrollView(
+                      child: Scrollbar(
                         key: _contentStateKey(),
-                        physics: const BouncingScrollPhysics(),
-                        slivers: [_buildContentSliver(strings)],
+                        controller: _scrollController,
+                        interactive: true,
+                        child: CustomScrollView(
+                          controller: _scrollController,
+                          physics: const BouncingScrollPhysics(),
+                          slivers: [_buildContentSliver(strings)],
+                        ),
                       ),
                     );
                   },
@@ -901,16 +996,19 @@ class _AlbumsFilterChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.trailing,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return TagChipComponent(
       label: label,
+      trailing: trailing,
       state: selected
           ? TagChipComponentState.selected
           : TagChipComponentState.unselected,

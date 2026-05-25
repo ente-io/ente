@@ -117,6 +117,8 @@ internal class ChatStoreActions(
     }
 
     fun startNewSessionDraft() {
+        if (state.value.chat.isDownloading) return
+
         resetGenerationState()
         state.update { appState ->
             appState.copy(

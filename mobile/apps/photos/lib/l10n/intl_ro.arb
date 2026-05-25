@@ -653,7 +653,6 @@
   "existingUser": "Utilizator existent",
   "newToEnte": "Nou la Ente",
   "pleaseLoginAgain": "Vă rugăm, autentificați-vă din nou",
-  "autoLogoutMessage": "Din cauza unei probleme tehnice, ați fost deconectat. Ne cerem scuze pentru neplăcerile create.",
   "yourSubscriptionHasExpired": "Abonamentul dvs. a expirat",
   "storageLimitExceeded": "Limita de spațiu depășită",
   "upgrade": "Îmbunătățire",
@@ -674,11 +673,6 @@
   "collectEventPhotos": "Strângeți imagini de la evenimente",
   "sessionExpired": "Sesiune expirată",
   "loggingOut": "Se deconectează...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Pe dispozitiv",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1090,8 +1084,6 @@
   "noPhotosFoundHere": "Nu s-au găsit fotografii aici",
   "zoomOutToSeePhotos": "Micșorați pentru a vedea fotografiile",
   "noImagesWithLocation": "Nicio imagine cu locație",
-  "unpinAlbum": "Anulați fixarea albumului",
-  "pinAlbum": "Fixați albumul",
   "create": "Creare",
   "viewAll": "Vizualizați tot",
   "nothingSharedWithYouYet": "Nimic distribuit cu dvs. încă",

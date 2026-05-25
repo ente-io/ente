@@ -696,7 +696,6 @@
   "existingUser": "Бягучы карыстальнік",
   "newToEnte": "Упершыню ў Ente",
   "pleaseLoginAgain": "Аўтарызуйцеся яшчэ раз",
-  "autoLogoutMessage": "З прычыны тэхнічнага збою ваш сеанс у сістэме быў завершаны. Прыносім прабачэнні за нязручнасці.",
   "yourSubscriptionHasExpired": "Тэрмін дзеяння вашай падпіскі завяршыўся",
   "storageLimitExceeded": "Перавышана абмежаванне аб'ёму сховішча",
   "upgrade": "Палепшыць",
@@ -718,11 +717,6 @@
   "collectEventPhotos": "Сабраць фатаграфіі падзеі",
   "sessionExpired": "Сеанс завяршыўся",
   "loggingOut": "Выхад...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "На прыладзе",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1135,8 +1129,6 @@
   "noPhotosFoundHere": "Тут фатаграфій не знойдзена",
   "zoomOutToSeePhotos": "Паменшыць маштаб, каб убачыць фатаграфіі",
   "noImagesWithLocation": "Відарысы з месцазнаходжаннем адсутнічаюць",
-  "unpinAlbum": "Адмацаваць альбом",
-  "pinAlbum": "Замацаваць альбом",
   "pin": "Замацаваць",
   "pinPerson": "Замацаваць асобу",
   "pinToTop": "Замацаваць уверсе",
@@ -1673,9 +1665,7 @@
   "newPhotosEmoji": " новая 📸",
   "sorryWeHadToPauseYourBackups": "Прабачце, але давялося прыпыніць ваша рэзервовае капіяванне",
   "clickToInstallOurBestVersionYet": "Націсніце, каб усталяваць нашу лепшую версію",
-  "onThisDayNotificationExplanation": "Атрымлівайце напаміны аб успамінах з гэтага дня ў мінулыя гады.",
   "birthdayNotifications": "Апавяшчэнні аб днях нараджэння",
-  "receiveRemindersOnBirthdays": "Атрымлівайце напаміны, калі ў некага дзень нараджэння. Націск на апавяшчэнне перанясе вас да фатаграфій імянінніка.",
   "happyBirthday": "З днём нараджэння! 🥳",
   "birthdays": "Дні нараджэння",
   "wishThemAHappyBirthday": "Віншуем з днём нараджэння, {name}! 🎉",

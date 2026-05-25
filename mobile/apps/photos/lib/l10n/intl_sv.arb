@@ -715,11 +715,6 @@
   "shareAnAlbumNow": "Dela ett album nu",
   "collectEventPhotos": "Samla händelsefoton",
   "loggingOut": "Loggar ut...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "På enhet",
   "name": "Namn",
   "newest": "Nyaste",
   "lastUpdated": "Senast uppdaterad",

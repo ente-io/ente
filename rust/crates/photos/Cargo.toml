@@ -1,10 +1,9 @@
 [package]
 name = "ente_photos"
-version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ente_image = { path = "../image" }
+ente_image.workspace = true
 quick-xml = "0.37"
 # The FRB photos bridge calls the SimSIMD symbol exported by usearch 2.21.x.
 # Newer usearch releases switched that implementation to numkong symbols.

@@ -796,9 +796,7 @@
   "referrals": "Ajánlások",
   "notifications": "Értesítések",
   "sharedPhotoNotifications": "Új megosztott fotók és albumok",
-  "sharedPhotoNotificationsExplanation": "Értesítéseket kapsz az általad használt megosztott albumok új fotóiról, valamint a veled megosztott új albumokról.",
   "socialNotifications": "Tetszések és hozzászólások",
-  "socialNotificationsExplanation": "Értesítéseket kapsz a fotóidra érkező tetszésekről, valamint azokról a hozzászólásokról, amelyek azokban az albumokban jelennek meg, amelyekben részt veszel.",
   "advanced": "Speciális",
   "general": "Általános",
   "security": "Biztonság",
@@ -908,11 +906,6 @@
   "paymentFailedMessage": "Sajnos a fizetés nem sikerült. Kérjük, vedd fel a kapcsolatot az ügyfélszolgálattal, és segítünk!",
   "sessionExpired": "A munkamenet lejárt",
   "loggingOut": "Kijelentkezés...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Eszközön",
   "name": "Név",
   "newest": "Legújabb",
   "lastUpdated": "Utoljára frissítve",

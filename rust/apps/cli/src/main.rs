@@ -27,7 +27,7 @@ async fn run() -> Result<()> {
 
     match cli.command {
         Commands::Version => {
-            println!("ente-cli version {}", ente_rs::cli::version::VERSION);
+            println!("ente-rs version {}", ente_rs::cli::version::VERSION);
         }
         Commands::Account(account_cmd) => {
             commands::account::handle_account_command(account_cmd, &storage).await?;

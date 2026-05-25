@@ -99,9 +99,11 @@ struct DownloadToastView: View {
             }
 
             HStack {
-                Text(state.status)
-                    .font(EnsuFont.message(size: 12, weight: .regular))
-                    .foregroundStyle(hasError ? EnsuColor.error : EnsuColor.textMuted)
+                StableDownloadStatusText(
+                    text: state.status,
+                    font: EnsuFont.message(size: 12, weight: .regular),
+                    color: hasError ? EnsuColor.error : EnsuColor.textMuted
+                )
 
                 Spacer()
 
@@ -141,5 +143,31 @@ struct DownloadToastView: View {
         .shadow(color: .black.opacity(0.12), radius: 12, x: 0, y: 4)
         .padding(.horizontal, EnsuSpacing.lg)
         .transition(.move(edge: .top).combined(with: .opacity))
+    }
+}
+
+struct StableDownloadStatusText: View {
+    let text: String
+    let font: Font
+    let color: Color
+
+    private var widestText: String {
+        guard text.hasPrefix("Downloading... "), let slashRange = text.range(of: " / ") else {
+            return text
+        }
+        return "Downloading... 999.9 MB / \(text[slashRange.upperBound...])"
+    }
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            Text(widestText)
+                .hidden()
+                .accessibilityHidden(true)
+            Text(text)
+        }
+        .font(font)
+        .monospacedDigit()
+        .foregroundStyle(color)
+        .lineLimit(1)
     }
 }

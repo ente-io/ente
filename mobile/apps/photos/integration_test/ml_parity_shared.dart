@@ -293,6 +293,7 @@ Future<void> _ensureModelNetworkContext() async {
     prefs,
     NetworkClient.instance.enteDio,
     NetworkClient.instance.getDio(),
+    NetworkClient.instance.downloadDio,
     packageInfo,
   );
   await Configuration.instance.init();

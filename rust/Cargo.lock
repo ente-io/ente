@@ -1494,7 +1494,7 @@ checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 
 [[package]]
 name = "core"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "base64 0.22.1",
  "ente-core",
@@ -1924,7 +1924,7 @@ dependencies = [
 
 [[package]]
 name = "db"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "ensu-db",
  "serde",
@@ -2318,7 +2318,7 @@ checksum = "66b7e2430c6dff6a955451e2cfc438f09cea1965a9d6f87f7e3b90decc014099"
 
 [[package]]
 name = "ensu-db"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "ente-core",
  "ente_image",
@@ -2332,25 +2332,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ensu-sync"
-version = "0.1.0"
-dependencies = [
- "ensu-db",
- "ente-core",
- "hkdf 0.13.0",
- "httpmock",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "sha2 0.11.0",
- "tempfile",
- "thiserror 2.0.18",
- "uuid",
- "zeroize",
-]
-
-[[package]]
-name = "ensu-tauri"
+name = "ensu-desktop"
 version = "0.1.17-beta"
 dependencies = [
  "ensu-db",
@@ -2368,8 +2350,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ensu-sync"
+version = "0.0.0"
+dependencies = [
+ "ensu-db",
+ "ente-core",
+ "hkdf 0.13.0",
+ "httpmock",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "sha2 0.11.0",
+ "tempfile",
+ "thiserror 2.0.18",
+ "uuid",
+ "zeroize",
+]
+
+[[package]]
 name = "ensu-transcription"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "flate2",
  "ort 2.0.0-rc.12",
@@ -2383,7 +2383,7 @@ dependencies = [
 
 [[package]]
 name = "ente-accounts"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "base64 0.22.1",
  "ente-core",
@@ -2403,7 +2403,7 @@ dependencies = [
 
 [[package]]
 name = "ente-contacts"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "base64 0.22.1",
  "ente-core",
@@ -2422,7 +2422,7 @@ dependencies = [
 
 [[package]]
 name = "ente-core"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "argon2",
  "base64 0.22.1",
@@ -2451,7 +2451,7 @@ dependencies = [
 
 [[package]]
 name = "ente-e2e"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "base64 0.22.1",
  "ente-accounts",
@@ -2502,7 +2502,7 @@ dependencies = [
 
 [[package]]
 name = "ente-wasm"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "ente-contacts",
  "ente-core",
@@ -2516,14 +2516,14 @@ dependencies = [
 
 [[package]]
 name = "ente_crypto_ffi"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "ente-core",
 ]
 
 [[package]]
 name = "ente_image"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "fast_image_resize",
  "heic_decoder",
@@ -2535,7 +2535,7 @@ dependencies = [
 
 [[package]]
 name = "ente_photos"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "ente_image",
  "fast_image_resize",
@@ -2557,7 +2557,7 @@ dependencies = [
 
 [[package]]
 name = "ente_photos_rust"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "ente_image",
  "ente_photos",
@@ -2566,7 +2566,7 @@ dependencies = [
 
 [[package]]
 name = "ente_rust"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "ente-contacts",
  "ente-core",
@@ -4696,7 +4696,7 @@ dependencies = [
 
 [[package]]
 name = "inference"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "inference_rs",
  "serde",
@@ -4706,7 +4706,7 @@ dependencies = [
 
 [[package]]
 name = "inference_rs"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "futures-util",
  "llama-cpp-2",
@@ -8248,7 +8248,7 @@ dependencies = [
 
 [[package]]
 name = "sync"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "ensu-sync",
  "serde",
@@ -9192,7 +9192,7 @@ dependencies = [
 
 [[package]]
 name = "transcription"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "ensu-transcription",
  "thiserror 2.0.18",

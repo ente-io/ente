@@ -47,7 +47,7 @@ internal class DownloadProgressTracker(
         return ResolvedDownloadProgress(
             percent = resolvedPercent,
             status = resolvedStatus,
-            isDownloading = ((progress.percent in 0..99) || isLoading) && !isFinished,
+            isDownloading = progress.percent >= 0 && !isFinished,
             isFinished = isFinished
         )
     }

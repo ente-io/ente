@@ -278,7 +278,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                       ),
               ),
             ),
-            SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
+            const SliverToBoxAdapter(child: DeleteEmptyAlbums()),
             localGalleryMode
                 ? const SliverToBoxAdapter(child: EmptyOnEnteSection())
                 : Configuration.instance.hasConfiguredAccount()

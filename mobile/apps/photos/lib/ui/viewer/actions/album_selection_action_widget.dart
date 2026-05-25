@@ -79,7 +79,7 @@ class _AlbumSelectionActionWidgetState
       );
       items.add(
         SelectionActionButton(
-          labelText: AppLocalizations.of(context).pinAlbum,
+          labelText: AppLocalizations.of(context).pin,
           hugeIcon: HugeIcons.strokeRoundedPin,
           onTap: _onPinClick,
           shouldShow: hasUnpinnedAlbum,
@@ -88,7 +88,7 @@ class _AlbumSelectionActionWidgetState
 
       items.add(
         SelectionActionButton(
-          labelText: AppLocalizations.of(context).unpinAlbum,
+          labelText: AppLocalizations.of(context).unpin,
           hugeIcon: HugeIcons.strokeRoundedPinOff,
           onTap: _onUnpinClick,
           shouldShow: hasPinnedAlbum,
@@ -169,7 +169,7 @@ class _AlbumSelectionActionWidgetState
 
         items.add(
           SelectionActionButton(
-            labelText: AppLocalizations.of(context).pinAlbum,
+            labelText: AppLocalizations.of(context).pin,
             hugeIcon: HugeIcons.strokeRoundedPin,
             onTap: _onPinClickForSharee,
             shouldShow: hasShareeUnpinnedAlbum,
@@ -178,7 +178,7 @@ class _AlbumSelectionActionWidgetState
 
         items.add(
           SelectionActionButton(
-            labelText: AppLocalizations.of(context).unpinAlbum,
+            labelText: AppLocalizations.of(context).unpin,
             hugeIcon: HugeIcons.strokeRoundedPinOff,
             onTap: _onUnpinClickForSharee,
             shouldShow: hasShareePinnedAlbum,

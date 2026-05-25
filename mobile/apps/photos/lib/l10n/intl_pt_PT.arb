@@ -811,7 +811,6 @@
   "existingUser": "Utilizador existente",
   "newToEnte": "Novo no Ente",
   "pleaseLoginAgain": "Por favor, inicie sessão novamente",
-  "autoLogoutMessage": "Devido a uma falha técnica, a sua sessão foi encerrada. Pedimos desculpas pelo incómodo.",
   "yourSubscriptionHasExpired": "A sua subscrição expirou",
   "storageLimitExceeded": "Limite de armazenamento excedido",
   "upgrade": "Atualizar",
@@ -833,11 +832,6 @@
   "collectEventPhotos": "Coletar fotos do evento",
   "sessionExpired": "Sessão expirada",
   "loggingOut": "Terminar a sessão...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "No dispositivo",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1249,8 +1243,6 @@
   "noPhotosFoundHere": "Nenhuma foto encontrada aqui",
   "zoomOutToSeePhotos": "Diminuir o zoom para ver fotos",
   "noImagesWithLocation": "Nenhuma imagem com localização",
-  "unpinAlbum": "Desafixar álbum",
-  "pinAlbum": "Fixar álbum",
   "create": "Criar",
   "viewAll": "Ver tudo",
   "nothingSharedWithYouYet": "Ainda nada partilhado consigo",
@@ -1775,9 +1767,7 @@
   "newPhotosEmoji": " novo 📸",
   "sorryWeHadToPauseYourBackups": "Perdão, precisamos parar seus backups",
   "clickToInstallOurBestVersionYet": "Clica para transferir a melhor versão",
-  "onThisDayNotificationExplanation": "Obtém lembretes de memórias deste dia em anos passados.",
   "birthdayNotifications": "Notificações de felicidades",
-  "receiveRemindersOnBirthdays": "Obtém lembretes de quando é aniversário de alguém. Apertar na notificação o levará às fotos do aniversariante.",
   "happyBirthday": "Felicidades! 🥳",
   "birthdays": "Aniversários",
   "wishThemAHappyBirthday": "Envie um \"Felicidades\" a {name}! 🎉",

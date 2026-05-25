@@ -47,12 +47,11 @@ class ChipSurface extends StatelessWidget {
             minWidth: minWidth ?? 0,
           ),
           padding: padding,
-          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: background,
             borderRadius: borderRadius,
           ),
-          child: child,
+          child: Center(widthFactor: 1, heightFactor: 1, child: child),
         ),
       ),
     );

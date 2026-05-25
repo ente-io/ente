@@ -28,20 +28,35 @@ class OTTVerificationPage extends StatefulWidget {
 class _OTTVerificationPageState extends State<OTTVerificationPage> {
   final _pinController = TextEditingController();
   String _code = "";
+  bool _isSubmitting = false;
 
   Future<void> _onVerifyPressed() async {
-    if (widget.isChangeEmail) {
-      await UserService.instance.changeEmail(
-        context,
-        widget.email,
-        _pinController.text,
-      );
-    } else {
-      await UserService.instance.verifyEmail(
-        context,
-        _pinController.text,
-        isResettingPasswordScreen: widget.isResetPasswordScreen,
-      );
+    if (_isSubmitting) {
+      return;
+    }
+    setState(() {
+      _isSubmitting = true;
+    });
+    try {
+      if (widget.isChangeEmail) {
+        await UserService.instance.changeEmail(
+          context,
+          widget.email,
+          _pinController.text,
+        );
+      } else {
+        await UserService.instance.verifyEmail(
+          context,
+          _pinController.text,
+          isResettingPasswordScreen: widget.isResetPasswordScreen,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
     if (!mounted) {
       return;
@@ -59,7 +74,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isFormValid = _code.length == 6;
+    final isFormValid = _code.length == 6 && !_isSubmitting;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,

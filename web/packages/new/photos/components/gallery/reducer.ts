@@ -956,16 +956,32 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
 
         case "clearUnsyncedState": {
+            // Getting the last syncedCollectionFiles
+            const collectionFiles = state.lastSyncedCollectionFiles;
+
+            // Getting the FavoriteFileIDs from the syncedData
+            // without applying any optimistic chagnes.
+            const syncedFavoriteFileIDs = deriveFavoriteFileIDs(
+                state.user!,
+                state.collections,
+                collectionFiles,
+                new Map(),
+            );
+
             const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
-                new Map();
+                preserveUnreflectedFavoriteUpdates(
+                    state.user!,
+                    collectionFiles,
+                    syncedFavoriteFileIDs,
+                    state.unsyncedFavoriteUpdates,
+                );
             const favoriteFileIDs = deriveFavoriteFileIDs(
                 state.user!,
                 state.collections,
-                state.collectionFiles,
+                collectionFiles,
                 unsyncedFavoriteUpdates,
             );
 
-            const collectionFiles = state.lastSyncedCollectionFiles;
             const unsyncedPrivateMagicMetadataUpdates: GalleryState["unsyncedPrivateMagicMetadataUpdates"] =
                 new Map();
 
@@ -979,7 +995,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                         pendingFavoriteUpdates: new Set(),
                         pendingVisibilityUpdates: new Set(),
                         unsyncedPrivateMagicMetadataUpdates,
-                        unsyncedFavoriteUpdates: new Map(),
+                        unsyncedFavoriteUpdates,
                     },
                     collectionFiles,
                 ),
@@ -1353,6 +1369,64 @@ const deriveFavoriteFileIDs = (
         }
     }
     return favoriteFileIDs;
+};
+/**
+ *
+ * @param user The currentLoggedIn User
+ *
+ *  @param collectionFiles  The collectionsFiles which the user currently has
+ * from state.lastSyncedCollectionFiles
+ *
+ * @param syncedFavoriteFileIDs: The list of FavoriteFileIDs derived from
+ * the collectionFiles without any optimistic updations.
+ *
+ * @param unsyncedFavoriteUpdates The list of FavoriteFileIDs derived from
+ * the collectionFiles including any optimistic updates from the
+ * state.unsyncedFavoriteUpdates,
+ *
+ * @returns the preservedUpdates, If there is atleast one affected file
+ * where the synced state still disagrees with, we store that file's update in
+ * this variable and return it else, it will be an empty map.
+ */
+const preserveUnreflectedFavoriteUpdates = (
+    user: LocalUser,
+    collectionFiles: GalleryState["collectionFiles"],
+    syncedFavoriteFileIDs: GalleryState["favoriteFileIDs"],
+    unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
+) => {
+    const preservedUpdates: GalleryState["unsyncedFavoriteUpdates"] = new Map();
+
+    /**
+     * Iterating through the unsyncedFavoriteUpdates, if the file has
+     * fileHashAndTypeKey it's a shared album file, if so then, finding
+     * all non-owned/shared file sin the gallery whose hash/type matches
+     * this update and storing their IDs to the updatedFileIDs.
+     */
+    for (const [key, update] of unsyncedFavoriteUpdates.entries()) {
+        const updatedFileIDs = update.fileHashAndTypeKey
+            ? collectionFiles
+                  .filter(
+                      (file) =>
+                          file.ownerID != user.id &&
+                          favoriteFileHashAndTypeKey(file) ==
+                              update.fileHashAndTypeKey,
+                  )
+                  .map((file) => file.id)
+            : [update.fileID];
+
+        // So, If there at least one affected file where synced state still
+        // disagrees with the optimistic update, we preserve the update, else ignore it.
+        if (
+            updatedFileIDs.some(
+                (fileID) =>
+                    syncedFavoriteFileIDs.has(fileID) != update.isFavorite,
+            )
+        ) {
+            preservedUpdates.set(key, update);
+        }
+    }
+
+    return preservedUpdates;
 };
 
 /**

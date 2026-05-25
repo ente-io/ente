@@ -28,6 +28,7 @@ import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/components/auth_qr_dialog.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
+import 'package:ente_auth/ui/components/horizontal_scroll_area.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/add_tag_sheet.dart';
@@ -1764,74 +1765,77 @@ class _HomePageState extends State<HomePage> {
             if (!anyCodeHasError) ...[
               SizedBox(
                 height: 48,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 2,
-                  ),
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 8),
-                  itemCount: itemCount,
-                  itemBuilder: (context, index) {
-                    if (showAllChip && index == 0) {
-                      return TagChip(
-                        label: l10n.all,
-                        state: selectedTag == "" && _isTrashOpen == false
-                            ? TagChipState.selected
-                            : TagChipState.unselected,
-                        onTap: () {
-                          _codeDisplayStore.clearSelection();
-                          selectedTag = "";
-                          _isTrashOpen = false;
-
-                          setState(() {});
-                          _applyFilteringAndRefresh();
-                        },
-                      );
-                    }
-
-                    if (showTrashChip && index == itemCount - 1) {
-                      return TagChip(
-                        label: l10n.trash,
-                        state: _isTrashOpen
-                            ? TagChipState.selected
-                            : TagChipState.unselected,
-                        onTap: () {
-                          _codeDisplayStore.clearSelection();
-                          selectedTag = "";
-                          _isTrashOpen = !_isTrashOpen;
-                          setState(() {});
-                          _applyFilteringAndRefresh();
-                        },
-                        iconData: Icons.delete,
-                      );
-                    }
-                    final customTagIndex = index - (showAllChip ? 1 : 0);
-                    if (customTagIndex >= 0 && customTagIndex < tags.length) {
-                      return TagChip(
-                        label: tags[customTagIndex],
-                        action: TagChipAction.menu,
-                        state: selectedTag == tags[customTagIndex]
-                            ? TagChipState.selected
-                            : TagChipState.unselected,
-                        onTap: () {
-                          _codeDisplayStore.clearSelection();
-                          _isTrashOpen = false;
-                          if (selectedTag == tags[customTagIndex]) {
+                child: HorizontalScrollArea(
+                  builder: (context, scrollController) => ListView.separated(
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 2,
+                    ),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8),
+                    itemCount: itemCount,
+                    itemBuilder: (context, index) {
+                      if (showAllChip && index == 0) {
+                        return TagChip(
+                          label: l10n.all,
+                          state: selectedTag == "" && _isTrashOpen == false
+                              ? TagChipState.selected
+                              : TagChipState.unselected,
+                          onTap: () {
+                            _codeDisplayStore.clearSelection();
                             selectedTag = "";
+                            _isTrashOpen = false;
+
                             setState(() {});
                             _applyFilteringAndRefresh();
-                            return;
-                          }
-                          selectedTag = tags[customTagIndex];
-                          setState(() {});
-                          _applyFilteringAndRefresh();
-                        },
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
+                          },
+                        );
+                      }
+
+                      if (showTrashChip && index == itemCount - 1) {
+                        return TagChip(
+                          label: l10n.trash,
+                          state: _isTrashOpen
+                              ? TagChipState.selected
+                              : TagChipState.unselected,
+                          onTap: () {
+                            _codeDisplayStore.clearSelection();
+                            selectedTag = "";
+                            _isTrashOpen = !_isTrashOpen;
+                            setState(() {});
+                            _applyFilteringAndRefresh();
+                          },
+                          iconData: Icons.delete,
+                        );
+                      }
+                      final customTagIndex = index - (showAllChip ? 1 : 0);
+                      if (customTagIndex >= 0 && customTagIndex < tags.length) {
+                        return TagChip(
+                          label: tags[customTagIndex],
+                          action: TagChipAction.menu,
+                          state: selectedTag == tags[customTagIndex]
+                              ? TagChipState.selected
+                              : TagChipState.unselected,
+                          onTap: () {
+                            _codeDisplayStore.clearSelection();
+                            _isTrashOpen = false;
+                            if (selectedTag == tags[customTagIndex]) {
+                              selectedTag = "";
+                              setState(() {});
+                              _applyFilteringAndRefresh();
+                              return;
+                            }
+                            selectedTag = tags[customTagIndex];
+                            setState(() {});
+                            _applyFilteringAndRefresh();
+                          },
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 8),

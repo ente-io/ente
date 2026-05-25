@@ -805,6 +805,7 @@
     "shared_favorites": "Κοινόχρηστα αγαπημένα",
     "added_by_name": "Προστέθηκε από {{name}}",
     "unowned_files_not_processed": "Τα αρχεία που προστέθηκαν από άλλους χρήστες δεν υποβλήθηκαν σε επεξεργασία",
+    "unsupported_shared_favorites_not_processed": "",
     "custom_domains": "Προσαρμοσμένο domain",
     "custom_domains_desc": "Χρησιμοποιήστε το δικό σας domain κατά την κοινή χρήση",
     "link_your_domain": "Συνδέστε το domain σας",

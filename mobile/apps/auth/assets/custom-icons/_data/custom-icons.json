@@ -490,6 +490,11 @@
       "title": "Coinbase"
     },
     {
+      "title": "CoinMarketCap",
+      "slug": "coinmarketcap",
+      "hex": "000000"
+    },
+    {
       "title": "CoinDCX"
     },
     {

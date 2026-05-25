@@ -429,6 +429,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                         {selectedOwnFileCount > 0 && (
                             <SendLinkButton onClick={handleSendLink} />
                         )}
+                        {favoriteActionButton}
                         <DownloadButton onClick={handleDownload} />
                         {!!onShowAssignPersonDialog && (
                             <AddPersonButton

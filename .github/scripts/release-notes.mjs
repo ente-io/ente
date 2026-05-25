@@ -61,7 +61,7 @@ function groupedBody(body, previous) {
 
     if (!previousAgain.length) return body;
     return [
-        latest.length ? `New changes:\n\n${latest.join("\n")}` : "",
+        latest.length ? latest.join("\n") : "",
         `Previous changes:\n${previousAgain.join("\n")}`,
     ]
         .filter(Boolean)

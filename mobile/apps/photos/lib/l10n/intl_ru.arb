@@ -760,7 +760,6 @@
   "notifications": "Уведомления",
   "sharedPhotoNotifications": "Новые общие фото и альбомы",
   "socialNotifications": "Отметки \"Нравится\" и комментарии",
-  "socialNotificationsExplanation": "Получать уведомления об отметке \"Нравится\" на ваших фотографиях и комментариях в альбомах, в которых вы участвуете",
   "advanced": "Расширенные",
   "general": "Общие",
   "security": "Безопасность",
@@ -974,7 +973,6 @@
   "shareTheMoment": "Поделиться моментом",
   "letFriendsAndFamilyReact": "Дайте друзьям и семье возможность оставлять реакции и комментарии к вашим фотографиям.",
   "pleaseLoginAgain": "Пожалуйста, войдите снова",
-  "autoLogoutMessage": "Из-за технического сбоя вы были выведены из системы. Приносим извинения за неудобства.",
   "yourSubscriptionHasExpired": "Срок действия вашей подписки истёк",
   "storageLimitExceeded": "Превышен лимит хранилища",
   "upgrade": "Улучшить",
@@ -996,11 +994,6 @@
   "collectEventPhotos": "Собрать фото с мероприятия",
   "sessionExpired": "Сессия истекла",
   "loggingOut": "Выход...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "На устройстве",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1473,8 +1466,6 @@
   "noPhotosFoundHere": "Здесь фото не найдены",
   "zoomOutToSeePhotos": "Уменьшите масштаб, чтобы увидеть фото",
   "noImagesWithLocation": "Нет фото с местоположением",
-  "unpinAlbum": "Открепить альбом",
-  "pinAlbum": "Закрепить альбом",
   "pin": "Прикрепить",
   "pinPerson": "Закрепить человека",
   "pinToTop": "Закрепить сверху",
@@ -2070,9 +2061,7 @@
   "newPhotosEmoji": " новая 📸",
   "sorryWeHadToPauseYourBackups": "Извините, нам пришлось приостановить резервное копирование",
   "clickToInstallOurBestVersionYet": "Нажмите, чтобы установить нашу лучшую версию",
-  "onThisDayNotificationExplanation": "Получайте напоминания о воспоминаниях, связанных с этим днем в прошлые годы.",
   "birthdayNotifications": "Уведомления о днях рождения",
-  "receiveRemindersOnBirthdays": "Получайте напоминания, когда у кого-то день рождения. Нажатие на уведомление перенесет вас к фотографиям именинника.",
   "happyBirthday": "С днём рождения! 🥳",
   "birthdays": "Дни рождения",
   "wishThemAHappyBirthday": "Поздравляем {name} с днем ​​рождения! 🎉",

@@ -8,7 +8,6 @@ on:
 
 env:
     FLUTTER_VERSION: "3.38.10"
-    RUST_VERSION: "1.90.0"
 
 permissions:
     contents: read
@@ -47,21 +46,6 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION }}
                   cache: true
-
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              uses: dtolnay/rust-toolchain@stable
-              with:
-                  toolchain: ${{ env.RUST_VERSION }}
-
-            # Cargokit resolves the toolchain as "stable" rather than the
-            # pinned Rust version used in CI. Our vendored Cargokit now
-            # serializes `rustup target add` per target, so this pre-install
-            # is no longer required for correctness. We still do it for now
-            # to keep the setup straightforward, and because this step may
-            # become more useful if we later cache Rust toolchain state.
-            - name: Pre-install Android Rust targets
-              run: |
-                  rustup target add --toolchain stable armv7-linux-androideabi aarch64-linux-android
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
