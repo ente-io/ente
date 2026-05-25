@@ -132,8 +132,8 @@ class CollectionPage extends StatelessWidget {
         child: GalleryBoundariesProvider(
           child: Scaffold(
             appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(
-                GalleryAppBarWidget.hierarchicalPreferredHeight,
+              preferredSize: Size.fromHeight(
+                GalleryAppBarWidget.hierarchicalPreferredHeight(context),
               ),
               child: GalleryAppBarWidget(
                 galleryType,

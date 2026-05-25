@@ -30,7 +30,9 @@ const kShowUnnamedIgnoredPersonEventSource =
     "_AppBarWidgetState._showPersonUnnamedDelete";
 
 class PeopleAppBar extends StatefulWidget {
-  static const hierarchicalPreferredHeight = AppBarFilterChips.appBarHeight;
+  static double hierarchicalPreferredHeight(BuildContext context) {
+    return AppBarFilterChips.appBarHeight(context);
+  }
 
   final GalleryType type;
   final String? title;
@@ -173,9 +175,11 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             valueListenable: inheritedSearchFilterData!
                 .searchFilterDataProvider!
                 .isSearchingNotifier,
-            child: const PreferredSize(
-              preferredSize: Size.fromHeight(AppBarFilterChips.preferredHeight),
-              child: AppBarFilterChips(),
+            child: PreferredSize(
+              preferredSize: Size.fromHeight(
+                AppBarFilterChips.preferredHeight(context),
+              ),
+              child: const AppBarFilterChips(),
             ),
             builder: (context, isSearching, child) {
               return AppBar(

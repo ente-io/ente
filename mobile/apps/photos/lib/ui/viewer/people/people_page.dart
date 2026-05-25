@@ -251,7 +251,7 @@ class _PeoplePageState extends State<PeoplePage> {
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(
                 widget.searchResult != null
-                    ? PeopleAppBar.hierarchicalPreferredHeight
+                    ? PeopleAppBar.hierarchicalPreferredHeight(context)
                     : 50.0,
               ),
               child: PeopleAppBar(

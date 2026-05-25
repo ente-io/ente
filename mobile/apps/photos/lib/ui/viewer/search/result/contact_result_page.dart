@@ -153,6 +153,11 @@ class _ContactResultPageState extends State<ContactResultPage> {
           : const EmptyState(),
     );
 
+    final appBarHeight = _ContactResultAppBar.preferredHeight(
+      context,
+      isHierarchicalSearchable: true,
+    );
+
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: InheritedSearchFilterDataWrapper(
@@ -160,16 +165,16 @@ class _ContactResultPageState extends State<ContactResultPage> {
           child: Scaffold(
             backgroundColor: getEnteColorScheme(context).backgroundColour,
             appBar: PreferredSize(
-              preferredSize: Size.fromHeight(
-                _ContactResultAppBar.preferredHeight(
-                  isHierarchicalSearchable: true,
-                ),
-              ),
+              preferredSize: Size.fromHeight(appBarHeight),
               child: widget.enableGrouping
-                  ? const _ContactResultAppBar(isHierarchicalSearchable: true)
-                  : const _AppBarWithBoundary(
+                  ? _ContactResultAppBar(
+                      isHierarchicalSearchable: true,
+                      height: appBarHeight,
+                    )
+                  : _AppBarWithBoundary(
                       child: _ContactResultAppBar(
                         isHierarchicalSearchable: true,
+                        height: appBarHeight,
                       ),
                     ),
             ),
@@ -577,19 +582,24 @@ class _ContactResultAppBar extends StatelessWidget
   static const _toolbarHeight = 56.0;
 
   final bool isHierarchicalSearchable;
+  final double height;
 
-  const _ContactResultAppBar({required this.isHierarchicalSearchable});
+  const _ContactResultAppBar({
+    required this.isHierarchicalSearchable,
+    required this.height,
+  });
 
-  static double preferredHeight({required bool isHierarchicalSearchable}) {
+  static double preferredHeight(
+    BuildContext context, {
+    required bool isHierarchicalSearchable,
+  }) {
     return isHierarchicalSearchable
-        ? AppBarFilterChips.appBarHeight
+        ? AppBarFilterChips.appBarHeight(context)
         : _toolbarHeight;
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(
-    preferredHeight(isHierarchicalSearchable: isHierarchicalSearchable),
-  );
+  Size get preferredSize => Size.fromHeight(height);
 
   @override
   Widget build(BuildContext context) {
@@ -610,9 +620,11 @@ class _ContactResultAppBar extends StatelessWidget
       backgroundColor: colorScheme.backgroundColour,
       surfaceTintColor: Colors.transparent,
       titleSpacing: 0,
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(AppBarFilterChips.preferredHeight),
-        child: Padding(
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(
+          AppBarFilterChips.preferredHeight(context),
+        ),
+        child: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 12),
           child: AppBarFilterChips(),
         ),

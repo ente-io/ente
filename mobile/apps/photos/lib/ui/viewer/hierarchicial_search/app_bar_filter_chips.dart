@@ -11,10 +11,24 @@ import "package:photos/utils/hierarchical_search_util.dart";
 class AppBarFilterChips extends StatefulWidget {
   const AppBarFilterChips({super.key});
 
-  static const chipHeight = 40.0;
+  static const minChipHeight = 40.0;
   static const bottomPadding = 8.0;
-  static const preferredHeight = chipHeight + bottomPadding;
-  static const appBarHeight = kToolbarHeight + preferredHeight;
+  static const _textVerticalPadding = 24.0;
+  static const _labelLineHeight = 16.0;
+
+  static double chipHeight(BuildContext context) {
+    final textHeight = MediaQuery.textScalerOf(context).scale(_labelLineHeight);
+    final scaledChipHeight = _textVerticalPadding + textHeight;
+    return scaledChipHeight > minChipHeight ? scaledChipHeight : minChipHeight;
+  }
+
+  static double preferredHeight(BuildContext context) {
+    return chipHeight(context) + bottomPadding;
+  }
+
+  static double appBarHeight(BuildContext context) {
+    return kToolbarHeight + preferredHeight(context);
+  }
 
   @override
   State<AppBarFilterChips> createState() => _AppBarFilterChipsState();
@@ -81,17 +95,22 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
       return const SizedBox.shrink();
     }
 
+    final chipHeight = AppBarFilterChips.chipHeight(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppBarFilterChips.bottomPadding),
       child: SizedBox(
-        height: AppBarFilterChips.chipHeight,
+        height: chipHeight,
         child: SingleChildScrollView(
-          clipBehavior: Clip.none,
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(
             children: [
-              _buildAllFiltersButton(context, searchFilterDataProvider),
+              _buildAllFiltersButton(
+                context,
+                searchFilterDataProvider,
+                chipHeight,
+              ),
               for (final filter in appliedFilters)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -112,11 +131,12 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
   Widget _buildAllFiltersButton(
     BuildContext context,
     SearchFilterDataProvider searchFilterDataProvider,
+    double chipHeight,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: SizedBox(
-        height: AppBarFilterChips.chipHeight,
+        height: chipHeight,
         child: Center(
           child: IconButtonComponent(
             icon: const Icon(Icons.filter_list_rounded),
