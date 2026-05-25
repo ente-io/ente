@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import 'package:photos/core/constants.dart';
@@ -9,10 +10,10 @@ import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/components/buttons/button_component_adapter.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/text_input_widget.dart';
-import 'package:photos/utils/separators_util.dart';
 
 ///Will return null if dismissed by tapping outside
 Future<ButtonResult?> showDialogWidget({
@@ -24,25 +25,18 @@ Future<ButtonResult?> showDialogWidget({
   bool isDismissible = true,
   bool useRootNavigator = false,
 }) {
-  return showDialog(
-    barrierDismissible: isDismissible,
+  return showBottomSheetComponent<ButtonResult>(
     barrierColor: backdropFaintDark,
     context: context,
+    isDismissible: isDismissible,
+    enableDrag: isDismissible,
     useRootNavigator: useRootNavigator,
-    builder: (context) {
-      final widthOfScreen = MediaQuery.of(context).size.width;
-      final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: isMobileSmall ? 8 : 0),
-        child: Dialog(
-          insetPadding: EdgeInsets.zero,
-          child: DialogWidget(
-            title: title,
-            body: body,
-            buttons: buttons,
-            icon: icon,
-          ),
-        ),
+    builder: (_) {
+      return DialogWidget(
+        title: title,
+        body: body,
+        buttons: buttons,
+        icon: icon,
       );
     },
   );
@@ -63,46 +57,52 @@ class DialogWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final widthOfScreen = MediaQuery.of(context).size.width;
-    final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
-    final colorScheme = getEnteColorScheme(context);
-    return Container(
-      width: min(widthOfScreen, 320),
-      padding: isMobileSmall
-          ? const EdgeInsets.all(0)
-          : const EdgeInsets.fromLTRB(6, 8, 6, 6),
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated,
-        boxShadow: shadowFloatLight,
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ContentContainer(title: title, body: body, icon: icon),
-              const SizedBox(height: 36),
-              Actions(buttons),
-            ],
-          ),
+    final colors = context.componentColors;
+    final hasTitle = title.isNotEmpty;
+    final hasBody = body?.isNotEmpty == true;
+    final hasContent = hasTitle || hasBody || icon != null;
+
+    return BottomSheetComponent(
+      title: hasTitle ? title : null,
+      illustration: icon == null
+          ? null
+          : Icon(icon, size: 48, color: colors.iconColor),
+      content: hasBody ? _DialogBody(body!) : null,
+      actions: [
+        for (final button in buttons) ButtonComponentAdapter(button: button),
+      ],
+      showCloseButton: false,
+      actionsTopSpacing: hasContent ? Spacing.xl : 0,
+    );
+  }
+}
+
+class _DialogBody extends StatelessWidget {
+  const _DialogBody(this.body);
+
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.45;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: SingleChildScrollView(
+        child: Text(
+          body,
+          style: TextStyles.body.copyWith(color: colors.textLight),
         ),
       ),
     );
   }
 }
 
-class ContentContainer extends StatelessWidget {
+class _ContentContainer extends StatelessWidget {
   final String title;
   final String? body;
   final IconData? icon;
-  const ContentContainer({
-    required this.title,
-    this.body,
-    this.icon,
-    super.key,
-  });
+  const _ContentContainer({required this.title, this.body, this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -125,28 +125,6 @@ class ContentContainer extends StatelessWidget {
               )
             : const SizedBox.shrink(),
       ],
-    );
-  }
-}
-
-class Actions extends StatelessWidget {
-  final List<ButtonWidget> buttons;
-  const Actions(this.buttons, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: addSeparators(
-        buttons,
-        const SizedBox(
-          // In figma this white space is of height 8pts. But the Button
-          // component has 1pts of invisible border by default in code. So two
-          // 1pts borders will visually make the whitespace 8pts.
-          // Height of button component in figma = 48, in code = 50 (2pts for
-          // top + bottom border)
-          height: 6,
-        ),
-      ),
     );
   }
 }
@@ -256,7 +234,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ContentContainer(
+            _ContentContainer(
               title: widget.title,
               body: widget.body,
               icon: widget.icon,

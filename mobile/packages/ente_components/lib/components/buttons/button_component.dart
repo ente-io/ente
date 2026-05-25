@@ -38,6 +38,7 @@ class ButtonComponent extends StatefulWidget {
     this.shouldSurfaceExecutionStates = true,
     this.shouldShowSuccessConfirmation = false,
     this.progressStatus,
+    this.leading,
   });
 
   final String label;
@@ -48,6 +49,7 @@ class ButtonComponent extends StatefulWidget {
   final bool shouldSurfaceExecutionStates;
   final bool shouldShowSuccessConfirmation;
   final ValueListenable<String>? progressStatus;
+  final Widget? leading;
 
   @override
   State<ButtonComponent> createState() => _ButtonComponentState();
@@ -247,6 +249,13 @@ class _ButtonComponentState extends State<ButtonComponent>
           : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        if (widget.leading != null) ...[
+          IconTheme.merge(
+            data: IconThemeData(color: foreground, size: IconSizes.small),
+            child: widget.leading!,
+          ),
+          const SizedBox(width: Spacing.sm),
+        ],
         if (widget.variant != ButtonComponentVariant.link)
           Flexible(child: label)
         else

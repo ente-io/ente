@@ -30,6 +30,21 @@ void main() {
     expect(tapCount, 1);
   });
 
+  testWidgets("ButtonComponent renders leading content", (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        ButtonComponent(
+          label: "Share",
+          leading: const Icon(Icons.share_outlined),
+          onTap: () {},
+        ),
+      ),
+    );
+
+    expect(find.text("Share"), findsOneWidget);
+    expect(find.byIcon(Icons.share_outlined), findsOneWidget);
+  });
+
   testWidgets(
     "Small ButtonComponent shrink-wraps content without a minimum width",
     (tester) async {

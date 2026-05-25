@@ -18,8 +18,6 @@ import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/utils/email_util.dart";
 
-typedef DialogBuilder = DialogWidget Function(BuildContext context);
-
 ///Will return null if dismissed by tapping outside
 Future<ButtonResult?> showInfoDialog(
   BuildContext context, {
@@ -233,40 +231,6 @@ Future<void> showGenericErrorBottomSheet({
       ),
     ],
   );
-}
-
-DialogWidget choiceDialog({
-  required String title,
-  String? body,
-  required String firstButtonLabel,
-  String secondButtonLabel = "Cancel",
-  ButtonType firstButtonType = ButtonType.neutral,
-  ButtonType secondButtonType = ButtonType.secondary,
-  ButtonAction firstButtonAction = ButtonAction.first,
-  ButtonAction secondButtonAction = ButtonAction.cancel,
-  FutureVoidCallback? firstButtonOnTap,
-  FutureVoidCallback? secondButtonOnTap,
-  bool isCritical = false,
-  IconData? icon,
-}) {
-  final buttons = [
-    ButtonWidget(
-      buttonType: isCritical ? ButtonType.critical : firstButtonType,
-      labelText: firstButtonLabel,
-      isInAlert: true,
-      onTap: firstButtonOnTap,
-      buttonAction: firstButtonAction,
-    ),
-    ButtonWidget(
-      buttonType: secondButtonType,
-      labelText: secondButtonLabel,
-      isInAlert: true,
-      onTap: secondButtonOnTap,
-      buttonAction: secondButtonAction,
-    ),
-  ];
-
-  return DialogWidget(title: title, body: body, buttons: buttons, icon: icon);
 }
 
 ///Will return null if dismissed by tapping outside
