@@ -36,10 +36,8 @@ jobs:
             CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
-              with:
-                  persist-credentials: false
 
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v6

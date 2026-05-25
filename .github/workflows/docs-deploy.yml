@@ -1,13 +1,11 @@
 name: "Deploy (docs)"
 
 on:
-    # Run on every push to main that changes docs/
     push:
         branches: [main]
         paths:
-            - "docs/**"
             - ".github/workflows/docs-deploy.yml"
-    # Also allow manually running the workflow
+            - "docs/**"
     workflow_dispatch:
 
 permissions:
