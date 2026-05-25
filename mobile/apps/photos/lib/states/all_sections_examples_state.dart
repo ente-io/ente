@@ -56,7 +56,7 @@ class _AllSectionsExamplesProviderState
   bool isOnSearchTab = false;
   bool _firstLoadInProgressOrComplete = false;
   final _logger = Logger("AllSectionsExamplesProvider");
-  static const _initialLoadDelay = Duration(seconds: 10);
+  static const _initialLoadDelay = Duration(seconds: 30);
   Timer? _initialLoadTimer;
 
   final _debouncer = Debouncer(
