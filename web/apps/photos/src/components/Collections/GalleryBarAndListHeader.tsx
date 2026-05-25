@@ -229,6 +229,7 @@ export const GalleryBarAndListHeader: React.FC<
                         onVisualFeedback,
                         fileNormalCollectionIDs,
                         collectionNameByID,
+                        emailByUserID,
                         onSelectCollection,
                         onSelectPerson,
                     }}
@@ -279,6 +280,7 @@ export const GalleryBarAndListHeader: React.FC<
         onVisualFeedback,
         fileNormalCollectionIDs,
         collectionNameByID,
+        emailByUserID,
         onSelectCollection,
         onSelectPerson,
         canSetAlbumCover,

@@ -69,6 +69,7 @@ interface CollectionMapDialogProps
             | "onSelectCollection"
             | "onSelectPerson"
             | "mapFileSource"
+            | "emailByUserID"
         > {
     collectionSummary: CollectionSummary;
     activeCollection: Collection | undefined;
@@ -1485,6 +1486,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     onSelectCollection,
     onSelectPerson,
     mapFileSource,
+    emailByUserID,
 }) => {
     const { onGenericError } = useBaseContext();
     const mapComponents = useMapComponents();
@@ -1717,6 +1719,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 collectionNameByID={collectionNameByID}
                 onSelectCollection={onSelectCollection}
                 onSelectPerson={onSelectPerson}
+                emailByUserID={emailByUserID}
                 selected={emptySelected}
                 setSelected={noOpSetSelected}
                 onSetOpenFileViewer={handleSetFileViewerOpen}
@@ -1759,6 +1762,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         isVisiblePhotosUpdating,
         onClose,
         handleSetFileViewerOpen,
+        emailByUserID,
     ]);
 
     return (
@@ -1836,6 +1840,7 @@ interface MapLayoutProps {
     collectionNameByID?: FileListWithViewerProps["collectionNameByID"];
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
+    emailByUserID: FileListWithViewerProps["emailByUserID"];
     onSetOpenFileViewer?: (open: boolean) => void;
     selected: SelectedState;
     setSelected: () => void;
@@ -1872,6 +1877,7 @@ function MapLayout({
     collectionNameByID,
     onSelectCollection,
     onSelectPerson,
+    emailByUserID,
     onSetOpenFileViewer,
     selected,
     setSelected,
@@ -1902,6 +1908,7 @@ function MapLayout({
                 collectionNameByID={collectionNameByID}
                 onSelectCollection={onSelectCollection}
                 onSelectPerson={onSelectPerson}
+                emailByUserID={emailByUserID}
                 selected={selected}
                 setSelected={setSelected}
                 onSetOpenFileViewer={onSetOpenFileViewer}
@@ -1957,6 +1964,7 @@ interface CollectionSidebarProps {
     collectionNameByID?: FileListWithViewerProps["collectionNameByID"];
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
+    emailByUserID: FileListWithViewerProps["emailByUserID"];
     onSetOpenFileViewer?: (open: boolean) => void;
     selected: SelectedState;
     setSelected: () => void;
@@ -1993,6 +2001,7 @@ function CollectionSidebar({
     collectionNameByID,
     onSelectCollection,
     onSelectPerson,
+    emailByUserID,
     onSetOpenFileViewer,
     selected,
     setSelected,
@@ -2133,6 +2142,7 @@ function CollectionSidebar({
                             collectionNameByID={collectionNameByID}
                             onSelectCollection={onSelectCollection}
                             onSelectPerson={onSelectPerson}
+                            emailByUserID={emailByUserID}
                             enableImageEditing={false}
                             enableDownload={true}
                             activeCollectionID={collectionSummary.id}

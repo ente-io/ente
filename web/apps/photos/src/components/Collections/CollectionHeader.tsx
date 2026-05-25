@@ -90,6 +90,7 @@ export interface CollectionHeaderProps
         | "onVisualFeedback"
         | "fileNormalCollectionIDs"
         | "collectionNameByID"
+        | "emailByUserID"
         | "onSelectCollection"
         | "onSelectPerson"
     > {
@@ -178,6 +179,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onVisualFeedback,
     fileNormalCollectionIDs,
     collectionNameByID,
+    emailByUserID,
     onSelectCollection,
     onSelectPerson,
 }) => {
@@ -804,6 +806,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onVisualFeedback={onVisualFeedback}
                 fileNormalCollectionIDs={fileNormalCollectionIDs}
                 collectionNameByID={collectionNameByID}
+                emailByUserID={emailByUserID}
                 onSelectCollection={onSelectCollection}
                 onSelectPerson={onSelectPerson}
             />

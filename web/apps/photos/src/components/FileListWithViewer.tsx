@@ -427,6 +427,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         onVisualFeedback,
                         fileNormalCollectionIDs,
                         collectionNameByID,
+                        emailByUserID,
                         onSelectCollection,
                         onSelectPerson,
                     }}
