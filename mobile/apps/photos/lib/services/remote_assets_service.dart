@@ -219,7 +219,7 @@ class RemoteAssetsService {
     }
   }
 
-  Dio get _dio => NetworkClient.instance.getDio();
+  Dio get _dio => NetworkClient.instance.downloadDio;
 
   bool get _resumableDownloadsEnabled =>
       isLocalGalleryMode || flagService.internalUser;

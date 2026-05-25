@@ -47,6 +47,7 @@ class ServiceLocator {
   late final SharedPreferences prefs;
   late final Dio enteDio;
   late final Dio nonEnteDio;
+  late final Dio downloadDio;
   late final PackageInfo packageInfo;
   late final EndpointConfig endpointConfig;
 
@@ -59,11 +60,13 @@ class ServiceLocator {
     SharedPreferences prefs,
     Dio enteDio,
     Dio nonEnteDio,
+    Dio downloadDio,
     PackageInfo packageInfo,
   ) {
     this.prefs = prefs;
     this.enteDio = enteDio;
     this.nonEnteDio = nonEnteDio;
+    this.downloadDio = downloadDio;
     this.packageInfo = packageInfo;
     endpointConfig = EndpointConfig(prefs);
   }
@@ -242,7 +245,7 @@ FileDataService get fileDataService {
 
 DownloadManager? _downloadManager;
 DownloadManager get downloadManager {
-  _downloadManager ??= DownloadManager(ServiceLocator.instance.nonEnteDio);
+  _downloadManager ??= DownloadManager(ServiceLocator.instance.downloadDio);
   return _downloadManager!;
 }
 
