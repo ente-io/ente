@@ -160,7 +160,7 @@ Future<void> showRecoveryKeySheet(
     enableDrag: false,
     builder: (_) => BottomSheetComponent(
       title: context.strings.recoveryKey,
-      showCloseButton: false,
+      showCloseButton: true,
       content: RecoveryKeySheet(recoveryKey: recoveryKey),
     ),
   );
