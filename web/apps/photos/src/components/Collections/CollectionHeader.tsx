@@ -96,6 +96,7 @@ export interface CollectionHeaderProps
     collectionSummary: CollectionSummary;
     activeCollection: Collection | undefined;
     files: EnteFile[];
+    mapFileSource?: FileListWithViewerProps["mapFileSource"];
     setActiveCollectionID: (collectionID: number) => void;
     isActiveCollectionDownloadInProgress: () => boolean;
     /**
@@ -161,6 +162,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,
     collectionSummary,
     files,
+    mapFileSource,
     setActiveCollectionID,
     onRemotePull,
     onCollectionShare,
@@ -793,6 +795,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 collectionSummary={collectionSummary}
                 activeCollection={activeCollection}
                 files={files}
+                mapFileSource={mapFileSource}
                 onRemotePull={onRemotePull}
                 onAddSaveGroup={onAddSaveGroup}
                 onMarkTempDeleted={onMarkTempDeleted}

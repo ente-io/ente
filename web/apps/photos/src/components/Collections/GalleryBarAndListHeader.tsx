@@ -68,6 +68,7 @@ type GalleryBarAndListHeaderProps = Omit<
 } & Pick<
         CollectionHeaderProps,
         | "files"
+        | "mapFileSource"
         | "onRemotePull"
         | "onAddSaveGroup"
         | "onMarkTempDeleted"
@@ -120,6 +121,7 @@ export const GalleryBarAndListHeader: React.FC<
     allPeople,
     saveGroups,
     files,
+    mapFileSource,
     activePerson,
     emailByUserID,
     shareSuggestionEmails,
@@ -216,6 +218,7 @@ export const GalleryBarAndListHeader: React.FC<
                     {...{
                         activeCollection,
                         files,
+                        mapFileSource,
                         setActiveCollectionID,
                         isActiveCollectionDownloadInProgress,
                         onRemotePull,
@@ -262,6 +265,7 @@ export const GalleryBarAndListHeader: React.FC<
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         files,
+        mapFileSource,
         activePerson,
         showCollectionShare,
         openCollectionShare,

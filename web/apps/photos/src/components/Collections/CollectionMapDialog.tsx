@@ -68,6 +68,7 @@ interface CollectionMapDialogProps
             | "collectionNameByID"
             | "onSelectCollection"
             | "onSelectPerson"
+            | "mapFileSource"
         > {
     collectionSummary: CollectionSummary;
     activeCollection: Collection | undefined;
@@ -308,6 +309,206 @@ function useCurrentUser() {
 const favoriteFileHashAndTypeKey = (file: EnteFile) => {
     const hash = metadataHash(file.metadata);
     return hash ? `${hash}:${file.metadata.fileType}` : undefined;
+};
+
+interface DeriveLocationAwareMapFilesParams {
+    files: EnteFile[];
+    collectionFiles: EnteFile[];
+    collectionSummaryType: CollectionSummary["type"];
+    currentUserID: number | undefined;
+    favoriteFileIDs: Set<number>;
+    hiddenFileIDs: Set<number>;
+    archivedFileIDs: Set<number>;
+    tempDeletedFileIDs: Set<number>;
+    tempHiddenFileIDs: Set<number>;
+}
+
+const emptyFileIDs = new Set<number>();
+
+/**
+ *
+ * @param collectionSummaryType
+ * @returns Checks if the current active collection is All or userFavorites
+ * if so then we return true.
+ *
+ * This function is relevant because in All and Favorites album we have to handle
+ * the shared favorite files seperately.
+ */
+const shouldUseLocationAwareMapRepresentatives = (
+    collectionSummaryType: CollectionSummary["type"],
+) => collectionSummaryType == "all" || collectionSummaryType == "userFavorites";
+
+/**
+ *
+ * @param file The file for which we are checking whether the file
+ * can be used as a MapEquivalent.
+ *
+ * @param hiddenFileIDs The list of files which are hidden by the user
+ * @param archivedFileIDs The list of files which are archieved by the user
+ * @param tempDeletedFileIDs The list of files which are just deleted.
+ * @param tempHiddenFileIDs The list of the files which are just hidden.
+ *
+ * the tempDeletedFileIDs and the tempHiddenFileIDs hold the IDs of the files
+ * on which the action was just performed, and the remotePull hasn't happened yet
+ * so without these variables, a just-hidden/deleted file might still show up
+ * as an MapEquivalent file.
+ * @returns
+ */
+const canUseFileAsMapEquivalent = (
+    file: EnteFile,
+    hiddenFileIDs: Set<number>,
+    archivedFileIDs: Set<number>,
+    tempDeletedFileIDs: Set<number>,
+    tempHiddenFileIDs: Set<number>,
+) => {
+    // If the file is hidden, deleted or archieved then returning false.
+    if (tempDeletedFileIDs.has(file.id)) return false;
+    if (hiddenFileIDs.has(file.id)) return false;
+    if (tempHiddenFileIDs.has(file.id)) return false;
+    if (archivedFileIDs.has(file.id)) return false;
+
+    // Confirming that the file's visiblity is set to visible/undefined.
+    const visibility = file.magicMetadata?.data.visibility;
+    return visibility === undefined || visibility === ItemVisibility.visible;
+};
+
+const addUniqueMapFile = (
+    files: EnteFile[],
+    fileIDs: Set<number>,
+    file: EnteFile,
+) => {
+    if (fileIDs.has(file.id)) return;
+    fileIDs.add(file.id);
+    files.push(file);
+};
+
+const deriveLocationAwareMapFiles = ({
+    files,
+    collectionFiles,
+    collectionSummaryType,
+    currentUserID,
+    favoriteFileIDs,
+    hiddenFileIDs,
+    archivedFileIDs,
+    tempDeletedFileIDs,
+    tempHiddenFileIDs,
+}: DeriveLocationAwareMapFilesParams) => {
+    // If there is no loggedIn user or if the album is not
+    // All or Favorites then returning the files which we got
+    // from the gallery itself without any additional
+    // shared-favorite swapping or handling.
+    if (
+        !currentUserID ||
+        !shouldUseLocationAwareMapRepresentatives(collectionSummaryType)
+    ) {
+        return files;
+    }
+
+    const filesByHashAndType = new Map<string, EnteFile[]>();
+    for (const file of collectionFiles) {
+        // If a file doesn't statisfy the requirements of showing
+        // up as a MapEquivalent then skipping it.
+        if (
+            !canUseFileAsMapEquivalent(
+                file,
+                hiddenFileIDs,
+                archivedFileIDs,
+                tempDeletedFileIDs,
+                tempHiddenFileIDs,
+            )
+        ) {
+            continue;
+        }
+
+        // If the file can be shown in the map getting the FileHashAndTypeKey
+        const key = favoriteFileHashAndTypeKey(file);
+
+        if (!key) continue;
+
+        // Grouping the same files using their FileHashAndTypeKey as the key.
+        const matchingFiles = filesByHashAndType.get(key);
+        if (matchingFiles) {
+            matchingFiles.push(file);
+        } else {
+            filesByHashAndType.set(key, [file]);
+        }
+    }
+
+    const mapFiles: EnteFile[] = [];
+    const mapFileIDs = new Set<number>();
+
+    // Looping through the files which we got passed down from the gallery.
+    for (const file of files) {
+        const key = favoriteFileHashAndTypeKey(file);
+        const equivalentFiles = key ? filesByHashAndType.get(key) : undefined;
+
+        // if there is no equivalentFiles it means that the file has only one copy
+        // which is the original copy so keep it that.
+        if (!equivalentFiles) {
+            addUniqueMapFile(mapFiles, mapFileIDs, file);
+            continue;
+        }
+
+        // If we are in the All view, we check if any of the equivalentFiles
+        // are favorited, if not then we pass the original file to the addUniqueMapFile
+        if (
+            collectionSummaryType == "all" &&
+            !equivalentFiles.some((equivalentFile) =>
+                favoriteFileIDs.has(equivalentFile.id),
+            )
+        ) {
+            addUniqueMapFile(mapFiles, mapFileIDs, file);
+            continue;
+        }
+
+        // If we get here, the file has equivalentFiles and atleast one
+        // of them is favorited. So we split the equivalent files according
+        // to their ownership.
+
+        const ownedFiles = equivalentFiles.filter(
+            (equivalentFile) => equivalentFile.ownerID == currentUserID,
+        );
+        const sharedFiles = equivalentFiles.filter(
+            (equivalentFile) => equivalentFile.ownerID != currentUserID,
+        );
+
+        /**
+         * If there is not both an owned and shared side, it keeps the original file.
+         * The special logic only matters when the same underlying media exists as both an owned copy and a shared copy.
+         */
+        if (!ownedFiles.length || !sharedFiles.length) {
+            addUniqueMapFile(mapFiles, mapFileIDs, file);
+            continue;
+        }
+
+        const ownedFilesWithLocation = ownedFiles.filter(fileLocation);
+        const sharedFilesWithLocation = sharedFiles.filter(fileLocation);
+
+        if (ownedFilesWithLocation.length && sharedFilesWithLocation.length) {
+            // both owned and shared have location: add shared-with-location, then owned-with-location
+            for (const sharedFile of sharedFilesWithLocation) {
+                addUniqueMapFile(mapFiles, mapFileIDs, sharedFile);
+            }
+            for (const ownedFile of ownedFilesWithLocation) {
+                addUniqueMapFile(mapFiles, mapFileIDs, ownedFile);
+            }
+        } else if (sharedFilesWithLocation.length) {
+            // only shared has location: add shared-with-location
+            for (const sharedFile of sharedFilesWithLocation) {
+                addUniqueMapFile(mapFiles, mapFileIDs, sharedFile);
+            }
+        } else if (ownedFilesWithLocation.length) {
+            // only owned has location: add owned-with-location
+            for (const ownedFile of ownedFilesWithLocation) {
+                addUniqueMapFile(mapFiles, mapFileIDs, ownedFile);
+            }
+        } else {
+            // neither has location: keep the original file
+            addUniqueMapFile(mapFiles, mapFileIDs, file);
+        }
+    }
+
+    return mapFiles;
 };
 
 const deriveFavoriteFileIDs = (
@@ -839,6 +1040,8 @@ function useMapData(
 function useFavorites(
     open: boolean,
     user: ReturnType<typeof useCurrentUser>,
+    favoriteEquivalenceFiles: EnteFile[],
+    syncedFavoriteFileIDs?: Set<number>,
 ): FavoritesState & {
     handleToggleFavorite: (file: EnteFile) => Promise<void>;
     handleFileVisibilityUpdate: (
@@ -846,9 +1049,10 @@ function useFavorites(
         visibility: ItemVisibility,
     ) => Promise<void>;
 } {
-    //Set to store the ids of files which are currenly favorited
+    // Set to store the ids of files which are currenly favorited, if there is already an existing
+    // sycnedFavoriteFileIDs list then using that as the inital value.
     const [favoriteFileIDs, setFavoriteFileIDs] = useState<Set<number>>(
-        new Set(),
+        syncedFavoriteFileIDs ?? new Set(),
     );
     //Set to store the IDs of the files which are in-flight for updation(favorite/unfavorite)
     const [pendingFavoriteUpdates, setPendingFavoriteUpdates] = useState<
@@ -861,6 +1065,12 @@ function useFavorites(
 
     useEffect(() => {
         if (!open || !user) return;
+
+        // If there already exist an syncedFavoriteFileIDs then using that as inital value.
+        if (syncedFavoriteFileIDs) {
+            setFavoriteFileIDs(syncedFavoriteFileIDs);
+            return;
+        }
 
         /**
          * Each collectionFile has a collectionID associated with them, checking whether
@@ -889,7 +1099,7 @@ function useFavorites(
         };
 
         void loadFavorites();
-    }, [open, user]);
+    }, [open, syncedFavoriteFileIDs, user]);
 
     // Helper to add/remove from Set immutably - avoids recreating Set when unnecessary
     const addToSet = useCallback((set: Set<number>, id: number) => {
@@ -906,15 +1116,95 @@ function useFavorites(
         return next;
     }, []);
 
+    const addIDsToSet = useCallback((set: Set<number>, ids: number[]) => {
+        let next: Set<number> | undefined;
+        for (const id of ids) {
+            if (set.has(id) || next?.has(id)) continue;
+            next ??= new Set(set);
+            next.add(id);
+        }
+        return next ?? set;
+    }, []);
+
+    const removeIDsFromSet = useCallback((set: Set<number>, ids: number[]) => {
+        let next: Set<number> | undefined;
+        for (const id of ids) {
+            if (!set.has(id) && !next?.has(id)) continue;
+            next ??= new Set(set);
+            next.delete(id);
+        }
+        return next ?? set;
+    }, []);
+
+    // This function is triggered when if one visible shared/owned copy is toggled,
+    // the equivalent copies update their star/pending UI together.
+    const favoriteEquivalentFileIDs = useCallback(
+        (file: EnteFile) => {
+            // Getting the FileHashAndTypeKey of the file on which
+            // the favorite toggle was triggered.
+            const key = favoriteFileHashAndTypeKey(file);
+
+            // If there is no key we can't compute the equivalent files
+            // so returned just the original file.
+            if (!key) return [file.id];
+
+            const isSharedSourceFile = file.ownerID != user?.id;
+            let firstOwnedEquivalentID: number | undefined;
+            let hasFavoritedOwnedEquivalent = false;
+
+            const fileIDs = new Set([file.id]);
+
+            /**
+             * Looping through the favoriteEquivalenceFiles and for the files
+             * whose key match with the file's key.
+             *
+             * - If it's a shared file then adding to fileIDs
+             *
+             * - If it's a owned fie then already favorited, then updating the flag and
+             *   and then adding it to the fileIDs.
+             * - Else remembers the first owned equivalent ID
+             */
+            for (const equivalentFile of favoriteEquivalenceFiles) {
+                if (favoriteFileHashAndTypeKey(equivalentFile) != key) {
+                    continue;
+                }
+
+                if (equivalentFile.ownerID != user?.id) {
+                    fileIDs.add(equivalentFile.id);
+                    continue;
+                }
+
+                if (favoriteFileIDs.has(equivalentFile.id)) {
+                    hasFavoritedOwnedEquivalent = true;
+                    fileIDs.add(equivalentFile.id);
+                } else {
+                    firstOwnedEquivalentID ??= equivalentFile.id;
+                }
+            }
+
+            if (
+                isSharedSourceFile &&
+                !hasFavoritedOwnedEquivalent &&
+                firstOwnedEquivalentID !== undefined
+            ) {
+                fileIDs.add(firstOwnedEquivalentID);
+            }
+
+            return [...fileIDs];
+        },
+        [favoriteEquivalenceFiles, favoriteFileIDs, user?.id],
+    );
+
     const handleToggleFavorite = useCallback(
         async (file: EnteFile) => {
             if (!user) return;
             const fileID = file.id;
+            const fileIDs = favoriteEquivalentFileIDs(file);
 
             // Check favorite status at call time to avoid stale closure
             const isFavorite = favoriteFileIDs.has(fileID);
 
-            setPendingFavoriteUpdates((prev) => addToSet(prev, fileID));
+            setPendingFavoriteUpdates((prev) => addIDsToSet(prev, fileIDs));
             try {
                 const action = isFavorite
                     ? removeFromFavoritesCollection
@@ -922,16 +1212,22 @@ function useFavorites(
                 await action([file]);
                 setFavoriteFileIDs((prev) =>
                     isFavorite
-                        ? removeFromSet(prev, fileID)
-                        : addToSet(prev, fileID),
+                        ? removeIDsFromSet(prev, fileIDs)
+                        : addIDsToSet(prev, fileIDs),
                 );
             } finally {
                 setPendingFavoriteUpdates((prev) =>
-                    removeFromSet(prev, fileID),
+                    removeIDsFromSet(prev, fileIDs),
                 );
             }
         },
-        [user, favoriteFileIDs, addToSet, removeFromSet],
+        [
+            user,
+            favoriteFileIDs,
+            favoriteEquivalentFileIDs,
+            addIDsToSet,
+            removeIDsFromSet,
+        ],
     );
 
     const handleFileVisibilityUpdate = useCallback(
@@ -1188,12 +1484,60 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     collectionNameByID,
     onSelectCollection,
     onSelectPerson,
+    mapFileSource,
 }) => {
     const { onGenericError } = useBaseContext();
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const optimalZoom = DEFAULT_MAP_ZOOM;
+    const mapSourceCollectionFiles = mapFileSource?.collectionFiles ?? files;
+
+    const {
+        favoriteFileIDs,
+        pendingFavoriteUpdates,
+        pendingVisibilityUpdates,
+        handleToggleFavorite,
+        handleFileVisibilityUpdate,
+    } = useFavorites(
+        open,
+        user,
+        mapSourceCollectionFiles,
+        mapFileSource?.favoriteFileIDs,
+    );
+    const mapSourceHiddenFileIDs = mapFileSource?.hiddenFileIDs ?? emptyFileIDs;
+    const mapSourceArchivedFileIDs =
+        mapFileSource?.archivedFileIDs ?? emptyFileIDs;
+    const mapSourceTempDeletedFileIDs =
+        mapFileSource?.tempDeletedFileIDs ?? emptyFileIDs;
+    const mapSourceTempHiddenFileIDs =
+        mapFileSource?.tempHiddenFileIDs ?? emptyFileIDs;
+
+    const mapFiles = useMemo(
+        () =>
+            deriveLocationAwareMapFiles({
+                files,
+                collectionFiles: mapSourceCollectionFiles,
+                collectionSummaryType: collectionSummary.type,
+                currentUserID: user?.id,
+                favoriteFileIDs,
+                hiddenFileIDs: mapSourceHiddenFileIDs,
+                archivedFileIDs: mapSourceArchivedFileIDs,
+                tempDeletedFileIDs: mapSourceTempDeletedFileIDs,
+                tempHiddenFileIDs: mapSourceTempHiddenFileIDs,
+            }),
+        [
+            collectionSummary.type,
+            favoriteFileIDs,
+            files,
+            mapSourceArchivedFileIDs,
+            mapSourceCollectionFiles,
+            mapSourceHiddenFileIDs,
+            mapSourceTempDeletedFileIDs,
+            mapSourceTempHiddenFileIDs,
+            user?.id,
+        ],
+    );
 
     const {
         mapCenter,
@@ -1207,7 +1551,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         removeFiles: removeFilesFromMap,
         updateFileVisibility,
         queueThumbnailFetch,
-    } = useMapData(open, collectionSummary, files, onGenericError);
+    } = useMapData(open, collectionSummary, mapFiles, onGenericError);
 
     const {
         visiblePhotos,
@@ -1215,14 +1559,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         isVisiblePhotosUpdating,
         setIsVisiblePhotosUpdating,
     } = useVisiblePhotos();
-
-    const {
-        favoriteFileIDs,
-        pendingFavoriteUpdates,
-        pendingVisibilityUpdates,
-        handleToggleFavorite,
-        handleFileVisibilityUpdate,
-    } = useFavorites(open, user);
 
     useEffect(() => {
         if (!open) {
