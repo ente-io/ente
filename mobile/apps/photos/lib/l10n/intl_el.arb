@@ -560,7 +560,6 @@
   "existingUser": "Υπάρχων χρήστης",
   "newToEnte": "Νέος/α στο Ente",
   "pleaseLoginAgain": "Παρακαλούμε συνδεθείτε ξανά",
-  "autoLogoutMessage": "Έχετε αποσυνδεθεί λόγω τεχνικής δυσλειτουργίας. Ζητούμε συγνώμη για την ταλαιπωρία.",
   "yourSubscriptionHasExpired": "Η συνδρομή σας έχει λήξει",
   "storageLimitExceeded": "Υπέρβαση ορίου αποθήκευσης",
   "upgrade": "Αναβάθμιση",
@@ -582,11 +581,6 @@
   "collectEventPhotos": "Συλλογή φωτογραφιών",
   "sessionExpired": "Η συνεδρία έληξε",
   "loggingOut": "Αποσύνδεση...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Στη συσκευή",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
