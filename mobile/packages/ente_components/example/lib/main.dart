@@ -2789,15 +2789,10 @@ class _BottomSheetPreview extends StatelessWidget {
       message:
           'It looks like something went wrong. Please retry after some time.',
       illustration: const _WarningIllustration(),
-      actions: [
-        ButtonComponent(
-          label: 'Contact support',
-          variant: ButtonComponentVariant.secondary,
-          onTap: () async {
-            await Navigator.of(context).maybePop();
-          },
-        ),
-      ],
+      actionLabel: 'Contact support',
+      onActionTap: () async {
+        await Navigator.of(context).maybePop();
+      },
     );
   }
 }
