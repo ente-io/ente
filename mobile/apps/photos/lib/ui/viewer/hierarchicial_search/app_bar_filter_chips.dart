@@ -3,7 +3,6 @@ import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/hierarchical_filter_chip.dart";
@@ -132,7 +131,7 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
                   child: FilterOptionsBottomSheet(searchFilterDataProvider),
                 );
               },
-              backgroundColor: getEnteColorScheme(context).backgroundElevated2,
+              backgroundColor: context.componentColors.backgroundBase,
             ),
           ),
         ),

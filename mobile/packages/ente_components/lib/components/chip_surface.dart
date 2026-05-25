@@ -42,12 +42,9 @@ class ChipSurface extends StatelessWidget {
           key: surfaceKey,
           duration: Motion.quick,
           curve: Curves.easeInOutCubic,
-          constraints: BoxConstraints(
-            minHeight: height,
-            minWidth: minWidth ?? 0,
-          ),
+          height: height,
+          constraints: BoxConstraints(minWidth: minWidth ?? 0),
           padding: padding,
-          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: background,
             borderRadius: borderRadius,
