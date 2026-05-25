@@ -1255,6 +1255,7 @@ class SearchService {
         final bool isIgnored = p.data.isIgnored;
         if (showIgnoredOnly != isIgnored) continue;
         if (files.isEmpty) continue;
+        final matchedUploadedIDs = personIdToFileIds[personID]!;
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,
@@ -1289,7 +1290,7 @@ class SearchService {
                       faceName: p.data.name,
                       faceFile: files.first,
                       occurrence: kMostRelevantFilter,
-                      matchedUploadedIDs: filesToUploadedFileIDs(files),
+                      matchedUploadedIDs: matchedUploadedIDs,
                     ),
                   ),
                 ),
@@ -1301,7 +1302,7 @@ class SearchService {
               faceName: p.data.name,
               faceFile: files.first,
               occurrence: kMostRelevantFilter,
-              matchedUploadedIDs: filesToUploadedFileIDs(files),
+              matchedUploadedIDs: matchedUploadedIDs,
             ),
           ),
         );
