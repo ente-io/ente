@@ -3,7 +3,7 @@
 ## v1.7.24 (unreleased)
 
 - Upload files directly to shared albums
-- Add shared files to my album
+- Add shared files to your albums
 - Add shared files to shared albums
 - Favorite files in shared albums
 - Indicator for shared files in map view
