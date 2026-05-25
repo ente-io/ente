@@ -55,6 +55,33 @@ void main() {
     expect(find.text('Secondary'), findsOneWidget);
   });
 
+  testWidgets('BottomSheetComponent supports custom header height', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const BottomSheetComponent(
+          title: 'Default header',
+          content: Text('Body copy'),
+        ),
+      ),
+    );
+
+    expect(_headerWithHeight('Default header', 38), findsOneWidget);
+
+    await tester.pumpWidget(
+      _wrap(
+        const BottomSheetComponent(
+          title: 'Custom header',
+          headerHeight: 46,
+          content: Text('Body copy'),
+        ),
+      ),
+    );
+
+    expect(_headerWithHeight('Custom header', 46), findsOneWidget);
+  });
+
   testWidgets('BottomSheetComponent centers illustration message', (
     tester,
   ) async {
@@ -311,4 +338,13 @@ Future<void> _openLauncher(
   await tester.tap(find.text(label));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 500));
+}
+
+Finder _headerWithHeight(String title, double height) {
+  return find.ancestor(
+    of: find.text(title),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is SizedBox && widget.height == height,
+    ),
+  );
 }

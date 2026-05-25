@@ -22,6 +22,7 @@ class _BottomSheetHeaderComponent extends StatelessWidget {
     this.closeTooltip = 'Close',
     this.textAlign,
     this.isCentered = false,
+    this.height = _headerHeight,
   });
 
   final String? title;
@@ -35,6 +36,7 @@ class _BottomSheetHeaderComponent extends StatelessWidget {
   final String closeTooltip;
   final TextAlign? textAlign;
   final bool isCentered;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +62,7 @@ class _BottomSheetHeaderComponent extends StatelessWidget {
 
     final colors = context.componentColors;
     return SizedBox(
-      height: _headerHeight,
+      height: height,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -101,6 +103,7 @@ class BottomSheetComponent extends StatelessWidget {
     this.textAlign,
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.padding = const EdgeInsets.all(Spacing.xl),
+    this.headerHeight = _headerHeight,
     this.contentSpacing = Spacing.lg,
     this.actionsTopSpacing = Spacing.lg,
     this.backgroundColor,
@@ -123,6 +126,11 @@ class BottomSheetComponent extends StatelessWidget {
   final TextAlign? textAlign;
   final CrossAxisAlignment crossAxisAlignment;
   final EdgeInsets padding;
+
+  /// Height of the default title and close-button header.
+  ///
+  /// Ignored when [header] is provided.
+  final double headerHeight;
   final double contentSpacing;
   final double actionsTopSpacing;
   final Color? backgroundColor;
@@ -147,6 +155,7 @@ class BottomSheetComponent extends StatelessWidget {
                 closeTooltip: closeTooltip,
                 textAlign: textAlign,
                 isCentered: usesCenteredLayout,
+                height: headerHeight,
               )
             : null);
     final effectiveContent =

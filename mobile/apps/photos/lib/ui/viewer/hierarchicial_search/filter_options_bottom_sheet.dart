@@ -35,14 +35,12 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
     return BottomSheetComponent(
       title: l10n.filter,
       closeTooltip: l10n.close,
-      contentSpacing: 24,
       content: ConstrainedBox(
         constraints: BoxConstraints(
           maxHeight:
               MediaQuery.sizeOf(context).height * _maxContentHeightFactor,
         ),
         child: SingleChildScrollView(
-          clipBehavior: Clip.none,
           child: SizedBox(
             width: double.infinity,
             child: Column(
