@@ -51,7 +51,7 @@ class FilterChipComponent extends StatelessWidget {
       enabled: _enabled,
       selected: _selected,
       semanticLabel: tooltip ?? label,
-      height: 40,
+      minHeight: 40,
       minWidth: 40,
       padding: _padding,
       background: background,
@@ -175,7 +175,7 @@ class FilterChipComponent extends StatelessWidget {
 }
 
 const double _iconSlotSize = 16;
-const double _selectedTrailingIconSlotSize = 20;
+const double _selectedTrailingIconSlotSize = 16;
 
 class _FilterChipAvatar extends StatelessWidget {
   const _FilterChipAvatar({required this.enabled, required this.child});

@@ -288,6 +288,23 @@ void main() {
     expect(nextValue, isTrue);
   });
 
+  testWidgets("FilterChipComponent grows with scaled text", (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const FilterChipComponent(
+          label: "Screenshots",
+          state: FilterChipComponentState.unselected,
+        ),
+        textScaler: const TextScaler.linear(2),
+      ),
+    );
+
+    expect(
+      tester.getSize(find.byKey(const ValueKey("filter-chip-surface"))).height,
+      greaterThan(40),
+    );
+  });
+
   testWidgets("FilterChipComponent clips avatar content", (tester) async {
     await tester.pumpWidget(
       _wrap(
@@ -304,9 +321,16 @@ void main() {
   });
 }
 
-Widget _wrap(Widget child, {TargetPlatform platform = TargetPlatform.android}) {
+Widget _wrap(
+  Widget child, {
+  TargetPlatform platform = TargetPlatform.android,
+  TextScaler textScaler = TextScaler.noScaling,
+}) {
   return MaterialApp(
     theme: ComponentTheme.lightTheme().copyWith(platform: platform),
-    home: Scaffold(body: Center(child: child)),
+    home: MediaQuery(
+      data: MediaQueryData(textScaler: textScaler),
+      child: Scaffold(body: Center(child: child)),
+    ),
   );
 }
