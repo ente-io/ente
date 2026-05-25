@@ -22,6 +22,7 @@ void main() {
       prefs,
       Dio(),
       Dio(),
+      Dio(),
       PackageInfo(
         appName: 'Photos',
         packageName: 'photos',

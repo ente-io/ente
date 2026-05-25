@@ -36,6 +36,7 @@ class ButtonComponent extends StatefulWidget {
     this.size = ButtonComponentSize.large,
     this.isDisabled = false,
     this.shouldSurfaceExecutionStates = true,
+    this.shouldShowSuccessState = true,
     this.shouldShowSuccessConfirmation = false,
     this.progressStatus,
     this.leading,
@@ -47,6 +48,7 @@ class ButtonComponent extends StatefulWidget {
   final ButtonComponentSize size;
   final bool isDisabled;
   final bool shouldSurfaceExecutionStates;
+  final bool shouldShowSuccessState;
   final bool shouldShowSuccessConfirmation;
   final ValueListenable<String>? progressStatus;
   final Widget? leading;
@@ -387,7 +389,10 @@ class _ButtonComponentState extends State<ButtonComponent>
   bool get _showLoading =>
       widget.shouldSurfaceExecutionStates && _isExecuting && _loadingVisible;
 
-  bool get _showSuccess => widget.shouldSurfaceExecutionStates && _isSuccessful;
+  bool get _showSuccess =>
+      widget.shouldSurfaceExecutionStates &&
+      widget.shouldShowSuccessState &&
+      _isSuccessful;
 
   Future<void> _handleTap() async {
     final callback = widget.onTap;
@@ -420,6 +425,7 @@ class _ButtonComponentState extends State<ButtonComponent>
 
       final shouldShowSuccess =
           widget.shouldSurfaceExecutionStates &&
+          widget.shouldShowSuccessState &&
           (loadingSurfaced ||
               (loadingPending && widget.shouldShowSuccessConfirmation));
 

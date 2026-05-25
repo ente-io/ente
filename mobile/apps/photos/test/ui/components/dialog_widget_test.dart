@@ -1,11 +1,14 @@
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:photos/ente_theme_data.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/button_result.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 
 void main() {
@@ -203,6 +206,258 @@ void main() {
     expect(result?.action, ButtonAction.cancel);
     expect(find.byType(BottomSheetComponent), findsNothing);
   });
+
+  group("showTextInputDialog", () {
+    testWidgets("renders the migrated text input sheet", (tester) async {
+      await _pumpLauncher(
+        tester,
+        (context) => showTextInputDialog(
+          context,
+          title: "Rename file",
+          body: "Choose a short name.",
+          submitButtonLabel: "Rename",
+          icon: Icons.edit_outlined,
+          label: "Name",
+          hintText: "Enter file name",
+          prefixIcon: Icons.drive_file_rename_outline,
+          initialValue: "IMG_001",
+          message: ".JPG",
+          alignMessage: Alignment.centerRight,
+          onSubmit: (_) async {},
+        ),
+      );
+
+      await _openLauncher(tester);
+
+      expect(find.byType(BottomSheetComponent), findsOneWidget);
+      expect(find.byType(TextInputComponent), findsOneWidget);
+      expect(find.byType(ButtonComponent), findsNWidgets(2));
+      expect(find.byType(TextInputWidget), findsNothing);
+      expect(find.byType(Dialog), findsNothing);
+      expect(find.text("Rename file"), findsOneWidget);
+      expect(find.text("Choose a short name."), findsOneWidget);
+      expect(find.text("Name"), findsOneWidget);
+      expect(find.text(".JPG"), findsOneWidget);
+      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.drive_file_rename_outline), findsOneWidget);
+
+      final input = tester.widget<TextField>(find.byType(TextField));
+      expect(input.controller?.text, "IMG_001");
+    });
+
+    testWidgets("submits entered text and closes with a null result", (
+      tester,
+    ) async {
+      dynamic result;
+      var submitted = "";
+
+      await _pumpLauncher(tester, (context) async {
+        result = await showTextInputDialog(
+          context,
+          title: "New album",
+          submitButtonLabel: "Create",
+          hintText: "Enter album name",
+          onSubmit: (value) async {
+            submitted = value;
+          },
+        );
+      });
+
+      await _openLauncher(tester);
+
+      var submitButton = tester.widget<ButtonComponent>(
+        find.widgetWithText(ButtonComponent, "Create"),
+      );
+      expect(submitButton.isDisabled, isTrue);
+
+      await tester.enterText(find.byType(TextField), "Road trip");
+      await tester.pump();
+
+      submitButton = tester.widget<ButtonComponent>(
+        find.widgetWithText(ButtonComponent, "Create"),
+      );
+      expect(submitButton.isDisabled, isFalse);
+
+      await tester.tap(find.text("Create"));
+      await tester.pumpAndSettle();
+
+      expect(submitted, "Road trip");
+      expect(result, isNull);
+      expect(find.byType(BottomSheetComponent), findsNothing);
+    });
+
+    testWidgets("submits from the keyboard action", (tester) async {
+      dynamic result;
+      var submitted = "";
+
+      await _pumpLauncher(tester, (context) async {
+        result = await showTextInputDialog(
+          context,
+          title: "New album",
+          submitButtonLabel: "Create",
+          onSubmit: (value) async {
+            submitted = value;
+          },
+        );
+      });
+
+      await _openLauncher(tester);
+      await tester.enterText(find.byType(TextField), "Keyboard album");
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(submitted, "Keyboard album");
+      expect(result, isNull);
+      expect(find.byType(BottomSheetComponent), findsNothing);
+    });
+
+    testWidgets("returns a ButtonResult when cancelled", (tester) async {
+      dynamic result;
+
+      await _pumpLauncher(tester, (context) async {
+        result = await showTextInputDialog(
+          context,
+          title: "Rename album",
+          submitButtonLabel: "Rename",
+          initialValue: "Archive",
+          onSubmit: (_) async {},
+        );
+      });
+
+      await _openLauncher(tester);
+      await tester.tap(find.text("Cancel"));
+      await tester.pumpAndSettle();
+
+      expect(result, isA<ButtonResult>());
+      expect((result as ButtonResult).action, isNull);
+      expect(find.byType(BottomSheetComponent), findsNothing);
+    });
+
+    testWidgets("returns an exception when submit fails", (tester) async {
+      dynamic result;
+
+      await _pumpLauncher(tester, (context) async {
+        result = await showTextInputDialog(
+          context,
+          title: "Rename album",
+          submitButtonLabel: "Rename",
+          initialValue: "Archive",
+          onSubmit: (_) async {
+            throw StateError("boom");
+          },
+        );
+      });
+
+      await _openLauncher(tester);
+      await tester.tap(find.text("Rename"));
+      await tester.pumpAndSettle();
+
+      expect(result, isA<Exception>());
+      expect(find.byType(BottomSheetComponent), findsNothing);
+    });
+
+    testWidgets("keeps incorrect password errors in the sheet", (tester) async {
+      await _pumpLauncher(
+        tester,
+        (context) => showTextInputDialog(
+          context,
+          title: "Enter password",
+          submitButtonLabel: "Unlock",
+          initialValue: "bad-password",
+          isPasswordInput: true,
+          popnavAfterSubmission: false,
+          onSubmit: (_) async {
+            throw Exception("Incorrect password");
+          },
+        ),
+      );
+
+      await _openLauncher(tester);
+      await tester.tap(find.text("Unlock"));
+      await tester.pump();
+
+      expect(find.byType(BottomSheetComponent), findsOneWidget);
+      final input = tester.widget<TextInputComponent>(
+        find.byType(TextInputComponent),
+      );
+      expect(input.messageType, TextInputComponentMessageType.error);
+    });
+
+    testWidgets(
+      "allows manual navigation when popnavAfterSubmission is false",
+      (tester) async {
+        dynamic result;
+
+        await _pumpLauncher(tester, (context) async {
+          result = await showTextInputDialog(
+            context,
+            title: "Collect photos",
+            submitButtonLabel: "Create",
+            initialValue: "May 25",
+            popnavAfterSubmission: false,
+            onSubmit: (value) async {
+              Navigator.of(context).pop("created:$value");
+            },
+          );
+        });
+
+        await _openLauncher(tester);
+        await tester.tap(find.text("Create"));
+        await tester.pumpAndSettle();
+
+        expect(result, "created:May 25");
+        expect(find.byType(BottomSheetComponent), findsNothing);
+      },
+    );
+
+    testWidgets("preserves password mode and input formatters", (tester) async {
+      await _pumpLauncher(
+        tester,
+        (context) => showTextInputDialog(
+          context,
+          title: "Pair with TV",
+          submitButtonLabel: "Pair",
+          initialValue: "a1b2",
+          isPasswordInput: true,
+          textInputFormatter: [FilteringTextInputFormatter.digitsOnly],
+          onSubmit: (_) async {},
+        ),
+      );
+
+      await _openLauncher(tester);
+
+      final input = tester.widget<TextField>(find.byType(TextField));
+      expect(input.obscureText, isTrue);
+      expect(input.controller?.text, "12");
+      expect(
+        find.byKey(const ValueKey("text-field-password-toggle")),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets("showOnlyLoadingState suppresses button success state", (
+      tester,
+    ) async {
+      await _pumpLauncher(
+        tester,
+        (context) => showTextInputDialog(
+          context,
+          title: "New album",
+          submitButtonLabel: "Create",
+          initialValue: "Album",
+          showOnlyLoadingState: true,
+          onSubmit: (_) async {},
+        ),
+      );
+
+      await _openLauncher(tester);
+
+      final button = tester.widget<ButtonComponent>(
+        find.widgetWithText(ButtonComponent, "Create"),
+      );
+      expect(button.shouldShowSuccessState, isFalse);
+    });
+  });
 }
 
 Future<void> _pumpLauncher(
@@ -212,6 +467,8 @@ Future<void> _pumpLauncher(
   await tester.pumpWidget(
     MaterialApp(
       theme: darkThemeData,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: Builder(
           builder: (context) {

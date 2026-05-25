@@ -1,4 +1,5 @@
 import "package:dio/dio.dart";
+import "package:ente_components/ente_components.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
@@ -342,7 +343,7 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-///Can return ButtonResult? from ButtonWidget or Exception? from TextInputDialog
+/// Returns null on successful submit, ButtonResult on cancel, and Exception on submit failure.
 Future<dynamic> showTextInputDialog(
   BuildContext context, {
   required String title,
@@ -367,39 +368,32 @@ Future<dynamic> showTextInputDialog(
   bool useRootNavigator = false,
   bool popnavAfterSubmission = true,
 }) {
-  return showDialog(
+  return showBottomSheetComponent<dynamic>(
     barrierColor: backdropFaintDark,
     context: context,
     useRootNavigator: useRootNavigator,
-    builder: (context) {
-      final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-      final isKeyboardUp = bottomInset > 100;
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomInset : 0),
-          child: TextInputDialog(
-            title: title,
-            message: message,
-            label: label,
-            body: body,
-            icon: icon,
-            submitButtonLabel: submitButtonLabel,
-            onSubmit: onSubmit,
-            hintText: hintText,
-            prefixIcon: prefixIcon,
-            initialValue: initialValue,
-            alignMessage: alignMessage,
-            maxLength: maxLength,
-            showOnlyLoadingState: showOnlyLoadingState,
-            textCapitalization: textCapitalization,
-            alwaysShowSuccessState: alwaysShowSuccessState,
-            isPasswordInput: isPasswordInput,
-            textEditingController: textEditingController,
-            textInputFormatter: textInputFormatter,
-            textInputType: textInputType,
-            popnavAfterSubmission: popnavAfterSubmission,
-          ),
-        ),
+    builder: (_) {
+      return TextInputDialog(
+        title: title,
+        message: message,
+        label: label,
+        body: body,
+        icon: icon,
+        submitButtonLabel: submitButtonLabel,
+        onSubmit: onSubmit,
+        hintText: hintText,
+        prefixIcon: prefixIcon,
+        initialValue: initialValue,
+        alignMessage: alignMessage,
+        maxLength: maxLength,
+        showOnlyLoadingState: showOnlyLoadingState,
+        textCapitalization: textCapitalization,
+        alwaysShowSuccessState: alwaysShowSuccessState,
+        isPasswordInput: isPasswordInput,
+        textEditingController: textEditingController,
+        textInputFormatter: textInputFormatter,
+        textInputType: textInputType,
+        popnavAfterSubmission: popnavAfterSubmission,
       );
     },
   );
