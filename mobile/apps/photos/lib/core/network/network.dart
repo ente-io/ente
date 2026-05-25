@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 import 'package:logging/logging.dart';
+import 'package:native_dio_adapter/native_dio_adapter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/endpoint_config.dart";
@@ -17,6 +18,7 @@ class NetworkClient {
   final _logger = Logger("NetworkClient");
   final _http2FallbackPolicy = _Http2FallbackPolicy();
   late Dio _dio;
+  late Dio _downloadDio;
   late Dio _enteDio;
   StreamSubscription<EndpointUpdatedEvent>? _endpointUpdatedSubscription;
   static const kConnectTimeout = 15;
@@ -29,29 +31,12 @@ class NetworkClient {
     final endpointConfig = EndpointConfig(preferences);
     final String ua = await userAgent();
     final endpoint = endpointConfig.endpoint;
-    _dio = Dio(
-      BaseOptions(
-        connectTimeout: _connectTimeout,
-        headers: {
-          HttpHeaders.userAgentHeader: ua,
-          'X-Client-Version': packageInfo.version,
-          'X-Client-Package': packageInfo.packageName,
-        },
-      ),
-    );
-    _enteDio = Dio(
-      BaseOptions(
-        baseUrl: endpoint,
-        connectTimeout: _connectTimeout,
-        headers: {
-          HttpHeaders.userAgentHeader: ua,
-          'X-Client-Version': packageInfo.version,
-          'X-Client-Package': packageInfo.packageName,
-        },
-      ),
-    );
+    _dio = Dio(_newBaseOptions(ua, packageInfo));
+    _downloadDio = Dio(_newBaseOptions(ua, packageInfo));
+    _enteDio = Dio(_newBaseOptions(ua, packageInfo, baseUrl: endpoint));
 
     _dio.httpClientAdapter = _newAdaptiveHttpClientAdapter(_connectTimeout);
+    _downloadDio.httpClientAdapter = NativeAdapter();
     _enteDio.httpClientAdapter = _newAdaptiveHttpClientAdapter(_connectTimeout);
 
     _setupInterceptors(endpoint);
@@ -70,6 +55,22 @@ class NetworkClient {
   void _setupInterceptors(String endpoint) {
     _enteDio.interceptors.clear();
     _enteDio.interceptors.add(EnteRequestInterceptor(endpoint));
+  }
+
+  BaseOptions _newBaseOptions(
+    String ua,
+    PackageInfo packageInfo, {
+    String? baseUrl,
+  }) {
+    return BaseOptions(
+      baseUrl: baseUrl ?? "",
+      connectTimeout: _connectTimeout,
+      headers: {
+        HttpHeaders.userAgentHeader: ua,
+        'X-Client-Version': packageInfo.version,
+        'X-Client-Package': packageInfo.packageName,
+      },
+    );
   }
 
   HttpClientAdapter _newAdaptiveHttpClientAdapter(Duration connectTimeout) {
@@ -101,6 +102,8 @@ class NetworkClient {
   static NetworkClient instance = NetworkClient._privateConstructor();
 
   Dio getDio() => _dio;
+
+  Dio get downloadDio => _downloadDio;
 
   Dio get enteDio => _enteDio;
 }

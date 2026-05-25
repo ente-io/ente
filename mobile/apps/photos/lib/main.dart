@@ -251,6 +251,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       prefs,
       NetworkClient.instance.enteDio,
       NetworkClient.instance.getDio(),
+      NetworkClient.instance.downloadDio,
       packageInfo,
     );
     NotificationService.instance.init(prefs);
@@ -396,6 +397,7 @@ Future<void> _init(
       preferences,
       NetworkClient.instance.enteDio,
       NetworkClient.instance.getDio(),
+      NetworkClient.instance.downloadDio,
       packageInfo,
     );
 
