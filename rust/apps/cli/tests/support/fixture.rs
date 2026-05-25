@@ -17,27 +17,44 @@ pub struct Fixture {
 }
 
 impl Fixture {
+    pub fn run(test: impl FnOnce(&Self) -> TestResult) -> TestResult {
+        let mut fixture = Self::start()?;
+        let result = test(&fixture);
+        if result.is_err() {
+            fixture.retain_temp_dir();
+        }
+        result
+    }
+
     pub fn start() -> TestResult<Self> {
         let paths = Paths::discover()?;
-        let temp_dir = TempDir::new("ente-cli-paste")?;
+        let mut temp_dir = TempDir::new("ente-cli-test")?;
         let log_dir = temp_dir.path().join("logs");
         let pglite_port = free_port()?;
         let museum_port = free_port()?;
-        let paste_port = free_port()?;
-        let paste_origin = format!("http://{LOCAL_HOST}:{paste_port}");
+        let paste_origin = format!("http://{LOCAL_HOST}");
         let endpoint = format!("http://{LOCAL_HOST}:{museum_port}");
-        let credentials_file = temp_dir.path().join("credentials.yaml");
+        let museum_config_file = temp_dir.path().join("museum.yaml");
 
-        museum::write_credentials(&credentials_file, pglite_port)?;
-        let pglite = pglite::start(&paths.pglite_dir, &log_dir, pglite_port)?;
-        let museum = museum::start(
-            &paths.server_dir,
-            &log_dir,
-            &credentials_file,
-            museum_port,
-            pglite_port,
-            &paste_origin,
-        )?;
+        let result = (|| {
+            museum::write_config(&museum_config_file, museum_port, pglite_port, &paste_origin)?;
+            let pglite = pglite::start(&paths.pglite_dir, &log_dir, pglite_port)?;
+            let museum = museum::start(
+                &paths.server_dir,
+                &log_dir,
+                &museum_config_file,
+                museum_port,
+            )?;
+            Ok((pglite, museum))
+        })();
+
+        let (pglite, museum) = match result {
+            Ok(processes) => processes,
+            Err(error) => {
+                temp_dir.retain();
+                return Err(error);
+            }
+        };
 
         Ok(Self {
             temp_dir,
@@ -56,10 +73,14 @@ impl Fixture {
         &self.paste_origin
     }
 
-    pub fn cli(&self, name: &str) -> TestResult<Cli> {
-        let config_dir = self.temp_dir.path().join("cli").join(name);
+    pub fn cli_session(&self, scenario: &str) -> TestResult<Cli> {
+        let config_dir = self.temp_dir.path().join("cli").join(scenario);
         fs::create_dir_all(&config_dir)?;
         Ok(Cli::new(config_dir))
+    }
+
+    pub fn retain_temp_dir(&mut self) {
+        self.temp_dir.retain();
     }
 }
 
@@ -88,23 +109,37 @@ impl Paths {
 
 struct TempDir {
     path: PathBuf,
+    retained: bool,
 }
 
 impl TempDir {
     fn new(prefix: &str) -> TestResult<Self> {
         let path = std::env::temp_dir().join(format!("{prefix}-{}", Uuid::new_v4()));
         fs::create_dir_all(&path)?;
-        Ok(Self { path })
+        Ok(Self {
+            path,
+            retained: false,
+        })
     }
 
     fn path(&self) -> &Path {
         &self.path
     }
+
+    fn retain(&mut self) {
+        eprintln!(
+            "retaining CLI integration test temp dir: {}",
+            self.path.display()
+        );
+        self.retained = true;
+    }
 }
 
 impl Drop for TempDir {
     fn drop(&mut self) {
-        let _ = fs::remove_dir_all(&self.path);
+        if !self.retained {
+            let _ = fs::remove_dir_all(&self.path);
+        }
     }
 }
 

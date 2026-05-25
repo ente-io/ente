@@ -1,34 +1,30 @@
 mod support;
 
-use std::process::Output;
-
 use reqwest::Url;
 use support::{Cli, Fixture, TestResult};
 use uuid::Uuid;
 
 #[test]
 fn paste() -> TestResult {
-    let fixture = Fixture::start()?;
-
-    full_link_roundtrip(&fixture)?;
-    token_and_key_roundtrip(&fixture)?;
-    stdin_roundtrip(&fixture)?;
-
-    Ok(())
+    Fixture::run(|fixture| {
+        full_link_roundtrip(fixture)?;
+        token_and_key_roundtrip(fixture)?;
+        stdin_roundtrip(fixture)
+    })
 }
 
 fn full_link_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli("full-link")?;
+    let cli = fixture.cli_session("full-link")?;
     let text = unique_text("full-link");
     let link = create_paste(&cli, fixture, &text)?;
 
-    let consumed = cli_success(cli.run(&[
+    let consumed = cli.run_ok(&[
         "paste",
         "consume",
         "--endpoint",
         fixture.endpoint(),
         &link.raw,
-    ])?);
+    ])?;
     assert_eq!(consumed, text);
 
     let second_consume = cli.run(&[
@@ -53,11 +49,11 @@ fn full_link_roundtrip(fixture: &Fixture) -> TestResult {
 }
 
 fn token_and_key_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli("token-key")?;
+    let cli = fixture.cli_session("token-key")?;
     let text = unique_text("token-key");
     let link = create_paste(&cli, fixture, &text)?;
 
-    let consumed = cli_success(cli.run(&[
+    let consumed = cli.run_ok(&[
         "paste",
         "consume",
         "--endpoint",
@@ -65,19 +61,19 @@ fn token_and_key_roundtrip(fixture: &Fixture) -> TestResult {
         "--key",
         &link.key,
         &link.token,
-    ])?);
+    ])?;
     assert_eq!(consumed, text);
 
     Ok(())
 }
 
 fn stdin_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli("stdin")?;
+    let cli = fixture.cli_session("stdin")?;
     let text = format!(
         "paste stdin scenario {}\n\nsecond line stays intact\n",
         Uuid::new_v4()
     );
-    let link = cli_success(cli.run_with_stdin(
+    let link = cli.run_ok_with_stdin(
         &[
             "paste",
             "create",
@@ -87,23 +83,23 @@ fn stdin_roundtrip(fixture: &Fixture) -> TestResult {
             fixture.paste_origin(),
         ],
         &text,
-    )?);
+    )?;
     let link = PasteLink::parse(link.trim(), fixture.paste_origin());
 
-    let consumed = cli_success(cli.run(&[
+    let consumed = cli.run_ok(&[
         "paste",
         "consume",
         "--endpoint",
         fixture.endpoint(),
         &link.raw,
-    ])?);
+    ])?;
     assert_eq!(consumed, text);
 
     Ok(())
 }
 
 fn create_paste(cli: &Cli, fixture: &Fixture, text: &str) -> TestResult<PasteLink> {
-    let link = cli_success(cli.run(&[
+    let link = cli.run_ok(&[
         "paste",
         "create",
         "--endpoint",
@@ -111,7 +107,7 @@ fn create_paste(cli: &Cli, fixture: &Fixture, text: &str) -> TestResult<PasteLin
         "--paste-origin",
         fixture.paste_origin(),
         text,
-    ])?);
+    ])?;
     Ok(PasteLink::parse(link.trim(), fixture.paste_origin()))
 }
 
@@ -161,15 +157,4 @@ impl PasteLink {
             key,
         }
     }
-}
-
-fn cli_success(output: Output) -> String {
-    assert!(
-        output.status.success(),
-        "ente-rs failed\nstatus: {}\nstdout:\n{}\nstderr:\n{}",
-        output.status,
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr),
-    );
-    String::from_utf8(output.stdout).expect("ente-rs stdout should be UTF-8")
 }

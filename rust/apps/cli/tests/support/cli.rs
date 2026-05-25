@@ -23,6 +23,10 @@ impl Cli {
         Ok(command(&self.bin, &self.config_dir, args).output()?)
     }
 
+    pub fn run_ok(&self, args: &[&str]) -> TestResult<String> {
+        output_stdout(args, self.run(args)?)
+    }
+
     pub fn run_with_stdin(&self, args: &[&str], stdin: &str) -> TestResult<Output> {
         let mut child = command(&self.bin, &self.config_dir, args)
             .stdin(Stdio::piped())
@@ -38,14 +42,29 @@ impl Cli {
 
         Ok(child.wait_with_output()?)
     }
+
+    pub fn run_ok_with_stdin(&self, args: &[&str], stdin: &str) -> TestResult<String> {
+        output_stdout(args, self.run_with_stdin(args, stdin)?)
+    }
 }
 
 fn command(bin: &Path, config_dir: &Path, args: &[&str]) -> Command {
     let mut command = Command::new(bin);
+    command.args(args).env("ENTE_CLI_CONFIG_DIR", config_dir);
     command
-        .args(args)
-        .env("ENTE_CLI_CONFIG_DIR", config_dir)
-        .env("NO_PROXY", "127.0.0.1,localhost")
-        .env("no_proxy", "127.0.0.1,localhost");
-    command
+}
+
+fn output_stdout(args: &[&str], output: Output) -> TestResult<String> {
+    if output.status.success() {
+        Ok(String::from_utf8(output.stdout)?)
+    } else {
+        Err(format!(
+            "ente-rs {} failed\nstatus: {}\nstdout:\n{}\nstderr:\n{}",
+            args.join(" "),
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        )
+        .into())
+    }
 }

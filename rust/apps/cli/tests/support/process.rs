@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, File, OpenOptions},
+    fs::{self, OpenOptions},
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
 };
@@ -21,7 +21,7 @@ impl ChildProcess {
             .append(true)
             .open(&log_path)?;
         let child = command
-            .stdout(Stdio::from(clone_file(&log)?))
+            .stdout(Stdio::from(log.try_clone()?))
             .stderr(Stdio::from(log))
             .spawn()?;
         Ok(Self {
@@ -60,8 +60,4 @@ impl Drop for ChildProcess {
         let _ = self.child.kill();
         let _ = self.child.wait();
     }
-}
-
-fn clone_file(file: &File) -> TestResult<File> {
-    Ok(file.try_clone()?)
 }

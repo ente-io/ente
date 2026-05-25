@@ -12,10 +12,8 @@ use super::{LOCAL_HOST, TestResult, process::ChildProcess};
 pub fn start(
     server_dir: &Path,
     log_dir: &Path,
-    credentials_file: &Path,
+    config_file: &Path,
     museum_port: u16,
-    pglite_port: u16,
-    paste_origin: &str,
 ) -> TestResult<ChildProcess> {
     require_go()?;
 
@@ -24,31 +22,29 @@ pub fn start(
         .arg("run")
         .arg("./cmd/museum")
         .current_dir(server_dir)
-        .env("ENTE_CREDENTIALS_FILE", credentials_file)
-        .env("ENTE_HTTP_PORT", museum_port.to_string())
-        .env("ENTE_APPS_PUBLIC_PASTE", paste_origin)
-        .env("ENTE_DB_HOST", LOCAL_HOST)
-        .env("ENTE_DB_PORT", pglite_port.to_string())
-        .env("ENTE_DB_NAME", "postgres")
-        .env("ENTE_DB_USER", "postgres")
-        .env("ENTE_DB_PASSWORD", "")
-        .env("ENTE_DB_SSLMODE", "disable")
-        .env(
-            "ENTE_INTERNAL_HARDCODED_OTT_LOCAL_DOMAIN_SUFFIX",
-            "@ente-rust-test.org",
-        )
-        .env("ENTE_INTERNAL_HARDCODED_OTT_LOCAL_DOMAIN_VALUE", "123456");
+        .env("ENTE_CREDENTIALS_FILE", config_file);
 
     let mut museum = ChildProcess::spawn("museum", &mut command, log_dir)?;
     wait_for_museum(&mut museum, museum_port)?;
     Ok(museum)
 }
 
-pub fn write_credentials(path: &Path, pglite_port: u16) -> TestResult {
+pub fn write_config(
+    path: &Path,
+    museum_port: u16,
+    pglite_port: u16,
+    paste_origin: &str,
+) -> TestResult {
     fs::write(
         path,
         format!(
-            r#"db:
+            r#"http:
+    port: {museum_port}
+
+apps:
+    public-paste: "{paste_origin}"
+
+db:
     host: {LOCAL_HOST}
     port: {pglite_port}
     name: postgres
@@ -64,19 +60,10 @@ s3:
         endpoint: localhost:3200
         region: eu-central-2
         bucket: b2-eu-cen
-    wasabi-eu-central-2-v3:
-        key: changeme
-        secret: changeme1234
-        endpoint: localhost:3200
-        region: eu-central-2
-        bucket: wasabi-eu-central-2-v3
-        compliance: false
-    scw-eu-fr-v3:
-        key: changeme
-        secret: changeme1234
-        endpoint: localhost:3200
-        region: eu-central-2
-        bucket: scw-eu-fr-v3
+
+jobs:
+    cron:
+        skip: true
 "#
         ),
     )?;
