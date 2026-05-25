@@ -1,6 +1,7 @@
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
-import "package:photos/core/constants.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/only_them_filter.dart";
@@ -16,16 +17,18 @@ import "package:photos/utils/hierarchical_search_util.dart";
 class AppBarFilterChips extends StatefulWidget {
   const AppBarFilterChips({super.key});
 
+  static const chipHeight = 40.0;
+  static const bottomPadding = 8.0;
+  static const preferredHeight = chipHeight + bottomPadding;
+  static const appBarHeight = kToolbarHeight + preferredHeight;
+
   @override
   State<AppBarFilterChips> createState() => _AppBarFilterChipsState();
 }
 
 class _AppBarFilterChipsState extends State<AppBarFilterChips> {
-  final _scrollController = ScrollController();
-  final _filterChipKeys = Expando<GlobalKey>();
-  late SearchFilterDataProvider _searchFilterDataProvider;
-  late List<HierarchicalSearchFilter> _appliedFilters;
-  late List<HierarchicalSearchFilter> _recommendations;
+  final _filterChipKeys = <HierarchicalSearchFilter, GlobalKey>{};
+  SearchFilterDataProvider? _searchFilterDataProvider;
   HierarchicalSearchFilter? _filterToRevealAfterApply;
 
   @override
@@ -36,107 +39,73 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
       inheritedSearchFilterData.isHierarchicalSearchable,
       "Do not use this widget if gallery is not hierarchical searchable",
     );
-    _searchFilterDataProvider =
+    final searchFilterDataProvider =
         inheritedSearchFilterData.searchFilterDataProvider!;
-    _appliedFilters = _searchFilterDataProvider.appliedFilters;
-    _recommendations = getRecommendedFiltersForAppBar(
-      _searchFilterDataProvider,
-    );
-
-    _searchFilterDataProvider.removeListener(
+    if (_searchFilterDataProvider == searchFilterDataProvider) {
+      return;
+    }
+    _searchFilterDataProvider?.removeListener(
       fromApplied: true,
-      listener: onFiltersUpdate,
+      listener: _onFiltersUpdate,
     );
-    _searchFilterDataProvider.removeListener(
+    _searchFilterDataProvider?.removeListener(
       fromRecommended: true,
-      listener: onFiltersUpdate,
+      listener: _onFiltersUpdate,
     );
-    _searchFilterDataProvider.addListener(
+    _searchFilterDataProvider = searchFilterDataProvider;
+    searchFilterDataProvider.addListener(
       toApplied: true,
-      listener: onFiltersUpdate,
+      listener: _onFiltersUpdate,
     );
-    _searchFilterDataProvider.addListener(
+    searchFilterDataProvider.addListener(
       toRecommended: true,
-      listener: onFiltersUpdate,
+      listener: _onFiltersUpdate,
     );
   }
 
   @override
   void dispose() {
-    _searchFilterDataProvider.removeListener(
+    _searchFilterDataProvider?.removeListener(
       fromApplied: true,
-      listener: onFiltersUpdate,
+      listener: _onFiltersUpdate,
     );
-    _searchFilterDataProvider.removeListener(
+    _searchFilterDataProvider?.removeListener(
       fromRecommended: true,
-      listener: onFiltersUpdate,
+      listener: _onFiltersUpdate,
     );
-    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_appliedFilters.isEmpty && _recommendations.isEmpty) {
+    final searchFilterDataProvider = _searchFilterDataProvider!;
+    final appliedFilters = searchFilterDataProvider.appliedFilters;
+    final recommendations = getRecommendedFiltersForAppBar(
+      searchFilterDataProvider,
+    );
+    if (appliedFilters.isEmpty && recommendations.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppBarFilterChips.bottomPadding),
       child: SizedBox(
-        // +1 to account for the filter's outer stroke width
-        height: kFilterChipHeight + 1,
+        height: AppBarFilterChips.chipHeight,
         child: ListView.builder(
-          controller: _scrollController,
           itemBuilder: (context, index) {
             if (index == 0) {
-              return GestureDetector(
-                onTap: () {
-                  showBarModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return SafeArea(
-                        child: FilterOptionsBottomSheet(
-                          _searchFilterDataProvider,
-                        ),
-                      );
-                    },
-                    backgroundColor: getEnteColorScheme(
-                      context,
-                    ).backgroundElevated2,
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).fillFaint,
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(kFilterChipHeight / 2),
-                      ),
-                      border: Border.all(
-                        color: getEnteColorScheme(context).strokeFaint,
-                        width: 0.5,
-                      ),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Icon(Icons.filter_list_rounded, size: 20),
-                    ),
-                  ),
-                ),
-              );
+              return _buildAllFiltersButton(context, searchFilterDataProvider);
             }
 
-            if (index <= _appliedFilters.length) {
-              final filter = _appliedFilters[index - 1];
+            if (index <= appliedFilters.length) {
+              final filter = appliedFilters[index - 1];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: _buildFilterChip(filter),
               );
             }
 
-            final filter = _recommendations[index - _appliedFilters.length - 1];
+            final filter = recommendations[index - appliedFilters.length - 1];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: _buildFilterChip(filter),
@@ -144,8 +113,37 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
           },
           clipBehavior: Clip.none,
           scrollDirection: Axis.horizontal,
-          itemCount: _appliedFilters.length + _recommendations.length + 1,
+          itemCount: appliedFilters.length + recommendations.length + 1,
           padding: const EdgeInsets.symmetric(horizontal: 4),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAllFiltersButton(
+    BuildContext context,
+    SearchFilterDataProvider searchFilterDataProvider,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: SizedBox(
+        height: AppBarFilterChips.chipHeight,
+        child: Center(
+          child: IconButtonComponent(
+            icon: const Icon(Icons.filter_list_rounded),
+            variant: IconButtonComponentVariant.primary,
+            shouldSurfaceExecutionStates: false,
+            tooltip: AppLocalizations.of(context).filter,
+            onTap: () => showBarModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return SafeArea(
+                  child: FilterOptionsBottomSheet(searchFilterDataProvider),
+                );
+              },
+              backgroundColor: getEnteColorScheme(context).backgroundElevated2,
+            ),
+          ),
         ),
       ),
     );
@@ -181,27 +179,20 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
   }
 
   GlobalKey _keyForFilter(HierarchicalSearchFilter filter) {
-    return _filterChipKeys[filter] ??= GlobalKey(
-      debugLabel: "app-bar-filter-${filter.filterTypeName}",
-    );
+    return _filterChipKeys[filter] ??= GlobalKey();
   }
 
   void _applyFilter(HierarchicalSearchFilter filter) {
     _filterToRevealAfterApply = filter;
-    _searchFilterDataProvider.applyFilters([filter]);
+    _searchFilterDataProvider!.applyFilters([filter]);
   }
 
   void _removeFilter(HierarchicalSearchFilter filter) {
-    _searchFilterDataProvider.removeAppliedFilters([filter]);
+    _searchFilterDataProvider!.removeAppliedFilters([filter]);
   }
 
-  void onFiltersUpdate() {
-    setState(() {
-      _appliedFilters = _searchFilterDataProvider.appliedFilters;
-      _recommendations = getRecommendedFiltersForAppBar(
-        _searchFilterDataProvider,
-      );
-    });
+  void _onFiltersUpdate() {
+    setState(() {});
     _revealPendingAppliedFilter();
   }
 
@@ -210,7 +201,9 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
     if (filter == null) {
       return;
     }
-    if (!_appliedFilters.any((applied) => applied.isSameFilter(filter))) {
+    if (!_searchFilterDataProvider!.appliedFilters.any(
+      (applied) => applied.isSameFilter(filter),
+    )) {
       return;
     }
 

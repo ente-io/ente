@@ -63,6 +63,8 @@ import 'package:photos/utils/magic_util.dart';
 import "package:uuid/uuid.dart";
 
 class GalleryAppBarWidget extends StatefulWidget {
+  static const hierarchicalPreferredHeight = AppBarFilterChips.appBarHeight;
+
   final GalleryType type;
   final String? title;
   final SelectedFiles selectedFiles;
@@ -197,8 +199,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 .searchFilterDataProvider!
                 .isSearchingNotifier,
             child: const PreferredSize(
-              preferredSize: Size.fromHeight(0),
-              child: Flexible(child: AppBarFilterChips()),
+              preferredSize: Size.fromHeight(AppBarFilterChips.preferredHeight),
+              child: AppBarFilterChips(),
             ),
             builder: (context, isSearching, child) {
               return AppBar(

@@ -4,7 +4,6 @@ import "package:email_validator/email_validator.dart";
 import "package:ente_contacts/contacts.dart" as contacts;
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/contacts_changed_event.dart";
 import "package:photos/events/files_updated_event.dart";
@@ -576,7 +575,6 @@ class _UnsavedContactEmptyState extends StatelessWidget {
 class _ContactResultAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   static const _toolbarHeight = 56.0;
-  static const _bottomPadding = 8.0;
 
   final bool isHierarchicalSearchable;
 
@@ -584,7 +582,7 @@ class _ContactResultAppBar extends StatelessWidget
 
   static double preferredHeight({required bool isHierarchicalSearchable}) {
     return isHierarchicalSearchable
-        ? _toolbarHeight + kFilterChipHeight + _bottomPadding + 1
+        ? AppBarFilterChips.appBarHeight
         : _toolbarHeight;
   }
 
@@ -613,7 +611,7 @@ class _ContactResultAppBar extends StatelessWidget
       surfaceTintColor: Colors.transparent,
       titleSpacing: 0,
       bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(0),
+        preferredSize: Size.fromHeight(AppBarFilterChips.preferredHeight),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 12),
           child: AppBarFilterChips(),

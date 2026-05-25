@@ -209,7 +209,9 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
           searchFilterDataProvider: _searchFilterDataProvider,
           child: Scaffold(
             appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(90.0),
+              preferredSize: const Size.fromHeight(
+                GalleryAppBarWidget.hierarchicalPreferredHeight,
+              ),
               child: _enableGrouping
                   ? GalleryAppBarWidget(
                       MagicResultScreen.appBarType,

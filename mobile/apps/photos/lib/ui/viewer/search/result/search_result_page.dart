@@ -108,7 +108,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
           searchFilterDataProvider: _searchFilterDataProvider,
           child: Scaffold(
             appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(90.0),
+              preferredSize: const Size.fromHeight(
+                GalleryAppBarWidget.hierarchicalPreferredHeight,
+              ),
               child: widget.enableGrouping
                   ? GalleryAppBarWidget(
                       SearchResultPage.appBarType,

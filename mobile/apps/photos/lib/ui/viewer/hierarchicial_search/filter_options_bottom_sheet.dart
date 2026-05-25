@@ -54,7 +54,6 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                           FaceFilterChip(
                             personId: filter.personId,
                             clusterId: filter.clusterId,
-                            isInAllFiltersView: true,
                             apply: () {
                               widget.searchFilterDataProvider.applyFilters([
                                 filter,
@@ -83,7 +82,6 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                               Navigator.of(context).pop();
                             },
                             isApplied: filter.isApplied,
-                            isInAllFiltersView: true,
                           )
                         else
                           GenericFilterChip(
@@ -101,7 +99,6 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                               Navigator.of(context).pop();
                             },
                             isApplied: filter.isApplied,
-                            isInAllFiltersView: true,
                           ),
                     ],
                   ),
