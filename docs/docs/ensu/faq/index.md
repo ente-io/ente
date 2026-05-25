@@ -92,7 +92,15 @@ Not in the current release. Ensu ships with a fixed default model for each platf
 
 Yes. Ensu supports image attachments on iOS, Android, and desktop. You can attach photos from your device and ask the model about them. The model processes the image locally, and the image is never uploaded anywhere.
 
+Recent updates have also made image attachments feel smoother in practice, with better compression, thumbnails, full-screen previews, and cleaner previews in the composer.
+
 Image attachments are not supported on the web version at this time.
+
+### Can I talk to Ensu instead of typing? {#voice-input}
+
+Yes, on iOS and Android. Tap the microphone in the chat composer and speak your prompt. Ensu transcribes it locally on your device, so your voice input is not sent to Ente or any external transcription service.
+
+This voice input feature is not available on the web version, and desktop support may differ by release.
 
 ### Does Ensu support web search? {#web-search}
 
