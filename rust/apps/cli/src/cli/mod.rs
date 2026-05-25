@@ -7,7 +7,7 @@ pub mod version;
 
 #[derive(Parser)]
 #[command(name = "ente")]
-#[command(about = "CLI tool for exporting your photos from Ente", long_about = None)]
+#[command(about = "Command-line interface for Ente", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,

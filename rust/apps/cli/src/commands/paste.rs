@@ -1,4 +1,5 @@
 use crate::{
+    api::client::USER_AGENT,
     cli::paste::{PasteCommand, PasteSubcommands},
     models::error::{Error, Result},
 };
@@ -16,7 +17,6 @@ const FRAGMENT_SECRET_LENGTH: usize = 12;
 const FRAGMENT_SECRET_ALPHABET: &[u8] =
     b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const PASTE_GUARD_COOKIE: &str = "paste_guard";
-const USER_AGENT: &str = concat!("ente-cli-rust/", env!("CARGO_PKG_VERSION"));
 
 pub async fn handle_paste_command(cmd: PasteCommand) -> Result<()> {
     match cmd.command {
