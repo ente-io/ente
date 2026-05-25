@@ -18,6 +18,7 @@ class FilterOptionsBottomSheet extends StatefulWidget {
 
 class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
   static const _maxContentHeightFactor = 0.68;
+  static const _topFadeHeight = 16.0;
 
   late final Map<String, List<HierarchicalSearchFilter>> _filtersByType;
 
@@ -40,7 +41,8 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
           maxHeight:
               MediaQuery.sizeOf(context).height * _maxContentHeightFactor,
         ),
-        child: SingleChildScrollView(
+        child: _TopFadingScrollView(
+          fadeHeight: _topFadeHeight,
           child: SizedBox(
             width: double.infinity,
             child: Column(
@@ -127,6 +129,50 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
 
   List<HierarchicalSearchFilter> _filters(String type) {
     return _filtersByType[type] ?? const [];
+  }
+}
+
+class _TopFadingScrollView extends StatefulWidget {
+  const _TopFadingScrollView({required this.fadeHeight, required this.child});
+
+  final double fadeHeight;
+  final Widget child;
+
+  @override
+  State<_TopFadingScrollView> createState() => _TopFadingScrollViewState();
+}
+
+class _TopFadingScrollViewState extends State<_TopFadingScrollView> {
+  bool _hasScrolled = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (bounds) {
+        final fadeStop = (widget.fadeHeight / bounds.height).clamp(0.0, 1.0);
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: _hasScrolled
+              ? const [Colors.transparent, Colors.black, Colors.black]
+              : const [Colors.black, Colors.black, Colors.black],
+          stops: [0, fadeStop.toDouble(), 1],
+        ).createShader(bounds);
+      },
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _updateHasScrolled,
+        child: SingleChildScrollView(child: widget.child),
+      ),
+    );
+  }
+
+  bool _updateHasScrolled(ScrollNotification notification) {
+    final hasScrolled = notification.metrics.pixels > 0;
+    if (hasScrolled != _hasScrolled) {
+      setState(() => _hasScrolled = hasScrolled);
+    }
+    return false;
   }
 }
 
