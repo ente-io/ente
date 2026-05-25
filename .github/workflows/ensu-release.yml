@@ -109,6 +109,11 @@ jobs:
                   rc_tag="ensu-v${VERSION}-rc"
                   final_tag="ensu-v${VERSION}"
 
+                  if ! rc_is_draft="$(gh release view "${rc_tag}" --json isDraft --jq .isDraft 2>/dev/null)" || [ "${rc_is_draft}" != "true" ]; then
+                      echo "::error::${rc_tag} draft release does not exist"
+                      exit 1
+                  fi
+
                   branch_version="$(node .github/scripts/ensu-version.mjs get)"
                   if [ "${branch_version}" != "${VERSION}" ]; then
                       echo "::error::${release_branch} is ${branch_version}, expected ${VERSION}"

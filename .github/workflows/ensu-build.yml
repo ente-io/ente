@@ -167,7 +167,7 @@ jobs:
                   AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                   AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
               run: |
-                  cargo install --locked trusted-signing-cli --version 0.11.0
+                  cargo install --locked artifact-signing-cli --version 0.11.0
                   echo "$(cygpath -w "$HOME/.cargo/bin")" >> $GITHUB_PATH
                   SIGNTOOL_PATH=$(powershell -NoProfile -Command "Get-ChildItem 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe' -ErrorAction Stop | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName" | tr -d '\r')
                   test -n "$SIGNTOOL_PATH"
