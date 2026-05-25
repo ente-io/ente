@@ -9,6 +9,7 @@ permissions:
 jobs:
     deploy:
         runs-on: ubuntu-latest
+        environment: production
 
         defaults:
             run:

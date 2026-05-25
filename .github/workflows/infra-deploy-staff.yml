@@ -16,6 +16,7 @@ permissions:
 jobs:
     lint:
         runs-on: ubuntu-latest
+        environment: production
 
         defaults:
             run:
