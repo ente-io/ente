@@ -44,10 +44,12 @@ class BannerActionButton extends StatelessWidget {
       fontWeight: FontWeight.w700,
     );
 
-    final resolvedTagBackgroundColor =
-        stickTagToLightTheme ? fillLight : colorScheme.fillReverse;
-    final resolvedTagForegroundColor =
-        stickTagToLightTheme ? contentLight : colorScheme.contentReverse;
+    final resolvedTagBackgroundColor = stickTagToLightTheme
+        ? fillLight
+        : colorScheme.fillReverse;
+    final resolvedTagForegroundColor = stickTagToLightTheme
+        ? contentLight
+        : colorScheme.contentReverse;
     final tagTextStyle = textTheme.miniBold.copyWith(
       color: resolvedTagForegroundColor,
       fontWeight: FontWeight.w900,
@@ -79,6 +81,7 @@ class BannerActionButton extends StatelessWidget {
 
     return Stack(
       clipBehavior: Clip.none,
+      fit: StackFit.passthrough,
       children: [
         Positioned(
           top: -17,
