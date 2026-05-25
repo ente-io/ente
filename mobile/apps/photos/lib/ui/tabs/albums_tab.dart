@@ -822,7 +822,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                   duration: _kSearchTransitionDuration,
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeInCubic,
-                  child: _isSearchActive
+                  child: _isSearchActive || localGalleryMode
                       ? const SizedBox.shrink(key: ValueKey("hidden_filters"))
                       : Padding(
                           key: const ValueKey("album_filters"),

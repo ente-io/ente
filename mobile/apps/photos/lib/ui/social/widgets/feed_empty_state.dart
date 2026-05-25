@@ -1,10 +1,9 @@
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/account/email_entry_page.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/components/banners/banner_action_button.dart";
 import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
 
 class FeedEmptyState extends StatelessWidget {
@@ -12,115 +11,177 @@ class FeedEmptyState extends StatelessWidget {
 
   final bool localGalleryMode;
 
+  static const _topPadding = 32.0;
+  static const _sectionSpacing = 48.0;
+  static const _contentWidth = 343.0;
+  static const _featureWidth = 300.0;
+  static const _assetHeight = 150.0;
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final strings = AppLocalizations.of(context);
     final bottomPadding = 64 + MediaQuery.paddingOf(context).bottom + 32;
+    final content = _content(context, strings);
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16, 32, 16, bottomPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 320),
-              child: Column(
-                children: [
-                  Text(
-                    localGalleryMode
-                        ? strings.seeWhatYourPeopleAreUpTo
-                        : strings.nothingHereYet,
-                    textAlign: TextAlign.center,
-                    style: textTheme.largeBold.copyWith(
-                      fontFamily: "Nunito",
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                      height: 28 / 18,
-                      color: colorScheme.content,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    localGalleryMode
-                        ? strings.signUpToShareMomentsPrivately
-                        : strings.shareAnAlbumWithSomeoneYouLove,
-                    textAlign: TextAlign.center,
-                    style: textTheme.miniMuted,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 320),
-              child: Column(
-                children: localGalleryMode
-                    ? [
-                        EmptyStateFeatureRow(
-                          icon: HugeIcons.strokeRoundedFavourite,
-                          label: strings.reactToTheMomentsThatMatter,
-                        ),
-                        const SizedBox(height: 24),
-                        EmptyStateFeatureRow(
-                          icon: HugeIcons.strokeRoundedComment01,
-                          label: strings.leaveANoteOnTheMomentsSharedWithYou,
-                        ),
-                        const SizedBox(height: 24),
-                        EmptyStateFeatureRow(
-                          icon: HugeIcons.strokeRoundedLockSync01,
-                          label:
-                              strings.endToEndEncryptedOnlyYourPeopleCanSeeIt,
-                        ),
-                      ]
-                    : [
-                        EmptyStateFeatureRow(
-                          icon: HugeIcons.strokeRoundedFavourite,
-                          label: strings.seeTheLoveYourPhotosGet,
-                        ),
-                        const SizedBox(height: 24),
-                        EmptyStateFeatureRow(
-                          icon: HugeIcons.strokeRoundedComment01,
-                          label: strings.yourConversationsAttachedToTheMoment,
-                        ),
-                        const SizedBox(height: 24),
-                        EmptyStateFeatureRow(
-                          icon: HugeIcons.strokeRoundedUserMultiple,
-                          label: strings.stayConnectedWithThePeopleYouShareWith,
-                        ),
-                      ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.primary,
-              labelText: localGalleryMode
-                  ? strings.getStarted
-                  : strings.shareAnAlbum,
-              onTap: () async {
-                if (localGalleryMode) {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const EmailEntryPage(
-                        showReferralSourceField: false,
-                        referralSource: "Offline",
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  _topPadding,
+                  16,
+                  bottomPadding,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _FeedAssetSlot(assetPath: content.assetPath),
+                    const SizedBox(height: _sectionSpacing),
+                    SizedBox(
+                      width: _contentWidth,
+                      child: Column(
+                        children: [
+                          Text(
+                            content.title,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Nunito",
+                              fontWeight: FontWeight.w800,
+                              fontSize: 24,
+                              height: 28 / 24,
+                              letterSpacing: 0,
+                              color: colors.textBase,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: _featureWidth,
+                            child: Column(
+                              children: [
+                                EmptyStateBulletFeatureRow(
+                                  label: content.features[0],
+                                ),
+                                const SizedBox(height: 12),
+                                EmptyStateBulletFeatureRow(
+                                  label: content.features[1],
+                                ),
+                                const SizedBox(height: 12),
+                                EmptyStateBulletFeatureRow(
+                                  label: content.features[2],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                  return;
-                }
-                showCollectionActionSheet(
-                  context,
-                  actionType: CollectionActionType.shareCollection,
-                );
-              },
+                    const SizedBox(height: _sectionSpacing),
+                    SizedBox(
+                      width: content.showTag ? _featureWidth : _contentWidth,
+                      child: BannerActionButton(
+                        label: content.buttonLabel,
+                        variant: BannerActionButtonVariant.primary,
+                        showTag: content.showTag,
+                        onTap: content.onTap,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
+    );
+  }
+
+  _FeedEmptyStateContent _content(
+    BuildContext context,
+    AppLocalizations strings,
+  ) {
+    if (localGalleryMode) {
+      return _FeedEmptyStateContent(
+        assetPath: "assets/shared.png",
+        title: strings.albumsSharedEmptyTitle,
+        features: [
+          strings.albumsSharedEmptyFeatureShareLovedOnes,
+          strings.albumsSharedEmptyFeatureReactAndComment,
+          strings.albumsSharedEmptyFeaturePrivacy,
+        ],
+        buttonLabel: strings.getStarted,
+        showTag: true,
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const EmailEntryPage(
+                showReferralSourceField: false,
+                referralSource: "Offline",
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    return _FeedEmptyStateContent(
+      assetPath: "assets/feed.png",
+      title: strings.albumsSharedEmptyTitle,
+      features: [
+        strings.albumsSharedEmptyFeatureShareLovedOnes,
+        strings.albumsSharedEmptyFeatureReactAndComment,
+        strings.albumsSharedEmptyFeaturePrivacy,
+      ],
+      buttonLabel: strings.shareAnAlbum,
+      onTap: () {
+        showCollectionActionSheet(
+          context,
+          actionType: CollectionActionType.shareCollection,
+        );
+      },
+    );
+  }
+}
+
+class _FeedEmptyStateContent {
+  const _FeedEmptyStateContent({
+    required this.assetPath,
+    required this.title,
+    required this.features,
+    required this.buttonLabel,
+    required this.onTap,
+    this.showTag = false,
+  });
+
+  final String? assetPath;
+  final String title;
+  final List<String> features;
+  final String buttonLabel;
+  final VoidCallback onTap;
+  final bool showTag;
+}
+
+class _FeedAssetSlot extends StatelessWidget {
+  const _FeedAssetSlot({required this.assetPath});
+
+  final String? assetPath;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = assetPath;
+    if (path != null) {
+      return Image.asset(path);
+    }
+
+    return const SizedBox(
+      width: FeedEmptyState._contentWidth,
+      height: FeedEmptyState._assetHeight,
     );
   }
 }

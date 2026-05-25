@@ -17,7 +17,7 @@ import "package:photos/ui/collections/device/device_folder_list_item.dart";
 import "package:photos/ui/collections/device/device_folder_row_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/searchable_appbar.dart';
-import "package:photos/ui/tabs/albums/empty_states/on_device_select_folders_empty_state.dart";
+import "package:photos/ui/tabs/albums/empty_states/on_device_empty_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/utils/device_collection_sort_util.dart";
 import "package:photos/utils/local_settings.dart";
@@ -165,7 +165,7 @@ class _DeviceFolderVerticalGridViewBodyState
     if (backupPreferenceService.hasSkippedOnboardingPermission) {
       return SliverFillRemaining(
         hasScrollBody: false,
-        child: OnDeviceSelectFoldersEmptyState(
+        child: OnDeviceEmptyState.permission(
           onFoldersSelected: () {
             _refreshDeviceCollections();
           },
@@ -199,11 +199,18 @@ class _DeviceFolderVerticalGridViewBodyState
               return widget.emptyStateSliver!;
             }
             return widget.showEmptyState
-                ? const SliverFillRemaining(
-                    child: Padding(
-                      padding: EdgeInsets.all(22),
-                      child: EmptyState(),
-                    ),
+                ? SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: widget.searchQuery.isEmpty
+                        ? OnDeviceEmptyState.noFolders(
+                            onFoldersSelected: _refreshDeviceCollections,
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(22),
+                            child: EmptyState(
+                              text: AppLocalizations.of(context).noResultsFound,
+                            ),
+                          ),
                   )
                 : const SliverToBoxAdapter(child: SizedBox.shrink());
           }
