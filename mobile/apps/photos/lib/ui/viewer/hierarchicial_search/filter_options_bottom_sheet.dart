@@ -1,11 +1,7 @@
 import "package:flutter/material.dart";
-import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
-import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/face_filter_chip.dart";
-import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/generic_filter_chip.dart";
-import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/only_them_filter_chip.dart";
+import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/hierarchical_filter_chip.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 
 class FilterOptionsBottomSheet extends StatefulWidget {
@@ -18,13 +14,14 @@ class FilterOptionsBottomSheet extends StatefulWidget {
 }
 
 class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
-  late final Map<String, List<HierarchicalSearchFilter>> _filters;
+  late final List<List<HierarchicalSearchFilter>> _filterGroups;
 
   @override
   void initState() {
     super.initState();
-    _filters = getFiltersForBottomSheet(widget.searchFilterDataProvider);
-    _filters.removeWhere((key, value) => value.isEmpty);
+    _filterGroups = getFiltersForBottomSheet(
+      widget.searchFilterDataProvider,
+    ).values.where((filters) => filters.isNotEmpty).toList();
   }
 
   @override
@@ -38,7 +35,7 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (String filterName in _filters.keys)
+              for (final filters in _filterGroups)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -48,58 +45,7 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                     spacing: 6,
                     runSpacing: 6,
                     children: [
-                      for (HierarchicalSearchFilter filter
-                          in _filters[filterName]!)
-                        if (filter is FaceFilter)
-                          FaceFilterChip(
-                            personId: filter.personId,
-                            clusterId: filter.clusterId,
-                            apply: () {
-                              widget.searchFilterDataProvider.applyFilters([
-                                filter,
-                              ]);
-                              Navigator.of(context).pop();
-                            },
-                            remove: () {
-                              widget.searchFilterDataProvider
-                                  .removeAppliedFilters([filter]);
-                              Navigator.of(context).pop();
-                            },
-                            isApplied: filter.isApplied,
-                          )
-                        else if (filter is OnlyThemFilter)
-                          OnlyThemFilterChip(
-                            faceFilters: filter.faceFilters,
-                            apply: () {
-                              widget.searchFilterDataProvider.applyFilters([
-                                filter,
-                              ]);
-                              Navigator.of(context).pop();
-                            },
-                            remove: () {
-                              widget.searchFilterDataProvider
-                                  .removeAppliedFilters([filter]);
-                              Navigator.of(context).pop();
-                            },
-                            isApplied: filter.isApplied,
-                          )
-                        else
-                          GenericFilterChip(
-                            label: filter.name(),
-                            leadingIcon: filter.icon(),
-                            apply: () {
-                              widget.searchFilterDataProvider.applyFilters([
-                                filter,
-                              ]);
-                              Navigator.of(context).pop();
-                            },
-                            remove: () {
-                              widget.searchFilterDataProvider
-                                  .removeAppliedFilters([filter]);
-                              Navigator.of(context).pop();
-                            },
-                            isApplied: filter.isApplied,
-                          ),
+                      for (final filter in filters) _buildFilterChip(filter),
                     ],
                   ),
                 ),
@@ -108,5 +54,23 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
         ),
       ),
     );
+  }
+
+  Widget _buildFilterChip(HierarchicalSearchFilter filter) {
+    return HierarchicalFilterChip(
+      filter: filter,
+      apply: () => _applyFilter(filter),
+      remove: () => _removeFilter(filter),
+    );
+  }
+
+  void _applyFilter(HierarchicalSearchFilter filter) {
+    widget.searchFilterDataProvider.applyFilters([filter]);
+    Navigator.of(context).pop();
+  }
+
+  void _removeFilter(HierarchicalSearchFilter filter) {
+    widget.searchFilterDataProvider.removeAppliedFilters([filter]);
+    Navigator.of(context).pop();
   }
 }

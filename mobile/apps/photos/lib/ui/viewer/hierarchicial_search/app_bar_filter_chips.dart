@@ -2,15 +2,11 @@ import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
-import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/face_filter_chip.dart";
-import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/generic_filter_chip.dart";
-import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/only_them_filter_chip.dart";
+import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/hierarchical_filter_chip.dart";
 import "package:photos/ui/viewer/hierarchicial_search/filter_options_bottom_sheet.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 
@@ -148,28 +144,11 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
     final chipKey = _keyForFilter(filter);
     return KeyedSubtree(
       key: chipKey,
-      child: filter is FaceFilter
-          ? FaceFilterChip(
-              personId: filter.personId,
-              clusterId: filter.clusterId,
-              apply: () => _applyFilter(filter),
-              remove: () => _removeFilter(filter),
-              isApplied: filter.isApplied,
-            )
-          : filter is OnlyThemFilter
-          ? OnlyThemFilterChip(
-              faceFilters: filter.faceFilters,
-              apply: () => _applyFilter(filter),
-              remove: () => _removeFilter(filter),
-              isApplied: filter.isApplied,
-            )
-          : GenericFilterChip(
-              label: filter.name(),
-              apply: () => _applyFilter(filter),
-              remove: () => _removeFilter(filter),
-              leadingIcon: filter.icon(),
-              isApplied: filter.isApplied,
-            ),
+      child: HierarchicalFilterChip(
+        filter: filter,
+        apply: () => _applyFilter(filter),
+        remove: () => _removeFilter(filter),
+      ),
     );
   }
 
@@ -196,9 +175,7 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
     if (filter == null) {
       return;
     }
-    if (!_searchFilterDataProvider!.appliedFilters.any(
-      (applied) => applied.isSameFilter(filter),
-    )) {
+    if (!_searchFilterDataProvider!.appliedFilters.contains(filter)) {
       return;
     }
 
@@ -207,7 +184,7 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
       if (!mounted) {
         return;
       }
-      final chipContext = _keyForFilter(filter).currentContext;
+      final chipContext = _filterChipKeys[filter]?.currentContext;
       if (chipContext == null) {
         return;
       }
