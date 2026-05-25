@@ -42,70 +42,80 @@ class OnDeviceEmptyState extends StatelessWidget {
       strings.albumsOnDevicePermissionFeatureControlUploads,
     ];
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          _permissionTopPadding,
-          16,
-          bottomPadding,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: _contentWidth,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    "assets/on_device.png",
-                  ),
-                  const SizedBox(height: _permissionSectionSpacing),
-                  Text(
-                    strings.allowAccessToYourPhotos,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: "Nunito",
-                      fontWeight: FontWeight.w800,
-                      fontSize: 24,
-                      height: 28 / 24,
-                      letterSpacing: 0,
-                      color: colors.textBase,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  _permissionTopPadding,
+                  16,
+                  bottomPadding,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: _contentWidth,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            "assets/on_device.png",
+                          ),
+                          const SizedBox(height: _permissionSectionSpacing),
+                          Text(
+                            strings.allowAccessToYourPhotos,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Nunito",
+                              fontWeight: FontWeight.w800,
+                              fontSize: 24,
+                              height: 28 / 24,
+                              letterSpacing: 0,
+                              color: colors.textBase,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: _featureWidth,
+                            child: Column(
+                              children: [
+                                EmptyStateBulletFeatureRow(
+                                  label: features[0],
+                                ),
+                                const SizedBox(height: 12),
+                                EmptyStateBulletFeatureRow(
+                                  label: features[1],
+                                ),
+                                const SizedBox(height: 12),
+                                EmptyStateBulletFeatureRow(
+                                  label: features[2],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: _featureWidth,
-                    child: Column(
-                      children: [
-                        EmptyStateBulletFeatureRow(
-                          label: features[0],
-                        ),
-                        const SizedBox(height: 12),
-                        EmptyStateBulletFeatureRow(
-                          label: features[1],
-                        ),
-                        const SizedBox(height: 12),
-                        EmptyStateBulletFeatureRow(
-                          label: features[2],
-                        ),
-                      ],
+                    const SizedBox(height: _permissionSectionSpacing),
+                    ButtonComponent(
+                      label: strings.albumsOnDevicePermissionCta,
+                      shouldSurfaceExecutionStates: false,
+                      onTap: () => _selectFolders(context),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: _permissionSectionSpacing),
-            ButtonComponent(
-              label: strings.albumsOnDevicePermissionCta,
-              shouldSurfaceExecutionStates: false,
-              onTap: () => _selectFolders(context),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
