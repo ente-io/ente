@@ -9,11 +9,11 @@ use uuid::Uuid;
 use super::{Cli, LOCAL_HOST, TestResult, museum, pglite, process::ChildProcess};
 
 pub struct Fixture {
+    _museum: ChildProcess,
+    _pglite: ChildProcess,
     temp_dir: TempDir,
     endpoint: String,
     paste_origin: String,
-    _pglite: ChildProcess,
-    _museum: ChildProcess,
 }
 
 impl Fixture {
@@ -57,11 +57,11 @@ impl Fixture {
         };
 
         Ok(Self {
+            _museum: museum,
+            _pglite: pglite,
             temp_dir,
             endpoint,
             paste_origin,
-            _pglite: pglite,
-            _museum: museum,
         })
     }
 

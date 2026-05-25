@@ -92,8 +92,6 @@ async fn consume_paste(
     access_token: &str,
     fragment_secret: &str,
 ) -> Result<String> {
-    validate_fragment_secret(fragment_secret)?;
-
     let client = paste_http_client()?;
     let request = PasteTokenRequest {
         access_token: access_token.to_string(),
@@ -231,8 +229,6 @@ fn encrypt_paste_for_create(text: &str) -> Result<(String, PastePayload)> {
 }
 
 fn decrypt_consumed_paste(fragment_secret: &str, payload: &PastePayload) -> Result<String> {
-    validate_fragment_secret(fragment_secret)?;
-
     let salt = BASE64.decode(&payload.kdf_nonce)?;
     let key_encryption_key = argon::derive_key(
         fragment_secret,
