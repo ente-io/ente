@@ -1,4 +1,4 @@
-name: "Lint (rust)"
+name: "Lint (Rust)"
 
 on:
     pull_request:

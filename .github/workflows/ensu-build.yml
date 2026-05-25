@@ -1,4 +1,4 @@
-name: "Build (ensu)"
+name: "Build (Ensu)"
 
 # See .github/docs/ensu-release.md
 
@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
     build-metadata:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-latest
 
         outputs:
             should_build: ${{ steps.prepare.outputs.should_build }}
@@ -37,7 +37,7 @@ jobs:
             android_apk_name: ${{ steps.prepare.outputs.android_apk_name }}
 
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
               with:
                   ref: ${{ github.ref_name }}
@@ -96,6 +96,8 @@ jobs:
             fail-fast: false
             matrix:
                 platform:
+                    # Tauri v1 needs WebKitGTK 4.0, which Ubuntu 24.04 no
+                    # longer ships (see also: rust-lint.yml).
                     - os: ubuntu-22.04
                       rust-target: x86_64-unknown-linux-gnu
                       bundle-targets: appimage,deb,rpm,updater
@@ -116,7 +118,7 @@ jobs:
             RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
 
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
               with:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
@@ -229,7 +231,7 @@ jobs:
                 working-directory: mobile/native/android/apps/ensu
 
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
               with:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
@@ -308,7 +310,7 @@ jobs:
                 working-directory: mobile/native/darwin/Apps/Ensu
 
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
               with:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
@@ -362,7 +364,7 @@ jobs:
     finish-build:
         needs: [build-metadata, build-desktop, build-android, build-ios]
         if: needs.build-metadata.outputs.should_build == 'true'
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-latest
 
         steps:
             - name: Checkout built commit
