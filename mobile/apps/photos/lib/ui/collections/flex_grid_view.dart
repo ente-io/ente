@@ -126,41 +126,20 @@ class _CollectionsFlexiGridViewWidgetState
   }
 
   Future<void> _createAlbum() async {
-    final result = await showTextInputDialog(
-      context,
-      title: AppLocalizations.of(context).newAlbum,
-      submitButtonLabel: AppLocalizations.of(context).create,
-      hintText: AppLocalizations.of(context).enterAlbumName,
-      alwaysShowSuccessState: false,
-      initialValue: "",
-      textCapitalization: TextCapitalization.words,
-      popnavAfterSubmission: false,
-      onSubmit: (String text) async {
-        text = text.trim();
-        if (text == "") {
-          return;
-        }
-
-        try {
-          final Collection c = await CollectionsService.instance.createAlbum(
-            text,
-          );
-          // ignore: unawaited_futures
-          await routeToPage(
-            context,
-            CollectionPage(CollectionWithThumbnail(c, null)),
-          );
-          Navigator.of(context).pop();
-        } catch (e, s) {
-          Logger(
-            "CollectionsFlexiGridViewWidget",
-          ).severe("Failed to create album", e, s);
-          rethrow;
-        }
-      },
+    final result = await showBottomSheetComponent<Object?>(
+      context: context,
+      builder: (_) => const _CreateAlbumBottomSheet(),
     );
 
-    if (result is Exception) {
+    if (!mounted || result == null) {
+      return;
+    }
+    if (result is Collection) {
+      await routeToPage(
+        context,
+        CollectionPage(CollectionWithThumbnail(result, null)),
+      );
+    } else {
       await showGenericErrorDialog(context: context, error: result);
     }
   }
@@ -220,6 +199,7 @@ class _CollectionsFlexiGridViewWidgetState
             return NewAlbumRowItemWidget(
               height: sideOfThumbnail,
               width: sideOfThumbnail,
+              onTap: (_) => _createAlbum(),
             );
           }
           final collectionIndex = showCreateAlbum ? index - 1 : index;
@@ -290,14 +270,18 @@ class _CollectionsFlexiGridViewWidgetState
       sliver: SliverList.builder(
         itemBuilder: (context, index) {
           Widget item;
+          Key itemKey;
 
           if (showCreateAlbum && index == 0) {
+            itemKey = ValueKey("${widget.tag}_new_album_list_item");
             item = NewAlbumListItemWidget(onTap: (_) => _createAlbum());
           } else {
             final collectionIndex = showCreateAlbum ? index - 1 : index;
+            final collection = widget.collections![collectionIndex];
+            itemKey = ValueKey("${widget.tag}_list_${collection.id}");
 
             item = AlbumListItemWidget(
-              widget.collections![collectionIndex],
+              collection,
               selectedAlbums: widget.selectedAlbums,
               onTapCallback: (c) {
                 isAnyAlbumSelected
@@ -315,6 +299,7 @@ class _CollectionsFlexiGridViewWidgetState
           }
 
           return Padding(
+            key: itemKey,
             padding: const EdgeInsets.symmetric(
               vertical: ThumbnailListItem.defaultItemSpacing / 2,
             ),
@@ -324,5 +309,80 @@ class _CollectionsFlexiGridViewWidgetState
         itemCount: displayItemCount,
       ),
     );
+  }
+}
+
+class _CreateAlbumBottomSheet extends StatefulWidget {
+  const _CreateAlbumBottomSheet();
+
+  @override
+  State<_CreateAlbumBottomSheet> createState() =>
+      _CreateAlbumBottomSheetState();
+}
+
+class _CreateAlbumBottomSheetState extends State<_CreateAlbumBottomSheet> {
+  final _controller = TextEditingController();
+  bool _hasAlbumName = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    return BottomSheetComponent(
+      title: strings.newAlbum,
+      isKeyboardAware: true,
+      content: TextInputComponent(
+        controller: _controller,
+        hintText: strings.enterAlbumName,
+        autofocus: true,
+        isClearable: true,
+        textCapitalization: TextCapitalization.words,
+        onSubmit: (_) => _createAlbum(),
+        onChanged: (_) {
+          final hasAlbumName = _controller.text.trim().isNotEmpty;
+          if (_hasAlbumName == hasAlbumName) {
+            return;
+          }
+          setState(() {
+            _hasAlbumName = hasAlbumName;
+          });
+        },
+      ),
+      actions: [
+        ButtonComponent(
+          label: strings.create,
+          isDisabled: !_hasAlbumName,
+          onTap: _createAlbum,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _createAlbum() async {
+    final albumName = _controller.text.trim();
+    if (albumName.isEmpty) {
+      return;
+    }
+
+    try {
+      final collection = await CollectionsService.instance.createAlbum(
+        albumName,
+      );
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop(collection);
+    } catch (e, s) {
+      Logger("CreateAlbumBottomSheet").severe("Failed to create album", e, s);
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop(e);
+    }
   }
 }

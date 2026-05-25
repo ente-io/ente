@@ -10,8 +10,6 @@ const double kCollectionBadgeStrokeWidth = 2.0;
 const double kCollectionBadgeBorderWidth = 1.0;
 
 class CollectionStatusBadge extends StatelessWidget {
-  static const Color backgroundColor = Color.fromRGBO(0, 0, 0, 0.24);
-
   final Widget child;
 
   const CollectionStatusBadge({super.key, required this.child});
@@ -21,10 +19,7 @@ class CollectionStatusBadge extends StatelessWidget {
     return Container(
       width: kCollectionBadgeSize,
       height: kCollectionBadgeSize,
-      decoration: const BoxDecoration(
-        color: backgroundColor,
-        shape: BoxShape.circle,
-      ),
+      decoration: const BoxDecoration(shape: BoxShape.circle),
       child: Center(child: child),
     );
   }
@@ -68,11 +63,10 @@ class CollectionPinnedBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CollectionStatusBadge(
-      child: HugeIcon(
-        icon: HugeIcons.strokeRoundedPin,
+      child: ImageIcon(
+        AssetImage("assets/collection_pin.png"),
         size: kCollectionBadgeIconSize,
         color: Colors.white,
-        strokeWidth: kCollectionBadgeStrokeWidth,
       ),
     );
   }
@@ -94,23 +88,31 @@ class CollectionArchivedBadge extends StatelessWidget {
   }
 }
 
+enum CollectionShareBadgeVariant { filled, outlined }
+
 class CollectionShareBadge extends StatelessWidget {
   final bool isOutgoing;
+  final CollectionShareBadgeVariant variant;
 
-  const CollectionShareBadge({super.key, required this.isOutgoing});
+  const CollectionShareBadge({
+    super.key,
+    required this.isOutgoing,
+    this.variant = CollectionShareBadgeVariant.filled,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final isOutlined = variant == CollectionShareBadgeVariant.outlined;
     return Container(
-      width: kCollectionBadgeSize,
-      height: kCollectionBadgeSize,
+      width: 12,
+      height: 12,
       decoration: BoxDecoration(
-        color: colorScheme.greenBase,
+        color: isOutlined ? Colors.transparent : colorScheme.greenBase,
         shape: BoxShape.circle,
         border: Border.all(
-          color: colorScheme.fill,
-          width: kCollectionBadgeBorderWidth,
+          color: isOutlined ? colorScheme.greenBase : colorScheme.fill,
+          width: isOutlined ? 1.0 : kCollectionBadgeBorderWidth,
         ),
       ),
       child: Center(
@@ -119,8 +121,8 @@ class CollectionShareBadge extends StatelessWidget {
               ? HugeIcons.strokeRoundedArrowUpRight01
               : HugeIcons.strokeRoundedArrowDownLeft01,
           strokeWidth: kCollectionBadgeStrokeWidth,
-          color: Colors.white,
-          size: kCollectionBadgeIconSize,
+          color: isOutlined ? colorScheme.greenBase : Colors.white,
+          size: 8,
         ),
       ),
     );
@@ -128,11 +130,26 @@ class CollectionShareBadge extends StatelessWidget {
 }
 
 class CollectionLinkBadge extends StatelessWidget {
-  const CollectionLinkBadge({super.key});
+  final CollectionShareBadgeVariant variant;
+
+  const CollectionLinkBadge({
+    super.key,
+    this.variant = CollectionShareBadgeVariant.filled,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final isOutlined = variant == CollectionShareBadgeVariant.outlined;
+    if (isOutlined) {
+      return HugeIcon(
+        icon: HugeIcons.strokeRoundedLink02,
+        strokeWidth: kCollectionBadgeStrokeWidth,
+        color: colorScheme.greenBase,
+        size: kCollectionBadgeIconSize,
+      );
+    }
+
     return Container(
       width: kCollectionBadgeSize,
       height: kCollectionBadgeSize,

@@ -1859,6 +1859,7 @@
   },
   "enable": "Enable",
   "enabled": "Enabled",
+  "more": "More",
   "moreDetails": "More details",
   "enableMLIndexingDesc": "Ente supports on-device machine learning for face recognition, magic search and other advanced search features",
   "magicSearchHint": "Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identity documents'",
