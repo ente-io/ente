@@ -34,6 +34,7 @@ jobs:
             release_title: ${{ steps.prepare.outputs.release_title }}
             release_body: ${{ steps.prepare.outputs.release_body }}
             release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            android_apk_name: ${{ steps.prepare.outputs.android_apk_name }}
 
         steps:
             - name: Checkout code
@@ -85,6 +86,7 @@ jobs:
                   echo "build_number=${build_number}" >> "${GITHUB_OUTPUT}"
                   echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
                   echo "release_title=${release_title}" >> "${GITHUB_OUTPUT}"
+                  echo "android_apk_name=${release_tag%-rc}.apk" >> "${GITHUB_OUTPUT}"
                   node .github/scripts/release-notes.mjs rust/apps/ensu/changes "${release_tag}" >> "${GITHUB_OUTPUT}"
 
     build-desktop:
@@ -220,6 +222,7 @@ jobs:
             BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
             RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
             RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            ANDROID_APK_NAME: ${{ needs.build-metadata.outputs.android_apk_name }}
 
         defaults:
             run:
@@ -270,7 +273,7 @@ jobs:
             - name: Prepare Android APK for GitHub release
               run: |
                   mkdir -p artifacts
-                  cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/${{ env.RELEASE_TAG }}.apk
+                  cp app-ui/build/outputs/apk/release/app-ui-release.apk "artifacts/${ANDROID_APK_NAME}"
 
             - name: Upload Android APK to GitHub release
               uses: ncipollo/release-action@v1
@@ -279,7 +282,7 @@ jobs:
                   name: ${{ env.RELEASE_TAG }}
                   body: ${{ env.RELEASE_BODY }}
                   commit: ${{ env.COMMIT_SHA }}
-                  artifacts: mobile/native/android/apps/ensu/artifacts/${{ env.RELEASE_TAG }}.apk
+                  artifacts: mobile/native/android/apps/ensu/artifacts/${{ env.ANDROID_APK_NAME }}
                   allowUpdates: true
                   draft: true
                   prerelease: false
