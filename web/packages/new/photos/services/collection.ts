@@ -799,6 +799,9 @@ const pendingFavoriteFilesByHashAndType = new Map<string, EnteFile>();
  * Then if the user immediately unfavorites or favorites again, the code can resolve the real
  * favorite file Y instead of trying to operate on shared file X.
  *
+ * This also records owned source files, so an owned favorite can immediately
+ * resolve shared hash-equivalent rows before the remote pull updates local DB.
+ *
  */
 const rememberPendingFavoriteFiles = (
     sourceFiles: EnteFile[],
@@ -811,12 +814,10 @@ const rememberPendingFavoriteFiles = (
         userID,
     );
 
-    // Iterating through the sourceFiles to check whether the non-owned files
-    // which where favorited have a hashAndType match in favoriteFilesByHashAndType
+    // Iterating through the sourceFiles to check whether the files which where
+    // favorited have a hashAndType match in favoriteFilesByHashAndType
     // if so storing the file in the pendingFavoriteFilesByHashAndType
     for (const sourceFile of sourceFiles) {
-        if (sourceFile.ownerID == userID) continue;
-
         const hashAndType = hashAndTypeKey(sourceFile);
         const favoriteFile = hashAndType
             ? favoriteFilesByHashAndType.get(hashAndType)

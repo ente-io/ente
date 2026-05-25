@@ -35,6 +35,18 @@ export type FileListWithViewerProps = {
      * The list of files to show.
      */
     files: EnteFile[];
+    /**
+     * Additional source data for deriving Map View files. Defaults to using
+     * {@link files} directly.
+     */
+    mapFileSource?: {
+        collectionFiles: EnteFile[];
+        favoriteFileIDs: Set<number>;
+        hiddenFileIDs: Set<number>;
+        archivedFileIDs: Set<number>;
+        tempDeletedFileIDs: Set<number>;
+        tempHiddenFileIDs: Set<number>;
+    };
     enableDownload?: boolean;
     enableImageEditing?: boolean;
     /**
@@ -186,6 +198,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     pendingFileSidebar,
     pendingHighlightCommentID,
     onPendingNavigationConsumed,
+    mapFileSource,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -404,6 +417,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     collectionSummary={activeCollectionSummary}
                     activeCollection={activeCollection}
                     files={files}
+                    mapFileSource={mapFileSource}
                     onRemotePull={onRemotePull}
                     {...{
                         onAddSaveGroup,
@@ -413,6 +427,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         onVisualFeedback,
                         fileNormalCollectionIDs,
                         collectionNameByID,
+                        emailByUserID,
                         onSelectCollection,
                         onSelectPerson,
                     }}

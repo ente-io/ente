@@ -90,12 +90,14 @@ export interface CollectionHeaderProps
         | "onVisualFeedback"
         | "fileNormalCollectionIDs"
         | "collectionNameByID"
+        | "emailByUserID"
         | "onSelectCollection"
         | "onSelectPerson"
     > {
     collectionSummary: CollectionSummary;
     activeCollection: Collection | undefined;
     files: EnteFile[];
+    mapFileSource?: FileListWithViewerProps["mapFileSource"];
     setActiveCollectionID: (collectionID: number) => void;
     isActiveCollectionDownloadInProgress: () => boolean;
     /**
@@ -161,6 +163,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,
     collectionSummary,
     files,
+    mapFileSource,
     setActiveCollectionID,
     onRemotePull,
     onCollectionShare,
@@ -176,6 +179,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onVisualFeedback,
     fileNormalCollectionIDs,
     collectionNameByID,
+    emailByUserID,
     onSelectCollection,
     onSelectPerson,
 }) => {
@@ -793,6 +797,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 collectionSummary={collectionSummary}
                 activeCollection={activeCollection}
                 files={files}
+                mapFileSource={mapFileSource}
                 onRemotePull={onRemotePull}
                 onAddSaveGroup={onAddSaveGroup}
                 onMarkTempDeleted={onMarkTempDeleted}
@@ -801,6 +806,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onVisualFeedback={onVisualFeedback}
                 fileNormalCollectionIDs={fileNormalCollectionIDs}
                 collectionNameByID={collectionNameByID}
+                emailByUserID={emailByUserID}
                 onSelectCollection={onSelectCollection}
                 onSelectPerson={onSelectPerson}
             />

@@ -470,6 +470,24 @@ const Page: React.FC = () => {
         tempDeletedFileIDs,
         tempHiddenFileIDs,
     ]);
+    const mapFileSource = useMemo(
+        () => ({
+            collectionFiles: state.collectionFiles,
+            favoriteFileIDs,
+            hiddenFileIDs,
+            archivedFileIDs: state.archivedFileIDs,
+            tempDeletedFileIDs,
+            tempHiddenFileIDs,
+        }),
+        [
+            favoriteFileIDs,
+            hiddenFileIDs,
+            state.archivedFileIDs,
+            state.collectionFiles,
+            tempDeletedFileIDs,
+            tempHiddenFileIDs,
+        ],
+    );
     const selectedFilesInView = useMemo(
         () => getSelectedFiles(selected, filteredFiles),
         [selected, filteredFiles],
@@ -2014,6 +2032,7 @@ const Page: React.FC = () => {
                     files: activeCollection
                         ? activeCollectionFiles
                         : filteredFiles,
+                    mapFileSource,
                     activePerson,
                     setFileListHeader,
                     saveGroups,
@@ -2118,6 +2137,7 @@ const Page: React.FC = () => {
                     footer={fileListFooter}
                     user={user}
                     files={filteredFiles}
+                    mapFileSource={mapFileSource}
                     enableDownload={true}
                     disableGrouping={state.searchSuggestion?.type == "clip"}
                     enableSelect={true}
