@@ -29,8 +29,6 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
-              with:
-                  persist-credentials: false
 
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v6
