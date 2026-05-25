@@ -805,6 +805,7 @@
     "shared_favorites": "Paylaşılan favoriler",
     "added_by_name": "{{name}} tarafından eklendi",
     "unowned_files_not_processed": "Diğer kullanıcılar tarafından eklenen dosyalar işlenmedi",
+    "unsupported_shared_favorites_not_processed": "",
     "custom_domains": "",
     "custom_domains_desc": "",
     "link_your_domain": "",

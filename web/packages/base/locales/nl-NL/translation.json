@@ -805,6 +805,7 @@
     "shared_favorites": "Gedeelde favorieten",
     "added_by_name": "Toegevoegd door {{name}}",
     "unowned_files_not_processed": "Bestanden die toegevoegd zijn door andere gebruikers zijn niet verwerkt",
+    "unsupported_shared_favorites_not_processed": "",
     "custom_domains": "Gepersonaliseerde domeinen",
     "custom_domains_desc": "Gebruik je eigen domein wanneer je deelt",
     "link_your_domain": "Link je domein",
