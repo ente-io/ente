@@ -1255,7 +1255,7 @@ class SearchService {
         final bool isIgnored = p.data.isIgnored;
         if (showIgnoredOnly != isIgnored) continue;
         if (files.isEmpty) continue;
-        final matchedUploadedIDs = filesToUploadedFileIDs(files);
+        final matchedUploadedIDs = personIdToFileIds[personID]!;
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,
