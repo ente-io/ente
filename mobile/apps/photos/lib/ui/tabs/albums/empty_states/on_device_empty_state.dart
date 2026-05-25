@@ -2,6 +2,7 @@ import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/ui/common/backup_flow_helper.dart";
+import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
 
 class OnDeviceEmptyState extends StatelessWidget {
   const OnDeviceEmptyState.permission({
@@ -17,10 +18,9 @@ class OnDeviceEmptyState extends StatelessWidget {
   static const _permissionTopPadding = 12.0;
   static const _permissionSectionSpacing = 48.0;
   static const _buttonHeight = 52.0;
+
   static const _contentWidth = 343.0;
-  static const _featureWidth = _contentWidth;
-  static const _noFoldersTitleWidth = 239.0;
-  static const _noFoldersDescriptionWidth = 299.0;
+  static const _featureWidth = 300.0;
 
   final _OnDeviceEmptyStateMode _mode;
   final VoidCallback? onFoldersSelected;
@@ -85,15 +85,15 @@ class OnDeviceEmptyState extends StatelessWidget {
                           width: _featureWidth,
                           child: Column(
                             children: [
-                              _BackupFeatureRow(
+                              EmptyStateBulletFeatureRow(
                                 label: features[0],
                               ),
                               const SizedBox(height: 12),
-                              _BackupFeatureRow(
+                              EmptyStateBulletFeatureRow(
                                 label: features[1],
                               ),
                               const SizedBox(height: 12),
-                              _BackupFeatureRow(
+                              EmptyStateBulletFeatureRow(
                                 label: features[2],
                               ),
                             ],
@@ -125,12 +125,12 @@ class OnDeviceEmptyState extends StatelessWidget {
 
     return Center(
       child: SizedBox(
-        width: _noFoldersDescriptionWidth,
+        width: _contentWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              width: _noFoldersTitleWidth,
+              width: _contentWidth,
               child: Text(
                 strings.noAlbumsOnThisDevice,
                 textAlign: TextAlign.center,
@@ -161,44 +161,6 @@ class OnDeviceEmptyState extends StatelessWidget {
   Future<void> _selectFolders(BuildContext context) async {
     await handleFolderSelectionBackupFlow(context);
     onFoldersSelected?.call();
-  }
-}
-
-class _BackupFeatureRow extends StatelessWidget {
-  const _BackupFeatureRow({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.componentColors;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 5,
-          height: 20,
-          child: Align(
-            alignment: Alignment.center,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const SizedBox.square(dimension: 4),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyles.body.copyWith(color: colors.textLight),
-          ),
-        ),
-      ],
-    );
   }
 }
 
