@@ -3,13 +3,12 @@
 use std::error::Error as StdError;
 use std::fmt::Write as _;
 use std::sync::RwLock;
-#[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
 
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, LOCATION};
 #[cfg(not(target_arch = "wasm32"))]
 use reqwest::redirect::Policy;
-use reqwest::{Response, Url};
+use reqwest::{RequestBuilder, Response, Url};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -269,12 +268,14 @@ pub struct HttpClient {
     user_agent: Option<String>,
     client_package: Option<String>,
     client_version: Option<String>,
+    timeout: Option<Duration>,
 }
 
 /// Bare HTTP client for presigned object-store transfers.
 #[derive(Clone)]
 pub struct ObjectStoreHttpClient {
     client: reqwest::Client,
+    timeout: Option<Duration>,
 }
 
 impl HttpClient {
@@ -296,14 +297,15 @@ impl HttpClient {
                 None
             }
         });
+        let timeout = config.timeout_secs.map(Duration::from_secs);
 
         #[cfg(not(target_arch = "wasm32"))]
         let mut builder = reqwest::Client::builder();
         #[cfg(target_arch = "wasm32")]
         let builder = reqwest::Client::builder();
         #[cfg(not(target_arch = "wasm32"))]
-        if let Some(timeout) = config.timeout_secs {
-            builder = builder.timeout(Duration::from_secs(timeout));
+        if let Some(timeout) = timeout {
+            builder = builder.timeout(timeout);
         }
 
         let client = builder.build().map_err(Error::from)?;
@@ -312,8 +314,8 @@ impl HttpClient {
         #[cfg(target_arch = "wasm32")]
         let no_redirect_builder = reqwest::Client::builder();
         #[cfg(not(target_arch = "wasm32"))]
-        if let Some(timeout) = config.timeout_secs {
-            no_redirect_builder = no_redirect_builder.timeout(Duration::from_secs(timeout));
+        if let Some(timeout) = timeout {
+            no_redirect_builder = no_redirect_builder.timeout(timeout);
         }
         let no_redirect_client = no_redirect_builder.build().map_err(Error::from)?;
 
@@ -327,6 +329,7 @@ impl HttpClient {
             user_agent: config.user_agent,
             client_package: config.client_package,
             client_version: config.client_version,
+            timeout,
         })
     }
 
@@ -340,6 +343,7 @@ impl HttpClient {
     pub fn object_store(&self) -> ObjectStoreHttpClient {
         ObjectStoreHttpClient {
             client: self.no_redirect_client.clone(),
+            timeout: self.timeout,
         }
     }
 
@@ -542,37 +546,10 @@ impl HttpClient {
 
     /// Download bytes from a URL, following redirects safely.
     pub async fn get_bytes(&self, url: &str) -> Result<Vec<u8>, Error> {
-        self.get_bytes_with_headers(url, |current_url| self.build_headers_for_url(current_url))
-            .await
-    }
-
-    async fn get_bytes_with_headers<F>(
-        &self,
-        url: &str,
-        headers_for_url: F,
-    ) -> Result<Vec<u8>, Error>
-    where
-        F: Fn(&Url) -> Result<HeaderMap, Error>,
-    {
-        let mut current_url = self.parse_url(url)?;
-        for _ in 0..5 {
-            let headers = headers_for_url(&current_url)?;
-            let response = self
-                .no_redirect_client
-                .get(current_url.clone())
-                .headers(headers)
-                .send()
-                .await?;
-            if response.status().is_redirection()
-                && let Some(location) = response.headers().get(LOCATION)
-            {
-                current_url = self.resolve_redirect(&current_url, location)?;
-                continue;
-            }
-            return parse_bytes_response(response).await;
-        }
-
-        Err(Error::InvalidUrl("too many redirects".to_string()))
+        get_bytes_with_client(&self.no_redirect_client, url, self.timeout, |current_url| {
+            self.build_headers_for_url(current_url)
+        })
+        .await
     }
 
     /// Upload raw bytes to a presigned URL, following redirects safely.
@@ -582,34 +559,7 @@ impl HttpClient {
         body: &[u8],
         headers: &[(&str, String)],
     ) -> Result<(), Error> {
-        let mut header_map = HeaderMap::new();
-        for (name, value) in headers {
-            let header_name =
-                HeaderName::from_bytes(name.as_bytes()).map_err(|e| Error::Parse(e.to_string()))?;
-            let header_value =
-                HeaderValue::from_str(value).map_err(|e| Error::Parse(e.to_string()))?;
-            header_map.insert(header_name, header_value);
-        }
-
-        let mut current_url = self.parse_url(url)?;
-        for _ in 0..5 {
-            let response = self
-                .no_redirect_client
-                .put(current_url.clone())
-                .headers(header_map.clone())
-                .body(body.to_vec())
-                .send()
-                .await?;
-            if response.status().is_redirection()
-                && let Some(location) = response.headers().get(LOCATION)
-            {
-                current_url = self.resolve_redirect(&current_url, location)?;
-                continue;
-            }
-            return parse_empty_response(response).await;
-        }
-
-        Err(Error::InvalidUrl("too many redirects".to_string()))
+        put_bytes_with_client(&self.no_redirect_client, url, self.timeout, body, headers).await
     }
 
     fn request_url(&self, path: &str) -> Result<String, Error> {
@@ -636,19 +586,6 @@ impl HttpClient {
     /// Ping the API, returns [PingResponse].
     pub async fn ping(&self) -> Result<PingResponse, Error> {
         self.get_json("/ping", &[]).await
-    }
-
-    fn parse_url(&self, url: &str) -> Result<Url, Error> {
-        Url::parse(url).map_err(|e| Error::InvalidUrl(format!("invalid url: {e}")))
-    }
-
-    fn resolve_redirect(&self, current_url: &Url, location: &HeaderValue) -> Result<Url, Error> {
-        let next = location
-            .to_str()
-            .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))?;
-        Url::parse(next)
-            .or_else(|_| current_url.join(next))
-            .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))
     }
 
     fn is_same_origin(&self, url: &Url) -> bool {
@@ -707,7 +644,7 @@ impl HttpClient {
 impl ObjectStoreHttpClient {
     /// Download bytes from a presigned URL without Ente headers.
     pub async fn get_bytes(&self, url: &str) -> Result<Vec<u8>, Error> {
-        get_bytes_with_client(&self.client, url, |_| Ok(HeaderMap::new())).await
+        get_bytes_with_client(&self.client, url, self.timeout, |_| Ok(HeaderMap::new())).await
     }
 
     /// Upload raw bytes to a presigned URL without Ente headers.
@@ -717,13 +654,14 @@ impl ObjectStoreHttpClient {
         body: &[u8],
         headers: &[(&str, String)],
     ) -> Result<(), Error> {
-        put_bytes_with_client(&self.client, url, body, headers).await
+        put_bytes_with_client(&self.client, url, self.timeout, body, headers).await
     }
 }
 
 async fn get_bytes_with_client<F>(
     client: &reqwest::Client,
     url: &str,
+    timeout: Option<Duration>,
     headers_for_url: F,
 ) -> Result<Vec<u8>, Error>
 where
@@ -732,9 +670,7 @@ where
     let mut current_url = parse_url(url)?;
     for _ in 0..5 {
         let headers = headers_for_url(&current_url)?;
-        let response = client
-            .get(current_url.clone())
-            .headers(headers)
+        let response = with_timeout(client.get(current_url.clone()).headers(headers), timeout)
             .send()
             .await?;
         if response.status().is_redirection()
@@ -752,18 +688,22 @@ where
 async fn put_bytes_with_client(
     client: &reqwest::Client,
     url: &str,
+    timeout: Option<Duration>,
     body: &[u8],
     headers: &[(&str, String)],
 ) -> Result<(), Error> {
     let header_map = build_header_map(headers)?;
     let mut current_url = parse_url(url)?;
     for _ in 0..5 {
-        let response = client
-            .put(current_url.clone())
-            .headers(header_map.clone())
-            .body(body.to_vec())
-            .send()
-            .await?;
+        let response = with_timeout(
+            client
+                .put(current_url.clone())
+                .headers(header_map.clone())
+                .body(body.to_vec()),
+            timeout,
+        )
+        .send()
+        .await?;
         if response.status().is_redirection()
             && let Some(location) = response.headers().get(LOCATION)
         {
@@ -774,6 +714,14 @@ async fn put_bytes_with_client(
     }
 
     Err(Error::InvalidUrl("too many redirects".to_string()))
+}
+
+fn with_timeout(request: RequestBuilder, timeout: Option<Duration>) -> RequestBuilder {
+    if let Some(timeout) = timeout {
+        request.timeout(timeout)
+    } else {
+        request
+    }
 }
 
 fn build_header_map(headers: &[(&str, String)]) -> Result<HeaderMap, Error> {
