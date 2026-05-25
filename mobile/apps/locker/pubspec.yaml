@@ -20,6 +20,8 @@ dependencies:
     path: ../../packages/accounts
   ente_base:
     path: ../../packages/base
+  ente_components:
+    path: ../../packages/ente_components
   ente_configuration:
     path: ../../packages/configuration
   ente_contacts:

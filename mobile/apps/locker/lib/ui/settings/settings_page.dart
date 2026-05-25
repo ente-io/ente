@@ -1,13 +1,12 @@
 import "dart:io";
 
 import "package:ente_accounts/services/user_service.dart";
-import "package:ente_ui/components/alert_bottom_sheet.dart";
-import "package:ente_ui/components/buttons/gradient_button.dart";
-import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_components/ente_components.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/ui/settings/components/settings_item.dart";
 import "package:locker/ui/settings/pages/about_page.dart";
 import "package:locker/ui/settings/pages/account_settings_page.dart";
 import "package:locker/ui/settings/pages/general_settings_page.dart";
@@ -15,7 +14,6 @@ import "package:locker/ui/settings/pages/security_settings_page.dart";
 import "package:locker/ui/settings/pages/support_page.dart";
 import "package:locker/ui/settings/pages/theme_settings_page.dart";
 import "package:locker/ui/settings/widgets/app_version_widget.dart";
-import "package:locker/ui/settings/widgets/settings_widget.dart";
 import "package:locker/ui/settings/widgets/social_icons_row.dart";
 
 class SettingsWidget extends StatelessWidget {
@@ -82,7 +80,7 @@ class SettingsWidget extends StatelessWidget {
     contents.add(
       SettingsItem(
         icon: HugeIcons.strokeRoundedInformationCircle,
-        title: l10n.aboutUs,
+        title: l10n.about,
         onTap: () => _navigateTo(context, const AboutPage()),
       ),
     );
@@ -93,8 +91,7 @@ class SettingsWidget extends StatelessWidget {
         SettingsItem(
           icon: HugeIcons.strokeRoundedLogout05,
           title: l10n.logout,
-          iconColor: getEnteColorScheme(context).warning400,
-          textColor: getEnteColorScheme(context).warning400,
+          isDestructive: true,
           onTap: () => _onLogoutTapped(context),
         ),
       );
@@ -122,20 +119,25 @@ class SettingsWidget extends StatelessWidget {
   }
 
   void _onLogoutTapped(BuildContext context) {
-    showAlertBottomSheet(
-      context,
-      title: context.l10n.warning,
-      message: context.l10n.areYouSureYouWantToLogout,
-      assetPath: "assets/warning-grey.png",
-      buttons: [
-        GradientButton(
-          buttonType: GradientButtonType.critical,
-          text: context.l10n.yesLogout,
-          onTap: () async {
-            await UserService.instance.logout(context);
-          },
-        ),
-      ],
+    showBottomSheetComponent<void>(
+      context: context,
+      builder: (sheetContext) => BottomSheetComponent(
+        title: context.l10n.warning,
+        message: context.l10n.areYouSureYouWantToLogout,
+        illustration: Image.asset("assets/warning-grey.png"),
+        actions: [
+          ButtonComponent(
+            label: context.l10n.yesLogout,
+            variant: ButtonComponentVariant.critical,
+            onTap: () async {
+              await UserService.instance.logout(context);
+              if (sheetContext.mounted) {
+                Navigator.of(sheetContext).pop();
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }
