@@ -10,7 +10,6 @@ class SharedEmptyState extends StatelessWidget {
   static const _topPadding = 32.0;
   static const _sectionSpacing = 48.0;
   static const _contentToButtonSpacing = 56.0;
-  static const _buttonHeight = 52.0;
   static const _contentWidth = 343.0;
   static const _featureWidth = 300.0;
 
@@ -29,68 +28,59 @@ class SharedEmptyState extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       child: Padding(
         padding: EdgeInsets.fromLTRB(16, _topPadding, 16, bottomPadding),
-        child: SizedBox.expand(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                bottom: _buttonHeight + _contentToButtonSpacing,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    width: _contentWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: _contentWidth,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    "assets/shared.png",
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: _sectionSpacing),
+                  Text(
+                    strings.albumsSharedEmptyTitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: "Nunito",
+                      fontWeight: FontWeight.w800,
+                      fontSize: 24,
+                      height: 28 / 24,
+                      letterSpacing: 0,
+                      color: colors.textBase,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: _featureWidth,
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Image.asset(
-                          "assets/shared.png",
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(height: _sectionSpacing),
-                        Text(
-                          strings.albumsSharedEmptyTitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: "Nunito",
-                            fontWeight: FontWeight.w800,
-                            fontSize: 24,
-                            height: 28 / 24,
-                            letterSpacing: 0,
-                            color: colors.textBase,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: _featureWidth,
-                          child: Column(
-                            children: [
-                              EmptyStateBulletFeatureRow(label: features[0]),
-                              const SizedBox(height: 12),
-                              EmptyStateBulletFeatureRow(label: features[1]),
-                              const SizedBox(height: 12),
-                              EmptyStateBulletFeatureRow(label: features[2]),
-                            ],
-                          ),
-                        ),
+                        EmptyStateBulletFeatureRow(label: features[0]),
+                        const SizedBox(height: 12),
+                        EmptyStateBulletFeatureRow(label: features[1]),
+                        const SizedBox(height: 12),
+                        EmptyStateBulletFeatureRow(label: features[2]),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: ButtonComponent(
-                  label: strings.shareAnAlbum,
-                  shouldSurfaceExecutionStates: false,
-                  onTap: () async {
-                    showCollectionActionSheet(
-                      context,
-                      actionType: CollectionActionType.shareCollection,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: _contentToButtonSpacing),
+            ButtonComponent(
+              label: strings.shareAnAlbum,
+              shouldSurfaceExecutionStates: false,
+              onTap: () async {
+                showCollectionActionSheet(
+                  context,
+                  actionType: CollectionActionType.shareCollection,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

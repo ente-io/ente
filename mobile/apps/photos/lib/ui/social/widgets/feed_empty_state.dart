@@ -24,60 +24,81 @@ class FeedEmptyState extends StatelessWidget {
     final bottomPadding = 64 + MediaQuery.paddingOf(context).bottom + 32;
     final content = _content(context, strings);
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16, _topPadding, 16, bottomPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _FeedAssetSlot(assetPath: content.assetPath),
-            const SizedBox(height: _sectionSpacing),
-            SizedBox(
-              width: _contentWidth,
-              child: Column(
-                children: [
-                  Text(
-                    content.title,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: "Nunito",
-                      fontWeight: FontWeight.w800,
-                      fontSize: 24,
-                      height: 28 / 24,
-                      letterSpacing: 0,
-                      color: colors.textBase,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  _topPadding,
+                  16,
+                  bottomPadding,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _FeedAssetSlot(assetPath: content.assetPath),
+                    const SizedBox(height: _sectionSpacing),
+                    SizedBox(
+                      width: _contentWidth,
+                      child: Column(
+                        children: [
+                          Text(
+                            content.title,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Nunito",
+                              fontWeight: FontWeight.w800,
+                              fontSize: 24,
+                              height: 28 / 24,
+                              letterSpacing: 0,
+                              color: colors.textBase,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: _featureWidth,
+                            child: Column(
+                              children: [
+                                EmptyStateBulletFeatureRow(
+                                  label: content.features[0],
+                                ),
+                                const SizedBox(height: 12),
+                                EmptyStateBulletFeatureRow(
+                                  label: content.features[1],
+                                ),
+                                const SizedBox(height: 12),
+                                EmptyStateBulletFeatureRow(
+                                  label: content.features[2],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: _featureWidth,
-                    child: Column(
-                      children: [
-                        EmptyStateBulletFeatureRow(label: content.features[0]),
-                        const SizedBox(height: 12),
-                        EmptyStateBulletFeatureRow(label: content.features[1]),
-                        const SizedBox(height: 12),
-                        EmptyStateBulletFeatureRow(label: content.features[2]),
-                      ],
+                    const SizedBox(height: _sectionSpacing),
+                    SizedBox(
+                      width: content.showTag ? _featureWidth : _contentWidth,
+                      child: BannerActionButton(
+                        label: content.buttonLabel,
+                        variant: BannerActionButtonVariant.primary,
+                        showTag: content.showTag,
+                        onTap: content.onTap,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: _sectionSpacing),
-            SizedBox(
-              width: content.showTag ? _featureWidth : _contentWidth,
-              child: BannerActionButton(
-                label: content.buttonLabel,
-                variant: BannerActionButtonVariant.primary,
-                showTag: content.showTag,
-                onTap: content.onTap,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

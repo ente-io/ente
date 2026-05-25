@@ -17,7 +17,6 @@ class OnDeviceEmptyState extends StatelessWidget {
 
   static const _permissionTopPadding = 12.0;
   static const _permissionSectionSpacing = 48.0;
-  static const _buttonHeight = 52.0;
 
   static const _contentWidth = 343.0;
   static const _featureWidth = 300.0;
@@ -52,68 +51,59 @@ class OnDeviceEmptyState extends StatelessWidget {
           16,
           bottomPadding,
         ),
-        child: SizedBox.expand(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                bottom: _buttonHeight + _permissionSectionSpacing,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    width: _contentWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: _contentWidth,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    "assets/on_device.png",
+                  ),
+                  const SizedBox(height: _permissionSectionSpacing),
+                  Text(
+                    strings.allowAccessToYourPhotos,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: "Nunito",
+                      fontWeight: FontWeight.w800,
+                      fontSize: 24,
+                      height: 28 / 24,
+                      letterSpacing: 0,
+                      color: colors.textBase,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: _featureWidth,
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Image.asset(
-                          "assets/on_device.png",
+                        EmptyStateBulletFeatureRow(
+                          label: features[0],
                         ),
-                        const SizedBox(height: _permissionSectionSpacing),
-                        Text(
-                          strings.allowAccessToYourPhotos,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: "Nunito",
-                            fontWeight: FontWeight.w800,
-                            fontSize: 24,
-                            height: 28 / 24,
-                            letterSpacing: 0,
-                            color: colors.textBase,
-                          ),
+                        const SizedBox(height: 12),
+                        EmptyStateBulletFeatureRow(
+                          label: features[1],
                         ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: _featureWidth,
-                          child: Column(
-                            children: [
-                              EmptyStateBulletFeatureRow(
-                                label: features[0],
-                              ),
-                              const SizedBox(height: 12),
-                              EmptyStateBulletFeatureRow(
-                                label: features[1],
-                              ),
-                              const SizedBox(height: 12),
-                              EmptyStateBulletFeatureRow(
-                                label: features[2],
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 12),
+                        EmptyStateBulletFeatureRow(
+                          label: features[2],
                         ),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: ButtonComponent(
-                  label: strings.albumsOnDevicePermissionCta,
-                  shouldSurfaceExecutionStates: false,
-                  onTap: () => _selectFolders(context),
-                ),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: _permissionSectionSpacing),
+            ButtonComponent(
+              label: strings.albumsOnDevicePermissionCta,
+              shouldSurfaceExecutionStates: false,
+              onTap: () => _selectFolders(context),
+            ),
+          ],
         ),
       ),
     );
