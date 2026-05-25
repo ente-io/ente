@@ -351,11 +351,6 @@
   "send": "ส่ง",
   "rateTheApp": "ให้คะแนนแอพนี้",
   "createAnEnteAccount": "สร้างบัญชี Ente",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "ในเครื่อง",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"

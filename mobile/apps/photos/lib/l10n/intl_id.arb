@@ -670,7 +670,6 @@
   "existingUser": "Masuk",
   "newToEnte": "Baru di Ente",
   "pleaseLoginAgain": "Silakan masuk akun lagi",
-  "autoLogoutMessage": "Akibat kesalahan teknis, kamu telah keluar dari akunmu. Kami mohon maaf atas ketidaknyamanannya.",
   "yourSubscriptionHasExpired": "Langgananmu telah berakhir",
   "storageLimitExceeded": "Batas penyimpanan terlampaui",
   "upgrade": "Tingkatkan",
@@ -692,11 +691,6 @@
   "collectEventPhotos": "Kumpulkan foto acara",
   "sessionExpired": "Sesi berakhir",
   "loggingOut": "Mengeluarkan akun...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Di perangkat ini",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
