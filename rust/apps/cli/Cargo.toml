@@ -7,6 +7,14 @@ homepage = "https://ente.com"
 repository = "https://github.com/ente-io/ente"
 license = "AGPL-3.0-only"
 
+[features]
+museum = []
+pglite = []
+
+[[test]]
+name = "paste"
+required-features = ["museum", "pglite"]
+
 [dependencies]
 # CLI
 clap = { version = "4.5", features = ["derive", "env"] }

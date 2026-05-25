@@ -11,8 +11,6 @@ museum_yaml="$fixture_dir/museum.yaml"
 endpoint="${ENTE_E2E_ENDPOINT:-http://localhost:18080}"
 project_name="${ENTE_E2E_DOCKER_PROJECT:-ente-rust-e2e}"
 endpoint_port=$(printf '%s' "$endpoint" | sed -E 's#^https?://[^:]+:([0-9]+).*$#\1#')
-target_dir="${ENTE_E2E_TARGET_DIR:-$repo_dir/rust/target}"
-cli_bin="$target_dir/debug/ente-rs"
 
 compose() {
     docker compose -p "$project_name" -f "$compose_file" "$@"
@@ -60,11 +58,8 @@ done
 
 cd "$repo_dir/rust"
 export ENTE_E2E_ENDPOINT="$endpoint"
-export ENTE_E2E_CLI_BIN="$cli_bin"
 
-cargo build -p ente-rs --target-dir "$target_dir" --bin ente-rs
-
-if ! cargo test -p ente-e2e --target-dir "$target_dir" "$@" -- --ignored --nocapture; then
+if ! cargo test -p ente-e2e "$@" -- --ignored --nocapture; then
     dump_logs
     exit 1
 fi
