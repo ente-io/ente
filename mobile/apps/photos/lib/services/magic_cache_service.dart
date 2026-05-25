@@ -423,23 +423,32 @@ class MagicCacheService {
       if (!isLocalGalleryMode) {
         final Map<String, List<EnteFile>> magicIdToFiles = {};
         final Map<String, Map<int, int>> promptFileOrder = {};
+        final Map<int, List<String>> uploadedIdToMagicTitles = {};
         for (final cache in magicCaches) {
           magicIdToFiles[cache.title] = [];
           promptFileOrder[cache.title] = cache.fileIdToPositionMap;
+          for (final uploadedId in cache.fileIdToPositionMap.keys) {
+            uploadedIdToMagicTitles
+                .putIfAbsent(uploadedId, () => <String>[])
+                .add(cache.title);
+          }
         }
         for (EnteFile file in files) {
           if (!file.isUploaded) continue;
-          for (MagicCache magicCache in magicCaches) {
-            final uploadedId = file.uploadedFileID;
-            if (uploadedId == null) continue;
-            if (magicCache.fileIdToPositionMap.containsKey(uploadedId)) {
-              if (file.isVideo &&
-                  (promptByTitle[magicCache.title]?.showVideo ?? true) ==
-                      false) {
-                continue;
-              }
-              magicIdToFiles[magicCache.title]!.add(file);
+          final uploadedId = file.uploadedFileID;
+          if (uploadedId == null) {
+            continue;
+          }
+          final magicTitles = uploadedIdToMagicTitles[uploadedId];
+          if (magicTitles == null) {
+            continue;
+          }
+          for (final magicTitle in magicTitles) {
+            if (file.isVideo &&
+                (promptByTitle[magicTitle]?.showVideo ?? true) == false) {
+              continue;
             }
+            magicIdToFiles[magicTitle]!.add(file);
           }
         }
         for (final p in prompts) {
