@@ -133,22 +133,17 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
         page: const SupportPage(),
       ),
       _SearchableSetting(
-        title: l10n.contactSupport,
+        title: l10n.askAQuestion,
         category: l10n.helpAndSupport,
         page: const SupportPage(),
       ),
       _SearchableSetting(
-        title: l10n.help,
+        title: l10n.requestAFeature,
         category: l10n.helpAndSupport,
         page: const SupportPage(),
       ),
       _SearchableSetting(
-        title: l10n.suggestFeatures,
-        category: l10n.helpAndSupport,
-        page: const SupportPage(),
-      ),
-      _SearchableSetting(
-        title: l10n.reportABug,
+        title: l10n.reportAnIssue,
         category: l10n.helpAndSupport,
         page: const SupportPage(),
       ),
