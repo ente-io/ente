@@ -13,17 +13,16 @@ import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/only_them_fil
 import "package:photos/ui/viewer/hierarchicial_search/filter_options_bottom_sheet.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 
-class RecommendedFiltersForAppbar extends StatefulWidget {
-  const RecommendedFiltersForAppbar({super.key});
+class AppBarFilterChips extends StatefulWidget {
+  const AppBarFilterChips({super.key});
 
   @override
-  State<RecommendedFiltersForAppbar> createState() =>
-      _RecommendedFiltersForAppbarState();
+  State<AppBarFilterChips> createState() => _AppBarFilterChipsState();
 }
 
-class _RecommendedFiltersForAppbarState
-    extends State<RecommendedFiltersForAppbar> {
+class _AppBarFilterChipsState extends State<AppBarFilterChips> {
   late SearchFilterDataProvider _searchFilterDataProvider;
+  late List<HierarchicalSearchFilter> _appliedFilters;
   late List<HierarchicalSearchFilter> _recommendations;
   int _filtersUpdateCount = 0;
 
@@ -37,33 +36,46 @@ class _RecommendedFiltersForAppbarState
     );
     _searchFilterDataProvider =
         inheritedSearchFilterData.searchFilterDataProvider!;
+    _appliedFilters = _searchFilterDataProvider.appliedFilters;
     _recommendations = getRecommendedFiltersForAppBar(
       _searchFilterDataProvider,
     );
     _filtersUpdateCount++;
 
     _searchFilterDataProvider.removeListener(
+      fromApplied: true,
+      listener: onFiltersUpdate,
+    );
+    _searchFilterDataProvider.removeListener(
       fromRecommended: true,
-      listener: onRecommendedFiltersUpdate,
+      listener: onFiltersUpdate,
+    );
+    _searchFilterDataProvider.addListener(
+      toApplied: true,
+      listener: onFiltersUpdate,
     );
     _searchFilterDataProvider.addListener(
       toRecommended: true,
-      listener: onRecommendedFiltersUpdate,
+      listener: onFiltersUpdate,
     );
   }
 
   @override
   void dispose() {
     _searchFilterDataProvider.removeListener(
+      fromApplied: true,
+      listener: onFiltersUpdate,
+    );
+    _searchFilterDataProvider.removeListener(
       fromRecommended: true,
-      listener: onRecommendedFiltersUpdate,
+      listener: onFiltersUpdate,
     );
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_recommendations.isEmpty) {
+    if (_appliedFilters.isEmpty && _recommendations.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -117,54 +129,25 @@ class _RecommendedFiltersForAppbarState
                   ),
                 );
               }
-              final filter = _recommendations[index - 1];
+
+              if (index <= _appliedFilters.length) {
+                final filter = _appliedFilters[index - 1];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: _buildFilterChip(filter),
+                );
+              }
+
+              final filter =
+                  _recommendations[index - _appliedFilters.length - 1];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: filter is FaceFilter
-                    ? FaceFilterChip(
-                        personId: filter.personId,
-                        clusterId: filter.clusterId,
-                        apply: () {
-                          _searchFilterDataProvider.applyFilters([filter]);
-                        },
-                        remove: () {
-                          _searchFilterDataProvider.removeAppliedFilters([
-                            filter,
-                          ]);
-                        },
-                        isApplied: filter.isApplied,
-                      )
-                    : filter is OnlyThemFilter
-                    ? OnlyThemFilterChip(
-                        faceFilters: filter.faceFilters,
-                        apply: () {
-                          _searchFilterDataProvider.applyFilters([filter]);
-                        },
-                        remove: () {
-                          _searchFilterDataProvider.removeAppliedFilters([
-                            filter,
-                          ]);
-                        },
-                        isApplied: filter.isApplied,
-                      )
-                    : GenericFilterChip(
-                        label: filter.name(),
-                        apply: () {
-                          _searchFilterDataProvider.applyFilters([filter]);
-                        },
-                        remove: () {
-                          _searchFilterDataProvider.removeAppliedFilters([
-                            filter,
-                          ]);
-                        },
-                        leadingIcon: filter.icon(),
-                        isApplied: filter.isApplied,
-                      ),
+                child: _buildFilterChip(filter),
               );
             },
             clipBehavior: Clip.none,
             scrollDirection: Axis.horizontal,
-            itemCount: _recommendations.length + 1,
+            itemCount: _appliedFilters.length + _recommendations.length + 1,
             padding: const EdgeInsets.symmetric(horizontal: 4),
           ),
         ),
@@ -172,9 +155,47 @@ class _RecommendedFiltersForAppbarState
     );
   }
 
-  void onRecommendedFiltersUpdate() {
+  Widget _buildFilterChip(HierarchicalSearchFilter filter) {
+    return filter is FaceFilter
+        ? FaceFilterChip(
+            personId: filter.personId,
+            clusterId: filter.clusterId,
+            apply: () {
+              _searchFilterDataProvider.applyFilters([filter]);
+            },
+            remove: () {
+              _searchFilterDataProvider.removeAppliedFilters([filter]);
+            },
+            isApplied: filter.isApplied,
+          )
+        : filter is OnlyThemFilter
+        ? OnlyThemFilterChip(
+            faceFilters: filter.faceFilters,
+            apply: () {
+              _searchFilterDataProvider.applyFilters([filter]);
+            },
+            remove: () {
+              _searchFilterDataProvider.removeAppliedFilters([filter]);
+            },
+            isApplied: filter.isApplied,
+          )
+        : GenericFilterChip(
+            label: filter.name(),
+            apply: () {
+              _searchFilterDataProvider.applyFilters([filter]);
+            },
+            remove: () {
+              _searchFilterDataProvider.removeAppliedFilters([filter]);
+            },
+            leadingIcon: filter.icon(),
+            isApplied: filter.isApplied,
+          );
+  }
+
+  void onFiltersUpdate() {
     setState(() {
       _filtersUpdateCount++;
+      _appliedFilters = _searchFilterDataProvider.appliedFilters;
       _recommendations = getRecommendedFiltersForAppBar(
         _searchFilterDataProvider,
       );

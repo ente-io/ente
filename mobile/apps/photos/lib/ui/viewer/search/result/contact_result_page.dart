@@ -38,8 +38,7 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
-import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
+import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
 import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/search/contact_avatar_widget.dart";
 import "package:photos/ui/viewer/search/result/edit_contact_page.dart";
@@ -607,37 +606,19 @@ class _ContactResultAppBar extends StatelessWidget
       );
     }
 
-    final searchFilterData = InheritedSearchFilterData.of(context);
-    return ValueListenableBuilder(
-      valueListenable:
-          searchFilterData.searchFilterDataProvider!.isSearchingNotifier,
-      builder: (context, isSearching, _) {
-        return AppBar(
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          backgroundColor: colorScheme.backgroundColour,
-          surfaceTintColor: Colors.transparent,
-          titleSpacing: 0,
-          bottom: isSearching
-              ? const PreferredSize(
-                  preferredSize: Size.fromHeight(kFilterChipHeight + 1),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: SizedBox(
-                      height: kFilterChipHeight + 1,
-                      child: AppliedFiltersForAppbar(),
-                    ),
-                  ),
-                )
-              : const PreferredSize(
-                  preferredSize: Size.fromHeight(0),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: RecommendedFiltersForAppbar(),
-                  ),
-                ),
-        );
-      },
+    return AppBar(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      backgroundColor: colorScheme.backgroundColour,
+      surfaceTintColor: Colors.transparent,
+      titleSpacing: 0,
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(0),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: AppBarFilterChips(),
+        ),
+      ),
     );
   }
 }
