@@ -21,10 +21,12 @@ class AppBarFilterChips extends StatefulWidget {
 }
 
 class _AppBarFilterChipsState extends State<AppBarFilterChips> {
+  final _scrollController = ScrollController();
+  final _filterChipKeys = Expando<GlobalKey>();
   late SearchFilterDataProvider _searchFilterDataProvider;
   late List<HierarchicalSearchFilter> _appliedFilters;
   late List<HierarchicalSearchFilter> _recommendations;
-  int _filtersUpdateCount = 0;
+  HierarchicalSearchFilter? _filterToRevealAfterApply;
 
   @override
   void didChangeDependencies() {
@@ -40,7 +42,6 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
     _recommendations = getRecommendedFiltersForAppBar(
       _searchFilterDataProvider,
     );
-    _filtersUpdateCount++;
 
     _searchFilterDataProvider.removeListener(
       fromApplied: true,
@@ -70,6 +71,7 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
       fromRecommended: true,
       listener: onFiltersUpdate,
     );
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -84,120 +86,148 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
       child: SizedBox(
         // +1 to account for the filter's outer stroke width
         height: kFilterChipHeight + 1,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
-          switchInCurve: Curves.easeInOutExpo,
-          switchOutCurve: Curves.easeInOutExpo,
-          child: ListView.builder(
-            key: ValueKey(_filtersUpdateCount),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return GestureDetector(
-                  onTap: () {
-                    showBarModalBottomSheet(
-                      context: context,
-                      builder: (context) {
-                        return SafeArea(
-                          child: FilterOptionsBottomSheet(
-                            _searchFilterDataProvider,
-                          ),
-                        );
-                      },
-                      backgroundColor: getEnteColorScheme(
-                        context,
-                      ).backgroundElevated2,
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: getEnteColorScheme(context).fillFaint,
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(kFilterChipHeight / 2),
+        child: ListView.builder(
+          controller: _scrollController,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return GestureDetector(
+                onTap: () {
+                  showBarModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return SafeArea(
+                        child: FilterOptionsBottomSheet(
+                          _searchFilterDataProvider,
                         ),
-                        border: Border.all(
-                          color: getEnteColorScheme(context).strokeFaint,
-                          width: 0.5,
-                        ),
+                      );
+                    },
+                    backgroundColor: getEnteColorScheme(
+                      context,
+                    ).backgroundElevated2,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: getEnteColorScheme(context).fillFaint,
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(kFilterChipHeight / 2),
                       ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(Icons.filter_list_rounded, size: 20),
+                      border: Border.all(
+                        color: getEnteColorScheme(context).strokeFaint,
+                        width: 0.5,
                       ),
                     ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(Icons.filter_list_rounded, size: 20),
+                    ),
                   ),
-                );
-              }
+                ),
+              );
+            }
 
-              if (index <= _appliedFilters.length) {
-                final filter = _appliedFilters[index - 1];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: _buildFilterChip(filter),
-                );
-              }
-
-              final filter =
-                  _recommendations[index - _appliedFilters.length - 1];
+            if (index <= _appliedFilters.length) {
+              final filter = _appliedFilters[index - 1];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: _buildFilterChip(filter),
               );
-            },
-            clipBehavior: Clip.none,
-            scrollDirection: Axis.horizontal,
-            itemCount: _appliedFilters.length + _recommendations.length + 1,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-          ),
+            }
+
+            final filter = _recommendations[index - _appliedFilters.length - 1];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: _buildFilterChip(filter),
+            );
+          },
+          clipBehavior: Clip.none,
+          scrollDirection: Axis.horizontal,
+          itemCount: _appliedFilters.length + _recommendations.length + 1,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
         ),
       ),
     );
   }
 
   Widget _buildFilterChip(HierarchicalSearchFilter filter) {
-    return filter is FaceFilter
-        ? FaceFilterChip(
-            personId: filter.personId,
-            clusterId: filter.clusterId,
-            apply: () {
-              _searchFilterDataProvider.applyFilters([filter]);
-            },
-            remove: () {
-              _searchFilterDataProvider.removeAppliedFilters([filter]);
-            },
-            isApplied: filter.isApplied,
-          )
-        : filter is OnlyThemFilter
-        ? OnlyThemFilterChip(
-            faceFilters: filter.faceFilters,
-            apply: () {
-              _searchFilterDataProvider.applyFilters([filter]);
-            },
-            remove: () {
-              _searchFilterDataProvider.removeAppliedFilters([filter]);
-            },
-            isApplied: filter.isApplied,
-          )
-        : GenericFilterChip(
-            label: filter.name(),
-            apply: () {
-              _searchFilterDataProvider.applyFilters([filter]);
-            },
-            remove: () {
-              _searchFilterDataProvider.removeAppliedFilters([filter]);
-            },
-            leadingIcon: filter.icon(),
-            isApplied: filter.isApplied,
-          );
+    final chipKey = _keyForFilter(filter);
+    return KeyedSubtree(
+      key: chipKey,
+      child: filter is FaceFilter
+          ? FaceFilterChip(
+              personId: filter.personId,
+              clusterId: filter.clusterId,
+              apply: () => _applyFilter(filter),
+              remove: () => _removeFilter(filter),
+              isApplied: filter.isApplied,
+            )
+          : filter is OnlyThemFilter
+          ? OnlyThemFilterChip(
+              faceFilters: filter.faceFilters,
+              apply: () => _applyFilter(filter),
+              remove: () => _removeFilter(filter),
+              isApplied: filter.isApplied,
+            )
+          : GenericFilterChip(
+              label: filter.name(),
+              apply: () => _applyFilter(filter),
+              remove: () => _removeFilter(filter),
+              leadingIcon: filter.icon(),
+              isApplied: filter.isApplied,
+            ),
+    );
+  }
+
+  GlobalKey _keyForFilter(HierarchicalSearchFilter filter) {
+    return _filterChipKeys[filter] ??= GlobalKey(
+      debugLabel: "app-bar-filter-${filter.filterTypeName}",
+    );
+  }
+
+  void _applyFilter(HierarchicalSearchFilter filter) {
+    _filterToRevealAfterApply = filter;
+    _searchFilterDataProvider.applyFilters([filter]);
+  }
+
+  void _removeFilter(HierarchicalSearchFilter filter) {
+    _searchFilterDataProvider.removeAppliedFilters([filter]);
   }
 
   void onFiltersUpdate() {
     setState(() {
-      _filtersUpdateCount++;
       _appliedFilters = _searchFilterDataProvider.appliedFilters;
       _recommendations = getRecommendedFiltersForAppBar(
         _searchFilterDataProvider,
+      );
+    });
+    _revealPendingAppliedFilter();
+  }
+
+  void _revealPendingAppliedFilter() {
+    final filter = _filterToRevealAfterApply;
+    if (filter == null) {
+      return;
+    }
+    if (!_appliedFilters.any((applied) => applied.isSameFilter(filter))) {
+      return;
+    }
+
+    _filterToRevealAfterApply = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final chipContext = _keyForFilter(filter).currentContext;
+      if (chipContext == null) {
+        return;
+      }
+      Scrollable.ensureVisible(
+        chipContext,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
       );
     });
   }
