@@ -180,7 +180,7 @@ jobs:
               run: node rust/apps/ensu/scripts/ci-enable-updater.mjs
 
             - name: Build and release Tauri app
-              uses: tauri-apps/tauri-action@v0
+              uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
@@ -235,13 +235,13 @@ jobs:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
 
             - name: Setup JDK 17
-              uses: actions/setup-java@v4
+              uses: actions/setup-java@v5
               with:
                   distribution: "temurin"
                   java-version: "17"
 
             - name: Setup Android SDK
-              uses: android-actions/setup-android@v3
+              uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
 
             - name: Install NDK
               run: |
@@ -276,7 +276,7 @@ jobs:
                   cp app-ui/build/outputs/apk/release/app-ui-release.apk "artifacts/${ANDROID_APK_NAME}"
 
             - name: Upload Android APK to GitHub release
-              uses: ncipollo/release-action@v1
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
               with:
                   tag: ${{ env.RELEASE_TAG }}
                   name: ${{ env.RELEASE_TAG }}
@@ -289,7 +289,7 @@ jobs:
                   updateOnlyUnreleased: true
 
             - name: Upload AAB to Play Store
-              uses: r0adkll/upload-google-play@v1
+              uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.ensu
