@@ -29,6 +29,9 @@
       }
     }
   },
+  "keepOffline": "Оставаться в автономном режиме",
+  "cloudOnly": "Отключить автономный режим",
+  "savingOffline": "Сохранение не в сети...",
   "downloadFailed": "Скачивание не удалось",
   "failedToDownloadOrDecrypt": "Не удалось загрузить элемент",
   "errorOpeningFile": "Ошибка при открытии элемента",
