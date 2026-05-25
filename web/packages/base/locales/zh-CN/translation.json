@@ -805,6 +805,7 @@
     "shared_favorites": "已共享的收藏",
     "added_by_name": "由{{name}}添加",
     "unowned_files_not_processed": "由其他用户添加的文件未被处理",
+    "unsupported_shared_favorites_not_processed": "",
     "custom_domains": "自定义域名",
     "custom_domains_desc": "分享时使用您自己的域名",
     "link_your_domain": "链接您的域名",
