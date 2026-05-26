@@ -756,8 +756,17 @@ Future<bool> shouldProceedWithDeletion(BuildContext context) async {
 Future<void> showDeleteSheet(
   BuildContext context,
   SelectedFiles selectedFiles,
-  FilesSplit filesSplit,
-) async {
+  FilesSplit filesSplit, {
+  @visibleForTesting
+  Future<void> Function(BuildContext context, List<EnteFile> files)?
+  deleteFromRemoteOnlyOverride,
+  @visibleForTesting
+  Future<void> Function(BuildContext context, List<EnteFile> files)?
+  deleteOnDeviceOnlyOverride,
+  @visibleForTesting
+  Future<void> Function(BuildContext context, List<EnteFile> files)?
+  deleteFromEverywhereOverride,
+}) async {
   if (selectedFiles.files.length != filesSplit.count) {
     throw AssertionError(
       "Unexpected state, #{selectedFiles.files.length} != "
@@ -766,6 +775,17 @@ Future<void> showDeleteSheet(
   }
   final List<EnteFile> deletableFiles =
       filesSplit.ownedByCurrentUser + filesSplit.pendingUploads;
+  final Future<void> Function(BuildContext context, List<EnteFile> files)
+  deleteFromRemoteOnlyAction =
+      deleteFromRemoteOnlyOverride ?? deleteFilesFromRemoteOnly;
+  final Future<void> Function(BuildContext context, List<EnteFile> files)
+  deleteOnDeviceOnlyAction =
+      deleteOnDeviceOnlyOverride ??
+      (context, files) async => deleteFilesOnDeviceOnly(context, files);
+  final Future<void> Function(BuildContext context, List<EnteFile> files)
+  deleteFromEverywhereAction =
+      deleteFromEverywhereOverride ?? deleteFilesFromEverywhere;
+
   if (deletableFiles.isEmpty && filesSplit.ownedByOtherUsers.isNotEmpty) {
     showShortToast(
       context,
@@ -784,14 +804,13 @@ Future<void> showDeleteSheet(
       );
       return;
     }
-    await deleteFilesOnDeviceOnly(context, localGalleryDeletableFiles);
+    await deleteOnDeviceOnlyAction(context, localGalleryDeletableFiles);
     selectedFiles.unSelectAll(localGalleryDeletableFiles.toSet());
     return;
   }
   final containsUploadedFile = deletableFiles.any((f) => f.isUploaded);
   final containsLocalFile = deletableFiles.any((f) => f.localID != null);
 
-  final List<ButtonWidget> buttons = [];
   final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
   final bool isLocalOnly = !containsUploadedFile;
   final bool isRemoteOnly = !containsLocalFile;
@@ -810,7 +829,7 @@ Future<void> showDeleteSheet(
   } else {
     throw AssertionError("Unexpected state");
   }
-  // Add option to delete from ente
+  final List<ButtonWidget> buttons = [];
   if (isBothLocalAndRemote || isRemoteOnly) {
     buttons.add(
       ButtonWidget(
@@ -824,7 +843,7 @@ Future<void> showDeleteSheet(
         shouldSurfaceExecutionStates: true,
         isInAlert: true,
         onTap: () async {
-          await deleteFilesFromRemoteOnly(context, deletableFiles).then(
+          await deleteFromRemoteOnlyAction(context, deletableFiles).then(
             (value) {
               showShortToast(
                 context,
@@ -839,7 +858,6 @@ Future<void> showDeleteSheet(
       ),
     );
   }
-  // Add option to delete from local
   if (isBothLocalAndRemote || isLocalOnly) {
     buttons.add(
       ButtonWidget(
@@ -853,7 +871,7 @@ Future<void> showDeleteSheet(
         shouldSurfaceExecutionStates: false,
         isInAlert: true,
         onTap: () async {
-          await deleteFilesOnDeviceOnly(context, deletableFiles);
+          await deleteOnDeviceOnlyAction(context, deletableFiles);
         },
       ),
     );
@@ -870,7 +888,7 @@ Future<void> showDeleteSheet(
         shouldSurfaceExecutionStates: true,
         isInAlert: true,
         onTap: () async {
-          await deleteFilesFromEverywhere(context, deletableFiles);
+          await deleteFromEverywhereAction(context, deletableFiles);
         },
       ),
     );

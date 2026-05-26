@@ -103,6 +103,30 @@ void main() {
     expect(find.text('Default close'), findsNothing);
   });
 
+  testWidgets('BottomSheetComponent returns closeResult from close button', (
+    tester,
+  ) async {
+    String? result;
+
+    await _pumpLauncher(tester, (context) async {
+      result = await showBottomSheetComponent<String>(
+        context: context,
+        builder: (_) => const BottomSheetComponent(
+          title: 'Close result',
+          content: Text('Sheet body'),
+          closeResult: 'cancelled',
+        ),
+      );
+    });
+
+    await _openLauncher(tester);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+
+    expect(result, 'cancelled');
+    expect(find.text('Close result'), findsNothing);
+  });
+
   testWidgets(
     'showBottomSheetComponent blocks system back when not dismissible',
     (tester) async {

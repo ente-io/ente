@@ -18,6 +18,7 @@ class _BottomSheetHeaderComponent extends StatelessWidget {
     this.title,
     this.illustration,
     this.onClose,
+    this.closeResult,
     this.showCloseButton = true,
     this.closeTooltip = 'Close',
     this.textAlign,
@@ -31,6 +32,7 @@ class _BottomSheetHeaderComponent extends StatelessWidget {
   ///
   /// Barrier taps, drag dismissals, and system back dismissals do not call this.
   final FutureOr<void> Function()? onClose;
+  final Object? closeResult;
   final bool showCloseButton;
   final String closeTooltip;
   final TextAlign? textAlign;
@@ -43,6 +45,7 @@ class _BottomSheetHeaderComponent extends StatelessWidget {
         title: title,
         illustration: illustration,
         onClose: onClose,
+        closeResult: closeResult,
         showCloseButton: showCloseButton,
         closeTooltip: closeTooltip,
       );
@@ -53,7 +56,11 @@ class _BottomSheetHeaderComponent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           if (showCloseButton)
-            _BottomSheetCloseButton(onClose: onClose, tooltip: closeTooltip),
+            _BottomSheetCloseButton(
+              onClose: onClose,
+              closeResult: closeResult,
+              tooltip: closeTooltip,
+            ),
         ],
       );
     }
@@ -75,7 +82,11 @@ class _BottomSheetHeaderComponent extends StatelessWidget {
           ),
           if (showCloseButton) const SizedBox(width: Spacing.md),
           if (showCloseButton)
-            _BottomSheetCloseButton(onClose: onClose, tooltip: closeTooltip),
+            _BottomSheetCloseButton(
+              onClose: onClose,
+              closeResult: closeResult,
+              tooltip: closeTooltip,
+            ),
         ],
       ),
     );
@@ -96,6 +107,7 @@ class BottomSheetComponent extends StatelessWidget {
     this.content,
     this.actions = const [],
     this.onClose,
+    this.closeResult,
     this.showCloseButton = true,
     this.closeTooltip = 'Close',
     this.textAlign,
@@ -118,6 +130,7 @@ class BottomSheetComponent extends StatelessWidget {
   ///
   /// Barrier taps, drag dismissals, and system back dismissals do not call this.
   final FutureOr<void> Function()? onClose;
+  final Object? closeResult;
   final bool showCloseButton;
   final String closeTooltip;
   final TextAlign? textAlign;
@@ -143,6 +156,7 @@ class BottomSheetComponent extends StatelessWidget {
                 title: title,
                 illustration: illustration,
                 onClose: onClose,
+                closeResult: closeResult,
                 showCloseButton: showCloseButton,
                 closeTooltip: closeTooltip,
                 textAlign: textAlign,
@@ -235,6 +249,7 @@ class _CenteredHeader extends StatelessWidget {
     required this.title,
     required this.illustration,
     required this.onClose,
+    required this.closeResult,
     required this.showCloseButton,
     required this.closeTooltip,
   });
@@ -242,6 +257,7 @@ class _CenteredHeader extends StatelessWidget {
   final String? title;
   final Widget? illustration;
   final FutureOr<void> Function()? onClose;
+  final Object? closeResult;
   final bool showCloseButton;
   final String closeTooltip;
 
@@ -256,7 +272,11 @@ class _CenteredHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             if (showCloseButton)
-              _BottomSheetCloseButton(onClose: onClose, tooltip: closeTooltip),
+              _BottomSheetCloseButton(
+                onClose: onClose,
+                closeResult: closeResult,
+                tooltip: closeTooltip,
+              ),
           ],
         ),
         if (showCloseButton && (illustration != null || title != null))
@@ -278,10 +298,15 @@ class _CenteredHeader extends StatelessWidget {
 }
 
 class _BottomSheetCloseButton extends StatelessWidget {
-  const _BottomSheetCloseButton({required this.onClose, required this.tooltip});
+  const _BottomSheetCloseButton({
+    required this.onClose,
+    required this.closeResult,
+    required this.tooltip,
+  });
 
   /// Called when the close button is pressed, before the sheet is dismissed.
   final FutureOr<void> Function()? onClose;
+  final Object? closeResult;
   final String tooltip;
 
   @override
@@ -306,7 +331,7 @@ class _BottomSheetCloseButton extends StatelessWidget {
 
     final route = ModalRoute.of(context);
     if (route == null || route.isCurrent) {
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(closeResult);
     }
   }
 }

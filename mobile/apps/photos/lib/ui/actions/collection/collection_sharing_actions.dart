@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:ente_components/ente_components.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart' hide isValidEmail;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -18,8 +19,6 @@ import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/contacts/contact_identity_resolver.dart';
 import 'package:photos/services/hidden_service.dart';
-import 'package:photos/theme/colors.dart';
-import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import "package:photos/ui/common/user_dialogs.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -345,7 +344,7 @@ class CollectionActions {
     BuildContext context,
     List<Collection> collections,
   ) async {
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final actionResult = await showActionSheet(
       context: context,
       buttons: [
@@ -402,10 +401,10 @@ class CollectionActions {
         text: AppLocalizations.of(
           context,
         ).deleteMultipleAlbumDialog(count: collections.length),
-        style: textTheme.body.copyWith(color: textMutedDark),
+        style: TextStyles.body.copyWith(color: colors.textLight),
         tags: {
           'bold': StyledTextTag(
-            style: textTheme.body.copyWith(color: textBaseDark),
+            style: TextStyles.body.copyWith(color: colors.textBase),
           ),
         },
       ),
@@ -432,7 +431,7 @@ class CollectionActions {
     BuildContext bContext,
     Collection collection,
   ) async {
-    final textTheme = getEnteTextTheme(bContext);
+    final colors = bContext.componentColors;
     final currentUserID = Configuration.instance.getUserID()!;
     if (collection.owner.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
@@ -492,10 +491,10 @@ class CollectionActions {
       ],
       bodyWidget: StyledText(
         text: AppLocalizations.of(bContext).deleteAlbumDialog,
-        style: textTheme.body.copyWith(color: textMutedDark),
+        style: TextStyles.body.copyWith(color: colors.textLight),
         tags: {
           'bold': StyledTextTag(
-            style: textTheme.body.copyWith(color: textBaseDark),
+            style: TextStyles.body.copyWith(color: colors.textBase),
           ),
         },
       ),
