@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:ente_components/components/chip_surface.dart';
 import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -49,28 +51,13 @@ class FilterChipComponent extends StatelessWidget {
     return heightForTextScale(context) - _avatarVerticalPadding;
   }
 
-  static double _larger(double first, double second) {
-    return first > second ? first : second;
-  }
-
   double _avatarSizeFor(BuildContext context) {
     final baseAvatarSize = avatarSize ?? _avatarSize;
     if (!scaleAvatarWithText) {
       return baseAvatarSize;
     }
     final scaledAvatarSize = avatarSizeForTextScale(context);
-    return _larger(scaledAvatarSize, baseAvatarSize);
-  }
-
-  double _chipHeightFor(BuildContext context, double? effectiveAvatarSize) {
-    final textScaledHeight = heightForTextScale(context);
-    if (effectiveAvatarSize == null) {
-      return textScaledHeight;
-    }
-    return _larger(
-      textScaledHeight,
-      effectiveAvatarSize + _avatarVerticalPadding,
-    );
+    return math.max(scaledAvatarSize, baseAvatarSize);
   }
 
   bool get _selected => state == FilterChipComponentState.selected;
@@ -87,8 +74,14 @@ class FilterChipComponent extends StatelessWidget {
       FilterChipComponentState.disabled => colors.textLightest,
     };
     final background = _selected ? colors.primaryLight : colors.fillLight;
-    final effectiveAvatarSize = avatar == null ? null : _avatarSizeFor(context);
-    final effectiveChipHeight = _chipHeightFor(context, effectiveAvatarSize);
+    final effectiveAvatarSize = _avatarSizeFor(context);
+    final textScaledHeight = heightForTextScale(context);
+    final effectiveChipHeight = avatar == null
+        ? textScaledHeight
+        : math.max(
+            textScaledHeight,
+            effectiveAvatarSize + _avatarVerticalPadding,
+          );
 
     return ChipSurface(
       surfaceKey: const ValueKey('filter-chip-surface'),
@@ -110,7 +103,7 @@ class FilterChipComponent extends StatelessWidget {
     );
   }
 
-  List<Widget> _children(double? effectiveAvatarSize, Color color) {
+  List<Widget> _children(double effectiveAvatarSize, Color color) {
     final children = <Widget>[];
     final gap = avatar != null ? Spacing.xs : Spacing.sm;
 
@@ -124,7 +117,7 @@ class FilterChipComponent extends StatelessWidget {
       children.add(
         _FilterChipAvatar(
           enabled: state != FilterChipComponentState.disabled,
-          size: effectiveAvatarSize!,
+          size: effectiveAvatarSize,
           child: avatar!,
         ),
       );
