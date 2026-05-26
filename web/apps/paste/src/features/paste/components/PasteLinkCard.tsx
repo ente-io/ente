@@ -51,7 +51,7 @@ export const PasteLinkCard = ({
     const isStackedLayout = useMediaQuery("(max-width:599.95px)", {
         noSsr: true,
     });
-    const previewQrSize = isStackedLayout ? 168 : 150;
+    const previewQrSize = isStackedLayout ? 136 : 150;
 
     useEffect(() => {
         const linkCard = linkCardRef.current;
@@ -233,14 +233,18 @@ export const PasteLinkCard = ({
                     boxSizing: "border-box",
                     display: "grid",
                     gridTemplateColumns: {
-                        xs: "1fr",
+                        xs: `${previewQrSize}px minmax(0, 1fr)`,
                         sm: "150px minmax(0, 1fr)",
                     },
+                    gridTemplateAreas: {
+                        xs: '"qr actions" "details details"',
+                        sm: '"qr details" "qr actions"',
+                    },
                     alignItems: "center",
-                    rowGap: { xs: 2, sm: 2.6 },
-                    columnGap: { xs: 2.2, sm: 1.8 },
-                    px: { xs: 1.65, sm: 1.8 },
-                    py: { xs: 1.4, sm: 1.35 },
+                    rowGap: { xs: 1.45, sm: 1.35 },
+                    columnGap: { xs: 1.4, sm: 1.8 },
+                    px: { xs: 1.45, sm: 1.8 },
+                    py: { xs: 2.1, sm: 1.35 },
                     mx: "auto",
                     position: "relative",
                     zIndex: 1,
@@ -256,10 +260,11 @@ export const PasteLinkCard = ({
             >
                 <Box
                     sx={{
+                        gridArea: "qr",
+                        justifySelf: "start",
                         position: "relative",
                         width: { xs: previewQrSize, sm: 150 },
                         height: { xs: previewQrSize, sm: 150 },
-                        mx: { xs: "auto", sm: 0 },
                         borderRadius: "10px",
                         overflow: "hidden",
                         boxShadow:
@@ -280,6 +285,7 @@ export const PasteLinkCard = ({
                 <Stack
                     spacing={1.35}
                     sx={{
+                        gridArea: "details",
                         minWidth: 0,
                         width: "100%",
                         height: "100%",
@@ -383,37 +389,97 @@ export const PasteLinkCard = ({
                             </Box>
                         </Typography>
                     </Box>
+                </Stack>
 
-                    <Box
+                <Box
+                    sx={{
+                        gridArea: "actions",
+                        position: "relative",
+                        minHeight: { xs: previewQrSize, sm: 82 },
+                        mt: { xs: 0, sm: 0.65 },
+                        width: "100%",
+                        maxWidth: "100%",
+                        display: { xs: "flex", sm: "block" },
+                        alignItems: { xs: "center", sm: "stretch" },
+                        justifyContent: { xs: "center", sm: "flex-start" },
+                        overflow: "visible",
+                        transform: { xs: "none", sm: "translateY(14px)" },
+                    }}
+                >
+                    <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={{ xs: 1.45, sm: 3.6 }}
+                        alignItems="center"
+                        justifyContent="center"
                         sx={{
                             position: "relative",
-                            minHeight: { xs: 64, sm: 82 },
-                            mt: { xs: 0.35, sm: 0.65 },
-                            width: "100%",
+                            zIndex: 2,
+                            width: "fit-content",
                             maxWidth: "100%",
-                            overflow: "visible",
+                            mx: 0,
+                            transform: { xs: "none", sm: "translateY(16px)" },
                         }}
                     >
-                        <Stack
-                            direction="row"
-                            spacing={{ xs: 2.8, sm: 3.6 }}
-                            alignItems="center"
-                            justifyContent={{ xs: "center", sm: "flex-start" }}
+                        <Typography
+                            component="button"
+                            onClick={handleShareClick}
                             sx={{
+                                fontFamily:
+                                    '"Gochi Hand", "Comic Sans MS", "Bradley Hand", cursive',
+                                fontSize: { xs: "2.22rem", sm: "2rem" },
+                                "@media (max-width:424.95px)": {
+                                    fontSize: "2rem",
+                                },
+                                color: tokens.button.scriptLink,
+                                background: "none",
+                                border: "none",
+                                p: 0,
+                                m: 0,
+                                lineHeight: 1,
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                textUnderlineOffset: "3px",
+                                transform: {
+                                    xs: "translateX(-28px) rotate(-3deg)",
+                                    sm: "rotate(-3deg)",
+                                },
+                                "&:hover": {
+                                    color: tokens.button.scriptLinkHover,
+                                    textDecoration: "underline",
+                                    textUnderlineOffset: "3px",
+                                },
+                                "&:focus-visible": {
+                                    outline: `2px solid ${tokens.button.primaryBg}`,
+                                    outlineOffset: 3,
+                                    borderRadius: "6px",
+                                },
+                            }}
+                        >
+                            Share
+                        </Typography>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                minWidth: 0,
                                 position: "relative",
-                                zIndex: 2,
-                                width: "fit-content",
-                                maxWidth: "100%",
-                                transform: "translateY(16px)",
+                                transform: {
+                                    xs: "translateX(34px) rotate(3deg)",
+                                    sm: "rotate(3deg)",
+                                },
                             }}
                         >
                             <Typography
                                 component="button"
-                                onClick={handleShareClick}
+                                onClick={handleCopyClick}
                                 sx={{
                                     fontFamily:
                                         '"Gochi Hand", "Comic Sans MS", "Bradley Hand", cursive',
-                                    fontSize: { xs: "1.82rem", sm: "2rem" },
+                                    fontSize: { xs: "2.22rem", sm: "2rem" },
+                                    "@media (max-width:424.95px)": {
+                                        fontSize: "2rem",
+                                    },
                                     color: tokens.button.scriptLink,
                                     background: "none",
                                     border: "none",
@@ -423,7 +489,6 @@ export const PasteLinkCard = ({
                                     cursor: "pointer",
                                     textDecoration: "underline",
                                     textUnderlineOffset: "3px",
-                                    transform: "rotate(-3deg)",
                                     "&:hover": {
                                         color: tokens.button.scriptLinkHover,
                                         textDecoration: "underline",
@@ -436,127 +501,85 @@ export const PasteLinkCard = ({
                                     },
                                 }}
                             >
-                                Share
+                                Copy
                             </Typography>
-                            <Box
+                            <Typography
+                                variant="mini"
                                 sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    minWidth: 0,
-                                    position: "relative",
-                                    transform: "rotate(3deg)",
-                                }}
-                            >
-                                <Typography
-                                    component="button"
-                                    onClick={handleCopyClick}
-                                    sx={{
-                                        fontFamily:
-                                            '"Gochi Hand", "Comic Sans MS", "Bradley Hand", cursive',
-                                        fontSize: { xs: "1.82rem", sm: "2rem" },
-                                        color: tokens.button.scriptLink,
-                                        background: "none",
-                                        border: "none",
-                                        p: 0,
-                                        m: 0,
-                                        lineHeight: 1,
-                                        cursor: "pointer",
-                                        textDecoration: "underline",
-                                        textUnderlineOffset: "3px",
-                                        "&:hover": {
-                                            color: tokens.button
-                                                .scriptLinkHover,
-                                            textDecoration: "underline",
-                                            textUnderlineOffset: "3px",
-                                        },
-                                        "&:focus-visible": {
-                                            outline: `2px solid ${tokens.button.primaryBg}`,
-                                            outlineOffset: 3,
-                                            borderRadius: "6px",
-                                        },
-                                    }}
-                                >
-                                    Copy
-                                </Typography>
-                                <Typography
-                                    variant="mini"
-                                    sx={{
-                                        fontFamily:
-                                            '"Gochi Hand", "Comic Sans MS", "Bradley Hand", cursive',
-                                        position: "absolute",
-                                        top: "100%",
-                                        left: "50%",
-                                        transform: "translateX(-50%)",
-                                        mt: 0.5,
-                                        whiteSpace: "nowrap",
-                                        color: tokens.text.copied,
-                                        fontSize: "0.94rem",
-                                        fontWeight: 600,
-                                        lineHeight: 1,
-                                        letterSpacing: "0.06em",
-                                        opacity: showCopied ? 1 : 0,
-                                        transition: "opacity 150ms ease",
-                                        pointerEvents: "none",
-                                    }}
-                                >
-                                    Copied to clipboard.
-                                </Typography>
-                            </Box>
-                        </Stack>
-
-                        {arrow && (
-                            <Box
-                                sx={{
-                                    display: { xs: "none", sm: "block" },
+                                    fontFamily:
+                                        '"Gochi Hand", "Comic Sans MS", "Bradley Hand", cursive',
                                     position: "absolute",
-                                    left: { sm: 184, md: 208 },
-                                    top: { sm: -5, md: -7 },
-                                    width: { sm: 114, md: 133 },
-                                    height: "auto",
-                                    zIndex: 1,
-                                    opacity: 0.9,
+                                    top: "100%",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    mt: 0.5,
+                                    whiteSpace: "nowrap",
+                                    color: tokens.text.copied,
+                                    fontSize: "0.94rem",
+                                    fontWeight: 600,
+                                    lineHeight: 1,
+                                    letterSpacing: "0.06em",
+                                    opacity: showCopied ? 1 : 0,
+                                    transition: "opacity 150ms ease",
                                     pointerEvents: "none",
-                                    transform:
-                                        "translateY(-2px) scaleX(-1) rotate(0deg)",
-                                    transformOrigin: "50% 50%",
                                 }}
                             >
-                                <svg
-                                    ref={arrowSvgRef}
-                                    viewBox={`0 0 ${arrow.width} ${arrow.height}`}
-                                    width="100%"
-                                    height="100%"
-                                    fill="none"
-                                    aria-hidden="true"
-                                    focusable="false"
-                                >
-                                    <g transform={arrow.transform}>
-                                        {arrow.paths.map((path, idx) => (
-                                            <path
-                                                key={`${path.d}-${idx}`}
-                                                data-arrow-path="true"
-                                                data-arrow-index={idx}
-                                                d={path.d}
-                                                fill="none"
-                                                stroke={
-                                                    arrowStrokeColor ??
-                                                    path.color
-                                                }
-                                                strokeWidth={
-                                                    path.width *
-                                                    path.strokeScale
-                                                }
-                                                strokeLinecap={path.lineCap}
-                                                strokeLinejoin={path.lineJoin}
-                                            />
-                                        ))}
-                                    </g>
-                                </svg>
-                            </Box>
-                        )}
-                    </Box>
-                </Stack>
+                                Copied to clipboard.
+                            </Typography>
+                        </Box>
+                    </Stack>
+
+                    {arrow && (
+                        <Box
+                            sx={{
+                                display: "block",
+                                position: "absolute",
+                                left: { xs: -11, sm: 184, md: 208 },
+                                top: { xs: 82, sm: -5, md: -7 },
+                                width: { xs: 118, sm: 114, md: 133 },
+                                height: "auto",
+                                zIndex: 1,
+                                opacity: 0.9,
+                                pointerEvents: "none",
+                                transform: {
+                                    xs: "translateY(16px) scaleY(-1) rotate(-57deg)",
+                                    sm: "translateY(-2px) scaleX(-1) rotate(0deg)",
+                                },
+                                transformOrigin: "50% 50%",
+                            }}
+                        >
+                            <svg
+                                ref={arrowSvgRef}
+                                viewBox={`0 0 ${arrow.width} ${arrow.height}`}
+                                width="100%"
+                                height="100%"
+                                fill="none"
+                                aria-hidden="true"
+                                focusable="false"
+                            >
+                                <g transform={arrow.transform}>
+                                    {arrow.paths.map((path, idx) => (
+                                        <path
+                                            key={`${path.d}-${idx}`}
+                                            data-arrow-path="true"
+                                            data-arrow-index={idx}
+                                            d={path.d}
+                                            fill="none"
+                                            stroke={
+                                                arrowStrokeColor ?? path.color
+                                            }
+                                            strokeWidth={
+                                                path.width * path.strokeScale
+                                            }
+                                            strokeLinecap={path.lineCap}
+                                            strokeLinejoin={path.lineJoin}
+                                        />
+                                    ))}
+                                </g>
+                            </svg>
+                        </Box>
+                    )}
+                </Box>
             </Box>
 
             <Dialog
