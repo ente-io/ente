@@ -96,6 +96,7 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppBarFilterChips.bottomPadding),
       child: SizedBox(
+        width: double.infinity,
         height: chipHeight,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
