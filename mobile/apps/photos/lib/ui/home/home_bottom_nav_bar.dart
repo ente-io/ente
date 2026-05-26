@@ -159,7 +159,7 @@ class _FigmaHomeNavBar extends StatelessWidget {
       filledAsset: 'assets/icons/nav_bar/albums_filled.svg',
     ),
     _FigmaNavTab(
-      semanticLabel: 'Shared',
+      semanticLabel: 'Feed',
       outlineAsset: 'assets/icons/nav_bar/feed_outline.svg',
       filledAsset: 'assets/icons/nav_bar/feed_filled.svg',
     ),
