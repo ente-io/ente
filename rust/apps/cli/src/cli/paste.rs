@@ -39,7 +39,7 @@ pub enum PasteSubcommands {
         link_or_token: String,
 
         /// Fragment key when passing only an access token.
-        /// Password-protected keys include the `p:` prefix.
+        /// Password-protected keys include the `p-` prefix.
         #[arg(long)]
         key: Option<String>,
 
