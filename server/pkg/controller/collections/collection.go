@@ -45,6 +45,9 @@ type CollectionController struct {
 
 // Create creates a collection
 func (c *CollectionController) Create(collection ente.Collection, ownerID int64) (ente.Collection, error) {
+	if err := validateOwnedCollectionKey(collection.EncryptedKey, collection.KeyDecryptionNonce); err != nil {
+		return ente.Collection{}, err
+	}
 	// The key attribute check is to ensure that user does not end up uploading any files before actually setting the key attributes.
 	if _, keyErr := c.UserRepo.GetKeyAttributes(ownerID); keyErr != nil {
 		return ente.Collection{}, stacktrace.Propagate(keyErr, "Unable to get keyAttributes")

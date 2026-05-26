@@ -250,7 +250,9 @@ class _PeoplePageState extends State<PeoplePage> {
           child: Scaffold(
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(
-                widget.searchResult != null ? 90.0 : 50.0,
+                widget.searchResult != null
+                    ? PeopleAppBar.hierarchicalPreferredHeight(context)
+                    : 50.0,
               ),
               child: PeopleAppBar(
                 GalleryType.peopleTag,

@@ -4,7 +4,6 @@ import "package:email_validator/email_validator.dart";
 import "package:ente_contacts/contacts.dart" as contacts;
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/contacts_changed_event.dart";
 import "package:photos/events/files_updated_event.dart";
@@ -38,8 +37,7 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
-import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
+import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
 import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/search/contact_avatar_widget.dart";
 import "package:photos/ui/viewer/search/result/edit_contact_page.dart";
@@ -155,6 +153,11 @@ class _ContactResultPageState extends State<ContactResultPage> {
           : const EmptyState(),
     );
 
+    final appBarHeight = _ContactResultAppBar.preferredHeight(
+      context,
+      isHierarchicalSearchable: true,
+    );
+
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: InheritedSearchFilterDataWrapper(
@@ -162,16 +165,16 @@ class _ContactResultPageState extends State<ContactResultPage> {
           child: Scaffold(
             backgroundColor: getEnteColorScheme(context).backgroundColour,
             appBar: PreferredSize(
-              preferredSize: Size.fromHeight(
-                _ContactResultAppBar.preferredHeight(
-                  isHierarchicalSearchable: true,
-                ),
-              ),
+              preferredSize: Size.fromHeight(appBarHeight),
               child: widget.enableGrouping
-                  ? const _ContactResultAppBar(isHierarchicalSearchable: true)
-                  : const _AppBarWithBoundary(
+                  ? _ContactResultAppBar(
+                      isHierarchicalSearchable: true,
+                      height: appBarHeight,
+                    )
+                  : _AppBarWithBoundary(
                       child: _ContactResultAppBar(
                         isHierarchicalSearchable: true,
+                        height: appBarHeight,
                       ),
                     ),
             ),
@@ -577,22 +580,26 @@ class _UnsavedContactEmptyState extends StatelessWidget {
 class _ContactResultAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   static const _toolbarHeight = 56.0;
-  static const _bottomPadding = 8.0;
 
   final bool isHierarchicalSearchable;
+  final double height;
 
-  const _ContactResultAppBar({required this.isHierarchicalSearchable});
+  const _ContactResultAppBar({
+    required this.isHierarchicalSearchable,
+    required this.height,
+  });
 
-  static double preferredHeight({required bool isHierarchicalSearchable}) {
+  static double preferredHeight(
+    BuildContext context, {
+    required bool isHierarchicalSearchable,
+  }) {
     return isHierarchicalSearchable
-        ? _toolbarHeight + kFilterChipHeight + _bottomPadding + 1
+        ? AppBarFilterChips.appBarHeight(context)
         : _toolbarHeight;
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(
-    preferredHeight(isHierarchicalSearchable: isHierarchicalSearchable),
-  );
+  Size get preferredSize => Size.fromHeight(height);
 
   @override
   Widget build(BuildContext context) {
@@ -607,37 +614,21 @@ class _ContactResultAppBar extends StatelessWidget
       );
     }
 
-    final searchFilterData = InheritedSearchFilterData.of(context);
-    return ValueListenableBuilder(
-      valueListenable:
-          searchFilterData.searchFilterDataProvider!.isSearchingNotifier,
-      builder: (context, isSearching, _) {
-        return AppBar(
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          backgroundColor: colorScheme.backgroundColour,
-          surfaceTintColor: Colors.transparent,
-          titleSpacing: 0,
-          bottom: isSearching
-              ? const PreferredSize(
-                  preferredSize: Size.fromHeight(kFilterChipHeight + 1),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: SizedBox(
-                      height: kFilterChipHeight + 1,
-                      child: AppliedFiltersForAppbar(),
-                    ),
-                  ),
-                )
-              : const PreferredSize(
-                  preferredSize: Size.fromHeight(0),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: RecommendedFiltersForAppbar(),
-                  ),
-                ),
-        );
-      },
+    return AppBar(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      backgroundColor: colorScheme.backgroundColour,
+      surfaceTintColor: Colors.transparent,
+      titleSpacing: 0,
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(
+          AppBarFilterChips.preferredHeight(context),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: AppBarFilterChips(),
+        ),
+      ),
     );
   }
 }

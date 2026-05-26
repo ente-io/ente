@@ -74,6 +74,7 @@ class BannerActionButton extends StatelessWidget {
 
     return Stack(
       clipBehavior: Clip.none,
+      fit: StackFit.passthrough,
       children: [
         Positioned(
           top: -17,

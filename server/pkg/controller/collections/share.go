@@ -23,6 +23,9 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 	fromUserID := auth.GetUserID(ctx.Request.Header)
 	cID := req.CollectionID
 	encryptedKey := req.EncryptedKey
+	if err := validateSealedCollectionKey(encryptedKey); err != nil {
+		return nil, err
+	}
 	toUserEmail := emailUtil.NormalizeEmail(req.Email)
 	// default role type
 	role := ente.VIEWER
@@ -69,6 +72,9 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 }
 
 func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollectionViaLinkRequest) error {
+	if err := validateSealedCollectionKey(req.EncryptedKey); err != nil {
+		return err
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
 	collection, err := c.CollectionRepo.Get(req.CollectionID)
 	if err != nil {

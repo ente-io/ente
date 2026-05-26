@@ -44,6 +44,9 @@ async fn run() -> Result<()> {
 
             commands::export::run_export(export_cmd.account, filter).await?;
         }
+        Commands::Paste(paste_cmd) => {
+            commands::paste::handle_paste_command(paste_cmd).await?;
+        }
     }
 
     Ok(())

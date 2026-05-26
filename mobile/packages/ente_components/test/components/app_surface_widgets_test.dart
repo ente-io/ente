@@ -5,6 +5,7 @@ import 'package:ente_components/components/menu_component.dart';
 import 'package:ente_components/components/menu_group_component.dart';
 import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/icon_sizes.dart';
+import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -533,9 +534,9 @@ void main() {
     );
     expect(
       tester.getCenter(find.byKey(const ValueKey('header-leading'))).dy,
-      closeTo(71, 1),
+      closeTo(73, 1),
     );
-    expect(tester.getCenter(find.byIcon(Icons.add)).dy, closeTo(67, 1));
+    expect(tester.getCenter(find.byIcon(Icons.add)).dy, closeTo(73, 1));
 
     await tester.tap(find.byKey(const ValueKey('header-leading')));
     await tester.pump();
@@ -603,13 +604,15 @@ void main() {
       await tester.pump();
 
       final title = tester.widget<Text>(find.text('Menu items'));
-      expect(title.style?.fontSize, greaterThan(18));
+      expect(title.style?.fontSize, greaterThan(16));
+      expect(title.style?.fontFamily, TextStyles.outfitFontFamily);
 
-      scrollController.jumpTo(54);
+      scrollController.jumpTo(58);
       await tester.pump();
 
       final collapsedTitle = tester.widget<Text>(find.text('Menu items'));
-      expect(collapsedTitle.style?.fontSize, closeTo(18, 0.01));
+      expect(collapsedTitle.style?.fontSize, closeTo(20, 0.01));
+      expect(collapsedTitle.style?.fontFamily, TextStyles.outfitFontFamily);
       expect(tester.getTopLeft(find.text('Item 0')).dy, closeTo(56, 1));
     },
   );
@@ -640,14 +643,15 @@ void main() {
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -40));
     await tester.pumpAndSettle();
 
-    expect(scrollController.offset, closeTo(54, 1));
+    expect(scrollController.offset, closeTo(58, 1));
     final collapsedTitle = tester.widget<Text>(find.text('Appearance'));
-    expect(collapsedTitle.style?.fontSize, closeTo(18, 0.01));
+    expect(collapsedTitle.style?.fontSize, closeTo(20, 0.01));
+    expect(collapsedTitle.style?.fontFamily, TextStyles.outfitFontFamily);
     expect(tester.getTopLeft(find.text('System theme')).dy, closeTo(56, 1));
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 32));
     await tester.pumpAndSettle();
-    expect(scrollController.offset, closeTo(54, 1));
+    expect(scrollController.offset, closeTo(58, 1));
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
     await tester.pumpAndSettle();
@@ -725,7 +729,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text(title), findsOneWidget);
-    expect(tester.getBottomLeft(find.text(title)).dy, lessThanOrEqualTo(118));
+    expect(tester.getBottomLeft(find.text(title)).dy, lessThanOrEqualTo(128));
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -240));
     await tester.pump();

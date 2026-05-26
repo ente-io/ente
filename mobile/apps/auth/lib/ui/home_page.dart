@@ -53,6 +53,7 @@ import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
+import 'package:ente_ui/components/android_text_input_autofocus.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1530,27 +1531,31 @@ class _HomePageState extends State<HomePage> {
       ),
       title: !_showSearchBox
           ? const AuthLogoWidget(height: 18)
-          : TextField(
-              autocorrect: false,
-              enableSuggestions: false,
-              autofocus: _autoFocusSearch,
-              controller: _textController,
-              onChanged: (val) {
-                _searchText = val;
-                _applyFilteringAndRefresh();
-              },
-              onSubmitted: (_) {
-                if (_filteredCodes.isNotEmpty) {
-                  // Move focus to the first item in the grid
-                  _firstItemFocusNode.requestFocus();
-                }
-              },
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-              ),
+          : AndroidTextInputAutofocus(
+              enabled: _autoFocusSearch,
               focusNode: searchBoxFocusNode,
+              child: TextField(
+                autocorrect: false,
+                enableSuggestions: false,
+                autofocus: _autoFocusSearch && !Platform.isAndroid,
+                controller: _textController,
+                onChanged: (val) {
+                  _searchText = val;
+                  _applyFilteringAndRefresh();
+                },
+                onSubmitted: (_) {
+                  if (_filteredCodes.isNotEmpty) {
+                    // Move focus to the first item in the grid
+                    _firstItemFocusNode.requestFocus();
+                  }
+                },
+                decoration: InputDecoration(
+                  hintText: l10n.searchHint,
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+                focusNode: searchBoxFocusNode,
+              ),
             ),
       centerTitle: true,
       actions: <Widget>[

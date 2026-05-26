@@ -30,6 +30,7 @@ class TextInputWidget extends StatefulWidget {
   final TextCapitalization? textCapitalization;
   final bool isPasswordInput;
   final Iterable<String>? autofillHints;
+  final FocusNode? focusNode;
   final bool cancellable;
   final bool shouldUnfocusOnCancelOrSubmit;
   const TextInputWidget({
@@ -51,6 +52,7 @@ class TextInputWidget extends StatefulWidget {
     this.textCapitalization = TextCapitalization.none,
     this.isPasswordInput = false,
     this.autofillHints,
+    this.focusNode,
     this.cancellable = false,
     this.shouldUnfocusOnCancelOrSubmit = false,
     super.key,
@@ -124,6 +126,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
           child: TextFormField(
             textCapitalization: widget.textCapitalization!,
             autofocus: widget.autoFocus ?? false,
+            focusNode: widget.focusNode,
             controller: _textController,
             inputFormatters: widget.maxLength != null
                 ? [LengthLimitingTextInputFormatter(50)]

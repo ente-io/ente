@@ -102,6 +102,8 @@ const (
 	AccountDeletedEmailTemplate                       = "account_deleted.html"
 	AccountDeletedWithActiveSubscriptionEmailTemplate = "account_deleted_active_sub.html"
 	AccountDeletedEmailSubject                        = "Your Ente account has been deleted"
+	accountRecoveryLinkHost                           = "https://api.ente.com"
+	accountRecoveryLinkValidityDays                   = 7
 )
 
 func NewUserController(
@@ -335,25 +337,34 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 	if !isSubscriptionCancelled {
 		template = AccountDeletedWithActiveSubscriptionEmailTemplate
 	}
-	recoverToken, err2 := c.GetJWTTokenForClaim(&enteJWT.WebCommonJWTClaim{
-		UserID:     userID,
-		ExpiryTime: time.MicrosecondsAfterDays(7),
-		ClaimScope: enteJWT.RestoreAccount.Ptr(),
-		Email:      userEmail,
-	})
-	if err2 != nil {
-		logrus.WithError(err2).Error("failed to generate recover token")
+	accountRecoveryLink, err := c.getAccountRecoveryLink(userID, userEmail)
+	if err != nil {
+		logrus.WithError(err).Error("failed to generate recover token")
 		return
 	}
 
 	templateData := make(map[string]interface{})
-	templateData["AccountRecoveryLink"] = fmt.Sprintf("%s/users/recover-account?token=%s", "https://api.ente.com", recoverToken)
-	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.com",
+	templateData["AccountRecoveryLink"] = accountRecoveryLink
+	err = email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.com",
 		AccountDeletedEmailSubject, template, templateData, nil)
 	if err != nil {
 		logrus.WithError(err).Errorf("Failed to send the account deletion email to %s", userEmail)
 	}
 }
+
+func (c *UserController) getAccountRecoveryLink(userID int64, userEmail string) (string, error) {
+	recoverToken, err := c.GetJWTTokenForClaim(&enteJWT.WebCommonJWTClaim{
+		UserID:     userID,
+		ExpiryTime: time.MicrosecondsAfterDays(accountRecoveryLinkValidityDays),
+		ClaimScope: enteJWT.RestoreAccount.Ptr(),
+		Email:      userEmail,
+	})
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/users/recover-account?token=%s", accountRecoveryLinkHost, recoverToken), nil
+}
+
 func (c *UserController) HandleSelfAccountRecovery(ctx *gin.Context, token string) error {
 	jwtToken, err := c.ValidateJWTToken(token, enteJWT.RestoreAccount)
 	if err != nil {

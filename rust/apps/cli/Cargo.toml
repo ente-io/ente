@@ -2,10 +2,18 @@
 name = "ente-rs"
 version = "0.0.1"
 edition = "2024"
-description = "Rust bindings and CLI for Ente"
+description = "Command-line interface for Ente"
 homepage = "https://ente.com"
 repository = "https://github.com/ente-io/ente"
 license = "AGPL-3.0-only"
+
+[features]
+museum = []
+pglite = []
+
+[[test]]
+name = "paste"
+required-features = ["museum", "pglite"]
 
 [dependencies]
 # CLI

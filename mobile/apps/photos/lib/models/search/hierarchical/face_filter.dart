@@ -1,4 +1,3 @@
-import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 
@@ -33,7 +32,7 @@ class FaceFilter extends HierarchicalSearchFilter {
   }
 
   @override
-  IconData? icon() {
+  SearchFilterIcon? icon() {
     throw UnimplementedError(
       "FaceFilter does not use an icon, the face crop should be used instead",
     );

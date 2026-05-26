@@ -110,6 +110,15 @@ flutter:
         - asset: assets/fonts/Inter-Light.ttf
         - asset: assets/fonts/Inter-SemiBold.ttf
         - asset: assets/fonts/Inter-Bold.ttf
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-Regular.ttf
+        - asset: assets/fonts/Outfit-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Outfit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Outfit-Bold.ttf
+          weight: 700
     - family: Montserrat
       fonts:
         - asset: assets/fonts/Montserrat-Bold.ttf
