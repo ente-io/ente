@@ -19,7 +19,7 @@ const FRAGMENT_SECRET_ALPHABET: &[u8] =
     b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const PASTE_GUARD_COOKIE: &str = "paste_guard";
 const PASTE_PASSWORD_ENV: &str = "ENTE_PASTE_PASSWORD";
-const PASSWORD_FRAGMENT_PREFIX: &str = "p:";
+const PASSWORD_FRAGMENT_PREFIX: &str = "p-";
 const PASSWORD_KDF_CONTEXT: &str = "ente-paste-password-v1";
 
 pub async fn handle_paste_command(cmd: PasteCommand) -> Result<()> {
@@ -578,7 +578,7 @@ mod tests {
     #[test]
     fn parse_password_protected_paste_link() {
         let (token, paste_key) =
-            parse_paste_reference("https://paste.ente.com/ABC123#p:AbCd1234EfGh", None).unwrap();
+            parse_paste_reference("https://paste.ente.com/ABC123#p-AbCd1234EfGh", None).unwrap();
 
         assert_eq!(token, "ABC123");
         assert_eq!(
@@ -608,7 +608,7 @@ mod tests {
     #[test]
     fn parse_token_with_password_key() {
         let (token, paste_key) =
-            parse_paste_reference("ABC123", Some("p:AbCd1234EfGh".to_string())).unwrap();
+            parse_paste_reference("ABC123", Some("p-AbCd1234EfGh".to_string())).unwrap();
 
         assert_eq!(token, "ABC123");
         assert_eq!(

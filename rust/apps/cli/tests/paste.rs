@@ -180,7 +180,7 @@ impl PasteLink {
             .fragment()
             .expect("paste link should include a decryption key fragment")
             .to_string();
-        let (password_required, fragment_secret) = match key.strip_prefix("p:") {
+        let (password_required, fragment_secret) = match key.strip_prefix("p-") {
             Some(fragment_secret) => (true, fragment_secret),
             None => (false, key.as_str()),
         };
