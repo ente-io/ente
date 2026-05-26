@@ -1,13 +1,5 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { type UploadPhase } from "@/public-album/upload/pipeline";
-import type {
-    FinishedUploadType,
-    InProgressUpload,
-    SegregatedFinishedUploads,
-    UploadCounter,
-    UploadFileNames,
-} from "@/public-album/upload/services/upload-manager";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -68,6 +60,42 @@ interface UploadProgressProps {
     hasLivePhotos: boolean;
     cancelUploads: () => void;
 }
+
+type FileID = number;
+
+type PercentageUploaded = number;
+
+type UploadPhase =
+    | "preparing"
+    | "readingMetadata"
+    | "uploading"
+    | "cancelling"
+    | "done";
+
+interface UploadCounter {
+    finished: number;
+    total: number;
+}
+
+interface InProgressUpload {
+    localFileID: FileID;
+    progress: PercentageUploaded;
+}
+
+type FinishedUploadType =
+    | "unsupported"
+    | "zeroSize"
+    | "tooLarge"
+    | "largerThanAvailableStorage"
+    | "blocked"
+    | "failed"
+    | "alreadyUploaded"
+    | "uploadedWithStaticThumbnail"
+    | "uploaded";
+
+type SegregatedFinishedUploads = Map<FinishedUploadType, FileID[]>;
+
+type UploadFileNames = Map<FileID, string>;
 
 export const UploadProgress: React.FC<UploadProgressProps> = ({
     open,
