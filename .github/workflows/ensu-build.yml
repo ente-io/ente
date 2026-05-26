@@ -156,8 +156,7 @@ jobs:
               run: yarn build:wasm
 
             - name: Install Tauri dependencies
-              working-directory: rust/apps/ensu
-              run: yarn install --frozen-lockfile
+              run: npm ci --prefix rust/apps/ensu
 
             - name: Check Tauri updater public key
               if: vars.ENSU_TAURI_UPDATER_PUBKEY == ''

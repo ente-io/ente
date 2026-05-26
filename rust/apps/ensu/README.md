@@ -9,14 +9,14 @@ Requires cmake (e.g. `brew install cmake`).
 ```sh
 cd rust/apps/ensu
 # runs the Ensu web dev server and launches Tauri (default port 3010)
-yarn dev
+npm run dev
 ```
 
 To change the dev port:
 
 ```sh
 cd rust/apps/ensu
-ENSU_TAURI_PORT=3020 yarn dev
+ENSU_TAURI_PORT=3020 npm run dev
 ```
 
 ## Build
@@ -24,7 +24,7 @@ ENSU_TAURI_PORT=3020 yarn dev
 ```sh
 cd rust/apps/ensu
 # builds the Ensu web app and exports a static build for Tauri
-yarn build
+npm run build
 ```
 
 ## Notes
