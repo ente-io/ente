@@ -43,7 +43,9 @@ class _LocationScreenState extends State<LocationScreen> {
   @override
   Widget build(BuildContext context) {
     final heightOfStatusBar = MediaQuery.of(context).viewPadding.top;
-    const heightOfAppBar = 90.0;
+    final heightOfAppBar = GalleryAppBarWidget.hierarchicalPreferredHeight(
+      context,
+    );
     final locationTag = InheritedLocationScreenState.of(
       context,
     ).locationTagEntity.item;
@@ -59,7 +61,7 @@ class _LocationScreenState extends State<LocationScreen> {
           ),
           child: Scaffold(
             appBar: PreferredSize(
-              preferredSize: const Size(double.infinity, heightOfAppBar),
+              preferredSize: Size(double.infinity, heightOfAppBar),
               child: GalleryAppBarWidget(
                 GalleryType.locationTag,
                 locationTag.name,

@@ -55,8 +55,7 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
-import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
-import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
+import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
@@ -64,6 +63,10 @@ import 'package:photos/utils/magic_util.dart';
 import "package:uuid/uuid.dart";
 
 class GalleryAppBarWidget extends StatefulWidget {
+  static double hierarchicalPreferredHeight(BuildContext context) {
+    return AppBarFilterChips.appBarHeight(context);
+  }
+
   final GalleryType type;
   final String? title;
   final SelectedFiles selectedFiles;
@@ -197,28 +200,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             valueListenable: inheritedSearchFilterData!
                 .searchFilterDataProvider!
                 .isSearchingNotifier,
-            child: const PreferredSize(
-              preferredSize: Size.fromHeight(0),
-              child: Flexible(child: RecommendedFiltersForAppbar()),
+            child: PreferredSize(
+              preferredSize: Size.fromHeight(
+                AppBarFilterChips.preferredHeight(context),
+              ),
+              child: const AppBarFilterChips(),
             ),
             builder: (context, isSearching, child) {
               return AppBar(
                 elevation: 0,
                 centerTitle: false,
-                title: isSearching
-                    ? const SizedBox(
-                        // +1 to account for the filter's outer stroke width
-                        height: kFilterChipHeight + 1,
-                        child: AppliedFiltersForAppbar(),
-                      )
-                    : Text(
-                        _appBarTitle!,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                title: Text(
+                  _appBarTitle!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall!.copyWith(fontSize: 16),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 actions: isSearching ? null : _getDefaultActions(context),
                 bottom: child as PreferredSizeWidget,
                 surfaceTintColor: Colors.transparent,

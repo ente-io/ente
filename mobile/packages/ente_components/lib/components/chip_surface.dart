@@ -8,7 +8,7 @@ class ChipSurface extends StatelessWidget {
     required this.enabled,
     required this.selected,
     required this.semanticLabel,
-    required this.height,
+    required this.minHeight,
     required this.padding,
     required this.background,
     required this.borderRadius,
@@ -22,7 +22,7 @@ class ChipSurface extends StatelessWidget {
   final bool enabled;
   final bool selected;
   final String? semanticLabel;
-  final double height;
+  final double minHeight;
   final double? minWidth;
   final EdgeInsetsGeometry padding;
   final Color background;
@@ -43,8 +43,8 @@ class ChipSurface extends StatelessWidget {
           duration: Motion.quick,
           curve: Curves.easeInOutCubic,
           constraints: BoxConstraints(
-            minHeight: height,
             minWidth: minWidth ?? 0,
+            minHeight: minHeight,
           ),
           padding: padding,
           decoration: BoxDecoration(

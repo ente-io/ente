@@ -47,7 +47,7 @@ class TagChipComponent extends StatelessWidget {
       enabled: _enabled,
       selected: _selected,
       semanticLabel: tooltip ?? label,
-      height: 44,
+      minHeight: 44,
       padding: _padding,
       background: background,
       borderRadius: BorderRadius.circular(Radii.lg),

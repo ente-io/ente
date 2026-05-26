@@ -92,7 +92,9 @@ class UnCategorizedPage extends StatelessWidget {
           ),
           child: Scaffold(
             appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(90.0),
+              preferredSize: Size.fromHeight(
+                GalleryAppBarWidget.hierarchicalPreferredHeight(context),
+              ),
               child: GalleryAppBarWidget(
                 appBarType,
                 AppLocalizations.of(context).uncategorized,

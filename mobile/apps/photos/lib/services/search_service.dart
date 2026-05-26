@@ -2,8 +2,8 @@ import "dart:async";
 import "dart:math";
 
 import 'package:ente_pure_utils/ente_pure_utils.dart';
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import 'package:logging/logging.dart';
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
@@ -417,7 +417,7 @@ class SearchService {
                 occurrence: kMostRelevantFilter,
                 filterResultType: ResultType.year,
                 matchedUploadedIDs: filesToUploadedFileIDs(filesInYear),
-                filterIcon: Icons.calendar_month_outlined,
+                filterIcon: HugeIcons.strokeRoundedCalendar03,
               ),
             ),
           );
@@ -460,7 +460,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.month,
               matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-              filterIcon: Icons.calendar_month_outlined,
+              filterIcon: HugeIcons.strokeRoundedCalendar03,
             ),
           ),
         );
@@ -501,7 +501,7 @@ class SearchService {
                 occurrence: kMostRelevantFilter,
                 filterResultType: ResultType.event,
                 matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-                filterIcon: Icons.event_outlined,
+                filterIcon: HugeIcons.strokeRoundedCalendar03,
               ),
             ),
           );
@@ -542,7 +542,7 @@ class SearchService {
         occurrence: kMostRelevantFilter,
         filterResultType: ResultType.fileExtension,
         matchedUploadedIDs: filesToUploadedFileIDs(files),
-        filterIcon: CupertinoIcons.doc_text,
+        filterIcon: HugeIcons.strokeRoundedFile01,
       ),
     );
   }
@@ -696,7 +696,7 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.fileCaption,
             matchedUploadedIDs: filesToUploadedFileIDs(captionMatch),
-            filterIcon: Icons.description_outlined,
+            filterIcon: HugeIcons.strokeRoundedText,
           ),
         ),
       );
@@ -744,7 +744,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.cameraMake,
               matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
-              filterIcon: Icons.photo_camera_outlined,
+              filterIcon: HugeIcons.strokeRoundedCamera01,
             ),
           ),
         );
@@ -880,7 +880,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.fileType,
               matchedUploadedIDs: filesToUploadedFileIDs(noLocationFiles),
-              filterIcon: Icons.not_listed_location_outlined,
+              filterIcon: HugeIcons.strokeRoundedLocationOffline01,
             ),
           ),
         );
@@ -916,7 +916,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.fileType,
               matchedUploadedIDs: filesToUploadedFileIDs(noLocationTagFiles),
-              filterIcon: Icons.not_listed_location_outlined,
+              filterIcon: HugeIcons.strokeRoundedLocationOffline01,
             ),
           ),
         );
@@ -1584,7 +1584,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.month,
               matchedUploadedIDs: filesToUploadedFileIDs(monthYearFiles),
-              filterIcon: Icons.calendar_month_outlined,
+              filterIcon: HugeIcons.strokeRoundedCalendar03,
             ),
           ),
         );
@@ -1616,7 +1616,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.event,
               matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-              filterIcon: Icons.event_outlined,
+              filterIcon: HugeIcons.strokeRoundedCalendar03,
             ),
           ),
         );
@@ -1747,7 +1747,7 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.event,
             matchedUploadedIDs: filesToUploadedFileIDs(files),
-            filterIcon: Icons.event_outlined,
+            filterIcon: HugeIcons.strokeRoundedCalendar03,
           ),
         ),
       );

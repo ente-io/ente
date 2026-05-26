@@ -4,7 +4,6 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -21,8 +20,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
-import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
-import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
+import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -32,6 +30,10 @@ const kShowUnnamedIgnoredPersonEventSource =
     "_AppBarWidgetState._showPersonUnnamedDelete";
 
 class PeopleAppBar extends StatefulWidget {
+  static double hierarchicalPreferredHeight(BuildContext context) {
+    return AppBarFilterChips.appBarHeight(context);
+  }
+
   final GalleryType type;
   final String? title;
   final SelectedFiles selectedFiles;
@@ -173,28 +175,24 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             valueListenable: inheritedSearchFilterData!
                 .searchFilterDataProvider!
                 .isSearchingNotifier,
-            child: const PreferredSize(
-              preferredSize: Size.fromHeight(0),
-              child: Flexible(child: RecommendedFiltersForAppbar()),
+            child: PreferredSize(
+              preferredSize: Size.fromHeight(
+                AppBarFilterChips.preferredHeight(context),
+              ),
+              child: const AppBarFilterChips(),
             ),
             builder: (context, isSearching, child) {
               return AppBar(
                 elevation: 0,
                 centerTitle: false,
-                title: isSearching
-                    ? const SizedBox(
-                        // +1 to account for the filter's outer stroke width
-                        height: kFilterChipHeight + 1,
-                        child: AppliedFiltersForAppbar(),
-                      )
-                    : Text(
-                        _appBarTitle ?? "",
-                        style: Theme.of(
-                          context,
-                        ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                title: Text(
+                  _appBarTitle ?? "",
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall!.copyWith(fontSize: 16),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 bottom: child as PreferredSizeWidget,
                 actions: isSearching ? null : _getDefaultActions(context),
                 surfaceTintColor: Colors.transparent,
