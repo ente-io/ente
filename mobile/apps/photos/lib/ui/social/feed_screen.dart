@@ -564,7 +564,7 @@ class _FeedScreenState extends State<FeedScreen> {
           AppLocalizations.of(context).feed,
           style: widget.showBackButton
               ? TextStyles.bodyBold.copyWith(color: textTheme.bodyBold.color)
-              : TextStyles.h1Bold.copyWith(color: textTheme.h4Bold.color),
+              : TextStyles.display1.copyWith(color: textTheme.h4Bold.color),
         ),
       ),
       body: _isLoading

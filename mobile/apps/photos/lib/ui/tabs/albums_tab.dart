@@ -342,9 +342,13 @@ class _AlbumsTabState extends State<AlbumsTab>
         switchInCurve: Curves.easeOutCubic,
         switchOutCurve: Curves.easeInCubic,
         child: _shouldShowDeleteEmptyAlbums.value
-            ? DeleteEmptyAlbums(
+            ? Padding(
                 key: const ValueKey("delete_empty_albums_action"),
-                onDeleted: () => _loadEnteCollections(),
+                padding: const EdgeInsets.only(top: 8),
+                child: DeleteEmptyAlbums(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  onDeleted: () => _loadEnteCollections(),
+                ),
               )
             : const SizedBox.shrink(
                 key: ValueKey("delete_empty_albums_hidden"),
@@ -713,7 +717,7 @@ class _AlbumsTabState extends State<AlbumsTab>
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
                   height: _kHeaderToolbarHeight,
                   child: AnimatedSwitcher(
@@ -794,7 +798,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                 child: Text(
                                   strings.albums,
                                   key: const ValueKey("albums_title"),
-                                  style: TextStyles.h1Bold.copyWith(
+                                  style: TextStyles.display1.copyWith(
                                     color: textTheme.h4Bold.color,
                                   ),
                                 ),

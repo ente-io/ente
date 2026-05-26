@@ -680,9 +680,12 @@ _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
   final textScaler = MediaQuery.textScalerOf(context);
   final expandedTitleLineHeight = _scaledLineHeight(
     textScaler,
-    TextStyles.h1Bold,
+    TextStyles.display2,
   );
-  final collapsedTitleLineHeight = _scaledLineHeight(textScaler, TextStyles.h2);
+  final collapsedTitleLineHeight = _scaledLineHeight(
+    textScaler,
+    TextStyles.display3,
+  );
   final subtitleLineHeight = _scaledLineHeight(textScaler, TextStyles.mini);
   final defaultExpandedHeight = subtitle == null
       ? _titleOnlyExpandedHeight
@@ -768,8 +771,8 @@ class _MovingHeaderTitle extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: TextStyle.lerp(
-        TextStyles.h1Bold,
-        TextStyles.h2,
+        TextStyles.display2,
+        TextStyles.display3,
         progress,
       )!.copyWith(color: colors.textBase),
     );

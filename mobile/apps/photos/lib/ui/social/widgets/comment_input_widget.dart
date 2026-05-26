@@ -148,9 +148,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
                 ),
                 decoration: InputDecoration(
                   hintText: l10n.commentHint,
-                  hintStyle: textTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
+                  hintStyle: textTheme.bodyFaint,
                   border: InputBorder.none,
                   filled: true,
                   fillColor: Colors.transparent,

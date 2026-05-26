@@ -239,6 +239,19 @@ void main() {
   group("text styles", () {
     test("match the published type scale", () {
       expect(TextStyles.fontFamily, "Inter");
+      expect(TextStyles.outfitFontFamily, "Outfit");
+
+      expect(TextStyles.display1.fontFamily, "Outfit");
+      expect(TextStyles.display1.fontSize, 32);
+      expect(TextStyles.display1.height, 40 / 32);
+      expect(TextStyles.display1.fontWeight, FontWeight.w600);
+      expect(TextStyles.display1.letterSpacing, 0);
+
+      expect(TextStyles.display2.fontFamily, "Outfit");
+      expect(TextStyles.display2.fontSize, 24);
+      expect(TextStyles.display2.height, 32 / 24);
+      expect(TextStyles.display2.fontWeight, FontWeight.w600);
+      expect(TextStyles.display2.letterSpacing, 0);
 
       expect(TextStyles.h1.fontSize, 20);
       expect(TextStyles.h1.height, 28 / 20);
@@ -248,6 +261,11 @@ void main() {
       expect(TextStyles.h2.fontSize, 18);
       expect(TextStyles.h2.height, 24 / 18);
       expect(TextStyles.h2.fontWeight, FontWeight.w600);
+
+      expect(TextStyles.display3.fontFamily, "Outfit");
+      expect(TextStyles.display3.fontSize, 20);
+      expect(TextStyles.display3.height, 28 / 20);
+      expect(TextStyles.display3.fontWeight, FontWeight.w600);
 
       expect(TextStyles.body.fontSize, 14);
       expect(TextStyles.body.height, 20 / 14);

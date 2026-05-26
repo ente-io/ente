@@ -23,73 +23,58 @@ class OnEnteEmptyState extends StatelessWidget {
       strings.albumsOnEnteEmptyFeaturePrivacy,
     ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  _topPadding,
-                  16,
-                  bottomPadding,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset("assets/on_ente.png"),
-                    const SizedBox(height: _sectionSpacing),
-                    SizedBox(
-                      width: _contentWidth,
-                      child: Column(
-                        children: [
-                          Text(
-                            strings.albumsOnEnteEmptyTitle,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: "Nunito",
-                              fontWeight: FontWeight.w800,
-                              fontSize: 24,
-                              height: 28 / 24,
-                              letterSpacing: 0,
-                              color: colors.textBase,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          SizedBox(
-                            width: _featureWidth,
-                            child: Column(
-                              children: [
-                                EmptyStateBulletFeatureRow(label: features[0]),
-                                const SizedBox(height: 12),
-                                EmptyStateBulletFeatureRow(label: features[1]),
-                                const SizedBox(height: 12),
-                                EmptyStateBulletFeatureRow(label: features[2]),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, _topPadding, 16, bottomPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset("assets/on_ente.png"),
+            const SizedBox(height: _sectionSpacing),
+            SizedBox(
+              width: _contentWidth,
+              child: Column(
+                children: [
+                  Text(
+                    strings.albumsOnEnteEmptyTitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: "Nunito",
+                      fontWeight: FontWeight.w800,
+                      fontSize: 24,
+                      height: 28 / 24,
+                      letterSpacing: 0,
+                      color: colors.textBase,
                     ),
-                    const SizedBox(height: _sectionSpacing),
-                    ButtonComponent(
-                      label: strings.albumsOnEnteEmptyCta,
-                      shouldSurfaceExecutionStates: false,
-                      onTap: () async {
-                        await handleFolderSelectionBackupFlow(context);
-                      },
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: _featureWidth,
+                    child: Column(
+                      children: [
+                        EmptyStateBulletFeatureRow(label: features[0]),
+                        const SizedBox(height: 12),
+                        EmptyStateBulletFeatureRow(label: features[1]),
+                        const SizedBox(height: 12),
+                        EmptyStateBulletFeatureRow(label: features[2]),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: _sectionSpacing),
+            ButtonComponent(
+              label: strings.albumsOnEnteEmptyCta,
+              shouldSurfaceExecutionStates: false,
+              onTap: () async {
+                await handleFolderSelectionBackupFlow(context);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

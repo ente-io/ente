@@ -1,13 +1,13 @@
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import "package:photos/models/selected_albums.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/theme/colors.dart";
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/tabs/nav_bar.dart';
 
 class HomeBottomNavigationBar extends StatefulWidget {
   const HomeBottomNavigationBar(
@@ -109,14 +109,13 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   Widget build(BuildContext context) {
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     final bool albumsAreSelected = widget.selectedAlbums.albums.isNotEmpty;
-    final enteColorScheme = getEnteColorScheme(context);
 
     return SafeArea(
       child: RepaintBoundary(
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          height: filesAreSelected || albumsAreSelected ? 0 : 56,
+          height: filesAreSelected || albumsAreSelected ? 0 : 62,
           child: IgnorePointer(
             ignoring: filesAreSelected || albumsAreSelected,
             child: ListView(
@@ -125,75 +124,11 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GNav(
-                      curve: Curves.easeOutExpo,
-                      backgroundColor: getEnteColorScheme(
-                        context,
-                      ).backgroundElevated2,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      iconSize: 24,
-                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                      duration: const Duration(milliseconds: 200),
-                      gap: 0,
-                      tabBorderRadius: 32,
-                      tabBackgroundColor:
-                          Theme.of(context).brightness == Brightness.light
-                          ? strokeFainterLight
-                          : strokeSolidFaintLight,
-                      haptic: false,
-                      tabs: [
-                        GButton(
-                          margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
-                          icon: Icons.home_rounded,
-                          iconColor: enteColorScheme.tabIcon,
-                          iconActiveColor: strokeBaseLight,
-                          text: '',
-                          onPressed: () {
-                            _onTabChange(
-                              0,
-                              mode: "OnPressed",
-                            ); // To take care of occasional missing events
-                          },
-                        ),
-                        GButton(
-                          margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
-                          icon: Icons.collections_rounded,
-                          iconColor: enteColorScheme.tabIcon,
-                          iconActiveColor: strokeBaseLight,
-                          text: '',
-                          onPressed: () {
-                            _onTabChange(
-                              1,
-                              mode: "OnPressed",
-                            ); // To take care of occasional missing
-                            // events
-                          },
-                        ),
-                        GButton(
-                          margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
-                          icon: Icons.people_outlined,
-                          iconColor: enteColorScheme.tabIcon,
-                          iconActiveColor: strokeBaseLight,
-                          text: '',
-                          onPressed: () {
-                            _onTabChange(2, mode: "OnPressed"); // To take care
-                            // of occasional missing events
-                          },
-                        ),
-                        GButton(
-                          margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
-                          icon: Icons.search_outlined,
-                          iconColor: enteColorScheme.tabIcon,
-                          iconActiveColor: strokeBaseLight,
-                          text: '',
-                          onPressed: () {
-                            _onTabChange(3, mode: "OnPressed"); // To take care
-                            // of occasional missing events
-                          },
-                        ),
-                      ],
+                    _FigmaHomeNavBar(
                       selectedIndex: currentTabIndex,
-                      onTabChange: _onTabChange,
+                      onTabChange: (index) {
+                        _onTabChange(index, mode: "OnPressed");
+                      },
                     ),
                   ],
                 ),
@@ -204,4 +139,147 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
       ),
     );
   }
+}
+
+class _FigmaHomeNavBar extends StatelessWidget {
+  const _FigmaHomeNavBar({
+    required this.selectedIndex,
+    required this.onTabChange,
+  });
+
+  static const _tabs = [
+    _FigmaNavTab(
+      semanticLabel: 'Home',
+      outlineAsset: 'assets/icons/nav_bar/home_outline.svg',
+      filledAsset: 'assets/icons/nav_bar/home_filled.svg',
+    ),
+    _FigmaNavTab(
+      semanticLabel: 'Albums',
+      outlineAsset: 'assets/icons/nav_bar/albums_outline.svg',
+      filledAsset: 'assets/icons/nav_bar/albums_filled.svg',
+    ),
+    _FigmaNavTab(
+      semanticLabel: 'Feed',
+      outlineAsset: 'assets/icons/nav_bar/feed_outline.svg',
+      filledAsset: 'assets/icons/nav_bar/feed_filled.svg',
+    ),
+    _FigmaNavTab(
+      semanticLabel: 'Search',
+      outlineAsset: 'assets/icons/nav_bar/search_outline.svg',
+      filledAsset: 'assets/icons/nav_bar/search_filled.svg',
+    ),
+  ];
+
+  final int selectedIndex;
+  final ValueChanged<int> onTabChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    final navWidth = math.min(
+      318.0,
+      math.max(0.0, MediaQuery.sizeOf(context).width - 32.0),
+    );
+
+    return Container(
+      width: navWidth,
+      height: 62,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.fillLight,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.25),
+            offset: Offset(0, 4),
+            blurRadius: 8.75,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(_tabs.length, (index) {
+          return _FigmaNavButton(
+            tab: _tabs[index],
+            selected: selectedIndex == index,
+            onTap: () => onTabChange(index),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _FigmaNavButton extends StatelessWidget {
+  const _FigmaNavButton({
+    required this.tab,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _FigmaNavTab tab;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    final iconColor = colors.iconColor;
+    return Semantics(
+      label: tab.semanticLabel,
+      selected: selected,
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutExpo,
+          width: 38,
+          height: 38,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: selected ? colors.fillDark : colors.fillLight,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: _FigmaNavIcon(tab: tab, selected: selected, color: iconColor),
+        ),
+      ),
+    );
+  }
+}
+
+class _FigmaNavIcon extends StatelessWidget {
+  const _FigmaNavIcon({
+    required this.tab,
+    required this.selected,
+    required this.color,
+  });
+
+  final _FigmaNavTab tab;
+  final bool selected;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorFilter = ColorFilter.mode(color, BlendMode.srcIn);
+    return SvgPicture.asset(
+      selected ? tab.filledAsset : tab.outlineAsset,
+      width: 18,
+      height: 18,
+      colorFilter: colorFilter,
+    );
+  }
+}
+
+class _FigmaNavTab {
+  const _FigmaNavTab({
+    required this.semanticLabel,
+    required this.outlineAsset,
+    required this.filledAsset,
+  });
+
+  final String semanticLabel;
+  final String outlineAsset;
+  final String filledAsset;
 }
