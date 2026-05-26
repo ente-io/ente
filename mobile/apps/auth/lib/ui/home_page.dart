@@ -32,7 +32,6 @@ import 'package:ente_auth/ui/components/horizontal_scroll_area.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/add_tag_sheet.dart';
-import 'package:ente_auth/ui/home/android_search_autofocus.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/shortcuts.dart';
@@ -54,6 +53,7 @@ import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
+import 'package:ente_ui/components/android_text_input_autofocus.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1531,7 +1531,7 @@ class _HomePageState extends State<HomePage> {
       ),
       title: !_showSearchBox
           ? const AuthLogoWidget(height: 18)
-          : AndroidSearchAutofocus(
+          : AndroidTextInputAutofocus(
               enabled: _autoFocusSearch,
               focusNode: searchBoxFocusNode,
               child: TextField(
