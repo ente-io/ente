@@ -179,16 +179,12 @@ jobs:
               shell: bash
               env:
                   ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
-                  ENSU_TAURI_UPDATER_ENDPOINT: ${{ vars.ENSU_TAURI_UPDATER_ENDPOINT }}
-                  ENSU_TAURI_REQUIRE_UPDATER_PUBKEY: "1"
               run: node rust/apps/ensu/scripts/ci-enable-updater.mjs
 
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
-                  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   TAURI_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
                   TAURI_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   APPLE_CERTIFICATE: ${{ secrets.MAC_OS_CERTIFICATE }}

@@ -1,47 +1,18 @@
 import fs from "node:fs";
 
-const configPath =
-    process.env.ENSU_TAURI_CONFIG_PATH ??
-    "rust/apps/ensu/src-tauri/tauri.conf.json";
+const { AZURE_ENDPOINT, AZURE_CODE_SIGNING_NAME, AZURE_CERT_PROFILE_NAME } =
+    process.env;
 
-const endpoint = process.env.AZURE_ENDPOINT;
-const accountName = process.env.AZURE_CODE_SIGNING_NAME;
-const profileName = process.env.AZURE_CERT_PROFILE_NAME;
-
-if (!endpoint || !accountName || !profileName) {
+if (!AZURE_ENDPOINT || !AZURE_CODE_SIGNING_NAME || !AZURE_CERT_PROFILE_NAME) {
     throw new Error(
         "AZURE_ENDPOINT, AZURE_CODE_SIGNING_NAME, and AZURE_CERT_PROFILE_NAME are required",
     );
 }
 
+const configPath = new URL("../src-tauri/tauri.conf.json", import.meta.url);
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-if (config.tauri && typeof config.tauri === "object" && config.bundle && typeof config.bundle === "object") {
-    config.tauri.bundle = {
-        ...(config.tauri.bundle || {}),
-        ...config.bundle,
-    };
-    delete config.bundle;
-}
-
-const bundleConfig = config.bundle ?? config.tauri?.bundle;
-if (!bundleConfig || typeof bundleConfig !== "object") {
-    throw new Error(`Unable to locate bundle config in ${configPath}`);
-}
-
-bundleConfig.windows = bundleConfig.windows || {};
-
-bundleConfig.windows.signCommand = [
-    "artifact-signing-cli",
-    "-e",
-    endpoint,
-    "-a",
-    accountName,
-    "-c",
-    profileName,
-    "-d",
-    "Ensu",
-    "%1",
-].join(" ");
+config.tauri.bundle.windows = {
+    signCommand: `artifact-signing-cli -e ${AZURE_ENDPOINT} -a ${AZURE_CODE_SIGNING_NAME} -c ${AZURE_CERT_PROFILE_NAME} -d Ensu %1`,
+};
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-console.log(`Updated windows signCommand in ${configPath}`);
