@@ -109,6 +109,68 @@ const ADVANCED_SETTINGS_UNLOCK_KEY = "ensu.advancedSettingsUnlocked";
 const MODEL_SETTINGS_STORAGE_KEY = "ensu.modelSettings";
 const SYSTEM_PROMPT_STORAGE_KEY = "ensu.systemPrompt";
 
+interface TauriCommandError {
+    code?: string;
+    message?: string;
+}
+
+const tauriCommandError = (error: unknown): TauriCommandError => {
+    if (!error || typeof error != "object") return {};
+    const record = error as Record<string, unknown>;
+    return {
+        code: typeof record.code == "string" ? record.code : undefined,
+        message: typeof record.message == "string" ? record.message : undefined,
+    };
+};
+
+const formatImageProcessingErrorForLog = (error: unknown) => {
+    const { code, message } = tauriCommandError(error);
+    if (code == "io") return "io: selected image file could not be read";
+    if (code && message) return `${code}: ${message}`;
+    if (message) return message;
+    if (error instanceof Error) return error.message;
+    if (typeof error == "string") return error;
+    return String(error);
+};
+
+const imageProcessingFailureDialog = (
+    error: unknown,
+    selectedImageCount: number,
+) => {
+    const { code, message } = tauriCommandError(error);
+    const lowerMessage = message?.toLowerCase() ?? "";
+    const subject =
+        selectedImageCount == 1
+            ? "The selected image"
+            : "One of the selected images";
+
+    if (code == "image" && lowerMessage.includes("memory limit")) {
+        return {
+            title: "Image too large",
+            message: `${subject} is too large for Ensu to process. Try resizing it or exporting a smaller copy, then attach it again.`,
+        };
+    }
+
+    if (code == "image") {
+        return {
+            title: "Image could not be attached",
+            message: `${subject} could not be decoded. Try converting it to a different image format, then attach it again.`,
+        };
+    }
+
+    if (code == "io") {
+        return {
+            title: "Image file could not be read",
+            message: `${subject} could not be read. Check that the file still exists and try again.`,
+        };
+    }
+
+    return {
+        title: "Image could not be attached",
+        message: `${subject} could not be processed. Try a different image or attach it again after resizing it.`,
+    };
+};
+
 const loadingPhraseVerbs = [
     "Generating",
     "Thinking through",
@@ -169,6 +231,7 @@ const IMAGE_SELECTOR_EXTENSIONS = [
 const IMAGE_SELECTOR_ACCEPT = IMAGE_SELECTOR_EXTENSIONS.map(
     (ext) => `.${ext}`,
 ).join(",");
+const MAX_IMAGE_ATTACHMENTS_PER_MESSAGE = 2;
 
 const buildPromptWithImages = (text: string, imageCount: number) => {
     if (imageCount <= 0) return text;
@@ -496,6 +559,7 @@ const Page: React.FC = () => {
         bgcolor: "transparent",
         color: "text.base",
         "&:hover": { bgcolor: "fill.faint" },
+        "&.Mui-disabled": { color: "text.faint" },
     } as const;
     const smallIconProps = { size: 24, strokeWidth: 2 } as const;
     const actionIconProps = { size: 24, strokeWidth: 2 } as const;
@@ -674,10 +738,9 @@ const Page: React.FC = () => {
         if (Array.isArray(value)) return value[0];
         return typeof value === "string" ? value : undefined;
     }, [router.isReady, router.query.session]);
-
-    const buildVersion = process.env.NEXT_PUBLIC_ENSU_VERSION
-        ? `v${process.env.NEXT_PUBLIC_ENSU_VERSION}`
-        : "dev";
+    const buildVersion = process.env.NEXT_PUBLIC_ENSU_DESKTOP_VERSION
+        ? `v${process.env.NEXT_PUBLIC_ENSU_DESKTOP_VERSION}`
+        : undefined;
 
     const lastRouteUpdateRef = useRef<{ sessionId?: string; at: number }>({
         sessionId: undefined,
@@ -3500,10 +3563,16 @@ const Page: React.FC = () => {
         onSelect: handleDocumentSelect,
         onCancel: handleDocumentCancel,
     });
+    const imageAttachmentSlotsRemaining = Math.max(
+        0,
+        MAX_IMAGE_ATTACHMENTS_PER_MESSAGE - pendingImages.length,
+    );
+    const isImageAttachmentLimitReached = imageAttachmentSlotsRemaining === 0;
 
     const handleImageSelect = useCallback(
         (files: File[]) => {
             closeAttachmentMenu();
+            if (imageAttachmentSlotsRemaining <= 0) return;
             const images = files.map((file) => ({
                 id: createAttachmentId(),
                 name: file.name.replace(/\0/g, ""),
@@ -3511,10 +3580,17 @@ const Page: React.FC = () => {
                 file,
             }));
             if (images.length) {
-                setPendingImages((prev) => [...prev, ...images]);
+                setPendingImages((prev) => {
+                    const slotsRemaining = Math.max(
+                        0,
+                        MAX_IMAGE_ATTACHMENTS_PER_MESSAGE - prev.length,
+                    );
+                    if (slotsRemaining === 0) return prev;
+                    return [...prev, ...images.slice(0, slotsRemaining)];
+                });
             }
         },
-        [closeAttachmentMenu],
+        [closeAttachmentMenu, imageAttachmentSlotsRemaining],
     );
 
     const handleImageCancel = useCallback(() => {
@@ -3533,6 +3609,7 @@ const Page: React.FC = () => {
 
     const openTauriImageSelector = useCallback(async () => {
         closeAttachmentMenu();
+        if (imageAttachmentSlotsRemaining <= 0) return;
         try {
             const selection = await openFileDialog({
                 directory: false,
@@ -3555,26 +3632,41 @@ const Page: React.FC = () => {
                 handleImageCancel();
                 return;
             }
-
-            const { invoke } = await import("@tauri-apps/api/tauri");
-            const files = await Promise.all(
-                selectedPaths.map(async (selectedPath) => {
-                    const normalized = selectedPath.replace(/\\/g, "/");
-                    const name =
-                        normalized.split("/").pop()?.replace(/\0/g, "") ||
-                        "image";
-                    const compressed = await invoke<number[]>(
-                        "chat_db_compress_attachment_image_file",
-                        { path: selectedPath },
-                    );
-                    const bytes = new Uint8Array(compressed);
-                    return new File(
-                        [toSafeBlobPart(bytes)],
-                        normalizedJpegAttachmentName(name),
-                        { type: "image/jpeg" },
-                    );
-                }),
+            const pathsToProcess = selectedPaths.slice(
+                0,
+                imageAttachmentSlotsRemaining,
             );
+
+            let files: File[];
+            try {
+                const { invoke } = await import("@tauri-apps/api/tauri");
+                files = await Promise.all(
+                    pathsToProcess.map(async (selectedPath) => {
+                        const normalized = selectedPath.replace(/\\/g, "/");
+                        const name =
+                            normalized.split("/").pop()?.replace(/\0/g, "") ||
+                            "image";
+                        const compressed = await invoke<number[]>(
+                            "chat_db_compress_attachment_image_file",
+                            { path: selectedPath },
+                        );
+                        const bytes = new Uint8Array(compressed);
+                        return new File(
+                            [toSafeBlobPart(bytes)],
+                            normalizedJpegAttachmentName(name),
+                            { type: "image/jpeg" },
+                        );
+                    }),
+                );
+            } catch (error) {
+                log.error(
+                    `Failed to process selected image attachment: ${formatImageProcessingErrorForLog(error)}`,
+                );
+                showMiniDialog(
+                    imageProcessingFailureDialog(error, pathsToProcess.length),
+                );
+                return;
+            }
 
             log.info("Compressed selected image attachments", {
                 count: files.length,
@@ -3598,6 +3690,7 @@ const Page: React.FC = () => {
         closeAttachmentMenu,
         handleImageCancel,
         handleImageSelect,
+        imageAttachmentSlotsRemaining,
         prewarmSelectedImageInference,
         showMiniDialog,
     ]);
@@ -3606,6 +3699,7 @@ const Page: React.FC = () => {
         (_event: React.MouseEvent<HTMLElement>) => {
             closeAttachmentMenu();
             if (showImageAttachment) {
+                if (isImageAttachmentLimitReached) return;
                 if (isTauriRuntime) {
                     void openTauriImageSelector();
                 } else {
@@ -3618,6 +3712,7 @@ const Page: React.FC = () => {
         [
             closeAttachmentMenu,
             isTauriRuntime,
+            isImageAttachmentLimitReached,
             openDocumentSelector,
             openImageSelector,
             openTauriImageSelector,
@@ -3627,15 +3722,20 @@ const Page: React.FC = () => {
 
     const handleAttachmentChoice = useCallback(
         (choice: "image" | "document") => {
+            closeAttachmentMenu();
             if (choice === "image") {
-                closeAttachmentMenu();
+                if (isImageAttachmentLimitReached) return;
                 openImageSelector();
             } else {
-                closeAttachmentMenu();
                 openDocumentSelector();
             }
         },
-        [closeAttachmentMenu, openDocumentSelector, openImageSelector],
+        [
+            closeAttachmentMenu,
+            isImageAttachmentLimitReached,
+            openDocumentSelector,
+            openImageSelector,
+        ],
     );
 
     const removePendingDocument = useCallback((id: string) => {
@@ -4190,6 +4290,9 @@ const Page: React.FC = () => {
                         closeAttachmentMenu={closeAttachmentMenu}
                         handleAttachmentChoice={handleAttachmentChoice}
                         showImageAttachment={showImageAttachment}
+                        isImageAttachmentLimitReached={
+                            isImageAttachmentLimitReached
+                        }
                         getDocumentInputProps={getDocumentInputProps}
                         getImageInputProps={getImageInputProps}
                         actionButtonSx={actionButtonSx}

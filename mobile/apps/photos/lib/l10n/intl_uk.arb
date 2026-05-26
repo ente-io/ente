@@ -671,7 +671,6 @@
   "existingUser": "Наявний користувач",
   "newToEnte": "Уперше на Ente",
   "pleaseLoginAgain": "Увійдіть знову",
-  "autoLogoutMessage": "Через технічні збої ви вийшли з системи. Перепрошуємо за незручності.",
   "yourSubscriptionHasExpired": "Термін дії вашої передплати скінчився",
   "storageLimitExceeded": "Перевищено ліміт сховища",
   "upgrade": "Покращити",
@@ -692,11 +691,6 @@
   "collectEventPhotos": "Зібрати фотографії події",
   "sessionExpired": "Час сеансу минув",
   "loggingOut": "Вихід із системи...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "На пристрої",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1109,8 +1103,6 @@
   "noPhotosFoundHere": "Тут немає фотографій",
   "zoomOutToSeePhotos": "Збільште, щоб побачити фотографії",
   "noImagesWithLocation": "Немає зображень з розташуванням",
-  "unpinAlbum": "Відкріпити альбом",
-  "pinAlbum": "Закріпити альбом",
   "pin": "Закріпити",
   "pinPerson": "Закріпити особу",
   "pinToTop": "Закріпити вгорі",

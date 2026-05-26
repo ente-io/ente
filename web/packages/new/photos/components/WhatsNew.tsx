@@ -79,11 +79,11 @@ const ChangelogContent: React.FC = () => {
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
             <Typography variant="h6">
-                {ut("Public Albums, People Section and Memories Improvements")}
+                {ut("Shared Albums Improvements")}
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "Memories and Memory Lane links. Faster public albums. View less prominent faces in All People dialog. Lots of Improvements (Public albums, file viewer, metadata preservation on editing, and more)",
+                    "Upload files directly to shared albums. Add shared files to your albums or shared albums. Favorite files in shared albums. Indicator for shared files in map view.",
                 )}
             </Typography>
         </Stack>

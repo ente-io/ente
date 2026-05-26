@@ -1182,6 +1182,18 @@ abstract class AppLocalizations {
   /// **'Help and Support'**
   String get helpAndSupport;
 
+  /// No description provided for @getInTouch.
+  ///
+  /// In en, this message translates to:
+  /// **'Get in touch'**
+  String get getInTouch;
+
+  /// No description provided for @browseHelpPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse help pages'**
+  String get browseHelpPages;
+
   /// No description provided for @contactSupport.
   ///
   /// In en, this message translates to:
@@ -1194,11 +1206,23 @@ abstract class AppLocalizations {
   /// **'Help'**
   String get help;
 
+  /// No description provided for @askAQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask a question'**
+  String get askAQuestion;
+
   /// No description provided for @suggestFeatures.
   ///
   /// In en, this message translates to:
   /// **'Suggest features'**
   String get suggestFeatures;
+
+  /// No description provided for @requestAFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a feature'**
+  String get requestAFeature;
 
   /// No description provided for @reportABug.
   ///
@@ -1206,11 +1230,83 @@ abstract class AppLocalizations {
   /// **'Report a bug'**
   String get reportABug;
 
+  /// No description provided for @reportAnIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Report an issue'**
+  String get reportAnIssue;
+
   /// No description provided for @reportBug.
   ///
   /// In en, this message translates to:
   /// **'Report bug'**
   String get reportBug;
+
+  /// No description provided for @viewAllHelpTopics.
+  ///
+  /// In en, this message translates to:
+  /// **'View all help topics'**
+  String get viewAllHelpTopics;
+
+  /// No description provided for @gettingStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting started'**
+  String get gettingStarted;
+
+  /// No description provided for @gettingStartedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Install Locker, create an account, and save your first item'**
+  String get gettingStartedDesc;
+
+  /// No description provided for @informationTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Information types'**
+  String get informationTypes;
+
+  /// No description provided for @informationTypesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents, notes, cards, passwords, and other item types'**
+  String get informationTypesDesc;
+
+  /// No description provided for @organization.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization'**
+  String get organization;
+
+  /// No description provided for @organizationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections, favorites, search, and ways to keep items organized'**
+  String get organizationDesc;
+
+  /// No description provided for @legacyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted contacts, Legacy Kit, and account recovery planning'**
+  String get legacyDesc;
+
+  /// No description provided for @securityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Encryption, recovery keys, app lock, and account protection'**
+  String get securityDesc;
+
+  /// No description provided for @troubleshooting.
+  ///
+  /// In en, this message translates to:
+  /// **'Troubleshooting'**
+  String get troubleshooting;
+
+  /// No description provided for @troubleshootingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Common issues and their solutions'**
+  String get troubleshootingDesc;
 
   /// Dialog body text for sending logs in Locker app (without file name warning)
   ///

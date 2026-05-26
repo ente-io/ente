@@ -1,13 +1,11 @@
 [package]
 name = "transcription"
-version = "0.1.0"
 edition = "2024"
 
 [lib]
-name = "transcription"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-ensu-transcription = { path = "../../../../crates/ensu/transcription" }
+ensu-transcription.workspace = true
 thiserror = "2"
 uniffi = { version = "0.31.0" }

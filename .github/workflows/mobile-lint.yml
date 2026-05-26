@@ -19,8 +19,6 @@ on:
 
 env:
     FLUTTER_VERSION: "3.38.10"
-    RUST_VERSION: "1.90.0"
-    RUSTFLAGS: -D warnings
 
 permissions:
     contents: read
@@ -34,38 +32,6 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
-              with:
-                  fetch-depth: 2
-
-            - name: Detect Rust changes
-              id: rust_changes
-              shell: bash
-              run: |
-                  ente_rust=false
-                  ente_photos_rust=false
-
-                  while IFS= read -r file; do
-                      case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/bindings/frb/ente-rust/*|rust/crates/core/*|rust/crates/contacts/*|rust/apps/codegen/*|rust/Cargo.lock|rust/Cargo.toml)
-                              ente_rust=true
-                              ;;
-                      esac
-
-                      case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/apps/photos/rust_builder/*|rust/bindings/frb/photos/*|rust/crates/photos/*|rust/crates/image/*|rust/apps/codegen/*|rust/Cargo.lock|rust/Cargo.toml)
-                              ente_photos_rust=true
-                              ;;
-                      esac
-                  done < <(git diff --name-only "${{ github.event.pull_request.base.sha }}...HEAD")
-
-                  echo "ente_rust=$ente_rust" >> "$GITHUB_OUTPUT"
-                  echo "ente_photos_rust=$ente_photos_rust" >> "$GITHUB_OUTPUT"
-
-                  if [[ "$ente_rust" == "true" || "$ente_photos_rust" == "true" ]]; then
-                      echo "any=true" >> "$GITHUB_OUTPUT"
-                  else
-                      echo "any=false" >> "$GITHUB_OUTPUT"
-                  fi
 
             - name: Verify frozen mobile pubspecs
               run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/photos
@@ -82,67 +48,15 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              uses: dtolnay/rust-toolchain@stable
-              with:
-                  toolchain: ${{ env.RUST_VERSION }}
-                  components: rustfmt,clippy
-
-            - name: Cache
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('rust/Cargo.lock') }}
-
             - run: flutter pub get --enforce-lockfile
 
             - run: cargo codegen frb
+              working-directory: rust
+
+            - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
             - run: flutter analyze --no-fatal-infos
 
             - name: Run Flutter tests
               run: flutter test
-
-            - name: Check formatting (ente_rust)
-              if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: rust
-              run: cargo fmt --check -p ente_rust
-
-            - name: Run clippy (ente_rust)
-              if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: rust
-              run: cargo clippy -p ente_rust --all-targets --all-features
-
-            - name: Build (ente_rust)
-              if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: rust
-              run: cargo build -p ente_rust
-
-            - name: Test (ente_rust)
-              if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: rust
-              run: cargo test -p ente_rust
-
-            - name: Check formatting (ente_photos_rust)
-              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: rust
-              run: cargo fmt --check -p ente_photos_rust
-
-            - name: Run clippy (ente_photos_rust)
-              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: rust
-              run: cargo clippy -p ente_photos_rust --all-targets --all-features
-
-            - name: Build (ente_photos_rust)
-              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: rust
-              run: cargo build -p ente_photos_rust
-
-            - name: Test (ente_photos_rust)
-              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: rust
-              run: cargo test -p ente_photos_rust

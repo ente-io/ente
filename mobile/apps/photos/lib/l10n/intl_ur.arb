@@ -636,7 +636,6 @@
   "referrals": "ریفرلز",
   "notifications": "نوٹیفکیشنز",
   "socialNotifications": "لائکس اور تبصرے",
-  "socialNotificationsExplanation": "اپنی تصاویر پر لائکس اور جن البمز میں آپ شامل ہیں ان پر تبصروں کے لیے نوٹیفکیشنز موصول کریں",
   "advanced": "اعلیٰ",
   "general": "عمومی",
   "security": "سیکیورٹی",
@@ -787,7 +786,6 @@
   "shareTheMoment": "لمحے کو شیئر کریں",
   "letFriendsAndFamilyReact": "دوستوں اور فیملی کو اپنی تصاویر پر رد عمل اور تبصرہ کرنے دیں.",
   "pleaseLoginAgain": "براہ کرم دوبارہ لاگ ان کریں",
-  "autoLogoutMessage": "تکنیکی خرابی کی وجہ سے، آپ کو لاگ آؤٹ کر دیا گیا ہے. زحمت کے لیے ہم معذرت خواہ ہیں.",
   "yourSubscriptionHasExpired": "آپ کی سبسکرپشن کی میعاد ختم ہو گئی ہے",
   "storageLimitExceeded": "اسٹوریج کی حد سے تجاوز",
   "upgrade": "اپ گریڈ کریں",
@@ -809,11 +807,6 @@
   "collectEventPhotos": "ایونٹ کی تصاویر جمع کریں",
   "sessionExpired": "سیشن کی میعاد ختم",
   "loggingOut": "لاگ آؤٹ کیا جا رہا ہے...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "ڈیوائس پر",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1304,8 +1297,6 @@
   "noPhotosFoundHere": "یہاں کوئی تصاویر نہیں ملیں",
   "zoomOutToSeePhotos": "تصاویر دیکھنے کے لیے زوم آؤٹ کریں",
   "noImagesWithLocation": "مقام کے ساتھ کوئی تصاویر نہیں",
-  "unpinAlbum": "البم ان پن کریں",
-  "pinAlbum": "البم پن کریں",
   "pin": "پن کریں",
   "pinPerson": "شخص کو پن کریں",
   "pinToTop": "سب سے اوپر پن کریں",
@@ -1893,9 +1884,7 @@
   "newPhotosEmoji": " نئی 📸",
   "sorryWeHadToPauseYourBackups": "معذرت، ہمیں آپ کے بیک اپس روکنے پڑے",
   "clickToInstallOurBestVersionYet": "ہمارا اب تک کا بہترین ورژن انسٹال کرنے کے لیے کلک کریں",
-  "onThisDayNotificationExplanation": "پچھلے سالوں میں اس دن کی یادوں کے بارے میں یاددہانی حاصل کریں.",
   "birthdayNotifications": "سالگرہ کے نوٹیفکیشنز",
-  "receiveRemindersOnBirthdays": "جب کسی کی سالگرہ ہو تو یاددہانی حاصل کریں. نوٹیفکیشن پر ٹیپ کرنے سے آپ سالگرہ والے شخص کی تصاویر پر پہنچ جائیں گے.",
   "happyBirthday": "سالگرہ مبارک! 🥳",
   "birthdays": "سالگرہ",
   "wishThemAHappyBirthday": "{name} کو سالگرہ مبارک کہیں! 🎉",

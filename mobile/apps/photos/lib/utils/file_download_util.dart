@@ -117,7 +117,7 @@ Future<File?> downloadAndDecryptPublicFile(
     final headers = CollectionsService.instance.publicCollectionHeaders(
       file.collectionID!,
     );
-    final response = (await NetworkClient.instance.getDio().download(
+    final response = (await NetworkClient.instance.downloadDio.download(
       FileUrl.getUrl(file.uploadedFileID!, FileUrlType.publicDownload),
       encryptedFilePath,
       options: Options(headers: headers, responseType: ResponseType.bytes),
@@ -211,7 +211,7 @@ Future<File?> downloadAndDecrypt(
       }
     } else {
       // If the file is small, download it directly to the final location
-      final response = await NetworkClient.instance.getDio().download(
+      final response = await NetworkClient.instance.downloadDio.download(
         file.downloadUrl,
         encryptedFilePath,
         options: Options(

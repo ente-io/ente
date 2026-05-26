@@ -587,11 +587,6 @@
   "collectEventPhotos": "אסף תמונות מאירוע",
   "sessionExpired": "פג תוקף החיבור",
   "loggingOut": "מתנתק...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "על המכשיר",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"

@@ -1,142 +1,95 @@
-import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection/collection.dart";
-import "package:photos/models/collection/collection_items.dart";
-import "package:photos/services/collections_service.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/collections/album/smart_album_people.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/common/backup_flow_helper.dart";
 import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
-import "package:photos/ui/viewer/gallery/collection_page.dart";
-import "package:photos/utils/dialog_util.dart";
 
 class OnEnteEmptyState extends StatelessWidget {
   const OnEnteEmptyState({super.key});
 
+  static const _topPadding = 32.0;
+  static const _sectionSpacing = 48.0;
+  static const _contentWidth = 343.0;
+  static const _featureWidth = 300.0;
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final strings = AppLocalizations.of(context);
     final bottomPadding = 64 + MediaQuery.paddingOf(context).bottom + 32;
+    final features = [
+      strings.albumsOnEnteEmptyFeatureAccessAnyDevice,
+      strings.albumsOnEnteEmptyFeatureShareLovedOnes,
+      strings.albumsOnEnteEmptyFeaturePrivacy,
+    ];
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16, 32, 16, bottomPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 320),
-              child: Column(
-                children: [
-                  Text(
-                    strings.organizeYourMemories,
-                    textAlign: TextAlign.center,
-                    style: textTheme.largeBold.copyWith(
-                      fontFamily: "Nunito",
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                      height: 28 / 18,
-                      color: colorScheme.content,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  _topPadding,
+                  16,
+                  bottomPadding,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset("assets/on_ente.png"),
+                    const SizedBox(height: _sectionSpacing),
+                    SizedBox(
+                      width: _contentWidth,
+                      child: Column(
+                        children: [
+                          Text(
+                            strings.albumsOnEnteEmptyTitle,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Nunito",
+                              fontWeight: FontWeight.w800,
+                              fontSize: 24,
+                              height: 28 / 24,
+                              letterSpacing: 0,
+                              color: colors.textBase,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: _featureWidth,
+                            child: Column(
+                              children: [
+                                EmptyStateBulletFeatureRow(label: features[0]),
+                                const SizedBox(height: 12),
+                                EmptyStateBulletFeatureRow(label: features[1]),
+                                const SizedBox(height: 12),
+                                EmptyStateBulletFeatureRow(label: features[2]),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    strings.groupPhotosTheWayYouThinkAboutThem,
-                    textAlign: TextAlign.center,
-                    style: textTheme.miniMuted,
-                  ),
-                ],
+                    const SizedBox(height: _sectionSpacing),
+                    ButtonComponent(
+                      label: strings.albumsOnEnteEmptyCta,
+                      shouldSurfaceExecutionStates: false,
+                      onTap: () async {
+                        await handleFolderSelectionBackupFlow(context);
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 32),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 320),
-              child: Column(
-                children: [
-                  EmptyStateFeatureRow(
-                    icon: HugeIcons.strokeRoundedLockSync01,
-                    label: strings.endToEndEncryptedOnlyYourPeopleCanSeeIt,
-                  ),
-                  const SizedBox(height: 24),
-                  EmptyStateFeatureRow(
-                    icon: HugeIcons.strokeRoundedCloudSavingDone01,
-                    label: strings.backedUpSafelyAcrossDevices,
-                  ),
-                  const SizedBox(height: 24),
-                  EmptyStateFeatureRow(
-                    icon: HugeIcons.strokeRoundedSparkles,
-                    label: strings.smartAlbumsOrganizePhotosForYou,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.primary,
-              labelText: strings.createAlbum,
-              onTap: () => _createAlbum(context),
-              shouldSurfaceExecutionStates: false,
-            ),
-            const SizedBox(height: 8),
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.secondary,
-              labelText: strings.createASmartAlbum,
-              onTap: () => _createSmartAlbum(context),
-              shouldSurfaceExecutionStates: false,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<Collection?> _showCreateAlbumDialog(BuildContext context) async {
-    Collection? collection;
-    final result = await showTextInputDialog(
-      context,
-      title: AppLocalizations.of(context).newAlbum,
-      submitButtonLabel: AppLocalizations.of(context).create,
-      hintText: AppLocalizations.of(context).enterAlbumName,
-      alwaysShowSuccessState: false,
-      initialValue: "",
-      textCapitalization: TextCapitalization.words,
-      popnavAfterSubmission: true,
-      onSubmit: (String text) async {
-        final albumName = text.trim();
-        if (albumName.isEmpty) {
-          return;
-        }
-        collection = await CollectionsService.instance.createAlbum(albumName);
+          ),
+        );
       },
     );
-
-    if (result is Exception && context.mounted) {
-      await showGenericErrorDialog(context: context, error: result);
-    }
-    return collection;
-  }
-
-  Future<void> _createAlbum(BuildContext context) async {
-    final collection = await _showCreateAlbumDialog(context);
-    if (collection == null || !context.mounted) {
-      return;
-    }
-    await routeToPage(
-      context,
-      CollectionPage(CollectionWithThumbnail(collection, null)),
-    );
-  }
-
-  Future<void> _createSmartAlbum(BuildContext context) async {
-    final collection = await _showCreateAlbumDialog(context);
-    if (collection == null || !context.mounted) {
-      return;
-    }
-    await routeToPage(context, SmartAlbumPeople(collectionId: collection.id));
   }
 }

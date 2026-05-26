@@ -9,6 +9,7 @@ import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/horizontal_scroll_area.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:flutter/material.dart';
@@ -172,48 +173,53 @@ class _AddTagSheetState extends State<AddTagSheet> {
           const SizedBox(height: 16),
           SizedBox(
             height: 80,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: widget.selectedCodes.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (context, index) {
-                final code = widget.selectedCodes[index];
-                final iconData = code.display.isCustomIcon
-                    ? code.display.iconID
-                    : code.issuer;
+            child: HorizontalScrollArea(
+              builder: (context, scrollController) => ListView.separated(
+                controller: scrollController,
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.selectedCodes.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final code = widget.selectedCodes[index];
+                  final iconData = code.display.isCustomIcon
+                      ? code.display.iconID
+                      : code.issuer;
 
-                return SizedBox(
-                  width: 60,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: colorScheme.fillFaint.withValues(alpha: 0.02),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: IconUtils.instance.getIcon(
-                            context,
-                            iconData.trim(),
-                            width: 28,
+                  return SizedBox(
+                    width: 60,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: colorScheme.fillFaint.withValues(
+                              alpha: 0.02,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: IconUtils.instance.getIcon(
+                              context,
+                              iconData.trim(),
+                              width: 28,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        code.issuer,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.mini.copyWith(
-                          color: colorScheme.textMuted,
+                        const SizedBox(height: 8),
+                        Text(
+                          code.issuer,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.mini.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 24),

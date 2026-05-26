@@ -56,7 +56,7 @@ class _AllSectionsExamplesProviderState
   bool isOnSearchTab = false;
   bool _firstLoadInProgressOrComplete = false;
   final _logger = Logger("AllSectionsExamplesProvider");
-  static const _initialLoadDelay = Duration(seconds: 10);
+  static const _initialLoadDelay = Duration(seconds: 30);
   Timer? _initialLoadTimer;
 
   final _debouncer = Debouncer(
@@ -125,8 +125,8 @@ class _AllSectionsExamplesProviderState
         final hasAnySearchableFilesFuture = SearchService.instance
             .hasAnyFilesForSearch();
         for (SectionType sectionType in SectionType.values) {
-          // Contacts moved to shared, albums moved to the Albums tab, and file
-          // types render as a lazy placeholder in Search.
+          // Albums moved to the Albums tab. Contacts and file types render as
+          // lazy sections in Search so they do not block the section preload.
           if (sectionType == SectionType.contacts ||
               sectionType == SectionType.album ||
               sectionType == SectionType.fileTypesAndExtension) {

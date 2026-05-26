@@ -61,7 +61,7 @@ function groupedBody(body, previous) {
 
     if (!previousAgain.length) return body;
     return [
-        latest.length ? `New changes:\n\n${latest.join("\n")}` : "",
+        latest.length ? latest.join("\n") : "",
         `Previous changes:\n${previousAgain.join("\n")}`,
     ]
         .filter(Boolean)
@@ -69,9 +69,10 @@ function groupedBody(body, previous) {
 }
 
 function output(name, value) {
-    console.log(`${name}<<EOF`);
+    const delimiter = "RELEASE_NOTES_EOF";
+    console.log(`${name}<<${delimiter}`);
     console.log(value);
-    console.log("EOF");
+    console.log(delimiter);
 }
 
 const body = currentBody();

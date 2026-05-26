@@ -895,7 +895,6 @@
   "shareTheMoment": "Podziel się momentem",
   "letFriendsAndFamilyReact": "Pozwól rodzinie i przyjaciołom na reagowanie i komentowanie pod Twoimi zdjęciami.",
   "pleaseLoginAgain": "Zaloguj się ponownie",
-  "autoLogoutMessage": "Z powodu technicznego błędu, zostałeś wylogowany. Przepraszamy za niedogodności.",
   "yourSubscriptionHasExpired": "Twoja subskrypcja wygasła",
   "storageLimitExceeded": "Przekroczono limit pamięci",
   "upgrade": "Ulepsz",
@@ -918,11 +917,6 @@
   "collectEventPhotos": "Zbierz zdjęcia z wydarzenia",
   "sessionExpired": "Sesja wygasła",
   "loggingOut": "Wylogowywanie...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Na urządzeniu",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1342,8 +1336,6 @@
   "noPhotosFoundHere": "Nie znaleziono tutaj zdjęć",
   "zoomOutToSeePhotos": "Pomniejsz, aby zobaczyć zdjęcia",
   "noImagesWithLocation": "Brak zdjęć z lokalizacją",
-  "unpinAlbum": "Odepnij album",
-  "pinAlbum": "Przypnij album",
   "pinToTop": "Przypnij na górze",
   "unpin": "Odepnij",
   "unpinPerson": "Odepnij osobę",
@@ -1894,9 +1886,7 @@
   "newPhotosEmoji": " nowe 📸",
   "sorryWeHadToPauseYourBackups": "Przepraszamy, musieliśmy wstrzymać tworzenie kopii zapasowych",
   "clickToInstallOurBestVersionYet": "Kliknij, aby zainstalować naszą najlepszą wersję",
-  "onThisDayNotificationExplanation": "Otrzymuj przypomnienia o wspomnieniach z tego dnia w poprzednich latach.",
   "birthdayNotifications": "Powiadomienia o urodzinach",
-  "receiveRemindersOnBirthdays": "Otrzymuj przypomnienia, kiedy są czyjeś urodziny. Naciskając na powiadomienie zabierze Cię do zdjęć osoby, która ma urodziny.",
   "happyBirthday": "Wszystkiego najlepszego! 🥳",
   "birthdays": "Urodziny",
   "wishThemAHappyBirthday": "Życz {name} wszystkiego  najlepszego! 🎉",

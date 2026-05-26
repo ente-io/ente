@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:ente_components/ente_components.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -51,7 +52,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   static const _gridHorizontalPadding = 16.0;
   static const _gridCrossSpacing = 8.0;
   static const _gridMainSpacing = 8.0;
-  static const _thumbnailRadius = 12.0;
+  static const _cornerRadius = 20.0;
+  static const _cornerSmoothing = 0.6;
+  static const _thumbnailToTextSpacing = 8.0;
+  static const _titleToSubtitleSpacing = 4.0;
 
   @override
   void initState() {
@@ -285,6 +289,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     final sideOfThumbnail =
         (screenWidth - totalCrossAxisSpacing - _gridHorizontalPadding) /
         crossAxisCount;
+    final gridItemTextHeight = _gridItemTextHeight(context);
 
     return SliverPadding(
       padding: const EdgeInsets.symmetric(
@@ -298,10 +303,25 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           crossAxisCount: crossAxisCount,
           crossAxisSpacing: _gridCrossSpacing,
           mainAxisSpacing: _gridMainSpacing,
-          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
+          childAspectRatio:
+              sideOfThumbnail / (sideOfThumbnail + gridItemTextHeight),
         ),
       ),
     );
+  }
+
+  double _gridItemTextHeight(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    return (_thumbnailToTextSpacing +
+            _scaledLineHeight(textScaler, TextStyles.body) +
+            _titleToSubtitleSpacing +
+            _scaledLineHeight(textScaler, TextStyles.mini))
+        .ceilToDouble();
+  }
+
+  double _scaledLineHeight(TextScaler textScaler, TextStyle style) {
+    final fontSize = style.fontSize ?? 14;
+    return textScaler.scale(fontSize) * (style.height ?? 1);
   }
 
   Widget _buildFolderItem(
@@ -309,12 +329,13 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     double sideOfThumbnail,
   ) {
     final colors = context.componentColors;
+    final l10n = AppLocalizations.of(context);
     final isSelected = _selectedDevicePathIDs.contains(deviceCollection.id);
     final importedCount = _pathIDToItemCount?[deviceCollection.id];
     final formattedCount = NumberFormat().format(deviceCollection.count);
     final countText = kDebugMode && importedCount != null
         ? "inApp: $importedCount | device: $formattedCount"
-        : formattedCount;
+        : l10n.itemCount(count: deviceCollection.count);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -329,40 +350,32 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(_thumbnailRadius + 1),
-                  child: Container(
-                    color: colors.strokeFaint,
+                ClipSmoothRect(
+                  radius: SmoothBorderRadius(
+                    cornerRadius: _cornerRadius,
+                    cornerSmoothing: _cornerSmoothing,
+                  ),
+                  child: SizedBox(
                     width: sideOfThumbnail,
                     height: sideOfThumbnail,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(1),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(_thumbnailRadius),
-                    child: SizedBox(
-                      width: sideOfThumbnail - 2,
-                      height: sideOfThumbnail - 2,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          if (deviceCollection.thumbnail != null)
-                            ThumbnailWidget(
-                              deviceCollection.thumbnail!,
-                              shouldShowSyncStatus: false,
-                              key: ValueKey(
-                                "backup_selection_widget_${deviceCollection.id}",
-                              ),
-                            )
-                          else
-                            ColoredBox(color: colors.fillDark),
-                          if (isSelected)
-                            ColoredBox(
-                              color: Colors.black.withValues(alpha: 0.4),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (deviceCollection.thumbnail != null)
+                          ThumbnailWidget(
+                            deviceCollection.thumbnail!,
+                            shouldShowSyncStatus: false,
+                            key: ValueKey(
+                              "backup_selection_widget_${deviceCollection.id}",
                             ),
-                        ],
-                      ),
+                          )
+                        else
+                          ColoredBox(color: colors.fillDark),
+                        if (isSelected)
+                          ColoredBox(
+                            color: Colors.black.withValues(alpha: 0.4),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -387,22 +400,26 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               ],
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: _thumbnailToTextSpacing),
           SizedBox(
             width: sideOfThumbnail,
             child: Text(
               deviceCollection.name,
+              textAlign: TextAlign.left,
               maxLines: 1,
+              softWrap: false,
               overflow: TextOverflow.ellipsis,
               style: TextStyles.body.copyWith(color: colors.textBase),
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: _titleToSubtitleSpacing),
           SizedBox(
             width: sideOfThumbnail,
             child: Text(
               countText,
+              textAlign: TextAlign.left,
               maxLines: 1,
+              softWrap: false,
               overflow: TextOverflow.ellipsis,
               style: TextStyles.mini.copyWith(color: colors.textLight),
             ),

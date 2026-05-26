@@ -27,7 +27,7 @@ async fn run() -> Result<()> {
 
     match cli.command {
         Commands::Version => {
-            println!("ente-cli version {}", ente_rs::cli::version::VERSION);
+            println!("ente-rs version {}", ente_rs::cli::version::VERSION);
         }
         Commands::Account(account_cmd) => {
             commands::account::handle_account_command(account_cmd, &storage).await?;
@@ -43,6 +43,9 @@ async fn run() -> Result<()> {
             };
 
             commands::export::run_export(export_cmd.account, filter).await?;
+        }
+        Commands::Paste(paste_cmd) => {
+            commands::paste::handle_paste_command(paste_cmd).await?;
         }
     }
 

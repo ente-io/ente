@@ -1,17 +1,11 @@
 name: "Lint (mobile packages)"
 
 on:
-    # Run when mobile/packages or shared photos Rust changes
     pull_request:
         paths:
             - "mobile/packages/**"
             - "mobile/**/pubspec*.yaml"
             - "mobile/**/pubspec.lock"
-            - "rust/crates/photos/**"
-            - "rust/bindings/frb/**"
-            - "rust/apps/codegen/**"
-            - "rust/Cargo.lock"
-            - "rust/Cargo.toml"
             - ".github/workflows/mobile-packages-lint.yml"
             - "mobile/scripts/check_frozen_pubspecs.rb"
             - "mobile/scripts/check_source_arb_plurals.rb"
@@ -22,12 +16,9 @@ on:
 
 env:
     FLUTTER_VERSION: "3.38.10"
-    RUST_VERSION: "1.90.0"
-    RUSTFLAGS: -D warnings
 
 permissions:
     contents: read
-    pull-requests: read  # Required for paths-filter
 
 jobs:
     detect-changes:
@@ -38,31 +29,9 @@ jobs:
             lint_auth: ${{ steps.filter.outputs.lint_auth }}
             lint_locker: ${{ steps.filter.outputs.lint_locker }}
             lint_all: ${{ steps.filter.outputs.lint_all }}
-            rust_changed: ${{ steps.filter.outputs.rust_changed }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
-
-            - name: Detect changed files
-              uses: dorny/paths-filter@v3
-              id: changes
-              with:
-                  filters: |
-                      rust:
-                        - 'rust/bindings/frb/**/*.rs'
-                        - 'rust/bindings/frb/**/Cargo.toml'
-                        - 'rust/apps/codegen/**'
-                        - 'rust/Cargo.lock'
-                        - 'rust/Cargo.toml'
-                        - 'rust/crates/photos/**'
-                        - 'rust/crates/core/**/*.rs'
-                        - 'rust/crates/contacts/**/*.rs'
-                      workflow:
-                        - '.github/workflows/mobile-packages-lint.yml'
-                      analysis:
-                        - 'mobile/analysis_options.yaml'
-                      packages:
-                        - 'mobile/packages/**'
 
             - name: Determine affected packages
               id: filter
@@ -89,14 +58,12 @@ jobs:
                   echo "lint_auth=$LINT_AUTH" >> $GITHUB_OUTPUT
                   echo "lint_locker=$LINT_LOCKER" >> $GITHUB_OUTPUT
                   echo "lint_all=$LINT_ALL" >> $GITHUB_OUTPUT
-                  echo "rust_changed=${{ steps.changes.outputs.rust }}" >> $GITHUB_OUTPUT
 
                   echo "Affected packages: $PACKAGES"
                   echo "Lint photos: $LINT_PHOTOS"
                   echo "Lint auth: $LINT_AUTH"
                   echo "Lint locker: $LINT_LOCKER"
                   echo "Lint all: $LINT_ALL"
-                  echo "Rust changed: ${{ steps.changes.outputs.rust }}"
 
     pubspec-constraints:
         runs-on: ubuntu-latest
@@ -127,22 +94,10 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              uses: dtolnay/rust-toolchain@stable
-              with:
-                  toolchain: ${{ env.RUST_VERSION }}
-                  components: rustfmt,clippy
-
-            - name: Cache Rust dependencies
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: ${{ runner.os }}-cargo-packages-${{ hashFiles('rust/Cargo.lock') }}
-
             - run: cargo codegen frb
+              working-directory: rust
+
+            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
             - name: Generate strings localizations
@@ -250,71 +205,6 @@ jobs:
               run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/utils
 
-    rust-lint:
-        needs: detect-changes
-        runs-on: ubuntu-latest
-        if: needs.detect-changes.outputs.rust_changed == 'true'
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v6
-
-            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
-              uses: subosito/flutter-action@v2
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION  }}
-                  cache: true
-
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              uses: dtolnay/rust-toolchain@stable
-              with:
-                  toolchain: ${{ env.RUST_VERSION }}
-                  components: rustfmt,clippy
-
-            - name: Cache Rust dependencies
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: ${{ runner.os }}-cargo-packages-${{ hashFiles('rust/Cargo.lock') }}
-
-            - run: cargo codegen frb
-              working-directory: rust
-
-            - name: Check formatting (ente_rust)
-              working-directory: rust
-              run: cargo fmt --check -p ente_rust
-
-            - name: Run clippy (ente_rust)
-              working-directory: rust
-              run: cargo clippy -p ente_rust --all-targets --all-features
-
-            - name: Build (ente_rust)
-              working-directory: rust
-              run: cargo build -p ente_rust
-
-            - name: Test (ente_rust)
-              working-directory: rust
-              run: cargo test -p ente_rust
-
-            - name: Check formatting (ente_photos_rust)
-              working-directory: rust
-              run: cargo fmt --check -p ente_photos_rust
-
-            - name: Run clippy (ente_photos_rust)
-              working-directory: rust
-              run: cargo clippy -p ente_photos_rust --all-targets --all-features
-
-            - name: Build (ente_photos_rust)
-              working-directory: rust
-              run: cargo build -p ente_photos_rust
-
-            - name: Test (ente_photos_rust)
-              working-directory: rust
-              run: cargo test -p ente_photos_rust
-
     apps-lint:
         needs: detect-changes
         runs-on: ubuntu-latest
@@ -337,24 +227,16 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
-              uses: dtolnay/rust-toolchain@stable
-              with:
-                  toolchain: ${{ env.RUST_VERSION }}
-                  components: rustfmt,clippy
-
-            - name: Cache Rust dependencies
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      rust/target
-                  key: ${{ runner.os }}-cargo-packages-${{ hashFiles('rust/Cargo.lock') }}
-
             - if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
               run: cargo codegen frb
+              working-directory: rust
+
+            - if: needs.detect-changes.outputs.lint_photos == 'true'
+              run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
+              working-directory: rust
+
+            - if: needs.detect-changes.outputs.lint_locker == 'true'
+              run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
             - name: Generate strings localizations

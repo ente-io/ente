@@ -11,7 +11,7 @@ on:
                 type: choice
                 options:
                     - start
-                    - finalize
+                    - promote
             version:
                 description: "Release version, e.g. 0.1.16"
                 required: true
@@ -42,7 +42,7 @@ jobs:
                   ref: main
 
             - name: Checkout release branch
-              if: inputs.action == 'finalize'
+              if: inputs.action == 'promote'
               uses: actions/checkout@v6
               with:
                   ref: release/ensu-v${{ inputs.version }}
@@ -93,8 +93,8 @@ jobs:
 
                   gh pr create --base main --head "${next_branch}" --title "[ensu] Start Ensu ${next_version}" --body ""
 
-            - name: Finalize release
-              if: inputs.action == 'finalize'
+            - name: Promote release
+              if: inputs.action == 'promote'
               env:
                   RELEASE_BRANCH_PUSH_TOKEN: ${{ secrets.RELEASE_BRANCH_PUSH_TOKEN }}
               run: |
@@ -108,6 +108,11 @@ jobs:
                   release_branch="release/ensu-v${VERSION}"
                   rc_tag="ensu-v${VERSION}-rc"
                   final_tag="ensu-v${VERSION}"
+
+                  if ! rc_is_draft="$(gh release view "${rc_tag}" --json isDraft --jq .isDraft 2>/dev/null)" || [ "${rc_is_draft}" != "true" ]; then
+                      echo "::error::${rc_tag} draft release does not exist"
+                      exit 1
+                  fi
 
                   branch_version="$(node .github/scripts/ensu-version.mjs get)"
                   if [ "${branch_version}" != "${VERSION}" ]; then

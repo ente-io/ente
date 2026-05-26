@@ -128,7 +128,7 @@ pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> 
     };
 
     if accounts.is_empty() {
-        println!("No accounts configured. Use 'ente-cli account add' first.");
+        println!("No accounts configured. Use 'ente-rs account add' first.");
         return Ok(());
     }
 

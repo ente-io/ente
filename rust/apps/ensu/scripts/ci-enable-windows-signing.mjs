@@ -31,7 +31,7 @@ if (!bundleConfig || typeof bundleConfig !== "object") {
 bundleConfig.windows = bundleConfig.windows || {};
 
 bundleConfig.windows.signCommand = [
-    "trusted-signing-cli",
+    "artifact-signing-cli",
     "-e",
     endpoint,
     "-a",

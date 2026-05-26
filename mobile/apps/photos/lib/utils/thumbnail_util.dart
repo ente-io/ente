@@ -213,12 +213,12 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
       final headers = CollectionsService.instance.publicCollectionHeaders(
         file.collectionID!,
       );
-      encryptedThumbnail = (await NetworkClient.instance.getDio().get(
+      encryptedThumbnail = (await NetworkClient.instance.downloadDio.get(
         FileUrl.getUrl(file.uploadedFileID!, FileUrlType.publicThumbnail),
         options: Options(headers: headers, responseType: ResponseType.bytes),
       )).data;
     } else {
-      encryptedThumbnail = (await NetworkClient.instance.getDio().get(
+      encryptedThumbnail = (await NetworkClient.instance.downloadDio.get(
         FileUrl.getUrl(file.uploadedFileID!, FileUrlType.thumbnail),
         options: Options(
           headers: {"X-Auth-Token": Configuration.instance.getToken()},

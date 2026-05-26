@@ -48,6 +48,10 @@ struct MessageInputView: View {
         return hasContent && !isDownloading && !isAttachmentDownloadBlocked && !voiceInputState.blocksSend
     }
 
+    private var isImageAttachmentLimitReached: Bool {
+        attachments.filter { $0.kind == .image }.count >= ChatAttachmentLimits.maxImagesPerMessage
+    }
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
@@ -162,7 +166,10 @@ struct MessageInputView: View {
                         #endif
 
                     if EnsuFeatureFlags.enableImageUploads && editingMessage == nil {
-                        let canUseAttachment = !isGenerating && !isDownloading && !isAttachmentDownloadBlocked
+                        let canUseAttachment = !isGenerating &&
+                            !isDownloading &&
+                            !isAttachmentDownloadBlocked &&
+                            !isImageAttachmentLimitReached
                         PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                             Image("Upload01Icon")
                                 .resizable()
@@ -173,7 +180,9 @@ struct MessageInputView: View {
                         .disabled(!canUseAttachment)
                         .foregroundStyle(canUseAttachment ? EnsuColor.textPrimary : EnsuColor.textMuted)
                         .simultaneousGesture(TapGesture().onEnded {
-                            hapticTap()
+                            if canUseAttachment {
+                                hapticTap()
+                            }
                         })
                         #if os(macOS)
                         .buttonStyle(.plain)
@@ -181,6 +190,10 @@ struct MessageInputView: View {
                         #endif
                         .onChange(of: selectedPhotoItem) { newItem in
                             guard let newItem else { return }
+                            guard !isImageAttachmentLimitReached else {
+                                selectedPhotoItem = nil
+                                return
+                            }
                             Task {
                                 let data = try? await newItem.loadTransferable(type: Data.self)
                                 await MainActor.run {

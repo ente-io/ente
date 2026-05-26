@@ -795,9 +795,7 @@
   "referrals": "Inviti",
   "notifications": "Notifiche",
   "sharedPhotoNotifications": "Nuove foto e album condivisi",
-  "sharedPhotoNotificationsExplanation": "Ricevi notifiche quando vengono caricate nuove foto negli album condivisi di cui fai parte e quando vengono condivisi nuovi album con te.",
   "socialNotifications": "Mi piace e commenti",
-  "socialNotificationsExplanation": "Ricevi notifiche quando ottieni mi piace sulle tue foto e commenti sugli album di cui fai parte",
   "advanced": "Avanzate",
   "general": "Generali",
   "security": "Sicurezza",
@@ -950,7 +948,6 @@
   "existingUser": "Accedi",
   "newToEnte": "Prima volta con Ente",
   "pleaseLoginAgain": "Effettua nuovamente l'accesso",
-  "autoLogoutMessage": "A causa di problemi tecnici, sei stato disconnesso. Ci scusiamo per l'inconveniente.",
   "yourSubscriptionHasExpired": "Il tuo abbonamento è scaduto",
   "storageLimitExceeded": "Limite d'archiviazione superato",
   "upgrade": "Acquista altro spazio",
@@ -972,11 +969,6 @@
   "collectEventPhotos": "Raccogli le foto di un evento",
   "sessionExpired": "Sessione scaduta",
   "loggingOut": "Disconnessione...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Sul dispositivo",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1389,8 +1381,6 @@
   "noPhotosFoundHere": "Nessuna foto trovata",
   "zoomOutToSeePhotos": "Zoom indietro per visualizzare le foto",
   "noImagesWithLocation": "Nessuna immagine con posizione",
-  "unpinAlbum": "Non fissare album",
-  "pinAlbum": "Fissa l'album",
   "create": "Crea",
   "viewAll": "Visualizza tutte",
   "nothingSharedWithYouYet": "Ancora nulla di condiviso con te",
@@ -1919,9 +1909,7 @@
   "newPhotosEmoji": " nuova 📸",
   "sorryWeHadToPauseYourBackups": "Spiacenti, abbiamo dovuto mettere in pausa i backup",
   "clickToInstallOurBestVersionYet": "Clicca per installare l'ultima versione dell'app",
-  "onThisDayNotificationExplanation": "Ricevi promemoria sui ricordi da questo giorno negli anni precedenti.",
   "birthdayNotifications": "Notifiche dei compleanni",
-  "receiveRemindersOnBirthdays": "Ricevi promemoria quando è il compleanno di qualcuno. Toccare la notifica ti porterà alle foto della persona che compie gli anni.",
   "happyBirthday": "Buon compleanno! 🥳",
   "birthdays": "Compleanni",
   "wishThemAHappyBirthday": "Auguri ad {name} un buon compleanno! 🎉",

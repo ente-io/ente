@@ -33,6 +33,8 @@ enum class AttachmentType {
     Document
 }
 
+const val MaxImageAttachmentsPerMessage = 2
+
 data class Attachment(
     val id: String = UUID.randomUUID().toString(),
     val name: String,

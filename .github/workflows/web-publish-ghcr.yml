@@ -15,23 +15,23 @@ jobs:
     publish:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
 
+            - name: Log in to GHCR
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: printf '%s' "${GITHUB_TOKEN}" | docker login ghcr.io --username "${GITHUB_ACTOR}" --password-stdin
+
             - name: Build and push
-              uses: mr-smithers-excellent/docker-build-push@v6
-              with:
-                  dockerfile: web/Dockerfile
-                  directory: . # repo root
-                  # Resultant package name will be ghcr.io/ente-io/web
-                  image: web
-                  registry: ghcr.io
-                  enableBuildKit: true
-                  multiPlatform: true
-                  platform: linux/amd64,linux/arm64
-                  tags: ${{ github.sha }}, latest
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  docker buildx create --use
+                  docker buildx build --push \
+                      --file web/Dockerfile \
+                      --platform linux/amd64,linux/arm64 \
+                      --tag ghcr.io/ente-io/web:${GITHUB_SHA} \
+                      --tag ghcr.io/ente-io/web:latest \
+                      .
 
             - name: Update branch ghcr/web to point to source commit
               run: |

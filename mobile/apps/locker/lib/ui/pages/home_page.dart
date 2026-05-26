@@ -3,6 +3,7 @@ import 'dart:io';
 
 import "package:app_links/app_links.dart";
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_components/ente_components.dart";
 import 'package:ente_events/event_bus.dart';
 import "package:ente_events/models/trigger_logout_event.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
@@ -612,6 +613,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final componentColors = context.componentColors;
     return UserDetailsStateWidget(
       child: ListenableBuilder(
         listenable: _selectedFiles,
@@ -647,7 +649,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 backgroundColor: colorScheme.backgroundBase,
                 drawer: Drawer(
                   width: 428,
-                  backgroundColor: colorScheme.backgroundBase,
+                  backgroundColor: componentColors.backgroundBase,
                   child: _settingsPage,
                 ),
                 drawerEnableOpenDragGesture: true,

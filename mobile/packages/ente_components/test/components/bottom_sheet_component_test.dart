@@ -200,12 +200,7 @@ void main() {
         context: context,
         message: 'Something went wrong.',
         onClose: () => closeCount += 1,
-        actions: const [
-          ButtonComponent(
-            label: 'Contact support',
-            variant: ButtonComponentVariant.secondary,
-          ),
-        ],
+        actionLabel: 'Contact support',
       ),
       label: 'Show error',
     );

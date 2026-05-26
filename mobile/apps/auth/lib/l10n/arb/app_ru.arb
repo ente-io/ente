@@ -12,7 +12,7 @@
   "featureOpenSource": "Открытый исходный код\nпроверенный экспертами по безопасности",
   "signUp": "Регистрация",
   "onBoardingGetStarted": "Начать",
-  "setupFirstAccount": "Настройте свою первую\nучетную запись",
+  "setupFirstAccount": "Настройте свой аккаунт",
   "allTabEmptyHint": "Ничего не найдено. Нажмите +, чтобы добавить код, или откройте Корзину, чтобы восстановить его.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"

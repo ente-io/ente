@@ -560,14 +560,12 @@ class _FeedScreenState extends State<FeedScreen> {
                 onTap: () => Navigator.of(context).pop(),
               )
             : null,
-        title: _feedItems.isEmpty
-            ? null
-            : Text(
-                AppLocalizations.of(context).feed,
-                style: widget.showBackButton
-                    ? textTheme.bodyBold
-                    : TextStyles.h1Bold.copyWith(color: textTheme.h4Bold.color),
-              ),
+        title: Text(
+          AppLocalizations.of(context).feed,
+          style: widget.showBackButton
+              ? TextStyles.bodyBold.copyWith(color: textTheme.bodyBold.color)
+              : TextStyles.h1Bold.copyWith(color: textTheme.h4Bold.color),
+        ),
       ),
       body: _isLoading
           ? const Center(child: EnteLoadingWidget(size: 24))

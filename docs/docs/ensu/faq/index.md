@@ -69,7 +69,7 @@ When encrypted sync and backup arrive (see [below](#sync)), your chats will be e
 
 Ensu picks a default model based on your device:
 
-- **macOS with 16 GB or more RAM**: Qwen 3.5 4B (Q4_K_M), a 4-billion parameter model by Qwen. This offers higher quality responses on machines that can handle it.
+- **macOS with 16 GB or more RAM**: Gemma 4 E4B (Q4_K_M), a 4-billion parameter model by Deepmind. This offers higher quality responses on machines that can handle it.
 - **All other platforms** (Android, iOS, Windows, Linux, lower-memory macOS, and web): LFM 2.5 VL 1.6B (Q4_0), a 1.6-billion parameter multimodal model by Liquid AI. This is compact enough to run well on phones and less powerful computers.
 
 The model downloads automatically on first launch and is around 1 GB in size (varies by model).
@@ -93,6 +93,12 @@ Not in the current release. Ensu ships with a fixed default model for each platf
 Yes. Ensu supports image attachments on iOS, Android, and desktop. You can attach photos from your device and ask the model about them. The model processes the image locally, and the image is never uploaded anywhere.
 
 Image attachments are not supported on the web version at this time.
+
+### Can I talk to Ensu instead of typing? {#voice-input}
+
+Yes, on iOS and Android. Tap the microphone in the chat composer and speak your prompt. Ensu transcribes it locally on your device, so your voice input is not sent to Ente or any external transcription service.
+
+This voice input feature is not available on the web and desktop version.
 
 ### Does Ensu support web search? {#web-search}
 

@@ -57,6 +57,7 @@ import io.ente.ensu.components.ImageAttachmentThumbnail
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
+import io.ente.ensu.domain.model.MaxImageAttachmentsPerMessage
 import io.ente.ensu.domain.util.formattedFileSize
 import io.ente.ensu.utils.EnsuFeatureFlags
 import io.ente.ensu.utils.rememberEnsuHaptics
@@ -124,6 +125,8 @@ internal fun MessageInput(
     val hasAttachmentContent = attachments.isNotEmpty() || isProcessingAttachments
     val inputVerticalPadding = if (hasAttachmentContent) EnsuSpacing.xs.dp else 10.dp
     val bottomPadding = if (hasAttachmentContent) EnsuSpacing.sm.dp else EnsuSpacing.md.dp
+    val isImageAttachmentLimitReached =
+        attachments.count { it.type == AttachmentType.Image } >= MaxImageAttachmentsPerMessage
 
     Column(
         modifier = modifier
@@ -266,12 +269,16 @@ internal fun MessageInput(
                 Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
 
                 if (EnsuFeatureFlags.enableImageUploads && editingMessage == null) {
+                    val canAddImageAttachment = !isGenerating &&
+                        !isDownloading &&
+                        !isAttachmentDownloadBlocked &&
+                        !isImageAttachmentLimitReached
                     IconButton(
                         onClick = {
                             haptic.perform(HapticFeedbackType.TextHandleMove)
                             onAttachmentSelected(AttachmentType.Image)
                         },
-                        enabled = !isGenerating && !isDownloading && !isAttachmentDownloadBlocked,
+                        enabled = canAddImageAttachment,
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(

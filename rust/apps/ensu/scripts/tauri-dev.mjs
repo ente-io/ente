@@ -14,10 +14,12 @@ const port = process.env.ENSU_TAURI_PORT || process.env.PORT || "3010";
 
 const rawConfig = await fs.readFile(tauriConfigPath, "utf8");
 const config = JSON.parse(rawConfig);
+const desktopVersion = config.package?.version;
+if (!desktopVersion) throw new Error("Missing Ensu desktop version");
 
 config.build = config.build || {};
 config.build.beforeDevCommand =
-    `cd ../../../web && yarn build:wasm && yarn workspace ensu next dev -p ${port}`;
+    `cd ../../../web && yarn build:wasm && NEXT_PUBLIC_ENSU_DESKTOP_VERSION=${desktopVersion} yarn workspace ensu next dev -p ${port}`;
 config.build.devPath = `http://localhost:${port}`;
 
 await fs.writeFile(devConfigPath, JSON.stringify(config, null, 2));

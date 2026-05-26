@@ -51,7 +51,7 @@ class ChipSurface extends StatelessWidget {
             color: background,
             borderRadius: borderRadius,
           ),
-          child: child,
+          child: Center(widthFactor: 1, heightFactor: 1, child: child),
         ),
       ),
     );
