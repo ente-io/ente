@@ -11,6 +11,7 @@ class EntePopupMenuOption<T> {
     required this.value,
     required this.label,
     this.secondaryLabel,
+    this.labelColor,
     this.isActive = false,
     this.trailingWidget,
     this.activeTrailingWidget,
@@ -20,6 +21,7 @@ class EntePopupMenuOption<T> {
   final T value;
   final String label;
   final String? secondaryLabel;
+  final Color? labelColor;
   final bool isActive;
   final Widget? trailingWidget;
   final Widget? activeTrailingWidget;
@@ -41,7 +43,7 @@ class EntePopupMenuButton<T> extends StatelessWidget {
     super.key,
   });
 
-  final List<EntePopupMenuOption<T>> Function() optionsBuilder;
+  final FutureOr<List<EntePopupMenuOption<T>>> Function() optionsBuilder;
   final FutureOr<void> Function(T value) onSelected;
   final Widget? child;
   final double menuWidth;
@@ -76,7 +78,7 @@ class EntePopupMenuButton<T> extends StatelessWidget {
   }
 
   Future<void> _showMenu(BuildContext context, TapDownDetails details) async {
-    final options = optionsBuilder();
+    final options = await optionsBuilder();
     if (options.isEmpty) {
       return;
     }
@@ -139,25 +141,24 @@ Future<T?> showEntePopupMenu<T>({
       side: BorderSide(color: colorScheme.strokeFaint),
     ),
     position: RelativeRect.fromLTRB(left, top, right, overlaySize.height - top),
-    items: options
-        .map(
-          (option) => PopupMenuItem<T>(
-            value: option.value,
-            padding: EdgeInsets.zero,
-            height: itemHeight,
-            child: Container(
-              height: itemHeight,
-              padding: EdgeInsets.symmetric(horizontal: itemHorizontalPadding),
-              decoration: BoxDecoration(
-                border: option.showDivider
-                    ? Border(bottom: BorderSide(color: colorScheme.strokeFaint))
-                    : null,
-              ),
-              child: _EntePopupMenuRow(option: option),
-            ),
+    items: List.generate(options.length, (index) {
+      final option = options[index];
+      return PopupMenuItem<T>(
+        value: option.value,
+        padding: EdgeInsets.zero,
+        height: itemHeight,
+        child: Container(
+          height: itemHeight,
+          padding: EdgeInsets.symmetric(horizontal: itemHorizontalPadding),
+          decoration: BoxDecoration(
+            border: option.showDivider && index != options.length - 1
+                ? Border(bottom: BorderSide(color: colorScheme.strokeFaint))
+                : null,
           ),
-        )
-        .toList(),
+          child: _EntePopupMenuRow(option: option),
+        ),
+      );
+    }),
   );
 }
 
@@ -184,12 +185,13 @@ class _EntePopupMenuRow<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final titleStyle = textTheme.mini.copyWith(color: option.labelColor);
     final title = option.secondaryLabel == null
         ? Text(
             option.label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: textTheme.mini,
+            style: titleStyle,
           )
         : Row(
             children: [
@@ -198,7 +200,7 @@ class _EntePopupMenuRow<T> extends StatelessWidget {
                   option.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: textTheme.mini,
+                  style: titleStyle,
                 ),
               ),
               const SizedBox(width: 6),
