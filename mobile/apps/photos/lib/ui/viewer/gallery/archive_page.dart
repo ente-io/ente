@@ -101,7 +101,9 @@ class ArchivePage extends StatelessWidget {
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
+            preferredSize: const Size.fromHeight(
+              GalleryAppBarWidget.toolbarHeight,
+            ),
             child: GalleryAppBarWidget(
               appBarType,
               AppLocalizations.of(context).archive,
