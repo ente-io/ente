@@ -28,3 +28,19 @@ func TestStorageWarningTemplatesIncludeAccountEmail(t *testing.T) {
 		})
 	}
 }
+
+func TestInactiveUserDeletionFinalTemplateIncludesRecoveryLink(t *testing.T) {
+	testutil.WithServerRoot(t)
+
+	recoveryLink := "https://api.ente.com/users/recover-account?token=test-token"
+	body, err := getMailBodyWithBase("ente_base.html", "inactive-user-deletion/confirm_13m.html", map[string]interface{}{
+		"Email":               "inactive@example.com",
+		"DeletionDate":        "01 Apr 2026",
+		"AccountRecoveryLink": recoveryLink,
+	})
+
+	assert.NoError(t, err)
+	assert.Contains(t, body, recoveryLink)
+	assert.Contains(t, body, "recover your account")
+	assert.Contains(t, body, "within 7 days of deletion")
+}
