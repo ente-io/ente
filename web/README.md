@@ -13,7 +13,7 @@ To know more about Ente, see [our main README](../README.md) or visit [ente.com]
 
 ## Building from source
 
-Install [node](https://nodejs.org) and [Rust](https://www.rust-lang.org/tools/install).
+Install [Node](https://nodejs.org) and [Rust](https://www.rust-lang.org/tools/install).
 
 Install dependencies
 
