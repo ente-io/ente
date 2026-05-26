@@ -1,10 +1,18 @@
 {
-    "extends": "ente-build-config/tsconfig-next.json",
-    "compilerOptions": { "baseUrl": "./src" },
-    "include": [
-        "src",
-        "next-env.d.ts",
-        "../../packages/base/global-electron.d.ts",
-        "../../packages/base/components/utils/mui-theme.d.ts"
+  "extends": "ente-build-config/tsconfig-next.json",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "plugins": [
+      {
+        "name": "next"
+      }
     ]
+  },
+  "include": [
+    "../../packages/base/components/utils/mui-theme.d.ts",
+    "../../packages/base/global-electron.d.ts",
+    "next-env.d.ts",
+    "src",
+    ".next/types/**/*.ts"
+  ]
 }

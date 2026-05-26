@@ -1,4 +1,5 @@
 import "@fontsource-variable/inter";
+import "app/styles/fonts.css";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { CustomHead } from "ente-base/components/Head";
@@ -12,7 +13,15 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     return (
         <ThemeProvider theme={shareTheme} defaultMode="dark">
-            <CustomHead title="Ente Paste" />
+            <CustomHead title="Ente Paste">
+                <link
+                    rel="preload"
+                    href="/fonts/gochi-hand-latin.woff2"
+                    as="font"
+                    type="font/woff2"
+                    crossOrigin="anonymous"
+                />
+            </CustomHead>
             <CssBaseline enableColorScheme />
             <Component {...pageProps} />
         </ThemeProvider>
