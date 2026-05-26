@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:ente_components/components/chip_surface.dart';
+import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
@@ -69,11 +70,13 @@ class FilterChipComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     final textColor = switch (state) {
-      FilterChipComponentState.selected => colors.primary,
+      FilterChipComponentState.selected => colors.textReverse,
       FilterChipComponentState.unselected => colors.textLight,
       FilterChipComponentState.disabled => colors.textLightest,
     };
-    final background = _selected ? colors.primaryLight : colors.fillLight;
+    final background = _selected
+        ? _inverseBackgroundBase(context)
+        : colors.fillLight;
     final effectiveAvatarSize = _avatarSizeFor(context);
     final textScaledHeight = heightForTextScale(context);
     final effectiveChipHeight = avatar == null
@@ -101,6 +104,12 @@ class FilterChipComponent extends StatelessWidget {
         children: _children(effectiveAvatarSize, textColor),
       ),
     );
+  }
+
+  Color _inverseBackgroundBase(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? ColorTokens.light.backgroundBase
+        : ColorTokens.dark.backgroundBase;
   }
 
   List<Widget> _children(double effectiveAvatarSize, Color color) {

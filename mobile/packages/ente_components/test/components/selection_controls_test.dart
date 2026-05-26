@@ -249,8 +249,32 @@ void main() {
     final label = tester.widget<Text>(find.text("Faces"));
 
     expect(tester.getSize(surfaceFinder).height, 40);
-    expect(decoration.color, ColorTokens.light.primaryLight);
-    expect(label.style?.color, ColorTokens.light.primary);
+    expect(decoration.color, ColorTokens.dark.backgroundBase);
+    expect(label.style?.color, ColorTokens.light.textReverse);
+    expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+  });
+
+  testWidgets("FilterChipComponent inverts selected colors in dark theme", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const FilterChipComponent(
+          label: "Faces",
+          state: FilterChipComponentState.selected,
+        ),
+        theme: ComponentTheme.darkTheme(),
+      ),
+    );
+
+    final surface = tester.widget<AnimatedContainer>(
+      find.byKey(const ValueKey("filter-chip-surface")),
+    );
+    final decoration = surface.decoration! as BoxDecoration;
+    final label = tester.widget<Text>(find.text("Faces"));
+
+    expect(decoration.color, ColorTokens.light.backgroundBase);
+    expect(label.style?.color, ColorTokens.dark.textReverse);
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
   });
 
@@ -412,9 +436,10 @@ Widget _wrap(
   Widget child, {
   TargetPlatform platform = TargetPlatform.android,
   TextScaler textScaler = TextScaler.noScaling,
+  ThemeData? theme,
 }) {
   return MaterialApp(
-    theme: ComponentTheme.lightTheme().copyWith(platform: platform),
+    theme: (theme ?? ComponentTheme.lightTheme()).copyWith(platform: platform),
     home: MediaQuery(
       data: MediaQueryData(textScaler: textScaler),
       child: Scaffold(body: Center(child: child)),
