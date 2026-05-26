@@ -4,23 +4,36 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class AndroidSearchAutofocus extends StatefulWidget {
-  const AndroidSearchAutofocus({
+/// Requests focus and explicitly shows Android's soft keyboard for text input.
+///
+/// Flutter can mark a text field as focused during a route/app-launch
+/// transition without Android showing the IME. This is visible on launch-time
+/// app lock screens: the password field is focused, but the keyboard stays
+/// hidden. This wrapper waits until the field is attached, focuses the provided
+/// [focusNode], then asks the platform text input channel to show the keyboard.
+/// See https://github.com/flutter/flutter/issues/122994 for the upstream
+/// Flutter issue tracking this behavior.
+///
+/// Use this only for text inputs that intentionally need keyboard focus as soon
+/// as they appear. The same [focusNode] must be passed to the wrapped text field.
+class AndroidTextInputAutofocus extends StatefulWidget {
+  const AndroidTextInputAutofocus({
     super.key,
-    required this.enabled,
     required this.focusNode,
     required this.child,
+    this.enabled = true,
   });
 
-  final bool enabled;
   final FocusNode focusNode;
   final Widget child;
+  final bool enabled;
 
   @override
-  State<AndroidSearchAutofocus> createState() => _AndroidSearchAutofocusState();
+  State<AndroidTextInputAutofocus> createState() =>
+      _AndroidTextInputAutofocusState();
 }
 
-class _AndroidSearchAutofocusState extends State<AndroidSearchAutofocus> {
+class _AndroidTextInputAutofocusState extends State<AndroidTextInputAutofocus> {
   int _token = 0;
 
   @override
@@ -30,7 +43,7 @@ class _AndroidSearchAutofocusState extends State<AndroidSearchAutofocus> {
   }
 
   @override
-  void didUpdateWidget(AndroidSearchAutofocus oldWidget) {
+  void didUpdateWidget(AndroidTextInputAutofocus oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!oldWidget.enabled && widget.enabled) {
       _scheduleFocus();
