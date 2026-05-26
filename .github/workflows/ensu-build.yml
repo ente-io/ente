@@ -159,17 +159,19 @@ jobs:
               working-directory: rust/apps/ensu
               run: yarn install --frozen-lockfile
 
+            - name: Check Tauri updater public key
+              if: vars.ENSU_TAURI_UPDATER_PUBKEY == ''
+              run: exit 1
+
             - name: Write Tauri config override (updater)
               if: matrix.platform.os != 'windows-latest'
-              env:
-                  ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
               run: |
-                  cat > rust/apps/ensu/tauri.ci.conf.json <<EOF
+                  cat > rust/apps/ensu/tauri.ci.conf.json <<'EOF'
                   {
                       "tauri": {
                           "updater": {
                               "active": true,
-                              "pubkey": "${ENSU_TAURI_UPDATER_PUBKEY}"
+                              "pubkey": ${{ toJSON(vars.ENSU_TAURI_UPDATER_PUBKEY) }}
                           }
                       }
                   }
@@ -178,27 +180,22 @@ jobs:
             - name: Write Tauri config override (updater + Windows signing)
               if: matrix.platform.os == 'windows-latest'
               shell: bash
-              env:
-                  ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
-                  AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-                  AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-                  AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
               run: |
                   cargo install --locked artifact-signing-cli --version 0.11.0
                   echo "$(cygpath -w "$HOME/.cargo/bin")" >> $GITHUB_PATH
                   SIGNTOOL_PATH=$(powershell -NoProfile -Command "Get-ChildItem 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe' -ErrorAction Stop | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName" | tr -d '\r')
                   echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
 
-                  cat > rust/apps/ensu/tauri.ci.conf.json <<EOF
+                  cat > rust/apps/ensu/tauri.ci.conf.json <<'EOF'
                   {
                       "tauri": {
                           "updater": {
                               "active": true,
-                              "pubkey": "${ENSU_TAURI_UPDATER_PUBKEY}"
+                              "pubkey": ${{ toJSON(vars.ENSU_TAURI_UPDATER_PUBKEY) }}
                           },
                           "bundle": {
                               "windows": {
-                                  "signCommand": "artifact-signing-cli -e ${AZURE_ENDPOINT} -a ${AZURE_CODE_SIGNING_NAME} -c ${AZURE_CERT_PROFILE_NAME} -d Ensu %1"
+                                  "signCommand": ${{ toJSON(format('artifact-signing-cli -e {0} -a {1} -c {2} -d Ensu %1', secrets.AZURE_ENDPOINT, secrets.AZURE_CODE_SIGNING_NAME, secrets.AZURE_CERT_PROFILE_NAME)) }}
                               }
                           }
                       }
