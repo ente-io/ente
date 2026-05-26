@@ -1,9 +1,11 @@
 import "package:ente_components/ente_components.dart";
-import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
+import "package:hugeicons/hugeicons.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 
 class GenericFilterChip extends StatelessWidget {
   final String label;
-  final IconData? leadingIcon;
+  final SearchFilterIcon? leadingIcon;
   final VoidCallback apply;
   final VoidCallback remove;
   final bool isApplied;
@@ -21,7 +23,9 @@ class GenericFilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return FilterChipComponent(
       label: label,
-      leading: leadingIcon == null ? null : Icon(leadingIcon),
+      leading: leadingIcon == null
+          ? null
+          : HugeIcon(icon: leadingIcon!, size: IconSizes.small),
       state: isApplied
           ? FilterChipComponentState.selected
           : FilterChipComponentState.unselected,

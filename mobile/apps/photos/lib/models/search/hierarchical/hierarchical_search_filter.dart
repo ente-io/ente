@@ -1,8 +1,9 @@
-import "package:flutter/widgets.dart";
 import "package:photos/models/file/file.dart";
 
 int kMostRelevantFilter = 10000;
 int kLeastRelevantFilter = -1;
+
+typedef SearchFilterIcon = List<List<dynamic>>;
 
 enum FilterTypeNames {
   albumFilter,
@@ -37,7 +38,7 @@ abstract class HierarchicalSearchFilter {
       );
 
   String name();
-  IconData? icon();
+  SearchFilterIcon? icon();
 
   /// Will be [kmostRelevantFilter] if the filter is a Top-level filter. For
   /// example, when searching for an album 'A' and opening it, when

@@ -7,6 +7,7 @@ import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 enum FilterChipComponentState { selected, unselected, disabled }
 
@@ -162,11 +163,16 @@ class FilterChipComponent extends StatelessWidget {
       children.add(
         ChipIconSlot(
           color: color,
-          size: selectedTrailing ? IconSizes.tiny : IconSizes.small,
+          size: selectedTrailing ? _selectedTrailingIconSize : IconSizes.small,
           slotSize: selectedTrailing
-              ? _selectedTrailingIconSlotSize
+              ? _selectedTrailingIconSize
               : _iconSlotSize,
-          child: selectedTrailing ? const Icon(Icons.close_rounded) : trailing!,
+          child: selectedTrailing
+              ? const HugeIcon(
+                  icon: HugeIcons.strokeRoundedCancel01,
+                  size: _selectedTrailingIconSize,
+                )
+              : trailing!,
         ),
       );
     }
@@ -222,7 +228,7 @@ class FilterChipComponent extends StatelessWidget {
 }
 
 const double _iconSlotSize = 16;
-const double _selectedTrailingIconSlotSize = 16;
+const double _selectedTrailingIconSize = 14;
 const double _avatarSize = 32;
 
 class _FilterChipAvatar extends StatelessWidget {

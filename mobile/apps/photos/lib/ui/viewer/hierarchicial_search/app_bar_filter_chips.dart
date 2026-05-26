@@ -1,5 +1,6 @@
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -134,7 +135,10 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
         height: chipHeight,
         child: Center(
           child: IconButtonComponent(
-            icon: const Icon(Icons.filter_list_rounded),
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedMenu08,
+              size: IconSizes.small,
+            ),
             variant: IconButtonComponentVariant.primary,
             shouldSurfaceExecutionStates: false,
             tooltip: AppLocalizations.of(context).filter,

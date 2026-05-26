@@ -4,6 +4,7 @@ import "package:ente_components/ente_components.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
+import "package:hugeicons/hugeicons.dart";
 
 void main() {
   testWidgets("CheckboxComponent toggles to the next selected value", (
@@ -251,7 +252,11 @@ void main() {
     expect(tester.getSize(surfaceFinder).height, 40);
     expect(decoration.color, ColorTokens.dark.backgroundBase);
     expect(label.style?.color, ColorTokens.light.textReverse);
-    expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+    expect(find.byWidgetPredicate(_isCancelIcon), findsOneWidget);
+    expect(
+      tester.widget<HugeIcon>(find.byWidgetPredicate(_isCancelIcon)).size,
+      14,
+    );
   });
 
   testWidgets("FilterChipComponent inverts selected colors in dark theme", (
@@ -275,7 +280,7 @@ void main() {
 
     expect(decoration.color, ColorTokens.light.backgroundBase);
     expect(label.style?.color, ColorTokens.dark.textReverse);
-    expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+    expect(find.byWidgetPredicate(_isCancelIcon), findsOneWidget);
   });
 
   testWidgets("FilterChipComponent toggles only when enabled", (tester) async {
@@ -445,4 +450,8 @@ Widget _wrap(
       child: Scaffold(body: Center(child: child)),
     ),
   );
+}
+
+bool _isCancelIcon(Widget widget) {
+  return widget is HugeIcon && widget.icon == HugeIcons.strokeRoundedCancel01;
 }

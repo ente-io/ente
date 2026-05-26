@@ -38,7 +38,7 @@ class _TestFilter extends HierarchicalSearchFilter {
       );
 
   @override
-  IconData? icon() => null;
+  SearchFilterIcon? icon() => null;
 
   @override
   bool isMatch(EnteFile file) => false;
