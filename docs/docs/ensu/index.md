@@ -43,6 +43,10 @@ Some things people have been using it for:
 - Discussing books and ideas (Ensu knows classics like the Gita and the Bible quite well, even without web search).
 - Chatting on flights and in places with no internet.
 
+## Changelog
+
+For a list of recent changes, see the [Changelog](/ensu/changelog).
+
 ## Getting Help
 
 - **FAQ**: Check the [FAQ](/ensu/faq/) for common questions.
