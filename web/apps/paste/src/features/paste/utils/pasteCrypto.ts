@@ -3,6 +3,7 @@ import {
     decryptMetadataJSON,
     deriveInteractiveKey,
     deriveKey,
+    deriveModerateKey,
     encryptBox,
     encryptMetadataJSON,
     generateKey,
@@ -24,16 +25,27 @@ export interface PasteKey {
 export const createFragmentSecret = () =>
     newID("").slice(0, FRAGMENT_SECRET_LENGTH);
 
-export const encryptPasteForCreate = async (text: string) => {
+const pasteKeyLinkFragment = (pasteKey: PasteKey) =>
+    pasteKey.passwordRequired
+        ? `${PASSWORD_FRAGMENT_PREFIX}${pasteKey.fragmentSecret}`
+        : pasteKey.fragmentSecret;
+
+export const encryptPasteForCreate = async (
+    text: string,
+    password?: string,
+) => {
     const key = await generateKey();
     const fragmentSecret = createFragmentSecret();
+    const pasteKey = { fragmentSecret, passwordRequired: !!password };
 
     const encrypted = await encryptMetadataJSON({ text }, key);
-    const keyEncryptionKey = await deriveInteractiveKey(fragmentSecret);
+    const keyEncryptionKey = password
+        ? await deriveModerateKey(pasteKeyKdfSecret(pasteKey, password))
+        : await deriveInteractiveKey(fragmentSecret);
     const encryptedPasteKey = await encryptBox(key, keyEncryptionKey.key);
 
     return {
-        fragmentSecret,
+        linkFragment: pasteKeyLinkFragment(pasteKey),
         payload: {
             encryptedData: encrypted.encryptedData,
             decryptionHeader: encrypted.decryptionHeader,

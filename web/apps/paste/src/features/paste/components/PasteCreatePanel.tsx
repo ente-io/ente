@@ -1,15 +1,25 @@
 import { Navigation06Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import {
     Box,
+    Button,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     IconButton,
+    Stack,
     TextField,
     Typography,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { MAX_PASTE_CHARS } from "../constants";
 import { PasteLinkCard } from "./PasteLinkCard";
 import { pasteTextFieldSx } from "./textFieldSx";
@@ -20,7 +30,7 @@ interface PasteCreatePanelProps {
     createError: string | null;
     createdLink: string | null;
     onInputChange: (value: string) => void;
-    onCreate: () => Promise<void>;
+    onCreate: (password?: string) => Promise<void>;
     onCopyLink: (value: string) => Promise<void>;
     onShareLink: (url: string) => Promise<void>;
 }
@@ -38,6 +48,11 @@ export const PasteCreatePanel = ({
     const isMobile = useMediaQuery("(max-width:599.95px)", { noSsr: true });
     const { resolvedMode } = usePasteColorMode();
     const tokens = getPasteThemeTokens(resolvedMode);
+    const [passwordProtected, setPasswordProtected] = useState(false);
+    const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordError, setPasswordError] = useState<string | null>(null);
     const isInputEmpty = inputText.trim().length === 0;
     const nearLimitThreshold = Math.floor(MAX_PASTE_CHARS * 0.9);
     const isNearCharLimit = inputText.length >= nearLimitThreshold;
@@ -48,6 +63,29 @@ export const PasteCreatePanel = ({
         "One-time view",
         "Auto-deletes after 24 hours",
     ];
+
+    const resetPasswordDialog = () => {
+        setPassword("");
+        setConfirmPassword("");
+        setPasswordError(null);
+    };
+
+    const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!password) {
+            setPasswordError("Enter a password");
+            return;
+        }
+        if (password !== confirmPassword) {
+            setPasswordError("Passwords do not match");
+            return;
+        }
+
+        const submittedPassword = password;
+        setPasswordDialogOpen(false);
+        resetPasswordDialog();
+        void onCreate(submittedPassword);
+    };
 
     return (
         <Box sx={{ width: "100%", maxWidth: "100%", minWidth: 0 }}>
@@ -126,41 +164,83 @@ export const PasteCreatePanel = ({
                         pointerEvents: "none",
                     }}
                 >
-                    <Typography
-                        variant="mini"
+                    <Box
                         sx={{
                             display: "flex",
                             alignItems: "center",
+                            gap: 0.7,
                             height: { xs: 32, sm: 36 },
-                            color: tokens.text.counter,
-                            fontWeight: 600,
-                            lineHeight: 1,
-                            letterSpacing: "0.01em",
+                            pointerEvents: "auto",
                         }}
                     >
-                        <Box
-                            component="span"
+                        <Typography
+                            variant="mini"
                             sx={{
-                                color: isNearCharLimit
-                                    ? tokens.text.counterHighlight
-                                    : tokens.text.counter,
+                                display: "flex",
+                                alignItems: "center",
+                                color: tokens.text.counter,
+                                fontWeight: 600,
+                                lineHeight: 1,
+                                letterSpacing: "0.01em",
                             }}
                         >
-                            {inputText.length}
-                        </Box>
-                        <Box
-                            component="span"
-                            sx={{ color: tokens.text.counter }}
+                            <Box
+                                component="span"
+                                sx={{
+                                    color: isNearCharLimit
+                                        ? tokens.text.counterHighlight
+                                        : tokens.text.counter,
+                                }}
+                            >
+                                {inputText.length}
+                            </Box>
+                            <Box
+                                component="span"
+                                sx={{ color: tokens.text.counter }}
+                            >
+                                /{MAX_PASTE_CHARS}
+                            </Box>
+                        </Typography>
+                        <IconButton
+                            aria-label={
+                                passwordProtected
+                                    ? "Disable password protection"
+                                    : "Enable password protection"
+                            }
+                            aria-pressed={passwordProtected}
+                            onClick={() => {
+                                if (creating) return;
+                                setPasswordProtected((enabled) => !enabled);
+                            }}
+                            sx={{
+                                width: { xs: 30, sm: 32 },
+                                height: { xs: 30, sm: 32 },
+                                color: passwordProtected
+                                    ? tokens.button.primaryBg
+                                    : tokens.text.counter,
+                                bgcolor: passwordProtected
+                                    ? tokens.surface.chipBg
+                                    : "transparent",
+                                "&:hover": { bgcolor: tokens.surface.chipBg },
+                            }}
                         >
-                            /{MAX_PASTE_CHARS}
-                        </Box>
-                    </Typography>
+                            {passwordProtected ? (
+                                <LockRoundedIcon sx={{ fontSize: 17 }} />
+                            ) : (
+                                <LockOpenRoundedIcon sx={{ fontSize: 17 }} />
+                            )}
+                        </IconButton>
+                    </Box>
                     <IconButton
                         aria-label="Create secure link"
                         aria-busy={creating}
                         onClick={() => {
                             if (creating || isCreateDisabled) return;
-                            void onCreate();
+                            if (passwordProtected) {
+                                setPasswordDialogOpen(true);
+                            } else {
+                                void onCreate();
+                            }
                         }}
                         disabled={isCreateDisabled}
                         sx={{
@@ -295,6 +375,65 @@ export const PasteCreatePanel = ({
                     />
                 </Box>
             )}
+
+            <Dialog
+                open={passwordDialogOpen}
+                onClose={() => {
+                    setPasswordDialogOpen(false);
+                    resetPasswordDialog();
+                }}
+                fullWidth
+                maxWidth="xs"
+                slotProps={{
+                    paper: {
+                        component: "form",
+                        onSubmit: handlePasswordSubmit,
+                        sx: { borderRadius: "14px" },
+                    },
+                }}
+            >
+                <DialogTitle sx={{ pb: 1 }}>Paste password</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={1.5} sx={{ pt: 1 }}>
+                        <TextField
+                            autoFocus
+                            type="password"
+                            label="Password"
+                            value={password}
+                            autoComplete="off"
+                            onChange={(event) => {
+                                setPassword(event.target.value);
+                                setPasswordError(null);
+                            }}
+                        />
+                        <TextField
+                            type="password"
+                            label="Confirm password"
+                            value={confirmPassword}
+                            autoComplete="off"
+                            error={!!passwordError}
+                            helperText={passwordError ?? " "}
+                            onChange={(event) => {
+                                setConfirmPassword(event.target.value);
+                                setPasswordError(null);
+                            }}
+                        />
+                    </Stack>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2.5 }}>
+                    <Button
+                        onClick={() => {
+                            setPasswordDialogOpen(false);
+                            resetPasswordDialog();
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button type="submit" variant="contained" disableElevation>
+                        Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

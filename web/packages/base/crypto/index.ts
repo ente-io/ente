@@ -514,6 +514,15 @@ export const deriveInteractiveKey = (
         : sharedWorker().then((w) => w.deriveInteractiveKey(passphrase));
 
 /**
+ * Derive a key suitable for moderate-cost password gates from the given
+ * {@link passphrase}.
+ */
+export const deriveModerateKey = (passphrase: string): Promise<DerivedKey> =>
+    inWorker()
+        ? libsodium.deriveModerateKey(passphrase)
+        : sharedWorker().then((w) => w.deriveModerateKey(passphrase));
+
+/**
  * Derive a subkey of the given {@link key} using the specified parameters.
  *
  * @returns the bytes of the derived subkey.

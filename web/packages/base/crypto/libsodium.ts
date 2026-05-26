@@ -859,6 +859,21 @@ export const deriveInteractiveKey = async (
 };
 
 /**
+ * A variant of {@link deriveSensitiveKey} for deriving an alternative key with
+ * parameters suitable for moderate-cost password gates.
+ */
+export const deriveModerateKey = async (
+    passphrase: string,
+): Promise<DerivedKey> => {
+    const salt = await generateDeriveKeySalt();
+    const opsLimit = sodium.crypto_pwhash_OPSLIMIT_MODERATE;
+    const memLimit = sodium.crypto_pwhash_MEMLIMIT_MODERATE;
+
+    const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
+    return { key, salt, opsLimit, memLimit };
+};
+
+/**
  * Derive a {@link subKeyID}-th subkey of length {@link subKeyLength} bytes by
  * applying a KDF (Key Derivation Function) for the given {@link key} and the
  * {@link context}.
