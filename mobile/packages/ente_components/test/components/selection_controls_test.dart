@@ -342,6 +342,56 @@ void main() {
     );
   });
 
+  testWidgets("FilterChipComponent uses custom avatar size", (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const FilterChipComponent(
+          avatar: ColoredBox(key: ValueKey("avatar"), color: Colors.purple),
+          state: FilterChipComponentState.unselected,
+          avatarSize: 48,
+        ),
+      ),
+    );
+
+    final surface = tester.widget<AnimatedContainer>(
+      find.byKey(const ValueKey("filter-chip-surface")),
+    );
+    final decoration = surface.decoration! as BoxDecoration;
+    final avatarClip = tester.widget<ClipRRect>(find.byType(ClipRRect));
+
+    expect(
+      tester.getSize(find.byKey(const ValueKey("avatar"))),
+      const Size.square(48),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey("filter-chip-surface"))).height,
+      56,
+    );
+    expect(decoration.borderRadius, BorderRadius.circular(28));
+    expect(avatarClip.borderRadius, BorderRadius.circular(24));
+  });
+
+  testWidgets("FilterChipComponent scales custom avatar size when needed", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const FilterChipComponent(
+          avatar: ColoredBox(key: ValueKey("avatar"), color: Colors.purple),
+          state: FilterChipComponentState.unselected,
+          avatarSize: 40,
+          scaleAvatarWithText: true,
+        ),
+        textScaler: const TextScaler.linear(2),
+      ),
+    );
+
+    expect(
+      tester.getSize(find.byKey(const ValueKey("avatar"))),
+      const Size.square(48),
+    );
+  });
+
   testWidgets("FilterChipComponent clips avatar content", (tester) async {
     await tester.pumpWidget(
       _wrap(

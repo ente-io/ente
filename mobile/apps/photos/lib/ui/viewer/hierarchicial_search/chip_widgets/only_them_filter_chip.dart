@@ -9,11 +9,13 @@ class OnlyThemFilterChip extends StatelessWidget {
   final VoidCallback apply;
   final VoidCallback remove;
   final bool isApplied;
+  final double? avatarSize;
   const OnlyThemFilterChip({
     required this.faceFilters,
     required this.apply,
     required this.remove,
     required this.isApplied,
+    this.avatarSize,
     super.key,
   });
 
@@ -21,14 +23,12 @@ class OnlyThemFilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return FilterChipComponent(
       label: AppLocalizations.of(context).onlyThem,
-      avatar: _OnlyThemFilterThumbnail(
-        faceFilters: faceFilters,
-        size: FilterChipComponent.avatarSizeForTextScale(context),
-      ),
+      avatar: _OnlyThemFilterThumbnail(faceFilters: faceFilters),
       state: isApplied
           ? FilterChipComponentState.selected
           : FilterChipComponentState.unselected,
       onChanged: (_) => isApplied ? remove() : apply(),
+      avatarSize: avatarSize,
       scaleAvatarWithText: true,
     );
   }
@@ -36,14 +36,19 @@ class OnlyThemFilterChip extends StatelessWidget {
 
 class _OnlyThemFilterThumbnail extends StatelessWidget {
   final List<FaceFilter> faceFilters;
-  final double size;
-  const _OnlyThemFilterThumbnail({
-    required this.faceFilters,
-    required this.size,
-  }) : assert(faceFilters.length > 0 && faceFilters.length <= 4);
+  const _OnlyThemFilterThumbnail({required this.faceFilters})
+    : assert(faceFilters.length > 0 && faceFilters.length <= 4);
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return _buildThumbnail(constraints.biggest.shortestSide);
+      },
+    );
+  }
+
+  Widget _buildThumbnail(double size) {
     final numberOfFaces = faceFilters.length;
     if (numberOfFaces == 1) {
       return ClipOval(

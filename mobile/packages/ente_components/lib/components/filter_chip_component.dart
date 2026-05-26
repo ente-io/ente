@@ -1,6 +1,5 @@
 import 'package:ente_components/components/chip_surface.dart';
 import 'package:ente_components/theme/icon_sizes.dart';
-import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
@@ -10,7 +9,7 @@ enum FilterChipComponentState { selected, unselected, disabled }
 
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=9524-4352&m=dev
 /// Section: Filter Chip
-/// Specs: 40px height, 24px radius, selected/unselected/disabled states with icon and avatar slots.
+/// Specs: 40px minimum height, pill radius, selected/unselected/disabled states with icon and avatar slots.
 class FilterChipComponent extends StatelessWidget {
   const FilterChipComponent({
     super.key,
@@ -21,6 +20,7 @@ class FilterChipComponent extends StatelessWidget {
     this.state = FilterChipComponentState.unselected,
     this.onChanged,
     this.tooltip,
+    this.avatarSize,
     this.scaleAvatarWithText = false,
   }) : assert(label != null || avatar != null);
 
@@ -31,6 +31,7 @@ class FilterChipComponent extends StatelessWidget {
   final FilterChipComponentState state;
   final ValueChanged<bool>? onChanged;
   final String? tooltip;
+  final double? avatarSize;
   final bool scaleAvatarWithText;
 
   static const minHeight = 40.0;
@@ -48,6 +49,30 @@ class FilterChipComponent extends StatelessWidget {
     return heightForTextScale(context) - _avatarVerticalPadding;
   }
 
+  static double _larger(double first, double second) {
+    return first > second ? first : second;
+  }
+
+  double _avatarSizeFor(BuildContext context) {
+    final baseAvatarSize = avatarSize ?? _avatarSize;
+    if (!scaleAvatarWithText) {
+      return baseAvatarSize;
+    }
+    final scaledAvatarSize = avatarSizeForTextScale(context);
+    return _larger(scaledAvatarSize, baseAvatarSize);
+  }
+
+  double _chipHeightFor(BuildContext context, double? effectiveAvatarSize) {
+    final textScaledHeight = heightForTextScale(context);
+    if (effectiveAvatarSize == null) {
+      return textScaledHeight;
+    }
+    return _larger(
+      textScaledHeight,
+      effectiveAvatarSize + _avatarVerticalPadding,
+    );
+  }
+
   bool get _selected => state == FilterChipComponentState.selected;
 
   bool get _enabled =>
@@ -62,28 +87,30 @@ class FilterChipComponent extends StatelessWidget {
       FilterChipComponentState.disabled => colors.textLightest,
     };
     final background = _selected ? colors.primaryLight : colors.fillLight;
+    final effectiveAvatarSize = avatar == null ? null : _avatarSizeFor(context);
+    final effectiveChipHeight = _chipHeightFor(context, effectiveAvatarSize);
 
     return ChipSurface(
       surfaceKey: const ValueKey('filter-chip-surface'),
       enabled: _enabled,
       selected: _selected,
       semanticLabel: tooltip ?? label,
-      minHeight: minHeight,
-      minWidth: minHeight,
+      minHeight: effectiveChipHeight,
+      minWidth: effectiveChipHeight,
       padding: _padding,
       background: background,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(effectiveChipHeight / 2),
       onTap: _enabled ? () => onChanged!(!_selected) : null,
       tooltip: tooltip,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: _children(context, textColor),
+        children: _children(effectiveAvatarSize, textColor),
       ),
     );
   }
 
-  List<Widget> _children(BuildContext context, Color color) {
+  List<Widget> _children(double? effectiveAvatarSize, Color color) {
     final children = <Widget>[];
     final gap = avatar != null ? Spacing.xs : Spacing.sm;
 
@@ -97,9 +124,7 @@ class FilterChipComponent extends StatelessWidget {
       children.add(
         _FilterChipAvatar(
           enabled: state != FilterChipComponentState.disabled,
-          size: scaleAvatarWithText
-              ? avatarSizeForTextScale(context)
-              : _avatarSize,
+          size: effectiveAvatarSize!,
           child: avatar!,
         ),
       );
@@ -214,7 +239,7 @@ class _FilterChipAvatar extends StatelessWidget {
     return Opacity(
       opacity: enabled ? 1 : 0.6,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(Radii.button),
+        borderRadius: BorderRadius.circular(size / 2),
         child: SizedBox.square(dimension: size, child: child),
       ),
     );

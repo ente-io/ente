@@ -19,6 +19,7 @@ class FilterOptionsBottomSheet extends StatefulWidget {
 class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
   static const _maxContentHeightFactor = 0.68;
   static const _topFadeHeight = 16.0;
+  static const _peopleAvatarSize = 48.0;
 
   late final Map<String, List<HierarchicalSearchFilter>> _filtersByType;
 
@@ -71,18 +72,23 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
           spacing: 8,
           runSpacing: 12,
           children: [
-            for (final filter in group.filters) _buildFilterChip(filter),
+            for (final filter in group.filters)
+              _buildFilterChip(filter, faceAvatarSize: group.faceAvatarSize),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildFilterChip(HierarchicalSearchFilter filter) {
+  Widget _buildFilterChip(
+    HierarchicalSearchFilter filter, {
+    double? faceAvatarSize,
+  }) {
     return HierarchicalFilterChip(
       filter: filter,
       apply: () => _applyFilter(filter),
       remove: () => _removeFilter(filter),
+      faceAvatarSize: faceAvatarSize,
     );
   }
 
@@ -100,7 +106,11 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
     final l10n = AppLocalizations.of(context);
     final peopleFilters = _peopleFilters;
     final groups = [
-      _FilterGroup(l10n.people, peopleFilters),
+      _FilterGroup(
+        l10n.people,
+        peopleFilters,
+        faceAvatarSize: _peopleAvatarSize,
+      ),
       _FilterGroup(l10n.smartSuggestions, [
         ..._filters("magicFilters"),
         ..._filters("topLevelGenericFilter"),
@@ -179,6 +189,7 @@ class _TopFadingScrollViewState extends State<_TopFadingScrollView> {
 class _FilterGroup {
   final String label;
   final List<HierarchicalSearchFilter> filters;
+  final double? faceAvatarSize;
 
-  const _FilterGroup(this.label, this.filters);
+  const _FilterGroup(this.label, this.filters, {this.faceAvatarSize});
 }

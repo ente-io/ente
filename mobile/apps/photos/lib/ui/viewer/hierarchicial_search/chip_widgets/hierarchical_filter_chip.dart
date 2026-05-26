@@ -10,11 +10,13 @@ class HierarchicalFilterChip extends StatelessWidget {
   final HierarchicalSearchFilter filter;
   final VoidCallback apply;
   final VoidCallback remove;
+  final double? faceAvatarSize;
 
   const HierarchicalFilterChip({
     required this.filter,
     required this.apply,
     required this.remove,
+    this.faceAvatarSize,
     super.key,
   });
 
@@ -28,6 +30,7 @@ class HierarchicalFilterChip extends StatelessWidget {
         apply: apply,
         remove: remove,
         isApplied: filter.isApplied,
+        avatarSize: faceAvatarSize,
       );
     }
     if (filter is OnlyThemFilter) {
@@ -36,6 +39,7 @@ class HierarchicalFilterChip extends StatelessWidget {
         apply: apply,
         remove: remove,
         isApplied: filter.isApplied,
+        avatarSize: faceAvatarSize,
       );
     }
     return GenericFilterChip(
