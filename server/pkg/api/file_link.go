@@ -61,7 +61,7 @@ func (h *FileHandler) PasswordInfo(c *gin.Context) {
 
 func (h *FileHandler) LinkThumbnail(c *gin.Context) {
 	linkCtx := auth.MustGetFileLinkAccessContext(c)
-	url, err := h.Controller.GetThumbnailURL(c, linkCtx.OwnerID, linkCtx.FileID)
+	url, err := h.Controller.GetThumbnailURLForOwner(c, linkCtx.OwnerID, linkCtx.FileID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -71,7 +71,7 @@ func (h *FileHandler) LinkThumbnail(c *gin.Context) {
 
 func (h *FileHandler) LinkFile(c *gin.Context) {
 	linkCtx := auth.MustGetFileLinkAccessContext(c)
-	url, err := h.Controller.GetFileURL(c, linkCtx.OwnerID, linkCtx.FileID)
+	url, err := h.Controller.GetFileURLForOwner(c, linkCtx.OwnerID, linkCtx.FileID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
