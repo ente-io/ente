@@ -379,6 +379,7 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 		return inactivityEmailStageNone, false, false, false, nil
 	}
 
+	accountRecoveryLink := ""
 	if config.IsFinal {
 		if c.UserController == nil {
 			return stage, false, false, false, fmt.Errorf("inactive user deletion requires user controller")
@@ -423,6 +424,11 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 			}
 		}
 
+		accountRecoveryLink, err = c.UserController.getAccountRecoveryLink(user.ID, user.Email)
+		if err != nil {
+			return stage, false, false, false, err
+		}
+
 		deleteLogger := log.WithFields(log.Fields{
 			"user_id": user.ID,
 			"req_ctx": "inactive_account_deletion",
@@ -436,6 +442,9 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 	templateData := map[string]interface{}{
 		"Email":        user.Email,
 		"DeletionDate": deletionDate,
+	}
+	if accountRecoveryLink != "" {
+		templateData["AccountRecoveryLink"] = accountRecoveryLink
 	}
 	if emailSemaphore != nil {
 		emailSemaphore <- struct{}{}
