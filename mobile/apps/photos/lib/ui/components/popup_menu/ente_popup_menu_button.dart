@@ -12,6 +12,7 @@ class EntePopupMenuOption<T> {
     required this.label,
     this.secondaryLabel,
     this.labelColor,
+    this.leadingWidget,
     this.isActive = false,
     this.trailingWidget,
     this.activeTrailingWidget,
@@ -22,6 +23,7 @@ class EntePopupMenuOption<T> {
   final String label;
   final String? secondaryLabel;
   final Color? labelColor;
+  final Widget? leadingWidget;
   final bool isActive;
   final Widget? trailingWidget;
   final Widget? activeTrailingWidget;
@@ -218,8 +220,14 @@ class _EntePopupMenuRow<T> extends StatelessWidget {
           );
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        if (option.leadingWidget != null) ...[
+          SizedBox.square(
+            dimension: 20,
+            child: Center(child: option.leadingWidget),
+          ),
+          const SizedBox(width: 12),
+        ],
         Expanded(child: title),
         if (option.trailingWidget != null)
           option.trailingWidget!

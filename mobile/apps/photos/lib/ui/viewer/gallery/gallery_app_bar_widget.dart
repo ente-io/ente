@@ -285,6 +285,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return EntePopupMenuButton<T>(
       optionsBuilder: optionsBuilder,
       onSelected: onSelected,
+      elevation: 0,
       child: Tooltip(
         message: tooltip,
         child: _GalleryAppBarIconButtonSurface(icon: icon),
@@ -869,14 +870,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   EntePopupMenuOption<AlbumPopupAction> _menuOption(
     AlbumPopupAction value,
     String label,
-    Widget trailingWidget, {
+    Widget leadingWidget, {
     Color? labelColor,
   }) {
     return EntePopupMenuOption(
       value: value,
       label: label,
       labelColor: labelColor,
-      trailingWidget: trailingWidget,
+      leadingWidget: leadingWidget,
     );
   }
 
