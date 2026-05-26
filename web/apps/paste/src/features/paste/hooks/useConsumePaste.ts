@@ -30,11 +30,19 @@ export const useConsumePaste = (mode: PageMode, accessToken: string | null) => {
                 await waitUntilVisible();
                 await setGuard(accessToken);
                 const payload = await consumePaste(accessToken);
-                const decryptedText = await decryptConsumedPaste(
-                    pasteKey,
-                    payload,
-                    password,
-                );
+                let decryptedText: string;
+                try {
+                    decryptedText = await decryptConsumedPaste(
+                        pasteKey,
+                        payload,
+                        password,
+                    );
+                } catch (error) {
+                    if (pasteKey.passwordRequired) {
+                        throw new Error("Incorrect paste password");
+                    }
+                    throw error;
+                }
 
                 setResolvedText(decryptedText);
             } catch (error) {
