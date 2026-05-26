@@ -44,16 +44,6 @@ const Page = () => {
                     name="twitter:image"
                     content="https://paste.ente.com/images/metaimage.png"
                 />
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link
-                    rel="preconnect"
-                    href="https://fonts.gstatic.com"
-                    crossOrigin="anonymous"
-                />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap"
-                    rel="stylesheet"
-                />
             </Head>
 
             <PasteFrame footer={<PasteFooter />}>

@@ -650,6 +650,11 @@
   resolved "https://registry.npmjs.org/@fontsource/cormorant-garamond/-/cormorant-garamond-5.2.11.tgz"
   integrity sha512-5JjpN023lhA5soijgVT0BdRGzmlijm402ppjccMd6h+vRE0mX2lJnE+41UPfnlidrkV9/rCo1mf58WZlHnB0CA==
 
+"@fontsource/gochi-hand@^5.2.8":
+  version "5.2.8"
+  resolved "https://registry.yarnpkg.com/@fontsource/gochi-hand/-/gochi-hand-5.2.8.tgz#ca16a3da16c4036cf608e05f29191c405a584cde"
+  integrity sha512-29XgI4temBWT9GE3hP4fgMtNv+s2pSLePmnxZEszS7RD/3BHL25om/4sxa6aA3fdSMImddi1PzLzbdqBP/DzLw==
+
 "@fontsource/itim@^5.2.7":
   version "5.2.7"
   resolved "https://registry.yarnpkg.com/@fontsource/itim/-/itim-5.2.7.tgz#c966f5d12688057821599f8a2b9f6342bb661251"
