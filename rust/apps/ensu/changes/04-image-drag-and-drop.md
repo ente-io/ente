@@ -1,0 +1,1 @@
+- Added support for dragging and dropping images into desktop chat attachments.
