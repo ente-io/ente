@@ -358,8 +358,11 @@ class _TextInputComponentState extends State<TextInputComponent> {
     if (_isError) {
       return colors.warning;
     }
-    if (_hasSuccess || _focusNode.hasFocus) {
+    if (_hasSuccess) {
       return colors.primary;
+    }
+    if (_focusNode.hasFocus) {
+      return colors.textLighter;
     }
     return colors.strokeFaint;
   }

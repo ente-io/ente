@@ -532,7 +532,7 @@ const Color textDarkerDark = Color.fromRGBO(204, 204, 204, 1);
 const Color textLighterLight = Color.fromRGBO(150, 150, 150, 1);
 const Color textLighterDark = Color.fromRGBO(150, 150, 150, 1);
 
-const Color textLightestLight = Color.fromRGBO(222, 222, 222, 1);
+const Color textLightestLight = Color.fromRGBO(214, 214, 214, 1);
 const Color textLightestDark = Color.fromRGBO(65, 65, 65, 1);
 
 const Color textReverseLight = Color.fromRGBO(255, 255, 255, 1);
@@ -556,7 +556,7 @@ const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color fillDarkLight = Color.fromRGBO(234, 234, 234, 1);
 const Color fillDarkDark = Color.fromRGBO(10, 10, 10, 1);
 
-const Color fillDarkerLight = Color.fromRGBO(233, 233, 233, 1);
+const Color fillDarkerLight = Color.fromRGBO(222, 222, 222, 1);
 const Color fillDarkerDark = Color.fromRGBO(20, 20, 20, 1);
 
 const Color fillDarkestLight = Color.fromRGBO(210, 210, 210, 1);

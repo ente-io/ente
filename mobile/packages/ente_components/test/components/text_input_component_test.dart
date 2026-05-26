@@ -94,7 +94,7 @@ void main() {
 
     expect(
       _fieldDecoration(tester).border?.top.color,
-      ColorTokens.light.primary,
+      ColorTokens.light.textLighter,
     );
   });
 
