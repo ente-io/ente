@@ -9,6 +9,7 @@ permissions:
 jobs:
     build:
         runs-on: ubuntu-latest
+        environment: production
         steps:
             - uses: actions/checkout@v6
               name: Check out code
