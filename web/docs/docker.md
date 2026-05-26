@@ -2,7 +2,7 @@
 
 Automated Docker images for the self-hosting web apps are created every Wednesday. You can fetch them from `ghcr.io/ente-io/web`.
 
-These images expose 9 web apps on the following ports:
+These images expose 10 web apps on the following ports:
 
 - `3000` - Photos
 - `3001` - Accounts
@@ -12,6 +12,7 @@ These images expose 9 web apps on the following ports:
 - `3005` - Share
 - `3006` - Embed
 - `3008` - Paste
+- `3009` - Locker
 - `3010` - Memories
 
 For example, for selectively exposing only the photos web app on your port 8000, you could:

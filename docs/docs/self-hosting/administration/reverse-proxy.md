@@ -87,6 +87,11 @@ embed.ente.yourdomain.tld {
     reverse_proxy http://localhost:3006
 }
 
+# For Ente Locker web app
+locker.ente.yourdomain.tld {
+    reverse_proxy http://localhost:3009
+}
+
 # For Ente Memories web app
 memories.ente.yourdomain.tld {
     reverse_proxy http://localhost:3010
