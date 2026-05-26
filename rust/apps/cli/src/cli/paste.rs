@@ -26,6 +26,10 @@ pub enum PasteSubcommands {
         /// Public paste origin used for the generated link
         #[arg(long, default_value = "https://paste.ente.com")]
         paste_origin: String,
+
+        /// Require a password to consume the paste
+        #[arg(long)]
+        password: bool,
     },
 
     /// Consume a one-time encrypted paste
@@ -34,7 +38,8 @@ pub enum PasteSubcommands {
         /// Paste URL or access token
         link_or_token: String,
 
-        /// Fragment key when passing only an access token
+        /// Fragment key when passing only an access token.
+        /// Password-protected keys include the `p:` prefix.
         #[arg(long)]
         key: Option<String>,
 

@@ -5,6 +5,7 @@ use crate::{
 };
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64;
+use dialoguer::Password;
 use ente_core::crypto::{self, argon, blob, keys, secretbox};
 use reqwest::{Client, StatusCode, header};
 use serde::{Deserialize, Serialize};
@@ -17,6 +18,9 @@ const FRAGMENT_SECRET_LENGTH: usize = 12;
 const FRAGMENT_SECRET_ALPHABET: &[u8] =
     b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const PASTE_GUARD_COOKIE: &str = "paste_guard";
+const PASTE_PASSWORD_ENV: &str = "ENTE_PASTE_PASSWORD";
+const PASSWORD_FRAGMENT_PREFIX: &str = "p:";
+const PASSWORD_KDF_CONTEXT: &str = "ente-paste-password-v1";
 
 pub async fn handle_paste_command(cmd: PasteCommand) -> Result<()> {
     match cmd.command {
@@ -25,9 +29,15 @@ pub async fn handle_paste_command(cmd: PasteCommand) -> Result<()> {
             file,
             endpoint,
             paste_origin,
+            password,
         } => {
             let text = read_paste_text(text, file)?;
-            let link = create_paste(&endpoint, &paste_origin, &text).await?;
+            let password = if password {
+                Some(resolve_new_paste_password()?)
+            } else {
+                None
+            };
+            let link = create_paste(&endpoint, &paste_origin, &text, password.as_deref()).await?;
             println!("{link}");
             Ok(())
         }
@@ -36,8 +46,14 @@ pub async fn handle_paste_command(cmd: PasteCommand) -> Result<()> {
             key,
             endpoint,
         } => {
-            let (access_token, fragment_secret) = parse_paste_reference(&link_or_token, key)?;
-            let text = consume_paste(&endpoint, &access_token, &fragment_secret).await?;
+            let (access_token, paste_key) = parse_paste_reference(&link_or_token, key)?;
+            let password = if paste_key.password_required {
+                Some(resolve_paste_password()?)
+            } else {
+                None
+            };
+            let text =
+                consume_paste(&endpoint, &access_token, &paste_key, password.as_deref()).await?;
             print!("{text}");
             Ok(())
         }
@@ -75,22 +91,88 @@ fn read_stdin() -> Result<String> {
     Ok(input)
 }
 
-async fn create_paste(endpoint: &str, paste_origin: &str, text: &str) -> Result<String> {
+fn resolve_new_paste_password() -> Result<String> {
+    match paste_password_from_env()? {
+        Some(password) => Ok(password),
+        None => prompt_new_paste_password(),
+    }
+}
+
+fn resolve_paste_password() -> Result<String> {
+    match paste_password_from_env()? {
+        Some(password) => Ok(password),
+        None => prompt_paste_password(),
+    }
+}
+
+fn paste_password_from_env() -> Result<Option<String>> {
+    match std::env::var(PASTE_PASSWORD_ENV) {
+        Ok(password) => {
+            validate_password(&password)?;
+            Ok(Some(password))
+        }
+        Err(std::env::VarError::NotPresent) => Ok(None),
+        Err(error) => Err(Error::InvalidInput(format!(
+            "{PASTE_PASSWORD_ENV} is not valid Unicode: {error}"
+        ))),
+    }
+}
+
+fn prompt_new_paste_password() -> Result<String> {
+    let password = Password::new()
+        .with_prompt("Paste password")
+        .with_confirmation("Confirm paste password", "Passwords do not match")
+        .interact()
+        .map_err(dialoguer_error)?;
+    validate_password(&password)?;
+    Ok(password)
+}
+
+fn prompt_paste_password() -> Result<String> {
+    let password = Password::new()
+        .with_prompt("Paste password")
+        .interact()
+        .map_err(dialoguer_error)?;
+    validate_password(&password)?;
+    Ok(password)
+}
+
+fn dialoguer_error(error: dialoguer::Error) -> Error {
+    match error {
+        dialoguer::Error::IO(source) => Error::Io(source),
+    }
+}
+
+fn validate_password(password: &str) -> Result<()> {
+    if password.is_empty() {
+        Err(Error::InvalidInput("Paste password is empty".to_string()))
+    } else {
+        Ok(())
+    }
+}
+
+async fn create_paste(
+    endpoint: &str,
+    paste_origin: &str,
+    text: &str,
+    password: Option<&str>,
+) -> Result<String> {
     let client = paste_http_client()?;
-    let (fragment_secret, payload) = encrypt_paste_for_create(text)?;
+    let (paste_key, payload) = encrypt_paste_for_create(text, password)?;
     let response: CreatePasteResponse =
         post_json(&client, endpoint, "/paste/create", &payload, None, None).await?;
     Ok(build_paste_link(
         paste_origin,
         &response.access_token,
-        &fragment_secret,
+        &paste_key.link_fragment(),
     ))
 }
 
 async fn consume_paste(
     endpoint: &str,
     access_token: &str,
-    fragment_secret: &str,
+    paste_key: &PasteKey,
+    password: Option<&str>,
 ) -> Result<String> {
     let client = paste_http_client()?;
     let request = PasteTokenRequest {
@@ -107,7 +189,7 @@ async fn consume_paste(
     )
     .await?;
 
-    decrypt_consumed_paste(fragment_secret, &payload)
+    decrypt_consumed_paste(paste_key, password, &payload)
 }
 
 fn paste_http_client() -> Result<Client> {
@@ -202,20 +284,30 @@ fn build_paste_link(paste_origin: &str, access_token: &str, fragment_secret: &st
     )
 }
 
-fn encrypt_paste_for_create(text: &str) -> Result<(String, PastePayload)> {
+fn encrypt_paste_for_create(
+    text: &str,
+    password: Option<&str>,
+) -> Result<(PasteKey, PastePayload)> {
     let paste_key = keys::generate_key();
     let fragment_secret = create_fragment_secret();
+    let paste_key_reference = PasteKey {
+        fragment_secret,
+        password_required: password.is_some(),
+    };
     let encrypted = blob::encrypt_json(
         &PasteText {
             text: text.to_string(),
         },
         &paste_key,
     )?;
-    let key_encryption_key = argon::derive_interactive_key(&fragment_secret)?;
+    let key_encryption_key = derive_paste_key_encryption_key(
+        &paste_key_reference.kdf_secret(password)?,
+        paste_key_reference.password_required,
+    )?;
     let encrypted_paste_key = secretbox::encrypt_with_key(&paste_key, &key_encryption_key.key)?;
 
     Ok((
-        fragment_secret,
+        paste_key_reference,
         PastePayload {
             encrypted_data: crypto::encode_b64(&encrypted.encrypted_data),
             decryption_header: crypto::encode_b64(&encrypted.decryption_header),
@@ -228,10 +320,33 @@ fn encrypt_paste_for_create(text: &str) -> Result<(String, PastePayload)> {
     ))
 }
 
-fn decrypt_consumed_paste(fragment_secret: &str, payload: &PastePayload) -> Result<String> {
+fn derive_paste_key_encryption_key(
+    kdf_secret: &str,
+    password_required: bool,
+) -> Result<argon::DerivedKeyResult> {
+    if !password_required {
+        return Ok(argon::derive_interactive_key(kdf_secret)?);
+    }
+
+    let salt = keys::generate_salt();
+    let key = argon::derive_moderate_key(kdf_secret, &salt)?;
+    Ok(argon::DerivedKeyResult {
+        key: crypto::SecretVec::new(key),
+        salt,
+        mem_limit: argon::MEMLIMIT_MODERATE,
+        ops_limit: argon::OPSLIMIT_MODERATE,
+    })
+}
+
+fn decrypt_consumed_paste(
+    paste_key: &PasteKey,
+    password: Option<&str>,
+    payload: &PastePayload,
+) -> Result<String> {
     let salt = BASE64.decode(&payload.kdf_nonce)?;
+    let kdf_secret = paste_key.kdf_secret(password)?;
     let key_encryption_key = argon::derive_key(
-        fragment_secret,
+        &kdf_secret,
         &salt,
         payload.kdf_mem_limit,
         payload.kdf_ops_limit,
@@ -276,7 +391,7 @@ fn create_fragment_secret() -> String {
     secret
 }
 
-fn parse_paste_reference(input: &str, key: Option<String>) -> Result<(String, String)> {
+fn parse_paste_reference(input: &str, key: Option<String>) -> Result<(String, PasteKey)> {
     let input = input.trim();
     if input.is_empty() {
         return Err(Error::InvalidInput(
@@ -306,23 +421,22 @@ fn parse_paste_reference(input: &str, key: Option<String>) -> Result<(String, St
         ));
     }
 
-    let fragment_secret = match (embedded_secret, key) {
+    let paste_key = match (embedded_secret, key) {
         (Some(embedded), Some(key)) if embedded != key => {
             return Err(Error::InvalidInput(
                 "Paste URL fragment and --key do not match".to_string(),
             ));
         }
-        (Some(embedded), _) => embedded,
-        (None, Some(key)) => key,
+        (Some(embedded), _) => PasteKey::parse(&embedded)?,
+        (None, Some(key)) => PasteKey::parse(&key)?,
         (None, None) => {
             return Err(Error::InvalidInput(
                 "Paste key missing. Pass a full paste URL or --key".to_string(),
             ));
         }
     };
-    validate_fragment_secret(&fragment_secret)?;
 
-    Ok((access_token, fragment_secret))
+    Ok((access_token, paste_key))
 }
 
 fn validate_fragment_secret(fragment_secret: &str) -> Result<()> {
@@ -335,6 +449,49 @@ fn validate_fragment_secret(fragment_secret: &str) -> Result<()> {
     }
 
     Err(Error::InvalidInput("Invalid paste key".to_string()))
+}
+
+#[derive(Debug, Eq, PartialEq)]
+struct PasteKey {
+    fragment_secret: String,
+    password_required: bool,
+}
+
+impl PasteKey {
+    fn parse(raw: &str) -> Result<Self> {
+        let (password_required, fragment_secret) = match raw.strip_prefix(PASSWORD_FRAGMENT_PREFIX)
+        {
+            Some(fragment_secret) => (true, fragment_secret),
+            None => (false, raw),
+        };
+        validate_fragment_secret(fragment_secret)?;
+        Ok(Self {
+            fragment_secret: fragment_secret.to_string(),
+            password_required,
+        })
+    }
+
+    fn link_fragment(&self) -> String {
+        if self.password_required {
+            format!("{PASSWORD_FRAGMENT_PREFIX}{}", self.fragment_secret)
+        } else {
+            self.fragment_secret.clone()
+        }
+    }
+
+    fn kdf_secret(&self, password: Option<&str>) -> Result<String> {
+        if self.password_required {
+            let password = password
+                .ok_or_else(|| Error::InvalidInput("Paste password is required".to_string()))?;
+            validate_password(password)?;
+            Ok(format!(
+                "{PASSWORD_KDF_CONTEXT}\n{}\n{password}",
+                self.fragment_secret
+            ))
+        } else {
+            Ok(self.fragment_secret.clone())
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -381,28 +538,102 @@ mod tests {
     fn encrypt_then_decrypt_paste_payload() {
         crypto::init().unwrap();
 
-        let (fragment_secret, payload) = encrypt_paste_for_create("hello paste").unwrap();
-        let text = decrypt_consumed_paste(&fragment_secret, &payload).unwrap();
+        let (paste_key, payload) = encrypt_paste_for_create("hello paste", None).unwrap();
+        let text = decrypt_consumed_paste(&paste_key, None, &payload).unwrap();
 
         assert_eq!(text, "hello paste");
+        assert_eq!(payload.kdf_mem_limit, argon::MEMLIMIT_INTERACTIVE);
+        assert_eq!(payload.kdf_ops_limit, argon::OPSLIMIT_INTERACTIVE);
+    }
+
+    #[test]
+    fn encrypt_then_decrypt_password_protected_paste_payload() {
+        crypto::init().unwrap();
+
+        let (paste_key, payload) =
+            encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
+        let text = decrypt_consumed_paste(&paste_key, Some("correct horse"), &payload).unwrap();
+
+        assert_eq!(text, "protected paste");
+        assert!(paste_key.password_required);
+        assert!(
+            paste_key
+                .link_fragment()
+                .starts_with(PASSWORD_FRAGMENT_PREFIX)
+        );
+        assert_eq!(payload.kdf_mem_limit, argon::MEMLIMIT_MODERATE);
+        assert_eq!(payload.kdf_ops_limit, argon::OPSLIMIT_MODERATE);
+    }
+
+    #[test]
+    fn reject_wrong_paste_password() {
+        crypto::init().unwrap();
+
+        let (paste_key, payload) =
+            encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
+        let error = decrypt_consumed_paste(&paste_key, Some("wrong horse"), &payload).unwrap_err();
+
+        assert!(matches!(error, Error::Crypto(_)));
     }
 
     #[test]
     fn parse_full_paste_link() {
-        let (token, secret) =
+        let (token, paste_key) =
             parse_paste_reference("https://paste.ente.com/ABC123#AbCd1234EfGh", None).unwrap();
 
         assert_eq!(token, "ABC123");
-        assert_eq!(secret, "AbCd1234EfGh");
+        assert_eq!(
+            paste_key,
+            PasteKey {
+                fragment_secret: "AbCd1234EfGh".to_string(),
+                password_required: false,
+            }
+        );
+    }
+
+    #[test]
+    fn parse_password_protected_paste_link() {
+        let (token, paste_key) =
+            parse_paste_reference("https://paste.ente.com/ABC123#p:AbCd1234EfGh", None).unwrap();
+
+        assert_eq!(token, "ABC123");
+        assert_eq!(
+            paste_key,
+            PasteKey {
+                fragment_secret: "AbCd1234EfGh".to_string(),
+                password_required: true,
+            }
+        );
     }
 
     #[test]
     fn parse_token_with_key() {
-        let (token, secret) =
+        let (token, paste_key) =
             parse_paste_reference("ABC123", Some("AbCd1234EfGh".to_string())).unwrap();
 
         assert_eq!(token, "ABC123");
-        assert_eq!(secret, "AbCd1234EfGh");
+        assert_eq!(
+            paste_key,
+            PasteKey {
+                fragment_secret: "AbCd1234EfGh".to_string(),
+                password_required: false,
+            }
+        );
+    }
+
+    #[test]
+    fn parse_token_with_password_key() {
+        let (token, paste_key) =
+            parse_paste_reference("ABC123", Some("p:AbCd1234EfGh".to_string())).unwrap();
+
+        assert_eq!(token, "ABC123");
+        assert_eq!(
+            paste_key,
+            PasteKey {
+                fragment_secret: "AbCd1234EfGh".to_string(),
+                password_required: true,
+            }
+        );
     }
 
     #[test]
@@ -421,8 +652,8 @@ mod tests {
         crypto::init().unwrap();
 
         let access_token = "ABC123";
-        let fragment_secret = "AbCd1234EfGh";
-        let payload = test_payload("guarded paste", fragment_secret);
+        let paste_key = PasteKey::parse("AbCd1234EfGh").unwrap();
+        let payload = test_payload("guarded paste", &paste_key, None);
         let mut server = Server::new_async().await;
 
         let guard = server
@@ -448,7 +679,7 @@ mod tests {
             .create_async()
             .await;
 
-        let text = consume_paste(&server.url(), access_token, fragment_secret)
+        let text = consume_paste(&server.url(), access_token, &paste_key, None)
             .await
             .unwrap();
 
@@ -457,7 +688,7 @@ mod tests {
         consume.assert_async().await;
     }
 
-    fn test_payload(text: &str, fragment_secret: &str) -> PastePayload {
+    fn test_payload(text: &str, key_reference: &PasteKey, password: Option<&str>) -> PastePayload {
         let paste_key = [7u8; secretbox::KEY_BYTES];
         let encrypted = blob::encrypt_json(
             &PasteText {
@@ -467,13 +698,10 @@ mod tests {
         )
         .unwrap();
         let salt = [9u8; argon::SALT_BYTES];
-        let key_encryption_key = argon::derive_key(
-            fragment_secret,
-            &salt,
-            argon::MEMLIMIT_MIN,
-            argon::OPSLIMIT_MIN,
-        )
-        .unwrap();
+        let kdf_secret = key_reference.kdf_secret(password).unwrap();
+        let key_encryption_key =
+            argon::derive_key(&kdf_secret, &salt, argon::MEMLIMIT_MIN, argon::OPSLIMIT_MIN)
+                .unwrap();
         let encrypted_paste_key =
             secretbox::encrypt_with_key(&paste_key, &key_encryption_key).unwrap();
 
