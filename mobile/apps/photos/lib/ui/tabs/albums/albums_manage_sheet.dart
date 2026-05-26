@@ -23,7 +23,7 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
     builder: (sheetContext) {
       final colors = sheetContext.componentColors;
       return BottomSheetComponent(
-        title: strings.manage,
+        title: strings.more,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
