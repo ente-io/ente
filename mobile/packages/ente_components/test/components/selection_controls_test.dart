@@ -305,6 +305,43 @@ void main() {
     );
   });
 
+  testWidgets("FilterChipComponent keeps avatar fixed by default", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const FilterChipComponent(
+          avatar: ColoredBox(key: ValueKey("avatar"), color: Colors.purple),
+          state: FilterChipComponentState.unselected,
+        ),
+        textScaler: const TextScaler.linear(2),
+      ),
+    );
+
+    expect(
+      tester.getSize(find.byKey(const ValueKey("avatar"))),
+      const Size.square(32),
+    );
+  });
+
+  testWidgets("FilterChipComponent scales avatar when enabled", (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const FilterChipComponent(
+          avatar: ColoredBox(key: ValueKey("avatar"), color: Colors.purple),
+          state: FilterChipComponentState.unselected,
+          scaleAvatarWithText: true,
+        ),
+        textScaler: const TextScaler.linear(2),
+      ),
+    );
+
+    expect(
+      tester.getSize(find.byKey(const ValueKey("avatar"))),
+      const Size.square(48),
+    );
+  });
+
   testWidgets("FilterChipComponent clips avatar content", (tester) async {
     await tester.pumpWidget(
       _wrap(

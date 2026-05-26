@@ -11,15 +11,10 @@ import "package:photos/utils/hierarchical_search_util.dart";
 class AppBarFilterChips extends StatefulWidget {
   const AppBarFilterChips({super.key});
 
-  static const minChipHeight = 40.0;
   static const bottomPadding = 8.0;
-  static const _textVerticalPadding = 24.0;
-  static const _labelLineHeight = 16.0;
 
   static double chipHeight(BuildContext context) {
-    final textHeight = MediaQuery.textScalerOf(context).scale(_labelLineHeight);
-    final scaledChipHeight = _textVerticalPadding + textHeight;
-    return scaledChipHeight > minChipHeight ? scaledChipHeight : minChipHeight;
+    return FilterChipComponent.heightForTextScale(context);
   }
 
   static double preferredHeight(BuildContext context) {

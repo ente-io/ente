@@ -21,19 +21,26 @@ class OnlyThemFilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return FilterChipComponent(
       label: AppLocalizations.of(context).onlyThem,
-      avatar: _OnlyThemFilterThumbnail(faceFilters: faceFilters),
+      avatar: _OnlyThemFilterThumbnail(
+        faceFilters: faceFilters,
+        size: FilterChipComponent.avatarSizeForTextScale(context),
+      ),
       state: isApplied
           ? FilterChipComponentState.selected
           : FilterChipComponentState.unselected,
       onChanged: (_) => isApplied ? remove() : apply(),
+      scaleAvatarWithText: true,
     );
   }
 }
 
 class _OnlyThemFilterThumbnail extends StatelessWidget {
   final List<FaceFilter> faceFilters;
-  const _OnlyThemFilterThumbnail({required this.faceFilters})
-    : assert(faceFilters.length > 0 && faceFilters.length <= 4);
+  final double size;
+  const _OnlyThemFilterThumbnail({
+    required this.faceFilters,
+    required this.size,
+  }) : assert(faceFilters.length > 0 && faceFilters.length <= 4);
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +48,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
     if (numberOfFaces == 1) {
       return ClipOval(
         child: SizedBox(
-          width: _thumbnailSize,
-          height: _thumbnailSize,
+          width: size,
+          height: size,
           child: PersonFaceWidget(
             personId: faceFilters.first.personId,
             clusterID: faceFilters.first.clusterId,
@@ -55,8 +62,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              width: _thumbnailSize / 2,
-              height: _thumbnailSize,
+              width: size / 2 - 0.5,
+              height: size,
               child: PersonFaceWidget(
                 personId: faceFilters.first.personId,
                 clusterID: faceFilters.first.clusterId,
@@ -65,8 +72,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
             ),
             const SizedBox(width: 1),
             SizedBox(
-              width: _thumbnailSize / 2,
-              height: _thumbnailSize,
+              width: size / 2 - 0.5,
+              height: size,
               child: PersonFaceWidget(
                 personId: faceFilters.last.personId,
                 clusterID: faceFilters.last.clusterId,
@@ -82,8 +89,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: _thumbnailSize,
-              width: _thumbnailSize / 2 - 0.5,
+              height: size,
+              width: size / 2 - 0.5,
               child: PersonFaceWidget(
                 personId: faceFilters[0].personId,
                 clusterID: faceFilters[0].clusterId,
@@ -95,8 +102,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  width: _thumbnailSize / 2 - 0.5,
-                  height: _thumbnailSize / 2 - 0.5,
+                  width: size / 2 - 0.5,
+                  height: size / 2 - 0.5,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(1),
@@ -110,8 +117,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                 ),
                 const SizedBox(height: 1),
                 SizedBox(
-                  width: _thumbnailSize / 2 - 0.5,
-                  height: _thumbnailSize / 2 - 0.5,
+                  width: size / 2 - 0.5,
+                  height: size / 2 - 0.5,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(1),
@@ -137,8 +144,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  width: _thumbnailSize / 2 - 0.5,
-                  height: _thumbnailSize / 2 - 0.5,
+                  width: size / 2 - 0.5,
+                  height: size / 2 - 0.5,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       bottomRight: Radius.circular(1),
@@ -152,8 +159,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                 ),
                 const SizedBox(width: 1),
                 SizedBox(
-                  width: _thumbnailSize / 2 - 0.5,
-                  height: _thumbnailSize / 2 - 0.5,
+                  width: size / 2 - 0.5,
+                  height: size / 2 - 0.5,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(1),
@@ -172,8 +179,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  width: _thumbnailSize / 2 - 0.5,
-                  height: _thumbnailSize / 2 - 0.5,
+                  width: size / 2 - 0.5,
+                  height: size / 2 - 0.5,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(1),
@@ -187,8 +194,8 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                 ),
                 const SizedBox(width: 1),
                 SizedBox(
-                  width: _thumbnailSize / 2 - 0.5,
-                  height: _thumbnailSize / 2 - 0.5,
+                  width: size / 2 - 0.5,
+                  height: size / 2 - 0.5,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(1),
@@ -208,5 +215,3 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
     }
   }
 }
-
-const _thumbnailSize = 32.0;

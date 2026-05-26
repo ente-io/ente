@@ -30,6 +30,7 @@ class FaceFilterChip extends StatelessWidget {
           ? FilterChipComponentState.selected
           : FilterChipComponentState.unselected,
       onChanged: (_) => isApplied ? remove() : apply(),
+      scaleAvatarWithText: true,
     );
   }
 }
