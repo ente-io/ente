@@ -1,7 +1,7 @@
 name: "Release (server)"
 
 on:
-    workflow_dispatch: # Run manually
+    workflow_dispatch:
 
 permissions:
     contents: read
@@ -11,7 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         environment: production
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
 
             - name: Log in to Docker registry

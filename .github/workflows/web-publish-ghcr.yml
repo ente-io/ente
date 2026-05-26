@@ -15,7 +15,7 @@ jobs:
     publish:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
 
             - name: Log in to GHCR
