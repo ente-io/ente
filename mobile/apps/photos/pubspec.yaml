@@ -49,7 +49,7 @@ dependencies:
   defer_pointer: 0.0.2
   device_info_plus: 11.3.0
   dio: 5.9.2
-  dio_http2_adapter: 2.7.0
+  dio_http2_adapter: 2.7.1
   dots_indicator: 4.0.1
   dotted_border: 2.1.0
   dropdown_button2: 2.3.9
