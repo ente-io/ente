@@ -24,10 +24,13 @@ const Page = () => {
         createSecureLink,
     } = useCreatePaste();
 
-    const { consuming, consumeError, resolvedText } = useConsumePaste(
-        mode,
-        accessToken,
-    );
+    const {
+        consuming,
+        consumeError,
+        resolvedText,
+        passwordRequired,
+        submitPassword,
+    } = useConsumePaste(mode, accessToken);
 
     return (
         <>
@@ -84,6 +87,8 @@ const Page = () => {
                             consuming={consuming}
                             consumeError={consumeError}
                             resolvedText={resolvedText}
+                            passwordRequired={passwordRequired}
+                            onSubmitPassword={submitPassword}
                             onCopyText={copyTextToClipboard}
                         />
                     )}

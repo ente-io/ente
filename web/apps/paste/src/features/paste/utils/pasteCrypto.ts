@@ -9,7 +9,17 @@ import {
 } from "ente-base/crypto";
 import { newID } from "ente-base/id";
 import type { PastePayload } from "services/paste";
-import { FRAGMENT_SECRET_LENGTH, FRAGMENT_SECRET_PATTERN } from "../constants";
+import {
+    FRAGMENT_SECRET_LENGTH,
+    FRAGMENT_SECRET_PATTERN,
+    PASSWORD_FRAGMENT_PREFIX,
+    PASSWORD_KDF_CONTEXT,
+} from "../constants";
+
+export interface PasteKey {
+    fragmentSecret: string;
+    passwordRequired: boolean;
+}
 
 export const createFragmentSecret = () =>
     newID("").slice(0, FRAGMENT_SECRET_LENGTH);
@@ -36,16 +46,36 @@ export const encryptPasteForCreate = async (text: string) => {
     };
 };
 
-const resolvePasteKey = async (
-    fragmentSecret: string,
-    payload: PastePayload,
-) => {
+export const parsePasteKey = (fragment: string): PasteKey => {
+    const passwordRequired = fragment.startsWith(PASSWORD_FRAGMENT_PREFIX);
+    const fragmentSecret = passwordRequired
+        ? fragment.slice(PASSWORD_FRAGMENT_PREFIX.length)
+        : fragment;
+
     if (!FRAGMENT_SECRET_PATTERN.test(fragmentSecret)) {
         throw new Error("Invalid key in URL");
     }
 
+    return { fragmentSecret, passwordRequired };
+};
+
+const pasteKeyKdfSecret = (pasteKey: PasteKey, password?: string) => {
+    if (!pasteKey.passwordRequired) {
+        return pasteKey.fragmentSecret;
+    }
+    if (!password) {
+        throw new Error("Password required");
+    }
+    return `${PASSWORD_KDF_CONTEXT}\n${pasteKey.fragmentSecret}\n${password}`;
+};
+
+const resolvePasteKey = async (
+    pasteKey: PasteKey,
+    payload: PastePayload,
+    password?: string,
+) => {
     const keyEncryptionKey = await deriveKey(
-        fragmentSecret,
+        pasteKeyKdfSecret(pasteKey, password),
         payload.kdfNonce,
         payload.kdfOpsLimit,
         payload.kdfMemLimit,
@@ -61,10 +91,11 @@ const resolvePasteKey = async (
 };
 
 export const decryptConsumedPaste = async (
-    fragmentSecret: string,
+    pasteKey: PasteKey,
     payload: PastePayload,
+    password?: string,
 ) => {
-    const key = await resolvePasteKey(fragmentSecret, payload);
+    const key = await resolvePasteKey(pasteKey, payload, password);
     const decrypted = (await decryptMetadataJSON(
         {
             encryptedData: payload.encryptedData,
