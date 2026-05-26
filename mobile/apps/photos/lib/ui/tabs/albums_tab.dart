@@ -342,9 +342,13 @@ class _AlbumsTabState extends State<AlbumsTab>
         switchInCurve: Curves.easeOutCubic,
         switchOutCurve: Curves.easeInCubic,
         child: _shouldShowDeleteEmptyAlbums.value
-            ? DeleteEmptyAlbums(
+            ? Padding(
                 key: const ValueKey("delete_empty_albums_action"),
-                onDeleted: () => _loadEnteCollections(),
+                padding: const EdgeInsets.only(top: 8),
+                child: DeleteEmptyAlbums(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  onDeleted: () => _loadEnteCollections(),
+                ),
               )
             : const SizedBox.shrink(
                 key: ValueKey("delete_empty_albums_hidden"),

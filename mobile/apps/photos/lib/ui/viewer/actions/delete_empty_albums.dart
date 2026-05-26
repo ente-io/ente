@@ -10,8 +10,13 @@ import 'package:photos/services/collections_service.dart';
 
 class DeleteEmptyAlbums extends StatefulWidget {
   final Future<void> Function()? onDeleted;
+  final EdgeInsetsGeometry padding;
 
-  const DeleteEmptyAlbums({super.key, this.onDeleted});
+  const DeleteEmptyAlbums({
+    super.key,
+    this.onDeleted,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  });
 
   @override
   State<DeleteEmptyAlbums> createState() => _DeleteEmptyAlbumsState();
@@ -36,13 +41,13 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: widget.padding,
           child: Text(
             AppLocalizations.of(context).deleteEmptyAlbums,
             style: TextStyles.body.copyWith(
-              color: colors.textBase,
+              color: colors.textLight,
               decoration: TextDecoration.underline,
-              decorationColor: colors.textBase,
+              decorationColor: colors.textLight,
             ),
           ),
         ),
