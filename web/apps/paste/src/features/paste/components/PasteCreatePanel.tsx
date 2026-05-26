@@ -1,15 +1,26 @@
 import { Navigation06Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import {
     Box,
+    Button,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     IconButton,
+    Stack,
     TextField,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { MAX_PASTE_CHARS } from "../constants";
 import { PasteLinkCard } from "./PasteLinkCard";
 import { pasteTextFieldSx } from "./textFieldSx";
@@ -20,7 +31,7 @@ interface PasteCreatePanelProps {
     createError: string | null;
     createdLink: string | null;
     onInputChange: (value: string) => void;
-    onCreate: () => Promise<void>;
+    onCreate: (password?: string) => Promise<void>;
     onCopyLink: (value: string) => Promise<void>;
     onShareLink: (url: string) => Promise<void>;
 }
@@ -38,16 +49,56 @@ export const PasteCreatePanel = ({
     const isMobile = useMediaQuery("(max-width:599.95px)", { noSsr: true });
     const { resolvedMode } = usePasteColorMode();
     const tokens = getPasteThemeTokens(resolvedMode);
+    const [passwordProtected, setPasswordProtected] = useState(false);
+    const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordError, setPasswordError] = useState<string | null>(null);
     const isInputEmpty = inputText.trim().length === 0;
     const nearLimitThreshold = Math.floor(MAX_PASTE_CHARS * 0.9);
     const isNearCharLimit = inputText.length >= nearLimitThreshold;
     const isCreateDisabled = isInputEmpty;
+    const passwordTooltip = passwordProtected
+        ? "Password protection enabled"
+        : "Password protect";
     const privacyPills = [
         "Private",
         isMobile ? "E2EE" : "End-to-end encrypted",
         "One-time view",
         "Auto-deletes after 24 hours",
     ];
+    const passwordFieldSx = {
+        "& .MuiInputLabel-root": { color: tokens.text.muted },
+        "& .MuiOutlinedInput-root": {
+            color: tokens.text.primary,
+            "& fieldset": { borderColor: tokens.surface.dialogBorder },
+            "&:hover fieldset": { borderColor: tokens.button.ghostHoverBorder },
+            "&.Mui-focused fieldset": { borderColor: tokens.button.primaryBg },
+        },
+    };
+
+    const resetPasswordDialog = () => {
+        setPassword("");
+        setConfirmPassword("");
+        setPasswordError(null);
+    };
+
+    const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!password) {
+            setPasswordError("Enter a password");
+            return;
+        }
+        if (password !== confirmPassword) {
+            setPasswordError("Passwords do not match");
+            return;
+        }
+
+        const submittedPassword = password;
+        setPasswordDialogOpen(false);
+        resetPasswordDialog();
+        void onCreate(submittedPassword);
+    };
 
     return (
         <Box sx={{ width: "100%", maxWidth: "100%", minWidth: 0 }}>
@@ -126,41 +177,89 @@ export const PasteCreatePanel = ({
                         pointerEvents: "none",
                     }}
                 >
-                    <Typography
-                        variant="mini"
+                    <Box
                         sx={{
                             display: "flex",
                             alignItems: "center",
+                            gap: 0.7,
                             height: { xs: 32, sm: 36 },
-                            color: tokens.text.counter,
-                            fontWeight: 600,
-                            lineHeight: 1,
-                            letterSpacing: "0.01em",
+                            pointerEvents: "auto",
                         }}
                     >
-                        <Box
-                            component="span"
+                        <Typography
+                            variant="mini"
                             sx={{
-                                color: isNearCharLimit
-                                    ? tokens.text.counterHighlight
-                                    : tokens.text.counter,
+                                display: "flex",
+                                alignItems: "center",
+                                color: tokens.text.counter,
+                                fontWeight: 600,
+                                lineHeight: 1,
+                                letterSpacing: "0.01em",
                             }}
                         >
-                            {inputText.length}
-                        </Box>
-                        <Box
-                            component="span"
-                            sx={{ color: tokens.text.counter }}
-                        >
-                            /{MAX_PASTE_CHARS}
-                        </Box>
-                    </Typography>
+                            <Box
+                                component="span"
+                                sx={{
+                                    color: isNearCharLimit
+                                        ? tokens.text.counterHighlight
+                                        : tokens.text.counter,
+                                }}
+                            >
+                                {inputText.length}
+                            </Box>
+                            <Box
+                                component="span"
+                                sx={{ color: tokens.text.counter }}
+                            >
+                                /{MAX_PASTE_CHARS}
+                            </Box>
+                        </Typography>
+                        <Tooltip title={passwordTooltip} arrow>
+                            <IconButton
+                                aria-label={
+                                    passwordProtected
+                                        ? "Disable password protection"
+                                        : "Enable password protection"
+                                }
+                                aria-pressed={passwordProtected}
+                                onClick={() => {
+                                    if (creating) return;
+                                    setPasswordProtected((enabled) => !enabled);
+                                }}
+                                sx={{
+                                    width: { xs: 30, sm: 32 },
+                                    height: { xs: 30, sm: 32 },
+                                    color: passwordProtected
+                                        ? tokens.button.primaryBg
+                                        : tokens.text.counter,
+                                    bgcolor: passwordProtected
+                                        ? tokens.surface.chipBg
+                                        : "transparent",
+                                    "&:hover": {
+                                        bgcolor: tokens.surface.chipBg,
+                                    },
+                                }}
+                            >
+                                {passwordProtected ? (
+                                    <LockRoundedIcon sx={{ fontSize: 17 }} />
+                                ) : (
+                                    <LockOpenRoundedIcon
+                                        sx={{ fontSize: 17 }}
+                                    />
+                                )}
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
                     <IconButton
                         aria-label="Create secure link"
                         aria-busy={creating}
                         onClick={() => {
                             if (creating || isCreateDisabled) return;
-                            void onCreate();
+                            if (passwordProtected) {
+                                setPasswordDialogOpen(true);
+                            } else {
+                                void onCreate();
+                            }
                         }}
                         disabled={isCreateDisabled}
                         sx={{
@@ -295,6 +394,107 @@ export const PasteCreatePanel = ({
                     />
                 </Box>
             )}
+
+            <Dialog
+                open={passwordDialogOpen}
+                onClose={() => {
+                    setPasswordDialogOpen(false);
+                    resetPasswordDialog();
+                }}
+                fullWidth
+                maxWidth="xs"
+                slotProps={{
+                    backdrop: {
+                        sx: { bgcolor: tokens.surface.dialogBackdrop },
+                    },
+                    paper: {
+                        component: "form",
+                        onSubmit: handlePasswordSubmit,
+                        sx: {
+                            borderRadius: "16px",
+                            border: `1px solid ${tokens.surface.dialogBorder}`,
+                            bgcolor: tokens.surface.dialogBg,
+                            color: tokens.text.primary,
+                            boxShadow: tokens.surface.floatingCardShadow,
+                            backdropFilter: "blur(12px) saturate(112%)",
+                            WebkitBackdropFilter: "blur(12px) saturate(112%)",
+                        },
+                    },
+                }}
+            >
+                <DialogTitle sx={{ pb: 1, color: tokens.text.primary }}>
+                    Paste password
+                </DialogTitle>
+                <DialogContent>
+                    <Stack spacing={1.5} sx={{ pt: 1 }}>
+                        <TextField
+                            autoFocus
+                            type="password"
+                            label="Password"
+                            value={password}
+                            autoComplete="off"
+                            sx={passwordFieldSx}
+                            onChange={(event) => {
+                                setPassword(event.target.value);
+                                setPasswordError(null);
+                            }}
+                        />
+                        <TextField
+                            type="password"
+                            label="Confirm password"
+                            value={confirmPassword}
+                            autoComplete="off"
+                            error={!!passwordError}
+                            helperText={passwordError ?? " "}
+                            sx={[
+                                passwordFieldSx,
+                                {
+                                    "& .MuiFormHelperText-root": {
+                                        minHeight: "1.25em",
+                                    },
+                                },
+                            ]}
+                            onChange={(event) => {
+                                setConfirmPassword(event.target.value);
+                                setPasswordError(null);
+                            }}
+                        />
+                    </Stack>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2.5 }}>
+                    <Button
+                        variant="outlined"
+                        sx={{
+                            borderColor: tokens.button.ghostBorder,
+                            color: tokens.button.ghostText,
+                            "&:hover": {
+                                borderColor: tokens.button.ghostHoverBorder,
+                                bgcolor: tokens.button.ghostHoverBg,
+                            },
+                        }}
+                        onClick={() => {
+                            setPasswordDialogOpen(false);
+                            resetPasswordDialog();
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disableElevation
+                        sx={{
+                            bgcolor: tokens.button.primaryBg,
+                            color: tokens.button.primaryText,
+                            "&:hover": {
+                                bgcolor: tokens.button.primaryHoverBg,
+                            },
+                        }}
+                    >
+                        Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

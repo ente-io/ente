@@ -12,7 +12,7 @@ export const useCreatePaste = () => {
     const [createError, setCreateError] = useState<string | null>(null);
     const [createdLink, setCreatedLink] = useState<string | null>(null);
 
-    const createSecureLink = async () => {
+    const createSecureLink = async (password?: string) => {
         setCreateError(null);
 
         if (!inputText.trim()) {
@@ -27,12 +27,12 @@ export const useCreatePaste = () => {
 
         setCreating(true);
         try {
-            const { fragmentSecret, payload } =
-                await encryptPasteForCreate(inputText);
-            const response = await createPaste(payload);
-            setCreatedLink(
-                buildPasteLink(response.accessToken, fragmentSecret),
+            const { linkFragment, payload } = await encryptPasteForCreate(
+                inputText,
+                password,
             );
+            const response = await createPaste(payload);
+            setCreatedLink(buildPasteLink(response.accessToken, linkFragment));
         } catch (error) {
             const message =
                 error instanceof Error

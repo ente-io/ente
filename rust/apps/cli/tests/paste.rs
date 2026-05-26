@@ -4,12 +4,15 @@ use reqwest::Url;
 use support::{Cli, Fixture, TestResult};
 use uuid::Uuid;
 
+const PASTE_PASSWORD_ENV: &str = "ENTE_PASTE_PASSWORD";
+
 #[test]
 fn paste() -> TestResult {
     Fixture::run(|fixture| {
         full_link_roundtrip(fixture)?;
         token_and_key_roundtrip(fixture)?;
-        stdin_roundtrip(fixture)
+        stdin_roundtrip(fixture)?;
+        password_protected_roundtrip(fixture)
     })
 }
 
@@ -98,6 +101,42 @@ fn stdin_roundtrip(fixture: &Fixture) -> TestResult {
     Ok(())
 }
 
+fn password_protected_roundtrip(fixture: &Fixture) -> TestResult {
+    let cli = fixture.cli_session("password-protected")?;
+    let text = unique_text("password-protected");
+    let password = format!("password {}", Uuid::new_v4());
+    let env = [(PASTE_PASSWORD_ENV, password.as_str())];
+    let link = cli.run_ok_with_env(
+        &[
+            "paste",
+            "create",
+            "--endpoint",
+            fixture.endpoint(),
+            "--paste-origin",
+            fixture.paste_origin(),
+            "--password",
+            &text,
+        ],
+        &env,
+    )?;
+    let link = PasteLink::parse(link.trim(), fixture.paste_origin());
+    assert!(link.password_required);
+
+    let consumed = cli.run_ok_with_env(
+        &[
+            "paste",
+            "consume",
+            "--endpoint",
+            fixture.endpoint(),
+            &link.raw,
+        ],
+        &env,
+    )?;
+    assert_eq!(consumed, text);
+
+    Ok(())
+}
+
 fn create_paste(cli: &Cli, fixture: &Fixture, text: &str) -> TestResult<PasteLink> {
     let link = cli.run_ok(&[
         "paste",
@@ -119,6 +158,7 @@ struct PasteLink {
     raw: String,
     token: String,
     key: String,
+    password_required: bool,
 }
 
 impl PasteLink {
@@ -140,13 +180,20 @@ impl PasteLink {
             .fragment()
             .expect("paste link should include a decryption key fragment")
             .to_string();
+        let (password_required, fragment_secret) = match key.strip_prefix("p:") {
+            Some(fragment_secret) => (true, fragment_secret),
+            None => (false, key.as_str()),
+        };
 
         assert_eq!(
             actual_origin, expected_origin,
             "paste link used unexpected origin: {raw}",
         );
         assert!(
-            key.len() == 12 && key.bytes().all(|byte| byte.is_ascii_alphanumeric()),
+            fragment_secret.len() == 12
+                && fragment_secret
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric()),
             "paste link key has unexpected format: {key}",
         );
         assert!(!token.is_empty(), "paste link token is empty: {raw}");
@@ -155,6 +202,7 @@ impl PasteLink {
             raw: raw.to_string(),
             token,
             key,
+            password_required,
         }
     }
 }

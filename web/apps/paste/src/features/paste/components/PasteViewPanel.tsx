@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
+import type { FormEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { pasteTextFieldSx } from "./textFieldSx";
 
@@ -18,6 +19,8 @@ interface PasteViewPanelProps {
     consuming: boolean;
     consumeError: string | null;
     resolvedText: string | null;
+    passwordRequired: boolean;
+    onSubmitPassword: (password: string) => Promise<void>;
     onCopyText: (value: string) => Promise<void>;
 }
 
@@ -25,11 +28,14 @@ export const PasteViewPanel = ({
     consuming,
     consumeError,
     resolvedText,
+    passwordRequired,
+    onSubmitPassword,
     onCopyText,
 }: PasteViewPanelProps) => {
     const { resolvedMode } = usePasteColorMode();
     const tokens = getPasteThemeTokens(resolvedMode);
     const [copied, setCopied] = useState(false);
+    const [password, setPassword] = useState("");
     const copiedTimerRef = useRef<number | null>(null);
 
     useEffect(() => {
@@ -40,8 +46,107 @@ export const PasteViewPanel = ({
         };
     }, []);
 
+    const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!password) {
+            return;
+        }
+        void onSubmitPassword(password);
+    };
+
     return (
         <>
+            {passwordRequired &&
+                !consuming &&
+                !consumeError &&
+                !resolvedText && (
+                    <Stack
+                        component="form"
+                        onSubmit={handlePasswordSubmit}
+                        spacing={1.4}
+                        alignItems="center"
+                        sx={{
+                            width: "100%",
+                            pt: { xs: 1.5, md: 2 },
+                            pb: { xs: 0.5, md: 1 },
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                color: tokens.status.loadingTitle,
+                                fontWeight: 600,
+                                fontSize: { xs: "1rem", md: "1.1rem" },
+                                lineHeight: 1.2,
+                                textAlign: "center",
+                            }}
+                        >
+                            Enter paste password
+                        </Typography>
+                        <TextField
+                            variant="filled"
+                            hiddenLabel
+                            fullWidth
+                            type="password"
+                            value={password}
+                            autoFocus
+                            autoComplete="off"
+                            placeholder="Password"
+                            slotProps={{
+                                htmlInput: { "aria-label": "Paste password" },
+                                input: { disableUnderline: true },
+                            }}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
+                            sx={[
+                                pasteTextFieldSx(tokens, "16px"),
+                                {
+                                    maxWidth: 420,
+                                    "& .MuiFilledInput-root": {
+                                        pr: "58px",
+                                        minHeight: 56,
+                                        backdropFilter:
+                                            "blur(9px) saturate(112%)",
+                                        WebkitBackdropFilter:
+                                            "blur(9px) saturate(112%)",
+                                        background:
+                                            tokens.surface.inputGradient,
+                                        boxShadow: tokens.surface.inputShadow,
+                                    },
+                                },
+                            ]}
+                        />
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disableElevation
+                            disabled={!password}
+                            sx={{
+                                px: "30px",
+                                py: "13px",
+                                minHeight: 50,
+                                borderRadius: "10px",
+                                textTransform: "none",
+                                fontWeight: 600,
+                                fontSize: "0.96rem",
+                                lineHeight: 1,
+                                bgcolor: tokens.button.primaryBg,
+                                color: tokens.button.primaryText,
+                                "&:hover": {
+                                    bgcolor: tokens.button.primaryHoverBg,
+                                    boxShadow: "none",
+                                },
+                                "&.Mui-disabled": {
+                                    bgcolor: tokens.button.primaryDisabledBg,
+                                    color: tokens.button.primaryDisabledText,
+                                },
+                            }}
+                        >
+                            Open paste
+                        </Button>
+                    </Stack>
+                )}
+
             {consuming && (
                 <Stack
                     spacing={1.1}

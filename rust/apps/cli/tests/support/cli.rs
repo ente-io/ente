@@ -23,8 +23,18 @@ impl Cli {
         Ok(command(&self.bin, &self.config_dir, args).output()?)
     }
 
+    pub fn run_with_env(&self, args: &[&str], env: &[(&str, &str)]) -> TestResult<Output> {
+        let mut command = command(&self.bin, &self.config_dir, args);
+        command.envs(env.iter().copied());
+        Ok(command.output()?)
+    }
+
     pub fn run_ok(&self, args: &[&str]) -> TestResult<String> {
         output_stdout(args, self.run(args)?)
+    }
+
+    pub fn run_ok_with_env(&self, args: &[&str], env: &[(&str, &str)]) -> TestResult<String> {
+        output_stdout(args, self.run_with_env(args, env)?)
     }
 
     pub fn run_with_stdin(&self, args: &[&str], stdin: &str) -> TestResult<Output> {
