@@ -105,6 +105,7 @@ services:
       # - 3005:3005 # Share
       # - 3006:3006 # Embed
       # - 3008:3008 # Paste
+      # - 3009:3009 # Locker
     # Modify these values to your custom subdomains, if using any
     environment:
       ENTE_API_ORIGIN: http://localhost:8080
