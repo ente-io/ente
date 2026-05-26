@@ -713,7 +713,7 @@ class _AlbumsTabState extends State<AlbumsTab>
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
                   height: _kHeaderToolbarHeight,
                   child: AnimatedSwitcher(
@@ -794,7 +794,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                 child: Text(
                                   strings.albums,
                                   key: const ValueKey("albums_title"),
-                                  style: TextStyles.h1Bold.copyWith(
+                                  style: TextStyles.display1.copyWith(
                                     color: textTheme.h4Bold.color,
                                   ),
                                 ),

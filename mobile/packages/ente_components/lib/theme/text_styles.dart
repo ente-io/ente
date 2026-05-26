@@ -2,11 +2,30 @@ import 'package:flutter/material.dart';
 
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=7672-54672&m=dev
 /// Section: Text styles
-/// Specs: Inter, letter spacing 0; H1 20/28, H2 18/24, body 14/20, mini 12/16, tiny 10/12.
+/// Specs: Inter body scale, Outfit display title scale, letter spacing 0.
+/// Display-1 32/40, Display-2 24/32, Display-3 20/28; H1 20/28, H2 18/24,
+/// body 14/20, mini 12/16, tiny 10/12.
 class TextStyles {
   const TextStyles._();
 
   static const String fontFamily = 'Inter';
+  static const String outfitFontFamily = 'Outfit';
+
+  static const display1 = TextStyle(
+    fontFamily: outfitFontFamily,
+    fontSize: 32,
+    height: 40 / 32,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  );
+
+  static const display2 = TextStyle(
+    fontFamily: outfitFontFamily,
+    fontSize: 24,
+    height: 32 / 24,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  );
 
   static const h1 = TextStyle(
     fontFamily: fontFamily,
@@ -36,6 +55,14 @@ class TextStyles {
     fontFamily: fontFamily,
     fontSize: 16,
     height: 20 / 16,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  );
+
+  static const display3 = TextStyle(
+    fontFamily: outfitFontFamily,
+    fontSize: 20,
+    height: 28 / 20,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
   );
