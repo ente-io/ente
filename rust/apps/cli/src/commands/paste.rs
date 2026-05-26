@@ -300,10 +300,12 @@ fn encrypt_paste_for_create(
         },
         &paste_key,
     )?;
-    let key_encryption_key = derive_paste_key_encryption_key(
-        &paste_key_reference.kdf_secret(password)?,
-        paste_key_reference.password_required,
-    )?;
+    let kdf_secret = paste_key_reference.kdf_secret(password)?;
+    let key_encryption_key = if password.is_some() {
+        argon::derive_moderate_key(&kdf_secret)?
+    } else {
+        argon::derive_interactive_key(&kdf_secret)?
+    };
     let encrypted_paste_key = secretbox::encrypt_with_key(&paste_key, &key_encryption_key.key)?;
 
     Ok((
@@ -318,24 +320,6 @@ fn encrypt_paste_for_create(
             kdf_ops_limit: key_encryption_key.ops_limit,
         },
     ))
-}
-
-fn derive_paste_key_encryption_key(
-    kdf_secret: &str,
-    password_required: bool,
-) -> Result<argon::DerivedKeyResult> {
-    if !password_required {
-        return Ok(argon::derive_interactive_key(kdf_secret)?);
-    }
-
-    let salt = keys::generate_salt();
-    let key = argon::derive_moderate_key(kdf_secret, &salt)?;
-    Ok(argon::DerivedKeyResult {
-        key: crypto::SecretVec::new(key),
-        salt,
-        mem_limit: argon::MEMLIMIT_MODERATE,
-        ops_limit: argon::OPSLIMIT_MODERATE,
-    })
 }
 
 fn decrypt_consumed_paste(

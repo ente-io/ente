@@ -182,7 +182,27 @@ pub fn derive_interactive_key_with_salt(password: &str, salt: &[u8]) -> Result<V
     derive_key(password, salt, MEMLIMIT_INTERACTIVE, OPSLIMIT_INTERACTIVE)
 }
 
-/// Derive a key with moderate parameters (balanced security/performance).
+/// Derive a key with moderate parameters and a generated salt.
+///
+/// Uses OPSLIMIT_MODERATE and MEMLIMIT_MODERATE.
+///
+/// # Arguments
+/// * `password` - Password string.
+///
+/// # Returns
+/// DerivedKeyResult containing the key, salt, and parameters used.
+pub fn derive_moderate_key(password: &str) -> Result<DerivedKeyResult> {
+    let salt = super::keys::generate_salt();
+    let key = derive_moderate_key_with_salt(password, &salt)?;
+    Ok(DerivedKeyResult {
+        key: SecretVec::new(key),
+        salt,
+        mem_limit: MEMLIMIT_MODERATE,
+        ops_limit: OPSLIMIT_MODERATE,
+    })
+}
+
+/// Derive a key with moderate parameters using provided salt.
 ///
 /// Uses OPSLIMIT_MODERATE and MEMLIMIT_MODERATE.
 ///
@@ -192,7 +212,7 @@ pub fn derive_interactive_key_with_salt(password: &str, salt: &[u8]) -> Result<V
 ///
 /// # Returns
 /// 32-byte derived key.
-pub fn derive_moderate_key(password: &str, salt: &[u8]) -> Result<Vec<u8>> {
+pub fn derive_moderate_key_with_salt(password: &str, salt: &[u8]) -> Result<Vec<u8>> {
     derive_key(password, salt, MEMLIMIT_MODERATE, OPSLIMIT_MODERATE)
 }
 
@@ -413,10 +433,12 @@ mod tests {
     #[test]
     fn test_derive_moderate_key() {
         let password = "moderate test";
-        let salt = keys::generate_salt();
 
-        let key = derive_moderate_key(password, &salt).unwrap();
-        assert_eq!(key.len(), KEY_BYTES);
+        let result = derive_moderate_key(password).unwrap();
+        assert_eq!(result.key.len(), KEY_BYTES);
+        assert_eq!(result.salt.len(), SALT_BYTES);
+        assert_eq!(result.mem_limit, MEMLIMIT_MODERATE);
+        assert_eq!(result.ops_limit, OPSLIMIT_MODERATE);
     }
 
     #[test]
@@ -557,7 +579,7 @@ mod tests {
         let salt = vec![0x42u8; SALT_BYTES];
 
         let interactive = derive_interactive_key_with_salt(password, &salt).unwrap();
-        let moderate = derive_moderate_key(password, &salt).unwrap();
+        let moderate = derive_moderate_key_with_salt(password, &salt).unwrap();
         let sensitive = derive_sensitive_key_with_salt(password, &salt).unwrap();
 
         // All should be different
