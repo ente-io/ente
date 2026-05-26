@@ -185,7 +185,9 @@ class _SharedPublicCollectionPageState
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
+            preferredSize: const Size.fromHeight(
+              GalleryAppBarWidget.toolbarHeight,
+            ),
             child: GalleryAppBarWidget(
               galleryType,
               widget.c.collection.displayName,

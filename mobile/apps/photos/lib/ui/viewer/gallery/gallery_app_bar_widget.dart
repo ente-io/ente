@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
+import "package:ente_components/ente_components.dart";
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart";
@@ -63,8 +64,13 @@ import 'package:photos/utils/magic_util.dart';
 import "package:uuid/uuid.dart";
 
 class GalleryAppBarWidget extends StatefulWidget {
+  static const double toolbarHeight = kToolbarHeight;
+  static const double _controlRowHeight = 38.0;
+  static const double _actionGap = 8.0;
+  static const double _defaultBackIconSize = IconSizes.medium;
+
   static double hierarchicalPreferredHeight(BuildContext context) {
-    return AppBarFilterChips.appBarHeight(context);
+    return toolbarHeight + AppBarFilterChips.preferredHeight(context);
   }
 
   final GalleryType type;
@@ -98,7 +104,7 @@ enum AlbumPopupAction {
   sharedArchive,
   ownedHide,
   sharedHide,
-  playOnTv,
+  castAlbum,
   autoAddPhotos,
   sort,
   leave,
@@ -128,8 +134,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   late GalleryType galleryType;
 
   bool _isICloudSharedAlbum = false;
-  final ValueNotifier<int> castNotifier = ValueNotifier<int>(0);
-
   @override
   void initState() {
     super.initState();
@@ -207,36 +211,85 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               child: const AppBarFilterChips(),
             ),
             builder: (context, isSearching, child) {
-              return AppBar(
-                elevation: 0,
-                centerTitle: false,
-                title: Text(
-                  _appBarTitle!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                actions: isSearching ? null : _getDefaultActions(context),
+              return _buildAppBar(
+                context,
+                actions: isSearching ? const [] : _getDefaultActions(context),
                 bottom: child as PreferredSizeWidget,
-                surfaceTintColor: Colors.transparent,
               );
             },
           )
-        : AppBar(
-            elevation: 0,
-            centerTitle: false,
-            title: Text(
-              _appBarTitle!,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            actions: _getDefaultActions(context),
-          );
+        : _buildAppBar(context, actions: _getDefaultActions(context));
+  }
+
+  AppBar _buildAppBar(
+    BuildContext context, {
+    required List<Widget> actions,
+    PreferredSizeWidget? bottom,
+  }) {
+    final colors = context.componentColors;
+
+    return AppBar(
+      elevation: 0,
+      centerTitle: false,
+      automaticallyImplyLeading: false,
+      toolbarHeight: GalleryAppBarWidget.toolbarHeight,
+      titleSpacing: 0,
+      title: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+        child: SizedBox(
+          height: GalleryAppBarWidget._controlRowHeight,
+          child: Row(
+            children: [
+              const _GalleryAppBarBackButton(),
+              const SizedBox(width: Spacing.sm),
+              Expanded(
+                child: Text(
+                  _appBarTitle!,
+                  style: TextStyles.h2.copyWith(color: colors.textBase),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (actions.isNotEmpty) ...[
+                const SizedBox(width: Spacing.md),
+                ..._actionsWithSpacing(actions),
+              ],
+            ],
+          ),
+        ),
+      ),
+      bottom: bottom,
+      surfaceTintColor: Colors.transparent,
+      backgroundColor: getEnteColorScheme(context).backgroundColour,
+    );
+  }
+
+  List<Widget> _actionsWithSpacing(List<Widget> actions) {
+    return [
+      for (var index = 0; index < actions.length; index++) ...[
+        SizedBox.square(
+          dimension: GalleryAppBarWidget._controlRowHeight,
+          child: Center(child: actions[index]),
+        ),
+        if (index != actions.length - 1)
+          const SizedBox(width: GalleryAppBarWidget._actionGap),
+      ],
+    ];
+  }
+
+  PopupMenuButton<T> _buildPopupMenuAction<T>({
+    required Widget icon,
+    required String tooltip,
+    required PopupMenuItemBuilder<T> itemBuilder,
+    required PopupMenuItemSelected<T> onSelected,
+  }) {
+    return PopupMenuButton<T>(
+      padding: EdgeInsets.zero,
+      tooltip: tooltip,
+      itemBuilder: itemBuilder,
+      onSelected: onSelected,
+      child: _GalleryAppBarIconButtonSurface(icon: icon),
+    );
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
@@ -407,34 +460,30 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     if (galleryType == GalleryType.magic) {
       actions.add(
-        Tooltip(
-          message: AppLocalizations.of(context).sort,
-          child: PopupMenuButton(
-            icon: const Icon(Icons.sort_rounded),
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem(
-                  value: AlbumPopupAction.sortByMostRecent,
-                  child: Text(AppLocalizations.of(context).mostRecent),
-                ),
-                PopupMenuItem(
-                  value: AlbumPopupAction.sortByMostRelevant,
-                  child: Text(AppLocalizations.of(context).mostRelevant),
-                ),
-              ];
-            },
-            onSelected: (AlbumPopupAction value) {
-              if (value == AlbumPopupAction.sortByMostRecent) {
-                Bus.instance.fire(
-                  MagicSortChangeEvent(MagicSortType.mostRecent),
-                );
-              } else if (value == AlbumPopupAction.sortByMostRelevant) {
-                Bus.instance.fire(
-                  MagicSortChangeEvent(MagicSortType.mostRelevant),
-                );
-              }
-            },
-          ),
+        _buildPopupMenuAction<AlbumPopupAction>(
+          tooltip: AppLocalizations.of(context).sort,
+          icon: const Icon(Icons.sort_rounded),
+          itemBuilder: (context) {
+            return [
+              PopupMenuItem(
+                value: AlbumPopupAction.sortByMostRecent,
+                child: Text(AppLocalizations.of(context).mostRecent),
+              ),
+              PopupMenuItem(
+                value: AlbumPopupAction.sortByMostRelevant,
+                child: Text(AppLocalizations.of(context).mostRelevant),
+              ),
+            ];
+          },
+          onSelected: (AlbumPopupAction value) {
+            if (value == AlbumPopupAction.sortByMostRecent) {
+              Bus.instance.fire(MagicSortChangeEvent(MagicSortType.mostRecent));
+            } else if (value == AlbumPopupAction.sortByMostRelevant) {
+              Bus.instance.fire(
+                MagicSortChangeEvent(MagicSortType.mostRelevant),
+              );
+            }
+          },
         ),
       );
     }
@@ -443,56 +492,36 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     isQuickLink = widget.collection?.isQuickLinkCollection() ?? false;
     if (galleryType.canAddFiles(widget.collection, userId)) {
       actions.add(
-        Tooltip(
-          message: AppLocalizations.of(context).addFiles,
-          child: IconButton(
-            icon: const Icon(Icons.add_photo_alternate_outlined),
-            onPressed: () async {
-              await _showAddPhotoDialog(context);
-            },
-          ),
+        IconButtonComponent(
+          tooltip: AppLocalizations.of(context).addFiles,
+          icon: const Icon(Icons.add_photo_alternate_outlined),
+          variant: IconButtonComponentVariant.primary,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            await _showAddPhotoDialog(context);
+          },
         ),
       );
     }
 
     if (galleryType.isSharable() && !widget.isFromCollectPhotos) {
       actions.add(
-        Tooltip(
-          message: AppLocalizations.of(context).share,
-          child: IconButton(
-            icon: Icon(
-              isQuickLink && (widget.collection!.hasLink)
-                  ? Icons.link_outlined
-                  : Icons.adaptive.share,
-            ),
-            onPressed: () async {
-              await _showShareCollectionDialog();
-            },
+        IconButtonComponent(
+          tooltip: AppLocalizations.of(context).share,
+          icon: Icon(
+            isQuickLink && (widget.collection!.hasLink)
+                ? Icons.link_outlined
+                : Icons.adaptive.share,
           ),
+          variant: IconButtonComponentVariant.primary,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            await _showShareCollectionDialog();
+          },
         ),
       );
     }
 
-    if (widget.collection != null && castService.isSupported) {
-      actions.add(
-        Tooltip(
-          message: AppLocalizations.of(context).castAlbum,
-          child: IconButton(
-            icon: ValueListenableBuilder<int>(
-              valueListenable: castNotifier,
-              builder: (context, value, child) {
-                return castService.getActiveSessions().isNotEmpty
-                    ? const Icon(Icons.cast_connected_rounded)
-                    : const Icon(Icons.cast_outlined);
-              },
-            ),
-            onPressed: () async {
-              await _castChoiceDialog();
-            },
-          ),
-        ),
-      );
-    }
     final bool isArchived = widget.collection?.isArchived() ?? false;
     final bool isHidden = widget.collection?.isHidden() ?? false;
 
@@ -591,11 +620,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             ),
           ),
         ),
-      if (widget.collection != null)
+      if (widget.collection != null && castService.isSupported)
         EntePopupMenuItem(
-          value: AlbumPopupAction.playOnTv,
-          context.l10n.playOnTv,
-          icon: Icons.tv_outlined,
+          value: AlbumPopupAction.castAlbum,
+          AppLocalizations.of(context).castAlbum,
+          icon: castService.getActiveSessions().isNotEmpty
+              ? Icons.cast_connected_rounded
+              : Icons.cast_outlined,
         ),
       if (hasGrantedMLConsent &&
           (widget.collection?.canAutoAdd(userId) ?? false))
@@ -687,7 +718,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     actions.add(
-      PopupMenuButton(
+      _buildPopupMenuAction<AlbumPopupAction>(
+        tooltip: AppLocalizations.of(context).more,
+        icon: const Icon(Icons.more_vert_outlined),
         itemBuilder: (context) {
           return items;
         },
@@ -718,7 +751,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             await _removeQuickLink();
           } else if (value == AlbumPopupAction.leave) {
             await _leaveAlbum(context);
-          } else if (value == AlbumPopupAction.playOnTv) {
+          } else if (value == AlbumPopupAction.castAlbum) {
             await _castChoiceDialog();
           } else if (value == AlbumPopupAction.autoAddPhotos) {
             await routeToPage(
@@ -1099,7 +1132,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await castService.closeActiveCasts();
         },
       );
-      castNotifier.value++;
       return;
     }
 
@@ -1193,8 +1225,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         castToken,
       );
       _logger.info("cast album completed");
-      // showToast(bContext, AppLocalizations.of(context).pairingComplete);
-      castNotifier.value++;
       return true;
     } catch (e, s) {
       lastCode = '';
@@ -1208,7 +1238,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       } else {
         await showGenericErrorDialog(context: bContext, error: e);
       }
-      castNotifier.value++;
       return false;
     }
   }
@@ -1260,5 +1289,63 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         AppLocalizations.of(context).guestViewEnablePreSteps,
       );
     }
+  }
+}
+
+class _GalleryAppBarBackButton extends StatelessWidget {
+  const _GalleryAppBarBackButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    final tooltip = MaterialLocalizations.of(context).backButtonTooltip;
+
+    return Semantics(
+      button: true,
+      label: tooltip,
+      child: Tooltip(
+        message: tooltip,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.maybePop(context),
+          child: SizedBox.square(
+            dimension: GalleryAppBarWidget._defaultBackIconSize,
+            child: Icon(
+              Icons.arrow_back,
+              color: colors.textBase,
+              size: GalleryAppBarWidget._defaultBackIconSize,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GalleryAppBarIconButtonSurface extends StatelessWidget {
+  const _GalleryAppBarIconButtonSurface({required this.icon});
+
+  final Widget icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+
+    return SizedBox.square(
+      dimension: 36,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.fillLight,
+          borderRadius: BorderRadius.circular(Radii.md),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(Spacing.sm),
+          child: IconTheme.merge(
+            data: IconThemeData(color: colors.textBase, size: IconSizes.small),
+            child: icon,
+          ),
+        ),
+      ),
+    );
   }
 }
