@@ -159,10 +159,30 @@ jobs:
               working-directory: rust/apps/ensu
               run: yarn install --frozen-lockfile
 
+            - name: Write Tauri config override
+              shell: bash
+              env:
+                  ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
+              run: |
+                  set -euo pipefail
+                  : "${ENSU_TAURI_UPDATER_PUBKEY:?}"
+
+                  cat > rust/apps/ensu/tauri.ci.conf.json <<EOF
+                  {
+                      "tauri": {
+                          "updater": {
+                              "active": true,
+                              "pubkey": "${ENSU_TAURI_UPDATER_PUBKEY}"
+                          }
+                      }
+                  }
+                  EOF
+
             - name: Prepare Windows signing
               if: matrix.platform.os == 'windows-latest'
               shell: bash
               env:
+                  ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
                   AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
                   AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                   AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
@@ -173,13 +193,26 @@ jobs:
                   test -n "$SIGNTOOL_PATH"
                   echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
 
-                  node rust/apps/ensu/scripts/ci-enable-windows-signing.mjs
+                  : "${ENSU_TAURI_UPDATER_PUBKEY:?}"
+                  : "${AZURE_ENDPOINT:?}"
+                  : "${AZURE_CODE_SIGNING_NAME:?}"
+                  : "${AZURE_CERT_PROFILE_NAME:?}"
 
-            - name: Enable updater artifacts for release builds
-              shell: bash
-              env:
-                  ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
-              run: node rust/apps/ensu/scripts/ci-enable-updater.mjs
+                  cat > rust/apps/ensu/tauri.ci.conf.json <<EOF
+                  {
+                      "tauri": {
+                          "updater": {
+                              "active": true,
+                              "pubkey": "${ENSU_TAURI_UPDATER_PUBKEY}"
+                          },
+                          "bundle": {
+                              "windows": {
+                                  "signCommand": "artifact-signing-cli -e ${AZURE_ENDPOINT} -a ${AZURE_CODE_SIGNING_NAME} -c ${AZURE_CERT_PROFILE_NAME} -d Ensu %1"
+                              }
+                          }
+                      }
+                  }
+                  EOF
 
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
@@ -209,7 +242,7 @@ jobs:
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
-                  args: ${{ format('--target {0} --bundles {1} --features updater', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
+                  args: ${{ format('--target {0} --bundles {1} --features updater --config tauri.ci.conf.json', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
 
     build-android:
         needs: build-metadata
