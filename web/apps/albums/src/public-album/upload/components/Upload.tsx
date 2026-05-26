@@ -126,6 +126,7 @@ export const Upload: React.FC<UploadProps> = ({
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
     const [uploaderName, setUploaderName] = useState("");
+    const [pendingUploadFileCount, setPendingUploadFileCount] = useState(0);
     const {
         show: showUploaderNameInput,
         props: uploaderNameInputVisibilityProps,
@@ -262,6 +263,7 @@ export const Upload: React.FC<UploadProps> = ({
             ([, path]) => !basename(path).startsWith("."),
         );
         uploadItemsAndPaths.current = prunedItemAndPaths;
+        setPendingUploadFileCount(prunedItemAndPaths.length);
         selectedUploadType.current = undefined;
         props.setLoading(false);
 
@@ -484,7 +486,7 @@ export const Upload: React.FC<UploadProps> = ({
                 open={uploaderNameInputVisibilityProps.open}
                 onClose={handleUploaderNameInputClose}
                 uploaderName={uploaderName}
-                uploadFileCount={uploadItemsAndPaths.current.length}
+                uploadFileCount={pendingUploadFileCount}
                 onSubmit={handlePublicUpload}
             />
         </>
