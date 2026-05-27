@@ -564,6 +564,12 @@ export const sidebar = [
         collapsed: true,
         items: [
             { text: "Introduction", link: "/ensu/" },
+            { text: "How it works", link: "/ensu/how-it-works" },
+            {
+                text: "Features",
+                collapsed: true,
+                items: [{ text: "Overview", link: "/ensu/features/" }],
+            },
             {
                 text: "FAQ",
                 link: "/ensu/faq/",
