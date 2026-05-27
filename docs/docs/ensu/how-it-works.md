@@ -44,7 +44,6 @@ When Ensu opens for the first time, it picks a default model based on your devic
 
 Native downloads are resumable: if the download is interrupted, Ensu picks it up from where it stopped the next time you launch the app. Downloads happen in parallel where possible, and retry automatically.
 
-On desktop you can pick a different preset or paste any direct `.gguf` URL from Hugging Face. Learn more in [Model selection (desktop)](/ensu/features/#model-selection-desktop).
 
 ## What happens when you send a message
 
@@ -66,6 +65,7 @@ Ensu stores everything related to a chat on your device. There is no Ente accoun
 Local data includes:
 
 - **The model file** (and the mmproj file for multimodal models). This is the largest item.
+- **Voice transcription models** on iOS and Android, if you use voice input.
 - **Your chat history**: messages, attachments, session titles, and branch metadata.
 - **Settings**: your system prompt, model choice, and other preferences.
 - **Logs**, for debugging. These do not include your chat content and are only used when you choose to export them.
@@ -98,11 +98,12 @@ What Ensu does not do:
 
 What is sent over the network at all:
 
-- The model download from Hugging Face on first launch (and when you switch models or update Ensu and a model version changes).
+- The chat model download from Hugging Face on first launch (and when you switch models or update Ensu and a model version changes).
+- On iOS and Android, the Parakeet transcription model and Silero VAD model download from `models.ente.io` the first time voice input is used, unless they are already cached.
 - Software update checks, which the platform's app store or the desktop auto-updater handles.
 - If you sign in for the future sync feature (see below), the standard authentication exchange.
 
-You can confirm any of this by running Ensu offline once the model is downloaded, or by inspecting [the source](https://github.com/ente-io/ente).
+You can confirm any of this by running Ensu offline once the required models are downloaded, or by inspecting [the source](https://github.com/ente-io/ente).
 
 ## Sync and backup (in development)
 
