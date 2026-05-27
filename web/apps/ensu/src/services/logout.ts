@@ -1,10 +1,7 @@
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { accountLogout } from "ente-accounts/services/logout";
 import log from "ente-base/log";
-
-const isTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_IPC__" in window);
+import { isTauriRuntime } from "services/tauri-runtime";
 
 /**
  * Logout sequence for the Ensu app.

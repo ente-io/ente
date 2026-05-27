@@ -23,6 +23,7 @@ import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { setupAutoAppUpdates } from "services/app-update";
 import { ensuLogout } from "services/logout";
+import { isTauriRuntime } from "services/tauri-runtime";
 import {
     getPendingDesktopWhatsNew,
     markDesktopWhatsNewSeen,
@@ -61,9 +62,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, [isWhatsNewOpen, miniDialogProps.open, pendingWhatsNew]);
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
-        const isTauri = "__TAURI__" in window || "__TAURI_IPC__" in window;
-        if (!isTauri) return;
+        if (!isTauriRuntime()) return;
         const isEditableTarget = (target: EventTarget | null) => {
             if (!(target instanceof HTMLElement)) return false;
             const tag = target.tagName.toLowerCase();

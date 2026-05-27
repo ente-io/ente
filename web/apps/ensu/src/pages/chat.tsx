@@ -9,7 +9,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
-import { open as openFileDialog, save } from "@tauri-apps/api/dialog";
+import { open as openFileDialog, save } from "@tauri-apps/plugin-dialog";
 import { ChatComposer } from "components/chat/ChatComposer";
 import { ChatDialogs } from "components/chat/ChatDialogs";
 import { ChatMessageList } from "components/chat/ChatMessageList";
@@ -92,6 +92,7 @@ import {
     masterKeyFromSession,
     updateSessionFromTauriSecureStorageIfNeeded,
 } from "services/session";
+import { isTauriRuntime as detectTauriAppRuntime } from "services/tauri-runtime";
 
 const formatTime = (timestamp: number) => {
     const date = new Date(Math.floor(timestamp / 1000));
@@ -422,11 +423,7 @@ const groupSessionsByDate = (sessions: ChatSession[]) => {
 };
 
 const detectTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window ||
-        "__TAURI_IPC__" in window ||
-        "__TAURI_INTERNALS__" in window ||
-        "__TAURI_METADATA__" in window);
+    detectTauriAppRuntime();
 
 const Page: React.FC = () => {
     const router = useRouter();
@@ -2013,12 +2010,12 @@ const Page: React.FC = () => {
         async (images: ImageAttachment[]) => {
             if (!isTauriRuntime || images.length === 0) return [] as string[];
             const { appDataDir, join } = await import("@tauri-apps/api/path");
-            const { createDir, writeBinaryFile } = await import(
-                "@tauri-apps/api/fs"
+            const { mkdir, writeFile } = await import(
+                "@tauri-apps/plugin-fs"
             );
             const root = await appDataDir();
             const dir = await join(root, "ensu_llmchat_inference_images");
-            await createDir(dir, { recursive: true });
+            await mkdir(dir, { recursive: true });
 
             const paths = await Promise.all(
                 images.map(async (image) => {
@@ -2026,7 +2023,7 @@ const Page: React.FC = () => {
                         await image.file.arrayBuffer(),
                     );
                     const path = await join(dir, `${image.id}.jpg`);
-                    await writeBinaryFile({ path, contents: bytes });
+                    await writeFile(path, bytes);
                     return path;
                 }),
             );
@@ -2039,11 +2036,11 @@ const Page: React.FC = () => {
     const cleanupInferenceImages = useCallback(
         async (paths: string[]) => {
             if (!isTauriRuntime || paths.length === 0) return;
-            const { removeFile } = await import("@tauri-apps/api/fs");
+            const { remove } = await import("@tauri-apps/plugin-fs");
             await Promise.all(
                 paths.map(async (path) => {
                     try {
-                        await removeFile(path);
+                        await remove(path);
                     } catch {
                         // ignore cleanup failures
                     }
@@ -2698,27 +2695,20 @@ const Page: React.FC = () => {
                 if (isTauriRuntime) {
                     const [
                         { appDataDir, join },
-                        { createDir, writeBinaryFile },
-                        { open },
+                        { mkdir, writeFile },
+                        { openPath },
                     ] = await Promise.all([
                         import("@tauri-apps/api/path"),
-                        import("@tauri-apps/api/fs"),
-                        import("@tauri-apps/api/shell"),
+                        import("@tauri-apps/plugin-fs"),
+                        import("@tauri-apps/plugin-opener"),
                     ]);
                     const root = await appDataDir();
                     const dir = await join(root, "ensu_llmchat_attachments_v2");
-                    await createDir(dir, { recursive: true });
+                    await mkdir(dir, { recursive: true });
                     const filePath = await join(dir, filename);
 
-                    await writeBinaryFile({ path: filePath, contents: bytes });
-
-                    const normalizedPath = filePath.replace(/\\/g, "/");
-                    const fileUrl = new URL("file:///");
-                    fileUrl.pathname = normalizedPath.startsWith("/")
-                        ? normalizedPath
-                        : `/${normalizedPath}`;
-                    const openTarget = fileUrl.toString();
-                    await open(openTarget);
+                    await writeFile(filePath, bytes);
+                    await openPath(filePath);
                     return;
                 }
 
@@ -3348,9 +3338,9 @@ const Page: React.FC = () => {
                     filters: [{ name: "Logs", extensions: ["txt"] }],
                 });
                 if (!path) return;
-                const { writeBinaryFile } = await import("@tauri-apps/api/fs");
+                const { writeFile } = await import("@tauri-apps/plugin-fs");
                 const encoded = new TextEncoder().encode(savedLogs());
-                await writeBinaryFile({ path, contents: encoded });
+                await writeFile(path, encoded);
                 return;
             } catch (error) {
                 log.error("Failed to export logs", error);
@@ -3639,7 +3629,7 @@ const Page: React.FC = () => {
 
             let files: File[];
             try {
-                const { invoke } = await import("@tauri-apps/api/tauri");
+                const { invoke } = await import("@tauri-apps/api/core");
                 files = await Promise.all(
                     pathsToProcess.map(async (selectedPath) => {
                         const normalized = selectedPath.replace(/\\/g, "/");

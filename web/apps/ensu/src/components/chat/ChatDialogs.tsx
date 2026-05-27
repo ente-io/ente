@@ -31,6 +31,7 @@ import {
     type NotificationAttributes,
 } from "ente-new/photos/components/Notification";
 import React, { memo } from "react";
+import { isTauriRuntime as detectTauriAppRuntime } from "services/tauri-runtime";
 
 interface IconProps {
     size: number;
@@ -174,17 +175,12 @@ export const ChatDialogs = memo(
         closeImagePreview,
     }: ChatDialogsProps) => {
         const openExternalUrl = async (url: string) => {
-            const hasTauriBridge =
-                typeof window !== "undefined" &&
-                ("__TAURI__" in window ||
-                    "__TAURI_IPC__" in window ||
-                    "__TAURI_INTERNALS__" in window ||
-                    "__TAURI_METADATA__" in window);
-
-            if (isTauriRuntime || hasTauriBridge) {
+            if (isTauriRuntime || detectTauriAppRuntime()) {
                 try {
-                    const { open } = await import("@tauri-apps/api/shell");
-                    await open(url);
+                    const { openUrl } = await import(
+                        "@tauri-apps/plugin-opener"
+                    );
+                    await openUrl(url);
                     return;
                 } catch {
                     // fall through to browser open fallback

@@ -1,0 +1,33 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "main-capability",
+    "description": "Capability for the main Ensu desktop window",
+    "windows": ["main"],
+    "permissions": [
+        "core:default",
+        "dialog:default",
+        "opener:default",
+        "process:default",
+        "updater:default",
+        "fs:read-all",
+        "fs:write-all",
+        {
+            "identifier": "fs:scope",
+            "allow": [
+                { "path": "$APPDATA" },
+                { "path": "$APPDATA/*" },
+                { "path": "$APPDATA/**" },
+                { "path": "$DOCUMENT" },
+                { "path": "$DOCUMENT/*" },
+                { "path": "$DOCUMENT/**" }
+            ]
+        },
+        {
+            "identifier": "opener:allow-open-path",
+            "allow": [
+                { "path": "$APPDATA/ensu_llmchat_attachments_v2/*" },
+                { "path": "$APPDATA/ensu_llmchat_attachments_v2/**" }
+            ]
+        }
+    ]
+}

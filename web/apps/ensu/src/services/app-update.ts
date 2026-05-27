@@ -22,14 +22,19 @@ export const checkForAppUpdates = async (): Promise<AppUpdateCheckResult> => {
 
     const run = async (): Promise<AppUpdateCheckResult> => {
         try {
-            const { checkUpdate } = await import("@tauri-apps/api/updater");
-            const update = await checkUpdate();
-            if (!update.shouldUpdate) {
+            const { check } = await import("@tauri-apps/plugin-updater");
+            const update = await check();
+            if (!update) {
                 log.debug(() => "Ensu is already on the latest version");
                 return { kind: "up-to-date" };
             }
 
-            const version = update.manifest?.version ?? "unknown";
+            const version = update.version;
+            try {
+                await update.close();
+            } catch (e) {
+                log.warn("Failed to close Ensu updater resource", e);
+            }
             return { kind: "available", version };
         } catch (e) {
             log.error("Failed to auto-update Ensu", e);
@@ -45,13 +50,15 @@ export const checkForAppUpdates = async (): Promise<AppUpdateCheckResult> => {
 };
 
 const installAppUpdate = async (version: string) => {
-    const [{ installUpdate }, { relaunch }] = await Promise.all([
-        import("@tauri-apps/api/updater"),
-        import("@tauri-apps/api/process"),
+    const [{ check }, { relaunch }] = await Promise.all([
+        import("@tauri-apps/plugin-updater"),
+        import("@tauri-apps/plugin-process"),
     ]);
 
     log.info(`Installing Ensu update ${version}`);
-    await installUpdate();
+    const update = await check();
+    if (!update) return;
+    await update.downloadAndInstall();
     log.info(`Installed Ensu update ${version}, relaunching`);
     await relaunch();
 };

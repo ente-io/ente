@@ -85,15 +85,15 @@ const nativeChatKeyPath = async () => {
 const readNativeChatKeys = async (): Promise<PersistedChatKeys> => {
     if (!isTauriAppRuntime()) return {};
 
-    const [{ exists, readBinaryFile }, path] = await Promise.all([
-        import("@tauri-apps/api/fs"),
+    const [{ exists, readFile }, path] = await Promise.all([
+        import("@tauri-apps/plugin-fs"),
         nativeChatKeyPath(),
     ]);
 
     if (!(await exists(path))) return {};
 
     try {
-        const raw = new TextDecoder().decode(await readBinaryFile(path));
+        const raw = new TextDecoder().decode(await readFile(path));
         const parsed = JSON.parse(raw) as PersistedChatKeys;
         return {
             remoteChatKey:
@@ -154,9 +154,9 @@ const cleanupLegacyChatKeyCopies = async () => {
     removeLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
 
     try {
-        const { removeFile } = await import("@tauri-apps/api/fs");
+        const { remove } = await import("@tauri-apps/plugin-fs");
         const path = await nativeChatKeyPath();
-        await removeFile(path);
+        await remove(path);
     } catch {
         // ignore missing legacy file
     }
