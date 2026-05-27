@@ -4,7 +4,7 @@ This document outlines how we ourselves deploy museum. Note that this is very sp
 
 ## Overview
 
-We use museum's Dockerfile to build images which we then run on vanilla Ubuntu servers (+ Docker installed). For ease of administration, we wrap Docker commands to start/stop/update it in a systemd service.
+We use museum's Dockerfile to build images which we then run on vanilla Ubuntu servers (+ Docker installed). For ease of administration, we wrap Docker commands to start/stop it in a systemd service.
 
 - The production machines are vanilla Ubuntu instances, with Docker and Promtail installed.
 
@@ -16,9 +16,9 @@ We use museum's Dockerfile to build images which we then run on vanilla Ubuntu s
 
 - So museum is a "service". You can see its systemd unit definition in [museum.service](museum.service)
 
-- On the running instance, we use `systemctl start|stop|status museum` to manage it.
+- On the running instance, we use `systemctl start|stop|status museum` to manage the current image.
 
-- The service automatically updates itself on each start. There's also a convenience [script](update-and-restart-museum.sh) that pre-downloads the latest image to further reduce the delay during a restart.
+- To update museum, use [update-and-restart-museum.sh](update-and-restart-museum.sh). It pulls the latest image before restarting the service.
 
 - Optionally and alternatively, museum can also be run behind an Nginx. This option has a separate service definition.
 
