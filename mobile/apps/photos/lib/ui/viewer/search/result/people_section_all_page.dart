@@ -1,8 +1,10 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/event.dart";
@@ -24,8 +26,6 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/banners/save_faces_banner.dart";
 import "package:photos/ui/components/bottom_action_bar/people_bottom_action_bar_widget.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -341,6 +341,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   bool _isInitialLoad = true;
   bool userDismissedPersonGallerySuggestion = false;
   String _searchQuery = "";
+  late bool _isSearchBarVisible;
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   int _suggestionReloadToken = 0;
   final Debouncer _peopleReloadDebouncer = Debouncer(
     const Duration(milliseconds: 400),
@@ -384,14 +387,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     });
   }
 
-  void _clearSearchQuery() {
-    if (_searchQuery.isNotEmpty) {
-      setState(() {
-        _searchQuery = "";
-      });
-    }
-  }
-
   void _toggleIgnoredPeopleView() {
     setState(() {
       _showingIgnoredPeople = !_showingIgnoredPeople;
@@ -403,6 +398,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   @override
   void initState() {
     super.initState();
+    _isSearchBarVisible = widget.showSearchBar && widget.startInSearchMode;
+    if (_isSearchBarVisible) {
+      _focusSearchField();
+    }
     final settings = localSettings;
     _sortKey = settings.peopleSortKey();
     _nameSortAscending = settings.peopleNameSortAscending;
@@ -455,6 +454,30 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         }),
       );
     }
+  }
+
+  void _focusSearchField() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _searchFocusNode.requestFocus();
+      }
+    });
+  }
+
+  void _activateSearch() {
+    setState(() {
+      _isSearchBarVisible = true;
+    });
+    _focusSearchField();
+  }
+
+  void _closeSearch() {
+    _searchFocusNode.unfocus();
+    _searchController.clear();
+    setState(() {
+      _isSearchBarVisible = false;
+      _searchQuery = "";
+    });
   }
 
   Future<List<GenericSearchResult>> getResults({bool init = false}) async {
@@ -609,6 +632,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     for (var subscriptions in streamSubscriptions) {
       subscriptions.cancel();
     }
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -625,28 +650,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     return FutureBuilder<List<GenericSearchResult>>(
       future: sectionData,
       builder: (context, snapshot) {
-        final slivers = <Widget>[
-          if (widget.showSearchBar)
-            SearchableAppBar(
-              title: Text(SectionType.face.sectionTitle(context)),
-              autoActivateSearch: widget.startInSearchMode,
-              onSearch: _updateSearchQuery,
-              onSearchClosed: _clearSearchQuery,
-              centerTitle: false,
-              searchIconPadding: const EdgeInsets.fromLTRB(
-                12,
-                12,
-                horizontalEdgePadding,
-                12,
-              ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: horizontalEdgePadding),
-                  child: _buildSortMenu(context, textTheme, colorScheme),
-                ),
-              ],
-            ),
-        ];
+        final slivers = <Widget>[];
+        if (widget.showSearchBar && _isSearchBarVisible) {
+          slivers.add(_buildSearchFieldSliver(context, horizontalEdgePadding));
+        }
         if (!_isLoaded &&
             snapshot.connectionState == ConnectionState.waiting &&
             _isInitialLoad) {
@@ -655,14 +662,14 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               child: Center(child: EnteLoadingWidget()),
             ),
           );
-          return CustomScrollView(slivers: slivers);
+          return _buildScrollBody(slivers, textTheme, colorScheme);
         } else if (snapshot.hasError) {
           slivers.add(
             const SliverFillRemaining(
               child: Center(child: Icon(Icons.error_outline_rounded)),
             ),
           );
-          return CustomScrollView(slivers: slivers);
+          return _buildScrollBody(slivers, textTheme, colorScheme);
         } else {
           final filteredNormalFaces = _filterFaces(normalFaces);
           final filteredExtraFaces = _filterFaces(extraFaces);
@@ -680,7 +687,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 ),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return _buildScrollBody(slivers, textTheme, colorScheme);
           }
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
@@ -845,9 +852,82 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
             ]);
           }
-          return CustomScrollView(slivers: slivers);
+          return _buildScrollBody(slivers, textTheme, colorScheme);
         }
       },
+    );
+  }
+
+  Widget _buildScrollBody(
+    List<Widget> slivers,
+    EnteTextTheme textTheme,
+    EnteColorScheme colorScheme,
+  ) {
+    if (!widget.showSearchBar) {
+      return CustomScrollView(slivers: slivers);
+    }
+
+    return AppBarComponent(
+      title: SectionType.face.sectionTitle(context),
+      physics: const BouncingScrollPhysics(),
+      actions: _isSearchBarVisible
+          ? const []
+          : [
+              _buildSearchAction(),
+              _buildSortMenu(context, textTheme, colorScheme),
+            ],
+      slivers: slivers,
+    );
+  }
+
+  Widget _buildSearchAction() {
+    return IconButtonComponent(
+      variant: IconButtonComponentVariant.primary,
+      shouldSurfaceExecutionStates: false,
+      icon: const HugeIcon(icon: HugeIcons.strokeRoundedSearch01),
+      onTap: _activateSearch,
+    );
+  }
+
+  Widget _buildSearchFieldSliver(
+    BuildContext context,
+    double horizontalEdgePadding,
+  ) {
+    final colors = context.componentColors;
+    return SliverPadding(
+      padding: EdgeInsets.fromLTRB(
+        horizontalEdgePadding,
+        0,
+        horizontalEdgePadding,
+        4,
+      ),
+      sliver: SliverToBoxAdapter(
+        child: TextInputComponent(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          hintText: AppLocalizations.of(context).search,
+          onChanged: _updateSearchQuery,
+          prefix: HugeIcon(
+            icon: HugeIcons.strokeRoundedSearch01,
+            size: 20,
+            color: colors.textLight,
+            strokeWidth: 1.6,
+          ),
+          suffix: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _closeSearch,
+            child: SizedBox.square(
+              dimension: IconSizes.medium,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedCancel01,
+                size: 18,
+                color: colors.textLight,
+                strokeWidth: 1.6,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -856,75 +936,61 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     EnteTextTheme textTheme,
     EnteColorScheme colorScheme,
   ) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-      ),
-      child: GestureDetector(
-        onTapDown: (TapDownDetails details) async {
-          final l10n = AppLocalizations.of(context);
-          const sortKeys = PeopleSortKey.values;
-          final PeopleSortKey? selectedKey = await showMenu<PeopleSortKey>(
-            color: colorScheme.backgroundElevated,
-            context: context,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              side: BorderSide(width: 0.5, color: colorScheme.strokeFaint),
-              borderRadius: BorderRadius.circular(_sortMenuCornerRadius),
-            ),
-            position: RelativeRect.fromLTRB(
-              details.globalPosition.dx,
-              details.globalPosition.dy,
-              details.globalPosition.dx,
-              details.globalPosition.dy + 50,
-            ),
-            items: [
-              ...List.generate(sortKeys.length, (index) {
-                final key = sortKeys[index];
-                return _buildSortMenuItem(
-                  key,
-                  index == sortKeys.length - 1,
-                  textTheme,
-                  colorScheme,
-                  l10n,
-                );
-              }),
-              _buildIgnoredPeopleMenuItem(
-                context,
+    return IconButtonComponent(
+      variant: IconButtonComponentVariant.primary,
+      shouldSurfaceExecutionStates: false,
+      icon: Icon(Icons.sort_rounded, color: colorScheme.textMuted),
+      onTapDown: (details) async {
+        final l10n = AppLocalizations.of(context);
+        const sortKeys = PeopleSortKey.values;
+        final PeopleSortKey? selectedKey = await showMenu<PeopleSortKey>(
+          color: colorScheme.backgroundElevated,
+          context: context,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(width: 0.5, color: colorScheme.strokeFaint),
+            borderRadius: BorderRadius.circular(_sortMenuCornerRadius),
+          ),
+          position: RelativeRect.fromLTRB(
+            details.globalPosition.dx,
+            details.globalPosition.dy,
+            details.globalPosition.dx,
+            details.globalPosition.dy + 50,
+          ),
+          items: [
+            ...List.generate(sortKeys.length, (index) {
+              final key = sortKeys[index];
+              return _buildSortMenuItem(
+                key,
+                index == sortKeys.length - 1,
                 textTheme,
                 colorScheme,
                 l10n,
-              ),
-            ],
-          );
-          if (!mounted || selectedKey == null) {
-            return;
+              );
+            }),
+            _buildIgnoredPeopleMenuItem(context, textTheme, colorScheme, l10n),
+          ],
+        );
+        if (!mounted || selectedKey == null) {
+          return;
+        }
+        if (selectedKey == _sortKey && !_canToggleSortDirection(selectedKey)) {
+          return;
+        }
+        setState(() {
+          if (selectedKey == _sortKey) {
+            _toggleSortDirection(selectedKey);
+          } else {
+            _sortKey = selectedKey;
           }
-          if (selectedKey == _sortKey &&
-              !_canToggleSortDirection(selectedKey)) {
-            return;
+          _sortFaces(normalFaces);
+          _sortFaces(extraFaces);
+          if (_showingIgnoredPeople) {
+            _prioritizeNamedIgnoredPeople(normalFaces);
           }
-          setState(() {
-            if (selectedKey == _sortKey) {
-              _toggleSortDirection(selectedKey);
-            } else {
-              _sortKey = selectedKey;
-            }
-            _sortFaces(normalFaces);
-            _sortFaces(extraFaces);
-            if (_showingIgnoredPeople) {
-              _prioritizeNamedIgnoredPeople(normalFaces);
-            }
-          });
-          unawaited(_persistSortPreferences());
-        },
-        child: IconButtonWidget(
-          icon: Icons.sort_rounded,
-          iconButtonType: IconButtonType.secondary,
-          iconColor: colorScheme.textMuted,
-        ),
-      ),
+        });
+        unawaited(_persistSortPreferences());
+      },
     );
   }
 

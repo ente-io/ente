@@ -35,6 +35,7 @@ class AppBarComponent extends StatefulWidget {
     this.showExpandedBackButton = true,
     this.controller,
     this.physics,
+    this.cacheExtent,
   });
 
   final String title;
@@ -54,6 +55,7 @@ class AppBarComponent extends StatefulWidget {
   final List<Widget> slivers;
   final ScrollController? controller;
   final ScrollPhysics? physics;
+  final double? cacheExtent;
 
   @override
   State<AppBarComponent> createState() => _AppBarComponentState();
@@ -200,6 +202,7 @@ class _AppBarComponentState extends State<AppBarComponent> {
       child: CustomScrollView(
         controller: _controller,
         physics: widget.physics,
+        cacheExtent: widget.cacheExtent,
         slivers: [
           SliverAppBarComponent(
             title: widget.title,

@@ -1,8 +1,10 @@
 import "dart:async";
 
 import "package:collection/collection.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
@@ -13,7 +15,6 @@ import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
@@ -35,14 +36,21 @@ class SearchSectionAllPage extends StatefulWidget {
 class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
   late Future<List<SearchResult>> sectionData;
   final streamSubscriptions = <StreamSubscription>[];
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   String _searchQuery = "";
+  late bool _isSearchBarVisible;
 
   bool get _isSearching => _searchQuery.trim().isNotEmpty;
 
   @override
   void initState() {
     super.initState();
+    _isSearchBarVisible = widget.startInSearchMode;
     sectionData = widget.sectionType.getData(context);
+    if (_isSearchBarVisible) {
+      _focusSearchField();
+    }
 
     final streamsToListenTo = widget.sectionType.viewAllUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
@@ -56,18 +64,34 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
     }
   }
 
+  void _focusSearchField() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _searchFocusNode.requestFocus();
+      }
+    });
+  }
+
+  void _activateSearch() {
+    setState(() {
+      _isSearchBarVisible = true;
+    });
+    _focusSearchField();
+  }
+
   void _updateSearchQuery(String value) {
     setState(() {
       _searchQuery = value;
     });
   }
 
-  void _clearSearchQuery() {
-    if (_searchQuery.isNotEmpty) {
-      setState(() {
-        _searchQuery = "";
-      });
-    }
+  void _closeSearch() {
+    _searchFocusNode.unfocus();
+    _searchController.clear();
+    setState(() {
+      _isSearchBarVisible = false;
+      _searchQuery = "";
+    });
   }
 
   List<SearchResult> _filterResults(List<SearchResult> sectionResults) {
@@ -88,6 +112,8 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
     for (var subscriptions in streamSubscriptions) {
       subscriptions.cancel();
     }
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -99,21 +125,10 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
       body: FutureBuilder<List<SearchResult>>(
         future: sectionData,
         builder: (context, snapshot) {
-          final slivers = <Widget>[
-            SearchableAppBar(
-              title: Text(widget.sectionType.sectionTitle(context)),
-              autoActivateSearch: widget.startInSearchMode,
-              onSearch: _updateSearchQuery,
-              onSearchClosed: _clearSearchQuery,
-              centerTitle: false,
-              searchIconPadding: const EdgeInsets.fromLTRB(
-                12,
-                12,
-                horizontalEdgePadding,
-                12,
-              ),
-            ),
-          ];
+          final slivers = <Widget>[];
+          if (_isSearchBarVisible) {
+            slivers.add(_buildSearchFieldSliver(context));
+          }
 
           if (!snapshot.hasData) {
             slivers.add(
@@ -121,11 +136,7 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                 child: Center(child: EnteLoadingWidget()),
               ),
             );
-            return CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              cacheExtent: cacheExtent,
-              slivers: slivers,
-            );
+            return _buildScaffoldBody(slivers, cacheExtent);
           }
 
           List<SearchResult> sectionResults = snapshot.data!;
@@ -155,11 +166,7 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                 ),
               ),
             );
-            return CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              cacheExtent: cacheExtent,
-              slivers: slivers,
-            );
+            return _buildScaffoldBody(slivers, cacheExtent);
           }
 
           final showCTA = widget.sectionType.isCTAVisible && !_isSearching;
@@ -241,12 +248,61 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
               ),
             );
           }
-          return CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            cacheExtent: cacheExtent,
-            slivers: slivers,
-          );
+          return _buildScaffoldBody(slivers, cacheExtent);
         },
+      ),
+    );
+  }
+
+  Widget _buildScaffoldBody(List<Widget> slivers, double? cacheExtent) {
+    return AppBarComponent(
+      title: widget.sectionType.sectionTitle(context),
+      physics: const BouncingScrollPhysics(),
+      cacheExtent: cacheExtent,
+      actions: _isSearchBarVisible ? const [] : [_buildSearchAction()],
+      slivers: slivers,
+    );
+  }
+
+  Widget _buildSearchAction() {
+    return IconButtonComponent(
+      variant: IconButtonComponentVariant.primary,
+      shouldSurfaceExecutionStates: false,
+      icon: const HugeIcon(icon: HugeIcons.strokeRoundedSearch01),
+      onTap: _activateSearch,
+    );
+  }
+
+  Widget _buildSearchFieldSliver(BuildContext context) {
+    final colors = context.componentColors;
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      sliver: SliverToBoxAdapter(
+        child: TextInputComponent(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          hintText: AppLocalizations.of(context).search,
+          onChanged: _updateSearchQuery,
+          prefix: HugeIcon(
+            icon: HugeIcons.strokeRoundedSearch01,
+            size: 20,
+            color: colors.textLight,
+            strokeWidth: 1.6,
+          ),
+          suffix: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _closeSearch,
+            child: SizedBox.square(
+              dimension: IconSizes.medium,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedCancel01,
+                size: 18,
+                color: colors.textLight,
+                strokeWidth: 1.6,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
