@@ -1193,7 +1193,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     try {
       final action = await updateService.getChangeLogAction(
         locale: Localizations.localeOf(context),
-        isAndroid: Platform.isAndroid,
         isLocalGallery: isLocalGalleryMode,
         isSignedIn: Configuration.instance.isLoggedIn(),
       );
