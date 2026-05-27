@@ -8,6 +8,21 @@ import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 
+typedef HeaderAppBarTitleBuilder =
+    Widget Function(BuildContext context, HeaderAppBarTitleState state);
+
+class HeaderAppBarTitleState {
+  const HeaderAppBarTitleState({
+    required this.title,
+    required this.textStyle,
+    required this.height,
+  });
+
+  final String title;
+  final TextStyle textStyle;
+  final double height;
+}
+
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=11439-5036&m=dev
 /// Section: Appbar/header / Header v2
 /// Specs: Scroll view with a pinned header app bar that animates between
@@ -20,6 +35,8 @@ class AppBarComponent extends StatefulWidget {
     super.key,
     required this.title,
     required this.slivers,
+    this.titleBuilder,
+    this.titleBuilderHeight,
     this.onTitleTap,
     this.onTitleDoubleTap,
     this.onTitleLongPress,
@@ -35,9 +52,12 @@ class AppBarComponent extends StatefulWidget {
     this.showExpandedBackButton = true,
     this.controller,
     this.physics,
+    this.cacheExtent,
   });
 
   final String title;
+  final HeaderAppBarTitleBuilder? titleBuilder;
+  final double? titleBuilderHeight;
   final VoidCallback? onTitleTap;
   final VoidCallback? onTitleDoubleTap;
   final VoidCallback? onTitleLongPress;
@@ -54,6 +74,7 @@ class AppBarComponent extends StatefulWidget {
   final List<Widget> slivers;
   final ScrollController? controller;
   final ScrollPhysics? physics;
+  final double? cacheExtent;
 
   @override
   State<AppBarComponent> createState() => _AppBarComponentState();
@@ -188,6 +209,7 @@ class _AppBarComponentState extends State<AppBarComponent> {
       subtitle: widget.subtitle,
       expandedHeight: widget.expandedHeight,
       collapsedHeight: widget.collapsedHeight,
+      titleBuilderHeight: widget.titleBuilderHeight,
     );
     _collapseExtent = metrics.collapseExtent;
     if (!_controller.hasClients ||
@@ -200,9 +222,12 @@ class _AppBarComponentState extends State<AppBarComponent> {
       child: CustomScrollView(
         controller: _controller,
         physics: widget.physics,
+        cacheExtent: widget.cacheExtent,
         slivers: [
           SliverAppBarComponent(
             title: widget.title,
+            titleBuilder: widget.titleBuilder,
+            titleBuilderHeight: widget.titleBuilderHeight,
             onTitleTap: widget.onTitleTap,
             onTitleDoubleTap: widget.onTitleDoubleTap,
             onTitleLongPress: widget.onTitleLongPress,
@@ -255,6 +280,8 @@ class SliverAppBarComponent extends StatelessWidget {
   const SliverAppBarComponent({
     super.key,
     required this.title,
+    this.titleBuilder,
+    this.titleBuilderHeight,
     this.onTitleTap,
     this.onTitleDoubleTap,
     this.onTitleLongPress,
@@ -271,6 +298,8 @@ class SliverAppBarComponent extends StatelessWidget {
   });
 
   final String title;
+  final HeaderAppBarTitleBuilder? titleBuilder;
+  final double? titleBuilderHeight;
   final VoidCallback? onTitleTap;
   final VoidCallback? onTitleDoubleTap;
   final VoidCallback? onTitleLongPress;
@@ -293,12 +322,15 @@ class SliverAppBarComponent extends StatelessWidget {
       subtitle: subtitle,
       expandedHeight: expandedHeight,
       collapsedHeight: collapsedHeight,
+      titleBuilderHeight: titleBuilderHeight,
     );
 
     return SliverPersistentHeader(
       pinned: true,
       delegate: _HeaderAppBarDelegate(
         title: title,
+        titleBuilder: titleBuilder,
+        titleBuilderHeight: titleBuilderHeight,
         onTitleTap: onTitleTap,
         onTitleDoubleTap: onTitleDoubleTap,
         onTitleLongPress: onTitleLongPress,
@@ -325,6 +357,8 @@ class SliverAppBarComponent extends StatelessWidget {
 class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   const _HeaderAppBarDelegate({
     required this.title,
+    required this.titleBuilder,
+    required this.titleBuilderHeight,
     required this.onTitleTap,
     required this.onTitleDoubleTap,
     required this.onTitleLongPress,
@@ -346,6 +380,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   });
 
   final String title;
+  final HeaderAppBarTitleBuilder? titleBuilder;
+  final double? titleBuilderHeight;
   final VoidCallback? onTitleTap;
   final VoidCallback? onTitleDoubleTap;
   final VoidCallback? onTitleLongPress;
@@ -382,16 +418,21 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
         ? 1.0
         : (shrinkOffset / scrollRange).clamp(0.0, 1.0);
     final titleProgress = Curves.easeInOut.transform(progress);
+    final expandedTitleHeight = titleBuilderHeight ?? expandedTitleLineHeight;
+    final collapsedTitleHeight = titleBuilderHeight ?? collapsedTitleLineHeight;
+    final titleLayoutHeight = titleBuilderHeight == null
+        ? lerpDouble(expandedTitleHeight, collapsedTitleHeight, titleProgress)!
+        : titleBuilderHeight!;
     final collapsedControlTop = _centeredTop(
       collapsedHeight,
       _headerControlSize,
     );
     final collapsedTitleTop = _centeredTop(
       collapsedHeight,
-      collapsedTitleLineHeight,
+      collapsedTitleHeight,
     );
     final expandedTextBlockHeight =
-        expandedTitleLineHeight +
+        expandedTitleHeight +
         (subtitle == null ? 0 : _subtitleGap + subtitleLineHeight);
     final leadingTop =
         _expandedContentTop +
@@ -452,6 +493,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
               ),
             _MovingHeaderTitle(
               title: title,
+              titleBuilder: titleBuilder,
               onTap: onTitleTap,
               onDoubleTap: onTitleDoubleTap,
               onLongPress: onTitleLongPress,
@@ -459,15 +501,13 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
               left: titleLeft,
               right: titleRight,
               progress: titleProgress,
+              height: titleLayoutHeight,
             ),
             if (subtitle != null)
               Positioned(
                 left: titleLeft,
                 right: titleRight,
-                top:
-                    _expandedContentTop +
-                    expandedTitleLineHeight +
-                    _subtitleGap,
+                top: _expandedContentTop + expandedTitleHeight + _subtitleGap,
                 child: IgnorePointer(
                   child: ExcludeSemantics(
                     child: Opacity(
@@ -507,6 +547,9 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _HeaderAppBarDelegate oldDelegate) {
     return oldDelegate.title != title ||
+        titleBuilder != null ||
+        oldDelegate.titleBuilder != null ||
+        oldDelegate.titleBuilderHeight != titleBuilderHeight ||
         oldDelegate.onTitleTap != onTitleTap ||
         oldDelegate.onTitleDoubleTap != onTitleDoubleTap ||
         oldDelegate.onTitleLongPress != onTitleLongPress ||
@@ -676,6 +719,7 @@ _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
   required String? subtitle,
   required double? expandedHeight,
   required double collapsedHeight,
+  required double? titleBuilderHeight,
 }) {
   final textScaler = MediaQuery.textScalerOf(context);
   final expandedTitleLineHeight = _scaledLineHeight(
@@ -692,7 +736,10 @@ _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
       : _subtitleExpandedHeight;
   final effectiveCollapsedHeight = _maxDouble(
     collapsedHeight,
-    _maxDouble(_headerControlSize, collapsedTitleLineHeight),
+    _maxDouble(
+      _headerControlSize,
+      _maxDouble(collapsedTitleLineHeight, titleBuilderHeight ?? 0),
+    ),
   );
   final expandedTextBlockHeight =
       expandedTitleLineHeight +
@@ -745,6 +792,7 @@ double _actionsWidth(int actionCount) {
 class _MovingHeaderTitle extends StatelessWidget {
   const _MovingHeaderTitle({
     required this.title,
+    required this.titleBuilder,
     required this.onTap,
     required this.onDoubleTap,
     required this.onLongPress,
@@ -752,9 +800,11 @@ class _MovingHeaderTitle extends StatelessWidget {
     required this.left,
     required this.right,
     required this.progress,
+    required this.height,
   });
 
   final String title;
+  final HeaderAppBarTitleBuilder? titleBuilder;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final VoidCallback? onLongPress;
@@ -762,19 +812,39 @@ class _MovingHeaderTitle extends StatelessWidget {
   final double left;
   final double right;
   final double progress;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
+    final textStyle = TextStyle.lerp(
+      TextStyles.display2,
+      TextStyles.display3,
+      progress,
+    )!.copyWith(color: colors.textBase);
+
+    final customTitleBuilder = titleBuilder;
+    if (customTitleBuilder != null) {
+      return Positioned(
+        left: left,
+        right: right,
+        top: top,
+        child: customTitleBuilder(
+          context,
+          HeaderAppBarTitleState(
+            title: title,
+            textStyle: textStyle,
+            height: height,
+          ),
+        ),
+      );
+    }
+
     final titleText = Text(
       title,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: TextStyle.lerp(
-        TextStyles.display2,
-        TextStyles.display3,
-        progress,
-      )!.copyWith(color: colors.textBase),
+      style: textStyle,
     );
 
     return Positioned(
