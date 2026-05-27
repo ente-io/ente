@@ -117,15 +117,10 @@ Learn more in the [storage optimization guide](/photos/features/albums-and-organ
 
 ### Platform availability
 
-**Mobile apps (iOS and Android):**
+**Mobile, web, and desktop:**
 
 - Full support for collaborative albums
 - Can view, add, and manage photos
-
-**Web and desktop:**
-
-- Currently view-only mode for collaborative albums
-- We're actively working on adding full collaboration support
 
 ## Collecting photos from anyone
 
@@ -196,14 +191,14 @@ When someone adds a photo via a collect link:
 
 ## Comparison
 
-| Feature                            | Collaborative Albums                   | Collect Links                         |
-| ---------------------------------- | -------------------------------------- | ------------------------------------- |
-| **Participants need Ente account** | Yes                                    | No                                    |
-| **Access method**                  | Email invitation                       | Link                                  |
-| **Who pays for storage**           | Each uploader                          | Album owner                           |
-| **Best for**                       | Ongoing collaboration with Ente users  | One-time collection from large groups |
-| **Platform support**               | Mobile (full), Web/Desktop (view only) | All platforms via web browser         |
-| **Can set upload limits**          | No (trust-based)                       | Yes (password, expiry, device limits) |
+| Feature                            | Collaborative Albums                  | Collect Links                         |
+| ---------------------------------- | ------------------------------------- | ------------------------------------- |
+| **Participants need Ente account** | Yes                                   | No                                    |
+| **Access method**                  | Email invitation                      | Link                                  |
+| **Who pays for storage**           | Each uploader                         | Album owner                           |
+| **Best for**                       | Ongoing collaboration with Ente users | One-time collection from large groups |
+| **Platform support**               | Mobile, web, and desktop              | All platforms via web browser         |
+| **Can set upload limits**          | No (trust-based)                      | Yes (password, expiry, device limits) |
 
 ## Related topics
 

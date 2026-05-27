@@ -42,7 +42,7 @@ Multiple Ente users can add photos to the same album:
 - All collaborators can contribute photos
 - Each person's uploads count towards their own storage
 - Owner controls permissions and membership
-- Currently full support on mobile, view-only on web/desktop
+- Supported on mobile, web, and desktop
 
 Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/collaboration)
 
@@ -197,8 +197,8 @@ When a collaborator is removed from a shared album (or when they leave the album
 
 **Collaborative albums** (sharing with other Ente users):
 
-- Fully supported on mobile apps (iOS and Android)
-- View-only mode on web and desktop (we're actively working on adding full support)
+- Fully supported on mobile apps (iOS and Android), web, and desktop
+- Can view, add, and manage photos
 
 **Collaborative links** (collect links):
 
@@ -483,11 +483,15 @@ Ente creates a special album behind the scenes with the selected photos. Quick l
 
 ### Can I add photos from a shared album to my own albums? {#add-shared-photos}
 
-Yes, on Ente's mobile apps, you can add photos from an album that's shared with you into one of your own albums.
+Yes, on Ente's mobile, web, and desktop apps, you can add photos from an album that's shared with you into one of your own albums.
 
 **Important**: This creates a copy of the photo that you fully own, and it will count against your storage quota. This is different from just viewing shared photos, which doesn't use your storage.
 
 The reason for creating copies is to avoid complications around ownership - if the original owner deletes the photo from their library, your copy remains safe in your account.
+
+### Can I upload, add, or move files in shared albums on web/desktop? {#manage-shared-album-files}
+
+Yes. On web and desktop, collaborators, admins, and owners can upload files from their device to shared albums, and can add files already in their Ente library to shared albums.
 
 ### Why does adding shared photos to my albums count against my storage? {#shared-storage-count}
 
