@@ -56,7 +56,6 @@ import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMa
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
-import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     addOrCopyToCollection,
@@ -179,8 +178,6 @@ export const Upload: React.FC<UploadProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showNotification, watchFolderView } = usePhotosAppContext();
-    const { isInternalUser } = useSettingsSnapshot();
-    const canUseSharedAlbumUpload = isInternalUser;
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [
@@ -571,8 +568,7 @@ export const Upload: React.FC<UploadProps> = ({
             const canUploadToActiveCollection =
                 props.activeCollection &&
                 (props.activeCollection.owner.id == user?.id ||
-                    (canUseSharedAlbumUpload &&
-                        canAddFilesToCollection(props.activeCollection)));
+                    canAddFilesToCollection(props.activeCollection));
             if (props.activeCollection && canUploadToActiveCollection) {
                 uploadFilesToExistingCollection(props.activeCollection);
                 return;
@@ -655,7 +651,7 @@ export const Upload: React.FC<UploadProps> = ({
         try {
             const uploadCollection = canDirectlyUploadToCollection(collection)
                 ? collection
-                : canUseSharedAlbumUpload && canAddFilesToCollection(collection)
+                : canAddFilesToCollection(collection)
                   ? await savedOrCreateUserUncategorizedCollection()
                   : undefined;
 

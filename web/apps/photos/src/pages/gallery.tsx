@@ -255,8 +255,7 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
-    const { customDomain, isInternalUser } = useSettingsSnapshot();
-    const canUseSharedAlbumAdd = isInternalUser;
+    const { customDomain } = useSettingsSnapshot();
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
 
@@ -994,14 +993,12 @@ const Page: React.FC = () => {
                         (f) => f.ownerID == user!.id,
                     );
                     /**
-                     * The shared-album add/copy path can process non-owned
-                     * files, but keep the old owner-only behavior for users who
-                     * do not pass the shared-album add gate.
+                     * The add/copy path can process non-owned files when a
+                     * shared album requires copying them through the current
+                     * user's library.
                      */
                     const filesToProcess =
-                        canUseSharedAlbumAdd && op == "add"
-                            ? selectedFiles
-                            : userFiles;
+                        op == "add" ? selectedFiles : userFiles;
                     const sourceCollectionID = selected.collectionID;
                     if (filesToProcess.length > 0) {
                         await performCollectionOp(
@@ -1012,7 +1009,7 @@ const Page: React.FC = () => {
                         );
                     }
                     if (
-                        !(canUseSharedAlbumAdd && op == "add") &&
+                        op != "add" &&
                         userFiles.length != selectedFiles.length
                     ) {
                         showMiniDialog(notifyOthersFilesDialogAttributes());

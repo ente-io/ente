@@ -83,7 +83,7 @@ const ChangelogContent: React.FC = () => {
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "Upload files directly to shared albums. Add shared files to your albums or shared albums. Favorite files in shared albums. Indicator for shared files in map view.",
+                    "Upload files to shared albums. Add shared files to your albums or shared albums. Favorite files in shared albums. Indicator for shared files in map view.",
                 )}
             </Typography>
         </Stack>

@@ -7,6 +7,14 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v1.7.24 (desktop) - May 2026
+
+- Upload files to shared albums
+- Add shared files to your albums
+- Add shared files to shared albums
+- Favorite files in shared albums
+- Indicator for shared files in map view
+
 ## v1.3.44 (mobile) - May 2026
 
 - Added support for selecting photos in 3rd party apps
