@@ -946,10 +946,6 @@ Future<ButtonResult?> _showMixedDeleteTargetSheet({
   );
 }
 
-Widget _deleteSheetIllustration() {
-  return Image.asset("assets/warning-grey.png");
-}
-
 Future<ButtonResult?> _showSingleDeleteConfirmationSheet({
   required BuildContext context,
   required String body,
@@ -964,7 +960,7 @@ Future<ButtonResult?> _showSingleDeleteConfirmationSheet({
     builder: (sheetContext) => BottomSheetComponent(
       title: l10n.areYouSure,
       message: body,
-      illustration: _deleteSheetIllustration(),
+      illustration: Image.asset("assets/warning-grey.png"),
       closeTooltip: l10n.close,
       closeResult: ButtonResult(ButtonAction.fourth),
       actions: [
@@ -1001,7 +997,7 @@ class _MixedDeleteTargetSheet extends StatelessWidget {
     return BottomSheetComponent(
       title: title,
       message: '$body\n$bodyHighlight',
-      illustration: _deleteSheetIllustration(),
+      illustration: Image.asset("assets/warning-grey.png"),
       closeTooltip: closeTooltip,
       actions: [
         for (final option in options)
