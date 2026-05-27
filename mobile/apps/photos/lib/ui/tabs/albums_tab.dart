@@ -398,7 +398,7 @@ class _AlbumsTabState extends State<AlbumsTab>
       padding: const EdgeInsets.only(left: 8, right: 8, top: 16),
       child: Text(
         title,
-        style: TextStyles.large.copyWith(color: colors.textLight),
+        style: TextStyles.large.copyWith(color: colors.textBase),
       ),
     );
   }

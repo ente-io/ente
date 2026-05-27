@@ -9,38 +9,49 @@ class MoreCountWidget extends StatelessWidget {
   final MoreCountType type;
   final bool thumbnailView;
   final int count;
+  final Color? backgroundColor;
+  final Color? textColor;
 
   const MoreCountWidget(
     this.count, {
     super.key,
     this.type = MoreCountType.medium,
     this.thumbnailView = false,
+    this.backgroundColor,
+    this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final displayChar = "+$count";
-    final Color decorationColor = thumbnailView
-        ? backgroundElevated2Light
-        : colorScheme.backgroundElevated2;
+    final Color decorationColor =
+        backgroundColor ??
+        (thumbnailView
+            ? backgroundElevated2Light
+            : colorScheme.backgroundElevated2);
 
     final avatarStyle = getAvatarStyle(context, type);
     final double size = avatarStyle.item1;
-    final TextStyle textStyle = thumbnailView
-        ? avatarStyle.item2.copyWith(color: textFaintLight)
-        : avatarStyle.item2.copyWith(color: Colors.white);
+    final resolvedTextColor =
+        textColor ??
+        (thumbnailView && backgroundColor == null
+            ? textBaseLight
+            : Colors.white);
+    final TextStyle textStyle = avatarStyle.item2.copyWith(
+      color: resolvedTextColor,
+    );
     return Container(
-      padding: const EdgeInsets.all(0.5),
+      padding: thumbnailView ? EdgeInsets.zero : const EdgeInsets.all(0.5),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(
-          color: thumbnailView
-              ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
-          width: 1.0,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
+        border: thumbnailView
+            ? null
+            : Border.all(
+                color: getEnteColorScheme(context).strokeMuted,
+                width: 1.0,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
       ),
       child: SizedBox(
         height: size,

@@ -50,6 +50,7 @@ class AlbumSharesIcons extends StatelessWidget {
             sharees.length - displayCount,
             type: moreCountTypeFromAvatarType(type),
             thumbnailView: removeBorder,
+            backgroundColor: getUserAvatarColor(context, sharees[displayCount]),
           ),
         ),
       );
