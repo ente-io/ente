@@ -10,6 +10,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/gateways/collections/models/create_request.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
+import 'package:photos/models/button_result.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/files_split.dart';
@@ -344,71 +345,125 @@ class CollectionActions {
     BuildContext context,
     List<Collection> collections,
   ) async {
-    final colors = context.componentColors;
-    final actionResult = await showActionSheet(
+    return _showDeleteCollectionConfirmationSheet(
       context: context,
-      buttons: [
-        ButtonWidget(
-          labelText: AppLocalizations.of(context).keepPhotos,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.first,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          onTap: () async {
-            for (final collection in collections) {
-              try {
-                await trashCollectionKeepingPhotos(collection, context);
-              } catch (e, s) {
-                logger.severe(
-                  "Failed to keep photos & delete collection",
-                  e,
-                  s,
-                );
-                rethrow;
-              }
-            }
-          },
-        ),
-        ButtonWidget(
-          labelText: AppLocalizations.of(context).deletePhotos,
-          buttonType: ButtonType.critical,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          onTap: () async {
-            for (final collection in collections) {
-              try {
-                await collectionsService.trashNonEmptyCollection(collection);
-              } catch (e) {
-                logger.severe("Failed to delete collection", e);
-                rethrow;
-              }
-            }
-          },
-        ),
-        ButtonWidget(
-          labelText: AppLocalizations.of(context).cancel,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.third,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
-      bodyWidget: StyledText(
-        text: AppLocalizations.of(
-          context,
-        ).deleteMultipleAlbumDialog(count: collections.length),
-        style: TextStyles.body.copyWith(color: colors.textLight),
-        tags: {
-          'bold': StyledTextTag(
-            style: TextStyles.body.copyWith(color: colors.textBase),
+      title: AppLocalizations.of(context).deleteMultipleAlbumsQuestion,
+      message: AppLocalizations.of(
+        context,
+      ).deleteMultipleAlbumDialog(count: collections.length),
+      keepPhotos: () async {
+        for (final collection in collections) {
+          try {
+            await trashCollectionKeepingPhotos(collection, context);
+          } catch (e, s) {
+            logger.severe("Failed to keep photos & delete collection", e, s);
+            rethrow;
+          }
+        }
+      },
+      deletePhotos: () async {
+        for (final collection in collections) {
+          try {
+            await collectionsService.trashNonEmptyCollection(collection);
+          } catch (e) {
+            logger.severe("Failed to delete collection", e);
+            rethrow;
+          }
+        }
+      },
+    );
+  }
+
+  // deleteCollectionSheet returns true if the album is successfully deleted
+  Future<bool> deleteCollectionSheet(
+    BuildContext bContext,
+    Collection collection,
+  ) async {
+    final currentUserID = Configuration.instance.getUserID()!;
+    if (collection.owner.id != currentUserID) {
+      throw AssertionError("Can not delete album owned by others");
+    }
+    if (collection.hasSharees) {
+      final bool confirmDelete = await _confirmSharedAlbumDeletion(
+        bContext,
+        collection,
+      );
+      if (!confirmDelete) {
+        return false;
+      }
+    }
+    return _showDeleteCollectionConfirmationSheet(
+      context: bContext,
+      title: AppLocalizations.of(bContext).deleteAlbumQuestion,
+      message: AppLocalizations.of(bContext).deleteAlbumDialog,
+      keepPhotos: () async {
+        try {
+          await trashCollectionKeepingPhotos(collection, bContext);
+        } catch (e, s) {
+          logger.severe("Failed to keep photos & delete collection", e, s);
+          rethrow;
+        }
+      },
+      deletePhotos: () async {
+        try {
+          await collectionsService.trashNonEmptyCollection(collection);
+        } catch (e) {
+          logger.severe("Failed to delete collection", e);
+          rethrow;
+        }
+      },
+    );
+  }
+
+  Future<bool> _showDeleteCollectionConfirmationSheet({
+    required BuildContext context,
+    required String title,
+    required String message,
+    required Future<void> Function() keepPhotos,
+    required Future<void> Function() deletePhotos,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final actionResult = await showBottomSheetComponent<ButtonResult>(
+      context: context,
+      builder: (sheetContext) {
+        final colors = sheetContext.componentColors;
+        return BottomSheetComponent(
+          title: title,
+          illustration: Image.asset("assets/warning-grey.png"),
+          closeTooltip: l10n.close,
+          closeResult: ButtonResult(ButtonAction.third),
+          content: StyledText(
+            text: message,
+            textAlign: TextAlign.center,
+            style: TextStyles.body.copyWith(color: colors.textLight),
+            tags: {
+              'bold': StyledTextTag(
+                style: TextStyles.body.copyWith(color: colors.textBase),
+              ),
+            },
           ),
-        },
-      ),
-      actionSheetType: ActionSheetType.defaultActionSheet,
+          actions: [
+            ButtonComponent(
+              label: l10n.keepPhotos,
+              variant: ButtonComponentVariant.neutral,
+              onTap: () => _runCollectionAction(
+                sheetContext,
+                ButtonAction.first,
+                keepPhotos,
+              ),
+            ),
+            ButtonComponent(
+              label: l10n.deletePhotos,
+              variant: ButtonComponentVariant.critical,
+              onTap: () => _runCollectionAction(
+                sheetContext,
+                ButtonAction.second,
+                deletePhotos,
+              ),
+            ),
+          ],
+        );
+      },
     );
     if (actionResult?.action != null &&
         actionResult!.action == ButtonAction.error) {
@@ -426,94 +481,28 @@ class CollectionActions {
     return false;
   }
 
-  // deleteCollectionSheet returns true if the album is successfully deleted
-  Future<bool> deleteCollectionSheet(
-    BuildContext bContext,
-    Collection collection,
+  Future<void> _runCollectionAction(
+    BuildContext context,
+    ButtonAction action,
+    Future<void> Function() callback,
   ) async {
-    final colors = bContext.componentColors;
-    final currentUserID = Configuration.instance.getUserID()!;
-    if (collection.owner.id != currentUserID) {
-      throw AssertionError("Can not delete album owned by others");
-    }
-    if (collection.hasSharees) {
-      final bool confirmDelete = await _confirmSharedAlbumDeletion(
-        bContext,
-        collection,
-      );
-      if (!confirmDelete) {
-        return false;
+    try {
+      await callback();
+      if (context.mounted) {
+        Navigator.of(context).pop(ButtonResult(action));
       }
+    } catch (error) {
+      if (context.mounted) {
+        Navigator.of(
+          context,
+        ).pop(ButtonResult(ButtonAction.error, _toException(error)));
+      }
+      rethrow;
     }
-    final actionResult = await showActionSheet(
-      context: bContext,
-      buttons: [
-        ButtonWidget(
-          labelText: AppLocalizations.of(bContext).keepPhotos,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.first,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          onTap: () async {
-            try {
-              await trashCollectionKeepingPhotos(collection, bContext);
-            } catch (e, s) {
-              logger.severe("Failed to keep photos & delete collection", e, s);
-              rethrow;
-            }
-          },
-        ),
-        ButtonWidget(
-          labelText: AppLocalizations.of(bContext).deletePhotos,
-          buttonType: ButtonType.critical,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          onTap: () async {
-            try {
-              await collectionsService.trashNonEmptyCollection(collection);
-            } catch (e) {
-              logger.severe("Failed to delete collection", e);
-              rethrow;
-            }
-          },
-        ),
-        ButtonWidget(
-          labelText: AppLocalizations.of(bContext).cancel,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.third,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
-      bodyWidget: StyledText(
-        text: AppLocalizations.of(bContext).deleteAlbumDialog,
-        style: TextStyles.body.copyWith(color: colors.textLight),
-        tags: {
-          'bold': StyledTextTag(
-            style: TextStyles.body.copyWith(color: colors.textBase),
-          ),
-        },
-      ),
-      actionSheetType: ActionSheetType.defaultActionSheet,
-    );
-    if (actionResult?.action != null &&
-        actionResult!.action == ButtonAction.error) {
-      await showGenericErrorDialog(
-        context: bContext,
-        error: actionResult.exception,
-      );
-      return false;
-    }
-    if ((actionResult?.action != null) &&
-        (actionResult!.action == ButtonAction.first ||
-            actionResult.action == ButtonAction.second)) {
-      return true;
-    }
-    return false;
+  }
+
+  Exception _toException(Object error) {
+    return error is Exception ? error : Exception(error.toString());
   }
 
   Future<void> trashCollectionKeepingPhotos(
