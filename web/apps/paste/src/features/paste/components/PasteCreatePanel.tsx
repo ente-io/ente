@@ -17,12 +17,14 @@ import {
     Typography,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { MAX_PASTE_CHARS } from "../constants";
 import { PasteLinkCard } from "./PasteLinkCard";
+import { downloadPasteQrCode } from "./PasteQrCode";
 import { pasteTextFieldSx } from "./textFieldSx";
 
 interface PasteCreatePanelProps {
@@ -30,6 +32,7 @@ interface PasteCreatePanelProps {
     creating: boolean;
     createError: string | null;
     createdLink: string | null;
+    createdLinkPasswordProtected: boolean;
     onInputChange: (value: string) => void;
     onCreate: (password?: string) => Promise<void>;
     onCopyLink: (value: string) => Promise<void>;
@@ -41,6 +44,7 @@ export const PasteCreatePanel = ({
     creating,
     createError,
     createdLink,
+    createdLinkPasswordProtected,
     onInputChange,
     onCreate,
     onCopyLink,
@@ -53,6 +57,8 @@ export const PasteCreatePanel = ({
     const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const isInputEmpty = inputText.trim().length === 0;
     const nearLimitThreshold = Math.floor(MAX_PASTE_CHARS * 0.9);
@@ -61,6 +67,18 @@ export const PasteCreatePanel = ({
     const passwordTooltip = passwordProtected
         ? "Password protection enabled"
         : "Password protect";
+    const errorColor =
+        resolvedMode === "dark"
+            ? "rgba(255, 139, 160, 0.9)"
+            : "rgba(178, 42, 72, 0.9)";
+    const passwordDialogBg = resolvedMode === "dark" ? "#0d1016" : "#f8fbff";
+    const passwordFieldBg = resolvedMode === "dark" ? "#191c22" : "#ffffff";
+    const passwordFieldHoverBg =
+        resolvedMode === "dark" ? "#20232b" : "#f4f8ff";
+    const passwordDialogShadow =
+        resolvedMode === "dark"
+            ? "0 22px 56px rgba(0, 0, 0, 0.48)"
+            : "0 18px 44px rgba(17, 49, 114, 0.18)";
     const privacyPills = [
         "Private",
         isMobile ? "E2EE" : "End-to-end encrypted",
@@ -68,19 +86,105 @@ export const PasteCreatePanel = ({
         "Auto-deletes after 24 hours",
     ];
     const passwordFieldSx = {
-        "& .MuiInputLabel-root": { color: tokens.text.muted },
-        "& .MuiOutlinedInput-root": {
-            color: tokens.text.primary,
-            "& fieldset": { borderColor: tokens.surface.dialogBorder },
-            "&:hover fieldset": { borderColor: tokens.button.ghostHoverBorder },
-            "&.Mui-focused fieldset": { borderColor: tokens.button.primaryBg },
+        ...pasteTextFieldSx(tokens, "14px"),
+        "& .MuiFilledInput-root": {
+            borderRadius: "12px",
+            bgcolor: resolvedMode === "dark" ? "transparent" : passwordFieldBg,
+            border: "1px solid",
+            borderColor: tokens.surface.inputBorder,
+            boxSizing: "border-box",
+            minHeight: 48,
+            alignItems: "center",
+            px: 1.45,
+            py: 0,
+            background:
+                resolvedMode === "dark" ? "transparent" : passwordFieldBg,
+            boxShadow: "none",
+            transition:
+                "background 180ms ease, border-color 180ms ease, box-shadow 180ms ease",
+            "&:before, &:after": {
+                display: "none",
+                borderBottom: "0 !important",
+            },
+            "&:hover:not(.Mui-disabled, .Mui-error):before": {
+                display: "none",
+                borderBottom: "0 !important",
+            },
+            "&:hover": {
+                bgcolor:
+                    resolvedMode === "dark"
+                        ? "rgba(255, 255, 255, 0.03)"
+                        : passwordFieldHoverBg,
+                borderColor: tokens.surface.inputBorder,
+                background:
+                    resolvedMode === "dark"
+                        ? "rgba(255, 255, 255, 0.03)"
+                        : passwordFieldHoverBg,
+                boxShadow: "none",
+            },
+            "&.Mui-focused": {
+                bgcolor:
+                    resolvedMode === "dark"
+                        ? "rgba(255, 255, 255, 0.035)"
+                        : passwordFieldBg,
+                borderColor: tokens.button.primaryBg,
+                background:
+                    resolvedMode === "dark"
+                        ? "rgba(255, 255, 255, 0.035)"
+                        : passwordFieldBg,
+                boxShadow: `0 0 0 2px ${tokens.accent.soft}`,
+            },
+            "&.Mui-error": { borderColor: errorColor },
         },
+        "& .MuiInputBase-input": {
+            color: tokens.text.primary,
+            fontSize: { xs: "0.92rem", sm: "0.95rem" },
+            lineHeight: 1.35,
+            padding: "0 !important",
+            borderBottom: "0 !important",
+            boxShadow: "none",
+        },
+        "& .MuiFilledInput-underline:before, & .MuiFilledInput-underline:after":
+            { display: "none", borderBottom: "0 !important" },
+        "& .MuiInputAdornment-root": { ml: 0.75, mr: 0.5 },
+        "& .MuiIconButton-root": {
+            p: 0.75,
+            color: tokens.text.placeholder,
+            "&:hover": {
+                color: tokens.text.primary,
+                bgcolor:
+                    resolvedMode === "dark"
+                        ? "rgba(255, 255, 255, 0.06)"
+                        : "rgba(17, 49, 114, 0.06)",
+            },
+        },
+        "& .MuiIconButton-edgeEnd": { mr: 0 },
+        "& .MuiSvgIcon-root": { fontSize: 19 },
+        "& input::placeholder": { color: tokens.text.placeholder, opacity: 1 },
+        "& .MuiFormHelperText-root": {
+            mx: 0,
+            mt: 0.65,
+            color: tokens.text.subtle,
+            fontSize: "0.78rem",
+            lineHeight: 1.25,
+        },
+        "& .MuiFormHelperText-root.Mui-error": { color: errorColor },
     };
 
     const resetPasswordDialog = () => {
         setPassword("");
         setConfirmPassword("");
+        setShowPassword(false);
+        setShowConfirmPassword(false);
         setPasswordError(null);
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword((visible) => !visible);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword((visible) => !visible);
     };
 
     const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -98,6 +202,17 @@ export const PasteCreatePanel = ({
         setPasswordDialogOpen(false);
         resetPasswordDialog();
         void onCreate(submittedPassword);
+    };
+
+    const handleDownloadQrClick = () => {
+        if (!createdLink) return;
+
+        void downloadPasteQrCode({
+            value: createdLink,
+            tokens,
+            paperBg: tokens.qr.paperBg,
+            showCenterLock: createdLinkPasswordProtected,
+        }).catch(() => undefined);
     };
 
     return (
@@ -187,11 +302,15 @@ export const PasteCreatePanel = ({
                         }}
                     >
                         <Typography
+                            component="span"
                             variant="mini"
                             sx={{
                                 display: "flex",
                                 alignItems: "center",
+                                flexShrink: 0,
                                 color: tokens.text.counter,
+                                fontVariantNumeric: "tabular-nums",
+                                fontFeatureSettings: '"tnum"',
                                 fontWeight: 600,
                                 lineHeight: 1,
                                 letterSpacing: "0.01em",
@@ -391,7 +510,50 @@ export const PasteCreatePanel = ({
                         link={createdLink}
                         onCopy={onCopyLink}
                         onShare={onShareLink}
+                        passwordProtected={createdLinkPasswordProtected}
                     />
+                    <Box
+                        sx={{
+                            mt: 0.85,
+                            display: "flex",
+                            justifyContent: "flex-start",
+                        }}
+                    >
+                        <Typography
+                            component="button"
+                            type="button"
+                            variant="mini"
+                            onClick={handleDownloadQrClick}
+                            sx={{
+                                appearance: "none",
+                                border: 0,
+                                p: 0,
+                                m: 0,
+                                bgcolor: "transparent",
+                                color: tokens.text.muted,
+                                cursor: "pointer",
+                                fontSize: { xs: "0.68rem", sm: "0.72rem" },
+                                fontWeight: 600,
+                                lineHeight: 1.3,
+                                letterSpacing: 0,
+                                opacity: 0.6,
+                                textDecoration: "underline",
+                                textUnderlineOffset: "3px",
+                                "&:hover": {
+                                    color: tokens.text.muted,
+                                    opacity: 0.72,
+                                    textDecoration: "underline",
+                                },
+                                "&:focus-visible": {
+                                    outline: `2px solid ${tokens.button.primaryBg}`,
+                                    outlineOffset: 3,
+                                    borderRadius: "4px",
+                                },
+                            }}
+                        >
+                            Download QR
+                        </Typography>
+                    </Box>
                 </Box>
             )}
 
@@ -411,28 +573,81 @@ export const PasteCreatePanel = ({
                         component: "form",
                         onSubmit: handlePasswordSubmit,
                         sx: {
-                            borderRadius: "16px",
-                            border: `1px solid ${tokens.surface.dialogBorder}`,
-                            bgcolor: tokens.surface.dialogBg,
+                            mx: { xs: 2.5, sm: 3 },
+                            p: { xs: "24px 20px 26px", sm: "28px 26px 30px" },
+                            borderRadius: "24px",
+                            border: "1px solid",
+                            borderColor: tokens.surface.dialogBorder,
+                            boxSizing: "border-box",
+                            bgcolor: passwordDialogBg,
+                            background:
+                                resolvedMode === "dark"
+                                    ? "rgba(13, 16, 22, 0.78)"
+                                    : "rgba(248, 251, 255, 0.82)",
+                            backdropFilter: "blur(16px) saturate(118%)",
+                            WebkitBackdropFilter: "blur(16px) saturate(118%)",
                             color: tokens.text.primary,
-                            boxShadow: tokens.surface.floatingCardShadow,
-                            backdropFilter: "blur(12px) saturate(112%)",
-                            WebkitBackdropFilter: "blur(12px) saturate(112%)",
+                            boxShadow: passwordDialogShadow,
+                            overflow: "hidden",
                         },
                     },
                 }}
             >
-                <DialogTitle sx={{ pb: 1, color: tokens.text.primary }}>
-                    Paste password
+                <DialogTitle
+                    component="div"
+                    sx={{
+                        p: 0,
+                        ml: { xs: -1.4, sm: -1.6 },
+                        color: tokens.text.primary,
+                    }}
+                >
+                    <Typography
+                        component="h2"
+                        sx={{
+                            m: 0,
+                            color: tokens.text.primary,
+                            fontSize: { xs: "1.24rem", sm: "1.38rem" },
+                            fontWeight: 750,
+                            lineHeight: 1.18,
+                        }}
+                    >
+                        Paste password
+                    </Typography>
+                    <Typography
+                        sx={{
+                            mt: 0.5,
+                            color: tokens.text.muted,
+                            fontSize: { xs: "0.86rem", sm: "0.9rem" },
+                            fontWeight: 500,
+                            lineHeight: 1.45,
+                        }}
+                    >
+                        This password will be required to unlock this paste.
+                    </Typography>
                 </DialogTitle>
-                <DialogContent>
-                    <Stack spacing={1.5} sx={{ pt: 1 }}>
+                <DialogContent sx={{ p: "0 !important", mt: 2.25 }}>
+                    <Stack spacing={1.5}>
                         <TextField
                             autoFocus
-                            type="password"
-                            label="Password"
+                            variant="filled"
+                            hiddenLabel
+                            fullWidth
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
                             value={password}
                             autoComplete="off"
+                            slotProps={{
+                                htmlInput: { "aria-label": "Password" },
+                                input: {
+                                    disableUnderline: true,
+                                    endAdornment: (
+                                        <ShowHidePasswordInputAdornment
+                                            showPassword={showPassword}
+                                            onToggle={togglePasswordVisibility}
+                                        />
+                                    ),
+                                },
+                            }}
                             sx={passwordFieldSx}
                             onChange={(event) => {
                                 setPassword(event.target.value);
@@ -440,20 +655,30 @@ export const PasteCreatePanel = ({
                             }}
                         />
                         <TextField
-                            type="password"
-                            label="Confirm password"
+                            variant="filled"
+                            hiddenLabel
+                            fullWidth
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Confirm password"
                             value={confirmPassword}
                             autoComplete="off"
                             error={!!passwordError}
-                            helperText={passwordError ?? " "}
-                            sx={[
-                                passwordFieldSx,
-                                {
-                                    "& .MuiFormHelperText-root": {
-                                        minHeight: "1.25em",
-                                    },
+                            helperText={passwordError}
+                            slotProps={{
+                                htmlInput: { "aria-label": "Confirm password" },
+                                input: {
+                                    disableUnderline: true,
+                                    endAdornment: (
+                                        <ShowHidePasswordInputAdornment
+                                            showPassword={showConfirmPassword}
+                                            onToggle={
+                                                toggleConfirmPasswordVisibility
+                                            }
+                                        />
+                                    ),
                                 },
-                            ]}
+                            }}
+                            sx={passwordFieldSx}
                             onChange={(event) => {
                                 setConfirmPassword(event.target.value);
                                 setPasswordError(null);
@@ -461,10 +686,24 @@ export const PasteCreatePanel = ({
                         />
                     </Stack>
                 </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 2.5 }}>
+                <DialogActions
+                    sx={{
+                        gap: 1.1,
+                        p: "0 !important",
+                        mt: { xs: 3, sm: 3.75 },
+                    }}
+                >
                     <Button
                         variant="outlined"
                         sx={{
+                            minHeight: 40,
+                            minWidth: 96,
+                            px: 1.8,
+                            borderRadius: "999px",
+                            textTransform: "none",
+                            fontSize: "0.9rem",
+                            fontWeight: 600,
+                            letterSpacing: "0.01em",
                             borderColor: tokens.button.ghostBorder,
                             color: tokens.button.ghostText,
                             "&:hover": {
@@ -484,10 +723,21 @@ export const PasteCreatePanel = ({
                         variant="contained"
                         disableElevation
                         sx={{
+                            minHeight: 40,
+                            minWidth: 96,
+                            px: 1.8,
+                            borderRadius: "999px",
+                            textTransform: "none",
+                            fontSize: "0.9rem",
+                            fontWeight: 600,
+                            letterSpacing: "0.01em",
                             bgcolor: tokens.button.primaryBg,
                             color: tokens.button.primaryText,
+                            boxShadow: "0 2px 8px rgba(47, 109, 247, 0.2)",
                             "&:hover": {
                                 bgcolor: tokens.button.primaryHoverBg,
+                                boxShadow:
+                                    "0 3px 10px rgba(47, 109, 247, 0.24)",
                             },
                         }}
                     >

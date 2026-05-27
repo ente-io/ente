@@ -13,6 +13,7 @@ interface PasteQrCodeProps {
     size?: number;
     paperBg?: string;
     borderRadius?: string;
+    showCenterLock?: boolean;
     /** When set, shows a floating close control (e.g. to dismiss the QR panel). */
     onClose?: () => void;
     /** Color mode for close button hover; pass when `onClose` is used. */
@@ -22,6 +23,9 @@ interface PasteQrCodeProps {
 interface QRCodeStylingInstance {
     append(container: HTMLElement): void;
     update(options: Record<string, unknown>): void;
+    download(
+        options?: { name?: string; extension?: string } | string,
+    ): Promise<void>;
     _qr?: { getModuleCount(): number };
 }
 
@@ -36,8 +40,15 @@ interface QRCodeStylingModule {
 type QrErrorCorrectionLevel = "L" | "M" | "Q" | "H";
 
 const QR_ERROR_CORRECTION_LEVEL: QrErrorCorrectionLevel = "M";
+const QR_LOGO_ERROR_CORRECTION_LEVEL: QrErrorCorrectionLevel = "H";
 const QUIET_ZONE_MODULES = 4;
 const QR_LOAD_ERROR_LABEL = "QR unavailable. Refresh to try again.";
+
+const qrCenterLockDataUrl = (paperBg: string, lockColor: string) => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="${paperBg}"/><path fill="${lockColor}" d="M10 14v-2.5C10 8.5 12.5 6 16 6s6 2.5 6 5.5V14h1c1.1 0 2 .9 2 2v8c0 1.1-.9 2-2 2H9c-1.1 0-2-.9-2-2v-8c0-1.1.9-2 2-2h1Zm3 0h6v-2.5C19 10.1 17.9 9 16 9s-3 1.1-3 2.5V14Z"/></svg>`;
+
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+};
 
 const isQRCodeStylingModule = (
     value: unknown,
@@ -67,12 +78,85 @@ const getQrRenderMetrics = (qrSize: number, moduleCount: number) => {
     };
 };
 
+const getPasteQrCodeOptions = ({
+    value,
+    qrSize,
+    qrPaperBg,
+    tokens,
+    showCenterLock,
+}: {
+    value: string;
+    qrSize: number;
+    qrPaperBg: string;
+    tokens: PasteThemeTokens;
+    showCenterLock: boolean;
+}) => ({
+    width: qrSize,
+    height: qrSize,
+    type: "svg",
+    data: value,
+    qrOptions: {
+        errorCorrectionLevel: showCenterLock
+            ? QR_LOGO_ERROR_CORRECTION_LEVEL
+            : QR_ERROR_CORRECTION_LEVEL,
+    },
+    backgroundOptions: { color: qrPaperBg },
+    dotsOptions: { color: tokens.qr.module, type: "rounded" },
+    cornersSquareOptions: { color: tokens.qr.finder, type: "extra-rounded" },
+    cornersDotOptions: { color: tokens.qr.finder, type: "dot" },
+    ...(showCenterLock && {
+        image: qrCenterLockDataUrl(qrPaperBg, tokens.qr.finder),
+        imageOptions: { hideBackgroundDots: true, imageSize: 0.2, margin: 1 },
+    }),
+});
+
+export const downloadPasteQrCode = async ({
+    value,
+    tokens,
+    paperBg,
+    showCenterLock,
+}: {
+    value: string;
+    tokens: PasteThemeTokens;
+    paperBg?: string;
+    showCenterLock: boolean;
+}) => {
+    const qrSize = 512;
+    const qrPaperBg = paperBg ?? tokens.qr.paperBg;
+    const qrCodeStylingModule = (await import("qr-code-styling")) as unknown;
+
+    if (!isQRCodeStylingModule(qrCodeStylingModule)) {
+        throw new Error("Failed to load qr-code-styling");
+    }
+
+    const { default: QRCodeStyling } = qrCodeStylingModule;
+    const qrOptions = getPasteQrCodeOptions({
+        value,
+        qrSize,
+        qrPaperBg,
+        tokens,
+        showCenterLock,
+    });
+    const qrCode = new QRCodeStyling(qrOptions);
+    const moduleCount = getQrModuleCount(qrCode);
+
+    if (moduleCount !== undefined) {
+        qrCode.update({
+            ...qrOptions,
+            ...getQrRenderMetrics(qrSize, moduleCount),
+        });
+    }
+
+    await qrCode.download({ name: "ente-paste-qr", extension: "png" });
+};
+
 export const PasteQrCode = ({
     value,
     tokens,
     size,
     paperBg,
     borderRadius,
+    showCenterLock = false,
     onClose,
     resolvedMode,
 }: PasteQrCodeProps) => {
@@ -85,21 +169,22 @@ export const PasteQrCode = ({
     const qrPaperBg = paperBg ?? tokens.qr.paperBg;
 
     const qrOptions = useMemo(
-        () => ({
-            width: qrSize,
-            height: qrSize,
-            type: "svg",
-            data: value,
-            qrOptions: { errorCorrectionLevel: QR_ERROR_CORRECTION_LEVEL },
-            backgroundOptions: { color: qrPaperBg },
-            dotsOptions: { color: tokens.qr.module, type: "rounded" },
-            cornersSquareOptions: {
-                color: tokens.qr.finder,
-                type: "extra-rounded",
-            },
-            cornersDotOptions: { color: tokens.qr.finder, type: "dot" },
-        }),
-        [qrSize, tokens.qr.finder, tokens.qr.module, qrPaperBg, value],
+        () =>
+            getPasteQrCodeOptions({
+                value,
+                qrSize,
+                qrPaperBg,
+                tokens,
+                showCenterLock,
+            }),
+        [
+            qrSize,
+            showCenterLock,
+            tokens.qr.finder,
+            tokens.qr.module,
+            qrPaperBg,
+            value,
+        ],
     );
 
     useEffect(() => {

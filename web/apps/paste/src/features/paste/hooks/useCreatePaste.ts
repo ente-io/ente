@@ -11,6 +11,8 @@ export const useCreatePaste = () => {
     const [creating, setCreating] = useState(false);
     const [createError, setCreateError] = useState<string | null>(null);
     const [createdLink, setCreatedLink] = useState<string | null>(null);
+    const [createdLinkPasswordProtected, setCreatedLinkPasswordProtected] =
+        useState(false);
 
     const createSecureLink = async (password?: string) => {
         setCreateError(null);
@@ -33,6 +35,7 @@ export const useCreatePaste = () => {
             );
             const response = await createPaste(payload);
             setCreatedLink(buildPasteLink(response.accessToken, linkFragment));
+            setCreatedLinkPasswordProtected(!!password);
         } catch (error) {
             const message =
                 error instanceof Error
@@ -50,6 +53,7 @@ export const useCreatePaste = () => {
         creating,
         createError,
         createdLink,
+        createdLinkPasswordProtected,
         createSecureLink,
     };
 };
