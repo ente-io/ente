@@ -15,11 +15,11 @@ No. Both creating and opening a paste are anonymous. Paste does not have a sign-
 
 ### How long does a paste last? {#paste-expiry}
 
-A paste lasts until the first time it is opened, or 24 hours from creation, whichever comes first. Once consumed, the ciphertext is deleted from Ente's servers and cannot be retrieved.
+A paste lasts until Ente serves the ciphertext to a browser, or 24 hours from creation, whichever comes first. Once consumed, the ciphertext is deleted from Ente's servers and cannot be retrieved.
 
 ### Can I open the same paste twice? {#paste-open-twice}
 
-No. A paste is consumed the first time it is successfully opened. Reloading the page, opening the link on a second device, or sharing it onward after the first read all result in "This paste has expired or was already opened."
+No. A paste is consumed when Ente serves the ciphertext to a browser. For regular links that is the first open; for password-protected links, entering the wrong password after the ciphertext is fetched also consumes the paste. Reloading the page, opening the link on a second device, or sharing it onward after that all result in "This paste has expired or was already opened."
 
 If you need the recipient to be able to refer back to the text, ask them to copy it once they have opened the paste, or use [Ente Locker](/locker/) for durable storage.
 
