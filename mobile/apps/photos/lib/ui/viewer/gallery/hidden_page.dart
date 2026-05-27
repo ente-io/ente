@@ -263,7 +263,9 @@ class _HiddenPageState extends State<HiddenPage> {
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
+            preferredSize: const Size.fromHeight(
+              GalleryAppBarWidget.toolbarHeight,
+            ),
             child: GalleryAppBarWidget(
               widget.appBarType,
               AppLocalizations.of(context).hidden,

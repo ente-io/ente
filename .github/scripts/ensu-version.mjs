@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const files = {
     packageJson: path.join(root, "rust/apps/ensu/package.json"),
+    packageLock: path.join(root, "rust/apps/ensu/package-lock.json"),
     tauri: path.join(root, "rust/apps/ensu/src-tauri/tauri.conf.json"),
     cargoToml: path.join(root, "rust/apps/ensu/src-tauri/Cargo.toml"),
     cargoLock: path.join(root, "rust/Cargo.lock"),
@@ -57,6 +58,8 @@ function check() {
     const releaseVersion = trimVersion(version);
 
     expect("tauri.conf.json", JSON.parse(read(files.tauri)).package?.version, version);
+    expect("package-lock.json", value(files.packageLock, /"name": "ensu-desktop",\n  "version": "([^"]+)"/), version);
+    expect("package-lock.json packages[\"\"]", value(files.packageLock, /"": \{\n      "name": "ensu-desktop",\n      "version": "([^"]+)"/), version);
     expect("Cargo.toml", value(files.cargoToml, /\[package\][\s\S]*?^version = "([^"]+)"/m), version);
     expect("Cargo.lock", value(files.cargoLock, /\[\[package\]\]\nname = "ensu-desktop"\nversion = "([^"]+)"/), version);
     expect("Android versionName", value(files.android, /versionName = "([^"]+)"/), releaseVersion);
@@ -72,10 +75,9 @@ function check() {
 function setVersion(version) {
     const releaseVersion = trimVersion(version);
 
-    const packageJson = JSON.parse(read(files.packageJson));
-    packageJson.version = version;
-    write(files.packageJson, `${JSON.stringify(packageJson, null, 2)}\n`);
-
+    replace(files.packageJson, /("name": "ensu-desktop",\n\s+"version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.packageLock, /("name": "ensu-desktop",\n  "version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.packageLock, /("": \{\n      "name": "ensu-desktop",\n      "version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
     replace(files.tauri, /("package"\s*:\s*\{[\s\S]*?"version"\s*:\s*")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
     replace(files.cargoToml, /(\[package\][\s\S]*?^version = ")[^"]+(")/m, (_m, a, b) => `${a}${version}${b}`);
     replace(files.cargoLock, /(\[\[package\]\]\nname = "ensu-desktop"\nversion = ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);

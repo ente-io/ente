@@ -30,6 +30,21 @@ void main() {
     expect(tapCount, 1);
   });
 
+  testWidgets("ButtonComponent renders leading content", (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        ButtonComponent(
+          label: "Share",
+          leading: const Icon(Icons.share_outlined),
+          onTap: () {},
+        ),
+      ),
+    );
+
+    expect(find.text("Share"), findsOneWidget);
+    expect(find.byIcon(Icons.share_outlined), findsOneWidget);
+  });
+
   testWidgets(
     "Small ButtonComponent shrink-wraps content without a minimum width",
     (tester) async {
@@ -183,6 +198,34 @@ void main() {
       expect(find.text("Saved"), findsOneWidget);
     },
   );
+
+  testWidgets("ButtonComponent can surface loading without success", (
+    tester,
+  ) async {
+    final completer = Completer<void>();
+
+    await tester.pumpWidget(
+      _wrap(
+        ButtonComponent(
+          label: "Saving",
+          shouldShowSuccessState: false,
+          onTap: () => completer.future,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text("Saving"));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const ValueKey('loading')), findsOneWidget);
+
+    completer.complete();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byKey(const ValueKey('success')), findsNothing);
+    expect(find.text("Saving"), findsOneWidget);
+  });
 
   testWidgets(
     "ButtonComponent can hide execution visuals while still blocking taps",

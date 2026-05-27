@@ -1,4 +1,5 @@
 import "package:dio/dio.dart";
+import "package:ente_components/ente_components.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
@@ -7,7 +8,6 @@ import 'package:photos/models/button_result.dart';
 import 'package:photos/models/typedefs.dart';
 import "package:photos/module/download/manager.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -17,8 +17,6 @@ import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/utils/email_util.dart";
-
-typedef DialogBuilder = DialogWidget Function(BuildContext context);
 
 ///Will return null if dismissed by tapping outside
 Future<ButtonResult?> showInfoDialog(
@@ -235,40 +233,6 @@ Future<void> showGenericErrorBottomSheet({
   );
 }
 
-DialogWidget choiceDialog({
-  required String title,
-  String? body,
-  required String firstButtonLabel,
-  String secondButtonLabel = "Cancel",
-  ButtonType firstButtonType = ButtonType.neutral,
-  ButtonType secondButtonType = ButtonType.secondary,
-  ButtonAction firstButtonAction = ButtonAction.first,
-  ButtonAction secondButtonAction = ButtonAction.cancel,
-  FutureVoidCallback? firstButtonOnTap,
-  FutureVoidCallback? secondButtonOnTap,
-  bool isCritical = false,
-  IconData? icon,
-}) {
-  final buttons = [
-    ButtonWidget(
-      buttonType: isCritical ? ButtonType.critical : firstButtonType,
-      labelText: firstButtonLabel,
-      isInAlert: true,
-      onTap: firstButtonOnTap,
-      buttonAction: firstButtonAction,
-    ),
-    ButtonWidget(
-      buttonType: secondButtonType,
-      labelText: secondButtonLabel,
-      isInAlert: true,
-      onTap: secondButtonOnTap,
-      buttonAction: secondButtonAction,
-    ),
-  ];
-
-  return DialogWidget(title: title, body: body, buttons: buttons, icon: icon);
-}
-
 ///Will return null if dismissed by tapping outside
 Future<ButtonResult?> showChoiceDialog(
   BuildContext context, {
@@ -378,7 +342,7 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-///Can return ButtonResult? from ButtonWidget or Exception? from TextInputDialog
+/// Returns null on successful submit, ButtonResult on cancel, and Exception on submit failure.
 Future<dynamic> showTextInputDialog(
   BuildContext context, {
   required String title,
@@ -403,39 +367,31 @@ Future<dynamic> showTextInputDialog(
   bool useRootNavigator = false,
   bool popnavAfterSubmission = true,
 }) {
-  return showDialog(
-    barrierColor: backdropFaintDark,
+  return showBottomSheetComponent<dynamic>(
     context: context,
     useRootNavigator: useRootNavigator,
-    builder: (context) {
-      final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-      final isKeyboardUp = bottomInset > 100;
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomInset : 0),
-          child: TextInputDialog(
-            title: title,
-            message: message,
-            label: label,
-            body: body,
-            icon: icon,
-            submitButtonLabel: submitButtonLabel,
-            onSubmit: onSubmit,
-            hintText: hintText,
-            prefixIcon: prefixIcon,
-            initialValue: initialValue,
-            alignMessage: alignMessage,
-            maxLength: maxLength,
-            showOnlyLoadingState: showOnlyLoadingState,
-            textCapitalization: textCapitalization,
-            alwaysShowSuccessState: alwaysShowSuccessState,
-            isPasswordInput: isPasswordInput,
-            textEditingController: textEditingController,
-            textInputFormatter: textInputFormatter,
-            textInputType: textInputType,
-            popnavAfterSubmission: popnavAfterSubmission,
-          ),
-        ),
+    builder: (_) {
+      return TextInputDialog(
+        title: title,
+        message: message,
+        label: label,
+        body: body,
+        icon: icon,
+        submitButtonLabel: submitButtonLabel,
+        onSubmit: onSubmit,
+        hintText: hintText,
+        prefixIcon: prefixIcon,
+        initialValue: initialValue,
+        alignMessage: alignMessage,
+        maxLength: maxLength,
+        showOnlyLoadingState: showOnlyLoadingState,
+        textCapitalization: textCapitalization,
+        alwaysShowSuccessState: alwaysShowSuccessState,
+        isPasswordInput: isPasswordInput,
+        textEditingController: textEditingController,
+        textInputFormatter: textInputFormatter,
+        textInputType: textInputType,
+        popnavAfterSubmission: popnavAfterSubmission,
       );
     },
   );

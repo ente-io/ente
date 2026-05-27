@@ -28,6 +28,7 @@ RUN yarn build:cast
 RUN yarn build:share
 RUN yarn build:embed
 RUN yarn build:paste
+RUN yarn build:locker
 RUN yarn build:memories
 
 FROM nginx
@@ -42,6 +43,7 @@ COPY --from=builder /build/web/apps/cast/out /out/cast
 COPY --from=builder /build/web/apps/share/out /out/share
 COPY --from=builder /build/web/apps/embed/out /out/embed
 COPY --from=builder /build/web/apps/paste/out /out/paste
+COPY --from=builder /build/web/apps/locker/out /out/locker
 COPY --from=builder /build/web/apps/memories/out /out/memories
 
 COPY <<EOF /etc/nginx/conf.d/default.conf
@@ -78,6 +80,10 @@ server {
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
+    listen 3009; root /out/locker;
+    location / { try_files \$uri \$uri.html /index.html; }
+}
+server {
     listen 3010; root /out/memories;
     location / { try_files \$uri \$uri.html /index.html; }
 }
@@ -91,6 +97,7 @@ EXPOSE 3004
 EXPOSE 3005
 EXPOSE 3006
 EXPOSE 3008
+EXPOSE 3009
 EXPOSE 3010
 
 ENV ENTE_API_ORIGIN=http://localhost:8080
