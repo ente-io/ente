@@ -340,7 +340,7 @@ class _ButtonComponentState extends State<ButtonComponent>
     if (widget.isDisabled || widget.onTap == null) {
       return _ResolvedButtonColors(
         background: _disabledBackground(context),
-        foreground: _componentColors(context).textLighter,
+        foreground: _componentColors(context).textLightest,
       );
     }
 
@@ -475,7 +475,7 @@ class _ButtonComponentState extends State<ButtonComponent>
     final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.primary,
-      ButtonComponentVariant.secondary => colors.primaryLight,
+      ButtonComponentVariant.secondary => colors.fillDark,
       ButtonComponentVariant.neutral => colors.fillBase,
       ButtonComponentVariant.critical => colors.warning,
       ButtonComponentVariant.tertiaryCritical => Colors.transparent,
@@ -487,7 +487,7 @@ class _ButtonComponentState extends State<ButtonComponent>
     final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.primaryDark,
-      ButtonComponentVariant.secondary => colors.primaryLightHover,
+      ButtonComponentVariant.secondary => colors.fillDarker,
       ButtonComponentVariant.neutral => colors.fillBase,
       ButtonComponentVariant.critical => colors.warningDark,
       ButtonComponentVariant.tertiaryCritical => Colors.transparent,
@@ -499,7 +499,7 @@ class _ButtonComponentState extends State<ButtonComponent>
     final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.primaryDarker,
-      ButtonComponentVariant.secondary => colors.primaryLightPressed,
+      ButtonComponentVariant.secondary => colors.fillDarkest,
       ButtonComponentVariant.neutral => colors.fillBase,
       ButtonComponentVariant.critical => colors.warningDarker,
       ButtonComponentVariant.tertiaryCritical => Colors.transparent,
@@ -524,10 +524,7 @@ class _ButtonComponentState extends State<ButtonComponent>
     final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.specialWhite,
-      ButtonComponentVariant.secondary => _secondaryForeground(
-        colors,
-        isPressed: isPressed,
-      ),
+      ButtonComponentVariant.secondary => colors.textBase,
       ButtonComponentVariant.neutral => colors.textReverse,
       ButtonComponentVariant.critical => colors.specialWhite,
       ButtonComponentVariant.tertiaryCritical =>
@@ -543,13 +540,6 @@ class _ButtonComponentState extends State<ButtonComponent>
             ? colors.primaryDark
             : colors.primary,
     };
-  }
-
-  Color _secondaryForeground(ColorTokens colors, {required bool isPressed}) {
-    if (colors.primary == colors.blue || colors.primary == colors.purple) {
-      return colors.primary;
-    }
-    return isPressed ? colors.primaryDarker : colors.primaryDark;
   }
 
   ColorTokens _componentColors(BuildContext context) {

@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:ui";
 
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
@@ -309,6 +310,8 @@ void main() {
         _buttonContainerColor(tester, "Disabled"),
         ColorTokens.light.fillDark,
       );
+      expect(_textColor(tester, "No callback"), ColorTokens.light.textLightest);
+      expect(_textColor(tester, "Disabled"), ColorTokens.light.textLightest);
       await tester.tap(find.text("Disabled"));
       await tester.pump();
 
@@ -352,7 +355,8 @@ void main() {
       ),
     );
 
-    expect(_containerColor(tester), ColorTokens.light.primaryLight);
+    expect(_containerColor(tester), ColorTokens.light.fillDark);
+    expect(_textColor(tester, "Cancel"), ColorTokens.light.textBase);
     expect(tester.getSize(find.byType(AnimatedContainer)).height, 52);
 
     await tester.pumpWidget(
@@ -369,7 +373,7 @@ void main() {
     expect(tester.getSize(find.byType(AnimatedContainer)).height, 52);
   });
 
-  testWidgets("Secondary button foreground follows app-specific Figma tokens", (
+  testWidgets("Secondary button states follow Figma fill and text tokens", (
     tester,
   ) async {
     Future<void> pumpSecondary({
@@ -392,28 +396,54 @@ void main() {
     }
 
     await pumpSecondary(label: "Photos", app: ComponentApp.photos);
-    expect(_textColor(tester, "Photos"), greenDarkLight);
+    expect(_containerColor(tester), ColorTokens.light.fillDark);
+    expect(_textColor(tester, "Photos"), ColorTokens.light.textBase);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: Offset.zero);
+    await tester.pump();
+    await mouse.moveTo(tester.getCenter(find.text("Photos")));
+    await tester.pumpAndSettle();
+
+    expect(_containerColor(tester), ColorTokens.light.fillDarker);
+
+    final photosGesture = await tester.startGesture(
+      tester.getCenter(find.text("Photos")),
+    );
+    await tester.pump();
+
+    expect(_containerColor(tester), ColorTokens.light.fillDarkest);
+    expect(_textColor(tester, "Photos"), ColorTokens.light.textBase);
+
+    await photosGesture.up();
+    await tester.pump(const Duration(milliseconds: 140));
+    await mouse.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
 
     await pumpSecondary(label: "Locker", app: ComponentApp.locker);
-    expect(_textColor(tester, "Locker"), blueDefaultLight);
+    expect(_containerColor(tester), ColorTokens.light.fillDark);
+    expect(_textColor(tester, "Locker"), ColorTokens.light.textBase);
 
     await pumpSecondary(label: "Auth", app: ComponentApp.auth);
-    expect(_textColor(tester, "Auth"), purpleDefaultLight);
+    expect(_containerColor(tester), ColorTokens.light.fillDark);
+    expect(_textColor(tester, "Auth"), ColorTokens.light.textBase);
 
     await pumpSecondary(
       label: "Auth dark",
       app: ComponentApp.auth,
       brightness: Brightness.dark,
     );
-    expect(_textColor(tester, "Auth dark"), purpleDefaultDark);
+    expect(_containerColor(tester), ColorTokens.dark.fillDark);
+    expect(_textColor(tester, "Auth dark"), ColorTokens.dark.textBase);
 
     final gesture = await tester.startGesture(
       tester.getCenter(find.text("Auth dark")),
     );
     await tester.pump();
 
-    expect(_containerColor(tester), purpleLightPressedDark);
-    expect(_textColor(tester, "Auth dark"), purpleDefaultDark);
+    expect(_containerColor(tester), ColorTokens.dark.fillDarkest);
+    expect(_textColor(tester, "Auth dark"), ColorTokens.dark.textBase);
 
     await gesture.up();
   });
