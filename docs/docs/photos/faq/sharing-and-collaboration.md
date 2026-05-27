@@ -493,8 +493,6 @@ The reason for creating copies is to avoid complications around ownership - if t
 
 Yes. On web and desktop, collaborators, admins, and owners can upload files from their device to shared albums, and can add files already in their Ente library to shared albums.
 
-You can move your own files between albums, including shared albums you have access to.
-
 ### Why does adding shared photos to my albums count against my storage? {#shared-storage-count}
 
 When you add a shared photo to your own album, Ente creates a hard copy that you fully own. This ensures that:
