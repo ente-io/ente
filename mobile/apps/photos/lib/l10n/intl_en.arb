@@ -283,7 +283,7 @@
     },
     "description": "Number of participants in an album, including the album owner."
   },
-  "collabLinkSectionDescription": "Create a link to allow people to add and view photos in your shared album without needing an Ente app or account. Great for collecting event photos.",
+  "collabLinkSectionDescription": "Let people add photos without an Ente account",
   "collectPhotos": "Collect photos",
   "collaborativeLink": "Collaborative link",
   "shareWithNonenteUsers": "Share with non-Ente users",
