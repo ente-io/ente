@@ -116,19 +116,33 @@ class AlbumRowItemWidget extends StatelessWidget {
                               );
                               return Hero(
                                 tag: heroTag,
+                                flightShuttleBuilder:
+                                    (
+                                      flightContext,
+                                      animation,
+                                      flightDirection,
+                                      fromHeroContext,
+                                      toHeroContext,
+                                    ) => (toHeroContext.widget as Hero).child,
                                 transitionOnUserGestures: true,
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    thumbnailWidget,
-                                    if (isSelected)
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: componentColors.specialScrim
-                                              .withValues(alpha: 0.4),
+                                child: ClipSmoothRect(
+                                  radius: SmoothBorderRadius(
+                                    cornerRadius: _cornerRadius,
+                                    cornerSmoothing: _cornerSmoothing,
+                                  ),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      thumbnailWidget,
+                                      if (isSelected)
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: componentColors.specialScrim
+                                                .withValues(alpha: 0.4),
+                                          ),
                                         ),
-                                      ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               );
                             } else {

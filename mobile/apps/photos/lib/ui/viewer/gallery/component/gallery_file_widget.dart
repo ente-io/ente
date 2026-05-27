@@ -151,9 +151,12 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                           flightDirection,
                           fromHeroContext,
                           toHeroContext,
-                        ) => thumbnailWidget,
+                        ) => (toHeroContext.widget as Hero).child,
                     transitionOnUserGestures: true,
-                    child: thumbnailWidget,
+                    child: ClipRRect(
+                      borderRadius: borderRadius,
+                      child: thumbnailWidget,
+                    ),
                   ),
                 ),
                 Container(
@@ -186,9 +189,12 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                       flightDirection,
                       fromHeroContext,
                       toHeroContext,
-                    ) => thumbnailWidget,
+                    ) => (toHeroContext.widget as Hero).child,
                 transitionOnUserGestures: true,
-                child: thumbnailWidget,
+                child: ClipRRect(
+                  borderRadius: borderRadius,
+                  child: thumbnailWidget,
+                ),
               ),
             ),
     );
