@@ -304,6 +304,7 @@ class MagicCacheService {
     if (forced) {
       _pendingUpdateReason.add("Forced update");
     }
+    await _updateCacheIfTheTimeHasCome();
     try {
       if (_pendingUpdateReason.isEmpty || _isUpdateInProgress) {
         _logger.info(
