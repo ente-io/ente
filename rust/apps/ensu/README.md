@@ -1,33 +1,36 @@
-# Ensu Tauri
+# Ensu Desktop
 
-This wraps the **Ensu web app** in a Tauri shell for maximum component reuse.
+Desktop app for [Ensu](https://ente.com/ensu/). Built using Tauri.
 
-Requires cmake (e.g. `brew install cmake`).
+## Building from source
 
-## Dev
+1. Install [Node](https://nodejs.org), [Rust](https://www.rust-lang.org/tools/install) and CMake (e.g. `brew install cmake`).
+
+2. Install web dependencies:
+
+    ```sh
+    cd web
+    yarn install --frozen-lockfile
+    ```
+
+3. Install desktop dependencies:
+
+    ```sh
+    cd rust/apps/ensu
+    npm ci
+    ```
+
+4. Run the desktop app:
+
+    ```sh
+    npm run dev
+    ```
+
+The dev command starts the Ensu web app on port 3010 and launches Tauri, and changes in the web code will be hot reloaded.
+
+To create a static build:
 
 ```sh
 cd rust/apps/ensu
-# runs the Ensu web dev server and launches Tauri (default port 3010)
-yarn dev
+npm run build
 ```
-
-To change the dev port:
-
-```sh
-cd rust/apps/ensu
-ENSU_TAURI_PORT=3020 yarn dev
-```
-
-## Build
-
-```sh
-cd rust/apps/ensu
-# builds the Ensu web app and exports a static build for Tauri
-yarn build
-```
-
-## Notes
-
-- The Tauri build uses the Ensu web app at `web/apps/ensu`.
-- Static export is enabled only when `ENTE_TAURI=1`.

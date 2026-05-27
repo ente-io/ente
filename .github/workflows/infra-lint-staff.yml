@@ -1,17 +1,16 @@
 name: "Lint (staff)"
 
 on:
-    # Run on every pull request (open or push to it) that changes infra/staff/
     pull_request:
         paths:
+            - ".github/workflows/infra-lint-staff.yml"
             - "infra/staff/**"
-            - ".github/workflows/infra-deploy-staff.yml"
 
 permissions:
     contents: read
 
 jobs:
-    deploy:
+    lint:
         runs-on: ubuntu-latest
 
         defaults:
