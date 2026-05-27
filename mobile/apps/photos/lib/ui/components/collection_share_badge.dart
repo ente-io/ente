@@ -104,6 +104,7 @@ class CollectionShareBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final isOutlined = variant == CollectionShareBadgeVariant.outlined;
+    final outlinedColor = colorScheme.textBase;
     return Container(
       width: 12,
       height: 12,
@@ -111,7 +112,7 @@ class CollectionShareBadge extends StatelessWidget {
         color: isOutlined ? Colors.transparent : colorScheme.greenBase,
         shape: BoxShape.circle,
         border: Border.all(
-          color: isOutlined ? colorScheme.greenBase : colorScheme.fill,
+          color: isOutlined ? outlinedColor : colorScheme.fill,
           width: isOutlined ? 1.0 : kCollectionBadgeBorderWidth,
         ),
       ),
@@ -121,7 +122,7 @@ class CollectionShareBadge extends StatelessWidget {
               ? HugeIcons.strokeRoundedArrowUpRight01
               : HugeIcons.strokeRoundedArrowDownLeft01,
           strokeWidth: kCollectionBadgeStrokeWidth,
-          color: isOutlined ? colorScheme.greenBase : Colors.white,
+          color: isOutlined ? outlinedColor : Colors.white,
           size: 8,
         ),
       ),
@@ -145,7 +146,7 @@ class CollectionLinkBadge extends StatelessWidget {
       return HugeIcon(
         icon: HugeIcons.strokeRoundedLink02,
         strokeWidth: kCollectionBadgeStrokeWidth,
-        color: colorScheme.greenBase,
+        color: colorScheme.textBase,
         size: kCollectionBadgeIconSize,
       );
     }

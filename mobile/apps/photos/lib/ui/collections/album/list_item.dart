@@ -70,7 +70,7 @@ class AlbumListItemWidget extends StatelessWidget {
     final colors = context.componentColors;
     return ThumbnailListItem(
       backgroundColor: thumbnailListItemBackgroundColor(context),
-      selectedBorderColor: colors.primaryStroke,
+      selectedBorderColor: colors.strokeDark,
       isSelected: isSelected,
       onTap: onTapCallback == null ? null : () => onTapCallback!(collection),
       onLongPress: onLongPressCallback == null
@@ -211,17 +211,17 @@ class AlbumListItemWidget extends StatelessWidget {
             ImageIcon(
               const AssetImage("assets/collection_pin.png"),
               size: 12,
-              color: colors.textLight,
+              color: colors.textBase,
             ),
           if (showArchive)
             HugeIcon(
               icon: HugeIcons.strokeRoundedArchive03,
               size: 12,
-              color: colors.textLight,
+              color: colors.textBase,
               strokeWidth: 2.0,
             ),
           if (isFavoriteAlbum)
-            Icon(EnteIcons.favoriteFilled, size: 12, color: colors.primary),
+            Icon(EnteIcons.favoriteFilled, size: 12, color: colors.textBase),
         ],
       ],
     );

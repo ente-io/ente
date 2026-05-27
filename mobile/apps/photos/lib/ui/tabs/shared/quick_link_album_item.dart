@@ -38,7 +38,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.fill,
         border: Border.all(
-          color: isSelected ? colorScheme.greenStroke : colorScheme.fill,
+          color: isSelected ? colorScheme.strokeDark : colorScheme.fill,
         ),
         borderRadius: const BorderRadius.all(Radius.circular(_cardRadius)),
       ),

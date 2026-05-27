@@ -9,6 +9,9 @@ import 'package:photos/events/tab_changed_event.dart';
 import "package:photos/models/selected_albums.dart";
 import 'package:photos/models/selected_files.dart';
 
+const double _homeNavBarHeight = 62;
+const double _homeNavContainerHeight = 78;
+
 class HomeBottomNavigationBar extends StatefulWidget {
   const HomeBottomNavigationBar(
     this.selectedFiles,
@@ -115,24 +118,21 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          height: filesAreSelected || albumsAreSelected ? 0 : 62,
-          child: IgnorePointer(
-            ignoring: filesAreSelected || albumsAreSelected,
-            child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _FigmaHomeNavBar(
-                      selectedIndex: currentTabIndex,
-                      onTabChange: (index) {
-                        _onTabChange(index, mode: "OnPressed");
-                      },
-                    ),
-                  ],
+          height: filesAreSelected || albumsAreSelected
+              ? 0
+              : _homeNavContainerHeight,
+          child: ClipRect(
+            child: IgnorePointer(
+              ignoring: filesAreSelected || albumsAreSelected,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: _FigmaHomeNavBar(
+                  selectedIndex: currentTabIndex,
+                  onTabChange: (index) {
+                    _onTabChange(index, mode: "OnPressed");
+                  },
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -183,7 +183,7 @@ class _FigmaHomeNavBar extends StatelessWidget {
 
     return Container(
       width: navWidth,
-      height: 62,
+      height: _homeNavBarHeight,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: colors.fillLight,
