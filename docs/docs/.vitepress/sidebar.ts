@@ -571,6 +571,41 @@ export const sidebar = [
         ],
     },
     {
+        text: "Toys",
+        collapsed: false,
+        items: [
+            {
+                text: "Paste",
+                collapsed: true,
+                items: [
+                    { text: "Introduction", link: "/paste/" },
+                    {
+                        text: "Send your first paste",
+                        link: "/paste/getting-started",
+                    },
+                    {
+                        text: "How encryption works",
+                        link: "/paste/features/security",
+                    },
+                    { text: "FAQ", link: "/paste/faq" },
+                ],
+            },
+            {
+                text: "2of3",
+                collapsed: true,
+                items: [
+                    { text: "Introduction", link: "/2of3/" },
+                    {
+                        text: "Getting started",
+                        link: "/2of3/getting-started",
+                    },
+                    { text: "How it works", link: "/2of3/how-it-works" },
+                    { text: "FAQ", link: "/2of3/faq" },
+                ],
+            },
+        ],
+    },
+    {
         text: "Self-hosting",
         collapsed: true,
         items: [
