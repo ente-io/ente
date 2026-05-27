@@ -173,13 +173,15 @@ If the underlying secret needs to change, generate a fresh set of three cards fr
 
 ## Comparison and scope
 
-### How is this different from a Legacy Kit or Ente's account recovery? {#2of3-vs-legacy-kit}
+### How is this different from Legacy Kit? {#2of3-vs-legacy-kit}
 
-[Ente's Legacy](/locker/features/legacy/) is an account-level feature: trusted contacts (and Legacy Kits) can request access to your Ente account after a waiting period. It is integrated with Ente, requires a server, and is built around the lifecycle of a person's account.
+[Legacy Kit](/locker/features/legacy/legacy-kits) and 2of3 both use the same Shamir 2-of-3 math. The difference is what sits around the math.
 
-2of3 is a single-purpose tool that operates on _any_ piece of text. It has no account, no server, and no concept of "your account". You can use it to back up an Ente recovery key, but you can also use it to back up a Bitcoin seed phrase, a LUKS recovery passphrase, or anything else. The trade-off: 2of3 has no time-delay protection, no notifications, and no concept of "who is the rightful owner". Anyone with two cards reconstructs the secret.
+**Legacy Kit** is the version we ship for Ente accounts. It is server-mediated, so kits can be revoked if a sheet is lost or stolen; recovery has a configurable waiting period during which you can block it; and the helper does not need an Ente account. If you want someone to be able to recover your Ente account without you around, Legacy Kit is the right tool.
 
-Use Legacy if you want an account-aware, time-delayed inheritance flow tied to Ente. Use 2of3 when you want a generic split-and-recover that works on any secret and survives any one place failing.
+**2of3** is the standalone version. It works on any piece of text (a Bitcoin seed phrase, a full-disk encryption key, a non-Ente recovery code) without needing an Ente account or a server. The trade-off is that 2of3 has no revocation, no waiting period, and no notion of "the rightful owner": anyone with any two cards reconstructs the secret immediately.
+
+2of3 stays useful when you want the same split-and-recover guarantee for a non-Ente secret, or when you want recovery to depend on nothing but the cards themselves.
 
 ### How is this different from a password manager? {#2of3-vs-password-manager}
 

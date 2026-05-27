@@ -11,6 +11,10 @@ This page explains what is actually happening when 2of3 splits a secret into thr
 
 2of3 is built on **Shamir secret sharing**, a classic cryptographic scheme from 1979. The version 2of3 uses is the simplest interesting case: split a secret into three shares such that any two shares reconstruct the original, and any one share alone leaks nothing.
 
+> [!TIP]
+>
+> If you want a visual walkthrough first, see the blog post [How Shamir's Secret Sharing Works](https://ente.com/blog/how-shamirs-secret-sharing-works). The rest of this section covers the same idea in text, with the specifics of what 2of3 does.
+
 The intuition is a straight line through two points. Pick any line through the y-axis. The y-intercept is your "secret". The slope is a random number you throw away after using it. Now pick three different x values (say x = 1, 2, 3) and compute the corresponding y values on that line. Each (x, y) pair is one "share".
 
 - Give someone any **one** share (one point on the line), and they can draw infinitely many lines through it. They learn nothing about the y-intercept.
@@ -29,7 +33,9 @@ GF(256) multiplication uses the standard AES polynomial (`0x11b`). Two of those 
 
 > [!NOTE]
 >
-> 2of3 specifically implements the 2-of-3 case for clarity and simplicity. If you want general-purpose k-of-n Shamir sharing for a research project, look at SLIP-0039 or similar standards. 2of3's job is to make 2-of-3 friction-free for normal people, not to be a general crypto library.
+> 2of3 specifically implements the 2-of-3 case for clarity and simplicity. The same scheme also powers Ente's [Legacy Kit](/locker/features/legacy/legacy-kits), the version we ship for Ente accounts: it adds a server-mediated, revocable recovery flow tied to your Ente account on top of the same 2-of-3 math.
+>
+> If you want general-purpose k-of-n Shamir sharing for a research project, look at SLIP-0039 or similar standards. 2of3's job is to make 2-of-3 friction-free for normal people, not to be a general crypto library.
 
 ## What is on a card
 

@@ -27,6 +27,12 @@ The in-app examples are a good guide:
 
 Concretely, people use 2of3 for things like Ente recovery keys, password manager master passwords, crypto wallet recovery phrases, full-disk encryption keys, and 2FA backup codes that they do not want to keep in only one drawer.
 
+> [!NOTE]
+>
+> If the secret is your Ente account recovery key specifically, consider [Legacy Kit](/locker/features/legacy/legacy-kits) instead. Legacy Kit is the version we ship for Ente accounts. It is built on the same 2-of-3 Shamir math but adds a configurable waiting period, the ability to revoke sheets if one is lost, and a server-mediated recovery flow tied to your Ente account.
+>
+> 2of3 stays useful when you want the same split-and-recover guarantee for a non-Ente secret, or when you want recovery to depend on nothing but the cards themselves.
+
 ## How a card works
 
 When you enter a secret, 2of3 generates three cards in your browser. Each card carries:
