@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -32,7 +33,10 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
           const SizedBox(height: 12),
           ButtonWidget(
             labelText: AppLocalizations.of(context).autoPair,
-            icon: Icons.cast_outlined,
+            iconWidget: const HugeIcon(
+              icon: HugeIcons.strokeRoundedTvSmart,
+              size: 20,
+            ),
             buttonType: ButtonType.neutral,
             buttonSize: ButtonSize.large,
             shouldStickToDarkTheme: true,
@@ -49,8 +53,10 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
           ButtonWidget(
             labelText: AppLocalizations.of(context).pairWithPin,
             buttonType: ButtonType.neutral,
-            // icon for pairing with TV manually
-            icon: Icons.tv_outlined,
+            iconWidget: const HugeIcon(
+              icon: HugeIcons.strokeRoundedTv02,
+              size: 20,
+            ),
             buttonSize: ButtonSize.large,
             isInAlert: true,
 

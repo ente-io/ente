@@ -1,5 +1,6 @@
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import 'package:path/path.dart' as path;
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -31,9 +32,11 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
   Widget build(BuildContext context) {
     return InfoItemWidget(
       key: const ValueKey("File properties"),
-      leadingIcon: widget.isImage
-          ? Icons.photo_outlined
-          : Icons.video_camera_back_outlined,
+      leadingIconWidget: HugeIcon(
+        icon: widget.isImage
+            ? HugeIcons.strokeRoundedImage01
+            : HugeIcons.strokeRoundedVideo02,
+      ),
       title:
           path.basenameWithoutExtension(widget.file.displayName) +
           path.extension(widget.file.displayName).toUpperCase(),

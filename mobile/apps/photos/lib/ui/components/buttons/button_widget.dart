@@ -292,13 +292,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                                         ),
                                       ),
                                     ),
-                              widget.icon == null
-                                  ? widget.iconWidget ?? const SizedBox.shrink()
-                                  : Icon(
-                                      widget.icon,
-                                      size: 20,
-                                      color: iconColor,
-                                    ),
+                              _buttonIcon(),
                             ],
                           )
                         : Builder(
@@ -317,14 +311,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                                     : MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  widget.icon == null
-                                      ? widget.iconWidget ??
-                                            const SizedBox.shrink()
-                                      : Icon(
-                                          widget.icon,
-                                          size: 20,
-                                          color: iconColor,
-                                        ),
+                                  _buttonIcon(),
                                   widget.icon == null &&
                                               widget.iconWidget == null ||
                                           widget.labelText == null
@@ -426,6 +413,19 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       iconColor = widget.buttonStyle.defaultIconColor;
       labelStyle = widget.buttonStyle.defaultLabelStyle;
     }
+  }
+
+  Widget _buttonIcon() {
+    if (widget.icon != null) {
+      return Icon(widget.icon, size: 20, color: iconColor);
+    }
+    if (widget.iconWidget == null) {
+      return const SizedBox.shrink();
+    }
+    return IconTheme.merge(
+      data: IconThemeData(size: 20, color: iconColor),
+      child: widget.iconWidget!,
+    );
   }
 
   bool get _shouldRegisterGestures =>
