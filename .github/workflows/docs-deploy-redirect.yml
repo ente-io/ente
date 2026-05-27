@@ -19,7 +19,7 @@ jobs:
             - uses: actions/checkout@v6
 
             - name: Deploy redirect to help.ente.io
-              uses: cloudflare/wrangler-action@v3
+              uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
