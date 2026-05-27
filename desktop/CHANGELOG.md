@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.7.25 (unreleased)
+
+-
+
 ## v1.7.24
 
 - Upload files to shared albums
