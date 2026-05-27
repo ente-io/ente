@@ -1,19 +1,14 @@
+import 'package:ente_components/ente_components.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/contacts/contact_identity_resolver.dart";
-import 'package:photos/theme/colors.dart';
-import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/captioned_text_widget.dart';
-import 'package:photos/ui/components/divider_widget.dart';
-import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/components/menu_section_description_widget.dart';
-import 'package:photos/ui/components/menu_section_title.dart';
-import 'package:photos/ui/components/title_bar_title_widget.dart';
+import 'package:photos/ui/sharing/share_components.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class ManageIndividualParticipant extends StatefulWidget {
@@ -38,48 +33,22 @@ class _ManageIndividualParticipantState
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     final isAdmin = widget.user.isAdmin;
     final isCollaborator = widget.user.isCollaborator;
     final isViewer = widget.user.isViewer;
     final resolvedName = resolveDisplayName(widget.user);
     bool isConvertToViewSuccess = false;
-    return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 12),
-                  TitleBarTitleWidget(
-                    title: AppLocalizations.of(context).manage,
-                  ),
-                  Text(
-                    resolvedName,
-                    textAlign: TextAlign.left,
-                    style: textTheme.small.copyWith(
-                      color: colorScheme.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            MenuSectionTitle(title: AppLocalizations.of(context).addedAs),
-            MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
-                title: AppLocalizations.of(context).admin,
-              ),
-              leadingIcon: Icons.admin_panel_settings_outlined,
-              menuItemColor: colorScheme.fillFaint,
-              trailingIcon: isAdmin ? Icons.check : null,
+    return ShareScaffold(
+      title: AppLocalizations.of(context).manage,
+      subtitle: resolvedName,
+      children: [
+        ShareSectionTitle(AppLocalizations.of(context).addedAs),
+        ShareMenuGroup(
+          items: [
+            ShareMenuItem(
+              title: AppLocalizations.of(context).admin,
+              icon: HugeIcons.strokeRoundedCrown,
+              trailing: isAdmin ? shareCheck(context) : null,
               onTap: isAdmin
                   ? null
                   : () async {
@@ -96,19 +65,11 @@ class _ManageIndividualParticipantState
                         setState(() => {});
                       }
                     },
-              isBottomBorderRadiusRemoved: true,
             ),
-            DividerWidget(
-              dividerType: DividerType.menu,
-              bgColor: colorScheme.fillFaint,
-            ),
-            MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
-                title: AppLocalizations.of(context).collaborator,
-              ),
-              leadingIcon: Icons.edit_outlined,
-              menuItemColor: colorScheme.fillFaint,
-              trailingIcon: isCollaborator ? Icons.check : null,
+            ShareMenuItem(
+              title: AppLocalizations.of(context).collaborator,
+              icon: HugeIcons.strokeRoundedUserGroup,
+              trailing: isCollaborator ? shareCheck(context) : null,
               onTap: isCollaborator
                   ? null
                   : () async {
@@ -126,21 +87,11 @@ class _ManageIndividualParticipantState
                         setState(() => {});
                       }
                     },
-              isTopBorderRadiusRemoved: true,
-              isBottomBorderRadiusRemoved: true,
             ),
-            DividerWidget(
-              dividerType: DividerType.menu,
-              bgColor: colorScheme.fillFaint,
-            ),
-            MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
-                title: AppLocalizations.of(context).viewer,
-              ),
-              leadingIcon: Icons.photo_outlined,
-              leadingIconColor: colorScheme.strokeBase,
-              menuItemColor: colorScheme.fillFaint,
-              trailingIcon: isViewer ? Icons.check : null,
+            ShareMenuItem(
+              title: AppLocalizations.of(context).viewer,
+              icon: HugeIcons.strokeRoundedView,
+              trailing: isViewer ? shareCheck(context) : null,
               showOnlyLoadingState: true,
               onTap: isViewer
                   ? null
@@ -174,7 +125,6 @@ class _ManageIndividualParticipantState
                             );
                           }
                           if (isConvertToViewSuccess && mounted) {
-                            // reset value
                             isConvertToViewSuccess = false;
                             widget.user.role = CollectionParticipantRole.viewer
                                 .toStringVal();
@@ -183,26 +133,22 @@ class _ManageIndividualParticipantState
                         }
                       }
                     },
-              isTopBorderRadiusRemoved: true,
             ),
-            MenuSectionDescriptionWidget(
-              content: AppLocalizations.of(
-                context,
-              ).adminsAndCollaboratorsCanAddPhotosDescription,
-            ),
-            const SizedBox(height: 24),
-            MenuSectionTitle(
-              title: AppLocalizations.of(context).removeParticipant,
-            ),
-            MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
-                title: AppLocalizations.of(context).remove,
-                textColor: warning500,
-                makeTextBold: true,
-              ),
-              leadingIcon: Icons.not_interested_outlined,
-              leadingIconColor: warning500,
-              menuItemColor: colorScheme.fillFaint,
+          ],
+        ),
+        ShareSectionDescription(
+          AppLocalizations.of(
+            context,
+          ).adminsAndCollaboratorsCanAddPhotosDescription,
+        ),
+        const SizedBox(height: Spacing.xxl),
+        ShareSectionTitle(AppLocalizations.of(context).removeParticipant),
+        ShareMenuGroup(
+          items: [
+            ShareMenuItem(
+              title: AppLocalizations.of(context).remove,
+              leading: const Icon(Icons.not_interested_outlined),
+              isDestructive: true,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(
                   context,
@@ -217,7 +163,7 @@ class _ManageIndividualParticipantState
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
