@@ -24,6 +24,7 @@ interface PasteLinkCardProps {
     link: string;
     onCopy: (value: string) => Promise<void>;
     onShare: (url: string) => Promise<void>;
+    passwordProtected?: boolean;
 }
 
 interface MeasuredPath {
@@ -36,6 +37,7 @@ export const PasteLinkCard = ({
     link,
     onCopy,
     onShare,
+    passwordProtected = false,
 }: PasteLinkCardProps) => {
     const { resolvedMode } = usePasteColorMode();
     const tokens = getPasteThemeTokens(resolvedMode);
@@ -241,10 +243,10 @@ export const PasteLinkCard = ({
                         sm: '"qr details" "qr actions"',
                     },
                     alignItems: "center",
-                    rowGap: { xs: 1.45, sm: 1.35 },
+                    rowGap: { xs: 1.3, sm: 1 },
                     columnGap: { xs: 1.4, sm: 1.8 },
                     px: { xs: 1.45, sm: 1.8 },
-                    py: { xs: 2.1, sm: 1.35 },
+                    py: { xs: 1.6, sm: 1.95 },
                     mx: "auto",
                     position: "relative",
                     zIndex: 1,
@@ -279,6 +281,7 @@ export const PasteLinkCard = ({
                         size={previewQrSize}
                         paperBg={tokens.qr.paperBg}
                         borderRadius="10px"
+                        showCenterLock={passwordProtected}
                     />
                 </Box>
 
@@ -292,7 +295,7 @@ export const PasteLinkCard = ({
                         alignSelf: "stretch",
                         justifyContent: "center",
                         pr: { xs: 0, sm: 0.55 },
-                        transform: { xs: "none", sm: "translateY(14px)" },
+                        transform: { xs: "none", sm: "translateY(8px)" },
                     }}
                 >
                     <Typography
@@ -395,7 +398,7 @@ export const PasteLinkCard = ({
                     sx={{
                         gridArea: "actions",
                         position: "relative",
-                        minHeight: { xs: previewQrSize, sm: 82 },
+                        minHeight: { xs: previewQrSize, sm: 64 },
                         mt: { xs: 0, sm: 0.65 },
                         width: "100%",
                         maxWidth: "100%",
@@ -403,7 +406,7 @@ export const PasteLinkCard = ({
                         alignItems: { xs: "center", sm: "stretch" },
                         justifyContent: { xs: "center", sm: "flex-start" },
                         overflow: "visible",
-                        transform: { xs: "none", sm: "translateY(14px)" },
+                        transform: { xs: "none", sm: "translateY(8px)" },
                     }}
                 >
                     <Stack

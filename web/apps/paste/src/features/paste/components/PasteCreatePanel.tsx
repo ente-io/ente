@@ -24,6 +24,7 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { MAX_PASTE_CHARS } from "../constants";
 import { PasteLinkCard } from "./PasteLinkCard";
+import { downloadPasteQrCode } from "./PasteQrCode";
 import { pasteTextFieldSx } from "./textFieldSx";
 
 interface PasteCreatePanelProps {
@@ -201,6 +202,17 @@ export const PasteCreatePanel = ({
         setPasswordDialogOpen(false);
         resetPasswordDialog();
         void onCreate(submittedPassword);
+    };
+
+    const handleDownloadQrClick = () => {
+        if (!createdLink) return;
+
+        void downloadPasteQrCode({
+            value: createdLink,
+            tokens,
+            paperBg: tokens.qr.paperBg,
+            showCenterLock: createdLinkPasswordProtected,
+        }).catch(() => undefined);
     };
 
     return (
@@ -498,23 +510,50 @@ export const PasteCreatePanel = ({
                         link={createdLink}
                         onCopy={onCopyLink}
                         onShare={onShareLink}
+                        passwordProtected={createdLinkPasswordProtected}
                     />
-                    {createdLinkPasswordProtected && (
+                    <Box
+                        sx={{
+                            mt: 0.85,
+                            display: "flex",
+                            justifyContent: "flex-start",
+                        }}
+                    >
                         <Typography
+                            component="button"
+                            type="button"
                             variant="mini"
+                            onClick={handleDownloadQrClick}
                             sx={{
-                                mt: 0.85,
+                                appearance: "none",
+                                border: 0,
+                                p: 0,
+                                m: 0,
+                                bgcolor: "transparent",
                                 color: tokens.text.muted,
+                                cursor: "pointer",
                                 fontSize: { xs: "0.68rem", sm: "0.72rem" },
-                                fontWeight: 500,
+                                fontWeight: 600,
                                 lineHeight: 1.3,
                                 letterSpacing: 0,
-                                opacity: 0.58,
+                                opacity: 0.6,
+                                textDecoration: "underline",
+                                textUnderlineOffset: "3px",
+                                "&:hover": {
+                                    color: tokens.text.muted,
+                                    opacity: 0.72,
+                                    textDecoration: "underline",
+                                },
+                                "&:focus-visible": {
+                                    outline: `2px solid ${tokens.button.primaryBg}`,
+                                    outlineOffset: 3,
+                                    borderRadius: "4px",
+                                },
                             }}
                         >
-                            This paste is password protected
+                            Download QR
                         </Typography>
-                    )}
+                    </Box>
                 </Box>
             )}
 
