@@ -4,17 +4,17 @@ on:
     # Run on every pull request (open or push to it) that changes locker app
     pull_request:
         paths:
+            - ".github/workflows/locker-lint.yml"
             - "mobile/apps/locker/**"
             - "mobile/packages/contacts/**"
             - "mobile/packages/legacy/**"
             - "mobile/packages/rust/**"
             - "mobile/packages/sharing/**"
+            - "mobile/scripts/check_source_arb_plurals.rb"
             - "rust/bindings/frb/ente-rust/**"
             - "rust/apps/codegen/**"
             - "rust/Cargo.lock"
             - "rust/Cargo.toml"
-            - ".github/workflows/locker-lint.yml"
-            - "mobile/scripts/check_source_arb_plurals.rb"
 
 env:
     FLUTTER_VERSION: "3.38.10"
@@ -29,7 +29,7 @@ jobs:
             run:
                 working-directory: mobile/apps/locker
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
 
             - name: Verify frozen mobile pubspecs
@@ -62,8 +62,8 @@ jobs:
             - name: Generate locker localizations
               run: flutter gen-l10n
 
-            - name: Analyze locker
-              run: flutter analyze --no-fatal-infos
+            - run: dart format --output=none --set-exit-if-changed .
 
-            - name: Test locker
-              run: flutter test
+            - run: flutter analyze --no-fatal-infos
+
+            - run: flutter test

@@ -36,10 +36,7 @@ class EmptyStateFeatureRow extends StatelessWidget {
 }
 
 class EmptyStateBulletFeatureRow extends StatelessWidget {
-  const EmptyStateBulletFeatureRow({
-    required this.label,
-    super.key,
-  });
+  const EmptyStateBulletFeatureRow({required this.label, super.key});
 
   final String label;
 

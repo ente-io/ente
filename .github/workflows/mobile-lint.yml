@@ -5,7 +5,9 @@ on:
     # Photos Rust, or shared Rust crates used by Photos
     pull_request:
         paths:
+            - ".github/workflows/mobile-lint.yml"
             - "mobile/apps/photos/**"
+            - "mobile/scripts/check_source_arb_plurals.rb"
             - "rust/crates/photos/**"
             - "rust/crates/core/**"
             - "rust/crates/contacts/**"
@@ -14,8 +16,6 @@ on:
             - "rust/apps/codegen/**"
             - "rust/Cargo.lock"
             - "rust/Cargo.toml"
-            - ".github/workflows/mobile-lint.yml"
-            - "mobile/scripts/check_source_arb_plurals.rb"
 
 env:
     FLUTTER_VERSION: "3.38.10"
@@ -30,7 +30,7 @@ jobs:
             run:
                 working-directory: mobile/apps/photos
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v6
 
             - name: Verify frozen mobile pubspecs
@@ -56,7 +56,8 @@ jobs:
             - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
+            - run: dart format --output=none --set-exit-if-changed .
+
             - run: flutter analyze --no-fatal-infos
 
-            - name: Run Flutter tests
-              run: flutter test
+            - run: flutter test
