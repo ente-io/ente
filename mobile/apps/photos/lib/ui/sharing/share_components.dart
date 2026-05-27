@@ -115,7 +115,7 @@ class ShareMenuGroup extends StatelessWidget {
   const ShareMenuGroup({
     super.key,
     required this.items,
-    this.showDividers = true,
+    this.showDividers = false,
     this.dividerPadding = EdgeInsets.zero,
   });
 
