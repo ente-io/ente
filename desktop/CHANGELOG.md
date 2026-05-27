@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## v1.7.24 (unreleased)
+## v1.7.24
 
-- Upload files directly to shared albums
+- Add files to shared albums
 - Add shared files to your albums
 - Add shared files to shared albums
 - Favorite files in shared albums
