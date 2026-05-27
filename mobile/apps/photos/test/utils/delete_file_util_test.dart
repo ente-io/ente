@@ -73,7 +73,7 @@ void main() {
       },
     );
 
-    testWidgets('matches the legacy remote-only delete action sheet', (
+    testWidgets('remote-only delete sheet uses title and critical action', (
       tester,
     ) async {
       final file = _file(generatedID: 2, uploadedID: 12);
@@ -95,8 +95,13 @@ void main() {
         ),
         findsOneWidget,
       );
+      expect(find.text('Are you sure?'), findsOneWidget);
       expect(find.text('They will be deleted from all albums.'), findsNothing);
       expect(find.byType(ButtonComponent), findsOneWidget);
+      final deleteButton = tester.widget<ButtonComponent>(
+        find.byType(ButtonComponent),
+      );
+      expect(deleteButton.variant, ButtonComponentVariant.critical);
       expect(find.text('Delete from Ente'), findsNothing);
       expect(find.text('Delete from device'), findsNothing);
       expect(find.text('Delete from both'), findsNothing);
@@ -105,7 +110,7 @@ void main() {
       _expectVisibleButtonsInOrder(tester, ['Yes, delete']);
     });
 
-    testWidgets('matches the legacy local-only delete action sheet', (
+    testWidgets('local-only delete sheet uses title and critical action', (
       tester,
     ) async {
       final file = _file(generatedID: 3, localID: 'local-3');
@@ -125,8 +130,13 @@ void main() {
         find.text('These items will be deleted from your device.'),
         findsOneWidget,
       );
+      expect(find.text('Are you sure?'), findsOneWidget);
       expect(find.text('They will be deleted from all albums.'), findsNothing);
       expect(find.byType(ButtonComponent), findsOneWidget);
+      final deleteButton = tester.widget<ButtonComponent>(
+        find.byType(ButtonComponent),
+      );
+      expect(deleteButton.variant, ButtonComponentVariant.critical);
       expect(find.text('Delete from Ente'), findsNothing);
       expect(find.text('Delete from device'), findsNothing);
       expect(find.text('Delete from both'), findsNothing);

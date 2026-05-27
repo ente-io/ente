@@ -814,6 +814,7 @@ Future<void> showDeleteSheet(
   final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
   final bool isLocalOnly = !containsUploadedFile;
   final bool isRemoteOnly = !containsLocalFile;
+  final bool hasSingleDeleteAction = isLocalOnly || isRemoteOnly;
   final String? bodyHighlight = isBothLocalAndRemote
       ? AppLocalizations.of(context).theyWillBeDeletedFromAllAlbums
       : null;
@@ -836,7 +837,9 @@ Future<void> showDeleteSheet(
         labelText: isBothLocalAndRemote
             ? AppLocalizations.of(context).deleteFromEnte
             : AppLocalizations.of(context).yesDelete,
-        buttonType: ButtonType.neutral,
+        buttonType: hasSingleDeleteAction
+            ? ButtonType.critical
+            : ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
         buttonAction: ButtonAction.first,
@@ -864,7 +867,9 @@ Future<void> showDeleteSheet(
         labelText: isBothLocalAndRemote
             ? AppLocalizations.of(context).deleteFromDevice
             : AppLocalizations.of(context).yesDelete,
-        buttonType: ButtonType.neutral,
+        buttonType: hasSingleDeleteAction
+            ? ButtonType.critical
+            : ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
         buttonAction: ButtonAction.second,
@@ -907,6 +912,9 @@ Future<void> showDeleteSheet(
     context: context,
     buttons: buttons,
     actionSheetType: ActionSheetType.defaultActionSheet,
+    title: hasSingleDeleteAction
+        ? AppLocalizations.of(context).areYouSure
+        : null,
     body: body,
     bodyHighlight: bodyHighlight,
   );
