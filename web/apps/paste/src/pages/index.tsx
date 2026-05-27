@@ -21,6 +21,7 @@ const Page = () => {
         creating,
         createError,
         createdLink,
+        createdLinkPasswordProtected,
         createSecureLink,
     } = useCreatePaste();
 
@@ -65,6 +66,9 @@ const Page = () => {
                             creating={creating}
                             createError={createError}
                             createdLink={createdLink}
+                            createdLinkPasswordProtected={
+                                createdLinkPasswordProtected
+                            }
                             onInputChange={setInputText}
                             onCreate={createSecureLink}
                             onCopyLink={copyTextToClipboard}
