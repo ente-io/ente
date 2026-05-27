@@ -34,6 +34,10 @@ class SearchSectionAllPage extends StatefulWidget {
 }
 
 class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
+  static const _titleActionSize = 36.0;
+  static const _searchTitleHeight = 52.0;
+  static const _searchTransitionDuration = Duration(milliseconds: 240);
+
   late Future<List<SearchResult>> sectionData;
   final streamSubscriptions = <StreamSubscription>[];
   final _searchController = TextEditingController();
@@ -126,9 +130,6 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
         future: sectionData,
         builder: (context, snapshot) {
           final slivers = <Widget>[];
-          if (_isSearchBarVisible) {
-            slivers.add(_buildSearchFieldSliver(context));
-          }
 
           if (!snapshot.hasData) {
             slivers.add(
@@ -259,8 +260,75 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
       title: widget.sectionType.sectionTitle(context),
       physics: const BouncingScrollPhysics(),
       cacheExtent: cacheExtent,
-      actions: _isSearchBarVisible ? const [] : [_buildSearchAction()],
+      titleBuilder: _buildTitle,
+      titleBuilderHeight: _searchTitleHeight,
       slivers: slivers,
+    );
+  }
+
+  Widget _buildTitle(BuildContext context, HeaderAppBarTitleState state) {
+    return AnimatedSwitcher(
+      duration: _searchTransitionDuration,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      layoutBuilder: (currentChild, previousChildren) => Stack(
+        alignment: Alignment.centerLeft,
+        clipBehavior: Clip.none,
+        children: [...previousChildren, if (currentChild != null) currentChild],
+      ),
+      transitionBuilder: (child, animation) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        final beginOffset = child.key == const ValueKey("search_field")
+            ? const Offset(0.035, 0)
+            : const Offset(-0.035, 0);
+        return FadeTransition(
+          opacity: curvedAnimation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: beginOffset,
+              end: Offset.zero,
+            ).animate(curvedAnimation),
+            child: child,
+          ),
+        );
+      },
+      child: _isSearchBarVisible
+          ? KeyedSubtree(
+              key: const ValueKey("search_field"),
+              child: _buildSearchField(context),
+            )
+          : KeyedSubtree(
+              key: const ValueKey("title_row"),
+              child: _buildTitleRow(state),
+            ),
+    );
+  }
+
+  Widget _buildTitleRow(HeaderAppBarTitleState state) {
+    return SizedBox(
+      height: state.height,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text(
+              state.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: state.textStyle,
+            ),
+          ),
+          const SizedBox(width: Spacing.md),
+          SizedBox.square(
+            dimension: _titleActionSize,
+            child: _buildSearchAction(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -273,37 +341,29 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
     );
   }
 
-  Widget _buildSearchFieldSliver(BuildContext context) {
+  Widget _buildSearchField(BuildContext context) {
     final colors = context.componentColors;
-    return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-      sliver: SliverToBoxAdapter(
-        child: TextInputComponent(
-          controller: _searchController,
-          focusNode: _searchFocusNode,
-          hintText: AppLocalizations.of(context).search,
-          onChanged: _updateSearchQuery,
-          prefix: HugeIcon(
-            icon: HugeIcons.strokeRoundedSearch01,
-            size: 20,
-            color: colors.textLight,
-            strokeWidth: 1.6,
-          ),
-          suffix: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _closeSearch,
-            child: SizedBox.square(
-              dimension: IconSizes.medium,
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedCancel01,
-                size: 18,
-                color: colors.textLight,
-                strokeWidth: 1.6,
-              ),
-            ),
-          ),
+    return TextInputComponent(
+      controller: _searchController,
+      focusNode: _searchFocusNode,
+      hintText: AppLocalizations.of(context).search,
+      autofocus: true,
+      shouldUnfocusOnClearOrSubmit: true,
+      prefix: HugeIcon(
+        icon: HugeIcons.strokeRoundedSearch01,
+        size: 18,
+        color: colors.textLight,
+      ),
+      suffix: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _closeSearch,
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedCancel01,
+          size: 18,
+          color: colors.textLight,
         ),
       ),
+      onChanged: _updateSearchQuery,
     );
   }
 }
