@@ -21,7 +21,7 @@ A paste lasts until the first time it is opened, or 24 hours from creation, whic
 
 No. A paste is consumed the first time it is successfully opened. Reloading the page, opening the link on a second device, or sharing it onward after the first read all result in "This paste has expired or was already opened."
 
-If you need the recipient to be able to refer back to the text, ask them to copy it once they have opened the paste, or use [Ente Locker](https://ente.com/locker) for durable storage.
+If you need the recipient to be able to refer back to the text, ask them to copy it once they have opened the paste, or use [Ente Locker](/locker/) for durable storage.
 
 ### Can I edit or delete a paste after creating it? {#paste-edit-delete}
 
@@ -33,7 +33,7 @@ There is no edit or delete UI. The closest equivalent to delete is to open the l
 
 ### Can I paste binary data or files? {#paste-binary-files}
 
-No. Paste is text-only. For files and durable secrets, use [Ente Locker](https://ente.com/locker).
+No. Paste is text-only. For files and durable secrets, use [Ente Locker](/locker/).
 
 ### What if I open my own link by accident? {#paste-self-opened}
 
@@ -103,6 +103,6 @@ Yes. The Paste server endpoints are part of [Museum](/self-hosting/), Ente's mai
 
 ## Related topics
 
-- [Introduction to Ente Paste](/paste/)
-- [Send your first paste](/paste/getting-started)
-- [How encryption works](/paste/features/security)
+- [Introduction to Ente Paste](/paste/): what Paste is and how it works.
+- [Send your first paste](/paste/getting-started): create, share, and open flows, including password protection.
+- [How encryption works](/paste/features/security): the cryptographic guarantees behind a Paste link.

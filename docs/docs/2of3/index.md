@@ -19,7 +19,7 @@ This is the same idea behind safe-deposit boxes that need two keys, or backup ta
 
 ## When to use it
 
-The in-app examples are a good guide:
+Some of the ways people use 2of3:
 
 - **Legacy account recovery.** You want a spouse, adult child, or executor to recover something important if you are not around to explain it. One card stays with your documents, one in a safe place at home, and one with a trusted person. Any two are enough when the time comes.
 - **Break-glass credentials.** A root password, a production recovery key, or the master secret behind your setup. 2of3 avoids both bad outcomes at once: one lost copy that locks you out, or one stolen copy that gives everything away.

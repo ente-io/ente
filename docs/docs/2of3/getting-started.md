@@ -81,7 +81,7 @@ Before you store the cards, scroll down to the **Recover** section on the same p
 - A card from a different set that snuck in by mistake.
 - A copy-paste that dropped a character at the end of the code.
 
-If recovery works on all three of the (any two) pairs, the set is good and you can put the cards away.
+If all three possible pairs (1+2, 1+3, 2+3) recover the secret, the set is good and you can put the cards away.
 
 ## Recover the secret
 

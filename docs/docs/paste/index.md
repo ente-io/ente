@@ -21,6 +21,8 @@ No account is required to create or open a paste.
 
 The key after `#` is the [URL fragment](https://en.wikipedia.org/wiki/URI_fragment). Browsers never send it to servers, so Ente only ever sees the ciphertext.
 
+You can also [password-protect](/paste/getting-started#password-protection) a paste, in which case the recipient needs both the link and the password to decrypt it. Useful when the link will travel over a channel that you do not fully trust.
+
 ## What Paste is for
 
 - One-off secrets: API keys, recovery codes, app passwords, signing keys
@@ -28,7 +30,7 @@ The key after `#` is the [URL fragment](https://en.wikipedia.org/wiki/URI_fragme
 - Short instructions you do not want preserved in chat
 - Anything you would otherwise paste into chat and immediately regret
 
-If you need durable storage for the same kinds of secrets, use [Ente Locker](https://ente.com/locker) instead. Paste is for transit.
+If you need durable storage for the same kinds of secrets, use [Ente Locker](/locker/) instead. Paste is for transit.
 
 ## Limits
 
