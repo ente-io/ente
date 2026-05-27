@@ -86,6 +86,8 @@ jobs:
             - name: Generate auth localizations
               run: flutter gen-l10n
 
+            - run: dart format --output=none --set-exit-if-changed .
+
             - name: Analyze auth
               run: flutter analyze --no-fatal-infos
 

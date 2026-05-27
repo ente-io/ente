@@ -62,6 +62,8 @@ jobs:
             - name: Generate locker localizations
               run: flutter gen-l10n
 
+            - run: dart format --output=none --set-exit-if-changed .
+
             - name: Analyze locker
               run: flutter analyze --no-fatal-infos
 
