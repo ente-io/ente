@@ -1,5 +1,5 @@
-import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type { AssetsPathConfig } from "@wllama/wllama/esm/index.js";
 import {
     ModelManager,

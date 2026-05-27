@@ -8,6 +8,7 @@ import { getKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiOrigin, apiURL } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
+import { isTauriRuntime } from "services/tauri-runtime";
 import { masterKeyFromSession } from "../session";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 import { cachedLocalChatKey } from "./chatKey";
@@ -40,7 +41,6 @@ import {
     type LocalMessageRecord,
     type LocalSessionRecord,
 } from "./store";
-import { isTauriRuntime } from "services/tauri-runtime";
 
 type DiffCursor = {
     base_since_time: number;
