@@ -21,6 +21,9 @@
         "lint:fix": "prettier --write --log-level warn . && eslint && tsc",
         "prepare": "node scripts/vips.js"
     },
+    "overrides": {
+        "yauzl": "^3.3.1"
+    },
     "dependencies": {
         "any-shell-escape": "0.1.1",
         "auto-launch": "5.0.6",
