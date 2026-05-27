@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
@@ -29,7 +30,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
   @override
   Widget build(BuildContext context) {
     return InfoItemWidget(
-      leadingIcon: Icons.text_snippet_outlined,
+      leadingIconWidget: const HugeIcon(icon: HugeIcons.strokeRoundedLicense),
       title: AppLocalizations.of(context).videoInfo,
       subtitleSection: _exifButton(context, widget.file, widget.props),
       onTap: _onTap,

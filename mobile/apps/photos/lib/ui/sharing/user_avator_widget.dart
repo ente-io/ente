@@ -17,6 +17,20 @@ import 'package:tuple/tuple.dart';
 
 enum AvatarType { xs, small, medium, regular, large, huge }
 
+Color getUserAvatarColor(BuildContext context, User user) {
+  if (user.email == Configuration.instance.getEmail()) {
+    return Colors.black;
+  }
+  final colorScheme = getEnteColorScheme(context);
+  final resolvedDisplayName = resolveDisplayName(user);
+  final colorIndex = user.email.contains("unknown.com")
+      ? resolvedDisplayName.length
+      : user.email.length;
+  return colorScheme.avatarColors[colorIndex.remainder(
+    colorScheme.avatarColors.length,
+  )];
+}
+
 class UserAvatarWidget extends StatefulWidget {
   final User user;
   final AvatarType type;
@@ -204,23 +218,13 @@ class _FirstLetterCircularAvatarState
     extends State<_FirstLetterCircularAvatar> {
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final resolvedDisplayName = resolveDisplayName(widget.user);
     final displayChar = resolvedDisplayName.isEmpty
         ? ((widget.user.email.isEmpty)
               ? " "
               : widget.user.email.substring(0, 1))
         : resolvedDisplayName.substring(0, 1);
-    Color decorationColor;
-    if (widget.user.email == Configuration.instance.getEmail()) {
-      decorationColor = Colors.black;
-    } else {
-      final colorIndex = widget.user.email.contains("unknown.com")
-          ? resolvedDisplayName.length
-          : widget.user.email.length;
-      decorationColor = colorScheme
-          .avatarColors[colorIndex.remainder(colorScheme.avatarColors.length)];
-    }
+    final decorationColor = getUserAvatarColor(context, widget.user);
 
     final avatarStyle = getAvatarStyle(context, widget.type);
     final double size = avatarStyle.item1;
@@ -287,7 +291,6 @@ class FirstLetterUserAvatar extends StatefulWidget {
 }
 
 class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
-  final currentUserEmail = Configuration.instance.getEmail();
   late User user;
 
   @override
@@ -308,21 +311,11 @@ class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final resolvedDisplayName = resolveDisplayName(user);
     final displayChar = resolvedDisplayName.isEmpty
         ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
         : resolvedDisplayName.substring(0, 1);
-    Color decorationColor;
-    if (user.email == currentUserEmail) {
-      decorationColor = Colors.black;
-    } else {
-      final colorIndex = user.email.contains("unknown.com")
-          ? resolvedDisplayName.length
-          : user.email.length;
-      decorationColor = colorScheme
-          .avatarColors[colorIndex.remainder(colorScheme.avatarColors.length)];
-    }
+    final decorationColor = getUserAvatarColor(context, user);
     return Container(
       color: decorationColor,
       child: Center(

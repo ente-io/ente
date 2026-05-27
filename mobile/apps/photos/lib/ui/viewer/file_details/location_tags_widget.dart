@@ -5,6 +5,7 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_map/flutter_map.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:latlong2/latlong.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
@@ -35,7 +36,6 @@ class LocationTagsWidget extends StatefulWidget {
 
 class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   String? title;
-  IconData? leadingIcon;
   late Future<List<Widget>> locationTagChips;
   late StreamSubscription<LocationTagUpdatedEvent> _locTagUpdateListener;
   VoidCallback? onTap;
@@ -70,7 +70,9 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       switchOutCurve: Curves.easeInOutExpo,
       child: InfoItemWidget(
         key: ValueKey(title),
-        leadingIcon: leadingIcon ?? Icons.pin_drop_outlined,
+        leadingIconWidget: const HugeIcon(
+          icon: HugeIcons.strokeRoundedLocation01,
+        ),
         title: title,
         subtitleSection: locationTagChips,
         onTap: onTap,
@@ -110,7 +112,6 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       if (mounted) {
         setState(() {
           title = AppLocalizations.of(context).location;
-          leadingIcon = Icons.pin_drop_outlined;
           onTap = null;
         });
       }
@@ -124,7 +125,6 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       if (mounted) {
         setState(() {
           title = AppLocalizations.of(context).location;
-          leadingIcon = Icons.pin_drop_outlined;
           onTap = null;
         });
       }

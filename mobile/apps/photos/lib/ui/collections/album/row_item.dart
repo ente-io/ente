@@ -389,8 +389,11 @@ class _AlbumRowSharePillContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayCount = min(sharees.length, _limitCountTo);
     final hasMore = sharees.length > _limitCountTo;
+    final displayCount = min(
+      sharees.length,
+      hasMore ? _limitCountTo - 1 : _limitCountTo,
+    );
     const type = AvatarType.xs;
     final double avatarSize = getAvatarSize(type);
     final double overlapPadding = getOverlapPadding(type);
@@ -425,6 +428,7 @@ class _AlbumRowSharePillContent extends StatelessWidget {
             sharees.length - displayCount,
             type: moreCountTypeFromAvatarType(type),
             thumbnailView: true,
+            backgroundColor: getUserAvatarColor(context, sharees[displayCount]),
           ),
         ),
       );
