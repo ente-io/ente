@@ -27,9 +27,8 @@ import "package:photos/services/sync/local_sync_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
-import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart'
+    show ButtonAction;
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/utils/device_info.dart";
 import 'package:photos/utils/dialog_util.dart';
@@ -816,20 +815,32 @@ Future<void> showDeleteSheet(
   final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
   final bool isLocalOnly = !containsUploadedFile;
   final bool isRemoteOnly = !containsLocalFile;
-  final String? bodyHighlight = isBothLocalAndRemote
-      ? AppLocalizations.of(context).theyWillBeDeletedFromAllAlbums
-      : null;
-  String body = "";
+  late final String body;
+  late final String? bodyHighlight;
   if (isBothLocalAndRemote) {
     body = AppLocalizations.of(context).someItemsAreInBothEnteAndYourDevice;
+    bodyHighlight = AppLocalizations.of(context).theyWillBeDeletedFromAllAlbums;
   } else if (isRemoteOnly) {
     body = AppLocalizations.of(
       context,
     ).selectedItemsWillBeDeletedFromAllAlbumsAndMoved;
+    bodyHighlight = null;
   } else if (isLocalOnly) {
     body = AppLocalizations.of(context).theseItemsWillBeDeletedFromYourDevice;
+    bodyHighlight = null;
   } else {
     throw AssertionError("Unexpected state");
+  }
+
+  Future<void> deleteFromEnte() async {
+    await deleteFromRemoteOnlyAction(context, deletableFiles).then(
+      (value) {
+        showShortToast(context, AppLocalizations.of(context).movedToTrash);
+      },
+      onError: (e, s) {
+        showGenericErrorDialog(context: context, error: e);
+      },
+    );
   }
 
   if (isBothLocalAndRemote) {
@@ -840,17 +851,7 @@ Future<void> showDeleteSheet(
       onDelete: (target) async {
         switch (target) {
           case _MixedDeleteTarget.ente:
-            await deleteFromRemoteOnlyAction(context, deletableFiles).then(
-              (value) {
-                showShortToast(
-                  context,
-                  AppLocalizations.of(context).movedToTrash,
-                );
-              },
-              onError: (e, s) {
-                showGenericErrorDialog(context: context, error: e);
-              },
-            );
+            await deleteFromEnte();
           case _MixedDeleteTarget.device:
             await deleteOnDeviceOnlyAction(context, deletableFiles);
           case _MixedDeleteTarget.both:
@@ -870,69 +871,18 @@ Future<void> showDeleteSheet(
     return;
   }
 
-  final List<ButtonWidget> buttons = [];
-  if (isBothLocalAndRemote || isRemoteOnly) {
-    buttons.add(
-      ButtonWidget(
-        labelText: isBothLocalAndRemote
-            ? AppLocalizations.of(context).deleteFromEnte
-            : AppLocalizations.of(context).yesDelete,
-        buttonType: ButtonType.critical,
-        buttonSize: ButtonSize.large,
-        shouldStickToDarkTheme: true,
-        buttonAction: ButtonAction.first,
-        shouldSurfaceExecutionStates: true,
-        isInAlert: true,
-        onTap: () async {
-          await deleteFromRemoteOnlyAction(context, deletableFiles).then(
-            (value) {
-              showShortToast(
-                context,
-                AppLocalizations.of(context).movedToTrash,
-              );
-            },
-            onError: (e, s) {
-              showGenericErrorDialog(context: context, error: e);
-            },
-          );
-        },
-      ),
-    );
-  }
-  if (isBothLocalAndRemote || isLocalOnly) {
-    buttons.add(
-      ButtonWidget(
-        labelText: isBothLocalAndRemote
-            ? AppLocalizations.of(context).deleteFromDevice
-            : AppLocalizations.of(context).yesDelete,
-        buttonType: ButtonType.critical,
-        buttonSize: ButtonSize.large,
-        shouldStickToDarkTheme: true,
-        buttonAction: ButtonAction.second,
-        shouldSurfaceExecutionStates: false,
-        isInAlert: true,
-        onTap: () async {
-          await deleteOnDeviceOnlyAction(context, deletableFiles);
-        },
-      ),
-    );
-  }
-  buttons.add(
-    ButtonWidget(
-      labelText: AppLocalizations.of(context).cancel,
-      buttonType: ButtonType.secondary,
-      buttonSize: ButtonSize.large,
-      shouldStickToDarkTheme: true,
-      buttonAction: ButtonAction.fourth,
-      isInAlert: true,
-    ),
-  );
-  final actionResult = await showActionSheet(
+  final actionResult = await _showSingleDeleteConfirmationSheet(
     context: context,
-    buttons: buttons,
-    actionSheetType: ActionSheetType.defaultActionSheet,
-    title: AppLocalizations.of(context).areYouSure,
     body: body,
+    action: isRemoteOnly ? ButtonAction.first : ButtonAction.second,
+    shouldSurfaceExecutionStates: isRemoteOnly,
+    onDelete: () async {
+      if (isRemoteOnly) {
+        await deleteFromEnte();
+      } else {
+        await deleteOnDeviceOnlyAction(context, deletableFiles);
+      }
+    },
   );
   if (actionResult?.action != null &&
       actionResult!.action == ButtonAction.error) {
@@ -996,6 +946,39 @@ Future<ButtonResult?> _showMixedDeleteTargetSheet({
   );
 }
 
+Widget _deleteSheetIllustration() {
+  return Image.asset("assets/warning-grey.png");
+}
+
+Future<ButtonResult?> _showSingleDeleteConfirmationSheet({
+  required BuildContext context,
+  required String body,
+  required ButtonAction action,
+  required bool shouldSurfaceExecutionStates,
+  required Future<void> Function() onDelete,
+}) {
+  final l10n = AppLocalizations.of(context);
+  return showBottomSheetComponent<ButtonResult>(
+    context: context,
+    useRootNavigator: Platform.isIOS,
+    builder: (sheetContext) => BottomSheetComponent(
+      title: l10n.areYouSure,
+      message: body,
+      illustration: _deleteSheetIllustration(),
+      closeTooltip: l10n.close,
+      closeResult: ButtonResult(ButtonAction.fourth),
+      actions: [
+        ButtonComponent(
+          label: l10n.yesDelete,
+          variant: ButtonComponentVariant.critical,
+          shouldSurfaceExecutionStates: shouldSurfaceExecutionStates,
+          onTap: () => _runDeleteAction(sheetContext, action, onDelete),
+        ),
+      ],
+    ),
+  );
+}
+
 class _MixedDeleteTargetSheet extends StatelessWidget {
   const _MixedDeleteTargetSheet({
     required this.title,
@@ -1015,42 +998,44 @@ class _MixedDeleteTargetSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.componentColors;
-
     return BottomSheetComponent(
       title: title,
+      message: '$body\n$bodyHighlight',
+      illustration: _deleteSheetIllustration(),
       closeTooltip: closeTooltip,
-      content: Text(
-        '$body\n$bodyHighlight',
-        style: TextStyles.body.copyWith(color: colors.textLight),
-      ),
       actions: [
         for (final option in options)
           ButtonComponent(
             key: ValueKey('mixedDeleteTarget.${option.target.name}'),
             label: option.label,
             variant: _variantFor(option.target),
-            onTap: () => _handleDelete(context, option),
+            onTap: () => _runDeleteAction(
+              context,
+              option.action,
+              () => onDelete(option.target),
+            ),
           ),
       ],
     );
   }
+}
 
-  Future<void> _handleDelete(
-    BuildContext context,
-    _MixedDeleteTargetOption option,
-  ) async {
-    try {
-      await onDelete(option.target);
-      if (!context.mounted) return;
-      Navigator.of(context).pop(ButtonResult(option.action));
-    } catch (error) {
-      if (context.mounted) {
-        Navigator.of(
-          context,
-        ).pop(ButtonResult(ButtonAction.error, _toException(error)));
-      }
+Future<void> _runDeleteAction(
+  BuildContext context,
+  ButtonAction action,
+  Future<void> Function() onDelete,
+) async {
+  try {
+    await onDelete();
+    if (!context.mounted) return;
+    Navigator.of(context).pop(ButtonResult(action));
+  } catch (error) {
+    if (context.mounted) {
+      Navigator.of(
+        context,
+      ).pop(ButtonResult(ButtonAction.error, _toException(error)));
     }
+    rethrow;
   }
 }
 

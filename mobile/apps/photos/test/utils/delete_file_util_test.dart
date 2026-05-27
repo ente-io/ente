@@ -54,6 +54,7 @@ void main() {
         );
 
         expect(find.byType(BottomSheetComponent), findsOneWidget);
+        _expectDeleteWarningIllustration();
         expect(
           find.text(
             'Some items are in both Ente and your device.\n'
@@ -215,6 +216,7 @@ void main() {
         ),
         findsOneWidget,
       );
+      _expectDeleteWarningIllustration();
       expect(find.text('Are you sure?'), findsOneWidget);
       expect(find.text('They will be deleted from all albums.'), findsNothing);
       expect(find.byType(ButtonComponent), findsOneWidget);
@@ -250,6 +252,7 @@ void main() {
         find.text('These items will be deleted from your device.'),
         findsOneWidget,
       );
+      _expectDeleteWarningIllustration();
       expect(find.text('Are you sure?'), findsOneWidget);
       expect(find.text('They will be deleted from all albums.'), findsNothing);
       expect(find.byType(ButtonComponent), findsOneWidget);
@@ -592,6 +595,18 @@ void _expectVisibleButtonsInOrder(WidgetTester tester, List<String> labels) {
       reason: '${labels[i]} should appear above ${labels[i + 1]}',
     );
   }
+}
+
+void _expectDeleteWarningIllustration() {
+  expect(
+    find.byWidgetPredicate(
+      (widget) =>
+          widget is Image &&
+          widget.image is AssetImage &&
+          (widget.image as AssetImage).assetName == 'assets/warning-grey.png',
+    ),
+    findsOneWidget,
+  );
 }
 
 class _TestApp extends StatelessWidget {
