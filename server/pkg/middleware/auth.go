@@ -114,7 +114,7 @@ func (m *AuthMiddleware) AdminAuthMiddleware() gin.HandlerFunc {
 		// if no admins are set, then check if the user is first user in the system
 		if len(admins) == 0 && admin == 0 {
 			id, err := m.UserAuthRepo.GetMinUserID()
-			if err != nil && id == userID {
+			if err == nil && id == userID {
 				c.Next()
 				return
 			}
