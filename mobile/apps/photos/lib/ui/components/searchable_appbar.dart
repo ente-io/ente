@@ -151,15 +151,12 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
           size: 18,
           color: colors.textLight,
         ),
-        suffix: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _deactivateSearch,
-          child: HugeIcon(
-            icon: HugeIcons.strokeRoundedCancel01,
-            size: 18,
-            color: colors.textLight,
-          ),
+        suffix: HugeIcon(
+          icon: HugeIcons.strokeRoundedCancel01,
+          size: 18,
+          color: colors.textLight,
         ),
+        onSuffixTap: _deactivateSearch,
         onChanged: widget.onSearch,
       ),
     );

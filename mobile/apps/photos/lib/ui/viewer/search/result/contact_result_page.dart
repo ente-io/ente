@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:email_validator/email_validator.dart";
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_contacts/contacts.dart" as contacts;
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
@@ -168,11 +169,13 @@ class _ContactResultPageState extends State<ContactResultPage> {
               preferredSize: Size.fromHeight(appBarHeight),
               child: widget.enableGrouping
                   ? _ContactResultAppBar(
+                      title: _searchResultName,
                       isHierarchicalSearchable: true,
                       height: appBarHeight,
                     )
                   : _AppBarWithBoundary(
                       child: _ContactResultAppBar(
+                        title: _searchResultName,
                         isHierarchicalSearchable: true,
                         height: appBarHeight,
                       ),
@@ -483,9 +486,11 @@ class _UnsavedContactHeader extends StatelessWidget {
         children: [
           Text(
             email,
-            style: textTheme.largeBold.copyWith(fontSize: 20, height: 28 / 20),
+            style: TextStyles.body.copyWith(color: colorScheme.textMuted),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           MenuItemWidgetNew(
             title: l10n.addANameAndPhoto,
             subText: l10n.itemCount(count: itemCount),
@@ -581,10 +586,12 @@ class _ContactResultAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   static const _toolbarHeight = 56.0;
 
+  final String title;
   final bool isHierarchicalSearchable;
   final double height;
 
   const _ContactResultAppBar({
+    required this.title,
     required this.isHierarchicalSearchable,
     required this.height,
   });
@@ -611,6 +618,8 @@ class _ContactResultAppBar extends StatelessWidget
         backgroundColor: colorScheme.backgroundColour,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
+        centerTitle: false,
+        title: _ContactResultAppBarTitle(title: title),
       );
     }
 
@@ -620,6 +629,8 @@ class _ContactResultAppBar extends StatelessWidget
       backgroundColor: colorScheme.backgroundColour,
       surfaceTintColor: Colors.transparent,
       titleSpacing: 0,
+      centerTitle: false,
+      title: _ContactResultAppBarTitle(title: title),
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(
           AppBarFilterChips.preferredHeight(context),
@@ -629,6 +640,24 @@ class _ContactResultAppBar extends StatelessWidget
           child: AppBarFilterChips(),
         ),
       ),
+    );
+  }
+}
+
+class _ContactResultAppBarTitle extends StatelessWidget {
+  const _ContactResultAppBarTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: getEnteTextTheme(
+        context,
+      ).largeBold.copyWith(color: getEnteColorScheme(context).textBase),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

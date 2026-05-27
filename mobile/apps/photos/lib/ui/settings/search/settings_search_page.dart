@@ -166,21 +166,15 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           color: colors.textLight,
           strokeWidth: 1.6,
         ),
-        suffix: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _searchQuery.isNotEmpty
-              ? _clearSearch
-              : () => Navigator.of(context).pop(),
-          child: SizedBox.square(
-            dimension: 24,
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedCancel01,
-              size: 18,
-              color: colors.textLight,
-              strokeWidth: 1.6,
-            ),
-          ),
+        suffix: HugeIcon(
+          icon: HugeIcons.strokeRoundedCancel01,
+          size: 18,
+          color: colors.textLight,
+          strokeWidth: 1.6,
         ),
+        onSuffixTap: _searchQuery.isNotEmpty
+            ? _clearSearch
+            : () => Navigator.of(context).pop(),
       ),
     );
   }

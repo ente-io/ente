@@ -13,6 +13,7 @@ import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/favorites_service_init_complete_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/events/tab_changed_event.dart";
 import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -53,6 +54,7 @@ class AlbumsTab extends StatefulWidget {
 
 class _AlbumsTabState extends State<AlbumsTab>
     with AutomaticKeepAliveClientMixin {
+  static const int _kAlbumsTabIndex = 1;
   static const double _kHeaderToolbarHeight = 60;
   static const Duration _kSearchTransitionDuration = Duration(
     milliseconds: 240,
@@ -100,6 +102,7 @@ class _AlbumsTabState extends State<AlbumsTab>
   _backupFoldersUpdatedEvent;
   late final StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   late final StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  late final StreamSubscription<TabChangedEvent> _tabChangedEvent;
 
   final _debouncer = Debouncer(
     const Duration(seconds: 2),
@@ -156,6 +159,9 @@ class _AlbumsTabState extends State<AlbumsTab>
       _enteCollections.value = null;
       _sharedCollections.value = null;
     });
+    _tabChangedEvent = Bus.instance.on<TabChangedEvent>().listen(
+      _handleTabChanged,
+    );
     widget.isSearchActiveNotifier?.addListener(_handleSearchStateChanged);
     _syncSearchNotifier(_isSearchActive);
   }
@@ -174,6 +180,12 @@ class _AlbumsTabState extends State<AlbumsTab>
   void _handleSearchStateChanged() {
     if (widget.isSearchActiveNotifier?.value == false && _isSearchActive) {
       _deactivateSearch(syncNotifier: false);
+    }
+  }
+
+  void _handleTabChanged(TabChangedEvent event) {
+    if (event.selectedIndex != _kAlbumsTabIndex) {
+      _searchFocusNode.unfocus();
     }
   }
 
@@ -676,6 +688,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     _backupFoldersUpdatedEvent.cancel();
     _appModeChangedEvent.cancel();
     _loggedOutEvent.cancel();
+    _tabChangedEvent.cancel();
     widget.isSearchActiveNotifier?.removeListener(_handleSearchStateChanged);
     _debouncer.cancelDebounceTimer();
     _searchController.dispose();
@@ -768,15 +781,12 @@ class _AlbumsTabState extends State<AlbumsTab>
                                     size: 18,
                                     color: componentColors.textLight,
                                   ),
-                                  suffix: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: _deactivateSearch,
-                                    child: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedCancel01,
-                                      size: 18,
-                                      color: componentColors.textLight,
-                                    ),
+                                  suffix: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedCancel01,
+                                    size: 18,
+                                    color: componentColors.textLight,
                                   ),
+                                  onSuffixTap: _deactivateSearch,
                                   onChanged: (value) {
                                     final hadSearchQuery = _hasSearchQuery;
                                     if (!hadSearchQuery &&
