@@ -149,6 +149,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   Future<void> _showExitConfirmationDialog(BuildContext context) async {
     final actionResult = await showActionSheet(
       context: context,
+      title: AppLocalizations.of(context).discardEditsQuestion,
       buttons: [
         ButtonWidget(
           labelText: AppLocalizations.of(context).yesDiscardChanges,
