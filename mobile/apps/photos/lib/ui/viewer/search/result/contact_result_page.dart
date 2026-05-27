@@ -168,11 +168,13 @@ class _ContactResultPageState extends State<ContactResultPage> {
               preferredSize: Size.fromHeight(appBarHeight),
               child: widget.enableGrouping
                   ? _ContactResultAppBar(
+                      title: _searchResultName,
                       isHierarchicalSearchable: true,
                       height: appBarHeight,
                     )
                   : _AppBarWithBoundary(
                       child: _ContactResultAppBar(
+                        title: _searchResultName,
                         isHierarchicalSearchable: true,
                         height: appBarHeight,
                       ),
@@ -581,10 +583,12 @@ class _ContactResultAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   static const _toolbarHeight = 56.0;
 
+  final String title;
   final bool isHierarchicalSearchable;
   final double height;
 
   const _ContactResultAppBar({
+    required this.title,
     required this.isHierarchicalSearchable,
     required this.height,
   });
@@ -611,6 +615,8 @@ class _ContactResultAppBar extends StatelessWidget
         backgroundColor: colorScheme.backgroundColour,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
+        centerTitle: false,
+        title: _ContactResultAppBarTitle(title: title),
       );
     }
 
@@ -620,6 +626,8 @@ class _ContactResultAppBar extends StatelessWidget
       backgroundColor: colorScheme.backgroundColour,
       surfaceTintColor: Colors.transparent,
       titleSpacing: 0,
+      centerTitle: false,
+      title: _ContactResultAppBarTitle(title: title),
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(
           AppBarFilterChips.preferredHeight(context),
@@ -629,6 +637,24 @@ class _ContactResultAppBar extends StatelessWidget
           child: AppBarFilterChips(),
         ),
       ),
+    );
+  }
+}
+
+class _ContactResultAppBarTitle extends StatelessWidget {
+  const _ContactResultAppBarTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: getEnteTextTheme(
+        context,
+      ).largeBold.copyWith(color: getEnteColorScheme(context).textBase),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
