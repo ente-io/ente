@@ -1,11 +1,10 @@
 name: "Lint (auth)"
 
 on:
-    # Run on every pull request (open or push to it) that changes auth app
     pull_request:
         paths:
-            - "mobile/apps/auth/**"
             - ".github/workflows/auth-lint.yml"
+            - "mobile/apps/auth/**"
             - "mobile/scripts/check_source_arb_plurals.rb"
 
 env:
@@ -88,8 +87,6 @@ jobs:
 
             - run: dart format --output=none --set-exit-if-changed .
 
-            - name: Analyze auth
-              run: flutter analyze --no-fatal-infos
+            - run: flutter analyze --no-fatal-infos
 
-            - name: Test auth
-              run: flutter test
+            - run: flutter test
