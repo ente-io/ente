@@ -38,6 +38,8 @@ class ManageSharedLinkWidget extends StatefulWidget {
 }
 
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
+  static const Duration _expiryPresetSelectionTolerance = Duration(minutes: 5);
+
   final CollectionActions sharingActions = CollectionActions(
     CollectionsService.instance,
   );
@@ -150,7 +152,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
             ),
           ],
         ),
-        if (url.hasExpiry)
+        if (url.hasExpiry) ...[
           ShareSectionDescription(
             url.isExpired
                 ? AppLocalizations.of(context).expiredLinkInfo
@@ -161,6 +163,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
           ),
+          const SizedBox(height: Spacing.sm),
+        ],
         const SizedBox(height: Spacing.sm),
         ShareMenuGroup(
           items: [
@@ -391,6 +395,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       ),
       (title: l10n.custom, expireAfterInMicroseconds: -1),
     ];
+    final selectedExpiryOption = _selectedExpiryOption(
+      url,
+      expiryOptions.map((option) => option.expireAfterInMicroseconds),
+    );
 
     await showBottomSheetComponent<void>(
       context: context,
@@ -403,8 +411,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 key: ValueKey(expiryOption.expireAfterInMicroseconds),
                 title: expiryOption.title,
                 trailing:
-                    !url.hasExpiry &&
-                        expiryOption.expireAfterInMicroseconds == 0
+                    selectedExpiryOption ==
+                        expiryOption.expireAfterInMicroseconds
                     ? shareCheck(sheetContext)
                     : null,
                 showOnlyLoadingState:
@@ -455,6 +463,30 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       return 0;
     }
     return DateTime.now().microsecondsSinceEpoch + expireAfterInMicroseconds;
+  }
+
+  int _selectedExpiryOption(PublicURL url, Iterable<int> expireAfterOptions) {
+    if (!url.hasExpiry) {
+      return 0;
+    }
+
+    final remainingMicroseconds =
+        url.validTill - DateTime.now().microsecondsSinceEpoch;
+    if (remainingMicroseconds <= 0) {
+      return -1;
+    }
+
+    for (final expireAfterOption in expireAfterOptions) {
+      if (expireAfterOption <= 0) {
+        continue;
+      }
+      final difference = (remainingMicroseconds - expireAfterOption).abs();
+      if (difference <= _expiryPresetSelectionTolerance.inMicroseconds) {
+        return expireAfterOption;
+      }
+    }
+
+    return -1;
   }
 
   Future<void> _showDeviceLimitSheet(
