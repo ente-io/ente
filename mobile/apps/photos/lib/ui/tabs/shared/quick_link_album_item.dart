@@ -81,11 +81,6 @@ class QuickLinkAlbumItem extends StatelessWidget {
                           }
                         },
                       ),
-                      const Positioned(
-                        right: -4,
-                        bottom: -4,
-                        child: CollectionLinkBadge(),
-                      ),
                     ],
                   ),
                 ),
@@ -96,11 +91,22 @@ class QuickLinkAlbumItem extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        c.displayName,
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              c.displayName,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const CollectionLinkBadge(
+                            variant: CollectionShareBadgeVariant.outlined,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       FutureBuilder<int>(
