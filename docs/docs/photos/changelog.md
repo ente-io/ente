@@ -9,7 +9,7 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 
 ## v1.7.24 (desktop) - May 2026
 
-- Add files to shared albums
+- Upload files to shared albums
 - Add shared files to your albums
 - Add shared files to shared albums
 - Favorite files in shared albums
