@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:email_validator/email_validator.dart";
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_contacts/contacts.dart" as contacts;
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
@@ -485,7 +486,9 @@ class _UnsavedContactHeader extends StatelessWidget {
         children: [
           Text(
             email,
-            style: textTheme.largeBold.copyWith(fontSize: 20, height: 28 / 20),
+            style: TextStyles.body.copyWith(color: colorScheme.textMuted),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 20),
           MenuItemWidgetNew(
