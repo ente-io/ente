@@ -781,15 +781,12 @@ class _AlbumsTabState extends State<AlbumsTab>
                                     size: 18,
                                     color: componentColors.textLight,
                                   ),
-                                  suffix: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: _deactivateSearch,
-                                    child: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedCancel01,
-                                      size: 18,
-                                      color: componentColors.textLight,
-                                    ),
+                                  suffix: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedCancel01,
+                                    size: 18,
+                                    color: componentColors.textLight,
                                   ),
+                                  onSuffixTap: _deactivateSearch,
                                   onChanged: (value) {
                                     final hadSearchQuery = _hasSearchQuery;
                                     if (!hadSearchQuery &&
