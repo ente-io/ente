@@ -6,7 +6,8 @@ enum IconButtonType { primary, secondary, rounded }
 
 class IconButtonWidget extends StatefulWidget {
   final IconButtonType iconButtonType;
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final bool disableGestureDetector;
   final VoidCallback? onTap;
   final Color? defaultColor;
@@ -15,7 +16,8 @@ class IconButtonWidget extends StatefulWidget {
   final double size;
   final bool roundedIcon;
   const IconButtonWidget({
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     required this.iconButtonType,
     this.disableGestureDetector = false,
     this.onTap,
@@ -25,7 +27,7 @@ class IconButtonWidget extends StatefulWidget {
     this.size = 24,
     this.roundedIcon = true,
     super.key,
-  });
+  }) : assert(icon != null || iconWidget != null);
 
   @override
   State<IconButtonWidget> createState() => _IconButtonWidgetState();
@@ -35,7 +37,9 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
   Color? iconStateColor;
   @override
   void didUpdateWidget(IconButtonWidget oldWidget) {
-    if (oldWidget.icon != widget.icon && mounted) {
+    if ((oldWidget.icon != widget.icon ||
+            oldWidget.iconWidget != widget.iconWidget) &&
+        mounted) {
       setState(() {
         iconStateColor = null;
       });
@@ -65,6 +69,13 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
   }
 
   Widget _iconButton(EnteColorScheme colorTheme) {
+    final iconColor =
+        widget.iconColor ??
+        (widget.iconButtonType == IconButtonType.secondary
+            ? colorTheme.strokeMuted
+            : colorTheme.strokeBase);
+    final icon = widget.iconWidget ?? Icon(widget.icon, size: widget.size);
+
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: widget.roundedIcon
@@ -75,24 +86,14 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
                 borderRadius: BorderRadius.circular(widget.size),
                 color: iconStateColor,
               ),
-              child: Icon(
-                widget.icon,
-                color:
-                    widget.iconColor ??
-                    (widget.iconButtonType == IconButtonType.secondary
-                        ? colorTheme.strokeMuted
-                        : colorTheme.strokeBase),
-                size: widget.size,
+              child: IconTheme(
+                data: IconThemeData(color: iconColor, size: widget.size),
+                child: icon,
               ),
             )
-          : Icon(
-              widget.icon,
-              color:
-                  widget.iconColor ??
-                  (widget.iconButtonType == IconButtonType.secondary
-                      ? colorTheme.strokeMuted
-                      : colorTheme.strokeBase),
-              size: widget.size,
+          : IconTheme(
+              data: IconThemeData(color: iconColor, size: widget.size),
+              child: icon,
             ),
     );
   }
