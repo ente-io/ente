@@ -490,7 +490,7 @@ class _UnsavedContactHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           MenuItemWidgetNew(
             title: l10n.addANameAndPhoto,
             subText: l10n.itemCount(count: itemCount),
