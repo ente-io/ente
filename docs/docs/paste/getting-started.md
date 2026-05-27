@@ -104,7 +104,7 @@ If the paste is password protected, the recipient sees an "Enter paste password"
 ## What can go wrong
 
 - **"This paste has expired or was already opened."** The link has been consumed by someone else, or the 24-hour window has elapsed. The paste cannot be recovered. Create a new one.
-- **"Incorrect paste password"** (password-protected pastes only). The password did not produce the right key. The paste is _not_ consumed by a failed password attempt. Try again, or ask the sender to confirm the password.
+- **"Incorrect paste password"** (password-protected pastes only). The password did not produce the right key. Because the paste was already fetched for this one-time open, it cannot be retried. Ask the sender to create a new paste.
 - **"Missing key in URL" / "Invalid key in URL"** The fragment after `#` is missing or malformed. This usually means the link was truncated when it was shared. Ask the sender to resend the full link, and prefer copying and pasting it exactly rather than retyping it.
 - **"Paste is unavailable"** The link is being opened by a tool that looks like a link-preview bot or crawler, or the request was not made from `paste.ente.com`. Open the link directly in a regular browser tab.
 

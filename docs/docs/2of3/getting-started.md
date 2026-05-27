@@ -95,9 +95,9 @@ Both paths work the same way and run entirely in your browser.
 1. Open 2of3.ente.com, or open `2of3-recovery.html` from wherever you stored it (double-click works on most operating systems; it opens in your default browser).
 2. The recovery section has two slots: **Card A** and **Card B**. They are interchangeable.
 3. For each slot, do one of the following:
-   - **Upload image**: pick a saved card PNG or JPG, or a phone photo of a printed card.
-   - **Drag and drop**: drop an image file directly onto the slot.
-   - **Paste code**: paste the text code that starts with `2of3-` into the **Code A** or **Code B** field.
+    - **Upload image**: pick a saved card PNG or JPG, or a phone photo of a printed card.
+    - **Drag and drop**: drop an image file directly onto the slot.
+    - **Paste code**: paste the text code that starts with `2of3-` into the **Code A** or **Code B** field.
 4. As soon as a slot has a valid card, the slot shows which card it is. For example: `Card 2 from ID A1B2C3D4`. Make sure both slots show the same ID.
 5. Click **Recover secret**. The original secret appears in a **Recovered secret** box. Click **Copy** to copy it to your clipboard.
 

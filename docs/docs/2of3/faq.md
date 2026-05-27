@@ -105,7 +105,7 @@ The two cards you uploaded share the same card number. You probably uploaded the
 
 Both cards parsed fine but combined into bytes that did not match the checksum stored on each card. This usually means at least one card has been corrupted: a misread QR, a transcribed text code with a typo, or a faint print where the decoder picked up wrong bits.
 
-Try a different pair of cards. With three cards in a set there are three possible pairs (1+2, 1+3, 2+3); if exactly one card is bad, two of those three pairs will still recover the secret.
+Try a different pair of cards. With three cards in a set there are three possible pairs (1+2, 1+3, 2+3); if exactly one card is bad, the pair that avoids the bad card will still recover the secret.
 
 ### Can a chat app eating my link or text break recovery? {#2of3-chat-mangling}
 
