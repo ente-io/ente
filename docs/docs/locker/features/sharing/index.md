@@ -29,9 +29,7 @@ Learn more about [Public links](/locker/features/sharing/public-links).
 
 ### Share text via Ente Paste
 
-Use Ente Paste when you need to share sensitive text quickly with a one-time link. Pastes are end-to-end encrypted, deleted after first open, and expire after 24 hours.
-
-Learn more about [Ente Paste](/locker/features/sharing/ente-paste).
+Use [Ente Paste](/paste/) when you need to share sensitive text quickly with a one-time link. Pastes are end-to-end encrypted, deleted after first open, and expire after 24 hours.
 
 ## What you can share
 

@@ -17,6 +17,8 @@ During recovery, the helper combines any 2 sheets in a browser. The browser reco
 
 The server never sees the kit secret, the sheet contents, or your decrypted recovery key.
 
+The split uses Shamir's 2-of-3 secret sharing. Legacy Kit is the version we ship for Ente accounts: it adds the server-mediated, revocable recovery flow that account inheritance needs on top of the same 2-of-3 math. The same scheme is also available as a standalone web app at [2of3](/2of3/), which works on any text-based secret without an Ente account. For a visual walkthrough of the math, see [How Shamir's Secret Sharing Works](https://ente.com/blog/how-shamirs-secret-sharing-works).
+
 ## Create a Legacy Kit
 
 Legacy Kit creation and management are available in Ente Locker on mobile.
