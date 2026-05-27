@@ -1,6 +1,7 @@
 import "dart:math" as math;
 
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
@@ -27,13 +28,10 @@ class StartNewRitualCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final componentColors = context.componentColors;
     const fillColor = Colors.transparent;
-    final dottedBorderColor = isDark
-        ? colorScheme.strokeFaint
-        : const Color(0xFFF0F0F0);
+    final dottedBorderColor = componentColors.textLightest;
     final contentRightPadding = variant == StartNewRitualCardVariant.compact
         ? 14.0
         : 0.0;
