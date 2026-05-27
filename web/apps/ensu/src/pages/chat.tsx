@@ -6,6 +6,7 @@ import {
     Drawer,
     IconButton,
     Stack,
+    Typography,
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
@@ -422,8 +423,7 @@ const groupSessionsByDate = (sessions: ChatSession[]) => {
     ).filter(([, group]) => group.length > 0);
 };
 
-const detectTauriRuntime = () =>
-    detectTauriAppRuntime();
+const detectTauriRuntime = () => detectTauriAppRuntime();
 
 const Page: React.FC = () => {
     const router = useRouter();
@@ -650,6 +650,9 @@ const Page: React.FC = () => {
     const [pendingImagePreviews, setPendingImagePreviews] = useState<
         Record<string, string>
     >({});
+    const [isImageDragActive, setIsImageDragActive] = useState(false);
+    const [isProcessingDroppedImages, setIsProcessingDroppedImages] =
+        useState(false);
     const [imagePreview, setImagePreview] = useState<{
         url: string;
         name: string;
@@ -2010,9 +2013,7 @@ const Page: React.FC = () => {
         async (images: ImageAttachment[]) => {
             if (!isTauriRuntime || images.length === 0) return [] as string[];
             const { appDataDir, join } = await import("@tauri-apps/api/path");
-            const { mkdir, writeFile } = await import(
-                "@tauri-apps/plugin-fs"
-            );
+            const { mkdir, writeFile } = await import("@tauri-apps/plugin-fs");
             const root = await appDataDir();
             const dir = await join(root, "ensu_llmchat_inference_images");
             await mkdir(dir, { recursive: true });
@@ -3558,6 +3559,31 @@ const Page: React.FC = () => {
         MAX_IMAGE_ATTACHMENTS_PER_MESSAGE - pendingImages.length,
     );
     const isImageAttachmentLimitReached = imageAttachmentSlotsRemaining === 0;
+    const canHandleImageDrop =
+        showImageAttachment &&
+        !isGenerating &&
+        !isDownloading &&
+        !showModelGate;
+    const canAttachDroppedImages =
+        canHandleImageDrop &&
+        !isImageAttachmentLimitReached &&
+        !isProcessingDroppedImages;
+    const showImageDropOverlay =
+        canHandleImageDrop && (isImageDragActive || isProcessingDroppedImages);
+    const imageDropOverlayTitle = isProcessingDroppedImages
+        ? "Attaching images..."
+        : isImageAttachmentLimitReached
+          ? "Image limit reached"
+          : "Drop images to attach";
+    const imageDropOverlayDescription = isImageAttachmentLimitReached
+        ? `You can attach up to ${MAX_IMAGE_ATTACHMENTS_PER_MESSAGE} images per message.`
+        : "PNG, JPG, WebP, GIF, BMP, HEIC, HEIF, AVIF";
+
+    useEffect(() => {
+        if (!canHandleImageDrop) {
+            setIsImageDragActive(false);
+        }
+    }, [canHandleImageDrop]);
 
     const handleImageSelect = useCallback(
         (files: File[]) => {
@@ -3597,6 +3623,80 @@ const Page: React.FC = () => {
         onCancel: handleImageCancel,
     });
 
+    const processTauriImagePaths = useCallback(
+        async (selectedPaths: string[], source: "picker" | "drop") => {
+            if (imageAttachmentSlotsRemaining <= 0) return;
+            const pathsToProcess = selectedPaths.slice(
+                0,
+                imageAttachmentSlotsRemaining,
+            );
+            if (pathsToProcess.length === 0) {
+                handleImageCancel();
+                return;
+            }
+
+            const isDrop = source === "drop";
+            if (isDrop) setIsProcessingDroppedImages(true);
+
+            try {
+                const { invoke } = await import("@tauri-apps/api/core");
+                const files = await Promise.all(
+                    pathsToProcess.map(async (selectedPath) => {
+                        const normalized = selectedPath.replace(/\\/g, "/");
+                        const name =
+                            normalized.split("/").pop()?.replace(/\0/g, "") ||
+                            "image";
+                        const compressed = await invoke<number[]>(
+                            "chat_db_compress_attachment_image_file",
+                            { path: selectedPath },
+                        );
+                        const bytes = new Uint8Array(compressed);
+                        return new File(
+                            [toSafeBlobPart(bytes)],
+                            normalizedJpegAttachmentName(name),
+                            { type: "image/jpeg" },
+                        );
+                    }),
+                );
+
+                log.info(
+                    `Compressed ${source === "drop" ? "dropped" : "selected"} image attachments`,
+                    {
+                        count: files.length,
+                        totalBytes: files.reduce(
+                            (sum, file) => sum + file.size,
+                            0,
+                        ),
+                    },
+                );
+
+                if (files.length > 0) {
+                    handleImageSelect(files);
+                    prewarmSelectedImageInference();
+                } else {
+                    handleImageCancel();
+                }
+            } catch (error) {
+                log.error(
+                    `Failed to process ${source === "drop" ? "dropped" : "selected"} image attachment: ${formatImageProcessingErrorForLog(error)}`,
+                );
+                showMiniDialog(
+                    imageProcessingFailureDialog(error, pathsToProcess.length),
+                );
+                return;
+            } finally {
+                if (isDrop) setIsProcessingDroppedImages(false);
+            }
+        },
+        [
+            handleImageCancel,
+            handleImageSelect,
+            imageAttachmentSlotsRemaining,
+            prewarmSelectedImageInference,
+            showMiniDialog,
+        ],
+    );
+
     const openTauriImageSelector = useCallback(async () => {
         closeAttachmentMenu();
         if (imageAttachmentSlotsRemaining <= 0) return;
@@ -3622,53 +3722,7 @@ const Page: React.FC = () => {
                 handleImageCancel();
                 return;
             }
-            const pathsToProcess = selectedPaths.slice(
-                0,
-                imageAttachmentSlotsRemaining,
-            );
-
-            let files: File[];
-            try {
-                const { invoke } = await import("@tauri-apps/api/core");
-                files = await Promise.all(
-                    pathsToProcess.map(async (selectedPath) => {
-                        const normalized = selectedPath.replace(/\\/g, "/");
-                        const name =
-                            normalized.split("/").pop()?.replace(/\0/g, "") ||
-                            "image";
-                        const compressed = await invoke<number[]>(
-                            "chat_db_compress_attachment_image_file",
-                            { path: selectedPath },
-                        );
-                        const bytes = new Uint8Array(compressed);
-                        return new File(
-                            [toSafeBlobPart(bytes)],
-                            normalizedJpegAttachmentName(name),
-                            { type: "image/jpeg" },
-                        );
-                    }),
-                );
-            } catch (error) {
-                log.error(
-                    `Failed to process selected image attachment: ${formatImageProcessingErrorForLog(error)}`,
-                );
-                showMiniDialog(
-                    imageProcessingFailureDialog(error, pathsToProcess.length),
-                );
-                return;
-            }
-
-            log.info("Compressed selected image attachments", {
-                count: files.length,
-                totalBytes: files.reduce((sum, file) => sum + file.size, 0),
-            });
-
-            if (files.length > 0) {
-                handleImageSelect(files);
-                prewarmSelectedImageInference();
-            } else {
-                handleImageCancel();
-            }
+            await processTauriImagePaths(selectedPaths, "picker");
         } catch (error) {
             log.error("Failed to open image picker", error);
             showMiniDialog({
@@ -3679,9 +3733,91 @@ const Page: React.FC = () => {
     }, [
         closeAttachmentMenu,
         handleImageCancel,
-        handleImageSelect,
         imageAttachmentSlotsRemaining,
-        prewarmSelectedImageInference,
+        processTauriImagePaths,
+        showMiniDialog,
+    ]);
+
+    useEffect(() => {
+        if (!isTauriRuntime || !showImageAttachment) return;
+
+        let disposed = false;
+        let unlisten: (() => void) | undefined;
+
+        void import("@tauri-apps/api/webview")
+            .then(({ getCurrentWebview }) =>
+                getCurrentWebview().onDragDropEvent((event) => {
+                    if (
+                        event.payload.type === "enter" ||
+                        event.payload.type === "over"
+                    ) {
+                        if (canHandleImageDrop) {
+                            setIsImageDragActive(
+                                (isActive) => isActive || true,
+                            );
+                        }
+                        return;
+                    }
+
+                    if (event.payload.type === "leave") {
+                        setIsImageDragActive(false);
+                        return;
+                    }
+
+                    setIsImageDragActive(false);
+                    if (!canHandleImageDrop) return;
+                    if (isImageAttachmentLimitReached) {
+                        showMiniDialog({
+                            title: "Image limit reached",
+                            message: `You can attach up to ${MAX_IMAGE_ATTACHMENTS_PER_MESSAGE} images per message.`,
+                        });
+                        return;
+                    }
+                    if (!canAttachDroppedImages) return;
+
+                    const imagePaths = event.payload.paths.filter((path) => {
+                        const lowerPath = path.toLowerCase();
+                        return IMAGE_SELECTOR_EXTENSIONS.some((extension) =>
+                            lowerPath.endsWith(`.${extension}`),
+                        );
+                    });
+                    if (imagePaths.length === 0) {
+                        showMiniDialog({
+                            title: "No supported images",
+                            message:
+                                "Drop PNG, JPG, WebP, GIF, BMP, HEIC, HEIF, or AVIF images.",
+                        });
+                        return;
+                    }
+
+                    void processTauriImagePaths(imagePaths, "drop");
+                }),
+            )
+            .then((dispose) => {
+                if (disposed) {
+                    dispose();
+                } else {
+                    unlisten = dispose;
+                }
+            })
+            .catch((error: unknown) => {
+                log.error(
+                    "Failed to subscribe to Tauri image drop events",
+                    error,
+                );
+            });
+
+        return () => {
+            disposed = true;
+            unlisten?.();
+        };
+    }, [
+        canAttachDroppedImages,
+        canHandleImageDrop,
+        isImageAttachmentLimitReached,
+        isTauriRuntime,
+        processTauriImagePaths,
+        showImageAttachment,
         showMiniDialog,
     ]);
 
@@ -4292,6 +4428,50 @@ const Page: React.FC = () => {
                         actionIconProps={actionIconProps}
                         stopButtonColor={theme.palette.error.main}
                     />
+                    {showImageDropOverlay && (
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                inset: 0,
+                                zIndex: 40,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                pointerEvents: "none",
+                                bgcolor: "rgba(0, 0, 0, 0.38)",
+                                backdropFilter: "blur(10px)",
+                                WebkitBackdropFilter: "blur(10px)",
+                            }}
+                        >
+                            <Stack
+                                sx={{
+                                    alignItems: "center",
+                                    gap: 0.75,
+                                    px: 3,
+                                    py: 2,
+                                    borderRadius: 2,
+                                    border: "1px solid rgba(255, 255, 255, 0.32)",
+                                    bgcolor: "rgba(0, 0, 0, 0.42)",
+                                    color: "#fff",
+                                    boxShadow:
+                                        "0 18px 48px rgba(0, 0, 0, 0.22)",
+                                }}
+                            >
+                                <Typography
+                                    variant="small"
+                                    sx={{ fontWeight: 700, color: "inherit" }}
+                                >
+                                    {imageDropOverlayTitle}
+                                </Typography>
+                                <Typography
+                                    variant="mini"
+                                    sx={{ color: "rgba(255, 255, 255, 0.78)" }}
+                                >
+                                    {imageDropOverlayDescription}
+                                </Typography>
+                            </Stack>
+                        </Box>
+                    )}
                 </Box>
             </Box>
 
