@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:ente_components/ente_components.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -15,6 +16,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/gateways/trash/models/trash_item_request.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/button_result.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import "package:photos/models/freeable_space_info.dart";
@@ -814,7 +816,6 @@ Future<void> showDeleteSheet(
   final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
   final bool isLocalOnly = !containsUploadedFile;
   final bool isRemoteOnly = !containsLocalFile;
-  final bool hasSingleDeleteAction = isLocalOnly || isRemoteOnly;
   final String? bodyHighlight = isBothLocalAndRemote
       ? AppLocalizations.of(context).theyWillBeDeletedFromAllAlbums
       : null;
@@ -830,6 +831,45 @@ Future<void> showDeleteSheet(
   } else {
     throw AssertionError("Unexpected state");
   }
+
+  if (isBothLocalAndRemote) {
+    final actionResult = await _showMixedDeleteTargetSheet(
+      context: context,
+      body: body,
+      bodyHighlight: bodyHighlight!,
+      onDelete: (target) async {
+        switch (target) {
+          case _MixedDeleteTarget.ente:
+            await deleteFromRemoteOnlyAction(context, deletableFiles).then(
+              (value) {
+                showShortToast(
+                  context,
+                  AppLocalizations.of(context).movedToTrash,
+                );
+              },
+              onError: (e, s) {
+                showGenericErrorDialog(context: context, error: e);
+              },
+            );
+          case _MixedDeleteTarget.device:
+            await deleteOnDeviceOnlyAction(context, deletableFiles);
+          case _MixedDeleteTarget.both:
+            await deleteFromEverywhereAction(context, deletableFiles);
+        }
+      },
+    );
+    if (actionResult?.action != null &&
+        actionResult!.action == ButtonAction.error) {
+      await showGenericErrorDialog(
+        context: context,
+        error: actionResult.exception,
+      );
+    } else {
+      selectedFiles.clearAll();
+    }
+    return;
+  }
+
   final List<ButtonWidget> buttons = [];
   if (isBothLocalAndRemote || isRemoteOnly) {
     buttons.add(
@@ -837,9 +877,7 @@ Future<void> showDeleteSheet(
         labelText: isBothLocalAndRemote
             ? AppLocalizations.of(context).deleteFromEnte
             : AppLocalizations.of(context).yesDelete,
-        buttonType: hasSingleDeleteAction
-            ? ButtonType.critical
-            : ButtonType.neutral,
+        buttonType: ButtonType.critical,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
         buttonAction: ButtonAction.first,
@@ -867,9 +905,7 @@ Future<void> showDeleteSheet(
         labelText: isBothLocalAndRemote
             ? AppLocalizations.of(context).deleteFromDevice
             : AppLocalizations.of(context).yesDelete,
-        buttonType: hasSingleDeleteAction
-            ? ButtonType.critical
-            : ButtonType.neutral,
+        buttonType: ButtonType.critical,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
         buttonAction: ButtonAction.second,
@@ -877,23 +913,6 @@ Future<void> showDeleteSheet(
         isInAlert: true,
         onTap: () async {
           await deleteOnDeviceOnlyAction(context, deletableFiles);
-        },
-      ),
-    );
-  }
-
-  if (isBothLocalAndRemote) {
-    buttons.add(
-      ButtonWidget(
-        labelText: AppLocalizations.of(context).deleteFromBoth,
-        buttonType: ButtonType.neutral,
-        buttonSize: ButtonSize.large,
-        shouldStickToDarkTheme: true,
-        buttonAction: ButtonAction.third,
-        shouldSurfaceExecutionStates: true,
-        isInAlert: true,
-        onTap: () async {
-          await deleteFromEverywhereAction(context, deletableFiles);
         },
       ),
     );
@@ -912,11 +931,8 @@ Future<void> showDeleteSheet(
     context: context,
     buttons: buttons,
     actionSheetType: ActionSheetType.defaultActionSheet,
-    title: hasSingleDeleteAction
-        ? AppLocalizations.of(context).areYouSure
-        : null,
+    title: AppLocalizations.of(context).areYouSure,
     body: body,
-    bodyHighlight: bodyHighlight,
   );
   if (actionResult?.action != null &&
       actionResult!.action == ButtonAction.error) {
@@ -927,4 +943,125 @@ Future<void> showDeleteSheet(
   } else {
     selectedFiles.clearAll();
   }
+}
+
+enum _MixedDeleteTarget { ente, device, both }
+
+class _MixedDeleteTargetOption {
+  const _MixedDeleteTargetOption({
+    required this.target,
+    required this.action,
+    required this.label,
+  });
+
+  final _MixedDeleteTarget target;
+  final ButtonAction action;
+  final String label;
+}
+
+Future<ButtonResult?> _showMixedDeleteTargetSheet({
+  required BuildContext context,
+  required String body,
+  required String bodyHighlight,
+  required Future<void> Function(_MixedDeleteTarget target) onDelete,
+}) {
+  final l10n = AppLocalizations.of(context);
+  return showBottomSheetComponent<ButtonResult>(
+    context: context,
+    useRootNavigator: Platform.isIOS,
+    builder: (_) => _MixedDeleteTargetSheet(
+      title: l10n.areYouSure,
+      body: body,
+      bodyHighlight: bodyHighlight,
+      closeTooltip: l10n.close,
+      options: [
+        _MixedDeleteTargetOption(
+          target: _MixedDeleteTarget.ente,
+          action: ButtonAction.first,
+          label: l10n.deleteFromEnte,
+        ),
+        _MixedDeleteTargetOption(
+          target: _MixedDeleteTarget.device,
+          action: ButtonAction.second,
+          label: l10n.deleteFromDevice,
+        ),
+        _MixedDeleteTargetOption(
+          target: _MixedDeleteTarget.both,
+          action: ButtonAction.third,
+          label: l10n.deleteFromBoth,
+        ),
+      ],
+      onDelete: onDelete,
+    ),
+  );
+}
+
+class _MixedDeleteTargetSheet extends StatelessWidget {
+  const _MixedDeleteTargetSheet({
+    required this.title,
+    required this.body,
+    required this.bodyHighlight,
+    required this.closeTooltip,
+    required this.options,
+    required this.onDelete,
+  });
+
+  final String title;
+  final String body;
+  final String bodyHighlight;
+  final String closeTooltip;
+  final List<_MixedDeleteTargetOption> options;
+  final Future<void> Function(_MixedDeleteTarget target) onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+
+    return BottomSheetComponent(
+      title: title,
+      closeTooltip: closeTooltip,
+      content: Text(
+        '$body\n$bodyHighlight',
+        style: TextStyles.body.copyWith(color: colors.textLight),
+      ),
+      actions: [
+        for (final option in options)
+          ButtonComponent(
+            key: ValueKey('mixedDeleteTarget.${option.target.name}'),
+            label: option.label,
+            variant: _variantFor(option.target),
+            onTap: () => _handleDelete(context, option),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _handleDelete(
+    BuildContext context,
+    _MixedDeleteTargetOption option,
+  ) async {
+    try {
+      await onDelete(option.target);
+      if (!context.mounted) return;
+      Navigator.of(context).pop(ButtonResult(option.action));
+    } catch (error) {
+      if (context.mounted) {
+        Navigator.of(
+          context,
+        ).pop(ButtonResult(ButtonAction.error, _toException(error)));
+      }
+    }
+  }
+}
+
+ButtonComponentVariant _variantFor(_MixedDeleteTarget target) {
+  return switch (target) {
+    _MixedDeleteTarget.ente ||
+    _MixedDeleteTarget.device => ButtonComponentVariant.neutral,
+    _MixedDeleteTarget.both => ButtonComponentVariant.critical,
+  };
+}
+
+Exception _toException(Object error) {
+  return error is Exception ? error : Exception(error.toString());
 }
