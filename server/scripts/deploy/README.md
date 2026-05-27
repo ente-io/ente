@@ -26,59 +26,59 @@ We use museum's Dockerfile to build images which we then run on vanilla Ubuntu s
 
 To bring up an additional museum node:
 
-- Prepare the instance to run our services
+Prepare the instance to run our services.
 
-- Setup [promtail](../../../infra/services/promtail/README.md), [prometheus and node-exporter](../../../infra/services/prometheus/README.md) services
+Setup [promtail](../../../infra/services/promtail/README.md), [prometheus and node-exporter](../../../infra/services/prometheus/README.md) services.
 
-- If running behind Nginx, install the [nginx](../../../infra/services/nginx/README.md) service.
+If running behind Nginx, install the [nginx](../../../infra/services/nginx/README.md) service.
 
-- Add credentials
+Add credentials
 
-  ```sh
-  sudo mkdir -p /root/museum/credentials
-  sudo tee /root/museum/credentials/pst-service-account.json
-  sudo tee /root/museum/credentials/fcm-service-account.json
-  sudo tee /root/museum/credentials.yaml
-  ```
+```sh
+sudo mkdir -p /root/museum/credentials
+sudo tee /root/museum/credentials/pst-service-account.json
+sudo tee /root/museum/credentials/fcm-service-account.json
+sudo tee /root/museum/credentials.yaml
+```
 
-- Add billing data
+Add billing data from the pricing-data repo
 
-  ```sh
-  scp /path/to/billing/*.json <instance>:
+```sh
+scp /path/to/pricing-data/{us,in,black-friday}.json <instance>:
 
-  sudo mkdir -p /root/museum/data/billing
-  sudo mv *.json /root/museum/data/billing/
-  ```
+sudo mkdir -p /root/museum/data/billing
+sudo mv *.json /root/museum/data/billing/
+```
 
-- If not running behind Nginx, add the TLS credentials (otherwise add them to Nginx)
+Add the TLS credentials (optional if running behind Nginx)
 
-  ```sh
-  sudo tee /root/museum/credentials/tls.cert
-  sudo tee /root/museum/credentials/tls.key
-  ```
+```sh
+sudo tee /root/museum/credentials/tls.cert
+sudo tee /root/museum/credentials/tls.key
+```
 
-- Copy the service definition and restart script to the new instance. The restart script can remain in the ente user's home directory. Move the service definition to its proper place.
+Copy the service definition and restart script to the new instance. The restart script can remain in the ente user's home directory. Move the service definition to its proper place.
 
-  ```sh
-  # If using nginx
-  scp scripts/deploy/museum.nginx.service <instance>:museum.service
-  # otherwise
-  scp scripts/deploy/museum.service <instance>:
+```sh
+# If using nginx
+scp scripts/deploy/museum.nginx.service <instance>:museum.service
+# otherwise
+scp scripts/deploy/museum.service <instance>:
 
-  scp scripts/deploy/update-and-restart-museum.sh <instance>:
+scp scripts/deploy/update-and-restart-museum.sh <instance>:
 
-  sudo mv museum.service /etc/systemd/system
-  sudo systemctl daemon-reload
-  ```
+sudo mv museum.service /etc/systemd/system
+sudo systemctl daemon-reload
+```
 
-- If running behind Nginx, tell it about museum
+If running behind Nginx, tell it about museum config (modified with suitable rate limits)
 
-  ```sh
-  scp scripts/deploy/museum.nginx.conf <instance>:
+```sh
+scp scripts/deploy/museum.nginx.conf <instance>:
 
-  sudo mv museum.nginx.conf /root/nginx/conf.d
-  sudo systemctl reload nginx
-  ```
+sudo mv museum.nginx.conf /root/nginx/conf.d
+sudo systemctl reload nginx
+```
 
 ## Starting
 

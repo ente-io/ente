@@ -12,4 +12,4 @@ sudo docker pull rg.fr-par.scw.cloud/ente/museum-prod
 
 sudo systemctl restart museum
 sudo systemctl status museum | more
-sudo tail -f /root/var/logs/museum.log
+sudo tail -F /root/var/logs/museum.log
