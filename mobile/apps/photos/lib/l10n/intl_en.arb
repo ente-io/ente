@@ -3212,5 +3212,4 @@
   "@archiveCollectionName": {
     "description": "Name of the 'Archive' collection"
   }
-
 }
