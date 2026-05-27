@@ -51,8 +51,8 @@ To update Sentry just fetch the latest upstream and re-run `./install.sh`.
 
 > The following assumes that you have already provisioned new instances using our standard process.
 
-- `cd /home/ente && git clone https://github.com/getsentry/self-hosted sentry`
-- Checkout the latest tag, e.g. `git checkout 24.2.0` (Sentry uses CalVer, so this'll be the latest `year.month.0`)
+- `cd /home/ente && git clone https://github.com/getsentry/self-hosted.git`
+- Checkout the latest tag, e.g. `git checkout 26.5.0` (Sentry uses CalVer, so this'll be the latest `year.month.0`)
 - Run `sudo ./install.sh`
 
 The rest of this section describes the remaining three steps:
@@ -69,7 +69,6 @@ Next, modify `.env`, setting
 
 ```dotenv
 SENTRY_EVENT_RETENTION_DAYS=30
-SENTRY_MAIL_HOST=ente.io
 ```
 
 ### Configure external nginx
@@ -89,7 +88,7 @@ sudo tee /root/nginx/key.pem
 Sentry should automatically start when the instance boots. If needed (and for the first time), it can be started manually by
 
 ```sh
-cd /home/ente/sentry
+cd /home/ente/self-hosted
 sudo docker compose up -d
 ```
 
@@ -102,14 +101,14 @@ sudo systemctl start nginx
 In their docs Sentry sometimes refers to commands like `sentry createuser`. To run them, prefix the command with `docker compose exec web`. e.g.
 
 ```sh
-cd /home/ente/sentry
+cd /home/ente/self-hosted
 sudo docker compose exec web sentry createuser
 ```
 
 If needed, Sentry can be stopped by using
 
 ```sh
-cd /home/ente/sentry
+cd /home/ente/self-hosted
 sudo docker compose stop
 ```
 
