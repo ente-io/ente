@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
@@ -13,7 +14,6 @@ import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 
 class SearchWidget extends StatefulWidget {
@@ -143,10 +143,7 @@ class SearchWidgetState extends State<SearchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final mutedTextColor =
-        textTheme.smallMuted.color ?? colorScheme.strokeMuted;
+    final componentColors = context.componentColors;
     final shouldShowClearButton =
         focusNode.hasFocus ||
         MediaQuery.viewInsetsOf(context).bottom > 0 ||
@@ -156,63 +153,25 @@ class SearchWidgetState extends State<SearchWidget> {
       child: Padding(
         padding: EdgeInsets.only(bottom: _bottomPadding),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          child: SizedBox(
-            height: 58,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: ColoredBox(
-                color: colorScheme.fillFaint,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedSearch01,
-                        color: mutedTextColor,
-                        size: 24,
-                        strokeWidth: 1.5,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: textController,
-                          focusNode: focusNode,
-                          style: textTheme.small,
-                          textAlignVertical: TextAlignVertical.center,
-                          // Below parameters are to disable auto-suggestion
-                          // Above parameters are to disable auto-suggestion
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(context).search,
-                            hintStyle: textTheme.smallMuted,
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                      ),
-
-                      /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
-                      setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
-                      ValueListenableBuilder(
-                        valueListenable: isLoading,
-                        builder:
-                            (
-                              BuildContext context,
-                              bool isSearching,
-                              Widget? child,
-                            ) {
-                              return SearchSuffixIcon(
-                                isSearching,
-                                showClearButton: shouldShowClearButton,
-                              );
-                            },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: TextInputComponent(
+            controller: textController,
+            focusNode: focusNode,
+            hintText: AppLocalizations.of(context).search,
+            shouldUnfocusOnClearOrSubmit: true,
+            prefix: HugeIcon(
+              icon: HugeIcons.strokeRoundedSearch01,
+              size: 18,
+              color: componentColors.textLight,
+            ),
+            suffix: ValueListenableBuilder(
+              valueListenable: isLoading,
+              builder: (BuildContext context, bool isSearching, Widget? child) {
+                return SearchSuffixIcon(
+                  isSearching,
+                  showClearButton: shouldShowClearButton,
+                );
+              },
             ),
           ),
         ),
