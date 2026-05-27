@@ -37,7 +37,7 @@ class NewAlbumListItemWidget extends StatelessWidget {
         ),
       ),
       title: Text(
-        AppLocalizations.of(context).addNew,
+        AppLocalizations.of(context).createAlbum,
         style: TextStyles.body.copyWith(color: colors.textLight),
         maxLines: 1,
         softWrap: false,

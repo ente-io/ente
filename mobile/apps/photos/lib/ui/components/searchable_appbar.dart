@@ -1,8 +1,8 @@
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/soft_icon_button.dart";
-import "package:photos/ui/components/text_input_widget_v2.dart";
 
 class SearchableAppBar extends StatefulWidget {
   final Widget title;
@@ -137,29 +137,30 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
   }
 
   Widget _buildSearchField() {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     return Container(
       key: const ValueKey('searchBar'),
       alignment: Alignment.center,
-      child: TextInputWidgetV2(
-        textEditingController: _searchController,
+      child: TextInputComponent(
+        controller: _searchController,
         focusNode: _searchFocusNode,
-        autoFocus: true,
-        shouldSurfaceExecutionStates: false,
-        leadingWidget: HugeIcon(
+        autofocus: true,
+        shouldUnfocusOnClearOrSubmit: true,
+        prefix: HugeIcon(
           icon: HugeIcons.strokeRoundedSearch01,
           size: 18,
-          color: colorScheme.textMuted,
+          color: colors.textLight,
         ),
-        trailingWidget: GestureDetector(
+        suffix: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: _deactivateSearch,
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedCancel01,
             size: 18,
-            color: colorScheme.textMuted,
+            color: colors.textLight,
           ),
         ),
-        onChange: widget.onSearch,
+        onChanged: widget.onSearch,
       ),
     );
   }

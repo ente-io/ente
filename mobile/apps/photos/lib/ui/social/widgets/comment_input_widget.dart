@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -87,7 +88,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final componentColors = context.componentColors;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textFieldFillColor = isDarkMode
         ? const Color(0xFF212121)
@@ -141,14 +142,14 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
                 minLines: 1,
                 maxLines: widget.replyingTo != null ? 4 : 8,
                 textAlignVertical: TextAlignVertical.center,
-                style: textTheme.body.copyWith(
-                  height: 15 / 16,
-                  letterSpacing: -0.32,
-                  color: colorScheme.textBase.withValues(alpha: 0.8),
+                style: TextStyles.body.copyWith(
+                  color: componentColors.textBase,
                 ),
                 decoration: InputDecoration(
                   hintText: l10n.commentHint,
-                  hintStyle: textTheme.bodyFaint,
+                  hintStyle: TextStyles.body.copyWith(
+                    color: componentColors.textLighter,
+                  ),
                   border: InputBorder.none,
                   filled: true,
                   fillColor: Colors.transparent,

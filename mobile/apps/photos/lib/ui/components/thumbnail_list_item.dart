@@ -66,7 +66,7 @@ class _ThumbnailListItemState extends State<ThumbnailListItem> {
         borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
         border: Border.all(
           color: widget.isSelected
-              ? widget.selectedBorderColor ?? colors.primaryStroke
+              ? widget.selectedBorderColor ?? colors.strokeDark
               : widget.borderColor ?? _backgroundColor(colors),
         ),
       ),

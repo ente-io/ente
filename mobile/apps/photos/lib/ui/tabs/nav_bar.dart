@@ -28,6 +28,8 @@ class GNav extends StatefulWidget {
     this.tabShadow,
     this.haptic,
     this.tabBackgroundGradient,
+    this.borderRadius,
+    this.boxShadow,
     this.mainAxisAlignment = MainAxisAlignment.spaceBetween,
   });
 
@@ -54,6 +56,8 @@ class GNav extends StatefulWidget {
   final Border? tabActiveBorder;
   final List<BoxShadow>? tabShadow;
   final Gradient? tabBackgroundGradient;
+  final double? borderRadius;
+  final List<BoxShadow>? boxShadow;
   final MainAxisAlignment mainAxisAlignment;
 
   @override
@@ -78,9 +82,9 @@ class _GNavState extends State<GNav> {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(widget.borderRadius ?? 32),
         color: widget.backgroundColor,
-        boxShadow: shadowMenuLight,
+        boxShadow: widget.boxShadow ?? shadowMenuLight,
       ),
       child: Row(
         mainAxisAlignment: widget.mainAxisAlignment,
@@ -115,6 +119,7 @@ class _GNavState extends State<GNav> {
                     t.backgroundGradient ?? widget.tabBackgroundGradient,
                 backgroundColor: t.backgroundColor ?? widget.tabBackgroundColor,
                 duration: widget.duration ?? const Duration(milliseconds: 500),
+                semanticLabel: t.semanticLabel,
                 onPressed: () {
                   widget.onTabChange!(widget.tabs!.indexOf(t));
                 },
