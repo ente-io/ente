@@ -20,7 +20,7 @@ fn main() {
         .manage(commands::LlmModelDownloadState::default())
         .manage(commands::ChatDbState::default())
         .setup(|app| {
-            logging::init_logging(&app.handle());
+            logging::init_logging(app.handle());
             logging::log("App", "setup started");
 
             // Show the main window after setup is complete
