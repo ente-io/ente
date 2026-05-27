@@ -68,9 +68,7 @@ extension CollectionFileActions on CollectionActions {
           isInAlert: true,
         ),
       ],
-      title: removingOthersFile
-          ? AppLocalizations.of(context).removeFromAlbumTitle
-          : null,
+      title: AppLocalizations.of(context).removeFromAlbumTitle,
       body: removingOthersFile
           ? AppLocalizations.of(context).removeShareItemsWarning
           : AppLocalizations.of(context).itemsWillBeRemovedFromAlbum,

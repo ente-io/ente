@@ -38,7 +38,7 @@ void main() {
 
   group('showDeleteSheet', () {
     testWidgets(
-      'matches the legacy mixed local and remote delete action sheet',
+      'mixed local and remote delete sheet shows mixed component actions',
       (tester) async {
         final file = _file(generatedID: 1, uploadedID: 11, localID: 'local-1');
         final selectedFiles = SelectedFiles()..selectAll({file});
@@ -54,15 +54,39 @@ void main() {
         );
 
         expect(find.byType(BottomSheetComponent), findsOneWidget);
+        _expectDeleteWarningIllustration();
         expect(
-          find.text('Some items are in both Ente and your device.'),
+          find.text(
+            'Some items are in both Ente and your device.\n'
+            'They will be deleted from all albums.',
+          ),
           findsOneWidget,
         );
-        expect(
-          find.text('They will be deleted from all albums.'),
-          findsOneWidget,
-        );
+        expect(find.text('Are you sure?'), findsOneWidget);
+        expect(find.byType(RadioComponent), findsNothing);
+        expect(find.byType(MenuGroupComponent), findsNothing);
+        expect(find.byType(MenuComponent), findsNothing);
         expect(find.byType(ButtonComponent), findsNWidgets(3));
+        final buttons = tester.widgetList<ButtonComponent>(
+          find.byType(ButtonComponent),
+        );
+        expect(buttons.map((button) => button.variant), [
+          ButtonComponentVariant.neutral,
+          ButtonComponentVariant.neutral,
+          ButtonComponentVariant.critical,
+        ]);
+        expect(
+          find.byKey(const ValueKey('mixedDeleteTarget.ente')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('mixedDeleteTarget.device')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('mixedDeleteTarget.both')),
+          findsOneWidget,
+        );
         expect(find.byTooltip('Close'), findsOneWidget);
         expect(find.text('Cancel'), findsNothing);
         _expectVisibleButtonsInOrder(tester, [
@@ -73,7 +97,104 @@ void main() {
       },
     );
 
-    testWidgets('matches the legacy remote-only delete action sheet', (
+    testWidgets(
+      'mixed delete from Ente choice uses the remote delete path and clears selection',
+      (tester) async {
+        final file = _file(
+          generatedID: 14,
+          uploadedID: 24,
+          localID: 'local-14',
+        );
+        final selectedFiles = SelectedFiles()..selectAll({file});
+        var remoteDeleteCalls = 0;
+        List<EnteFile>? remoteDeleteFiles;
+
+        await _pumpDeleteSheet(
+          tester,
+          selectedFiles: selectedFiles,
+          split: FilesSplit(
+            pendingUploads: const [],
+            ownedByCurrentUser: [file],
+            ownedByOtherUsers: const [],
+          ),
+          deleteFromRemoteOnlyOverride: (context, files) async {
+            remoteDeleteCalls++;
+            remoteDeleteFiles = List.of(files);
+          },
+        );
+
+        await tester.tap(find.byKey(const ValueKey('mixedDeleteTarget.ente')));
+        await tester.pumpAndSettle();
+
+        expect(remoteDeleteCalls, 1);
+        expect(remoteDeleteFiles, [file]);
+        expect(find.byType(BottomSheetComponent), findsNothing);
+        expect(selectedFiles.files, isEmpty);
+
+        await _settleToast(tester);
+      },
+    );
+
+    testWidgets('mixed delete sheet close clears selection', (tester) async {
+      final file = _file(generatedID: 16, uploadedID: 26, localID: 'local-16');
+      final selectedFiles = SelectedFiles()..selectAll({file});
+
+      await _pumpDeleteSheet(
+        tester,
+        selectedFiles: selectedFiles,
+        split: FilesSplit(
+          pendingUploads: const [],
+          ownedByCurrentUser: [file],
+          ownedByOtherUsers: const [],
+        ),
+      );
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BottomSheetComponent), findsNothing);
+      expect(selectedFiles.files, isEmpty);
+    });
+
+    testWidgets(
+      'mixed delete from device choice uses the device delete path and clears selection',
+      (tester) async {
+        final file = _file(
+          generatedID: 15,
+          uploadedID: 25,
+          localID: 'local-15',
+        );
+        final selectedFiles = SelectedFiles()..selectAll({file});
+        var deviceDeleteCalls = 0;
+        List<EnteFile>? deviceDeleteFiles;
+
+        await _pumpDeleteSheet(
+          tester,
+          selectedFiles: selectedFiles,
+          split: FilesSplit(
+            pendingUploads: const [],
+            ownedByCurrentUser: [file],
+            ownedByOtherUsers: const [],
+          ),
+          deleteOnDeviceOnlyOverride: (context, files) async {
+            deviceDeleteCalls++;
+            deviceDeleteFiles = List.of(files);
+          },
+        );
+
+        await tester.tap(
+          find.byKey(const ValueKey('mixedDeleteTarget.device')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(deviceDeleteCalls, 1);
+        expect(deviceDeleteFiles, [file]);
+        expect(find.byType(BottomSheetComponent), findsNothing);
+        expect(selectedFiles.files, isEmpty);
+      },
+    );
+
+    testWidgets('remote-only delete sheet uses title and critical action', (
       tester,
     ) async {
       final file = _file(generatedID: 2, uploadedID: 12);
@@ -95,8 +216,14 @@ void main() {
         ),
         findsOneWidget,
       );
+      _expectDeleteWarningIllustration();
+      expect(find.text('Are you sure?'), findsOneWidget);
       expect(find.text('They will be deleted from all albums.'), findsNothing);
       expect(find.byType(ButtonComponent), findsOneWidget);
+      final deleteButton = tester.widget<ButtonComponent>(
+        find.byType(ButtonComponent),
+      );
+      expect(deleteButton.variant, ButtonComponentVariant.critical);
       expect(find.text('Delete from Ente'), findsNothing);
       expect(find.text('Delete from device'), findsNothing);
       expect(find.text('Delete from both'), findsNothing);
@@ -105,7 +232,7 @@ void main() {
       _expectVisibleButtonsInOrder(tester, ['Yes, delete']);
     });
 
-    testWidgets('matches the legacy local-only delete action sheet', (
+    testWidgets('local-only delete sheet uses title and critical action', (
       tester,
     ) async {
       final file = _file(generatedID: 3, localID: 'local-3');
@@ -125,8 +252,14 @@ void main() {
         find.text('These items will be deleted from your device.'),
         findsOneWidget,
       );
+      _expectDeleteWarningIllustration();
+      expect(find.text('Are you sure?'), findsOneWidget);
       expect(find.text('They will be deleted from all albums.'), findsNothing);
       expect(find.byType(ButtonComponent), findsOneWidget);
+      final deleteButton = tester.widget<ButtonComponent>(
+        find.byType(ButtonComponent),
+      );
+      expect(deleteButton.variant, ButtonComponentVariant.critical);
       expect(find.text('Delete from Ente'), findsNothing);
       expect(find.text('Delete from device'), findsNothing);
       expect(find.text('Delete from both'), findsNothing);
@@ -246,7 +379,7 @@ void main() {
           },
         );
 
-        await tester.tap(find.text('Delete from both'));
+        await tester.tap(find.byKey(const ValueKey('mixedDeleteTarget.both')));
         await tester.pumpAndSettle();
 
         expect(everywhereDeleteCalls, 1);
@@ -462,6 +595,18 @@ void _expectVisibleButtonsInOrder(WidgetTester tester, List<String> labels) {
       reason: '${labels[i]} should appear above ${labels[i + 1]}',
     );
   }
+}
+
+void _expectDeleteWarningIllustration() {
+  expect(
+    find.byWidgetPredicate(
+      (widget) =>
+          widget is Image &&
+          widget.image is AssetImage &&
+          (widget.image as AssetImage).assetName == 'assets/warning-grey.png',
+    ),
+    findsOneWidget,
+  );
 }
 
 class _TestApp extends StatelessWidget {

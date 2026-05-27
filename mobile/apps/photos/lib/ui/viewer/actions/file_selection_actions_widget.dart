@@ -944,6 +944,7 @@ class _FileSelectionActionsWidgetState
     try {
       final actionResult = await showActionSheet(
         context: context,
+        title: AppLocalizations.of(context).removeFromPersonQuestion,
         buttons: [
           ButtonWidget(
             labelText: AppLocalizations.of(context).yesRemove,
@@ -991,6 +992,7 @@ class _FileSelectionActionsWidgetState
     }
     final actionResult = await showActionSheet(
       context: context,
+      title: AppLocalizations.of(context).removeFromPersonQuestion,
       buttons: [
         ButtonWidget(
           labelText: AppLocalizations.of(context).yesRemove,
@@ -1062,6 +1064,7 @@ class _FileSelectionActionsWidgetState
 
     final actionResult = await showActionSheet(
       context: context,
+      title: l10n.deleteFromDeviceQuestion,
       buttons: [
         ButtonWidget(
           labelText: l10n.deleteFromDevice,

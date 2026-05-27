@@ -171,6 +171,7 @@ class _CleanupHiddenFromDevicePageState
     final l10n = AppLocalizations.of(context);
     final actionResult = await showActionSheet(
       context: context,
+      title: l10n.deleteFromDeviceQuestion,
       buttons: [
         ButtonWidget(
           labelText: l10n.deleteFromDevice,
