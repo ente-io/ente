@@ -72,7 +72,8 @@
       "slug": "allegro"
     },
     {
-      "title": "Amazon"
+      "title": "Amazon",
+      "hex": "FF9900"
     },
     {
       "title": "Amica",
@@ -874,7 +875,8 @@
       "title": "GERID"
     },
     {
-      "title": "GitHub"
+      "title": "GitHub",
+      "hex": "181717"
     },
     {
       "title": "GitLab"
