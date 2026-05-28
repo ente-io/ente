@@ -11,8 +11,7 @@ import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
-import "package:photos/service_locator.dart"
-    show flagService, isLocalGalleryMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -33,7 +32,7 @@ class _ContactsSectionLoaderState extends State<ContactsSectionLoader> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLocalGalleryMode || !flagService.enableContact) {
+    if (isLocalGalleryMode) {
       return const SizedBox.shrink();
     }
     _contactsFuture ??= SearchService.instance.getAllContactsSearchResults(
