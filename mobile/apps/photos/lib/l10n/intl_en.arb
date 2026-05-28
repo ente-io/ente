@@ -428,6 +428,9 @@
   "sharing": "Sharing...",
   "youCannotShareWithYourself": "You cannot share with yourself",
   "archive": "Archive",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Long press to select photos and click + to create an album",
   "importing": "Importing....",
   "failedToLoadAlbums": "Failed to load albums",
@@ -1170,6 +1173,9 @@
   "moveToAlbum": "Move to album",
   "unhide": "Unhide",
   "unarchive": "Unarchive",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favorite",
   "removeFromFavorite": "Remove from favorites",
   "shareMemories": "Share memories",
@@ -3206,5 +3212,9 @@
   "offlineNameFaceBannerSubtitle": "Sign up to tag them and easily find their photos later.",
   "signUp": "Sign up",
   "dog": "Dog",
-  "cat": "Cat"
+  "cat": "Cat",
+  "archiveCollectionName": "Archive",
+  "@archiveCollectionName": {
+    "description": "Name of the 'Archive' collection"
+  }
 }

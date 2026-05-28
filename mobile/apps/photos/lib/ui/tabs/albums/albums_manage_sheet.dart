@@ -72,7 +72,7 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
             ),
             const SizedBox(height: 8),
             _manageItem(
-              label: strings.archive,
+              label: strings.archiveCollectionName,
               icon: HugeIcons.strokeRoundedArchive03,
               iconColor: colors.primary,
               onTap: () async {

@@ -89,7 +89,9 @@ class ArchivePage extends StatelessWidget {
               CollectionListPage(
                 collections,
                 sectionType: UISectionType.archivedCollections,
-                appTitle: Text(AppLocalizations.of(context).archive),
+                appTitle: Text(
+                  AppLocalizations.of(context).archiveCollectionName,
+                ),
                 tag: "archived",
               ),
             );
