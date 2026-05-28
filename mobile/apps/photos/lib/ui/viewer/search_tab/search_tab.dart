@@ -117,8 +117,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 final sectionResultsByType = snapshot.data!.sectionResults;
                 final hasAnySearchableFiles =
                     snapshot.data!.hasAnySearchableFiles;
-                final shouldRenderContacts =
-                    !isLocalGalleryMode && flagService.enableContact;
+                final shouldRenderContacts = !isLocalGalleryMode;
                 if (!hasAnySearchableFiles &&
                     sectionResultsByType.every((element) => element.isEmpty) &&
                     !shouldRenderContacts) {
