@@ -45,11 +45,11 @@ final _logger = Logger("main");
 
 Future<void> initSystemTray() async {
   if (PlatformDetector.isMobile()) return;
-  String path = Platform.isWindows
+  final String path = Platform.isWindows
       ? 'assets/icons/auth-icon-monochrome.ico'
       : Platform.isMacOS
       ? 'assets/icons/auth-icon-monochrome-padded.png'
-      : 'assets/icons/auth-icon-monochrome.png';
+      : _linuxTrayIconPath();
   await trayManager.setIcon(path, isTemplate: true);
   Menu menu = Menu(
     items: [
@@ -60,6 +60,14 @@ Future<void> initSystemTray() async {
     ],
   );
   await trayManager.setContextMenu(menu);
+}
+
+String _linuxTrayIconPath() {
+  if (Platform.environment.containsKey('FLATPAK_ID') ||
+      Platform.environment.containsKey('SNAP')) {
+    return 'io.ente.auth';
+  }
+  return 'assets/icons/auth-icon-monochrome.png';
 }
 
 void main() async {
