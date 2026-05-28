@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
@@ -9,9 +8,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/onboarding/view/onboarding_page.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
-import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
-import 'package:ente_auth/services/window_listener_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:ente_events/event_bus.dart';
@@ -22,9 +19,6 @@ import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:tray_manager/tray_manager.dart';
-import 'package:win32/win32.dart';
-import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
   final Locale? locale;
@@ -44,8 +38,7 @@ class App extends StatefulWidget {
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App>
-    with WindowListener, TrayListener, WidgetsBindingObserver {
+class _AppState extends State<App> with WidgetsBindingObserver {
   static final Logger _renderErrorLogger = Logger('RenderError');
   late StreamSubscription<SignedOutEvent> _signedOutEvent;
   late StreamSubscription<SignedInEvent> _signedInEvent;
@@ -56,18 +49,8 @@ class _AppState extends State<App>
     });
   }
 
-  Future<void> initWindowManager() async {
-    windowManager.addListener(this);
-  }
-
-  Future<void> initTrayManager() async {
-    trayManager.addListener(this);
-  }
-
   @override
   void initState() {
-    initWindowManager();
-    initTrayManager();
     WidgetsBinding.instance.addObserver(this);
 
     _signedOutEvent = Bus.instance.on<SignedOutEvent>().listen((event) {
@@ -103,9 +86,6 @@ class _AppState extends State<App>
   @override
   void dispose() {
     super.dispose();
-
-    windowManager.removeListener(this);
-    trayManager.removeListener(this);
 
     _signedOutEvent.cancel();
     _signedInEvent.cancel();
@@ -164,97 +144,6 @@ class _AppState extends State<App>
           ? const HomePage()
           : const OnboardingPage(),
     };
-  }
-
-  @override
-  void onWindowResize() {
-    WindowListenerService.instance.onWindowResize().ignore();
-  }
-
-  @override
-  void onWindowMaximize() {
-    WindowListenerService.instance.onWindowMaximize().ignore();
-  }
-
-  @override
-  void onWindowUnmaximize() {
-    WindowListenerService.instance.onWindowUnmaximize().ignore();
-  }
-
-  @override
-  void onTrayIconMouseDown() {
-    if (Platform.isWindows) {
-      windowManager.show();
-    } else {
-      trayManager.popUpContextMenu();
-    }
-  }
-
-  @override
-  void onTrayIconRightMouseDown() {
-    if (Platform.isWindows) {
-      trayManager.popUpContextMenu();
-    } else {
-      windowManager.show();
-    }
-  }
-
-  @override
-  void onWindowFocus() {
-    // When window receives focus (e.g., reopened from app launcher while
-    // hidden to tray), ensure the taskbar icon is visible
-    if (Platform.isWindows || Platform.isLinux) {
-      windowManager.setSkipTaskbar(false);
-    }
-  }
-
-  @override
-  void onTrayIconRightMouseUp() {}
-
-  @override
-  void onTrayMenuItemClick(MenuItem menuItem) {
-    switch (menuItem.key) {
-      case 'hide_window':
-        windowManager.hide();
-        windowManager.setSkipTaskbar(true);
-        break;
-      case 'show_window':
-        windowManager.show();
-        windowManager.setSkipTaskbar(false);
-        break;
-      case 'exit_app':
-        _quitApp().ignore();
-        break;
-    }
-  }
-
-  @override
-  void onWindowClose() {
-    final shouldMinimizeToTray = PreferenceService.instance
-        .shouldMinimizeToTrayOnClose();
-    if (shouldMinimizeToTray) {
-      windowManager.hide();
-      windowManager.setSkipTaskbar(true);
-    } else {
-      _quitApp().ignore();
-    }
-  }
-
-  Future<void> _quitApp() async {
-    if (Platform.isWindows) {
-      final int hProcess = GetCurrentProcess();
-      TerminateProcess(hProcess, 0);
-      return;
-    }
-
-    await windowManager.setPreventClose(false);
-    await windowManager.destroy();
-
-    // On Linux, closing via window_manager.destroy() can still segfault during
-    // native window teardown. Explicitly exiting here avoids that crash.
-    if (Platform.isLinux) {
-      exit(0);
-    }
   }
 
   Widget _materialAppBuilder(BuildContext context, Widget? widget) {

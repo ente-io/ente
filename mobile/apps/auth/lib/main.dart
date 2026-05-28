@@ -46,7 +46,7 @@ final _logger = Logger("main");
 Future<void> initSystemTray() async {
   if (PlatformDetector.isMobile()) return;
   final String path = Platform.isWindows
-      ? 'assets/icons/auth-icon-monochrome.ico'
+      ? 'assets/icons/auth-icon.ico'
       : Platform.isMacOS
       ? 'assets/icons/auth-icon-monochrome-padded.png'
       : _linuxTrayIconPath();
