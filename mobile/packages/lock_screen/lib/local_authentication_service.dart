@@ -36,7 +36,7 @@ class LocalAuthenticationService {
         return true;
       }
     }
-    if (await isLocalAuthSupportedOnDevice() ||
+    if (await isLocalAuthSupportedOnDevice() &&
         LockScreenSettings.instance.getIsAppLockSet()) {
       AppLock.of(context)!.setEnabled(false);
       final result = await requestAuthentication(
