@@ -1375,10 +1375,6 @@
       ]
     },
     {
-      "title": "MozillaOld",
-      "slug": "mozilla_old"
-    },
-    {
       "title": "Mozilla",
       "slug": "mozilla",
       "altNames": [
