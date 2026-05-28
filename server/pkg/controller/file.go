@@ -892,7 +892,7 @@ func (c *FileController) CleanupDeletedFiles() {
 	defer func() {
 		c.LockController.ReleaseLock(DeletedObjectQueueLock)
 	}()
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 5000)
+	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 10000)
 	if err != nil {
 		log.WithError(err).Error("Failed to fetch items from queue")
 		return
@@ -901,7 +901,7 @@ func (c *FileController) CleanupDeletedFiles() {
 	itemChan := make(chan repo.QueueItem, len(items))
 
 	// Start worker goroutines
-	for w := 0; w < 4; w++ {
+	for w := 0; w < 8; w++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
