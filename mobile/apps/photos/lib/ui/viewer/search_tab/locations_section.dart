@@ -149,7 +149,7 @@ class _LocationsSectionState extends State<LocationsSection> {
 
 class LocationRecommendation extends StatelessWidget {
   static const width = 100.0;
-  static const height = 123.0;
+  static const height = 124.0;
   static const thumbnailBorderWidth = 1.0;
   static const outerCornerRadius = 12.0;
   static const cornerSmoothing = 1.0;
@@ -239,9 +239,6 @@ class LocationRecommendation extends StatelessWidget {
                                     )
                                   : const NoThumbnailWidget(),
                             ),
-                            Container(
-                              color: Colors.black.withValues(alpha: 0.2),
-                            ),
                           ],
                         ),
                         Padding(
@@ -317,9 +314,7 @@ class LocationRecommendation extends StatelessWidget {
                                     children: [
                                       Text(
                                         locationSearchResult.name(),
-                                        style: enteTextTheme.mini.copyWith(
-                                          color: Colors.white,
-                                        ),
+                                        style: enteTextTheme.small,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.center,
