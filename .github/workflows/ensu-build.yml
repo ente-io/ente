@@ -419,6 +419,9 @@ jobs:
                       previous && NF { print "-# " $0; next }
                       { print }
                   ' <<< "${RELEASE_BODY_GROUPED}")"
+                  if [ "${#release_body_discord}" -gt 3000 ]; then
+                      release_body_discord="${release_body_discord:0:3000}"$'\n\n...\n-# See the GitHub release for full notes.'
+                  fi
 
                   jq -n \
                       --arg title "${{ needs.build-metadata.outputs.release_title }}" \

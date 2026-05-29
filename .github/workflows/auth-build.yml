@@ -365,6 +365,7 @@ jobs:
                   file-digest: SHA256
                   timestamp-rfc3161: http://timestamp.acs.microsoft.com
                   timestamp-digest: SHA256
+                  cache-dependencies: false
 
             - name: Verify signed Windows payload
               run: ./scripts/verify_windows_authenticode.ps1 -Path "build/windows/x64/runner/Release"
@@ -390,6 +391,7 @@ jobs:
                   file-digest: SHA256
                   timestamp-rfc3161: http://timestamp.acs.microsoft.com
                   timestamp-digest: SHA256
+                  cache-dependencies: false
 
             - name: Verify signed Windows installer
               run: ./scripts/verify_windows_authenticode.ps1 -Path "artifacts/${{ env.ARTIFACT_STEM }}-installer.exe"
@@ -675,6 +677,9 @@ jobs:
                       previous && NF { print "-# " $0; next }
                       { print }
                   ' <<< "${RELEASE_BODY_GROUPED}")"
+                  if [ "${#release_body_discord}" -gt 3000 ]; then
+                      release_body_discord="${release_body_discord:0:3000}"$'\n\n...\n-# See the GitHub release for full notes.'
+                  fi
 
                   jq -n \
                       --arg title "${{ needs.build-metadata.outputs.release_title }}" \
