@@ -18,9 +18,7 @@ env:
 
 jobs:
     lint:
-        runs-on: ubuntu-22.04
-        env:
-            CXX: g++-12
+        runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: rust
@@ -30,12 +28,10 @@ jobs:
             - name: Install Linux dependencies
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y g++-12 libwebkit2gtk-4.1-dev libsoup-3.0-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
             - run: cargo fmt --check
 
             - run: cargo clippy --all-targets --locked
 
-            # ORT rc.12's Linux test binary links glibc 2.38 symbols that are
-            # unavailable on the Ubuntu 22.04 runner.
-            - run: cargo test --locked --workspace --exclude transcription --exclude ensu-transcription
+            - run: cargo test --locked --workspace

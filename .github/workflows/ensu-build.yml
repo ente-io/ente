@@ -98,6 +98,9 @@ jobs:
             fail-fast: false
             matrix:
                 platform:
+                    # Tauri docs recommend building Linux release bundles on the
+                    # oldest supported runtime OS with WebKitGTK 4.1, so that
+                    # AppImage/deb/rpm artifacts keep a low glibc baseline.
                     - os: ubuntu-22.04
                       rust-target: x86_64-unknown-linux-gnu
                       bundle-targets: appimage,deb,rpm
