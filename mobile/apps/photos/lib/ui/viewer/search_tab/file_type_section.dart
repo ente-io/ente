@@ -24,7 +24,7 @@ class FileTypeSection extends StatelessWidget {
     if (!hasAnySearchableFiles) {
       final textTheme = getEnteTextTheme(context);
       return Padding(
-        padding: const EdgeInsets.only(left: 12, right: 8),
+        padding: const EdgeInsets.only(left: 12, right: 8, bottom: 24),
         child: Row(
           children: [
             Expanded(
@@ -59,7 +59,7 @@ class FileTypeSection extends StatelessWidget {
 
     final tiles = _previewTiles(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(top: 8, bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
