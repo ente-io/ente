@@ -2,3 +2,5 @@
 .flutter-plugins-dependencies
 build/
 **/.gradle/
+.build/
+.swiftpm/

@@ -1,5 +1,3 @@
-node_modules/
-.DS_Store
 .wrangler/
 
 # Workers mostly have dev dependencies, and usually only wrangler, so exact
