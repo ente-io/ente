@@ -21,6 +21,7 @@ import "package:photos/events/account_configured_event.dart";
 import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/christmas_banner_event.dart";
+import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
 import "package:photos/events/opened_settings_event.dart";
 import "package:photos/events/permission_granted_event.dart";
@@ -101,8 +102,6 @@ class HomeWidget extends StatefulWidget {
 
 class _HomeWidgetState extends State<HomeWidget> {
   static const _feedTab = FeedScreen(showBackButton: false);
-  static const _searchTab = SearchTab();
-
   final _logger = Logger("HomeWidgetState");
   final _selectedAlbums = SelectedAlbums();
   final _selectedFiles = SelectedFiles();
@@ -128,6 +127,14 @@ class _HomeWidgetState extends State<HomeWidget> {
   final ValueNotifier<bool> _isAlbumsSearchActiveNotifier = ValueNotifier<bool>(
     false,
   );
+  final ValueNotifier<bool> _isAlbumsSearchFieldFocusedNotifier =
+      ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isAlbumsSearchFieldNotEmptyNotifier =
+      ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isSearchTabSearchFieldFocusedNotifier =
+      ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isSearchTabSearchFieldNotEmptyNotifier =
+      ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
 
@@ -547,6 +554,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     _intentDataStreamSubscription?.cancel();
     isOnSearchTabNotifier.dispose();
     _isAlbumsSearchActiveNotifier.dispose();
+    _isAlbumsSearchFieldFocusedNotifier.dispose();
+    _isAlbumsSearchFieldNotEmptyNotifier.dispose();
+    _isSearchTabSearchFieldFocusedNotifier.dispose();
+    _isSearchTabSearchFieldNotEmptyNotifier.dispose();
     _pageController.dispose();
     _publicAlbumLinkSubscription?.cancel();
     _authDeepLinkSubscription?.cancel();
@@ -843,15 +854,28 @@ class _HomeWidgetState extends State<HomeWidget> {
               _selectedAlbums.clearAll();
               return;
             }
-            if (_isAlbumsSearchActiveNotifier.value) {
-              if (MediaQuery.viewInsetsOf(context).bottom > 0) {
+            if (_isAlbumsSearchFieldFocusedNotifier.value) {
+              if (_isAlbumsSearchActiveNotifier.value) {
+                _isAlbumsSearchActiveNotifier.value = false;
+              } else {
                 FocusManager.instance.primaryFocus?.unfocus();
-                return;
               }
+              return;
+            }
+            if (_isAlbumsSearchFieldNotEmptyNotifier.value) {
+              if (_isAlbumsSearchActiveNotifier.value) {
+                _isAlbumsSearchActiveNotifier.value = false;
+              }
+              return;
+            }
+            if (_isAlbumsSearchActiveNotifier.value) {
               _isAlbumsSearchActiveNotifier.value = false;
-              Bus.instance.fire(
-                TabChangedEvent(0, TabChangedEventSource.backButton),
-              );
+            }
+          }
+          if (_selectedTabIndex == 3) {
+            if (_isSearchTabSearchFieldFocusedNotifier.value ||
+                _isSearchTabSearchFieldNotEmptyNotifier.value) {
+              Bus.instance.fire(ClearAndUnfocusSearchBar());
               return;
             }
           }
@@ -1049,10 +1073,23 @@ class _HomeWidgetState extends State<HomeWidget> {
                             selectedAlbums: _selectedAlbums,
                             isSearchActiveNotifier:
                                 _isAlbumsSearchActiveNotifier,
+                            isSearchFieldFocusedNotifier:
+                                _isAlbumsSearchFieldFocusedNotifier,
+                            isSearchFieldNotEmptyNotifier:
+                                _isAlbumsSearchFieldNotEmptyNotifier,
                           ),
                         ),
                         _buildTabHeroMode(2, selectedTabIndex, _feedTab),
-                        _buildTabHeroMode(3, selectedTabIndex, _searchTab),
+                        _buildTabHeroMode(
+                          3,
+                          selectedTabIndex,
+                          SearchTab(
+                            isSearchFieldFocusedNotifier:
+                                _isSearchTabSearchFieldFocusedNotifier,
+                            isSearchFieldNotEmptyNotifier:
+                                _isSearchTabSearchFieldNotEmptyNotifier,
+                          ),
+                        ),
                       ],
                     );
                   },

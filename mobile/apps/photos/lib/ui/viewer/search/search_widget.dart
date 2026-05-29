@@ -17,7 +17,14 @@ import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({super.key});
+  const SearchWidget({
+    super.key,
+    this.isSearchFieldFocusedNotifier,
+    this.isSearchFieldNotEmptyNotifier,
+  });
+
+  final ValueNotifier<bool>? isSearchFieldFocusedNotifier;
+  final ValueNotifier<bool>? isSearchFieldNotEmptyNotifier;
 
   @override
   State<SearchWidget> createState() => SearchWidgetState();
@@ -51,6 +58,7 @@ class SearchWidgetState extends State<SearchWidget> {
     super.initState();
     focusNode = FocusNode();
     focusNode.addListener(() {
+      _syncSearchFieldFocusNotifier();
       if (mounted) {
         setState(() {});
       }
@@ -93,13 +101,39 @@ class SearchWidgetState extends State<SearchWidget> {
     //Populate the serach tab with the latest query when coming back
     //to the serach tab.
     textController.text = query;
+    _syncSearchFieldTextNotifier();
 
     _clearAndUnfocusSearchBar = Bus.instance
         .on<ClearAndUnfocusSearchBar>()
         .listen((event) {
           textController.clear();
+          _syncSearchFieldTextNotifier(
+            widget.isSearchFieldNotEmptyNotifier,
+            false,
+          );
           focusNode.unfocus();
         });
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isSearchFieldFocusedNotifier !=
+        widget.isSearchFieldFocusedNotifier) {
+      _syncSearchFieldFocusNotifier(
+        oldWidget.isSearchFieldFocusedNotifier,
+        false,
+      );
+      _syncSearchFieldFocusNotifier();
+    }
+    if (oldWidget.isSearchFieldNotEmptyNotifier !=
+        widget.isSearchFieldNotEmptyNotifier) {
+      _syncSearchFieldTextNotifier(
+        oldWidget.isSearchFieldNotEmptyNotifier,
+        false,
+      );
+      _syncSearchFieldTextNotifier();
+    }
   }
 
   @override
@@ -117,6 +151,8 @@ class SearchWidgetState extends State<SearchWidget> {
 
   @override
   void dispose() {
+    _syncSearchFieldFocusNotifier(widget.isSearchFieldFocusedNotifier, false);
+    _syncSearchFieldTextNotifier(widget.isSearchFieldNotEmptyNotifier, false);
     _debouncer.cancelDebounceTimer();
     focusNode.dispose();
     _tabChangedEvent?.cancel();
@@ -127,7 +163,32 @@ class SearchWidgetState extends State<SearchWidget> {
     super.dispose();
   }
 
+  void _syncSearchFieldFocusNotifier([
+    ValueNotifier<bool>? notifier,
+    bool? isFocused,
+  ]) {
+    final focusNotifier = notifier ?? widget.isSearchFieldFocusedNotifier;
+    final hasFocus = isFocused ?? focusNode.hasFocus;
+    if (focusNotifier == null || focusNotifier.value == hasFocus) {
+      return;
+    }
+    focusNotifier.value = hasFocus;
+  }
+
+  void _syncSearchFieldTextNotifier([
+    ValueNotifier<bool>? notifier,
+    bool? hasText,
+  ]) {
+    final textNotifier = notifier ?? widget.isSearchFieldNotEmptyNotifier;
+    final isNotEmpty = hasText ?? textController.text.trim().isNotEmpty;
+    if (textNotifier == null || textNotifier.value == isNotEmpty) {
+      return;
+    }
+    textNotifier.value = isNotEmpty;
+  }
+
   Future<void> textControllerListener() async {
+    _syncSearchFieldTextNotifier();
     isLoading.value = true;
     _debouncer.run(() async {
       if (mounted) {
