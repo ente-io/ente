@@ -614,7 +614,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     var unsupportedDeviceMessage: String {
-        Self.unsupportedDeviceMessage(for: deviceCapability)
+        Self.unsupportedDeviceMessage
     }
 
     func refreshDeviceCapability() {
@@ -641,13 +641,9 @@ final class ChatViewModel: ObservableObject {
         showUnsupportedDeviceDialog = false
     }
 
-    static func unsupportedDeviceMessage(for capability: ChatDeviceCapability) -> String {
-        var message = "Ensu runs the AI model locally and needs at least 4 GB of RAM. This device does not have enough memory for chat. You can still view existing chats, but sending new messages is disabled."
-        if let totalMemoryBytes = capability.totalMemoryBytes {
-            message += " Reported memory: \(Int64(totalMemoryBytes).formattedFileSize)."
-        }
-        return message
-    }
+    static let unsupportedDeviceMessage =
+        "This device doesn't have enough memory to run Ensu's AI model. " +
+        "You can view existing chats, but can't send new messages."
 
     private func reopenSyncStoresIfNeeded(force: Bool = false) {
         let hasSyncDb = FileManager.default.fileExists(atPath: syncDbPath)
@@ -2749,8 +2745,8 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func userFacingModelReadyError(_ error: Error, wasDownloaded: Bool) -> String {
-        if let error = error as? UnsupportedDeviceMemoryError {
-            return Self.unsupportedDeviceMessage(for: error.capability)
+        if error is UnsupportedDeviceMemoryError {
+            return Self.unsupportedDeviceMessage
         }
         if isOutOfStorageError(error) {
             return "Not enough storage space to download the model. Please free up space and try again."

@@ -240,7 +240,6 @@ fun ChatView(
 
             if (unsupportedCapability != null) {
                 UnsupportedChatInputNotice(
-                    capability = unsupportedCapability,
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
@@ -303,7 +302,6 @@ fun ChatView(
 
         if (chatState.showUnsupportedDeviceDialog && unsupportedCapability != null) {
             UnsupportedDeviceDialog(
-                capability = unsupportedCapability,
                 onDismiss = onDismissUnsupportedDeviceDialog
             )
         }

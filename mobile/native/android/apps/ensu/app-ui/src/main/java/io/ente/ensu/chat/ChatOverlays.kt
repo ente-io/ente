@@ -29,7 +29,6 @@ import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
-import io.ente.ensu.domain.device.ChatDeviceCapability
 import io.ente.ensu.domain.state.OverflowDialogState
 import io.ente.ensu.domain.util.formatBytes
 import io.ente.ensu.utils.rememberEnsuHaptics
@@ -67,9 +66,12 @@ internal fun OverflowDialog(
     )
 }
 
+private const val UNSUPPORTED_DEVICE_MESSAGE =
+    "This device doesn't have enough memory to run Ensu's AI model. " +
+        "You can view existing chats, but can't send new messages."
+
 @Composable
 internal fun UnsupportedDeviceDialog(
-    capability: ChatDeviceCapability.UnsupportedLowMemory,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -77,7 +79,7 @@ internal fun UnsupportedDeviceDialog(
         title = { Text(text = "Chat unavailable on this device", style = EnsuTypography.h3) },
         text = {
             Text(
-                text = unsupportedDeviceMessage(capability),
+                text = UNSUPPORTED_DEVICE_MESSAGE,
                 style = EnsuTypography.body,
                 color = EnsuColor.textPrimary()
             )
@@ -93,7 +95,6 @@ internal fun UnsupportedDeviceDialog(
 
 @Composable
 internal fun UnsupportedChatInputNotice(
-    capability: ChatDeviceCapability.UnsupportedLowMemory,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -108,19 +109,13 @@ internal fun UnsupportedChatInputNotice(
             color = EnsuColor.textPrimary()
         )
         Text(
-            text = unsupportedDeviceMessage(capability),
+            text = UNSUPPORTED_DEVICE_MESSAGE,
             style = EnsuTypography.body,
             color = EnsuColor.textMuted(),
             modifier = Modifier.padding(top = EnsuSpacing.xs.dp)
         )
     }
 }
-
-private fun unsupportedDeviceMessage(capability: ChatDeviceCapability.UnsupportedLowMemory): String =
-    "Ensu runs the AI model locally and needs at least 4 GB of RAM. " +
-        "This device does not have enough memory for chat. " +
-        "You can still view existing chats, but sending new messages is disabled. " +
-        "Reported memory: ${formatBytes(capability.totalMemoryBytes)}."
 
 @Composable
 internal fun DownloadToastOverlay(
