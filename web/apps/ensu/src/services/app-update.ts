@@ -1,6 +1,6 @@
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import log from "ente-base/log";
-import { isTauriAppRuntime } from "services/secure-storage";
+import { isTauriRuntime } from "services/tauri-runtime";
 
 const oneDay = 24 * 60 * 60 * 1000;
 
@@ -17,7 +17,7 @@ type AppUpdateCheckResult =
     | { kind: "error" };
 
 export const checkForAppUpdates = async (): Promise<AppUpdateCheckResult> => {
-    if (!isTauriAppRuntime()) return { kind: "not-supported" };
+    if (!isTauriRuntime()) return { kind: "not-supported" };
     if (inFlightUpdateCheck) return inFlightUpdateCheck;
 
     const run = async (): Promise<AppUpdateCheckResult> => {
@@ -113,7 +113,7 @@ export const handleManualAppUpdateCheck = async (
 
 export const setupAutoAppUpdates = (showMiniDialog: ShowMiniDialog) => {
     if (
-        !isTauriAppRuntime() ||
+        !isTauriRuntime() ||
         process.env.NODE_ENV !== "production" ||
         intervalId
     ) {

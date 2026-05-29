@@ -10,7 +10,6 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
-import { open as openFileDialog, save } from "@tauri-apps/plugin-dialog";
 import { ChatComposer } from "components/chat/ChatComposer";
 import { ChatDialogs } from "components/chat/ChatDialogs";
 import { ChatMessageList } from "components/chat/ChatMessageList";
@@ -3333,6 +3332,7 @@ const Page: React.FC = () => {
 
         if (isTauriRuntime) {
             try {
+                const { save } = await import("@tauri-apps/plugin-dialog");
                 const filename = `ensu-web-logs-${Date.now()}.txt`;
                 const path = await save({
                     defaultPath: filename,
@@ -3701,6 +3701,9 @@ const Page: React.FC = () => {
         closeAttachmentMenu();
         if (imageAttachmentSlotsRemaining <= 0) return;
         try {
+            const { open: openFileDialog } = await import(
+                "@tauri-apps/plugin-dialog"
+            );
             const selection = await openFileDialog({
                 directory: false,
                 multiple: true,

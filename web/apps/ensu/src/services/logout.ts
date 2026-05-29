@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import { accountLogout } from "ente-accounts/services/logout";
 import log from "ente-base/log";
 import { isTauriRuntime } from "services/tauri-runtime";
@@ -16,6 +15,7 @@ export const ensuLogout = async () => {
 
     if (isTauriRuntime()) {
         try {
+            const { invoke } = await import("@tauri-apps/api/core");
             await invoke("chat_db_reset");
         } catch (e) {
             ignoreError("Tauri chat DB", e);

@@ -1,8 +1,8 @@
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { HTTPError } from "ente-base/http";
 import log from "ente-base/log";
+import { isTauriRuntime } from "services/tauri-runtime";
 import {
-    isTauriAppRuntime,
     secureStorageDelete,
     secureStorageGet,
     secureStorageSet,
@@ -83,7 +83,7 @@ const nativeChatKeyPath = async () => {
 };
 
 const readNativeChatKeys = async (): Promise<PersistedChatKeys> => {
-    if (!isTauriAppRuntime()) return {};
+    if (!isTauriRuntime()) return {};
 
     const [{ exists, readFile }, path] = await Promise.all([
         import("@tauri-apps/plugin-fs"),
@@ -111,7 +111,7 @@ const readNativeChatKeys = async (): Promise<PersistedChatKeys> => {
 };
 
 const persistNativeChatKeys = async () => {
-    if (!isTauriAppRuntime()) return;
+    if (!isTauriRuntime()) return;
 
     const operations: Promise<void>[] = [];
     const remoteStorageKey = scopedRemoteChatKeySecureStorageKey();
@@ -163,7 +163,7 @@ const cleanupLegacyChatKeyCopies = async () => {
 };
 
 export const initChatKeyStore = async () => {
-    if (!isTauriAppRuntime()) return;
+    if (!isTauriRuntime()) return;
 
     const userID = savedLocalUser()?.id;
     if (_chatKeyStoreInitPromise && _chatKeyStoreInitUserID === userID) {
@@ -280,7 +280,7 @@ export const initChatKeyStore = async () => {
 };
 
 const setCachedChatKey = (chatKey: string) => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         _persistedChatKeys.remoteChatKey = chatKey;
         persistNativeChatKeysSoon();
         return;
@@ -293,7 +293,7 @@ const setCachedChatKey = (chatKey: string) => {
 };
 
 const setCachedLocalChatKey = (chatKey: string) => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         _persistedChatKeys.localChatKey = chatKey;
         persistNativeChatKeysSoon();
         return;
@@ -306,7 +306,7 @@ const setCachedLocalChatKey = (chatKey: string) => {
  * Return the cached chat key (base64), if present.
  */
 export const cachedChatKey = (): string | undefined => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         return _persistedChatKeys.remoteChatKey;
     }
 
@@ -316,7 +316,7 @@ export const cachedChatKey = (): string | undefined => {
 };
 
 export const legacyCachedChatKey = (): string | undefined => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         return _legacyPersistedChatKeys.remoteChatKey;
     }
 
@@ -328,7 +328,7 @@ export const legacyCachedChatKey = (): string | undefined => {
  * Return the cached local-only chat key (base64), if present.
  */
 export const cachedLocalChatKey = (): string | undefined => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         return _persistedChatKeys.localChatKey;
     }
 
@@ -336,7 +336,7 @@ export const cachedLocalChatKey = (): string | undefined => {
 };
 
 export const legacyLocalChatKey = (): string | undefined => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         return _legacyPersistedChatKeys.localChatKey;
     }
 
@@ -377,7 +377,7 @@ export const legacyAttachmentChatKey = (): string | undefined =>
 
 export const setLegacyAttachmentChatKey = async (chatKey?: string) => {
     _legacyAttachmentChatKey = chatKey;
-    if (!isTauriAppRuntime()) return;
+    if (!isTauriRuntime()) return;
     if (chatKey) {
         await secureStorageSet(
             LEGACY_ATTACHMENT_KEY_SECURE_STORAGE_KEY,
@@ -389,7 +389,7 @@ export const setLegacyAttachmentChatKey = async (chatKey?: string) => {
 };
 
 export const clearCachedChatKey = () => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         delete _persistedChatKeys.remoteChatKey;
         persistNativeChatKeysSoon();
     }
@@ -399,7 +399,7 @@ export const clearCachedChatKey = () => {
 };
 
 export const clearLocalChatKey = () => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         delete _persistedChatKeys.localChatKey;
         persistNativeChatKeysSoon();
         return;

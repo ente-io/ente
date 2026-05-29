@@ -24,5 +24,3 @@ export const secureStorageDelete = async (key: string) => {
     if (!isTauriRuntime()) return;
     await tauriInvoke("secure_storage_delete", { key });
 };
-
-export const isTauriAppRuntime = isTauriRuntime;
