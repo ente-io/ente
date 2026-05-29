@@ -4,13 +4,13 @@ on:
     push:
         branches: [main]
         paths:
+            - ".github/workflows/mobile-crowdin-push-sources.yml"
             - "mobile/apps/photos/lib/l10n/intl_en.arb"
             - "mobile/apps/photos/crowdin.yml"
             - "mobile/apps/auth/lib/l10n/arb/app_en.arb"
             - "mobile/apps/auth/crowdin.yml"
             - "mobile/apps/locker/lib/l10n/app_en.arb"
             - "mobile/apps/locker/crowdin.yml"
-            - ".github/workflows/mobile-crowdin-push-sources.yml"
 
 concurrency:
     group: ${{ github.workflow }}
