@@ -355,7 +355,6 @@ jobs:
                   ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
                   ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-                  APP_STORE_PROFILE_SPECIFIER: Ensu App Store
                   BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
               run: |
                   key_path="${RUNNER_TEMP}/AuthKey_${ASC_KEY_ID}.p8"
@@ -374,7 +373,7 @@ jobs:
                       CODE_SIGN_STYLE=Manual \
                       CODE_SIGN_IDENTITY="Apple Distribution" \
                       DEVELOPMENT_TEAM="${APPLE_TEAM_ID}" \
-                      APP_STORE_PROFILE_SPECIFIER="${APP_STORE_PROFILE_SPECIFIER}" \
+                      APP_STORE_PROFILE_SPECIFIER="Ensu App Store" \
                       CURRENT_PROJECT_VERSION="${BUILD_NUMBER}"
 
                   xcodebuild -exportArchive \
