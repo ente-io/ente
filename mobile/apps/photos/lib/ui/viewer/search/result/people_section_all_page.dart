@@ -998,7 +998,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     return IconButtonComponent(
       variant: IconButtonComponentVariant.primary,
       shouldSurfaceExecutionStates: false,
-      icon: Icon(Icons.sort_rounded, color: colorScheme.textMuted),
+      icon: const HugeIcon(icon: HugeIcons.strokeRoundedFilterHorizontal),
       onTapDown: (details) async {
         final l10n = AppLocalizations.of(context);
         const sortKeys = PeopleSortKey.values;

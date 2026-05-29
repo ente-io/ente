@@ -464,7 +464,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       actions.add(
         _buildPopupMenuAction<AlbumPopupAction>(
           tooltip: strings.sort,
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedSorting01),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedFilterHorizontal),
           optionsBuilder: () {
             return [
               EntePopupMenuOption(
