@@ -42,7 +42,10 @@ export const markDesktopWhatsNewSeen = () => {
 const readSeenVersion = () => {
     try {
         const rawValue = window.localStorage.getItem(storageKey);
-        if (rawValue === null) return 0;
+        if (rawValue === null) {
+            markDesktopWhatsNewSeen();
+            return whatsNewVersion;
+        }
 
         const parsed = Number(rawValue);
         if (Number.isInteger(parsed) && parsed > 0) return parsed;
