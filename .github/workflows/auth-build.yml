@@ -107,12 +107,6 @@ jobs:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
                   submodules: recursive
 
-            - name: Free up disk space
-              run: |
-                  df -h /
-                  sudo rm -rf /usr/share/dotnet "$AGENT_TOOLSDIRECTORY"
-                  df -h /
-
             - name: Setup JDK 17
               uses: actions/setup-java@v5
               with:
@@ -146,7 +140,9 @@ jobs:
                   fi
 
             - name: Add keystore
-              run: echo "${{ secrets.SIGNING_KEY_AUTH }}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
+              run: printf '%s' "${SIGNING_KEY_AUTH}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
+              env:
+                  SIGNING_KEY_AUTH: ${{ secrets.SIGNING_KEY_AUTH }}
 
             - name: Create artifacts directory
               run: mkdir artifacts
@@ -172,7 +168,7 @@ jobs:
 
             - name: Install dependencies for desktop build
               run: |
-                  sudo apt-get update -y
+                  sudo apt-get update
                   sudo apt-get install -y libsecret-1-dev libsodium-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate libayatana-appindicator3-dev libffi-dev libtiff5 xz-utils libarchive-tools libcurl4-openssl-dev
                   sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
 
@@ -408,18 +404,16 @@ jobs:
               run: |
                   PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
                   mkdir -p "$PROFILES_HOME"
-                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).provisionprofile)"
-                  echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
-                  echo "Saved provisioning profile $PROFILE_PATH"
+                  printf '%s' "${CM_PROVISIONING_PROFILE}" | base64 --decode > "$PROFILES_HOME/$(uuidgen).provisionprofile"
               env:
                   CM_PROVISIONING_PROFILE: ${{ secrets.AUTH_MACOS_DEVELOPER_ID_PROVISION_PROFILE_BASE64 }}
 
             - name: Add certificates
               run: |
-                  CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-                  echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+                  CERTIFICATE_PATH="$RUNNER_TEMP/build_certificate.p12"
+                  printf '%s' "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
                   keychain initialize
-                  keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+                  keychain add-certificates --certificate "$CERTIFICATE_PATH" --certificate-password "$P12_PASSWORD"
                   xcode-project use-profiles --project=macos/**/*.xcodeproj
 
                   signing_settings="$RUNNER_TEMP/auth-macos-ci-signing.xcconfig"
@@ -449,7 +443,7 @@ jobs:
 
             - name: Code sign DMG
               run: |
-                  CERT_NAME=$(security find-identity -v -p codesigning | grep "Developer ID Application" | awk -F'"' '{print $2}' | grep -m1 "")
+                  CERT_NAME=$(security find-identity -v -p codesigning | awk -F'"' '/Developer ID Application/ { print $2; exit }')
                   codesign --force --timestamp --sign "$CERT_NAME" --options runtime "artifacts/${ARTIFACT_STEM}.dmg"
                   codesign --verify --verbose=4 "artifacts/${ARTIFACT_STEM}.dmg"
 
@@ -457,9 +451,9 @@ jobs:
               run: |
                   xcrun notarytool submit "artifacts/${ARTIFACT_STEM}.dmg" \
                     --wait \
-                    --apple-id $APPLE_ID \
-                    --password $APPLE_PASSWORD \
-                    --team-id $APPLE_TEAM_ID
+                    --apple-id "$APPLE_ID" \
+                    --password "$APPLE_PASSWORD" \
+                    --team-id "$APPLE_TEAM_ID"
                   xcrun stapler staple "artifacts/${ARTIFACT_STEM}.dmg"
               env:
                   APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -595,8 +589,6 @@ jobs:
                   COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
-                  set -euo pipefail
-
                   git tag --force "${RELEASE_TAG}" "${COMMIT_SHA}"
                   git push --force origin "refs/tags/${RELEASE_TAG}"
 
