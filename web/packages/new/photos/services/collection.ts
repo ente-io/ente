@@ -2170,9 +2170,51 @@ export const canRemoveFilesFromAllParticipants = (collection: Collection) => {
  * If the default hidden collection does not already exist, it is created.
  *
  * Reads local state but does not modify it. The effects are on remote.
+ *
+ * Since now we also support upload to shared album on desktop/web, the files
+ * got as params will also have shared files in them, whose collectionID
+ * points to the shared album. And moving files from those collections aren't
+ * possible.
+ *
+ * Therefore for such files are being removed instead of moving.
  */
-export const hideFiles = async (files: EnteFile[]) =>
-    moveToCollection(await savedOrCreateDefaultHiddenCollection(), files);
+export const hideFiles = async (files: EnteFile[]) => {
+    const userID = ensureLocalUser().id;
+    const defaultHiddenCollection =
+        await savedOrCreateDefaultHiddenCollection();
+    const collections = await savedCollections();
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+
+    /**
+     * Grouping the files based on their collectionID, so if a file exists
+     * in a user-owned collection and non-user owned collection for those files
+     * where will be two entries based on their collectionID
+     *
+     * the owned-collection file will be moved using /move-files endpoint
+     * wherease the non-owned collection file will be removed from the shared collection
+     * using the /
+     */
+    for (const [collectionID, collectionFiles] of groupFilesByCollectionID(
+        files,
+    ).entries()) {
+        if (collectionID == defaultHiddenCollection.id) continue;
+
+        const collection = collectionsByID.get(collectionID);
+        if (!collection) {
+            throw new Error(`Collection ${collectionID} not found`);
+        }
+
+        if (collection.owner.id == userID) {
+            await moveFromCollection(
+                collectionID,
+                defaultHiddenCollection,
+                collectionFiles,
+            );
+        } else {
+            await removeFromCollection(collection, collectionFiles);
+        }
+    }
+};
 
 /**
  * Share the provided collection with another Ente user.
