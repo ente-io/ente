@@ -246,9 +246,8 @@ class Media3TransformerProcessor(private val context: Context) {
             }
 
             val editedMediaItem = editedMediaItemBuilder.build()
-            val sequence = EditedMediaItemSequence.withAudioAndVideoFrom(
-                listOf(editedMediaItem)
-            )
+            @Suppress("DEPRECATION")
+            val sequence = EditedMediaItemSequence.Builder(listOf(editedMediaItem)).build()
             val composition = Composition.Builder(listOf(sequence)).build()
 
             // Start export
