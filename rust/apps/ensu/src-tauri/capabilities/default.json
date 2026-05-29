@@ -6,11 +6,15 @@
     "permissions": [
         "core:default",
         "dialog:default",
-        "opener:default",
-        "process:default",
+        "fs:allow-exists",
+        "fs:allow-mkdir",
+        "fs:allow-read-file",
+        "fs:allow-remove",
+        "fs:allow-write-file",
+        "opener:allow-default-urls",
+        "opener:allow-open-url",
+        "process:allow-restart",
         "updater:default",
-        "fs:read-all",
-        "fs:write-all",
         {
             "identifier": "fs:scope",
             "allow": [
