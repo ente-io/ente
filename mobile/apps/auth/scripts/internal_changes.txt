@@ -6,6 +6,7 @@
 - Added custom icons for 1984 Hosting, Art Fight, BJ-Share, CatRealm, CoinMarketCap, Cove Backup, eClinicalWorks, HaloPSA, JumpCloud, Patchmon, Racket Coach, RustDesk, Sherweb, Smogon, Sony, Trade Republic, Zabbix, and Zyxel Nebula
 - Updated the Availity and Mozilla custom icons, and fixed several multi-color custom icons rendering as single-color masks ([#10281](https://github.com/ente-io/ente/pull/10281), [#10328](https://github.com/ente-io/ente/pull/10328), [#10453](https://github.com/ente-io/ente/pull/10453), [#10710](https://github.com/ente-io/ente/pull/10710))
 - Fixed the CoinMarketCap custom icon being invisible in dark mode ([#10615](https://github.com/ente-io/ente/issues/10615))
+- Fixed several single-color custom icons rendering with the wrong color or disappearing in dark mode ([#7828](https://github.com/ente-io/ente/issues/7828))
 - Fixed Auth desktop custom icons flashing for Amazon and other monochrome icons ([#8264](https://github.com/ente-io/ente/issues/8264), [#8499](https://github.com/ente-io/ente/issues/8499))
 - Fixed missing Auth tray icons in sandboxed Linux builds ([#4608](https://github.com/ente-io/ente/issues/4608), [#7815](https://github.com/ente-io/ente/issues/7815), [flathub/io.ente.auth#75](https://github.com/flathub/io.ente.auth/issues/75))
 - Fixed Auth tray close, exit, and menu actions on Windows ([#8164](https://github.com/ente-io/ente/issues/8164), [#4360](https://github.com/ente-io/ente/issues/4360), [#3518](https://github.com/ente-io/ente/issues/3518))
