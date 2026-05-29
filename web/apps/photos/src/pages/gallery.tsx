@@ -115,8 +115,10 @@ import {
     updateCollectionCover,
 } from "ente-new/photos/services/collection";
 import {
+    canAddToCollection,
     haveOnlySystemCollections,
     PseudoCollectionID,
+    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import {
@@ -979,27 +981,26 @@ const Page: React.FC = () => {
     };
 
     const createOnSelectForCollectionOp =
-        (op: CollectionOp) => (selectedCollection: Collection) => {
-            void (async () => {
+        (op: CollectionOp) =>
+        (
+            selectedCollection: Collection,
+            selectedCollectionSummary?: CollectionSummary,
+        ) => {
+            const selectedFiles = getSelectedFiles(selected, filteredFiles);
+            const userFiles = selectedFiles.filter(
+                // If a selection is happening, there must be a user.
+                (f) => f.ownerID == user!.id,
+            );
+            const sourceCollectionID = selected.collectionID;
+
+            const performSelectedCollectionOp = async (
+                op: CollectionOp,
+                filesToProcess: EnteFile[],
+                notifySkippedFiles = false,
+            ) => {
                 showLoadingBar();
                 try {
                     setOpenCollectionSelector(false);
-                    const selectedFiles = getSelectedFiles(
-                        selected,
-                        filteredFiles,
-                    );
-                    const userFiles = selectedFiles.filter(
-                        // If a selection is happening, there must be a user.
-                        (f) => f.ownerID == user!.id,
-                    );
-                    /**
-                     * The add/copy path can process non-owned files when a
-                     * shared album requires copying them through the current
-                     * user's library.
-                     */
-                    const filesToProcess =
-                        op == "add" ? selectedFiles : userFiles;
-                    const sourceCollectionID = selected.collectionID;
                     if (filesToProcess.length > 0) {
                         await performCollectionOp(
                             op,
@@ -1008,18 +1009,53 @@ const Page: React.FC = () => {
                             sourceCollectionID,
                         );
                     }
-                    if (
-                        op != "add" &&
-                        userFiles.length != selectedFiles.length
-                    ) {
+                    if (notifySkippedFiles) {
                         showMiniDialog(notifyOthersFilesDialogAttributes());
                     }
                     clearSelection();
                     await remotePull({ silent: true });
-                } catch (e) {
-                    onGenericError(e);
                 } finally {
                     hideLoadingBar();
+                }
+            };
+
+            const shouldAddInsteadOfMove =
+                op == "move" &&
+                !!selectedCollectionSummary &&
+                selectedCollectionSummary.attributes.has("sharedIncoming") &&
+                canAddToCollection(selectedCollectionSummary);
+
+            if (shouldAddInsteadOfMove) {
+                setOpenCollectionSelector(false);
+                showMiniDialog({
+                    title: t("cannot_move_to_shared_albums"),
+                    message: t("cannot_move_to_shared_albums_message"),
+                    continue: {
+                        text: t("add"),
+                        action: () =>
+                            performSelectedCollectionOp("add", selectedFiles),
+                    },
+                    cancel: t("cancel"),
+                });
+                return;
+            }
+
+            void (async () => {
+                try {
+                    /**
+                     * The add/copy path can process non-owned files when a
+                     * shared album requires copying them through the current
+                     * user's library.
+                     */
+                    const filesToProcess =
+                        op == "add" ? selectedFiles : userFiles;
+                    await performSelectedCollectionOp(
+                        op,
+                        filesToProcess,
+                        op != "add" && userFiles.length != selectedFiles.length,
+                    );
+                } catch (e) {
+                    onGenericError(e);
                 }
             })();
         };

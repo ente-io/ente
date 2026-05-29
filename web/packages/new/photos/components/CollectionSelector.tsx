@@ -83,7 +83,10 @@ export interface CollectionSelectorAttributes {
      * Callback invoked when the user selects one the existing collections
      * listed in the dialog.
      */
-    onSelectCollection: (collection: Collection) => void;
+    onSelectCollection: (
+        collection: Collection,
+        collectionSummary: CollectionSummary,
+    ) => void;
     /**
      * Callback invoked when the user cancels the collection selection dialog.
      */
@@ -177,8 +180,16 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                             cs.type == "uncategorized") &&
                         cs.type != "userFavorites"
                     );
+                } else if (attributes.action == "move") {
+                    const canAddInsteadOfMove =
+                        cs.attributes.has("sharedIncoming") &&
+                        canAddToCollection(cs);
+                    return (
+                        (canMoveToCollection(cs) || canAddInsteadOfMove) &&
+                        cs.type != "userFavorites"
+                    );
                 } else {
-                    // "move" and "unhide"
+                    // "unhide"
                     return (
                         canMoveToCollection(cs) && cs.type != "userFavorites"
                     );
@@ -234,7 +245,13 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         attributes;
 
     const handleCollectionSummaryClick = async (id: number) => {
-        onSelectCollection(await collectionForCollectionSummaryID(id));
+        const collectionSummary = filteredCollections.find((cs) => cs.id == id);
+        if (!collectionSummary) return;
+
+        onSelectCollection(
+            await collectionForCollectionSummaryID(id),
+            collectionSummary,
+        );
         onClose();
     };
 

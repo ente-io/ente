@@ -136,7 +136,10 @@ interface SelectedFileOptionsProps {
      */
     createOnSelectForCollectionOp: (
         op: CollectionOp,
-    ) => (selectedCollection: Collection) => void;
+    ) => (
+        selectedCollection: Collection,
+        selectedCollectionSummary?: CollectionSummary,
+    ) => void;
     /**
      * A function called to obtain a handler for the provided {@link op}.
      *
