@@ -320,7 +320,7 @@ jobs:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.ensu
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
-                  track: internal
+                  tracks: internal
                   whatsNewDirectory: mobile/native/android/apps/ensu/whatsnew
 
     build-ios:
