@@ -337,22 +337,6 @@ jobs:
               run: ./scripts/verify_windows_authenticode.ps1 -Path "artifacts/${{ env.ARTIFACT_STEM }}-installer.exe"
               shell: pwsh
 
-            - name: Retain signed Windows EXE and DLLs
-              run: Copy-Item -Recurse -Force "build/windows/x64/runner/Release" "${{ env.ARTIFACT_STEM }}-windows"
-              shell: pwsh
-
-            - name: Zip Windows EXE and DLLs
-              run: |
-                  $zipPath = "artifacts/${{ env.ARTIFACT_STEM }}-windows.zip"
-                  Compress-Archive `
-                    -Path "${{ env.ARTIFACT_STEM }}-windows" `
-                    -DestinationPath $zipPath `
-                    -Force
-                  Add-Type -AssemblyName System.IO.Compression.FileSystem
-                  $zip = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zipPath))
-                  $zip.Dispose()
-              shell: pwsh
-
             - name: Generate checksums
               run: sha256sum artifacts/ente-auth-* > artifacts/sha256sum-windows
               shell: bash
@@ -370,7 +354,7 @@ jobs:
                   name: ${{ env.RELEASE_TAG }}
                   body: ${{ env.RELEASE_BODY }}
                   commit: ${{ env.COMMIT_SHA }}
-                  artifacts: "mobile/apps/auth/artifacts/ente-auth-*.exe,mobile/apps/auth/artifacts/ente-auth-*.zip"
+                  artifacts: "mobile/apps/auth/artifacts/ente-auth-*.exe"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
