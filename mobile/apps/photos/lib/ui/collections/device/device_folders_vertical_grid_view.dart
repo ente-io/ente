@@ -163,14 +163,19 @@ class _DeviceFolderVerticalGridViewBodyState
   @override
   Widget build(BuildContext context) {
     if (backupPreferenceService.hasSkippedOnboardingPermission) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: OnDeviceEmptyState.permission(
-          onFoldersSelected: () {
-            _refreshDeviceCollections();
-          },
-        ),
-      );
+      if (widget.emptyStateSliver != null) {
+        return widget.emptyStateSliver!;
+      }
+      return widget.showEmptyState
+          ? SliverFillRemaining(
+              hasScrollBody: false,
+              child: OnDeviceEmptyState.permission(
+                onFoldersSelected: () {
+                  _refreshDeviceCollections();
+                },
+              ),
+            )
+          : const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
     return FutureBuilder<List<DeviceCollection>>(
