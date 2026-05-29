@@ -275,7 +275,7 @@ class _RitualsDiscoverySection extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.only(top: 8, bottom: 24),
       child: RitualsBanner(),
     );
   }

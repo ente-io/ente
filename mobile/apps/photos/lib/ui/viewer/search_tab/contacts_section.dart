@@ -56,7 +56,7 @@ class ContactsLoadingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.only(top: 8, bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -124,7 +124,7 @@ class _ContactsSectionState extends State<ContactsSection> {
     if (_contactSearchResults.isEmpty) {
       final textTheme = getEnteTextTheme(context);
       return Padding(
-        padding: const EdgeInsets.only(left: 12, right: 8),
+        padding: const EdgeInsets.only(left: 12, right: 8, bottom: 24),
         child: Row(
           children: [
             Expanded(
@@ -164,7 +164,7 @@ class _ContactsSectionState extends State<ContactsSection> {
         const ContactCTA(),
       ];
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.only(top: 8, bottom: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -78,7 +78,7 @@ class _LocationsSectionState extends State<LocationsSection> {
     if (_locationsSearchResults.isEmpty) {
       final textTheme = getEnteTextTheme(context);
       return Padding(
-        padding: const EdgeInsets.only(left: 12, right: 8),
+        padding: const EdgeInsets.only(left: 12, right: 8, bottom: 24),
         child: Row(
           children: [
             Expanded(
@@ -118,7 +118,7 @@ class _LocationsSectionState extends State<LocationsSection> {
         const RepaintBoundary(child: LocationCTA()),
       ];
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.only(top: 8, bottom: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
