@@ -89,7 +89,7 @@
     },
     {
       "title": "Animal Crossing",
-      "slug:": "animal_crossing",
+      "slug": "animal_crossing",
       "altNames": [
         "AnimalCrossing",
         "Bell Tree Forums",
@@ -141,13 +141,6 @@
       "slug": "autenti"
     },
     {
-      "title": "Autenticacion Digital",
-      "slug": "autenticacion-digital",
-      "altNames": [
-        "autenticaciondigital.and.gov.co"
-      ]
-    },
-    {
       "title": "authentik",
       "altNames": [
         "goauthentik"
@@ -177,7 +170,7 @@
     },
     {
       "title": "AzurWare",
-      "slug": "azuware"
+      "slug": "azurware"
     },
     {
       "title": "Badlion",
@@ -882,7 +875,7 @@
     },
     {
       "title": "Gate.io",
-      "slug": "gateio.svg"
+      "slug": "gateio"
     },
     {
       "title": "GERID"
@@ -1041,10 +1034,6 @@
       "altNames": [
         "ImmobilienScout24"
       ]
-    },
-    {
-      "title": "Impact.com",
-      "slug": "impact"
     },
     {
       "title": "Infomaniak"
@@ -1870,9 +1859,6 @@
     {
       "title": "Reolink",
       "slug": "reolink"
-    },
-    {
-      "title": "Restorecord"
     },
     {
       "title": "Restream",
