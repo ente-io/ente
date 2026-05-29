@@ -369,7 +369,9 @@ const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
     onClick,
 }) => {
     const isFavorite = collectionSummary.type === "userFavorites";
-    const isPinned = collectionSummary.attributes.has("pinned");
+    const isPinned =
+        collectionSummary.attributes.has("pinned") ||
+        collectionSummary.attributes.has("shareePinned");
 
     return (
         <ItemCard
