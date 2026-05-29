@@ -3752,9 +3752,7 @@ const Page: React.FC = () => {
                         event.payload.type === "over"
                     ) {
                         if (canHandleImageDrop) {
-                            setIsImageDragActive(
-                                (isActive) => isActive || true,
-                            );
+                            setIsImageDragActive(true);
                         }
                         return;
                     }

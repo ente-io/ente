@@ -29,12 +29,8 @@ export const checkForAppUpdates = async (): Promise<AppUpdateCheckResult> => {
                 return { kind: "up-to-date" };
             }
 
-            const version = update.version;
-            try {
-                await update.close();
-            } catch (e) {
-                log.warn("Failed to close Ensu updater resource", e);
-            }
+            const { version } = update;
+            await update.close();
             return { kind: "available", version };
         } catch (e) {
             log.error("Failed to auto-update Ensu", e);

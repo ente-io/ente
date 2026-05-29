@@ -1,14 +1,10 @@
-type TauriRuntimeWindow = Window & { isTauri?: unknown };
+type TauriGlobal = typeof globalThis & { isTauri?: unknown };
 
-export const isTauriRuntime = () => {
-    if (typeof window === "undefined") return false;
-
-    const tauriWindow = window as TauriRuntimeWindow;
-    return (
-        tauriWindow.isTauri === true ||
-        "__TAURI__" in tauriWindow ||
-        "__TAURI_IPC__" in tauriWindow ||
-        "__TAURI_INTERNALS__" in tauriWindow ||
-        "__TAURI_METADATA__" in tauriWindow
-    );
-};
+/**
+ * Return true if we're running under Tauri.
+ *
+ * TThis is an inlined variant of `isTauri` from from `@tauri-apps/api/core`
+ * so that we can detect Tauri runtime without importing the entire package.
+ */
+export const isTauriRuntime = () =>
+    (globalThis as TauriGlobal).isTauri === true;
