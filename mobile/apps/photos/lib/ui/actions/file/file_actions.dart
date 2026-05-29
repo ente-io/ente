@@ -119,10 +119,8 @@ Future<void> showSingleFileDeleteSheet(
             onTap: () => _runSingleFileDeleteAction(
               sheetContext,
               ButtonAction.third,
-              () async {
-                await deleteFilesFromEverywhere(context, [file]);
-                onFileRemoved?.call(file);
-              },
+              () => deleteFilesFromEverywhere(context, [file]),
+              afterPop: () => onFileRemoved?.call(file),
             ),
           ),
       ],
@@ -140,12 +138,14 @@ Future<void> showSingleFileDeleteSheet(
 Future<void> _runSingleFileDeleteAction(
   BuildContext context,
   ButtonAction action,
-  Future<void> Function() onDelete,
-) async {
+  Future<void> Function() onDelete, {
+  FutureOr<void> Function()? afterPop,
+}) async {
   try {
     await onDelete();
     if (context.mounted) {
       Navigator.of(context).pop(ButtonResult(action));
+      await afterPop?.call();
     }
   } catch (error) {
     if (context.mounted) {
