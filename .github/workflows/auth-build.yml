@@ -427,7 +427,7 @@ jobs:
                   echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
                   echo "Saved provisioning profile $PROFILE_PATH"
               env:
-                  CM_PROVISIONING_PROFILE: ${{ secrets.MAC_OS_BUILD_PROVISION_PROFILE_BASE64 }}
+                  CM_PROVISIONING_PROFILE: ${{ secrets.AUTH_MACOS_DEVELOPER_ID_PROVISION_PROFILE_BASE64 }}
 
             - name: Add certificates
               run: |
