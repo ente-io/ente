@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
+import { isTauriRuntime } from "services/tauri-runtime";
 
 interface MarkdownRendererProps {
     content: string;
@@ -96,17 +97,10 @@ const CodeBlock = ({ children, node: _node, ...rest }: PreProps) => {
 };
 
 const openExternalUrl = async (url: string) => {
-    const hasTauriBridge =
-        typeof window !== "undefined" &&
-        ("__TAURI__" in window ||
-            "__TAURI_IPC__" in window ||
-            "__TAURI_INTERNALS__" in window ||
-            "__TAURI_METADATA__" in window);
-
-    if (hasTauriBridge) {
+    if (isTauriRuntime()) {
         try {
-            const { open } = await import("@tauri-apps/api/shell");
-            await open(url);
+            const { openUrl } = await import("@tauri-apps/plugin-opener");
+            await openUrl(url);
             return;
         } catch {
             // Fall back to the browser open path below.

@@ -16,7 +16,9 @@ import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({super.key});
+  const SearchWidget({super.key, this.shouldConsumeBackNotifier});
+
+  final ValueNotifier<bool>? shouldConsumeBackNotifier;
 
   @override
   State<SearchWidget> createState() => SearchWidgetState();
@@ -47,6 +49,7 @@ class SearchWidgetState extends State<SearchWidget> {
     super.initState();
     focusNode = FocusNode();
     focusNode.addListener(() {
+      _syncSearchBackNotifier();
       if (mounted) {
         setState(() {});
       }
@@ -73,17 +76,30 @@ class SearchWidgetState extends State<SearchWidget> {
     //Populate the serach tab with the latest query when coming back
     //to the serach tab.
     textController.text = query;
+    _syncSearchBackNotifier();
 
     _clearAndUnfocusSearchBar = Bus.instance
         .on<ClearAndUnfocusSearchBar>()
         .listen((event) {
           textController.clear();
           focusNode.unfocus();
+          _syncSearchBackNotifier(false);
         });
   }
 
   @override
+  void didUpdateWidget(covariant SearchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shouldConsumeBackNotifier !=
+        widget.shouldConsumeBackNotifier) {
+      _syncSearchBackNotifier(false, oldWidget.shouldConsumeBackNotifier);
+      _syncSearchBackNotifier();
+    }
+  }
+
+  @override
   void dispose() {
+    _syncSearchBackNotifier(false);
     _debouncer.cancelDebounceTimer();
     focusNode.dispose();
     _tabChangedEvent?.cancel();
@@ -94,7 +110,22 @@ class SearchWidgetState extends State<SearchWidget> {
     super.dispose();
   }
 
+  void _syncSearchBackNotifier([
+    bool? shouldConsumeBack,
+    ValueNotifier<bool>? notifier,
+  ]) {
+    final backNotifier = notifier ?? widget.shouldConsumeBackNotifier;
+    final shouldConsume =
+        shouldConsumeBack ??
+        (focusNode.hasFocus || textController.text.trim().isNotEmpty);
+    if (backNotifier == null || backNotifier.value == shouldConsume) {
+      return;
+    }
+    backNotifier.value = shouldConsume;
+  }
+
   Future<void> textControllerListener() async {
+    _syncSearchBackNotifier();
     isLoading.value = true;
     _debouncer.run(() async {
       if (mounted) {

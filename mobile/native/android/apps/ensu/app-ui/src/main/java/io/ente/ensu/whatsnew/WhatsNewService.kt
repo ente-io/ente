@@ -14,11 +14,12 @@ class WhatsNewService(context: Context) {
     )
 
     fun getPendingWhatsNew(): PendingWhatsNew? {
-        val seenVersion = if (preferences.contains(KEY_SEEN_VERSION)) {
-            preferences.getInt(KEY_SEEN_VERSION, WhatsNewContent.VERSION)
-        } else {
-            0
+        if (!preferences.contains(KEY_SEEN_VERSION)) {
+            markSeen()
+            return null
         }
+
+        val seenVersion = preferences.getInt(KEY_SEEN_VERSION, WhatsNewContent.VERSION)
         if (seenVersion >= WhatsNewContent.VERSION) return null
 
         if (WhatsNewContent.entries.isEmpty()) {

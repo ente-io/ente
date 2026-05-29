@@ -1313,10 +1313,45 @@
   dependencies:
     tslib "^2.8.0"
 
-"@tauri-apps/api@^1.5.0":
-  version "1.6.0"
-  resolved "https://registry.npmjs.org/@tauri-apps/api/-/api-1.6.0.tgz"
-  integrity sha512-rqI++FWClU5I2UBp4HXFvl+sBWkdigBkxnpJDQUWttNyG7IZP4FwQGhTNL5EOw0vI8i6eSAJ5frLqO7n7jbJdg==
+"@tauri-apps/api@^2.10.1", "@tauri-apps/api@^2.11.0", "@tauri-apps/api@^2.8.0":
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.11.0.tgz#00fb69996010178a5153798d4a84f6fe3a1e1182"
+  integrity sha512-7CinYODhky9lmO23xHnUFv0Xt43fbtWMyxZcLcRBlFkcgXKuEirBvHpmtJ89YMhyeGcq20Wuc47Fa4XjyniywA==
+
+"@tauri-apps/plugin-dialog@^2.7.1":
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-dialog/-/plugin-dialog-2.7.1.tgz#fc83387de807c8d064d2b64b1b813b84e8286a12"
+  integrity sha512-OK1UBXYt+ojcmxMktzzuyonYIFta8CmAASpX+CA+DTGK24KlHjhYI6x2iOJ/TjZF4N7/ACK1oFmEOjIY9IhzOQ==
+  dependencies:
+    "@tauri-apps/api" "^2.11.0"
+
+"@tauri-apps/plugin-fs@^2.5.1":
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-fs/-/plugin-fs-2.5.1.tgz#e1b8643d41c74251699fcdecc800877d18a4a6fc"
+  integrity sha512-9Lz+Jopp6QyeEWhlpkMx4R/+P9HgR+AVAI4vOZhlT8Xaymtz8iVI/Ov984/XTqgJz/5gz5NretqPB/XEMS3NhQ==
+  dependencies:
+    "@tauri-apps/api" "^2.11.0"
+
+"@tauri-apps/plugin-opener@^2.5.4":
+  version "2.5.4"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-opener/-/plugin-opener-2.5.4.tgz#b37883e4d36125b8c5a0c74f683395958a65bd7d"
+  integrity sha512-1HnPkb+AmgO29HBazm4uPLKB+r7zzcTBW1d0fyYp1uP+jwtpoiNDGKMMzz58SFp49nOIrxdE3aUJtT57lfO9CQ==
+  dependencies:
+    "@tauri-apps/api" "^2.11.0"
+
+"@tauri-apps/plugin-process@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-process/-/plugin-process-2.3.1.tgz#fff77aa7550c9c5347689c859d581f88287bf7ae"
+  integrity sha512-nCa4fGVaDL/B9ai03VyPOjfAHRHSBz5v6F/ObsB73r/dA3MHHhZtldaDMIc0V/pnUw9ehzr2iEG+XkSEyC0JJA==
+  dependencies:
+    "@tauri-apps/api" "^2.8.0"
+
+"@tauri-apps/plugin-updater@^2.10.1":
+  version "2.10.1"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-updater/-/plugin-updater-2.10.1.tgz#ea0efd766890394b6c719b9fc21de7da0029c69c"
+  integrity sha512-NFYMg+tWOZPJdzE/PpFj2qfqwAWwNS3kXrb1tm1gnBJ9mYzZ4WDRrwy8udzWoAnfGCHLuePNLY1WVCNHnh3eRA==
+  dependencies:
+    "@tauri-apps/api" "^2.10.1"
 
 "@tokenizer/inflate@^0.4.1":
   version "0.4.1"

@@ -1,4 +1,4 @@
-import { isTauriAppRuntime } from "services/secure-storage";
+import { isTauriRuntime } from "services/tauri-runtime";
 import {
     whatsNewEntries,
     whatsNewVersion,
@@ -15,7 +15,7 @@ export interface PendingDesktopWhatsNew {
 export const getPendingDesktopWhatsNew = ():
     | PendingDesktopWhatsNew
     | undefined => {
-    if (!isTauriAppRuntime()) return undefined;
+    if (!isTauriRuntime()) return undefined;
 
     const seenVersion = readSeenVersion();
     if (seenVersion >= whatsNewVersion) return undefined;
@@ -29,7 +29,7 @@ export const getPendingDesktopWhatsNew = ():
 };
 
 export const markDesktopWhatsNewSeen = () => {
-    if (!isTauriAppRuntime()) return;
+    if (!isTauriRuntime()) return;
 
     try {
         window.localStorage.setItem(storageKey, String(whatsNewVersion));
@@ -42,7 +42,10 @@ export const markDesktopWhatsNewSeen = () => {
 const readSeenVersion = () => {
     try {
         const rawValue = window.localStorage.getItem(storageKey);
-        if (rawValue === null) return 0;
+        if (rawValue === null) {
+            markDesktopWhatsNewSeen();
+            return whatsNewVersion;
+        }
 
         const parsed = Number(rawValue);
         if (Number.isInteger(parsed) && parsed > 0) return parsed;

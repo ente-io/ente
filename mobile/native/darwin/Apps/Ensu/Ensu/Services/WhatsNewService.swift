@@ -19,13 +19,12 @@ final class WhatsNewService {
     }
 
     func pendingWhatsNew() -> PendingWhatsNew? {
-        let seenVersion: Int
         if defaults.object(forKey: seenVersionKey) == nil {
-            seenVersion = 0
-        } else {
-            seenVersion = defaults.integer(forKey: seenVersionKey)
+            markSeen()
+            return nil
         }
 
+        let seenVersion = defaults.integer(forKey: seenVersionKey)
         if seenVersion >= WhatsNewContent.version {
             return nil
         }

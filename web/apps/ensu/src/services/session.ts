@@ -1,6 +1,6 @@
 import log from "ente-base/log";
+import { isTauriRuntime } from "services/tauri-runtime";
 import {
-    isTauriAppRuntime,
     secureStorageDelete,
     secureStorageGet,
     secureStorageSet,
@@ -36,7 +36,7 @@ const sessionKeyData = async (keyDataB64: string): Promise<SessionKeyData> => {
 
 /** Return the decrypted master key (base64) from session storage, if present. */
 export const masterKeyFromSession = async (): Promise<string | undefined> => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         if (_tauriMasterKeyCache) return _tauriMasterKeyCache;
         try {
             const masterKey = await secureStorageGet(
@@ -62,7 +62,7 @@ export const masterKeyFromSession = async (): Promise<string | undefined> => {
     await ensureCryptoInit();
     const wasm = await enteWasm();
     const masterKey = await wasm.crypto_decrypt_box(encryptedData, nonce, key);
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         _tauriMasterKeyCache = masterKey;
     }
     return masterKey;
@@ -70,7 +70,7 @@ export const masterKeyFromSession = async (): Promise<string | undefined> => {
 
 /** Save the master key (base64) in session storage and secure storage on Tauri. */
 export const saveMasterKeyInSession = async (masterKeyB64: string) => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         _tauriMasterKeyCache = masterKeyB64;
         try {
             await secureStorageSet(MASTER_KEY_SECURE_STORAGE_KEY, masterKeyB64);
@@ -87,7 +87,7 @@ export const saveMasterKeyInSession = async (masterKeyB64: string) => {
 
 /** Remove the master key from session storage. */
 export const clearMasterKeyFromSession = () => {
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         _tauriMasterKeyCache = undefined;
     }
     sessionStorage.removeItem(MASTER_KEY_SESSION_KEY);
@@ -96,7 +96,7 @@ export const clearMasterKeyFromSession = () => {
 /** Remove the master key from session storage and Tauri secure storage. */
 export const clearMasterKeyFromEverywhere = async () => {
     clearMasterKeyFromSession();
-    if (isTauriAppRuntime()) {
+    if (isTauriRuntime()) {
         try {
             await secureStorageDelete(MASTER_KEY_SECURE_STORAGE_KEY);
         } catch (error) {
@@ -107,7 +107,7 @@ export const clearMasterKeyFromEverywhere = async () => {
 
 /** Hydrate session storage from Tauri secure storage when possible. */
 export const updateSessionFromTauriSecureStorageIfNeeded = async () => {
-    if (!isTauriAppRuntime()) return;
+    if (!isTauriRuntime()) return;
     if (_tauriMasterKeyCache) return;
 
     try {
