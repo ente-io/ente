@@ -107,6 +107,7 @@ import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
     addToCollection,
     addToFavoritesCollection,
+    canAddFilesToCollection,
     createAlbum,
     createPublicURL,
     createQuickLinkCollection,
@@ -115,10 +116,8 @@ import {
     updateCollectionCover,
 } from "ente-new/photos/services/collection";
 import {
-    canAddToCollection,
     haveOnlySystemCollections,
     PseudoCollectionID,
-    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import {
@@ -981,11 +980,7 @@ const Page: React.FC = () => {
     };
 
     const createOnSelectForCollectionOp =
-        (op: CollectionOp) =>
-        (
-            selectedCollection: Collection,
-            selectedCollectionSummary?: CollectionSummary,
-        ) => {
+        (op: CollectionOp) => (selectedCollection: Collection) => {
             const selectedFiles = getSelectedFiles(selected, filteredFiles);
             const userFiles = selectedFiles.filter(
                 // If a selection is happening, there must be a user.
@@ -1021,12 +1016,10 @@ const Page: React.FC = () => {
 
             const shouldAddInsteadOfMove =
                 op == "move" &&
-                !!selectedCollectionSummary &&
-                selectedCollectionSummary.attributes.has("sharedIncoming") &&
-                canAddToCollection(selectedCollectionSummary);
+                selectedCollection.owner.id != user!.id &&
+                canAddFilesToCollection(selectedCollection);
 
             if (shouldAddInsteadOfMove) {
-                setOpenCollectionSelector(false);
                 showMiniDialog({
                     title: t("cannot_move_to_shared_albums"),
                     message: t("cannot_move_to_shared_albums_message"),

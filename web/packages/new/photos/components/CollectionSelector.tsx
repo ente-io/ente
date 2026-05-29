@@ -83,10 +83,7 @@ export interface CollectionSelectorAttributes {
      * Callback invoked when the user selects one the existing collections
      * listed in the dialog.
      */
-    onSelectCollection: (
-        collection: Collection,
-        collectionSummary: CollectionSummary,
-    ) => void;
+    onSelectCollection: (collection: Collection) => void;
     /**
      * Callback invoked when the user cancels the collection selection dialog.
      */
@@ -166,7 +163,10 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             (cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
-                } else if (attributes.action == "add") {
+                } else if (
+                    attributes.action == "add" ||
+                    attributes.action == "move"
+                ) {
                     return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
@@ -178,14 +178,6 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     return (
                         (canMoveToCollection(cs) ||
                             cs.type == "uncategorized") &&
-                        cs.type != "userFavorites"
-                    );
-                } else if (attributes.action == "move") {
-                    const canAddInsteadOfMove =
-                        cs.attributes.has("sharedIncoming") &&
-                        canAddToCollection(cs);
-                    return (
-                        (canMoveToCollection(cs) || canAddInsteadOfMove) &&
                         cs.type != "userFavorites"
                     );
                 } else {
@@ -245,13 +237,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         attributes;
 
     const handleCollectionSummaryClick = async (id: number) => {
-        const collectionSummary = filteredCollections.find((cs) => cs.id == id);
-        if (!collectionSummary) return;
-
-        onSelectCollection(
-            await collectionForCollectionSummaryID(id),
-            collectionSummary,
-        );
+        onSelectCollection(await collectionForCollectionSummaryID(id));
         onClose();
     };
 
