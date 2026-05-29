@@ -2,7 +2,7 @@
 
 ## v1.7.25 (unreleased)
 
--
+- Support Traditional Chinese and Urdu translations.
 
 ## v1.7.24
 
