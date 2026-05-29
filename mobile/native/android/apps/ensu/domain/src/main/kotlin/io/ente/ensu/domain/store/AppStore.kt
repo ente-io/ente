@@ -2,12 +2,16 @@ package io.ente.ensu.domain.store
 
 import io.ente.ensu.domain.chat.ChatRepository
 import io.ente.ensu.domain.chat.ChatSyncRepository
+import io.ente.ensu.domain.device.ChatDeviceCapability
+import io.ente.ensu.domain.device.DeviceCapabilityProvider
+import io.ente.ensu.domain.device.UnknownDeviceCapabilityProvider
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.logging.LogRepository
 import io.ente.ensu.domain.logging.NoOpLogRepository
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.EnsuDefaults
+import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.preferences.SessionPreferences
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.state.DeveloperSettingsState
@@ -16,12 +20,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class AppStore(
     private val sessionPreferences: SessionPreferences,
     private val chatRepository: ChatRepository,
     private val chatSyncRepository: ChatSyncRepository? = null,
     private val llmProvider: LlmProvider,
+    private val deviceCapabilityProvider: DeviceCapabilityProvider = UnknownDeviceCapabilityProvider,
     val ensuDefaults: EnsuDefaults,
     private val clock: () -> Long = { System.currentTimeMillis() },
     private val logRepository: LogRepository = NoOpLogRepository
@@ -60,8 +66,46 @@ class AppStore(
         attachmentActions.setScope(scope)
         syncActions.setScope(scope)
         modelSettingsActions.setScope(scope)
+        refreshDeviceCapability(scope)
         chatActions.bootstrap(scope)
         modelSettingsActions.refreshModelDownloadInfo()
+    }
+
+    fun refreshDeviceCapability(scope: CoroutineScope? = null) {
+        val capability = deviceCapabilityProvider.chatCapability()
+        val unsupported = capability is ChatDeviceCapability.UnsupportedLowMemory
+        _state.value = _state.value.copy(
+            chat = _state.value.chat.copy(
+                deviceCapability = capability,
+                showUnsupportedDeviceDialog = unsupported || _state.value.chat.showUnsupportedDeviceDialog,
+                isDownloading = if (unsupported) false else _state.value.chat.isDownloading,
+                downloadPercent = if (unsupported) null else _state.value.chat.downloadPercent,
+                downloadStatus = if (unsupported) null else _state.value.chat.downloadStatus,
+                hasRequestedModelDownload = if (unsupported) false else _state.value.chat.hasRequestedModelDownload,
+                editingMessageId = if (unsupported) null else _state.value.chat.editingMessageId,
+                messageText = if (unsupported) "" else _state.value.chat.messageText,
+                attachments = if (unsupported) emptyList() else _state.value.chat.attachments
+            )
+        )
+        if (unsupported) {
+            scope?.let { coroutineScope ->
+                coroutineScope.launch {
+                    sessionPreferences.setModelDownloadRequested(false)
+                }
+            }
+        }
+        logRepository.log(
+            LogLevel.Info,
+            "Chat device capability evaluated",
+            details = "capability=$capability",
+            tag = "App"
+        )
+    }
+
+    fun dismissUnsupportedDeviceDialog() {
+        _state.value = _state.value.copy(
+            chat = _state.value.chat.copy(showUnsupportedDeviceDialog = false)
+        )
     }
 
     fun hydrateModelDownloadRequested(requested: Boolean) {

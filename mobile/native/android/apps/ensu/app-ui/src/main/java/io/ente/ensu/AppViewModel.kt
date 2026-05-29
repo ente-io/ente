@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.data.AdvancedSettingsSnapshot
+import io.ente.ensu.data.AndroidDeviceCapabilityProvider
 import io.ente.ensu.data.EndpointPreferencesDataStore
 import io.ente.ensu.data.SessionPreferencesDataStore
 import io.ente.ensu.data.auth.EnsuAuthService
@@ -31,12 +32,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val advancedSettingsDataStore = AdvancedSettingsDataStore(application)
     private val credentialStore = CredentialStore(application)
     val appVersion = runCatching { getAppVersion(application) }.getOrDefault("unknown")
+    private val deviceCapabilityProvider = AndroidDeviceCapabilityProvider(application)
 
     val logRepository = FileLogRepository(application)
     private val llmProvider = InferenceRsProvider(
         context = application,
         modelDir = resolveModelDir(application),
-        legacyModelDir = File(application.filesDir, "llm")
+        legacyModelDir = File(application.filesDir, "llm"),
+        deviceCapabilityProvider = deviceCapabilityProvider
     )
     private val chatRepository = RustChatRepository(application, credentialStore)
     private val chatSyncRepository = RustChatSyncRepository(
@@ -61,6 +64,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         chatRepository = chatRepository,
         chatSyncRepository = chatSyncRepository,
         llmProvider = llmProvider,
+        deviceCapabilityProvider = deviceCapabilityProvider,
         ensuDefaults = ensuDefaults,
         logRepository = logRepository
     )

@@ -1,5 +1,6 @@
 package io.ente.ensu.domain.state
 
+import io.ente.ensu.domain.device.ChatDeviceCapability
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
@@ -28,6 +29,8 @@ data class ChatState(
     val isModelDownloaded: Boolean = false,
     val modelDownloadSizeBytes: Long? = null,
     val hasRequestedModelDownload: Boolean = false,
+    val deviceCapability: ChatDeviceCapability = ChatDeviceCapability.Unknown,
+    val showUnsupportedDeviceDialog: Boolean = false,
     val overflowDialog: OverflowDialogState? = null
 )
 

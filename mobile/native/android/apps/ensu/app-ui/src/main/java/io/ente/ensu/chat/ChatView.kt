@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
+import io.ente.ensu.domain.device.ChatDeviceCapability
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
@@ -69,6 +70,7 @@ fun ChatView(
     onBranchChange: (String, Int) -> Unit,
     onOpenAttachment: (Attachment) -> Unit,
     onStartDownload: (Boolean) -> Unit,
+    onDismissUnsupportedDeviceDialog: () -> Unit,
     onOverflowTrim: () -> Unit,
     onOverflowCancel: () -> Unit
 ) {
@@ -79,6 +81,8 @@ fun ChatView(
     val latestOnMessageChange by rememberUpdatedState(onMessageChange)
     val sessionKey = chatState.currentSessionId ?: "new-session"
     val latestSessionKey by rememberUpdatedState(sessionKey)
+    val unsupportedCapability = chatState.deviceCapability as? ChatDeviceCapability.UnsupportedLowMemory
+    val isChatUnsupported = unsupportedCapability != null
     var pendingVoiceSessionKey by remember { mutableStateOf<String?>(null) }
     val voiceController = rememberVoiceTranscriptionController(
         onTranscript = { transcript ->
@@ -96,6 +100,7 @@ fun ChatView(
     val canStartVoiceInput = !chatState.isGenerating &&
         !chatState.isDownloading &&
         !chatState.isAttachmentDownloadBlocked &&
+        !isChatUnsupported &&
         editingMessage == null
     val latestCanStartVoiceInput by rememberUpdatedState(canStartVoiceInput)
 
@@ -118,12 +123,14 @@ fun ChatView(
     val showDownloadOnboarding by remember(
         chatState.isModelDownloaded,
         chatState.messages,
-        chatState.isGenerating
+        chatState.isGenerating,
+        isChatUnsupported
     ) {
         derivedStateOf {
             !chatState.isModelDownloaded &&
                 chatState.messages.isEmpty() &&
-                !chatState.isGenerating
+                !chatState.isGenerating &&
+                !isChatUnsupported
         }
     }
 
@@ -134,6 +141,7 @@ fun ChatView(
 
     val shouldAutoFocusInput = chatState.isModelDownloaded &&
         !showDownloadOnboarding &&
+        !isChatUnsupported &&
         !chatState.isDownloading &&
         !chatState.isGenerating &&
         !didAutoFocusInput &&
@@ -156,6 +164,7 @@ fun ChatView(
         if (wasDrawerOpen) {
             val shouldRestoreFocus = chatState.isModelDownloaded &&
                 !showDownloadOnboarding &&
+                !isChatUnsupported &&
                 !chatState.isDownloading &&
                 !chatState.isGenerating
             if (shouldRestoreFocus) {
@@ -206,6 +215,7 @@ fun ChatView(
                         streamingParentId = chatState.streamingParentId,
                         isGenerating = chatState.isGenerating,
                         isModelDownloaded = chatState.isModelDownloaded,
+                        isChatUnsupported = isChatUnsupported,
                         isDownloading = chatState.isDownloading,
                         downloadPercent = chatState.downloadPercent,
                         downloadStatus = chatState.downloadStatus,
@@ -228,7 +238,17 @@ fun ChatView(
                 )
             }
 
-            if (!showDownloadOnboarding) {
+            if (unsupportedCapability != null) {
+                UnsupportedChatInputNotice(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .background(EnsuColor.backgroundBase())
+                        .onGloballyPositioned { coords ->
+                            inputBarHeightDp = with(density) { coords.size.height.toDp() }
+                        }
+                )
+            } else if (!showDownloadOnboarding) {
                 MessageInput(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -278,6 +298,12 @@ fun ChatView(
                     focusRequestId = focusRequestId
                 )
             }
+        }
+
+        if (chatState.showUnsupportedDeviceDialog && unsupportedCapability != null) {
+            UnsupportedDeviceDialog(
+                onDismiss = onDismissUnsupportedDeviceDialog
+            )
         }
 
         val imeVisible = WindowInsets.ime.getBottom(density) > 0

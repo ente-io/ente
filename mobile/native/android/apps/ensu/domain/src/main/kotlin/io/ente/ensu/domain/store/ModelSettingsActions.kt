@@ -1,5 +1,6 @@
 package io.ente.ensu.domain.store
 
+import io.ente.ensu.domain.device.isChatSupported
 import io.ente.ensu.domain.llm.LlmModelTarget
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.logging.LogRepository
@@ -62,6 +63,24 @@ internal class ModelSettingsActions(
     }
 
     fun refreshModelDownloadInfo() {
+        if (!state.value.chat.deviceCapability.isChatSupported()) {
+            downloadProgressMonitorJob?.cancel()
+            modelDownloadJob?.cancel()
+            llmProvider.cancelDownload()
+            persistModelDownloadRequested(false)
+            state.update { appState ->
+                appState.copy(
+                    chat = appState.chat.copy(
+                        isDownloading = false,
+                        downloadPercent = null,
+                        downloadStatus = null,
+                        modelDownloadSizeBytes = null,
+                        hasRequestedModelDownload = false
+                    )
+                )
+            }
+            return
+        }
         val target = resolveTarget(state.value.modelSettings)
         val isDownloaded = llmProvider.isModelDownloaded(target)
         if (isDownloaded) {
@@ -130,6 +149,7 @@ internal class ModelSettingsActions(
     fun startModelDownload(userInitiated: Boolean = true) {
         val scope = scope ?: return
         val currentState = state.value
+        if (!currentState.chat.deviceCapability.isChatSupported()) return
         if (modelDownloadJob?.isActive == true) return
         if (currentState.chat.isDownloading || currentState.chat.isGenerating) return
         if (!userInitiated && !currentState.chat.hasRequestedModelDownload) return
@@ -256,6 +276,7 @@ internal class ModelSettingsActions(
         val scope = scope ?: return
         val currentState = state.value
         if (currentState.chat.isGenerating || currentState.chat.isDownloading) return
+        if (!currentState.chat.deviceCapability.isChatSupported()) return
 
         val target = resolveTarget(currentState.modelSettings)
         if (!llmProvider.isModelDownloaded(target)) return

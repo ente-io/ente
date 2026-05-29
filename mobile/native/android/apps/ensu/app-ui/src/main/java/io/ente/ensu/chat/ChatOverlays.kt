@@ -66,6 +66,57 @@ internal fun OverflowDialog(
     )
 }
 
+private const val UNSUPPORTED_DEVICE_MESSAGE =
+    "This device doesn't have enough memory to run Ensu's AI model. " +
+        "You can view existing chats, but can't send new messages."
+
+@Composable
+internal fun UnsupportedDeviceDialog(
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Chat unavailable on this device", style = EnsuTypography.h3) },
+        text = {
+            Text(
+                text = UNSUPPORTED_DEVICE_MESSAGE,
+                style = EnsuTypography.body,
+                color = EnsuColor.textPrimary()
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Got it", color = EnsuColor.textPrimary())
+            }
+        },
+        containerColor = EnsuColor.backgroundBase()
+    )
+}
+
+@Composable
+internal fun UnsupportedChatInputNotice(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp)
+            .background(EnsuColor.fillFaint(), RoundedCornerShape(EnsuCornerRadius.card.dp))
+            .padding(EnsuSpacing.md.dp)
+    ) {
+        Text(
+            text = "Chat unavailable on this device",
+            style = EnsuTypography.large,
+            color = EnsuColor.textPrimary()
+        )
+        Text(
+            text = UNSUPPORTED_DEVICE_MESSAGE,
+            style = EnsuTypography.body,
+            color = EnsuColor.textMuted(),
+            modifier = Modifier.padding(top = EnsuSpacing.xs.dp)
+        )
+    }
+}
+
 @Composable
 internal fun DownloadToastOverlay(
     status: String,
