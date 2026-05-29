@@ -284,7 +284,7 @@ const attachProcessHandlers = () => {
     // Gracefully quit the app if we get a SIGINT.
     //
     // This is meant to allow graceful shutdowns during development, when the
-    // app is launched using `yarn dev`. In such cases, pressing CTRL-C sends a
+    // app is launched using `npm run dev`. In such cases, pressing CTRL-C sends a
     // SIGINT to the process. The default handling of SIGINT is not graceful
     // enough (apparently), since I can observe that sometimes recent writes to
     // local storage are lost. This has also been reported by other people:

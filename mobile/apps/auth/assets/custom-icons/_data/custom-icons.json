@@ -1387,13 +1387,8 @@
       ]
     },
     {
-      "title": "MozillaOld",
-      "slug": "mozilla_old"
-    },
-    {
       "title": "Mozilla",
       "slug": "mozilla",
-      "hex": "000000",
       "altNames": [
         "Mozilla Account"
       ]

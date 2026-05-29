@@ -112,7 +112,7 @@ const mainProcess = (method: string, param: unknown) =>
  *
  * So the alternative is to bundle a FFmpeg executable binary with our app. e.g.
  *
- *     yarn add fluent-ffmpeg ffmpeg-static ffprobe-static
+ *     npm install fluent-ffmpeg ffmpeg-static ffprobe-static
  *
  * (we only use ffmpeg-static, the rest are mentioned for completeness' sake).
  *

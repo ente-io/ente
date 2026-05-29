@@ -52,14 +52,11 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 24
-
-            - name: Increase yarn timeout
-              # `yarn install` times out sometimes on the Windows runner,
-              # resulting in flaky builds.
-              run: yarn config set network-timeout 900000 -g
+                  cache: "npm"
+                  cache-dependency-path: "desktop/package-lock.json"
 
             - name: Install dependencies
-              run: yarn install --frozen-lockfile
+              run: npm ci
 
             - name: Create universal ffmpeg binaries for macOS
               if: startsWith(matrix.os, 'macos')
@@ -72,14 +69,11 @@ jobs:
               # the Intel and ARM binaries, and combine them into a single
               # universal binary using lipo.
               #
-              # Note that the yarn install will run again, as part of the
-              # "build:ci" step, so we're relying on ffmpeg-static install.js's
-              # behaviour of not overwriting the existing file named `ffmpeg`.
               run: |
                   rm -f node_modules/ffmpeg-static/ffmpeg
-                  npm_config_arch=arm64 yarn add --check-files ffmpeg-static
+                  npm_config_arch=arm64 node node_modules/ffmpeg-static/install.js
                   mv node_modules/ffmpeg-static/ffmpeg ffmpeg-arm64
-                  npm_config_arch=x64 yarn add --check-files ffmpeg-static
+                  npm_config_arch=x64 node node_modules/ffmpeg-static/install.js
                   mv node_modules/ffmpeg-static/ffmpeg ffmpeg-x64
                   lipo -create ffmpeg-arm64 ffmpeg-x64 -output node_modules/ffmpeg-static/ffmpeg
                   rm ffmpeg-arm64 ffmpeg-x64
@@ -99,8 +93,8 @@ jobs:
                       export CSC_KEY_PASSWORD="${MAC_CERTS_PASSWORD}"
                   fi
 
-                  yarn run build:ci
-                  yarn run electron-builder --${{ startsWith(matrix.os, 'macos') && 'mac' || startsWith(matrix.os, 'windows') && 'windows' || 'linux' }} --publish always
+                  npm run build:ci
+                  npm exec -- electron-builder --${{ startsWith(matrix.os, 'macos') && 'mac' || startsWith(matrix.os, 'windows') && 'windows' || 'linux' }} --publish always
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   MAC_CERTS: ${{ secrets.MAC_CERTS }}
