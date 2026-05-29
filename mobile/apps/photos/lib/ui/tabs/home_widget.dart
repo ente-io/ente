@@ -127,13 +127,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   final ValueNotifier<bool> _isAlbumsSearchActiveNotifier = ValueNotifier<bool>(
     false,
   );
-  final ValueNotifier<bool> _isAlbumsSearchFieldFocusedNotifier =
+  final ValueNotifier<bool> _shouldAlbumsSearchConsumeBackNotifier =
       ValueNotifier<bool>(false);
-  final ValueNotifier<bool> _isAlbumsSearchFieldNotEmptyNotifier =
-      ValueNotifier<bool>(false);
-  final ValueNotifier<bool> _isSearchTabSearchFieldFocusedNotifier =
-      ValueNotifier<bool>(false);
-  final ValueNotifier<bool> _isSearchTabSearchFieldNotEmptyNotifier =
+  final ValueNotifier<bool> _shouldSearchTabSearchConsumeBackNotifier =
       ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
@@ -554,10 +550,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _intentDataStreamSubscription?.cancel();
     isOnSearchTabNotifier.dispose();
     _isAlbumsSearchActiveNotifier.dispose();
-    _isAlbumsSearchFieldFocusedNotifier.dispose();
-    _isAlbumsSearchFieldNotEmptyNotifier.dispose();
-    _isSearchTabSearchFieldFocusedNotifier.dispose();
-    _isSearchTabSearchFieldNotEmptyNotifier.dispose();
+    _shouldAlbumsSearchConsumeBackNotifier.dispose();
+    _shouldSearchTabSearchConsumeBackNotifier.dispose();
     _pageController.dispose();
     _publicAlbumLinkSubscription?.cancel();
     _authDeepLinkSubscription?.cancel();
@@ -854,18 +848,8 @@ class _HomeWidgetState extends State<HomeWidget> {
               _selectedAlbums.clearAll();
               return;
             }
-            if (_isAlbumsSearchFieldFocusedNotifier.value) {
-              if (_isAlbumsSearchActiveNotifier.value) {
-                _isAlbumsSearchActiveNotifier.value = false;
-              } else {
-                FocusManager.instance.primaryFocus?.unfocus();
-              }
-              return;
-            }
-            if (_isAlbumsSearchFieldNotEmptyNotifier.value) {
-              if (_isAlbumsSearchActiveNotifier.value) {
-                _isAlbumsSearchActiveNotifier.value = false;
-              }
+            if (_shouldAlbumsSearchConsumeBackNotifier.value) {
+              _isAlbumsSearchActiveNotifier.value = false;
               return;
             }
             if (_isAlbumsSearchActiveNotifier.value) {
@@ -873,8 +857,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             }
           }
           if (_selectedTabIndex == 3) {
-            if (_isSearchTabSearchFieldFocusedNotifier.value ||
-                _isSearchTabSearchFieldNotEmptyNotifier.value) {
+            if (_shouldSearchTabSearchConsumeBackNotifier.value) {
               Bus.instance.fire(ClearAndUnfocusSearchBar());
               return;
             }
@@ -1073,10 +1056,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                             selectedAlbums: _selectedAlbums,
                             isSearchActiveNotifier:
                                 _isAlbumsSearchActiveNotifier,
-                            isSearchFieldFocusedNotifier:
-                                _isAlbumsSearchFieldFocusedNotifier,
-                            isSearchFieldNotEmptyNotifier:
-                                _isAlbumsSearchFieldNotEmptyNotifier,
+                            shouldConsumeBackNotifier:
+                                _shouldAlbumsSearchConsumeBackNotifier,
                           ),
                         ),
                         _buildTabHeroMode(2, selectedTabIndex, _feedTab),
@@ -1084,10 +1065,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                           3,
                           selectedTabIndex,
                           SearchTab(
-                            isSearchFieldFocusedNotifier:
-                                _isSearchTabSearchFieldFocusedNotifier,
-                            isSearchFieldNotEmptyNotifier:
-                                _isSearchTabSearchFieldNotEmptyNotifier,
+                            shouldConsumeBackNotifier:
+                                _shouldSearchTabSearchConsumeBackNotifier,
                           ),
                         ),
                       ],

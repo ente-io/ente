@@ -17,14 +17,9 @@ import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({
-    super.key,
-    this.isSearchFieldFocusedNotifier,
-    this.isSearchFieldNotEmptyNotifier,
-  });
+  const SearchWidget({super.key, this.shouldConsumeBackNotifier});
 
-  final ValueNotifier<bool>? isSearchFieldFocusedNotifier;
-  final ValueNotifier<bool>? isSearchFieldNotEmptyNotifier;
+  final ValueNotifier<bool>? shouldConsumeBackNotifier;
 
   @override
   State<SearchWidget> createState() => SearchWidgetState();
@@ -58,7 +53,7 @@ class SearchWidgetState extends State<SearchWidget> {
     super.initState();
     focusNode = FocusNode();
     focusNode.addListener(() {
-      _syncSearchFieldFocusNotifier();
+      _syncSearchBackNotifier();
       if (mounted) {
         setState(() {});
       }
@@ -101,38 +96,24 @@ class SearchWidgetState extends State<SearchWidget> {
     //Populate the serach tab with the latest query when coming back
     //to the serach tab.
     textController.text = query;
-    _syncSearchFieldTextNotifier();
+    _syncSearchBackNotifier();
 
     _clearAndUnfocusSearchBar = Bus.instance
         .on<ClearAndUnfocusSearchBar>()
         .listen((event) {
           textController.clear();
-          _syncSearchFieldTextNotifier(
-            widget.isSearchFieldNotEmptyNotifier,
-            false,
-          );
           focusNode.unfocus();
+          _syncSearchBackNotifier(false);
         });
   }
 
   @override
   void didUpdateWidget(covariant SearchWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isSearchFieldFocusedNotifier !=
-        widget.isSearchFieldFocusedNotifier) {
-      _syncSearchFieldFocusNotifier(
-        oldWidget.isSearchFieldFocusedNotifier,
-        false,
-      );
-      _syncSearchFieldFocusNotifier();
-    }
-    if (oldWidget.isSearchFieldNotEmptyNotifier !=
-        widget.isSearchFieldNotEmptyNotifier) {
-      _syncSearchFieldTextNotifier(
-        oldWidget.isSearchFieldNotEmptyNotifier,
-        false,
-      );
-      _syncSearchFieldTextNotifier();
+    if (oldWidget.shouldConsumeBackNotifier !=
+        widget.shouldConsumeBackNotifier) {
+      _syncSearchBackNotifier(false, oldWidget.shouldConsumeBackNotifier);
+      _syncSearchBackNotifier();
     }
   }
 
@@ -151,8 +132,7 @@ class SearchWidgetState extends State<SearchWidget> {
 
   @override
   void dispose() {
-    _syncSearchFieldFocusNotifier(widget.isSearchFieldFocusedNotifier, false);
-    _syncSearchFieldTextNotifier(widget.isSearchFieldNotEmptyNotifier, false);
+    _syncSearchBackNotifier(false);
     _debouncer.cancelDebounceTimer();
     focusNode.dispose();
     _tabChangedEvent?.cancel();
@@ -163,32 +143,22 @@ class SearchWidgetState extends State<SearchWidget> {
     super.dispose();
   }
 
-  void _syncSearchFieldFocusNotifier([
+  void _syncSearchBackNotifier([
+    bool? shouldConsumeBack,
     ValueNotifier<bool>? notifier,
-    bool? isFocused,
   ]) {
-    final focusNotifier = notifier ?? widget.isSearchFieldFocusedNotifier;
-    final hasFocus = isFocused ?? focusNode.hasFocus;
-    if (focusNotifier == null || focusNotifier.value == hasFocus) {
+    final backNotifier = notifier ?? widget.shouldConsumeBackNotifier;
+    final shouldConsume =
+        shouldConsumeBack ??
+        (focusNode.hasFocus || textController.text.trim().isNotEmpty);
+    if (backNotifier == null || backNotifier.value == shouldConsume) {
       return;
     }
-    focusNotifier.value = hasFocus;
-  }
-
-  void _syncSearchFieldTextNotifier([
-    ValueNotifier<bool>? notifier,
-    bool? hasText,
-  ]) {
-    final textNotifier = notifier ?? widget.isSearchFieldNotEmptyNotifier;
-    final isNotEmpty = hasText ?? textController.text.trim().isNotEmpty;
-    if (textNotifier == null || textNotifier.value == isNotEmpty) {
-      return;
-    }
-    textNotifier.value = isNotEmpty;
+    backNotifier.value = shouldConsume;
   }
 
   Future<void> textControllerListener() async {
-    _syncSearchFieldTextNotifier();
+    _syncSearchBackNotifier();
     isLoading.value = true;
     _debouncer.run(() async {
       if (mounted) {

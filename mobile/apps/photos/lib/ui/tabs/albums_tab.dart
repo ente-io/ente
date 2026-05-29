@@ -43,14 +43,12 @@ class AlbumsTab extends StatefulWidget {
     super.key,
     this.selectedAlbums,
     this.isSearchActiveNotifier,
-    this.isSearchFieldFocusedNotifier,
-    this.isSearchFieldNotEmptyNotifier,
+    this.shouldConsumeBackNotifier,
   });
 
   final SelectedAlbums? selectedAlbums;
   final ValueNotifier<bool>? isSearchActiveNotifier;
-  final ValueNotifier<bool>? isSearchFieldFocusedNotifier;
-  final ValueNotifier<bool>? isSearchFieldNotEmptyNotifier;
+  final ValueNotifier<bool>? shouldConsumeBackNotifier;
 
   @override
   State<AlbumsTab> createState() => _AlbumsTabState();
@@ -169,8 +167,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     _searchFocusNode.addListener(_handleSearchFocusChanged);
     widget.isSearchActiveNotifier?.addListener(_handleSearchStateChanged);
     _syncSearchNotifier(_isSearchActive);
-    _syncSearchFieldFocusNotifier(_searchFocusNode.hasFocus);
-    _syncSearchFieldTextNotifier(_hasSearchQuery);
+    _syncSearchBackNotifier();
   }
 
   @override
@@ -183,21 +180,10 @@ class _AlbumsTabState extends State<AlbumsTab>
       widget.isSearchActiveNotifier?.addListener(_handleSearchStateChanged);
       _syncSearchNotifier(_isSearchActive);
     }
-    if (oldWidget.isSearchFieldFocusedNotifier !=
-        widget.isSearchFieldFocusedNotifier) {
-      _syncSearchFieldFocusNotifier(
-        false,
-        oldWidget.isSearchFieldFocusedNotifier,
-      );
-      _syncSearchFieldFocusNotifier(_searchFocusNode.hasFocus);
-    }
-    if (oldWidget.isSearchFieldNotEmptyNotifier !=
-        widget.isSearchFieldNotEmptyNotifier) {
-      _syncSearchFieldTextNotifier(
-        false,
-        oldWidget.isSearchFieldNotEmptyNotifier,
-      );
-      _syncSearchFieldTextNotifier(_hasSearchQuery);
+    if (oldWidget.shouldConsumeBackNotifier !=
+        widget.shouldConsumeBackNotifier) {
+      _syncSearchBackNotifier(false, oldWidget.shouldConsumeBackNotifier);
+      _syncSearchBackNotifier();
     }
   }
 
@@ -214,7 +200,7 @@ class _AlbumsTabState extends State<AlbumsTab>
   }
 
   void _handleSearchFocusChanged() {
-    _syncSearchFieldFocusNotifier(_searchFocusNode.hasFocus);
+    _syncSearchBackNotifier();
   }
 
   void _syncSearchNotifier(bool isSearchActive) {
@@ -223,22 +209,15 @@ class _AlbumsTabState extends State<AlbumsTab>
     notifier.value = isSearchActive;
   }
 
-  void _syncSearchFieldFocusNotifier(
-    bool hasFocus, [
+  void _syncSearchBackNotifier([
+    bool? shouldConsumeBack,
     ValueNotifier<bool>? notifier,
   ]) {
-    final focusNotifier = notifier ?? widget.isSearchFieldFocusedNotifier;
-    if (focusNotifier == null || focusNotifier.value == hasFocus) return;
-    focusNotifier.value = hasFocus;
-  }
-
-  void _syncSearchFieldTextNotifier(
-    bool hasText, [
-    ValueNotifier<bool>? notifier,
-  ]) {
-    final textNotifier = notifier ?? widget.isSearchFieldNotEmptyNotifier;
-    if (textNotifier == null || textNotifier.value == hasText) return;
-    textNotifier.value = hasText;
+    final backNotifier = notifier ?? widget.shouldConsumeBackNotifier;
+    final shouldConsume =
+        shouldConsumeBack ?? (_searchFocusNode.hasFocus || _hasSearchQuery);
+    if (backNotifier == null || backNotifier.value == shouldConsume) return;
+    backNotifier.value = shouldConsume;
   }
 
   Future<void> _loadAll() async {
@@ -323,6 +302,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     _searchController.clear();
     _searchFocusNode.unfocus();
     if (!_isSearchActive && _searchQuery.isEmpty) {
+      _syncSearchBackNotifier(false);
       if (syncNotifier) {
         _syncSearchNotifier(false);
       }
@@ -333,7 +313,7 @@ class _AlbumsTabState extends State<AlbumsTab>
       _isSearchActive = false;
       _searchQuery = "";
     });
-    _syncSearchFieldTextNotifier(false);
+    _syncSearchBackNotifier(false);
     if (syncNotifier) {
       _syncSearchNotifier(false);
     }
@@ -737,8 +717,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     _loggedOutEvent.cancel();
     _tabChangedEvent.cancel();
     widget.isSearchActiveNotifier?.removeListener(_handleSearchStateChanged);
-    _syncSearchFieldFocusNotifier(false);
-    _syncSearchFieldTextNotifier(false);
+    _syncSearchBackNotifier(false);
     _searchFocusNode.removeListener(_handleSearchFocusChanged);
     _debouncer.cancelDebounceTimer();
     _searchController.dispose();
@@ -846,9 +825,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                     setState(() {
                                       _searchQuery = value;
                                     });
-                                    _syncSearchFieldTextNotifier(
-                                      value.trim().isNotEmpty,
-                                    );
+                                    _syncSearchBackNotifier();
                                   },
                                 ),
                               ),

@@ -26,14 +26,9 @@ import "package:photos/ui/viewer/search_tab/people_section.dart";
 import "package:photos/ui/wrapped/wrapped_discovery_section.dart";
 
 class SearchTab extends StatefulWidget {
-  const SearchTab({
-    super.key,
-    this.isSearchFieldFocusedNotifier,
-    this.isSearchFieldNotEmptyNotifier,
-  });
+  const SearchTab({super.key, this.shouldConsumeBackNotifier});
 
-  final ValueNotifier<bool>? isSearchFieldFocusedNotifier;
-  final ValueNotifier<bool>? isSearchFieldNotEmptyNotifier;
+  final ValueNotifier<bool>? shouldConsumeBackNotifier;
 
   @override
   State<SearchTab> createState() => _SearchTabState();
@@ -78,9 +73,7 @@ class _SearchTabState extends State<SearchTab> {
           child: SafeArea(
             bottom: false,
             child: SearchWidget(
-              isSearchFieldFocusedNotifier: widget.isSearchFieldFocusedNotifier,
-              isSearchFieldNotEmptyNotifier:
-                  widget.isSearchFieldNotEmptyNotifier,
+              shouldConsumeBackNotifier: widget.shouldConsumeBackNotifier,
             ),
           ),
         ),
