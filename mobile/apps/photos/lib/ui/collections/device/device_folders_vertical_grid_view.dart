@@ -163,14 +163,19 @@ class _DeviceFolderVerticalGridViewBodyState
   @override
   Widget build(BuildContext context) {
     if (backupPreferenceService.hasSkippedOnboardingPermission) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: OnDeviceEmptyState.permission(
-          onFoldersSelected: () {
-            _refreshDeviceCollections();
-          },
-        ),
-      );
+      if (widget.emptyStateSliver != null) {
+        return widget.emptyStateSliver!;
+      }
+      return widget.showEmptyState
+          ? SliverFillRemaining(
+              hasScrollBody: false,
+              child: OnDeviceEmptyState.permission(
+                onFoldersSelected: () {
+                  _refreshDeviceCollections();
+                },
+              ),
+            )
+          : const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
     return FutureBuilder<List<DeviceCollection>>(
@@ -179,6 +184,7 @@ class _DeviceFolderVerticalGridViewBodyState
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<DeviceCollection> deviceCollections = snapshot.data!.toList();
+          final hasDeviceCollections = deviceCollections.isNotEmpty;
           if (widget.searchQuery.isNotEmpty) {
             final String query = widget.searchQuery.toLowerCase();
             deviceCollections = deviceCollections
@@ -201,7 +207,7 @@ class _DeviceFolderVerticalGridViewBodyState
             return widget.showEmptyState
                 ? SliverFillRemaining(
                     hasScrollBody: false,
-                    child: widget.searchQuery.isEmpty
+                    child: !hasDeviceCollections
                         ? OnDeviceEmptyState.noFolders(
                             onFoldersSelected: _refreshDeviceCollections,
                           )

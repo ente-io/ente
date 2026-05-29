@@ -405,12 +405,12 @@ class _AlbumsTabState extends State<AlbumsTab>
   }
 
   Widget _buildSearchSectionHeader(String title) {
-    final colors = context.componentColors;
+    final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8, top: 16),
       child: Text(
         title,
-        style: TextStyles.large.copyWith(color: colors.textBase),
+        style: TextStyles.h2.copyWith(color: textTheme.largeBold.color),
       ),
     );
   }

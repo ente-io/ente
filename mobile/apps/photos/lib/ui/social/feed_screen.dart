@@ -553,6 +553,8 @@ class _FeedScreenState extends State<FeedScreen> {
         backgroundColor: isDark ? null : colorScheme.backgroundColour,
         elevation: 0,
         centerTitle: false,
+        leadingWidth: widget.showBackButton ? 48 : null,
+        titleSpacing: widget.showBackButton ? 4 : null,
         leading: widget.showBackButton
             ? IconButtonWidget(
                 iconButtonType: IconButtonType.primary,
@@ -563,7 +565,7 @@ class _FeedScreenState extends State<FeedScreen> {
         title: Text(
           AppLocalizations.of(context).feed,
           style: widget.showBackButton
-              ? TextStyles.bodyBold.copyWith(color: textTheme.bodyBold.color)
+              ? TextStyles.display3.copyWith(color: textTheme.h4Bold.color)
               : TextStyles.display1.copyWith(color: textTheme.h4Bold.color),
         ),
       ),

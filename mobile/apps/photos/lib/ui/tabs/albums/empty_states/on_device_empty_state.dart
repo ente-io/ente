@@ -102,15 +102,9 @@ class OnDeviceEmptyState extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     final bottomPadding = 64 + MediaQuery.paddingOf(context).bottom + 32;
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          _permissionTopPadding,
-          16,
-          bottomPadding,
-        ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
+      child: Center(
         child: SizedBox(
           width: _contentWidth,
           child: Column(
