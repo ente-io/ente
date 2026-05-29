@@ -1,6 +1,6 @@
 name: "Build (Ensu)"
 
-# See .github/docs/ensu-release.md
+# See .github/docs/app-release.md
 
 on:
     push:
