@@ -81,7 +81,10 @@ class AppStore(
                 isDownloading = if (unsupported) false else _state.value.chat.isDownloading,
                 downloadPercent = if (unsupported) null else _state.value.chat.downloadPercent,
                 downloadStatus = if (unsupported) null else _state.value.chat.downloadStatus,
-                hasRequestedModelDownload = if (unsupported) false else _state.value.chat.hasRequestedModelDownload
+                hasRequestedModelDownload = if (unsupported) false else _state.value.chat.hasRequestedModelDownload,
+                editingMessageId = if (unsupported) null else _state.value.chat.editingMessageId,
+                messageText = if (unsupported) "" else _state.value.chat.messageText,
+                attachments = if (unsupported) emptyList() else _state.value.chat.attachments
             )
         )
         if (unsupported) {

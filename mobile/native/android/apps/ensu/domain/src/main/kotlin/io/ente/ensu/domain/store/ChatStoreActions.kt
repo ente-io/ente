@@ -250,7 +250,9 @@ internal class ChatStoreActions(
     }
 
     fun beginEditing(messageId: String) {
-        val sessionId = state.value.chat.currentSessionId ?: return
+        val currentState = state.value
+        if (!currentState.chat.deviceCapability.isChatSupported()) return
+        val sessionId = currentState.chat.currentSessionId ?: return
         val message = messageStore[sessionId]?.firstOrNull { it.id == messageId } ?: return
         if (message.author != MessageAuthor.User) return
 

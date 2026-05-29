@@ -631,6 +631,9 @@ final class ChatViewModel: ObservableObject {
         downloadProgressMonitorTask?.cancel()
         sharedModelReadyTask?.cancel()
         clearSharedModelReadyTask()
+        editingMessageId = nil
+        draftText = ""
+        draftAttachments = []
         provider.cancelDownload()
     }
 
@@ -1053,6 +1056,10 @@ final class ChatViewModel: ObservableObject {
     }
 
     func beginEditing(message: RenderedChatMessage) {
+        guard !isChatUnsupported else {
+            showUnsupportedDeviceDialog = true
+            return
+        }
         guard message.role == .user else { return }
         editingMessageId = message.id
         draftText = message.text
