@@ -29,6 +29,7 @@ import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
+import io.ente.ensu.domain.device.ChatDeviceCapability
 import io.ente.ensu.domain.state.OverflowDialogState
 import io.ente.ensu.domain.util.formatBytes
 import io.ente.ensu.utils.rememberEnsuHaptics
@@ -65,6 +66,61 @@ internal fun OverflowDialog(
         containerColor = EnsuColor.backgroundBase()
     )
 }
+
+@Composable
+internal fun UnsupportedDeviceDialog(
+    capability: ChatDeviceCapability.UnsupportedLowMemory,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Chat unavailable on this device", style = EnsuTypography.h3) },
+        text = {
+            Text(
+                text = unsupportedDeviceMessage(capability),
+                style = EnsuTypography.body,
+                color = EnsuColor.textPrimary()
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Got it", color = EnsuColor.textPrimary())
+            }
+        },
+        containerColor = EnsuColor.backgroundBase()
+    )
+}
+
+@Composable
+internal fun UnsupportedChatInputNotice(
+    capability: ChatDeviceCapability.UnsupportedLowMemory,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp)
+            .background(EnsuColor.fillFaint(), RoundedCornerShape(EnsuCornerRadius.card.dp))
+            .padding(EnsuSpacing.md.dp)
+    ) {
+        Text(
+            text = "Chat unavailable on this device",
+            style = EnsuTypography.large,
+            color = EnsuColor.textPrimary()
+        )
+        Text(
+            text = unsupportedDeviceMessage(capability),
+            style = EnsuTypography.body,
+            color = EnsuColor.textMuted(),
+            modifier = Modifier.padding(top = EnsuSpacing.xs.dp)
+        )
+    }
+}
+
+private fun unsupportedDeviceMessage(capability: ChatDeviceCapability.UnsupportedLowMemory): String =
+    "Ensu runs the AI model locally and needs at least 4 GB of RAM. " +
+        "This device does not have enough memory for chat. " +
+        "You can still view existing chats, but sending new messages is disabled. " +
+        "Reported memory: ${formatBytes(capability.totalMemoryBytes)}."
 
 @Composable
 internal fun DownloadToastOverlay(

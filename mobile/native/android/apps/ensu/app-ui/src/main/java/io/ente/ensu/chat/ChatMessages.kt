@@ -92,6 +92,7 @@ internal fun MessageList(
     streamingParentId: String?,
     isGenerating: Boolean,
     isModelDownloaded: Boolean,
+    isChatUnsupported: Boolean,
     isDownloading: Boolean,
     downloadPercent: Int?,
     downloadStatus: String?,
@@ -104,7 +105,7 @@ internal fun MessageList(
     onStartDownload: (Boolean) -> Unit
 ) {
     if (messages.isEmpty() && !isGenerating) {
-        if (!isModelDownloaded) {
+        if (!isModelDownloaded && !isChatUnsupported) {
             DownloadOnboarding(
                 modifier = modifier,
                 isDownloading = isDownloading,

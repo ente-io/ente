@@ -1,5 +1,56 @@
 import Foundation
 
+let chatMinimumRAMBytes: UInt64 = 4_000_000_000
+
+enum ChatDeviceCapability: Equatable {
+    case supported(totalMemoryBytes: UInt64?)
+    case unsupportedLowMemory(totalMemoryBytes: UInt64, requiredMemoryBytes: UInt64)
+    case unknown
+
+    var isChatSupported: Bool {
+        if case .unsupportedLowMemory = self {
+            return false
+        }
+        return true
+    }
+
+    var totalMemoryBytes: UInt64? {
+        switch self {
+        case .supported(let totalMemoryBytes):
+            return totalMemoryBytes
+        case .unsupportedLowMemory(let totalMemoryBytes, _):
+            return totalMemoryBytes
+        case .unknown:
+            return nil
+        }
+    }
+}
+
+protocol ChatDeviceCapabilityProviding {
+    func chatCapability() -> ChatDeviceCapability
+}
+
+struct ProcessInfoChatDeviceCapabilityProvider: ChatDeviceCapabilityProviding {
+    func chatCapability() -> ChatDeviceCapability {
+        let totalMemoryBytes = ProcessInfo.processInfo.physicalMemory
+        if totalMemoryBytes < chatMinimumRAMBytes {
+            return .unsupportedLowMemory(
+                totalMemoryBytes: totalMemoryBytes,
+                requiredMemoryBytes: chatMinimumRAMBytes
+            )
+        }
+        return .supported(totalMemoryBytes: totalMemoryBytes)
+    }
+}
+
+struct UnsupportedDeviceMemoryError: LocalizedError {
+    let capability: ChatDeviceCapability
+
+    var errorDescription: String? {
+        "Device does not have enough RAM for local chat"
+    }
+}
+
 @MainActor
 final class ModelSettingsStore: ObservableObject {
     static let shared = ModelSettingsStore()
