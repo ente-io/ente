@@ -184,6 +184,7 @@ class _DeviceFolderVerticalGridViewBodyState
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<DeviceCollection> deviceCollections = snapshot.data!.toList();
+          final hasDeviceCollections = deviceCollections.isNotEmpty;
           if (widget.searchQuery.isNotEmpty) {
             final String query = widget.searchQuery.toLowerCase();
             deviceCollections = deviceCollections
@@ -206,7 +207,7 @@ class _DeviceFolderVerticalGridViewBodyState
             return widget.showEmptyState
                 ? SliverFillRemaining(
                     hasScrollBody: false,
-                    child: widget.searchQuery.isEmpty
+                    child: !hasDeviceCollections
                         ? OnDeviceEmptyState.noFolders(
                             onFoldersSelected: _refreshDeviceCollections,
                           )
