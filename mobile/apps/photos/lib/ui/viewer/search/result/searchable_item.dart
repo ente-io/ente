@@ -78,9 +78,7 @@ class SearchableItemWidget extends StatelessWidget {
           ? const SizedBox.shrink()
           : Text(
               searchResult.name(),
-              style: searchResult.type() == ResultType.locationSuggestion
-                  ? textTheme.bodyFaint
-                  : textTheme.body,
+              style: textTheme.body,
               overflow: TextOverflow.ellipsis,
             ),
       subtitle: FutureBuilder<int>(
