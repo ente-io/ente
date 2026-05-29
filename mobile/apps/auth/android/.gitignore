@@ -6,6 +6,7 @@ gradle-wrapper.jar
 /local.properties
 GeneratedPluginRegistrant.java
 /app/.cxx/
+/app/build/
 /.kotlin/
 
 # Remember to never publicly share your keystore.
