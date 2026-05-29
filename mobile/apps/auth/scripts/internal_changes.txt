@@ -6,6 +6,7 @@
 - Focus newly added Auth codes so stale search or tag filters do not hide successful additions
 - Added custom icons for 1984 Hosting, Art Fight, BJ-Share, CatRealm, Cove Backup, eClinicalWorks, HaloPSA, JumpCloud, Patchmon, Racket Coach, RustDesk, Sherweb, Smogon, Sony, Zabbix, and Zyxel Nebula
 - Updated the Availity custom icon and fixed several multi-color custom icons rendering as single-color masks
+- Fixed Auth desktop custom icons flashing for Amazon and other monochrome icons ([#8264](https://github.com/ente-io/ente/issues/8264), [#8499](https://github.com/ente-io/ente/issues/8499))
 - Preserved maximized window state across desktop app launches
 - Hid the share-code option for HOTP entries, keeping sharing limited to TOTP-compatible codes
 - Migrated Auth app API, sharing, billing, web access, exported HTML asset links, and credential associations to ente.com domains
