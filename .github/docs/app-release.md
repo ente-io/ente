@@ -1,6 +1,10 @@
-# Ensu release process
+# App release process
 
-> The following assumes main is `0.1.16-beta`, we want to release `0.1.16` and move main to `0.1.17-beta`.
+Auth and Ensu use the same release process, as described here.
+
+> For simplicity, the following assumes we're trying to release Ensu, that main is `0.1.16-beta`, we want to release `0.1.16` and move main to `0.1.17-beta`.
+>
+> To do the same steps for, say, auth, you can just mechanically replace "ensu" with "auth" in the steps.
 
 ## Normal development
 
@@ -15,8 +19,9 @@ Nightly builds of `main` are automatically created every weekday morning (IST), 
 ## Start release
 
 ```sh
-gh workflow run ensu-release.yml \
+gh workflow run app-release.yml \
   -f action=start \
+  -f app=ensu \
   -f version=0.1.16
 ```
 
@@ -41,8 +46,9 @@ git push
 ## Promote release
 
 ```sh
-gh workflow run ensu-release.yml \
+gh workflow run app-release.yml \
   -f action=promote \
+  -f app=ensu \
   -f version=0.1.16
 ```
 
@@ -62,4 +68,4 @@ Publish the draft ensu-v0.1.16 release on GitHub when ready.
 >
 > If a build has already reached Play Store or TestFlight, trigger a new workflow run instead of re-running failed jobs so that it gets a new build number.
 
-`ensu-release.yml` changes release state. If it fails, inspect the failed step before re-running. After it has pushed a branch, created a tag, or moved a draft release, either finish the remaining step manually or undo the partial state first. Cleanup is intentionally late: `action=start` pushes the release branch before deleting the beta draft, and `action=promote` deletes the release branch last.
+`app-release.yml` changes release state. If it fails, inspect the failed step before re-running. After it has pushed a branch, created a tag, or moved a draft release, either finish the remaining step manually or undo the partial state first. Cleanup is intentionally late: `action=start` pushes the release branch before deleting the beta draft, and `action=promote` deletes the release branch last.

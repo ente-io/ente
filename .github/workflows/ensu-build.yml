@@ -1,6 +1,6 @@
 name: "Build (Ensu)"
 
-# See .github/docs/ensu-release.md
+# See .github/docs/app-release.md
 
 on:
     push:
@@ -228,7 +228,6 @@ jobs:
                   releaseBody: ${{ env.RELEASE_BODY }}
                   releaseCommitish: ${{ env.COMMIT_SHA }}
                   releaseDraft: true
-                  prerelease: false
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
@@ -313,7 +312,6 @@ jobs:
                   artifacts: mobile/native/android/apps/ensu/artifacts/${{ env.ANDROID_APK_NAME }}
                   allowUpdates: true
                   draft: true
-                  prerelease: false
                   updateOnlyUnreleased: true
 
             - name: Upload AAB to Play Store
@@ -324,7 +322,6 @@ jobs:
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
                   track: internal
                   whatsNewDirectory: mobile/native/android/apps/ensu/whatsnew
-                  changesNotSentForReview: false
 
     build-ios:
         needs: build-metadata
