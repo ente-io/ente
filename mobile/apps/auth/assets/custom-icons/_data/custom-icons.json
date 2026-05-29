@@ -328,6 +328,7 @@
     {
       "title": "bonify",
       "slug": "bonify",
+      "hex": "165CC3",
       "altNames": [
         "bonify.de"
       ]
@@ -379,7 +380,8 @@
       "slug": "butterflymx"
     },
     {
-      "title": "Bybit"
+      "title": "Bybit",
+      "hex": "F6A500"
     },
     {
       "title": "Caixa"
@@ -396,7 +398,8 @@
       "title": "Canva"
     },
     {
-      "title": "Capacities"
+      "title": "Capacities",
+      "hex": "000000"
     },
     {
       "title": "Capcom",
@@ -407,6 +410,7 @@
     },
     {
       "title": "Carta",
+      "hex": "000000",
       "altNames": [
         "Carta.com"
       ]
@@ -754,6 +758,7 @@
     {
       "title": "ESL",
       "slug": "esl",
+      "hex": "000000",
       "altNames": [
         "ESL Gaming"
       ]
@@ -797,6 +802,7 @@
     {
       "title": "Federal Student Aid",
       "slug": "federal_student_aid",
+      "hex": "000000",
       "altNames": [
         "FSA",
         "FAFSA"
@@ -818,7 +824,8 @@
       "slug": "filecloud"
     },
     {
-      "title": "Filen"
+      "title": "Filen",
+      "hex": "000000"
     },
     {
       "title": "Finanzfluss",
@@ -905,6 +912,7 @@
     {
       "title": "GOV.UK",
       "slug": "gov_uk",
+      "hex": "000000",
       "altNames": [
         "Government Gateway"
       ]
@@ -1151,7 +1159,8 @@
       "title": "Koofr"
     },
     {
-      "title": "Kotas"
+      "title": "Kotas",
+      "hex": "000000"
     },
     {
       "title": "KPN",
@@ -1249,6 +1258,7 @@
     {
       "title": "Luma",
       "slug": "luma",
+      "hex": "000000",
       "altNames": [
         "luma",
         "lu.ma"
@@ -1383,6 +1393,7 @@
     {
       "title": "Mozilla",
       "slug": "mozilla",
+      "hex": "000000",
       "altNames": [
         "Mozilla Account"
       ]
@@ -1484,6 +1495,7 @@
     },
     {
       "title": "Nintendo",
+      "hex": "E60012",
       "altNames": [
         "\u4efb\u5929\u5802",
         "Nintendo Account"
@@ -1638,7 +1650,8 @@
       ]
     },
     {
-      "title": "Peerberry"
+      "title": "Peerberry",
+      "hex": "00E6A5"
     },
     {
       "title": "Peking University",
@@ -1743,7 +1756,8 @@
       "slug": "proton_wallet"
     },
     {
-      "title": "Proxmox"
+      "title": "Proxmox",
+      "hex": "E57000"
     },
     {
       "title": "Pufferfish Host",
@@ -1993,7 +2007,8 @@
     },
     {
       "title": "Square Enix",
-      "slug": "square_enix"
+      "slug": "square_enix",
+      "hex": "ED1C24"
     },
     {
       "title": "Standard Notes",
@@ -2070,7 +2085,8 @@
       "hex": "000000"
     },
     {
-      "title": "TCPShield"
+      "title": "TCPShield",
+      "hex": "000000"
     },
     {
       "title": "Tebex",
