@@ -422,6 +422,8 @@
     "added_to_album": "",
     "added_to_person": "",
     "move_to_album": "Flytta till album",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "",
     "restore_to_album": "Återställ till album",
     "section_all": "Alla",

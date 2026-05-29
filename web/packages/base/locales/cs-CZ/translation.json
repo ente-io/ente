@@ -422,6 +422,8 @@
     "added_to_album": "Přidáno do alba",
     "added_to_person": "Přidat k osobě",
     "move_to_album": "Přesunout do alba",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "Odkrýt do alba",
     "restore_to_album": "Obnovit do alba",
     "section_all": "Vše",

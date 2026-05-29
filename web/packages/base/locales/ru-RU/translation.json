@@ -422,6 +422,8 @@
     "added_to_album": "Добавить в альбом",
     "added_to_person": "Добавить нового человека",
     "move_to_album": "Перейти к альбому",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "Отобразить в альбоме",
     "restore_to_album": "Восстановить в альбом",
     "section_all": "Все",

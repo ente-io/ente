@@ -422,6 +422,8 @@
     "added_to_album": "Afegit a l'àlbum",
     "added_to_person": "Afegit a la persona",
     "move_to_album": "Mou a l'àlbum",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "Mostra a l'àlbum",
     "restore_to_album": "Restaura a l'àlbum",
     "section_all": "Tot",
