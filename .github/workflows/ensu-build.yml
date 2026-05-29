@@ -320,7 +320,7 @@ jobs:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.ensu
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
-                  track: internal
+                  tracks: internal
                   whatsNewDirectory: mobile/native/android/apps/ensu/whatsnew
 
     build-ios:
@@ -402,8 +402,6 @@ jobs:
                   COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
-                  set -euo pipefail
-
                   git tag --force "${RELEASE_TAG}" "${COMMIT_SHA}"
                   git push --force origin "refs/tags/${RELEASE_TAG}"
 

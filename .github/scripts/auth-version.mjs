@@ -37,7 +37,7 @@ function usage() {
   node .github/scripts/auth-version.mjs get
   node .github/scripts/auth-version.mjs get-build-base
   node .github/scripts/auth-version.mjs set 4.4.23
-  node .github/scripts/auth-version.mjs set-build 4.4.23 878`);
+  node .github/scripts/auth-version.mjs set-build 4.4.23 1007`);
 }
 
 const [command = "get", ...args] = process.argv.slice(2);

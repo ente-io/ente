@@ -82,7 +82,7 @@ jobs:
                   echo "artifact_stem=ente-${release_tag%-rc}" >> "${GITHUB_OUTPUT}"
                   node .github/scripts/release-notes.mjs mobile/apps/auth/changes "${release_tag}" >> "${GITHUB_OUTPUT}"
 
-    build-android-linux:
+    build-android:
         needs: build-metadata
         if: needs.build-metadata.outputs.should_build == 'true'
         runs-on: ubuntu-22.04
@@ -106,12 +106,6 @@ jobs:
               with:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
                   submodules: recursive
-
-            - name: Free up disk space
-              run: |
-                  df -h /
-                  sudo rm -rf /usr/share/dotnet "$AGENT_TOOLSDIRECTORY"
-                  df -h /
 
             - name: Setup JDK 17
               uses: actions/setup-java@v5
@@ -146,7 +140,9 @@ jobs:
                   fi
 
             - name: Add keystore
-              run: echo "${{ secrets.SIGNING_KEY_AUTH }}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
+              run: printf '%s' "${SIGNING_KEY_AUTH}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
+              env:
+                  SIGNING_KEY_AUTH: ${{ secrets.SIGNING_KEY_AUTH }}
 
             - name: Create artifacts directory
               run: mkdir artifacts
@@ -170,9 +166,85 @@ jobs:
                   SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_AUTH }}
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_AUTH }}
 
-            - name: Install dependencies for desktop build
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-auth-*.apk > artifacts/sha256sum-apk
+
+            - name: Upload checksum snippet
+              uses: actions/upload-artifact@v4
+              with:
+                  name: auth-sha256sum-android
+                  path: mobile/apps/auth/artifacts/sha256sum-apk
+
+            - name: Upload Android artifact to GitHub release
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  commit: ${{ env.COMMIT_SHA }}
+                  artifacts: "mobile/apps/auth/artifacts/ente-auth-*.apk"
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+            - name: Upload AAB to PlayStore
+              uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+              with:
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+                  packageName: io.ente.auth
+                  releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  tracks: internal
+                  whatsNewDirectory: mobile/apps/auth/whatsnew
+                  mappingFile: mobile/apps/auth/build/app/outputs/mapping/playstoreRelease/mapping.txt
+
+    build-linux:
+        needs: build-metadata
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: ubuntu-22.04
+        environment:
+            name: production
+        env:
+            COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
+            BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
+            RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
+            RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+            RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            ARTIFACT_STEM: ${{ needs.build-metadata.outputs.artifact_stem }}
+
+        defaults:
+            run:
+                working-directory: mobile/apps/auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
+            - name: Set build version
+              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
+            - name: Install dependencies for Linux build
               run: |
-                  sudo apt-get update -y
+                  sudo apt-get update
                   sudo apt-get install -y libsecret-1-dev libsodium-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate libayatana-appindicator3-dev libffi-dev libtiff5 xz-utils libarchive-tools libcurl4-openssl-dev
                   sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
 
@@ -185,7 +257,7 @@ jobs:
                   chmod +x appimagetool
                   mv appimagetool /usr/local/bin/
 
-            - name: Build desktop app
+            - name: Build Linux app
               run: |
                   flutter config --enable-linux-desktop
                   flutter build linux --release
@@ -198,39 +270,25 @@ jobs:
                   mv dist/**/*-*-linux.deb "artifacts/${ARTIFACT_STEM}-x86_64.deb"
 
             - name: Generate checksums
-              run: |
-                  sha256sum artifacts/ente-auth-*.apk > artifacts/sha256sum-apk
-                  sha256sum artifacts/ente-auth-*.deb artifacts/ente-auth-*.rpm artifacts/ente-auth-*.AppImage > artifacts/sha256sum-linux
+              run: sha256sum artifacts/ente-auth-*.deb artifacts/ente-auth-*.rpm artifacts/ente-auth-*.AppImage > artifacts/sha256sum-linux
 
-            - name: Upload checksum snippets
+            - name: Upload checksum snippet
               uses: actions/upload-artifact@v4
               with:
-                  name: auth-sha256sum-android-linux
-                  path: |
-                      mobile/apps/auth/artifacts/sha256sum-apk
-                      mobile/apps/auth/artifacts/sha256sum-linux
+                  name: auth-sha256sum-linux
+                  path: mobile/apps/auth/artifacts/sha256sum-linux
 
-            - name: Upload Android and Linux artifacts to GitHub release
+            - name: Upload Linux artifacts to GitHub release
               uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
               with:
                   tag: ${{ env.RELEASE_TAG }}
                   name: ${{ env.RELEASE_TAG }}
                   body: ${{ env.RELEASE_BODY }}
                   commit: ${{ env.COMMIT_SHA }}
-                  artifacts: "mobile/apps/auth/artifacts/ente-auth-*.apk,mobile/apps/auth/artifacts/ente-auth-*.deb,mobile/apps/auth/artifacts/ente-auth-*.rpm,mobile/apps/auth/artifacts/ente-auth-*.AppImage"
+                  artifacts: "mobile/apps/auth/artifacts/ente-auth-*.deb,mobile/apps/auth/artifacts/ente-auth-*.rpm,mobile/apps/auth/artifacts/ente-auth-*.AppImage"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
-
-            - name: Upload AAB to PlayStore
-              uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
-              with:
-                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-                  packageName: io.ente.auth
-                  releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
-                  track: internal
-                  whatsNewDirectory: mobile/apps/auth/whatsnew
-                  mappingFile: mobile/apps/auth/build/app/outputs/mapping/playstoreRelease/mapping.txt
 
     build-windows:
         needs: build-metadata
@@ -408,18 +466,16 @@ jobs:
               run: |
                   PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
                   mkdir -p "$PROFILES_HOME"
-                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).provisionprofile)"
-                  echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
-                  echo "Saved provisioning profile $PROFILE_PATH"
+                  printf '%s' "${CM_PROVISIONING_PROFILE}" | base64 --decode > "$PROFILES_HOME/$(uuidgen).provisionprofile"
               env:
                   CM_PROVISIONING_PROFILE: ${{ secrets.AUTH_MACOS_DEVELOPER_ID_PROVISION_PROFILE_BASE64 }}
 
             - name: Add certificates
               run: |
-                  CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-                  echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+                  CERTIFICATE_PATH="$RUNNER_TEMP/build_certificate.p12"
+                  printf '%s' "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
                   keychain initialize
-                  keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+                  keychain add-certificates --certificate "$CERTIFICATE_PATH" --certificate-password "$P12_PASSWORD"
                   xcode-project use-profiles --project=macos/**/*.xcodeproj
 
                   signing_settings="$RUNNER_TEMP/auth-macos-ci-signing.xcconfig"
@@ -449,7 +505,7 @@ jobs:
 
             - name: Code sign DMG
               run: |
-                  CERT_NAME=$(security find-identity -v -p codesigning | grep "Developer ID Application" | awk -F'"' '{print $2}' | grep -m1 "")
+                  CERT_NAME=$(security find-identity -v -p codesigning | awk -F'"' '/Developer ID Application/ { print $2; exit }')
                   codesign --force --timestamp --sign "$CERT_NAME" --options runtime "artifacts/${ARTIFACT_STEM}.dmg"
                   codesign --verify --verbose=4 "artifacts/${ARTIFACT_STEM}.dmg"
 
@@ -457,13 +513,13 @@ jobs:
               run: |
                   xcrun notarytool submit "artifacts/${ARTIFACT_STEM}.dmg" \
                     --wait \
-                    --apple-id $APPLE_ID \
-                    --password $APPLE_PASSWORD \
-                    --team-id $APPLE_TEAM_ID
+                    --apple-id "$APPLE_ID" \
+                    --password "$APPLE_PASSWORD" \
+                    --team-id "$APPLE_TEAM_ID"
                   xcrun stapler staple "artifacts/${ARTIFACT_STEM}.dmg"
               env:
                   APPLE_ID: ${{ secrets.APPLE_ID }}
-                  APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+                  APPLE_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
             - name: Generate checksums
@@ -487,8 +543,90 @@ jobs:
                   allowUpdates: true
                   updateOnlyUnreleased: true
 
+    build-ios:
+        needs: build-metadata
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: macos-26
+        environment:
+            name: production
+        env:
+            BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
+            RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
+
+        defaults:
+            run:
+                working-directory: mobile/apps/auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
+            - name: Set build version
+              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
+            - name: Install iOS pods
+              run: pod install --deployment
+              working-directory: mobile/apps/auth/ios
+
+            - name: Import Apple Distribution certificate
+              uses: Apple-Actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7.0.0
+              with:
+                  p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_CERT_BASE64 }}
+                  p12-password: ${{ secrets.APPLE_DISTRIBUTION_CERT_PASSWORD }}
+
+            - name: Archive and upload Auth to TestFlight
+              env:
+                  ASC_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+                  ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+                  ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+              run: |
+                  key_path="${RUNNER_TEMP}/AuthKey_${ASC_KEY_ID}.p8"
+                  printf '%s' "${ASC_API_KEY_BASE64}" | base64 --decode > "${key_path}"
+
+                  xcodebuild archive \
+                      -workspace ios/Runner.xcworkspace \
+                      -scheme Runner \
+                      -configuration Release \
+                      -destination 'generic/platform=iOS' \
+                      -archivePath build/ios/archive/Runner.xcarchive \
+                      -allowProvisioningUpdates \
+                      -authenticationKeyPath "${key_path}" \
+                      -authenticationKeyID "${ASC_KEY_ID}" \
+                      -authenticationKeyIssuerID "${ASC_ISSUER_ID}" \
+                      CODE_SIGN_STYLE=Manual \
+                      CODE_SIGN_IDENTITY="Apple Distribution" \
+                      DEVELOPMENT_TEAM="${APPLE_TEAM_ID}" \
+                      PROVISIONING_PROFILE_SPECIFIER="Auth App Store"
+
+                  xcodebuild -exportArchive \
+                      -archivePath build/ios/archive/Runner.xcarchive \
+                      -exportPath build/ios/export \
+                      -exportOptionsPlist scripts/ExportOptions-AppStore-CI.plist \
+                      -allowProvisioningUpdates \
+                      -authenticationKeyPath "${key_path}" \
+                      -authenticationKeyID "${ASC_KEY_ID}" \
+                      -authenticationKeyIssuerID "${ASC_ISSUER_ID}"
+
     finish-build:
-        needs: [build-metadata, build-android-linux, build-windows, build-macos]
+        needs: [build-metadata, build-android, build-linux, build-windows, build-macos, build-ios]
         if: needs.build-metadata.outputs.should_build == 'true'
         runs-on: ubuntu-latest
 
@@ -513,8 +651,6 @@ jobs:
                   COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
-                  set -euo pipefail
-
                   git tag --force "${RELEASE_TAG}" "${COMMIT_SHA}"
                   git push --force origin "refs/tags/${RELEASE_TAG}"
 
@@ -533,7 +669,7 @@ jobs:
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
                   release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
-                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.auth) | [GitHub Release](${release_url})"
+                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.auth) | [TestFlight](https://appstoreconnect.apple.com/apps/6444121398/testflight/ios) | [GitHub Release](${release_url})"
                   release_body_discord="$(awk '
                       /^Previous changes:$/ { previous = 1 }
                       previous && NF { print "-# " $0; next }
