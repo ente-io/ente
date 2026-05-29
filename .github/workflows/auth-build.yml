@@ -487,8 +487,90 @@ jobs:
                   allowUpdates: true
                   updateOnlyUnreleased: true
 
+    build-ios:
+        needs: build-metadata
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: macos-26
+        environment:
+            name: production
+        env:
+            BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
+            RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
+
+        defaults:
+            run:
+                working-directory: mobile/apps/auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
+            - name: Set build version
+              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
+            - name: Install iOS pods
+              run: pod install --deployment
+              working-directory: mobile/apps/auth/ios
+
+            - name: Import Apple Distribution certificate
+              uses: Apple-Actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7.0.0
+              with:
+                  p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_CERT_BASE64 }}
+                  p12-password: ${{ secrets.APPLE_DISTRIBUTION_CERT_PASSWORD }}
+
+            - name: Archive and upload Auth to TestFlight
+              env:
+                  ASC_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+                  ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+                  ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+              run: |
+                  key_path="${RUNNER_TEMP}/AuthKey_${ASC_KEY_ID}.p8"
+                  printf '%s' "${ASC_API_KEY_BASE64}" | base64 --decode > "${key_path}"
+
+                  xcodebuild archive \
+                      -workspace ios/Runner.xcworkspace \
+                      -scheme Runner \
+                      -configuration Release \
+                      -destination 'generic/platform=iOS' \
+                      -archivePath build/ios/archive/Runner.xcarchive \
+                      -allowProvisioningUpdates \
+                      -authenticationKeyPath "${key_path}" \
+                      -authenticationKeyID "${ASC_KEY_ID}" \
+                      -authenticationKeyIssuerID "${ASC_ISSUER_ID}" \
+                      CODE_SIGN_STYLE=Manual \
+                      CODE_SIGN_IDENTITY="Apple Distribution" \
+                      DEVELOPMENT_TEAM="${APPLE_TEAM_ID}" \
+                      PROVISIONING_PROFILE_SPECIFIER="Auth App Store"
+
+                  xcodebuild -exportArchive \
+                      -archivePath build/ios/archive/Runner.xcarchive \
+                      -exportPath build/ios/export \
+                      -exportOptionsPlist scripts/ExportOptions-AppStore-CI.plist \
+                      -allowProvisioningUpdates \
+                      -authenticationKeyPath "${key_path}" \
+                      -authenticationKeyID "${ASC_KEY_ID}" \
+                      -authenticationKeyIssuerID "${ASC_ISSUER_ID}"
+
     finish-build:
-        needs: [build-metadata, build-android-linux, build-windows, build-macos]
+        needs: [build-metadata, build-android-linux, build-windows, build-macos, build-ios]
         if: needs.build-metadata.outputs.should_build == 'true'
         runs-on: ubuntu-latest
 
@@ -533,7 +615,7 @@ jobs:
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
                   release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
-                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.auth) | [GitHub Release](${release_url})"
+                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.auth) | [TestFlight](https://appstoreconnect.apple.com/apps/6444121398/testflight/ios) | [GitHub Release](${release_url})"
                   release_body_discord="$(awk '
                       /^Previous changes:$/ { previous = 1 }
                       previous && NF { print "-# " $0; next }
