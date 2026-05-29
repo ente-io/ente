@@ -25,9 +25,12 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+def nativeVideoEditorCompileSdkVersion = rootProject.ext.has('compileSdkVersion') ?
+        rootProject.ext.compileSdkVersion : 35
+
 android {
     namespace 'io.ente.native_video_editor'
-    compileSdkVersion 33
+    compileSdkVersion nativeVideoEditorCompileSdkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
