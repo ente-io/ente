@@ -1,0 +1,574 @@
+name: "Build (Auth)"
+
+# See .github/docs/app-release.md
+
+on:
+    push:
+        branches:
+            - "release/auth-v*"
+    workflow_dispatch:
+    schedule:
+        # Run every weekday at ~6:15 AM IST
+        - cron: "45 0 * * 1-5"
+
+env:
+    FLUTTER_VERSION: "3.38.10"
+
+permissions:
+    contents: write
+
+concurrency:
+    group: auth-build
+    cancel-in-progress: false
+
+jobs:
+    build-metadata:
+        runs-on: ubuntu-latest
+
+        outputs:
+            should_build: ${{ steps.prepare.outputs.should_build }}
+            commit_sha: ${{ steps.prepare.outputs.commit_sha }}
+            build_number: ${{ steps.prepare.outputs.build_number }}
+            release_version: ${{ steps.prepare.outputs.release_version }}
+            release_tag: ${{ steps.prepare.outputs.release_tag }}
+            release_title: ${{ steps.prepare.outputs.release_title }}
+            release_body: ${{ steps.prepare.outputs.release_body }}
+            release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            artifact_stem: ${{ steps.prepare.outputs.artifact_stem }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.ref_name }}
+
+            - name: Prepare release
+              id: prepare
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [[ "${GITHUB_EVENT_NAME}" == "schedule" ]] && git ls-remote --exit-code --heads origin 'release/auth-v*' >/dev/null 2>&1; then
+                      echo "Active Auth release branch found; skipping scheduled nightly"
+                      echo "should_build=false" >> "${GITHUB_OUTPUT}"
+                      exit 0
+                  fi
+
+                  release_version="$(node .github/scripts/auth-version.mjs get)"
+                  build_number_base="$(node .github/scripts/auth-version.mjs get-build-base)"
+                  build_number=$((build_number_base + GITHUB_RUN_NUMBER))
+
+                  if [[ "${GITHUB_REF_NAME}" == release/auth-v* ]]; then
+                      if [[ "${GITHUB_REF_NAME}" != "release/auth-v${release_version}" ]]; then
+                          echo "::error::Branch ${GITHUB_REF_NAME} does not match Auth version ${release_version}"
+                          exit 1
+                      fi
+                      release_tag="auth-v${release_version}-rc"
+                      release_title="Auth release candidate - ${release_version} (build ${build_number})"
+                  else
+                      release_tag="auth-v${release_version}-beta"
+                      release_title="Auth nightly - ${release_version} (build ${build_number})"
+                  fi
+
+                  commit_sha="$(git rev-parse HEAD)"
+                  git fetch --force --depth=1 --no-tags origin "refs/tags/${release_tag}:refs/tags/${release_tag}" || true
+
+                  echo "should_build=true" >> "${GITHUB_OUTPUT}"
+                  echo "commit_sha=${commit_sha}" >> "${GITHUB_OUTPUT}"
+                  echo "build_number=${build_number}" >> "${GITHUB_OUTPUT}"
+                  echo "release_version=${release_version}" >> "${GITHUB_OUTPUT}"
+                  echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+                  echo "release_title=${release_title}" >> "${GITHUB_OUTPUT}"
+                  echo "artifact_stem=ente-${release_tag%-rc}" >> "${GITHUB_OUTPUT}"
+                  node .github/scripts/release-notes.mjs mobile/apps/auth/changes "${release_tag}" >> "${GITHUB_OUTPUT}"
+
+    build-android-linux:
+        needs: build-metadata
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: ubuntu-22.04
+        environment:
+            name: production
+        env:
+            COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
+            BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
+            RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
+            RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+            RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            ARTIFACT_STEM: ${{ needs.build-metadata.outputs.artifact_stem }}
+
+        defaults:
+            run:
+                working-directory: mobile/apps/auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+                  submodules: recursive
+
+            - name: Free up disk space
+              run: |
+                  df -h /
+                  sudo rm -rf /usr/share/dotnet "$AGENT_TOOLSDIRECTORY"
+                  df -h /
+
+            - name: Setup JDK 17
+              uses: actions/setup-java@v1
+              with:
+                  java-version: 17
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
+            - name: Set build version
+              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
+            - name: Prepare whatsnew
+              run: |
+                  mkdir -p whatsnew
+                  if [ -n "${RELEASE_BODY}" ]; then
+                      printf '%s' "${RELEASE_BODY}" | head -c 500 > whatsnew/whatsnew-en-US
+                  else
+                      printf '%s\n' "Bug fixes and improvements" > whatsnew/whatsnew-en-US
+                  fi
+
+            - name: Add keystore
+              run: echo "${{ secrets.SIGNING_KEY_AUTH }}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
+
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
+            - name: Build independent APK
+              run: |
+                  flutter build apk --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --dart-define=cronetHttpNoPlay=true --release --flavor independent
+                  mv build/app/outputs/flutter-apk/app-independent-release.apk "artifacts/${ARTIFACT_STEM}.apk"
+              env:
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_auth_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_AUTH }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_AUTH }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_AUTH }}
+
+            - name: Build PlayStore AAB
+              run: |
+                  flutter build appbundle --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --release --flavor playstore --dart-define=app.flavor=playstore --dart-define=cronetHttpNoPlay=true
+              env:
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_auth_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_AUTH }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_AUTH }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_AUTH }}
+
+            - name: Install dependencies for desktop build
+              run: |
+                  sudo apt-get update -y
+                  sudo apt-get install -y libsecret-1-dev libsodium-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate libayatana-appindicator3-dev libffi-dev libtiff5 xz-utils libarchive-tools libcurl4-openssl-dev
+                  sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
+
+            - name: Install fpm for RPM packaging
+              run: sudo gem install fpm
+
+            - name: Install appimagetool
+              run: |
+                  wget -O appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+                  chmod +x appimagetool
+                  mv appimagetool /usr/local/bin/
+
+            - name: Build desktop app
+              run: |
+                  flutter config --enable-linux-desktop
+                  flutter build linux --release
+                  ./linux/packaging/build_rpm.sh
+                  mv dist/*/*.rpm "artifacts/${ARTIFACT_STEM}-x86_64.rpm"
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  fastforge package --platform=linux --targets=appimage --skip-clean
+                  mv dist/**/*-*-linux.AppImage "artifacts/${ARTIFACT_STEM}-x86_64.AppImage"
+                  fastforge package --platform=linux --targets=deb --skip-clean
+                  mv dist/**/*-*-linux.deb "artifacts/${ARTIFACT_STEM}-x86_64.deb"
+
+            - name: Generate checksums
+              run: |
+                  sha256sum artifacts/ente-auth-*.apk > artifacts/sha256sum-apk
+                  sha256sum artifacts/ente-auth-*.deb artifacts/ente-auth-*.rpm artifacts/ente-auth-*.AppImage > artifacts/sha256sum-linux
+
+            - name: Upload checksum snippets
+              uses: actions/upload-artifact@v4
+              with:
+                  name: auth-sha256sum-android-linux
+                  path: |
+                      mobile/apps/auth/artifacts/sha256sum-apk
+                      mobile/apps/auth/artifacts/sha256sum-linux
+
+            - name: Upload Android and Linux artifacts to GitHub release
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  commit: ${{ env.COMMIT_SHA }}
+                  artifacts: "mobile/apps/auth/artifacts/ente-auth-*.apk,mobile/apps/auth/artifacts/ente-auth-*.deb,mobile/apps/auth/artifacts/ente-auth-*.rpm,mobile/apps/auth/artifacts/ente-auth-*.AppImage"
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+            - name: Upload AAB to PlayStore
+              uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+              with:
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+                  packageName: io.ente.auth
+                  releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  track: internal
+                  whatsNewDirectory: mobile/apps/auth/whatsnew
+                  mappingFile: mobile/apps/auth/build/app/outputs/mapping/playstoreRelease/mapping.txt
+
+    build-windows:
+        needs: build-metadata
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: windows-latest
+        environment:
+            name: production
+        env:
+            COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
+            BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
+            RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
+            RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+            RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            ARTIFACT_STEM: ${{ needs.build-metadata.outputs.artifact_stem }}
+
+        defaults:
+            run:
+                working-directory: mobile/apps/auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
+            - name: Set build version
+              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+              shell: bash
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
+            - name: Build Windows release
+              run: |
+                  flutter config --enable-windows-desktop
+                  choco install innosetup -y
+                  flutter build windows --release
+              shell: bash
+
+            - name: Verify Windows PE allowlist
+              run: |
+                  & ./scripts/verify_windows_pe_allowlist.ps1 `
+                    -PayloadDir "build/windows/x64/runner/Release" `
+                    -AllowlistPath "windows/signing/allowed-pe-files.txt"
+              shell: pwsh
+
+            - name: Sign Windows payload with Trusted Signing
+              uses: azure/trusted-signing-action@v0
+              with:
+                  azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                  azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                  azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+                  endpoint: ${{ secrets.AZURE_ENDPOINT }}
+                  trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                  certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+                  files-folder: ${{ github.workspace }}/mobile/apps/auth/build/windows/x64/runner/Release
+                  files-folder-filter: exe,dll
+                  files-folder-recurse: true
+                  file-digest: SHA256
+                  timestamp-rfc3161: http://timestamp.acs.microsoft.com
+                  timestamp-digest: SHA256
+
+            - name: Verify signed Windows payload
+              run: ./scripts/verify_windows_authenticode.ps1 -Path "build/windows/x64/runner/Release"
+              shell: pwsh
+
+            - name: Build Windows installer
+              run: |
+                  & ./scripts/build_windows_installer.ps1 `
+                    -SourceDir "build/windows/x64/runner/Release" `
+                    -InstallerPath "artifacts/${{ env.ARTIFACT_STEM }}-installer.exe"
+              shell: pwsh
+
+            - name: Sign Windows installer with Trusted Signing
+              uses: azure/trusted-signing-action@v0
+              with:
+                  azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                  azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                  azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+                  endpoint: ${{ secrets.AZURE_ENDPOINT }}
+                  trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                  certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+                  files: ${{ github.workspace }}/mobile/apps/auth/artifacts/${{ env.ARTIFACT_STEM }}-installer.exe
+                  file-digest: SHA256
+                  timestamp-rfc3161: http://timestamp.acs.microsoft.com
+                  timestamp-digest: SHA256
+
+            - name: Verify signed Windows installer
+              run: ./scripts/verify_windows_authenticode.ps1 -Path "artifacts/${{ env.ARTIFACT_STEM }}-installer.exe"
+              shell: pwsh
+
+            - name: Retain signed Windows EXE and DLLs
+              run: Copy-Item -Recurse -Force "build/windows/x64/runner/Release" "${{ env.ARTIFACT_STEM }}-windows"
+              shell: pwsh
+
+            - name: Zip Windows EXE and DLLs
+              run: |
+                  $zipPath = "artifacts/${{ env.ARTIFACT_STEM }}-windows.zip"
+                  Compress-Archive `
+                    -Path "${{ env.ARTIFACT_STEM }}-windows" `
+                    -DestinationPath $zipPath `
+                    -Force
+                  Add-Type -AssemblyName System.IO.Compression.FileSystem
+                  $zip = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zipPath))
+                  $zip.Dispose()
+              shell: pwsh
+
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-auth-* > artifacts/sha256sum-windows
+              shell: bash
+
+            - name: Upload checksum snippet
+              uses: actions/upload-artifact@v4
+              with:
+                  name: auth-sha256sum-windows
+                  path: mobile/apps/auth/artifacts/sha256sum-windows
+
+            - name: Upload Windows artifacts to GitHub release
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  commit: ${{ env.COMMIT_SHA }}
+                  artifacts: "mobile/apps/auth/artifacts/ente-auth-*.exe,mobile/apps/auth/artifacts/ente-auth-*.zip"
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+    build-macos:
+        needs: build-metadata
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: macos-15
+        environment:
+            name: production
+        env:
+            COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
+            BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
+            RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
+            RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+            RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            ARTIFACT_STEM: ${{ needs.build-metadata.outputs.artifact_stem }}
+
+        defaults:
+            run:
+                working-directory: mobile/apps/auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
+            - name: Set build version
+              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
+            - name: Install code signing dependencies
+              run: pip3 install codemagic-cli-tools --break-system-packages
+
+            - name: Add provisioning profiles
+              run: |
+                  PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+                  mkdir -p "$PROFILES_HOME"
+                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).provisionprofile)"
+                  echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
+                  echo "Saved provisioning profile $PROFILE_PATH"
+              env:
+                  CM_PROVISIONING_PROFILE: ${{ secrets.MAC_OS_BUILD_PROVISION_PROFILE_BASE64 }}
+
+            - name: Add certificates
+              run: |
+                  CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+                  echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+                  keychain initialize
+                  keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+                  xcode-project use-profiles --project=macos/**/*.xcodeproj
+
+                  signing_settings="$RUNNER_TEMP/auth-macos-ci-signing.xcconfig"
+                  printf '%s\n' \
+                      'CODE_SIGN_IDENTITY = Developer ID Application' \
+                      'CODE_SIGN_STYLE = Manual' \
+                      > "$signing_settings"
+                  echo "XCODE_XCCONFIG_FILE=$signing_settings" >> "$GITHUB_ENV"
+              env:
+                  BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
+                  P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
+
+            - name: Install build dependencies
+              run: |
+                  pip3 install setuptools --break-system-packages
+                  npm install -g appdmg
+
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
+            - name: Build macOS DMG
+              run: |
+                  flutter config --enable-macos-desktop
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  fastforge package --platform=macos --targets=dmg --skip-clean
+                  mv dist/**/*-macos.dmg "artifacts/${ARTIFACT_STEM}.dmg"
+
+            - name: Code sign DMG
+              run: |
+                  CERT_NAME=$(security find-identity -v -p codesigning | grep "Developer ID Application" | awk -F'"' '{print $2}' | grep -m1 "")
+                  codesign --force --timestamp --sign "$CERT_NAME" --options runtime "artifacts/${ARTIFACT_STEM}.dmg"
+                  codesign --verify --verbose=4 "artifacts/${ARTIFACT_STEM}.dmg"
+
+            - name: Notarize and staple DMG
+              run: |
+                  xcrun notarytool submit "artifacts/${ARTIFACT_STEM}.dmg" \
+                    --wait \
+                    --apple-id $APPLE_ID \
+                    --password $APPLE_PASSWORD \
+                    --team-id $APPLE_TEAM_ID
+                  xcrun stapler staple "artifacts/${ARTIFACT_STEM}.dmg"
+              env:
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+            - name: Generate checksums
+              run: shasum -a 256 artifacts/ente-auth-* > artifacts/sha256sum-macos
+
+            - name: Upload checksum snippet
+              uses: actions/upload-artifact@v4
+              with:
+                  name: auth-sha256sum-macos
+                  path: mobile/apps/auth/artifacts/sha256sum-macos
+
+            - name: Upload macOS artifacts to GitHub release
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  commit: ${{ env.COMMIT_SHA }}
+                  artifacts: "mobile/apps/auth/artifacts/ente-auth-*.dmg"
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+    finish-build:
+        needs: [build-metadata, build-android-linux, build-windows, build-macos]
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout built commit
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+
+            - name: Download checksum snippets
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: auth-sha256sum-*
+                  path: checksums
+                  merge-multiple: true
+
+            - name: Combine checksums
+              run: cat checksums/sha256sum-* > sha256sum
+
+            - name: Point release tag at the successfully built commit
+              env:
+                  COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
+                  RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+              run: |
+                  set -euo pipefail
+
+                  git tag --force "${RELEASE_TAG}" "${COMMIT_SHA}"
+                  git push --force origin "refs/tags/${RELEASE_TAG}"
+
+            - name: Upload checksum to GitHub release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+              run: gh release upload "${RELEASE_TAG}" sha256sum --clobber
+
+            - name: Notify Discord
+              continue-on-error: true
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  GH_TOKEN: ${{ github.token }}
+                  RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
+                  RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+              run: |
+                  release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
+                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.auth) | [GitHub Release](${release_url})"
+                  release_body_discord="$(awk '
+                      /^Previous changes:$/ { previous = 1 }
+                      previous && NF { print "-# " $0; next }
+                      { print }
+                  ' <<< "${RELEASE_BODY_GROUPED}")"
+
+                  jq -n \
+                      --arg title "${{ needs.build-metadata.outputs.release_title }}" \
+                      --arg body "${release_body_discord}" \
+                      --arg download_line "${download_line}" \
+                      '{
+                          flags: 32768,
+                          components: [{
+                              type: 17,
+                              accent_color: 8388736,
+                              components: (
+                                  [{type: 10, content: ("## " + $title)}]
+                                  + (if $body == "" then [] else [{type: 10, content: $body}] end)
+                                  + [{type: 14}, {type: 10, content: $download_line}]
+                              )
+                          }]
+                      }' \
+                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}?with_components=true"
