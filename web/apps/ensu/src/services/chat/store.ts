@@ -2,6 +2,7 @@ import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from "idb";
 import { base64ToBytes } from "services/base64";
+import { isTauriRuntime } from "services/tauri-runtime";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 import {
     allLegacyKeyCandidates,
@@ -215,10 +216,6 @@ interface NativeLegacyMigrationResult {
 }
 
 const nowMicros = () => Date.now() * 1000;
-
-const isTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_IPC__" in window);
 
 const formatLogError = (error: unknown) => {
     if (error instanceof Error) {
@@ -934,7 +931,7 @@ const invokeChat = async <T>(
     command: string,
     args?: Record<string, unknown>,
 ) => {
-    const { invoke } = await import("@tauri-apps/api/tauri");
+    const { invoke } = await import("@tauri-apps/api/core");
     return invoke<T>(command, args);
 };
 
@@ -1452,10 +1449,10 @@ const attachmentDir = async () => {
 
     _attachmentDir ??= (async () => {
         const { appDataDir, join } = await import("@tauri-apps/api/path");
-        const { createDir } = await import("@tauri-apps/api/fs");
+        const { mkdir } = await import("@tauri-apps/plugin-fs");
         const root = await appDataDir();
         const dir = await join(root, "ensu_llmchat_attachments_v2");
-        await createDir(dir, { recursive: true });
+        await mkdir(dir, { recursive: true });
         return dir;
     })();
 
@@ -1470,9 +1467,9 @@ const attachmentPath = async (id: string) => {
 
 export const writeAttachmentBytes = async (id: string, data: Uint8Array) => {
     if (isTauriRuntime()) {
-        const { writeBinaryFile } = await import("@tauri-apps/api/fs");
+        const { writeFile } = await import("@tauri-apps/plugin-fs");
         const path = await attachmentPath(id);
-        await writeBinaryFile({ path, contents: data });
+        await writeFile(path, data);
         return;
     }
 
@@ -1492,9 +1489,9 @@ export const storeEncryptedAttachmentBytes = async (
 
 export const readAttachmentBytes = async (id: string): Promise<Uint8Array> => {
     if (isTauriRuntime()) {
-        const { readBinaryFile } = await import("@tauri-apps/api/fs");
+        const { readFile } = await import("@tauri-apps/plugin-fs");
         const path = await attachmentPath(id);
-        return readBinaryFile(path);
+        return readFile(path);
     }
 
     const db = await chatDb();
@@ -1538,7 +1535,7 @@ export const readDecryptedAttachmentBytes = async (
 
 export const attachmentBytesExists = async (id: string): Promise<boolean> => {
     if (isTauriRuntime()) {
-        const { exists } = await import("@tauri-apps/api/fs");
+        const { exists } = await import("@tauri-apps/plugin-fs");
         const path = await attachmentPath(id);
         return exists(path);
     }
@@ -1550,10 +1547,10 @@ export const attachmentBytesExists = async (id: string): Promise<boolean> => {
 
 export const deleteAttachmentBytes = async (id: string) => {
     if (isTauriRuntime()) {
-        const { removeFile } = await import("@tauri-apps/api/fs");
+        const { remove } = await import("@tauri-apps/plugin-fs");
         const path = await attachmentPath(id);
         try {
-            await removeFile(path);
+            await remove(path);
         } catch {
             // ignore missing files
         }

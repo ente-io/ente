@@ -14,7 +14,7 @@ use ente_core::{auth as core_auth, crypto as core_crypto};
 use inference_rs as llm;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
-use tauri::{AppHandle, Manager, State, Window};
+use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
 use uuid::Uuid;
 
 use crate::logging;
@@ -1515,7 +1515,7 @@ const LLM_EVENT_BATCH_MS: u64 = 80;
 const LLM_EVENT_BATCH_BYTES: usize = 2048;
 
 struct LlmEventSink {
-    window: Window,
+    window: WebviewWindow,
     buffered_text: String,
     buffered_job_id: Option<llm::JobId>,
     buffered_token_id: Option<i32>,
@@ -1523,7 +1523,7 @@ struct LlmEventSink {
 }
 
 impl LlmEventSink {
-    fn new(window: Window) -> Self {
+    fn new(window: WebviewWindow) -> Self {
         Self {
             window,
             buffered_text: String::new(),
@@ -1615,7 +1615,7 @@ pub fn get_ensu_defaults() -> TauriEnsuDefaults {
 
 #[tauri::command]
 pub async fn llm_download_model_files(
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, LlmModelDownloadState>,
     downloads: Vec<TauriLlmModelDownloadTarget>,
 ) -> Result<(), ApiError> {
@@ -1917,7 +1917,7 @@ pub async fn llm_prewarm_multimodal_context(
 #[tauri::command]
 pub fn llm_generate_chat_stream(
     state: State<LlmState>,
-    window: Window,
+    window: WebviewWindow,
     request: llm::GenerateChatRequest,
 ) -> Result<(), ApiError> {
     let context = state
@@ -2080,10 +2080,10 @@ pub fn secure_storage_delete(key: String) -> Result<(), ApiError> {
 }
 
 fn app_data_dir(app: &AppHandle) -> Result<PathBuf, ApiError> {
-    let resolver = app.path_resolver();
-    let dir = resolver
+    let dir = app
+        .path()
         .app_data_dir()
-        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
+        .map_err(|err| ApiError::new("path", err.to_string()))?;
     std::fs::create_dir_all(&dir).map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(dir)
 }

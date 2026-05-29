@@ -6,6 +6,7 @@
  */
 
 import { loadEnteWasm } from "ente-wasm/load";
+import { isTauriRuntime } from "services/tauri-runtime";
 
 export type EnteWasmModule = typeof import("ente-wasm");
 
@@ -81,10 +82,6 @@ export interface EnteCryptoAdapter {
     ) => SrpSessionAdapter;
 }
 
-const isTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_IPC__" in window);
-
 const createWasmAdapter = (wasm: EnteWasmModule): EnteCryptoAdapter => {
     class WasmSrpSession implements SrpSessionAdapter {
         private inner: InstanceType<typeof wasm.SrpSession>;
@@ -154,7 +151,7 @@ const createWasmAdapter = (wasm: EnteWasmModule): EnteCryptoAdapter => {
 };
 
 const createTauriAdapter = async (): Promise<EnteCryptoAdapter> => {
-    const { invoke } = (await import("@tauri-apps/api/tauri")) as {
+    const { invoke } = (await import("@tauri-apps/api/core")) as {
         invoke: <T>(
             command: string,
             args?: Record<string, unknown>,

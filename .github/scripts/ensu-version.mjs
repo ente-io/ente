@@ -57,9 +57,9 @@ function check() {
     const version = sourceVersion();
     const releaseVersion = trimVersion(version);
 
-    expect("tauri.conf.json", JSON.parse(read(files.tauri)).package?.version, version);
-    expect("package-lock.json", value(files.packageLock, /"name": "ensu-desktop",\n  "version": "([^"]+)"/), version);
-    expect("package-lock.json packages[\"\"]", value(files.packageLock, /"": \{\n      "name": "ensu-desktop",\n      "version": "([^"]+)"/), version);
+    expect("tauri.conf.json", value(files.tauri, /^\s*"version"\s*:\s*"([^"]+)"/m), version);
+    expect("package-lock.json", value(files.packageLock, /"name": "ensu-desktop",\n\s+"version": "([^"]+)"/), version);
+    expect("package-lock.json packages[\"\"]", value(files.packageLock, /"": \{\n\s+"name": "ensu-desktop",\n\s+"version": "([^"]+)"/), version);
     expect("Cargo.toml", value(files.cargoToml, /\[package\][\s\S]*?^version = "([^"]+)"/m), version);
     expect("Cargo.lock", value(files.cargoLock, /\[\[package\]\]\nname = "ensu-desktop"\nversion = "([^"]+)"/), version);
     expect("Android versionName", value(files.android, /versionName = "([^"]+)"/), releaseVersion);
@@ -76,9 +76,9 @@ function setVersion(version) {
     const releaseVersion = trimVersion(version);
 
     replace(files.packageJson, /("name": "ensu-desktop",\n\s+"version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
-    replace(files.packageLock, /("name": "ensu-desktop",\n  "version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
-    replace(files.packageLock, /("": \{\n      "name": "ensu-desktop",\n      "version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
-    replace(files.tauri, /("package"\s*:\s*\{[\s\S]*?"version"\s*:\s*")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.packageLock, /("name": "ensu-desktop",\n\s+"version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.packageLock, /("": \{\n\s+"name": "ensu-desktop",\n\s+"version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.tauri, /^(\s*"version"\s*:\s*")[^"]+(")/m, (_m, a, b) => `${a}${version}${b}`);
     replace(files.cargoToml, /(\[package\][\s\S]*?^version = ")[^"]+(")/m, (_m, a, b) => `${a}${version}${b}`);
     replace(files.cargoLock, /(\[\[package\]\]\nname = "ensu-desktop"\nversion = ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
     replace(files.android, /versionName = "[^"]+"/, `versionName = "${releaseVersion}"`);

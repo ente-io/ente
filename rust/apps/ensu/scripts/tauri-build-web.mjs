@@ -11,7 +11,7 @@ const webDir = path.resolve(rootDir, "..", "..", "..", "web");
 const tauriConfigPath = path.join(rootDir, "src-tauri", "tauri.conf.json");
 const desktopVersion = JSON.parse(
     fs.readFileSync(tauriConfigPath, "utf8"),
-).package?.version;
+).version;
 if (!desktopVersion) throw new Error("Missing Ensu desktop version");
 
 const yarnBin = process.platform === "win32" ? "yarn.cmd" : "yarn";

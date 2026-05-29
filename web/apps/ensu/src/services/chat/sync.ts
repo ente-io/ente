@@ -8,6 +8,7 @@ import { getKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiOrigin, apiURL } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
+import { isTauriRuntime } from "services/tauri-runtime";
 import { masterKeyFromSession } from "../session";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 import { cachedLocalChatKey } from "./chatKey";
@@ -40,10 +41,6 @@ import {
     type LocalMessageRecord,
     type LocalSessionRecord,
 } from "./store";
-
-const isTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_IPC__" in window);
 
 type DiffCursor = {
     base_since_time: number;
@@ -162,7 +159,7 @@ const syncChatNative = async (chatKey: string, token: string) => {
     const masterKey = await masterKeyFromSession();
     if (!masterKey) return;
 
-    const { invoke } = await import("@tauri-apps/api/tauri");
+    const { invoke } = await import("@tauri-apps/api/core");
     const { getName, getVersion } = await import("@tauri-apps/api/app");
 
     const [baseUrl, clientPackage, clientVersion] = await Promise.all([

@@ -1,7 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::Manager;
-use tauri::RunEvent;
+use tauri::{Manager, RunEvent};
 
 mod commands;
 mod logging;
@@ -11,16 +10,21 @@ fn main() {
     logging::log("App", "starting Tauri backend");
 
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
         .manage(commands::LlmModelDownloadState::default())
         .manage(commands::ChatDbState::default())
         .setup(|app| {
-            logging::init_logging(&app.handle());
+            logging::init_logging(app.handle());
             logging::log("App", "setup started");
 
             // Show the main window after setup is complete
-            if let Some(window) = app.get_window("main") {
+            if let Some(window) = app.get_webview_window("main") {
                 if let Err(err) = window.show() {
                     logging::log("App", format!("failed to show main window error={err}"));
                     return Err(Box::new(err));

@@ -463,7 +463,7 @@ export class LlmProvider {
 
     public cancelDownload() {
         if (this.downloadActive && this.backend.kind === "tauri") {
-            void import("@tauri-apps/api/tauri").then(({ invoke }) =>
+            void import("@tauri-apps/api/core").then(({ invoke }) =>
                 invoke("llm_cancel_model_download").catch((error: unknown) => {
                     log.warn("LLM cancel model download failed", { error });
                 }),
@@ -508,7 +508,7 @@ export class LlmProvider {
         }
 
         try {
-            const { invoke } = await import("@tauri-apps/api/tauri");
+            const { invoke } = await import("@tauri-apps/api/core");
             const info = await invoke<{
                 platform?: string;
                 totalMemoryBytes?: number | null;
@@ -654,7 +654,7 @@ export class LlmProvider {
     ) {
         const emit = onProgress ?? ((progress) => this.emitProgress(progress));
         const [{ invoke }, { listen }] = await Promise.all([
-            import("@tauri-apps/api/tauri"),
+            import("@tauri-apps/api/core"),
             import("@tauri-apps/api/event"),
         ]);
 
