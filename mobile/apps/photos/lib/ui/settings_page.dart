@@ -496,7 +496,7 @@ class _SettingsBody extends StatelessWidget {
       context,
       title: AppLocalizations.of(context).areYouSureYouWantToLogout,
       illustration: Image.asset("assets/warning-grey.png"),
-      firstButtonLabel: AppLocalizations.of(context).yesLogout,
+      firstButtonLabel: AppLocalizations.of(context).yes,
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
