@@ -91,7 +91,7 @@ class AlertBottomSheet<T> extends StatelessWidget {
                 style: textTheme.largeBold,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 16),
               Text(
                 message,
                 style: textTheme.small.copyWith(

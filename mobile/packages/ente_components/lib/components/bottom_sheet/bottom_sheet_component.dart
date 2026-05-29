@@ -176,7 +176,7 @@ class BottomSheetComponent extends StatelessWidget {
         ? CrossAxisAlignment.stretch
         : crossAxisAlignment;
     final effectiveContentSpacing = usesCenteredLayout
-        ? Spacing.xs
+        ? Spacing.lg
         : contentSpacing;
 
     return AnimatedPadding(
