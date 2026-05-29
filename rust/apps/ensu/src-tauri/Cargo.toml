@@ -1,7 +1,7 @@
 [package]
 name = "ensu-desktop"
 version = "0.1.17-beta"
-edition = "2021"
+edition = "2024"
 
 [build-dependencies]
 tauri-build = { version = "2.6.2", features = [] }
