@@ -200,15 +200,11 @@ class Media3TransformerProcessor(private val context: Context) {
 
             // Configure Transformer
             val transformerBuilder = Transformer.Builder(context)
-                .setTransformationRequest(
-                    TransformationRequest.Builder()
-                        .setVideoMimeType(MimeTypes.VIDEO_H264) // Use H.264 for compatibility
-                        .build()
-                )
+                .setVideoMimeType(MimeTypes.VIDEO_H264) // Use H.264 for compatibility
                 .addListener(object : Transformer.Listener {
                     override fun onCompleted(composition: Composition, exportResult: ExportResult) {
                         logVerbose("Export completed successfully")
-                        logVerbose("Export result: duration=${exportResult.durationMs}ms, " +
+                        logVerbose("Export result: duration=${exportResult.approximateDurationMs}ms, " +
                                   "size=${exportResult.fileSizeBytes} bytes")
                         latch.countDown()
                     }
@@ -250,7 +246,9 @@ class Media3TransformerProcessor(private val context: Context) {
             }
 
             val editedMediaItem = editedMediaItemBuilder.build()
-            val sequence = EditedMediaItemSequence(listOf(editedMediaItem))
+            val sequence = EditedMediaItemSequence.withAudioAndVideoFrom(
+                listOf(editedMediaItem)
+            )
             val composition = Composition.Builder(listOf(sequence)).build()
 
             // Start export

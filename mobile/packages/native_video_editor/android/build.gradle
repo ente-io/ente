@@ -3,6 +3,7 @@ version '1.0'
 
 buildscript {
     ext.kotlin_version = '1.9.25'
+    ext.media3_version = '1.9.2'
     repositories {
         google()
         mavenCentral()
@@ -51,10 +52,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
 
     // Media3 Transformer for efficient video operations
-    implementation "androidx.media3:media3-transformer:1.1.1"
-    implementation "androidx.media3:media3-common:1.1.1"
-    implementation "androidx.media3:media3-effect:1.1.1"
-    implementation "androidx.media3:media3-extractor:1.1.1"
+    implementation "androidx.media3:media3-transformer:$media3_version"
+    implementation "androidx.media3:media3-common:$media3_version"
+    implementation "androidx.media3:media3-effect:$media3_version"
+    implementation "androidx.media3:media3-extractor:$media3_version"
 
     // Guava for ImmutableList
     implementation "com.google.guava:guava:31.1-android"
