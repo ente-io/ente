@@ -3,7 +3,6 @@ import "dart:async";
 import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:flutter/scheduler.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -38,9 +37,6 @@ class SearchWidgetState extends State<SearchWidget> {
   late FocusNode focusNode;
   StreamSubscription<TabChangedEvent>? _tabChangedEvent;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
-  double _bottomPadding = 0.0;
-  double _distanceOfWidgetFromBottom = 0;
-  GlobalKey widgetKey = GlobalKey();
   TextEditingController textController = TextEditingController();
   late final StreamSubscription<ClearAndUnfocusSearchBar>
   _clearAndUnfocusSearchBar;
@@ -72,23 +68,7 @@ class SearchWidgetState extends State<SearchWidget> {
       }
     });
 
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      //This buffer is for doing this operation only after SearchWidget's
-      //animation is complete.
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          final RenderBox box =
-              widgetKey.currentContext!.findRenderObject() as RenderBox;
-          final heightOfWidget = box.size.height;
-          final offsetPosition = box.localToGlobal(Offset.zero);
-          final y = offsetPosition.dy;
-          final heightOfScreen = MediaQuery.sizeOf(context).height;
-          _distanceOfWidgetFromBottom = heightOfScreen - (y + heightOfWidget);
-        }
-      });
-
-      textController.addListener(textControllerListener);
-    });
+    textController.addListener(textControllerListener);
 
     //Populate the serach tab with the latest query when coming back
     //to the serach tab.
@@ -100,19 +80,6 @@ class SearchWidgetState extends State<SearchWidget> {
           textController.clear();
           focusNode.unfocus();
         });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    //https://api.flutter.dev/flutter/dart-ui/FlutterView-class.html
-    _bottomPadding =
-        (MediaQuery.viewInsetsOf(context).bottom - _distanceOfWidgetFromBottom);
-    if (_bottomPadding < 0) {
-      _bottomPadding = 0;
-    } else if (_bottomPadding != 0) {
-      _bottomPadding += MediaQuery.viewPaddingOf(context).bottom;
-    }
   }
 
   @override
@@ -149,30 +116,26 @@ class SearchWidgetState extends State<SearchWidget> {
         MediaQuery.viewInsetsOf(context).bottom > 0 ||
         textController.text.trim().isNotEmpty;
     return RepaintBoundary(
-      key: widgetKey,
       child: Padding(
-        padding: EdgeInsets.only(bottom: _bottomPadding),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: TextInputComponent(
-            controller: textController,
-            focusNode: focusNode,
-            hintText: AppLocalizations.of(context).search,
-            shouldUnfocusOnClearOrSubmit: true,
-            prefix: HugeIcon(
-              icon: HugeIcons.strokeRoundedSearch01,
-              size: 18,
-              color: componentColors.textLight,
-            ),
-            suffix: ValueListenableBuilder(
-              valueListenable: isLoading,
-              builder: (BuildContext context, bool isSearching, Widget? child) {
-                return SearchSuffixIcon(
-                  isSearching,
-                  showClearButton: shouldShowClearButton,
-                );
-              },
-            ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: TextInputComponent(
+          controller: textController,
+          focusNode: focusNode,
+          hintText: AppLocalizations.of(context).search,
+          shouldUnfocusOnClearOrSubmit: true,
+          prefix: HugeIcon(
+            icon: HugeIcons.strokeRoundedSearch01,
+            size: 18,
+            color: componentColors.textLight,
+          ),
+          suffix: ValueListenableBuilder(
+            valueListenable: isLoading,
+            builder: (BuildContext context, bool isSearching, Widget? child) {
+              return SearchSuffixIcon(
+                isSearching,
+                showClearButton: shouldShowClearButton,
+              );
+            },
           ),
         ),
       ),

@@ -102,6 +102,8 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
   @override
   Widget build(BuildContext context) {
     final searchTypes = SectionType.values.toList(growable: true);
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final bottomPadding = keyboardInset > 130.0 ? keyboardInset + 50.0 : 180.0;
 
     return Padding(
       padding: const EdgeInsets.only(top: 4),
@@ -144,7 +146,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     faceSectionIndex < sectionResultsByType.length &&
                     sectionResultsByType.elementAt(faceSectionIndex).isNotEmpty;
                 return ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 180),
+                      padding: EdgeInsets.only(bottom: bottomPadding),
                       physics: const BouncingScrollPhysics(),
                       itemCount: searchTypes.length + 1,
                       itemBuilder: (context, index) {
