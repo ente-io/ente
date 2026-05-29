@@ -114,12 +114,13 @@ jobs:
                   df -h /
 
             - name: Setup JDK 17
-              uses: actions/setup-java@v1
+              uses: actions/setup-java@v5
               with:
-                  java-version: 17
+                  distribution: "temurin"
+                  java-version: "17"
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@v2
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
               with:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -257,7 +258,7 @@ jobs:
                   submodules: recursive
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@v2
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
               with:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -292,13 +293,13 @@ jobs:
               shell: pwsh
 
             - name: Sign Windows payload with Trusted Signing
-              uses: azure/trusted-signing-action@v0
+              uses: azure/trusted-signing-action@208f8af4bf26cf2af8597424e3cb5582801523ba # v2.0.0
               with:
                   azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
                   azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
                   endpoint: ${{ secrets.AZURE_ENDPOINT }}
-                  trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                  signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                   certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                   files-folder: ${{ github.workspace }}/mobile/apps/auth/build/windows/x64/runner/Release
                   files-folder-filter: exe,dll
@@ -319,13 +320,13 @@ jobs:
               shell: pwsh
 
             - name: Sign Windows installer with Trusted Signing
-              uses: azure/trusted-signing-action@v0
+              uses: azure/trusted-signing-action@208f8af4bf26cf2af8597424e3cb5582801523ba # v2.0.0
               with:
                   azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
                   azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
                   endpoint: ${{ secrets.AZURE_ENDPOINT }}
-                  trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                  signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                   certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                   files: ${{ github.workspace }}/mobile/apps/auth/artifacts/${{ env.ARTIFACT_STEM }}-installer.exe
                   file-digest: SHA256
@@ -400,7 +401,7 @@ jobs:
                   submodules: recursive
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@v2
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
               with:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION }}
