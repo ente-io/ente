@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
-use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -1565,10 +1565,10 @@ impl llm::EventSink for LlmEventSink {
                 text,
                 token_id,
             } => {
-                if let Some(current) = self.buffered_job_id {
-                    if current != job_id {
-                        self.flush_text();
-                    }
+                if let Some(current) = self.buffered_job_id
+                    && current != job_id
+                {
+                    self.flush_text();
                 }
 
                 if self.buffered_text.is_empty() {

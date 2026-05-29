@@ -24,11 +24,11 @@ fn main() {
             logging::log("App", "setup started");
 
             // Show the main window after setup is complete
-            if let Some(window) = app.get_webview_window("main") {
-                if let Err(err) = window.show() {
-                    logging::log("App", format!("failed to show main window error={err}"));
-                    return Err(Box::new(err));
-                }
+            if let Some(window) = app.get_webview_window("main")
+                && let Err(err) = window.show()
+            {
+                logging::log("App", format!("failed to show main window error={err}"));
+                return Err(Box::new(err));
             }
             logging::log("App", "setup complete");
             Ok(())
