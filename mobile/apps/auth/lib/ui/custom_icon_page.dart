@@ -212,7 +212,7 @@ class _CustomIconPageState extends State<CustomIconPage> {
                       String? slug = iconData.slug;
                       Widget iconWidget;
                       if (iconType == IconType.simpleIcon) {
-                        final simpleIconPath = normalizeSimpleIconName(title);
+                        final simpleIconPath = simpleIconAssetStem(title, slug);
                         iconWidget = IconUtils.instance.getSVGIcon(
                           "assets/simple-icons/icons/$simpleIconPath.svg",
                           title,
