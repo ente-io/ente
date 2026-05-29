@@ -30,7 +30,11 @@ export const checkForAppUpdates = async (): Promise<AppUpdateCheckResult> => {
             }
 
             const { version } = update;
-            await update.close();
+            try {
+                await update.close();
+            } catch (e) {
+                log.warn("Failed to close Ensu update check", e);
+            }
             return { kind: "available", version };
         } catch (e) {
             log.error("Failed to auto-update Ensu", e);
@@ -46,17 +50,24 @@ export const checkForAppUpdates = async (): Promise<AppUpdateCheckResult> => {
 };
 
 const installAppUpdate = async (version: string) => {
-    const [{ check }, { relaunch }] = await Promise.all([
-        import("@tauri-apps/plugin-updater"),
-        import("@tauri-apps/plugin-process"),
-    ]);
+    try {
+        const [{ check }, { relaunch }] = await Promise.all([
+            import("@tauri-apps/plugin-updater"),
+            import("@tauri-apps/plugin-process"),
+        ]);
 
-    log.info(`Installing Ensu update ${version}`);
-    const update = await check();
-    if (!update) return;
-    await update.downloadAndInstall();
-    log.info(`Installed Ensu update ${version}, relaunching`);
-    await relaunch();
+        log.info(`Installing Ensu update ${version}`);
+        const update = await check();
+        if (!update) {
+            throw new Error(`Ensu update ${version} is no longer available`);
+        }
+        await update.downloadAndInstall();
+        log.info(`Installed Ensu update ${version}, relaunching`);
+        await relaunch();
+    } catch (e) {
+        log.error(`Failed to install Ensu update ${version}`, e);
+        throw e;
+    }
 };
 
 const showUpdatePrompt = (showMiniDialog: ShowMiniDialog, version: string) => {
