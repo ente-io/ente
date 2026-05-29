@@ -78,9 +78,13 @@ class AlertBottomSheet<T> extends StatelessWidget {
                   child: SizedBox(
                     width: 180,
                     height: 120,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Image.asset(assetPath!),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 11),
+                      child: FittedBox(
+                        alignment: Alignment.bottomCenter,
+                        fit: BoxFit.scaleDown,
+                        child: Image.asset(assetPath!),
+                      ),
                     ),
                   ),
                 ),
@@ -111,7 +115,7 @@ class AlertBottomSheet<T> extends StatelessWidget {
     if (buttons == null || buttons!.isEmpty) return [];
 
     return [
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),

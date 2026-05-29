@@ -178,6 +178,9 @@ class BottomSheetComponent extends StatelessWidget {
     final effectiveContentSpacing = usesCenteredLayout
         ? Spacing.lg
         : contentSpacing;
+    final effectiveActionsTopSpacing = usesCenteredLayout
+        ? Spacing.xxl
+        : actionsTopSpacing;
 
     return AnimatedPadding(
       duration: const Duration(milliseconds: 200),
@@ -207,7 +210,7 @@ class BottomSheetComponent extends StatelessWidget {
                   effectiveContent,
                 ],
                 if (actions.isNotEmpty) ...[
-                  SizedBox(height: actionsTopSpacing),
+                  SizedBox(height: effectiveActionsTopSpacing),
                   _BottomSheetActions(actions: actions),
                 ],
               ],
@@ -309,7 +312,14 @@ class _BottomSheetIllustrationSlot extends StatelessWidget {
       child: SizedBox(
         width: _illustrationSlotWidth,
         height: _illustrationSlotHeight,
-        child: FittedBox(fit: BoxFit.scaleDown, child: child),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: _illustrationSlotBottomInset),
+          child: FittedBox(
+            alignment: Alignment.bottomCenter,
+            fit: BoxFit.scaleDown,
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -377,3 +387,4 @@ class _BottomSheetActions extends StatelessWidget {
 const double _headerHeight = 38;
 const double _illustrationSlotWidth = 180;
 const double _illustrationSlotHeight = 120;
+const double _illustrationSlotBottomInset = 11;
