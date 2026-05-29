@@ -1,15 +1,20 @@
 - Upgraded Auth to Flutter 3.38.10 and Android target SDK 36
-- Worked around Android search autofocus not reliably opening the keyboard on app start
-- Made overflowing Auth tag strips scrollable with desktop mouse wheel and drag interactions
-- Made Auth tag chips reachable by keyboard Tab and selectable with Enter or Space
-- Fixed saved theme selection being reset after unlocking Auth and improved password manager autofill detection for password fields
-- Focus newly added Auth codes so stale search or tag filters do not hide successful additions
-- Added custom icons for 1984 Hosting, Art Fight, BJ-Share, CatRealm, Cove Backup, eClinicalWorks, HaloPSA, JumpCloud, Patchmon, Racket Coach, RustDesk, Sherweb, Smogon, Sony, Zabbix, and Zyxel Nebula
-- Updated the Availity custom icon and fixed several multi-color custom icons rendering as single-color masks
+- Worked around Android search and app-lock password autofocus not reliably opening the keyboard on app start ([#279](https://github.com/ente-io/ente/issues/279), [#10614](https://github.com/ente-io/ente/issues/10614))
+- Made overflowing Auth tag strips scrollable with desktop mouse wheel and drag interactions, and made tag chips reachable by keyboard Tab and selectable with Enter or Space ([#4079](https://github.com/ente-io/ente/issues/4079), [#1811](https://github.com/ente-io/ente/issues/1811), [#1929](https://github.com/ente-io/ente/issues/1929), [#4686](https://github.com/ente-io/ente/issues/4686))
+- Fixed saved theme selection being reset after unlocking Auth and improved password manager autofill detection for password fields ([#10466](https://github.com/ente-io/ente/issues/10466), [#1303](https://github.com/ente-io/ente/issues/1303))
+- Focus newly added Auth codes so stale search or tag filters do not hide successful additions ([#3699](https://github.com/ente-io/ente/issues/3699), [#7415](https://github.com/ente-io/ente/issues/7415))
+- Added custom icons for 1984 Hosting, Art Fight, BJ-Share, CatRealm, CoinMarketCap, Cove Backup, eClinicalWorks, HaloPSA, JumpCloud, Patchmon, Racket Coach, RustDesk, Sherweb, Smogon, Sony, Trade Republic, Zabbix, and Zyxel Nebula
+- Updated the Availity and Mozilla custom icons, and fixed several multi-color custom icons rendering as single-color masks ([#10281](https://github.com/ente-io/ente/pull/10281), [#10328](https://github.com/ente-io/ente/pull/10328), [#10453](https://github.com/ente-io/ente/pull/10453), [#10710](https://github.com/ente-io/ente/pull/10710))
+- Fixed the CoinMarketCap custom icon being invisible in dark mode ([#10615](https://github.com/ente-io/ente/issues/10615))
+- Fixed Auth desktop custom icons flashing for Amazon and other monochrome icons ([#8264](https://github.com/ente-io/ente/issues/8264), [#8499](https://github.com/ente-io/ente/issues/8499))
+- Fixed missing Auth tray icons in sandboxed Linux builds ([#4608](https://github.com/ente-io/ente/issues/4608), [#7815](https://github.com/ente-io/ente/issues/7815), [flathub/io.ente.auth#75](https://github.com/flathub/io.ente.auth/issues/75))
+- Fixed Auth tray close, exit, and menu actions on Windows ([#8164](https://github.com/ente-io/ente/issues/8164), [#4360](https://github.com/ente-io/ente/issues/4360), [#3518](https://github.com/ente-io/ente/issues/3518))
+- Fixed stale or duplicate Auth tray icons on Windows ([#8165](https://github.com/ente-io/ente/issues/8165))
+- Improved Auth tray icon contrast in the Windows tray overflow ([#9491](https://github.com/ente-io/ente/issues/9491))
 - Preserved maximized window state across desktop app launches
 - Hid the share-code option for HOTP entries, keeping sharing limited to TOTP-compatible codes
 - Migrated Auth app API, sharing, billing, web access, exported HTML asset links, and credential associations to ente.com domains
-- Reduced direct-distribution Android APK size by filtering supported ABIs and compressing native libraries
+- Reduced direct-distribution Android APK size by filtering supported ABIs and compressing native libraries ([#10194](https://github.com/ente-io/ente/issues/10194))
 - Signed Windows payload binaries and fixed macOS keychain/signing setup for desktop releases
-- Cleaned up temporary files created while importing Auth exports from other apps
-- Updated Estonian and Lithuanian translations
+- Cleaned up temporary files created while importing Auth exports from other apps ([#2742](https://github.com/ente-io/ente/issues/2742))
+- Updated Estonian, Hungarian, Lithuanian, Portuguese, and Russian translations
