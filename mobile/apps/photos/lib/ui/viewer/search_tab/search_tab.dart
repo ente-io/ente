@@ -26,7 +26,9 @@ import "package:photos/ui/viewer/search_tab/people_section.dart";
 import "package:photos/ui/wrapped/wrapped_discovery_section.dart";
 
 class SearchTab extends StatefulWidget {
-  const SearchTab({super.key});
+  const SearchTab({super.key, this.shouldConsumeBackNotifier});
+
+  final ValueNotifier<bool>? shouldConsumeBackNotifier;
 
   @override
   State<SearchTab> createState() => _SearchTabState();
@@ -68,7 +70,12 @@ class _SearchTabState extends State<SearchTab> {
       children: [
         ColoredBox(
           color: headerColor,
-          child: const SafeArea(bottom: false, child: SearchWidget()),
+          child: SafeArea(
+            bottom: false,
+            child: SearchWidget(
+              shouldConsumeBackNotifier: widget.shouldConsumeBackNotifier,
+            ),
+          ),
         ),
         Expanded(
           child: AllSectionsExamplesProvider(
