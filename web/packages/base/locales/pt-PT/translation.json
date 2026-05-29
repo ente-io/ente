@@ -422,6 +422,8 @@
     "added_to_album": "Adicionado a álbum",
     "added_to_person": "Adicionado a pessoa",
     "move_to_album": "Mover para álbum",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "Mostrar para o álbum",
     "restore_to_album": "Restaurar para álbum",
     "section_all": "Todos",

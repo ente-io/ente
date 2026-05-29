@@ -422,6 +422,8 @@
     "added_to_album": "Додано до альбому",
     "added_to_person": "Додано до особи",
     "move_to_album": "Перемістити до альбому",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "Показати в альбомі",
     "restore_to_album": "Відновити в альбомі",
     "section_all": "Усі",
