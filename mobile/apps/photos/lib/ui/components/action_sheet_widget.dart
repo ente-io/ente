@@ -19,6 +19,7 @@ Future<ButtonResult?> showActionSheet({
   bool isDismissible = true,
   bool isCheckIconGreen = false,
   String? title,
+  Widget? illustration,
   Widget? bodyWidget,
   String? body,
   String? bodyHighlight,
@@ -36,6 +37,7 @@ Future<ButtonResult?> showActionSheet({
     builder: (_) {
       return ActionSheetWidget(
         title: title,
+        illustration: illustration,
         bodyWidget: bodyWidget,
         body: body,
         bodyHighlight: bodyHighlight,
@@ -49,6 +51,7 @@ Future<ButtonResult?> showActionSheet({
 
 class ActionSheetWidget extends StatelessWidget {
   final String? title;
+  final Widget? illustration;
   final Widget? bodyWidget;
   final String? body;
   final String? bodyHighlight;
@@ -61,6 +64,7 @@ class ActionSheetWidget extends StatelessWidget {
     required this.actionSheetType,
     required this.isCheckIconGreen,
     this.title,
+    this.illustration,
     this.bodyWidget,
     this.body,
     this.bodyHighlight,
@@ -88,13 +92,15 @@ class ActionSheetWidget extends StatelessWidget {
 
     return BottomSheetComponent(
       title: title,
-      illustration: actionSheetType == ActionSheetType.iconOnly
-          ? Icon(
-              Icons.check_outlined,
-              size: 48,
-              color: isCheckIconGreen ? colors.primary : colors.iconColor,
-            )
-          : null,
+      illustration:
+          illustration ??
+          (actionSheetType == ActionSheetType.iconOnly
+              ? Icon(
+                  Icons.check_outlined,
+                  size: 48,
+                  color: isCheckIconGreen ? colors.primary : colors.iconColor,
+                )
+              : null),
       content: hasDefaultContent
           ? _ActionSheetContent(
               bodyWidget: bodyWidget,

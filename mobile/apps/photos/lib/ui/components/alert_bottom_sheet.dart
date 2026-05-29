@@ -74,8 +74,17 @@ class AlertBottomSheet<T> extends StatelessWidget {
                 ),
               SizedBox(height: showCloseButton ? 4 : 24),
               if (assetPath != null) ...[
-                Center(child: Image.asset(assetPath!)),
-                const SizedBox(height: 24),
+                Center(
+                  child: SizedBox(
+                    width: 180,
+                    height: 120,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Image.asset(assetPath!),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
               Text(
                 title,

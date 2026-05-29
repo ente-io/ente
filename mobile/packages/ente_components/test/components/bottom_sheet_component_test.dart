@@ -74,6 +74,16 @@ void main() {
 
     expect(find.byKey(const ValueKey('warning-illustration')), findsOneWidget);
     expect(find.text('Centered message'), findsOneWidget);
+    final illustrationSlot = find.ancestor(
+      of: find.byKey(const ValueKey('warning-illustration')),
+      matching: find.byType(FittedBox),
+    );
+    expect(illustrationSlot, findsOneWidget);
+    expect(tester.getSize(illustrationSlot), const Size(180, 120));
+    expect(
+      tester.getSize(find.byKey(const ValueKey('warning-illustration'))),
+      const Size(80, 80),
+    );
 
     final message = tester.widget<Text>(find.text('Centered message'));
     expect(message.textAlign, TextAlign.center);

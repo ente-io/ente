@@ -210,6 +210,7 @@ class _LockScreenState extends State<LockScreen>
     showChoiceActionSheet(
       context,
       title: AppLocalizations.of(context).areYouSureYouWantToLogout,
+      illustration: Image.asset("assets/warning-grey.png"),
       firstButtonLabel: AppLocalizations.of(context).yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {

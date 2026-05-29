@@ -281,6 +281,7 @@ Future<ButtonResult?> showChoiceActionSheet(
   BuildContext context, {
   required String title,
   String? body,
+  Widget? illustration,
   required String firstButtonLabel,
   String secondButtonLabel = "Cancel",
   ButtonType firstButtonType = ButtonType.neutral,
@@ -314,6 +315,7 @@ Future<ButtonResult?> showChoiceActionSheet(
   return showActionSheet(
     context: context,
     title: title,
+    illustration: illustration,
     body: body,
     buttons: buttons,
     isDismissible: isDismissible,

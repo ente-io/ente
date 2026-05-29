@@ -495,6 +495,7 @@ class _SettingsBody extends StatelessWidget {
     showChoiceActionSheet(
       context,
       title: AppLocalizations.of(context).areYouSureYouWantToLogout,
+      illustration: Image.asset("assets/warning-grey.png"),
       firstButtonLabel: AppLocalizations.of(context).yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {

@@ -281,7 +281,8 @@ class _CenteredHeader extends StatelessWidget {
         ),
         if (showCloseButton && (illustration != null || title != null))
           const SizedBox(height: Spacing.xs),
-        if (illustration != null) Center(child: illustration!),
+        if (illustration != null)
+          _BottomSheetIllustrationSlot(child: illustration!),
         if (title != null) ...[
           SizedBox(height: illustration == null ? 0 : Spacing.lg),
           Text(
@@ -293,6 +294,23 @@ class _CenteredHeader extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _BottomSheetIllustrationSlot extends StatelessWidget {
+  const _BottomSheetIllustrationSlot({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: _illustrationSlotWidth,
+        height: _illustrationSlotHeight,
+        child: FittedBox(fit: BoxFit.scaleDown, child: child),
+      ),
     );
   }
 }
@@ -357,3 +375,5 @@ class _BottomSheetActions extends StatelessWidget {
 }
 
 const double _headerHeight = 38;
+const double _illustrationSlotWidth = 180;
+const double _illustrationSlotHeight = 120;
