@@ -163,7 +163,10 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             (cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
-                } else if (attributes.action == "add") {
+                } else if (
+                    attributes.action == "add" ||
+                    attributes.action == "move"
+                ) {
                     return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
@@ -178,7 +181,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                         cs.type != "userFavorites"
                     );
                 } else {
-                    // "move" and "unhide"
+                    // "unhide"
                     return (
                         canMoveToCollection(cs) && cs.type != "userFavorites"
                     );
