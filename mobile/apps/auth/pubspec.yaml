@@ -73,10 +73,6 @@ dependencies:
   flutter_displaymode: 0.6.0
   flutter_email_sender: 7.0.0
   flutter_launcher_icons: 0.14.4
-  flutter_local_authentication: # linux fprintd fix is not published on pub.dev
-    git:
-      url: https://github.com/eaceto/flutter_local_authentication
-      ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
   flutter_local_notifications: 18.0.1
   flutter_localizations:
     sdk: flutter

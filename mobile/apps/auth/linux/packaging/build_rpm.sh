@@ -97,6 +97,7 @@ fpm -s dir -t rpm \
   --depends sqlite-libs \
   --depends libsecret \
   --depends libappindicator \
+  --depends pam \
   -C "$STAGING_DIR" \
   -p "$OUTPUT_DIR/enteauth-VERSION.ARCH.rpm" \
   .

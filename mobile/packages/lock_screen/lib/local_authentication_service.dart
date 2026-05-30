@@ -12,7 +12,6 @@ import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_authentication/flutter_local_authentication.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:logging/logging.dart';
 
@@ -190,16 +189,6 @@ class LocalAuthenticationService {
           "isDeviceSupported=$isSupported",
         );
         return isSupported;
-      }
-      if (Platform.isLinux) {
-        logger.fine("Checking Linux local authentication support");
-        final canAuthenticate = await FlutterLocalAuthentication()
-            .canAuthenticate();
-        logger.fine(
-          "Linux local authentication support: "
-          "canAuthenticate=$canAuthenticate",
-        );
-        return canAuthenticate;
       }
       return await LocalAuthentication().isDeviceSupported();
     } on MissingPluginException {

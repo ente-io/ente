@@ -17,6 +17,7 @@ requires:
   - libsqlite3x
   - libsecret
   - libappindicator
+  - pam
 
 keywords:
   - Authentication
