@@ -17,7 +17,13 @@ requires:
   - libsqlite3x
   - libsecret
   - libappindicator
-  - pam
+  - polkit
+
+postinstall_scripts:
+  - install -D -m 0644 /usr/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy /usr/share/polkit-1/actions/io.ente.auth.policy
+
+postuninstall_scripts:
+  - rm -f /usr/share/polkit-1/actions/io.ente.auth.policy
 
 keywords:
   - Authentication

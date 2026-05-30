@@ -1,22 +1,26 @@
 #include "include/local_auth_linux/local_auth_linux_plugin.h"
 
 #include <flutter_linux/flutter_linux.h>
-#include <gtk/gtk.h>
-#include <pwd.h>
-#include <security/pam_appl.h>
+#include <gio/gio.h>
 #include <string.h>
-#include <unistd.h>
-
-#include <cstdlib>
-#include <cstring>
 
 #define LOCAL_AUTH_LINUX_PLUGIN(obj)                                      \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), local_auth_linux_plugin_get_type(), \
                               LocalAuthLinuxPlugin))
 
 static constexpr const char* kChannelName = "ente.io/local_auth_linux";
-static constexpr const char* kDefaultPamService = "login";
-static constexpr const char* kPamServiceEnv = "ENTE_LOCAL_AUTH_PAM_SERVICE";
+static constexpr const char* kPolkitBusName = "org.freedesktop.PolicyKit1";
+static constexpr const char* kPolkitAuthorityPath =
+    "/org/freedesktop/PolicyKit1/Authority";
+static constexpr const char* kPolkitAuthorityInterface =
+    "org.freedesktop.PolicyKit1.Authority";
+static constexpr const char* kPolkitActionId = "io.ente.auth.unlock";
+static constexpr const char* kPolicyAssetPath =
+    "/usr/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy";
+static constexpr const char* kFlatpakPolicyAssetPath =
+    "/app/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy";
+static constexpr const char* kBundledPolicyAssetRelativePath =
+    "data/flutter_assets/assets/polkit/io.ente.auth.policy";
 
 struct _LocalAuthLinuxPlugin {
   GObject parent_instance;
@@ -29,27 +33,42 @@ struct _LocalAuthLinuxPluginClass {
   GObjectClass parent_class;
 };
 
-struct PamConversationData {
-  const gchar* title;
-  const gchar* reason;
-  const gchar* cancel_button;
-  gboolean cancelled;
-};
-
 static const gchar* string_or_default(const gchar* value,
                                       const gchar* fallback) {
   return value != nullptr && value[0] != '\0' ? value : fallback;
 }
 
-static const char* pam_service_name() {
-  const char* service_name = std::getenv(kPamServiceEnv);
-  return service_name != nullptr && service_name[0] != '\0' ? service_name
-                                                            : kDefaultPamService;
+static gboolean is_flatpak() {
+  return g_getenv("FLATPAK_ID") != nullptr ||
+         g_file_test("/.flatpak-info", G_FILE_TEST_EXISTS);
 }
 
-static const char* current_user_name() {
-  passwd* user = getpwuid(getuid());
-  return user != nullptr ? user->pw_name : nullptr;
+static gchar* policy_asset_path() {
+  if (is_flatpak() &&
+      g_file_test(kFlatpakPolicyAssetPath, G_FILE_TEST_IS_REGULAR)) {
+    return g_strdup(kFlatpakPolicyAssetPath);
+  }
+  if (g_file_test(kPolicyAssetPath, G_FILE_TEST_IS_REGULAR)) {
+    return g_strdup(kPolicyAssetPath);
+  }
+
+  const gchar* appdir = g_getenv("APPDIR");
+  if (appdir != nullptr && appdir[0] != '\0') {
+    g_autofree gchar* appimage_path =
+        g_build_filename(appdir, kBundledPolicyAssetRelativePath, nullptr);
+    if (g_file_test(appimage_path, G_FILE_TEST_IS_REGULAR)) {
+      return g_strdup(appimage_path);
+    }
+  }
+
+  g_autofree gchar* cwd = g_get_current_dir();
+  g_autofree gchar* cwd_path =
+      g_build_filename(cwd, kBundledPolicyAssetRelativePath, nullptr);
+  if (g_file_test(cwd_path, G_FILE_TEST_IS_REGULAR)) {
+    return g_strdup(cwd_path);
+  }
+
+  return g_strdup(is_flatpak() ? kFlatpakPolicyAssetPath : kPolicyAssetPath);
 }
 
 static FlMethodResponse* error_response(const gchar* code,
@@ -58,227 +77,168 @@ static FlMethodResponse* error_response(const gchar* code,
       fl_method_error_response_new(code, message, nullptr));
 }
 
-static const gchar* value_lookup_string(FlValue* map, const gchar* key) {
-  if (map == nullptr || fl_value_get_type(map) != FL_VALUE_TYPE_MAP) {
-    return nullptr;
-  }
-  g_autoptr(FlValue) lookup_key = fl_value_new_string(key);
-  FlValue* value = fl_value_lookup(map, lookup_key);
-  if (value == nullptr || fl_value_get_type(value) != FL_VALUE_TYPE_STRING) {
-    return nullptr;
-  }
-  return fl_value_get_string(value);
+static GDBusConnection* system_bus_connection(GError** error) {
+  return g_bus_get_sync(G_BUS_TYPE_SYSTEM, nullptr, error);
 }
 
-static gchar* show_prompt_dialog(PamConversationData* data,
-                                 const char* message,
-                                 gboolean secret) {
-  GtkWidget* dialog = gtk_dialog_new_with_buttons(
-      string_or_default(data->title, "Authentication required"), nullptr,
-      GTK_DIALOG_MODAL, string_or_default(data->cancel_button, "Cancel"),
-      GTK_RESPONSE_CANCEL, "OK", GTK_RESPONSE_OK, nullptr);
-
-  gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
-  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-
-  GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-  gtk_container_set_border_width(GTK_CONTAINER(content_area), 16);
-
-  const gchar* reason = string_or_default(data->reason, "");
-  if (reason[0] != '\0') {
-    GtkWidget* reason_label = gtk_label_new(reason);
-    gtk_label_set_line_wrap(GTK_LABEL(reason_label), TRUE);
-    gtk_label_set_xalign(GTK_LABEL(reason_label), 0.0);
-    gtk_box_pack_start(GTK_BOX(content_area), reason_label, FALSE, FALSE, 8);
+static gboolean polkit_action_exists(GDBusConnection* connection,
+                                      GError** error) {
+  g_autoptr(GVariant) result = g_dbus_connection_call_sync(
+      connection, kPolkitBusName, kPolkitAuthorityPath,
+      kPolkitAuthorityInterface, "EnumerateActions", g_variant_new("(s)", ""),
+      G_VARIANT_TYPE("(a(ssssssuuua{ss}))"), G_DBUS_CALL_FLAGS_NONE, -1,
+      nullptr, error);
+  if (result == nullptr) {
+    return FALSE;
   }
 
-  GtkWidget* message_label =
-      gtk_label_new(string_or_default(message, "Password"));
-  gtk_label_set_line_wrap(GTK_LABEL(message_label), TRUE);
-  gtk_label_set_xalign(GTK_LABEL(message_label), 0.0);
-  gtk_box_pack_start(GTK_BOX(content_area), message_label, FALSE, FALSE, 8);
+  g_autoptr(GVariant) actions = nullptr;
+  g_variant_get(result, "(@a(ssssssuuua{ss}))", &actions);
 
-  GtkWidget* entry = gtk_entry_new();
-  gtk_entry_set_visibility(GTK_ENTRY(entry), !secret);
-  gtk_entry_set_activates_default(GTK_ENTRY(entry), TRUE);
-  gtk_box_pack_start(GTK_BOX(content_area), entry, FALSE, FALSE, 0);
-
-  gtk_widget_show_all(dialog);
-  gint response = gtk_dialog_run(GTK_DIALOG(dialog));
-  gchar* result = nullptr;
-  if (response == GTK_RESPONSE_OK) {
-    result = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
-  } else {
-    data->cancelled = TRUE;
-  }
-
-  gtk_widget_destroy(dialog);
-  while (gtk_events_pending()) {
-    gtk_main_iteration();
-  }
-  return result;
-}
-
-static void show_message_dialog(PamConversationData* data,
-                                const char* message,
-                                GtkMessageType type) {
-  GtkWidget* dialog = gtk_message_dialog_new(
-      nullptr, GTK_DIALOG_MODAL, type, GTK_BUTTONS_OK, "%s",
-      string_or_default(message, ""));
-  gtk_window_set_title(GTK_WINDOW(dialog),
-                       string_or_default(data->title, "Authentication"));
-  gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
-  gtk_dialog_run(GTK_DIALOG(dialog));
-  gtk_widget_destroy(dialog);
-  while (gtk_events_pending()) {
-    gtk_main_iteration();
-  }
-}
-
-static void free_pam_responses(pam_response* responses, int count) {
-  if (responses == nullptr) {
-    return;
-  }
-  for (int i = 0; i < count; i++) {
-    std::free(responses[i].resp);
-  }
-  std::free(responses);
-}
-
-static int pam_conversation(int num_msg,
-                            const struct pam_message** msg,
-                            struct pam_response** resp,
-                            void* appdata_ptr) {
-  if (num_msg <= 0 || msg == nullptr || resp == nullptr ||
-      appdata_ptr == nullptr) {
-    return PAM_CONV_ERR;
-  }
-
-  PamConversationData* data =
-      static_cast<PamConversationData*>(appdata_ptr);
-  pam_response* responses =
-      static_cast<pam_response*>(std::calloc(num_msg, sizeof(pam_response)));
-  if (responses == nullptr) {
-    return PAM_BUF_ERR;
-  }
-
-  for (int i = 0; i < num_msg; i++) {
-    const char* message = msg[i]->msg != nullptr ? msg[i]->msg : "";
-    switch (msg[i]->msg_style) {
-      case PAM_PROMPT_ECHO_ON:
-      case PAM_PROMPT_ECHO_OFF: {
-        g_autofree gchar* answer =
-            show_prompt_dialog(data, message,
-                               msg[i]->msg_style == PAM_PROMPT_ECHO_OFF);
-        if (data->cancelled || answer == nullptr) {
-          free_pam_responses(responses, i);
-          return PAM_CONV_ERR;
-        }
-        responses[i].resp = strdup(answer);
-        if (responses[i].resp == nullptr) {
-          free_pam_responses(responses, i);
-          return PAM_BUF_ERR;
-        }
-        break;
-      }
-      case PAM_TEXT_INFO:
-        show_message_dialog(data, message, GTK_MESSAGE_INFO);
-        break;
-      case PAM_ERROR_MSG:
-        show_message_dialog(data, message, GTK_MESSAGE_ERROR);
-        break;
-      default:
-        free_pam_responses(responses, i);
-        return PAM_CONV_ERR;
+  GVariantIter iter;
+  g_variant_iter_init(&iter, actions);
+  while (true) {
+    g_autoptr(GVariant) action = g_variant_iter_next_value(&iter);
+    if (action == nullptr) {
+      break;
+    }
+    g_autoptr(GVariant) action_id_value = g_variant_get_child_value(action, 0);
+    const gchar* action_id = g_variant_get_string(action_id_value, nullptr);
+    if (g_strcmp0(action_id, kPolkitActionId) == 0) {
+      return TRUE;
     }
   }
-
-  *resp = responses;
-  return PAM_SUCCESS;
+  return FALSE;
 }
 
-static gboolean can_authenticate_with_pam() {
-  const char* user_name = current_user_name();
-  if (user_name == nullptr) {
+static gboolean check_polkit_authorization(GDBusConnection* connection,
+                                           gboolean allow_user_interaction,
+                                           GError** error) {
+  const gchar* unique_name = g_dbus_connection_get_unique_name(connection);
+  if (unique_name == nullptr || unique_name[0] == '\0') {
+    g_set_error(error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                "Unable to determine the app's system bus name.");
     return FALSE;
   }
 
-  pam_handle_t* pam_handle = nullptr;
-  pam_conv conversation = {nullptr, nullptr};
-  int status =
-      pam_start(pam_service_name(), user_name, &conversation, &pam_handle);
-  if (pam_handle != nullptr) {
-    pam_end(pam_handle, status);
+  GVariantBuilder subject_details;
+  g_variant_builder_init(&subject_details, G_VARIANT_TYPE("a{sv}"));
+  g_variant_builder_add(&subject_details, "{sv}", "name",
+                        g_variant_new_string(unique_name));
+
+  GVariantBuilder details;
+  g_variant_builder_init(&details, G_VARIANT_TYPE("a{ss}"));
+
+  g_autoptr(GVariant) result = g_dbus_connection_call_sync(
+      connection, kPolkitBusName, kPolkitAuthorityPath,
+      kPolkitAuthorityInterface, "CheckAuthorization",
+      g_variant_new("((sa{sv})sa{ss}us)", "system-bus-name",
+                    &subject_details, kPolkitActionId, &details,
+                    allow_user_interaction ? 1u : 0u, ""),
+      G_VARIANT_TYPE("((bba{ss}))"), G_DBUS_CALL_FLAGS_NONE, -1, nullptr,
+      error);
+  if (result == nullptr) {
+    return FALSE;
   }
-  return status == PAM_SUCCESS;
+
+  g_autoptr(GVariant) authorization = nullptr;
+  g_variant_get(result, "(@(bba{ss}))", &authorization);
+
+  gboolean is_authorized = FALSE;
+  gboolean is_challenge = FALSE;
+  g_autoptr(GVariant) result_details = nullptr;
+  g_variant_get(authorization, "(bb@a{ss})", &is_authorized, &is_challenge,
+                &result_details);
+  return is_authorized;
 }
 
-static gboolean authenticate_with_pam(const gchar* reason,
-                                      gchar** error_code,
-                                      gchar** error_message,
-                                      gboolean* authentication_failed) {
-  if (gdk_display_get_default() == nullptr) {
-    *error_code = g_strdup("ui_unavailable");
-    *error_message = g_strdup("No GTK display is available.");
+static gboolean is_cancelled_error(GError* error) {
+  if (error == nullptr) {
+    return FALSE;
+  }
+  g_autofree gchar* remote_error = g_dbus_error_get_remote_error(error);
+  return g_strcmp0(remote_error,
+                   "org.freedesktop.PolicyKit1.Error.Cancelled") == 0;
+}
+
+static gboolean can_authenticate_with_polkit() {
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GDBusConnection) connection = system_bus_connection(&error);
+  if (connection == nullptr) {
+    return FALSE;
+  }
+  return polkit_action_exists(connection, &error);
+}
+
+static gboolean authenticate_with_polkit(gchar** error_code,
+                                         gchar** error_message) {
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GDBusConnection) connection = system_bus_connection(&error);
+  if (connection == nullptr) {
+    *error_code = g_strdup("polkit_unavailable");
+    *error_message =
+        g_strdup(string_or_default(error != nullptr ? error->message : nullptr,
+                                   "Polkit is not available."));
     return FALSE;
   }
 
-  const char* user_name = current_user_name();
-  if (user_name == nullptr) {
-    *error_code = g_strdup("unsupported_runtime");
-    *error_message = g_strdup("Unable to determine the current user.");
+  if (!polkit_action_exists(connection, &error)) {
+    *error_code = g_strdup("setup_required");
+    *error_message = g_strdup(
+        "The Ente Auth Polkit policy is not installed on this system.");
     return FALSE;
   }
 
-  PamConversationData conversation_data = {
-      "Authentication required",
-      string_or_default(reason, "Authenticate with your system password."),
-      "Cancel", FALSE};
-  pam_conv conversation = {pam_conversation, &conversation_data};
-  pam_handle_t* pam_handle = nullptr;
-
-  int status =
-      pam_start(pam_service_name(), user_name, &conversation, &pam_handle);
-  if (status != PAM_SUCCESS) {
-    *error_code = g_strdup("pam_unavailable");
-    *error_message = g_strdup(pam_strerror(pam_handle, status));
-    if (pam_handle != nullptr) {
-      pam_end(pam_handle, status);
-    }
-    return FALSE;
-  }
-
-  status = pam_authenticate(pam_handle, 0);
-  if (status == PAM_SUCCESS) {
-    status = pam_acct_mgmt(pam_handle, 0);
-  }
-
-  g_autofree gchar* pam_message = g_strdup(pam_strerror(pam_handle, status));
-  pam_end(pam_handle, status);
-
-  if (status == PAM_SUCCESS) {
+  error = nullptr;
+  if (check_polkit_authorization(connection, TRUE, &error)) {
     return TRUE;
   }
 
-  if (conversation_data.cancelled) {
+  if (is_cancelled_error(error)) {
     *error_code = g_strdup("authentication_canceled");
     *error_message = g_strdup("Authentication was canceled.");
-  } else if (status == PAM_AUTH_ERR || status == PAM_USER_UNKNOWN ||
-             status == PAM_MAXTRIES) {
-    *authentication_failed = TRUE;
-    *error_message =
-        g_strdup(string_or_default(pam_message, "Authentication failed."));
-  } else if (status == PAM_ACCT_EXPIRED || status == PAM_PERM_DENIED ||
-             status == PAM_NEW_AUTHTOK_REQD) {
-    *error_code = g_strdup("account_unavailable");
-    *error_message =
-        g_strdup(string_or_default(pam_message, "Account is unavailable."));
+  } else if (error != nullptr) {
+    *error_code = g_strdup("polkit_error");
+    *error_message = g_strdup(error->message);
   } else {
-    *error_code = g_strdup("pam_error");
-    *error_message =
-        g_strdup(string_or_default(pam_message, "PAM authentication failed."));
+    *error_code = g_strdup("authentication_failed");
+    *error_message = g_strdup("Authentication failed.");
   }
   return FALSE;
+}
+
+static FlValue* setup_status() {
+  gboolean polkit_available = FALSE;
+  gboolean policy_installed = FALSE;
+  g_autofree gchar* error_message = nullptr;
+
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GDBusConnection) connection = system_bus_connection(&error);
+  if (connection != nullptr) {
+    polkit_available = TRUE;
+    policy_installed = polkit_action_exists(connection, &error);
+  }
+  if (error != nullptr) {
+    error_message = g_strdup(error->message);
+  }
+  g_autofree gchar* asset_path = policy_asset_path();
+
+  FlValue* status = fl_value_new_map();
+  fl_value_set_take(status, fl_value_new_string("actionId"),
+                    fl_value_new_string(kPolkitActionId));
+  fl_value_set_take(status, fl_value_new_string("policyAssetPath"),
+                    fl_value_new_string(asset_path));
+  fl_value_set_take(status, fl_value_new_string("polkitAvailable"),
+                    fl_value_new_bool(polkit_available));
+  fl_value_set_take(status, fl_value_new_string("policyInstalled"),
+                    fl_value_new_bool(policy_installed));
+  fl_value_set_take(status, fl_value_new_string("isFlatpak"),
+                    fl_value_new_bool(is_flatpak()));
+  if (error_message != nullptr) {
+    fl_value_set_take(status, fl_value_new_string("errorMessage"),
+                      fl_value_new_string(error_message));
+  }
+  return status;
 }
 
 static void local_auth_linux_plugin_handle_method_call(
@@ -290,25 +250,24 @@ static void local_auth_linux_plugin_handle_method_call(
 
   if (strcmp(method, "isDeviceSupported") == 0) {
     g_autoptr(FlValue) result =
-        fl_value_new_bool(can_authenticate_with_pam());
+        fl_value_new_bool(can_authenticate_with_polkit());
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+  } else if (strcmp(method, "getSetupStatus") == 0) {
+    g_autoptr(FlValue) result = setup_status();
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   } else if (strcmp(method, "authenticate") == 0) {
-    FlValue* arguments = fl_method_call_get_args(method_call);
-    const gchar* reason = value_lookup_string(arguments, "localizedReason");
     g_autofree gchar* error_code = nullptr;
     g_autofree gchar* error_message = nullptr;
-    gboolean authentication_failed = FALSE;
 
-    if (authenticate_with_pam(reason, &error_code, &error_message,
-                              &authentication_failed)) {
+    if (authenticate_with_polkit(&error_code, &error_message)) {
       g_autoptr(FlValue) result = fl_value_new_bool(TRUE);
       response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
-    } else if (authentication_failed) {
+    } else if (g_strcmp0(error_code, "authentication_failed") == 0) {
       g_autoptr(FlValue) result = fl_value_new_bool(FALSE);
       response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
     } else {
       response = error_response(
-          string_or_default(error_code, "pam_error"),
+          string_or_default(error_code, "polkit_error"),
           string_or_default(error_message, "Authentication failed."));
     }
   } else {

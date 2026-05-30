@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:local_auth_linux/local_auth_linux.dart';
 import 'package:logging/logging.dart';
 
 class LocalAuthenticationService {
@@ -181,6 +182,18 @@ class LocalAuthenticationService {
 
   Future<bool> isLocalAuthSupportedOnDevice() async {
     try {
+      if (Platform.isLinux) {
+        final status = await getLinuxLocalAuthSetupStatus();
+        logger.info(
+          "Linux local authentication support: "
+          "polkitAvailable=${status?.polkitAvailable}, "
+          "policyInstalled=${status?.policyInstalled}, "
+          "isFlatpak=${status?.isFlatpak}, "
+          "error=${status?.errorMessage}",
+        );
+        return status?.polkitAvailable == true &&
+            status?.policyInstalled == true;
+      }
       if (Platform.isWindows) {
         final localAuth = LocalAuthentication();
         final isSupported = await localAuth.isDeviceSupported();
@@ -200,6 +213,21 @@ class LocalAuthenticationService {
       }
       logger.warning("Failed to check Windows local authentication", e, s);
       return false;
+    }
+  }
+
+  Future<LinuxLocalAuthSetupStatus?> getLinuxLocalAuthSetupStatus() async {
+    if (!Platform.isLinux) {
+      return null;
+    }
+    try {
+      return await LocalAuthLinux().getSetupStatus();
+    } on MissingPluginException {
+      logger.warning("Linux local authentication plugin is not available");
+      return null;
+    } on PlatformException catch (e, s) {
+      logger.warning("Failed to check Linux local authentication setup", e, s);
+      return null;
     }
   }
 }

@@ -21,6 +21,13 @@ void main() {
           return switch (methodCall.method) {
             'authenticate' => true,
             'isDeviceSupported' => true,
+            'getSetupStatus' => <String, Object?>{
+              'actionId': linuxLocalAuthPolkitActionId,
+              'policyAssetPath': '/usr/share/enteauth/policy',
+              'polkitAvailable': true,
+              'policyInstalled': true,
+              'isFlatpak': false,
+            },
             _ => null,
           };
         });
@@ -131,10 +138,48 @@ void main() {
     await expectLater(first, completion(isTrue));
   });
 
-  test('reports PAM device support but no direct biometric support', () async {
-    expect(await localAuth.isDeviceSupported(), isTrue);
-    expect(await localAuth.deviceSupportsBiometrics(), isFalse);
-    expect(await localAuth.getEnrolledBiometrics(), isEmpty);
-    expect(await localAuth.stopAuthentication(), isFalse);
+  test(
+    'reports Polkit device support but no direct biometric support',
+    () async {
+      expect(await localAuth.isDeviceSupported(), isTrue);
+      expect(await localAuth.deviceSupportsBiometrics(), isFalse);
+      expect(await localAuth.getEnrolledBiometrics(), isEmpty);
+      expect(await localAuth.stopAuthentication(), isFalse);
+    },
+  );
+
+  test('reads setup status from native code', () async {
+    final status = await localAuth.getSetupStatus();
+
+    expect(status.actionId, linuxLocalAuthPolkitActionId);
+    expect(status.policyAssetPath, '/usr/share/enteauth/policy');
+    expect(status.polkitAvailable, isTrue);
+    expect(status.policyInstalled, isTrue);
+    expect(status.isFlatpak, isFalse);
+    expect(status.setupRequired, isFalse);
+  });
+
+  test('maps missing Polkit policy to no credentials set', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (_) async {
+          throw PlatformException(
+            code: 'setup_required',
+            message: 'The Ente Auth Polkit policy is not installed.',
+          );
+        });
+
+    await expectLater(
+      localAuth.authenticate(
+        localizedReason: 'Unlock Ente Auth',
+        authMessages: const <AuthMessages>[],
+      ),
+      throwsA(
+        isA<LocalAuthException>().having(
+          (e) => e.code,
+          'code',
+          LocalAuthExceptionCode.noCredentialsSet,
+        ),
+      ),
+    );
   });
 }

@@ -21,7 +21,12 @@ enum WindowsLocalAuthIssue {
   disabledByPolicy,
 }
 
-enum LocalAuthUnavailableIssue { notConfigured, noHardware, unavailable }
+enum LocalAuthUnavailableIssue {
+  notConfigured,
+  noHardware,
+  unavailable,
+  linuxSetupRequired,
+}
 
 class LocalAuthenticationUnavailableException implements Exception {
   const LocalAuthenticationUnavailableException({
@@ -46,6 +51,9 @@ class LocalAuthenticationUnavailableException implements Exception {
       ),
       LocalAuthUnavailableIssue.unavailable => pendingTranslation(
         "System authentication is not available right now. Try again, or switch Ente App lock to PIN/password.",
+      ),
+      LocalAuthUnavailableIssue.linuxSetupRequired => pendingTranslation(
+        "Linux system authentication needs one-time setup. Install the Ente Auth Polkit policy, or switch Ente App lock to PIN/password.",
       ),
     };
   }
@@ -126,6 +134,16 @@ bool isExpectedLocalAuthFailure(LocalAuthException error) {
 LocalAuthenticationUnavailableException?
 localAuthenticationUnavailableExceptionForError(LocalAuthException error) {
   final code = error.code;
+  if (Platform.isLinux &&
+      code == LocalAuthExceptionCode.noCredentialsSet &&
+      (error.description?.contains("Polkit policy") ?? false)) {
+    return LocalAuthenticationUnavailableException(
+      issue: LocalAuthUnavailableIssue.linuxSetupRequired,
+      code: code.name,
+      description: error.description,
+      originalError: error,
+    );
+  }
   final issue = switch (code) {
     LocalAuthExceptionCode.noCredentialsSet ||
     LocalAuthExceptionCode.noBiometricsEnrolled =>

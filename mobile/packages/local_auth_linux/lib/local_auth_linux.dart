@@ -1,8 +1,62 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth_platform_interface/local_auth_platform_interface.dart';
 
 const MethodChannel _defaultChannel = MethodChannel('ente.io/local_auth_linux');
+const String linuxLocalAuthPolkitActionId = 'io.ente.auth.unlock';
+
+class LinuxLocalAuthSetupStatus {
+  const LinuxLocalAuthSetupStatus({
+    required this.actionId,
+    required this.policyAssetPath,
+    required this.polkitAvailable,
+    required this.policyInstalled,
+    required this.isFlatpak,
+    this.errorMessage,
+  });
+
+  factory LinuxLocalAuthSetupStatus.fromMap(Map<Object?, Object?> map) {
+    return LinuxLocalAuthSetupStatus(
+      actionId: map['actionId'] as String? ?? linuxLocalAuthPolkitActionId,
+      policyAssetPath: map['policyAssetPath'] as String? ?? _policyAssetPath,
+      polkitAvailable: map['polkitAvailable'] as bool? ?? false,
+      policyInstalled: map['policyInstalled'] as bool? ?? false,
+      isFlatpak: map['isFlatpak'] as bool? ?? _isFlatpak,
+      errorMessage: map['errorMessage'] as String?,
+    );
+  }
+
+  final String actionId;
+  final String policyAssetPath;
+  final bool polkitAvailable;
+  final bool policyInstalled;
+  final bool isFlatpak;
+  final String? errorMessage;
+
+  bool get setupRequired => polkitAvailable && !policyInstalled;
+
+  String get policyInstallCommand {
+    if (isFlatpak) {
+      return '''
+install_dir="\$(flatpak info --show-location io.ente.auth)"
+pkexec install -D -m 0644 "\$install_dir/files/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy" /usr/share/polkit-1/actions/io.ente.auth.policy
+pkaction --action-id $actionId --verbose''';
+    }
+    return '''
+pkexec install -D -m 0644 "$policyAssetPath" /usr/share/polkit-1/actions/io.ente.auth.policy
+pkaction --action-id $actionId --verbose''';
+  }
+}
+
+bool get _isFlatpak =>
+    Platform.environment.containsKey('FLATPAK_ID') ||
+    File('/.flatpak-info').existsSync();
+
+String get _policyAssetPath => _isFlatpak
+    ? '/app/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy'
+    : '/usr/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy';
 
 class LocalAuthLinux extends LocalAuthPlatform {
   LocalAuthLinux({@visibleForTesting MethodChannel? channel})
@@ -25,7 +79,7 @@ class LocalAuthLinux extends LocalAuthPlatform {
 
     if (options.biometricOnly) {
       throw UnsupportedError(
-        "Linux PAM authentication doesn't support the biometricOnly parameter.",
+        "Linux Polkit authentication doesn't support the biometricOnly parameter.",
       );
     }
     if (_isAuthenticating) {
@@ -66,6 +120,15 @@ class LocalAuthLinux extends LocalAuthPlatform {
 
   @override
   Future<bool> stopAuthentication() async => false;
+
+  Future<LinuxLocalAuthSetupStatus> getSetupStatus() async {
+    final result = await _channel.invokeMapMethod<Object?, Object?>(
+      'getSetupStatus',
+    );
+    return LinuxLocalAuthSetupStatus.fromMap(
+      result ?? const <Object?, Object?>{},
+    );
+  }
 }
 
 LocalAuthException _localAuthExceptionForPlatformException(
@@ -73,12 +136,10 @@ LocalAuthException _localAuthExceptionForPlatformException(
 ) {
   final code = switch (error.code) {
     'authentication_canceled' => LocalAuthExceptionCode.userCanceled,
-    'ui_unavailable' => LocalAuthExceptionCode.uiUnavailable,
-    'pam_unavailable' ||
-    'unsupported_runtime' ||
-    'account_unavailable' => LocalAuthExceptionCode.deviceError,
+    'setup_required' => LocalAuthExceptionCode.noCredentialsSet,
+    'polkit_unavailable' => LocalAuthExceptionCode.deviceError,
     'authentication_failed' => LocalAuthExceptionCode.unknownError,
-    'pam_error' => LocalAuthExceptionCode.unknownError,
+    'polkit_error' => LocalAuthExceptionCode.unknownError,
     _ => LocalAuthExceptionCode.unknownError,
   };
   return LocalAuthException(code: code, description: error.message);

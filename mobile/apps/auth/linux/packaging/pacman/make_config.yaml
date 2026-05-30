@@ -14,7 +14,7 @@ dependencies:
   - sqlite
   - libsecret
   - libappindicator-gtk3
-  - pam
+  - polkit
 
 keywords:
   - Authentication
@@ -31,6 +31,7 @@ supported_mime_type:
 postinstall_scripts:
   - gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
   - update-desktop-database -q
+  - install -D -m 0644 /usr/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy /usr/share/polkit-1/actions/io.ente.auth.policy
   - if [ ! -e /usr/lib/libsodium.so.23 ]; then
   - "   ln -s /usr/lib/libsodium.so /usr/lib/libsodium.so.23"
   - fi
@@ -41,6 +42,7 @@ postupgrade_scripts:
 postremove_scripts:
   - gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
   - update-desktop-database -q
+  - rm -f /usr/share/polkit-1/actions/io.ente.auth.policy
   - if [ -e /usr/lib/libsodium.so.23 ]; then
   - rm /usr/lib/libsodium.so.23
   - fi
