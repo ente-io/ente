@@ -40,12 +40,16 @@ class LinuxLocalAuthSetupStatus {
   String get policyInstallCommand {
     if (isFlatpak) {
       return '''
-install_dir="\$(flatpak info --show-location io.ente.auth)"
-pkexec install -D -m 0644 "\$install_dir/files/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy" /usr/share/polkit-1/actions/io.ente.auth.policy
+app_id="\${FLATPAK_ID:-io.ente.auth}"
+install_dir="\$(flatpak info --show-location "\$app_id")"
+policy="\$install_dir/files/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy"
+sudo install -D -o root -g root -m 0644 "\$policy" /usr/share/polkit-1/actions/io.ente.auth.policy
+if command -v chcon >/dev/null 2>&1; then sudo chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/io.ente.auth.policy || true; fi
 pkaction --action-id $actionId --verbose''';
     }
     return '''
-pkexec install -D -m 0644 "$policyAssetPath" /usr/share/polkit-1/actions/io.ente.auth.policy
+sudo install -D -o root -g root -m 0644 "$policyAssetPath" /usr/share/polkit-1/actions/io.ente.auth.policy
+if command -v chcon >/dev/null 2>&1; then sudo chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/io.ente.auth.policy || true; fi
 pkaction --action-id $actionId --verbose''';
   }
 }

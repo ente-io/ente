@@ -61,6 +61,17 @@ static gchar* policy_asset_path() {
     }
   }
 
+  g_autofree gchar* executable_path =
+      g_file_read_link("/proc/self/exe", nullptr);
+  if (executable_path != nullptr && executable_path[0] != '\0') {
+    g_autofree gchar* executable_dir = g_path_get_dirname(executable_path);
+    g_autofree gchar* executable_relative_path = g_build_filename(
+        executable_dir, kBundledPolicyAssetRelativePath, nullptr);
+    if (g_file_test(executable_relative_path, G_FILE_TEST_IS_REGULAR)) {
+      return g_strdup(executable_relative_path);
+    }
+  }
+
   g_autofree gchar* cwd = g_get_current_dir();
   g_autofree gchar* cwd_path =
       g_build_filename(cwd, kBundledPolicyAssetRelativePath, nullptr);
