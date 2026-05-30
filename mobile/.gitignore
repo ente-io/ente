@@ -3,11 +3,7 @@
 *.log
 *.pyc
 *.swp
-.atom/
-.buildlog/
 .history
-.svn/
-migrate_working_dir/
 
 # IntelliJ
 *.iml
