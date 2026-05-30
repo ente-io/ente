@@ -16,6 +16,7 @@
 - Fixed some Simple Icons and custom icons not loading in the Auth icon picker because their registry filenames were not resolved correctly
 - Fixed Auth desktop custom icons flashing for Amazon and other monochrome icons ([#8264](https://github.com/ente-io/ente/issues/8264), [#8499](https://github.com/ente-io/ente/issues/8499))
 - Fixed missing Auth tray icons in sandboxed Linux builds ([#4608](https://github.com/ente-io/ente/issues/4608), [#7815](https://github.com/ente-io/ente/issues/7815), [flathub/io.ente.auth#75](https://github.com/flathub/io.ente.auth/issues/75))
+- Fixed Auth AppImage startup failures on some Linux systems by preferring host runtime libraries before bundled AppImage fallbacks ([#6705](https://github.com/ente-io/ente/issues/6705), [#7646](https://github.com/ente-io/ente/issues/7646), [#9738](https://github.com/ente-io/ente/issues/9738), [#6976](https://github.com/ente-io/ente/issues/6976), [#6600](https://github.com/ente-io/ente/issues/6600))
 - Fixed Auth tray close, exit, and menu actions on Windows ([#8164](https://github.com/ente-io/ente/issues/8164), [#4360](https://github.com/ente-io/ente/issues/4360), [#3518](https://github.com/ente-io/ente/issues/3518))
 - Fixed stale or duplicate Auth tray icons on Windows ([#8165](https://github.com/ente-io/ente/issues/8165))
 - Improved Auth tray icon contrast in the Windows tray overflow ([#9491](https://github.com/ente-io/ente/issues/9491))

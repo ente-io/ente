@@ -265,7 +265,9 @@ jobs:
                   mv dist/*/*.rpm "artifacts/${ARTIFACT_STEM}-x86_64.rpm"
                   dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
                   fastforge package --platform=linux --targets=appimage --skip-clean
-                  mv dist/**/*-*-linux.AppImage "artifacts/${ARTIFACT_STEM}-x86_64.AppImage"
+                  appimage_path="$(find dist -name '*-*-linux.AppImage' -print -quit)"
+                  ./linux/packaging/post_process_appimage.sh "$appimage_path"
+                  mv "$appimage_path" "artifacts/${ARTIFACT_STEM}-x86_64.AppImage"
                   fastforge package --platform=linux --targets=deb --skip-clean
                   mv dist/**/*-*-linux.deb "artifacts/${ARTIFACT_STEM}-x86_64.deb"
 
