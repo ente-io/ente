@@ -1,19 +1,16 @@
-# Misc
+# Miscellaneous
 *.class
 *.log
 *.pyc
 *.swp
-.atom/
-.buildlog/
 .history
-.svn/
-migrate_working_dir/
+.build/
+.swiftpm/
 
 # IntelliJ
 *.iml
 *.ipr
 *.iws
-melos_*.iml
 
 # Flutter/Dart/Pub
 **/doc/api/
@@ -24,7 +21,43 @@ melos_*.iml
 .packages
 .pub-cache/
 .pub/
-/build/
+build/
+coverage/
+
+# Xcode
+DerivedData/
+xcuserdata/
+
+# Flutter iOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/ServiceDefinitions.json
+
+# Flutter macOS
+**/macos/Pods/
+**/macos/Flutter/ephemeral/
+
+# Flutter Linux/Windows
+**/linux/flutter/ephemeral/
+**/windows/flutter/ephemeral/
+
+# Windows
+**/windows/*.suo
+**/windows/*.user
+**/windows/*.userosscache
+**/windows/*.sln.docstates
+**/windows/x64/
+**/windows/x86/
+**/windows/*.[Cc]ache
+!**/windows/*.[Cc]ache/
 
 # Symbolication
 app.*.symbols
@@ -32,7 +65,20 @@ app.*.symbols
 # Obfuscation
 app.*.map.json
 
-# Android Studio
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Android
+**/android/**/.cxx/
+**/android/**/.gradle/
+**/android/**/.kotlin/
+**/android/**/.settings/
+**/android/**/GeneratedPluginRegistrant.java
+**/android/captures/
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+local.properties
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks
