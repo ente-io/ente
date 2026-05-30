@@ -1,6 +1,1 @@
 .gradle/
-build/
-*.keystore
-!debug.keystore
-key.properties
-local.properties
