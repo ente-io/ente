@@ -183,6 +183,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
         await localSettings.setAppMode(AppMode.localGallery);
+        localSettings.localGalleryModeEnabledThisSession = true;
         Bus.instance.fire(AppModeChangedEvent());
         await permissionService.onUpdatePermission(state);
         SyncService.instance.onPermissionGranted().ignore();

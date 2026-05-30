@@ -108,6 +108,12 @@ class LocalSettings {
 
   AppMode? _cachedAppMode;
 
+  /// True only for the session in which the user just enabled local-gallery
+  /// mode during onboarding. Intentionally not persisted, so it resets to
+  /// false on the next app launch. Used to defer the get-started banner to
+  /// the second app open (after onboarding).
+  bool localGalleryModeEnabledThisSession = false;
+
   LocalSettings(this._prefs);
 
   bool _getFlag(LocalGalleryFlag flag) {
