@@ -11,7 +11,6 @@
 *.iml
 *.ipr
 *.iws
-melos_*.iml
 
 # Flutter/Dart/Pub
 **/doc/api/
@@ -24,6 +23,41 @@ melos_*.iml
 .pub/
 build/
 coverage/
+
+# Xcode
+DerivedData/
+xcuserdata/
+
+# Flutter iOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/ServiceDefinitions.json
+
+# Flutter macOS
+**/macos/Pods/
+**/macos/Flutter/ephemeral/
+
+# Flutter Linux/Windows
+**/linux/flutter/ephemeral/
+**/windows/flutter/ephemeral/
+
+# Windows
+**/windows/*.suo
+**/windows/*.user
+**/windows/*.userosscache
+**/windows/*.sln.docstates
+**/windows/x64/
+**/windows/x86/
+**/windows/*.[Cc]ache
+!**/windows/*.[Cc]ache/
 
 # Symbolication
 app.*.symbols
