@@ -549,7 +549,7 @@
     {
       "title": "Cove Backup",
       "slug": "cove"
-    },  
+    },
     {
       "title": "Creately",
       "slug": "creately"
@@ -844,6 +844,10 @@
       ]
     },
     {
+      "title": "Fluxer",
+      "slug": "fluxer"
+    },
+    {
       "title": "fortrabbit"
     },
     {
@@ -1107,7 +1111,7 @@
     {
       "title": "JumpCloud",
       "slug": "jumpcloud"
-    },  
+    },
     {
       "title": "Kagi"
     },
@@ -1900,7 +1904,7 @@
       "title": "RustDesk",
       "slug": "rustdesk",
       "altNames": [
-      "RustDesk Connection"
+        "RustDesk Connection"
       ]
     },
     {
