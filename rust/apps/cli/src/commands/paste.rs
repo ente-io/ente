@@ -243,7 +243,7 @@ async fn consume_paste_payload(
     cookie: &str,
 ) -> Result<PastePayload> {
     post_json(
-        &client,
+        client,
         endpoint,
         "/paste/consume",
         &request,
@@ -490,7 +490,7 @@ fn decrypt_consumed_text(paste_key: &[u8], payload: &PastePayload) -> Result<Str
             encrypted_data,
             decryption_header,
         },
-        &paste_key,
+        paste_key,
     )?;
     Ok(text.text)
 }
