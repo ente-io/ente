@@ -5,7 +5,6 @@ import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_authentication/flutter_local_authentication.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
 import 'package:local_auth_darwin/types/auth_messages_ios.dart';
@@ -22,7 +21,12 @@ enum WindowsLocalAuthIssue {
   disabledByPolicy,
 }
 
-enum LocalAuthUnavailableIssue { notConfigured, noHardware, unavailable }
+enum LocalAuthUnavailableIssue {
+  notConfigured,
+  noHardware,
+  unavailable,
+  linuxSetupRequired,
+}
 
 class LocalAuthenticationUnavailableException implements Exception {
   const LocalAuthenticationUnavailableException({
@@ -47,6 +51,9 @@ class LocalAuthenticationUnavailableException implements Exception {
       ),
       LocalAuthUnavailableIssue.unavailable => pendingTranslation(
         "System authentication is not available right now. Try again, or switch Ente App lock to PIN/password.",
+      ),
+      LocalAuthUnavailableIssue.linuxSetupRequired => pendingTranslation(
+        "Linux system authentication needs one-time setup. Install the Ente Auth Polkit policy, or switch Ente App lock to PIN/password.",
       ),
     };
   }
@@ -127,6 +134,16 @@ bool isExpectedLocalAuthFailure(LocalAuthException error) {
 LocalAuthenticationUnavailableException?
 localAuthenticationUnavailableExceptionForError(LocalAuthException error) {
   final code = error.code;
+  if (Platform.isLinux &&
+      code == LocalAuthExceptionCode.noCredentialsSet &&
+      (error.description?.contains("Polkit policy") ?? false)) {
+    return LocalAuthenticationUnavailableException(
+      issue: LocalAuthUnavailableIssue.linuxSetupRequired,
+      code: code.name,
+      description: error.description,
+      originalError: error,
+    );
+  }
   final issue = switch (code) {
     LocalAuthExceptionCode.noCredentialsSet ||
     LocalAuthExceptionCode.noBiometricsEnrolled =>
@@ -270,84 +287,76 @@ Future<bool> requestAuthentication(
           isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
         );
   }
-  if (Platform.isLinux) {
-    // Linux uses flutter_local_authentication
-    _logger.info("Starting Linux local authentication");
-    final result = await FlutterLocalAuthentication().authenticate();
-    _logger.info("Linux local authentication result: $result");
+  final localAuth = LocalAuthentication();
+  try {
+    await localAuth.stopAuthentication();
+    await _logLocalAuthState(localAuth);
+    final l10n = context.strings;
+    final result = await localAuth.authenticate(
+      localizedReason: Platform.isMacOS ? macOSReason : defaultReason,
+      authMessages: [
+        AndroidAuthMessages(
+          cancelButton: l10n.androidCancelButton,
+          signInHint: l10n.androidBiometricHint,
+          signInTitle: l10n.androidSignInTitle,
+        ),
+        IOSAuthMessages(
+          cancelButton: l10n.iOSOkButton,
+          localizedFallbackTitle: l10n.enterPassword,
+        ),
+        MacOSAuthMessages(
+          cancelButton: l10n.iOSOkButton,
+          localizedFallbackTitle: l10n.enterPassword,
+        ),
+      ],
+    );
+    if (Platform.isWindows || Platform.isLinux) {
+      _logger.info("System local authentication result: $result");
+    }
     return result;
-  } else {
-    final localAuth = LocalAuthentication();
-    try {
-      await localAuth.stopAuthentication();
-      await _logLocalAuthState(localAuth);
-      final l10n = context.strings;
-      final result = await localAuth.authenticate(
-        localizedReason: Platform.isMacOS ? macOSReason : defaultReason,
-        authMessages: [
-          AndroidAuthMessages(
-            cancelButton: l10n.androidCancelButton,
-            signInHint: l10n.androidBiometricHint,
-            signInTitle: l10n.androidSignInTitle,
-          ),
-          IOSAuthMessages(
-            cancelButton: l10n.iOSOkButton,
-            localizedFallbackTitle: l10n.enterPassword,
-          ),
-          MacOSAuthMessages(
-            cancelButton: l10n.iOSOkButton,
-            localizedFallbackTitle: l10n.enterPassword,
-          ),
-        ],
-      );
-      if (Platform.isWindows) {
-        _logger.info("Windows local authentication result: $result");
-      }
-      return result;
-    } on LocalAuthException catch (e, s) {
-      final windowsException = Platform.isWindows
-          ? windowsLocalAuthenticationExceptionForError(e)
-          : null;
-      if (windowsException != null) {
-        _logger.warning("Windows local authentication failed", e, s);
-        throw windowsException;
-      }
-      final unavailableException =
-          localAuthenticationUnavailableExceptionForError(e);
-      if (unavailableException != null) {
-        _logger.warning("System local authentication unavailable", e, s);
-        throw unavailableException;
-      }
-      if (isExpectedLocalAuthFailure(e)) {
-        _logger.fine(
-          "Local authentication did not complete: "
-          "${e.code.name}, ${e.description}",
-        );
-        return false;
-      }
-      _logger.warning("System local authentication failed", e, s);
-      rethrow;
-    } on PlatformException catch (e, s) {
-      final windowsException = Platform.isWindows
-          ? windowsLocalAuthenticationExceptionForError(e)
-          : null;
-      if (windowsException == null) {
-        _logger.warning("System local authentication platform error", e, s);
-        rethrow;
-      }
-      _logger.warning("Windows local authentication failed", e, s);
-      throw windowsException;
-    } catch (e, s) {
-      final windowsException = Platform.isWindows
-          ? windowsLocalAuthenticationExceptionForError(e)
-          : null;
-      if (windowsException == null) {
-        _logger.warning("Unexpected system local authentication error", e, s);
-        rethrow;
-      }
+  } on LocalAuthException catch (e, s) {
+    final windowsException = Platform.isWindows
+        ? windowsLocalAuthenticationExceptionForError(e)
+        : null;
+    if (windowsException != null) {
       _logger.warning("Windows local authentication failed", e, s);
       throw windowsException;
     }
+    final unavailableException =
+        localAuthenticationUnavailableExceptionForError(e);
+    if (unavailableException != null) {
+      _logger.warning("System local authentication unavailable", e, s);
+      throw unavailableException;
+    }
+    if (isExpectedLocalAuthFailure(e)) {
+      _logger.fine(
+        "Local authentication did not complete: "
+        "${e.code.name}, ${e.description}",
+      );
+      return false;
+    }
+    _logger.warning("System local authentication failed", e, s);
+    rethrow;
+  } on PlatformException catch (e, s) {
+    final windowsException = Platform.isWindows
+        ? windowsLocalAuthenticationExceptionForError(e)
+        : null;
+    if (windowsException == null) {
+      _logger.warning("System local authentication platform error", e, s);
+      rethrow;
+    }
+    _logger.warning("Windows local authentication failed", e, s);
+    throw windowsException;
+  } catch (e, s) {
+    final windowsException = Platform.isWindows
+        ? windowsLocalAuthenticationExceptionForError(e)
+        : null;
+    if (windowsException == null) {
+      _logger.warning("Unexpected system local authentication error", e, s);
+      rethrow;
+    }
+    _logger.warning("Windows local authentication failed", e, s);
+    throw windowsException;
   }
 }
 

@@ -5,7 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   file_saver
-  flutter_local_authentication
   flutter_secure_storage_windows
   local_auth_windows
   screen_retriever_windows

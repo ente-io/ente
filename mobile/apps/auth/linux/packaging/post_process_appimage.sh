@@ -60,6 +60,7 @@ cat >"$appdir/AppRun" <<'APPRUN'
 set -e
 
 APPDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export APPDIR
 cd "$APPDIR"
 
 HOST_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib64:/usr/lib64:/lib:/usr/lib"

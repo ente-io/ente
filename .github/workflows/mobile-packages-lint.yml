@@ -155,6 +155,11 @@ jobs:
               run: flutter pub get --enforce-lockfile && dart format --output=none --set-exit-if-changed . && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/legacy
 
+            - name: Lint package - local_auth_linux
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'local_auth_linux')
+              run: flutter pub get --enforce-lockfile && dart format --output=none --set-exit-if-changed . && flutter analyze --no-fatal-infos && flutter test
+              working-directory: mobile/packages/local_auth_linux
+
             - name: Lint package - lock_screen
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'lock_screen')
               run: flutter pub get --enforce-lockfile && dart format --output=none --set-exit-if-changed . && flutter analyze --no-fatal-infos

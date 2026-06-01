@@ -62,10 +62,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_displaymode: 0.6.0
-  flutter_local_authentication:
-    git:
-      url: https://github.com/eaceto/flutter_local_authentication
-      ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
   flutter_localizations:
     sdk: flutter
   flutter_svg: 2.2.3

@@ -68,6 +68,27 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       await _lockScreenSettings.removePinAndPassword();
       await _lockScreenSettings.setSystemLockScreen(!isSystemLockEnabled);
     } else {
+      final linuxStatus = await LocalAuthenticationService.instance
+          .getLinuxLocalAuthSetupStatus();
+      if (Platform.isLinux && linuxStatus?.setupRequired == true) {
+        await showDialogWidget(
+          context: context,
+          title: pendingTranslation("Linux setup required"),
+          body: pendingTranslation(
+            "Install the Ente Auth Polkit policy, then try device lock again.\n\n${linuxStatus!.policyInstallCommand}",
+          ),
+          isDismissible: true,
+          buttons: [
+            ButtonWidget(
+              buttonType: ButtonType.secondary,
+              labelText: context.strings.ok,
+              isInAlert: true,
+            ),
+          ],
+        );
+        await _initializeSettings();
+        return;
+      }
       await showDialogWidget(
         context: context,
         title: context.strings.noSystemLockFound,
