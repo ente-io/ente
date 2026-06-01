@@ -438,6 +438,21 @@ func (c *UserController) ensureStorageWarningDeletionLoginAllowed(userID int64, 
 		return stacktrace.Propagate(err, "failed to read storage warning deletion state")
 	}
 	if deletionScheduled {
+		// Login blocking is terminal-row based. If a daily storage-warning run
+		// races with an admin soft-unblock, the terminal row can reappear while
+		// the grace window is still active, so login must honor grace directly.
+		graceActive, graceUntil, err := c.NotificationHistoryRepo.IsStorageWarningLoginGraceActive(userID, time.Microseconds())
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to read storage warning login grace")
+		}
+		if graceActive {
+			log.WithFields(log.Fields{
+				"user_id":     userID,
+				"app":         app,
+				"grace_until": graceUntil,
+			}).Info("allowing login during storage warning grace")
+			return nil
+		}
 		c.alertStorageWarningDeletionScheduledLoginBlock(userID, app)
 		return storageWarningDeletionScheduledError()
 	}
