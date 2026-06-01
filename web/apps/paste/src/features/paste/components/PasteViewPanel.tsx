@@ -39,6 +39,7 @@ export const PasteViewPanel = ({
     const [copied, setCopied] = useState(false);
     const [password, setPassword] = useState("");
     const copiedTimerRef = useRef<number | null>(null);
+    const passwordInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         return () => {
@@ -47,6 +48,13 @@ export const PasteViewPanel = ({
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (!passwordError) return;
+
+        setPassword("");
+        passwordInputRef.current?.focus();
+    }, [passwordError]);
 
     const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -92,6 +100,7 @@ export const PasteViewPanel = ({
                             value={password}
                             error={!!passwordError}
                             helperText={passwordError}
+                            inputRef={passwordInputRef}
                             autoFocus
                             autoComplete="off"
                             placeholder="Password"
