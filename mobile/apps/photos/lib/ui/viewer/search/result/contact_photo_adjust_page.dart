@@ -54,10 +54,7 @@ class _ContactPhotoAdjustPageState extends State<ContactPhotoAdjustPage> {
               pngLevel: 0,
             ),
             cropRotateEditor: CropRotateEditorConfigs(
-              showRotateButton: false,
-              showFlipButton: false,
-              showAspectRatioButton: false,
-              showResetButton: false,
+              tools: const [],
               initAspectRatio: 1.0,
               aspectRatios: const [AspectRatioItem(text: "1*1", value: 1.0)],
               style: CropRotateEditorStyle(

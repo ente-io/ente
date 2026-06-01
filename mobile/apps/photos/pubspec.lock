@@ -2277,10 +2277,10 @@ packages:
     dependency: "direct main"
     description:
       name: pro_image_editor
-      sha256: df25475c7df5fb90c36f7ede774c7c14b83d862148ed5ab77f09a0dd120ec159
+      sha256: d0cc9516c52e775de4b02ece96f69dd9c5eebf1f9c3060ecec9a58042038f786
       url: "https://pub.dev"
     source: hosted
-    version: "11.3.0"
+    version: "11.23.0"
   process:
     dependency: transitive
     description:

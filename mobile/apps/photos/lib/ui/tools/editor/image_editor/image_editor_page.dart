@@ -1,7 +1,7 @@
 import "dart:async";
 import "dart:io";
 import "dart:math";
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show Image, ImageByteFormat;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
@@ -68,18 +68,21 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
     debugPrint("Image saved with size: ${bytes.length} bytes");
     final DateTime start = DateTime.now();
-
-    final ui.Image decodedResult = await decodeImageFromList(bytes);
-    final result = await FlutterImageCompress.compressWithList(
-      bytes,
-      minWidth: decodedResult.width,
-      minHeight: decodedResult.height,
-    );
-    _logger.info('Size after compression = ${result.length}');
-    final Duration diff = DateTime.now().difference(start);
-    _logger.info('image_editor time : $diff');
+    bool hasStoppedChangeNotify = false;
 
     try {
+      final ui.Image decodedResult = await decodeImageFromList(bytes);
+      final result = await FlutterImageCompress.compressWithList(
+        bytes,
+        minWidth: decodedResult.width,
+        minHeight: decodedResult.height,
+        quality: 95,
+        format: CompressFormat.jpeg,
+      );
+      _logger.info('Size after compression = ${result.length}');
+      final Duration diff = DateTime.now().difference(start);
+      _logger.info('image_editor time : $diff');
+
       final fileName =
           path.basenameWithoutExtension(widget.originalFile.title!) +
           "_edited_" +
@@ -88,6 +91,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
+      hasStoppedChangeNotify = true;
       final AssetEntity newAsset = await (PhotoManager.editor.saveImage(
         result,
         filename: fileName,
@@ -142,7 +146,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       showToast(context, AppLocalizations.of(context).oopsCouldNotSaveEdits);
       _logger.severe("Failed to save image edits", e, s);
     } finally {
-      await PhotoManager.startChangeNotify();
+      if (hasStoppedChangeNotify) {
+        await PhotoManager.startChangeNotify();
+      }
     }
   }
 
@@ -214,6 +220,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             imageGeneration: const ImageGenerationConfigs(
               jpegQuality: 100,
               enableIsolateGeneration: true,
+              captureImageByteFormat: ui.ImageByteFormat.rawStraightRgba,
+              outputFormat: OutputFormat.png,
               pngLevel: 0,
             ),
             layerInteraction: const LayerInteractionConfigs(
@@ -232,6 +240,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             ),
             mainEditor: MainEditorConfigs(
               enableZoom: true,
+              tools: const [
+                SubEditorMode.cropRotate,
+                SubEditorMode.filter,
+                SubEditorMode.tune,
+                SubEditorMode.paint,
+                SubEditorMode.emoji,
+              ],
               style: MainEditorStyle(
                 uiOverlayStyle: SystemUiOverlayStyle(
                   systemNavigationBarContrastEnforced: true,
@@ -344,7 +359,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
             ),
             paintEditor: PaintEditorConfigs(
-              enabled: true,
               style: PaintEditorStyle(
                 initialColor: const Color(0xFF00FFFF),
                 background: colorScheme.backgroundColour,
@@ -386,7 +400,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
             ),
             textEditor: TextEditorConfigs(
-              enabled: false,
               showBackgroundModeButton: true,
               showTextAlignButton: true,
               style: const TextEditorStyle(
@@ -437,10 +450,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
             ),
             cropRotateEditor: CropRotateEditorConfigs(
-              showAspectRatioButton: true,
-              showFlipButton: true,
-              showRotateButton: true,
-              enabled: true,
               style: CropRotateEditorStyle(
                 background: colorScheme.backgroundColour,
                 cropCornerColor: Theme.of(
@@ -476,7 +485,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
             ),
             filterEditor: FilterEditorConfigs(
-              enabled: true,
               fadeInUpDuration: fadeInDuration,
               fadeInUpStaggerDelayDuration: fadeInDelay,
               filterList: filterList,
@@ -533,7 +541,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
             ),
             tuneEditor: TuneEditorConfigs(
-              enabled: true,
               style: TuneEditorStyle(background: colorScheme.backgroundColour),
               widgets: TuneEditorWidgets(
                 appBar: (editor, rebuildStream) {
@@ -567,9 +574,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 },
               ),
             ),
-            blurEditor: const BlurEditorConfigs(enabled: false),
+            blurEditor: const BlurEditorConfigs(),
             emojiEditor: EmojiEditorConfigs(
-              enabled: true,
               checkPlatformCompatibility: true,
               style: EmojiEditorStyle(
                 bottomActionBarConfig: BottomActionBarConfig(
@@ -582,7 +588,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
             ),
             stickerEditor: StickerEditorConfigs(
-              enabled: false,
               builder: (setLayer, scrollController) {
                 return const SizedBox.shrink();
               },

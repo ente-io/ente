@@ -221,7 +221,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/privacy_screen.git
       ref: 2389eaa88f07724a38b9dcab49fef8e96c723921
-  pro_image_editor: 11.3.0
+  pro_image_editor: 11.23.0
   random_access_source: 4.2.1
   receive_sharing_intent: # pub.dev is behind
     git:
