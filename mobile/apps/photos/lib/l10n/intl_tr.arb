@@ -270,7 +270,6 @@
   "after1Month": "1 ay sonra",
   "after1Year": "1 yıl sonra",
   "manageParticipants": "Yönet",
-  "collabLinkSectionDescription": "Ente aplikasyonu veya hesabı olmadan insanların paylaşılan albümde fotoğraf ekleyip görüntülemelerine izin vermek için bir bağlantı oluşturun. Grup veya etkinlik fotoğraflarını toplamak için harika bir seçenek.",
   "collectPhotos": "Fotoğrafları topla",
   "collaborativeLink": "Ortak bağlantı",
   "shareWithNonenteUsers": "Ente kullanıcısı olmayanlar için paylaş",
@@ -391,7 +390,6 @@
   "creatingLink": "Bağlantı oluşturuluyor...",
   "removeWithQuestionMark": "Kaldırılsın mı?",
   "removeParticipantBody": "{userEmail} bu paylaşılan albümden kaldırılacaktır\n\nOnlar tarafından eklenen tüm fotoğraflar da albümden kaldırılacaktır",
-  "keepPhotos": "Fotoğrafları sakla",
   "deletePhotos": "Fotoğrafları sil",
   "inviteToEnte": "Ente'ye davet edin",
   "removePublicLink": "Herkese açık bağlantıyı kaldır",
@@ -399,6 +397,9 @@
   "sharing": "Paylaşılıyor...",
   "youCannotShareWithYourself": "Kendinizle paylaşamazsınız",
   "archive": "Arşivle",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Fotoğrafları seçmek için uzun basın ve + düğmesine tıklayarak bir albüm oluşturun",
   "importing": "İçeri aktarılıyor....",
   "failedToLoadAlbums": "Albüm yüklenirken hata oluştu",
@@ -934,6 +935,9 @@
   "moveToAlbum": "Albüme taşı",
   "unhide": "Gizleme",
   "unarchive": "Arşivden cıkar",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favorile",
   "removeFromFavorite": "Favorilerden Kaldır",
   "shareLink": "Bağlantıyı paylaş",

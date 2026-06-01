@@ -239,7 +239,6 @@
   "after1Month": "Праз 1 месяц",
   "after1Year": "Праз 1 год",
   "manageParticipants": "Кіраванне",
-  "collabLinkSectionDescription": "Стварыце спасылку, каб людзі маглі дадаваць і праглядаць фатаграфіі ў вашым абагуленым альбоме без неабходнасці ўсталёўваць праграму або ствараць уліковы запіс Ente. Гэта выдатна пасуе для збору фатаграфій з падзей.",
   "collectPhotos": "Збор фатаграфій",
   "collaborativeLink": "Сумесная спасылка",
   "shareWithNonenteUsers": "Абагуліць з карыстальнікамі, якія не карыстаюцца Ente",
@@ -337,7 +336,6 @@
   "creatingLink": "Стварэнне спасылкі...",
   "removeWithQuestionMark": "Выдаліць?",
   "removeParticipantBody": "{userEmail} будзе выдалены з гэтага абагуленага альбома\n\nЛюбыя фатаграфіі, якія дададзены гэтым карыстальнікам, таксама будуць выдалены з альбома",
-  "keepPhotos": "Пакінуць фатаграфіі",
   "deletePhotos": "Выдаліць фатаграфіі",
   "inviteToEnte": "Запрасіць у Ente",
   "removePublicLink": "Выдаліць публічную спасылку",
@@ -345,6 +343,9 @@
   "sharing": "Абагульванне...",
   "youCannotShareWithYourself": "Нельга абагуліць файлы з самім сабою",
   "archive": "Архіў",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Доўга ўтрымлівайце, каб выбраць фатаграфію, і націсніце «+», каб стварыць альбом",
   "importing": "Імпартаванне....",
   "failedToLoadAlbums": "Не ўдалося загрузіць альбомы",
@@ -757,6 +758,9 @@
   "moveToAlbum": "Перамясціць у альбом",
   "unhide": "Паказаць",
   "unarchive": "Вывесці з архіва",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Абраныя",
   "removeFromFavorite": "Выдаліць з абранага",
   "shareLink": "Абагуліць спасылку",

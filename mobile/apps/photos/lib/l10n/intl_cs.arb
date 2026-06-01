@@ -273,7 +273,6 @@
   "after1Month": "Po 1 měsíci",
   "after1Year": "Po 1 roce",
   "manageParticipants": "Spravovat",
-  "collabLinkSectionDescription": "Vytvořte odkaz, který umožní ostatním přidávat a prohlížet fotografie ve Vašem sdíleném albu, aniž by potřebovali aplikaci Ente nebo účet. Skvělé pro shromažďování fotografií z akcí.",
   "collectPhotos": "Shromáždit fotografie",
   "collaborativeLink": "Odkaz na spolupráci",
   "shareWithNonenteUsers": "Sdílet s jinými uživateli",
@@ -400,7 +399,6 @@
   "creatingLink": "Vytváření odkazu...",
   "removeWithQuestionMark": "Odstranit?",
   "removeParticipantBody": "{userEmail} budou odebráni z tohoto sdíleného alba\n\nVšechny jimi přidané fotografie budou z alba také odebrány",
-  "keepPhotos": "Ponechat fotografie",
   "deletePhotos": "Smazat fotografie",
   "inviteToEnte": "Pozvat do Ente",
   "removePublicLink": "Odstranit veřejný odkaz",
@@ -408,6 +406,9 @@
   "sharing": "Sdílení...",
   "youCannotShareWithYourself": "Nemůžete sdílet se sebou",
   "archive": "Archiv",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Dlouze podržte pro výběr fotografií a klikněte na + pro vytvoření alba",
   "importing": "Importování....",
   "failedToLoadAlbums": "Nepodařilo se načíst alba",
@@ -1090,6 +1091,9 @@
   "moveToAlbum": "Přesunout do alba",
   "unhide": "Odkrýt",
   "unarchive": "Odebrat z archivu",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Oblíbené",
   "removeFromFavorite": "Odebrat z oblíbených",
   "shareMemories": "Sdílet vzpomínky",

@@ -204,11 +204,13 @@
     "description": "Label for setting custom value for link expiry"
   },
   "manageParticipants": "مدیریت",
-  "collabLinkSectionDescription": "پیوندی ایجاد کنید تا به افراد اجازه دهید بدون نیاز به برنامه یا حساب کاربری Ente عکس‌ها را در آلبوم اشتراک گذاشته شده شما اضافه و مشاهده کنند. برای جمع‌آوری عکس‌های رویداد عالی است.",
   "verifyEmailID": "تایید {email}",
   "details": "جزئیات",
   "faq": "سوالات متداول",
   "archive": "بایگانی",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "uncategorized": "دسته‌بندی نشده",
   "videoSmallCase": "ویدیو",
   "photoSmallCase": "عکس",

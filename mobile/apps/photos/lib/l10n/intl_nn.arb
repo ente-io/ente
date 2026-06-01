@@ -156,6 +156,9 @@
   "sorryCouldNotAddToFavorites": "Klarte ikkje leggja til i favorittar.",
   "sorryCouldNotRemoveFromFavorites": "Klarte ikkje fjerna frå favorittar.",
   "archive": "Arkiv",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Trykk lenge for å velja foto, og trykk på pluss-ikonet for å oppretta eit album",
   "importing": "Importerer …",
   "failedToLoadAlbums": "Feil ved lasting av album",

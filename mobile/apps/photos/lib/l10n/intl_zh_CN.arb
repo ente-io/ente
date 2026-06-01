@@ -250,7 +250,6 @@
   "after1Month": "1个月后",
   "after1Year": "1 年后",
   "manageParticipants": "管理",
-  "collabLinkSectionDescription": "创建一个链接来让他人无需 Ente 应用程序或账户即可在您的共享相册中添加和查看照片。非常适合收集活动照片。",
   "collectPhotos": "收集照片",
   "collaborativeLink": "协作链接",
   "shareWithNonenteUsers": "与非 Ente 用户共享",
@@ -371,7 +370,6 @@
   "creatingLink": "正在创建链接...",
   "removeWithQuestionMark": "要移除吗?",
   "removeParticipantBody": "{userEmail} 将从这个共享相册中删除\n\nTA们添加的任何照片也将从相册中删除",
-  "keepPhotos": "保留照片",
   "deletePhotos": "删除照片",
   "inviteToEnte": "邀请到 Ente",
   "removePublicLink": "删除公开链接",
@@ -379,6 +377,9 @@
   "sharing": "正在分享...",
   "youCannotShareWithYourself": "莫开玩笑，您不能与自己分享",
   "archive": "存档",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "长按选择照片，然后点击 + 创建相册",
   "importing": "正在导入...",
   "failedToLoadAlbums": "加载相册失败",
@@ -827,6 +828,9 @@
   "moveToAlbum": "移动到相册",
   "unhide": "取消隐藏",
   "unarchive": "取消存档",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "收藏",
   "removeFromFavorite": "从收藏中移除",
   "shareLink": "分享链接",

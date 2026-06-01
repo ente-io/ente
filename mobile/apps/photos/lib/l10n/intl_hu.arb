@@ -273,7 +273,6 @@
   "after1Month": "Egy hónap múlva",
   "after1Year": "Egy év múlva",
   "manageParticipants": "Kezelés",
-  "collabLinkSectionDescription": "Hozzon létre egy hivatkozást, amely lehetővé teszi az emberek számára, hogy fotókat adhassanak hozzá és tekintsenek meg megosztott albumában anélkül, hogy Ente alkalmazásra vagy fiókra lenne szükségük. Kiválóan alkalmas rendezvényfotók gyűjtésére.",
   "collectPhotos": "Fotók gyűjtése",
   "collaborativeLink": "Együttműködési hivatkozás",
   "shareWithNonenteUsers": "Megosztás nem Ente felhasználókkal",
@@ -400,7 +399,6 @@
   "creatingLink": "Link létrehozása...",
   "removeWithQuestionMark": "Eltávolítás?",
   "removeParticipantBody": "{userEmail} felhasználó el lesz távolítva ebből a megosztott albumból\n\nAz általa hozzáadott összes fotó is eltávolításra kerül az albumból.",
-  "keepPhotos": "Fotók megőrzése",
   "deletePhotos": "Fotók törlése",
   "inviteToEnte": "Meghívás az Ente-re",
   "removePublicLink": "Nyilvános hivatkozás eltávolítása",
@@ -408,6 +406,9 @@
   "sharing": "Megosztás...",
   "youCannotShareWithYourself": "Nem oszthatod meg magaddal",
   "archive": "Archívum",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Hosszan nyomva tartva kiválaszthatod a fotókat, majd a + jelre kattintva albumot hozhatsz létre",
   "importing": "Importálás...",
   "failedToLoadAlbums": "Nem sikerült betölteni az albumokat",
@@ -942,6 +943,9 @@
   "moveToAlbum": "Áthelyezés albumba",
   "unhide": "Felfedés",
   "unarchive": "Archiválás visszavonása",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Kedvenc",
   "removeFromFavorite": "Eltávolítás a kedvencek közül",
   "shareMemories": "Emlékek megosztása",

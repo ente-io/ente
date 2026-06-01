@@ -219,7 +219,6 @@
   "after1Month": "Hilabete bat barru",
   "after1Year": "Urtebete barru",
   "manageParticipants": "Kudeatu",
-  "collabLinkSectionDescription": "Sortu esteka bat beste pertsona batzuei zure album partekatuan arriskuak gehitu eta ikusten uzteko, naiz eta Ente aplikazio edo kontua ez izan. Oso egokia gertakizun bateko argazkiak biltzeko.",
   "collectPhotos": "Bildu argazkiak",
   "collaborativeLink": "Parte hartzeko esteka",
   "shareWithNonenteUsers": "Partekatu Ente erabiltzen ez dutenekin",
@@ -312,7 +311,6 @@
   "creatingLink": "Esteka sortzen...",
   "removeWithQuestionMark": "Ezabatuko?",
   "removeParticipantBody": "{userEmail} partekatutako album honetatik ezabatuko da \n\nHaiek gehitutako argazki guztiak ere ezabatuak izango dira albumetik",
-  "keepPhotos": "Gorde Argazkiak",
   "deletePhotos": "Ezabatu argazkiak",
   "inviteToEnte": "Gonbidatu Ente-ra",
   "removePublicLink": "Ezabatu esteka publikoa",
@@ -320,6 +318,9 @@
   "sharing": "Partekatzen...",
   "youCannotShareWithYourself": "Ezin duzu zeure buruarekin partekatu",
   "archive": "Artxiboa",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Luze klikatu argazkiak hautatzeko eta klikatu + albuma sortzeko",
   "importing": "Inportatzen....",
   "failedToLoadAlbums": "Errorea albumak kargatzen",

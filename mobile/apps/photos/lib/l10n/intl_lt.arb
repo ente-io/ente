@@ -243,7 +243,7 @@
   "after1Month": "Po 1 mėnesio",
   "after1Year": "Po 1 metų",
   "manageParticipants": "Tvarkyti",
-  "collabLinkSectionDescription": "Sukurkite nuorodą, kad asmenys galėtų pridėti ir peržiūrėti nuotraukas bendrinamame albume, nereikalaujant „Ente“ programos ar paskyros. Puikiai tinka įvykių nuotraukoms rinkti.",
+  "collabLinkSectionDescription": "Leiskite žmonėms pridėti nuotraukas be „Ente“ paskyros.",
   "collectPhotos": "Rinkti nuotraukas",
   "collaborativeLink": "Bendradarbiavimo nuoroda",
   "shareWithNonenteUsers": "Bendrinkite su ne „Ente“ naudotojais.",
@@ -340,13 +340,14 @@
   "canOnlyRemoveFilesOwnedByYou": "Galima pašalinti tik jums priklausančius failus",
   "deleteSharedAlbum": "Ištrinti bendrinamą albumą?",
   "deleteAlbum": "Ištrinti albumą",
+  "deleteAlbumQuestion": "Ištrinti šį albumą?",
   "deleteAlbumDialog": "Taip pat ištrinti šiame albume esančias nuotraukas (ir vaizdo įrašus) iš <bold>visų</bold> kitų albumų, kuriuose jos yra dalis?",
   "deleteSharedAlbumDialogBody": "Albumas bus ištrintas visiems.\n\nPrarasite prieigą prie bendrinamų nuotraukų, esančių šiame albume ir priklausančių kitiems.",
   "yesRemove": "Taip, šalinti",
   "creatingLink": "Kuriama nuoroda...",
   "removeWithQuestionMark": "Šalinti?",
   "removeParticipantBody": "{userEmail} bus pašalintas iš šio bendrinamo albumo.\n\nVisos jų pridėtos nuotraukos taip pat bus pašalintos iš albumo.",
-  "keepPhotos": "Palikti nuotraukas",
+  "keepPhotos": "Laikyti nuotraukas",
   "deletePhotos": "Ištrinti nuotraukas",
   "inviteToEnte": "Kviesti į „Ente“",
   "removePublicLink": "Šalinti viešą nuorodą",
@@ -354,6 +355,9 @@
   "sharing": "Bendrinima...",
   "youCannotShareWithYourself": "Negalite bendrinti su savimi.",
   "archive": "Archyvas",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Ilgai paspauskite, kad pasirinktumėte nuotraukas, ir spustelėkite +, kad sukurtumėte albumą",
   "importing": "Importuojama....",
   "failedToLoadAlbums": "Nepavyko įkelti albumų.",
@@ -371,6 +375,7 @@
   "deleteFromEnte": "Ištrinti iš „Ente“",
   "yesDelete": "Taip, ištrinti",
   "movedToTrash": "Perkelta į šiukšlinę",
+  "deleteFromDeviceQuestion": "Ištrinti iš įrenginio?",
   "deleteFromDevice": "Ištrinti iš įrenginio",
   "deleteFromBoth": "Ištrinti iš abiejų",
   "newAlbum": "Naujas albumas",
@@ -775,6 +780,8 @@
   "grantFullAccessPrompt": "Leiskite prieigą prie visų nuotraukų nustatymų programoje.",
   "allowPermTitle": "Leisti prieigą prie nuotraukų",
   "allowPermBody": "Iš nustatymų leiskite prieigą prie nuotraukų, kad „Ente“ galėtų rodyti ir kurti atsargines bibliotekos kopijas.",
+  "albumsOnDevicePermissionCta": "Leisti prieigą",
+  "startSnappingYourPhotosWillShowUpHere": "Pradėkite fotografuoti – jūsų nuotraukos bus rodomos čia.",
   "selectMorePhotos": "Pasirinkti daugiau nuotraukų",
   "existingUser": "Esamas naudotojas",
   "newToEnte": "Naujas platformoje „Ente“",
@@ -840,6 +847,9 @@
   "moveToAlbum": "Perkelti į albumą",
   "unhide": "Rodyti",
   "unarchive": "Išarchyvuoti",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Pamėgti",
   "removeFromFavorite": "Šalinti iš mėgstamų",
   "shareLink": "Bendrinti nuorodą",
@@ -1137,6 +1147,7 @@
   "light": "Šviesi",
   "color": "Spalva",
   "yesDiscardChanges": "Taip, atmesti pakeitimus",
+  "discardEditsQuestion": "Atmesti redagavimus?",
   "doYouWantToDiscardTheEditsYouHaveMade": "Ar norite atmesti atliktus pakeitimus?",
   "saving": "Išsaugoma...",
   "editsSaved": "Redagavimai išsaugoti",
@@ -1266,6 +1277,7 @@
   "upto50OffUntil4thDec": "Iki 50% nuolaida, gruodžio 4 d.",
   "photos": "Nuotraukos",
   "videos": "Vaizdo įrašai",
+  "camera": "Fotoaparatas",
   "livePhotos": "Gyvos nuotraukos",
   "searchHint1": "Sparti paieška įrenginyje",
   "searchHint2": "Nuotraukų datos ir aprašai",
@@ -1393,6 +1405,7 @@
   },
   "enable": "Įjungti",
   "enabled": "Įjungta",
+  "more": "Daugiau",
   "moreDetails": "Daugiau išsamios informacijos",
   "enableMLIndexingDesc": "„Ente“ palaiko įrenginyje mašininį mokymąsi, skirtą veidų atpažinimui, magiškai paieškai ir kitoms išplėstinėms paieškos funkcijoms",
   "magicSearchHint": "Magiška paieška leidžia ieškoti nuotraukų pagal jų turinį, pvz., „gėlė“, „raudonas automobilis“, „tapatybės dokumentai“",
@@ -1717,6 +1730,7 @@
   "photosKeepRelativeTimeDifference": "Nuotraukos išlaiko santykinį laiko skirtumą",
   "appIcon": "Programos piktograma",
   "notThisPerson": "Ne šis asmuo?",
+  "removeFromPersonQuestion": "Pašalinti iš asmens?",
   "selectedItemsWillBeRemovedFromThisPerson": "Pasirinkti elementai bus pašalinti iš šio asmens, bet nebus ištrinti iš jūsų bibliotekos.",
   "throughTheYears": "{dateFormat} per metus",
   "thisWeekThroughTheYears": "Ši savaitė per metus",
@@ -1752,6 +1766,7 @@
   "memories": "Prisiminimai",
   "smartMemories": "Išmanieji prisiminimai",
   "pastYearsMemories": "Praėjusių metų prisiminimai",
+  "deleteMultipleAlbumsQuestion": "Ištrinti šiuos albumus?",
   "deleteMultipleAlbumDialog": "Taip pat ištrinti nuotraukas (ir vaizdo įrašus), esančias šiuose {count} albumuose, iš <bold>visų</bold> kitų albumų, kuriuose jos yra dalis?",
   "addParticipants": "Įtraukti dalyvių",
   "selectedAlbums": "{count} pasirinkta",
@@ -1812,6 +1827,7 @@
   "undo": "Anuliuoti",
   "redo": "Grąžinti",
   "filter": "Filtruoti",
+  "filters": "Filtrai",
   "adjust": "Priderinti",
   "draw": "Piešti",
   "sticker": "Lipdukas",
@@ -1876,5 +1892,10 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
-  "grantPermission": "Suteikti leidimą"
+  "smartSuggestions": "Išmanūs pasiūlymai",
+  "grantPermission": "Suteikti leidimą",
+  "archiveCollectionName": "Archyvas",
+  "@archiveCollectionName": {
+    "description": "Name of the 'Archive' collection"
+  }
 }

@@ -390,6 +390,9 @@
   "moveToAlbum": "ย้ายไปยังอัลบั้ม",
   "unhide": "เลิกซ่อน",
   "unarchive": "เลิกเก็บถาวร",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "ชื่นชอบ",
   "shareLink": "แชร์​ลิงก์",
   "addToEnte": "เพิ่มไปที่ Ente",
