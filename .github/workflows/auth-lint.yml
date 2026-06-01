@@ -15,7 +15,7 @@ permissions:
 
 jobs:
     auth-lint:
-        runs-on: ubuntu-latest
+        runs-on: macos-26
         defaults:
             run:
                 working-directory: mobile/apps/auth
@@ -81,6 +81,10 @@ jobs:
               working-directory: mobile/packages/strings
 
             - run: flutter pub get --enforce-lockfile
+
+            - name: Check iOS Podfile.lock is current
+              run: pod install --deployment
+              working-directory: mobile/apps/auth/ios
 
             - name: Generate auth localizations
               run: flutter gen-l10n
