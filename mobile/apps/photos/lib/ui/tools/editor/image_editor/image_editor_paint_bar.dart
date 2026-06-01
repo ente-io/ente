@@ -1,6 +1,6 @@
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_color_picker.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_constants.dart";
@@ -45,6 +45,7 @@ class _ImageEditorPaintBarState extends State<ImageEditorPaintBar>
   }
 
   Widget _buildFunctions(BoxConstraints constraints) {
+    final colors = context.componentColors;
     return BottomAppBar(
       height: editorBottomBarHeight,
       padding: EdgeInsets.zero,
@@ -60,7 +61,7 @@ class _ImageEditorPaintBarState extends State<ImageEditorPaintBar>
                 padding: const EdgeInsets.only(left: 20.0),
                 child: Text(
                   AppLocalizations.of(context).brushColor,
-                  style: getEnteTextTheme(context).body,
+                  style: TextStyles.large.copyWith(color: colors.textBase),
                 ),
               ),
               const SizedBox(height: 24),

@@ -1,8 +1,7 @@
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:pro_image_editor/pro_image_editor.dart";
 
 class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -32,7 +31,8 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
+    final actionTextStyle = TextStyles.large.copyWith(color: colors.textBase);
     return AppBar(
       elevation: 0,
       automaticallyImplyLeading: false,
@@ -45,7 +45,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
             },
             child: Text(
               AppLocalizations.of(context).cancel,
-              style: getEnteTextTheme(context).body,
+              style: actionTextStyle,
             ),
           ),
           if (undo != null && redo != null)
@@ -59,9 +59,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                   },
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedUndo03,
-                    color: enableUndo
-                        ? colorScheme.textBase
-                        : colorScheme.textMuted,
+                    color: enableUndo ? colors.textBase : colors.textLight,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -72,9 +70,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                   },
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedRedo03,
-                    color: enableRedo
-                        ? colorScheme.textBase
-                        : colorScheme.textMuted,
+                    color: enableRedo ? colors.textBase : colors.textLight,
                   ),
                 ),
               ],
@@ -90,14 +86,10 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                 isMainEditor
                     ? AppLocalizations.of(context).saveCopy
                     : AppLocalizations.of(context).done,
-                style: getEnteTextTheme(context).body.copyWith(
+                style: actionTextStyle.copyWith(
                   color: isMainEditor
-                      ? (enableUndo
-                            ? Theme.of(
-                                context,
-                              ).colorScheme.imageEditorPrimaryColor
-                            : colorScheme.textMuted)
-                      : Theme.of(context).colorScheme.imageEditorPrimaryColor,
+                      ? (enableUndo ? colors.primary : colors.textLight)
+                      : colors.primary,
                 ),
               ),
             ),

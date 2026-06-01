@@ -1,11 +1,10 @@
 import 'dart:math';
 
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:flutter_svg/svg.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:photos/ente_theme_data.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_constants.dart";
 import 'package:pro_image_editor/core/mixins/converted_configs.dart';
@@ -147,6 +146,7 @@ class TuneItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.componentColors;
     final hugeIcon = _hugeIconForLabel(label);
     final svgPath = _svgPathForLabel(label);
     return GestureDetector(
@@ -165,14 +165,12 @@ class TuneItem extends StatelessWidget {
               hugeIcon: hugeIcon,
               svgPath: svgPath,
               isSelected: isSelected,
-              progressColor: Theme.of(
-                context,
-              ).colorScheme.imageEditorPrimaryColor,
+              progressColor: colors.primary,
             ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: getEnteTextTheme(context).small,
+              style: TextStyles.body.copyWith(color: colors.textBase),
               textAlign: TextAlign.center,
             ),
           ],
@@ -314,8 +312,7 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final displayValue = _normalizeValueForDisplay(
       widget.value,
       widget.min,
@@ -340,11 +337,11 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
               shape: BoxShape.circle,
               color: showValue || widget.isSelected
                   ? progressColor.withValues(alpha: 0.2)
-                  : Theme.of(context).colorScheme.editorBackgroundColor,
+                  : colors.fillLight,
               border: Border.all(
                 color: widget.isSelected
                     ? progressColor.withValues(alpha: 0.4)
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                    : colors.fillLight,
                 width: 2,
               ),
             ),
@@ -383,7 +380,10 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
           Align(
             alignment: Alignment.center,
             child: showValue
-                ? Text("$prefix$displayText", style: textTheme.smallBold)
+                ? Text(
+                    "$prefix$displayText",
+                    style: TextStyles.bodyBold.copyWith(color: colors.textBase),
+                  )
                 : widget.svgPath != null
                 ? SvgPicture.asset(
                     widget.svgPath!,
@@ -391,17 +391,17 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
                     height: 22,
                     fit: BoxFit.scaleDown,
                     colorFilter: ColorFilter.mode(
-                      colorTheme.tabIcon,
+                      colors.iconColor,
                       BlendMode.srcIn,
                     ),
                   )
                 : widget.hugeIcon != null
                 ? HugeIcon(
                     icon: widget.hugeIcon!,
-                    color: colorTheme.tabIcon,
+                    color: colors.iconColor,
                     size: 22,
                   )
-                : Icon(widget.icon, color: colorTheme.tabIcon, size: 20),
+                : Icon(widget.icon, color: colors.iconColor, size: 20),
           ),
         ],
       ),
@@ -424,7 +424,7 @@ class _TuneAdjustWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     return SizedBox(
       height: 40,
       child: Stack(
@@ -435,7 +435,7 @@ class _TuneAdjustWidget extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(25),
-                color: Theme.of(context).colorScheme.editorBackgroundColor,
+                color: colors.fillLight,
               ),
             ),
           ),
@@ -446,12 +446,8 @@ class _TuneAdjustWidget extends StatelessWidget {
               data: SliderTheme.of(context).copyWith(
                 thumbShape: const _ColorPickerThumbShape(),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 0),
-                activeTrackColor: Theme.of(
-                  context,
-                ).colorScheme.imageEditorPrimaryColor,
-                inactiveTrackColor: Theme.of(
-                  context,
-                ).colorScheme.editorBackgroundColor,
+                activeTrackColor: colors.primary,
+                inactiveTrackColor: colors.fillLight,
                 trackShape: const _CenterBasedTrackShape(),
                 trackHeight: 24,
               ),
@@ -473,7 +469,7 @@ class _TuneAdjustWidget extends StatelessWidget {
                   height: 6,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colorScheme.fillBase.withAlpha(30),
+                    color: colors.fillBase.withAlpha(30),
                   ),
                 ),
                 Container(
@@ -481,7 +477,7 @@ class _TuneAdjustWidget extends StatelessWidget {
                   height: 6,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colorScheme.fillBase.withAlpha(30),
+                    color: colors.fillBase.withAlpha(30),
                   ),
                 ),
                 Container(
@@ -489,7 +485,7 @@ class _TuneAdjustWidget extends StatelessWidget {
                   height: 6,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colorScheme.fillBase.withAlpha(30),
+                    color: colors.fillBase.withAlpha(30),
                   ),
                 ),
               ],

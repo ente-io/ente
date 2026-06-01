@@ -1,8 +1,7 @@
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/svg.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:photos/ente_theme_data.dart";
-import "package:photos/theme/ente_theme.dart";
 
 class CircularIconButton extends StatelessWidget {
   final String label;
@@ -31,14 +30,13 @@ class CircularIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     final Widget iconContent;
     if (hugeIcon != null) {
       iconContent = HugeIcon(
         icon: hugeIcon!,
         size: 24,
-        color: colorScheme.tabIcon,
+        color: colors.iconColor,
       );
     } else if (svgPath != null) {
       iconContent = SvgPicture.asset(
@@ -46,10 +44,10 @@ class CircularIconButton extends StatelessWidget {
         width: 12,
         height: 12,
         fit: BoxFit.scaleDown,
-        colorFilter: ColorFilter.mode(colorScheme.tabIcon, BlendMode.srcIn),
+        colorFilter: ColorFilter.mode(colors.iconColor, BlendMode.srcIn),
       );
     } else if (icon != null) {
-      iconContent = Icon(icon, size: size * 0.4, color: colorScheme.tabIcon);
+      iconContent = Icon(icon, size: size * 0.4, color: colors.iconColor);
     } else {
       iconContent = child!;
     }
@@ -67,14 +65,11 @@ class CircularIconButton extends StatelessWidget {
               width: size,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context).colorScheme.imageEditorPrimaryColor
-                          .withValues(alpha: 0.24)
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                    ? colors.primary.withValues(alpha: 0.24)
+                    : colors.fillLight,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.imageEditorPrimaryColor
-                      : Theme.of(context).colorScheme.editorBackgroundColor,
+                  color: isSelected ? colors.primary : colors.fillLight,
                   width: 2,
                 ),
               ),
@@ -82,7 +77,11 @@ class CircularIconButton extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(label, style: textTheme.small, textAlign: TextAlign.center),
+          Text(
+            label,
+            style: TextStyles.body.copyWith(color: colors.textBase),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );

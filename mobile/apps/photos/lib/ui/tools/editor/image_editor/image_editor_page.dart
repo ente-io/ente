@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:math";
 import 'dart:ui' as ui show Image, ImageByteFormat;
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
@@ -13,13 +14,11 @@ import 'package:path/path.dart' as path;
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart' as ente;
 import "package:photos/models/location/location.dart";
 import "package:photos/services/sync/sync_service.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -186,8 +185,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   @override
   Widget build(BuildContext context) {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
+    final actionTextStyle = TextStyles.large.copyWith(color: colors.textBase);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -198,7 +197,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         resizeToAvoidBottomInset: false,
-        backgroundColor: colorScheme.backgroundColour,
+        backgroundColor: colors.backgroundBase,
         body: ProImageEditor.file(
           key: editorKey,
           widget.file,
@@ -228,13 +227,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               hideToolbarOnInteraction: false,
             ),
             theme: ThemeData(
-              scaffoldBackgroundColor: colorScheme.backgroundColour,
+              scaffoldBackgroundColor: colors.backgroundBase,
               appBarTheme: AppBarTheme(
-                titleTextStyle: textTheme.body,
-                backgroundColor: colorScheme.backgroundColour,
+                titleTextStyle: actionTextStyle,
+                backgroundColor: colors.backgroundBase,
               ),
               bottomAppBarTheme: BottomAppBarThemeData(
-                color: colorScheme.backgroundColour,
+                color: colors.backgroundBase,
               ),
               brightness: isLightMode ? Brightness.light : Brightness.dark,
             ),
@@ -258,9 +257,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                       ? Brightness.dark
                       : Brightness.light,
                 ),
-                appBarBackground: colorScheme.backgroundColour,
-                background: colorScheme.backgroundColour,
-                bottomBarBackground: colorScheme.backgroundColour,
+                appBarBackground: colors.backgroundBase,
+                background: colors.backgroundBase,
+                bottomBarBackground: colors.backgroundBase,
               ),
               widgets: MainEditorWidgets(
                 removeLayerArea:
@@ -290,7 +289,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                                       margin: const EdgeInsets.only(bottom: 24),
                                       decoration: BoxDecoration(
                                         color: isHovered
-                                            ? colorScheme.warning400.withValues(
+                                            ? colors.warning.withValues(
                                                 alpha: 0.8,
                                               )
                                             : Colors.white,
@@ -302,8 +301,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                                           icon: HugeIcons.strokeRoundedDelete02,
                                           color: isHovered
                                               ? Colors.white
-                                              : colorScheme.warning400
-                                                    .withValues(alpha: 0.8),
+                                              : colors.warning.withValues(
+                                                  alpha: 0.8,
+                                                ),
                                         ),
                                       ),
                                     )
@@ -358,7 +358,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             paintEditor: PaintEditorConfigs(
               style: PaintEditorStyle(
                 initialColor: const Color(0xFF00FFFF),
-                background: colorScheme.backgroundColour,
+                background: colors.backgroundBase,
               ),
               widgets: PaintEditorWidgets(
                 appBar: (editor, rebuildStream) {
@@ -448,10 +448,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             ),
             cropRotateEditor: CropRotateEditorConfigs(
               style: CropRotateEditorStyle(
-                background: colorScheme.backgroundColour,
-                cropCornerColor: Theme.of(
-                  context,
-                ).colorScheme.imageEditorPrimaryColor,
+                background: colors.backgroundBase,
+                cropCornerColor: colors.primary,
               ),
               widgets: CropRotateEditorWidgets(
                 appBar: (editor, rebuildStream) {
@@ -485,9 +483,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               fadeInUpDuration: fadeInDuration,
               fadeInUpStaggerDelayDuration: fadeInDelay,
               filterList: filterList,
-              style: FilterEditorStyle(
-                background: colorScheme.backgroundColour,
-              ),
+              style: FilterEditorStyle(background: colors.backgroundBase),
               widgets: FilterEditorWidgets(
                 slider:
                     (
@@ -538,7 +534,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
             ),
             tuneEditor: TuneEditorConfigs(
-              style: TuneEditorStyle(background: colorScheme.backgroundColour),
+              style: TuneEditorStyle(background: colors.backgroundBase),
               widgets: TuneEditorWidgets(
                 appBar: (editor, rebuildStream) {
                   return ReactiveAppbar(
@@ -577,11 +573,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               style: EmojiEditorStyle(
                 bottomActionBarConfig: BottomActionBarConfig(
                   showSearchViewButton: true,
-                  buttonColor: colorScheme.backgroundColour,
-                  buttonIconColor: colorScheme.tabIcon,
-                  backgroundColor: colorScheme.backgroundColour,
+                  buttonColor: colors.backgroundBase,
+                  buttonIconColor: colors.iconColor,
+                  backgroundColor: colors.backgroundBase,
                 ),
-                backgroundColor: colorScheme.backgroundColour,
+                backgroundColor: colors.backgroundBase,
               ),
             ),
             stickerEditor: StickerEditorConfigs(

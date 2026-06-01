@@ -1,8 +1,7 @@
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/circular_icon_button.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_color_picker.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
@@ -143,7 +142,8 @@ class _FontPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
+    final selectedBackground = colors.fillBase.withValues(alpha: 0.9);
     if (editor.textEditorConfigs.customTextStyles == null) {
       return const SizedBox.shrink();
     }
@@ -167,18 +167,14 @@ class _FontPickerWidget extends StatelessWidget {
               height: 40,
               width: 48,
               decoration: BoxDecoration(
-                color: isSelected
-                    ? colorScheme.fillBasePressed
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                color: isSelected ? selectedBackground : colors.fillLight,
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Center(
                 child: Text(
                   'Aa',
                   style: item.copyWith(
-                    color: isSelected
-                        ? colorScheme.backdropBase
-                        : colorScheme.tabIcon,
+                    color: isSelected ? colors.textReverse : colors.iconColor,
                   ),
                 ),
               ),
@@ -197,15 +193,16 @@ class _BackgroundPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
     final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final faintFill = colors.fillBase.withValues(
+      alpha: isLightMode ? 0.04 : 0.12,
+    );
     final backgroundStyles = {
       LayerBackgroundMode.background: {
         'text': 'Aa',
-        'selectedBackgroundColor': isLightMode
-            ? colorScheme.fillFaint
-            : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'selectedBackgroundColor': isLightMode ? faintFill : Colors.white,
+        'backgroundColor': colors.fillLight,
         'border': null,
         'textColor': Colors.white,
         'selectedInnerBackgroundColor': Colors.black,
@@ -213,10 +210,8 @@ class _BackgroundPickerWidget extends StatelessWidget {
       },
       LayerBackgroundMode.backgroundAndColor: {
         'text': 'Aa',
-        'selectedBackgroundColor': isLightMode
-            ? colorScheme.fillFaint
-            : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'selectedBackgroundColor': isLightMode ? faintFill : Colors.white,
+        'backgroundColor': colors.fillLight,
         'border': null,
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.transparent,
@@ -224,10 +219,8 @@ class _BackgroundPickerWidget extends StatelessWidget {
       },
       LayerBackgroundMode.backgroundAndColorWithOpacity: {
         'text': 'Aa',
-        'selectedBackgroundColor': isLightMode
-            ? colorScheme.fillFaint
-            : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'selectedBackgroundColor': isLightMode ? faintFill : Colors.white,
+        'backgroundColor': colors.fillLight,
         'border': null,
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.black.withValues(alpha: 0.11),
@@ -237,10 +230,8 @@ class _BackgroundPickerWidget extends StatelessWidget {
       },
       LayerBackgroundMode.onlyColor: {
         'text': 'Aa',
-        'selectedBackgroundColor': isLightMode
-            ? colorScheme.fillFaint
-            : Colors.black,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'selectedBackgroundColor': isLightMode ? faintFill : Colors.black,
+        'backgroundColor': colors.fillLight,
         'border': isLightMode
             ? null
             : Border.all(color: Colors.white, width: 2),
@@ -299,7 +290,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
                         style: TextStyle(
                           color: isSelected
                               ? style['textColor'] as Color
-                              : colorScheme.tabIcon,
+                              : colors.iconColor,
                         ),
                       ),
                     ),
@@ -321,7 +312,8 @@ class _AlignPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final colors = context.componentColors;
+    final selectedBackground = colors.fillBase.withValues(alpha: 0.9);
     final alignments = <(TextAlign, List<List<dynamic>>)>[
       (TextAlign.left, HugeIcons.strokeRoundedTextAlignLeft),
       (TextAlign.center, HugeIcons.strokeRoundedTextAlignCenter),
@@ -346,9 +338,7 @@ class _AlignPickerWidget extends StatelessWidget {
               height: 40,
               width: 48,
               decoration: BoxDecoration(
-                color: isSelected
-                    ? colorScheme.fillBasePressed
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                color: isSelected ? selectedBackground : colors.fillLight,
                 borderRadius: BorderRadius.circular(25),
                 border: isSelected
                     ? Border.all(color: Colors.black, width: 2)
@@ -358,9 +348,7 @@ class _AlignPickerWidget extends StatelessWidget {
                 child: HugeIcon(
                   icon: hugeIcon,
                   size: 22,
-                  color: isSelected
-                      ? colorScheme.backdropBase
-                      : colorScheme.tabIcon,
+                  color: isSelected ? colors.textReverse : colors.iconColor,
                 ),
               ),
             ),
