@@ -11,7 +11,7 @@ dependencies:
     path: ..
   flutter:
     sdk: flutter
-  hugeicons: 1.1.5
+  hugeicons: 1.1.7
 
 dev_dependencies:
   flutter_lints: 5.0.0
