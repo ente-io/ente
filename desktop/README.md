@@ -8,16 +8,24 @@ To know more about Ente, see [our main README](../README.md) or visit [ente.com]
 
 ## Building from source
 
-Clone this repository and change to this directory
+Clone this repository
 
 ```sh
 git clone https://github.com/ente-io/ente
-cd ente/desktop
+cd ente
 ```
 
-Install dependencies:
+Install the web dependencies
 
 ```sh
+cd web
+npm ci
+```
+
+Install the desktop dependencies
+
+```sh
+cd ../desktop
 npm ci
 ```
 

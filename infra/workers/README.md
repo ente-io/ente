@@ -2,21 +2,31 @@
 
 Source code for our [Cloudflare Workers](https://developers.cloudflare.com/workers/).
 
-Workers are organized as Yarn workspaces sharing a common `package.json` and base `tsconfig`. They can however be deployed individually.
+Workers are organized as npm workspaces sharing a common `package.json` and base `tsconfig`. They can however be deployed individually.
 
 ## Deploying
 
-Install dependencies with `yarn`.
-
-> If you have previously deployed, then you will have an old `yarn.lock`. In this case it is safe to delete and recreate using `rm yarn.lock && yarn`.
+Install dependencies with `npm ci`.
 
 Then, to deploy an individual worker
 
-- Login into wrangler (if needed) using `yarn workspace health-check wrangler login`
+- Login into wrangler (if needed) using `npm exec --workspace health-check -- wrangler login`
 
-- Deploy! `yarn workspace health-check wrangler deploy`
+- Deploy! `npm exec --workspace health-check -- wrangler deploy`
 
-Wrangler is the CLI provided by Cloudflare to manage workers. Apart from deploying, it also allows us to stream logs from running workers by using `yarn workspace <worker-name> wrangler tail`.
+Wrangler is the CLI provided by Cloudflare to manage workers. Apart from deploying, it also allows us to stream logs from running workers by using `npm exec --workspace <worker-name> -- wrangler tail`.
+
+> [!NOTE]
+>
+> When you're done, remember to logout!
+>
+> ```sh
+> npm exec --workspace health-check -- wrangler logout
+> ```
+
+> [!TIP]
+>
+> `wrangler login` and `wrangler logout` can be run from any of the worker workspaces, wrangler stores the credentials in some OS dependent shared location.
 
 ## Creating a new worker
 

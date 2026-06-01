@@ -41,9 +41,9 @@ const gitSHA = (() => {
 /**
  * The name of the Ente app we're building.
  *
- * This is taken from the name of the directory which we're building. e.g. `yarn
- * dev:auth` will cause yarn to be invoked in `web/apps/auth`, and so this will
- * be set to `auth`.
+ * This is taken from the name of the directory which we're building. e.g.
+ * `npm run dev:auth` will run Next.js in `web/apps/auth`, and so this will be
+ * set to `auth`.
  *
  * In our runtime code, all references to `process.env.appName` will be
  * statically replaced by this value at build time.
@@ -53,7 +53,7 @@ const appName = path.basename(process.cwd());
 /**
  * "1" if we're building our desktop app.
  *
- * The _ENTE_IS_DESKTOP environment variable will be set by the yarn script that
+ * The _ENTE_IS_DESKTOP environment variable will be set by the npm script that
  * builds the web app for embedding in the desktop app. Whenever it is set, we
  * set this value to "1".
  *

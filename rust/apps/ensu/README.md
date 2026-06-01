@@ -10,7 +10,7 @@ Desktop app for [Ensu](https://ente.com/ensu/). Built using Tauri.
 
     ```sh
     cd web
-    yarn install --frozen-lockfile
+    npm ci
     ```
 
 3. Install desktop dependencies:

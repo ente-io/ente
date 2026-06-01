@@ -25,7 +25,7 @@ Modify "https://payments.ente.com" to "http://localhost:3001".
 Then start it locally
 
 ```sh
-yarn dev:photos
+npm run dev:photos
 ```
 
 This tells it to connect to the museum and payments app running on localhost.
@@ -46,7 +46,7 @@ VITE_STRIPE_US_PUBLISHABLE_KEY = stripe_publishable_key
 Then start it locally
 
 ```sh
-yarn dev:payments
+npm run dev:payments
 ```
 
 ### Museum

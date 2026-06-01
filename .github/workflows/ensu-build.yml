@@ -130,13 +130,8 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 24
-                  cache: "yarn"
-                  cache-dependency-path: "web/yarn.lock"
-
-            - name: Activate Yarn 1.22.22
-              run: |
-                  corepack enable
-                  corepack prepare yarn@1.22.22 --activate
+                  cache: "npm"
+                  cache-dependency-path: "web/package-lock.json"
 
             - name: Install dependencies (Ubuntu only)
               if: matrix.platform.os == 'ubuntu-22.04'
@@ -150,11 +145,11 @@ jobs:
 
             - name: Install web dependencies
               working-directory: web
-              run: yarn install --frozen-lockfile
+              run: npm ci
 
             - name: Build WASM
               working-directory: web
-              run: yarn build:wasm
+              run: npm run build:wasm
 
             - name: Install Tauri dependencies
               run: npm ci --prefix rust/apps/ensu

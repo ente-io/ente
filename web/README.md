@@ -18,15 +18,13 @@ Install [Node](https://nodejs.org) and [Rust](https://www.rust-lang.org/tools/in
 Install dependencies
 
 ```sh
-yarn install --frozen-lockfile
+npm ci
 ```
-
-Use plain `yarn install` only when you are intentionally updating dependencies and reviewing the resulting `yarn.lock` changes.
 
 Start a local development server
 
 ```sh
-yarn dev
+npm run dev
 ```
 
 That's it. The web app will automatically hot reload when you make changes.
@@ -37,9 +35,9 @@ That's it. The web app will automatically hot reload when you make changes.
 
 ## Other apps
 
-By default, `yarn dev` builds the Photos app. To run the public albums app, use `yarn dev:albums`. To run auth, use `yarn dev:auth`.
+By default, `npm run dev` builds the Photos app. To run the public albums app, use `npm run dev:albums`. To run auth, use `npm run dev:auth`.
 
-To see the full list of apps you can run (and other scripts that you can use), use `yarn run`.
+To see the full list of apps you can run (and other scripts that you can use), use `npm run`.
 
 For more details about development workflows, see [docs/dev](docs/dev.md).
 
