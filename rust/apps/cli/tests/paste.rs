@@ -218,7 +218,7 @@ fn consumed_password_paste_checks_availability_before_password(fixture: &Fixture
         String::from_utf8_lossy(&second.stderr),
     );
     assert!(
-        !String::from_utf8_lossy(&second.stderr).contains("Paste password is empty"),
+        !String::from_utf8_lossy(&second.stderr).contains("Paste password cannot be empty"),
         "consumed paste validated password before guard: {}",
         String::from_utf8_lossy(&second.stderr),
     );

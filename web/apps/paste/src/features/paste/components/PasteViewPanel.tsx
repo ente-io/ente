@@ -84,19 +84,6 @@ export const PasteViewPanel = ({
                         >
                             Enter paste password
                         </Typography>
-                        <Typography
-                            variant="mini"
-                            sx={{
-                                maxWidth: 420,
-                                color: tokens.status.loadingBody,
-                                fontWeight: 500,
-                                lineHeight: 1.35,
-                                textAlign: "center",
-                            }}
-                        >
-                            Password is checked in your browser. If it fails,
-                            retry here instead of reopening the link.
-                        </Typography>
                         <TextField
                             variant="filled"
                             hiddenLabel

@@ -64,7 +64,7 @@ export const useConsumePaste = (mode: PageMode, accessToken: string | null) => {
                 setPasswordRequired(false);
             } catch (error) {
                 if (error instanceof IncorrectPastePasswordError) {
-                    setPasswordError("Incorrect paste password");
+                    setPasswordError(error.message);
                 } else {
                     setConsumeError(errorMessage(error));
                 }
