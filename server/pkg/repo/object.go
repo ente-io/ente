@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/pkg/utils/s3config"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 )
@@ -16,6 +17,7 @@ type ObjectRepository struct {
 	DB                 *sql.DB
 	LatencySensitiveDB *sql.DB
 	QueueRepo          *QueueRepository
+	S3Config           *s3config.S3Config
 }
 
 func (repo *ObjectRepository) objectLookupDB() *sql.DB {
@@ -318,9 +320,11 @@ func (repo *ObjectRepository) MarkObjectsAsDeletedForFileIDs(ctx context.Context
 		keysToBeDeleted = append(keysToBeDeleted, s3ObjectKey.ObjectKey)
 	}
 
-	err = repo.QueueRepo.AddItems(ctx, tx, RemoveComplianceHoldQueue, keysToBeDeleted)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
+	if repo.S3Config.WasabiComplianceDC() != "" {
+		err = repo.QueueRepo.AddItems(ctx, tx, RemoveComplianceHoldQueue, keysToBeDeleted)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
 	}
 
 	err = repo.QueueRepo.AddItems(ctx, tx, DeleteObjectQueue, keysToBeDeleted)

@@ -183,7 +183,7 @@ func main() {
 
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
-	objectRepo := &repo.ObjectRepository{DB: db, LatencySensitiveDB: latencySensitiveDB, QueueRepo: queueRepo}
+	objectRepo := &repo.ObjectRepository{DB: db, LatencySensitiveDB: latencySensitiveDB, QueueRepo: queueRepo, S3Config: s3Config}
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
 	contactRepository := &contactRepo.Repository{
 		DB:                  db,
