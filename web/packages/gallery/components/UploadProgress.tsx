@@ -1,13 +1,7 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { type UploadPhase } from "@/public-album/upload/pipeline";
-import type {
-    FinishedUploadType,
-    InProgressUpload,
-    SegregatedFinishedUploads,
-    UploadCounter,
-    UploadFileNames,
-} from "@/public-album/upload/services/upload-manager";
+import { DragDropVerticalIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -44,6 +38,7 @@ import React, {
     useCallback,
     useContext,
     useEffect,
+    useRef,
     useState,
     type ReactElement,
 } from "react";
@@ -69,6 +64,42 @@ interface UploadProgressProps {
     cancelUploads: () => void;
 }
 
+type FileID = number;
+
+type PercentageUploaded = number;
+
+type UploadPhase =
+    | "preparing"
+    | "readingMetadata"
+    | "uploading"
+    | "cancelling"
+    | "done";
+
+interface UploadCounter {
+    finished: number;
+    total: number;
+}
+
+interface InProgressUpload {
+    localFileID: FileID;
+    progress: PercentageUploaded;
+}
+
+type FinishedUploadType =
+    | "unsupported"
+    | "zeroSize"
+    | "tooLarge"
+    | "largerThanAvailableStorage"
+    | "blocked"
+    | "failed"
+    | "alreadyUploaded"
+    | "uploadedWithStaticThumbnail"
+    | "uploaded";
+
+type SegregatedFinishedUploads = Map<FinishedUploadType, FileID[]>;
+
+type UploadFileNames = Map<FileID, string>;
+
 export const UploadProgress: React.FC<UploadProgressProps> = ({
     open,
     onClose,
@@ -85,9 +116,13 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
     const { showMiniDialog } = useBaseContext();
 
     const [expanded, setExpanded] = useState(false);
+    const [dragPosition, setDragPosition] = useState<DragPosition>();
 
     useEffect(() => {
-        if (open) setExpanded(false);
+        if (open) {
+            setExpanded(false);
+            setDragPosition(undefined);
+        }
     }, [open]);
 
     const handleClose = useCallback(() => {
@@ -126,6 +161,8 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
                 hasLivePhotos,
                 expanded,
                 setExpanded,
+                dragPosition,
+                setDragPosition,
             }}
         >
             {expanded ? <UploadProgressDialog /> : <MinimizedUploadProgress />}
@@ -149,6 +186,10 @@ interface UploadProgressContextT {
     hasLivePhotos: boolean;
     expanded: boolean;
     setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+    dragPosition: DragPosition | undefined;
+    setDragPosition: React.Dispatch<
+        React.SetStateAction<DragPosition | undefined>
+    >;
 }
 
 const UploadProgressContext = createContext<UploadProgressContextT | undefined>(
@@ -165,13 +206,44 @@ const UploadProgressContext = createContext<UploadProgressContextT | undefined>(
  */
 const useUploadProgressContext = () => useContext(UploadProgressContext)!;
 
-const MinimizedUploadProgress: React.FC = () => (
-    <Snackbar open anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-        <Paper sx={{ width: "min(360px, 100svw)" }}>
-            <UploadProgressHeader />
-        </Paper>
-    </Snackbar>
-);
+interface DragPosition {
+    x: number;
+    y: number;
+}
+
+interface DragState {
+    pointerStartX: number;
+    pointerStartY: number;
+    positionStartX: number;
+    positionStartY: number;
+    currentX: number;
+    currentY: number;
+    surface: HTMLElement;
+    surfaceWidth: number;
+    surfaceHeight: number;
+}
+
+const MinimizedUploadProgress: React.FC = () => {
+    const { dragPosition, dragSurfaceProps } = useUploadProgressDrag();
+
+    return (
+        <Snackbar
+            open
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        >
+            <Paper
+                {...dragSurfaceProps}
+                sx={[
+                    uploadProgressSurfaceSx,
+                    { width: "min(360px, 100svw)" },
+                    surfacePaperPositionSx(dragPosition),
+                ]}
+            >
+                <UploadProgressHeader />
+            </Paper>
+        </Snackbar>
+    );
+};
 
 const UploadProgressHeader: React.FC = () => (
     <>
@@ -185,12 +257,15 @@ const UploadProgressTitle: React.FC = () => {
     const toggleExpanded = () => setExpanded((expanded) => !expanded);
 
     return (
-        <DialogTitle>
+        <DialogTitle sx={{ pl: 1 }}>
             <SpacedRow>
-                <Box>
-                    <Typography variant="h3">{t("file_upload")}</Typography>
-                    <UploadProgressSubtitleText />
-                </Box>
+                <Stack direction="row" sx={{ gap: 2, alignItems: "center" }}>
+                    {!expanded && <UploadProgressDragIcon />}
+                    <Box>
+                        <Typography variant="h3">{t("file_upload")}</Typography>
+                        <UploadProgressSubtitleText />
+                    </Box>
+                </Stack>
                 <Stack direction="row" sx={{ gap: 1 }}>
                     <FilledIconButton onClick={toggleExpanded}>
                         {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
@@ -203,6 +278,132 @@ const UploadProgressTitle: React.FC = () => {
         </DialogTitle>
     );
 };
+
+const UploadProgressDragIcon: React.FC = () => (
+    <Box
+        component="span"
+        aria-hidden
+        sx={{ color: "text.muted", display: "inline-flex", flexShrink: 0 }}
+    >
+        <HugeiconsIcon
+            icon={DragDropVerticalIcon}
+            size={26}
+            strokeWidth={2.8}
+        />
+    </Box>
+);
+
+const useUploadProgressDrag = () => {
+    const { dragPosition, setDragPosition } = useUploadProgressContext();
+    const dragState = useRef<DragState | undefined>(undefined);
+
+    const handlePointerDown = (event: React.PointerEvent<HTMLElement>) => {
+        if (event.button != 0 || isInteractiveTarget(event.target)) return;
+
+        const surface = event.currentTarget;
+
+        const rect = surface.getBoundingClientRect();
+        surface.style.position = "fixed";
+        surface.style.left = `${rect.left}px`;
+        surface.style.top = `${rect.top}px`;
+        surface.style.right = "auto";
+        surface.style.bottom = "auto";
+        surface.style.margin = "0";
+
+        dragState.current = {
+            pointerStartX: event.clientX,
+            pointerStartY: event.clientY,
+            positionStartX: rect.left,
+            positionStartY: rect.top,
+            currentX: rect.left,
+            currentY: rect.top,
+            surface,
+            surfaceWidth: rect.width,
+            surfaceHeight: rect.height,
+        };
+
+        event.currentTarget.setPointerCapture(event.pointerId);
+        event.preventDefault();
+    };
+
+    const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
+        if (!dragState.current) return;
+
+        const nextX =
+            dragState.current.positionStartX +
+            event.clientX -
+            dragState.current.pointerStartX;
+        const nextY =
+            dragState.current.positionStartY +
+            event.clientY -
+            dragState.current.pointerStartY;
+
+        const x = clamp(
+            nextX,
+            0,
+            window.innerWidth - dragState.current.surfaceWidth,
+        );
+        const y = clamp(
+            nextY,
+            0,
+            window.innerHeight - dragState.current.surfaceHeight,
+        );
+
+        dragState.current.currentX = x;
+        dragState.current.currentY = y;
+        dragState.current.surface.style.left = `${x}px`;
+        dragState.current.surface.style.top = `${y}px`;
+    };
+
+    const handlePointerUp = (event: React.PointerEvent<HTMLElement>) => {
+        if (dragState.current) {
+            setDragPosition({
+                x: dragState.current.currentX,
+                y: dragState.current.currentY,
+            });
+        }
+        dragState.current = undefined;
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+    };
+
+    return {
+        dragPosition,
+        dragSurfaceProps: {
+            onPointerCancel: handlePointerUp,
+            onPointerDown: handlePointerDown,
+            onPointerMove: handlePointerMove,
+            onPointerUp: handlePointerUp,
+        },
+    };
+};
+
+const uploadProgressSurfaceSx = {
+    cursor: "grab",
+    touchAction: "none",
+    userSelect: "none",
+    "&:active": { cursor: "grabbing" },
+};
+
+const surfacePaperPositionSx = (dragPosition: DragPosition | undefined) =>
+    dragPosition
+        ? {
+              position: "fixed",
+              left: `${dragPosition.x}px`,
+              top: `${dragPosition.y}px`,
+              margin: 0,
+          }
+        : {};
+
+const isInteractiveTarget = (target: EventTarget) =>
+    target instanceof Element &&
+    Boolean(
+        target.closest("button, a, input, textarea, select, [role='button']"),
+    );
+
+const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), Math.max(min, max));
 
 const UploadProgressSubtitleText: React.FC = () => {
     const { uploadPhase, uploadCounter, finishedUploads } =
