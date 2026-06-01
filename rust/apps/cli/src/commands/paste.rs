@@ -69,7 +69,9 @@ fn read_paste_text(text: Option<String>, file: Option<PathBuf>) -> Result<String
     };
 
     if text.trim().is_empty() {
-        return Err(Error::InvalidInput("Paste text cannot be empty".to_string()));
+        return Err(Error::InvalidInput(
+            "Paste text cannot be empty".to_string(),
+        ));
     }
     if text.chars().count() > MAX_PASTE_CHARS {
         return Err(Error::InvalidInput(format!(
@@ -154,7 +156,9 @@ fn dialoguer_error(error: dialoguer::Error) -> Error {
 
 fn validate_password(password: &str) -> Result<()> {
     if password.is_empty() {
-        Err(Error::InvalidInput("Paste password cannot be empty".to_string()))
+        Err(Error::InvalidInput(
+            "Paste password cannot be empty".to_string(),
+        ))
     } else {
         Ok(())
     }
