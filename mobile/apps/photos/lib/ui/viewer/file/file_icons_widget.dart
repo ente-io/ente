@@ -1,15 +1,11 @@
-import 'dart:math' as math;
-
 import 'package:ente_components/ente_components.dart';
 import 'package:ente_icons/ente_icons.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
-import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/file/trash_file.dart';
-import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
@@ -33,63 +29,12 @@ class UnSyncedIcon extends StatelessWidget {
   }
 }
 
-class DeviceIcon extends StatelessWidget {
-  const DeviceIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _BottomLeftOverlayIcon(
-      Icons.mobile_friendly_rounded,
-      baseSize: 18,
-      color: Color.fromRGBO(1, 222, 77, 0.8),
-    );
-  }
-}
-
-class CloudOnlyIcon extends StatelessWidget {
-  const CloudOnlyIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _BottomLeftOverlayIcon(
-      Icons.cloud_done_outlined,
-      baseSize: 18,
-      color: Color.fromRGBO(1, 222, 77, 0.8),
-    );
-  }
-}
-
 class FavoriteOverlayIcon extends StatelessWidget {
   const FavoriteOverlayIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const _BottomLeftOverlayIcon(EnteIcons.favoriteFilled, baseSize: 22);
-  }
-}
-
-class ArchiveOverlayIcon extends StatelessWidget {
-  const ArchiveOverlayIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _BottomLeftOverlayIcon(
-      Icons.archive_outlined,
-      color: fixedStrokeMutedWhite,
-    );
-  }
-}
-
-class PinOverlayIcon extends StatelessWidget {
-  const PinOverlayIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _BottomRightOverlayIcon(
-      CupertinoIcons.pin,
-      color: fixedStrokeMutedWhite,
-      rotationAngle: 45 * math.pi / 180,
-    );
   }
 }
 
@@ -270,19 +215,12 @@ class FileOverlayText extends StatelessWidget {
 class _BottomLeftOverlayIcon extends StatelessWidget {
   final IconData icon;
 
-  /// Overriddable color. Default is a fixed white.
-  final Color color;
-
   /// Overriddable default size. This is just the initial hint, the actual size
   /// is dynamic based on the widget's width (so that we show smaller icons in
   /// smaller thumbnails).
   final double baseSize;
 
-  const _BottomLeftOverlayIcon(
-    this.icon, {
-    this.baseSize = 24,
-    this.color = Colors.white, // fixed
-  });
+  const _BottomLeftOverlayIcon(this.icon, {this.baseSize = 24});
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +256,7 @@ class _BottomLeftOverlayIcon extends StatelessWidget {
             alignment: Alignment.bottomLeft,
             child: Padding(
               padding: EdgeInsets.only(left: inset, bottom: inset),
-              child: Icon(icon, size: size, color: color),
+              child: Icon(icon, size: size, color: Colors.white),
             ),
           ),
         );
@@ -334,23 +272,12 @@ class _BottomLeftOverlayIcon extends StatelessWidget {
 class _BottomRightOverlayIcon extends StatelessWidget {
   final IconData icon;
 
-  /// Overriddable color. Default is a fixed white.
-  final Color color;
-
   /// Overriddable default size. This is just the initial hint, the actual size
   /// is dynamic based on the widget's width (so that we show smaller icons in
   /// smaller thumbnails).
   final double baseSize;
 
-  // Overridable rotation angle. Default is null, which means no rotation.
-  final double? rotationAngle;
-
-  const _BottomRightOverlayIcon(
-    this.icon, {
-    this.rotationAngle,
-    this.baseSize = 24,
-    this.color = Colors.white, // fixed
-  });
+  const _BottomRightOverlayIcon(this.icon, {this.baseSize = 24});
 
   @override
   Widget build(BuildContext context) {
@@ -386,12 +313,7 @@ class _BottomRightOverlayIcon extends StatelessWidget {
             alignment: Alignment.bottomRight,
             child: Padding(
               padding: EdgeInsets.only(bottom: inset, right: inset),
-              child: rotationAngle == null
-                  ? Icon(icon, size: size, color: color)
-                  : Transform.rotate(
-                      angle: rotationAngle!, // rotate by 45 degrees
-                      child: Icon(icon, size: size, color: color),
-                    ),
+              child: Icon(icon, size: size, color: Colors.white),
             ),
           ),
         );

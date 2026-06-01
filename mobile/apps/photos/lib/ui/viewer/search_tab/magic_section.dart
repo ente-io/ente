@@ -198,7 +198,6 @@ class MagicRecommendation extends StatelessWidget {
                                 tag: heroTag,
                                 child: ThumbnailWidget(
                                   magicSearchResult.previewThumbnail()!,
-                                  shouldShowArchiveStatus: false,
                                   shouldShowSyncStatus: false,
                                 ),
                               )

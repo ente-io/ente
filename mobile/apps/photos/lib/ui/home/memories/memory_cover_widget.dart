@@ -102,7 +102,6 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                     tag: "memories" + memory.file.tag,
                     child: ThumbnailWidget(
                       memory.file,
-                      shouldShowArchiveStatus: false,
                       shouldShowSyncStatus: false,
                       key: Key("memories" + memory.file.tag),
                     ),
