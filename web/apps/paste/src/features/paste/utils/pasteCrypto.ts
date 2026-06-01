@@ -22,6 +22,12 @@ export interface PasteKey {
     passwordRequired: boolean;
 }
 
+export class IncorrectPastePasswordError extends Error {
+    constructor() {
+        super("Incorrect paste password");
+    }
+}
+
 export const createFragmentSecret = () =>
     newID("").slice(0, FRAGMENT_SECRET_LENGTH);
 
@@ -93,13 +99,20 @@ const resolvePasteKey = async (
         payload.kdfMemLimit,
     );
 
-    return await decryptBox(
-        {
-            encryptedData: payload.encryptedPasteKey,
-            nonce: payload.encryptedPasteKeyNonce,
-        },
-        keyEncryptionKey,
-    );
+    try {
+        return await decryptBox(
+            {
+                encryptedData: payload.encryptedPasteKey,
+                nonce: payload.encryptedPasteKeyNonce,
+            },
+            keyEncryptionKey,
+        );
+    } catch (error) {
+        if (pasteKey.passwordRequired) {
+            throw new IncorrectPastePasswordError();
+        }
+        throw error;
+    }
 };
 
 export const decryptConsumedPaste = async (

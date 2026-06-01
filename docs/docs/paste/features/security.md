@@ -38,13 +38,12 @@ The server hands back an access token. The page constructs the link by concatena
 When the recipient opens the link:
 
 1. The browser parses the URL fragment. If it starts with `p-`, the page shows a password prompt and waits for input.
-2. The browser asks the server for the ciphertext using the access token.
+2. The browser asks the server for the ciphertext using the access token. The server deletes the paste in the same step that returns the ciphertext, so it can only ever be served once.
 3. The browser re-runs Argon2id locally on the fragment secret (and password, if applicable) using the salt and parameters stored alongside the ciphertext. This produces the same key-encryption key as during creation.
 4. The encrypted paste key is decrypted with the key-encryption key, yielding the original paste key.
 5. The paste key is used to decrypt the text.
-6. Ente deletes the paste from its servers.
 
-For a wrong password, step 3 produces the wrong key-encryption key, step 4 fails the authentication tag check, and the page shows "Incorrect paste password". Because the ciphertext was already fetched for this one-time open, the paste cannot be retried. Ask the sender to create a new paste.
+For a wrong password, step 3 produces the wrong key-encryption key, step 4 fails the authentication tag check, and the page shows "Incorrect paste password". The page keeps the encrypted paste in memory, so the recipient can retry in the same tab. If the page is closed or reloaded, the sender needs to create a new paste.
 
 ## What Ente's servers store
 
