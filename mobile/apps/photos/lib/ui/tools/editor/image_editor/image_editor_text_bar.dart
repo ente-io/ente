@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import "package:flutter_svg/svg.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -71,7 +71,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         CircularIconButton(
-          svgPath: "assets/image-editor/image-editor-text-color.svg",
+          hugeIcon: HugeIcons.strokeRoundedTextColor,
           label: AppLocalizations.of(context).color,
           isSelected: selectedActionIndex == 0,
           onTap: () {
@@ -79,7 +79,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
           },
         ),
         CircularIconButton(
-          svgPath: "assets/image-editor/image-editor-text-font.svg",
+          hugeIcon: HugeIcons.strokeRoundedTextFont,
           label: AppLocalizations.of(context).font,
           isSelected: selectedActionIndex == 1,
           onTap: () {
@@ -87,7 +87,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
           },
         ),
         CircularIconButton(
-          svgPath: "assets/image-editor/image-editor-text-background.svg",
+          hugeIcon: HugeIcons.strokeRoundedTextSquare,
           label: AppLocalizations.of(context).background,
           isSelected: selectedActionIndex == 2,
           onTap: () {
@@ -97,7 +97,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
           },
         ),
         CircularIconButton(
-          svgPath: "assets/image-editor/image-editor-text-align-left.svg",
+          hugeIcon: HugeIcons.strokeRoundedTextAlignLeft,
           label: AppLocalizations.of(context).align,
           isSelected: selectedActionIndex == 3,
           onTap: () {
@@ -322,22 +322,16 @@ class _AlignPickerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final alignments = [
-      (TextAlign.left, "assets/image-editor/image-editor-text-align-left.svg"),
-      (
-        TextAlign.center,
-        "assets/image-editor/image-editor-text-align-center.svg",
-      ),
-      (
-        TextAlign.right,
-        "assets/image-editor/image-editor-text-align-right.svg",
-      ),
+    final alignments = <(TextAlign, List<List<dynamic>>)>[
+      (TextAlign.left, HugeIcons.strokeRoundedTextAlignLeft),
+      (TextAlign.center, HugeIcons.strokeRoundedTextAlignCenter),
+      (TextAlign.right, HugeIcons.strokeRoundedTextAlignRight),
     ];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: alignments.map((alignmentData) {
-        final (alignment, svgPath) = alignmentData;
+        final (alignment, hugeIcon) = alignmentData;
         final isSelected = editor.align == alignment;
 
         return Padding(
@@ -361,15 +355,12 @@ class _AlignPickerWidget extends StatelessWidget {
                     : null,
               ),
               child: Center(
-                child: SvgPicture.asset(
-                  svgPath,
-                  width: 22,
-                  height: 22,
-                  fit: BoxFit.scaleDown,
-                  colorFilter: ColorFilter.mode(
-                    isSelected ? colorScheme.backdropBase : colorScheme.tabIcon,
-                    BlendMode.srcIn,
-                  ),
+                child: HugeIcon(
+                  icon: hugeIcon,
+                  size: 22,
+                  color: isSelected
+                      ? colorScheme.backdropBase
+                      : colorScheme.tabIcon,
                 ),
               ),
             ),

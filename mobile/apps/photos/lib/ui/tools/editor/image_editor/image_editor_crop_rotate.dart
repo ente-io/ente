@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:flutter_svg/svg.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -109,7 +110,7 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularIconButton(
-                    svgPath: "assets/image-editor/image-editor-crop-rotate.svg",
+                    hugeIcon: HugeIcons.strokeRoundedRotateCrop,
                     label: AppLocalizations.of(context).rotate,
                     onTap: () {
                       widget.editor.rotate();
@@ -117,7 +118,7 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
                   ),
                   const SizedBox(width: 6),
                   CircularIconButton(
-                    svgPath: "assets/image-editor/image-editor-flip.svg",
+                    hugeIcon: HugeIcons.strokeRoundedFlipLeft,
                     label: AppLocalizations.of(context).flip,
                     onTap: () {
                       widget.editor.flip();

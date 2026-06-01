@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import "package:flutter_svg/svg.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -57,12 +57,11 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: () {
                     undo != null ? undo!() : null;
                   },
-                  icon: SvgPicture.asset(
-                    "assets/image-editor/image-editor-undo.svg",
-                    colorFilter: ColorFilter.mode(
-                      enableUndo ? colorScheme.textBase : colorScheme.textMuted,
-                      BlendMode.srcIn,
-                    ),
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedUndo03,
+                    color: enableUndo
+                        ? colorScheme.textBase
+                        : colorScheme.textMuted,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -71,12 +70,11 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: () {
                     redo != null ? redo!() : null;
                   },
-                  icon: SvgPicture.asset(
-                    'assets/image-editor/image-editor-redo.svg',
-                    colorFilter: ColorFilter.mode(
-                      enableRedo ? colorScheme.textBase : colorScheme.textMuted,
-                      BlendMode.srcIn,
-                    ),
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedRedo03,
+                    color: enableRedo
+                        ? colorScheme.textBase
+                        : colorScheme.textMuted,
                   ),
                 ),
               ],

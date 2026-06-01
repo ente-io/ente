@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:flutter_svg/svg.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
@@ -146,6 +147,8 @@ class TuneItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hugeIcon = _hugeIconForLabel(label);
+    final svgPath = _svgPathForLabel(label);
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
@@ -159,12 +162,12 @@ class TuneItem extends StatelessWidget {
               max: max,
               size: 60,
               icon: icon,
+              hugeIcon: hugeIcon,
+              svgPath: svgPath,
               isSelected: isSelected,
               progressColor: Theme.of(
                 context,
               ).colorScheme.imageEditorPrimaryColor,
-              svgPath:
-                  "assets/image-editor/image-editor-${label.toLowerCase()}.svg",
             ),
             const SizedBox(height: 8),
             Text(
@@ -177,6 +180,27 @@ class TuneItem extends StatelessWidget {
       ),
     );
   }
+
+  List<List<dynamic>>? _hugeIconForLabel(String label) {
+    return switch (label.toLowerCase()) {
+      "brightness" => HugeIcons.strokeRoundedSun01,
+      "contrast" => HugeIcons.strokeRoundedSlidersHorizontal,
+      "exposure" => HugeIcons.strokeRoundedCameraLens,
+      "saturation" => HugeIcons.strokeRoundedDroplet,
+      "temperature" => HugeIcons.strokeRoundedTemperature,
+      "sharpness" => HugeIcons.strokeRoundedFocusPoint,
+      "hue" => HugeIcons.strokeRoundedColors,
+      _ => null,
+    };
+  }
+
+  String? _svgPathForLabel(String label) {
+    return switch (label.toLowerCase()) {
+      "luminance" ||
+      "fade" => "assets/image-editor/image-editor-${label.toLowerCase()}.svg",
+      _ => null,
+    };
+  }
 }
 
 class CircularProgressWithValue extends StatefulWidget {
@@ -184,6 +208,7 @@ class CircularProgressWithValue extends StatefulWidget {
   final double min;
   final double max;
   final IconData icon;
+  final List<List<dynamic>>? hugeIcon;
   final bool isSelected;
   final double size;
   final Color progressColor;
@@ -195,10 +220,11 @@ class CircularProgressWithValue extends StatefulWidget {
     required this.min,
     required this.max,
     required this.icon,
+    this.hugeIcon,
+    this.svgPath,
     required this.progressColor,
     this.isSelected = false,
     this.size = 60,
-    this.svgPath,
   });
 
   @override
@@ -368,6 +394,12 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
                       colorTheme.tabIcon,
                       BlendMode.srcIn,
                     ),
+                  )
+                : widget.hugeIcon != null
+                ? HugeIcon(
+                    icon: widget.hugeIcon!,
+                    color: colorTheme.tabIcon,
+                    size: 22,
                   )
                 : Icon(widget.icon, color: colorTheme.tabIcon, size: 20),
           ),

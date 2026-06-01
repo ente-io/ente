@@ -7,7 +7,7 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
-import "package:flutter_svg/svg.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
 import "package:photo_manager/photo_manager.dart";
@@ -298,15 +298,12 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                                       ),
                                       padding: const EdgeInsets.all(12),
                                       child: Center(
-                                        child: SvgPicture.asset(
-                                          "assets/image-editor/image-editor-delete.svg",
-                                          colorFilter: ColorFilter.mode(
-                                            isHovered
-                                                ? Colors.white
-                                                : colorScheme.warning400
-                                                      .withValues(alpha: 0.8),
-                                            BlendMode.srcIn,
-                                          ),
+                                        child: HugeIcon(
+                                          icon: HugeIcons.strokeRoundedDelete02,
+                                          color: isHovered
+                                              ? Colors.white
+                                              : colorScheme.warning400
+                                                    .withValues(alpha: 0.8),
                                         ),
                                       ),
                                     )

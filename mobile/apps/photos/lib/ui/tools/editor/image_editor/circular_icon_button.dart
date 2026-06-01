@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import "package:flutter_svg/svg.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class CircularIconButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final List<List<dynamic>>? hugeIcon;
   final String? svgPath;
   final IconData? icon;
   final Widget? child;
@@ -16,14 +18,15 @@ class CircularIconButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.onTap,
+    this.hugeIcon,
     this.svgPath,
     this.icon,
     this.child,
     this.size = 60,
     this.isSelected = false,
   }) : assert(
-         svgPath != null || icon != null || child != null,
-         'One of svgPath, icon or child must be provided',
+         hugeIcon != null || svgPath != null || icon != null || child != null,
+         'One of hugeIcon, svgPath, icon or child must be provided',
        );
 
   @override
@@ -31,7 +34,13 @@ class CircularIconButton extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     final Widget iconContent;
-    if (svgPath != null) {
+    if (hugeIcon != null) {
+      iconContent = HugeIcon(
+        icon: hugeIcon!,
+        size: 24,
+        color: colorScheme.tabIcon,
+      );
+    } else if (svgPath != null) {
       iconContent = SvgPicture.asset(
         svgPath!,
         width: 12,
@@ -69,7 +78,7 @@ class CircularIconButton extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              child: iconContent,
+              child: Center(child: iconContent),
             ),
           ),
           const SizedBox(height: 6),
