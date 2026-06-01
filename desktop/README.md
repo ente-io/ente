@@ -16,12 +16,14 @@ cd ente
 ```
 
 Install the web dependencies
+
 ```sh
 cd web
 npm ci
 ```
 
 Install the desktop dependencies
+
 ```sh
 cd ../desktop
 npm ci
