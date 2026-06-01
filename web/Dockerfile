@@ -15,21 +15,17 @@ WORKDIR /build/web
 
 ENV NEXT_PUBLIC_ENTE_ENDPOINT=ENTE_API_ORIGIN_PLACEHOLDER
 
-# `yarn install` is flaky on the GitHub arm64 runners otherwise.
-RUN yarn config set network-timeout 900000 -g
-
-RUN corepack enable && corepack prepare yarn@1.22.22 --activate
-RUN yarn install --frozen-lockfile
-RUN yarn build:photos
-RUN yarn build:albums
-RUN yarn build:accounts
-RUN yarn build:auth
-RUN yarn build:cast
-RUN yarn build:share
-RUN yarn build:embed
-RUN yarn build:paste
-RUN yarn build:locker
-RUN yarn build:memories
+RUN npm ci
+RUN npm run build:photos
+RUN npm run build:albums
+RUN npm run build:accounts
+RUN npm run build:auth
+RUN npm run build:cast
+RUN npm run build:share
+RUN npm run build:embed
+RUN npm run build:paste
+RUN npm run build:locker
+RUN npm run build:memories
 
 FROM nginx
 

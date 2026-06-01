@@ -16,4 +16,4 @@ A CLI tool that orchestrates the WASM build process:
 2. Invokes `wasm-bindgen` CLI to generate JS/TS bindings from the compiled WASM
 3. Outputs everything to a `pkg/` directory ready for npm/bundlers
 
-wasm-pack is installed via npm as a devDependency, so `yarn install` handles it.
+wasm-pack is installed via npm as a devDependency, so `npm ci` handles it.

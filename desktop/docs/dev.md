@@ -2,6 +2,10 @@
 
 ## npm commands
 
+### npm install
+
+Use `npm ci` when installing dependencies since it uses the lockfile. Use plain `npm install` only when you are intentionally updating dependencies and reviewing the resulting `package-lock.json` changes.
+
 ### npm run dev
 
 Launch the app in development mode:

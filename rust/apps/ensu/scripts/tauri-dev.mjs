@@ -19,7 +19,7 @@ if (!desktopVersion) throw new Error("Missing Ensu desktop version");
 
 config.build = config.build || {};
 config.build.beforeDevCommand =
-    `cd ../../../web && yarn build:wasm && NEXT_PUBLIC_ENSU_DESKTOP_VERSION=${desktopVersion} yarn workspace ensu next dev -p ${port}`;
+    `cd ../../../web && npm run build:wasm && NEXT_PUBLIC_ENSU_DESKTOP_VERSION=${desktopVersion} npm exec --workspace ensu -- next dev -p ${port}`;
 config.build.devUrl = `http://localhost:${port}`;
 
 await fs.writeFile(devConfigPath, JSON.stringify(config, null, 2));

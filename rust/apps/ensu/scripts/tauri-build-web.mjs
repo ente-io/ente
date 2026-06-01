@@ -14,9 +14,9 @@ const desktopVersion = JSON.parse(
 ).version;
 if (!desktopVersion) throw new Error("Missing Ensu desktop version");
 
-const yarnBin = process.platform === "win32" ? "yarn.cmd" : "yarn";
+const npmBin = process.platform === "win32" ? "npm.cmd" : "npm";
 
-const child = spawn(yarnBin, ["build:ensu"], {
+const child = spawn(npmBin, ["run", "build:ensu"], {
     cwd: webDir,
     stdio: "inherit",
     shell: process.platform === "win32",

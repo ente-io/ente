@@ -21,7 +21,7 @@ runs:
         - name: Build ${{ inputs.app }}
           shell: bash
           working-directory: web
-          run: yarn build:${{ inputs.app }}
+          run: npm run build:${{ inputs.app }}
 
         - name: Publish ${{ inputs.app }}
           uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
