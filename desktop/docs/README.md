@@ -1,9 +1,10 @@
 # Developer docs
 
-If you just want to run the Ente Photos desktop app locally or develop it, you can do:
+If you just want to run the Ente Photos desktop app locally or develop it, from the repository root you can do:
 
 ```sh
-npm ci
+cd web && npm ci && cd ..
+cd desktop && npm ci
 npm run dev
 ```
 
