@@ -82,6 +82,14 @@ jobs:
 
             - run: flutter pub get --enforce-lockfile
 
+            - name: Verify iOS pods lockfile
+              run: |
+                  # Match Homebrew CocoaPods' JSON output so path-pod checksums match macOS.
+                  sudo gem install json -v 2.18.0 --no-document
+                  sudo gem install cocoapods -v 1.16.2 --no-document
+                  pod install --deployment
+              working-directory: mobile/apps/auth/ios
+
             - name: Generate auth localizations
               run: flutter gen-l10n
 

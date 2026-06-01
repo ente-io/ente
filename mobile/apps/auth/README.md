@@ -41,7 +41,7 @@ You can view your 2FA codes at [auth.ente.com](https://auth.ente.com). For addin
 
 3. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
-   - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
+   - **Using Flutter directly:** Run `flutter pub get --enforce-lockfile` in `packages/strings` and this folder
 
 4. Run the app:
    - Android: `flutter run --flavor independent`
@@ -51,6 +51,10 @@ You can view your 2FA codes at [auth.ente.com](https://auth.ente.com). For addin
 To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.
 
 If the code you're working needs to modify user facing strings, see [docs/localization](docs/localization.md).
+
+### Updating dependencies
+
+After updating Flutter dependencies, run `pod install` from `ios/` on macOS and commit `ios/Podfile.lock` if it changes.
 
 ## 🔩 Architecture
 
