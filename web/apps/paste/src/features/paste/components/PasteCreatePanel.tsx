@@ -16,7 +16,6 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
@@ -50,7 +49,6 @@ export const PasteCreatePanel = ({
     onCopyLink,
     onShareLink,
 }: PasteCreatePanelProps) => {
-    const isMobile = useMediaQuery("(max-width:599.95px)", { noSsr: true });
     const { resolvedMode } = usePasteColorMode();
     const tokens = getPasteThemeTokens(resolvedMode);
     const [passwordProtected, setPasswordProtected] = useState(false);
@@ -80,10 +78,28 @@ export const PasteCreatePanel = ({
             ? "0 22px 56px rgba(0, 0, 0, 0.48)"
             : "0 18px 44px rgba(17, 49, 114, 0.18)";
     const privacyPills = [
-        "Private",
-        isMobile ? "E2EE" : "End-to-end encrypted",
-        "One-time view",
-        "Auto-deletes after 24 hours",
+        { key: "private", label: "Private" },
+        {
+            key: "e2ee",
+            label: (
+                <>
+                    <Box
+                        component="span"
+                        sx={{ display: { xs: "inline", sm: "none" } }}
+                    >
+                        E2EE
+                    </Box>
+                    <Box
+                        component="span"
+                        sx={{ display: { xs: "none", sm: "inline" } }}
+                    >
+                        End-to-end encrypted
+                    </Box>
+                </>
+            ),
+        },
+        { key: "one-time-view", label: "One-time view" },
+        { key: "auto-delete", label: "Auto-deletes after 24 hours" },
     ];
     const passwordFieldSx = {
         ...pasteTextFieldSx(tokens, "14px"),
@@ -473,9 +489,9 @@ export const PasteCreatePanel = ({
                         userSelect: "none",
                     }}
                 >
-                    {privacyPills.map((label) => (
+                    {privacyPills.map(({ key, label }) => (
                         <Box
-                            key={label}
+                            key={key}
                             component="span"
                             aria-disabled="true"
                             sx={{

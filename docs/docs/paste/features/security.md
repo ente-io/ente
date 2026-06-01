@@ -44,7 +44,7 @@ When the recipient opens the link:
 5. The paste key is used to decrypt the text.
 6. Ente deletes the paste from its servers.
 
-For a wrong password, step 3 produces the wrong key-encryption key, step 4 fails the authentication tag check, and the page shows "Incorrect paste password". Because the ciphertext was already fetched for this one-time open, the paste cannot be retried. Ask the sender to create a new paste.
+For a wrong password, step 3 produces the wrong key-encryption key, step 4 fails the authentication tag check, and the page shows "Incorrect paste password". The page keeps the encrypted paste in memory, so the recipient can retry in the same tab. If the page is closed or reloaded, the sender needs to create a new paste.
 
 ## What Ente's servers store
 

@@ -20,6 +20,7 @@ interface PasteViewPanelProps {
     consumeError: string | null;
     resolvedText: string | null;
     passwordRequired: boolean;
+    passwordError: string | null;
     onSubmitPassword: (password: string) => Promise<void>;
     onCopyText: (value: string) => Promise<void>;
 }
@@ -29,6 +30,7 @@ export const PasteViewPanel = ({
     consumeError,
     resolvedText,
     passwordRequired,
+    passwordError,
     onSubmitPassword,
     onCopyText,
 }: PasteViewPanelProps) => {
@@ -82,12 +84,27 @@ export const PasteViewPanel = ({
                         >
                             Enter paste password
                         </Typography>
+                        <Typography
+                            variant="mini"
+                            sx={{
+                                maxWidth: 420,
+                                color: tokens.status.loadingBody,
+                                fontWeight: 500,
+                                lineHeight: 1.35,
+                                textAlign: "center",
+                            }}
+                        >
+                            Password is checked in your browser. If it fails,
+                            retry here instead of reopening the link.
+                        </Typography>
                         <TextField
                             variant="filled"
                             hiddenLabel
                             fullWidth
                             type="password"
                             value={password}
+                            error={!!passwordError}
+                            helperText={passwordError}
                             autoFocus
                             autoComplete="off"
                             placeholder="Password"
@@ -112,6 +129,17 @@ export const PasteViewPanel = ({
                                         background:
                                             tokens.surface.inputGradient,
                                         boxShadow: tokens.surface.inputShadow,
+                                    },
+                                    "& .MuiFilledInput-root.Mui-error": {
+                                        borderColor: tokens.status.errorIcon,
+                                    },
+                                    "& .MuiFormHelperText-root": {
+                                        mx: 0,
+                                        mt: 0.75,
+                                        color: tokens.status.errorBody,
+                                        fontSize: "0.8rem",
+                                        lineHeight: 1.25,
+                                        textAlign: "center",
                                     },
                                 },
                             ]}
