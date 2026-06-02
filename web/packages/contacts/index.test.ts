@@ -203,7 +203,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).toContain("contacts/");
@@ -228,7 +228,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).not.toContain("wrapped-root-key");
@@ -245,7 +245,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).toContain("wrapped-root-key");

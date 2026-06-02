@@ -10,7 +10,7 @@
         "ente-base": "*",
         "ente-contacts-web": "*",
         "ente-utils": "*",
-        "exifreader": "^4.32.0",
+        "exifreader": "^4.40.3",
         "hls-video-element": "^1.5.8",
         "jszip": "^3.10.1",
         "leaflet": "^1.9.4",

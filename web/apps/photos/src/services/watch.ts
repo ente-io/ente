@@ -575,10 +575,7 @@ class FolderWatcher {
         const files = await computeAllCollectionFilesFromSaved();
         const filesToTrash = files.filter((file) => {
             const correspondingSyncedFile = syncedFileForID.get(file.id);
-            if (
-                correspondingSyncedFile &&
-                correspondingSyncedFile.collectionID == file.collectionID
-            ) {
+            if (correspondingSyncedFile?.collectionID == file.collectionID) {
                 return true;
             }
             return false;

@@ -94,10 +94,7 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { isMLSupported } from "ente-new/photos/services/ml";
-import {
-    performSidebarAction as performSidebarRegistryAction,
-    type SidebarActionContext,
-} from "ente-new/photos/services/search/sidebar-search-registry";
+import { performSidebarAction as performSidebarRegistryAction } from "ente-new/photos/services/search/sidebar-search-registry";
 import type { SidebarActionID } from "ente-new/photos/services/search/types";
 import {
     isDevBuildAndUser,
@@ -353,7 +350,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     setPendingFreeUpSpaceAction(
                         a as FreeUpSpaceAction | undefined,
                     ),
-            } as SidebarActionContext),
+            }),
         [
             handleLogout,
             handleOpenWatchFolder,
