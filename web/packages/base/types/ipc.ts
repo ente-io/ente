@@ -887,11 +887,25 @@ export interface FolderWatchSyncedFile {
  */
 export type ZipItem = [zipPath: string, entryName: string];
 
+// macOS-injected metadata files tagged as `"macosSystemFile"`. Excludes
+// plain Unix dotfiles (`.bashrc`, `.config`, ...) which may be legit
+// content the user wants backed up. Kept in sync with the desktop side.
+export const macosSystemFileBasenames = new Set<string>([
+    ".DS_Store",
+    ".localized",
+    ".Spotlight-V100",
+    ".fseventsd",
+    ".Trashes",
+    ".TemporaryItems",
+    ".DocumentRevisions-V100",
+]);
+
 /**
  * The reason a file was excluded from the upload.
  *
- * - `"macosSystemFile"`: macOS-injected placeholder (`._*` fork or
- *   `__MACOSX__` entry), deliberately filtered out.
+ * - `"macosSystemFile"`: macOS-injected placeholder (`._*` fork, one of
+ *   {@link macosSystemFileBasenames}, or a `__MACOSX__` entry), filtered
+ *   out.
  * - `"failedZip"`: a `.zip` file that couldn't be opened as a zip archive.
  *   Surfaced as a failure so the user notices.
  */

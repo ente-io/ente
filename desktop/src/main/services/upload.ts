@@ -6,12 +6,24 @@ import log from "../log";
 import { uploadStatusStore } from "../stores/upload-status";
 import { clearOpenZipCache, markClosableZip, openZip } from "./zip";
 
+// macOS-injected metadata files to tag as `"macosSystemFile"`. Excludes
+// plain Unix dotfiles (`.bashrc`, `.config`, ...) which may be legit
+// content the user wants backed up. Kept in sync with the web side.
+const macosSystemFileBasenames = new Set<string>([
+    ".DS_Store",
+    ".localized",
+    ".Spotlight-V100",
+    ".fseventsd",
+    ".Trashes",
+    ".TemporaryItems",
+    ".DocumentRevisions-V100",
+]);
+
 export const listZipItems = async (
     zipPath: string,
 ): Promise<{ items: ZipItem[]; skippedFiles: SkippedFile[] }> => {
-    // Filter macOS-injected placeholders (`._*` basenames, `__MACOSX__`
-    // entries) into `skippedFiles` with kind `"macosSystemFile"`. If the
-    // file can't be opened as a zip at all, surface it as `"failedZip"`.
+    // Filter `._*` forks, other macOS metadata files, and `__MACOSX__`
+    // entries into `skippedFiles`. Open failures surface as `"failedZip"`.
     try {
         const zip = openZip(zipPath);
         try {
@@ -25,6 +37,7 @@ export const listZipItems = async (
                 const basename = path.basename(entry.name);
                 if (
                     basename.startsWith("._") ||
+                    macosSystemFileBasenames.has(basename) ||
                     entry.name.split("/").includes("__MACOSX__")
                 ) {
                     skippedFiles.push({

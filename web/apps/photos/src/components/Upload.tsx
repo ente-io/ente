@@ -33,11 +33,12 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import type {
-    CollectionMapping,
-    Electron,
-    SkippedFile,
-    ZipItem,
+import {
+    macosSystemFileBasenames,
+    type CollectionMapping,
+    type Electron,
+    type SkippedFile,
+    type ZipItem,
 } from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { UploadProgress } from "ente-gallery/components/UploadProgress";
@@ -1104,9 +1105,12 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     for (const file of files) {
         const path = electron.pathForFile(file);
 
-        // macOS `._*` extended attribute forks ÔÇö skip zip parsing even if
-        // the name ends in `.zip`.
-        if (file.name.startsWith("._")) {
+        // macOS `._*` forks and other macOS metadata files — skip zip
+        // parsing even if the name ends in `.zip`.
+        if (
+            file.name.startsWith("._") ||
+            macosSystemFileBasenames.has(file.name)
+        ) {
             skippedFiles.push({ name: file.name, kind: "macosSystemFile" });
             continue;
         }
