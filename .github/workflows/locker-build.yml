@@ -64,10 +64,10 @@ jobs:
                           exit 1
                       fi
                       release_tag="locker-v${release_version}-rc"
-                      release_title="Locker release candidate - ${release_version} (build ${build_number})"
+                      release_title="🔵 Locker release candidate - ${release_version} (build ${build_number})"
                   else
                       release_tag="locker-v${release_version}-beta"
-                      release_title="Locker nightly - ${release_version} (build ${build_number})"
+                      release_title="🔵 Locker nightly - ${release_version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"
@@ -250,7 +250,7 @@ jobs:
                       { print }
                   ' <<< "${RELEASE_BODY_GROUPED}")"
                   if [ "${#release_body_discord}" -gt 3000 ]; then
-                      release_body_discord="${release_body_discord:0:3000}"$'\n\n...\n-# See the GitHub release for full notes.'
+                      release_body_discord="${release_body_discord:0:3000}"$'\n...\n-# See the GitHub release for full notes.'
                   fi
 
                   jq -n \
@@ -261,7 +261,7 @@ jobs:
                           flags: 32768,
                           components: [{
                               type: 17,
-                              accent_color: 8388736,
+                              accent_color: 1077759,
                               components: (
                                   [{type: 10, content: ("## " + $title)}]
                                   + (if $body == "" then [] else [{type: 10, content: $body}] end)

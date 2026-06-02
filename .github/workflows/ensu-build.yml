@@ -68,14 +68,14 @@ jobs:
                           exit 1
                       fi
                       release_tag="ensu-v${release_version}-rc"
-                      release_title="🤖   Ensu release candidate · ${release_version} (build ${build_number})"
+                      release_title="🟡 Ensu release candidate · ${release_version} (build ${build_number})"
                   else
                       if [[ "${version}" != "${release_version}-beta" ]]; then
                           echo "::error::${GITHUB_REF_NAME} is ${version}, expected ${release_version}-beta"
                           exit 1
                       fi
                       release_tag="ensu-v${release_version}-beta"
-                      release_title="🤖   Ensu nightly · ${version} (build ${build_number})"
+                      release_title="🟡 Ensu nightly · ${version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"
@@ -415,7 +415,7 @@ jobs:
                       { print }
                   ' <<< "${RELEASE_BODY_GROUPED}")"
                   if [ "${#release_body_discord}" -gt 3000 ]; then
-                      release_body_discord="${release_body_discord:0:3000}"$'\n\n...\n-# See the GitHub release for full notes.'
+                      release_body_discord="${release_body_discord:0:3000}"$'\n...\n-# See the GitHub release for full notes.'
                   fi
 
                   jq -n \
