@@ -7,6 +7,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/extensions/lat_lng_extension.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
@@ -157,12 +158,9 @@ class OfflineImportMetadataService {
     if (shouldFetchAssetLocation) {
       final asset = await file.getAsset;
       if (asset != null) {
-        final latLong = await asset.latlngAsync();
-        if (latLong != null) {
-          file.location = Location(
-            latitude: latLong.latitude,
-            longitude: latLong.longitude,
-          );
+        final location = (await asset.latlngAsync()).toEnteLocation();
+        if (location != null) {
+          file.location = location;
         }
       }
     }
