@@ -42,3 +42,7 @@ npm run build
 ```
 
 That's the gist of it. For more development related documentation, see [docs](docs/README.md).
+
+> [!NOTE]
+>
+> If the relevant `package-lock.json` has not changed since your last `npm ci`, you can use `npm install` as a faster incremental alternative. For caveats, see [docs/dev.md](docs/dev.md#npm-ci-npm-install).

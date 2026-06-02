@@ -8,6 +8,10 @@ Workers are organized as npm workspaces sharing a common `package.json` and base
 
 Install dependencies with `npm ci`.
 
+> [!NOTE]
+>
+> If `package-lock.json` has not changed since your last `npm ci`, you can use `npm install` as a faster incremental alternative.
+
 Then, to deploy an individual worker
 
 - Login into wrangler (if needed) using `npm exec --workspace health-check -- wrangler login`

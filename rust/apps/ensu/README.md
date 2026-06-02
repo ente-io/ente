@@ -28,6 +28,10 @@ Desktop app for [Ensu](https://ente.com/ensu/). Built using Tauri.
 
 The dev command starts the Ensu web app on port 3010 and launches Tauri, and changes in the web code will be hot reloaded.
 
+> [!NOTE]
+>
+> If the relevant `package-lock.json` has not changed since your last `npm ci`, you can use `npm install` as a faster incremental alternative for both web and desktop.
+
 To create a static build:
 
 ```sh
