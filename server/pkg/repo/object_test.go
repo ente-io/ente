@@ -544,3 +544,124 @@ func linkObjectTestFileToCollection(t *testing.T, db *sql.DB, collectionID int64
 		t.Fatalf("failed to link file %d to collection %d: %v", fileID, collectionID, err)
 	}
 }
+
+func TestGetDelayInMinReturnsDefaultDelayForDeleteObjectQueue(t *testing.T) {
+	testutil.WithServerRoot(t)
+	viper.Reset()
+	if err := config.ConfigureViper("local"); err != nil {
+		t.Fatalf("failed to configure viper: %v", err)
+	}
+
+	viper.Set("s3.b2-eu-cen.key", "test-key")
+	viper.Set("s3.b2-eu-cen.secret", "test-secret")
+	t.Cleanup(viper.Reset)
+
+	s3Config := s3config.NewS3Config()
+	repo := &QueueRepository{
+		DB:       nil,
+		S3Config: s3Config,
+	}
+
+	delay, err := repo.getDelayInMin(DeleteObjectQueue)
+	if err != nil {
+		t.Fatalf("getDelayInMin error = %v", err)
+	}
+
+	expectedDelay := int64(45 * 24 * 60) // 45 days in minutes
+	if delay != expectedDelay {
+		t.Fatalf("expected delay %d, got %d", expectedDelay, delay)
+	}
+}
+
+func TestGetDelayInMinReturnsAtLeastWasabiObjectConditionalHoldDaysForDeleteObjectQueue(t *testing.T) {
+	testutil.WithServerRoot(t)
+	viper.Reset()
+	if err := config.ConfigureViper("local"); err != nil {
+		t.Fatalf("failed to configure viper: %v", err)
+	}
+
+	viper.Set("s3.wasabi-eu-central-2-v3.compliance", true)
+	configuredDays := 1
+	viper.Set("s3.object_deletion_interval_days", configuredDays)
+	viper.Set("s3.b2-eu-cen.key", "test-key")
+	viper.Set("s3.b2-eu-cen.secret", "test-secret")
+	t.Cleanup(viper.Reset)
+
+	s3Config := s3config.NewS3Config()
+	repo := &QueueRepository{
+		DB:       nil,
+		S3Config: s3Config,
+	}
+
+	delay, err := repo.getDelayInMin(DeleteObjectQueue)
+	if err != nil {
+		t.Fatalf("getDelayInMin error = %v", err)
+	}
+
+	expectedDelay := int64(s3config.WasabiObjectConditionalHoldDays * 24 * 60)
+	if delay != expectedDelay {
+		t.Fatalf("expected delay %d, got %d", expectedDelay, delay)
+	}
+}
+
+func TestGetDelayInMinReturnsConfiguredDelayIfLessThanWasabiObjectConditionalHoldDaysForDeleteObjectQueue(t *testing.T) {
+	testutil.WithServerRoot(t)
+	viper.Reset()
+	if err := config.ConfigureViper("local"); err != nil {
+		t.Fatalf("failed to configure viper: %v", err)
+	}
+
+	configuredDays := 1
+	viper.Set("s3.wasabi-eu-central-2-v3.compliance", false)
+	viper.Set("s3.object_deletion_interval_days", configuredDays)
+	viper.Set("s3.b2-eu-cen.key", "test-key")
+	viper.Set("s3.b2-eu-cen.secret", "test-secret")
+	t.Cleanup(viper.Reset)
+
+	s3Config := s3config.NewS3Config()
+	repo := &QueueRepository{
+		DB:       nil,
+		S3Config: s3Config,
+	}
+
+	delay, err := repo.getDelayInMin(DeleteObjectQueue)
+	if err != nil {
+		t.Fatalf("getDelayInMin error = %v", err)
+	}
+
+	expectedDelay := int64(configuredDays * 24 * 60)
+	if delay != expectedDelay {
+		t.Fatalf("expected delay %d, got %d", expectedDelay, delay)
+	}
+}
+
+func TestGetDelayInMinReturnsConfiguredDelayForDeleteObjectQueue(t *testing.T) {
+	testutil.WithServerRoot(t)
+	viper.Reset()
+	if err := config.ConfigureViper("local"); err != nil {
+		t.Fatalf("failed to configure viper: %v", err)
+	}
+
+	// Configure a test deletion interval
+	configuredDays := 30
+	viper.Set("s3.object_deletion_interval_days", configuredDays)
+	viper.Set("s3.b2-eu-cen.key", "test-key")
+	viper.Set("s3.b2-eu-cen.secret", "test-secret")
+	t.Cleanup(viper.Reset)
+
+	s3Config := s3config.NewS3Config()
+	repo := &QueueRepository{
+		DB:       nil,
+		S3Config: s3Config,
+	}
+
+	delay, err := repo.getDelayInMin(DeleteObjectQueue)
+	if err != nil {
+		t.Fatalf("getDelayInMin error = %v", err)
+	}
+
+	expectedDelay := int64(configuredDays * 24 * 60) // 30 days in minutes
+	if delay != expectedDelay {
+		t.Fatalf("expected delay %d, got %d", expectedDelay, delay)
+	}
+}

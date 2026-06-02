@@ -26,7 +26,7 @@ This is not guaranteed, each browsers handles CSP errors differently, and some m
 Deleted files don't immediately free up S3/MinIO storage:
 
 1. **Trash retention**: 30 days
-2. **Deletion queue**: Additional 45 days after permanent deletion
+2. **Deletion queue**: Defaults to an additional 45 days after permanent deletion
 3. **Total**: Up to 75 days before storage is freed
 
 To speed this up:
