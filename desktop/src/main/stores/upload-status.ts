@@ -1,4 +1,5 @@
-import Store, { Schema } from "electron-store";
+﻿import Store, { Schema } from "electron-store";
+import type { SkippedFile, ZipItem } from "../../types/ipc";
 
 export interface UploadStatusStore {
     /**
@@ -14,11 +15,14 @@ export interface UploadStatusStore {
     /**
      * Each item is the path to a zip file and the name of an entry within it.
      */
-    zipItems?: [zipPath: string, entryName: string][];
+    zipItems?: ZipItem[];
     /**
      * @deprecated Legacy paths to zip files, now subsumed into zipItems.
      */
     zipPaths?: string[];
+    /** Files that aren't being uploaded (macOS-injected placeholders or
+     * unopenable zips). Surfaced in the upload progress UI on resume. */
+    skippedFiles?: SkippedFile[];
 }
 
 const uploadStatusSchema: Schema<UploadStatusStore> = {
@@ -29,6 +33,20 @@ const uploadStatusSchema: Schema<UploadStatusStore> = {
         items: { type: "array", items: { type: "string" } },
     },
     zipPaths: { type: "array", items: { type: "string" } },
+    skippedFiles: {
+        type: "array",
+        items: {
+            type: "object",
+            required: ["name", "kind"],
+            properties: {
+                name: { type: "string" },
+                kind: {
+                    type: "string",
+                    enum: ["macosSystemFile", "failedZip"],
+                },
+            },
+        },
+    },
 };
 
 export const uploadStatusStore = new Store({

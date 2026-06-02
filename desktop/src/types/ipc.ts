@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file types that are shared across the IPC boundary with the renderer process
  *
  * This file is manually kept in sync with the renderer code.
@@ -78,10 +78,18 @@ export interface FolderWatchSyncedFile {
 
 export type ZipItem = [zipPath: string, entryName: string];
 
+export type SkippedFileKind = "macosSystemFile" | "failedZip";
+
+export interface SkippedFile {
+    name: string;
+    kind: SkippedFileKind;
+}
+
 export interface PendingUploads {
     collectionName: string | undefined;
     filePaths: string[];
     zipItems: ZipItem[];
+    skippedFiles?: SkippedFile[];
 }
 
 export type FFmpegCommand = string[] | { default: string[]; hdr: string[] };

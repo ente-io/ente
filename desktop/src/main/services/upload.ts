@@ -1,29 +1,52 @@
-import fs from "node:fs/promises";
+﻿import fs from "node:fs/promises";
 import path from "node:path";
 import { existsSync } from "original-fs";
-import type { PendingUploads, ZipItem } from "../../types/ipc";
+import type { PendingUploads, SkippedFile, ZipItem } from "../../types/ipc";
 import log from "../log";
 import { uploadStatusStore } from "../stores/upload-status";
 import { clearOpenZipCache, markClosableZip, openZip } from "./zip";
 
-export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
-    const zip = openZip(zipPath);
-
+export const listZipItems = async (
+    zipPath: string,
+): Promise<{ items: ZipItem[]; skippedFiles: SkippedFile[] }> => {
+    // Filter macOS-injected placeholders (`._*` basenames, `__MACOSX__`
+    // entries) into `skippedFiles` with kind `"macosSystemFile"`. If the
+    // file can't be opened as a zip at all, surface it as `"failedZip"`.
     try {
-        const entries = await zip.entries();
-        const entryNames: string[] = [];
+        const zip = openZip(zipPath);
+        try {
+            const entries = await zip.entries();
+            const items: ZipItem[] = [];
+            const skippedFiles: SkippedFile[] = [];
 
-        for (const entry of Object.values(entries)) {
-            const basename = path.basename(entry.name);
-            // Ignore "hidden" files (files whose names begins with a dot).
-            if (entry.isFile && !basename.startsWith(".")) {
-                // `entry.name` is the path within the zip.
-                entryNames.push(entry.name);
+            for (const entry of Object.values(entries)) {
+                if (!entry.isFile) continue;
+
+                const basename = path.basename(entry.name);
+                if (
+                    basename.startsWith("._") ||
+                    entry.name.split("/").includes("__MACOSX__")
+                ) {
+                    skippedFiles.push({
+                        name: entry.name,
+                        kind: "macosSystemFile",
+                    });
+                    continue;
+                }
+
+                items.push([zipPath, entry.name]);
             }
+
+            return { items, skippedFiles };
+        } finally {
+            markClosableZip(zipPath);
         }
-        return entryNames.map((entryName) => [zipPath, entryName]);
-    } finally {
-        markClosableZip(zipPath);
+    } catch (e) {
+        log.error("Ignoring malformed zip", e);
+        return {
+            items: [],
+            skippedFiles: [{ name: path.basename(zipPath), kind: "failedZip" }],
+        };
     }
 };
 
@@ -56,7 +79,7 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     const filePaths = allFilePaths.filter((f) => existsSync(f));
 
     const allZipItems = uploadStatusStore.get("zipItems");
-    let zipItems: typeof allZipItems;
+    let zipItems: ZipItem[] = [];
 
     // Migration code - May 2024. Remove after a bit (tag: Migration).
     //
@@ -70,13 +93,15 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     if (allZipItems === undefined) {
         const allZipPaths = uploadStatusStore.get("zipPaths") ?? [];
         const zipPaths = allZipPaths.filter((f) => existsSync(f));
-        zipItems = [];
+        const allSkippedFiles: SkippedFile[] = [];
         for (const zip of zipPaths) {
-            try {
-                zipItems = zipItems.concat(await listZipItems(zip));
-            } catch (e) {
-                log.error("Ignoring items in malformed zip", e);
-            }
+            const result = await listZipItems(zip);
+            zipItems = zipItems.concat(result.items);
+            allSkippedFiles.push(...result.skippedFiles);
+        }
+
+        if (allSkippedFiles.length > 0) {
+            uploadStatusStore.set("skippedFiles", allSkippedFiles);
         }
     } else {
         zipItems = allZipItems.filter(([z]) => existsSync(z));
@@ -84,7 +109,12 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
 
     if (filePaths.length == 0 && zipItems.length == 0) return undefined;
 
-    return { collectionName, filePaths, zipItems };
+    return {
+        collectionName,
+        filePaths,
+        zipItems,
+        skippedFiles: uploadStatusStore.get("skippedFiles") ?? [],
+    };
 };
 
 /**
@@ -127,22 +157,24 @@ export const setPendingUploads = ({
     collectionName,
     filePaths,
     zipItems,
+    skippedFiles,
 }: PendingUploads) => {
     uploadStatusStore.set({
         collectionName: collectionName ?? "",
         filePaths: filePaths,
         zipItems: zipItems,
+        skippedFiles: skippedFiles ?? [],
     });
 };
 
 export const markUploadedFile = (
     path: string,
     associatedPath: string | undefined,
-) => {
+): Promise<number> => {
     const existing = uploadStatusStore.get("filePaths") ?? [];
     const updated = existing.filter((p) => p != path && p != associatedPath);
     uploadStatusStore.set("filePaths", updated);
-    // See: [Note: Integral last modified time]
+
     return fs.stat(path).then((st) => st.mtime.getTime());
 };
 
