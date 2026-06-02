@@ -29,24 +29,31 @@ io.ente.auth.unlock
 
 ### Flatpak
 
-Flatpak apps cannot install host Polkit policies by themselves. Install the
-policy from the installed Flatpak bundle:
+Flatpak apps cannot install host Polkit policies by themselves. Download the
+policy from GitHub and verify its SHA-256 checksum before installing it:
 
 ```sh
-app_id="io.ente.auth"
-install_dir="$(flatpak info --show-location "$app_id")"
-policy="$install_dir/files/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy"
+policy_url="https://raw.githubusercontent.com/ente-io/ente/main/mobile/apps/auth/assets/polkit/io.ente.auth.policy"
+policy_sha256="31e4fb0757c8a55cee49324ddc310ff660a53d7f143049de202510fa58fe1d24"
+policy="$(mktemp)"
 
-sudo install -D -o root -g root -m 0644 \
-  "$policy" \
-  /usr/share/polkit-1/actions/io.ente.auth.policy
+if curl -fsSL "$policy_url" -o "$policy" &&
+  printf "%s  %s\n" "$policy_sha256" "$policy" | sha256sum -c -; then
+  sudo install -D -o root -g root -m 0644 \
+    "$policy" \
+    /usr/share/polkit-1/actions/io.ente.auth.policy
 
-if command -v chcon >/dev/null 2>&1; then
-  sudo chcon system_u:object_r:usr_t:s0 \
-    /usr/share/polkit-1/actions/io.ente.auth.policy || true
+  if command -v chcon >/dev/null 2>&1; then
+    sudo chcon system_u:object_r:usr_t:s0 \
+      /usr/share/polkit-1/actions/io.ente.auth.policy || true
+  fi
+
+  pkaction --action-id io.ente.auth.unlock --verbose
+else
+  echo "Policy download or checksum verification failed. Not installing."
 fi
 
-pkaction --action-id io.ente.auth.unlock --verbose
+rm -f "$policy"
 ```
 
 ### AppImage or Manual Builds
