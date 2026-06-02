@@ -27,9 +27,9 @@ The policy action is:
 io.ente.auth.unlock
 ```
 
-### Flatpak, AppImage, or Manual Builds
+### Manual Policy Setup
 
-Flatpak apps cannot install host Polkit policies by themselves. AppImage or
+Flatpak apps cannot install host Polkit policies by themselves, and AppImage or
 manual builds may also need manual setup. Download the policy from GitHub and
 verify its SHA-256 checksum before installing it:
 

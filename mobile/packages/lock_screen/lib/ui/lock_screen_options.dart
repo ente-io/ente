@@ -79,7 +79,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
           context: context,
           title: pendingTranslation("Linux setup required"),
           body: pendingTranslation(
-            "Ente Auth needs a one-time Linux Polkit policy setup before system authentication can be used. Open the guide for setup steps, including Flatpak, AppImage, and fingerprint notes.",
+            "To use device lock on Linux, Ente Auth needs a one-time system authentication setup. The guide includes setup steps for Flatpak, AppImage, and fingerprint prompts.",
           ),
           isDismissible: true,
           buttons: [
