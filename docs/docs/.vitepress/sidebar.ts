@@ -325,20 +325,6 @@ export const sidebar = [
                     },
                 ],
             },
-            {
-                text: "Troubleshooting",
-                collapsed: true,
-                items: [
-                    {
-                        text: "Linux system authentication",
-                        link: "/auth/troubleshooting/linux-system-auth",
-                    },
-                    {
-                        text: "Windows login",
-                        link: "/auth/troubleshooting/windows-login",
-                    },
-                ],
-            },
         ],
     },
     {
@@ -396,6 +382,20 @@ export const sidebar = [
                     {
                         text: "Export",
                         link: "/auth/migration/export",
+                    },
+                ],
+            },
+            {
+                text: "Troubleshooting",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Linux system authentication",
+                        link: "/auth/troubleshooting/linux-system-auth",
+                    },
+                    {
+                        text: "Windows login",
+                        link: "/auth/troubleshooting/windows-login",
                     },
                 ],
             },
