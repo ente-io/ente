@@ -523,7 +523,28 @@ export const Upload: React.FC<UploadProps> = ({
             desktopZipItems.map((ze) => [ze, joinPath(dirname(ze[0]), ze[1])]),
         ].flat() as UploadItemAndPath[];
 
-        if (allItemAndPaths.length == 0) return;
+        if (allItemAndPaths.length == 0) {
+            // No real items to upload. If we also have skipped files
+            // (e.g. a corrupt .zip, or a `._foo.zip` macOS sidecar), the
+            // user still deserves to see what was filtered out — otherwise
+            // the new failedZip / macosSystemFile sections would never be
+            // shown for exactly the failure case they're meant to report.
+            // Open the dialog with phase = "done" so the user can dismiss
+            // it via the Done button.
+            //
+            // We must also gate on `uploadRunning.current` being false:
+            // when a selection contains both real items and skipped files,
+            // the import flow below clears the real-item state (which
+            // re-triggers this effect) but does not clear `skippedFiles`,
+            // so on the second pass this branch would otherwise fire and
+            // surface a "done" dialog while the actual upload is still in
+            // flight.
+            if (skippedFiles.length > 0 && !uploadRunning.current) {
+                uploadManager.setUploadPhase("done");
+                uploadManager.showUploadProgressDialog();
+            }
+            return;
+        }
 
         if (uploadManager.isUploadRunning()) {
             if (watcher.isUploadRunning()) {
