@@ -41,7 +41,7 @@ You can view your 2FA codes at [auth.ente.com](https://auth.ente.com). For addin
 
 3. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
-   - **Using Flutter directly:** Run `flutter pub get --enforce-lockfile` in `packages/strings` and this folder
+   - **Using Flutter directly:** Run `flutter pub get --enforce-lockfile` in `packages/strings` and this folder.
 
 4. Run the app:
    - Android: `flutter run --flavor independent`
