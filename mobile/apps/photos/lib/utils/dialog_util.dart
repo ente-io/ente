@@ -18,7 +18,7 @@ import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/utils/email_util.dart";
 
-///Will return null if dismissed by tapping outside
+/// Legacy info-dialog helper backed by [showDialogWidget].
 Future<ButtonResult?> showInfoDialog(
   BuildContext context, {
   String title = "",
@@ -43,7 +43,7 @@ Future<ButtonResult?> showInfoDialog(
   );
 }
 
-///Will return null if dismissed by tapping outside
+/// Legacy error-dialog helper backed by [showDialogWidget].
 Future<ButtonResult?> showErrorDialog(
   BuildContext context,
   String title,
@@ -68,6 +68,7 @@ Future<ButtonResult?> showErrorDialog(
   );
 }
 
+/// Legacy exception-dialog helper backed by [showDialogWidget].
 Future<ButtonResult?> showErrorDialogForException({
   required BuildContext context,
   required Exception exception,
@@ -155,7 +156,7 @@ String parseErrorForUI(
   return genericError;
 }
 
-///Will return null if dismissed by tapping outside
+/// Legacy parsed-error dialog helper backed by [showDialogWidget].
 Future<ButtonResult?> showGenericErrorDialog({
   required BuildContext context,
   bool isDismissible = true,
@@ -233,7 +234,7 @@ Future<void> showGenericErrorBottomSheet({
   );
 }
 
-///Will return null if dismissed by tapping outside
+/// Legacy two-choice dialog helper backed by [showDialogWidget].
 Future<ButtonResult?> showChoiceDialog(
   BuildContext context, {
   required String title,
@@ -276,11 +277,16 @@ Future<ButtonResult?> showChoiceDialog(
   );
 }
 
-///Will return null if dismissed by tapping outside
+/// Compatibility adapter for legacy Photos choice sheets.
+///
+/// Preserves existing two-choice [ButtonResult] behavior while rendering
+/// through [BottomSheetComponent]. Prefer [BottomSheetComponent] directly for
+/// new sheets.
 Future<ButtonResult?> showChoiceActionSheet(
   BuildContext context, {
   required String title,
   String? body,
+  Widget? illustration,
   required String firstButtonLabel,
   String secondButtonLabel = "Cancel",
   ButtonType firstButtonType = ButtonType.neutral,
@@ -314,6 +320,7 @@ Future<ButtonResult?> showChoiceActionSheet(
   return showActionSheet(
     context: context,
     title: title,
+    illustration: illustration,
     body: body,
     buttons: buttons,
     isDismissible: isDismissible,
@@ -342,7 +349,10 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-/// Returns null on successful submit, ButtonResult on cancel, and Exception on submit failure.
+/// Compatibility adapter for legacy Photos text-input dialogs.
+///
+/// Returns null on successful submit, [ButtonResult] on cancel, and [Exception]
+/// on submit failure. Prefer [BottomSheetComponent] directly for new sheets.
 Future<dynamic> showTextInputDialog(
   BuildContext context, {
   required String title,
@@ -371,7 +381,7 @@ Future<dynamic> showTextInputDialog(
     context: context,
     useRootNavigator: useRootNavigator,
     builder: (_) {
-      return TextInputDialog(
+      return LegacyTextInputDialog(
         title: title,
         message: message,
         label: label,

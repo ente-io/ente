@@ -114,7 +114,7 @@ class BottomSheetComponent extends StatelessWidget {
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.padding = const EdgeInsets.all(Spacing.xl),
     this.contentSpacing = Spacing.lg,
-    this.actionsTopSpacing = Spacing.lg,
+    this.actionsTopSpacing,
     this.backgroundColor,
     this.isKeyboardAware = false,
   });
@@ -137,7 +137,7 @@ class BottomSheetComponent extends StatelessWidget {
   final CrossAxisAlignment crossAxisAlignment;
   final EdgeInsets padding;
   final double contentSpacing;
-  final double actionsTopSpacing;
+  final double? actionsTopSpacing;
   final Color? backgroundColor;
   final bool isKeyboardAware;
 
@@ -176,8 +176,10 @@ class BottomSheetComponent extends StatelessWidget {
         ? CrossAxisAlignment.stretch
         : crossAxisAlignment;
     final effectiveContentSpacing = usesCenteredLayout
-        ? Spacing.xs
+        ? Spacing.lg
         : contentSpacing;
+    final effectiveActionsTopSpacing =
+        actionsTopSpacing ?? (usesCenteredLayout ? Spacing.xxl : Spacing.lg);
 
     return AnimatedPadding(
       duration: const Duration(milliseconds: 200),
@@ -207,7 +209,7 @@ class BottomSheetComponent extends StatelessWidget {
                   effectiveContent,
                 ],
                 if (actions.isNotEmpty) ...[
-                  SizedBox(height: actionsTopSpacing),
+                  SizedBox(height: effectiveActionsTopSpacing),
                   _BottomSheetActions(actions: actions),
                 ],
               ],
@@ -281,7 +283,8 @@ class _CenteredHeader extends StatelessWidget {
         ),
         if (showCloseButton && (illustration != null || title != null))
           const SizedBox(height: Spacing.xs),
-        if (illustration != null) Center(child: illustration!),
+        if (illustration != null)
+          _BottomSheetIllustrationSlot(child: illustration!),
         if (title != null) ...[
           SizedBox(height: illustration == null ? 0 : Spacing.lg),
           Text(
@@ -293,6 +296,30 @@ class _CenteredHeader extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _BottomSheetIllustrationSlot extends StatelessWidget {
+  const _BottomSheetIllustrationSlot({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: _illustrationSlotWidth,
+        height: _illustrationSlotHeight,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: _illustrationSlotBottomInset),
+          child: FittedBox(
+            alignment: Alignment.bottomCenter,
+            fit: BoxFit.scaleDown,
+            child: child,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -357,3 +384,6 @@ class _BottomSheetActions extends StatelessWidget {
 }
 
 const double _headerHeight = 38;
+const double _illustrationSlotWidth = 180;
+const double _illustrationSlotHeight = 120;
+const double _illustrationSlotBottomInset = 11;

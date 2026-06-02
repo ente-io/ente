@@ -74,9 +74,45 @@ void main() {
 
     expect(find.byKey(const ValueKey('warning-illustration')), findsOneWidget);
     expect(find.text('Centered message'), findsOneWidget);
+    final illustrationSlot = find.ancestor(
+      of: find.byKey(const ValueKey('warning-illustration')),
+      matching: find.byType(FittedBox),
+    );
+    expect(illustrationSlot, findsOneWidget);
+    expect(tester.getSize(illustrationSlot), const Size(180, 109));
+    expect(
+      tester.getSize(find.byKey(const ValueKey('warning-illustration'))),
+      const Size(80, 80),
+    );
 
     final message = tester.widget<Text>(find.text('Centered message'));
     expect(message.textAlign, TextAlign.center);
+  });
+
+  testWidgets('BottomSheetComponent respects explicit action spacing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const BottomSheetComponent(
+          title: 'Title',
+          message: 'Centered message',
+          actionsTopSpacing: 7,
+          actions: [
+            ButtonComponent(key: ValueKey('action-button'), label: 'Action'),
+          ],
+        ),
+      ),
+    );
+
+    final messageBottom = tester
+        .getBottomLeft(find.text('Centered message'))
+        .dy;
+    final actionTop = tester
+        .getTopLeft(find.byKey(const ValueKey('action-button')))
+        .dy;
+
+    expect(actionTop - messageBottom, 7);
   });
 
   testWidgets('BottomSheetComponent dismisses from close button by default', (

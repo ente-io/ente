@@ -10,7 +10,11 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 
 enum ActionSheetType { defaultActionSheet, iconOnly }
 
-///Returns null if dismissed
+/// Compatibility adapter for legacy Photos action sheets.
+///
+/// Preserves existing [ButtonWidget]/[ButtonResult] behavior while rendering
+/// through [BottomSheetComponent]. Prefer [BottomSheetComponent] directly for
+/// new sheets.
 Future<ButtonResult?> showActionSheet({
   required BuildContext context,
   required List<ButtonWidget> buttons,
@@ -19,6 +23,7 @@ Future<ButtonResult?> showActionSheet({
   bool isDismissible = true,
   bool isCheckIconGreen = false,
   String? title,
+  Widget? illustration,
   Widget? bodyWidget,
   String? body,
   String? bodyHighlight,
@@ -34,8 +39,9 @@ Future<ButtonResult?> showActionSheet({
     isDismissible: isDismissible,
     enableDrag: enableDrag,
     builder: (_) {
-      return ActionSheetWidget(
+      return LegacyActionSheetWidget(
         title: title,
+        illustration: illustration,
         bodyWidget: bodyWidget,
         body: body,
         bodyHighlight: bodyHighlight,
@@ -47,8 +53,9 @@ Future<ButtonResult?> showActionSheet({
   );
 }
 
-class ActionSheetWidget extends StatelessWidget {
+class LegacyActionSheetWidget extends StatelessWidget {
   final String? title;
+  final Widget? illustration;
   final Widget? bodyWidget;
   final String? body;
   final String? bodyHighlight;
@@ -56,11 +63,12 @@ class ActionSheetWidget extends StatelessWidget {
   final ActionSheetType actionSheetType;
   final bool isCheckIconGreen;
 
-  const ActionSheetWidget({
+  const LegacyActionSheetWidget({
     required this.actionButtons,
     required this.actionSheetType,
     required this.isCheckIconGreen,
     this.title,
+    this.illustration,
     this.bodyWidget,
     this.body,
     this.bodyHighlight,
@@ -85,21 +93,25 @@ class ActionSheetWidget extends StatelessWidget {
       for (var index = 0; index < actionButtons.length; index++)
         if (index != cancelButtonIndex) actionButtons[index],
     ];
+    final effectiveIllustration =
+        illustration ??
+        (actionSheetType == ActionSheetType.iconOnly
+            ? Icon(
+                Icons.check_outlined,
+                size: 48,
+                color: isCheckIconGreen ? colors.primary : colors.iconColor,
+              )
+            : null);
 
     return BottomSheetComponent(
       title: title,
-      illustration: actionSheetType == ActionSheetType.iconOnly
-          ? Icon(
-              Icons.check_outlined,
-              size: 48,
-              color: isCheckIconGreen ? colors.primary : colors.iconColor,
-            )
-          : null,
+      illustration: effectiveIllustration,
       content: hasDefaultContent
-          ? _ActionSheetContent(
+          ? _LegacyActionSheetContent(
               bodyWidget: bodyWidget,
               body: body,
               bodyHighlight: bodyHighlight,
+              textAlign: illustration == null ? null : TextAlign.center,
             )
           : null,
       actions: [
@@ -112,17 +124,27 @@ class ActionSheetWidget extends StatelessWidget {
       onClose: cancelButton == null
           ? null
           : () => sheetCloseAction(context, cancelButton),
-      actionsTopSpacing: hasContent ? Spacing.lg : 0,
+      actionsTopSpacing: illustration != null
+          ? null
+          : hasContent
+          ? Spacing.lg
+          : 0,
     );
   }
 }
 
-class _ActionSheetContent extends StatelessWidget {
+class _LegacyActionSheetContent extends StatelessWidget {
   final Widget? bodyWidget;
   final String? body;
   final String? bodyHighlight;
+  final TextAlign? textAlign;
 
-  const _ActionSheetContent({this.bodyWidget, this.body, this.bodyHighlight});
+  const _LegacyActionSheetContent({
+    this.bodyWidget,
+    this.body,
+    this.bodyHighlight,
+    this.textAlign,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -141,12 +163,14 @@ class _ActionSheetContent extends StatelessWidget {
           bodyWidget ??
               Text(
                 body!,
+                textAlign: textAlign,
                 style: TextStyles.body.copyWith(color: colors.textLight),
               ),
         if (bodyHighlight != null) ...[
           if (hasBody) const SizedBox(height: Spacing.lg),
           Text(
             bodyHighlight!,
+            textAlign: textAlign,
             style: TextStyles.body.copyWith(color: colors.textBase),
           ),
         ],

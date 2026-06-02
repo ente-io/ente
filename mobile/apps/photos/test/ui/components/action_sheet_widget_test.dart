@@ -251,6 +251,35 @@ void main() {
       expect(find.text("Close"), findsOneWidget);
       expect(find.byTooltip("Close"), findsNothing);
     });
+
+    testWidgets("centers body text for illustrated sheets", (tester) async {
+      await _pumpLauncher(
+        tester,
+        (context) => showActionSheet(
+          context: context,
+          title: "Warning",
+          body: "Are you sure?",
+          illustration: const SizedBox(width: 80, height: 80),
+          buttons: const [
+            ButtonWidget(
+              buttonType: ButtonType.critical,
+              labelText: "Yes",
+              isInAlert: true,
+              buttonAction: ButtonAction.first,
+            ),
+          ],
+        ),
+      );
+
+      await _openLauncher(tester);
+
+      final body = tester.widget<Text>(find.text("Are you sure?"));
+      final bodyBottom = tester.getBottomLeft(find.text("Are you sure?")).dy;
+      final buttonTop = tester.getTopLeft(find.byType(ButtonComponent)).dy;
+
+      expect(body.textAlign, TextAlign.center);
+      expect(buttonTop - bodyBottom, 24);
+    });
   });
 }
 

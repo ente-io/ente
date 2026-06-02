@@ -74,15 +74,28 @@ class AlertBottomSheet<T> extends StatelessWidget {
                 ),
               SizedBox(height: showCloseButton ? 4 : 24),
               if (assetPath != null) ...[
-                Center(child: Image.asset(assetPath!)),
-                const SizedBox(height: 24),
+                Center(
+                  child: SizedBox(
+                    width: 180,
+                    height: 120,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 11),
+                      child: FittedBox(
+                        alignment: Alignment.bottomCenter,
+                        fit: BoxFit.scaleDown,
+                        child: Image.asset(assetPath!),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
               Text(
                 title,
                 style: textTheme.largeBold,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 16),
               Text(
                 message,
                 style: textTheme.small.copyWith(
@@ -102,7 +115,7 @@ class AlertBottomSheet<T> extends StatelessWidget {
     if (buttons == null || buttons!.isEmpty) return [];
 
     return [
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
