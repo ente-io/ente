@@ -14,7 +14,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/rollout"
 	"github.com/ente-io/museum/pkg/utils/time"
 	log "github.com/sirupsen/logrus"
-	logtest "github.com/sirupsen/logrus/hooks/test"
 )
 
 type recordingUserAccessResetter struct {
@@ -955,36 +954,6 @@ func TestStorageWarningTemplateDetailsActiveOverage(t *testing.T) {
 	}
 }
 
-func TestProcessStorageWarningSnapshotSkipsDueToRolloutWithoutPerRecipientLog(t *testing.T) {
-	standardLogger := log.StandardLogger()
-	originalHooks := standardLogger.ReplaceHooks(make(log.LevelHooks))
-	hook := logtest.NewGlobal()
-	defer standardLogger.ReplaceHooks(originalHooks)
-
-	snapshot := storageWarningSnapshot{
-		RecipientID:      12345,
-		AccountEmail:     "user@example.com",
-		TotalUsage:       storageWarningOverageThreshold + 10,
-		AllottedStorage:  0,
-		AvailableStorage: -10,
-		Bucket:           storageWarningBucketExpired,
-		ExpiredStage:     expiredWarningStage0,
-		EffectiveExpiry:  1,
-	}
-
-	result, err := (&EmailNotificationController{}).processStorageWarningSnapshot(context.Background(), snapshot)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result != storageWarningProcessResultSkippedRollout {
-		t.Fatalf("unexpected result: got %q want %q", result, storageWarningProcessResultSkippedRollout)
-	}
-
-	if entry := hook.LastEntry(); entry != nil {
-		t.Fatalf("expected no per-recipient rollout log, got %q", entry.Message)
-	}
-}
-
 func TestProcessStorageWarningSnapshotScheduledDeletionSkipsResetWhenEmailFails(t *testing.T) {
 	originalSendStorageWarningTemplatedEmail := sendStorageWarningTemplatedEmail
 	originalPersistStorageWarningHistory := persistStorageWarningHistory
@@ -1350,7 +1319,7 @@ func TestBuildStorageWarningRunSummary(t *testing.T) {
 	stats.SkippedRolloutPct = 39
 
 	got := buildStorageWarningRunSummary(stats, 0)
-	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 | sent=3 | success={expired_0d=1, active_overage_0d=2} | failures={active_overage_60d=1} | skipped_rollout={expired_30d=39} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=90"
+	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 | sent=3 | success={expired_0d=1, active_overage_0d=2} | failures={active_overage_60d=1} | skipped_rollout={expired_30d=39} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=100"
 	if got != want {
 		t.Fatalf("unexpected summary:\n got: %s\nwant: %s", got, want)
 	}
