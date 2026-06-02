@@ -177,14 +177,7 @@ export const PasteQrCode = ({
                 tokens,
                 showCenterLock,
             }),
-        [
-            qrSize,
-            showCenterLock,
-            tokens.qr.finder,
-            tokens.qr.module,
-            qrPaperBg,
-            value,
-        ],
+        [qrSize, showCenterLock, tokens, qrPaperBg, value],
     );
 
     useEffect(() => {
