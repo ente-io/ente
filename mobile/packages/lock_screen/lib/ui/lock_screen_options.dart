@@ -20,7 +20,11 @@ import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
+
+const _linuxSystemAuthGuideUrl =
+    "https://ente.com/help/auth/troubleshooting/linux-system-auth";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -75,14 +79,21 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
           context: context,
           title: pendingTranslation("Linux setup required"),
           body: pendingTranslation(
-            "Install the Ente Auth Polkit policy, then try device lock again.\n\n${linuxStatus!.policyInstallCommand}",
+            "To use device lock on Linux, Ente Auth needs a one-time system authentication setup. The guide includes setup steps for Flatpak, AppImage, and fingerprint prompts.",
           ),
           isDismissible: true,
           buttons: [
             ButtonWidget(
-              buttonType: ButtonType.secondary,
-              labelText: context.strings.ok,
+              buttonType: ButtonType.primary,
+              labelText: pendingTranslation("Open guide"),
               isInAlert: true,
+              onTap: () async {
+                await PlatformUtil.openWebView(
+                  context,
+                  pendingTranslation("Linux setup required"),
+                  _linuxSystemAuthGuideUrl,
+                );
+              },
             ),
           ],
         );
