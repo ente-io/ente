@@ -364,6 +364,16 @@ class UploadManager {
     }
 
     /**
+     * Set the current {@link UploadPhase} shown in the progress dialog.
+     * Normally driven by {@link uploadItems}; exposed for callers that
+     * need to show the dialog without going through the upload pipeline
+     * (e.g. when surfacing only skipped files to the user).
+     */
+    setUploadPhase(phase: UploadPhase) {
+        this.uiService.setUploadPhase(phase);
+    }
+
+    /**
      * Upload files
      *
      * This method waits for all the files to get uploaded (successfully or
