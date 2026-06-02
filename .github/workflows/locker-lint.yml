@@ -24,7 +24,7 @@ permissions:
 
 jobs:
     locker-lint:
-        runs-on: ubuntu-latest
+        runs-on: macos-26
         defaults:
             run:
                 working-directory: mobile/apps/locker
@@ -58,6 +58,10 @@ jobs:
               working-directory: mobile/packages/strings
 
             - run: flutter pub get --enforce-lockfile
+
+            - name: Check iOS Podfile.lock is current
+              run: pod install --deployment
+              working-directory: mobile/apps/locker/ios
 
             - name: Generate locker localizations
               run: flutter gen-l10n

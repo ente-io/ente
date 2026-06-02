@@ -8,8 +8,8 @@ on:
             - "release/auth-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~6:15 AM IST
-        - cron: "45 0 * * 1-5"
+        # Run every weekday at ~5:15 AM IST
+        - cron: "45 23 * * 0-4"
 
 env:
     FLUTTER_VERSION: "3.38.10"
@@ -54,8 +54,8 @@ jobs:
                       exit 0
                   fi
 
-                  release_version="$(node .github/scripts/auth-version.mjs get)"
-                  build_number_base="$(node .github/scripts/auth-version.mjs get-build-base)"
+                  release_version="$(node .github/scripts/flutter-version.mjs auth get)"
+                  build_number_base="$(node .github/scripts/flutter-version.mjs auth get-build-base)"
                   build_number=$((build_number_base + GITHUB_RUN_NUMBER))
 
                   if [[ "${GITHUB_REF_NAME}" == release/auth-v* ]]; then
@@ -64,10 +64,10 @@ jobs:
                           exit 1
                       fi
                       release_tag="auth-v${release_version}-rc"
-                      release_title="Auth release candidate - ${release_version} (build ${build_number})"
+                      release_title="🟣 Auth release candidate - ${release_version} (build ${build_number})"
                   else
                       release_tag="auth-v${release_version}-beta"
-                      release_title="Auth nightly - ${release_version} (build ${build_number})"
+                      release_title="🟣 Auth nightly - ${release_version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"
@@ -125,7 +125,7 @@ jobs:
               working-directory: mobile/packages/strings
 
             - name: Set build version
-              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+              run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
@@ -234,7 +234,7 @@ jobs:
               working-directory: mobile/packages/strings
 
             - name: Set build version
-              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+              run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
@@ -329,7 +329,7 @@ jobs:
               working-directory: mobile/packages/strings
 
             - name: Set build version
-              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+              run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
               shell: bash
 
             - name: Resolve dependencies with lockfile enforcement
@@ -458,7 +458,7 @@ jobs:
               working-directory: mobile/packages/strings
 
             - name: Set build version
-              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+              run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
@@ -580,7 +580,7 @@ jobs:
               working-directory: mobile/packages/strings
 
             - name: Set build version
-              run: node ../../../.github/scripts/auth-version.mjs set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+              run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
@@ -680,7 +680,7 @@ jobs:
                       { print }
                   ' <<< "${RELEASE_BODY_GROUPED}")"
                   if [ "${#release_body_discord}" -gt 3000 ]; then
-                      release_body_discord="${release_body_discord:0:3000}"$'\n\n...\n-# See the GitHub release for full notes.'
+                      release_body_discord="${release_body_discord:0:3000}"$'\n...\n-# See the GitHub release for full notes.'
                   fi
 
                   jq -n \
