@@ -1,4 +1,4 @@
-// Following are types shared with the Electron process. This list is manually
+﻿// Following are types shared with the Electron process. This list is manually
 // kept in sync with `desktop/src/types/ipc.ts`.
 //
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
@@ -626,9 +626,17 @@ export interface Electron {
      * whose file name begins with a dot (i.e. "hidden" files) will also be
      * excluded.
      *
+     * In addition to the regular {@link items}, returns a {@link skippedFiles}
+     * list of files that aren't being uploaded (`._*` / `__MACOSX__`
+     * placeholders, or `.zip` files that can't be opened). Each entry is
+     * tagged with a {@link SkippedFileKind} so the renderer can surface
+     * it in the right section of the upload progress UI.
+     *
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
-    listZipItems: (zipPath: string) => Promise<ZipItem[]>;
+    listZipItems: (
+        zipPath: string,
+    ) => Promise<{ items: ZipItem[]; skippedFiles: SkippedFile[] }>;
 
     /**
      * Return the size in bytes of the file at the given path or of a particular
@@ -880,6 +888,26 @@ export interface FolderWatchSyncedFile {
 export type ZipItem = [zipPath: string, entryName: string];
 
 /**
+ * The reason a file was excluded from the upload.
+ *
+ * - `"macosSystemFile"`: macOS-injected placeholder (`._*` fork or
+ *   `__MACOSX__` entry), deliberately filtered out.
+ * - `"failedZip"`: a `.zip` file that couldn't be opened as a zip archive.
+ *   Surfaced as a failure so the user notices.
+ */
+export type SkippedFileKind = "macosSystemFile" | "failedZip";
+
+/**
+ * A file that isn't being uploaded, together with the reason it was
+ * skipped. {@link name} is shown in the upload progress UI (the zip entry
+ * name inside an archive, or the file name for top-level files).
+ */
+export interface SkippedFile {
+    name: string;
+    kind: SkippedFileKind;
+}
+
+/**
  * State about pending and in-progress uploads.
  *
  * When the user starts an upload, we remember the files they'd selected (or
@@ -906,6 +934,9 @@ export interface PendingUploads {
      * {@link ZipItem} (zip path and entry name) that need to be uploaded.
      */
     zipItems: ZipItem[];
+    /** Files that aren't being uploaded (macOS placeholders or unopenable
+     * zips), tagged with a {@link SkippedFileKind} for display. */
+    skippedFiles?: SkippedFile[];
 }
 
 /**

@@ -1,4 +1,4 @@
-{
+﻿{
     "intro_slide_1_title": "Private backups<br/>for your memories",
     "intro_slide_1": "End-to-end encrypted by default",
     "intro_slide_2_title": "Safely stored<br/>at a fallout shelter",
@@ -397,6 +397,10 @@
     "live_photos_detected": "The photo and video files from your Live Photos have been merged into a single file",
     "ignored_uploads": "Ignored uploads",
     "ignored_uploads_hint": "Skipped these as there are files with matching name and content in the same album",
+    "macos_fake_files": "macOS metadata files",
+    "macos_fake_files_hint": "These are not photos. They are hidden files that macOS creates, and have been skipped.",
+    "failed_zip_files": "Unreadable zip files",
+    "failed_zip_files_hint": "These files end in .zip but could not be opened as zip archives. They have been skipped.",
     "file_not_uploaded_list": "The following files were not uploaded",
     "failed_uploads": "Failed uploads",
     "failed_uploads_hint": "There will be an option to retry these when the upload finishes",

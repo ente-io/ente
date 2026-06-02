@@ -94,7 +94,9 @@ type FinishedUploadType =
     | "failed"
     | "alreadyUploaded"
     | "uploadedWithStaticThumbnail"
-    | "uploaded";
+    | "uploaded"
+    | "macosSystemFile"
+    | "failedZip";
 
 type SegregatedFinishedUploads = Map<FinishedUploadType, FileID[]>;
 
@@ -480,6 +482,8 @@ const notUploadedFileCount = (
     c += finishedUploads.get("tooLarge")?.length ?? 0;
     c += finishedUploads.get("unsupported")?.length ?? 0;
     c += finishedUploads.get("zeroSize")?.length ?? 0;
+    c += finishedUploads.get("macosSystemFile")?.length ?? 0;
+    c += finishedUploads.get("failedZip")?.length ?? 0;
     return c;
 };
 
@@ -560,6 +564,16 @@ function UploadProgressDialog() {
                         resultType="largerThanAvailableStorage"
                         sectionTitle={t("insufficient_storage")}
                         sectionInfo={t("insufficient_storage_hint")}
+                    />
+                    <ResultSection
+                        resultType="macosSystemFile"
+                        sectionTitle={t("macos_fake_files")}
+                        sectionInfo={t("macos_fake_files_hint")}
+                    />
+                    <ResultSection
+                        resultType="failedZip"
+                        sectionTitle={t("failed_zip_files")}
+                        sectionInfo={t("failed_zip_files_hint")}
                     />
                     <ResultSection
                         resultType="unsupported"
