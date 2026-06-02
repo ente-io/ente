@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
-import type { FormEvent } from "react";
+import type { SubmitEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { pasteTextFieldSx } from "./textFieldSx";
 
@@ -56,7 +56,7 @@ export const PasteViewPanel = ({
         passwordInputRef.current?.focus();
     }, [passwordError]);
 
-    const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handlePasswordSubmit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!password) {
             return;

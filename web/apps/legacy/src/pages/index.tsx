@@ -985,7 +985,7 @@ const LegacyPasswordForm: React.FC<LegacyPasswordFormProps> = ({
         !isWeakPassword(password) &&
         !isSubmitting;
 
-    const submit = async (event: React.FormEvent) => {
+    const submit = async (event: React.SubmitEvent) => {
         event.preventDefault();
         setFieldError("");
 

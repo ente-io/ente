@@ -477,7 +477,7 @@ const PasswordUnlockContent = ({
     const cooldown = useCooldownState(appLock.cooldownExpiresAt);
 
     const handleSubmit = useCallback(
-        async (e?: React.FormEvent) => {
+        async (e?: React.SubmitEvent) => {
             e?.preventDefault();
             if (!password || loading) return;
 
@@ -524,7 +524,7 @@ const PasswordUnlockContent = ({
             <AppLockCard closeAction={closeAction}>
                 <Stack
                     component="form"
-                    onSubmit={(e: React.FormEvent) => void handleSubmit(e)}
+                    onSubmit={(e: React.SubmitEvent) => void handleSubmit(e)}
                     spacing={0}
                     useFlexGap
                     alignItems="center"
