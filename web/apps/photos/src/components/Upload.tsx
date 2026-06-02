@@ -35,6 +35,7 @@ import { basename, dirname, joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
+import { UploadProgress } from "ente-gallery/components/UploadProgress";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import {
     groupItemsBasedOnParentFolder,
@@ -89,7 +90,6 @@ import {
 import watcher from "services/watch";
 import { hasReliableCanvasReadback } from "utils/upload/canvas-integrity";
 import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
-import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
     /** The logged in user, if any. */

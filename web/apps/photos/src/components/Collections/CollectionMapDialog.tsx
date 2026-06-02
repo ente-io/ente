@@ -819,8 +819,7 @@ function useMapData(
 
         //preventing reloading of the data if it's already loaded.
         if (
-            loaded &&
-            loaded.summaryId === currentSummaryId &&
+            loaded?.summaryId === currentSummaryId &&
             loaded.fileCount === currentFileCount &&
             loaded.updationTime === currentUpdationTime &&
             loaded.files === files
@@ -1572,9 +1571,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         useCallback(
             (next) => {
                 const nextValue =
-                    typeof next === "function"
-                        ? (next as (prev: boolean) => boolean)(isFileViewerOpen)
-                        : next;
+                    typeof next === "function" ? next(isFileViewerOpen) : next;
                 setIsFileViewerOpen(nextValue);
             },
             [isFileViewerOpen],

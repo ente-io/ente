@@ -15,6 +15,7 @@ import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/code_widget_layout_utils.dart';
 import 'package:ente_auth/ui/components/auth_qr_dialog.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/shortcuts.dart';
@@ -335,7 +336,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       );
     }
 
-    return Container(
+    final bool isIOS = !kIsWeb && Platform.isIOS;
+    final Widget content = Container(
       margin: widget.isCompactMode
           ? const EdgeInsets.only(left: 16, right: 16, bottom: 6, top: 6)
           : const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
@@ -365,6 +367,15 @@ class _CodeWidgetState extends State<CodeWidget> {
           return clippedCard(l10n);
         },
       ),
+    );
+    if (!isIOS) return content;
+    final double scale = capCodeWidgetTextScaleForIOS(
+      MediaQuery.textScalerOf(context).scale(1.0),
+    );
+    return MediaQuery(
+      data:
+          MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+      child: content,
     );
   }
 

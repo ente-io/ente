@@ -7,7 +7,7 @@
     },
     "dependencies": {
         "ente-base": "*",
-        "hugeicons-react": "^0.3.0"
+        "hugeicons-react": "0.3.0"
     },
     "devDependencies": {
         "ente-build-config": "*"

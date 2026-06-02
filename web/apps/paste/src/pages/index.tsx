@@ -30,6 +30,7 @@ const Page = () => {
         consumeError,
         resolvedText,
         passwordRequired,
+        passwordError,
         submitPassword,
     } = useConsumePaste(mode, accessToken);
 
@@ -82,6 +83,7 @@ const Page = () => {
                             consumeError={consumeError}
                             resolvedText={resolvedText}
                             passwordRequired={passwordRequired}
+                            passwordError={passwordError}
                             onSubmitPassword={submitPassword}
                             onCopyText={copyTextToClipboard}
                         />

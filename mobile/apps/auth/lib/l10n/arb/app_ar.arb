@@ -537,5 +537,12 @@
   "chooseBackupLocation": "اختر موقع النسخة الاحتياطية",
   "loadDefaultLocation": "تحميل الموقع الافتراضي...",
   "couldNotDetermineLocation": "تعذر تحديد الموقع...",
-  "saveBackup": "احفظ النسخ الاحتياطي"
+  "saveBackup": "احفظ النسخ الاحتياطي",
+  "chooseIcon": "اختر أيقونة",
+  "customOrder": "ترتيب مخصّص",
+  "appIcon": "أيقونة التطبيق",
+  "importAndOTPGuide": "صدّر النسخة الاحتياطية من andOTP باستخدام خيار \"النسخ الاحتياطي\" في الإعدادات.\n\nإذا تم تشفير النسخة الاحتياطية، سوف تحتاج إلى إدخال كلمة مرور النسخ الاحتياطي لفك تشفيرها.",
+  "enterPasswordToDecryptAndOTP": "أدخل كلمة المرور لفك تشفير النسخ الاحتياطي لـ andOTP",
+  "failedToDecryptAndOTPBackup": "فشل فك تشفير النسخ الاحتياطي لـ andOTP",
+  "notSupportedForHOTP": "غير مدعوم لـ HOTP"
 }

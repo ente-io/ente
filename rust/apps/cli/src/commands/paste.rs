@@ -47,13 +47,7 @@ pub async fn handle_paste_command(cmd: PasteCommand) -> Result<()> {
             endpoint,
         } => {
             let (access_token, paste_key) = parse_paste_reference(&link_or_token, key)?;
-            let password = if paste_key.password_required {
-                Some(resolve_paste_password()?)
-            } else {
-                None
-            };
-            let text =
-                consume_paste(&endpoint, &access_token, &paste_key, password.as_deref()).await?;
+            let text = consume_paste(&endpoint, &access_token, &paste_key).await?;
             print!("{text}");
             Ok(())
         }
@@ -75,7 +69,9 @@ fn read_paste_text(text: Option<String>, file: Option<PathBuf>) -> Result<String
     };
 
     if text.trim().is_empty() {
-        return Err(Error::InvalidInput("Paste text is empty".to_string()));
+        return Err(Error::InvalidInput(
+            "Paste text cannot be empty".to_string(),
+        ));
     }
     if text.chars().count() > MAX_PASTE_CHARS {
         return Err(Error::InvalidInput(format!(
@@ -98,10 +94,10 @@ fn resolve_new_paste_password() -> Result<String> {
     }
 }
 
-fn resolve_paste_password() -> Result<String> {
+fn resolve_paste_password_attempt() -> Result<PastePasswordAttempt> {
     match paste_password_from_env()? {
-        Some(password) => Ok(password),
-        None => prompt_paste_password(),
+        Some(password) => Ok(PastePasswordAttempt::Env(password)),
+        None => Ok(PastePasswordAttempt::Prompted(prompt_paste_password()?)),
     }
 }
 
@@ -129,12 +125,27 @@ fn prompt_new_paste_password() -> Result<String> {
 }
 
 fn prompt_paste_password() -> Result<String> {
-    let password = Password::new()
+    prompt_valid_paste_password(prompt_raw_paste_password)
+}
+
+fn prompt_raw_paste_password() -> Result<String> {
+    Password::new()
         .with_prompt("Paste password")
         .interact()
-        .map_err(dialoguer_error)?;
-    validate_password(&password)?;
-    Ok(password)
+        .map_err(dialoguer_error)
+}
+
+fn prompt_valid_paste_password<F>(mut prompt_password: F) -> Result<String>
+where
+    F: FnMut() -> Result<String>,
+{
+    loop {
+        let password = prompt_password()?;
+        match validate_password(&password) {
+            Ok(()) => return Ok(password),
+            Err(error) => eprintln!("{error}"),
+        }
+    }
 }
 
 fn dialoguer_error(error: dialoguer::Error) -> Error {
@@ -145,9 +156,28 @@ fn dialoguer_error(error: dialoguer::Error) -> Error {
 
 fn validate_password(password: &str) -> Result<()> {
     if password.is_empty() {
-        Err(Error::InvalidInput("Paste password is empty".to_string()))
+        Err(Error::InvalidInput(
+            "Paste password cannot be empty".to_string(),
+        ))
     } else {
         Ok(())
+    }
+}
+
+enum PastePasswordAttempt {
+    Env(String),
+    Prompted(String),
+}
+
+impl PastePasswordAttempt {
+    fn value(&self) -> &str {
+        match self {
+            Self::Env(password) | Self::Prompted(password) => password,
+        }
+    }
+
+    fn can_retry(&self) -> bool {
+        matches!(self, Self::Prompted(_))
     }
 }
 
@@ -168,28 +198,99 @@ async fn create_paste(
     ))
 }
 
-async fn consume_paste(
+async fn consume_paste(endpoint: &str, access_token: &str, paste_key: &PasteKey) -> Result<String> {
+    consume_paste_with_password_resolver(
+        endpoint,
+        access_token,
+        paste_key,
+        resolve_paste_password_attempt,
+    )
+    .await
+}
+
+async fn consume_paste_with_password_resolver<F>(
     endpoint: &str,
     access_token: &str,
     paste_key: &PasteKey,
-    password: Option<&str>,
-) -> Result<String> {
+    resolve_password: F,
+) -> Result<String>
+where
+    F: FnOnce() -> Result<PastePasswordAttempt>,
+{
     let client = paste_http_client()?;
     let request = PasteTokenRequest {
         access_token: access_token.to_string(),
     };
+    let password = if paste_key.password_required {
+        guard_cookie(&client, endpoint, &request).await?;
+        Some(resolve_password()?)
+    } else {
+        None
+    };
     let cookie = guard_cookie(&client, endpoint, &request).await?;
-    let payload: PastePayload = post_json(
-        &client,
+    let payload = consume_paste_payload(&client, endpoint, &request, &cookie).await?;
+
+    match password {
+        Some(password) => decrypt_password_protected_paste(paste_key, &payload, password),
+        None => decrypt_consumed_paste(paste_key, None, &payload),
+    }
+}
+
+async fn consume_paste_payload(
+    client: &Client,
+    endpoint: &str,
+    request: &PasteTokenRequest,
+    cookie: &str,
+) -> Result<PastePayload> {
+    post_json(
+        client,
         endpoint,
         "/paste/consume",
         &request,
         Some(("X-Paste-Consume", "1")),
-        Some(&cookie),
+        Some(cookie),
     )
-    .await?;
+    .await
+}
 
-    decrypt_consumed_paste(paste_key, password, &payload)
+fn decrypt_password_protected_paste(
+    paste_key: &PasteKey,
+    payload: &PastePayload,
+    password: PastePasswordAttempt,
+) -> Result<String> {
+    decrypt_password_protected_paste_with_prompt(
+        paste_key,
+        payload,
+        password,
+        prompt_raw_paste_password,
+    )
+}
+
+fn decrypt_password_protected_paste_with_prompt<F>(
+    paste_key: &PasteKey,
+    payload: &PastePayload,
+    mut password: PastePasswordAttempt,
+    mut prompt_password: F,
+) -> Result<String>
+where
+    F: FnMut() -> Result<String>,
+{
+    loop {
+        let key_encryption_key =
+            derive_paste_key_encryption_key(paste_key, Some(password.value()), payload)?;
+        let paste_key = match decrypt_paste_key_for_password(payload, &key_encryption_key) {
+            Ok(paste_key) => paste_key,
+            Err(Error::AuthenticationFailed(_)) if password.can_retry() => {
+                eprintln!("Incorrect paste password. Try again.");
+                password = PastePasswordAttempt::Prompted(prompt_valid_paste_password(
+                    &mut prompt_password,
+                )?);
+                continue;
+            }
+            Err(error) => return Err(error),
+        };
+        return decrypt_consumed_text(&paste_key, payload);
+    }
 }
 
 fn paste_http_client() -> Result<Client> {
@@ -327,21 +428,61 @@ fn decrypt_consumed_paste(
     password: Option<&str>,
     payload: &PastePayload,
 ) -> Result<String> {
+    let key_encryption_key = derive_paste_key_encryption_key(paste_key, password, payload)?;
+    let paste_key = decrypt_wrapped_paste_key(payload, &key_encryption_key)?;
+    decrypt_consumed_text(&paste_key, payload)
+}
+
+fn derive_paste_key_encryption_key(
+    paste_key: &PasteKey,
+    password: Option<&str>,
+    payload: &PastePayload,
+) -> Result<Vec<u8>> {
     let salt = BASE64.decode(&payload.kdf_nonce)?;
     let kdf_secret = paste_key.kdf_secret(password)?;
-    let key_encryption_key = argon::derive_key(
+    Ok(argon::derive_key(
         &kdf_secret,
         &salt,
         payload.kdf_mem_limit,
         payload.kdf_ops_limit,
-    )?;
-    let encrypted_paste_key = BASE64.decode(&payload.encrypted_paste_key)?;
-    let encrypted_paste_key_nonce = BASE64.decode(&payload.encrypted_paste_key_nonce)?;
-    let paste_key = secretbox::decrypt(
+    )?)
+}
+
+fn decrypt_paste_key_for_password(
+    payload: &PastePayload,
+    key_encryption_key: &[u8],
+) -> Result<Vec<u8>> {
+    let (encrypted_paste_key, encrypted_paste_key_nonce) = decode_wrapped_paste_key(payload)?;
+    secretbox::decrypt(
         &encrypted_paste_key,
         &encrypted_paste_key_nonce,
-        &key_encryption_key,
-    )?;
+        key_encryption_key,
+    )
+    .map_err(|_| Error::AuthenticationFailed("Incorrect paste password".to_string()))
+}
+
+fn decrypt_wrapped_paste_key(payload: &PastePayload, key_encryption_key: &[u8]) -> Result<Vec<u8>> {
+    let (encrypted_paste_key, encrypted_paste_key_nonce) = decode_wrapped_paste_key(payload)?;
+    Ok(secretbox::decrypt(
+        &encrypted_paste_key,
+        &encrypted_paste_key_nonce,
+        key_encryption_key,
+    )?)
+}
+
+fn decode_wrapped_paste_key(payload: &PastePayload) -> Result<(Vec<u8>, Vec<u8>)> {
+    let encrypted_paste_key = BASE64.decode(&payload.encrypted_paste_key)?;
+    let encrypted_paste_key_nonce = BASE64.decode(&payload.encrypted_paste_key_nonce)?;
+    if encrypted_paste_key.len() < secretbox::MAC_BYTES {
+        return Err(invalid_paste_payload());
+    }
+    if encrypted_paste_key_nonce.len() != secretbox::NONCE_BYTES {
+        return Err(invalid_paste_payload());
+    }
+    Ok((encrypted_paste_key, encrypted_paste_key_nonce))
+}
+
+fn decrypt_consumed_text(paste_key: &[u8], payload: &PastePayload) -> Result<String> {
     let encrypted_data = BASE64.decode(&payload.encrypted_data)?;
     let decryption_header = BASE64.decode(&payload.decryption_header)?;
     let text: PasteText = blob::decrypt_json(
@@ -349,9 +490,13 @@ fn decrypt_consumed_paste(
             encrypted_data,
             decryption_header,
         },
-        &paste_key,
+        paste_key,
     )?;
     Ok(text.text)
+}
+
+fn invalid_paste_payload() -> Error {
+    Error::Crypto("The paste data is malformed or corrupted".to_string())
 }
 
 fn create_fragment_secret() -> String {
@@ -561,6 +706,106 @@ mod tests {
     }
 
     #[test]
+    fn reject_wrong_env_paste_password() {
+        crypto::init().unwrap();
+
+        let (paste_key, payload) =
+            encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
+        let error = decrypt_password_protected_paste(
+            &paste_key,
+            &payload,
+            PastePasswordAttempt::Env("wrong horse".to_string()),
+        )
+        .unwrap_err();
+
+        assert!(matches!(error, Error::AuthenticationFailed(_)));
+    }
+
+    #[test]
+    fn prompted_password_retry_can_recover() {
+        crypto::init().unwrap();
+
+        let (paste_key, payload) =
+            encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
+        let mut retry_passwords = ["correct horse"].into_iter();
+        let text = decrypt_password_protected_paste_with_prompt(
+            &paste_key,
+            &payload,
+            PastePasswordAttempt::Prompted("wrong horse".to_string()),
+            || Ok::<_, Error>(retry_passwords.next().expect("retry password").to_string()),
+        )
+        .unwrap();
+
+        assert_eq!(text, "protected paste");
+        assert_eq!(retry_passwords.next(), None);
+    }
+
+    #[test]
+    fn prompted_password_retry_ignores_empty_password() {
+        crypto::init().unwrap();
+
+        let (paste_key, payload) =
+            encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
+        let mut retry_passwords = ["", "correct horse"].into_iter();
+        let text = decrypt_password_protected_paste_with_prompt(
+            &paste_key,
+            &payload,
+            PastePasswordAttempt::Prompted("wrong horse".to_string()),
+            || Ok::<_, Error>(retry_passwords.next().expect("retry password").to_string()),
+        )
+        .unwrap();
+
+        assert_eq!(text, "protected paste");
+        assert_eq!(retry_passwords.next(), None);
+    }
+
+    #[test]
+    fn prompted_password_retry_does_not_hide_structural_payload_errors() {
+        crypto::init().unwrap();
+
+        let (paste_key, mut payload) =
+            encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
+        payload.kdf_nonce = "not base64".to_string();
+        let mut prompts = 0;
+        let error = decrypt_password_protected_paste_with_prompt(
+            &paste_key,
+            &payload,
+            PastePasswordAttempt::Prompted("correct horse".to_string()),
+            || {
+                prompts += 1;
+                Ok::<_, Error>("correct horse".to_string())
+            },
+        )
+        .unwrap_err();
+
+        assert!(matches!(error, Error::Base64Decode(_)));
+        assert_eq!(prompts, 0);
+    }
+
+    #[test]
+    fn prompted_password_retry_does_not_hide_wrapped_key_payload_errors() {
+        crypto::init().unwrap();
+
+        let (paste_key, mut payload) =
+            encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
+        payload.encrypted_paste_key = "not base64".to_string();
+        let mut prompts = 0;
+        let error = decrypt_password_protected_paste_with_prompt(
+            &paste_key,
+            &payload,
+            PastePasswordAttempt::Prompted("correct horse".to_string()),
+            || {
+                prompts += 1;
+                Ok::<_, Error>("correct horse".to_string())
+            },
+        )
+        .unwrap_err();
+
+        assert!(matches!(error, Error::Base64Decode(_)));
+        assert_eq!(prompts, 0);
+    }
+
+    #[test]
     fn parse_full_paste_link() {
         let (token, paste_key) =
             parse_paste_reference("https://paste.ente.com/ABC123#AbCd1234EfGh", None).unwrap();
@@ -663,12 +908,73 @@ mod tests {
             .create_async()
             .await;
 
-        let text = consume_paste(&server.url(), access_token, &paste_key, None)
+        let text = consume_paste(&server.url(), access_token, &paste_key)
             .await
             .unwrap();
 
         assert_eq!(text, "guarded paste");
         guard.assert_async().await;
+        consume.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn password_paste_refreshes_guard_after_password_resolution() {
+        crypto::init().unwrap();
+
+        let access_token = "ABC123";
+        let paste_key = PasteKey::parse("p-AbCd1234EfGh").unwrap();
+        let payload = test_payload("guarded paste", &paste_key, Some("correct horse"));
+        let mut server = Server::new_async().await;
+
+        let availability_guard = server
+            .mock("POST", "/paste/guard")
+            .match_body(Matcher::PartialJson(serde_json::json!({
+                "accessToken": access_token,
+            })))
+            .with_status(200)
+            .with_header(
+                "set-cookie",
+                "paste_guard=availability-cookie; Path=/; HttpOnly",
+            )
+            .with_body("{}")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let consume_guard = server
+            .mock("POST", "/paste/guard")
+            .match_body(Matcher::PartialJson(serde_json::json!({
+                "accessToken": access_token,
+            })))
+            .with_status(200)
+            .with_header("set-cookie", "paste_guard=consume-cookie; Path=/; HttpOnly")
+            .with_body("{}")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let consume = server
+            .mock("POST", "/paste/consume")
+            .match_header("x-paste-consume", "1")
+            .match_header("cookie", "paste_guard=consume-cookie")
+            .match_body(Matcher::PartialJson(serde_json::json!({
+                "accessToken": access_token,
+            })))
+            .with_status(200)
+            .with_body(serde_json::to_string(&payload).unwrap())
+            .create_async()
+            .await;
+
+        let text =
+            consume_paste_with_password_resolver(&server.url(), access_token, &paste_key, || {
+                Ok(PastePasswordAttempt::Env("correct horse".to_string()))
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(text, "guarded paste");
+        availability_guard.assert_async().await;
+        consume_guard.assert_async().await;
         consume.assert_async().await;
     }
 

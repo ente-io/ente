@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
-import type { FormEvent } from "react";
+import type { SubmitEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { pasteTextFieldSx } from "./textFieldSx";
 
@@ -20,6 +20,7 @@ interface PasteViewPanelProps {
     consumeError: string | null;
     resolvedText: string | null;
     passwordRequired: boolean;
+    passwordError: string | null;
     onSubmitPassword: (password: string) => Promise<void>;
     onCopyText: (value: string) => Promise<void>;
 }
@@ -29,6 +30,7 @@ export const PasteViewPanel = ({
     consumeError,
     resolvedText,
     passwordRequired,
+    passwordError,
     onSubmitPassword,
     onCopyText,
 }: PasteViewPanelProps) => {
@@ -37,6 +39,7 @@ export const PasteViewPanel = ({
     const [copied, setCopied] = useState(false);
     const [password, setPassword] = useState("");
     const copiedTimerRef = useRef<number | null>(null);
+    const passwordInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         return () => {
@@ -46,7 +49,14 @@ export const PasteViewPanel = ({
         };
     }, []);
 
-    const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        if (!passwordError) return;
+
+        setPassword("");
+        passwordInputRef.current?.focus();
+    }, [passwordError]);
+
+    const handlePasswordSubmit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!password) {
             return;
@@ -88,6 +98,9 @@ export const PasteViewPanel = ({
                             fullWidth
                             type="password"
                             value={password}
+                            error={!!passwordError}
+                            helperText={passwordError}
+                            inputRef={passwordInputRef}
                             autoFocus
                             autoComplete="off"
                             placeholder="Password"
@@ -112,6 +125,17 @@ export const PasteViewPanel = ({
                                         background:
                                             tokens.surface.inputGradient,
                                         boxShadow: tokens.surface.inputShadow,
+                                    },
+                                    "& .MuiFilledInput-root.Mui-error": {
+                                        borderColor: tokens.status.errorIcon,
+                                    },
+                                    "& .MuiFormHelperText-root": {
+                                        mx: 0,
+                                        mt: 0.75,
+                                        color: tokens.status.errorBody,
+                                        fontSize: "0.8rem",
+                                        lineHeight: 1.25,
+                                        textAlign: "center",
                                     },
                                 },
                             ]}

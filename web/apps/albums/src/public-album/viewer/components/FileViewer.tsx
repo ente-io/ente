@@ -913,7 +913,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const activeFileID = activeAnnotatedFile?.file.id;
     const shouldFetchPublicSocialData =
-        !!open &&
+        open &&
         enableComment &&
         !!activeFileID &&
         !!publicAlbumsCredentials &&

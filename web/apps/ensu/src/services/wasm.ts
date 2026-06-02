@@ -174,12 +174,14 @@ const createTauriAdapter = async (): Promise<EnteCryptoAdapter> => {
                 "code" in error &&
                 "message" in error
             ) {
-                const code = String(
-                    (error as { code?: string }).code ?? "native_error",
-                );
-                const message = String(
-                    (error as { message?: string }).message ?? "Unknown error",
-                );
+                const code =
+                    typeof error.code === "string"
+                        ? error.code
+                        : "native_error";
+                const message =
+                    typeof error.message === "string"
+                        ? error.message
+                        : "Unknown error";
 
                 if (error instanceof Error) {
                     (error as Error & { code?: string }).code = code;

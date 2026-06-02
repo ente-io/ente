@@ -10,5 +10,5 @@
     "workspaces": [
         "*"
     ],
-    "packageManager": "yarn@1.22.22"
+    "packageManager": "npm@11.12.1"
 }

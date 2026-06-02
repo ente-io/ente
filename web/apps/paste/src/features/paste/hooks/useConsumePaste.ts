@@ -1,57 +1,75 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { consumePaste, setGuard } from "services/paste";
+import { consumePaste, setGuard, type PastePayload } from "services/paste";
 import type { PageMode } from "../types";
 import { waitUntilVisible } from "../utils/browser";
 import {
     decryptConsumedPaste,
+    IncorrectPastePasswordError,
     parsePasteKey,
     type PasteKey,
 } from "../utils/pasteCrypto";
+
+const errorMessage = (error: unknown) =>
+    error instanceof Error ? error.message : "Paste is unavailable";
 
 export const useConsumePaste = (mode: PageMode, accessToken: string | null) => {
     const [consuming, setConsuming] = useState(false);
     const [consumeError, setConsumeError] = useState<string | null>(null);
     const [resolvedText, setResolvedText] = useState<string | null>(null);
     const [passwordRequired, setPasswordRequired] = useState(false);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
 
-    const startedConsumeRef = useRef(false);
+    const consumeInFlightRef = useRef(false);
+    const consumedPayloadRef = useRef<PastePayload | null>(null);
     const pasteKeyRef = useRef<PasteKey | null>(null);
+
+    const confirmPasteAvailable = useCallback(async () => {
+        if (!accessToken) return;
+
+        try {
+            setConsuming(true);
+            setConsumeError(null);
+            await waitUntilVisible();
+            await setGuard(accessToken);
+            setPasswordRequired(true);
+        } catch (error) {
+            setConsumeError(errorMessage(error));
+        } finally {
+            setConsuming(false);
+        }
+    }, [accessToken]);
 
     const consume = useCallback(
         async (pasteKey: PasteKey, password?: string) => {
-            if (!accessToken || startedConsumeRef.current) {
+            if (!accessToken || consumeInFlightRef.current) {
                 return;
             }
-            startedConsumeRef.current = true;
+            consumeInFlightRef.current = true;
             try {
                 setConsuming(true);
                 setConsumeError(null);
+                setPasswordError(null);
 
-                await waitUntilVisible();
-                await setGuard(accessToken);
-                const payload = await consumePaste(accessToken);
-                let decryptedText: string;
-                try {
-                    decryptedText = await decryptConsumedPaste(
-                        pasteKey,
-                        payload,
-                        password,
-                    );
-                } catch (error) {
-                    if (pasteKey.passwordRequired) {
-                        throw new Error("Incorrect paste password");
-                    }
-                    throw error;
+                let payload = consumedPayloadRef.current;
+                if (!payload) {
+                    await waitUntilVisible();
+                    await setGuard(accessToken);
+                    payload = await consumePaste(accessToken);
+                    consumedPayloadRef.current = payload;
                 }
 
-                setResolvedText(decryptedText);
+                setResolvedText(
+                    await decryptConsumedPaste(pasteKey, payload, password),
+                );
+                setPasswordRequired(false);
             } catch (error) {
-                const message =
-                    error instanceof Error
-                        ? error.message
-                        : "Paste is unavailable";
-                setConsumeError(message);
+                if (error instanceof IncorrectPastePasswordError) {
+                    setPasswordError(error.message);
+                } else {
+                    setConsumeError(errorMessage(error));
+                }
             } finally {
+                consumeInFlightRef.current = false;
                 setConsuming(false);
             }
         },
@@ -70,20 +88,18 @@ export const useConsumePaste = (mode: PageMode, accessToken: string | null) => {
             const pasteKey = parsePasteKey(fragment);
             pasteKeyRef.current = pasteKey;
             if (pasteKey.passwordRequired) {
-                setPasswordRequired(true);
+                void confirmPasteAvailable();
             } else {
                 void consume(pasteKey);
             }
         } catch (error) {
-            const message =
-                error instanceof Error ? error.message : "Paste is unavailable";
-            setConsumeError(message);
+            setConsumeError(errorMessage(error));
         }
-    }, [mode, accessToken, consume]);
+    }, [mode, accessToken, confirmPasteAvailable, consume]);
 
     const submitPassword = async (password: string) => {
         if (!password) {
-            setConsumeError("Enter the paste password");
+            setPasswordError("Enter the paste password");
             return;
         }
         if (!pasteKeyRef.current) {
@@ -98,6 +114,7 @@ export const useConsumePaste = (mode: PageMode, accessToken: string | null) => {
         consumeError,
         resolvedText,
         passwordRequired,
+        passwordError,
         submitPassword,
     };
 };

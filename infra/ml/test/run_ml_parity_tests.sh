@@ -1129,8 +1129,8 @@ run_preflight_checks() {
         if ! command -v npx >/dev/null 2>&1; then
           preflight_errors+=("npx is required for desktop parity")
         fi
-        if ! command -v yarn >/dev/null 2>&1; then
-          preflight_errors+=("yarn is required for desktop parity compilation")
+        if ! command -v npm >/dev/null 2>&1; then
+          preflight_errors+=("npm is required for desktop parity compilation")
         fi
         ;;
       android|ios)
@@ -1445,7 +1445,7 @@ run_desktop_runner() {
   fi
 
   echo "Compiling desktop TypeScript sources"
-  if ! yarn --cwd "$desktop_dir" tsc; then
+  if ! (cd "$desktop_dir" && npm exec -- tsc); then
     echo "Desktop TypeScript compilation failed; desktop parity output not generated."
     return 1
   fi

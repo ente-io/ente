@@ -1,6 +1,3 @@
-.dart_tool/
-.flutter-plugins-dependencies
-build/
-**/.gradle/
-.build/
-.swiftpm/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/**/gradle-wrapper.jar

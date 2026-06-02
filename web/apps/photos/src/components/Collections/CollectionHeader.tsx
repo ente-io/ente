@@ -762,7 +762,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 collectionSummary={collectionSummary}
-                isQuickLinkAlbum={!!isQuickLinkAlbum}
+                isQuickLinkAlbum={isQuickLinkAlbum}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onMapClick={handleShowMap}
                 onEmptyTrashClick={confirmEmptyTrash}

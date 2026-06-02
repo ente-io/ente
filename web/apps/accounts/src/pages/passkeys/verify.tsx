@@ -546,7 +546,7 @@ const isLockerErrorPayload = (
     typeof payload == "object" &&
     payload !== null &&
     "code" in payload &&
-    typeof (payload as { code: unknown }).code === "string";
+    typeof payload.code === "string";
 
 const lockerAccessErrorCode = async (
     error: unknown,

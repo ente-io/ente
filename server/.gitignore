@@ -1,5 +1,4 @@
 data/
-Photos.code-workspace
 logs/
 tmp/
 museum.yaml
@@ -9,4 +8,4 @@ __debug_bin*
 config/.env
 /main
 /museum
-credentials
+credentials/

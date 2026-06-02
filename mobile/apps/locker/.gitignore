@@ -1,12 +1,11 @@
-/build/
-lib/l10n/untranslated_messages.json
-
-lib/generated_plugin_registrant.dart
 .env
 
 fastlane/report.xml
 
 devtools_options.yaml
+
+# Generated l10n audit output
+lib/l10n/untranslated_messages.json
 
 # Generated localization files
 lib/l10n/app_localizations*.dart

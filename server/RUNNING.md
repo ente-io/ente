@@ -37,7 +37,7 @@ curl http://localhost:8080/ping
 Or connect from the [web app](../web)
 
 ```sh
-NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev
+NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 npm run dev
 ```
 
 Or connect from the [mobile app](../mobile)

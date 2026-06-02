@@ -10,7 +10,3 @@ CLAUDE.local.md
 
 # Node
 node_modules/
-
-# Cargo credentials
-**/.cargo/credentials
-**/.cargo/credentials.toml
