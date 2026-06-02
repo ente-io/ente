@@ -5,6 +5,9 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import io.ente.ensu.domain.device.DeviceCapabilityProvider
+import io.ente.ensu.domain.device.UnknownDeviceCapabilityProvider
+import io.ente.ensu.domain.device.requireChatSupported
 import io.ente.ensu.domain.llm.DownloadProgress
 import io.ente.ensu.domain.llm.GenerationSummary
 import io.ente.ensu.domain.llm.LlmMessage
@@ -53,6 +56,7 @@ class InferenceRsProvider(
     context: Context,
     private val modelDir: File,
     private val legacyModelDir: File? = null,
+    private val deviceCapabilityProvider: DeviceCapabilityProvider = UnknownDeviceCapabilityProvider,
     private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
 ) : LlmProvider {
     private data class LoadedModelKey(
@@ -121,6 +125,7 @@ class InferenceRsProvider(
         maxTokens: Int?,
         onToken: (String) -> Unit
     ): GenerationSummary = withContext(ioDispatcher) {
+        deviceCapabilityProvider.chatCapability().requireChatSupported()
         val context = contextHandle ?: throw IllegalStateException("Model context not loaded")
         currentJobId = null
         val mmprojPath = if (imageFiles.isEmpty()) {
@@ -362,6 +367,7 @@ class InferenceRsProvider(
         target: LlmModelTarget,
         onProgress: (DownloadProgress) -> Unit
     ) {
+        deviceCapabilityProvider.chatCapability().requireChatSupported()
         val modelKey = LoadedModelKey(target.id, target.contextLength)
         if (!backendInitialized) {
             initBackend()

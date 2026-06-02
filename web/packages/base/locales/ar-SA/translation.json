@@ -422,6 +422,8 @@
     "added_to_album": "",
     "added_to_person": "",
     "move_to_album": "نقل إلى الألبوم",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "إلغاء الإخفاء إلى الألبوم",
     "restore_to_album": "استعادة إلى الألبوم",
     "section_all": "الكل",

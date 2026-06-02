@@ -1,6 +1,6 @@
 name: "Build (Ensu)"
 
-# See .github/docs/ensu-release.md
+# See .github/docs/app-release.md
 
 on:
     push:
@@ -228,7 +228,6 @@ jobs:
                   releaseBody: ${{ env.RELEASE_BODY }}
                   releaseCommitish: ${{ env.COMMIT_SHA }}
                   releaseDraft: true
-                  prerelease: false
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
@@ -313,7 +312,6 @@ jobs:
                   artifacts: mobile/native/android/apps/ensu/artifacts/${{ env.ANDROID_APK_NAME }}
                   allowUpdates: true
                   draft: true
-                  prerelease: false
                   updateOnlyUnreleased: true
 
             - name: Upload AAB to Play Store
@@ -322,9 +320,8 @@ jobs:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.ensu
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
-                  track: internal
+                  tracks: internal
                   whatsNewDirectory: mobile/native/android/apps/ensu/whatsnew
-                  changesNotSentForReview: false
 
     build-ios:
         needs: build-metadata
@@ -358,7 +355,6 @@ jobs:
                   ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
                   ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-                  APP_STORE_PROFILE_SPECIFIER: Ensu App Store
                   BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
               run: |
                   key_path="${RUNNER_TEMP}/AuthKey_${ASC_KEY_ID}.p8"
@@ -377,7 +373,7 @@ jobs:
                       CODE_SIGN_STYLE=Manual \
                       CODE_SIGN_IDENTITY="Apple Distribution" \
                       DEVELOPMENT_TEAM="${APPLE_TEAM_ID}" \
-                      APP_STORE_PROFILE_SPECIFIER="${APP_STORE_PROFILE_SPECIFIER}" \
+                      APP_STORE_PROFILE_SPECIFIER="Ensu App Store" \
                       CURRENT_PROJECT_VERSION="${BUILD_NUMBER}"
 
                   xcodebuild -exportArchive \
@@ -405,8 +401,6 @@ jobs:
                   COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
-                  set -euo pipefail
-
                   git tag --force "${RELEASE_TAG}" "${COMMIT_SHA}"
                   git push --force origin "refs/tags/${RELEASE_TAG}"
 
@@ -425,6 +419,9 @@ jobs:
                       previous && NF { print "-# " $0; next }
                       { print }
                   ' <<< "${RELEASE_BODY_GROUPED}")"
+                  if [ "${#release_body_discord}" -gt 3000 ]; then
+                      release_body_discord="${release_body_discord:0:3000}"$'\n\n...\n-# See the GitHub release for full notes.'
+                  fi
 
                   jq -n \
                       --arg title "${{ needs.build-metadata.outputs.release_title }}" \

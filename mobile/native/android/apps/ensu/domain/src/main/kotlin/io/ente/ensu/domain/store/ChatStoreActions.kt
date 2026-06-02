@@ -1,6 +1,7 @@
 package io.ente.ensu.domain.store
 
 import io.ente.ensu.domain.chat.ChatRepository
+import io.ente.ensu.domain.device.isChatSupported
 import io.ente.ensu.domain.logging.LogRepository
 import io.ente.ensu.domain.llm.LlmMessage
 import io.ente.ensu.domain.llm.LlmMessageRole
@@ -249,7 +250,9 @@ internal class ChatStoreActions(
     }
 
     fun beginEditing(messageId: String) {
-        val sessionId = state.value.chat.currentSessionId ?: return
+        val currentState = state.value
+        if (!currentState.chat.deviceCapability.isChatSupported()) return
+        val sessionId = currentState.chat.currentSessionId ?: return
         val message = messageStore[sessionId]?.firstOrNull { it.id == messageId } ?: return
         if (message.author != MessageAuthor.User) return
 
@@ -286,6 +289,7 @@ internal class ChatStoreActions(
         if (state.value.chat.isGenerating) {
             stopGeneration()
         }
+        if (!state.value.chat.deviceCapability.isChatSupported()) return
         val sessionId = state.value.chat.currentSessionId ?: return
 
         // For synthetic interrupted placeholders, find the parent user message directly
@@ -311,6 +315,7 @@ internal class ChatStoreActions(
     fun sendMessage() {
         val currentState = state.value
         if (currentState.chat.isGenerating || currentState.chat.isDownloading) return
+        if (!currentState.chat.deviceCapability.isChatSupported()) return
         val text = currentState.chat.messageText.trim()
         val attachments = currentState.chat.attachments
         if (text.isEmpty() && attachments.isEmpty()) return
@@ -455,6 +460,7 @@ internal class ChatStoreActions(
 
     private fun startGeneration(sessionId: String, userMessage: ChatMessage) {
         val scope = scope ?: return
+        if (!state.value.chat.deviceCapability.isChatSupported()) return
         generationJob?.cancel()
         sessionSummaryJob?.cancel()
         stopRequested = false
@@ -795,6 +801,9 @@ internal class ChatStoreActions(
         fallback: String,
         target: LlmModelTarget
     ): String? {
+        if (!state.value.chat.deviceCapability.isChatSupported()) {
+            return sessionTitleFromText(fallback, fallback = fallback)
+        }
         if (!llmProvider.isModelDownloaded(target)) {
             return sessionTitleFromText(fallback, fallback = fallback)
         }

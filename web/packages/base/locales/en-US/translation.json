@@ -422,6 +422,8 @@
     "added_to_album": "Added to album",
     "added_to_person": "Added to person",
     "move_to_album": "Move to album",
+    "cannot_move_to_shared_albums": "Can't move to shared albums",
+    "cannot_move_to_shared_albums_message": "Items can only be added to shared albums, not moved. Would you like to add instead?",
     "unhide_to_album": "Unhide to album",
     "restore_to_album": "Restore to album",
     "section_all": "All",

@@ -422,6 +422,8 @@
     "added_to_album": "",
     "added_to_person": "",
     "move_to_album": "アルバムに移動",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "アルバムを再表示する",
     "restore_to_album": "アルバムに戻す",
     "section_all": "すべて",

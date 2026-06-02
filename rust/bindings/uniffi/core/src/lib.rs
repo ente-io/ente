@@ -1,6 +1,6 @@
 use base64::{
-    engine::general_purpose::{STANDARD as BASE64_STANDARD, URL_SAFE as BASE64_URL_SAFE},
     Engine,
+    engine::general_purpose::{STANDARD as BASE64_STANDARD, URL_SAFE as BASE64_URL_SAFE},
 };
 use once_cell::sync::Lazy;
 use std::sync::{Mutex, MutexGuard};

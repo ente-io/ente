@@ -14,14 +14,13 @@ GitHub macOS builds are made by manually signing with an Apple Developer ID Appl
 
 ## What you need
 
-| Artifact                             | Scope       | Where it lives                                             |
-| ------------------------------------ | ----------- | ---------------------------------------------------------- |
-| Developer ID Application certificate | Team-wide   | GitHub secret as a base64 `.p12`, plus its export password |
-| Apple Distribution certificate       | Team-wide   | GitHub secret as a base64 `.p12`, plus its export password |
-| App Store Connect API key            | Team-wide   | GitHub secrets for the `.p8`, key ID, and issuer ID        |
-| App ID                               | Per iOS app | Apple Developer portal                                     |
-| App Store Connect app                | Per iOS app | App Store Connect                                          |
-| App Store provisioning profile       | Per iOS app | Apple Developer portal                                     |
+| Item                                   | Scope          | Notes                                                                                         |
+| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| Developer ID Application certificate   | Team-wide      | `MAC_OS_CERTIFICATE`, `MAC_OS_CERTIFICATE_PASSWORD`                                           |
+| Apple Distribution certificate         | Team-wide      | `APPLE_DISTRIBUTION_CERT_BASE64`, `APPLE_DISTRIBUTION_CERT_PASSWORD`                          |
+| App Store Connect API key              | Team-wide      | `APP_STORE_CONNECT_API_KEY_BASE64`, `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID` |
+| Auth Developer ID provisioning profile | Auth macOS app | `AUTH_MACOS_DEVELOPER_ID_PROVISION_PROFILE_BASE64`                                            |
+| App Store provisioning profile         | Per iOS app    | App Store profile downloaded by Xcode during the build                                        |
 
 The Developer ID certificate and Apple Distribution certificate are different certificates. Developer ID is for distributing notarized macOS apps outside the Mac App Store. Apple Distribution is for App Store/TestFlight distribution.
 
@@ -103,6 +102,21 @@ Download the `.p8` immediately; Apple only offers it once. Store:
 - `APP_STORE_CONNECT_ISSUER_ID`: the issuer UUID
 
 If the key is lost or compromised, revoke it and create a new one.
+
+## Auth macOS setup
+
+### Developer ID provisioning profile
+
+Auth macOS builds use a Developer ID provisioning profile because Auth's macOS entitlements include keychain access groups. The profile is stored as `AUTH_MACOS_DEVELOPER_ID_PROVISION_PROFILE_BASE64`.
+
+Create the profile in Apple Developer > Certificates, Identifiers & Profiles > Profiles:
+
+1. Select Developer ID.
+2. Select the Auth macOS App ID, `io.ente.auth.mac`.
+3. Select the Developer ID Application certificate stored in `MAC_OS_CERTIFICATE`.
+4. Set `AUTH_MACOS_DEVELOPER_ID_PROVISION_PROFILE_BASE64` to the base64 of the downloaded profile.
+
+Regenerate the profile when the App ID entitlements or Developer ID certificate change.
 
 ## Per-app iOS setup
 

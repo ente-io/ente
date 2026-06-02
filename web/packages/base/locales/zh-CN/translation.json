@@ -422,6 +422,8 @@
     "added_to_album": "已添加到相册",
     "added_to_person": "",
     "move_to_album": "移动到相册",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "取消隐藏到相册",
     "restore_to_album": "恢复到相册",
     "section_all": "全部",

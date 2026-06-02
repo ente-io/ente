@@ -422,6 +422,8 @@
     "added_to_album": "البم میں شامل کیا گیا",
     "added_to_person": "شخص میں شامل کیا گیا",
     "move_to_album": "البم میں منتقل کریں",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "البم میں Unhide کریں",
     "restore_to_album": "البم میں بحال کریں",
     "section_all": "سب",

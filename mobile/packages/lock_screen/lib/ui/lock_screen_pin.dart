@@ -1,6 +1,5 @@
 import "dart:convert";
 import "dart:io";
-import "dart:typed_data";
 
 import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";

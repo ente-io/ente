@@ -1,0 +1,1 @@
+- Added a mobile device memory check to disable local chat on devices with less than 4 GB of RAM

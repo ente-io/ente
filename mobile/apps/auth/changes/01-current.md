@@ -1,3 +1,9 @@
+- App icon picker to customize your home screen appearance
+- New QR code dialog with branded design for sharing codes
+- Import 2FA codes from andOTP encrypted backups
+- Enhanced search and copy with keyboard shortcuts on desktop (press '/' to search, Enter to select, 'C' to copy, 'N' for next code)
+- Refreshed empty home screen when no codes are imported
+- Bug fixes and performance improvements
 - Upgraded Auth to Flutter 3.38.10 and Android target SDK 36
 - Worked around Android search and app-lock password autofocus not reliably opening the keyboard on app start ([#279](https://github.com/ente-io/ente/issues/279), [#10614](https://github.com/ente-io/ente/issues/10614))
 - Made overflowing Auth tag strips scrollable with desktop mouse wheel and drag interactions, and made tag chips reachable by keyboard Tab and selectable with Enter or Space ([#4079](https://github.com/ente-io/ente/issues/4079), [#1811](https://github.com/ente-io/ente/issues/1811), [#1929](https://github.com/ente-io/ente/issues/1929), [#4686](https://github.com/ente-io/ente/issues/4686))
@@ -10,6 +16,7 @@
 - Fixed some Simple Icons and custom icons not loading in the Auth icon picker because their registry filenames were not resolved correctly
 - Fixed Auth desktop custom icons flashing for Amazon and other monochrome icons ([#8264](https://github.com/ente-io/ente/issues/8264), [#8499](https://github.com/ente-io/ente/issues/8499))
 - Fixed missing Auth tray icons in sandboxed Linux builds ([#4608](https://github.com/ente-io/ente/issues/4608), [#7815](https://github.com/ente-io/ente/issues/7815), [flathub/io.ente.auth#75](https://github.com/flathub/io.ente.auth/issues/75))
+- Fixed Auth AppImage startup failures on some Linux systems by preferring host runtime libraries before bundled AppImage fallbacks ([#6705](https://github.com/ente-io/ente/issues/6705), [#7646](https://github.com/ente-io/ente/issues/7646), [#9738](https://github.com/ente-io/ente/issues/9738), [#6976](https://github.com/ente-io/ente/issues/6976), [#6600](https://github.com/ente-io/ente/issues/6600))
 - Fixed Auth tray close, exit, and menu actions on Windows ([#8164](https://github.com/ente-io/ente/issues/8164), [#4360](https://github.com/ente-io/ente/issues/4360), [#3518](https://github.com/ente-io/ente/issues/3518))
 - Fixed stale or duplicate Auth tray icons on Windows ([#8165](https://github.com/ente-io/ente/issues/8165))
 - Improved Auth tray icon contrast in the Windows tray overflow ([#9491](https://github.com/ente-io/ente/issues/9491))

@@ -422,6 +422,8 @@
     "added_to_album": "Toegevoegd aan album",
     "added_to_person": "Toegevoegd aan persoon",
     "move_to_album": "Verplaats naar album",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "Zichtbaar maken in album",
     "restore_to_album": "Terugzetten naar album",
     "section_all": "Alle",

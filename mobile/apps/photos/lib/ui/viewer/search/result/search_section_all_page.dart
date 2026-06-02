@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:math" as math;
 
 import "package:collection/collection.dart";
 import "package:ente_components/ente_components.dart";
@@ -124,7 +125,12 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
   @override
   Widget build(BuildContext context) {
     const horizontalEdgePadding = 16.0;
+    const minimumBottomClearance = 72.0;
     final cacheExtent = widget.sectionType == SectionType.album ? 400.0 : null;
+    final bottomContentPadding = math.max(
+      20 + MediaQuery.viewPaddingOf(context).bottom,
+      minimumBottomClearance,
+    );
     return Scaffold(
       body: FutureBuilder<List<SearchResult>>(
         future: sectionData,
@@ -175,9 +181,11 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
           if (totalItems > 0) {
             slivers.add(
               SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 20,
-                  horizontal: horizontalEdgePadding,
+                padding: EdgeInsets.fromLTRB(
+                  horizontalEdgePadding,
+                  20,
+                  horizontalEdgePadding,
+                  bottomContentPadding,
                 ),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {

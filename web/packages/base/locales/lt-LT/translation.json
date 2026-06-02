@@ -422,6 +422,8 @@
     "added_to_album": "Įtraukta į albumą",
     "added_to_person": "",
     "move_to_album": "Perkelti į albumą",
+    "cannot_move_to_shared_albums": "",
+    "cannot_move_to_shared_albums_message": "",
     "unhide_to_album": "Rodyti į albumą",
     "restore_to_album": "Atkurti į albumą",
     "section_all": "Viskas",
