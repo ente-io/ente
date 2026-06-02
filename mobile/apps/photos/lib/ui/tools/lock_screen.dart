@@ -209,7 +209,8 @@ class _LockScreenState extends State<LockScreen>
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
-      title: AppLocalizations.of(context).areYouSureYouWantToLogout,
+      title: AppLocalizations.of(context).warning,
+      body: AppLocalizations.of(context).areYouSureYouWantToLogout,
       illustration: Image.asset("assets/warning-grey.png"),
       firstButtonLabel: AppLocalizations.of(context).yes,
       isCritical: true,

@@ -89,23 +89,25 @@ class ActionSheetWidget extends StatelessWidget {
       for (var index = 0; index < actionButtons.length; index++)
         if (index != cancelButtonIndex) actionButtons[index],
     ];
+    final effectiveIllustration =
+        illustration ??
+        (actionSheetType == ActionSheetType.iconOnly
+            ? Icon(
+                Icons.check_outlined,
+                size: 48,
+                color: isCheckIconGreen ? colors.primary : colors.iconColor,
+              )
+            : null);
 
     return BottomSheetComponent(
       title: title,
-      illustration:
-          illustration ??
-          (actionSheetType == ActionSheetType.iconOnly
-              ? Icon(
-                  Icons.check_outlined,
-                  size: 48,
-                  color: isCheckIconGreen ? colors.primary : colors.iconColor,
-                )
-              : null),
+      illustration: effectiveIllustration,
       content: hasDefaultContent
           ? _ActionSheetContent(
               bodyWidget: bodyWidget,
               body: body,
               bodyHighlight: bodyHighlight,
+              textAlign: illustration == null ? null : TextAlign.center,
             )
           : null,
       actions: [
@@ -118,7 +120,11 @@ class ActionSheetWidget extends StatelessWidget {
       onClose: cancelButton == null
           ? null
           : () => sheetCloseAction(context, cancelButton),
-      actionsTopSpacing: hasContent ? Spacing.lg : 0,
+      actionsTopSpacing: illustration != null
+          ? null
+          : hasContent
+          ? Spacing.lg
+          : 0,
     );
   }
 }
@@ -127,8 +133,14 @@ class _ActionSheetContent extends StatelessWidget {
   final Widget? bodyWidget;
   final String? body;
   final String? bodyHighlight;
+  final TextAlign? textAlign;
 
-  const _ActionSheetContent({this.bodyWidget, this.body, this.bodyHighlight});
+  const _ActionSheetContent({
+    this.bodyWidget,
+    this.body,
+    this.bodyHighlight,
+    this.textAlign,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -147,12 +159,14 @@ class _ActionSheetContent extends StatelessWidget {
           bodyWidget ??
               Text(
                 body!,
+                textAlign: textAlign,
                 style: TextStyles.body.copyWith(color: colors.textLight),
               ),
         if (bodyHighlight != null) ...[
           if (hasBody) const SizedBox(height: Spacing.lg),
           Text(
             bodyHighlight!,
+            textAlign: textAlign,
             style: TextStyles.body.copyWith(color: colors.textBase),
           ),
         ],
