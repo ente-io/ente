@@ -89,6 +89,32 @@ void main() {
     expect(message.textAlign, TextAlign.center);
   });
 
+  testWidgets('BottomSheetComponent respects explicit action spacing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const BottomSheetComponent(
+          title: 'Title',
+          message: 'Centered message',
+          actionsTopSpacing: 7,
+          actions: [
+            ButtonComponent(key: ValueKey('action-button'), label: 'Action'),
+          ],
+        ),
+      ),
+    );
+
+    final messageBottom = tester
+        .getBottomLeft(find.text('Centered message'))
+        .dy;
+    final actionTop = tester
+        .getTopLeft(find.byKey(const ValueKey('action-button')))
+        .dy;
+
+    expect(actionTop - messageBottom, 7);
+  });
+
   testWidgets('BottomSheetComponent dismisses from close button by default', (
     tester,
   ) async {

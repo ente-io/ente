@@ -114,7 +114,7 @@ class BottomSheetComponent extends StatelessWidget {
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.padding = const EdgeInsets.all(Spacing.xl),
     this.contentSpacing = Spacing.lg,
-    this.actionsTopSpacing = Spacing.lg,
+    this.actionsTopSpacing,
     this.backgroundColor,
     this.isKeyboardAware = false,
   });
@@ -137,7 +137,7 @@ class BottomSheetComponent extends StatelessWidget {
   final CrossAxisAlignment crossAxisAlignment;
   final EdgeInsets padding;
   final double contentSpacing;
-  final double actionsTopSpacing;
+  final double? actionsTopSpacing;
   final Color? backgroundColor;
   final bool isKeyboardAware;
 
@@ -178,9 +178,8 @@ class BottomSheetComponent extends StatelessWidget {
     final effectiveContentSpacing = usesCenteredLayout
         ? Spacing.lg
         : contentSpacing;
-    final effectiveActionsTopSpacing = usesCenteredLayout
-        ? Spacing.xxl
-        : actionsTopSpacing;
+    final effectiveActionsTopSpacing =
+        actionsTopSpacing ?? (usesCenteredLayout ? Spacing.xxl : Spacing.lg);
 
     return AnimatedPadding(
       duration: const Duration(milliseconds: 200),
