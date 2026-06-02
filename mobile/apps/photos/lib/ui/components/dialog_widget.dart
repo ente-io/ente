@@ -9,7 +9,11 @@ import 'package:photos/models/typedefs.dart';
 import "package:photos/ui/components/buttons/button_component_adapter.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 
-///Will return null if dismissed by tapping outside
+/// Compatibility adapter for legacy Photos dialogs.
+///
+/// Preserves existing [ButtonWidget]/[ButtonResult] behavior while rendering
+/// through [BottomSheetComponent]. Prefer [BottomSheetComponent] directly for
+/// new sheets.
 Future<ButtonResult?> showDialogWidget({
   required BuildContext context,
   required String title,
@@ -25,7 +29,7 @@ Future<ButtonResult?> showDialogWidget({
     enableDrag: isDismissible,
     useRootNavigator: useRootNavigator,
     builder: (_) {
-      return DialogWidget(
+      return LegacyDialogWidget(
         title: title,
         body: body,
         buttons: buttons,
@@ -35,12 +39,12 @@ Future<ButtonResult?> showDialogWidget({
   );
 }
 
-class DialogWidget extends StatelessWidget {
+class LegacyDialogWidget extends StatelessWidget {
   final String title;
   final String? body;
   final List<ButtonWidget> buttons;
   final IconData? icon;
-  const DialogWidget({
+  const LegacyDialogWidget({
     required this.title,
     this.body,
     required this.buttons,
@@ -68,7 +72,7 @@ class DialogWidget extends StatelessWidget {
       illustration: icon == null
           ? null
           : Icon(icon, size: 48, color: colors.iconColor),
-      content: hasBody ? _DialogBody(body!) : null,
+      content: hasBody ? _LegacyDialogBody(body!) : null,
       actions: [
         for (final button in visibleButtons)
           ButtonComponentAdapter(button: button),
@@ -84,8 +88,8 @@ class DialogWidget extends StatelessWidget {
   }
 }
 
-class _DialogBody extends StatelessWidget {
-  const _DialogBody(this.body);
+class _LegacyDialogBody extends StatelessWidget {
+  const _LegacyDialogBody(this.body);
 
   final String body;
 
@@ -105,7 +109,7 @@ class _DialogBody extends StatelessWidget {
   }
 }
 
-class TextInputDialog extends StatefulWidget {
+class LegacyTextInputDialog extends StatefulWidget {
   final String title;
   final String? body;
   final String submitButtonLabel;
@@ -126,7 +130,7 @@ class TextInputDialog extends StatefulWidget {
   final List<TextInputFormatter>? textInputFormatter;
   final TextInputType? textInputType;
   final bool popnavAfterSubmission;
-  const TextInputDialog({
+  const LegacyTextInputDialog({
     required this.title,
     this.body,
     required this.submitButtonLabel,
@@ -151,10 +155,10 @@ class TextInputDialog extends StatefulWidget {
   });
 
   @override
-  State<TextInputDialog> createState() => _TextInputDialogState();
+  State<LegacyTextInputDialog> createState() => _LegacyTextInputDialogState();
 }
 
-class _TextInputDialogState extends State<TextInputDialog> {
+class _LegacyTextInputDialogState extends State<LegacyTextInputDialog> {
   static const _loadingSurfaceDelay = Duration(milliseconds: 300);
   static const _successDisplayDuration = Duration(seconds: 1);
 
@@ -210,7 +214,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
       illustration: widget.icon == null
           ? null
           : Icon(widget.icon, size: 48, color: colors.iconColor),
-      content: _TextInputDialogContent(
+      content: _LegacyTextInputDialogContent(
         body: widget.body,
         input: TextInputComponent(
           controller: _textEditingController,
@@ -338,8 +342,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
   }
 }
 
-class _TextInputDialogContent extends StatelessWidget {
-  const _TextInputDialogContent({
+class _LegacyTextInputDialogContent extends StatelessWidget {
+  const _LegacyTextInputDialogContent({
     required this.input,
     this.body,
     this.alignedMessage,

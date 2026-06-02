@@ -10,7 +10,11 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 
 enum ActionSheetType { defaultActionSheet, iconOnly }
 
-///Returns null if dismissed
+/// Compatibility adapter for legacy Photos action sheets.
+///
+/// Preserves existing [ButtonWidget]/[ButtonResult] behavior while rendering
+/// through [BottomSheetComponent]. Prefer [BottomSheetComponent] directly for
+/// new sheets.
 Future<ButtonResult?> showActionSheet({
   required BuildContext context,
   required List<ButtonWidget> buttons,
@@ -35,7 +39,7 @@ Future<ButtonResult?> showActionSheet({
     isDismissible: isDismissible,
     enableDrag: enableDrag,
     builder: (_) {
-      return ActionSheetWidget(
+      return LegacyActionSheetWidget(
         title: title,
         illustration: illustration,
         bodyWidget: bodyWidget,
@@ -49,7 +53,7 @@ Future<ButtonResult?> showActionSheet({
   );
 }
 
-class ActionSheetWidget extends StatelessWidget {
+class LegacyActionSheetWidget extends StatelessWidget {
   final String? title;
   final Widget? illustration;
   final Widget? bodyWidget;
@@ -59,7 +63,7 @@ class ActionSheetWidget extends StatelessWidget {
   final ActionSheetType actionSheetType;
   final bool isCheckIconGreen;
 
-  const ActionSheetWidget({
+  const LegacyActionSheetWidget({
     required this.actionButtons,
     required this.actionSheetType,
     required this.isCheckIconGreen,
@@ -103,7 +107,7 @@ class ActionSheetWidget extends StatelessWidget {
       title: title,
       illustration: effectiveIllustration,
       content: hasDefaultContent
-          ? _ActionSheetContent(
+          ? _LegacyActionSheetContent(
               bodyWidget: bodyWidget,
               body: body,
               bodyHighlight: bodyHighlight,
@@ -129,13 +133,13 @@ class ActionSheetWidget extends StatelessWidget {
   }
 }
 
-class _ActionSheetContent extends StatelessWidget {
+class _LegacyActionSheetContent extends StatelessWidget {
   final Widget? bodyWidget;
   final String? body;
   final String? bodyHighlight;
   final TextAlign? textAlign;
 
-  const _ActionSheetContent({
+  const _LegacyActionSheetContent({
     this.bodyWidget,
     this.body,
     this.bodyHighlight,
