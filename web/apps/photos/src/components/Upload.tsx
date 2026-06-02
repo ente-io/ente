@@ -33,7 +33,12 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
+import type {
+    CollectionMapping,
+    Electron,
+    SkippedFile,
+    ZipItem,
+} from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { UploadProgress } from "ente-gallery/components/UploadProgress";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
@@ -74,7 +79,13 @@ import { redirectToCustomerPortal } from "ente-new/photos/services/user-details"
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -246,6 +257,10 @@ export const Upload: React.FC<UploadProps> = ({
      */
     const [desktopZipItems, setDesktopZipItems] = useState<ZipItem[]>([]);
 
+    /** Files that aren't being uploaded, tagged with the reason they
+     * were skipped. Surfaced in the upload progress dialog. */
+    const [skippedFiles, setSkippedFiles] = useState<SkippedFile[]>([]);
+
     /**
      * Consolidated and cleaned list obtained from {@link webFiles},
      * {@link desktopFiles}, {@link desktopFilePaths} and
@@ -397,7 +412,8 @@ export const Upload: React.FC<UploadProps> = ({
             electron.pendingUploads().then((pending) => {
                 if (!pending) return;
 
-                const { collectionName, filePaths, zipItems } = pending;
+                const { collectionName, filePaths, zipItems, skippedFiles } =
+                    pending;
 
                 log.info(
                     `Resuming pending of upload of ${filePaths.length + zipItems.length} items${collectionName ? " to collection " + collectionName : ""}`,
@@ -406,9 +422,36 @@ export const Upload: React.FC<UploadProps> = ({
                 pendingDesktopUploadCollectionName.current = collectionName;
                 setDesktopFilePaths(filePaths);
                 setDesktopZipItems(zipItems);
+                setSkippedFiles(skippedFiles ?? []);
             });
         }
     }, []);
+
+    // Overlay synthetic entries (negative IDs) for the skipped files on
+    // top of what {@link uploadManager} most recently set. Derived rather
+    // than mutated in an effect, because {@link uploadManager} replaces
+    // the entire `finishedUploads` map on every progress update.
+    const effectiveFinishedUploads = useMemo(() => {
+        const next = new Map(finishedUploads);
+        next.delete("macosSystemFile");
+        next.delete("failedZip");
+        skippedFiles.forEach((f, i) => {
+            const id = -(i + 1);
+            const ids = next.get(f.kind) ?? [];
+            ids.push(id);
+            next.set(f.kind, ids);
+        });
+        return next;
+    }, [finishedUploads, skippedFiles]);
+
+    const effectiveUploadFileNames = useMemo(() => {
+        const next = new Map<number, string>(uploadFileNames);
+        for (const id of next.keys()) {
+            if (id < 0) next.delete(id);
+        }
+        skippedFiles.forEach((f, i) => next.set(-(i + 1), f.name));
+        return next;
+    }, [uploadFileNames, skippedFiles]);
 
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
@@ -437,9 +480,10 @@ export const Upload: React.FC<UploadProps> = ({
 
         if (electron) {
             desktopFilesAndZipItems(electron, files).then(
-                ({ fileAndPaths, zipItems }) => {
+                ({ fileAndPaths, zipItems, skippedFiles }) => {
                     setDesktopFiles(fileAndPaths);
                     setDesktopZipItems(zipItems);
+                    setSkippedFiles(skippedFiles);
                 },
             );
         } else {
@@ -812,6 +856,7 @@ export const Upload: React.FC<UploadProps> = ({
                     uploadItemsWithCollection
                         .map(({ uploadItem }) => uploadItem)
                         .filter((x) => x !== undefined),
+                    skippedFiles,
                 );
             }
             const batchResult = await uploadManager.uploadItems(
@@ -979,13 +1024,13 @@ export const Upload: React.FC<UploadProps> = ({
                 open={uploadProgressView}
                 onClose={closeUploadProgress}
                 percentComplete={percentComplete}
-                uploadFileNames={uploadFileNames!}
+                uploadFileNames={effectiveUploadFileNames}
                 uploadCounter={uploadCounter}
                 uploadPhase={uploadPhase}
                 inProgressUploads={inProgressUploads}
                 hasLivePhotos={hasLivePhotos}
                 retryFailed={retryFailed}
-                finishedUploads={finishedUploads}
+                finishedUploads={effectiveFinishedUploads}
                 cancelUploads={cancelUploads}
             />
             <CanvasReadbackBlockedDialog
@@ -1033,17 +1078,36 @@ const Inputs: React.FC<InputsProps> = ({
 const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     const fileAndPaths: FileAndPath[] = [];
     let zipItems: ZipItem[] = [];
+    let skippedFiles: SkippedFile[] = [];
 
     for (const file of files) {
         const path = electron.pathForFile(file);
+
+        // macOS `._*` extended attribute forks ÔÇö skip zip parsing even if
+        // the name ends in `.zip`.
+        if (file.name.startsWith("._")) {
+            skippedFiles.push({ name: file.name, kind: "macosSystemFile" });
+            continue;
+        }
+
         if (file.name.endsWith(".zip")) {
-            zipItems = zipItems.concat(await electron.listZipItems(path));
+            try {
+                const result = await electron.listZipItems(path);
+                zipItems = zipItems.concat(result.items);
+                skippedFiles = skippedFiles.concat(result.skippedFiles);
+            } catch (e) {
+                // IPC failure (desktop returns malformed zips as part of
+                // the response, so reaching this catch means something
+                // more fundamental went wrong).
+                log.error("Failed to list zip items", e);
+                skippedFiles.push({ name: file.name, kind: "failedZip" });
+            }
         } else {
             fileAndPaths.push({ file, path });
         }
     }
 
-    return { fileAndPaths, zipItems };
+    return { fileAndPaths, zipItems, skippedFiles };
 };
 
 /**
@@ -1172,6 +1236,7 @@ const setPendingUploads = async (
     electron: Electron,
     collections: Collection[],
     uploadItems: UploadItem[],
+    skippedFiles: SkippedFile[],
 ) => {
     let collectionName: string | undefined;
     /* collection being one suggest one of two things
@@ -1201,7 +1266,12 @@ const setPendingUploads = async (
         }
     }
 
-    await electron.setPendingUploads({ collectionName, filePaths, zipItems });
+    await electron.setPendingUploads({
+        collectionName,
+        filePaths,
+        zipItems,
+        skippedFiles,
+    });
 };
 
 type UploadTypeSelectorProps = ModalVisibilityProps & {
