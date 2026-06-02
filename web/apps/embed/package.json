@@ -7,15 +7,15 @@
         "ente-gallery": "*",
         "ente-media": "*",
         "ente-new": "*",
-        "memoize-one": "^6.0.0",
-        "react": "^19.2.7",
-        "react-dom": "^19.2.7",
-        "react-virtualized-auto-sizer": "^1.0.26"
+        "memoize-one": "6.0.0",
+        "react": "19.2.7",
+        "react-dom": "19.2.7",
+        "react-virtualized-auto-sizer": "1.0.26"
     },
     "devDependencies": {
-        "@types/node": "^24.12.4",
-        "@types/react": "^19.2.16",
-        "@types/react-dom": "^19.2.3",
+        "@types/node": "24.12.4",
+        "@types/react": "19.2.16",
+        "@types/react-dom": "19.2.3",
         "ente-build-config": "*"
     }
 }

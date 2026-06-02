@@ -5,11 +5,11 @@
     "dependencies": {
         "ente-base": "*",
         "file-type": "21.3.4",
-        "heic-convert": "^2.1.0",
-        "jszip": "^3.10.1"
+        "heic-convert": "2.1.0",
+        "jszip": "3.10.1"
     },
     "devDependencies": {
-        "@types/heic-convert": "^2.1.0",
+        "@types/heic-convert": "2.1.0",
         "ente-build-config": "*"
     }
 }
