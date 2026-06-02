@@ -15,7 +15,6 @@
         "i18next": "^25.10.10",
         "i18next-resources-to-backend": "^1.2.1",
         "idb": "^8.0.3",
-        "libsodium-sumo": "0.7.15",
         "libsodium-wrappers-sumo": "0.7.15",
         "nanoid": "^5.1.11",
         "next": "^15.5.19",
