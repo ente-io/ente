@@ -25,6 +25,7 @@ import "package:photos/services/machine_learning/face_ml/face_detection/detectio
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/services/machine_learning/ml_model_download_service.dart";
+import "package:photos/services/machine_learning/ml_process_lock.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
@@ -357,6 +358,7 @@ class MLService {
       _logger.info("runAllML called while already running, skipping");
       return;
     }
+    bool acquiredProcessLock = false;
     try {
       final MLMode mode = isLocalGalleryMode
           ? MLMode.localGallery
@@ -368,6 +370,16 @@ class MLService {
       if (!_canRunMLFunction(function: "AllML") && !force) return;
       if (!force && !computeController.requestCompute(ml: true)) return;
       _isRunningML = true;
+      // Ensure only one process (foreground or background) runs ML at a time,
+      // so the foreground and background isolates don't collide on the ML
+      // database. The foreground has priority; the background defers to it.
+      acquiredProcessLock = await MLProcessLock.instance.acquireForRun();
+      if (!acquiredProcessLock) {
+        _logger.info(
+          "Could not acquire ML process lock, another process is running ML. Skipping.",
+        );
+        return;
+      }
       await sync();
       if (_hasModeChanged(mode)) {
         _logger.info("App mode changed during ML run, stopping");
@@ -418,6 +430,9 @@ class MLService {
     } finally {
       _logger.info("ML finished running");
       _isRunningML = false;
+      if (acquiredProcessLock) {
+        await MLProcessLock.instance.release();
+      }
       computeController.releaseCompute(ml: true);
       if (!isProcessBg) {
         VideoPreviewService.instance.queueFiles();
@@ -473,6 +488,12 @@ class MLService {
 
       stream:
       await for (final chunk in instructionStream) {
+        if (isProcessBg && await MLProcessLock.instance.isForegroundActive()) {
+          _logger.info(
+            "Foreground became active, stopping background indexing to yield",
+          );
+          break stream;
+        }
         if ((isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery) !=
             mode) {
           _logger.info(
@@ -626,6 +647,13 @@ class MLService {
           if (_shouldPauseIndexingAndClustering) {
             _logger.info(
               "MLController does not allow running ML, stopping before clustering bucket $bucket",
+            );
+            break;
+          }
+          if (isProcessBg &&
+              await MLProcessLock.instance.isForegroundActive()) {
+            _logger.info(
+              "Foreground became active, stopping background clustering to yield",
             );
             break;
           }
