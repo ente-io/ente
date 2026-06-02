@@ -13,6 +13,7 @@ import "package:photos/events/gallery_downloads_events.dart";
 import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
@@ -601,6 +602,9 @@ class GalleryDownloadQueueService {
       "ownerID": file.ownerID,
       "collectionID": file.collectionID,
       "title": file.title,
+      "creationTime": file.creationTime,
+      "latitude": file.location?.latitude,
+      "longitude": file.location?.longitude,
       "fileType": file.fileType.index,
       "encryptedKey": file.encryptedKey,
       "keyDecryptionNonce": file.keyDecryptionNonce,
@@ -644,6 +648,7 @@ class GalleryDownloadQueueService {
         ..ownerID = map["ownerID"] as int?
         ..collectionID = map["collectionID"] as int?
         ..title = map["title"] as String?
+        ..creationTime = map["creationTime"] as int?
         ..fileType = getFileType(fileTypeIndex)
         ..encryptedKey = map["encryptedKey"] as String?
         ..keyDecryptionNonce = map["keyDecryptionNonce"] as String?
@@ -654,6 +659,12 @@ class GalleryDownloadQueueService {
         ..fileSize = map["fileSize"] as int?
         ..pubMmdEncodedJson = map["pubMmdEncodedJson"] as String?
         ..pubMmdVersion = map["pubMmdVersion"] as int? ?? 0;
+      final latitude = (map["latitude"] as num?)?.toDouble();
+      final longitude = (map["longitude"] as num?)?.toDouble();
+      final location = Location(latitude: latitude, longitude: longitude);
+      if (Location.isValidLocation(location)) {
+        file.location = location;
+      }
       if (file.uploadedFileID == null ||
           file.collectionID == null ||
           file.fileSize == null ||
