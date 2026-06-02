@@ -1457,6 +1457,7 @@
   "filesDeleted": "Files deleted",
   "selectedFilesAreNotOnEnte": "Selected files are not on Ente",
   "thisActionCannotBeUndone": "This action cannot be undone",
+  "selectedItemsWillBePermanentlyDeletedAndCannotBeRecovered": "Selected items will be permanently deleted and cannot be recovered.",
   "emptyTrash": "Empty trash?",
   "permDeleteWarning": "All items in trash will be permanently deleted\n\nThis action cannot be undone",
   "empty": "Empty",

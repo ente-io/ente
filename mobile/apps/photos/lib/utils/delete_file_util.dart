@@ -267,35 +267,51 @@ Future<List<EnteFile>> deleteFilesOnDeviceOnly(
 
 Future<bool> deleteFromTrash(BuildContext context, List<EnteFile> files) async {
   bool didDeletionStart = false;
-  final actionResult = await showChoiceActionSheet(
-    context,
-    title: AppLocalizations.of(context).permanentlyDelete,
-    body: AppLocalizations.of(context).thisActionCannotBeUndone,
-    firstButtonLabel: AppLocalizations.of(context).delete,
-    isCritical: true,
-    firstButtonOnTap: () async {
-      try {
-        didDeletionStart = true;
-        await trashSyncService.deleteFromTrash(files);
-        Bus.instance.fire(
-          FilesUpdatedEvent(
-            files,
-            type: EventType.deletedFromEverywhere,
-            source: "deleteFromTrash",
+  final l10n = AppLocalizations.of(context);
+  final actionResult = await showBottomSheetComponent<ButtonResult>(
+    context: context,
+    useRootNavigator: Platform.isIOS,
+    builder: (sheetContext) => BottomSheetComponent(
+      title: l10n.areYouSure,
+      message: l10n.selectedItemsWillBePermanentlyDeletedAndCannotBeRecovered,
+      illustration: Image.asset("assets/warning-grey.png"),
+      closeTooltip: l10n.close,
+      closeResult: ButtonResult(ButtonAction.fourth),
+      actions: [
+        ButtonComponent(
+          label: l10n.yesDelete,
+          variant: ButtonComponentVariant.critical,
+          onTap: () => _runDeleteAction(
+            sheetContext,
+            ButtonAction.first,
+            () async {
+              try {
+                didDeletionStart = true;
+                await trashSyncService.deleteFromTrash(files);
+                Bus.instance.fire(
+                  FilesUpdatedEvent(
+                    files,
+                    type: EventType.deletedFromEverywhere,
+                    source: "deleteFromTrash",
+                  ),
+                );
+                //the FilesUpdateEvent is not reloading trash on premanently removing
+                //files, so need to fire ForceReloadTrashPageEvent
+                Bus.instance.fire(ForceReloadTrashPageEvent());
+              } catch (e, s) {
+                _logger.info("failed to delete from trash", e, s);
+                rethrow;
+              }
+            },
           ),
-        );
-        //the FilesUpdateEvent is not reloading trash on premanently removing
-        //files, so need to fire ForceReloadTrashPageEvent
-        Bus.instance.fire(ForceReloadTrashPageEvent());
-      } catch (e, s) {
-        _logger.info("failed to delete from trash", e, s);
-        rethrow;
-      }
-    },
+        ),
+      ],
+    ),
   );
 
   if (actionResult?.action == null ||
-      actionResult!.action == ButtonAction.cancel) {
+      actionResult!.action == ButtonAction.cancel ||
+      actionResult.action == ButtonAction.fourth) {
     return didDeletionStart ? true : false;
   } else if (actionResult.action == ButtonAction.error) {
     await showGenericErrorDialog(

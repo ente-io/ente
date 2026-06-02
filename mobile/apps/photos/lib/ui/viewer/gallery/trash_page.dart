@@ -117,9 +117,7 @@ class TrashPage extends StatelessWidget {
               AppLocalizations.of(
                 context,
               ).itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall!.copyWith(fontSize: 16),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           );
         } else {

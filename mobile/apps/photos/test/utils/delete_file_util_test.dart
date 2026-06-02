@@ -36,6 +36,42 @@ void main() {
     await localSettings.setAppMode(AppMode.enteGallery);
   });
 
+  group('deleteFromTrash', () {
+    testWidgets('uses the migrated warning delete sheet', (tester) async {
+      final file = _file(generatedID: 21, uploadedID: 31);
+      bool? result;
+
+      await tester.pumpWidget(
+        _TestApp(
+          onOpen: (context) async {
+            result = await deleteFromTrash(context, [file]);
+          },
+        ),
+      );
+
+      await tester.tap(find.text('Open delete sheet'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BottomSheetComponent), findsOneWidget);
+      _expectDeleteWarningIllustration();
+      expect(find.text('Are you sure?'), findsOneWidget);
+      expect(
+        find.text(
+          'Selected items will be permanently deleted and cannot be recovered.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byTooltip('Close'), findsOneWidget);
+      expect(find.text('Cancel'), findsNothing);
+      _expectVisibleButtonsInOrder(tester, ['Yes, delete']);
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+
+      expect(result, false);
+    });
+  });
+
   group('showDeleteSheet', () {
     testWidgets(
       'mixed local and remote delete sheet shows mixed component actions',
