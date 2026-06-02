@@ -76,10 +76,4 @@ cat /etc/pam.d/polkit-1
 Enable **Fingerprint authentication** in `pam-auth-update`. Polkit should route
 through `common-auth`; otherwise `/etc/pam.d/polkit-1` may remain password-only.
 
-## Expected Linux Behavior
 
-- `canCheckBiometrics=false` is expected for this backend.
-- Ente Auth does not enumerate fingerprints directly.
-- System authentication is ready when Polkit is available and
-  `io.ente.auth.unlock` is registered.
-- Fingerprint availability depends on your host PAM/fprintd configuration.
