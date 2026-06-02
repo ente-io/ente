@@ -29,6 +29,10 @@ npm run lint # or lint:fix
 npm run build
 ```
 
+> [!NOTE]
+>
+> If `package-lock.json` has not changed since your last `npm ci`, you can use `npm install` as a faster incremental alternative.
+
 ### Deployment
 
 The app gets redeployed whenever a PR that touches `infra/staff/**` is merged into main. See [web/docs/deploy.md](../../web/docs/deploy.md) for details.

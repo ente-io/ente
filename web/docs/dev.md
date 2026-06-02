@@ -13,11 +13,15 @@ Optionally, if you're going to make many changes to the CSS in JS, you might als
 
 Use the npm version from `package.json`.
 
-### npm ci
+### npm ci, npm install
 
-Installs dependencies using the committed lockfile. This should be the default for local setup, and whenever there is a change in `package-lock.json` (e.g. when pulling the latest upstream).
+Use `npm ci` to install dependencies using the committed lockfile. You need this for initial setup, and whenever `package-lock.json` changes (e.g. after pulling the latest upstream).
 
-Use plain `npm install` only when intentionally updating dependencies and reviewing the resulting `package.json` and `package-lock.json` changes.
+`npm ci` is the safe default. However, it deletes and recreates `node_modules` each time. For a faster incremental install, you can use `npm install` if you have already run `npm ci` and `package-lock.json` has not changed since then.
+
+> We pin exact versions in `package.json` and commit the lockfile so both `npm install` and `npm ci` should give the same outcome; however, this is not guaranteed, so if `npm install` changes `package-lock.json`, review the diff instead of treating it as incidental churn.
+
+Use `npm install <package> --workspace <workspace>` only when intentionally adding or updating dependencies, and review the resulting `package.json` and `package-lock.json` changes.
 
 ### npm run dev:\*
 
@@ -49,9 +53,7 @@ There is also a convenience alias, `npm run dev:photos`. See `package.json` for 
 
 > Tip: `npm run dev` is a shortcut for `npm run dev:photos`
 
-Note that npm does not automatically update `node_modules` if you switch to a branch that has added or modified dependencies. So if you encounter unexpected errors on switching branches, make sure that your `node_modules` is up to date by running `npm ci` first.
-
-> Normal development should prefer `npm ci`.
+Note that npm does not automatically update `node_modules` if you switch to a branch that has added or modified dependencies. So if you encounter unexpected errors on switching branches, make sure that your `node_modules` is up to date first: use `npm install` if `package-lock.json` has not changed since your last `npm ci`, otherwise use `npm ci`.
 
 To add a local package as a dependency, use `<package-name>@*`. The "\*" here denotes any version.
 

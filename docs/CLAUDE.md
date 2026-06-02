@@ -10,7 +10,7 @@ npm run dev     # Start local dev server
 npm run build   # Build for production
 ```
 
-Use plain `npm install` only when intentionally updating dependencies and reviewing the resulting `package-lock.json` changes.
+Use `npm install` only when intentionally adding or updating dependencies, or if `package-lock.json` has not changed since the last `npm ci`.
 
 ## Commit messages
 

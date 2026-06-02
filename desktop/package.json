@@ -24,7 +24,7 @@
         "prepare": "node scripts/vips.js"
     },
     "overrides": {
-        "yauzl": "^3.3.1"
+        "yauzl": "3.3.1"
     },
     "dependencies": {
         "any-shell-escape": "0.1.1",

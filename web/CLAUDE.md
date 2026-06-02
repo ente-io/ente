@@ -22,6 +22,9 @@ Format markdown files with Prettier for consistent styling
 ```sh
 # Install dependencies from the committed lockfile
 npm ci
+# Fast path when the lock file has not changed since the last npm ci, OR when
+# adding or updating dependencies.
+npm install
 
 # Run development servers
 npm run dev          # Photos app (port 3000)
@@ -41,8 +44,6 @@ npm run build:auth   # Auth app
 npm run lint          # Check formatting, linting, and TypeScript types
 npm run lint:fix      # Auto-fix linting and formatting issues
 ```
-
-Use plain `npm install` only when intentionally updating dependencies and reviewing the resulting `package-lock.json` changes.
 
 ## Structure
 

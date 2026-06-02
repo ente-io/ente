@@ -2,9 +2,15 @@
 
 ## npm commands
 
-### npm install
+### npm ci, npm install
 
-Use `npm ci` when installing dependencies since it uses the lockfile. Use plain `npm install` only when you are intentionally updating dependencies and reviewing the resulting `package-lock.json` changes.
+Use `npm ci` to install dependencies using the committed lockfile. You need this for initial setup, and whenever `package-lock.json` changes (e.g. after pulling the latest upstream).
+
+`npm ci` is the safe default. However, it deletes and recreates `node_modules` each time. For a faster incremental install, you can use `npm install` if you have already run `npm ci` and `package-lock.json` has not changed since then.
+
+> We pin exact versions in `package.json` and commit the lockfile so both `npm install` and `npm ci` should give the same outcome; however, this is not guaranteed, so if `npm install` changes `package-lock.json`, review the diff instead of treating it as incidental churn.
+
+Use `npm install <package>` only when intentionally adding or updating dependencies, and review the resulting `package.json` and `package-lock.json` changes.
 
 The desktop app embeds the Photos web app, so local development also requires installing dependencies in `../web`:
 
@@ -23,7 +29,7 @@ Launch the app in development mode:
 
 - Runs a development server for the renderer, with hot module reload.
 
-The renderer scripts check that `../web` dependencies have been installed. If they are missing or stale, run `cd ../web && npm ci`.
+The renderer scripts check that `../web` dependencies have been installed. If they are missing or stale, update them before debugging renderer errors: use `npm install` in `../web` if its `package-lock.json` has not changed since your last `npm ci`, otherwise use `npm ci`.
 
 ### npm run build
 

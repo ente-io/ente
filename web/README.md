@@ -31,7 +31,11 @@ That's it. The web app will automatically hot reload when you make changes.
 
 > [!TIP]
 >
-> If you're new to web development and unsure about how to get started, or are facing some problems when running the above steps, see [docs/new](docs/new.md).
+> If you're new to web development and unsure about how to get started, or are facing some problems when running the above steps, see [docs/new.md](docs/new.md).
+
+> [!NOTE]
+>
+> If `package-lock.json` has not changed since your last `npm ci`, you can use `npm install` as a faster incremental alternative. For caveats, see [docs/dev.md](docs/dev.md#npm-ci-npm-install).
 
 ## Other apps
 

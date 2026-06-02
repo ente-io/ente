@@ -23,7 +23,7 @@ import type { SubmitEvent } from "react";
 import { useState } from "react";
 import { MAX_PASTE_CHARS } from "../constants";
 import { PasteLinkCard } from "./PasteLinkCard";
-import { downloadPasteQrCode } from "./PasteQrCode";
+import { downloadPasteQrCode } from "./qrCode";
 import { pasteTextFieldSx } from "./textFieldSx";
 
 interface PasteCreatePanelProps {

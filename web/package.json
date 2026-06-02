@@ -43,8 +43,8 @@
         "test": "npm run test --workspace ente-wasm && npm run test --workspace ente-contacts-web"
     },
     "overrides": {
-        "@types/react": "^19.2.2",
-        "@types/react-dom": "^19.2.2",
+        "@types/react": "19.2.16",
+        "@types/react-dom": "19.2.3",
         "base-x": "5.0.1"
     },
     "devDependencies": {
