@@ -170,7 +170,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 const annotateExif = (
     fileInfoExif: FileInfoExif | undefined,
 ): FileInfoAnnotatedExif | undefined => {
-    if (!fileInfoExif || !fileInfoExif.tags || !fileInfoExif.parsed) {
+    if (!fileInfoExif?.tags || !fileInfoExif.parsed) {
         return undefined;
     }
 

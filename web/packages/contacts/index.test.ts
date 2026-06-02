@@ -66,6 +66,7 @@ describe("resolveContactDisplayFromSnapshot", () => {
 
 beforeEach(() => {
     vi.resetModules();
+    vi.restoreAllMocks();
     vi.clearAllMocks();
     vi.useRealTimers();
 });
@@ -202,7 +203,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).toContain("contacts/");
@@ -227,7 +228,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).not.toContain("wrapped-root-key");
@@ -244,7 +245,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).toContain("wrapped-root-key");
@@ -280,11 +281,9 @@ describe("profile picture loading", () => {
     });
 
     test("uses the inferred image mime type for avatar blobs", async () => {
-        const createObjectURL = vi.fn((blob: Blob) => {
-            void blob;
-            return "blob:contact";
-        });
-        vi.stubGlobal("URL", { createObjectURL, revokeObjectURL: vi.fn() });
+        const createObjectURL = vi
+            .spyOn(URL, "createObjectURL")
+            .mockReturnValue("blob:contact");
         const pngBytes = Uint8Array.from([
             0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00,
             0x0d,
@@ -299,7 +298,7 @@ describe("profile picture loading", () => {
         });
         await contacts.__testing.preloadResolvedContactAvatar({ userID: 101 });
 
-        const blobArg = createObjectURL.mock.calls[0]?.[0];
+        const blobArg = createObjectURL.mock.calls[0]?.[0] as Blob | undefined;
         expect(blobArg?.type).toBe("image/png");
     });
 });

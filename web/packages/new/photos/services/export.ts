@@ -1327,7 +1327,7 @@ const convertCollectionIDExportNameObjectToMap = (
 ): Map<number, string> => {
     return new Map<number, string>(
         Object.entries(collectionExportNames ?? {}).map((e) => {
-            return [Number(e[0]), String(e[1])];
+            return [Number(e[0]), e[1]];
         }),
     );
 };
@@ -1337,7 +1337,7 @@ const convertFileIDExportNameObjectToMap = (
 ): Map<string, string> => {
     return new Map<string, string>(
         Object.entries(fileExportNames ?? {}).map((e) => {
-            return [String(e[0]), String(e[1])];
+            return [e[0], e[1]];
         }),
     );
 };

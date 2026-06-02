@@ -19,7 +19,7 @@ import {
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
-import type { FormEvent } from "react";
+import type { SubmitEvent } from "react";
 import { useState } from "react";
 import { MAX_PASTE_CHARS } from "../constants";
 import { PasteLinkCard } from "./PasteLinkCard";
@@ -203,7 +203,7 @@ export const PasteCreatePanel = ({
         setShowConfirmPassword((visible) => !visible);
     };
 
-    const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handlePasswordSubmit = (event: SubmitEvent) => {
         event.preventDefault();
         if (!password) {
             setPasswordError("Enter a password");

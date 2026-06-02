@@ -358,8 +358,7 @@ export class FileViewerPhotoSwipe {
             const file = currentFile();
             let annotatedFile = _currentAnnotatedFile;
             if (
-                !annotatedFile ||
-                annotatedFile.file.id != file.id ||
+                annotatedFile?.file.id != file.id ||
                 annotatedFile.file.updationTime != file.updationTime
             ) {
                 // Guard: slide data can be unavailable during state transitions.
@@ -415,7 +414,7 @@ export class FileViewerPhotoSwipe {
             const newFileCount = files.length;
 
             const newFile = files[pswp.currIndex];
-            if (!newFile || newFile.id != prevFileID) {
+            if (newFile?.id != prevFileID) {
                 // File is either no longer there, or has moved.
                 //
                 // In either case, after repositioning ourselves to the new
