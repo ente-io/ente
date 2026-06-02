@@ -62,6 +62,8 @@ You can install Ente Auth on Apple devices from [AppStore](https://apps.apple.co
 
 You can grab the latest version of Ente Auth for Mac, Windows and Linux from [GitHub](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v4).
 
+On Linux, App lock can use system authentication in releases newer than `auth-v4.4.22`. Learn how to [set up Linux system authentication](/auth/troubleshooting/linux-system-auth).
+
 <br/>
 
 ---

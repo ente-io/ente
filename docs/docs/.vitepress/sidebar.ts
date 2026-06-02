@@ -325,6 +325,20 @@ export const sidebar = [
                     },
                 ],
             },
+            {
+                text: "Troubleshooting",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Linux system authentication",
+                        link: "/auth/troubleshooting/linux-system-auth",
+                    },
+                    {
+                        text: "Windows login",
+                        link: "/auth/troubleshooting/windows-login",
+                    },
+                ],
+            },
         ],
     },
     {
