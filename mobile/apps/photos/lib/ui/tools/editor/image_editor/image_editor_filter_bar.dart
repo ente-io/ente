@@ -1,7 +1,6 @@
+import "package:ente_components/ente_components.dart";
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import "package:photos/ente_theme_data.dart";
-import "package:photos/theme/ente_theme.dart";
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class GlacierFilterMatrix {
@@ -209,6 +208,7 @@ class _ImageEditorFilterBarState extends State<ImageEditorFilterBar> {
     VoidCallback onSelectFilter,
     Key filterKey,
   ) {
+    final colors = context.componentColors;
     return GestureDetector(
       onTap: () => onSelectFilter(),
       child: SizedBox(
@@ -227,9 +227,7 @@ class _ImageEditorFilterBarState extends State<ImageEditorFilterBar> {
                     cornerSmoothing: 0.6,
                   ),
                   side: BorderSide(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.imageEditorPrimaryColor
-                        : Colors.transparent,
+                    color: isSelected ? colors.primary : Colors.transparent,
                     width: 1.5,
                   ),
                 ),
@@ -253,8 +251,8 @@ class _ImageEditorFilterBarState extends State<ImageEditorFilterBar> {
             Text(
               filterName,
               style: isSelected
-                  ? getEnteTextTheme(context).smallBold
-                  : getEnteTextTheme(context).smallMuted,
+                  ? TextStyles.bodyBold.copyWith(color: colors.textBase)
+                  : TextStyles.body.copyWith(color: colors.textLight),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
