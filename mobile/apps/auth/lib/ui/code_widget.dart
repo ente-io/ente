@@ -373,8 +373,9 @@ class _CodeWidgetState extends State<CodeWidget> {
       MediaQuery.textScalerOf(context).scale(1.0),
     );
     return MediaQuery(
-      data:
-          MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+      data: MediaQuery.of(
+        context,
+      ).copyWith(textScaler: TextScaler.linear(scale)),
       child: content,
     );
   }
