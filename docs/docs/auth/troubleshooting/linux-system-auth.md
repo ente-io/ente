@@ -27,10 +27,11 @@ The policy action is:
 io.ente.auth.unlock
 ```
 
-### Flatpak
+### Flatpak, AppImage, or Manual Builds
 
-Flatpak apps cannot install host Polkit policies by themselves. Download the
-policy from GitHub and verify its SHA-256 checksum before installing it:
+Flatpak apps cannot install host Polkit policies by themselves. AppImage or
+manual builds may also need manual setup. Download the policy from GitHub and
+verify its SHA-256 checksum before installing it:
 
 ```sh
 policy_url="https://raw.githubusercontent.com/ente-io/ente/main/mobile/apps/auth/assets/polkit/io.ente.auth.policy"
@@ -54,29 +55,6 @@ else
 fi
 
 rm -f "$policy"
-```
-
-### AppImage or Manual Builds
-
-If Ente Auth shows **Linux setup required**, click **Copy setup command** in the
-dialog and run the copied command in a terminal.
-
-For AppImage builds, you can also extract the AppImage and install the bundled
-policy:
-
-```sh
-./ente-auth.AppImage --appimage-extract
-
-sudo install -D -o root -g root -m 0644 \
-  squashfs-root/data/flutter_assets/assets/polkit/io.ente.auth.policy \
-  /usr/share/polkit-1/actions/io.ente.auth.policy
-
-if command -v chcon >/dev/null 2>&1; then
-  sudo chcon system_u:object_r:usr_t:s0 \
-    /usr/share/polkit-1/actions/io.ente.auth.policy || true
-fi
-
-pkaction --action-id io.ente.auth.unlock --verbose
 ```
 
 ## Fingerprint Prompts

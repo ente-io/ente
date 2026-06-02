@@ -22,7 +22,6 @@ import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 
 const _linuxSystemAuthGuideUrl =
     "https://ente.com/help/auth/troubleshooting/linux-system-auth";
@@ -93,17 +92,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                   context,
                   pendingTranslation("Linux setup required"),
                   _linuxSystemAuthGuideUrl,
-                );
-              },
-            ),
-            ButtonWidget(
-              buttonType: ButtonType.secondary,
-              labelText: pendingTranslation("Copy setup command"),
-              isInAlert: true,
-              shouldShowSuccessConfirmation: true,
-              onTap: () async {
-                await Clipboard.setData(
-                  ClipboardData(text: linuxStatus!.policyInstallCommand),
                 );
               },
             ),
