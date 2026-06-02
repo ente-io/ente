@@ -300,14 +300,13 @@ const createSingleSelection = (
     file: EnteFile,
     collectionID: number,
     userID: number,
-): SelectedState =>
-    ({
-        [file.id]: true,
-        ownCount: file.ownerID === userID ? 1 : 0,
-        count: 1,
-        collectionID,
-        context: { mode: "albums", collectionID },
-    }) as SelectedState;
+): SelectedState => ({
+    [file.id]: true,
+    ownCount: file.ownerID === userID ? 1 : 0,
+    count: 1,
+    collectionID,
+    context: { mode: "albums", collectionID },
+});
 
 const fileTimelineDateString = (file: EnteFile) => {
     const date = fileCreationPhotoDate(file);

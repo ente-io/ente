@@ -343,7 +343,7 @@ func (h *AdminHandler) UnblockStorageWarningLogin(c *gin.Context) {
 		"req_ctx":  "unblock_storage_warning_login",
 	})
 	logger.Info("Start unblock storage warning login")
-	err = h.UserController.ClearStorageWarningDeletionLoginBlock(request.UserID)
+	err = h.UserController.UnblockStorageWarningDeletionLogin(request.UserID, logger)
 	if err != nil {
 		logger.WithError(err).Error("Failed to unblock storage warning login")
 		handler.Error(c, stacktrace.Propagate(err, ""))

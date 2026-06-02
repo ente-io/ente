@@ -1,7 +1,7 @@
 name: locker
 description: "Ente Locker – Safe space for your important documents"
 publish_to: "none"
-version: 1.0.4+104
+version: 1.0.5+182
 environment:
   sdk: ">=3.10.0 <4.0.0"
 
@@ -62,14 +62,10 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_displaymode: 0.6.0
-  flutter_local_authentication:
-    git:
-      url: https://github.com/eaceto/flutter_local_authentication
-      ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
   flutter_localizations:
     sdk: flutter
   flutter_svg: 2.2.3
-  hugeicons: 1.1.5
+  hugeicons: 1.1.7
   intl: 0.20.2
   io: 1.0.5
   listen_sharing_intent: 1.9.2

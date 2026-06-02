@@ -7,8 +7,8 @@
     },
     "dependencies": {
         "@fontsource/gochi-hand": "^5.2.8",
-        "@hugeicons/core-free-icons": "^1.1.0",
-        "@hugeicons/react": "^1.1.4",
+        "@hugeicons/core-free-icons": "^1.2.1",
+        "@hugeicons/react": "^1.1.6",
         "ente-base": "*",
         "qr-code-styling": "^1.9.2"
     },

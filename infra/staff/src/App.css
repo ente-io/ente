@@ -37,6 +37,10 @@
     text-decoration: none;
 }
 
+.link-text:hover {
+    color: #1db954;
+}
+
 .text-fields {
     display: flex;
     gap: 20px;
@@ -51,11 +55,11 @@
     height: 56px;
     border: none;
     color: white;
-    background-color: #00b33c;
+    background-color: #1db954;
 }
 
 .fetch-button-container button:hover {
-    background-color: #007c6c;
+    background-color: #00b33c;
 }
 
 .content-container {

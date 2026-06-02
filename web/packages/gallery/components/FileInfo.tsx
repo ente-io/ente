@@ -501,8 +501,7 @@ type AnnotatedExif = Required<FileInfoExif> & {
 const annotateExif = (
     fileInfoExif: FileInfoExif | undefined,
 ): AnnotatedExif | undefined => {
-    if (!fileInfoExif || !fileInfoExif.tags || !fileInfoExif.parsed)
-        return undefined;
+    if (!fileInfoExif?.tags || !fileInfoExif.parsed) return undefined;
 
     const info: AnnotatedExif = { ...fileInfoExif };
 

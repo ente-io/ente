@@ -187,12 +187,7 @@ const advertiseCode = (cast: Cast) => {
         context.sendCustomMessage(namespace, senderId, { code });
     };
 
-    context.addCustomMessageListener(
-        namespace,
-        // We need to cast, the `senderId` is present in the message we get but
-        // not present in the TypeScript type.
-        incomingMessageListener as unknown as CustomMessageHandler,
-    );
+    context.addCustomMessageListener(namespace, incomingMessageListener);
 
     // Close the (chromecast) tab if the sender disconnects.
     //

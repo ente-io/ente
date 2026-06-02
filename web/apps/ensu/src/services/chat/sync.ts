@@ -365,7 +365,7 @@ const pushChat = async (chatKey: string) => {
                             `Message-specific limit reached for ${message.messageUuid}`,
                             error,
                         );
-                        sessionError = error as Error;
+                        sessionError = error;
                         // For limit errors, we stop pushing further messages in this session
                         // to maintain causal consistency on the server.
                         break;

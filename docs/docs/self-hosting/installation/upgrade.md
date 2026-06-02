@@ -60,7 +60,7 @@ You can pull in the latest source code from Git and build a new cluster based on
     cd ente
 
     # Pull changes and only keep changes from remote.
-    # This is needed to keep yarn.lock up-to-date.
+    # This is needed to keep package-lock.json up-to-date.
     # This resets all changes made in the local repository.
     # Make sure to stash changes if you have made any.
     git fetch origin

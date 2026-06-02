@@ -14,10 +14,13 @@ func TestStorageWarningTemplatesIncludeAccountEmail(t *testing.T) {
 		"AccountEmail":   "alerts@example.com",
 		"AutoDeleteDate": "April 1, 2026",
 		"ExpiryDate":     "March 1, 2026",
+		"GraceUntil":     "April 8, 2026 at 12:00 UTC",
+		"GraceDays":      7,
 	}
 	templateNames := []string{
 		"storage-warning/storage_warning_active_overage.html",
 		"storage-warning/storage_warning_expired.html",
+		"storage-warning/storage_warning_login_grace.html",
 	}
 
 	for _, templateName := range templateNames {

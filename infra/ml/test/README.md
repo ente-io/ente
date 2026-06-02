@@ -13,7 +13,7 @@ This directory contains the ML indexing parity framework for Android, iOS, deskt
 ## Prerequisites
 
 - Python + `uv`
-- Node/Yarn (desktop parity)
+- Node/npm (desktop parity)
 - Flutter SDK (Android/iOS parity)
 - Android emulator/device and iOS simulator/device when running mobile parity
 

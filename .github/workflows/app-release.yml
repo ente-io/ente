@@ -11,6 +11,7 @@ on:
                 type: choice
                 options:
                     - auth
+                    - locker
                     - ensu
             action:
                 description: "Release action"
@@ -68,6 +69,14 @@ jobs:
               run: |
                   set -euo pipefail
 
+                  app_version() {
+                      if [ "${APP}" = "ensu" ]; then
+                          node .github/scripts/ensu-version.mjs "$@"
+                      else
+                          node .github/scripts/flutter-version.mjs "${APP}" "$@"
+                      fi
+                  }
+
                   git_push_release_branch() {
                       git -c http.https://github.com/.extraheader= push \
                           "https://x-access-token:${RELEASE_BRANCH_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
@@ -84,7 +93,7 @@ jobs:
                   fi
                   next_branch="${APP}-v${next_version}"
 
-                  main_version="$(node ".github/scripts/${APP}-version.mjs" get)"
+                  main_version="$(app_version get)"
                   if [ "${main_version}" != "${expected_main_version}" ]; then
                       echo "::error::main is ${main_version}, expected ${expected_main_version}"
                       exit 1
@@ -92,7 +101,7 @@ jobs:
 
                   git switch -c "${release_branch}"
                   if [ "${APP}" = "ensu" ]; then
-                      node ".github/scripts/ensu-version.mjs" set "${VERSION}"
+                      app_version set "${VERSION}"
                       git commit -am "${APP^} v${VERSION}"
                   fi
                   git_push_release_branch "${release_branch}"
@@ -101,7 +110,7 @@ jobs:
                   git push origin ":refs/tags/${beta_tag}" || true
 
                   git switch -c "${next_branch}" main
-                  node ".github/scripts/${APP}-version.mjs" set "${next_version}"
+                  app_version set "${next_version}"
                   CHANGES_DIR="mobile/apps/${APP}/changes"
                   if [ "${APP}" = "ensu" ]; then
                       CHANGES_DIR="rust/apps/ensu/changes"
@@ -119,6 +128,14 @@ jobs:
               run: |
                   set -euo pipefail
 
+                  app_version() {
+                      if [ "${APP}" = "ensu" ]; then
+                          node .github/scripts/ensu-version.mjs "$@"
+                      else
+                          node .github/scripts/flutter-version.mjs "${APP}" "$@"
+                      fi
+                  }
+
                   git_push_release_branch() {
                       git -c http.https://github.com/.extraheader= push \
                           "https://x-access-token:${RELEASE_BRANCH_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
@@ -133,7 +150,7 @@ jobs:
                       exit 1
                   fi
 
-                  branch_version="$(node ".github/scripts/${APP}-version.mjs" get)"
+                  branch_version="$(app_version get)"
                   if [ "${branch_version}" != "${VERSION}" ]; then
                       echo "::error::${release_branch} is ${branch_version}, expected ${VERSION}"
                       exit 1

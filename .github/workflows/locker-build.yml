@@ -1,0 +1,272 @@
+name: "Build (Locker)"
+
+# See .github/docs/app-release.md
+
+on:
+    push:
+        branches:
+            - "release/locker-v*"
+    workflow_dispatch:
+    schedule:
+        # Run every weekday at ~6:15 AM IST
+        - cron: "45 0 * * 1-5"
+
+env:
+    FLUTTER_VERSION: "3.38.10"
+
+permissions:
+    contents: write
+
+concurrency:
+    group: locker-build
+    cancel-in-progress: false
+
+jobs:
+    build-metadata:
+        runs-on: ubuntu-latest
+
+        outputs:
+            should_build: ${{ steps.prepare.outputs.should_build }}
+            commit_sha: ${{ steps.prepare.outputs.commit_sha }}
+            build_number: ${{ steps.prepare.outputs.build_number }}
+            release_version: ${{ steps.prepare.outputs.release_version }}
+            release_tag: ${{ steps.prepare.outputs.release_tag }}
+            release_title: ${{ steps.prepare.outputs.release_title }}
+            release_body: ${{ steps.prepare.outputs.release_body }}
+            release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            artifact_stem: ${{ steps.prepare.outputs.artifact_stem }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.ref_name }}
+
+            - name: Prepare release
+              id: prepare
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [[ "${GITHUB_EVENT_NAME}" == "schedule" ]] && git ls-remote --exit-code --heads origin 'release/locker-v*' >/dev/null 2>&1; then
+                      echo "Active Locker release branch found; skipping scheduled nightly"
+                      echo "should_build=false" >> "${GITHUB_OUTPUT}"
+                      exit 0
+                  fi
+
+                  release_version="$(node .github/scripts/flutter-version.mjs locker get)"
+                  build_number_base="$(node .github/scripts/flutter-version.mjs locker get-build-base)"
+                  build_number=$((build_number_base + GITHUB_RUN_NUMBER))
+
+                  if [[ "${GITHUB_REF_NAME}" == release/locker-v* ]]; then
+                      if [[ "${GITHUB_REF_NAME}" != "release/locker-v${release_version}" ]]; then
+                          echo "::error::Branch ${GITHUB_REF_NAME} does not match Locker version ${release_version}"
+                          exit 1
+                      fi
+                      release_tag="locker-v${release_version}-rc"
+                      release_title="🔵 Locker release candidate - ${release_version} (build ${build_number})"
+                  else
+                      release_tag="locker-v${release_version}-beta"
+                      release_title="🔵 Locker nightly - ${release_version} (build ${build_number})"
+                  fi
+
+                  commit_sha="$(git rev-parse HEAD)"
+                  git fetch --force --depth=1 --no-tags origin "refs/tags/${release_tag}:refs/tags/${release_tag}" || true
+
+                  echo "should_build=true" >> "${GITHUB_OUTPUT}"
+                  echo "commit_sha=${commit_sha}" >> "${GITHUB_OUTPUT}"
+                  echo "build_number=${build_number}" >> "${GITHUB_OUTPUT}"
+                  echo "release_version=${release_version}" >> "${GITHUB_OUTPUT}"
+                  echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+                  echo "release_title=${release_title}" >> "${GITHUB_OUTPUT}"
+                  echo "artifact_stem=ente-${release_tag%-rc}" >> "${GITHUB_OUTPUT}"
+                  node .github/scripts/release-notes.mjs mobile/apps/locker/changes "${release_tag}" >> "${GITHUB_OUTPUT}"
+
+    build-android:
+        needs: build-metadata
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: ubuntu-22.04
+        environment:
+            name: production
+        env:
+            COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
+            BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
+            RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
+            RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+            RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            ARTIFACT_STEM: ${{ needs.build-metadata.outputs.artifact_stem }}
+
+        defaults:
+            run:
+                working-directory: mobile/apps/locker
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+                  submodules: recursive
+
+            - name: Setup JDK 17
+              uses: actions/setup-java@v5
+              with:
+                  distribution: "temurin"
+                  java-version: "17"
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
+            - name: Set build version
+              run: node ../../../.github/scripts/flutter-version.mjs locker set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
+            - run: cargo codegen frb
+              working-directory: rust
+
+            - name: Prepare whatsnew
+              run: |
+                  mkdir -p whatsnew
+                  if [ -n "${RELEASE_BODY}" ]; then
+                      printf '%s' "${RELEASE_BODY}" | head -c 500 > whatsnew/whatsnew-en-US
+                  else
+                      printf '%s\n' "Bug fixes and improvements" > whatsnew/whatsnew-en-US
+                  fi
+
+            - name: Add keystore
+              run: printf '%s' "${SIGNING_KEY_LOCKER}" | base64 -d > "$RUNNER_TEMP/ente_locker_key.jks"
+              env:
+                  SIGNING_KEY_LOCKER: ${{ secrets.SIGNING_KEY_LOCKER }}
+
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
+            - name: Build independent APK
+              run: |
+                  flutter build apk --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --dart-define=cronetHttpNoPlay=true --release --flavor independent
+                  mv build/app/outputs/flutter-apk/app-independent-release.apk "artifacts/${ARTIFACT_STEM}.apk"
+              env:
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_locker_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_LOCKER }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_LOCKER }}
+
+            - name: Build PlayStore AAB
+              run: flutter build appbundle --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --dart-define=cronetHttpNoPlay=true --release --flavor playstore
+              env:
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_locker_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_LOCKER }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_LOCKER }}
+
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-locker-*.apk > artifacts/sha256sum-apk
+
+            - name: Upload checksum snippet
+              uses: actions/upload-artifact@v4
+              with:
+                  name: locker-sha256sum-android
+                  path: mobile/apps/locker/artifacts/sha256sum-apk
+
+            - name: Upload Android artifact to GitHub release
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  commit: ${{ env.COMMIT_SHA }}
+                  artifacts: "mobile/apps/locker/artifacts/ente-locker-*.apk"
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+            - name: Upload AAB to PlayStore
+              uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+              with:
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+                  packageName: io.ente.locker
+                  releaseFiles: mobile/apps/locker/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  tracks: internal
+                  whatsNewDirectory: mobile/apps/locker/whatsnew
+                  mappingFile: mobile/apps/locker/build/app/outputs/mapping/playstoreRelease/mapping.txt
+
+    finish-build:
+        needs: [build-metadata, build-android]
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout built commit
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+
+            - name: Download checksum snippets
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: locker-sha256sum-*
+                  path: checksums
+                  merge-multiple: true
+
+            - name: Combine checksums
+              run: cat checksums/sha256sum-* > sha256sum
+
+            - name: Point release tag at the successfully built commit
+              env:
+                  COMMIT_SHA: ${{ needs.build-metadata.outputs.commit_sha }}
+                  RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+              run: |
+                  git tag --force "${RELEASE_TAG}" "${COMMIT_SHA}"
+                  git push --force origin "refs/tags/${RELEASE_TAG}"
+
+            - name: Upload checksum to GitHub release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+              run: gh release upload "${RELEASE_TAG}" sha256sum --clobber
+
+            - name: Notify Discord
+              continue-on-error: true
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  GH_TOKEN: ${{ github.token }}
+                  RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
+                  RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+              run: |
+                  release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
+                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.locker) | [GitHub Release](${release_url})"
+                  release_body_discord="$(awk '
+                      /^Previous changes:$/ { previous = 1 }
+                      previous && NF { print "-# " $0; next }
+                      { print }
+                  ' <<< "${RELEASE_BODY_GROUPED}")"
+                  if [ "${#release_body_discord}" -gt 3000 ]; then
+                      release_body_discord="${release_body_discord:0:3000}"$'\n...\n-# See the GitHub release for full notes.'
+                  fi
+
+                  jq -n \
+                      --arg title "${{ needs.build-metadata.outputs.release_title }}" \
+                      --arg body "${release_body_discord}" \
+                      --arg download_line "${download_line}" \
+                      '{
+                          flags: 32768,
+                          components: [{
+                              type: 17,
+                              accent_color: 1077759,
+                              components: (
+                                  [{type: 10, content: ("## " + $title)}]
+                                  + (if $body == "" then [] else [{type: 10, content: $body}] end)
+                                  + [{type: 14}, {type: 10, content: $download_line}]
+                              )
+                          }]
+                      }' \
+                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}?with_components=true"

@@ -26,7 +26,7 @@ dependencies:
     sdk: flutter
   flutter_animate: 4.5.2
   fluttertoast: 8.2.14
-  hugeicons: 1.1.5
+  hugeicons: 1.1.7
   modal_bottom_sheet: 3.0.0
   shared_preferences: 2.5.3
   window_manager: 0.5.1

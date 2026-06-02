@@ -20,7 +20,11 @@ import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
+
+const _linuxSystemAuthGuideUrl =
+    "https://ente.com/help/auth/troubleshooting/linux-system-auth";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -68,6 +72,34 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       await _lockScreenSettings.removePinAndPassword();
       await _lockScreenSettings.setSystemLockScreen(!isSystemLockEnabled);
     } else {
+      final linuxStatus = await LocalAuthenticationService.instance
+          .getLinuxLocalAuthSetupStatus();
+      if (Platform.isLinux && linuxStatus?.setupRequired == true) {
+        await showDialogWidget(
+          context: context,
+          title: pendingTranslation("Linux setup required"),
+          body: pendingTranslation(
+            "To use device lock on Linux, Ente Auth needs a one-time system authentication setup. The guide includes setup steps for Flatpak, AppImage, and fingerprint prompts.",
+          ),
+          isDismissible: true,
+          buttons: [
+            ButtonWidget(
+              buttonType: ButtonType.primary,
+              labelText: pendingTranslation("Open guide"),
+              isInAlert: true,
+              onTap: () async {
+                await PlatformUtil.openWebView(
+                  context,
+                  pendingTranslation("Linux setup required"),
+                  _linuxSystemAuthGuideUrl,
+                );
+              },
+            ),
+          ],
+        );
+        await _initializeSettings();
+        return;
+      }
       await showDialogWidget(
         context: context,
         title: context.strings.noSystemLockFound,

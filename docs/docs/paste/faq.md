@@ -19,7 +19,13 @@ A paste lasts until Ente serves the ciphertext to a browser, or 24 hours from cr
 
 ### Can I open the same paste twice? {#paste-open-twice}
 
-No. A paste is consumed when Ente serves the ciphertext to a browser. For regular links that is the first open; for password-protected links, entering the wrong password after the ciphertext is fetched also consumes the paste. Reloading the page, opening the link on a second device, or sharing it onward after that all result in "This paste has expired or was already opened."
+No. A paste can be served only once.
+
+More precisely, the paste is consumed when Ente serves the ciphertext to a browser: for a regular link, on the first open; for a password-protected link, when the recipient first enters a password, even an incorrect one.
+
+> [!NOTE]
+>
+> If the password is wrong, they can try again in the same tab, because the encrypted paste stays in memory there. Reloading the page, opening the link on a second device, or sharing it onward all result in "This paste has expired or was already opened."
 
 If you need the recipient to be able to refer back to the text, ask them to copy it once they have opened the paste, or use [Ente Locker](/locker/) for durable storage.
 

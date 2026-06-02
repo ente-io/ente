@@ -2,7 +2,7 @@
 
 ## Dev
 
-These are some global dev dependencies in the root `package.json`. These set the baseline for how our code be in all the workspaces in this (yarn) monorepo.
+These are some global dev dependencies in the root `package.json`. These set the baseline for how our code should be in all the workspaces in this npm monorepo.
 
 - [prettier](https://prettier.io) - Formatter
 
@@ -26,7 +26,7 @@ They also need some support packages, which come from the leaf `ente-build-confi
 
 The root `package.json` also has a convenience dev dependency:
 
-- [concurrently](https://github.com/open-cli-tools/concurrently) for spawning parallel tasks when we invoke various yarn scripts.
+- [concurrently](https://github.com/open-cli-tools/concurrently) for spawning parallel tasks when we invoke various npm scripts.
 
 > [!NOTE]
 >
@@ -34,7 +34,7 @@ The root `package.json` also has a convenience dev dependency:
 >
 > For example, ideally we'd just have specified the react dependencies in _ente-base_, but that leads to missing peer dependency warnings in our other packages, so we need to need to repeat them. For now, we manually ensure that all of them use the same version.
 >
-> Additionally, we pin the versions of the react types using the resolutions field in the top level `package.json`, to avoid type errors because of multiple versions of react types being in scope.
+> Additionally, we pin the versions of the react types using the overrides field in the top level `package.json`, to avoid type errors because of multiple versions of react types being in scope.
 
 ## Cryptography
 

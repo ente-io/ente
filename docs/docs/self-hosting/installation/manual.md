@@ -44,15 +44,13 @@ If you wish to run Ente from source without using Docker, follow the steps descr
     sudo apt install pkg-config
     ```
 
-4. **yarn, npm and Node.js:** Needed for building the web application.
+4. **npm and Node.js:** Needed for building the web application.
 
     Install npm and Node using your package manager.
 
     ```shell
     sudo apt install npm nodejs
     ```
-
-    Install yarn by following the [official documentation](https://yarnpkg.com/getting-started/install)
 
 5. **Git:** Needed for cloning the repository and pulling in latest changes
 
@@ -158,7 +156,7 @@ Museum should be accessible at `http://localhost:8080`
 
 ## Step 4: Configure Web Application
 
-1. Install the dependencies for web application. Enable corepack if prompted.
+1. Install the dependencies for web application.
 
     ```shell
     # Change into web directory, this is where all the applications
@@ -166,7 +164,7 @@ Museum should be accessible at `http://localhost:8080`
     cd ../web
 
     # Install dependencies
-    yarn install --frozen-lockfile
+    npm ci
     ```
 
 2. Configure the environment variables in your corresponding shell's configuration file (`.bashrc`, `.zshrc`)
@@ -181,28 +179,28 @@ Museum should be accessible at `http://localhost:8080`
     ```shell
     # These commands are executed inside web directory
     # Build photos. Build output to be served is present at apps/photos/out
-    yarn build
+    npm run build
 
     # Build albums. Build output to be served is present at apps/albums/out
-    yarn build:albums
+    npm run build:albums
 
     # Build accounts. Build output to be served is present at apps/accounts/out
-    yarn build:accounts
+    npm run build:accounts
 
     # Build auth. Build output to be served is present at apps/auth/out
-    yarn build:auth
+    npm run build:auth
 
     # Build cast. Build output to be served is present at apps/cast/out
-    yarn build:cast
+    npm run build:cast
 
     # Build public locker. Build output to be served is present at apps/share/out
-    yarn build:share
+    npm run build:share
 
     # Build embed. Build output to be served is present at apps/embed/out
-    yarn build:embed
+    npm run build:embed
 
     # Build memories. Build output to be served is present at apps/memories/out
-    yarn build:memories
+    npm run build:memories
     ```
 
 4. Copy the output files to `/var/www/ente/apps` for easier management.

@@ -407,15 +407,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
-  flutter_local_authentication:
-    dependency: transitive
-    description:
-      path: "."
-      ref: "1ac346a04592a05fd75acccf2e01fa3c7e955d96"
-      resolved-ref: "1ac346a04592a05fd75acccf2e01fa3c7e955d96"
-      url: "https://github.com/eaceto/flutter_local_authentication"
-    source: git
-    version: "1.2.0"
   flutter_localizations:
     dependency: transitive
     description: flutter
@@ -587,10 +578,10 @@ packages:
     dependency: "direct main"
     description:
       name: hugeicons
-      sha256: d19c0e2b57ccf455dd8ef08b84da40ae6dbba898c92960a0a0ada77df7865b8a
+      sha256: "5a4bb3f3e0a34df5ab8c41f43eb8c63382af8b3dcb8d63e8231b3d4dda3433e5"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.5"
+    version: "1.1.7"
   image:
     dependency: transitive
     description:
@@ -687,6 +678,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  local_auth_linux:
+    dependency: transitive
+    description:
+      path: "../local_auth_linux"
+      relative: true
+    source: path
+    version: "0.1.0"
   local_auth_platform_interface:
     dependency: transitive
     description:

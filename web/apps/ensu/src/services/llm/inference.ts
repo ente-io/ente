@@ -7,6 +7,7 @@ import {
     Wllama,
     WllamaAbortError,
 } from "@wllama/wllama/esm/index.js";
+import wllamaPackage from "@wllama/wllama/package.json";
 import log from "ente-base/log";
 import { isTauriRuntime } from "services/tauri-runtime";
 import type {
@@ -16,8 +17,7 @@ import type {
     LlmMessage,
 } from "./types";
 
-const WLLAMA_VERSION = "2.3.7";
-const CDN_BASE = `https://cdn.jsdelivr.net/npm/@wllama/wllama@${WLLAMA_VERSION}/src`;
+const CDN_BASE = `https://cdn.jsdelivr.net/npm/@wllama/wllama@${wllamaPackage.version}/src`;
 const MIN_GGUF_BYTES = 1024 * 1024;
 const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 

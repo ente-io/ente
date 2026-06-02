@@ -1,5 +1,3 @@
-/* eslint-env node */
-
 import nextConfig from "ente-base/next.config.base.js";
 
 /** @type {{ process?: { env?: Record<string, string> } }} */

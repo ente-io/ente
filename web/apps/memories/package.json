@@ -11,7 +11,7 @@
         "ente-gallery": "*",
         "ente-media": "*",
         "ente-new": "*",
-        "zod": "^4.1.12"
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "ente-build-config": "*"
