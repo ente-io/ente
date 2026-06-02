@@ -15,6 +15,20 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Favorite files in shared albums
 - Indicator for shared files in map view
 
+## v1.3.54 (mobile) - Jun 2026
+
+- New design system
+- Improved albums navigation
+- Feed gets its own tab
+- Bulk ignore faces from photo info
+- Better OCR animations
+- Faster file downloads
+- Faster face thumbnail generation
+- Fixed ML lookup failures for large offline galleries
+- Fixed video edit delete navigation
+- Fixed upload dates for files with ISO-like metadata timestamps
+- Fixed grey screen after single-memory delete or favorite actions
+
 ## v1.3.44 (mobile) - May 2026
 
 - Added support for selecting photos in 3rd party apps
