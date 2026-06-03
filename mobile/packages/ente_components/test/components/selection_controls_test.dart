@@ -230,6 +230,14 @@ void main() {
     expect(find.text("Back up automatically"), findsOneWidget);
     expect(find.text("Includes new photos"), findsOneWidget);
     expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text("Back up automatically")).style?.fontFamily,
+      TextStyles.body.fontFamily,
+    );
+    expect(
+      tester.widget<Text>(find.text("Includes new photos")).style?.fontFamily,
+      TextStyles.mini.fontFamily,
+    );
   });
 
   testWidgets("FilterChipComponent renders selected state with token colors", (

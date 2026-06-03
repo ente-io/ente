@@ -11,6 +11,7 @@ enum AvatarComponentSize {
     iconSize: 12,
     textStyle: TextStyle(
       fontFamily: TextStyles.fontFamily,
+      package: TextStyles.fontPackage,
       fontSize: 8,
       height: 15 / 8,
       fontWeight: FontWeight.w500,
@@ -23,6 +24,7 @@ enum AvatarComponentSize {
     iconSize: 14,
     textStyle: TextStyle(
       fontFamily: TextStyles.fontFamily,
+      package: TextStyles.fontPackage,
       fontSize: 10,
       height: 15 / 10,
       fontWeight: FontWeight.w500,
@@ -35,6 +37,7 @@ enum AvatarComponentSize {
     iconSize: 16,
     textStyle: TextStyle(
       fontFamily: TextStyles.fontFamily,
+      package: TextStyles.fontPackage,
       fontSize: 12,
       height: 15 / 12,
       fontWeight: FontWeight.w500,
@@ -48,6 +51,7 @@ enum AvatarComponentSize {
     iconSize: 16,
     textStyle: TextStyle(
       fontFamily: TextStyles.fontFamily,
+      package: TextStyles.fontPackage,
       fontSize: 12,
       height: 15 / 12,
       fontWeight: FontWeight.w500,
@@ -60,6 +64,7 @@ enum AvatarComponentSize {
     iconSize: 18,
     textStyle: TextStyle(
       fontFamily: TextStyles.fontFamily,
+      package: TextStyles.fontPackage,
       fontSize: 12,
       height: 15 / 12,
       fontWeight: FontWeight.w500,
@@ -72,6 +77,7 @@ enum AvatarComponentSize {
     iconSize: 18,
     textStyle: TextStyle(
       fontFamily: TextStyles.fontFamily,
+      package: TextStyles.fontPackage,
       fontSize: 12,
       height: 15 / 12,
       fontWeight: FontWeight.w500,

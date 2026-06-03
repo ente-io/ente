@@ -32,6 +32,9 @@ void main() {
     expect(tester.getSize(surfaces.at(3)), const Size(28, 28));
     expect(tester.getSize(surfaces.at(4)), const Size(32, 32));
     expect(tester.getSize(surfaces.at(5)), const Size(56, 56));
+    for (final text in tester.widgetList<Text>(find.text('E'))) {
+      expect(text.style?.fontFamily, TextStyles.body.fontFamily);
+    }
   });
 
   testWidgets(

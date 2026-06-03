@@ -1,4 +1,5 @@
 import 'package:ente_components/theme/spacing.dart';
+import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -25,9 +26,15 @@ class LabeledControlComponent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(color: colors.textBase)),
+              Text(
+                label,
+                style: TextStyles.body.copyWith(color: colors.textBase),
+              ),
               if (subtitle != null)
-                Text(subtitle!, style: TextStyle(color: colors.textLight)),
+                Text(
+                  subtitle!,
+                  style: TextStyles.mini.copyWith(color: colors.textLight),
+                ),
             ],
           ),
         ),

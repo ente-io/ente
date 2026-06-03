@@ -240,19 +240,21 @@ void main() {
     test("match the published type scale", () {
       expect(TextStyles.fontFamily, "Inter");
       expect(TextStyles.outfitFontFamily, "Outfit");
+      expect(TextStyles.fontPackage, "ente_components");
 
-      expect(TextStyles.display1.fontFamily, "Outfit");
+      expect(TextStyles.display1.fontFamily, "packages/ente_components/Outfit");
       expect(TextStyles.display1.fontSize, 32);
       expect(TextStyles.display1.height, 40 / 32);
       expect(TextStyles.display1.fontWeight, FontWeight.w600);
       expect(TextStyles.display1.letterSpacing, 0);
 
-      expect(TextStyles.display2.fontFamily, "Outfit");
+      expect(TextStyles.display2.fontFamily, "packages/ente_components/Outfit");
       expect(TextStyles.display2.fontSize, 24);
       expect(TextStyles.display2.height, 32 / 24);
       expect(TextStyles.display2.fontWeight, FontWeight.w600);
       expect(TextStyles.display2.letterSpacing, 0);
 
+      expect(TextStyles.h1.fontFamily, "packages/ente_components/Inter");
       expect(TextStyles.h1.fontSize, 20);
       expect(TextStyles.h1.height, 28 / 20);
       expect(TextStyles.h1.fontWeight, FontWeight.w700);
@@ -262,11 +264,12 @@ void main() {
       expect(TextStyles.h2.height, 24 / 18);
       expect(TextStyles.h2.fontWeight, FontWeight.w600);
 
-      expect(TextStyles.display3.fontFamily, "Outfit");
+      expect(TextStyles.display3.fontFamily, "packages/ente_components/Outfit");
       expect(TextStyles.display3.fontSize, 20);
       expect(TextStyles.display3.height, 28 / 20);
       expect(TextStyles.display3.fontWeight, FontWeight.w600);
 
+      expect(TextStyles.body.fontFamily, "packages/ente_components/Inter");
       expect(TextStyles.body.fontSize, 14);
       expect(TextStyles.body.height, 20 / 14);
       expect(TextStyles.body.fontWeight, FontWeight.w500);
@@ -285,13 +288,19 @@ void main() {
       expect(theme.scaffoldBackgroundColor, ColorTokens.light.backgroundBase);
       expect(theme.colorScheme.primary, ColorTokens.light.primary);
       expect(theme.colorScheme.error, ColorTokens.light.warning);
-      expect(theme.textTheme.headlineLarge?.fontFamily, TextStyles.fontFamily);
+      expect(
+        theme.textTheme.headlineLarge?.fontFamily,
+        TextStyles.h1.fontFamily,
+      );
       expect(theme.textTheme.headlineLarge?.fontSize, TextStyles.h1.fontSize);
       expect(
         theme.textTheme.headlineLarge?.fontWeight,
         TextStyles.h1.fontWeight,
       );
-      expect(theme.textTheme.bodyMedium?.fontFamily, TextStyles.fontFamily);
+      expect(
+        theme.textTheme.bodyMedium?.fontFamily,
+        TextStyles.body.fontFamily,
+      );
       expect(theme.textTheme.bodyMedium?.fontSize, TextStyles.body.fontSize);
     });
 
@@ -302,7 +311,10 @@ void main() {
       expect(theme.scaffoldBackgroundColor, ColorTokens.dark.backgroundBase);
       expect(theme.colorScheme.primary, ColorTokens.dark.primary);
       expect(theme.colorScheme.error, ColorTokens.dark.warning);
-      expect(theme.textTheme.labelSmall?.fontFamily, TextStyles.fontFamily);
+      expect(
+        theme.textTheme.labelSmall?.fontFamily,
+        TextStyles.tiny.fontFamily,
+      );
       expect(theme.textTheme.labelSmall?.fontSize, TextStyles.tiny.fontSize);
       expect(
         theme.textTheme.labelSmall?.fontWeight,
