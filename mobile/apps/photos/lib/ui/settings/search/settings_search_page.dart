@@ -193,7 +193,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           const SizedBox(height: 8),
           Text(
             AppLocalizations.of(context).suggestions,
-            style: TextStyles.bodyBold.copyWith(
+            style: TextStyles.large.copyWith(
               color: context.componentColors.textBase,
             ),
           ),
@@ -263,8 +263,8 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
             padding: const EdgeInsets.only(top: 12, bottom: 8),
             child: Text(
               entry.sectionKey,
-              style: TextStyles.mini.copyWith(
-                color: context.componentColors.textLight,
+              style: TextStyles.large.copyWith(
+                color: context.componentColors.textBase,
               ),
             ),
           ),

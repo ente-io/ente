@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
@@ -361,7 +362,7 @@ class _SearchResultsSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final showTypeLabel = results.length > 1;
     final children = <Widget>[];
     for (int i = 0; i < results.length; i++) {
@@ -408,7 +409,10 @@ class _SearchResultsSectionWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text(title, style: textTheme.bodyBold),
+              Text(
+                title,
+                style: TextStyles.large.copyWith(color: colors.textBase),
+              ),
             ],
           ),
         ),

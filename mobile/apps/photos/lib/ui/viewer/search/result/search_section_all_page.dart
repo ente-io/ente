@@ -323,11 +323,17 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Text(
-              state.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: state.textStyle,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TooltipComponent(
+                message: state.title,
+                child: Text(
+                  state.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: state.textStyle,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: Spacing.md),

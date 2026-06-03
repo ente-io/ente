@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
@@ -32,7 +33,7 @@ class SearchableItemWidget extends StatelessWidget {
     //SearchResultPage
     const additionalPrefix = "searchable_item";
     final heroTagPrefix = additionalPrefix + searchResult.heroTag();
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final colorScheme = getEnteColorScheme(context);
     final result = searchResult;
     final bool isCluster =
@@ -78,7 +79,7 @@ class SearchableItemWidget extends StatelessWidget {
           ? const SizedBox.shrink()
           : Text(
               searchResult.name(),
-              style: textTheme.body,
+              style: TextStyles.body.copyWith(color: colors.textBase),
               overflow: TextOverflow.ellipsis,
             ),
       subtitle: FutureBuilder<int>(
@@ -91,7 +92,7 @@ class SearchableItemWidget extends StatelessWidget {
                 count: noOfMemories,
                 formattedCount: NumberFormat().format(noOfMemories),
               ),
-              style: textTheme.smallMuted,
+              style: TextStyles.mini.copyWith(color: colors.textLight),
               overflow: TextOverflow.ellipsis,
             );
           } else {
@@ -121,7 +122,7 @@ class SearchableItemPlaceholder extends StatelessWidget {
     }
 
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return ThumbnailListItem(
       backgroundColor: thumbnailListItemBackgroundColor(context),
       onTap: sectionType.ctaOnTap(context),
@@ -134,7 +135,10 @@ class SearchableItemPlaceholder extends StatelessWidget {
           child: Icon(sectionType.getCTAIcon(), color: colorScheme.strokeMuted),
         ),
       ),
-      title: Text(sectionType.getCTAText(context), style: textTheme.body),
+      title: Text(
+        sectionType.getCTAText(context),
+        style: TextStyles.body.copyWith(color: colors.textBase),
+      ),
     );
   }
 }
