@@ -28,6 +28,7 @@ import "package:path/path.dart" as p;
 
 class FileUtil {
   static final Logger _logger = Logger("FileUtil");
+  static final Set<int> _recentlyTappedFiles = {};
 
   static Future<void> openFile(BuildContext context, EnteFile file) async {
     if (InfoFileService.instance.isInfoFile(file)) {
@@ -41,6 +42,14 @@ class FileUtil {
       );
       return;
     }
+
+    if (!_recentlyTappedFiles.add(file.uploadedFileID!)) {
+      return;
+    }
+
+    Future.delayed(const Duration(seconds: 1), () {
+      _recentlyTappedFiles.remove(file.uploadedFileID!);
+    });
 
     final cachedDecryptedFile = File(getCachedDecryptedFilePath(file));
     if (await cachedDecryptedFile.exists()) {
@@ -109,6 +118,8 @@ class FileUtil {
     } catch (e) {
       await dialog.hide();
       await showGenericErrorBottomSheet(context: context, error: e);
+    } finally {
+      _recentlyTappedFiles.remove(file.uploadedFileID!);
     }
   }
 
