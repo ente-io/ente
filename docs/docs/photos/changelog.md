@@ -28,6 +28,7 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Fixed video edit delete navigation
 - Fixed upload dates for files with ISO-like metadata timestamps
 - Fixed grey screen after single-memory delete or favorite actions
+- Better file-picker support for selecting photos in other Android apps
 
 ## v1.3.44 (mobile) - May 2026
 
