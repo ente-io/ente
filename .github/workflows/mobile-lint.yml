@@ -96,7 +96,7 @@ jobs:
                           flutter pub get --enforce-lockfile
                           dart format --output=none --set-exit-if-changed .
                           flutter analyze --no-fatal-infos
-                          if [[ "$package" == "local_auth_linux" ]]; then
+                          if [[ -d test ]]; then
                               flutter test
                           fi
                       )
