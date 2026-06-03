@@ -1,4 +1,4 @@
-﻿import fs from "node:fs/promises";
+import fs from "node:fs/promises";
 import path from "node:path";
 import { existsSync } from "original-fs";
 import type { PendingUploads, SkippedFile, ZipItem } from "../../types/ipc";

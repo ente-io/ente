@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file types that are shared across the IPC boundary with the renderer process
  *
  * This file is manually kept in sync with the renderer code.

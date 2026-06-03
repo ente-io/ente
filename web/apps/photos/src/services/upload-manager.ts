@@ -1,4 +1,4 @@
-﻿// TODO: Audit this file
+// TODO: Audit this file
 // TODO: Too many null assertions in this file. The types need reworking.
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
@@ -66,7 +66,7 @@ export interface InProgressUpload {
  * everything else remains as it were.
  *
  * The `"macosSystemFile"` and `"failedZip"` buckets are not real
- * {@link UploadResult}s ÔÇö they hold synthetic entries for items that
+ * {@link UploadResult}s - they hold synthetic entries for items that
  * never reached the upload pipeline (`._*` / `__MACOSX__` placeholders,
  * or `.zip` files that couldn't be opened). Their IDs are negative.
  */

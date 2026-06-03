@@ -1,4 +1,4 @@
-﻿import Store, { Schema } from "electron-store";
+import Store, { Schema } from "electron-store";
 import type { SkippedFile, ZipItem } from "../../types/ipc";
 
 export interface UploadStatusStore {
