@@ -64,16 +64,8 @@ export interface InProgressUpload {
  * A variant of {@link UploadResult}'s {@link type} values used when segregating
  * finished uploads in the UI. "addedSymlink" is treated as "uploaded",
  * everything else remains as it were.
- *
- * The `"macosSystemFile"` and `"failedZip"` buckets are not real
- * {@link UploadResult}s - they hold synthetic entries for items that
- * never reached the upload pipeline (`._*` / `__MACOSX__` placeholders,
- * or `.zip` files that couldn't be opened). Their IDs are negative.
  */
-export type FinishedUploadType =
-    | Exclude<UploadResult["type"], "addedSymlink">
-    | "macosSystemFile"
-    | "failedZip";
+export type FinishedUploadType = Exclude<UploadResult["type"], "addedSymlink">;
 
 export type InProgressUploads = Map<FileID, PercentageUploaded>;
 
@@ -361,16 +353,6 @@ class UploadManager {
 
     hideUploadProgressDialog() {
         this.uiService.setUploadProgressView(false);
-    }
-
-    /**
-     * Set the current {@link UploadPhase} shown in the progress dialog.
-     * Normally driven by {@link uploadItems}; exposed for callers that
-     * need to show the dialog without going through the upload pipeline
-     * (e.g. when surfacing only skipped files to the user).
-     */
-    setUploadPhase(phase: UploadPhase) {
-        this.uiService.setUploadPhase(phase);
     }
 
     /**

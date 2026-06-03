@@ -627,8 +627,8 @@ export interface Electron {
      * excluded.
      *
      * In addition to the regular {@link items}, returns a {@link skippedFiles}
-     * list of files that aren't being uploaded (`._*` / `__MACOSX__`
-     * placeholders, or `.zip` files that can't be opened). Each entry is
+     * list of files that aren't being uploaded (hidden files, macOS metadata
+     * files, or `.zip` files that can't be opened). Each entry is
      * tagged with a {@link SkippedFileKind} so the renderer can surface
      * it in the right section of the upload progress UI.
      *
@@ -887,29 +887,16 @@ export interface FolderWatchSyncedFile {
  */
 export type ZipItem = [zipPath: string, entryName: string];
 
-// macOS-injected metadata files tagged as `"macosSystemFile"`. Excludes
-// plain Unix dotfiles (`.bashrc`, `.config`, ...) which may be legit
-// content the user wants backed up. Kept in sync with the desktop side.
-export const macosSystemFileBasenames = new Set<string>([
-    ".DS_Store",
-    ".localized",
-    ".Spotlight-V100",
-    ".fseventsd",
-    ".Trashes",
-    ".TemporaryItems",
-    ".DocumentRevisions-V100",
-]);
-
 /**
  * The reason a file was excluded from the upload.
  *
- * - `"macosSystemFile"`: macOS-injected placeholder (`._*` fork, one of
- *   {@link macosSystemFileBasenames}, or a `__MACOSX__` entry), filtered
- *   out.
+ * - `"hiddenFile"`: a dot-prefixed file, filtered out.
+ * - `"macosSystemFile"`: macOS-injected placeholder (`._*` fork or a
+ *   `__MACOSX` entry), filtered out.
  * - `"failedZip"`: a `.zip` file that couldn't be opened as a zip archive.
  *   Surfaced as a failure so the user notices.
  */
-export type SkippedFileKind = "macosSystemFile" | "failedZip";
+export type SkippedFileKind = "hiddenFile" | "macosSystemFile" | "failedZip";
 
 /**
  * A file that isn't being uploaded, together with the reason it was
@@ -948,8 +935,8 @@ export interface PendingUploads {
      * {@link ZipItem} (zip path and entry name) that need to be uploaded.
      */
     zipItems: ZipItem[];
-    /** Files that aren't being uploaded (macOS placeholders or unopenable
-     * zips), tagged with a {@link SkippedFileKind} for display. */
+    /** Files that aren't being uploaded, tagged with a
+     * {@link SkippedFileKind} for display. */
     skippedFiles?: SkippedFile[];
 }
 

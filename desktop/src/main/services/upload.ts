@@ -6,24 +6,9 @@ import log from "../log";
 import { uploadStatusStore } from "../stores/upload-status";
 import { clearOpenZipCache, markClosableZip, openZip } from "./zip";
 
-// macOS-injected metadata files to tag as `"macosSystemFile"`. Excludes
-// plain Unix dotfiles (`.bashrc`, `.config`, ...) which may be legit
-// content the user wants backed up. Kept in sync with the web side.
-const macosSystemFileBasenames = new Set<string>([
-    ".DS_Store",
-    ".localized",
-    ".Spotlight-V100",
-    ".fseventsd",
-    ".Trashes",
-    ".TemporaryItems",
-    ".DocumentRevisions-V100",
-]);
-
 export const listZipItems = async (
     zipPath: string,
 ): Promise<{ items: ZipItem[]; skippedFiles: SkippedFile[] }> => {
-    // Filter `._*` forks, other macOS metadata files, and `__MACOSX__`
-    // entries into `skippedFiles`. Open failures surface as `"failedZip"`.
     try {
         const zip = openZip(zipPath);
         try {
@@ -37,8 +22,7 @@ export const listZipItems = async (
                 const basename = path.basename(entry.name);
                 if (
                     basename.startsWith("._") ||
-                    macosSystemFileBasenames.has(basename) ||
-                    entry.name.split("/").includes("__MACOSX__")
+                    entry.name.split("/").includes("__MACOSX")
                 ) {
                     skippedFiles.push({
                         name: entry.name,
@@ -47,6 +31,10 @@ export const listZipItems = async (
                     continue;
                 }
 
+                if (basename.startsWith(".")) {
+                    skippedFiles.push({ name: entry.name, kind: "hiddenFile" });
+                    continue;
+                }
                 items.push([zipPath, entry.name]);
             }
 
@@ -183,11 +171,11 @@ export const setPendingUploads = ({
 export const markUploadedFile = (
     path: string,
     associatedPath: string | undefined,
-): Promise<number> => {
+) => {
     const existing = uploadStatusStore.get("filePaths") ?? [];
     const updated = existing.filter((p) => p != path && p != associatedPath);
     uploadStatusStore.set("filePaths", updated);
-
+    // See: [Note: Integral last modified time]
     return fs.stat(path).then((st) => st.mtime.getTime());
 };
 

@@ -33,12 +33,11 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import {
-    macosSystemFileBasenames,
-    type CollectionMapping,
-    type Electron,
-    type SkippedFile,
-    type ZipItem,
+import type {
+    CollectionMapping,
+    Electron,
+    SkippedFile,
+    ZipItem,
 } from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { UploadProgress } from "ente-gallery/components/UploadProgress";
@@ -80,13 +79,7 @@ import { redirectToCustomerPortal } from "ente-new/photos/services/user-details"
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -428,32 +421,6 @@ export const Upload: React.FC<UploadProps> = ({
         }
     }, []);
 
-    // Overlay synthetic entries (negative IDs) for the skipped files on
-    // top of what {@link uploadManager} most recently set. Derived rather
-    // than mutated in an effect, because {@link uploadManager} replaces
-    // the entire `finishedUploads` map on every progress update.
-    const effectiveFinishedUploads = useMemo(() => {
-        const next = new Map(finishedUploads);
-        next.delete("macosSystemFile");
-        next.delete("failedZip");
-        skippedFiles.forEach((f, i) => {
-            const id = -(i + 1);
-            const ids = next.get(f.kind) ?? [];
-            ids.push(id);
-            next.set(f.kind, ids);
-        });
-        return next;
-    }, [finishedUploads, skippedFiles]);
-
-    const effectiveUploadFileNames = useMemo(() => {
-        const next = new Map<number, string>(uploadFileNames);
-        for (const id of next.keys()) {
-            if (id < 0) next.delete(id);
-        }
-        skippedFiles.forEach((f, i) => next.set(-(i + 1), f.name));
-        return next;
-    }, [uploadFileNames, skippedFiles]);
-
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
     useEffect(() => {
@@ -488,6 +455,7 @@ export const Upload: React.FC<UploadProps> = ({
                 },
             );
         } else {
+            setSkippedFiles([]);
             setWebFiles(files);
         }
     }, [selectedInputFiles, dragAndDropFiles]);
@@ -524,29 +492,22 @@ export const Upload: React.FC<UploadProps> = ({
             desktopZipItems.map((ze) => [ze, joinPath(dirname(ze[0]), ze[1])]),
         ].flat() as UploadItemAndPath[];
 
-        if (allItemAndPaths.length == 0) {
-            // No real items to upload. If we also have skipped files
-            // (e.g. a corrupt .zip, or a `._foo.zip` macOS sidecar), the
-            // user still deserves to see what was filtered out — otherwise
-            // the new failedZip / macosSystemFile sections would never be
-            // shown for exactly the failure case they're meant to report.
-            // Open the dialog with phase = "done" so the user can dismiss
-            // it via the Done button.
-            //
-            // We must also gate on `uploadRunning.current` being false:
-            // when a selection contains both real items and skipped files,
-            // the import flow below clears the real-item state (which
-            // re-triggers this effect) but does not clear `skippedFiles`,
-            // so on the second pass this branch would otherwise fire and
-            // surface a "done" dialog while the actual upload is still in
-            // flight.
-            if (skippedFiles.length > 0 && !uploadRunning.current) {
-                // Reset the manager's state from any previous upload —
-                // otherwise the derived effectiveFinishedUploads /
-                // effectiveUploadFileNames would surface stale entries
-                // (and even a retry button) from the prior run.
+        const hiddenFiles: SkippedFile[] = [];
+        const prunedItemAndPaths = allItemAndPaths.filter(([, p]) => {
+            const name = basename(p);
+            if (!name.startsWith(".")) return true;
+            const kind = skippedFileKindForFileName(name);
+            if (!kind) return true;
+            hiddenFiles.push({ name, kind });
+            return false;
+        });
+        const nextSkippedFiles = skippedFiles.concat(hiddenFiles);
+        if (hiddenFiles.length > 0) setSkippedFiles(nextSkippedFiles);
+
+        if (prunedItemAndPaths.length == 0) {
+            if (nextSkippedFiles.length > 0 && !uploadRunning.current) {
                 uploadManager.prepareForNewUpload();
-                uploadManager.setUploadPhase("done");
+                setUploadPhase("done");
                 uploadManager.showUploadProgressDialog();
             }
             return;
@@ -581,16 +542,7 @@ export const Upload: React.FC<UploadProps> = ({
         setDesktopFilePaths([]);
         setDesktopZipItems([]);
 
-        // Filter out files whose names begins with a ".".
-        const prunedItemAndPaths = allItemAndPaths.filter(
-            ([, p]) => !basename(p).startsWith("."),
-        );
-
         uploadItemsAndPaths.current = prunedItemAndPaths;
-        if (uploadItemsAndPaths.current.length == 0) {
-            props.setLoading(false);
-            return;
-        }
 
         const importSuggestion = deriveImportSuggestion(
             selectedUploadType.current,
@@ -1051,13 +1003,14 @@ export const Upload: React.FC<UploadProps> = ({
                 open={uploadProgressView}
                 onClose={closeUploadProgress}
                 percentComplete={percentComplete}
-                uploadFileNames={effectiveUploadFileNames}
+                uploadFileNames={uploadFileNames!}
                 uploadCounter={uploadCounter}
                 uploadPhase={uploadPhase}
                 inProgressUploads={inProgressUploads}
                 hasLivePhotos={hasLivePhotos}
                 retryFailed={retryFailed}
-                finishedUploads={effectiveFinishedUploads}
+                finishedUploads={finishedUploads}
+                skippedFiles={skippedFiles}
                 cancelUploads={cancelUploads}
             />
             <CanvasReadbackBlockedDialog
@@ -1110,13 +1063,9 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     for (const file of files) {
         const path = electron.pathForFile(file);
 
-        // macOS `._*` forks and other macOS metadata files — skip zip
-        // parsing even if the name ends in `.zip`.
-        if (
-            file.name.startsWith("._") ||
-            macosSystemFileBasenames.has(file.name)
-        ) {
-            skippedFiles.push({ name: file.name, kind: "macosSystemFile" });
+        const skippedFileKind = skippedFileKindForFileName(file.name);
+        if (skippedFileKind) {
+            skippedFiles.push({ name: file.name, kind: skippedFileKind });
             continue;
         }
 
@@ -1138,6 +1087,14 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     }
 
     return { fileAndPaths, zipItems, skippedFiles };
+};
+
+const skippedFileKindForFileName = (
+    fileName: string,
+): SkippedFile["kind"] | undefined => {
+    if (fileName.startsWith("._")) return "macosSystemFile";
+    if (fileName.startsWith(".")) return "hiddenFile";
+    return undefined;
 };
 
 /**

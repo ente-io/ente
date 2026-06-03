@@ -31,6 +31,7 @@ import { SpacedRow } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
 import { formattedListJoin } from "ente-base/i18n";
+import type { SkippedFile } from "ente-base/types/ipc";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, {
@@ -60,6 +61,7 @@ interface UploadProgressProps {
     inProgressUploads: InProgressUpload[];
     uploadFileNames: UploadFileNames;
     finishedUploads: SegregatedFinishedUploads;
+    skippedFiles?: SkippedFile[];
     hasLivePhotos: boolean;
     cancelUploads: () => void;
 }
@@ -94,9 +96,7 @@ type FinishedUploadType =
     | "failed"
     | "alreadyUploaded"
     | "uploadedWithStaticThumbnail"
-    | "uploaded"
-    | "macosSystemFile"
-    | "failedZip";
+    | "uploaded";
 
 type SegregatedFinishedUploads = Map<FinishedUploadType, FileID[]>;
 
@@ -113,6 +113,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
     hasLivePhotos,
     inProgressUploads,
     finishedUploads,
+    skippedFiles = [],
     cancelUploads,
 }) => {
     const { showMiniDialog } = useBaseContext();
@@ -160,6 +161,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
                 inProgressUploads,
                 uploadFileNames,
                 finishedUploads,
+                skippedFiles,
                 hasLivePhotos,
                 expanded,
                 setExpanded,
@@ -185,6 +187,7 @@ interface UploadProgressContextT {
     inProgressUploads: InProgressUpload[];
     uploadFileNames: UploadFileNames;
     finishedUploads: SegregatedFinishedUploads;
+    skippedFiles: SkippedFile[];
     hasLivePhotos: boolean;
     expanded: boolean;
     setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
@@ -408,7 +411,7 @@ const clamp = (value: number, min: number, max: number) =>
     Math.min(Math.max(value, min), Math.max(min, max));
 
 const UploadProgressSubtitleText: React.FC = () => {
-    const { uploadPhase, uploadCounter, finishedUploads } =
+    const { uploadPhase, uploadCounter, finishedUploads, skippedFiles } =
         useUploadProgressContext();
 
     return (
@@ -420,7 +423,12 @@ const UploadProgressSubtitleText: React.FC = () => {
                 marginTop: "4px",
             }}
         >
-            {subtitleText(uploadPhase, uploadCounter, finishedUploads)}
+            {subtitleText(
+                uploadPhase,
+                uploadCounter,
+                finishedUploads,
+                skippedFiles,
+            )}
         </Typography>
     );
 };
@@ -429,6 +437,7 @@ const subtitleText = (
     uploadPhase: UploadPhase,
     uploadCounter: UploadCounter,
     finishedUploads: SegregatedFinishedUploads | null | undefined,
+    skippedFiles: SkippedFile[],
 ) => {
     switch (uploadPhase) {
         case "preparing":
@@ -444,7 +453,10 @@ const subtitleText = (
             return t("upload_cancelling");
         case "done": {
             const count = uploadedFileCount(finishedUploads);
-            const notCount = notUploadedFileCount(finishedUploads);
+            const notCount = notUploadedFileCount(
+                finishedUploads,
+                skippedFiles,
+            );
             const items: string[] = [];
             if (count) items.push(t("upload_done", { count }));
             if (notCount) items.push(t("upload_skipped", { count: notCount }));
@@ -471,10 +483,11 @@ const uploadedFileCount = (
 
 const notUploadedFileCount = (
     finishedUploads: SegregatedFinishedUploads | null | undefined,
+    skippedFiles: SkippedFile[],
 ) => {
-    if (!finishedUploads) return 0;
+    let c = skippedFiles.length;
+    if (!finishedUploads) return c;
 
-    let c = 0;
     c += finishedUploads.get("alreadyUploaded")?.length ?? 0;
     c += finishedUploads.get("blocked")?.length ?? 0;
     c += finishedUploads.get("failed")?.length ?? 0;
@@ -482,8 +495,6 @@ const notUploadedFileCount = (
     c += finishedUploads.get("tooLarge")?.length ?? 0;
     c += finishedUploads.get("unsupported")?.length ?? 0;
     c += finishedUploads.get("zeroSize")?.length ?? 0;
-    c += finishedUploads.get("macosSystemFile")?.length ?? 0;
-    c += finishedUploads.get("failedZip")?.length ?? 0;
     return c;
 };
 
@@ -508,14 +519,16 @@ const UploadProgressBar: React.FC = () => {
 };
 
 function UploadProgressDialog() {
-    const { open, onClose, uploadPhase, finishedUploads } =
+    const { open, onClose, uploadPhase, finishedUploads, skippedFiles } =
         useUploadProgressContext();
 
     const [hasUnUploadedFiles, setHasUnUploadedFiles] = useState(false);
 
     useEffect(() => {
-        setHasUnUploadedFiles(notUploadedFileCount(finishedUploads) > 0);
-    }, [finishedUploads]);
+        setHasUnUploadedFiles(
+            notUploadedFileCount(finishedUploads, skippedFiles) > 0,
+        );
+    }, [finishedUploads, skippedFiles]);
 
     const handleClose: DialogProps["onClose"] = (_, reason) => {
         if (reason != "backdropClick") onClose();
@@ -565,13 +578,18 @@ function UploadProgressDialog() {
                         sectionTitle={t("insufficient_storage")}
                         sectionInfo={t("insufficient_storage_hint")}
                     />
-                    <ResultSection
-                        resultType="macosSystemFile"
+                    <SkippedFilesSection
+                        kind="hiddenFile"
+                        sectionTitle={t("hidden_files")}
+                        sectionInfo={t("hidden_files_hint")}
+                    />
+                    <SkippedFilesSection
+                        kind="macosSystemFile"
                         sectionTitle={t("macos_fake_files")}
                         sectionInfo={t("macos_fake_files_hint")}
                     />
-                    <ResultSection
-                        resultType="failedZip"
+                    <SkippedFilesSection
+                        kind="failedZip"
                         sectionTitle={t("failed_zip_files")}
                         sectionInfo={t("failed_zip_files_hint")}
                     />
@@ -760,6 +778,46 @@ const ResultSection: React.FC<ResultSectionProps> = ({
                     items={fileList}
                     generateItemKey={generateItemKey}
                     getItemTitle={getItemTitle}
+                    renderListItem={renderListItem}
+                    maxHeight={160}
+                    itemSize={35}
+                />
+            </SectionAccordionDetails>
+        </SectionAccordion>
+    );
+};
+
+interface SkippedFilesSectionProps {
+    kind: SkippedFile["kind"];
+    sectionTitle: string;
+    sectionInfo?: React.ReactNode;
+}
+
+const SkippedFilesSection: React.FC<SkippedFilesSectionProps> = ({
+    kind,
+    sectionTitle,
+    sectionInfo,
+}) => {
+    const { skippedFiles } = useUploadProgressContext();
+    const files = skippedFiles.filter((file) => file.kind == kind);
+
+    if (!files.length) return <></>;
+
+    const renderListItem = (file: SkippedFile) => (
+        <ResultItemContainer>{file.name}</ResultItemContainer>
+    );
+
+    return (
+        <SectionAccordion>
+            <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <TitleText title={sectionTitle} count={files.length} />
+            </SectionAccordionSummary>
+            <SectionAccordionDetails>
+                {sectionInfo && <SectionInfo>{sectionInfo}</SectionInfo>}
+                <ItemList
+                    items={files}
+                    generateItemKey={(file) => file.name}
+                    getItemTitle={(file) => file.name}
                     renderListItem={renderListItem}
                     maxHeight={160}
                     itemSize={35}

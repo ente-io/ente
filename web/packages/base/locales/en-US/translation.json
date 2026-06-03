@@ -397,6 +397,8 @@
     "live_photos_detected": "The photo and video files from your Live Photos have been merged into a single file",
     "ignored_uploads": "Ignored uploads",
     "ignored_uploads_hint": "Skipped these as there are files with matching name and content in the same album",
+    "hidden_files": "Hidden files",
+    "hidden_files_hint": "These files start with a dot and have been skipped.",
     "macos_fake_files": "macOS metadata files",
     "macos_fake_files_hint": "These are not photos. They are hidden files that macOS creates, and have been skipped.",
     "failed_zip_files": "Unreadable zip files",
