@@ -2366,7 +2366,7 @@ dependencies = [
 
 [[package]]
 name = "ensu-desktop"
-version = "0.1.17-beta"
+version = "0.1.18-beta"
 dependencies = [
  "ensu-db",
  "ensu-sync",

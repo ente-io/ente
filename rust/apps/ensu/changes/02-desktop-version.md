@@ -1,1 +1,0 @@
-- Fixed the desktop app version shown in settings.

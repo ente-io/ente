@@ -87,7 +87,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = (project.findProperty("versionCode") as? String)?.toInt() ?: 33
-        versionName = "0.1.17"
+        versionName = "0.1.18"
         buildConfigField("String", "API_ENDPOINT", "\"$apiEndpointOverride\"")
     }
 

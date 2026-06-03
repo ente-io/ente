@@ -1,1 +1,0 @@
-- Updated JNA library to satisfy Android's 16 KB page size requirement.
