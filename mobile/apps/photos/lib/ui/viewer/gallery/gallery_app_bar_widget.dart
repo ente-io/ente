@@ -240,11 +240,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               const _GalleryAppBarBackButton(),
               const SizedBox(width: Spacing.sm),
               Expanded(
-                child: Text(
-                  _appBarTitle!,
-                  style: TextStyles.h2.copyWith(color: colors.textBase),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TooltipComponent(
+                    message: _appBarTitle!,
+                    child: Text(
+                      _appBarTitle!,
+                      style: TextStyles.h2.copyWith(color: colors.textBase),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
               ),
               if (actions.isNotEmpty) ...[
