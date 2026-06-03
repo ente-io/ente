@@ -490,8 +490,8 @@ export const fileCreationTime = (file: EnteFile) =>
  */
 export const fileCreationPhotoDate = (file: EnteFile) =>
     createPhotoDate(
-        file.pubMagicMetadata?.data.dateTime ??
-            file.pubMagicMetadata?.data.editedTime ??
+        file.pubMagicMetadata?.data.editedTime ??
+            file.pubMagicMetadata?.data.dateTime ??
             file.metadata.creationTime,
     );
 
