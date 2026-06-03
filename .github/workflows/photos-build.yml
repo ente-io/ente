@@ -318,34 +318,7 @@ jobs:
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   GH_TOKEN: ${{ github.token }}
+                  RELEASE_TITLE: ${{ needs.build-metadata.outputs.release_title }}
                   RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
-              run: |
-                  release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
-                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.photos) | [TestFlight](https://appstoreconnect.apple.com/apps/1542026904/testflight/ios) | [GitHub Release](${release_url})"
-                  release_body_discord="$(awk '
-                      /^Previous changes:$/ { previous = 1 }
-                      previous && NF { print "-# " $0; next }
-                      { print }
-                  ' <<< "${RELEASE_BODY_GROUPED}")"
-                  if [ "${#release_body_discord}" -gt 3000 ]; then
-                      release_body_discord="${release_body_discord:0:3000}"$'\n...\n-# See the GitHub release for full notes.'
-                  fi
-
-                  jq -n \
-                      --arg title "${{ needs.build-metadata.outputs.release_title }}" \
-                      --arg body "${release_body_discord}" \
-                      --arg download_line "${download_line}" \
-                      '{
-                          flags: 32768,
-                          components: [{
-                              type: 17,
-                              accent_color: 65280,
-                              components: (
-                                  [{type: 10, content: ("## " + $title)}]
-                                  + (if $body == "" then [] else [{type: 10, content: $body}] end)
-                                  + [{type: 14}, {type: 10, content: $download_line}]
-                              )
-                          }]
-                      }' \
-                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}?with_components=true"
+              run: node .github/scripts/release-notify.mjs photos "$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
