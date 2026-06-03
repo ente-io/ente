@@ -28,7 +28,7 @@ const kEmptyExifDateTime = "0000:00:00 00:00:00";
 
 final _logger = Logger("ExifUtil");
 final _standardExifDateTimePattern = RegExp(
-  r'^\d{4}:(0[1-9]|1[0-2]):(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$',
+  r'^(\d{4}:(0[1-9]|1[0-2]):(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d))([\.:]\d+)?$',
 );
 final _isoExifDateTimePattern = RegExp(
   r'^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])[T ]([01]\d|2[0-3]):([0-5]\d):([0-5]\d)([\.:]\d+)?([Zz]|[+-](?:[01]\d|2[0-3]):?[0-5]\d)?$',
@@ -169,11 +169,14 @@ ParsedExifDateTime _getStandardExifDateTimeInDeviceTimezone(
   String exifTime,
   String? offsetString,
 ) {
-  final offsetTime = _normalizeOffset(offsetString, throwOnInvalid: true);
+  final offsetTime = _normalizeOffset(offsetString);
   final hasOffset = offsetTime != null;
-  final DateTime result = DateFormat(
-    kExifDateTimePattern,
-  ).parseStrict(exifTime, hasOffset);
+  final match = _standardExifDateTimePattern.firstMatch(exifTime)!;
+  final DateTime result = DateFormat(kExifDateTimePattern)
+      .parseStrict(match.group(1)!, hasOffset)
+      .add(
+        Duration(microseconds: _parseFractionalMicroseconds(match.group(7))),
+      );
   if (hasOffset && offsetTime != "Z") {
     final List<String> splitHHMM = offsetTime.split(":");
     final int offsetHours = int.parse(splitHHMM[0]);
@@ -210,8 +213,7 @@ ParsedExifDateTime _getIsoExifDateTimeInDeviceTimezone(
   final metadataDateTime = _parseIsoDateTimeComponents(match);
   final localDateTimeString = formatPubMagicDateTime(metadataDateTime);
   final offsetTime =
-      _normalizeOffset(match.group(8)) ??
-      _normalizeOffset(offsetString, throwOnInvalid: true);
+      _normalizeOffset(match.group(8)) ?? _normalizeOffset(offsetString);
 
   if (offsetTime != null) {
     final deviceLocalTime = DateTime.parse(
@@ -240,15 +242,12 @@ ParsedExifDateTime _getIsoExifDateTimeInDeviceTimezone(
   );
 }
 
-String? _normalizeOffset(String? offsetString, {bool throwOnInvalid = false}) {
+String? _normalizeOffset(String? offsetString) {
   final offset = offsetString?.trim();
   if (offset == null || offset.isEmpty) {
     return null;
   }
   if (!_offsetPattern.hasMatch(offset)) {
-    if (throwOnInvalid) {
-      throw FormatException("Invalid EXIF offset", offsetString);
-    }
     return null;
   }
   final normalizedOffset = offset.toUpperCase();
