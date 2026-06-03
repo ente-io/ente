@@ -78,7 +78,7 @@ export interface FolderWatchSyncedFile {
 
 export type ZipItem = [zipPath: string, entryName: string];
 
-export type SkippedFileKind = "hiddenFile" | "macosSystemFile" | "failedZip";
+export type SkippedFileKind = "hiddenFile" | "failedZip";
 
 export interface SkippedFile {
     name: string;

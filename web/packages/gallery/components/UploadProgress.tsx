@@ -534,6 +534,14 @@ function UploadProgressDialog() {
         if (reason != "backdropClick") onClose();
     };
 
+    const skipped = (kind: SkippedFile["kind"]) =>
+        skippedFiles
+            .filter((file) => file.kind == kind)
+            .map(({ name }, index) => ({
+                key: `${kind}-${index}-${name}`,
+                name,
+            }));
+
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
             <UploadProgressHeader />
@@ -578,18 +586,13 @@ function UploadProgressDialog() {
                         sectionTitle={t("insufficient_storage")}
                         sectionInfo={t("insufficient_storage_hint")}
                     />
-                    <SkippedFilesSection
-                        kind="hiddenFile"
+                    <FileNameListSection
+                        items={skipped("hiddenFile")}
                         sectionTitle={t("hidden_files")}
                         sectionInfo={t("hidden_files_hint")}
                     />
-                    <SkippedFilesSection
-                        kind="macosSystemFile"
-                        sectionTitle={t("macos_fake_files")}
-                        sectionInfo={t("macos_fake_files_hint")}
-                    />
-                    <SkippedFilesSection
-                        kind="failedZip"
+                    <FileNameListSection
+                        items={skipped("failedZip")}
                         sectionTitle={t("failed_zip_files")}
                         sectionInfo={t("failed_zip_files_hint")}
                     />
@@ -739,85 +742,55 @@ const ResultSection: React.FC<ResultSectionProps> = ({
     sectionInfo,
 }) => {
     const { finishedUploads, uploadFileNames } = useUploadProgressContext();
-
     const fileList = finishedUploads.get(resultType);
 
-    if (!fileList?.length) {
-        return <></>;
-    }
-
-    // @ts-expect-error Need to add types
-    const renderListItem = (fileID) => {
-        return (
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            <ResultItemContainer key={fileID}>
-                {uploadFileNames.get(fileID)}
-            </ResultItemContainer>
-        );
-    };
-
-    // @ts-expect-error Need to add types
-    const getItemTitle = (fileID) => {
-        return uploadFileNames.get(fileID)!;
-    };
-
-    // @ts-expect-error Need to add types
-    const generateItemKey = (fileID) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return fileID;
-    };
+    if (!fileList?.length) return <></>;
 
     return (
-        <SectionAccordion>
-            <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <TitleText title={sectionTitle} count={fileList.length} />
-            </SectionAccordionSummary>
-            <SectionAccordionDetails>
-                {sectionInfo && <SectionInfo>{sectionInfo}</SectionInfo>}
-                <ItemList
-                    items={fileList}
-                    generateItemKey={generateItemKey}
-                    getItemTitle={getItemTitle}
-                    renderListItem={renderListItem}
-                    maxHeight={160}
-                    itemSize={35}
-                />
-            </SectionAccordionDetails>
-        </SectionAccordion>
+        <FileNameListSection
+            items={fileList.map((fileID) => ({
+                key: fileID,
+                name: uploadFileNames.get(fileID)!,
+            }))}
+            sectionTitle={sectionTitle}
+            sectionInfo={sectionInfo}
+        />
     );
 };
 
-interface SkippedFilesSectionProps {
-    kind: SkippedFile["kind"];
+interface ResultSectionItem {
+    key: string | number;
+    name: string;
+}
+
+interface FileNameListSectionProps {
+    items: ResultSectionItem[];
     sectionTitle: string;
     sectionInfo?: React.ReactNode;
 }
 
-const SkippedFilesSection: React.FC<SkippedFilesSectionProps> = ({
-    kind,
+const FileNameListSection: React.FC<FileNameListSectionProps> = ({
+    items,
     sectionTitle,
     sectionInfo,
 }) => {
-    const { skippedFiles } = useUploadProgressContext();
-    const files = skippedFiles.filter((file) => file.kind == kind);
+    if (!items.length) return <></>;
 
-    if (!files.length) return <></>;
-
-    const renderListItem = (file: SkippedFile) => (
-        <ResultItemContainer>{file.name}</ResultItemContainer>
+    const renderListItem = (item: ResultSectionItem) => (
+        <ResultItemContainer>{item.name}</ResultItemContainer>
     );
 
     return (
         <SectionAccordion>
             <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <TitleText title={sectionTitle} count={files.length} />
+                <TitleText title={sectionTitle} count={items.length} />
             </SectionAccordionSummary>
             <SectionAccordionDetails>
                 {sectionInfo && <SectionInfo>{sectionInfo}</SectionInfo>}
                 <ItemList
-                    items={files}
-                    generateItemKey={(file) => file.name}
-                    getItemTitle={(file) => file.name}
+                    items={items}
+                    generateItemKey={(item) => item.key}
+                    getItemTitle={(item) => item.name}
                     renderListItem={renderListItem}
                     maxHeight={160}
                     itemSize={35}

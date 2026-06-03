@@ -1092,7 +1092,6 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
 const skippedFileKindForFileName = (
     fileName: string,
 ): SkippedFile["kind"] | undefined => {
-    if (fileName.startsWith("._")) return "macosSystemFile";
     if (fileName.startsWith(".")) return "hiddenFile";
     return undefined;
 };

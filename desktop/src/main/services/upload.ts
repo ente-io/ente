@@ -20,17 +20,6 @@ export const listZipItems = async (
                 if (!entry.isFile) continue;
 
                 const basename = path.basename(entry.name);
-                if (
-                    basename.startsWith("._") ||
-                    entry.name.split("/").includes("__MACOSX")
-                ) {
-                    skippedFiles.push({
-                        name: entry.name,
-                        kind: "macosSystemFile",
-                    });
-                    continue;
-                }
-
                 if (basename.startsWith(".")) {
                     skippedFiles.push({ name: entry.name, kind: "hiddenFile" });
                     continue;

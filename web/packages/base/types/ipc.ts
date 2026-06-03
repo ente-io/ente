@@ -627,10 +627,10 @@ export interface Electron {
      * excluded.
      *
      * In addition to the regular {@link items}, returns a {@link skippedFiles}
-     * list of files that aren't being uploaded (hidden files, macOS metadata
-     * files, or `.zip` files that can't be opened). Each entry is
-     * tagged with a {@link SkippedFileKind} so the renderer can surface
-     * it in the right section of the upload progress UI.
+     * list of files that aren't being uploaded (hidden files, or `.zip` files
+     * that can't be opened). Each entry is tagged with a
+     * {@link SkippedFileKind} so the renderer can surface it in the right
+     * section of the upload progress UI.
      *
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
@@ -891,12 +891,10 @@ export type ZipItem = [zipPath: string, entryName: string];
  * The reason a file was excluded from the upload.
  *
  * - `"hiddenFile"`: a dot-prefixed file, filtered out.
- * - `"macosSystemFile"`: macOS-injected placeholder (`._*` fork or a
- *   `__MACOSX` entry), filtered out.
  * - `"failedZip"`: a `.zip` file that couldn't be opened as a zip archive.
  *   Surfaced as a failure so the user notices.
  */
-export type SkippedFileKind = "hiddenFile" | "macosSystemFile" | "failedZip";
+export type SkippedFileKind = "hiddenFile" | "failedZip";
 
 /**
  * A file that isn't being uploaded, together with the reason it was

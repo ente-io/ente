@@ -40,10 +40,7 @@ const uploadStatusSchema: Schema<UploadStatusStore> = {
             required: ["name", "kind"],
             properties: {
                 name: { type: "string" },
-                kind: {
-                    type: "string",
-                    enum: ["hiddenFile", "macosSystemFile", "failedZip"],
-                },
+                kind: { type: "string", enum: ["hiddenFile", "failedZip"] },
             },
         },
     },
