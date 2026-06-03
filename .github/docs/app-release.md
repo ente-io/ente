@@ -1,6 +1,6 @@
 # App release process
 
-Auth, Locker, and Ensu use the same release process, as described here.
+Photos, Auth, Locker, and Ensu use the same release process, as described here.
 
 > For simplicity, the following assumes we're trying to release Ensu, that main is `0.1.16-beta`, we want to release `0.1.16` and move main to `0.1.17-beta`.
 >

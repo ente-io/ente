@@ -8,8 +8,8 @@ on:
             - "release/auth-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~5:15 AM IST
-        - cron: "45 23 * * 0-4"
+        # Run every weekday at ~4:45 AM IST
+        - cron: "15 23 * * 0-4"
 
 env:
     FLUTTER_VERSION: "3.38.10"

@@ -1,15 +1,15 @@
-name: "Build (Locker)"
+name: "Build (Photos)"
 
 # See .github/docs/app-release.md
 
 on:
     push:
         branches:
-            - "release/locker-v*"
+            - "release/photos-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~5:45 AM IST
-        - cron: "15 0 * * 1-5"
+        # Run every weekday at ~3:45 AM IST
+        - cron: "15 22 * * 0-4"
 
 env:
     FLUTTER_VERSION: "3.38.10"
@@ -18,7 +18,7 @@ permissions:
     contents: write
 
 concurrency:
-    group: locker-build
+    group: photos-build
     cancel-in-progress: false
 
 jobs:
@@ -48,26 +48,26 @@ jobs:
               run: |
                   set -euo pipefail
 
-                  if [[ "${GITHUB_EVENT_NAME}" == "schedule" ]] && git ls-remote --exit-code --heads origin 'release/locker-v*' >/dev/null 2>&1; then
-                      echo "Active Locker release branch found; skipping scheduled nightly"
+                  if [[ "${GITHUB_EVENT_NAME}" == "schedule" ]] && git ls-remote --exit-code --heads origin 'release/photos-v*' >/dev/null 2>&1; then
+                      echo "Active Photos release branch found; skipping scheduled nightly"
                       echo "should_build=false" >> "${GITHUB_OUTPUT}"
                       exit 0
                   fi
 
-                  release_version="$(node .github/scripts/flutter-version.mjs locker get)"
-                  build_number_base="$(node .github/scripts/flutter-version.mjs locker get-build-base)"
+                  release_version="$(node .github/scripts/flutter-version.mjs photos get)"
+                  build_number_base="$(node .github/scripts/flutter-version.mjs photos get-build-base)"
                   build_number=$((build_number_base + GITHUB_RUN_NUMBER))
 
-                  if [[ "${GITHUB_REF_NAME}" == release/locker-v* ]]; then
-                      if [[ "${GITHUB_REF_NAME}" != "release/locker-v${release_version}" ]]; then
-                          echo "::error::Branch ${GITHUB_REF_NAME} does not match Locker version ${release_version}"
+                  if [[ "${GITHUB_REF_NAME}" == release/photos-v* ]]; then
+                      if [[ "${GITHUB_REF_NAME}" != "release/photos-v${release_version}" ]]; then
+                          echo "::error::Branch ${GITHUB_REF_NAME} does not match Photos version ${release_version}"
                           exit 1
                       fi
-                      release_tag="locker-v${release_version}-rc"
-                      release_title="🗄️ Locker release candidate - ${release_version} (build ${build_number})"
+                      release_tag="photos-v${release_version}-rc"
+                      release_title="🌻 Photos release candidate - ${release_version} (build ${build_number})"
                   else
-                      release_tag="locker-v${release_version}-beta"
-                      release_title="🗄️ Locker nightly - ${release_version} (build ${build_number})"
+                      release_tag="photos-v${release_version}-beta"
+                      release_title="🌻 Photos nightly - ${release_version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"
@@ -80,7 +80,7 @@ jobs:
                   echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
                   echo "release_title=${release_title}" >> "${GITHUB_OUTPUT}"
                   echo "artifact_stem=ente-${release_tag%-rc}" >> "${GITHUB_OUTPUT}"
-                  node .github/scripts/release-notes.mjs mobile/apps/locker/changes "${release_tag}" >> "${GITHUB_OUTPUT}"
+                  node .github/scripts/release-notes.mjs mobile/apps/photos/changes "${release_tag}" >> "${GITHUB_OUTPUT}"
 
     build-android:
         needs: build-metadata
@@ -98,7 +98,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: mobile/apps/locker
+                working-directory: mobile/apps/photos
 
         steps:
             - name: Checkout
@@ -119,17 +119,13 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION }}
                   cache: true
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
-              run: node ../../../.github/scripts/flutter-version.mjs locker set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+              run: node ../../../.github/scripts/flutter-version.mjs photos set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - run: cargo codegen frb shared
+            - run: cargo codegen frb
               working-directory: rust
 
             - name: Prepare whatsnew
@@ -142,39 +138,39 @@ jobs:
                   fi
 
             - name: Add keystore
-              run: printf '%s' "${SIGNING_KEY_LOCKER}" | base64 -d > "$RUNNER_TEMP/ente_locker_key.jks"
+              run: printf '%s' "${SIGNING_KEY_PHOTOS}" | base64 -d > "$RUNNER_TEMP/ente_photos_key.jks"
               env:
-                  SIGNING_KEY_LOCKER: ${{ secrets.SIGNING_KEY_LOCKER }}
+                  SIGNING_KEY_PHOTOS: ${{ secrets.SIGNING_KEY_PHOTOS }}
 
             - name: Create artifacts directory
               run: mkdir artifacts
 
             - name: Build independent APK
               run: |
-                  flutter build apk --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --dart-define=cronetHttpNoPlay=true --release --flavor independent
+                  flutter build apk --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --dart-define=cronetHttpNoPlay=true --release --flavor independent --target-platform android-arm,android-arm64
                   mv build/app/outputs/flutter-apk/app-independent-release.apk "artifacts/${ARTIFACT_STEM}.apk"
               env:
-                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_locker_key.jks
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_LOCKER }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_LOCKER }}
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_photos_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_PHOTOS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_PHOTOS }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_PHOTOS }}
 
             - name: Build PlayStore AAB
-              run: flutter build appbundle --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --dart-define=cronetHttpNoPlay=true --release --flavor playstore
+              run: flutter build appbundle --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --dart-define=cronetHttpNoPlay=true --release --flavor playstore --target-platform android-arm,android-arm64
               env:
-                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_locker_key.jks
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_LOCKER }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_LOCKER }}
+                  SIGNING_KEY_PATH: ${{ runner.temp }}/ente_photos_key.jks
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_PHOTOS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_PHOTOS }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_PHOTOS }}
 
             - name: Generate checksums
-              run: sha256sum artifacts/ente-locker-*.apk > artifacts/sha256sum-apk
+              run: sha256sum artifacts/ente-photos-*.apk > artifacts/sha256sum-apk
 
             - name: Upload checksum snippet
               uses: actions/upload-artifact@v4
               with:
-                  name: locker-sha256sum-android
-                  path: mobile/apps/locker/artifacts/sha256sum-apk
+                  name: photos-sha256sum-android
+                  path: mobile/apps/photos/artifacts/sha256sum-apk
 
             - name: Upload Android artifact to GitHub release
               uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
@@ -183,7 +179,7 @@ jobs:
                   name: ${{ env.RELEASE_TAG }}
                   body: ${{ env.RELEASE_BODY }}
                   commit: ${{ env.COMMIT_SHA }}
-                  artifacts: "mobile/apps/locker/artifacts/ente-locker-*.apk"
+                  artifacts: "mobile/apps/photos/artifacts/ente-photos-*.apk"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
@@ -192,11 +188,11 @@ jobs:
               uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-                  packageName: io.ente.locker
-                  releaseFiles: mobile/apps/locker/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  packageName: io.ente.photos
+                  releaseFiles: mobile/apps/photos/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   tracks: internal
-                  whatsNewDirectory: mobile/apps/locker/whatsnew
-                  mappingFile: mobile/apps/locker/build/app/outputs/mapping/playstoreRelease/mapping.txt
+                  whatsNewDirectory: mobile/apps/photos/whatsnew
+                  mappingFile: mobile/apps/photos/build/app/outputs/mapping/playstoreRelease/mapping.txt
 
     build-ios:
         needs: build-metadata
@@ -210,7 +206,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: mobile/apps/locker
+                working-directory: mobile/apps/photos
 
         steps:
             - name: Checkout code
@@ -225,22 +221,18 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION }}
                   cache: true
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
-              run: node ../../../.github/scripts/flutter-version.mjs locker set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
+              run: node ../../../.github/scripts/flutter-version.mjs photos set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - run: cargo codegen frb shared
+            - run: cargo codegen frb
               working-directory: rust
 
             - name: Install iOS pods
               run: pod install --deployment
-              working-directory: mobile/apps/locker/ios
+              working-directory: mobile/apps/photos/ios
 
             - name: Import Apple Distribution certificate
               uses: Apple-Actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7.0.0
@@ -248,7 +240,7 @@ jobs:
                   p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_CERT_BASE64 }}
                   p12-password: ${{ secrets.APPLE_DISTRIBUTION_CERT_PASSWORD }}
 
-            - name: Archive and upload Locker to TestFlight
+            - name: Archive and upload Photos to TestFlight
               env:
                   ASC_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
                   ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
@@ -271,8 +263,11 @@ jobs:
                       CODE_SIGN_STYLE=Manual \
                       CODE_SIGN_IDENTITY="Apple Distribution" \
                       DEVELOPMENT_TEAM="${APPLE_TEAM_ID}" \
-                      APP_STORE_PROFILE_SPECIFIER="Locker App Store" \
-                      SHARE_EXTENSION_APP_STORE_PROFILE_SPECIFIER="Locker Share Extension App Store" \
+                      APP_STORE_PROFILE_SPECIFIER="Photos App Store" \
+                      SHARE_EXTENSION_APP_STORE_PROFILE_SPECIFIER="Photos Share Extension App Store" \
+                      ALBUM_WIDGET_APP_STORE_PROFILE_SPECIFIER="Photos Album Widget App Store" \
+                      MEMORY_WIDGET_APP_STORE_PROFILE_SPECIFIER="Photos Memory Widget App Store" \
+                      PEOPLE_WIDGET_APP_STORE_PROFILE_SPECIFIER="Photos People Widget App Store" \
                       MARKETING_VERSION="${RELEASE_VERSION}" \
                       CURRENT_PROJECT_VERSION="${BUILD_NUMBER}"
 
@@ -299,7 +294,7 @@ jobs:
             - name: Download checksum snippets
               uses: actions/download-artifact@v4
               with:
-                  pattern: locker-sha256sum-*
+                  pattern: photos-sha256sum-*
                   path: checksums
                   merge-multiple: true
 
@@ -329,7 +324,7 @@ jobs:
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
               run: |
                   release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
-                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.locker) | [TestFlight](https://appstoreconnect.apple.com/apps/6747611956/testflight/ios) | [GitHub Release](${release_url})"
+                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.photos) | [TestFlight](https://appstoreconnect.apple.com/apps/1542026904/testflight/ios) | [GitHub Release](${release_url})"
                   release_body_discord="$(awk '
                       /^Previous changes:$/ { previous = 1 }
                       previous && NF { print "-# " $0; next }
@@ -347,7 +342,7 @@ jobs:
                           flags: 32768,
                           components: [{
                               type: 17,
-                              accent_color: 1077759,
+                              accent_color: 65280,
                               components: (
                                   [{type: 10, content: ("## " + $title)}]
                                   + (if $body == "" then [] else [{type: 10, content: $body}] end)

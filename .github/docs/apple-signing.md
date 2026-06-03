@@ -146,7 +146,28 @@ Use the distribution channel as the profile name: `<App> App Store`.
 
 For another iOS app, reuse the same Apple Distribution certificate and App Store Connect API key, but create a separate App Store provisioning profile for that app's bundle ID.
 
-If the app ships extensions, create one App ID and one App Store profile per shipped bundle ID. For example, Locker has two provisioning profiles: "Locker App Store" for `io.ente.locker` and "Locker Share Extension App Store" for `io.ente.locker.Share-Extension`.
+If the app ships extensions, create one App ID and one App Store profile per shipped bundle ID.
+
+Photos:
+
+- `io.ente.frame` -> `Photos App Store`
+- `io.ente.frame.ShareExtension` -> `Photos Share Extension App Store`
+- `io.ente.frame.EnteAlbumWidget` -> `Photos Album Widget App Store`
+- `io.ente.frame.EnteMemoryWidget` -> `Photos Memory Widget App Store`
+- `io.ente.frame.EntePeopleWidget` -> `Photos People Widget App Store`
+
+Auth:
+
+- `io.ente.auth` -> `Auth App Store`
+
+Locker:
+
+- `io.ente.locker` -> `Locker App Store`
+- `io.ente.locker.Share-Extension` -> `Locker Share Extension App Store`
+
+Ensu:
+
+- `io.ente.ensu` -> `Ensu App Store`
 
 ### Entitlements
 

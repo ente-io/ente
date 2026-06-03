@@ -24,7 +24,7 @@ trap cleanup EXIT
 
 git -C "$repo_root" worktree add --detach "$worktree" HEAD >/dev/null
 
-git -C "$repo_root" diff --binary HEAD -- "$app_rel" .github/workflows/mobile-release.yml > "$tmp_root/current.patch"
+git -C "$repo_root" diff --binary HEAD -- "$app_rel" > "$tmp_root/current.patch"
 if [[ -s "$tmp_root/current.patch" ]]; then
     git -C "$worktree" apply "$tmp_root/current.patch"
 fi
