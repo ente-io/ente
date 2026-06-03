@@ -1,0 +1,1 @@
+- Fixed JPEG export artifacts in the image editor.

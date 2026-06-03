@@ -1,0 +1,1 @@
+- Preserved date and location metadata when downloading photos from the gallery.
