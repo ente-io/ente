@@ -961,6 +961,7 @@ func main() {
 	adminAPI.DELETE("/user/delete", adminHandler.DeleteUser)
 	adminAPI.POST("/user/recover", adminHandler.RecoverAccount)
 	adminAPI.POST("/user/update-flag", adminHandler.UpdateFeatureFlag)
+	adminAPI.POST("/collections/cleanup-bad-entries", adminHandler.CleanupBadCollectionEntries)
 	adminAPI.GET("/email-hash", adminHandler.GetEmailHash)
 	adminAPI.POST("/emails-from-hashes", adminHandler.GetEmailsFromHashes)
 	adminAPI.PUT("/user/subscription", adminHandler.UpdateSubscription)

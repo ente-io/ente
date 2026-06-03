@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -487,6 +488,29 @@ func (h *AdminHandler) ChangeEmail(c *gin.Context) {
 	}
 	logrus.Info("Updated email")
 	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (h *AdminHandler) CleanupBadCollectionEntries(c *gin.Context) {
+	var r ente.CleanupBadCollectionEntriesRequest
+	if err := c.ShouldBindJSON(&r); err != nil && !errors.Is(err, io.EOF) {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	result, err := h.CollectionRepo.CleanupBadCollectionEntries(c, r.ApplyCollectionFilesCleanup, r.ApplyCollectionSharesCleanup)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	if r.ApplyCollectionFilesCleanup || r.ApplyCollectionSharesCleanup {
+		adminID := auth.GetUserID(c.Request.Header)
+		h.notifyAdminAction(
+			adminID,
+			"cleaned bad collection entries: collection_files=%d collection_shares=%d",
+			result.CollectionFilesDeleted,
+			result.CollectionSharesDeleted,
+		)
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 func (h *AdminHandler) ReQueueItem(c *gin.Context) {
