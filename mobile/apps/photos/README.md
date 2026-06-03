@@ -41,7 +41,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 2. Install dependencies and generate Rust bindings using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap` and `melos run codegen:rust`.
-   - **Using Flutter directly:** Run `flutter pub get`, then from `rust/`, run `cargo codegen frb`.
+   - **Using Flutter directly:** Run `flutter pub get --enforce-lockfile`, then from `rust/`, run `cargo codegen frb`.
 
 3. Run the app:
    - Android: `flutter run --flavor independent`
@@ -58,6 +58,10 @@ You can alternatively install the build from PlayStore or F-Droid.
 > ```
 
 To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.
+
+### Updating dependencies
+
+After updating Flutter dependencies, run `pod install` from `ios/` on macOS and commit `ios/Podfile.lock` if it changes.
 
 ## 📝 Localization
 

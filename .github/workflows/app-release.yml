@@ -10,6 +10,7 @@ on:
                 required: true
                 type: choice
                 options:
+                    - photos
                     - auth
                     - locker
                     - ensu

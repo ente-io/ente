@@ -12,7 +12,9 @@ function usage() {
   node .github/scripts/flutter-version.mjs auth get
   node .github/scripts/flutter-version.mjs auth get-build-base
   node .github/scripts/flutter-version.mjs auth set 4.4.23
-  node .github/scripts/flutter-version.mjs auth set-build 4.4.23 1007`);
+  node .github/scripts/flutter-version.mjs auth set-build 4.4.23 1007
+
+Valid apps: photos, auth, locker`);
 }
 
 if (!app) {

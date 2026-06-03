@@ -25,7 +25,7 @@ permissions:
 
 jobs:
     photos-lint:
-        runs-on: ubuntu-latest
+        runs-on: macos-26
         defaults:
             run:
                 working-directory: mobile/apps/photos
@@ -52,6 +52,10 @@ jobs:
 
             - run: cargo codegen frb
               working-directory: rust
+
+            - name: Check iOS Podfile.lock is current
+              run: pod install --deployment
+              working-directory: mobile/apps/photos/ios
 
             - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
