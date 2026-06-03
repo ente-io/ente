@@ -36,7 +36,7 @@ import "package:photos/utils/local_settings.dart";
 
 enum _AlbumsFilter { ente, onDevice, shared }
 
-enum _AlbumsMenuAction { toggleView, name, newest, updated }
+enum _AlbumsMenuAction { toggleView, name, lastUpdated }
 
 class AlbumsTab extends StatefulWidget {
   const AlbumsTab({
@@ -667,17 +667,10 @@ class _AlbumsTabState extends State<AlbumsTab>
               ? strings.sortAToZ
               : strings.sortZToA,
           isActive: currentSortKey == AlbumSortKey.albumName,
-          activeTrailingWidget: activeTrailingWidget,
         ),
         EntePopupMenuOption(
-          value: _AlbumsMenuAction.newest,
-          label: strings.newest,
-          isActive: currentSortKey == AlbumSortKey.newestPhoto,
-          activeTrailingWidget: activeTrailingWidget,
-        ),
-        EntePopupMenuOption(
-          value: _AlbumsMenuAction.updated,
-          label: strings.updated,
+          value: _AlbumsMenuAction.lastUpdated,
+          label: strings.lastUpdated,
           isActive: currentSortKey == AlbumSortKey.lastUpdated,
           activeTrailingWidget: activeTrailingWidget,
           showDivider: false,
@@ -694,10 +687,7 @@ class _AlbumsTabState extends State<AlbumsTab>
       case _AlbumsMenuAction.name:
         await _setSortMode(AlbumSortKey.albumName);
         break;
-      case _AlbumsMenuAction.newest:
-        await _setSortMode(AlbumSortKey.newestPhoto);
-        break;
-      case _AlbumsMenuAction.updated:
+      case _AlbumsMenuAction.lastUpdated:
         await _setSortMode(AlbumSortKey.lastUpdated);
         break;
     }
