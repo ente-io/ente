@@ -212,7 +212,12 @@ Future<bool> editTime(
       final file = entry.key;
       if (file.uploadedFileID == null) continue;
       final editedTime = entry.value;
-      fileIdToTimeUpdate[file.uploadedFileID!] = {editTimeKey: editedTime};
+      fileIdToTimeUpdate[file.uploadedFileID!] = {
+        editTimeKey: editedTime,
+        dateTimeKey: formatPubMagicDateTime(
+          DateTime.fromMicrosecondsSinceEpoch(editedTime),
+        ),
+      };
     }
 
     final dialog = createProgressDialog(

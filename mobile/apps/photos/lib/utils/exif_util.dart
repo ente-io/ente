@@ -9,6 +9,7 @@ import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/src/rust/api/motion_photo_api.dart";
@@ -186,13 +187,13 @@ ParsedExifDateTime _getStandardExifDateTimeInDeviceTimezone(
     final deviceLocalTime = photoUtcDate.toLocal();
     return ParsedExifDateTime(
       deviceLocalTime,
-      result.toIso8601String(),
+      formatPubMagicDateTime(result),
       offsetTime,
     );
   }
   return ParsedExifDateTime(
     result,
-    result.toIso8601String(),
+    formatPubMagicDateTime(result),
     offsetTime == "Z" ? "Z" : null,
   );
 }
@@ -207,7 +208,7 @@ ParsedExifDateTime _getIsoExifDateTimeInDeviceTimezone(
   }
 
   final metadataDateTime = _parseIsoDateTimeComponents(match);
-  final localDateTimeString = _dateTimeWithoutUtcMarker(metadataDateTime);
+  final localDateTimeString = formatPubMagicDateTime(metadataDateTime);
   final offsetTime =
       _normalizeOffset(match.group(8)) ??
       _normalizeOffset(offsetString, throwOnInvalid: true);
@@ -218,7 +219,7 @@ ParsedExifDateTime _getIsoExifDateTimeInDeviceTimezone(
     ).toLocal();
     return ParsedExifDateTime(
       deviceLocalTime,
-      metadataDateTime.toIso8601String(),
+      formatPubMagicDateTime(metadataDateTime),
       offsetTime,
     );
   }
@@ -234,7 +235,7 @@ ParsedExifDateTime _getIsoExifDateTimeInDeviceTimezone(
       metadataDateTime.millisecond,
       metadataDateTime.microsecond,
     ),
-    metadataDateTime.toIso8601String(),
+    formatPubMagicDateTime(metadataDateTime),
     null,
   );
 }
@@ -292,11 +293,6 @@ int _parseFractionalMicroseconds(String? fraction) {
   }
   final paddedFraction = fraction.substring(1).padRight(6, "0");
   return int.parse(paddedFraction.substring(0, 6));
-}
-
-String _dateTimeWithoutUtcMarker(DateTime dateTime) {
-  final value = dateTime.toIso8601String();
-  return value.endsWith("Z") ? value.substring(0, value.length - 1) : value;
 }
 
 Location? locationFromExif(Map<String, IfdTag> exif) {
