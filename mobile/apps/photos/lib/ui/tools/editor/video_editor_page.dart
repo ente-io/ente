@@ -12,9 +12,9 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/extensions/lat_lng_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/location/location.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -574,11 +574,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         if (!newFile.hasLocation && widget.file.localID != null) {
           final assetEntity = await widget.file.getAsset;
           if (assetEntity != null) {
-            final latLong = await assetEntity.latlngAsync();
-            newFile.location = Location(
-              latitude: latLong.latitude,
-              longitude: latLong.longitude,
-            );
+            final location = (await assetEntity.latlngAsync()).toEnteLocation();
+            if (location != null) {
+              newFile.location = location;
+            }
           }
         }
 

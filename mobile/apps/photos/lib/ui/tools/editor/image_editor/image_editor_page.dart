@@ -15,9 +15,9 @@ import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/extensions/lat_lng_extension.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart' as ente;
-import "package:photos/models/location/location.dart";
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -106,11 +106,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       if (!newFile.hasLocation && widget.originalFile.localID != null) {
         final assetEntity = await widget.originalFile.getAsset;
         if (assetEntity != null) {
-          final latLong = await assetEntity.latlngAsync();
-          newFile.location = Location(
-            latitude: latLong.latitude,
-            longitude: latLong.longitude,
-          );
+          final location = (await assetEntity.latlngAsync()).toEnteLocation();
+          if (location != null) {
+            newFile.location = location;
+          }
         }
       }
       newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);

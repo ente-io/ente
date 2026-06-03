@@ -16,6 +16,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import "package:photos/extensions/lat_lng_extension.dart";
 import "package:photos/gateways/collections/models/metadata.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -341,11 +342,10 @@ Future<void> _decorateEnteFileData(
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   if (file.location == null ||
       (file.location!.latitude == 0 && file.location!.longitude == 0)) {
-    final latLong = await asset.latlngAsync();
-    file.location = Location(
-      latitude: latLong.latitude,
-      longitude: latLong.longitude,
-    );
+    final location = (await asset.latlngAsync()).toEnteLocation();
+    if (location != null) {
+      file.location = location;
+    }
   }
   if (!file.hasLocation && file.isVideo && Platform.isAndroid) {
     final FFProbeProps? props = await getVideoPropsAsync(sourceFile);

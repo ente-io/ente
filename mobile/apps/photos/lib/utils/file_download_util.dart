@@ -18,6 +18,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ignored_file.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/module/download/file_url.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/module/download/task.dart";
@@ -71,6 +72,49 @@ String _getGallerySaveTitle(EnteFile file, String fallbackPath) {
     return title;
   }
   return file_path.basename(fallbackPath);
+}
+
+({DateTime? creationDate, double? latitude, double? longitude})
+_getGallerySaveMetadataForDownload(EnteFile file) {
+  final creationTime = file.pubMagicMetadata?.editedTime ?? file.creationTime;
+  final creationDate = creationTime != null && creationTime > 0
+      ? DateTime.fromMicrosecondsSinceEpoch(creationTime)
+      : null;
+
+  ({DateTime? creationDate, double? latitude, double? longitude})
+  saveMetadataWithLocation(Location location) {
+    return (
+      creationDate: creationDate,
+      latitude: location.latitude!,
+      longitude: location.longitude!,
+    );
+  }
+
+  final magicMetadata = file.pubMagicMetadata;
+  final magicLocation = Location(
+    latitude: magicMetadata?.lat,
+    longitude: magicMetadata?.long,
+  );
+  if (_isValidGallerySaveLocation(magicLocation)) {
+    return saveMetadataWithLocation(magicLocation);
+  }
+
+  final location = file.location;
+  if (_isValidGallerySaveLocation(location)) {
+    return saveMetadataWithLocation(location!);
+  }
+
+  return (creationDate: creationDate, latitude: null, longitude: null);
+}
+
+bool _isValidGallerySaveLocation(Location? location) {
+  if (!Location.isValidLocation(location)) {
+    return false;
+  }
+  return Location.isValidRange(
+    latitude: location!.latitude!,
+    longitude: location.longitude!,
+  );
 }
 
 Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
@@ -362,6 +406,7 @@ Future<void> downloadToGallery(
       throw DownloadFailedError("Unable to fetch file for gallery download");
     }
     final galleryTitle = _getGallerySaveTitle(file, fileToSave.path);
+    final saveMetadata = _getGallerySaveMetadataForDownload(file);
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
@@ -373,11 +418,17 @@ Future<void> downloadToGallery(
         savedAsset = await PhotoManager.editor.saveImageWithPath(
           fileToSave.path,
           title: galleryTitle,
+          creationDate: saveMetadata.creationDate,
+          latitude: saveMetadata.latitude,
+          longitude: saveMetadata.longitude,
         );
       } else if (type == FileType.video) {
         savedAsset = await PhotoManager.editor.saveVideo(
           fileToSave,
           title: galleryTitle,
+          creationDate: saveMetadata.creationDate,
+          latitude: saveMetadata.latitude,
+          longitude: saveMetadata.longitude,
         );
       } else if (type == FileType.livePhoto) {
         final File? liveVideoFile = await getFileFromServer(
@@ -454,10 +505,14 @@ Future<void> _saveLivePhotoOnDroid(
 ) async {
   debugPrint("Downloading LivePhoto on Droid");
   final imageTitle = _getGallerySaveTitle(enteFile, image.path);
+  final saveMetadata = _getGallerySaveMetadataForDownload(enteFile);
   AssetEntity? savedAsset =
       await (PhotoManager.editor.saveImageWithPath(
         image.path,
         title: imageTitle,
+        creationDate: saveMetadata.creationDate,
+        latitude: saveMetadata.latitude,
+        longitude: saveMetadata.longitude,
       )).catchError((err) {
         throw Exception("Failed to save image of live photo: $err");
       });
@@ -471,8 +526,14 @@ Future<void> _saveLivePhotoOnDroid(
   final videoTitle =
       file_path.basenameWithoutExtension(imageTitle) +
       file_path.extension(video.path);
-  savedAsset = (await (PhotoManager.editor.saveVideo(video, title: videoTitle))
-      .catchError((err) {
+  savedAsset =
+      (await (PhotoManager.editor.saveVideo(
+        video,
+        title: videoTitle,
+        creationDate: saveMetadata.creationDate,
+        latitude: saveMetadata.latitude,
+        longitude: saveMetadata.longitude,
+      )).catchError((err) {
         _logger.warning('Failed to save video $videoTitle of live photo');
         throw Exception("Failed to save video of live photo: $err");
       }));
