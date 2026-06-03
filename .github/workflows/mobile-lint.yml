@@ -50,12 +50,12 @@ jobs:
 
             - run: flutter pub get --enforce-lockfile
 
+            - run: cargo codegen frb
+              working-directory: rust
+
             - name: Check iOS Podfile.lock is current
               run: pod install --deployment
               working-directory: mobile/apps/photos/ios
-
-            - run: cargo codegen frb
-              working-directory: rust
 
             - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust

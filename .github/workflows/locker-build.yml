@@ -34,6 +34,7 @@ jobs:
             release_title: ${{ steps.prepare.outputs.release_title }}
             release_body: ${{ steps.prepare.outputs.release_body }}
             release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            play_store_release_notes: ${{ steps.prepare.outputs.play_store_release_notes }}
             artifact_stem: ${{ steps.prepare.outputs.artifact_stem }}
 
         steps:
@@ -94,6 +95,7 @@ jobs:
             RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
             RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
             RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            PLAY_STORE_RELEASE_NOTES: ${{ needs.build-metadata.outputs.play_store_release_notes }}
             ARTIFACT_STEM: ${{ needs.build-metadata.outputs.artifact_stem }}
 
         defaults:
@@ -135,11 +137,7 @@ jobs:
             - name: Prepare whatsnew
               run: |
                   mkdir -p whatsnew
-                  if [ -n "${RELEASE_BODY}" ]; then
-                      printf '%s' "${RELEASE_BODY}" | head -c 500 > whatsnew/whatsnew-en-US
-                  else
-                      printf '%s\n' "Bug fixes and improvements" > whatsnew/whatsnew-en-US
-                  fi
+                  printf '%s' "${PLAY_STORE_RELEASE_NOTES}" > whatsnew/whatsnew-en-US
 
             - name: Add keystore
               run: printf '%s' "${SIGNING_KEY_LOCKER}" | base64 -d > "$RUNNER_TEMP/ente_locker_key.jks"

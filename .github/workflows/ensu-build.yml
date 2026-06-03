@@ -34,6 +34,7 @@ jobs:
             release_title: ${{ steps.prepare.outputs.release_title }}
             release_body: ${{ steps.prepare.outputs.release_body }}
             release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            play_store_release_notes: ${{ steps.prepare.outputs.play_store_release_notes }}
             android_apk_name: ${{ steps.prepare.outputs.android_apk_name }}
 
         steps:
@@ -239,6 +240,7 @@ jobs:
             BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
             RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
             RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            PLAY_STORE_RELEASE_NOTES: ${{ needs.build-metadata.outputs.play_store_release_notes }}
             ANDROID_APK_NAME: ${{ needs.build-metadata.outputs.android_apk_name }}
 
         defaults:
@@ -290,7 +292,7 @@ jobs:
             - name: Prepare whatsnew
               run: |
                   mkdir -p whatsnew
-                  printf '%s' "${RELEASE_BODY}" | head -c 500 > whatsnew/whatsnew-en-US
+                  printf '%s' "${PLAY_STORE_RELEASE_NOTES}" > whatsnew/whatsnew-en-US
 
             - name: Prepare Android APK for GitHub release
               run: |
