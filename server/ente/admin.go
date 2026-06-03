@@ -91,6 +91,11 @@ type ChangeEmailRequest struct {
 	Email  string `json:"email" binding:"required"`
 }
 
+type CleanupBadCollectionEntriesRequest struct {
+	ApplyCollectionFilesCleanup  bool `json:"applyCollectionFilesCleanup"`
+	ApplyCollectionSharesCleanup bool `json:"applyCollectionSharesCleanup"`
+}
+
 type AddOnAction string
 
 const (
