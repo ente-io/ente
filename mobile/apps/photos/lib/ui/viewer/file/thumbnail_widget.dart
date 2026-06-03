@@ -37,8 +37,6 @@ class ThumbnailWidget extends StatefulWidget {
   /// Returns ThumbnailWidget without any overlay icons if true.
   final bool rawThumbnail;
   final bool shouldShowSyncStatus;
-  final bool shouldShowArchiveStatus;
-  final bool shouldShowPinIcon;
   final bool showFavForAlbumOnly;
   final bool shouldShowLivePhotoOverlay;
   final Duration? diskLoadDeferDuration;
@@ -61,8 +59,6 @@ class ThumbnailWidget extends StatefulWidget {
     this.rawThumbnail = false,
     this.shouldShowSyncStatus = true,
     this.shouldShowLivePhotoOverlay = false,
-    this.shouldShowArchiveStatus = false,
-    this.shouldShowPinIcon = false,
     this.showFavForAlbumOnly = false,
     this.shouldShowOwnerAvatar = false,
     this.ownerAvatarType = AvatarType.small,
@@ -265,13 +261,6 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       viewChildren.add(FileSizeOverlayText(widget.file));
     } else if (widget.file.debugCaption != null) {
       viewChildren.add(FileOverlayText(widget.file.debugCaption!));
-    }
-    // todo: Move this icon overlay to the collection widget.
-    if (widget.shouldShowArchiveStatus) {
-      viewChildren.add(const ArchiveOverlayIcon());
-    }
-    if (widget.shouldShowPinIcon) {
-      viewChildren.add(const PinOverlayIcon());
     }
     if (localSettings.showLocalIDOverThumbnails &&
         widget.file.localID != null) {

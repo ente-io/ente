@@ -233,7 +233,6 @@ class LocationRecommendation extends StatelessWidget {
                                       null
                                   ? ThumbnailWidget(
                                       locationSearchResult.previewThumbnail()!,
-                                      shouldShowArchiveStatus: false,
                                       shouldShowSyncStatus: false,
                                       shouldShowFavoriteIcon: false,
                                     )
@@ -295,7 +294,6 @@ class LocationRecommendation extends StatelessWidget {
                                               child: ThumbnailWidget(
                                                 locationSearchResult
                                                     .previewThumbnail()!,
-                                                shouldShowArchiveStatus: false,
                                                 shouldShowSyncStatus: false,
                                                 shouldShowFavoriteIcon: false,
                                               ),

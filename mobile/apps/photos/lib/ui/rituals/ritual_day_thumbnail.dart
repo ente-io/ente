@@ -261,8 +261,6 @@ class _PhotoTile extends StatelessWidget {
                               fit: BoxFit.cover,
                               rawThumbnail: true,
                               shouldShowSyncStatus: false,
-                              shouldShowArchiveStatus: false,
-                              shouldShowPinIcon: false,
                               shouldShowOwnerAvatar: false,
                               shouldShowFavoriteIcon: false,
                               shouldShowVideoDuration: false,
