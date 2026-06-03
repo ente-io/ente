@@ -541,6 +541,11 @@ export const Upload: React.FC<UploadProps> = ({
             // surface a "done" dialog while the actual upload is still in
             // flight.
             if (skippedFiles.length > 0 && !uploadRunning.current) {
+                // Reset the manager's state from any previous upload —
+                // otherwise the derived effectiveFinishedUploads /
+                // effectiveUploadFileNames would surface stale entries
+                // (and even a retry button) from the prior run.
+                uploadManager.prepareForNewUpload();
                 uploadManager.setUploadPhase("done");
                 uploadManager.showUploadProgressDialog();
             }
