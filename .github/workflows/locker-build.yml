@@ -64,10 +64,10 @@ jobs:
                           exit 1
                       fi
                       release_tag="locker-v${release_version}-rc"
-                      release_title="🔵 Locker release candidate - ${release_version} (build ${build_number})"
+                      release_title="🗄️ Locker release candidate - ${release_version} (build ${build_number})"
                   else
                       release_tag="locker-v${release_version}-beta"
-                      release_title="🔵 Locker nightly - ${release_version} (build ${build_number})"
+                      release_title="🗄️ Locker nightly - ${release_version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"
@@ -85,7 +85,7 @@ jobs:
     build-android:
         needs: build-metadata
         if: needs.build-metadata.outputs.should_build == 'true'
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-latest
         environment:
             name: production
         env:
@@ -129,7 +129,7 @@ jobs:
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - run: cargo codegen frb
+            - run: cargo codegen frb shared
               working-directory: rust
 
             - name: Prepare whatsnew
@@ -235,7 +235,7 @@ jobs:
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - run: cargo codegen frb
+            - run: cargo codegen frb shared
               working-directory: rust
 
             - name: Install iOS pods
