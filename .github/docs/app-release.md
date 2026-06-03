@@ -31,6 +31,10 @@ This:
 2. Pushes the branch, which triggers `ensu-build.yml` and creates the draft `ensu-v0.1.16-rc` GitHub release
 3. Removes the `ensu-v0.1.16-beta` draft and tag
 
+> [!TIP]
+>
+> You can trigger the workflow using GitHub's UI also.
+
 The workflow also opens a PR to move `main` to `0.1.17-beta`. Merge that PR after it is created. Scheduled nightlies are skipped while the release branch exists.
 
 ## Update the RC if needed
