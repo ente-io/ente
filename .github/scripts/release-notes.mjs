@@ -68,6 +68,10 @@ function groupedBody(body, previous) {
         .join("\n\n");
 }
 
+function playStoreBody(body) {
+    return Array.from(body || "Bug fixes and improvements").slice(0, 500).join("");
+}
+
 function output(name, value) {
     const delimiter = "RELEASE_NOTES_EOF";
     console.log(`${name}<<${delimiter}`);
@@ -79,3 +83,4 @@ const body = currentBody();
 
 output("release_body", body);
 output("release_body_grouped", groupedBody(body, previousBody()));
+output("play_store_release_notes", playStoreBody(body));

@@ -8,8 +8,8 @@ on:
             - "release/auth-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~5:15 AM IST
-        - cron: "45 23 * * 0-4"
+        # Run every weekday at ~4:45 AM IST
+        - cron: "15 23 * * 0-4"
 
 env:
     FLUTTER_VERSION: "3.38.10"
@@ -34,6 +34,7 @@ jobs:
             release_title: ${{ steps.prepare.outputs.release_title }}
             release_body: ${{ steps.prepare.outputs.release_body }}
             release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            play_store_release_notes: ${{ steps.prepare.outputs.play_store_release_notes }}
             artifact_stem: ${{ steps.prepare.outputs.artifact_stem }}
 
         steps:
@@ -94,6 +95,7 @@ jobs:
             RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
             RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
             RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            PLAY_STORE_RELEASE_NOTES: ${{ needs.build-metadata.outputs.play_store_release_notes }}
             ARTIFACT_STEM: ${{ needs.build-metadata.outputs.artifact_stem }}
 
         defaults:
@@ -133,11 +135,7 @@ jobs:
             - name: Prepare whatsnew
               run: |
                   mkdir -p whatsnew
-                  if [ -n "${RELEASE_BODY}" ]; then
-                      printf '%s' "${RELEASE_BODY}" | head -c 500 > whatsnew/whatsnew-en-US
-                  else
-                      printf '%s\n' "Bug fixes and improvements" > whatsnew/whatsnew-en-US
-                  fi
+                  printf '%s' "${PLAY_STORE_RELEASE_NOTES}" > whatsnew/whatsnew-en-US
 
             - name: Add keystore
               run: printf '%s' "${SIGNING_KEY_AUTH}" | base64 -d > "$RUNNER_TEMP/ente_auth_key.jks"
@@ -170,7 +168,7 @@ jobs:
               run: sha256sum artifacts/ente-auth-*.apk > artifacts/sha256sum-apk
 
             - name: Upload checksum snippet
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
               with:
                   name: auth-sha256sum-android
                   path: mobile/apps/auth/artifacts/sha256sum-apk
@@ -275,7 +273,7 @@ jobs:
               run: sha256sum artifacts/ente-auth-*.deb artifacts/ente-auth-*.rpm artifacts/ente-auth-*.AppImage > artifacts/sha256sum-linux
 
             - name: Upload checksum snippet
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
               with:
                   name: auth-sha256sum-linux
                   path: mobile/apps/auth/artifacts/sha256sum-linux
@@ -404,7 +402,7 @@ jobs:
               shell: bash
 
             - name: Upload checksum snippet
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
               with:
                   name: auth-sha256sum-windows
                   path: mobile/apps/auth/artifacts/sha256sum-windows
@@ -530,7 +528,7 @@ jobs:
               run: shasum -a 256 artifacts/ente-auth-* > artifacts/sha256sum-macos
 
             - name: Upload checksum snippet
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
               with:
                   name: auth-sha256sum-macos
                   path: mobile/apps/auth/artifacts/sha256sum-macos
@@ -641,7 +639,7 @@ jobs:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
 
             - name: Download checksum snippets
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   pattern: auth-sha256sum-*
                   path: checksums
@@ -669,34 +667,7 @@ jobs:
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   GH_TOKEN: ${{ github.token }}
+                  RELEASE_TITLE: ${{ needs.build-metadata.outputs.release_title }}
                   RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
-              run: |
-                  release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
-                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.auth) | [TestFlight](https://appstoreconnect.apple.com/apps/6444121398/testflight/ios) | [GitHub Release](${release_url})"
-                  release_body_discord="$(awk '
-                      /^Previous changes:$/ { previous = 1 }
-                      previous && NF { print "-# " $0; next }
-                      { print }
-                  ' <<< "${RELEASE_BODY_GROUPED}")"
-                  if [ "${#release_body_discord}" -gt 3000 ]; then
-                      release_body_discord="${release_body_discord:0:3000}"$'\n...\n-# See the GitHub release for full notes.'
-                  fi
-
-                  jq -n \
-                      --arg title "${{ needs.build-metadata.outputs.release_title }}" \
-                      --arg body "${release_body_discord}" \
-                      --arg download_line "${download_line}" \
-                      '{
-                          flags: 32768,
-                          components: [{
-                              type: 17,
-                              accent_color: 8388736,
-                              components: (
-                                  [{type: 10, content: ("## " + $title)}]
-                                  + (if $body == "" then [] else [{type: 10, content: $body}] end)
-                                  + [{type: 14}, {type: 10, content: $download_line}]
-                              )
-                          }]
-                      }' \
-                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}?with_components=true"
+              run: node .github/scripts/release-notify.mjs auth "$(gh release view "${RELEASE_TAG}" --json url --jq .url)"

@@ -8,8 +8,8 @@ on:
             - "release/ensu-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~7:15 AM IST
-        - cron: "45 1 * * 1-5"
+        # Run every weekday at ~6:45 AM IST
+        - cron: "15 1 * * 1-5"
 
 env:
     NDK_VERSION: "27.3.13750724"
@@ -34,6 +34,7 @@ jobs:
             release_title: ${{ steps.prepare.outputs.release_title }}
             release_body: ${{ steps.prepare.outputs.release_body }}
             release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            play_store_release_notes: ${{ steps.prepare.outputs.play_store_release_notes }}
             android_apk_name: ${{ steps.prepare.outputs.android_apk_name }}
 
         steps:
@@ -239,6 +240,7 @@ jobs:
             BUILD_NUMBER: ${{ needs.build-metadata.outputs.build_number }}
             RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
             RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
+            PLAY_STORE_RELEASE_NOTES: ${{ needs.build-metadata.outputs.play_store_release_notes }}
             ANDROID_APK_NAME: ${{ needs.build-metadata.outputs.android_apk_name }}
 
         defaults:
@@ -290,7 +292,7 @@ jobs:
             - name: Prepare whatsnew
               run: |
                   mkdir -p whatsnew
-                  printf '%s' "${RELEASE_BODY}" | head -c 500 > whatsnew/whatsnew-en-US
+                  printf '%s' "${PLAY_STORE_RELEASE_NOTES}" > whatsnew/whatsnew-en-US
 
             - name: Prepare Android APK for GitHub release
               run: |
@@ -404,34 +406,7 @@ jobs:
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   GH_TOKEN: ${{ github.token }}
+                  RELEASE_TITLE: ${{ needs.build-metadata.outputs.release_title }}
                   RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
-              run: |
-                  release_url="$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
-                  download_line="-# Download: [Play Store](https://play.google.com/store/apps/details?id=io.ente.ensu) | [TestFlight](https://appstoreconnect.apple.com/apps/6758197006/testflight/ios) | [GitHub Release](${release_url})"
-                  release_body_discord="$(awk '
-                      /^Previous changes:$/ { previous = 1 }
-                      previous && NF { print "-# " $0; next }
-                      { print }
-                  ' <<< "${RELEASE_BODY_GROUPED}")"
-                  if [ "${#release_body_discord}" -gt 3000 ]; then
-                      release_body_discord="${release_body_discord:0:3000}"$'\n...\n-# See the GitHub release for full notes.'
-                  fi
-
-                  jq -n \
-                      --arg title "${{ needs.build-metadata.outputs.release_title }}" \
-                      --arg body "${release_body_discord}" \
-                      --arg download_line "${download_line}" \
-                      '{
-                          flags: 32768,
-                          components: [{
-                              type: 17,
-                              accent_color: 16633363,
-                              components: (
-                                  [{type: 10, content: ("## " + $title)}]
-                                  + (if $body == "" then [] else [{type: 10, content: $body}] end)
-                                  + [{type: 14}, {type: 10, content: $download_line}]
-                              )
-                          }]
-                      }' \
-                      | curl -fsSL -H 'Content-Type: application/json' -d @- "${DISCORD_WEBHOOK}?with_components=true"
+              run: node .github/scripts/release-notify.mjs ensu "$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
