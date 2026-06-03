@@ -507,6 +507,7 @@
     {
       "title": "CoinTracking",
       "slug": "cointracking",
+      "hex": "318EFA",
       "altNames": [
         "cointracking.info",
         "Coin Tracking"
@@ -878,8 +879,12 @@
       "title": "Garena"
     },
     {
-      "title": "Gate.io",
-      "slug": "gateio"
+      "title": "Gate.com",
+      "slug": "gateio",
+      "altNames": [
+        "Gate.io",
+        "gate.io"
+      ]
     },
     {
       "title": "GERID"
