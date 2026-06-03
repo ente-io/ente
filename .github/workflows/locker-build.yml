@@ -129,7 +129,7 @@ jobs:
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - run: cargo codegen frb
+            - run: cargo codegen frb shared
               working-directory: rust
 
             - name: Prepare whatsnew
@@ -235,7 +235,7 @@ jobs:
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
 
-            - run: cargo codegen frb
+            - run: cargo codegen frb shared
               working-directory: rust
 
             - name: Install iOS pods

@@ -47,7 +47,7 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
-            - run: cargo codegen frb
+            - run: cargo codegen frb shared
               working-directory: rust
 
             - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings

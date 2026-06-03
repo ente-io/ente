@@ -24,6 +24,13 @@ struct AndroidCrate<'a> {
     stale_path: PathBuf,
 }
 
+#[derive(Clone, Copy)]
+enum FrbTarget {
+    All,
+    Shared,
+    Photos,
+}
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("{error}");
@@ -33,11 +40,26 @@ fn main() {
 
 fn run() -> Result<(), DynError> {
     let mut args = env::args().skip(1);
-    match (args.next().as_deref(), args.next()) {
-        (Some("native"), None) => generate_native(),
-        (Some("frb"), None) => generate_frb(),
-        _ => Err("usage: cargo codegen <native|frb>".into()),
+    match args.next().as_deref() {
+        Some("native") if args.next().is_none() => generate_native(),
+        Some("frb") => {
+            let target = match args.next().as_deref() {
+                None => FrbTarget::All,
+                Some("shared") => FrbTarget::Shared,
+                Some("photos") => FrbTarget::Photos,
+                _ => return Err(usage_error()),
+            };
+            if args.next().is_some() {
+                return Err(usage_error());
+            }
+            generate_frb(target)
+        }
+        _ => Err(usage_error()),
     }
+}
+
+fn usage_error() -> DynError {
+    "usage: cargo codegen <native|frb [shared|photos]>".into()
 }
 
 fn generate_native() -> Result<(), DynError> {
@@ -160,15 +182,19 @@ fn generate_native_android() -> Result<(), DynError> {
     Ok(())
 }
 
-fn generate_frb() -> Result<(), DynError> {
+fn generate_frb(target: FrbTarget) -> Result<(), DynError> {
     let rust_root = rust_root()?;
     let repo_root = rust_root
         .parent()
         .ok_or("failed to resolve repo root from rust/apps/codegen")?;
 
-    generate_frb_package(&repo_root.join("mobile/packages/rust"))?;
-    generate_frb_package(&repo_root.join("mobile/apps/photos"))?;
-    format_frb_bindings()
+    if matches!(target, FrbTarget::All | FrbTarget::Shared) {
+        generate_frb_package(&repo_root.join("mobile/packages/rust"))?;
+    }
+    if matches!(target, FrbTarget::All | FrbTarget::Photos) {
+        generate_frb_package(&repo_root.join("mobile/apps/photos"))?;
+    }
+    format_frb_bindings(target)
 }
 
 fn generate_frb_package(package_dir: &Path) -> Result<(), DynError> {
@@ -206,16 +232,28 @@ fn generate_frb_package(package_dir: &Path) -> Result<(), DynError> {
     Ok(())
 }
 
-fn format_frb_bindings() -> Result<(), DynError> {
+fn format_frb_bindings(target: FrbTarget) -> Result<(), DynError> {
     let rust_root = rust_root()?;
+    let mut command = Command::new("cargo");
+    command.arg("fmt");
+    match target {
+        FrbTarget::All => {
+            command
+                .arg("-p")
+                .arg("ente_rust")
+                .arg("-p")
+                .arg("ente_photos_rust");
+        }
+        FrbTarget::Shared => {
+            command.arg("-p").arg("ente_rust");
+        }
+        FrbTarget::Photos => {
+            command.arg("-p").arg("ente_photos_rust");
+        }
+    }
+    command.current_dir(rust_root);
     run_command(
-        Command::new("cargo")
-            .arg("fmt")
-            .arg("-p")
-            .arg("ente_rust")
-            .arg("-p")
-            .arg("ente_photos_rust")
-            .current_dir(rust_root),
+        &mut command,
         "failed to format generated FRB Rust bindings".to_owned(),
     )
 }

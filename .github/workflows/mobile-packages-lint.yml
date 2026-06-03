@@ -94,7 +94,7 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
-            - run: cargo codegen frb
+            - run: cargo codegen frb shared
               working-directory: rust
 
             - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
@@ -232,8 +232,12 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
-            - if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
+            - if: needs.detect-changes.outputs.lint_photos == 'true'
               run: cargo codegen frb
+              working-directory: rust
+
+            - if: needs.detect-changes.outputs.lint_photos != 'true' && needs.detect-changes.outputs.lint_locker == 'true'
+              run: cargo codegen frb shared
               working-directory: rust
 
             - if: needs.detect-changes.outputs.lint_photos == 'true'
