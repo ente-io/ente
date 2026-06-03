@@ -8,7 +8,7 @@ on:
     workflow_dispatch:
 
 permissions:
-    contents: write  # for pushing the `ghcr/server` branch
+    contents: read
     packages: write
 
 jobs:
@@ -41,7 +41,3 @@ jobs:
                       --tag ghcr.io/ente-io/server:${museum_commit} \
                       --tag ghcr.io/ente-io/server:latest \
                       server
-
-            - name: Update branch ghcr/server to point to source commit
-              run: |
-                  git push -f origin HEAD:refs/heads/ghcr/server

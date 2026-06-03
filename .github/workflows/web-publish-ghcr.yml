@@ -8,7 +8,7 @@ on:
     workflow_dispatch:
 
 permissions:
-    contents: write  # for pushing the `ghcr/web` branch
+    contents: read
     packages: write
 
 jobs:
@@ -32,7 +32,3 @@ jobs:
                       --tag ghcr.io/ente-io/web:${GITHUB_SHA} \
                       --tag ghcr.io/ente-io/web:latest \
                       .
-
-            - name: Update branch ghcr/web to point to source commit
-              run: |
-                  git push -f origin HEAD:refs/heads/ghcr/web
