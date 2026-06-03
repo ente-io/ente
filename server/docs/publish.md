@@ -25,5 +25,3 @@ gh workflow run server-publish.yml
 > It uses the commit that is deployed on production museum instances. We can publish from any arbitrary commit really, but by using the commit that's already seen production, we avoid externally publishing images with issues.
 
 Once the workflow completes, the resultant image will be available at `ghcr.io/ente-io/server`. The image will be tagged by the commit SHA. The latest image will also be tagged, well, "latest".
-
-The workflow will also update the branch `ghcr/server` to point to the commit it used to build the image. This branch will be overwritten on each publish; thus `ghcr/server` will always points to the code from which the most recent ghcr docker image for museum has been built.
