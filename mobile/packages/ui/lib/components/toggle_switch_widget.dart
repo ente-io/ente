@@ -70,7 +70,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                 ? Switch(
                     inactiveTrackColor: enteColorScheme.fillMuted,
                     activeTrackColor: enteColorScheme.primary500,
-                    activeColor: Colors.white,
+                    activeThumbColor: Colors.white,
                     inactiveThumbColor: enteColorScheme.primary500,
                     trackOutlineColor: WidgetStateColor.resolveWith(
                       (states) => enteColorScheme.primary500,
@@ -80,8 +80,8 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                     onChanged: _handleToggleChange,
                   )
                 : CupertinoSwitch(
-                    activeColor: enteColorScheme.primary500,
-                    trackColor: enteColorScheme.fillMuted,
+                    activeTrackColor: enteColorScheme.primary500,
+                    inactiveTrackColor: enteColorScheme.fillMuted,
                     thumbColor: Colors.white,
                     value: toggleValue ?? false,
                     onChanged: _handleToggleChange,

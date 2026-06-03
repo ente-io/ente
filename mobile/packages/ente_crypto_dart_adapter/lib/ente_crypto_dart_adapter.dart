@@ -3,8 +3,6 @@ import 'dart:typed_data';
 
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart' as dart_impl;
-import 'package:ente_crypto_dart/src/models/encryption_result.dart'
-    as dart_models;
 
 class EnteCryptoDartAdapter implements CryptoApi {
   const EnteCryptoDartAdapter();
@@ -191,7 +189,7 @@ class EnteCryptoDartAdapter implements CryptoApi {
   @override
   Future<Uint8List> getHash(File source) => dart_impl.getHash(source);
 
-  EncryptionResult _mapEncryptionResult(dart_models.EncryptionResult result) {
+  EncryptionResult _mapEncryptionResult(dart_impl.EncryptionResult result) {
     return EncryptionResult(
       encryptedData: result.encryptedData,
       key: result.key,
@@ -201,7 +199,7 @@ class EnteCryptoDartAdapter implements CryptoApi {
   }
 
   FileEncryptResult _mapFileEncryptionResult(
-    dart_models.FileEncryptResult result,
+    dart_impl.FileEncryptResult result,
   ) {
     return FileEncryptResult(
       key: result.key,

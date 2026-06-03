@@ -310,7 +310,9 @@ class _LogViewerPageState extends State<LogViewerPage> {
     try {
       final logText = await _logStore.exportLogs(filter: _filter);
 
-      await Share.share(logText, subject: 'App Logs');
+      await SharePlus.instance.share(
+        ShareParams(text: logText, subject: 'App Logs'),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(

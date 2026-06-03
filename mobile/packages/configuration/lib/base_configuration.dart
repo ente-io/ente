@@ -1,5 +1,3 @@
-library configuration;
-
 import 'dart:convert';
 import 'dart:io' as io;
 

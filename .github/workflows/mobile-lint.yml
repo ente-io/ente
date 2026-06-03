@@ -1,21 +1,19 @@
-name: "Lint (photos)"
+name: "Lint (mobile)"
 
 on:
-    # Run on every pull request (open or push to it) that changes the photos app,
-    # Photos Rust, or shared Rust crates used by Photos
     pull_request:
         paths:
             - ".github/workflows/mobile-lint.yml"
-            - "mobile/apps/photos/**"
-            - "mobile/scripts/check_source_arb_plurals.rb"
-            - "rust/crates/photos/**"
-            - "rust/crates/core/**"
-            - "rust/crates/contacts/**"
-            - "rust/crates/image/**"
-            - "rust/bindings/frb/**"
+            - "mobile/**"
             - "rust/apps/codegen/**"
+            - "rust/bindings/frb/**"
             - "rust/Cargo.lock"
             - "rust/Cargo.toml"
+            - "rust/crates/contacts/**"
+            - "rust/crates/core/**"
+            - "rust/crates/image/**"
+            - "rust/crates/photos/**"
+    workflow_dispatch:
 
 env:
     FLUTTER_VERSION: "3.38.10"
@@ -24,44 +22,99 @@ permissions:
     contents: read
 
 jobs:
-    photos-lint:
+    lint:
         runs-on: macos-26
-        defaults:
-            run:
-                working-directory: mobile/apps/photos
         steps:
-            - name: Checkout
+            - name: Checkout code and submodules
               uses: actions/checkout@v6
+              with:
+                  submodules: recursive
 
             - name: Verify frozen mobile pubspecs
-              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/photos
-              working-directory: ${{ github.workspace }}
+              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile
 
             - name: Verify source ARB plurals
               run: ruby mobile/scripts/check_source_arb_plurals.rb
-              working-directory: ${{ github.workspace }}
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+            - name: Verify auth custom icons
+              run: |
+                  find assets/custom-icons -type f -name "*.svg" | while read -r file; do
+                      name=$(basename "$file")
+                      if [[ "$name" != "$(printf "%s" "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '_')" ]]; then
+                          echo "File name is not lowercase: $file"
+                          exit 1
+                      fi
+
+                      if [[ "$file" == "assets/custom-icons/icons/bbs_nga.svg" ]]; then
+                          continue
+                      fi
+
+                      size=$(wc -c < "$file")
+                      if (( size > 20480 )); then
+                          echo "File size is greater than 20KB: $file ($size bytes)"
+                          exit 1
+                      fi
+                  done
+
+                  jq empty assets/custom-icons/_data/custom-icons.json
+                  jq -r '.icons[] | select(.hex != null) | .hex' assets/custom-icons/_data/custom-icons.json | while read -r hex; do
+                      if [[ -n "$hex" && ! "$hex" =~ ^[0-9a-fA-F]{6}$ ]]; then
+                          echo "Invalid hex color '$hex'. Must be exactly 6 hexadecimal characters."
+                          exit 1
+                      fi
+                  done
+              working-directory: mobile/apps/auth
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
               uses: subosito/flutter-action@v2
               with:
                   channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
                   cache: true
-
-            - run: flutter pub get --enforce-lockfile
 
             - run: cargo codegen frb
               working-directory: rust
 
-            - name: Check iOS Podfile.lock is current
-              run: pod install --deployment
-              working-directory: mobile/apps/photos/ios
-
             - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
-            - run: dart format --output=none --set-exit-if-changed .
+            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
+              working-directory: rust
 
-            - run: flutter analyze --no-fatal-infos
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
 
-            - run: flutter test
+            - name: Lint packages
+              run: |
+                  for pubspec in mobile/packages/*/pubspec.yaml; do
+                      package_dir=${pubspec%/pubspec.yaml}
+                      package=${package_dir##*/}
+                      echo "Linting $package"
+                      (
+                          cd "$package_dir"
+                          flutter pub get --enforce-lockfile
+                          dart format --output=none --set-exit-if-changed .
+                          flutter analyze
+                          if [[ -d test ]]; then
+                              flutter test
+                          fi
+                      )
+                  done
+
+            - name: Lint apps
+              run: |
+                  for app in photos auth locker; do
+                      echo "Linting $app"
+                      (
+                          cd "mobile/apps/$app"
+                          flutter pub get --enforce-lockfile
+                          (cd ios && pod install --deployment)
+                          if [[ "$app" != "photos" ]]; then
+                              flutter gen-l10n
+                          fi
+                          dart format --output=none --set-exit-if-changed .
+                          flutter analyze
+                          flutter test
+                      )
+                  done
