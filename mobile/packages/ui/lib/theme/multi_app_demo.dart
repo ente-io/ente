@@ -185,7 +185,7 @@ class DemoHomePage extends StatelessWidget {
           Switch(
             value: isDarkMode,
             onChanged: onThemeChanged,
-            activeColor: colorScheme.primary500,
+            activeThumbColor: colorScheme.primary500,
           ),
         ],
       ),
@@ -328,7 +328,7 @@ class DemoHomePage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.warning500.withOpacity(0.1),
+                color: colorScheme.warning500.withValues(alpha: 0.1),
                 border: Border.all(color: colorScheme.warning500),
                 borderRadius: BorderRadius.circular(8),
               ),

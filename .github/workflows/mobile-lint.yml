@@ -95,7 +95,7 @@ jobs:
                           cd "$package_dir"
                           flutter pub get --enforce-lockfile
                           dart format --output=none --set-exit-if-changed .
-                          flutter analyze --no-fatal-infos
+                          flutter analyze
                           if [[ -d test ]]; then
                               flutter test
                           fi
@@ -114,7 +114,7 @@ jobs:
                               flutter gen-l10n
                           fi
                           dart format --output=none --set-exit-if-changed .
-                          flutter analyze --no-fatal-infos
+                          flutter analyze
                           flutter test
                       )
                   done
