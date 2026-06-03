@@ -16,6 +16,17 @@ void main() {
       expect(parsed.time!.second, 50);
     });
 
+    test("parses standard EXIF date time with fractional seconds", () {
+      final parsed = getDateTimeInDeviceTimezone(
+        "2026:04:01 15:25:27.945",
+        null,
+      );
+
+      expect(parsed.dateTime, "2026-04-01T15:25:27.945");
+      expect(parsed.offsetTime, isNull);
+      expect(parsed.time, DateTime(2026, 4, 1, 15, 25, 27, 945));
+    });
+
     test("parses standard EXIF date time with separate offset", () {
       final parsed = getDateTimeInDeviceTimezone(
         "2025:01:30 08:59:50",
@@ -36,6 +47,28 @@ void main() {
       expect(parsed.dateTime, "2025-01-30T08:59:50.000");
       expect(parsed.offsetTime, "+05:30");
       expect(parsed.time!.toUtc(), DateTime.utc(2025, 1, 30, 3, 29, 50));
+    });
+
+    test("drops invalid separate offset for standard EXIF date time", () {
+      final parsed = getDateTimeInDeviceTimezone(
+        "2025:01:30 08:59:50",
+        "    :  ",
+      );
+
+      expect(parsed.dateTime, "2025-01-30T08:59:50.000");
+      expect(parsed.offsetTime, isNull);
+      expect(parsed.time, DateTime(2025, 1, 30, 8, 59, 50));
+    });
+
+    test("drops invalid separate offset for fractional EXIF date time", () {
+      final parsed = getDateTimeInDeviceTimezone(
+        "2026:04:01 15:25:27.945",
+        "CDT",
+      );
+
+      expect(parsed.dateTime, "2026-04-01T15:25:27.945");
+      expect(parsed.offsetTime, isNull);
+      expect(parsed.time, DateTime(2026, 4, 1, 15, 25, 27, 945));
     });
 
     test("parses ISO date time with numeric offset", () {
@@ -91,6 +124,14 @@ void main() {
       expect(parsed.dateTime, "2025-01-30T08:59:50.000");
       expect(parsed.offsetTime, "+05:30");
       expect(parsed.time!.toUtc(), DateTime.utc(2025, 1, 30, 3, 29, 50));
+    });
+
+    test("drops invalid separate offset for ISO date time", () {
+      final parsed = getDateTimeInDeviceTimezone("2025-01-30T08:59:50", "CDT");
+
+      expect(parsed.dateTime, "2025-01-30T08:59:50.000");
+      expect(parsed.offsetTime, isNull);
+      expect(parsed.time, DateTime(2025, 1, 30, 8, 59, 50));
     });
 
     test("parses ISO date time with Z offset", () {
@@ -150,6 +191,13 @@ void main() {
       );
     });
 
+    test("rejects invalid standard EXIF date time components", () {
+      expect(
+        () => getDateTimeInDeviceTimezone("2025:02:30 08:00:00.945", null),
+        throwsFormatException,
+      );
+    });
+
     test("rejects invalid ISO date time components", () {
       expect(
         () => getDateTimeInDeviceTimezone("2025-02-30T08:00:00Z", null),
@@ -161,13 +209,6 @@ void main() {
       );
       expect(
         () => getDateTimeInDeviceTimezone("2025-01-30T08:00:00+99:99", null),
-        throwsFormatException,
-      );
-    });
-
-    test("rejects invalid separate offset", () {
-      expect(
-        () => getDateTimeInDeviceTimezone("2025-01-30T08:59:50", "CDT"),
         throwsFormatException,
       );
     });
