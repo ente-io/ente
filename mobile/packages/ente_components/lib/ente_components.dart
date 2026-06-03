@@ -16,6 +16,7 @@ export 'components/slider_component.dart';
 export 'components/stepper_component.dart';
 export 'components/tag_chip_component.dart';
 export 'components/text_input_component.dart';
+export 'components/tooltip_component.dart';
 export 'models/component_execution_state.dart';
 export 'theme/colors.dart';
 export 'theme/icon_sizes.dart';

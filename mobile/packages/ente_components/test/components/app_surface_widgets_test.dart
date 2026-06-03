@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ente_components/components/app_bar_component.dart';
 import 'package:ente_components/components/menu_component.dart';
 import 'package:ente_components/components/menu_group_component.dart';
+import 'package:ente_components/components/tooltip_component.dart';
 import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/text_styles.dart';
@@ -569,6 +570,173 @@ void main() {
       closeTo(tester.getCenter(find.byIcon(Icons.arrow_back)).dy, 1),
     );
     expect(find.text('Menu items'), findsWidgets);
+  });
+
+  testWidgets('SliverAppBarComponent supports tap tooltip title reveal', (
+    tester,
+  ) async {
+    const title = 'Aman';
+
+    await pumpComponent(
+      tester,
+      CustomScrollView(
+        slivers: [
+          const SliverAppBarComponent(
+            title: title,
+            actions: [Icon(Icons.search), Icon(Icons.more_vert)],
+          ),
+          SliverList.builder(
+            itemCount: 8,
+            itemBuilder: (context, index) {
+              return SizedBox(height: 60, child: Text('Item $index'));
+            },
+          ),
+        ],
+      ),
+      width: 320,
+      height: 360,
+    );
+
+    expect(find.byType(TooltipComponent), findsOneWidget);
+    expect(tester.getSize(find.byType(TooltipComponent)).width, lessThan(160));
+    expect(find.byType(TooltipBubbleComponent), findsNothing);
+
+    await tester.tap(find.byType(TooltipComponent));
+    await tester.pump();
+
+    expect(find.byType(TooltipBubbleComponent), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(TooltipBubbleComponent)).width,
+      lessThan(160),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('SliverAppBarComponent keeps tap tooltip with title gestures', (
+    tester,
+  ) async {
+    var longPressed = false;
+
+    await pumpComponent(
+      tester,
+      CustomScrollView(
+        slivers: [
+          SliverAppBarComponent(
+            title: 'aman@example.com',
+            onTitleLongPress: () => longPressed = true,
+            actions: const [Icon(Icons.search), Icon(Icons.more_vert)],
+          ),
+          SliverList.builder(
+            itemCount: 8,
+            itemBuilder: (context, index) {
+              return SizedBox(height: 60, child: Text('Item $index'));
+            },
+          ),
+        ],
+      ),
+      width: 320,
+      height: 360,
+    );
+
+    expect(find.byType(TooltipComponent), findsOneWidget);
+    expect(find.byType(TooltipBubbleComponent), findsNothing);
+
+    await tester.tap(find.byType(TooltipComponent));
+    await tester.pump();
+
+    expect(find.byType(TooltipBubbleComponent), findsOneWidget);
+    expect(longPressed, isFalse);
+
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    await tester.longPress(find.byType(TooltipComponent));
+    await tester.pump();
+
+    expect(longPressed, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('SliverAppBarComponent can disable tap tooltip title reveal', (
+    tester,
+  ) async {
+    await pumpComponent(
+      tester,
+      CustomScrollView(
+        slivers: [
+          const SliverAppBarComponent(
+            title: 'Aman',
+            disableTitleTapReveal: true,
+            actions: [Icon(Icons.search)],
+          ),
+          SliverList.builder(
+            itemCount: 8,
+            itemBuilder: (context, index) {
+              return SizedBox(height: 60, child: Text('Item $index'));
+            },
+          ),
+        ],
+      ),
+      width: 320,
+      height: 360,
+    );
+
+    expect(find.byType(TooltipComponent), findsNothing);
+    expect(find.byType(TooltipBubbleComponent), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('SliverAppBarComponent preserves tap-only title callbacks', (
+    tester,
+  ) async {
+    var tapped = false;
+
+    await pumpComponent(
+      tester,
+      CustomScrollView(
+        slivers: [
+          SliverAppBarComponent(
+            title: 'Tap me',
+            onTitleTap: () => tapped = true,
+            actions: const [Icon(Icons.search)],
+          ),
+          SliverList.builder(
+            itemCount: 8,
+            itemBuilder: (context, index) {
+              return SizedBox(height: 60, child: Text('Item $index'));
+            },
+          ),
+        ],
+      ),
+      width: 320,
+      height: 360,
+    );
+
+    expect(find.byType(TooltipComponent), findsNothing);
+
+    await tester.tap(find.text('Tap me'));
+    await tester.pump();
+
+    expect(tapped, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('TooltipBubbleComponent renders top pointer bubble', (
+    tester,
+  ) async {
+    await pumpComponent(
+      tester,
+      const TooltipBubbleComponent(message: 'Tooltip text'),
+      width: 390,
+      height: 200,
+    );
+
+    expect(find.byType(TooltipBubbleComponent), findsOneWidget);
+    final tooltipText = tester.widget<Text>(find.text('Tooltip text'));
+    expect(tooltipText.style?.fontSize, 12);
+    expect(tooltipText.style?.fontWeight, FontWeight.w500);
+    expect(tooltipText.style?.height, 16 / 12);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
