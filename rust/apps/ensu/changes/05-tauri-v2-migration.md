@@ -1,1 +1,0 @@
-- Migrated the desktop app to Tauri v2.
