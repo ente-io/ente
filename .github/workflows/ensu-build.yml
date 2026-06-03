@@ -68,14 +68,14 @@ jobs:
                           exit 1
                       fi
                       release_tag="ensu-v${release_version}-rc"
-                      release_title="🟡 Ensu release candidate · ${release_version} (build ${build_number})"
+                      release_title="🤖 Ensu release candidate · ${release_version} (build ${build_number})"
                   else
                       if [[ "${version}" != "${release_version}-beta" ]]; then
                           echo "::error::${GITHUB_REF_NAME} is ${version}, expected ${release_version}-beta"
                           exit 1
                       fi
                       release_tag="ensu-v${release_version}-beta"
-                      release_title="🟡 Ensu nightly · ${version} (build ${build_number})"
+                      release_title="🤖 Ensu nightly · ${version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"

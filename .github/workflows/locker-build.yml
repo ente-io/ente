@@ -64,10 +64,10 @@ jobs:
                           exit 1
                       fi
                       release_tag="locker-v${release_version}-rc"
-                      release_title="🔵 Locker release candidate - ${release_version} (build ${build_number})"
+                      release_title="🗄️ Locker release candidate - ${release_version} (build ${build_number})"
                   else
                       release_tag="locker-v${release_version}-beta"
-                      release_title="🔵 Locker nightly - ${release_version} (build ${build_number})"
+                      release_title="🗄️ Locker nightly - ${release_version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"

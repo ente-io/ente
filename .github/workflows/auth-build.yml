@@ -64,10 +64,10 @@ jobs:
                           exit 1
                       fi
                       release_tag="auth-v${release_version}-rc"
-                      release_title="🟣 Auth release candidate - ${release_version} (build ${build_number})"
+                      release_title="🔒 Auth release candidate - ${release_version} (build ${build_number})"
                   else
                       release_tag="auth-v${release_version}-beta"
-                      release_title="🟣 Auth nightly - ${release_version} (build ${build_number})"
+                      release_title="🔒 Auth nightly - ${release_version} (build ${build_number})"
                   fi
 
                   commit_sha="$(git rev-parse HEAD)"
