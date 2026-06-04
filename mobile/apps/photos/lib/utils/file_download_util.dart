@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
-import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as file_path;
 import "package:photo_manager/photo_manager.dart";
@@ -26,6 +25,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/utils/apple_photos_errors.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 
@@ -470,7 +470,7 @@ Future<void> downloadToGallery(
       _logger.severe("Failed to save file due to storage limit", e, s);
       throw DownloadNotEnoughStorageError();
     }
-    if (_isApplePhotosUnsupportedResourceError(e)) {
+    if (isPHPhotosUnsupportedResourceError(e)) {
       _logger.warning(
         "Failed to save file because Apple Photos rejected the resource",
         e,
@@ -486,16 +486,6 @@ Future<void> downloadToGallery(
     await PhotoManager.startChangeNotify();
     LocalSyncService.instance.checkAndSync().ignore();
   }
-}
-
-bool _isApplePhotosUnsupportedResourceError(Object error) {
-  if (error is! PlatformException) {
-    return false;
-  }
-  return error.code == "PHPhotosErrorDomain (3302)" ||
-      (error.code.contains("PHPhotosErrorDomain") &&
-          error.code.contains("3302")) ||
-      (error.message?.contains("PHPhotosErrorDomain error 3302") ?? false);
 }
 
 Future<void> _saveLivePhotoOnDroid(
