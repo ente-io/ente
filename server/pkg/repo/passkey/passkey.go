@@ -532,10 +532,9 @@ func (r *Repository) FinishAuthentication(user *ente.User, req *http.Request, se
 func (r *Repository) DeletePasskey(user *ente.User, passkeyID uuid.UUID) (err error) {
 	_, err = r.DB.Exec(`
 		UPDATE passkeys
-		SET friendly_name = $1,
-			deleted_at = $2
-		WHERE id = $3 AND user_id = $4 AND deleted_at IS NULL
-	`, passkeyID, ente_time.Microseconds(), passkeyID, user.ID)
+		SET deleted_at = $1
+		WHERE id = $2 AND user_id = $3 AND deleted_at IS NULL
+	`, ente_time.Microseconds(), passkeyID, user.ID)
 	if err != nil {
 		err = stacktrace.Propagate(err, "")
 		return
