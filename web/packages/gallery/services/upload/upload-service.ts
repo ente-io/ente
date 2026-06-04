@@ -772,14 +772,15 @@ export const upload = async (
 
         abortIfCancelled();
 
-        const { metadata, publicMagicMetadata } = await extractAssetMetadata(
-            uploadAsset,
-            fileTypeInfo.fileType,
-            lastModifiedMs,
-            collection.id,
-            parsedMetadataJSONMap,
-            worker,
-        );
+        const { metadata, publicMagicMetadata, takeoutFavorited } =
+            await extractAssetMetadata(
+                uploadAsset,
+                fileTypeInfo.fileType,
+                lastModifiedMs,
+                collection.id,
+                parsedMetadataJSONMap,
+                worker,
+            );
 
         const matches = existingFiles.filter((file) =>
             areFilesSame(file, metadata),
@@ -792,7 +793,11 @@ export const upload = async (
                 (f) => f.collectionID == collection.id,
             );
             if (matchInSameCollection && !skipDuplicateAddToUploadCollection) {
-                return { type: "alreadyUploaded", file: matchInSameCollection };
+                return {
+                    type: "alreadyUploaded",
+                    file: matchInSameCollection,
+                    takeoutFavorited,
+                };
             }
 
             if (skipDuplicateAddToUploadCollection) {
@@ -802,6 +807,7 @@ export const upload = async (
                 return {
                     type: "addedSymlink",
                     file: matchInSameCollection ?? anyMatch,
+                    takeoutFavorited,
                 };
             }
 
@@ -809,7 +815,7 @@ export const upload = async (
             const symlink = Object.assign({}, anyMatch);
             symlink.collectionID = collection.id;
             await addToCollection(collection, [symlink]);
-            return { type: "addedSymlink", file: symlink };
+            return { type: "addedSymlink", file: symlink, takeoutFavorited };
         }
 
         abortIfCancelled();
@@ -864,6 +870,7 @@ export const upload = async (
                 ? "uploadedWithStaticThumbnail"
                 : "uploaded",
             file: await decryptRemoteFile(uploadedFile, collection.key),
+            takeoutFavorited,
         };
     } catch (e) {
         if (isUploadCancelledError(e)) {
@@ -1123,6 +1130,7 @@ const readEntireStream = async (stream: ReadableStream) =>
 interface ExtractAssetMetadataResult {
     metadata: FileMetadata;
     publicMagicMetadata: FilePublicMagicMetadataData;
+    takeoutFavorited?: true;
 }
 
 /**
@@ -1173,17 +1181,20 @@ const extractLivePhotoMetadata = async (
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
-    const { metadata: imageMetadata, publicMagicMetadata } =
-        await extractImageOrVideoMetadata(
-            livePhotoAssets.image,
-            pathPrefix,
-            undefined,
-            FileType.image,
-            lastModifiedMs,
-            collectionID,
-            parsedMetadataJSONMap,
-            worker,
-        );
+    const {
+        metadata: imageMetadata,
+        publicMagicMetadata,
+        takeoutFavorited,
+    } = await extractImageOrVideoMetadata(
+        livePhotoAssets.image,
+        pathPrefix,
+        undefined,
+        FileType.image,
+        lastModifiedMs,
+        collectionID,
+        parsedMetadataJSONMap,
+        worker,
+    );
 
     const imageHash = imageMetadata.hash;
     const videoHash = await computeHash(livePhotoAssets.video, worker);
@@ -1198,6 +1209,7 @@ const extractLivePhotoMetadata = async (
             hash,
         },
         publicMagicMetadata,
+        takeoutFavorited,
     };
 };
 
@@ -1322,7 +1334,11 @@ const extractImageOrVideoMetadata = async (
         publicMagicMetadata.cameraModel = parsedMetadata.cameraModel;
     }
 
-    return { metadata, publicMagicMetadata };
+    return {
+        metadata,
+        publicMagicMetadata,
+        takeoutFavorited: parsedMetadataJSON?.favorited,
+    };
 };
 
 const tryExtractImageMetadata = async (

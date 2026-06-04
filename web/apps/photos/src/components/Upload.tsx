@@ -65,6 +65,7 @@ import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/do
 import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     addOrCopyToCollection,
+    addToFavoritesCollection,
     canAddFilesToCollection,
     canDirectlyUploadToCollection,
     createAlbum,
@@ -89,6 +90,7 @@ import type {
     UploadItemWithCollection,
 } from "services/upload-manager";
 import {
+    favoritedFilesFromUploadBatchResult,
     successfulFilesFromUploadBatchResult,
     uploadManager,
 } from "services/upload-manager";
@@ -640,25 +642,57 @@ export const Upload: React.FC<UploadProps> = ({
         batchResult: UploadBatchResult,
         targetCollection: Collection | undefined,
     ) => {
-        if (!targetCollection) return;
-
-        const uploadedFiles = successfulFilesFromUploadBatchResult(batchResult);
-        if (!uploadedFiles.length) return;
-
-        log.info(
-            `Adding ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
-        );
         try {
-            await addOrCopyToCollection(targetCollection, uploadedFiles);
-            log.info(
-                `Added ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
-            );
-        } catch (e) {
-            log.error(
-                `Failed to add ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
-                e,
-            );
-            throw e;
+            if (targetCollection) {
+                const uploadedFiles =
+                    successfulFilesFromUploadBatchResult(batchResult);
+                if (uploadedFiles.length) {
+                    log.info(
+                        `Adding ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+                    );
+                    try {
+                        await addOrCopyToCollection(
+                            targetCollection,
+                            uploadedFiles,
+                        );
+                        log.info(
+                            `Added ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+                        );
+                    } catch (e) {
+                        log.error(
+                            `Failed to add ${uploadedFiles.length} uploaded file(s) to post-upload target collection ${targetCollection.id}`,
+                            e,
+                        );
+                        throw e;
+                    }
+                }
+            }
+        } finally {
+            // Don't leak uploads that landed in a hidden album into the
+            // visible Favorites collection. Gate on the actual destination
+            // collection's visibility (not the UI section being viewed), since
+            // watch-folder/pending syncs can route into an existing hidden
+            // album by name match while the user browses the normal view.
+            const favoritedFiles =
+                favoritedFilesFromUploadBatchResult(batchResult);
+            if (favoritedFiles.length) {
+                const hiddenCollectionIDs = new Set(
+                    (await savedHiddenCollections()).map((c) => c.id),
+                );
+                const visibleFavoritedFiles = favoritedFiles.filter(
+                    (f) => !hiddenCollectionIDs.has(f.collectionID),
+                );
+                if (visibleFavoritedFiles.length) {
+                    try {
+                        await addToFavoritesCollection(visibleFavoritedFiles);
+                    } catch (e) {
+                        log.error(
+                            "Failed to import Google Takeout favorites",
+                            e,
+                        );
+                    }
+                }
+            }
         }
     };
 

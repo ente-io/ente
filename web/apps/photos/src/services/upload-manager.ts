@@ -106,16 +106,45 @@ export const successfulFilesFromUploadBatchResult = (
     batchResult: UploadBatchResult,
 ) =>
     batchResult.itemResults.flatMap(({ result }) => {
-        switch (result.type) {
-            case "alreadyUploaded":
-            case "addedSymlink":
-            case "uploaded":
-            case "uploadedWithStaticThumbnail":
-                return [result.file];
-            default:
-                return [];
-        }
+        const file = successfulFileFromUploadResult(result);
+        return file ? [file] : [];
     });
+
+export const favoritedFilesFromUploadBatchResult = (
+    batchResult: UploadBatchResult,
+) => {
+    const files: EnteFile[] = [];
+    const seenFileIDs = new Set<number>();
+
+    for (const { result } of batchResult.itemResults) {
+        const file = successfulFileFromUploadResult(result);
+        if (
+            !file ||
+            !("takeoutFavorited" in result) ||
+            !result.takeoutFavorited ||
+            seenFileIDs.has(file.id)
+        ) {
+            continue;
+        }
+
+        seenFileIDs.add(file.id);
+        files.push(file);
+    }
+
+    return files;
+};
+
+const successfulFileFromUploadResult = (result: UploadResult) => {
+    switch (result.type) {
+        case "alreadyUploaded":
+        case "addedSymlink":
+        case "uploaded":
+        case "uploadedWithStaticThumbnail":
+            return result.file;
+        default:
+            return undefined;
+    }
+};
 
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;

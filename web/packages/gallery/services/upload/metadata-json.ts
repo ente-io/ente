@@ -27,6 +27,7 @@ export interface ParsedMetadataJSON {
     modificationTime?: number;
     location?: Location;
     description?: string;
+    favorited?: true;
 }
 
 /**
@@ -239,6 +240,10 @@ const parseMetadataJSONText = (text: string) => {
     parsedMetadataJSON.description = parseGTNonEmptyString(
         metadataJSON.description,
     );
+
+    if (metadataJSON.favorited === true) {
+        parsedMetadataJSON.favorited = true;
+    }
 
     return parsedMetadataJSON;
 };

@@ -443,10 +443,14 @@ export type UploadResult =
     | { type: "largerThanAvailableStorage" }
     | { type: "blocked" }
     | { type: "failed" }
-    | { type: "alreadyUploaded"; file: EnteFile }
-    | { type: "addedSymlink"; file: EnteFile }
-    | { type: "uploadedWithStaticThumbnail"; file: EnteFile }
-    | { type: "uploaded"; file: EnteFile };
+    | { type: "alreadyUploaded"; file: EnteFile; takeoutFavorited?: true }
+    | { type: "addedSymlink"; file: EnteFile; takeoutFavorited?: true }
+    | {
+          type: "uploadedWithStaticThumbnail";
+          file: EnteFile;
+          takeoutFavorited?: true;
+      }
+    | { type: "uploaded"; file: EnteFile; takeoutFavorited?: true };
 
 /**
  * Return true to disable the upload of files via Cloudflare Workers.
