@@ -37,7 +37,6 @@ import autoLauncher from "./main/services/auto-launcher";
 import { shouldHideDockIcon } from "./main/services/store";
 import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
-import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
 import { wait } from "./main/utils/common";
 import { isDev } from "./main/utils/electron";
@@ -91,7 +90,6 @@ const main = () => {
     // The order of the next two calls is important
     setupRendererServer();
     registerPrivilegedSchemes();
-    migrateLegacyWatchStoreIfNeeded();
 
     /**
      * Handle an open URL request, but ensuring that we have a mainWindow.
