@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math";
 
+import "package:ente_components/ente_components.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
@@ -144,7 +145,7 @@ class MagicRecommendation extends StatelessWidget {
     final heroTag =
         magicSearchResult.heroTag() +
         (magicSearchResult.previewThumbnail()?.tag ?? "");
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(2.5 - _borderWidth, 0)),
       child: GestureDetector(
@@ -225,8 +226,8 @@ class MagicRecommendation extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
                             magicSearchResult.name(),
-                            style: enteTextTheme.small.copyWith(
-                              color: Colors.white,
+                            style: TextStyles.body.copyWith(
+                              color: colors.specialWhite,
                             ),
                             maxLines: 3,
                             overflow: TextOverflow.fade,

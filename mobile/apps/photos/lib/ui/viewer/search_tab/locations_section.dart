@@ -3,7 +3,7 @@ import "dart:math";
 import "dart:ui";
 
 import "package:dotted_border/dotted_border.dart";
-import "package:ente_components/theme/text_styles.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
@@ -76,7 +76,7 @@ class _LocationsSectionState extends State<LocationsSection> {
   @override
   Widget build(BuildContext context) {
     if (_locationsSearchResults.isEmpty) {
-      final textTheme = getEnteTextTheme(context);
+      final colors = context.componentColors;
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8, bottom: 24),
         child: Row(
@@ -87,16 +87,14 @@ class _LocationsSectionState extends State<LocationsSection> {
                 children: [
                   Text(
                     SectionType.location.sectionTitle(context),
-                    style: TextStyles.h2.copyWith(
-                      color: textTheme.largeBold.color,
-                    ),
+                    style: TextStyles.h2.copyWith(color: colors.textBase),
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
                       SectionType.location.getEmptyStateText(context),
-                      style: textTheme.smallMuted,
+                      style: TextStyles.body.copyWith(color: colors.textLight),
                     ),
                   ),
                 ],
@@ -166,7 +164,7 @@ class LocationRecommendation extends StatelessWidget {
     final heroTag =
         locationSearchResult.heroTag() +
         (locationSearchResult.previewThumbnail()?.tag ?? "");
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(0, 2.5 - outerStrokeWidth)),
       child: GestureDetector(
@@ -312,7 +310,9 @@ class LocationRecommendation extends StatelessWidget {
                                     children: [
                                       Text(
                                         locationSearchResult.name(),
-                                        style: enteTextTheme.small,
+                                        style: TextStyles.body.copyWith(
+                                          color: colors.textBase,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.center,
@@ -376,7 +376,7 @@ class GoToMapWithBG extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: max(0, 2.5 - LocationRecommendation.outerStrokeWidth),
@@ -477,8 +477,8 @@ class GoToMapWithBG extends StatelessWidget {
                                   children: [
                                     Text(
                                       AppLocalizations.of(context).yourMap,
-                                      style: enteTextTheme.mini.copyWith(
-                                        color: Colors.white,
+                                      style: TextStyles.mini.copyWith(
+                                        color: colors.specialWhite,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -508,7 +508,7 @@ class LocationCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final enteColorScheme = getEnteColorScheme(context);
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -600,7 +600,9 @@ class LocationCTA extends StatelessWidget {
                               children: [
                                 Text(
                                   AppLocalizations.of(context).addNew,
-                                  style: enteTextTheme.miniFaint,
+                                  style: TextStyles.mini.copyWith(
+                                    color: colors.textLighter,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,

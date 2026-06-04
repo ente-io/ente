@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:ente_components/components/tooltip_component.dart';
 import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -40,6 +41,7 @@ class AppBarComponent extends StatefulWidget {
     this.onTitleTap,
     this.onTitleDoubleTap,
     this.onTitleLongPress,
+    this.disableTitleTapReveal = false,
     this.subtitle,
     this.leading,
     this.backButton,
@@ -61,6 +63,7 @@ class AppBarComponent extends StatefulWidget {
   final VoidCallback? onTitleTap;
   final VoidCallback? onTitleDoubleTap;
   final VoidCallback? onTitleLongPress;
+  final bool disableTitleTapReveal;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
@@ -231,6 +234,7 @@ class _AppBarComponentState extends State<AppBarComponent> {
             onTitleTap: widget.onTitleTap,
             onTitleDoubleTap: widget.onTitleDoubleTap,
             onTitleLongPress: widget.onTitleLongPress,
+            disableTitleTapReveal: widget.disableTitleTapReveal,
             subtitle: widget.subtitle,
             leading: widget.leading,
             backButton: widget.backButton,
@@ -285,6 +289,7 @@ class SliverAppBarComponent extends StatelessWidget {
     this.onTitleTap,
     this.onTitleDoubleTap,
     this.onTitleLongPress,
+    this.disableTitleTapReveal = false,
     this.subtitle,
     this.leading,
     this.backButton,
@@ -303,6 +308,7 @@ class SliverAppBarComponent extends StatelessWidget {
   final VoidCallback? onTitleTap;
   final VoidCallback? onTitleDoubleTap;
   final VoidCallback? onTitleLongPress;
+  final bool disableTitleTapReveal;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
@@ -334,6 +340,7 @@ class SliverAppBarComponent extends StatelessWidget {
         onTitleTap: onTitleTap,
         onTitleDoubleTap: onTitleDoubleTap,
         onTitleLongPress: onTitleLongPress,
+        disableTitleTapReveal: disableTitleTapReveal,
         subtitle: subtitle,
         leading: leading,
         backButton: backButton,
@@ -362,6 +369,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.onTitleTap,
     required this.onTitleDoubleTap,
     required this.onTitleLongPress,
+    required this.disableTitleTapReveal,
     required this.subtitle,
     required this.leading,
     required this.backButton,
@@ -385,6 +393,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   final VoidCallback? onTitleTap;
   final VoidCallback? onTitleDoubleTap;
   final VoidCallback? onTitleLongPress;
+  final bool disableTitleTapReveal;
   final String? subtitle;
   final Widget? leading;
   final Widget? backButton;
@@ -497,6 +506,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
               onTap: onTitleTap,
               onDoubleTap: onTitleDoubleTap,
               onLongPress: onTitleLongPress,
+              disableTapReveal: disableTitleTapReveal,
               top: titleTop,
               left: titleLeft,
               right: titleRight,
@@ -553,6 +563,7 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.onTitleTap != onTitleTap ||
         oldDelegate.onTitleDoubleTap != onTitleDoubleTap ||
         oldDelegate.onTitleLongPress != onTitleLongPress ||
+        oldDelegate.disableTitleTapReveal != disableTitleTapReveal ||
         oldDelegate.subtitle != subtitle ||
         oldDelegate.leading != leading ||
         oldDelegate.backButton != backButton ||
@@ -695,6 +706,7 @@ const _expandedContentBottomGap = Spacing.lg;
 const _subtitleGap = 2.0;
 const _headerSnapTolerance = 1.0;
 const _headerSnapDuration = Duration(milliseconds: 160);
+const _titleTooltipShowDuration = Duration(seconds: 3);
 
 class _HeaderAppBarMetrics {
   const _HeaderAppBarMetrics({
@@ -796,6 +808,7 @@ class _MovingHeaderTitle extends StatelessWidget {
     required this.onTap,
     required this.onDoubleTap,
     required this.onLongPress,
+    required this.disableTapReveal,
     required this.top,
     required this.left,
     required this.right,
@@ -808,6 +821,7 @@ class _MovingHeaderTitle extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final VoidCallback? onLongPress;
+  final bool disableTapReveal;
   final double top;
   final double left;
   final double right;
@@ -840,26 +854,76 @@ class _MovingHeaderTitle extends StatelessWidget {
       );
     }
 
-    final titleText = Text(
-      title,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: textStyle,
-    );
+    final canShowTitleTooltip = !disableTapReveal && onTap == null;
 
     return Positioned(
       left: left,
       right: right,
       top: top,
-      child: onTap == null && onDoubleTap == null && onLongPress == null
-          ? IgnorePointer(child: titleText)
+      child: canShowTitleTooltip
+          ? LayoutBuilder(
+              builder: (context, constraints) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: TooltipComponent(
+                    message: title,
+                    showDuration: _titleTooltipShowDuration,
+                    onDoubleTap: onDoubleTap,
+                    onLongPress: onLongPress,
+                    child: SizedBox(
+                      width: _singleLineTextWidth(
+                        context,
+                        title: title,
+                        style: textStyle,
+                        maxWidth: constraints.maxWidth,
+                      ),
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textStyle,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            )
+          : onTap == null && onDoubleTap == null && onLongPress == null
+          ? IgnorePointer(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textStyle,
+              ),
+            )
           : GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: onTap,
               onDoubleTap: onDoubleTap,
               onLongPress: onLongPress,
-              child: titleText,
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textStyle,
+              ),
             ),
     );
   }
+}
+
+double _singleLineTextWidth(
+  BuildContext context, {
+  required String title,
+  required TextStyle style,
+  required double maxWidth,
+}) {
+  final textPainter = TextPainter(
+    text: TextSpan(text: title, style: style),
+    maxLines: 1,
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout(maxWidth: maxWidth);
+  return math.min(textPainter.width, maxWidth);
 }

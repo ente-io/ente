@@ -1,7 +1,7 @@
 import "dart:async";
 
 import "package:dotted_border/dotted_border.dart";
-import "package:ente_components/theme/text_styles.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
@@ -122,7 +122,7 @@ class _ContactsSectionState extends State<ContactsSection> {
   @override
   Widget build(BuildContext context) {
     if (_contactSearchResults.isEmpty) {
-      final textTheme = getEnteTextTheme(context);
+      final colors = context.componentColors;
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8, bottom: 24),
         child: Row(
@@ -133,16 +133,14 @@ class _ContactsSectionState extends State<ContactsSection> {
                 children: [
                   Text(
                     SectionType.contacts.sectionTitle(context),
-                    style: TextStyles.h2.copyWith(
-                      color: textTheme.largeBold.color,
-                    ),
+                    style: TextStyles.h2.copyWith(color: colors.textBase),
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
                       SectionType.contacts.getEmptyStateText(context),
-                      style: textTheme.smallMuted,
+                      style: TextStyles.body.copyWith(color: colors.textLight),
                     ),
                   ),
                 ],
@@ -203,7 +201,7 @@ class ContactRecommendation extends StatefulWidget {
 class _ContactRecommendationState extends State<ContactRecommendation> {
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final personId =
         widget.contactSearchResult.params[kPersonParamID] as String?;
     final contactUserId =
@@ -257,7 +255,7 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
                     children: [
                       Text(
                         widget.contactSearchResult.name(),
-                        style: enteTextTheme.small,
+                        style: TextStyles.body.copyWith(color: colors.textBase),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
@@ -279,6 +277,7 @@ class ContactCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.componentColors;
     final enteColorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
@@ -319,7 +318,7 @@ class ContactCTA extends StatelessWidget {
                 const SizedBox(height: 10.5),
                 Text(
                   AppLocalizations.of(context).invite,
-                  style: getEnteTextTheme(context).smallFaint,
+                  style: TextStyles.body.copyWith(color: colors.textLighter),
                 ),
               ],
             ),

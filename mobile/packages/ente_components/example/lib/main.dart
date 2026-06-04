@@ -271,6 +271,12 @@ class _CatalogHomeState extends State<CatalogHome> {
         routeBuilder: _buildHeaderAppBarDemo,
       ),
       CatalogSection(
+        title: 'Tooltip',
+        icon: HugeIcons.strokeRoundedHelpCircle,
+        components: const ['Top pointer', 'Tap trigger'],
+        previewBuilder: (_) => const _TooltipPreview(),
+      ),
+      CatalogSection(
         title: 'Avatar',
         icon: HugeIcons.strokeRoundedUser,
         components: const ['Sizes', 'Seed palette', 'Add contact'],
@@ -2150,6 +2156,104 @@ class _HeaderAppBarEntryPreview extends StatelessWidget {
   }
 }
 
+class _TooltipPreview extends StatelessWidget {
+  const _TooltipPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+
+    return _CatalogPreviewList(
+      children: [
+        _CatalogPreviewGroup(
+          title: 'Top pointer',
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.fillDarker,
+              borderRadius: BorderRadius.circular(Radii.lg),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(Spacing.xl),
+              child: TooltipBubbleComponent(message: 'Tooltip text'),
+            ),
+          ),
+        ),
+        _CatalogPreviewGroup(
+          title: 'Tap triggers',
+          child: Column(
+            children: [
+              _TooltipTriggerRow(
+                title: 'Short',
+                subtitle: 'Compact bubble',
+                message: 'Tooltip',
+                colors: colors,
+              ),
+              const SizedBox(height: Spacing.sm),
+              _TooltipTriggerRow(
+                title: 'Medium title',
+                subtitle: 'Normal app title length',
+                message: 'Whatsapp video long long long name',
+                colors: colors,
+              ),
+              const SizedBox(height: Spacing.sm),
+              _TooltipTriggerRow(
+                title: 'Long email',
+                subtitle: 'Tests email wrapping points',
+                message:
+                    'alexandra.rivera.photo.archive.longtitle.test@examplemail.com',
+                colors: colors,
+              ),
+              const SizedBox(height: Spacing.sm),
+              _TooltipTriggerRow(
+                title: 'Overflow',
+                subtitle: 'Caps at max width and ellipsizes',
+                message:
+                    'This is an intentionally very long tooltip message that should wrap up to three lines and then ellipsize cleanly without covering the full screen.',
+                maxWidth: 240,
+                colors: colors,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TooltipTriggerRow extends StatelessWidget {
+  const _TooltipTriggerRow({
+    required this.title,
+    required this.subtitle,
+    required this.message,
+    required this.colors,
+    this.maxWidth = 320,
+  });
+
+  final String title;
+  final String subtitle;
+  final String message;
+  final ColorTokens colors;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return TooltipComponent(
+      message: message,
+      maxWidth: maxWidth,
+      child: MenuComponent(
+        title: title,
+        subtitle: subtitle,
+        leading: const _CatalogHugeIcon(HugeIcons.strokeRoundedHelpCircle),
+        trailing: _CatalogHugeIcon(
+          HugeIcons.strokeRoundedArrowRight02,
+          color: colors.textLight,
+          size: IconSizes.small,
+        ),
+      ),
+    );
+  }
+}
+
 class HeaderAppBarDemoPage extends StatefulWidget {
   const HeaderAppBarDemoPage({
     super.key,
@@ -2164,14 +2268,24 @@ class HeaderAppBarDemoPage extends StatefulWidget {
   State<HeaderAppBarDemoPage> createState() => _HeaderAppBarDemoPageState();
 }
 
+enum _HeaderTitleRevealVariant { tooltip, disabled }
+
 class _HeaderAppBarDemoPageState extends State<HeaderAppBarDemoPage> {
   static const _itemCount = 48;
+  static const _longTitle =
+      'alexandra.rivera.photo.archive.longtitle.test@examplemail.com';
 
   late ThemeMode _themeMode = widget.themeMode;
+  _HeaderTitleRevealVariant _titleRevealVariant =
+      _HeaderTitleRevealVariant.tooltip;
 
   void _setThemeMode(ThemeMode mode) {
     setState(() => _themeMode = mode);
     widget.onThemeModeChanged(mode);
+  }
+
+  void _setTitleRevealVariant(_HeaderTitleRevealVariant variant) {
+    setState(() => _titleRevealVariant = variant);
   }
 
   void _showAction(String label) {
@@ -2181,30 +2295,47 @@ class _HeaderAppBarDemoPageState extends State<HeaderAppBarDemoPage> {
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
+    final titleRevealVariant = _titleRevealVariant;
+    final disableTitleTapReveal =
+        titleRevealVariant != _HeaderTitleRevealVariant.tooltip;
+    final actions = <Widget>[
+      IconButtonComponent(
+        tooltip: 'Add item',
+        variant: IconButtonComponentVariant.primary,
+        icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
+        onTap: () => _showAction('Add tapped'),
+      ),
+      _CatalogThemeCycleButton(themeMode: _themeMode, onChanged: _setThemeMode),
+    ];
+
     return Scaffold(
       backgroundColor: colors.backgroundBase,
       body: AppBarComponent(
-        title: 'Menu items',
-        subtitle: 'Scroll to collapse into a single app bar row',
+        title: _longTitle,
+        disableTitleTapReveal: disableTitleTapReveal,
+        subtitle: titleRevealVariant.description,
         onBack: () => Navigator.of(context).pop(),
         leading: const _HeaderAppBarDemoLeading(),
-        actions: [
-          IconButtonComponent(
-            tooltip: 'Add item',
-            variant: IconButtonComponentVariant.primary,
-            icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
-            onTap: () => _showAction('Add tapped'),
-          ),
-          _CatalogThemeCycleButton(
-            themeMode: _themeMode,
-            onChanged: _setThemeMode,
-          ),
-        ],
+        actions: actions,
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               Spacing.lg,
               Spacing.xs,
+              Spacing.lg,
+              Spacing.xxl,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: _HeaderAppBarTitleRevealControls(
+                variant: titleRevealVariant,
+                onVariantChanged: _setTitleRevealVariant,
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.lg,
+              0,
               Spacing.lg,
               Spacing.xxl,
             ),
@@ -2217,6 +2348,63 @@ class _HeaderAppBarDemoPageState extends State<HeaderAppBarDemoPage> {
                 return _HeaderAppBarDemoListItem(index: index ~/ 2);
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+extension on _HeaderTitleRevealVariant {
+  String get label => switch (this) {
+    _HeaderTitleRevealVariant.tooltip => 'Tap popup',
+    _HeaderTitleRevealVariant.disabled => 'Disabled',
+  };
+
+  String get description => switch (this) {
+    _HeaderTitleRevealVariant.tooltip =>
+      'Default: tap title to show the full value in a popup',
+    _HeaderTitleRevealVariant.disabled =>
+      'Title tap reveal disabled for this screen',
+  };
+}
+
+class _HeaderAppBarTitleRevealControls extends StatelessWidget {
+  const _HeaderAppBarTitleRevealControls({
+    required this.variant,
+    required this.onVariantChanged,
+  });
+
+  final _HeaderTitleRevealVariant variant;
+  final ValueChanged<_HeaderTitleRevealVariant> onVariantChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+
+    return _CatalogPreviewGroup(
+      title: 'Title tap behavior',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: Spacing.sm,
+            runSpacing: Spacing.sm,
+            children: [
+              for (final option in _HeaderTitleRevealVariant.values)
+                FilterChipComponent(
+                  label: option.label,
+                  state: option == variant
+                      ? FilterChipComponentState.selected
+                      : FilterChipComponentState.unselected,
+                  onChanged: (_) => onVariantChanged(option),
+                ),
+            ],
+          ),
+          const SizedBox(height: Spacing.md),
+          Text(
+            variant.description,
+            style: TextStyles.mini.copyWith(color: colors.textLight),
           ),
         ],
       ),

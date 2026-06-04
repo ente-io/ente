@@ -143,8 +143,8 @@ class HelpSupportPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: Spacing.sm, top: 6, bottom: 6),
       child: Text(
-        title.toUpperCase(),
-        style: TextStyles.mini.copyWith(color: colors.textLight),
+        title,
+        style: TextStyles.large.copyWith(color: colors.textBase),
       ),
     );
   }
