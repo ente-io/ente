@@ -57,6 +57,16 @@ jobs:
               with:
                   ref: release/${{ inputs.app }}-v${{ inputs.version }}
 
+            - name: Mint App token
+              id: app_token
+              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              with:
+                  app-id: ${{ secrets.ENTE_CI_GH_APP_ID }}
+                  private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
+                  repositories: ente,nightly
+                  permission-contents: write
+                  permission-pull-requests: write
+
             - name: Configure Git
               if: inputs.action == 'start'
               run: |
@@ -66,7 +76,7 @@ jobs:
             - name: Start release
               if: inputs.action == 'start'
               env:
-                  RELEASE_BRANCH_PUSH_TOKEN: ${{ secrets.RELEASE_BRANCH_PUSH_TOKEN }}
+                  APP_GH_TOKEN: ${{ steps.app_token.outputs.token }}
               run: |
                   set -euo pipefail
 
@@ -80,7 +90,7 @@ jobs:
 
                   git_push_release_branch() {
                       git -c http.https://github.com/.extraheader= push \
-                          "https://x-access-token:${RELEASE_BRANCH_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
+                          "https://x-access-token:${APP_GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
                   }
 
                   release_branch="release/${APP}-v${VERSION}"
@@ -107,7 +117,7 @@ jobs:
                   fi
                   git_push_release_branch "${release_branch}"
 
-                  gh release delete "${beta_tag}" --yes || true
+                  GH_TOKEN="${APP_GH_TOKEN}" gh release delete "${beta_tag}" --yes --cleanup-tag --repo ente-io/nightly || true
                   git push origin ":refs/tags/${beta_tag}" || true
 
                   git switch -c "${next_branch}" main
@@ -120,12 +130,12 @@ jobs:
                   git commit -am "Start ${APP^} ${next_version}"
                   git push -u origin "${next_branch}"
 
-                  gh pr create --base main --head "${next_branch}" --title "[${APP}] Start ${APP^} ${next_version}" --body ""
+                  GH_TOKEN="${APP_GH_TOKEN}" gh pr create --base main --head "${next_branch}" --title "[${APP}] Start ${APP^} ${next_version}" --body ""
 
             - name: Promote release
               if: inputs.action == 'promote'
               env:
-                  RELEASE_BRANCH_PUSH_TOKEN: ${{ secrets.RELEASE_BRANCH_PUSH_TOKEN }}
+                  APP_GH_TOKEN: ${{ steps.app_token.outputs.token }}
               run: |
                   set -euo pipefail
 
@@ -139,7 +149,7 @@ jobs:
 
                   git_push_release_branch() {
                       git -c http.https://github.com/.extraheader= push \
-                          "https://x-access-token:${RELEASE_BRANCH_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
+                          "https://x-access-token:${APP_GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
                   }
 
                   release_branch="release/${APP}-v${VERSION}"
@@ -170,4 +180,5 @@ jobs:
                   gh release edit "${rc_tag}" --tag "${final_tag}" --title "${final_tag}" --target "${release_sha}" --draft --verify-tag
 
                   git push origin ":refs/tags/${rc_tag}" || true
+                  GH_TOKEN="${APP_GH_TOKEN}" gh release delete "${rc_tag}" --yes --cleanup-tag --repo ente-io/nightly || true
                   git_push_release_branch ":refs/heads/${release_branch}"

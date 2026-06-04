@@ -174,7 +174,31 @@ jobs:
                   name: locker-sha256sum-android
                   path: mobile/apps/locker/artifacts/sha256sum-apk
 
-            - name: Upload Android artifact to GitHub release
+            - name: Mint nightly token
+              id: nightly_token
+              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              with:
+                  app-id: ${{ secrets.ENTE_CI_GH_APP_ID }}
+                  private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
+                  repositories: nightly
+                  permission-contents: write
+
+            - name: Upload Android artifact to nightly release
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  repo: nightly
+                  token: ${{ steps.nightly_token.outputs.token }}
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  artifacts: "mobile/apps/locker/artifacts/ente-locker-*.apk"
+                  prerelease: true
+                  makeLatest: false
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+            - name: Upload Android artifact to RC draft
+              if: startsWith(github.ref_name, 'release/')
               uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
               with:
                   tag: ${{ env.RELEASE_TAG }}
@@ -287,6 +311,8 @@ jobs:
         needs: [build-metadata, build-android, build-ios]
         if: needs.build-metadata.outputs.should_build == 'true'
         runs-on: ubuntu-latest
+        environment:
+            name: production
 
         steps:
             - name: Checkout built commit
@@ -312,7 +338,23 @@ jobs:
                   git tag --force "${RELEASE_TAG}" "${COMMIT_SHA}"
                   git push --force origin "refs/tags/${RELEASE_TAG}"
 
-            - name: Upload checksum to GitHub release
+            - name: Mint nightly token
+              id: nightly_token
+              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              with:
+                  app-id: ${{ secrets.ENTE_CI_GH_APP_ID }}
+                  private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
+                  repositories: nightly
+                  permission-contents: write
+
+            - name: Upload checksum to nightly release
+              env:
+                  GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
+                  RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+              run: gh release upload "${RELEASE_TAG}" sha256sum --clobber --repo ente-io/nightly
+
+            - name: Upload checksum to RC draft
+              if: startsWith(github.ref_name, 'release/')
               env:
                   GH_TOKEN: ${{ github.token }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
@@ -322,8 +364,7 @@ jobs:
               continue-on-error: true
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
-                  GH_TOKEN: ${{ github.token }}
                   RELEASE_TITLE: ${{ needs.build-metadata.outputs.release_title }}
                   RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
-              run: node .github/scripts/release-notify.mjs locker "$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
+              run: node .github/scripts/release-notify.mjs locker "${RELEASE_TAG}"
