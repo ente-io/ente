@@ -82,7 +82,9 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
       trailingExtraMargin: 4,
       onTap: () async {
-        AdaptiveTheme.of(context).setThemeMode(themeMode);
+        final adaptiveTheme = AdaptiveTheme.of(context);
+        adaptiveTheme.setThemeMode(themeMode);
+        await adaptiveTheme.persist();
         currentThemeMode = themeMode;
         if (mounted) {
           setState(() {});
