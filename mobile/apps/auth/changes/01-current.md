@@ -1,9 +1,3 @@
-- App icon picker to customize your home screen appearance
-- New QR code dialog with branded design for sharing codes
-- Import 2FA codes from andOTP encrypted backups
-- Enhanced search and copy with keyboard shortcuts on desktop (press '/' to search, Enter to select, 'C' to copy, 'N' for next code)
-- Refreshed empty home screen when no codes are imported
-- Bug fixes and performance improvements
 - Upgraded Auth to Flutter 3.38.10 and Android target SDK 36
 - Worked around Android search and app-lock password autofocus not reliably opening the keyboard on app start ([#279](https://github.com/ente-io/ente/issues/279), [#10614](https://github.com/ente-io/ente/issues/10614))
 - Made overflowing Auth tag strips scrollable with desktop mouse wheel and drag interactions, and made tag chips reachable by keyboard Tab and selectable with Enter or Space ([#4079](https://github.com/ente-io/ente/issues/4079), [#1811](https://github.com/ente-io/ente/issues/1811), [#1929](https://github.com/ente-io/ente/issues/1929), [#4686](https://github.com/ente-io/ente/issues/4686))
