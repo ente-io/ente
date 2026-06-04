@@ -22,11 +22,13 @@ const apps = {
 };
 
 const app = process.argv[2];
-const config = apps[app];
-const releaseUrl = process.argv[3];
-if (!config || !releaseUrl) {
-    throw new Error(`Usage: node .github/scripts/release-notify.mjs ${Object.keys(apps).join("|")} <release-url>`);
+const releaseTag = process.argv[3];
+if (!config || !releaseTag) {
+    throw new Error(`Usage: node .github/scripts/release-notify.mjs ${Object.keys(apps).join("|")} <release-tag>`);
 }
+
+const config = apps[app];
+const releaseUrl = `https://github.com/ente-io/nightly/releases/tag/${releaseTag}`;
 
 const env = (name) => {
     const value = process.env[name];

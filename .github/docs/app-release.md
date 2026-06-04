@@ -8,7 +8,9 @@ Photos, Auth, Locker, and Ensu use the same release process, as described here.
 
 ## Normal development
 
-Nightly builds of `main` are automatically created every weekday morning (IST), and can also be created by running `ensu-build.yml` manually. These builds are attached to the draft `ensu-v0.1.16-beta` GitHub release; each nightly keeps updating the same draft.
+Nightly builds of `main` are automatically created every weekday morning (IST), and can also be created by running `ensu-build.yml` manually.
+
+The nightly builds are published to the `ensu-v0.1.16-beta` pre-release in [ente-io/nightly](https://github.com/ente-io/nightly); each nightly keeps updating the same pre-release.
 
 > [!NOTE]
 >
@@ -28,8 +30,8 @@ gh workflow run app-release.yml \
 This:
 
 1. Creates a release branch `release/ensu-v0.1.16` with the version set to `0.1.16`
-2. Pushes the branch, which triggers `ensu-build.yml` and creates the draft `ensu-v0.1.16-rc` GitHub release
-3. Removes the `ensu-v0.1.16-beta` draft and tag
+2. Pushes the branch, which triggers `ensu-build.yml`, which creates the draft `ensu-v0.1.16-rc` GitHub release in `ente-io/ente` (and a pre-release in `ente-io/nightly`).
+3. Removes the `ensu-v0.1.16-beta` pre-release from `ente-io/nightly` and the beta tag from `ente-io/ente`.
 
 > [!TIP]
 >
@@ -56,7 +58,7 @@ gh workflow run app-release.yml \
   -f version=0.1.16
 ```
 
-This does not create another build. It tags the last RC commit as `ensu-v0.1.16`, moves the GitHub draft from `ensu-v0.1.16-rc` to `ensu-v0.1.16`, removes the RC tag, and deletes the release branch.
+This does not create another build. It tags the last RC commit as `ensu-v0.1.16`, moves the GitHub draft from `ensu-v0.1.16-rc` to `ensu-v0.1.16`, removes the RC tag, deletes the `ensu-v0.1.16-rc` pre-release from `ente-io/nightly`, and deletes the release branch.
 
 Publish the draft ensu-v0.1.16 release on GitHub when ready.
 
@@ -66,10 +68,10 @@ Publish the draft ensu-v0.1.16 release on GitHub when ready.
 
 ## Retries
 
-`ensu-build.yml` is safe to retry. Both nightly and RC builds update fixed draft releases (`ensu-v0.1.16-beta` and `ensu-v0.1.16-rc`), and reruns update the same draft.
+`ensu-build.yml` is safe to retry. Both nightly and RC builds update fixed releases (`ensu-v0.1.16-beta` and `ensu-v0.1.16-rc`), and reruns update the same ones.
 
 > [!NOTE]
 >
 > If a build has already reached Play Store or TestFlight, trigger a new workflow run instead of re-running failed jobs so that it gets a new build number.
 
-`app-release.yml` changes release state. If it fails, inspect the failed step before re-running. After it has pushed a branch, created a tag, or moved a draft release, either finish the remaining step manually or undo the partial state first. Cleanup is intentionally late: `action=start` pushes the release branch before deleting the beta draft, and `action=promote` deletes the release branch last.
+`app-release.yml` changes release state. If it fails, inspect the failed step before re-running. After it has pushed a branch, created a tag, or moved a draft release, either finish the remaining step manually or undo the partial state first. Cleanup is intentionally late: `action=start` pushes the release branch before deleting the beta pre-release from `ente-io/nightly`, and `action=promote` deletes the release branch last.
