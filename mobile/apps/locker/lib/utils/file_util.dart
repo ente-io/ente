@@ -31,6 +31,14 @@ class FileUtil {
   static final Map<int, DateTime> _lastTapTimes = {};
 
   static Future<void> openFile(BuildContext context, EnteFile file) async {
+    if (file.uploadedFileID == null) {
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: Exception(context.l10n.errorOpeningFile),
+      );
+      return;
+    }
+
     final fileId = file.uploadedFileID!;
     final now = DateTime.now();
     final lastTap = _lastTapTimes[fileId];
@@ -43,14 +51,6 @@ class FileUtil {
 
     if (InfoFileService.instance.isInfoFile(file)) {
       return _openInfoFile(context, file);
-    }
-
-    if (file.uploadedFileID == null) {
-      await showGenericErrorBottomSheet(
-        context: context,
-        error: Exception(context.l10n.errorOpeningFile),
-      );
-      return;
     }
 
     final cachedDecryptedFile = File(getCachedDecryptedFilePath(file));
