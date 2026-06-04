@@ -98,7 +98,8 @@
     },
     {
       "title": "Ankama",
-      "slug": "ankama"
+      "slug": "ankama",
+      "hex": "000000"
     },
     {
       "title": "Ankara University",
@@ -130,7 +131,8 @@
       "hex": "ef8a33"
     },
     {
-      "title": "AscendEX"
+      "title": "AscendEX",
+      "hex": "000000"
     },
     {
       "title": "Aternos",
@@ -282,7 +284,8 @@
       "title": "BitOasis"
     },
     {
-      "title": "BitSkins"
+      "title": "BitSkins",
+      "hex": "000000"
     },
     {
       "title": "Bitstamp",
@@ -454,7 +457,8 @@
     },
     {
       "title": "CinemaZ.to",
-      "slug": "cinemaz"
+      "slug": "cinemaz",
+      "hex": "000000"
     },
     {
       "title": "Clickdoc",
@@ -571,7 +575,8 @@
     },
     {
       "title": "Cryptee",
-      "slug": "cryptee"
+      "slug": "cryptee",
+      "hex": "000000"
     },
     {
       "title": "Crypto.com",
@@ -628,7 +633,8 @@
       "title": "DEGIRO"
     },
     {
-      "title": "Deloitte"
+      "title": "Deloitte",
+      "hex": "000000"
     },
     {
       "title": "deriv"
@@ -849,7 +855,8 @@
       "slug": "fluxer"
     },
     {
-      "title": "fortrabbit"
+      "title": "fortrabbit",
+      "hex": "000000"
     },
     {
       "title": "ForUsAll"
@@ -1679,7 +1686,8 @@
     },
     {
       "title": "Pionex",
-      "slug": "pionex"
+      "slug": "pionex",
+      "hex": "000000"
     },
     {
       "title": "PSNProfiles",
