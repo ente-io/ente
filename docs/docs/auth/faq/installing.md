@@ -84,6 +84,12 @@ Latest versions of our web app are available at [auth.ente.com](https://auth.ent
 
 <br/>
 
+### What Windows version does Ente Auth run on? {#windows-version}
+
+The Ente Auth desktop app requires Windows 10 or later. Windows 7 and 8 are not supported.
+
+---
+
 # CLI
 
 Ente's CLI is distributed directly over [GitHub](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0).
