@@ -657,7 +657,29 @@ Yes, if the original photo is still available locally on your device or has alre
 
 Photos that exist only in the cloud need an internet connection to load in full quality.
 
+### Does Ente track edits or deletions made in Apple Photos after the initial upload? {#apple-photos-edits-deletions}
+
+No. Ente is an independent backup. After a photo is uploaded:
+
+- Edits made in Apple Photos won't sync to Ente. Ente keeps the original as uploaded.
+- Photos deleted in Apple Photos remain in Ente.
+- Photos deleted in Ente do not affect Apple Photos.
+
+If you're moving to Ente as your primary library, work directly in Ente going forward. For advanced edits, edit in Apple Photos or another editor, export the edited version, and add it to Ente manually.
+
+### Can I make Ente the default photo app on iOS? {#ente-default-ios}
+
+iOS doesn't let any third-party app replace Apple Photos as the system default. A few practical workarounds:
+
+- Share directly from Ente by opening the app, selecting photos, and tapping **Share**.
+- iOS learns from usage. The more you share via Ente, the higher it appears in the share sheet across other apps.
+- The iOS camera always saves to the system camera roll first. Ente auto-backs up from there.
+
 ## Exporting Your Data
+
+### Why does an export show more files than I have photos? {#export-more-files-than-photos}
+
+If the same photo or video is in multiple albums, the export includes a copy under each album folder. This is by design so each album folder is a self-contained collection. The number of unique files in your library is smaller than the total exported count.
 
 ### How do I import an Ente export back into Ente? {#import-ente-export}
 
@@ -702,6 +724,10 @@ But some of these formats cannot be streamed on the web browser and you will be 
 ### Does Ente apply compression to uploaded photos? {#compression}
 
 Ente does not apply compression to uploaded photos. The file size of your photos in Ente will be similar to the original file sizes you have.
+
+### Can I upload TIFF files? {#tiff-support}
+
+Ente Photos does not currently support uploading or rendering `.tif` / `.tiff` files. This is expected to be addressed alongside broader RAW image support.
 
 ## Deduplication
 
