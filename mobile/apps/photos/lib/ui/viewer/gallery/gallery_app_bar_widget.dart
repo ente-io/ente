@@ -846,7 +846,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _menuOption(
           AlbumPopupAction.freeUpSpace,
           strings.freeUpDeviceSpace,
-          _menuHugeIcon(HugeIcons.strokeRoundedCleaningBucket, iconColor),
+          _menuHugeIcon(HugeIcons.strokeRoundedClean, iconColor),
         ),
       if (galleryType == GalleryType.sharedPublicCollection &&
           (widget.collection?.isDownloadEnabledForPublicLink() ?? false))
