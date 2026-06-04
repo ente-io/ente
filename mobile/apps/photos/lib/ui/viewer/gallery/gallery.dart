@@ -83,7 +83,6 @@ class Gallery extends StatefulWidget {
   /// files, it's not necessary that this will be true.
   final bool inSelectionMode;
   final bool showSelectAll;
-  final bool isScrollablePositionedList;
 
   // add a Function variable to get sort value in bool
   final SortAscFn? sortAsyncFn;
@@ -118,7 +117,6 @@ class Gallery extends StatefulWidget {
     this.inSelectionMode = false,
     this.sortAsyncFn,
     this.showSelectAll = true,
-    this.isScrollablePositionedList = true,
     this.reloadDebounceTime = const Duration(milliseconds: 500),
     this.reloadDebounceExecutionInterval = const Duration(seconds: 2),
     this.priorityReloadDebounceTime = const Duration(milliseconds: 200),

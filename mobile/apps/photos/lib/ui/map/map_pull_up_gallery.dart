@@ -205,7 +205,6 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                           tagPrefix: "map_gallery",
                           showSelectAll: true,
                           selectedFiles: _selectedFiles,
-                          isScrollablePositionedList: false,
                         ),
                       );
                     },
