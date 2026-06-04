@@ -2,6 +2,7 @@
 
 ## v1.7.25 (unreleased)
 
+- Show files skipped during upload (hidden files and unreadable zips) in the upload progress.
 - Support Traditional Chinese and Urdu translations.
 
 ## v1.7.24

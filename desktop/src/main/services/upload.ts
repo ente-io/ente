@@ -21,7 +21,7 @@ export const listZipItems = async (
 
                 const basename = path.basename(entry.name);
                 if (basename.startsWith(".")) {
-                    skippedFiles.push({ name: entry.name, kind: "hiddenFile" });
+                    skippedFiles.push({ name: entry.name, type: "hiddenFile" });
                     continue;
                 }
                 items.push([zipPath, entry.name]);
@@ -35,7 +35,7 @@ export const listZipItems = async (
         log.error("Ignoring malformed zip", e);
         return {
             items: [],
-            skippedFiles: [{ name: path.basename(zipPath), kind: "failedZip" }],
+            skippedFiles: [{ name: path.basename(zipPath), type: "failedZip" }],
         };
     }
 };
@@ -70,6 +70,7 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
 
     const allZipItems = uploadStatusStore.get("zipItems");
     let zipItems: ZipItem[] = [];
+    let skippedFiles: SkippedFile[] = [];
 
     // Migration code - May 2024. Remove after a bit (tag: Migration).
     //
@@ -83,28 +84,19 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     if (allZipItems === undefined) {
         const allZipPaths = uploadStatusStore.get("zipPaths") ?? [];
         const zipPaths = allZipPaths.filter((f) => existsSync(f));
-        const allSkippedFiles: SkippedFile[] = [];
         for (const zip of zipPaths) {
             const result = await listZipItems(zip);
             zipItems = zipItems.concat(result.items);
-            allSkippedFiles.push(...result.skippedFiles);
-        }
-
-        if (allSkippedFiles.length > 0) {
-            uploadStatusStore.set("skippedFiles", allSkippedFiles);
+            skippedFiles = skippedFiles.concat(result.skippedFiles);
         }
     } else {
         zipItems = allZipItems.filter(([z]) => existsSync(z));
+        skippedFiles = uploadStatusStore.get("skippedFiles") ?? [];
     }
 
     if (filePaths.length == 0 && zipItems.length == 0) return undefined;
 
-    return {
-        collectionName,
-        filePaths,
-        zipItems,
-        skippedFiles: uploadStatusStore.get("skippedFiles") ?? [],
-    };
+    return { collectionName, filePaths, zipItems, skippedFiles };
 };
 
 /**

@@ -20,8 +20,10 @@ export interface UploadStatusStore {
      * @deprecated Legacy paths to zip files, now subsumed into zipItems.
      */
     zipPaths?: string[];
-    /** Files that aren't being uploaded (macOS-injected placeholders or
-     * unopenable zips). Surfaced in the upload progress UI on resume. */
+    /**
+     * Files that were skipped because either we could not open them (zip files)
+     * or they are hidden dot files.
+     */
     skippedFiles?: SkippedFile[];
 }
 
@@ -37,10 +39,10 @@ const uploadStatusSchema: Schema<UploadStatusStore> = {
         type: "array",
         items: {
             type: "object",
-            required: ["name", "kind"],
+            required: ["name", "type"],
             properties: {
                 name: { type: "string" },
-                kind: { type: "string", enum: ["hiddenFile", "failedZip"] },
+                type: { type: "string", enum: ["hiddenFile", "failedZip"] },
             },
         },
     },

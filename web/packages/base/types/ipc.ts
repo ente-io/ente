@@ -626,11 +626,9 @@ export interface Electron {
      * whose file name begins with a dot (i.e. "hidden" files) will also be
      * excluded.
      *
-     * In addition to the regular {@link items}, returns a {@link skippedFiles}
-     * list of files that aren't being uploaded (hidden files, or `.zip` files
-     * that can't be opened). Each entry is tagged with a
-     * {@link SkippedFileKind} so the renderer can surface it in the right
-     * section of the upload progress UI.
+     * Alongside `items`, the result includes `skippedFiles`: the hidden
+     * entries excluded above, plus a single entry for the zip itself if it
+     * could not be opened.
      *
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
@@ -887,23 +885,9 @@ export interface FolderWatchSyncedFile {
  */
 export type ZipItem = [zipPath: string, entryName: string];
 
-/**
- * The reason a file was excluded from the upload.
- *
- * - `"hiddenFile"`: a dot-prefixed file, filtered out.
- * - `"failedZip"`: a `.zip` file that couldn't be opened as a zip archive.
- *   Surfaced as a failure so the user notices.
- */
-export type SkippedFileKind = "hiddenFile" | "failedZip";
-
-/**
- * A file that isn't being uploaded, together with the reason it was
- * skipped. {@link name} is shown in the upload progress UI (the zip entry
- * name inside an archive, or the file name for top-level files).
- */
 export interface SkippedFile {
     name: string;
-    kind: SkippedFileKind;
+    type: "hiddenFile" | "failedZip";
 }
 
 /**
@@ -933,8 +917,10 @@ export interface PendingUploads {
      * {@link ZipItem} (zip path and entry name) that need to be uploaded.
      */
     zipItems: ZipItem[];
-    /** Files that aren't being uploaded, tagged with a
-     * {@link SkippedFileKind} for display. */
+    /**
+     * Files that were skipped because either we could not open them (zip files)
+     * or they are hidden dot files.
+     */
     skippedFiles?: SkippedFile[];
 }
 

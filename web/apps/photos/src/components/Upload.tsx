@@ -251,8 +251,6 @@ export const Upload: React.FC<UploadProps> = ({
      */
     const [desktopZipItems, setDesktopZipItems] = useState<ZipItem[]>([]);
 
-    /** Files that aren't being uploaded, tagged with the reason they
-     * were skipped. Surfaced in the upload progress dialog. */
     const [skippedFiles, setSkippedFiles] = useState<SkippedFile[]>([]);
 
     /**
@@ -495,11 +493,11 @@ export const Upload: React.FC<UploadProps> = ({
         const hiddenFiles: SkippedFile[] = [];
         const prunedItemAndPaths = allItemAndPaths.filter(([, p]) => {
             const name = basename(p);
-            if (!name.startsWith(".")) return true;
-            const kind = skippedFileKindForFileName(name);
-            if (!kind) return true;
-            hiddenFiles.push({ name, kind });
-            return false;
+            if (name.startsWith(".")) {
+                hiddenFiles.push({ name, type: "hiddenFile" });
+                return false;
+            }
+            return true;
         });
         const nextSkippedFiles = skippedFiles.concat(hiddenFiles);
         if (hiddenFiles.length > 0) setSkippedFiles(nextSkippedFiles);
@@ -1063,9 +1061,8 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     for (const file of files) {
         const path = electron.pathForFile(file);
 
-        const skippedFileKind = skippedFileKindForFileName(file.name);
-        if (skippedFileKind) {
-            skippedFiles.push({ name: file.name, kind: skippedFileKind });
+        if (file.name.startsWith(".")) {
+            skippedFiles.push({ name: file.name, type: "hiddenFile" });
             continue;
         }
 
@@ -1079,7 +1076,7 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
                 // the response, so reaching this catch means something
                 // more fundamental went wrong).
                 log.error("Failed to list zip items", e);
-                skippedFiles.push({ name: file.name, kind: "failedZip" });
+                skippedFiles.push({ name: file.name, type: "failedZip" });
             }
         } else {
             fileAndPaths.push({ file, path });
@@ -1087,13 +1084,6 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     }
 
     return { fileAndPaths, zipItems, skippedFiles };
-};
-
-const skippedFileKindForFileName = (
-    fileName: string,
-): SkippedFile["kind"] | undefined => {
-    if (fileName.startsWith(".")) return "hiddenFile";
-    return undefined;
 };
 
 /**

@@ -30,6 +30,7 @@ import {
 import { SpacedRow } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
+import { basename } from "ente-base/file-name";
 import { formattedListJoin } from "ente-base/i18n";
 import type { SkippedFile } from "ente-base/types/ipc";
 import { t } from "i18next";
@@ -486,6 +487,7 @@ const notUploadedFileCount = (
     skippedFiles: SkippedFile[],
 ) => {
     let c = skippedFiles.length;
+
     if (!finishedUploads) return c;
 
     c += finishedUploads.get("alreadyUploaded")?.length ?? 0;
@@ -495,6 +497,7 @@ const notUploadedFileCount = (
     c += finishedUploads.get("tooLarge")?.length ?? 0;
     c += finishedUploads.get("unsupported")?.length ?? 0;
     c += finishedUploads.get("zeroSize")?.length ?? 0;
+
     return c;
 };
 
@@ -534,12 +537,13 @@ function UploadProgressDialog() {
         if (reason != "backdropClick") onClose();
     };
 
-    const skipped = (kind: SkippedFile["kind"]) =>
+    const skipped = (type: SkippedFile["type"]) =>
         skippedFiles
-            .filter((file) => file.kind == kind)
+            .filter((file) => file.type == type)
             .map(({ name }, index) => ({
-                key: `${kind}-${index}-${name}`,
-                name,
+                key: `${type}-${index}-${name}`,
+                name: basename(name),
+                title: name,
             }));
 
     return (
@@ -593,8 +597,8 @@ function UploadProgressDialog() {
                     />
                     <FileNameListSection
                         items={skipped("failedZip")}
-                        sectionTitle={t("failed_zip_files")}
-                        sectionInfo={t("failed_zip_files_hint")}
+                        sectionTitle={t("unreadable_zip_files")}
+                        sectionInfo={t("unreadable_zip_files_hint")}
                     />
                     <ResultSection
                         resultType="unsupported"
@@ -744,7 +748,9 @@ const ResultSection: React.FC<ResultSectionProps> = ({
     const { finishedUploads, uploadFileNames } = useUploadProgressContext();
     const fileList = finishedUploads.get(resultType);
 
-    if (!fileList?.length) return <></>;
+    if (!fileList?.length) {
+        return <></>;
+    }
 
     return (
         <FileNameListSection
@@ -761,6 +767,10 @@ const ResultSection: React.FC<ResultSectionProps> = ({
 interface ResultSectionItem {
     key: string | number;
     name: string;
+    /**
+     * Tooltip text. Defaults to {@link name} if not provided.
+     */
+    title?: string;
 }
 
 interface FileNameListSectionProps {
@@ -774,7 +784,9 @@ const FileNameListSection: React.FC<FileNameListSectionProps> = ({
     sectionTitle,
     sectionInfo,
 }) => {
-    if (!items.length) return <></>;
+    if (!items.length) {
+        return <></>;
+    }
 
     const renderListItem = (item: ResultSectionItem) => (
         <ResultItemContainer>{item.name}</ResultItemContainer>
@@ -790,7 +802,7 @@ const FileNameListSection: React.FC<FileNameListSectionProps> = ({
                 <ItemList
                     items={items}
                     generateItemKey={(item) => item.key}
-                    getItemTitle={(item) => item.name}
+                    getItemTitle={(item) => item.title ?? item.name}
                     renderListItem={renderListItem}
                     maxHeight={160}
                     itemSize={35}
