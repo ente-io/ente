@@ -12,6 +12,6 @@ if (
 ) {
     console.error("Error: web dependencies are missing or stale.");
     console.error("Run:");
-    console.error("  cd web && npm ci");
+    console.error('  (cd "$(git rev-parse --show-toplevel)/web" && npm ci)');
     process.exit(1);
 }

@@ -62,37 +62,15 @@ export const pathOrZipItemSize = async (
     }
 };
 
-export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
+export const pendingUploads = (): PendingUploads | undefined => {
     const collectionName = uploadStatusStore.get("collectionName") ?? undefined;
 
     const allFilePaths = uploadStatusStore.get("filePaths") ?? [];
     const filePaths = allFilePaths.filter((f) => existsSync(f));
 
-    const allZipItems = uploadStatusStore.get("zipItems");
-    let zipItems: ZipItem[] = [];
-    let skippedFiles: SkippedFile[] = [];
-
-    // Migration code - May 2024. Remove after a bit (tag: Migration).
-    //
-    // The older store formats will not have zipItems and instead will have
-    // zipPaths. If we find such a case, read the zipPaths and enqueue all of
-    // their files as zipItems in the result.
-    //
-    // This potentially can be cause us to try reuploading an already uploaded
-    // file, but the dedup logic will kick in at that point so no harm will come
-    // of it.
-    if (allZipItems === undefined) {
-        const allZipPaths = uploadStatusStore.get("zipPaths") ?? [];
-        const zipPaths = allZipPaths.filter((f) => existsSync(f));
-        for (const zip of zipPaths) {
-            const result = await listZipItems(zip);
-            zipItems = zipItems.concat(result.items);
-            skippedFiles = skippedFiles.concat(result.skippedFiles);
-        }
-    } else {
-        zipItems = allZipItems.filter(([z]) => existsSync(z));
-        skippedFiles = uploadStatusStore.get("skippedFiles") ?? [];
-    }
+    const allZipItems = uploadStatusStore.get("zipItems") ?? [];
+    const zipItems = allZipItems.filter(([z]) => existsSync(z));
+    const skippedFiles = uploadStatusStore.get("skippedFiles") ?? [];
 
     if (filePaths.length == 0 && zipItems.length == 0) return undefined;
 
