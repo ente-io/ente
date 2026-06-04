@@ -115,6 +115,10 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            ndk {
+                abiFilters.clear()
+                abiFilters "arm64-v8a", "armeabi-v7a"
+            }
             minifyEnabled true
             proguardFiles getDefaultProguardFile(
                 "proguard-android-optimize.txt",
