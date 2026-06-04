@@ -136,16 +136,11 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
     if (_fallbackPolicy.isUnsupported(options.uri)) {
       return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
     }
-    // Keep explicit body send-timeout behavior on Dio's IO adapter. The app
-    // does not set this globally, but per-request timeouts should not inherit
-    // dio_http2_adapter's stream-close behavior after a timed-out body stream.
-    if (_hasRequestBodySendTimeout(options, requestStream)) {
-      return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
-    }
-    // Keep cancellable body streams on Dio's IO adapter. dio_http2_adapter closes
-    // the HTTP/2 outgoing stream on cancellation, which can race with active file
-    // streams and surface stream-close errors instead of a clean Dio cancellation.
-    if (_hasCancellableRequestBody(requestStream, cancelFuture)) {
+    if (_shouldUseFallbackForRequestBody(
+      options,
+      requestStream,
+      cancelFuture,
+    )) {
       return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
     }
 
@@ -194,6 +189,18 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
         message.contains("no application protocol");
   }
 
+  // Keep body sources on Dio's IO adapter when dio_http2_adapter can close the
+  // HTTP/2 outgoing stream before the body stops emitting.
+  bool _shouldUseFallbackForRequestBody(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    return _hasRequestBodySendTimeout(options, requestStream) ||
+        _hasCancellableRequestBody(requestStream, cancelFuture) ||
+        _hasSourceStreamingBody(options);
+  }
+
   bool _hasRequestBodySendTimeout(
     RequestOptions options,
     Stream<Uint8List>? requestStream,
@@ -207,6 +214,10 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) {
     return requestStream != null && cancelFuture != null;
+  }
+
+  bool _hasSourceStreamingBody(RequestOptions options) {
+    return options.data is Stream<List<int>> || options.data is FormData;
   }
 }
 
