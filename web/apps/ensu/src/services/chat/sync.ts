@@ -957,7 +957,7 @@ const ensureAttachmentEncryptedForUpload = async (
     attachmentId: string,
     sessionUuid: string,
     chatKey: string,
-): Promise<Uint8Array> => {
+): Promise<Uint8Array<ArrayBuffer>> => {
     const bytes = await readAttachmentBytes(attachmentId);
 
     try {

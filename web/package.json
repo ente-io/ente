@@ -51,7 +51,7 @@
         "concurrently": "9.2.1",
         "eslint": "9.39.4",
         "prettier": "3.6.2",
-        "typescript": "5.8.3"
+        "typescript": "6.0.3"
     },
     "packageManager": "npm@11.12.1"
 }

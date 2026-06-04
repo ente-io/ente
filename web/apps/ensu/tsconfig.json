@@ -11,6 +11,7 @@
         "next-env.d.ts",
         "next.config.mjs",
         "../../packages/base/global-electron.d.ts",
+        "../../packages/base/global-css.d.ts",
         "../../packages/base/components/utils/mui-theme.d.ts"
     ],
     "exclude": ["node_modules", "out", ".next", ".next-desktop"]

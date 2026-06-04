@@ -290,7 +290,10 @@ class DownloadManager {
      * can return `undefined` iff the thumbnail is not already cached, and
      * {@link cachedOnly} is set to `true`.
      */
-    async thumbnailData(file: EnteFile, cachedOnly = false) {
+    async thumbnailData(
+        file: EnteFile,
+        cachedOnly = false,
+    ): Promise<Uint8Array<ArrayBuffer> | undefined> {
         await this.initThumbnailCacheIfNeeded();
 
         const key = file.id.toString();

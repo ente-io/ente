@@ -10,7 +10,8 @@
         "**/*.tsx",
         "**/*.js",
         "../../packages/base/components/utils/mui-theme.d.ts",
-        "../../packages/base/global-electron.d.ts"
+        "../../packages/base/global-electron.d.ts",
+        "../../packages/base/global-css.d.ts"
     ],
     "exclude": ["node_modules", "out", ".next", ".next-desktop"]
 }

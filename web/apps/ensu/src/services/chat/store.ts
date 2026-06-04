@@ -70,7 +70,7 @@ interface StoredMessage {
 
 interface StoredAttachmentBytes {
     id: string;
-    data: Uint8Array;
+    data: Uint8Array<ArrayBuffer>;
 }
 
 interface ChatDbSchema {
@@ -1465,7 +1465,10 @@ const attachmentPath = async (id: string) => {
     return join(dir, id);
 };
 
-export const writeAttachmentBytes = async (id: string, data: Uint8Array) => {
+export const writeAttachmentBytes = async (
+    id: string,
+    data: Uint8Array<ArrayBuffer>,
+) => {
     if (isTauriRuntime()) {
         const { writeFile } = await import("@tauri-apps/plugin-fs");
         const path = await attachmentPath(id);
@@ -1487,7 +1490,9 @@ export const storeEncryptedAttachmentBytes = async (
     await writeAttachmentBytes(id, encrypted);
 };
 
-export const readAttachmentBytes = async (id: string): Promise<Uint8Array> => {
+export const readAttachmentBytes = async (
+    id: string,
+): Promise<Uint8Array<ArrayBuffer>> => {
     if (isTauriRuntime()) {
         const { readFile } = await import("@tauri-apps/plugin-fs");
         const path = await attachmentPath(id);
@@ -1508,7 +1513,7 @@ export const readDecryptedAttachmentBytes = async (
     id: string,
     chatKey: string,
     sessionUuid: string,
-): Promise<Uint8Array> => {
+): Promise<Uint8Array<ArrayBuffer>> => {
     const encrypted = await readAttachmentBytes(id);
     try {
         return await decryptAttachmentBytes(encrypted, chatKey, sessionUuid);
