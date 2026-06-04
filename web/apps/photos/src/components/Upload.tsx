@@ -33,7 +33,12 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
+import type {
+    CollectionMapping,
+    Electron,
+    SkippedFile,
+    ZipItem,
+} from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { UploadProgress } from "ente-gallery/components/UploadProgress";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
@@ -246,6 +251,8 @@ export const Upload: React.FC<UploadProps> = ({
      */
     const [desktopZipItems, setDesktopZipItems] = useState<ZipItem[]>([]);
 
+    const [skippedFiles, setSkippedFiles] = useState<SkippedFile[]>([]);
+
     /**
      * Consolidated and cleaned list obtained from {@link webFiles},
      * {@link desktopFiles}, {@link desktopFilePaths} and
@@ -397,7 +404,8 @@ export const Upload: React.FC<UploadProps> = ({
             electron.pendingUploads().then((pending) => {
                 if (!pending) return;
 
-                const { collectionName, filePaths, zipItems } = pending;
+                const { collectionName, filePaths, zipItems, skippedFiles } =
+                    pending;
 
                 log.info(
                     `Resuming pending of upload of ${filePaths.length + zipItems.length} items${collectionName ? " to collection " + collectionName : ""}`,
@@ -406,6 +414,7 @@ export const Upload: React.FC<UploadProps> = ({
                 pendingDesktopUploadCollectionName.current = collectionName;
                 setDesktopFilePaths(filePaths);
                 setDesktopZipItems(zipItems);
+                setSkippedFiles(skippedFiles ?? []);
             });
         }
     }, []);
@@ -437,12 +446,14 @@ export const Upload: React.FC<UploadProps> = ({
 
         if (electron) {
             desktopFilesAndZipItems(electron, files).then(
-                ({ fileAndPaths, zipItems }) => {
+                ({ fileAndPaths, zipItems, skippedFiles }) => {
                     setDesktopFiles(fileAndPaths);
                     setDesktopZipItems(zipItems);
+                    setSkippedFiles(skippedFiles);
                 },
             );
         } else {
+            setSkippedFiles([]);
             setWebFiles(files);
         }
     }, [selectedInputFiles, dragAndDropFiles]);
@@ -479,7 +490,26 @@ export const Upload: React.FC<UploadProps> = ({
             desktopZipItems.map((ze) => [ze, joinPath(dirname(ze[0]), ze[1])]),
         ].flat() as UploadItemAndPath[];
 
-        if (allItemAndPaths.length == 0) return;
+        const hiddenFiles: SkippedFile[] = [];
+        const prunedItemAndPaths = allItemAndPaths.filter(([, p]) => {
+            const name = basename(p);
+            if (name.startsWith(".")) {
+                hiddenFiles.push({ name, type: "hiddenFile" });
+                return false;
+            }
+            return true;
+        });
+        const nextSkippedFiles = skippedFiles.concat(hiddenFiles);
+        if (hiddenFiles.length > 0) setSkippedFiles(nextSkippedFiles);
+
+        if (prunedItemAndPaths.length == 0) {
+            if (nextSkippedFiles.length > 0 && !uploadRunning.current) {
+                uploadManager.prepareForNewUpload();
+                setUploadPhase("done");
+                uploadManager.showUploadProgressDialog();
+            }
+            return;
+        }
 
         if (uploadManager.isUploadRunning()) {
             if (watcher.isUploadRunning()) {
@@ -510,16 +540,7 @@ export const Upload: React.FC<UploadProps> = ({
         setDesktopFilePaths([]);
         setDesktopZipItems([]);
 
-        // Filter out files whose names begins with a ".".
-        const prunedItemAndPaths = allItemAndPaths.filter(
-            ([, p]) => !basename(p).startsWith("."),
-        );
-
         uploadItemsAndPaths.current = prunedItemAndPaths;
-        if (uploadItemsAndPaths.current.length == 0) {
-            props.setLoading(false);
-            return;
-        }
 
         const importSuggestion = deriveImportSuggestion(
             selectedUploadType.current,
@@ -812,6 +833,7 @@ export const Upload: React.FC<UploadProps> = ({
                     uploadItemsWithCollection
                         .map(({ uploadItem }) => uploadItem)
                         .filter((x) => x !== undefined),
+                    skippedFiles,
                 );
             }
             const batchResult = await uploadManager.uploadItems(
@@ -986,6 +1008,7 @@ export const Upload: React.FC<UploadProps> = ({
                 hasLivePhotos={hasLivePhotos}
                 retryFailed={retryFailed}
                 finishedUploads={finishedUploads}
+                skippedFiles={skippedFiles}
                 cancelUploads={cancelUploads}
             />
             <CanvasReadbackBlockedDialog
@@ -1033,17 +1056,34 @@ const Inputs: React.FC<InputsProps> = ({
 const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     const fileAndPaths: FileAndPath[] = [];
     let zipItems: ZipItem[] = [];
+    let skippedFiles: SkippedFile[] = [];
 
     for (const file of files) {
         const path = electron.pathForFile(file);
+
+        if (file.name.startsWith(".")) {
+            skippedFiles.push({ name: file.name, type: "hiddenFile" });
+            continue;
+        }
+
         if (file.name.endsWith(".zip")) {
-            zipItems = zipItems.concat(await electron.listZipItems(path));
+            try {
+                const result = await electron.listZipItems(path);
+                zipItems = zipItems.concat(result.items);
+                skippedFiles = skippedFiles.concat(result.skippedFiles);
+            } catch (e) {
+                // IPC failure (desktop returns malformed zips as part of
+                // the response, so reaching this catch means something
+                // more fundamental went wrong).
+                log.error("Failed to list zip items", e);
+                skippedFiles.push({ name: file.name, type: "failedZip" });
+            }
         } else {
             fileAndPaths.push({ file, path });
         }
     }
 
-    return { fileAndPaths, zipItems };
+    return { fileAndPaths, zipItems, skippedFiles };
 };
 
 /**
@@ -1172,6 +1212,7 @@ const setPendingUploads = async (
     electron: Electron,
     collections: Collection[],
     uploadItems: UploadItem[],
+    skippedFiles: SkippedFile[],
 ) => {
     let collectionName: string | undefined;
     /* collection being one suggest one of two things
@@ -1201,7 +1242,12 @@ const setPendingUploads = async (
         }
     }
 
-    await electron.setPendingUploads({ collectionName, filePaths, zipItems });
+    await electron.setPendingUploads({
+        collectionName,
+        filePaths,
+        zipItems,
+        skippedFiles,
+    });
 };
 
 type UploadTypeSelectorProps = ModalVisibilityProps & {
