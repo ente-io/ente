@@ -673,24 +673,18 @@ export const Upload: React.FC<UploadProps> = ({
             // collection's visibility (not the UI section being viewed), since
             // watch-folder/pending syncs can route into an existing hidden
             // album by name match while the user browses the normal view.
-            const favoritedFiles =
-                favoritedFilesFromUploadBatchResult(batchResult);
+            const hiddenCollectionIDs = new Set(
+                (await savedHiddenCollections()).map((c) => c.id),
+            );
+            const favoritedFiles = favoritedFilesFromUploadBatchResult(
+                batchResult,
+                hiddenCollectionIDs,
+            );
             if (favoritedFiles.length) {
-                const hiddenCollectionIDs = new Set(
-                    (await savedHiddenCollections()).map((c) => c.id),
-                );
-                const visibleFavoritedFiles = favoritedFiles.filter(
-                    (f) => !hiddenCollectionIDs.has(f.collectionID),
-                );
-                if (visibleFavoritedFiles.length) {
-                    try {
-                        await addToFavoritesCollection(visibleFavoritedFiles);
-                    } catch (e) {
-                        log.error(
-                            "Failed to import Google Takeout favorites",
-                            e,
-                        );
-                    }
+                try {
+                    await addToFavoritesCollection(favoritedFiles);
+                } catch (e) {
+                    log.error("Failed to import Google Takeout favorites", e);
                 }
             }
         }

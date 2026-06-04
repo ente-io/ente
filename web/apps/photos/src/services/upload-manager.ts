@@ -110,8 +110,21 @@ export const successfulFilesFromUploadBatchResult = (
         return file ? [file] : [];
     });
 
+/**
+ * Return the deduped set of files in {@link batchResult} that should be added
+ * to the user's Favorites because their Google Takeout sidecar marked them as
+ * favorited.
+ *
+ * @param hiddenCollectionIDs The IDs of the user's hidden collections. Results
+ * that landed in a hidden collection are skipped _before_ deduping, so that a
+ * file uploaded into both a hidden and a visible album in the same batch keeps
+ * its visible representative and is still favorited (the dedup keeps the first
+ * occurrence per file ID, and a single batch can emit multiple results sharing
+ * a file ID but differing in collection ID via symlinks).
+ */
 export const favoritedFilesFromUploadBatchResult = (
     batchResult: UploadBatchResult,
+    hiddenCollectionIDs: Set<number>,
 ) => {
     const files: EnteFile[] = [];
     const seenFileIDs = new Set<number>();
@@ -122,6 +135,7 @@ export const favoritedFilesFromUploadBatchResult = (
             !file ||
             !("takeoutFavorited" in result) ||
             !result.takeoutFavorited ||
+            hiddenCollectionIDs.has(file.collectionID) ||
             seenFileIDs.has(file.id)
         ) {
             continue;
