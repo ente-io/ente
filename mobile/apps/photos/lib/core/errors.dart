@@ -9,6 +9,7 @@ enum InvalidReason {
   livePhotoVideoMissing,
   thumbnailMissing,
   tooLargeFile,
+  photosResourceUnavailable,
   unknown,
 }
 

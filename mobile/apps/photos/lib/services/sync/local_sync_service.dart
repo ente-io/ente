@@ -289,11 +289,14 @@ class LocalSyncService {
       // but the file might be available later
       return;
     }
+    final reason = error.reason == InvalidReason.photosResourceUnavailable
+        ? (error.message?.toString() ?? error.reason.name)
+        : error.reason.name;
     final ignored = IgnoredFile(
       file.localID,
       file.title,
       file.deviceFolder,
-      error.reason.name,
+      reason,
     );
     await IgnoredFilesService.instance.cacheAndInsert([ignored]);
   }

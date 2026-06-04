@@ -1,0 +1,1 @@
+- Stopped repeatedly retrying Apple Photos items that cannot be downloaded from iCloud during backup.
