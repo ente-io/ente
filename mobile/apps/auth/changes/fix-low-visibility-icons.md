@@ -1,0 +1,1 @@
+- Fixed several Auth custom icons that were invisible or hard to see in light or dark mode.
