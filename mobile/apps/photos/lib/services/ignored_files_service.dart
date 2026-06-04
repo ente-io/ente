@@ -6,6 +6,7 @@ import "package:photos/core/errors.dart";
 import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/ignored_file.dart';
+import "package:photos/models/ignored_upload.dart";
 
 class IgnoredFilesService {
   final _logger = Logger("IgnoredFilesService");
@@ -62,6 +63,20 @@ class IgnoredFilesService {
   Future<bool> shouldSkipUploadAsync(EnteFile file) async {
     final ignoredID = await idToIgnoreReasonMap;
     return shouldSkipUpload(ignoredID, file);
+  }
+
+  List<IgnoredUpload> getIgnoredUploads(
+    Map<String, String> idToReasonMap,
+    Iterable<EnteFile> files,
+  ) {
+    final ignoredUploads = <IgnoredUpload>[];
+    for (final file in files) {
+      final reason = getUploadSkipReason(idToReasonMap, file);
+      if (reason != null) {
+        ignoredUploads.add(IgnoredUpload(file: file, reason: reason));
+      }
+    }
+    return ignoredUploads;
   }
 
   // removeIgnoredMappings is used to remove the ignore mapping for the given
