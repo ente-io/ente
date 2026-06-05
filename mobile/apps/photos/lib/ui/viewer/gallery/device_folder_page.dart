@@ -76,7 +76,8 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
     bool? asc,
   }) async {
     final int? userID = Configuration.instance.getUserID();
-    if (_ignoredUploadFilter == IgnoredUploadReasonBucket.all) {
+    if (!flagService.resetSplitReason ||
+        _ignoredUploadFilter == IgnoredUploadReasonBucket.all) {
       return FilesDB.instance.getFilesInDeviceCollection(
         widget.deviceCollection,
         userID,
@@ -130,7 +131,9 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
               onIgnoredUploadBucketChanged: _onIgnoredUploadFilterChanged,
             )
           : const SizedBox.shrink(),
-      initialFiles: _ignoredUploadFilter == IgnoredUploadReasonBucket.all
+      initialFiles:
+          !flagService.resetSplitReason ||
+              _ignoredUploadFilter == IgnoredUploadReasonBucket.all
           ? _initialFiles
           : null,
     );
@@ -256,15 +259,24 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                 ? AppLocalizations.of(context).deviceFilesAutoUploading
                 : AppLocalizations.of(context).turnOnBackupForAutoUpload,
           ),
-          if (shouldBackup) _buildIgnoredUploadFilter(),
+          if (shouldBackup) _buildIgnoredUploadsControl(),
         ],
       ),
     );
   }
 
-  Widget _buildIgnoredUploadFilter() {
+  Widget _buildIgnoredUploadsControl() {
+    final filesInDeviceCollection = _filesInDeviceCollection();
+    return flagService.resetSplitReason
+        ? _buildIgnoredUploadFilter(filesInDeviceCollection)
+        : _buildResetIgnoredFiles(filesInDeviceCollection);
+  }
+
+  Widget _buildIgnoredUploadFilter(
+    Future<List<EnteFile>> filesInDeviceCollection,
+  ) {
     return FutureBuilder<Set<IgnoredUploadReasonBucket>>(
-      future: _ignoredUploadReasonBuckets(_filesInDeviceCollection()),
+      future: _ignoredUploadReasonBuckets(filesInDeviceCollection),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           _logger.severe("Could not check if collection has ignored files");
@@ -282,6 +294,27 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
           availableBuckets: buckets,
           selectedBucket: widget.selectedIgnoredUploadBucket,
           onBucketChanged: widget.onIgnoredUploadBucketChanged,
+        );
+      },
+    );
+  }
+
+  Widget _buildResetIgnoredFiles(
+    Future<List<EnteFile>> filesInDeviceCollection,
+  ) {
+    return FutureBuilder<bool>(
+      future: _hasIgnoredFiles(filesInDeviceCollection),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          _logger.severe("Could not check if collection has ignored files");
+          return const SizedBox.shrink();
+        }
+        if (snapshot.data != true) {
+          return const SizedBox.shrink();
+        }
+        return ResetIgnoredFilesWidget(
+          filesInDeviceCollection,
+          () => setState(() {}),
         );
       },
     );
@@ -312,6 +345,24 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
     return buckets;
   }
 
+  Future<bool> _hasIgnoredFiles(
+    Future<List<EnteFile>> filesInDeviceCollection,
+  ) async {
+    final List<EnteFile> deviceCollectionFiles = await filesInDeviceCollection;
+    final allIgnoredIDs =
+        await IgnoredFilesService.instance.idToIgnoreReasonMap;
+    if (allIgnoredIDs.isEmpty) {
+      return false;
+    }
+    for (final file in deviceCollectionFiles) {
+      final ignoreID = IgnoredFilesService.instance.getIgnoredIDForFile(file);
+      if (ignoreID != null && allIgnoredIDs.containsKey(ignoreID)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void _resetUnavailableIgnoredUploadFilter(
     Set<IgnoredUploadReasonBucket> buckets,
   ) {
@@ -328,6 +379,62 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
       }
       widget.onIgnoredUploadBucketChanged(IgnoredUploadReasonBucket.all);
     });
+  }
+}
+
+class ResetIgnoredFilesWidget extends StatefulWidget {
+  final Future<List<EnteFile>> filesInDeviceCollection;
+  final VoidCallback parentSetState;
+
+  const ResetIgnoredFilesWidget(
+    this.filesInDeviceCollection,
+    this.parentSetState, {
+    super.key,
+  });
+
+  @override
+  State<ResetIgnoredFilesWidget> createState() =>
+      _ResetIgnoredFilesWidgetState();
+}
+
+class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).resetIgnoredFiles,
+          ),
+          singleBorderRadius: 8.0,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          leadingIcon: Icons.cloud_off_outlined,
+          alwaysShowSuccessState: true,
+          onTap: () async {
+            await _removeFilesFromIgnoredFiles(widget.filesInDeviceCollection);
+            // ignore: unawaited_futures
+            RemoteSyncService.instance.sync(silently: true).then((value) {
+              if (mounted) {
+                widget.parentSetState.call();
+              }
+            });
+          },
+        ),
+        MenuSectionDescriptionWidget(
+          content: AppLocalizations.of(context).ignoredFolderUploadReason,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _removeFilesFromIgnoredFiles(
+    Future<List<EnteFile>> filesInDeviceCollection,
+  ) async {
+    final List<EnteFile> deviceCollectionFiles = await filesInDeviceCollection;
+    await IgnoredFilesService.instance.removeIgnoredMappings(
+      deviceCollectionFiles,
+    );
   }
 }
 
