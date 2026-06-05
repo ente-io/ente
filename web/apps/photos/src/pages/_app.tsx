@@ -57,8 +57,8 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import "photoswipe/dist/photoswipe.css";
-import "styles/global.css";
-import "styles/photoswipe.css";
+import "../styles/global.css";
+import "../styles/photoswipe.css";
 
 type PhotosAppProps = AppProps<Record<string, unknown>>;
 
