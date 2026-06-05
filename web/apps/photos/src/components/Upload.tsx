@@ -12,6 +12,7 @@ import type {
     UploadItemWithCollection,
 } from "@/services/upload-manager";
 import {
+    favoritedFilesFromUploadBatchResult,
     successfulFilesFromUploadBatchResult,
     uploadManager,
 } from "@/services/upload-manager";
@@ -79,6 +80,7 @@ import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/do
 import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     addOrCopyToCollection,
+    addToFavoritesCollection,
     canAddFilesToCollection,
     canDirectlyUploadToCollection,
     createAlbum,
@@ -662,6 +664,56 @@ export const Upload: React.FC<UploadProps> = ({
         }
     };
 
+    const handleTakeoutFavoritesPostUpload = async (
+        batchResult: UploadBatchResult,
+        postUploadTargetCollection: Collection | undefined,
+    ) => {
+        if (
+            !batchResult.itemResults.some(
+                ({ takeoutFavorited }) => takeoutFavorited,
+            )
+        ) {
+            return;
+        }
+
+        const hiddenCollectionIDs = new Set(
+            (await savedHiddenCollections()).map(({ id }) => id),
+        );
+        if (
+            postUploadTargetCollection &&
+            isHiddenCollection(postUploadTargetCollection)
+        ) {
+            hiddenCollectionIDs.add(postUploadTargetCollection.id);
+        }
+        if (props.isInHiddenSection) {
+            for (const { requestedCollectionID } of batchResult.itemResults) {
+                hiddenCollectionIDs.add(requestedCollectionID);
+            }
+        }
+
+        const favoritedFiles = favoritedFilesFromUploadBatchResult(
+            batchResult,
+            hiddenCollectionIDs,
+            postUploadTargetCollection?.id,
+        );
+        if (!favoritedFiles.length) return;
+
+        log.info(
+            `Adding ${favoritedFiles.length} Google Takeout favorite file(s) to Favorites`,
+        );
+        try {
+            await addToFavoritesCollection(favoritedFiles);
+            log.info(
+                `Added ${favoritedFiles.length} Google Takeout favorite file(s) to Favorites`,
+            );
+        } catch (e) {
+            log.error(
+                `Failed to import ${favoritedFiles.length} Google Takeout favorite file(s)`,
+                e,
+            );
+        }
+    };
+
     const resetUploadUIState = () => {
         props.setShouldDisableDropzone(false);
         uploadRunning.current = false;
@@ -849,6 +901,10 @@ export const Upload: React.FC<UploadProps> = ({
                 batchResult,
                 opts?.postUploadTargetCollection,
             );
+            await handleTakeoutFavoritesPostUpload(
+                batchResult,
+                opts?.postUploadTargetCollection,
+            );
             if (isDesktop) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(uploadItemsWithCollection);
@@ -883,6 +939,10 @@ export const Upload: React.FC<UploadProps> = ({
             );
             if (!batchResult.processedAny) closeUploadProgress();
             await handlePostUploadBatchResult(
+                batchResult,
+                retrySharedAlbumUploadTarget.current,
+            );
+            await handleTakeoutFavoritesPostUpload(
                 batchResult,
                 retrySharedAlbumUploadTarget.current,
             );
