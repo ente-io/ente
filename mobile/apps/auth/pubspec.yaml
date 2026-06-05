@@ -164,6 +164,7 @@ flutter:
     - assets/
     - assets/icons/
     - assets/launcher_icon/
+    - assets/polkit/
     - assets/simple-icons/icons/
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/
