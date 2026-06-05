@@ -50,7 +50,7 @@ jobs:
                   fi
 
                   release_version="$(node .github/scripts/photos-desktop-version.mjs get)"
-                  release_tag="v${release_version}"
+                  release_tag="photos-desktop-v${release_version}"
 
                   if [[ "${GITHUB_REF_NAME}" == release/photos-desktop-v* ]]; then
                       if [[ "${GITHUB_REF_NAME}" != "release/photos-desktop-v${release_version}" ]]; then
@@ -151,12 +151,11 @@ jobs:
                   npm run build:ci
 
                   platform=${{ startsWith(matrix.os, 'macos') && 'mac' || startsWith(matrix.os, 'windows') && 'windows' || 'linux' }}
-                  notes="-c.releaseInfo.releaseNotes=${RELEASE_BODY}"
 
                   if [ "${IS_RC}" = "true" ]; then
-                      npm exec -- electron-builder --$platform --publish always "$notes"
+                      npm exec -- electron-builder --$platform --publish always "-c.releaseInfo.releaseNotes=${RELEASE_BODY}"
                   else
-                      EP_PRE_RELEASE=true npm exec -- electron-builder --$platform --publish always "$notes" -c.publish.provider=github -c.publish.owner=ente-io -c.publish.repo=nightly
+                      npm exec -- electron-builder --$platform --publish never
                   fi
               env:
                   GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
@@ -168,19 +167,18 @@ jobs:
                   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
                   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
                   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-                  # Allow continually updating the rolling pre-release.
+                  # Allow rebuilds to keep updating the rolling RC draft.
                   EP_GH_IGNORE_TIME: true
                   # Workaround recommended in
                   # https://github.com/electron-userland/electron-builder/issues/3179
                   USE_HARD_LINKS: false
 
-            - name: Upload candidate installers to nightly
-              if: startsWith(github.ref_name, 'release/')
+            - name: Upload to nightly
               shell: bash
               env:
                   GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
               run: |
-                  tag="v${RELEASE_VERSION}"
+                  tag="photos-desktop-v${RELEASE_VERSION}"
                   gh release create "${tag}" --repo ente-io/nightly --prerelease --title "${tag}" --notes "${RELEASE_BODY}" || true
                   shopt -s nullglob
                   gh release upload "${tag}" dist/ente-*.{exe,dmg,AppImage,deb,rpm,pacman} --repo ente-io/nightly --clobber

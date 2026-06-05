@@ -104,9 +104,6 @@ jobs:
                       expected_main_version="${VERSION}-beta"
                       next_version="${next_version}-beta"
                   fi
-                  if [ "${APP}" = "photos-desktop" ]; then
-                      beta_tag="v${VERSION}-beta"
-                  fi
                   next_branch="${APP}-v${next_version}"
 
                   main_version="$(app_version get)"
@@ -179,7 +176,7 @@ jobs:
                       git push origin "refs/tags/photos-desktop-v${VERSION}"
 
                       GH_TOKEN="${APP_GH_TOKEN}" gh release edit "v${VERSION}" --repo ente-io/photos-desktop --draft=false --prerelease=false --latest
-                      GH_TOKEN="${APP_GH_TOKEN}" gh release delete "v${VERSION}" --yes --cleanup-tag --repo ente-io/nightly || true
+                      GH_TOKEN="${APP_GH_TOKEN}" gh release delete "photos-desktop-v${VERSION}" --yes --cleanup-tag --repo ente-io/nightly || true
                       git_push_release_branch ":refs/heads/${release_branch}"
                       exit 0
                   fi
@@ -248,7 +245,7 @@ jobs:
 
                   git_push_branch() {
                       git -c http.https://github.com/.extraheader= push \
-                          "https://x-access-token:${APP_GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
+                          "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
                   }
 
                   bot_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
