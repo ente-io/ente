@@ -1,3 +1,4 @@
+import { WatchFolder } from "@/components/WatchFolder";
 import {
     Delete02Icon,
     Download05Icon,
@@ -24,7 +25,6 @@ import {
     useColorScheme,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { WatchFolder } from "components/WatchFolder";
 import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { isDesktop } from "ente-base/app";

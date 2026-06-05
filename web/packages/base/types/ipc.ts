@@ -403,9 +403,7 @@ export interface Electron {
      *
      * @returns JPEG data of the converted image.
      */
-    convertToJPEG: (
-        imageData: Uint8Array,
-    ) => Promise<Uint8Array<ArrayBuffer>>;
+    convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array<ArrayBuffer>>;
 
     /**
      * Generate a JPEG thumbnail for the given image.

@@ -41,9 +41,7 @@ export const generateVideoThumbnailWeb = async (blob: Blob) =>
     );
 
 const _generateVideoThumbnail = async (
-    thumbnailAtTime: (
-        seekTime: number,
-    ) => Promise<Uint8Array<ArrayBuffer>>,
+    thumbnailAtTime: (seekTime: number) => Promise<Uint8Array<ArrayBuffer>>,
 ): Promise<Uint8Array<ArrayBuffer>> => {
     try {
         // Try generating thumbnail at seekTime 1 second.

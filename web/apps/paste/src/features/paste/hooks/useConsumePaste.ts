@@ -1,5 +1,5 @@
+import { consumePaste, setGuard, type PastePayload } from "@/services/paste";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { consumePaste, setGuard, type PastePayload } from "services/paste";
 import type { PageMode } from "../types";
 import { waitUntilVisible } from "../utils/browser";
 import {

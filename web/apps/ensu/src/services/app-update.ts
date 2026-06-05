@@ -1,6 +1,6 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import log from "ente-base/log";
-import { isTauriRuntime } from "services/tauri-runtime";
 
 const oneDay = 24 * 60 * 60 * 1000;
 

@@ -1,3 +1,4 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import {
     authenticatedRequestHeaders,
@@ -8,7 +9,6 @@ import { getKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiOrigin, apiURL } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
-import { isTauriRuntime } from "services/tauri-runtime";
 import { masterKeyFromSession } from "../session";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 import { cachedLocalChatKey } from "./chatKey";

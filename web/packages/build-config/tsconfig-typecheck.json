@@ -4,8 +4,6 @@
     "compilerOptions": {
         /* We use TypeScript (tsc) as a type checker, not as a build tool */
         "noEmit": true,
-        /* baseUrl remains supported in TS 6; migrate it before TS 7. */
-        "ignoreDeprecations": "6.0",
 
         /*
          * Tell TypeScript which all things it can assume that our target

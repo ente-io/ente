@@ -1,15 +1,15 @@
-import { Stack } from "@mui/material";
-import { PasteCreatePanel } from "features/paste/components/PasteCreatePanel";
-import { PasteFooter } from "features/paste/components/PasteFooter";
-import { PasteFrame } from "features/paste/components/PasteFrame";
-import { PasteViewPanel } from "features/paste/components/PasteViewPanel";
-import { useConsumePaste } from "features/paste/hooks/useConsumePaste";
-import { useCreatePaste } from "features/paste/hooks/useCreatePaste";
-import { usePasteRoute } from "features/paste/hooks/usePasteRoute";
+import { PasteCreatePanel } from "@/features/paste/components/PasteCreatePanel";
+import { PasteFooter } from "@/features/paste/components/PasteFooter";
+import { PasteFrame } from "@/features/paste/components/PasteFrame";
+import { PasteViewPanel } from "@/features/paste/components/PasteViewPanel";
+import { useConsumePaste } from "@/features/paste/hooks/useConsumePaste";
+import { useCreatePaste } from "@/features/paste/hooks/useCreatePaste";
+import { usePasteRoute } from "@/features/paste/hooks/usePasteRoute";
 import {
     copyTextToClipboard,
     shareUrlOrCopy,
-} from "features/paste/utils/browser";
+} from "@/features/paste/utils/browser";
+import { Stack } from "@mui/material";
 import Head from "next/head";
 
 const Page = () => {

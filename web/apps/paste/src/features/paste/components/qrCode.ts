@@ -1,4 +1,4 @@
-import type { PasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
+import type { PasteThemeTokens } from "@/features/paste/theme/pasteThemeTokens";
 
 export interface QRCodeStylingInstance {
     append(container: HTMLElement): void;

@@ -1,3 +1,68 @@
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { ChatDialogs } from "@/components/chat/ChatDialogs";
+import { ChatMessageList } from "@/components/chat/ChatMessageList";
+import { ChatSidebar } from "@/components/chat/ChatSidebar";
+import { useFileInput } from "@/components/utils/use-file-input";
+import { handleManualAppUpdateCheck } from "@/services/app-update";
+import {
+    buildSelectedPath,
+    ROOT_SELECTION_KEY,
+    STREAMING_SELECTION_KEY,
+    type BranchSwitcher,
+} from "@/services/chat/branching";
+import {
+    cachedChatKey,
+    cachedLocalChatKey,
+    getOrCreateChatKey,
+    getOrCreateLocalChatKey,
+    initChatKeyStore,
+} from "@/services/chat/chatKey";
+import {
+    addMessage,
+    createSession,
+    deleteSession,
+    getBranchSelections,
+    initializeChatStorePersistence,
+    listMessages,
+    listSessions,
+    readDecryptedAttachmentBytes,
+    sessionTitleFromText,
+    setBranchSelection,
+    storeEncryptedAttachmentBytes,
+    updateSessionTitle,
+    type ChatAttachment,
+    type ChatMessage,
+    type ChatSession,
+} from "@/services/chat/store";
+import {
+    ChatSyncLimitError,
+    downloadAttachment,
+    syncChat,
+} from "@/services/chat/sync";
+import {
+    DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
+    SIGN_IN_ENABLED,
+} from "@/services/featureFlags";
+import {
+    DEFAULT_MODEL,
+    FALLBACK_DESKTOP_MODEL_PRESETS,
+    FALLBACK_MOBILE_MODEL_PRESETS,
+    LlmProvider,
+    type ResolvedModelPreset,
+} from "@/services/llm/provider";
+import type {
+    DownloadProgress,
+    GenerateEvent,
+    LlmMessage,
+    ModelInfo,
+    ModelSettings,
+} from "@/services/llm/types";
+import {
+    clearMasterKeyFromEverywhere,
+    masterKeyFromSession,
+    updateSessionFromTauriSecureStorageIfNeeded,
+} from "@/services/session";
+import { isTauriRuntime as detectTauriAppRuntime } from "@/services/tauri-runtime";
 import { Menu01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -10,11 +75,6 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
-import { ChatComposer } from "components/chat/ChatComposer";
-import { ChatDialogs } from "components/chat/ChatDialogs";
-import { ChatMessageList } from "components/chat/ChatMessageList";
-import { ChatSidebar } from "components/chat/ChatSidebar";
-import { useFileInput } from "components/utils/use-file-input";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
@@ -33,66 +93,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { handleManualAppUpdateCheck } from "services/app-update";
-import {
-    buildSelectedPath,
-    ROOT_SELECTION_KEY,
-    STREAMING_SELECTION_KEY,
-    type BranchSwitcher,
-} from "services/chat/branching";
-import {
-    cachedChatKey,
-    cachedLocalChatKey,
-    getOrCreateChatKey,
-    getOrCreateLocalChatKey,
-    initChatKeyStore,
-} from "services/chat/chatKey";
-import {
-    addMessage,
-    createSession,
-    deleteSession,
-    getBranchSelections,
-    initializeChatStorePersistence,
-    listMessages,
-    listSessions,
-    readDecryptedAttachmentBytes,
-    sessionTitleFromText,
-    setBranchSelection,
-    storeEncryptedAttachmentBytes,
-    updateSessionTitle,
-    type ChatAttachment,
-    type ChatMessage,
-    type ChatSession,
-} from "services/chat/store";
-import {
-    ChatSyncLimitError,
-    downloadAttachment,
-    syncChat,
-} from "services/chat/sync";
-import {
-    DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
-    SIGN_IN_ENABLED,
-} from "services/featureFlags";
-import {
-    DEFAULT_MODEL,
-    FALLBACK_DESKTOP_MODEL_PRESETS,
-    FALLBACK_MOBILE_MODEL_PRESETS,
-    LlmProvider,
-    type ResolvedModelPreset,
-} from "services/llm/provider";
-import type {
-    DownloadProgress,
-    GenerateEvent,
-    LlmMessage,
-    ModelInfo,
-    ModelSettings,
-} from "services/llm/types";
-import {
-    clearMasterKeyFromEverywhere,
-    masterKeyFromSession,
-    updateSessionFromTauriSecureStorageIfNeeded,
-} from "services/session";
-import { isTauriRuntime as detectTauriAppRuntime } from "services/tauri-runtime";
 
 const formatTime = (timestamp: number) => {
     const date = new Date(Math.floor(timestamp / 1000));

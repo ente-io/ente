@@ -1,7 +1,7 @@
 {
     "extends": "../../packages/build-config/tsconfig-typecheck.json",
     "compilerOptions": {
-        "baseUrl": "./src",
+        "paths": { "@/*": ["./src/*"] },
         "allowJs": true,
         "incremental": true,
         "exactOptionalPropertyTypes": false

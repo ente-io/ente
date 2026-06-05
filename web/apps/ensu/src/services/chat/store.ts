@@ -1,8 +1,8 @@
+import { base64ToBytes } from "@/services/base64";
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from "idb";
-import { base64ToBytes } from "services/base64";
-import { isTauriRuntime } from "services/tauri-runtime";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 import {
     allLegacyKeyCandidates,

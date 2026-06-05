@@ -5,8 +5,8 @@
  * when needed (login/crypto flows), while Tauri uses native Rust bindings.
  */
 
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { loadEnteWasm } from "ente-wasm/load";
-import { isTauriRuntime } from "services/tauri-runtime";
 
 export type EnteWasmModule = typeof import("ente-wasm");
 

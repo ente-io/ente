@@ -1,3 +1,5 @@
+import type { ChatMessage } from "@/services/chat/store";
+import type { DownloadProgress } from "@/services/llm/types";
 import {
     Attachment01Icon,
     Cancel01Icon,
@@ -19,8 +21,6 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import React, { memo } from "react";
-import type { ChatMessage } from "services/chat/store";
-import type { DownloadProgress } from "services/llm/types";
 
 type IconProps = { size: number; strokeWidth: number };
 

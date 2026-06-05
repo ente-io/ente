@@ -1,3 +1,5 @@
+import type { LockerCollection } from "@/types";
+import { isImportantCollection, visibleLockerCollections } from "@/types";
 import CloudQueueOutlinedIcon from "@mui/icons-material/CloudQueueOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
@@ -19,8 +21,6 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import React, { useMemo } from "react";
-import type { LockerCollection } from "types";
-import { isImportantCollection, visibleLockerCollections } from "types";
 
 /** Width of the sidebar on desktop. */
 export const SIDEBAR_WIDTH = 280;

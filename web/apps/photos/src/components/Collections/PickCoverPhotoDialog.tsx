@@ -1,3 +1,4 @@
+import { type SelectedState } from "@/utils/file";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -21,7 +22,6 @@ import { FileType } from "ente-media/file-type";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { type SelectedState } from "utils/file";
 import { FileList, type FileListAnnotatedFile } from "../FileList";
 
 interface PickCoverPhotoDialogProps {
