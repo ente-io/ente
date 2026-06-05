@@ -24,12 +24,13 @@ declare const process: {
  *   all other commands.
  */
 export const isDevBuild = process.env.NODE_ENV == "development";
+export const buildEnvIsProductionBuild = process.env.NODE_ENV == "production";
 
-export const customAPIEndpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-export const buildAppName = process.env.appName;
-export const buildIsDesktop = process.env.isDesktop == "1";
-export const buildDesktopAppVersion = process.env.desktopAppVersion;
-export const buildGitSHA = process.env.gitSHA;
+export const buildEnvCustomAPIEndpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+export const buildEnvAppName = process.env.appName;
+export const buildEnvIsDesktop = process.env.isDesktop == "1";
+export const buildEnvDesktopAppVersion = process.env.desktopAppVersion;
+export const buildEnvGitSHA = process.env.gitSHA;
 
 /**
  * `true` if we're running in the default global context (aka the main thread)

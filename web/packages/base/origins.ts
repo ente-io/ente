@@ -1,5 +1,5 @@
 import { getKVS } from "ente-base/kv";
-import { customAPIEndpoint } from "./env";
+import { buildEnvCustomAPIEndpoint } from "./env";
 
 /**
  * Return the origin (scheme, host, port triple) that should be used for making
@@ -56,13 +56,13 @@ export const apiURL = async (
  * Otherwise return undefined.
  */
 export const customAPIOrigin = async () =>
-    (await getKVS("apiOrigin")) ?? customAPIEndpoint ?? undefined;
+    (await getKVS("apiOrigin")) ?? buildEnvCustomAPIEndpoint ?? undefined;
 
 /**
  * A static build time constant that is `true` if the API origin has been
  * customized through the environment.
  */
-export const isCustomAPIOrigin = !!customAPIEndpoint;
+export const isCustomAPIOrigin = !!buildEnvCustomAPIEndpoint;
 
 /**
  * A convenience wrapper over {@link customAPIOrigin} that returns the only the
