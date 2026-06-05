@@ -2,6 +2,7 @@ import "dart:convert";
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:ente_auth/services/auth_theme_preferences.dart";
+import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart";
@@ -27,6 +28,34 @@ void main() {
 
   test("falls back to legacy adaptive theme preference", () async {
     await _setLegacyThemeMode(AdaptiveThemeMode.light);
+
+    expect(await AuthThemePreferences.getThemeMode(), AdaptiveThemeMode.light);
+  });
+
+  testWidgets("keeps Auth theme preference when adaptive value resets", (
+    tester,
+  ) async {
+    late BuildContext adaptiveThemeContext;
+    await tester.pumpWidget(
+      AdaptiveTheme(
+        light: ThemeData.light(),
+        dark: ThemeData.dark(),
+        initial: AdaptiveThemeMode.system,
+        builder: (_, _) => Builder(
+          builder: (context) {
+            adaptiveThemeContext = context;
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    await AuthThemePreferences.setThemeMode(
+      AdaptiveTheme.of(adaptiveThemeContext),
+      AdaptiveThemeMode.light,
+    );
+    await _setAsyncThemeMode(AdaptiveThemeMode.system);
+    await _setLegacyThemeMode(AdaptiveThemeMode.system);
 
     expect(await AuthThemePreferences.getThemeMode(), AdaptiveThemeMode.light);
   });
