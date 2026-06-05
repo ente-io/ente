@@ -83,7 +83,7 @@ export const matchJSONMetadata = (
     collectionID: number,
     fileName: string,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-) => {
+): ParsedMetadataJSON | undefined => {
     // Break the fileName down into its components.
     let [name, extension] = nameAndExtension(fileName);
     if (extension) {

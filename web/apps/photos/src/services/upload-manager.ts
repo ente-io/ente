@@ -92,7 +92,7 @@ interface UploadItemsOptions {
 
 export const successfulFilesFromUploadBatchResult = (
     batchResult: UploadBatchResult,
-) =>
+): EnteFile[] =>
     batchResult.itemResults.flatMap(({ result }) => {
         const file = successfulFileFromUploadResult(result);
         return file ? [file] : [];
@@ -102,7 +102,7 @@ export const favoritedFilesFromUploadBatchResult = (
     batchResult: UploadBatchResult,
     hiddenCollectionIDs: Set<number>,
     postUploadTargetCollectionID?: number,
-) => {
+): EnteFile[] => {
     const filesByID = new Map<number, EnteFile>();
 
     for (const itemResult of batchResult.itemResults) {
@@ -121,7 +121,9 @@ export const favoritedFilesFromUploadBatchResult = (
     return [...filesByID.values()];
 };
 
-const successfulFileFromUploadResult = (result: UploadResult) => {
+const successfulFileFromUploadResult = (
+    result: UploadResult,
+): EnteFile | undefined => {
     switch (result.type) {
         case "alreadyUploaded":
         case "addedSymlink":
