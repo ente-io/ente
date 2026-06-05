@@ -57,6 +57,15 @@ fi
 rm -f "$policy"
 ```
 
+### Remove the Policy
+
+If you manually installed the Polkit policy and no longer want Ente Auth to use
+Linux system authentication, remove it:
+
+```sh
+sudo rm -f /usr/share/polkit-1/actions/io.ente.auth.policy
+```
+
 ## Fingerprint Prompts
 
 The Polkit policy only registers Ente Auth as an application that can request
@@ -75,5 +84,3 @@ cat /etc/pam.d/polkit-1
 
 Enable **Fingerprint authentication** in `pam-auth-update`. Polkit should route
 through `common-auth`; otherwise `/etc/pam.d/polkit-1` may remain password-only.
-
-
