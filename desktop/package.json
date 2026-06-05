@@ -57,8 +57,8 @@
         "prettier-plugin-organize-imports": "4.3.0",
         "prettier-plugin-packagejson": "2.5.19",
         "shx": "0.4.0",
-        "typescript": "5.8.3",
-        "typescript-eslint": "8.35.1"
+        "typescript": "6.0.3",
+        "typescript-eslint": "8.59.3"
     },
     "packageManager": "npm@11.12.1",
     "productName": "ente"

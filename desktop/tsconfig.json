@@ -12,9 +12,7 @@
      */
     /* TSConfig docs: https://aka.ms/tsconfig.json */
     "compilerOptions": {
-        /* Mirror the runtime baseline of Electron 41. We inline the
-           Node 24 preset here because our pinned TypeScript 5.8.3 does not
-           yet accept one of @tsconfig/node24's lib entries (ESNext.Error). */
+        /* Mirror the runtime baseline of Electron 41. */
         "lib": [
             "ES2024",
             "ESNext.Array",
@@ -29,6 +27,7 @@
         "moduleResolution": "node16",
 
         /* Emit the generated JS into `app/` */
+        "rootDir": "src",
         "outDir": "app",
 
         /* Require the `type` modifier when importing types */
