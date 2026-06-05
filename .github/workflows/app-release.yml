@@ -128,13 +128,13 @@ jobs:
 
                   git switch -c "${next_branch}" main
                   app_version set "${next_version}"
-                  if [ "${APP}" != "photos-desktop" ]; then
-                      CHANGES_DIR="mobile/apps/${APP}/changes"
-                      if [ "${APP}" = "ensu" ]; then
-                          CHANGES_DIR="rust/apps/ensu/changes"
-                      fi
-                      find "${CHANGES_DIR}" -maxdepth 1 -type f -name '*.md' ! -name README.md -delete
+                  CHANGES_DIR="mobile/apps/${APP}/changes"
+                  if [ "${APP}" = "ensu" ]; then
+                      CHANGES_DIR="rust/apps/ensu/changes"
+                  elif [ "${APP}" = "photos-desktop" ]; then
+                      CHANGES_DIR="desktop/changes"
                   fi
+                  find "${CHANGES_DIR}" -maxdepth 1 -type f -name '*.md' ! -name README.md -delete
                   git commit -am "Start ${APP^} ${next_version}"
                   git push -u origin "${next_branch}"
 

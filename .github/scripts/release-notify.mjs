@@ -19,6 +19,9 @@ const apps = {
         testFlightId: "6758197006",
         accentColor: 16633363,
     },
+    "photos-desktop": {
+        accentColor: 65280,
+    },
 };
 
 const app = process.argv[2];
@@ -57,7 +60,15 @@ const releaseBodyDiscord =
         ? `${Array.from(releaseBody).slice(0, 3000).join("")}\n...\n-# See the GitHub release for full notes.`
         : releaseBody;
 
-const downloadLine = `-# Download: [Play Store](https://play.google.com/store/apps/details?id=${config.packageId}) | [TestFlight](https://appstoreconnect.apple.com/apps/${config.testFlightId}/testflight/ios) | [GitHub Release](${releaseUrl})`;
+const downloadLinks = [];
+if (config.packageId) {
+    downloadLinks.push(`[Play Store](https://play.google.com/store/apps/details?id=${config.packageId})`);
+}
+if (config.testFlightId) {
+    downloadLinks.push(`[TestFlight](https://appstoreconnect.apple.com/apps/${config.testFlightId}/testflight/ios)`);
+}
+downloadLinks.push(`[GitHub Release](${releaseUrl})`);
+const downloadLine = `-# Download: ${downloadLinks.join(" | ")}`;
 
 const components = [{ type: 10, content: `## ${releaseTitle}` }];
 if (releaseBodyDiscord) {

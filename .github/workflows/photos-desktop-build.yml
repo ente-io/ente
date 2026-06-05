@@ -8,8 +8,8 @@ on:
             - "release/photos-desktop-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~8:00 AM IST
-        - cron: "45 2 * * 1-5"
+        # Run every weekday at ~6:45 AM IST
+        - cron: "15 1 * * 1-5"
 
 permissions:
     contents: read
@@ -26,7 +26,10 @@ jobs:
             should_build: ${{ steps.prepare.outputs.should_build }}
             commit_sha: ${{ steps.prepare.outputs.commit_sha }}
             release_version: ${{ steps.prepare.outputs.release_version }}
-            is_rc: ${{ steps.prepare.outputs.is_rc }}
+            release_tag: ${{ steps.prepare.outputs.release_tag }}
+            release_title: ${{ steps.prepare.outputs.release_title }}
+            release_body: ${{ steps.prepare.outputs.release_body }}
+            release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
 
         steps:
             - name: Checkout
@@ -47,20 +50,24 @@ jobs:
                   fi
 
                   release_version="$(node .github/scripts/photos-desktop-version.mjs get)"
+                  release_tag="v${release_version}"
 
-                  is_rc=false
                   if [[ "${GITHUB_REF_NAME}" == release/photos-desktop-v* ]]; then
                       if [[ "${GITHUB_REF_NAME}" != "release/photos-desktop-v${release_version}" ]]; then
                           echo "::error::Branch ${GITHUB_REF_NAME} does not match desktop version ${release_version}"
                           exit 1
                       fi
-                      is_rc=true
+                      release_title="🖥️ Photos desktop release candidate - ${release_version}"
+                  else
+                      release_title="🖥️ Photos desktop nightly - ${release_version}"
                   fi
 
                   echo "should_build=true" >> "${GITHUB_OUTPUT}"
                   echo "commit_sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
                   echo "release_version=${release_version}" >> "${GITHUB_OUTPUT}"
-                  echo "is_rc=${is_rc}" >> "${GITHUB_OUTPUT}"
+                  echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+                  echo "release_title=${release_title}" >> "${GITHUB_OUTPUT}"
+                  node .github/scripts/release-notes.mjs desktop/changes >> "${GITHUB_OUTPUT}"
 
     build:
         needs: build-metadata
@@ -75,7 +82,8 @@ jobs:
 
         env:
             RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
-            IS_RC: ${{ needs.build-metadata.outputs.is_rc }}
+            IS_RC: ${{ startsWith(github.ref_name, 'release/') }}
+            RELEASE_BODY: ${{ needs.build-metadata.outputs.release_body }}
 
         defaults:
             run:
@@ -99,6 +107,15 @@ jobs:
 
             - name: Create universal ffmpeg binaries for macOS
               if: startsWith(matrix.os, 'macos')
+              # Currently, the ffmpeg-static binaries are not universal (Not
+              # their fault, we thank them for their useful package, the issue
+              # is that there don't seem to be well known upstream sources that
+              # provide a universal binary).
+              #
+              # As a workaround, we invoke ffmpeg-static twice to download both
+              # the Intel and ARM binaries, and combine them into a single
+              # universal binary using lipo.
+              #
               run: |
                   rm -f node_modules/ffmpeg-static/ffmpeg
                   npm_config_arch=arm64 node node_modules/ffmpeg-static/install.js
@@ -111,6 +128,7 @@ jobs:
 
             - name: Install libarchive-tools for pacman build
               if: startsWith(matrix.os, 'ubuntu')
+              # https://github.com/electron-userland/electron-builder/issues/4181
               run: sudo apt-get update && sudo apt-get install libarchive-tools
 
             - name: Mint nightly token
@@ -119,10 +137,7 @@ jobs:
               with:
                   client-id: ${{ secrets.ENTE_CI_GH_CLIENT_ID }}
                   private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
-                  owner: ${{ github.repository_owner }}
-                  repositories: |
-                      nightly
-                      photos-desktop
+                  repositories: nightly,photos-desktop
                   permission-contents: write
 
             - name: Build and publish
@@ -136,10 +151,12 @@ jobs:
                   npm run build:ci
 
                   platform=${{ startsWith(matrix.os, 'macos') && 'mac' || startsWith(matrix.os, 'windows') && 'windows' || 'linux' }}
+                  notes="-c.releaseInfo.releaseNotes=${RELEASE_BODY}"
+
                   if [ "${IS_RC}" = "true" ]; then
-                      npm exec -- electron-builder --$platform --publish always
+                      npm exec -- electron-builder --$platform --publish always "$notes"
                   else
-                      EP_PRE_RELEASE=true npm exec -- electron-builder --$platform --publish always -c.publish.provider=github -c.publish.owner=ente-io -c.publish.repo=nightly
+                      EP_PRE_RELEASE=true npm exec -- electron-builder --$platform --publish always "$notes" -c.publish.provider=github -c.publish.owner=ente-io -c.publish.repo=nightly
                   fi
               env:
                   GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
@@ -153,16 +170,37 @@ jobs:
                   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
                   # Allow continually updating the rolling pre-release.
                   EP_GH_IGNORE_TIME: true
+                  # Workaround recommended in
+                  # https://github.com/electron-userland/electron-builder/issues/3179
+                  USE_HARD_LINKS: false
 
             - name: Upload candidate installers to nightly
-              if: needs.build-metadata.outputs.is_rc == 'true'
+              if: startsWith(github.ref_name, 'release/')
               shell: bash
               env:
                   GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
               run: |
-                  set -euo pipefail
                   tag="v${RELEASE_VERSION}"
-                  gh release create "${tag}" --repo ente-io/nightly --prerelease --title "${tag}" --notes "Photos desktop release candidate" || true
+                  gh release create "${tag}" --repo ente-io/nightly --prerelease --title "${tag}" --notes "${RELEASE_BODY}" || true
                   shopt -s nullglob
-                  files=(dist/ente-*.exe dist/ente-*.dmg dist/ente-*.AppImage dist/ente-*.deb dist/ente-*.rpm dist/ente-*.pacman)
-                  gh release upload "${tag}" "${files[@]}" --repo ente-io/nightly --clobber
+                  gh release upload "${tag}" dist/ente-*.{exe,dmg,AppImage,deb,rpm,pacman} --repo ente-io/nightly --clobber
+
+    finish-build:
+        needs: [build-metadata, build]
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+
+            - name: Notify Discord
+              continue-on-error: true
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  RELEASE_TITLE: ${{ needs.build-metadata.outputs.release_title }}
+                  RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
+                  RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
+              run: node .github/scripts/release-notify.mjs photos-desktop "${RELEASE_TAG}"
