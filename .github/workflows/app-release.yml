@@ -68,16 +68,11 @@ jobs:
                   permission-contents: write
                   permission-pull-requests: write
 
-            - name: Configure Git
-              if: inputs.action == 'start'
-              run: |
-                  git config user.name "github-actions[bot]"
-                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
             - name: Start release
               if: inputs.action == 'start'
               env:
                   APP_GH_TOKEN: ${{ steps.app_token.outputs.token }}
+                  APP_SLUG: ${{ steps.app_token.outputs.app-slug }}
               run: |
                   set -euo pipefail
 
@@ -95,6 +90,10 @@ jobs:
                       git -c http.https://github.com/.extraheader= push \
                           "https://x-access-token:${APP_GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
                   }
+
+                  bot_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+                  git config user.name "${APP_SLUG}[bot]"
+                  git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
 
                   release_branch="release/${APP}-v${VERSION}"
                   beta_tag="${APP}-v${VERSION}-beta"
@@ -209,8 +208,69 @@ jobs:
 
                   git tag "${final_tag}" "${release_sha}"
                   git push origin "refs/tags/${final_tag}"
-                  gh release edit "${rc_tag}" --tag "${final_tag}" --title "${final_tag}" --target "${release_sha}" --draft --verify-tag
+                  gh release edit "${rc_tag}" --tag "${final_tag}" --title "${final_tag}" --target "${release_sha}" --draft=false --prerelease=false --verify-tag
 
                   git push origin ":refs/tags/${rc_tag}" || true
                   GH_TOKEN="${APP_GH_TOKEN}" gh release delete "${rc_tag}" --yes --cleanup-tag --repo ente-io/nightly || true
                   git_push_release_branch ":refs/heads/${release_branch}"
+
+    sync-docs:
+        needs: release
+        if: inputs.action == 'promote'
+        runs-on: ubuntu-latest
+        environment:
+            name: release-branch-push
+
+        steps:
+            - name: Checkout main
+              uses: actions/checkout@v6
+              with:
+                  ref: main
+
+            - name: Mint App token
+              id: app_token
+              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              with:
+                  client-id: ${{ secrets.ENTE_CI_GH_CLIENT_ID }}
+                  private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
+                  repositories: ente,photos-desktop
+                  permission-contents: write
+                  permission-pull-requests: write
+
+            - name: Open changelog PR
+              env:
+                  APP: ${{ inputs.app }}
+                  VERSION: ${{ inputs.version }}
+                  GH_TOKEN: ${{ steps.app_token.outputs.token }}
+                  APP_SLUG: ${{ steps.app_token.outputs.app-slug }}
+              run: |
+                  set -euo pipefail
+
+                  git_push_branch() {
+                      git -c http.https://github.com/.extraheader= push \
+                          "https://x-access-token:${APP_GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$@"
+                  }
+
+                  bot_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+                  git config user.name "${APP_SLUG}[bot]"
+                  git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+
+                  if [ "${APP}" = "photos-desktop" ]; then
+                      RELEASE_BODY="$(gh release view "v${VERSION}" --repo ente-io/photos-desktop --json body --jq .body)"
+                  else
+                      RELEASE_BODY="$(gh release view "${APP}-v${VERSION}" --json body --jq .body)"
+                  fi
+                  export RELEASE_BODY
+
+                  node .github/scripts/sync-help-changelog.mjs "${APP}" "${VERSION}"
+                  if git diff --quiet; then
+                      echo "Help changelog already up to date"
+                      exit 0
+                  fi
+
+                  branch="docs/${APP}-changelog-v${VERSION}"
+                  git switch -c "${branch}"
+                  git commit -am "Update ${APP} help changelog for v${VERSION}"
+                  git_push_branch "${branch}"
+                  gh pr create --base main --head "${branch}" \
+                      --title "[docs] Update ${APP} help changelog for v${VERSION}" --body ""

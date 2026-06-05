@@ -55,6 +55,10 @@ git push
 
 ## Promote release
 
+> [!IMPORTANT]
+>
+> Edit the release notes for the `ensu-v0.1.16-rc` draft release in `ente-io/ente` into the final user-facing changelog before promoting.
+
 ```sh
 gh workflow run app-release.yml \
   -f action=promote \
@@ -62,9 +66,9 @@ gh workflow run app-release.yml \
   -f version=0.1.16
 ```
 
-This does not create another build. It tags the last RC commit as `ensu-v0.1.16`, moves the GitHub draft from `ensu-v0.1.16-rc` to `ensu-v0.1.16`, removes the RC tag, deletes the `ensu-v0.1.16-rc` pre-release from `ente-io/nightly`, and deletes the release branch.
+This does not create another build. It tags the last RC commit as `ensu-v0.1.16`, publishes it (renaming `ensu-v0.1.16-rc` to `ensu-v0.1.16`), removes the RC tag, deletes the `ensu-v0.1.16-rc` pre-release from `ente-io/nightly`, and deletes the release branch.
 
-Publish the draft ensu-v0.1.16 release on GitHub when ready.
+It also opens a PR for updating the changelog in the docs.
 
 > [!NOTE]
 >

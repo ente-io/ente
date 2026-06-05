@@ -26,11 +26,17 @@ Cherry-pick fixes to the release branch to rebuild the candidate.
 
 ## Promote release
 
+> [!IMPORTANT]
+>
+> Edit the release notes for the `v1.7.25` draft release in `ente-io/photos-desktop` into the final user-facing changelog before promoting.
+
 ```sh
 gh workflow run app-release.yml -f action=promote -f app=photos-desktop -f version=1.7.25
 ```
 
 Publishes the `v1.7.25` draft in `ente-io/photos-desktop` as the latest release, pushes the `photos-desktop-v1.7.25` source tag, removes the `v1.7.25` pre-release from `ente-io/nightly`, and deletes the release branch. The website and the brew cask pick up the new latest release automatically.
+
+It also opens a PR for updating the changelog in the docs.
 
 ## Details
 
