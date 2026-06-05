@@ -105,6 +105,12 @@ export const favoritedFilesFromUploadBatchResult = (
 ): EnteFile[] => {
     const filesByID = new Map<number, EnteFile>();
 
+    /**
+     * Filters items with takeoutFavorited set to true, checks if their final upload
+     * target collection is not hidden, and collects successfully uploaded files
+     * and returns them to be added to the Favorites collection of the user after
+     * de-dupe check by fileID.
+     */
     for (const itemResult of batchResult.itemResults) {
         if (!itemResult.takeoutFavorited) continue;
 

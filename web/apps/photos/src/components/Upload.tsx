@@ -664,10 +664,20 @@ export const Upload: React.FC<UploadProps> = ({
         }
     };
 
+    /**
+     *
+     * @param batchResult
+     * @param postUploadTargetCollection
+     * @returns
+     *
+     * Adds successfully uploaded Takeout-favorited files to Favorites, skipping
+     * files whose effective target collection is hidden.
+     */
     const handleTakeoutFavoritesPostUpload = async (
         batchResult: UploadBatchResult,
         postUploadTargetCollection: Collection | undefined,
     ) => {
+        // Checking if any of the uploaded items have their takeoutFavorited as true.
         if (
             !batchResult.itemResults.some(
                 ({ takeoutFavorited }) => takeoutFavorited,
@@ -676,21 +686,37 @@ export const Upload: React.FC<UploadProps> = ({
             return;
         }
 
+        // Get the list of IDs of hidden collections.
         const hiddenCollectionIDs = new Set(
             (await savedHiddenCollections()).map(({ id }) => id),
         );
+
+        // In some cases, such as when the upload is happening to a non-owned album,
+        // files are first added to the user's own album and then, after upload,
+        // linked to the shared album.
+        //
+        // For such cases, check whether the real intended upload location is a
+        // hidden album and add it to the set.
         if (
             postUploadTargetCollection &&
             isHiddenCollection(postUploadTargetCollection)
         ) {
             hiddenCollectionIDs.add(postUploadTargetCollection.id);
         }
+
+        /**
+         * Treating the requestCollectionID as a hidden album because the upload was
+         * initated from the hidden-albums UI.
+         *
+         * savedHiddenCollections will already include hidden collections, but it is not
+         * guaranteed to include every hidden album. So this is also a guard at the UI
+         * level.
+         */
         if (props.isInHiddenSection) {
             for (const { requestedCollectionID } of batchResult.itemResults) {
                 hiddenCollectionIDs.add(requestedCollectionID);
             }
         }
-
         const favoritedFiles = favoritedFilesFromUploadBatchResult(
             batchResult,
             hiddenCollectionIDs,
