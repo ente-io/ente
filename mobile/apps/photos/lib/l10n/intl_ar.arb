@@ -218,7 +218,6 @@
   "after1Month": "بعد شهر",
   "after1Year": "بعد سنة",
   "manageParticipants": "إدارة المشاركين",
-  "collabLinkSectionDescription": "أنشئ رابطًا يسمح للأشخاص بإضافة الصور ومشاهدتها في ألبومك المشترك دون الحاجة إلى تطبيق أو حساب Ente. خيار مثالي لجمع صور الفعاليات بسهولة.",
   "collectPhotos": "جمع الصور",
   "collaborativeLink": "رابط تعاوني",
   "shareWithNonenteUsers": "المشاركة مع غير مستخدمي Ente",
@@ -311,7 +310,6 @@
   "creatingLink": "جارٍ إنشاء الرابط...",
   "removeWithQuestionMark": "إزالة؟",
   "removeParticipantBody": "سيتم إزالة {userEmail} من هذا الألبوم المشترك.\n\nسيتم أيضًا إزالة أي صور أضافها إلى الألبوم.",
-  "keepPhotos": "الاحتفاظ بالصور",
   "deletePhotos": "حذف الصور",
   "inviteToEnte": "دعوة إلى Ente",
   "removePublicLink": "إزالة الرابط العام",
@@ -319,6 +317,9 @@
   "sharing": "جارٍ المشاركة...",
   "youCannotShareWithYourself": "لا يمكنك المشاركة مع نفسك.",
   "archive": "الأرشيف",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "اضغط مطولاً لتحديد الصور ثم انقر على '+' لإنشاء ألبوم",
   "importing": "جارٍ الاستيراد...",
   "failedToLoadAlbums": "فشل تحميل الألبومات",
@@ -731,6 +732,9 @@
   "moveToAlbum": "نقل إلى ألبوم",
   "unhide": "إظهار",
   "unarchive": "إلغاء الأرشفة",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "المفضلة",
   "removeFromFavorite": "إزالة من المفضلة",
   "shareLink": "مشاركة الرابط",

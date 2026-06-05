@@ -2,24 +2,24 @@
 // the file it depends on have been audited and their interfaces fixed).
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import type { AddToAlbumPhase } from "@/components/AlbumAddedNotification";
+import { AlbumAddedNotification } from "@/components/AlbumAddedNotification";
+import { AuthenticateUser } from "@/components/AuthenticateUser";
+import { GalleryBarAndListHeader } from "@/components/Collections/GalleryBarAndListHeader";
+import { PickCoverPhotoDialog } from "@/components/Collections/PickCoverPhotoDialog";
+import { DownloadStatusNotifications } from "@/components/DownloadStatusNotifications";
+import type { FileListHeaderOrFooter } from "@/components/FileList";
+import { FileListWithViewer } from "@/components/FileListWithViewer";
+import { FixCreationTime } from "@/components/FixCreationTime";
+import { QuickLinkCreatedNotification } from "@/components/QuickLinkCreatedNotification";
+import { Sidebar } from "@/components/Sidebar";
+import { Upload } from "@/components/Upload";
 import { Upload01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
-import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
-import { AlbumAddedNotification } from "components/AlbumAddedNotification";
-import { AuthenticateUser } from "components/AuthenticateUser";
-import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import { PickCoverPhotoDialog } from "components/Collections/PickCoverPhotoDialog";
-import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
-import type { FileListHeaderOrFooter } from "components/FileList";
-import { FileListWithViewer } from "components/FileListWithViewer";
-import { FixCreationTime } from "components/FixCreationTime";
-import { QuickLinkCreatedNotification } from "components/QuickLinkCreatedNotification";
-import { Sidebar } from "components/Sidebar";
-import { Upload } from "components/Upload";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
     getAndClearIsFirstLogin,
@@ -129,6 +129,14 @@ import {
     isMLEnabled,
 } from "ente-new/photos/services/ml";
 
+import { uploadManager } from "@/services/upload-manager";
+import watcher from "@/services/watch";
+import {
+    getSelectedFiles,
+    performFileOp,
+    type SelectedState,
+} from "@/utils/file";
+import { quickLinkNameForFiles, resolveQuickLinkURL } from "@/utils/quick-link";
 import {
     savedCollectionFiles,
     savedCollections,
@@ -161,14 +169,6 @@ import { useRouter, type NextRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
-import { uploadManager } from "services/upload-manager";
-import watcher from "services/watch";
-import {
-    getSelectedFiles,
-    performFileOp,
-    type SelectedState,
-} from "utils/file";
-import { quickLinkNameForFiles, resolveQuickLinkURL } from "utils/quick-link";
 
 /**
  * The default view for logged in users.
@@ -508,8 +508,6 @@ const Page: React.FC = () => {
             state.normalCollectionSummaries,
         ],
     );
-
-    if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
 
     const router = useRouter();
 

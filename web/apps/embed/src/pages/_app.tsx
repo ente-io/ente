@@ -16,7 +16,7 @@ import { PhotosAppContext } from "ente-new/photos/types/context";
 import type { AppProps } from "next/app";
 import "photoswipe/dist/photoswipe.css";
 import { useCallback, useEffect, useMemo } from "react";
-import "styles/photoswipe.css";
+import "../styles/photoswipe.css";
 
 export default function App({ Component, pageProps }: AppProps) {
     useSetupLogs();

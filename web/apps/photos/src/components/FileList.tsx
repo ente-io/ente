@@ -1,9 +1,14 @@
+import Avatar from "@/components/Avatar";
+import { type SelectedState } from "@/utils/file";
+import {
+    handleSelectCreator,
+    handleSelectCreatorMulti,
+} from "@/utils/photoFrame";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
-import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
@@ -53,11 +58,6 @@ import {
     areEqual,
     type ListChildComponentProps,
 } from "react-window";
-import { type SelectedState } from "utils/file";
-import {
-    handleSelectCreator,
-    handleSelectCreatorMulti,
-} from "utils/photoFrame";
 
 /**
  * A component with an explicit height suitable for being plugged in as the

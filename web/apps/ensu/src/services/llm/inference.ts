@@ -1,3 +1,4 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { AssetsPathConfig } from "@wllama/wllama/esm/index.js";
@@ -9,7 +10,6 @@ import {
 } from "@wllama/wllama/esm/index.js";
 import wllamaPackage from "@wllama/wllama/package.json";
 import log from "ente-base/log";
-import { isTauriRuntime } from "services/tauri-runtime";
 import type {
     GenerateChatRequest,
     GenerateEvent,

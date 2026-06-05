@@ -19,8 +19,8 @@ export const generateVideoThumbnailWeb = async (blob: Blob) =>
     );
 
 const _generateVideoThumbnail = async (
-    thumbnailAtTime: (seekTime: number) => Promise<Uint8Array>,
-) => {
+    thumbnailAtTime: (seekTime: number) => Promise<Uint8Array<ArrayBuffer>>,
+): Promise<Uint8Array<ArrayBuffer>> => {
     try {
         return await thumbnailAtTime(1);
     } catch {
@@ -141,7 +141,9 @@ export const determineVideoDuration = async (
     uploadItem: File,
 ): Promise<number> => determineVideoDurationWeb(uploadItem);
 
-export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
+export const convertToMP4 = async (
+    blob: Blob,
+): Promise<Blob | Uint8Array<ArrayBuffer>> => {
     const command = [
         ffmpegPathPlaceholder,
         "-i",

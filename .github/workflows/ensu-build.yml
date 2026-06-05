@@ -8,8 +8,8 @@ on:
             - "release/ensu-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~6:45 AM IST
-        - cron: "15 1 * * 1-5"
+        # Run every weekday at ~5:45 AM IST
+        - cron: "15 0 * * 1-5"
 
 env:
     NDK_VERSION: "27.3.13750724"
@@ -200,10 +200,20 @@ jobs:
                   }
                   EOF
 
+            - name: Mint nightly token
+              id: nightly_token
+              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              with:
+                  client-id: ${{ secrets.ENTE_CI_GH_CLIENT_ID }}
+                  private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
+                  repositories: nightly
+                  permission-contents: write
+
             - name: Build and release Tauri app
+              id: tauri
               uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_TOKEN: ${{ steps.nightly_token.outputs.token }}
                   TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   APPLE_CERTIFICATE: ${{ secrets.MAC_OS_CERTIFICATE }}
@@ -219,15 +229,42 @@ jobs:
                   SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               with:
                   projectPath: rust/apps/ensu
+                  repo: nightly
                   tagName: ${{ env.RELEASE_TAG }}
                   releaseName: ${{ env.RELEASE_TAG }}
                   releaseBody: ${{ env.RELEASE_BODY }}
-                  releaseCommitish: ${{ env.COMMIT_SHA }}
-                  releaseDraft: true
+                  # Tag off nightly's default branch; the build commit isn't in that repo.
+                  releaseCommitish: main
+                  releaseDraft: false
+                  prerelease: true
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
                   args: ${{ format('--target {0} --bundles {1} --config tauri.ci.conf.json', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
+
+            # tauri-action emits JSON; ncipollo expects comma-delimited artifact paths.
+            - name: Collect RC artifact list
+              if: startsWith(github.ref_name, 'release/')
+              id: rc_artifacts
+              shell: bash
+              env:
+                  ARTIFACT_PATHS: ${{ steps.tauri.outputs.artifactPaths }}
+              run: |
+                  list="$(jq -rn 'env.ARTIFACT_PATHS | fromjson | join(",")')"
+                  printf 'list=%s\n' "${list}" >> "${GITHUB_OUTPUT}"
+
+            - name: Upload desktop artifacts to RC draft
+              if: startsWith(github.ref_name, 'release/')
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  commit: ${{ env.COMMIT_SHA }}
+                  artifacts: ${{ steps.rc_artifacts.outputs.list }}
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
 
     build-android:
         needs: build-metadata
@@ -299,7 +336,31 @@ jobs:
                   mkdir -p artifacts
                   cp app-ui/build/outputs/apk/release/app-ui-release.apk "artifacts/${ANDROID_APK_NAME}"
 
-            - name: Upload Android APK to GitHub release
+            - name: Mint nightly token
+              id: nightly_token
+              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              with:
+                  client-id: ${{ secrets.ENTE_CI_GH_CLIENT_ID }}
+                  private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
+                  repositories: nightly
+                  permission-contents: write
+
+            - name: Upload Android APK to nightly release
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  repo: nightly
+                  token: ${{ steps.nightly_token.outputs.token }}
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  artifacts: mobile/native/android/apps/ensu/artifacts/${{ env.ANDROID_APK_NAME }}
+                  prerelease: true
+                  makeLatest: false
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+            - name: Upload Android APK to RC draft
+              if: startsWith(github.ref_name, 'release/')
               uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
               with:
                   tag: ${{ env.RELEASE_TAG }}
@@ -307,8 +368,8 @@ jobs:
                   body: ${{ env.RELEASE_BODY }}
                   commit: ${{ env.COMMIT_SHA }}
                   artifacts: mobile/native/android/apps/ensu/artifacts/${{ env.ANDROID_APK_NAME }}
-                  allowUpdates: true
                   draft: true
+                  allowUpdates: true
                   updateOnlyUnreleased: true
 
             - name: Upload AAB to Play Store
@@ -405,8 +466,7 @@ jobs:
               continue-on-error: true
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
-                  GH_TOKEN: ${{ github.token }}
                   RELEASE_TITLE: ${{ needs.build-metadata.outputs.release_title }}
                   RELEASE_BODY_GROUPED: ${{ needs.build-metadata.outputs.release_body_grouped }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
-              run: node .github/scripts/release-notify.mjs ensu "$(gh release view "${RELEASE_TAG}" --json url --jq .url)"
+              run: node .github/scripts/release-notify.mjs ensu "${RELEASE_TAG}"

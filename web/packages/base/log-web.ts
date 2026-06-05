@@ -1,4 +1,4 @@
-import { isDevBuild } from "ente-base/env";
+import { buildEnvGitSHA, isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { appName, appNames } from "./app";
 
@@ -18,7 +18,7 @@ export const logStartupBanner = (userID?: number) => {
         );
     }
 
-    const sha = process.env.gitSHA;
+    const sha = buildEnvGitSHA;
     const buildID = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
     log.info(`Starting ente-${appName}-web ${buildID}uid ${userID ?? 0}`);
 };

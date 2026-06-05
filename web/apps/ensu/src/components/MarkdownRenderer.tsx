@@ -1,3 +1,4 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Box, IconButton } from "@mui/material";
@@ -6,7 +7,6 @@ import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import { isTauriRuntime } from "services/tauri-runtime";
 
 interface MarkdownRendererProps {
     content: string;
@@ -140,18 +140,19 @@ export const MarkdownRenderer = ({
     className,
 }: MarkdownRendererProps) => {
     return (
-        <ReactMarkdown
-            className={className}
-            remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[
-                [
-                    rehypeKatex,
-                    { strict: false, throwOnError: false, trust: true },
-                ],
-            ]}
-            components={{ pre: CodeBlock, a: ExternalLink }}
-        >
-            {content}
-        </ReactMarkdown>
+        <div className={className}>
+            <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[
+                    [
+                        rehypeKatex,
+                        { strict: false, throwOnError: false, trust: true },
+                    ],
+                ]}
+                components={{ pre: CodeBlock, a: ExternalLink }}
+            >
+                {content}
+            </ReactMarkdown>
+        </div>
     );
 };

@@ -1,0 +1,1 @@
+- Support Traditional Chinese and Urdu translations.

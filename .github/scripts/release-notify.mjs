@@ -19,14 +19,19 @@ const apps = {
         testFlightId: "6758197006",
         accentColor: 16633363,
     },
+    "photos-desktop": {
+        accentColor: 65280,
+    },
 };
 
 const app = process.argv[2];
 const config = apps[app];
-const releaseUrl = process.argv[3];
-if (!config || !releaseUrl) {
-    throw new Error(`Usage: node .github/scripts/release-notify.mjs ${Object.keys(apps).join("|")} <release-url>`);
+const releaseTag = process.argv[3];
+if (!config || !releaseTag) {
+    throw new Error(`Usage: node .github/scripts/release-notify.mjs ${Object.keys(apps).join("|")} <release-tag>`);
 }
+
+const releaseUrl = `https://github.com/ente-io/nightly/releases/tag/${releaseTag}`;
 
 const env = (name) => {
     const value = process.env[name];
@@ -55,7 +60,15 @@ const releaseBodyDiscord =
         ? `${Array.from(releaseBody).slice(0, 3000).join("")}\n...\n-# See the GitHub release for full notes.`
         : releaseBody;
 
-const downloadLine = `-# Download: [Play Store](https://play.google.com/store/apps/details?id=${config.packageId}) | [TestFlight](https://appstoreconnect.apple.com/apps/${config.testFlightId}/testflight/ios) | [GitHub Release](${releaseUrl})`;
+const downloadLinks = [];
+if (config.packageId) {
+    downloadLinks.push(`[Play Store](https://play.google.com/store/apps/details?id=${config.packageId})`);
+}
+if (config.testFlightId) {
+    downloadLinks.push(`[TestFlight](https://appstoreconnect.apple.com/apps/${config.testFlightId}/testflight/ios)`);
+}
+downloadLinks.push(`[GitHub Release](${releaseUrl})`);
+const downloadLine = `-# Download: ${downloadLinks.join(" | ")}`;
 
 const components = [{ type: 10, content: `## ${releaseTitle}` }];
 if (releaseBodyDiscord) {

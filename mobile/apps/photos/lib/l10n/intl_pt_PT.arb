@@ -270,7 +270,6 @@
   "after1Month": "Depois de 1 mês",
   "after1Year": "Depois de 1 ano",
   "manageParticipants": "Gerir",
-  "collabLinkSectionDescription": "Criar um link para permitir que as pessoas adicionem e visualizem fotos em seu álbum compartilhado sem precisar de um aplicativo Ente ou conta. Ótimo para coletar fotos do evento.",
   "collectPhotos": "Coletar fotos",
   "collaborativeLink": "Link colaborativo",
   "shareWithNonenteUsers": "Compartilhar com usuários que não usam Ente",
@@ -391,7 +390,6 @@
   "creatingLink": "Criar link...",
   "removeWithQuestionMark": "Remover?",
   "removeParticipantBody": "{userEmail} será removido deste álbum compartilhado\n\nQuaisquer fotos adicionadas por elas também serão removidas do álbum",
-  "keepPhotos": "Manter fotos",
   "deletePhotos": "Apagar fotos",
   "inviteToEnte": "Convidar para Ente",
   "removePublicLink": "Remover link público",
@@ -399,6 +397,9 @@
   "sharing": "Partilhar...",
   "youCannotShareWithYourself": "Não podes partilhar contigo mesmo",
   "archive": "............",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Pressione e segure para selecionar fotos e clique em + para criar um álbum",
   "importing": "A importar...",
   "failedToLoadAlbums": "Falha ao carregar álbuns",
@@ -872,6 +873,9 @@
   "moveToAlbum": "Mover para álbum",
   "unhide": "Mostrar",
   "unarchive": "Desarquivar",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favorito",
   "removeFromFavorite": "Remover dos favoritos",
   "shareLink": "Partilhar link",

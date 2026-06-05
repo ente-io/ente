@@ -391,14 +391,6 @@ If you refer more paid customers than your current plan allows, the extra storag
 
 For example, if you're on a 100 GB plan (max 100 GB earned storage) but refer 15 friends (150 GB worth), the extra 50 GB will be held in reserve until you upgrade to a plan that allows more referral storage.
 
-### Can referral credit be applied after signup? {#referral-credit-after-signup}
-
-No. Referral credits are only applied when a new account is created using the referral code during signup.
-
-If the person has not signed up yet, share your referral code before they create their account.
-
-Find your referral code in `Settings > Referrals`.
-
 ### What counts as abuse of the referral program? {#referral-abuse}
 
 In case our systems detect abuse, we may notify you and take back credited storage. Examples of abuse include:

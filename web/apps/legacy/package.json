@@ -8,7 +8,7 @@
         "ente-base": "*",
         "ente-wasm": "*",
         "pdfjs-dist": "5.7.284",
-        "qr": "0.5.5",
+        "qr": "0.6.0",
         "zod": "4.4.3"
     },
     "devDependencies": {

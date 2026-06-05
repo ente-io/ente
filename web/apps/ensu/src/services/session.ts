@@ -1,5 +1,5 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import log from "ente-base/log";
-import { isTauriRuntime } from "services/tauri-runtime";
 import {
     secureStorageDelete,
     secureStorageGet,

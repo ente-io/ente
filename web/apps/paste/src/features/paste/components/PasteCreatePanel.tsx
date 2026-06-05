@@ -1,3 +1,5 @@
+import { usePasteColorMode } from "@/features/paste/hooks/usePasteColorMode";
+import { getPasteThemeTokens } from "@/features/paste/theme/pasteThemeTokens";
 import { Navigation06Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
@@ -17,8 +19,6 @@ import {
     Typography,
 } from "@mui/material";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
-import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
-import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
 import type { SubmitEvent } from "react";
 import { useState } from "react";
 import { MAX_PASTE_CHARS } from "../constants";

@@ -35,7 +35,7 @@ The renderer scripts check that `../web` dependencies have been installed. If th
 
 Build a binary for your current platform.
 
-Note that our actual releases use a [GitHub workflow](../.github/workflows/desktop-release.yml) that is similar to this, except it builds binaries for all the supported OSes and uses production signing credentials.
+Note that our actual releases use a [GitHub workflow](../../.github/workflows/photos-desktop-build.yml) that is similar to this, except it builds binaries for all the supported OSes and uses production signing credentials.
 
 During development, you might find `npm run build:quick` helpful. It is a variant of `npm run build` that omits some steps to build a binary quicker, something that can be useful during development.
 

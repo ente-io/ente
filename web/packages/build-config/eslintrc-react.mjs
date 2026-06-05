@@ -36,7 +36,7 @@ export default [
             // create unnecessary helper files).
             "react-refresh/only-export-components": [
                 "warn",
-                { allowConstantExport: true },
+                { allowConstantExport: true, extraHOCs: ["styled"] },
             ],
         },
     },

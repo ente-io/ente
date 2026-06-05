@@ -218,7 +218,6 @@
   "after1Month": "Etter 1 måned",
   "after1Year": "Etter 1 år",
   "manageParticipants": "Administrer",
-  "collabLinkSectionDescription": "Opprett en lenke slik at folk kan legge til og se bilder i det delte albumet ditt uten å trenge Ente-appen eller en konto. Perfekt for å samle bilder fra arrangementer.",
   "collectPhotos": "Samle bilder",
   "collaborativeLink": "Samarbeidslenke",
   "shareWithNonenteUsers": "Del med brukere som ikke har Ente",
@@ -311,7 +310,6 @@
   "creatingLink": "Lager lenke...",
   "removeWithQuestionMark": "Fjern?",
   "removeParticipantBody": "{userEmail} vil bli fjernet fra dette delte albumet\n\nAlle bilder lagt til av dem vil også bli fjernet fra albumet",
-  "keepPhotos": "Behold Bilder",
   "deletePhotos": "Slett bilder",
   "inviteToEnte": "Inviter til Ente",
   "removePublicLink": "Fjern offentlig lenke",
@@ -319,6 +317,9 @@
   "sharing": "Deler...",
   "youCannotShareWithYourself": "Du kan ikke dele med deg selv",
   "archive": "Arkiv",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Trykk og holde inne for å velge bilder, og trykk på + for å lage et album",
   "importing": "Importerer....",
   "failedToLoadAlbums": "Kunne ikke laste inn album",
@@ -731,6 +732,9 @@
   "moveToAlbum": "Flytt til album",
   "unhide": "Gjør synligjort",
   "unarchive": "Opphev arkivering",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favoritt",
   "removeFromFavorite": "Fjern fra favoritter",
   "shareLink": "Del link",

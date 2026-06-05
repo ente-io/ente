@@ -1,0 +1,1 @@
+- Import Google Takeout favorites into Favorites.

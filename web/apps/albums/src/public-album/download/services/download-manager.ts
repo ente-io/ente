@@ -290,7 +290,10 @@ class DownloadManager {
      * can return `undefined` iff the thumbnail is not already cached, and
      * {@link cachedOnly} is set to `true`.
      */
-    async thumbnailData(file: EnteFile, cachedOnly = false) {
+    async thumbnailData(
+        file: EnteFile,
+        cachedOnly = false,
+    ): Promise<Uint8Array<ArrayBuffer> | undefined> {
         await this.initThumbnailCacheIfNeeded();
 
         const key = file.id.toString();
@@ -607,9 +610,7 @@ export class NetworkDownloadError extends Error {
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (Error.captureStackTrace)
-            Error.captureStackTrace(this, NetworkDownloadError);
+        Error.captureStackTrace?.(this, NetworkDownloadError);
 
         this.error = e;
     }

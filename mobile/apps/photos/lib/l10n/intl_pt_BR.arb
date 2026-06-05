@@ -283,7 +283,7 @@
     },
     "description": "Number of participants in an album, including the album owner."
   },
-  "collabLinkSectionDescription": "Crie um link para permitir que as pessoas adicionem e vejam fotos no seu álbum compartilhado sem a necessidade do aplicativo ou uma conta Ente. Ótimo para colecionar fotos de eventos.",
+  "collabLinkSectionDescription": "Permitir pessoas adicionar fotos sem uma conta Ente",
   "collectPhotos": "Coletar fotos",
   "collaborativeLink": "Link colaborativo",
   "shareWithNonenteUsers": "Compartilhar com usuários não ente",
@@ -413,6 +413,7 @@
   "cannotMoveToSharedAlbumsMessage": "Itens só podem ser adicionados para álbuns compartilhados, não movidos. Deseja adicionar?",
   "deleteSharedAlbum": "Excluir álbum compartilhado?",
   "deleteAlbum": "Excluir álbum",
+  "deleteAlbumQuestion": "Excluir álbum?",
   "deleteAlbumDialog": "Também excluir as fotos (e vídeos) presentes neste álbum de <bold>todos</bold> os outros álbuns que eles fazem parte?",
   "deleteSharedAlbumDialogBody": "O álbum será apagado para todos\n\nVocê perderá o acesso a fotos compartilhadas neste álbum que pertencem aos outros",
   "yesRemove": "Sim, excluir",
@@ -427,6 +428,9 @@
   "sharing": "Compartilhando...",
   "youCannotShareWithYourself": "Não é possível compartilhar consigo mesmo",
   "archive": "Arquivo",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Pressione para selecionar fotos e clique em + para criar um álbum",
   "importing": "Importando....",
   "failedToLoadAlbums": "Falhou ao carregar álbuns",
@@ -444,10 +448,12 @@
   "deleteFromEnte": "Excluir do Ente",
   "yesDelete": "Sim, excluir",
   "movedToTrash": "Movido para a lixeira",
+  "deleteFromDeviceQuestion": "Excluir do dispositivo?",
   "deleteFromDevice": "Excluir do dispositivo",
   "deleteFromBoth": "Excluir de ambos",
   "newAlbum": "Novo álbum",
   "albums": "Álbuns",
+  "ente": "Ente",
   "memoryCount": "{count, plural, =0{sem memórias} one{{formattedCount} memória} other{{formattedCount} memórias}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
@@ -835,10 +841,13 @@
   "referrals": "Referências",
   "notifications": "Notificações",
   "sharedPhotoNotifications": "Novas fotos e álbuns compartilhados",
+  "sharedPhotoNotificationsExplanation": "Novas fotos e álbuns que você participa ou compartilhado com você",
   "socialNotifications": "Curtidas e comentários",
+  "socialNotificationsExplanation": "Curtidas nas suas fotos e comentários em álbuns que você participa",
   "advanced": "Avançado",
   "general": "Geral",
   "security": "Segurança",
+  "settings": "Opções",
   "authToViewYourRecoveryKey": "Autentique para ver sua chave de recuperação",
   "twofactor": "Dois fatores",
   "authToConfigureTwofactorAuthentication": "Autentique para configurar a autenticação de dois fatores",
@@ -1056,6 +1065,32 @@
   "grantFullAccessPrompt": "Permita o acesso a todas as fotos nas opções do aplicativo",
   "allowPermTitle": "Permita acesso às Fotos",
   "allowPermBody": "Permita o acesso a suas fotos nas Opções para que Ente exiba e salva em segurança sua fototeca.",
+  "allowAccessToYourPhotos": "Permitir acesso às fotos",
+  "enteNeedsPermissionToSeeDeviceAlbums": "Ente precisa de permissão para ver os álbuns do dispositivo",
+  "allYourDeviceAlbumsInOnePlace": "Todos os álbuns do dispositivo, num só lugar",
+  "albumsOnEnteEmptyTitle": "Fazer backup de suas memórias",
+  "albumsOnEnteEmptyFeatureAccessAnyDevice": "Acesse-as em qualquer dispositivo",
+  "albumsOnEnteEmptyFeatureShareLovedOnes": "Compartilhe-as com entes queridos - eles podem comentar e reagir, sem uma conta",
+  "albumsOnEnteEmptyFeaturePrivacy": "Privacidade total com criptografia ponta a ponta",
+  "albumsOnEnteEmptyCta": "Selecione os álbuns para backup",
+  "albumsSharedEmptyTitle": "Compartilhe suas memórias",
+  "albumsSharedEmptyFeatureShareLovedOnes": "Compartilhe suas fotos e vídeos com entes queridos",
+  "albumsSharedEmptyFeatureReactAndComment": "Eles poderão ver, reagir e comentar, mesmo sem uma conta",
+  "albumsSharedEmptyFeaturePrivacy": "Privacidade total com criptografia ponta a ponta",
+  "albumsOnDevicePermissionCta": "Permitir",
+  "albumsOnDevicePermissionFeatureAllowAccessFaceRecognition": "Permitir que Ente acesse e organize suas fotos com reconhecimento facial",
+  "albumsOnDevicePermissionFeatureLocalProcessing": "Todo processamento ocorre em seu dispositivo",
+  "albumsOnDevicePermissionFeatureControlUploads": "Você está em controle do que é enviado",
+  "noAlbumsOnThisDevice": "Nenhum álbum\nno dispositivo",
+  "startSnappingYourPhotosWillShowUpHere": "Comece a arrastar, suas fotos aparecerão aqui",
+  "youPickWhatGetsBackedUp": "Você escolhe o que fazer backup",
+  "privateAndEndToEndEncryptedAlways": "Criptografado de ponta a ponta e privado, sempre",
+  "grantAccess": "Permitir",
+  "albumsSharedWithYouShowUpHere": "Álbuns compartilhados com você aparece aqui",
+  "inviteFamilyToSharePhotosPrivately": "Convide sua família para compartilhar fotos privadamente",
+  "shareStorageWithUpToFiveFamilyMembers": "Compartilhe o armazenamento com até 5 familiares",
+  "reactAndChatOnSharedMemories": "Reaja e fale nas memórias compartilhadas",
+  "addFamily": "Adicionar familiar",
   "openSettings": "Abrir opções",
   "selectMorePhotos": "Selecionar mais fotos",
   "existingUser": "Usuário existente",
@@ -1066,6 +1101,7 @@
   "shareTheMoment": "Compartilhar momento",
   "letFriendsAndFamilyReact": "Deixe seus amigos e sua família reagir e comentar em suas fotos.",
   "pleaseLoginAgain": "Registre-se novamente",
+  "autoLogoutMessage": "Devido a um erro técnico, você foi desconectado. Mil perdões pela inconveniência.",
   "yourSubscriptionHasExpired": "A sua assinatura expirou",
   "storageLimitExceeded": "Limite de armazenamento excedido",
   "upgrade": "Atualizar",
@@ -1088,12 +1124,20 @@
   "collectEventPhotos": "Coletar fotos de evento",
   "sessionExpired": "Sessão expirada",
   "loggingOut": "Desconectando...",
+  "@onDevice": {
+    "description": "The text displayed above folders/albums stored on device",
+    "type": "text"
+  },
+  "onDevice": "Dispositivo",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
   },
   "onEnte": "No <branding>ente</branding>",
+  "grid": "Grade",
+  "list": "Lista",
   "name": "Nome",
+  "created": "Criados",
   "newest": "Mais recente",
   "lastUpdated": "Última atualização",
   "updated": "Atualizado",
@@ -1129,6 +1173,9 @@
   "moveToAlbum": "Mover para o álbum",
   "unhide": "Desocultar",
   "unarchive": "Desarquivar",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favorito",
   "removeFromFavorite": "Desfavoritar",
   "shareMemories": "Compartilhar memórias",
@@ -1141,6 +1188,7 @@
   "deleteLinkQuestion": "Excluir link?",
   "deleteMemoryLinkMessage": "As pessoas que você compartilhou este link perderão acesso assim que ele for excluído.",
   "linkDeletedSuccessfully": "Link excluído com sucesso",
+  "memoryLink": "Vínculo da memória",
   "memoryLinks": "Links de memória",
   "openLink": "Abrir link",
   "pay": "Pagar",
@@ -1167,6 +1215,7 @@
   "createOrSelectAlbum": "Criar ou selecionar álbum",
   "selectAlbum": "Selecionar álbum",
   "searchByAlbumNameHint": "Nome do álbum",
+  "searchAlbums": "Buscar álbuns",
   "albumTitle": "Título do álbum",
   "enterAlbumName": "Inserir nome do álbum",
   "restoringFiles": "Restaurando arquivos...",
@@ -1258,6 +1307,10 @@
   "fileSavedToGallery": "Arquivo salvo na galeria",
   "filesSavedToGallery": "Arquivos salvos na galeria",
   "fileFailedToSaveToGallery": "Falhou ao salvar arquivo na galeria",
+  "applePhotosUnsupportedResource": "Este arquivo não pôde ser salvo no Apple Photos. Você ainda pode vê-lo no Ente.",
+  "@applePhotosUnsupportedResource": {
+    "description": "Shown when iOS Photos rejects a file while saving to gallery because the media resource is invalid or unsupported"
+  },
   "download": "Baixar",
   "downloadSkippedAlreadyAvailableOnDevice": "{fileName} já está disponível no álbum {albumName} em seu dispositivo",
   "@downloadSkippedAlreadyAvailableOnDevice": {
@@ -1549,6 +1602,7 @@
   "light": "Brilho",
   "color": "Cor",
   "yesDiscardChanges": "Sim, descartar alterações",
+  "discardEditsQuestion": "Descartar edições?",
   "doYouWantToDiscardTheEditsYouHaveMade": "Você quer descartar as edições que você fez?",
   "saving": "Salvando...",
   "editsSaved": "Edições salvas",
@@ -1641,6 +1695,8 @@
   "maps": "Mapas",
   "mapsPrivacyNotice": "Coordenadas aproximadas serão enviadas a terceiros conscientes da privacidade, como o OpenStreetMap para mostrar o mapa e a localização.",
   "enableMaps": "Ativar mapas",
+  "links": "Vínculos",
+  "noLinksYet": "Sem vínculos",
   "quickLinks": "Links rápidos",
   "selectItemsToAdd": "Selecionar itens para adicionar",
   "addSelected": "Adicionar selecionado",
@@ -1688,6 +1744,7 @@
   "upto50OffUntil4thDec": "Com 50% de desconto, até 4 de dezembro",
   "photos": "Fotos",
   "videos": "Vídeos",
+  "camera": "Câmera",
   "livePhotos": "Fotos animadas",
   "searchHint1": "busca rápida no dispositivo",
   "searchHint2": "Descrições e data das fotos",
@@ -1825,6 +1882,7 @@
   },
   "enable": "Ativar",
   "enabled": "Ativado",
+  "more": "Mais",
   "moreDetails": "Mais detalhes",
   "enableMLIndexingDesc": "Ente fornece aprendizado automático no dispositivo para reconhecimento facial, busca mágica e outros recursos de busca avançados.",
   "magicSearchHint": "A busca mágica permite buscar fotos pelo conteúdo, p. e.x. 'flor', 'carro vermelho', 'identidade'",
@@ -2384,6 +2442,7 @@
   },
   "appIcon": "Ícone do aplicativo",
   "notThisPerson": "Não é esta pessoa?",
+  "removeFromPersonQuestion": "Remover da pessoa?",
   "selectedItemsWillBeRemovedFromThisPerson": "Os itens selecionados serão removidos desta pessoa, entretanto não serão excluídos da sua biblioteca.",
   "throughTheYears": "{dateFormat} com o passar dos anos",
   "thisWeekThroughTheYears": "Esta semana com o passar dos anos",
@@ -2412,7 +2471,7 @@
   "tripInYear": "Viajem em {year}",
   "lastYearsTrip": "Viajem do ano passado",
   "sunrise": "No horizonte",
-  "mountains": "Sob as montanhas",
+  "mountains": "Sob as colinas",
   "greenery": "A vegetação verde",
   "beach": "Areia e o mar",
   "city": "Na cidade",
@@ -2428,6 +2487,7 @@
   "memoriesWidgetDesc": "Selecione as memórias que deseja ver na tela inicial.",
   "smartMemories": "Memórias inteligentes",
   "pastYearsMemories": "Memórias dos anos passados",
+  "deleteMultipleAlbumsQuestion": "Excluir estes álbuns?",
   "deleteMultipleAlbumDialog": "E também excluir todas as fotos (e vídeos) presente dentro desses {count} álbuns e de <bold>todos</bold> os álbuns que eles fazem parte?",
   "addParticipants": "Adicionar participante",
   "selectedAlbums": "{count} selecionado(s)",
@@ -2438,11 +2498,13 @@
   "newPhotosEmoji": " novo 📸",
   "sorryWeHadToPauseYourBackups": "Desculpe, tivemos que pausar os salvamentos em segurança",
   "clickToInstallOurBestVersionYet": "Clique para instalar a nossa melhor versão até então",
+  "onThisDayNotificationExplanation": "Memórias deste dia nos anos passados",
   "addMemoriesWidgetPrompt": "Adicione um widget de memórias à tela inicial para personalizá-lo aqui.",
   "addAlbumWidgetPrompt": "Adicione um widget de álbum à tela inicial para personalizá-lo aqui.",
   "addPeopleWidgetPrompt": "Adicione um widget de pessoas à tela inicial para personalizá-lo aqui.",
   "showTextOnWidget": "Exibir texto no widget",
   "birthdayNotifications": "Notificações de aniversário",
+  "receiveRemindersOnBirthdays": "Lembretes de que é aniversário de alguém",
   "happyBirthday": "Feliz aniversário! 🥳",
   "birthdays": "Aniversários",
   "wishThemAHappyBirthday": "Deseje um feliz aniversário a {name}! 🎉",
@@ -2481,11 +2543,11 @@
   "groupByWeek": "Semana",
   "groupByMonth": "Mês",
   "groupByYear": "Ano",
-  "faceThumbnailGenerationFailed": "Incapaz de gerar miniaturas de rosto",
-  "fileAnalysisFailed": "Incapaz de analisar rosto",
+  "faceThumbnailGenerationFailed": "Não foi possível gerar miniaturas de rosto",
+  "fileAnalysisFailed": "Não foi possível analisar arquivo",
   "editAutoAddPeople": "Editar adição automática de pessoas",
-  "autoAddPeople": "Adicionar pessoas auto.",
-  "autoAddToAlbum": "Adicionar ao álbum auto.",
+  "autoAddPeople": "Adicionar pessoas automaticamente",
+  "autoAddToAlbum": "Adicionar ao álbum automaticamente",
   "shouldRemoveFilesSmartAlbumsDesc": "Deveria excluir os arquivos relacionados à pessoa anteriormente selecionada nos álbuns inteligentes?",
   "addingPhotos": "Adicionando fotos",
   "gettingReady": "Preparando",
@@ -2502,6 +2564,7 @@
   "undo": " Desfazer ",
   "redo": "Refazer",
   "filter": "Filtrar",
+  "filters": "Filtros",
   "adjust": "Ajuste",
   "draw": "Desenho",
   "sticker": "Figurinha",
@@ -2952,6 +3015,16 @@
     }
   },
   "noActivityYet": "Sem atividades",
+  "nothingHereYet": "Nada aqui",
+  "shareAnAlbumWithSomeoneYouLove": "Compartilhe um álbum com alguém que ama",
+  "seeTheLoveYourPhotosGet": "Veja as curtidas que suas fotos obtiveram",
+  "yourConversationsAttachedToTheMoment": "Suas conversas, ligadas ao momento",
+  "stayConnectedWithThePeopleYouShareWith": "Mantenha-se conectado com as pessoas que você compartilha",
+  "shareAnAlbum": "Compartilhar um álbum",
+  "seeWhatYourPeopleAreUpTo": "Veja o que as pessoas estão fazendo",
+  "signUpToShareMomentsPrivately": "Registre-se para compartilhar momentos privadamente",
+  "reactToTheMomentsThatMatter": "Reaja a momentos que importam",
+  "leaveANoteOnTheMomentsSharedWithYou": "Deixe uma nota nos comentários compartilhados com você",
   "like": "Curtir",
   "comments": "Comentários",
   "commentHint": "Diga algo legal!",
@@ -3030,5 +3103,56 @@
   "@likeAll": {
     "description": "Button to like in all shared albums"
   },
-  "grantPermission": "Conceder permissões"
+  "selectAlbumToLikeVideo": "Selecione o álbum para curtir este vídeo",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Selecione o álbum para curtir esta foto",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Falhou ao curtir comentário",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Falhou ao excluir comentário",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(excluído)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Respondendo a você",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Respondendo a {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{Nenhum comentário} one{{count} comentário} other{{count} comentários}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchSettings": "Opções de busca",
+  "suggestions": "Sugestões",
+  "smartSuggestions": "Sugestões inteligentes",
+  "cleanupHiddenFiles": "Limpar arquivos ocultos",
+  "cleanupHiddenFilesDescription": "Alguns arquivos em álbuns ocultos ainda existem em álbuns visíveis, O que torna-os visível também. Limpar removerá-los dos álbuns não ocultos.",
+  "cleanupComplete": "Limpeza concluída",
+  "deleteHiddenFilesFromDevice": "Excluir arquivos ocultos do dispositivo",
+  "deleteHiddenFilesFromDeviceDescription": "Excluir cópias locais de arquivos ocultos do seu dispositivo",
+  "deleteOnDeviceFiles": "Excluir nos arquivos do dispositivo",
+  "grantPermission": "Permitir"
 }

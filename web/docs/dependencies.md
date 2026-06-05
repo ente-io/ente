@@ -170,12 +170,12 @@ Inter Variable (with support for weights 100 - 90) is used as the primary font, 
 
 - [otpauth](https://github.com/hectorm/otpauth) is used for the generation of the actual OTP from the user's TOTP/HOTP secret.
 
-- However, otpauth doesn't support steam OTPs. For these, we need to compute the SHA-1, and we use the same library, `jssha` that `otpauth` uses since it is already part of our bundle (transitively).
+- However, otpauth doesn't support steam OTPs. For these, we need to compute the SHA-1, and we use `@noble/hashes`, the same hash library that `otpauth` uses.
 
 ## Pinned
-
-- `otpauth` is pinned to 9.2.4 since subsequent versions changed the underlying hash library, which requires a change in the steam OTP generation code.
 
 - `react-dropzone` is pinned to the 14.2.10, the last version in the 14.2 series, since if we use 14.3 onwards (I tested till 14.3.5) then we are unable to get back a path from the file by using the `webUtils.getPathForFile` function provided by Electron. See: https://github.com/react-dropzone/react-dropzone/issues/1411
 
 - `@stripe/stripe-js` is pinned to the latest 1.x (it works as it is currently, migrating to newer major versions requires headspace since it _might_ also require museum changes).
+
+- `base-x` is pinned to 5.0.1 via the root `overrides` field because it is pulled in transitively by `bs58`, and 5.0.0 is affected by [CVE-2025-27611](https://github.com/advisories/GHSA-xq7p-g2vc-g82p).

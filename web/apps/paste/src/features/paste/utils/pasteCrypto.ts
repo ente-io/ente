@@ -1,3 +1,4 @@
+import type { PastePayload } from "@/services/paste";
 import {
     decryptBox,
     decryptMetadataJSON,
@@ -9,7 +10,6 @@ import {
     generateKey,
 } from "ente-base/crypto";
 import { newID } from "ente-base/id";
-import type { PastePayload } from "services/paste";
 import {
     FRAGMENT_SECRET_LENGTH,
     FRAGMENT_SECRET_PATTERN,

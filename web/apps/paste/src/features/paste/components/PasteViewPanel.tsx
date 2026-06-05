@@ -1,3 +1,5 @@
+import { usePasteColorMode } from "@/features/paste/hooks/usePasteColorMode";
+import { getPasteThemeTokens } from "@/features/paste/theme/pasteThemeTokens";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
@@ -9,8 +11,6 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
-import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
 import type { SubmitEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { pasteTextFieldSx } from "./textFieldSx";

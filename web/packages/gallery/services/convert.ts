@@ -248,7 +248,6 @@ export const playableVideoURL = async (
         if (
             isDesktop &&
             file.metadata.fileType == FileType.livePhoto &&
-            // eslint-disable-next-line @typescript-eslint/no-deprecated
             navigator.platform.startsWith("Linux")
         ) {
             shouldConvert = true;

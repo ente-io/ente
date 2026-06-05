@@ -245,7 +245,6 @@
   "after1Month": "Després d'1 mes",
   "after1Year": "Després d'1 any",
   "manageParticipants": "Gestiona",
-  "collabLinkSectionDescription": "Crea un enllaç per permetre que la gent afegeixi i vegi fotos al teu àlbum compartit sense necessitat d'una aplicació o compte d'Ente. Genial per recollir fotos d'esdeveniments.",
   "collectPhotos": "Recull fotos",
   "collaborativeLink": "Enllaç col·laboratiu",
   "shareWithNonenteUsers": "Comparteix amb usuaris no Ente",
@@ -366,7 +365,6 @@
   "creatingLink": "Creant enllaç...",
   "removeWithQuestionMark": "Eliminar?",
   "removeParticipantBody": "{userEmail} s'eliminarà d'aquest àlbum compartit\n\nQualsevol foto afegida per ells també s'eliminarà de l'àlbum",
-  "keepPhotos": "Mantingues les fotos",
   "deletePhotos": "Esborra fotos",
   "inviteToEnte": "Convida a Ente",
   "removePublicLink": "Elimina enllaç públic",
@@ -374,6 +372,9 @@
   "sharing": "Compartint...",
   "youCannotShareWithYourself": "No pots compartir amb tu mateix",
   "archive": "Arxiva",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Fes una pressió llarga per seleccionar fotos i fes clic a + per crear un àlbum",
   "importing": "Importar....",
   "failedToLoadAlbums": "No s'han pogut carregar els àlbums",
@@ -822,6 +823,9 @@
   "moveToAlbum": "Mou a l'àlbum",
   "unhide": "Mostra",
   "unarchive": "Desarxiva",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favorit",
   "removeFromFavorite": "Elimina de favorits",
   "shareLink": "Comparteix enllaç",

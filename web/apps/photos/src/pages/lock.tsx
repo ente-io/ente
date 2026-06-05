@@ -1,5 +1,5 @@
+import { LockScreenContents } from "@/components/app-lock/LockScreenContents";
 import { Modal } from "@mui/material";
-import { LockScreenContents } from "components/app-lock/LockScreenContents";
 import { t } from "i18next";
 
 export const LockPage = () => (
