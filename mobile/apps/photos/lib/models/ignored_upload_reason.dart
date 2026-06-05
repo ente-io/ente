@@ -8,13 +8,6 @@ enum IgnoredUploadReasonBucket {
   other,
 }
 
-const ignoredUploadReasonBuckets = <IgnoredUploadReasonBucket>[
-  IgnoredUploadReasonBucket.all,
-  IgnoredUploadReasonBucket.iCloudUnavailable,
-  IgnoredUploadReasonBucket.deletedFromEnte,
-  IgnoredUploadReasonBucket.other,
-];
-
 IgnoredUploadReasonBucket ignoredUploadReasonBucketFor(String reason) {
   if (reason == phPhotosResourceUnavailableReason) {
     return IgnoredUploadReasonBucket.iCloudUnavailable;

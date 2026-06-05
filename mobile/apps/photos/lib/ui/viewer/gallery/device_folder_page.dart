@@ -15,7 +15,6 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import 'package:photos/models/gallery_type.dart';
-import "package:photos/models/ignored_upload.dart";
 import "package:photos/models/ignored_upload_reason.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
@@ -97,14 +96,13 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
     );
     final idToReasonMap =
         await IgnoredFilesService.instance.idToIgnoreReasonMap;
-    final ignoredUploads = IgnoredFilesService.instance.getIgnoredUploads(
-      idToReasonMap,
-      result.files,
-    );
     return FileLoadResult(
-      ignoredUploads
-          .where((upload) => upload.reasonBucket == _ignoredUploadFilter)
-          .map((upload) => upload.file)
+      result.files
+          .where(
+            (file) =>
+                _ignoredUploadReasonBucketForFile(idToReasonMap, file) ==
+                _ignoredUploadFilter,
+          )
           .toList(),
       false,
     );
@@ -132,7 +130,9 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
               onIgnoredUploadBucketChanged: _onIgnoredUploadFilterChanged,
             )
           : const SizedBox.shrink(),
-      initialFiles: _initialFiles,
+      initialFiles: _ignoredUploadFilter == IgnoredUploadReasonBucket.all
+          ? _initialFiles
+          : null,
     );
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
@@ -167,9 +167,6 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   }
 
   List<EnteFile>? get _initialFiles {
-    if (_ignoredUploadFilter != IgnoredUploadReasonBucket.all) {
-      return null;
-    }
     final thumbnail = widget.deviceCollection.thumbnail;
     return thumbnail != null ? [thumbnail] : null;
   }
@@ -198,118 +195,91 @@ class BackupHeaderWidget extends StatefulWidget {
 }
 
 class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
-  late Future<List<EnteFile>> filesInDeviceCollection;
-  late ValueNotifier<bool> shouldBackup;
+  late bool shouldBackup;
   final Logger _logger = Logger("_BackupHeaderWidgetState");
   @override
   void initState() {
-    shouldBackup = ValueNotifier(widget.deviceCollection.shouldBackup);
-
+    shouldBackup = widget.deviceCollection.shouldBackup;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    filesInDeviceCollection = _filesInDeviceCollection();
-
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MenuItemWidget(
-                captionedTextWidget: CaptionedTextWidget(
-                  title: AppLocalizations.of(context).backup,
-                ),
-                singleBorderRadius: 8.0,
-                menuItemColor: colorScheme.fillFaint,
-                alignCaptionedTextToLeft: true,
-                trailingWidget: ToggleSwitchWidget(
-                  value: () => shouldBackup.value,
-                  onChanged: () async {
-                    _logger.info(
-                      "Toggling device folder sync status to "
-                      "${!shouldBackup.value}",
-                    );
-                    try {
-                      await RemoteSyncService.instance
-                          .updateDeviceFolderSyncStatus({
-                            widget.deviceCollection.id: !shouldBackup.value,
-                          });
-                      await backupPreferenceService.setHasManualFolderSelection(
-                        true,
-                      );
-                      if (mounted) {
-                        final newShouldBackup = !shouldBackup.value;
-                        setState(() {
-                          shouldBackup.value = newShouldBackup;
-                        });
-                        if (!newShouldBackup) {
-                          widget.onIgnoredUploadBucketChanged(
-                            IgnoredUploadReasonBucket.all,
-                          );
-                        }
-                      }
-                    } catch (e) {
-                      _logger.severe(
-                        "Could not update device folder sync status",
-                        e,
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: AppLocalizations.of(context).backup,
+            ),
+            singleBorderRadius: 8.0,
+            menuItemColor: colorScheme.fillFaint,
+            alignCaptionedTextToLeft: true,
+            trailingWidget: ToggleSwitchWidget(
+              value: () => shouldBackup,
+              onChanged: () async {
+                _logger.info(
+                  "Toggling device folder sync status to ${!shouldBackup}",
+                );
+                try {
+                  await RemoteSyncService.instance.updateDeviceFolderSyncStatus(
+                    {widget.deviceCollection.id: !shouldBackup},
+                  );
+                  await backupPreferenceService.setHasManualFolderSelection(
+                    true,
+                  );
+                  if (mounted) {
+                    final newShouldBackup = !shouldBackup;
+                    setState(() {
+                      shouldBackup = newShouldBackup;
+                    });
+                    if (!newShouldBackup) {
+                      widget.onIgnoredUploadBucketChanged(
+                        IgnoredUploadReasonBucket.all,
                       );
                     }
-                  },
-                ),
-              ),
-              ValueListenableBuilder(
-                valueListenable: shouldBackup,
-                builder: (BuildContext context, bool value, _) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      MenuSectionDescriptionWidget(
-                        content: value
-                            ? AppLocalizations.of(
-                                context,
-                              ).deviceFilesAutoUploading
-                            : AppLocalizations.of(
-                                context,
-                              ).turnOnBackupForAutoUpload,
-                      ),
-                      if (value) _buildIgnoredUploadFilter(),
-                    ],
+                  }
+                } catch (e) {
+                  _logger.severe(
+                    "Could not update device folder sync status",
+                    e,
                   );
-                },
-              ),
-            ],
+                }
+              },
+            ),
           ),
+          MenuSectionDescriptionWidget(
+            content: shouldBackup
+                ? AppLocalizations.of(context).deviceFilesAutoUploading
+                : AppLocalizations.of(context).turnOnBackupForAutoUpload,
+          ),
+          if (shouldBackup) _buildIgnoredUploadFilter(),
         ],
       ),
     );
   }
 
   Widget _buildIgnoredUploadFilter() {
-    return FutureBuilder<List<IgnoredUpload>>(
-      future: _ignoredUploads(filesInDeviceCollection),
+    return FutureBuilder<Set<IgnoredUploadReasonBucket>>(
+      future: _ignoredUploadReasonBuckets(_filesInDeviceCollection()),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          Logger(
-            "BackupHeaderWidget",
-          ).severe("Could not check if collection has ignored files");
+          _logger.severe("Could not check if collection has ignored files");
           return const SizedBox.shrink();
         }
         if (!snapshot.hasData) {
           return const SizedBox.shrink();
         }
-        final ignoredUploads = snapshot.data!;
-        _resetUnavailableIgnoredUploadFilter(ignoredUploads);
-        if (ignoredUploads.isEmpty) {
+        final buckets = snapshot.data!;
+        _resetUnavailableIgnoredUploadFilter(buckets);
+        if (buckets.isEmpty) {
           return const SizedBox.shrink();
         }
         return IgnoredUploadFilterWidget(
-          ignoredUploads: ignoredUploads,
+          availableBuckets: buckets,
           selectedBucket: widget.selectedIgnoredUploadBucket,
           onBucketChanged: widget.onIgnoredUploadBucketChanged,
         );
@@ -326,26 +296,29 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
     )).files;
   }
 
-  Future<List<IgnoredUpload>> _ignoredUploads(
+  Future<Set<IgnoredUploadReasonBucket>> _ignoredUploadReasonBuckets(
     Future<List<EnteFile>> filesInDeviceCollection,
   ) async {
     final List<EnteFile> deviceCollectionFiles = await filesInDeviceCollection;
     final allIgnoredIDs =
         await IgnoredFilesService.instance.idToIgnoreReasonMap;
-    return IgnoredFilesService.instance.getIgnoredUploads(
-      allIgnoredIDs,
-      deviceCollectionFiles,
-    );
+    final buckets = <IgnoredUploadReasonBucket>{};
+    for (final file in deviceCollectionFiles) {
+      final bucket = _ignoredUploadReasonBucketForFile(allIgnoredIDs, file);
+      if (bucket != null) {
+        buckets.add(bucket);
+      }
+    }
+    return buckets;
   }
 
   void _resetUnavailableIgnoredUploadFilter(
-    List<IgnoredUpload> ignoredUploads,
+    Set<IgnoredUploadReasonBucket> buckets,
   ) {
     final selectedBucket = widget.selectedIgnoredUploadBucket;
     if (selectedBucket == IgnoredUploadReasonBucket.all) {
       return;
     }
-    final buckets = ignoredUploads.map((upload) => upload.reasonBucket).toSet();
     if (buckets.contains(selectedBucket)) {
       return;
     }
@@ -359,12 +332,12 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
 }
 
 class IgnoredUploadFilterWidget extends StatelessWidget {
-  final List<IgnoredUpload> ignoredUploads;
+  final Set<IgnoredUploadReasonBucket> availableBuckets;
   final IgnoredUploadReasonBucket selectedBucket;
   final ValueChanged<IgnoredUploadReasonBucket> onBucketChanged;
 
   const IgnoredUploadFilterWidget({
-    required this.ignoredUploads,
+    required this.availableBuckets,
     required this.selectedBucket,
     required this.onBucketChanged,
     super.key,
@@ -406,14 +379,24 @@ class IgnoredUploadFilterWidget extends StatelessWidget {
   }
 
   List<IgnoredUploadReasonBucket> get _visibleBuckets {
-    final buckets = ignoredUploads.map((upload) => upload.reasonBucket).toSet();
     return [
       IgnoredUploadReasonBucket.all,
-      ...ignoredUploadReasonBuckets
+      ...IgnoredUploadReasonBucket.values
           .where((bucket) => bucket != IgnoredUploadReasonBucket.all)
-          .where(buckets.contains),
+          .where(availableBuckets.contains),
     ];
   }
+}
+
+IgnoredUploadReasonBucket? _ignoredUploadReasonBucketForFile(
+  Map<String, String> idToReasonMap,
+  EnteFile file,
+) {
+  final reason = IgnoredFilesService.instance.getUploadSkipReason(
+    idToReasonMap,
+    file,
+  );
+  return reason == null ? null : ignoredUploadReasonBucketFor(reason);
 }
 
 String ignoredUploadReasonBucketLabel(
