@@ -665,8 +665,15 @@ export class NetworkDownloadError extends Error {
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
-        if (Error.captureStackTrace)
-            Error.captureStackTrace(this, NetworkDownloadError);
+        const captureStackTrace = (
+            Error as {
+                captureStackTrace?: (
+                    targetObject: object,
+                    constructorOpt?: unknown,
+                ) => void;
+            }
+        ).captureStackTrace;
+        captureStackTrace?.(this, NetworkDownloadError);
 
         this.error = e;
     }
