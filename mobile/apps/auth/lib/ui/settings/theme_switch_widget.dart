@@ -6,6 +6,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:flutter/material.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
@@ -84,6 +85,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       onTap: () async {
         final adaptiveTheme = AdaptiveTheme.of(context);
         adaptiveTheme.setThemeMode(themeMode);
+        AppLock.of(context)?.setThemeMode(_themeMode(themeMode));
         await adaptiveTheme.persist();
         currentThemeMode = themeMode;
         if (mounted) {
@@ -91,5 +93,11 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
         }
       },
     );
+  }
+
+  ThemeMode _themeMode(AdaptiveThemeMode themeMode) {
+    if (themeMode.isLight) return ThemeMode.light;
+    if (themeMode.isDark) return ThemeMode.dark;
+    return ThemeMode.system;
   }
 }
