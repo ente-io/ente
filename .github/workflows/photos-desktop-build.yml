@@ -177,14 +177,18 @@ jobs:
                   USE_HARD_LINKS: false
 
             - name: Upload to nightly
-              shell: bash
-              env:
-                  GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
-              run: |
-                  tag="${RELEASE_TAG}"
-                  gh release create "${tag}" --repo ente-io/nightly --prerelease --title "${tag}" --notes "${RELEASE_BODY}" || true
-                  shopt -s nullglob
-                  gh release upload "${tag}" dist/ente-*.{exe,dmg,AppImage,deb,rpm,pacman} --repo ente-io/nightly --clobber
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+              with:
+                  repo: nightly
+                  token: ${{ steps.nightly_token.outputs.token }}
+                  tag: ${{ env.RELEASE_TAG }}
+                  name: ${{ env.RELEASE_TAG }}
+                  body: ${{ env.RELEASE_BODY }}
+                  artifacts: "desktop/dist/ente-*.@(exe|dmg|AppImage|deb|rpm|pacman)"
+                  prerelease: true
+                  makeLatest: false
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
 
     finish-build:
         needs: [build-metadata, build]
