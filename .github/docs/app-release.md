@@ -1,10 +1,14 @@
 # App release process
 
-Photos, Auth, Locker, and Ensu use the same release process, as described here.
+Photos, Auth, Locker, Ensu, and Photos desktop use the same release process, as described here.
 
 > For simplicity, the following assumes we're trying to release Ensu, that main is `0.1.16-beta`, we want to release `0.1.16` and move main to `0.1.17-beta`.
 >
 > To do the same steps for another app, say "auth", you can just mechanically replace "ensu" with that "auth" in the steps.
+
+## App specifics
+
+- Photos desktop follows the same flow, but its stable releases live in [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop). See [desktop/docs/release.md](../../desktop/docs/release.md) for more details.
 
 ## Normal development
 
@@ -51,6 +55,10 @@ git push
 
 ## Promote release
 
+> [!IMPORTANT]
+>
+> Edit the release notes for the `ensu-v0.1.16-rc` draft release in `ente-io/ente` into the final user-facing changelog before promoting.
+
 ```sh
 gh workflow run app-release.yml \
   -f action=promote \
@@ -58,9 +66,9 @@ gh workflow run app-release.yml \
   -f version=0.1.16
 ```
 
-This does not create another build. It tags the last RC commit as `ensu-v0.1.16`, moves the GitHub draft from `ensu-v0.1.16-rc` to `ensu-v0.1.16`, removes the RC tag, deletes the `ensu-v0.1.16-rc` pre-release from `ente-io/nightly`, and deletes the release branch.
+This does not create another build. It tags the last RC commit as `ensu-v0.1.16`, publishes it (renaming `ensu-v0.1.16-rc` to `ensu-v0.1.16`), removes the RC tag, deletes the `ensu-v0.1.16-rc` pre-release from `ente-io/nightly`, and deletes the release branch.
 
-Publish the draft ensu-v0.1.16 release on GitHub when ready.
+It also opens a PR for updating the changelog in the docs.
 
 > [!NOTE]
 >

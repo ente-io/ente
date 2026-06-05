@@ -8,8 +8,8 @@ on:
             - "release/ensu-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~6:45 AM IST
-        - cron: "15 1 * * 1-5"
+        # Run every weekday at ~5:45 AM IST
+        - cron: "15 0 * * 1-5"
 
 env:
     NDK_VERSION: "27.3.13750724"
@@ -242,7 +242,7 @@ jobs:
                   includeUpdaterJson: false
                   args: ${{ format('--target {0} --bundles {1} --config tauri.ci.conf.json', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
 
-            # ncipollo globs `artifacts`; its glob breaks on Windows backslash paths.
+            # tauri-action emits JSON; ncipollo expects comma-delimited artifact paths.
             - name: Collect RC artifact list
               if: startsWith(github.ref_name, 'release/')
               id: rc_artifacts
@@ -250,8 +250,8 @@ jobs:
               env:
                   ARTIFACT_PATHS: ${{ steps.tauri.outputs.artifactPaths }}
               run: |
-                  list="$(jq -rn 'env.ARTIFACT_PATHS | fromjson | map(gsub("\\\\"; "/")) | join(",")')"
-                  echo "list=${list}" >> "${GITHUB_OUTPUT}"
+                  list="$(jq -rn 'env.ARTIFACT_PATHS | fromjson | join(",")')"
+                  printf 'list=%s\n' "${list}" >> "${GITHUB_OUTPUT}"
 
             - name: Upload desktop artifacts to RC draft
               if: startsWith(github.ref_name, 'release/')

@@ -8,8 +8,8 @@ on:
             - "release/photos-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~3:45 AM IST
-        - cron: "15 22 * * 0-4"
+        # Run every weekday at ~2:35 AM IST
+        - cron: "5 21 * * 0-4"
 
 env:
     FLUTTER_VERSION: "3.38.10"
