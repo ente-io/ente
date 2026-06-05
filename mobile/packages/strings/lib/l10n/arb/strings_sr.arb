@@ -88,6 +88,7 @@
     "description": "Hint text for entering new email address"
   },
   "email": "Имејл",
+  "enterYourEmailAddressHint": "Унесите Ваш имејл",
   "@email": {
     "description": "Email field label"
   },

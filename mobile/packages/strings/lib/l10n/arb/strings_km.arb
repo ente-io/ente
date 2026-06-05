@@ -36,6 +36,7 @@
     "description": "Label for send button"
   },
   "email": "អ៊ីម៉ែល",
+  "enterYourEmailAddressHint": "វាយបញ្ចូលអ៊ីម៉ែល​របស់អ្នក",
   "@email": {
     "description": "Email field label"
   },

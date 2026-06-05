@@ -88,6 +88,7 @@
     "description": "Hint text for entering new email address"
   },
   "email": "E-mail",
+  "enterYourEmailAddressHint": "Entrez votre adresse e-mail",
   "@email": {
     "description": "Email field label"
   },

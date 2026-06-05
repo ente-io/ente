@@ -68,6 +68,7 @@
     "description": "Label for send button"
   },
   "email": "ایمیل",
+  "enterYourEmailAddressHint": "آدرس ایمیل خود را وارد کنید",
   "@email": {
     "description": "Email field label"
   },

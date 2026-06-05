@@ -138,6 +138,10 @@
     "description": "Email field label"
   },
   "emailHint": "Enter your email id",
+  "enterYourEmailAddressHint": "Enter your email address",
+  "@enterYourEmailAddressHint": {
+    "description": "Hint text for entering your own email address"
+  },
   "verify": "Verify",
   "@verify": {
     "description": "Verify button label"

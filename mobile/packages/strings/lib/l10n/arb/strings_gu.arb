@@ -16,6 +16,7 @@
     "description": "Label for reporting a bug"
   },
   "email": "ઇમેઇલ",
+  "enterYourEmailAddressHint": "Enter your email address",
   "@email": {
     "description": "Email field label"
   },

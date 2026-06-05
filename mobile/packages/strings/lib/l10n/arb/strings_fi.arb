@@ -32,6 +32,7 @@
     "description": "Label for send button"
   },
   "email": "Sähköposti",
+  "enterYourEmailAddressHint": "Syötä sähköpostiosoitteesi",
   "@email": {
     "description": "Email field label"
   },

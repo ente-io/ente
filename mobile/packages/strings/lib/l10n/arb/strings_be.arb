@@ -40,6 +40,7 @@
     "description": "Label for send button"
   },
   "email": "Электронная пошта",
+  "enterYourEmailAddressHint": "Увядзіце свой адрас электроннай пошты",
   "@email": {
     "description": "Email field label"
   },

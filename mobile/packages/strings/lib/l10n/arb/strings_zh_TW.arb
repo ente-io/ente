@@ -88,6 +88,7 @@
     "description": "Hint text for entering new email address"
   },
   "email": "電子郵件地址",
+  "enterYourEmailAddressHint": "請輸入您的電子信箱位址",
   "@email": {
     "description": "Email field label"
   },

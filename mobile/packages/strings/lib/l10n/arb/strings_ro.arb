@@ -46,6 +46,7 @@
     "description": "Label for send button"
   },
   "email": "E-mail",
+  "enterYourEmailAddressHint": "Introdu adresa ta de e-mail",
   "@email": {
     "description": "Email field label"
   },

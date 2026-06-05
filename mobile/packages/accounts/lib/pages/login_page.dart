@@ -145,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                           fillColor:
                               _emailInputFieldColor ?? colorScheme.backdropBase,
                           filled: true,
-                          hintText: context.strings.emailHint,
+                          hintText: context.strings.enterYourEmailAddressHint,
                           hintStyle: TextStyle(color: colorScheme.textMuted),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,

@@ -88,6 +88,7 @@
     "description": "Hint text for entering new email address"
   },
   "email": "电子邮件地址",
+  "enterYourEmailAddressHint": "请输入您的电子邮件地址",
   "@email": {
     "description": "Email field label"
   },

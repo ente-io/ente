@@ -84,6 +84,7 @@
     "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
   },
   "email": "Thư điện tử",
+  "enterYourEmailAddressHint": "Nhập địa chỉ email của bạn",
   "@email": {
     "description": "Email field label"
   },

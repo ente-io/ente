@@ -84,6 +84,7 @@
     "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
   },
   "email": "E-pošta",
+  "enterYourEmailAddressHint": "Vnesite svoj e-poštni naslov",
   "@email": {
     "description": "Email field label"
   },

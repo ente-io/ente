@@ -58,6 +58,7 @@
     "description": "Label for send button"
   },
   "email": "דוא\"ל",
+  "enterYourEmailAddressHint": "הכנס את כתובת הדוא״ל שלך",
   "@email": {
     "description": "Email field label"
   },

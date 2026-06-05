@@ -36,6 +36,7 @@
     "description": "Hint text for entering new email address"
   },
   "email": "E-post",
+  "enterYourEmailAddressHint": "Sisesta oma e-posti aadress",
   "@email": {
     "description": "Email field label"
   },

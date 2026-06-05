@@ -1,4 +1,5 @@
 {
+  "enterYourEmailAddressHint": "अपना ईमेल पता दर्ज करें",
   "ok": "ठीक है",
   "@ok": {
     "description": "Generic OK button label"

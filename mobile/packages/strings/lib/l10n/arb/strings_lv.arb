@@ -16,6 +16,7 @@
     "description": "Label for save button"
   },
   "email": "E-pasts",
+  "enterYourEmailAddressHint": "Ievadiet savu e-pasta adresi",
   "@email": {
     "description": "Email field label"
   },

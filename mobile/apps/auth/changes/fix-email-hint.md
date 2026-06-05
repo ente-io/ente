@@ -1,0 +1,1 @@
+- Fixed the login and sign-up email field hint.

@@ -50,6 +50,7 @@
     "description": "Label for reporting a bug"
   },
   "email": "Email",
+  "enterYourEmailAddressHint": "Enter your email address",
   "@email": {
     "description": "Email field label"
   },

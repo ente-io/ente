@@ -84,6 +84,7 @@
     "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
   },
   "email": "El. paštas",
+  "enterYourEmailAddressHint": "Įveskite savo el. pašto adresą",
   "@email": {
     "description": "Email field label"
   },

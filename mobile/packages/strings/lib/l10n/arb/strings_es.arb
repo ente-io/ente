@@ -84,6 +84,7 @@
     "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
   },
   "email": "Correo electrónico",
+  "enterYourEmailAddressHint": "Introduce tu dirección de correo electrónico",
   "@email": {
     "description": "Email field label"
   },
