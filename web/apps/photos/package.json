@@ -2,6 +2,9 @@
     "name": "photos",
     "version": "0.0.0",
     "private": true,
+    "scripts": {
+        "test": "vitest --run"
+    },
     "dependencies": {
         "@hugeicons/core-free-icons": "1.2.1",
         "@hugeicons/react": "1.1.6",
@@ -33,6 +36,7 @@
         "@types/react": "19.2.16",
         "@types/react-dom": "19.2.3",
         "@types/react-window": "1.8.8",
-        "ente-build-config": "*"
+        "ente-build-config": "*",
+        "vitest": "4.1.7"
     }
 }
