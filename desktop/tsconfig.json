@@ -26,6 +26,7 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "moduleResolution": "node16",
+        "types": ["node"],
 
         /* Emit the generated JS into `app/` */
         "rootDir": "src",
