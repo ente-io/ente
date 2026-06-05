@@ -119,16 +119,6 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              JumpToDateGallery.appBarType,
-              "",
-              _selectedFiles,
-            ),
-          ),
           body: _loadState == GalleryLoadState.loadingFiles
               ? EnteLoadingWidget(
                   color: getEnteColorScheme(context).strokeMuted,
@@ -145,6 +135,22 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         Gallery(
+                          appBarSliver: GalleryAppBarWidget(
+                            JumpToDateGallery.appBarType,
+                            "",
+                            _selectedFiles,
+                            asSliver: true,
+                          ),
+                          appBarPinnedHeight:
+                              GalleryAppBarWidget.sliverPinnedHeight(
+                                context,
+                                isHierarchicalSearchable: false,
+                              ),
+                          appBarExpandedHeight:
+                              GalleryAppBarWidget.sliverExpandedHeight(
+                                context,
+                                isHierarchicalSearchable: false,
+                              ),
                           asyncLoader:
                               (
                                 creationStartTime,

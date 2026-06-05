@@ -59,6 +59,22 @@ class CollectionPage extends StatelessWidget {
         ? [c.thumbnail!]
         : null;
     final gallery = Gallery(
+      appBarSliver: GalleryAppBarWidget(
+        galleryType,
+        c.collection.displayName,
+        _selectedFiles,
+        collection: c.collection,
+        isFromCollectPhotos: isFromCollectPhotos,
+        asSliver: true,
+      ),
+      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: true,
+      ),
+      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: true,
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result = await FilesDB.instance
             .getFilesInCollection(
@@ -131,18 +147,6 @@ class CollectionPage extends StatelessWidget {
         ),
         child: GalleryBoundariesProvider(
           child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(
-                GalleryAppBarWidget.hierarchicalPreferredHeight(context),
-              ),
-              child: GalleryAppBarWidget(
-                galleryType,
-                c.collection.displayName,
-                _selectedFiles,
-                collection: c.collection,
-                isFromCollectPhotos: isFromCollectPhotos,
-              ),
-            ),
             bottomNavigationBar: isFromCollectPhotos
                 ? CollectPhotosBottomButtons(
                     c.collection,

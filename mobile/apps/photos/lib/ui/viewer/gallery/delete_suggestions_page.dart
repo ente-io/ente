@@ -30,6 +30,20 @@ class DeleteSuggestionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gallery = Gallery(
+      appBarSliver: GalleryAppBarWidget(
+        appBarType,
+        AppLocalizations.of(context).deleteSuggestions,
+        _selectedFiles,
+        asSliver: true,
+      ),
+      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
+      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final fileIDs = await CollectionsService.instance
             .fetchDeleteSuggestionFileIDs();
@@ -52,16 +66,6 @@ class DeleteSuggestionsPage extends StatelessWidget {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              appBarType,
-              AppLocalizations.of(context).deleteSuggestions,
-              _selectedFiles,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

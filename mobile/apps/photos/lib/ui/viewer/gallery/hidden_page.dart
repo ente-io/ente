@@ -170,6 +170,20 @@ class _HiddenPageState extends State<HiddenPage> {
       return const EnteLoadingWidget();
     }
     final gallery = Gallery(
+      appBarSliver: GalleryAppBarWidget(
+        widget.appBarType,
+        AppLocalizations.of(context).hidden,
+        _selectedFiles,
+        asSliver: true,
+      ),
+      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
+      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollections(
           [_defaultHiddenCollectionId!],
@@ -262,16 +276,6 @@ class _HiddenPageState extends State<HiddenPage> {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              widget.appBarType,
-              AppLocalizations.of(context).hidden,
-              _selectedFiles,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

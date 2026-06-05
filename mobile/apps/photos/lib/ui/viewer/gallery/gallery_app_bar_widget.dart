@@ -65,9 +65,32 @@ class GalleryAppBarWidget extends StatefulWidget {
   static const double _controlRowHeight = 38.0;
   static const double _actionGap = 8.0;
   static const double _defaultBackIconSize = IconSizes.medium;
+  static const double _sliverExpandedHeight = 92.0;
 
   static double hierarchicalPreferredHeight(BuildContext context) {
     return toolbarHeight + AppBarFilterChips.preferredHeight(context);
+  }
+
+  static double sliverPinnedHeight(
+    BuildContext context, {
+    required bool isHierarchicalSearchable,
+  }) {
+    return MediaQuery.paddingOf(context).top +
+        toolbarHeight +
+        (isHierarchicalSearchable
+            ? AppBarFilterChips.preferredHeight(context)
+            : 0);
+  }
+
+  static double sliverExpandedHeight(
+    BuildContext context, {
+    required bool isHierarchicalSearchable,
+  }) {
+    return MediaQuery.paddingOf(context).top +
+        _sliverExpandedHeight +
+        (isHierarchicalSearchable
+            ? AppBarFilterChips.preferredHeight(context)
+            : 0);
   }
 
   final GalleryType type;
@@ -77,6 +100,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   final Collection? collection;
   final bool isFromCollectPhotos;
   final List<EnteFile>? files;
+  final bool asSliver;
 
   const GalleryAppBarWidget(
     this.type,
@@ -87,6 +111,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.collection,
     this.isFromCollectPhotos = false,
     this.files,
+    this.asSliver = false,
   });
 
   @override
@@ -194,9 +219,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final isHierarchicalSearchable =
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
 
-    return galleryType == GalleryType.homepage
-        ? const SizedBox.shrink()
-        : isHierarchicalSearchable
+    if (galleryType == GalleryType.homepage) {
+      return widget.asSliver
+          ? const SliverToBoxAdapter(child: SizedBox.shrink())
+          : const SizedBox.shrink();
+    }
+
+    return isHierarchicalSearchable
         ? ValueListenableBuilder(
             valueListenable: inheritedSearchFilterData!
                 .searchFilterDataProvider!
@@ -208,14 +237,41 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               child: const AppBarFilterChips(),
             ),
             builder: (context, isSearching, child) {
-              return _buildAppBar(
-                context,
-                actions: isSearching ? const [] : _getDefaultActions(context),
-                bottom: child as PreferredSizeWidget,
-              );
+              return widget.asSliver
+                  ? _buildSliverAppBar(
+                      context,
+                      actions: isSearching
+                          ? const []
+                          : _getDefaultActions(context),
+                      bottom: child as PreferredSizeWidget,
+                    )
+                  : _buildAppBar(
+                      context,
+                      actions: isSearching
+                          ? const []
+                          : _getDefaultActions(context),
+                      bottom: child as PreferredSizeWidget,
+                    );
             },
           )
+        : widget.asSliver
+        ? _buildSliverAppBar(context, actions: _getDefaultActions(context))
         : _buildAppBar(context, actions: _getDefaultActions(context));
+  }
+
+  Widget _buildSliverAppBar(
+    BuildContext context, {
+    required List<Widget> actions,
+    PreferredSizeWidget? bottom,
+  }) {
+    return SliverAppBarComponent(
+      title: _appBarTitle!,
+      actions: actions,
+      bottom: bottom,
+      expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,
+      collapsedHeight: GalleryAppBarWidget.toolbarHeight,
+      backgroundColor: getEnteColorScheme(context).backgroundColour,
+    );
   }
 
   AppBar _buildAppBar(

@@ -47,6 +47,7 @@ class AppBarComponent extends StatefulWidget {
     this.backButton,
     this.onBack,
     this.actions = const [],
+    this.bottom,
     this.expandedHeight,
     this.collapsedHeight = 56,
     this.horizontalPadding = Spacing.lg,
@@ -69,6 +70,7 @@ class AppBarComponent extends StatefulWidget {
   final Widget? backButton;
   final VoidCallback? onBack;
   final List<Widget> actions;
+  final PreferredSizeWidget? bottom;
   final double? expandedHeight;
   final double collapsedHeight;
   final double horizontalPadding;
@@ -240,6 +242,7 @@ class _AppBarComponentState extends State<AppBarComponent> {
             backButton: widget.backButton,
             onBack: widget.onBack,
             actions: widget.actions,
+            bottom: widget.bottom,
             expandedHeight: widget.expandedHeight,
             collapsedHeight: widget.collapsedHeight,
             horizontalPadding: widget.horizontalPadding,
@@ -295,6 +298,7 @@ class SliverAppBarComponent extends StatelessWidget {
     this.backButton,
     this.onBack,
     this.actions = const [],
+    this.bottom,
     this.expandedHeight,
     this.collapsedHeight = 56,
     this.horizontalPadding = Spacing.lg,
@@ -314,6 +318,7 @@ class SliverAppBarComponent extends StatelessWidget {
   final Widget? backButton;
   final VoidCallback? onBack;
   final List<Widget> actions;
+  final PreferredSizeWidget? bottom;
   final double? expandedHeight;
   final double collapsedHeight;
   final double horizontalPadding;
@@ -346,6 +351,8 @@ class SliverAppBarComponent extends StatelessWidget {
         backButton: backButton,
         onBack: onBack,
         actions: actions,
+        bottom: bottom,
+        bottomHeight: bottom?.preferredSize.height ?? 0,
         expandedHeight: metrics.expandedHeight,
         collapsedHeight: metrics.collapsedHeight,
         horizontalPadding: horizontalPadding,
@@ -375,6 +382,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.backButton,
     required this.onBack,
     required this.actions,
+    required this.bottom,
+    required this.bottomHeight,
     required this.expandedHeight,
     required this.collapsedHeight,
     required this.horizontalPadding,
@@ -399,6 +408,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget? backButton;
   final VoidCallback? onBack;
   final List<Widget> actions;
+  final PreferredSizeWidget? bottom;
+  final double bottomHeight;
   final double expandedHeight;
   final double collapsedHeight;
   final double horizontalPadding;
@@ -411,10 +422,10 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double subtitleLineHeight;
 
   @override
-  double get maxExtent => topPadding + expandedHeight;
+  double get maxExtent => topPadding + expandedHeight + bottomHeight;
 
   @override
-  double get minExtent => topPadding + collapsedHeight;
+  double get minExtent => topPadding + collapsedHeight + bottomHeight;
 
   @override
   Widget build(
@@ -471,83 +482,101 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
     return ColoredBox(
       color: backgroundColor ?? colors.backgroundBase,
       child: Padding(
-        padding: EdgeInsets.only(
-          top: topPadding,
-          left: horizontalPadding,
-          right: horizontalPadding,
-        ),
+        padding: EdgeInsets.only(top: topPadding),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (leading != null)
+            Positioned.fill(
+              bottom: bottomHeight,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (leading != null)
+                      Positioned(
+                        left: 0,
+                        top: leadingTop,
+                        child: IgnorePointer(
+                          ignoring: isLeadingHidden,
+                          child: ExcludeSemantics(
+                            excluding: isLeadingHidden,
+                            child: Opacity(
+                              opacity: leadingOpacity,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: SizedBox.square(
+                                  dimension: _headerControlSize,
+                                  child: leading,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    _MovingHeaderTitle(
+                      title: title,
+                      titleBuilder: titleBuilder,
+                      onTap: onTitleTap,
+                      onDoubleTap: onTitleDoubleTap,
+                      onLongPress: onTitleLongPress,
+                      disableTapReveal: disableTitleTapReveal,
+                      top: titleTop,
+                      left: titleLeft,
+                      right: titleRight,
+                      progress: titleProgress,
+                      height: titleLayoutHeight,
+                    ),
+                    if (subtitle != null)
+                      Positioned(
+                        left: titleLeft,
+                        right: titleRight,
+                        top:
+                            _expandedContentTop +
+                            expandedTitleHeight +
+                            _subtitleGap,
+                        child: IgnorePointer(
+                          child: ExcludeSemantics(
+                            child: Opacity(
+                              opacity: 1 - titleProgress,
+                              child: Text(
+                                subtitle!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyles.mini.copyWith(
+                                  color: colors.textLight,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: _PinnedHeaderChrome(
+                        backButton: backButton,
+                        onBack: onBack,
+                        actions: actions,
+                        actionsTop: actionsTop,
+                        chromeHeight: collapsedHeight,
+                        showBackButton: showExpandedBackButton,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (bottom != null)
               Positioned(
                 left: 0,
-                top: leadingTop,
-                child: IgnorePointer(
-                  ignoring: isLeadingHidden,
-                  child: ExcludeSemantics(
-                    excluding: isLeadingHidden,
-                    child: Opacity(
-                      opacity: leadingOpacity,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: SizedBox.square(
-                          dimension: _headerControlSize,
-                          child: leading,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                right: 0,
+                bottom: 0,
+                height: bottomHeight,
+                child: bottom!,
               ),
-            _MovingHeaderTitle(
-              title: title,
-              titleBuilder: titleBuilder,
-              onTap: onTitleTap,
-              onDoubleTap: onTitleDoubleTap,
-              onLongPress: onTitleLongPress,
-              disableTapReveal: disableTitleTapReveal,
-              top: titleTop,
-              left: titleLeft,
-              right: titleRight,
-              progress: titleProgress,
-              height: titleLayoutHeight,
-            ),
-            if (subtitle != null)
-              Positioned(
-                left: titleLeft,
-                right: titleRight,
-                top: _expandedContentTop + expandedTitleHeight + _subtitleGap,
-                child: IgnorePointer(
-                  child: ExcludeSemantics(
-                    child: Opacity(
-                      opacity: 1 - titleProgress,
-                      child: Text(
-                        subtitle!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyles.mini.copyWith(
-                          color: colors.textLight,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: _PinnedHeaderChrome(
-                backButton: backButton,
-                onBack: onBack,
-                actions: actions,
-                actionsTop: actionsTop,
-                chromeHeight: collapsedHeight,
-                showBackButton: showExpandedBackButton,
-              ),
-            ),
           ],
         ),
       ),
@@ -569,6 +598,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.backButton != backButton ||
         oldDelegate.onBack != onBack ||
         oldDelegate.actions != actions ||
+        oldDelegate.bottom != bottom ||
+        oldDelegate.bottomHeight != bottomHeight ||
         oldDelegate.expandedHeight != expandedHeight ||
         oldDelegate.collapsedHeight != collapsedHeight ||
         oldDelegate.horizontalPadding != horizontalPadding ||

@@ -38,6 +38,20 @@ class TrashPage extends StatelessWidget {
     final deleteAllButtonHeight = 40.0 + max(bottomPadding, 6.0) + 12.0;
 
     final gallery = Gallery(
+      appBarSliver: GalleryAppBarWidget(
+        appBarType,
+        AppLocalizations.of(context).trash,
+        _selectedFiles,
+        asSliver: true,
+      ),
+      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
+      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return TrashDB.instance.getTrashedFiles(
           creationStartTime,
@@ -63,16 +77,6 @@ class TrashPage extends StatelessWidget {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              appBarType,
-              AppLocalizations.of(context).trash,
-              _selectedFiles,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

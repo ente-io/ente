@@ -34,9 +34,24 @@ class DeviceFolderPage extends StatelessWidget {
   DeviceFolderPage(this.deviceCollection, {super.key});
 
   @override
-  Widget build(Object context) {
+  Widget build(BuildContext context) {
     final int? userID = Configuration.instance.getUserID();
     final gallery = Gallery(
+      appBarSliver: GalleryAppBarWidget(
+        GalleryType.localFolder,
+        deviceCollection.name,
+        _selectedFiles,
+        deviceCollection: deviceCollection,
+        asSliver: true,
+      ),
+      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
+      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInDeviceCollection(
           deviceCollection,
@@ -66,17 +81,6 @@ class DeviceFolderPage extends StatelessWidget {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              GalleryType.localFolder,
-              deviceCollection.name,
-              _selectedFiles,
-              deviceCollection: deviceCollection,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

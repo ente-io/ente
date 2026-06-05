@@ -42,10 +42,6 @@ class _LocationScreenState extends State<LocationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final heightOfStatusBar = MediaQuery.of(context).viewPadding.top;
-    final heightOfAppBar = GalleryAppBarWidget.hierarchicalPreferredHeight(
-      context,
-    );
     final locationTag = InheritedLocationScreenState.of(
       context,
     ).locationTagEntity.item;
@@ -60,27 +56,9 @@ class _LocationScreenState extends State<LocationScreen> {
             ),
           ),
           child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: Size(double.infinity, heightOfAppBar),
-              child: GalleryAppBarWidget(
-                GalleryType.locationTag,
-                locationTag.name,
-                selectedFiles,
-              ),
-            ),
-            body: Column(
-              children: <Widget>[
-                SizedBox(
-                  height:
-                      MediaQuery.of(context).size.height -
-                      (heightOfAppBar + heightOfStatusBar),
-                  width: double.infinity,
-                  child: LocationGalleryWidget(
-                    tagPrefix: widget.tagPrefix,
-                    selectedFiles: selectedFiles,
-                  ),
-                ),
-              ],
+            body: LocationGalleryWidget(
+              tagPrefix: widget.tagPrefix,
+              selectedFiles: selectedFiles,
             ),
           ),
         ),
@@ -158,6 +136,9 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
     final selectedRadius = InheritedLocationScreenState.of(
       context,
     ).locationTagEntity.item.radius;
+    final locationTag = InheritedLocationScreenState.of(
+      context,
+    ).locationTagEntity.item;
     final centerPoint = InheritedLocationScreenState.of(
       context,
     ).locationTagEntity.item.centerPoint;
@@ -207,6 +188,22 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                                 selectedFiles: _selectedFiles,
                               )
                             : Gallery(
+                                appBarSliver: GalleryAppBarWidget(
+                                  GalleryType.locationTag,
+                                  locationTag.name,
+                                  _selectedFiles,
+                                  asSliver: true,
+                                ),
+                                appBarPinnedHeight:
+                                    GalleryAppBarWidget.sliverPinnedHeight(
+                                      context,
+                                      isHierarchicalSearchable: true,
+                                    ),
+                                appBarExpandedHeight:
+                                    GalleryAppBarWidget.sliverExpandedHeight(
+                                      context,
+                                      isHierarchicalSearchable: true,
+                                    ),
                                 loadingWidget: Column(
                                   children: [
                                     EnteLoadingWidget(

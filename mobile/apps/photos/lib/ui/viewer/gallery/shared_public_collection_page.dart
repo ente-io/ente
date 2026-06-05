@@ -128,6 +128,22 @@ class _SharedPublicCollectionPageState
         : GroupType.day;
 
     final gallery = Gallery(
+      appBarSliver: GalleryAppBarWidget(
+        galleryType,
+        widget.c.collection.displayName,
+        _selectedFiles,
+        collection: widget.c.collection,
+        files: widget.files,
+        asSliver: true,
+      ),
+      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
+      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         widget.files!.sort(
           (a, b) => b.creationTime!.compareTo(a.creationTime!),
@@ -184,18 +200,6 @@ class _SharedPublicCollectionPageState
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              galleryType,
-              widget.c.collection.displayName,
-              _selectedFiles,
-              collection: widget.c.collection,
-              files: widget.files,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

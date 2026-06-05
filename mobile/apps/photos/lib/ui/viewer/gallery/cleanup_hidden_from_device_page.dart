@@ -62,6 +62,20 @@ class _CleanupHiddenFromDevicePageState
     final deleteAllButtonHeight = 40.0 + max(bottomPadding, 6.0) + 12.0;
 
     final gallery = Gallery(
+      appBarSliver: GalleryAppBarWidget(
+        GalleryType.cleanupHiddenFromDevice,
+        AppLocalizations.of(context).deleteOnDeviceFiles,
+        _selectedFiles,
+        asSliver: true,
+      ),
+      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
+      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: false,
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final files = await CollectionsService.instance
             .getHiddenFilesOnDevice();
@@ -80,16 +94,6 @@ class _CleanupHiddenFromDevicePageState
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              GalleryType.cleanupHiddenFromDevice,
-              AppLocalizations.of(context).deleteOnDeviceFiles,
-              _selectedFiles,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

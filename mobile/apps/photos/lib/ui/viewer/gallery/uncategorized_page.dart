@@ -40,6 +40,21 @@ class UnCategorizedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gallery = Gallery(
+      appBarSliver: GalleryAppBarWidget(
+        appBarType,
+        AppLocalizations.of(context).uncategorized,
+        _selectedFiles,
+        collection: collection,
+        asSliver: true,
+      ),
+      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: true,
+      ),
+      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: true,
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result = await FilesDB.instance
             .getFilesInCollection(
@@ -91,17 +106,6 @@ class UnCategorizedPage extends StatelessWidget {
             ),
           ),
           child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(
-                GalleryAppBarWidget.hierarchicalPreferredHeight(context),
-              ),
-              child: GalleryAppBarWidget(
-                appBarType,
-                AppLocalizations.of(context).uncategorized,
-                _selectedFiles,
-                collection: collection,
-              ),
-            ),
             body: SelectionState(
               selectedFiles: _selectedFiles,
               child: Stack(
