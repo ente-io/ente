@@ -610,9 +610,7 @@ export class NetworkDownloadError extends Error {
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (Error.captureStackTrace)
-            Error.captureStackTrace(this, NetworkDownloadError);
+        Error.captureStackTrace?.(this, NetworkDownloadError);
 
         this.error = e;
     }
