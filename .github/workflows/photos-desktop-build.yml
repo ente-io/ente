@@ -1,0 +1,168 @@
+name: "Build (Photos desktop)"
+
+# See .github/docs/app-release.md
+
+on:
+    push:
+        branches:
+            - "release/photos-desktop-v*"
+    workflow_dispatch:
+    schedule:
+        # Run every weekday at ~8:00 AM IST
+        - cron: "45 2 * * 1-5"
+
+permissions:
+    contents: read
+
+concurrency:
+    group: photos-desktop-build
+    cancel-in-progress: false
+
+jobs:
+    build-metadata:
+        runs-on: ubuntu-latest
+
+        outputs:
+            should_build: ${{ steps.prepare.outputs.should_build }}
+            commit_sha: ${{ steps.prepare.outputs.commit_sha }}
+            release_version: ${{ steps.prepare.outputs.release_version }}
+            is_rc: ${{ steps.prepare.outputs.is_rc }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.ref_name }}
+
+            - name: Prepare release
+              id: prepare
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [[ "${GITHUB_EVENT_NAME}" == "schedule" ]] && git ls-remote --exit-code --heads origin 'release/photos-desktop-v*' >/dev/null 2>&1; then
+                      echo "Active Photos desktop release branch found; skipping scheduled nightly"
+                      echo "should_build=false" >> "${GITHUB_OUTPUT}"
+                      exit 0
+                  fi
+
+                  release_version="$(node .github/scripts/photos-desktop-version.mjs get)"
+
+                  is_rc=false
+                  if [[ "${GITHUB_REF_NAME}" == release/photos-desktop-v* ]]; then
+                      if [[ "${GITHUB_REF_NAME}" != "release/photos-desktop-v${release_version}" ]]; then
+                          echo "::error::Branch ${GITHUB_REF_NAME} does not match desktop version ${release_version}"
+                          exit 1
+                      fi
+                      is_rc=true
+                  fi
+
+                  echo "should_build=true" >> "${GITHUB_OUTPUT}"
+                  echo "commit_sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
+                  echo "release_version=${release_version}" >> "${GITHUB_OUTPUT}"
+                  echo "is_rc=${is_rc}" >> "${GITHUB_OUTPUT}"
+
+    build:
+        needs: build-metadata
+        if: needs.build-metadata.outputs.should_build == 'true'
+        runs-on: ${{ matrix.os }}
+        environment:
+            name: production
+
+        strategy:
+            matrix:
+                os: [macos-latest, ubuntu-latest, windows-latest]
+
+        env:
+            RELEASE_VERSION: ${{ needs.build-metadata.outputs.release_version }}
+            IS_RC: ${{ needs.build-metadata.outputs.is_rc }}
+
+        defaults:
+            run:
+                working-directory: desktop
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ needs.build-metadata.outputs.commit_sha }}
+
+            - name: Setup node
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: "npm"
+                  cache-dependency-path: "desktop/package-lock.json"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Create universal ffmpeg binaries for macOS
+              if: startsWith(matrix.os, 'macos')
+              run: |
+                  rm -f node_modules/ffmpeg-static/ffmpeg
+                  npm_config_arch=arm64 node node_modules/ffmpeg-static/install.js
+                  mv node_modules/ffmpeg-static/ffmpeg ffmpeg-arm64
+                  npm_config_arch=x64 node node_modules/ffmpeg-static/install.js
+                  mv node_modules/ffmpeg-static/ffmpeg ffmpeg-x64
+                  lipo -create ffmpeg-arm64 ffmpeg-x64 -output node_modules/ffmpeg-static/ffmpeg
+                  rm ffmpeg-arm64 ffmpeg-x64
+                  file node_modules/ffmpeg-static/ffmpeg
+
+            - name: Install libarchive-tools for pacman build
+              if: startsWith(matrix.os, 'ubuntu')
+              run: sudo apt-get update && sudo apt-get install libarchive-tools
+
+            - name: Mint nightly token
+              id: nightly_token
+              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              with:
+                  client-id: ${{ secrets.ENTE_CI_GH_CLIENT_ID }}
+                  private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
+                  owner: ${{ github.repository_owner }}
+                  repositories: |
+                      nightly
+                      photos-desktop
+                  permission-contents: write
+
+            - name: Build and publish
+              shell: bash
+              run: |
+                  if [ "${RUNNER_OS}" = "macOS" ]; then
+                      export CSC_LINK="${MAC_CERTS}"
+                      export CSC_KEY_PASSWORD="${MAC_CERTS_PASSWORD}"
+                  fi
+
+                  npm run build:ci
+
+                  platform=${{ startsWith(matrix.os, 'macos') && 'mac' || startsWith(matrix.os, 'windows') && 'windows' || 'linux' }}
+                  if [ "${IS_RC}" = "true" ]; then
+                      npm exec -- electron-builder --$platform --publish always
+                  else
+                      EP_PRE_RELEASE=true npm exec -- electron-builder --$platform --publish always -c.publish.provider=github -c.publish.owner=ente-io -c.publish.repo=nightly
+                  fi
+              env:
+                  GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
+                  MAC_CERTS: ${{ secrets.MAC_CERTS }}
+                  MAC_CERTS_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+                  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+                  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+                  # Allow continually updating the rolling pre-release.
+                  EP_GH_IGNORE_TIME: true
+
+            - name: Upload candidate installers to nightly
+              if: needs.build-metadata.outputs.is_rc == 'true'
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
+              run: |
+                  set -euo pipefail
+                  tag="v${RELEASE_VERSION}"
+                  gh release create "${tag}" --repo ente-io/nightly --prerelease --title "${tag}" --notes "Photos desktop release candidate" || true
+                  shopt -s nullglob
+                  files=(dist/ente-*.exe dist/ente-*.dmg dist/ente-*.AppImage dist/ente-*.deb dist/ente-*.rpm dist/ente-*.pacman)
+                  gh release upload "${tag}" "${files[@]}" --repo ente-io/nightly --clobber

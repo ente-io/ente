@@ -1,10 +1,14 @@
 # App release process
 
-Photos, Auth, Locker, and Ensu use the same release process, as described here.
+Photos, Auth, Locker, Ensu, and Photos desktop use the same release process, as described here.
 
 > For simplicity, the following assumes we're trying to release Ensu, that main is `0.1.16-beta`, we want to release `0.1.16` and move main to `0.1.17-beta`.
 >
 > To do the same steps for another app, say "auth", you can just mechanically replace "ensu" with that "auth" in the steps.
+
+## App specifics
+
+- Photos desktop follows the same flow, but its stable releases live in [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop). See [desktop/docs/release.md](../../desktop/docs/release.md) for more details.
 
 ## Normal development
 

@@ -14,6 +14,7 @@ on:
                     - auth
                     - locker
                     - ensu
+                    - photos-desktop
             action:
                 description: "Release action"
                 required: true
@@ -63,7 +64,7 @@ jobs:
               with:
                   client-id: ${{ secrets.ENTE_CI_GH_CLIENT_ID }}
                   private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
-                  repositories: ente,nightly
+                  repositories: ente,nightly,photos-desktop
                   permission-contents: write
                   permission-pull-requests: write
 
@@ -83,6 +84,8 @@ jobs:
                   app_version() {
                       if [ "${APP}" = "ensu" ]; then
                           node .github/scripts/ensu-version.mjs "$@"
+                      elif [ "${APP}" = "photos-desktop" ]; then
+                          node .github/scripts/photos-desktop-version.mjs "$@"
                       else
                           node .github/scripts/flutter-version.mjs "${APP}" "$@"
                       fi
@@ -98,9 +101,12 @@ jobs:
                   IFS=. read -r major minor patch <<< "${VERSION}"
                   expected_main_version="${VERSION}"
                   next_version="${major}.${minor}.$((patch + 1))"
-                  if [ "${APP}" = "ensu" ]; then
+                  if [ "${APP}" = "ensu" ] || [ "${APP}" = "photos-desktop" ]; then
                       expected_main_version="${VERSION}-beta"
                       next_version="${next_version}-beta"
+                  fi
+                  if [ "${APP}" = "photos-desktop" ]; then
+                      beta_tag="v${VERSION}-beta"
                   fi
                   next_branch="${APP}-v${next_version}"
 
@@ -111,7 +117,7 @@ jobs:
                   fi
 
                   git switch -c "${release_branch}"
-                  if [ "${APP}" = "ensu" ]; then
+                  if [ "${APP}" = "ensu" ] || [ "${APP}" = "photos-desktop" ]; then
                       app_version set "${VERSION}"
                       git commit -am "${APP^} v${VERSION}"
                   fi
@@ -122,11 +128,13 @@ jobs:
 
                   git switch -c "${next_branch}" main
                   app_version set "${next_version}"
-                  CHANGES_DIR="mobile/apps/${APP}/changes"
-                  if [ "${APP}" = "ensu" ]; then
-                      CHANGES_DIR="rust/apps/ensu/changes"
+                  if [ "${APP}" != "photos-desktop" ]; then
+                      CHANGES_DIR="mobile/apps/${APP}/changes"
+                      if [ "${APP}" = "ensu" ]; then
+                          CHANGES_DIR="rust/apps/ensu/changes"
+                      fi
+                      find "${CHANGES_DIR}" -maxdepth 1 -type f -name '*.md' ! -name README.md -delete
                   fi
-                  find "${CHANGES_DIR}" -maxdepth 1 -type f -name '*.md' ! -name README.md -delete
                   git commit -am "Start ${APP^} ${next_version}"
                   git push -u origin "${next_branch}"
 
@@ -142,6 +150,8 @@ jobs:
                   app_version() {
                       if [ "${APP}" = "ensu" ]; then
                           node .github/scripts/ensu-version.mjs "$@"
+                      elif [ "${APP}" = "photos-desktop" ]; then
+                          node .github/scripts/photos-desktop-version.mjs "$@"
                       else
                           node .github/scripts/flutter-version.mjs "${APP}" "$@"
                       fi
@@ -153,6 +163,28 @@ jobs:
                   }
 
                   release_branch="release/${APP}-v${VERSION}"
+
+                  if [ "${APP}" = "photos-desktop" ]; then
+                      if ! draft="$(GH_TOKEN="${APP_GH_TOKEN}" gh release view "v${VERSION}" --repo ente-io/photos-desktop --json isDraft --jq .isDraft 2>/dev/null)" || [ "${draft}" != "true" ]; then
+                          echo "::error::v${VERSION} draft release does not exist in photos-desktop"
+                          exit 1
+                      fi
+                      branch_version="$(app_version get)"
+                      if [ "${branch_version}" != "${VERSION}" ]; then
+                          echo "::error::${release_branch} is ${branch_version}, expected ${VERSION}"
+                          exit 1
+                      fi
+                      release_sha="$(git rev-parse HEAD)"
+
+                      git tag "photos-desktop-v${VERSION}" "${release_sha}"
+                      git push origin "refs/tags/photos-desktop-v${VERSION}"
+
+                      GH_TOKEN="${APP_GH_TOKEN}" gh release edit "v${VERSION}" --repo ente-io/photos-desktop --draft=false --prerelease=false --latest
+                      GH_TOKEN="${APP_GH_TOKEN}" gh release delete "v${VERSION}" --yes --cleanup-tag --repo ente-io/nightly || true
+                      git_push_release_branch ":refs/heads/${release_branch}"
+                      exit 0
+                  fi
+
                   rc_tag="${APP}-v${VERSION}-rc"
                   final_tag="${APP}-v${VERSION}"
 
