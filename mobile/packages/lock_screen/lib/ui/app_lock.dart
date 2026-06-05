@@ -66,6 +66,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   late bool _didUnlockForAppLaunch;
   late bool _isLocked;
   late bool _enabled;
+  late ThemeMode _themeMode;
 
   Timer? _backgroundLockLatencyTimer;
 
@@ -78,6 +79,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     this._didUnlockForAppLaunch = !this.widget.enabled;
     this._isLocked = false;
     this._enabled = this.widget.enabled;
+    this._themeMode = this.widget.savedThemeMode;
   }
 
   @override
@@ -115,7 +117,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     return MaterialApp(
       home: this.widget.enabled ? this._lockScreen : this.widget.builder(null),
       navigatorKey: _navigatorKey,
-      themeMode: widget.savedThemeMode,
+      themeMode: this._themeMode,
       theme: widget.lightTheme,
       darkTheme: widget.darkTheme,
       locale: widget.locale,
@@ -174,6 +176,15 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     } else {
       this.disable();
     }
+  }
+
+  void setThemeMode(ThemeMode themeMode) {
+    if (this._themeMode == themeMode) {
+      return;
+    }
+    setState(() {
+      this._themeMode = themeMode;
+    });
   }
 
   /// Makes sure that [AppLock] shows the [lockScreen] on subsequent app pauses.
