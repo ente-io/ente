@@ -209,7 +209,7 @@ class _AppBarComponentState extends State<AppBarComponent> {
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
-    final metrics = _resolveHeaderAppBarMetrics(
+    final metrics = resolveHeaderAppBarMetrics(
       context,
       subtitle: widget.subtitle,
       expandedHeight: widget.expandedHeight,
@@ -328,7 +328,7 @@ class SliverAppBarComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
-    final metrics = _resolveHeaderAppBarMetrics(
+    final metrics = resolveHeaderAppBarMetrics(
       context,
       subtitle: subtitle,
       expandedHeight: expandedHeight,
@@ -739,8 +739,8 @@ const _headerSnapTolerance = 1.0;
 const _headerSnapDuration = Duration(milliseconds: 160);
 const _titleTooltipShowDuration = Duration(seconds: 3);
 
-class _HeaderAppBarMetrics {
-  const _HeaderAppBarMetrics({
+class HeaderAppBarMetrics {
+  const HeaderAppBarMetrics({
     required this.expandedHeight,
     required this.collapsedHeight,
     required this.expandedTitleLineHeight,
@@ -757,7 +757,7 @@ class _HeaderAppBarMetrics {
   double get collapseExtent => expandedHeight - collapsedHeight;
 }
 
-_HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
+HeaderAppBarMetrics resolveHeaderAppBarMetrics(
   BuildContext context, {
   required String? subtitle,
   required double? expandedHeight,
@@ -794,7 +794,7 @@ _HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
         _expandedContentBottomGap,
   );
 
-  return _HeaderAppBarMetrics(
+  return HeaderAppBarMetrics(
     expandedHeight: effectiveExpandedHeight,
     collapsedHeight: effectiveCollapsedHeight,
     expandedTitleLineHeight: expandedTitleLineHeight,

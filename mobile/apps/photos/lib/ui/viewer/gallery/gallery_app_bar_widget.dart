@@ -76,22 +76,38 @@ class GalleryAppBarWidget extends StatefulWidget {
     BuildContext context, {
     required bool isHierarchicalSearchable,
   }) {
+    final bottomHeight = isHierarchicalSearchable
+        ? AppBarFilterChips.preferredHeight(context)
+        : 0.0;
+    final metrics = resolveHeaderAppBarMetrics(
+      context,
+      subtitle: null,
+      expandedHeight: _sliverExpandedHeight,
+      collapsedHeight: toolbarHeight,
+      titleBuilderHeight: null,
+    );
     return MediaQuery.paddingOf(context).top +
-        toolbarHeight +
-        (isHierarchicalSearchable
-            ? AppBarFilterChips.preferredHeight(context)
-            : 0);
+        metrics.collapsedHeight +
+        bottomHeight;
   }
 
   static double sliverExpandedHeight(
     BuildContext context, {
     required bool isHierarchicalSearchable,
   }) {
+    final bottomHeight = isHierarchicalSearchable
+        ? AppBarFilterChips.preferredHeight(context)
+        : 0.0;
+    final metrics = resolveHeaderAppBarMetrics(
+      context,
+      subtitle: null,
+      expandedHeight: _sliverExpandedHeight,
+      collapsedHeight: toolbarHeight,
+      titleBuilderHeight: null,
+    );
     return MediaQuery.paddingOf(context).top +
-        _sliverExpandedHeight +
-        (isHierarchicalSearchable
-            ? AppBarFilterChips.preferredHeight(context)
-            : 0);
+        metrics.expandedHeight +
+        bottomHeight;
   }
 
   static GalleryAppBarConfig sliverConfig(
