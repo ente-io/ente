@@ -5,8 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('updates theme mode after startup', (tester) async {
     await tester.pumpWidget(
-      AppLock(
-        builder: (_) => Builder(
+      _buildAppLock(
+        ThemeMode.dark,
+        child: Builder(
           builder: (context) => Column(
             children: [
               Text(Theme.of(context).brightness.name),
@@ -18,15 +19,6 @@ void main() {
             ],
           ),
         ),
-        lockScreen: const SizedBox.shrink(),
-        enabled: false,
-        savedThemeMode: ThemeMode.dark,
-        lightTheme: ThemeData(brightness: Brightness.light),
-        darkTheme: ThemeData(brightness: Brightness.dark),
-        supportedLocales: const [Locale('en')],
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[],
-        localeListResolutionCallback: (_, supportedLocales) =>
-            supportedLocales.first,
       ),
     );
 
@@ -37,4 +29,32 @@ void main() {
 
     expect(find.text('light'), findsOneWidget);
   });
+
+  testWidgets('syncs theme mode when savedThemeMode changes', (tester) async {
+    await tester.pumpWidget(_buildAppLock(ThemeMode.dark));
+
+    expect(find.text('dark'), findsOneWidget);
+
+    await tester.pumpWidget(_buildAppLock(ThemeMode.light));
+    await tester.pumpAndSettle();
+
+    expect(find.text('light'), findsOneWidget);
+  });
+}
+
+Widget _buildAppLock(ThemeMode savedThemeMode, {Widget? child}) {
+  return AppLock(
+    builder: (_) =>
+        child ??
+        Builder(builder: (context) => Text(Theme.of(context).brightness.name)),
+    lockScreen: const SizedBox.shrink(),
+    enabled: false,
+    savedThemeMode: savedThemeMode,
+    lightTheme: ThemeData(brightness: Brightness.light),
+    darkTheme: ThemeData(brightness: Brightness.dark),
+    supportedLocales: const [Locale('en')],
+    localizationsDelegates: const <LocalizationsDelegate<dynamic>>[],
+    localeListResolutionCallback: (_, supportedLocales) =>
+        supportedLocales.first,
+  );
 }

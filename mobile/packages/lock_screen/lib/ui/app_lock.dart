@@ -83,6 +83,14 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   }
 
   @override
+  void didUpdateWidget(covariant AppLock oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.savedThemeMode != this.widget.savedThemeMode) {
+      this._themeMode = this.widget.savedThemeMode;
+    }
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!this._enabled) {
       return;
