@@ -79,16 +79,15 @@ class GalleryAppBarWidget extends StatefulWidget {
     final bottomHeight = isHierarchicalSearchable
         ? AppBarFilterChips.preferredHeight(context)
         : 0.0;
-    final metrics = resolveHeaderAppBarMetrics(
+    final geometry = SliverAppBarComponent.resolveGeometry(
       context,
       subtitle: null,
       expandedHeight: _sliverExpandedHeight,
       collapsedHeight: toolbarHeight,
       titleBuilderHeight: null,
+      bottomHeight: bottomHeight,
     );
-    return MediaQuery.paddingOf(context).top +
-        metrics.collapsedHeight +
-        bottomHeight;
+    return geometry.minExtent;
   }
 
   static double sliverExpandedHeight(
@@ -98,16 +97,15 @@ class GalleryAppBarWidget extends StatefulWidget {
     final bottomHeight = isHierarchicalSearchable
         ? AppBarFilterChips.preferredHeight(context)
         : 0.0;
-    final metrics = resolveHeaderAppBarMetrics(
+    final geometry = SliverAppBarComponent.resolveGeometry(
       context,
       subtitle: null,
       expandedHeight: _sliverExpandedHeight,
       collapsedHeight: toolbarHeight,
       titleBuilderHeight: null,
+      bottomHeight: bottomHeight,
     );
-    return MediaQuery.paddingOf(context).top +
-        metrics.expandedHeight +
-        bottomHeight;
+    return geometry.maxExtent;
   }
 
   static GalleryAppBarConfig sliverConfig(

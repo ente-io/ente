@@ -49,7 +49,7 @@ class AppBarComponent extends StatefulWidget {
     this.actions = const [],
     this.bottom,
     this.expandedHeight,
-    this.collapsedHeight = 56,
+    this.collapsedHeight = _defaultCollapsedHeight,
     this.horizontalPadding = Spacing.lg,
     this.backgroundColor,
     this.showExpandedBackButton = true,
@@ -209,7 +209,7 @@ class _AppBarComponentState extends State<AppBarComponent> {
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
-    final metrics = resolveHeaderAppBarMetrics(
+    final metrics = _resolveHeaderAppBarMetrics(
       context,
       subtitle: widget.subtitle,
       expandedHeight: widget.expandedHeight,
@@ -300,7 +300,7 @@ class SliverAppBarComponent extends StatelessWidget {
     this.actions = const [],
     this.bottom,
     this.expandedHeight,
-    this.collapsedHeight = 56,
+    this.collapsedHeight = _defaultCollapsedHeight,
     this.horizontalPadding = Spacing.lg,
     this.backgroundColor,
     this.showExpandedBackButton = true,
@@ -325,10 +325,32 @@ class SliverAppBarComponent extends StatelessWidget {
   final Color? backgroundColor;
   final bool showExpandedBackButton;
 
+  static HeaderAppBarGeometry resolveGeometry(
+    BuildContext context, {
+    String? subtitle,
+    double? expandedHeight,
+    double collapsedHeight = _defaultCollapsedHeight,
+    double? titleBuilderHeight,
+    double bottomHeight = 0,
+  }) {
+    final metrics = _resolveHeaderAppBarMetrics(
+      context,
+      subtitle: subtitle,
+      expandedHeight: expandedHeight,
+      collapsedHeight: collapsedHeight,
+      titleBuilderHeight: titleBuilderHeight,
+    );
+    final topPadding = MediaQuery.paddingOf(context).top;
+    return HeaderAppBarGeometry(
+      minExtent: topPadding + metrics.collapsedHeight + bottomHeight,
+      maxExtent: topPadding + metrics.expandedHeight + bottomHeight,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
-    final metrics = resolveHeaderAppBarMetrics(
+    final metrics = _resolveHeaderAppBarMetrics(
       context,
       subtitle: subtitle,
       expandedHeight: expandedHeight,
@@ -730,6 +752,7 @@ class _HeaderAppBarBackButton extends StatelessWidget {
 const _headerControlSize = 38.0;
 const _headerControlGap = Spacing.sm;
 const _defaultBackIconSize = IconSizes.medium;
+const _defaultCollapsedHeight = 56.0;
 const _titleOnlyExpandedHeight = 92.0;
 const _subtitleExpandedHeight = 110.0;
 const _expandedContentTop = 48.0;
@@ -739,8 +762,20 @@ const _headerSnapTolerance = 1.0;
 const _headerSnapDuration = Duration(milliseconds: 160);
 const _titleTooltipShowDuration = Duration(seconds: 3);
 
-class HeaderAppBarMetrics {
-  const HeaderAppBarMetrics({
+class HeaderAppBarGeometry {
+  const HeaderAppBarGeometry({
+    required this.minExtent,
+    required this.maxExtent,
+  });
+
+  final double minExtent;
+  final double maxExtent;
+
+  double get collapseExtent => maxExtent - minExtent;
+}
+
+class _HeaderAppBarMetrics {
+  const _HeaderAppBarMetrics({
     required this.expandedHeight,
     required this.collapsedHeight,
     required this.expandedTitleLineHeight,
@@ -757,7 +792,7 @@ class HeaderAppBarMetrics {
   double get collapseExtent => expandedHeight - collapsedHeight;
 }
 
-HeaderAppBarMetrics resolveHeaderAppBarMetrics(
+_HeaderAppBarMetrics _resolveHeaderAppBarMetrics(
   BuildContext context, {
   required String? subtitle,
   required double? expandedHeight,
@@ -794,7 +829,7 @@ HeaderAppBarMetrics resolveHeaderAppBarMetrics(
         _expandedContentBottomGap,
   );
 
-  return HeaderAppBarMetrics(
+  return _HeaderAppBarMetrics(
     expandedHeight: effectiveExpandedHeight,
     collapsedHeight: effectiveCollapsedHeight,
     expandedTitleLineHeight: expandedTitleLineHeight,
