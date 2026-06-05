@@ -12,6 +12,7 @@ import type {
     UploadItemWithCollection,
 } from "@/services/upload-manager";
 import {
+    favoritedFilesFromUploadBatchResult,
     successfulFilesFromUploadBatchResult,
     uploadManager,
 } from "@/services/upload-manager";
@@ -79,6 +80,7 @@ import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/do
 import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     addOrCopyToCollection,
+    addToFavoritesCollection,
     canAddFilesToCollection,
     canDirectlyUploadToCollection,
     createAlbum,
@@ -662,6 +664,82 @@ export const Upload: React.FC<UploadProps> = ({
         }
     };
 
+    /**
+     *
+     * @param batchResult
+     * @param postUploadTargetCollection
+     * @returns
+     *
+     * Adds successfully uploaded Takeout-favorited files to Favorites, skipping
+     * files whose effective target collection is hidden.
+     */
+    const handleTakeoutFavoritesPostUpload = async (
+        batchResult: UploadBatchResult,
+        postUploadTargetCollection: Collection | undefined,
+    ) => {
+        // Checking if any of the uploaded items have their takeoutFavorited as true.
+        if (
+            !batchResult.itemResults.some(
+                ({ takeoutFavorited }) => takeoutFavorited,
+            )
+        ) {
+            return;
+        }
+
+        // Get the list of IDs of hidden collections.
+        const hiddenCollectionIDs = new Set(
+            (await savedHiddenCollections()).map(({ id }) => id),
+        );
+
+        // In some cases, such as when the upload is happening to a non-owned album,
+        // files are first added to the user's own album and then, after upload,
+        // linked to the shared album.
+        //
+        // For such cases, check whether the real intended upload location is a
+        // hidden album and add it to the set.
+        if (
+            postUploadTargetCollection &&
+            isHiddenCollection(postUploadTargetCollection)
+        ) {
+            hiddenCollectionIDs.add(postUploadTargetCollection.id);
+        }
+
+        /**
+         * Treating the requestCollectionID as a hidden album because the upload was
+         * initated from the hidden-albums UI.
+         *
+         * savedHiddenCollections will already include hidden collections, but it is not
+         * guaranteed to include every hidden album. So this is also a guard at the UI
+         * level.
+         */
+        if (props.isInHiddenSection) {
+            for (const { requestedCollectionID } of batchResult.itemResults) {
+                hiddenCollectionIDs.add(requestedCollectionID);
+            }
+        }
+        const favoritedFiles = favoritedFilesFromUploadBatchResult(
+            batchResult,
+            hiddenCollectionIDs,
+            postUploadTargetCollection?.id,
+        );
+        if (!favoritedFiles.length) return;
+
+        log.info(
+            `Adding ${favoritedFiles.length} Google Takeout favorite file(s) to Favorites`,
+        );
+        try {
+            await addToFavoritesCollection(favoritedFiles);
+            log.info(
+                `Added ${favoritedFiles.length} Google Takeout favorite file(s) to Favorites`,
+            );
+        } catch (e) {
+            log.error(
+                `Failed to import ${favoritedFiles.length} Google Takeout favorite file(s)`,
+                e,
+            );
+        }
+    };
+
     const resetUploadUIState = () => {
         props.setShouldDisableDropzone(false);
         uploadRunning.current = false;
@@ -849,6 +927,10 @@ export const Upload: React.FC<UploadProps> = ({
                 batchResult,
                 opts?.postUploadTargetCollection,
             );
+            await handleTakeoutFavoritesPostUpload(
+                batchResult,
+                opts?.postUploadTargetCollection,
+            );
             if (isDesktop) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(uploadItemsWithCollection);
@@ -883,6 +965,10 @@ export const Upload: React.FC<UploadProps> = ({
             );
             if (!batchResult.processedAny) closeUploadProgress();
             await handlePostUploadBatchResult(
+                batchResult,
+                retrySharedAlbumUploadTarget.current,
+            );
+            await handleTakeoutFavoritesPostUpload(
                 batchResult,
                 retrySharedAlbumUploadTarget.current,
             );

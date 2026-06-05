@@ -27,6 +27,7 @@ export interface ParsedMetadataJSON {
     modificationTime?: number;
     location?: Location;
     description?: string;
+    favorited?: true;
 }
 
 /**
@@ -82,7 +83,7 @@ export const matchJSONMetadata = (
     collectionID: number,
     fileName: string,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-) => {
+): ParsedMetadataJSON | undefined => {
     // Break the fileName down into its components.
     let [name, extension] = nameAndExtension(fileName);
     if (extension) {
@@ -239,6 +240,10 @@ const parseMetadataJSONText = (text: string) => {
     parsedMetadataJSON.description = parseGTNonEmptyString(
         metadataJSON.description,
     );
+
+    if (metadataJSON.favorited === true) {
+        parsedMetadataJSON.favorited = true;
+    }
 
     return parsedMetadataJSON;
 };
