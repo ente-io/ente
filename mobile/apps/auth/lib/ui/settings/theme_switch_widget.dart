@@ -1,6 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/services/auth_theme_preferences.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -17,25 +18,6 @@ class ThemeSwitchWidget extends StatefulWidget {
 }
 
 class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
-  AdaptiveThemeMode? currentThemeMode;
-
-  @override
-  void initState() {
-    super.initState();
-    AdaptiveTheme.getThemeMode().then((value) {
-      currentThemeMode = value ?? AdaptiveThemeMode.system;
-      debugPrint('theme value $value');
-      if (mounted) {
-        setState(() => {});
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
@@ -73,6 +55,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
+    final currentThemeMode = AdaptiveTheme.of(context).mode;
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: _name(context, themeMode),
@@ -84,10 +67,9 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       trailingExtraMargin: 4,
       onTap: () async {
         final adaptiveTheme = AdaptiveTheme.of(context);
-        adaptiveTheme.setThemeMode(themeMode);
-        AppLock.of(context)?.setThemeMode(_themeMode(themeMode));
-        await adaptiveTheme.persist();
-        currentThemeMode = themeMode;
+        final appLock = AppLock.of(context);
+        await AuthThemePreferences.setThemeMode(adaptiveTheme, themeMode);
+        appLock?.setThemeMode(_themeMode(themeMode));
         if (mounted) {
           setState(() {});
         }
