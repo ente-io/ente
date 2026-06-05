@@ -1,1 +1,0 @@
-- Fixed Auth lock screen using the old theme after changing the in-app theme.
