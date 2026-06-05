@@ -223,7 +223,6 @@
   "after1Month": "Efter 1 måned",
   "after1Year": "Efter 1 år",
   "manageParticipants": "Administrer",
-  "collabLinkSectionDescription": "Opret et link, så folk kan tilføje og se fotos i dit delte album uden at behøve en Ente-app eller konto. Fantastisk til at indsamle event fotos.",
   "collectPhotos": "Indsaml billeder",
   "collaborativeLink": "Kollaborativt link",
   "shareWithNonenteUsers": "Del med ikke Ente brugere",
@@ -259,7 +258,6 @@
   "yesRemove": "Ja, fjern",
   "creatingLink": "Opretter link...",
   "removeWithQuestionMark": "Fjern?",
-  "keepPhotos": "Behold billeder",
   "newAlbum": "Nyt album",
   "selectedPhotos": "{count} valgt",
   "@selectedPhotos": {

@@ -211,7 +211,6 @@
   "after1Month": "אחרי חודש 1",
   "after1Year": "אחרי שנה 1",
   "manageParticipants": "נהל",
-  "collabLinkSectionDescription": "צור קישור על מנת לאפשר לאנשים להוסיף ולצפות בתמונות באלבום ששיתפת בלי צורך באפליקציית ente או חשבון. נהדר לאיסוף תמונות של אירועים.",
   "collectPhotos": "אסוף תמונות",
   "collaborativeLink": "קישור לשיתוף פעולה",
   "shareWithNonenteUsers": "שתף עם משתמשים שהם לא של ente",
@@ -298,13 +297,15 @@
   "creatingLink": "יוצר קישור...",
   "removeWithQuestionMark": "הסר?",
   "removeParticipantBody": "{userEmail} יוסר מהאלבום המשותף הזה\n\nגם תמונות שנוספו על ידיהם יוסרו מהאלבום",
-  "keepPhotos": "השאר תמונות",
   "deletePhotos": "מחק תמונות",
   "removePublicLink": "הסר לינק ציבורי",
   "disableLinkMessage": "זה יסיר את הלינק הפומבי שדרכו ניתן לגשת ל\"{albumName}\".",
   "sharing": "משתף...",
   "youCannotShareWithYourself": "אתה לא יכול לשתף עם עצמך",
   "archive": "שמירה בארכיון",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "לחץ לחיצה ארוכה על מנת לבחור תמונות ולחץ על + על מנת ליצור אלבום",
   "importing": "מייבא....",
   "failedToLoadAlbums": "נכשל בטעינת האלבומים",
@@ -612,6 +613,9 @@
   "moveToAlbum": "הזז לאלבום",
   "unhide": "בטל הסתרה",
   "unarchive": "הוצאה מארכיון",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "מועדף",
   "shareLink": "שתף קישור",
   "createCollage": "צור קולז",

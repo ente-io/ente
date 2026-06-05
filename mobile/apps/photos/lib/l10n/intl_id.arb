@@ -218,7 +218,6 @@
   "after1Month": "Setelah 1 bulan",
   "after1Year": "Setelah 1 tahun",
   "manageParticipants": "Atur",
-  "collabLinkSectionDescription": "Buat link untuk memungkinkan orang lain menambahkan dan melihat foto yang ada pada album bersama kamu tanpa memerlukan app atau akun Ente. Ideal untuk mengumpulkan foto pada suatu acara.",
   "collectPhotos": "Kumpulkan foto",
   "collaborativeLink": "Link kolaborasi",
   "shareWithNonenteUsers": "Bagikan ke pengguna non-Ente",
@@ -311,7 +310,6 @@
   "creatingLink": "Membuat link...",
   "removeWithQuestionMark": "Hapus?",
   "removeParticipantBody": "{userEmail} akan dikeluarkan dari album berbagi ini\n\nSemua foto yang ia tambahkan juga akan dihapus dari album ini",
-  "keepPhotos": "Simpan foto",
   "deletePhotos": "Hapus foto",
   "inviteToEnte": "Undang ke Ente",
   "removePublicLink": "Hapus link publik",
@@ -319,6 +317,9 @@
   "sharing": "Membagikan...",
   "youCannotShareWithYourself": "Kamu tidak bisa berbagi dengan dirimu sendiri",
   "archive": "Arsip",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Tekan dan tahan foto lalu klik + untuk membuat album baru",
   "importing": "Mengimpor....",
   "failedToLoadAlbums": "Gagal memuat album",
@@ -731,6 +732,9 @@
   "moveToAlbum": "Pindahkan ke album",
   "unhide": "Tampilkan",
   "unarchive": "Keluarkan dari arsip",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favorit",
   "removeFromFavorite": "Hapus dari favorit",
   "shareLink": "Bagikan link",

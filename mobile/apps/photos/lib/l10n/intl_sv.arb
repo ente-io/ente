@@ -245,7 +245,6 @@
   "after1Month": "Om en månad",
   "after1Year": "Om ett år",
   "manageParticipants": "Hantera",
-  "collabLinkSectionDescription": "Skapa en länk så att personer kan lägga till och visa foton i ditt delade album utan att behöva en Ente app eller konto. Perfekt för att samla in bilder från evenemang.",
   "collectPhotos": "Samla in foton",
   "collaborativeLink": "Samarbetslänk",
   "shareWithNonenteUsers": "Dela med icke-Ente användare",
@@ -351,7 +350,6 @@
   "creatingLink": "Skapar länk...",
   "removeWithQuestionMark": "Ta bort?",
   "removeParticipantBody": "{userEmail} kommer att tas bort från detta delade album\n\nAlla bilder som lagts till av dem kommer också att tas bort från albumet",
-  "keepPhotos": "Behåll foton",
   "deletePhotos": "Radera foton",
   "inviteToEnte": "Bjud in till Ente",
   "removePublicLink": "Ta bort publik länk",
@@ -359,6 +357,9 @@
   "sharing": "Delar...",
   "youCannotShareWithYourself": "Du kan inte dela med dig själv",
   "archive": "Arkiv",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Långtryck för att välja foton och klicka på + för att skapa ett album",
   "importing": "Importerar....",
   "failedToLoadAlbums": "Det gick inte att läsa in album",
@@ -748,6 +749,9 @@
   "moveToAlbum": "Flytta till album",
   "unhide": "Visa",
   "unarchive": "Ångra arkivering",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favorit",
   "removeFromFavorite": "Ta bort från favoriter",
   "shareLink": "Dela länk",

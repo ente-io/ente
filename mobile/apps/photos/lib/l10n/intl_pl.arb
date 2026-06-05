@@ -271,7 +271,6 @@
   "after1Month": "Po 1 miesiącu",
   "after1Year": "Po 1 roku",
   "manageParticipants": "Zarządzaj",
-  "collabLinkSectionDescription": "Utwórz link, aby umożliwić innym dodawanie i przeglądanie zdjęć w udostępnionym albumie bez konieczności korzystania z aplikacji lub konta Ente. Świetne rozwiązanie do gromadzenia zdjęć ze wspólnych wydarzeń.",
   "collectPhotos": "Zbierz zdjęcia",
   "collaborativeLink": "Link do współpracy",
   "shareWithNonenteUsers": "Udostępnij użytkownikom bez konta Ente",
@@ -393,7 +392,6 @@
   "creatingLink": "Tworzenie linku...",
   "removeWithQuestionMark": "Usunąć?",
   "removeParticipantBody": "{userEmail} zostanie usunięty z tego udostępnionego albumu\n\nWszelkie dodane przez nich zdjęcia zostaną usunięte z albumu",
-  "keepPhotos": "Zachowaj Zdjęcia",
   "deletePhotos": "Usuń zdjęcia",
   "inviteToEnte": "Zaproś do Ente",
   "removePublicLink": "Usuń link publiczny",
@@ -401,6 +399,9 @@
   "sharing": "Udostępnianie...",
   "youCannotShareWithYourself": "Nie możesz udostępnić samemu sobie",
   "archive": "Archiwum",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Przytrzymaj, aby wybrać zdjęcia i kliknij +, aby utworzyć album",
   "importing": "Importowanie....",
   "failedToLoadAlbums": "Nie udało się załadować albumów",
@@ -958,6 +959,9 @@
   "moveToAlbum": "Przenieś do albumu",
   "unhide": "Odkryj",
   "unarchive": "Przywróć z archiwum",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Dodaj do ulubionych",
   "removeFromFavorite": "Usuń z ulubionych",
   "shareLink": "Udostępnij link",
