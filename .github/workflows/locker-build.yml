@@ -8,8 +8,8 @@ on:
             - "release/locker-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~5:45 AM IST
-        - cron: "15 0 * * 1-5"
+        # Run every weekday at ~4:45 AM IST
+        - cron: "15 23 * * 0-4"
 
 env:
     FLUTTER_VERSION: "3.38.10"

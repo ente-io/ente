@@ -8,8 +8,8 @@ on:
             - "release/ensu-v*"
     workflow_dispatch:
     schedule:
-        # Run every weekday at ~6:45 AM IST
-        - cron: "15 1 * * 1-5"
+        # Run every weekday at ~5:45 AM IST
+        - cron: "15 0 * * 1-5"
 
 env:
     NDK_VERSION: "27.3.13750724"
