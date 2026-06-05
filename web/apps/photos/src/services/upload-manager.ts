@@ -1,5 +1,6 @@
 // TODO: Audit this file
 // TODO: Too many null assertions in this file. The types need reworking.
+import watcher from "@/services/watch";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
@@ -42,7 +43,6 @@ import { potentialFileTypeFromExtension } from "ente-media/live-photo";
 import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
-import watcher from "services/watch";
 
 export type FileID = number;
 

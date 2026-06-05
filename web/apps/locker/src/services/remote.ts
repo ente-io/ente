@@ -10,6 +10,12 @@
  *   masterKey → collectionKey → fileKey → file metadata (pubMagicMetadata)
  */
 
+import type {
+    LockerCollection,
+    LockerCollectionParticipant,
+    LockerItem,
+    LockerItemType,
+} from "@/types";
 import { deriveInteractiveKey } from "ente-accounts-rs/services/crypto";
 import {
     ensureLocalUser,
@@ -18,12 +24,6 @@ import {
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import type {
-    LockerCollection,
-    LockerCollectionParticipant,
-    LockerItem,
-    LockerItemType,
-} from "types";
 import { z } from "zod";
 import {
     b64ToBytes,

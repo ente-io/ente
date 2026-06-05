@@ -1,3 +1,4 @@
+import type { SelectedState } from "@/utils/file";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -51,7 +52,6 @@ import React, {
     useState,
 } from "react";
 import Supercluster from "supercluster";
-import type { SelectedState } from "utils/file";
 import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { FileListWithViewer } from "../FileListWithViewer";
 

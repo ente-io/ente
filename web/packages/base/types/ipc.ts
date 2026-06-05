@@ -403,7 +403,7 @@ export interface Electron {
      *
      * @returns JPEG data of the converted image.
      */
-    convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array>;
+    convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array<ArrayBuffer>>;
 
     /**
      * Generate a JPEG thumbnail for the given image.
@@ -427,7 +427,7 @@ export interface Electron {
         pathOrZipItem: string | ZipItem,
         maxDimension: number,
         maxSize: number,
-    ) => Promise<Uint8Array>;
+    ) => Promise<Uint8Array<ArrayBuffer>>;
 
     /**
      * Execute a FFmpeg {@link command} on the given {@link pathOrZipItem}.
@@ -462,7 +462,7 @@ export interface Electron {
         command: FFmpegCommand,
         pathOrZipItem: string | ZipItem,
         outputFileExtension: string,
-    ) => Promise<Uint8Array>;
+    ) => Promise<Uint8Array<ArrayBuffer>>;
 
     /**
      * Determine the duration (in seconds) of the video  present at

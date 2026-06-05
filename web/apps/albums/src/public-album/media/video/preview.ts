@@ -84,7 +84,7 @@ const decryptPlaylistJSON = async (
     return PlaylistJSON.parse(JSON.parse(jsonString));
 };
 
-const gunzip = async (data: Uint8Array) =>
+const gunzip = async (data: Uint8Array<ArrayBuffer>) =>
     await new Response(
         new Blob([data]).stream().pipeThrough(new DecompressionStream("gzip")),
     ).text();

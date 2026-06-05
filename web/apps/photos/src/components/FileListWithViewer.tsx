@@ -1,6 +1,7 @@
+import { CollectionMapDialog } from "@/components/Collections/CollectionMapDialog";
+import { uploadManager } from "@/services/upload-manager";
 import { IconButton, Tooltip, styled } from "@mui/material";
 import { useColorScheme, useTheme } from "@mui/material/styles";
-import { CollectionMapDialog } from "components/Collections/CollectionMapDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { isSameDay } from "ente-base/date";
@@ -23,7 +24,6 @@ import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { uploadManager } from "services/upload-manager";
 import {
     FileList,
     type FileListAnnotatedFile,

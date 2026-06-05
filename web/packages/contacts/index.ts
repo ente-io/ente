@@ -3,6 +3,7 @@ import { getUserRecoveryKey } from "ente-accounts-rs/services/recovery-key";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { clientPackageName, desktopAppVersion, isDesktop } from "ente-base/app";
+import { ensureArrayBufferBacked } from "ente-base/bytes";
 import log from "ente-base/log";
 import { apiOrigin } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
@@ -820,7 +821,9 @@ const ensureProfilePictureLoaded = async (contactID: string) => {
             ) {
                 return;
             }
-            const blob = new Blob([bytes], { type: inferImageMimeType(bytes) });
+            const blob = new Blob([ensureArrayBufferBacked(bytes)], {
+                type: inferImageMimeType(bytes),
+            });
             const url = URL.createObjectURL(blob);
             cleanupAvatarURL(contactID);
             state.avatarURLByContactID.set(contactID, url);

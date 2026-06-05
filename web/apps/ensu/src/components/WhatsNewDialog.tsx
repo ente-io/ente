@@ -1,3 +1,4 @@
+import type { WhatsNewEntry } from "@/services/whats-new-content";
 import {
     Button,
     Dialog,
@@ -8,7 +9,6 @@ import {
     Typography,
 } from "@mui/material";
 import React from "react";
-import type { WhatsNewEntry } from "services/whats-new-content";
 
 export interface WhatsNewDialogProps {
     readonly open: boolean;

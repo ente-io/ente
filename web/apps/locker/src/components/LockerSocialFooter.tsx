@@ -3,6 +3,7 @@ import RedditIcon from "@mui/icons-material/Reddit";
 import XIcon from "@mui/icons-material/X";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import { IconButton, Stack, Typography } from "@mui/material";
+import { buildEnvGitSHA } from "ente-base/env";
 import { t } from "i18next";
 import React from "react";
 
@@ -48,7 +49,7 @@ const socialLinks = [
 ] as const;
 
 const buildLabel = () => {
-    const sha = process.env.gitSHA;
+    const sha = buildEnvGitSHA;
     return sha ? `${t("build")} ${sha.slice(0, 7)}` : undefined;
 };
 

@@ -1,6 +1,6 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { accountLogout } from "ente-accounts/services/logout";
 import log from "ente-base/log";
-import { isTauriRuntime } from "services/tauri-runtime";
 
 /**
  * Logout sequence for the Ensu app.

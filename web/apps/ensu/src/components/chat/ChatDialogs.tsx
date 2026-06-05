@@ -1,3 +1,4 @@
+import { isTauriRuntime as detectTauriAppRuntime } from "@/services/tauri-runtime";
 import {
     ArrowRight01Icon,
     Bug01Icon,
@@ -31,7 +32,6 @@ import {
     type NotificationAttributes,
 } from "ente-new/photos/components/Notification";
 import React, { memo } from "react";
-import { isTauriRuntime as detectTauriAppRuntime } from "services/tauri-runtime";
 
 interface IconProps {
     size: number;

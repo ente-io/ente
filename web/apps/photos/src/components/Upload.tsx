@@ -3,6 +3,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import type {
+    InProgressUpload,
+    SegregatedFinishedUploads,
+    UploadBatchResult,
+    UploadCounter,
+    UploadFileNames,
+    UploadItemWithCollection,
+} from "@/services/upload-manager";
+import {
+    successfulFilesFromUploadBatchResult,
+    uploadManager,
+} from "@/services/upload-manager";
+import watcher from "@/services/watch";
+import { hasReliableCanvasReadback } from "@/utils/upload/canvas-integrity";
 import { Album02Icon, Folder01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -80,20 +94,6 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import type {
-    InProgressUpload,
-    SegregatedFinishedUploads,
-    UploadBatchResult,
-    UploadCounter,
-    UploadFileNames,
-    UploadItemWithCollection,
-} from "services/upload-manager";
-import {
-    successfulFilesFromUploadBatchResult,
-    uploadManager,
-} from "services/upload-manager";
-import watcher from "services/watch";
-import { hasReliableCanvasReadback } from "utils/upload/canvas-integrity";
 import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
 
 interface UploadProps {

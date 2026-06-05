@@ -1,4 +1,4 @@
-import { isTauriRuntime } from "services/tauri-runtime";
+import { isTauriRuntime } from "@/services/tauri-runtime";
 
 const tauriInvoke = async <T>(
     command: string,

@@ -1,52 +1,22 @@
-import { Menu01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-    Box,
-    Button,
-    Drawer,
-    IconButton,
-    Stack,
-    Typography,
-    useMediaQuery,
-} from "@mui/material";
-import { getLuminance, useTheme } from "@mui/material/styles";
-import { ChatComposer } from "components/chat/ChatComposer";
-import { ChatDialogs } from "components/chat/ChatDialogs";
-import { ChatMessageList } from "components/chat/ChatMessageList";
-import { ChatSidebar } from "components/chat/ChatSidebar";
-import { useFileInput } from "components/utils/use-file-input";
-import { savedLocalUser } from "ente-accounts/services/accounts-db";
-import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
-import { NavbarBase } from "ente-base/components/Navbar";
-import { useBaseContext } from "ente-base/context";
-import { getKV, removeKV, setKV } from "ente-base/kv";
-import log from "ente-base/log";
-import { savedLogs } from "ente-base/log-web";
-import { savedAuthToken } from "ente-base/token";
-import { saveStringAsFile } from "ente-base/utils/web";
-import { type NotificationAttributes } from "ente-new/photos/components/Notification";
-import { useRouter } from "next/router";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import { handleManualAppUpdateCheck } from "services/app-update";
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { ChatDialogs } from "@/components/chat/ChatDialogs";
+import { ChatMessageList } from "@/components/chat/ChatMessageList";
+import { ChatSidebar } from "@/components/chat/ChatSidebar";
+import { useFileInput } from "@/components/utils/use-file-input";
+import { handleManualAppUpdateCheck } from "@/services/app-update";
 import {
     buildSelectedPath,
     ROOT_SELECTION_KEY,
     STREAMING_SELECTION_KEY,
     type BranchSwitcher,
-} from "services/chat/branching";
+} from "@/services/chat/branching";
 import {
     cachedChatKey,
     cachedLocalChatKey,
     getOrCreateChatKey,
     getOrCreateLocalChatKey,
     initChatKeyStore,
-} from "services/chat/chatKey";
+} from "@/services/chat/chatKey";
 import {
     addMessage,
     createSession,
@@ -63,36 +33,67 @@ import {
     type ChatAttachment,
     type ChatMessage,
     type ChatSession,
-} from "services/chat/store";
+} from "@/services/chat/store";
 import {
     ChatSyncLimitError,
     downloadAttachment,
     syncChat,
-} from "services/chat/sync";
+} from "@/services/chat/sync";
 import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
     SIGN_IN_ENABLED,
-} from "services/featureFlags";
+} from "@/services/featureFlags";
 import {
     DEFAULT_MODEL,
     FALLBACK_DESKTOP_MODEL_PRESETS,
     FALLBACK_MOBILE_MODEL_PRESETS,
     LlmProvider,
     type ResolvedModelPreset,
-} from "services/llm/provider";
+} from "@/services/llm/provider";
 import type {
     DownloadProgress,
     GenerateEvent,
     LlmMessage,
     ModelInfo,
     ModelSettings,
-} from "services/llm/types";
+} from "@/services/llm/types";
 import {
     clearMasterKeyFromEverywhere,
     masterKeyFromSession,
     updateSessionFromTauriSecureStorageIfNeeded,
-} from "services/session";
-import { isTauriRuntime as detectTauriAppRuntime } from "services/tauri-runtime";
+} from "@/services/session";
+import { isTauriRuntime as detectTauriAppRuntime } from "@/services/tauri-runtime";
+import { Menu01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+    Box,
+    Button,
+    Drawer,
+    IconButton,
+    Stack,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
+import { getLuminance, useTheme } from "@mui/material/styles";
+import { savedLocalUser } from "ente-accounts/services/accounts-db";
+import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
+import { desktopAppVersion } from "ente-base/app";
+import { NavbarBase } from "ente-base/components/Navbar";
+import { useBaseContext } from "ente-base/context";
+import { getKV, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
+import { savedLogs } from "ente-base/log-web";
+import { savedAuthToken } from "ente-base/token";
+import { saveStringAsFile } from "ente-base/utils/web";
+import { type NotificationAttributes } from "ente-new/photos/components/Notification";
+import { useRouter } from "next/router";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 const formatTime = (timestamp: number) => {
     const date = new Date(Math.floor(timestamp / 1000));
@@ -737,8 +738,8 @@ const Page: React.FC = () => {
         if (Array.isArray(value)) return value[0];
         return typeof value === "string" ? value : undefined;
     }, [router.isReady, router.query.session]);
-    const buildVersion = process.env.NEXT_PUBLIC_ENSU_DESKTOP_VERSION
-        ? `v${process.env.NEXT_PUBLIC_ENSU_DESKTOP_VERSION}`
+    const buildVersion = desktopAppVersion
+        ? `v${desktopAppVersion}`
         : undefined;
 
     const lastRouteUpdateRef = useRef<{ sessionId?: string; at: number }>({

@@ -1,8 +1,8 @@
+import { usePasteColorMode } from "@/features/paste/hooks/usePasteColorMode";
+import { getPasteThemeTokens } from "@/features/paste/theme/pasteThemeTokens";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
-import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
 import type { ReactNode } from "react";
 
 interface PasteFrameProps {

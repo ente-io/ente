@@ -1,3 +1,4 @@
+import { WatchFolder } from "@/components/WatchFolder";
 import {
     Delete02Icon,
     Download05Icon,
@@ -24,7 +25,6 @@ import {
     useColorScheme,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { WatchFolder } from "components/WatchFolder";
 import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { isDesktop } from "ente-base/app";
@@ -97,7 +97,6 @@ import { isMLSupported } from "ente-new/photos/services/ml";
 import { performSidebarAction as performSidebarRegistryAction } from "ente-new/photos/services/search/sidebar-search-registry";
 import type { SidebarActionID } from "ente-new/photos/services/search/types";
 import {
-    isDevBuildAndUser,
     pullSettings,
     updateCFProxyDisabledPreference,
     updateCustomDomain,
@@ -136,7 +135,6 @@ import React, {
     type MouseEventHandler,
 } from "react";
 import { Trans } from "react-i18next";
-import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 
 type SidebarProps = ModalVisibilityProps & {
@@ -233,7 +231,6 @@ type HelpAction = Extract<
     | "help.requestFeature"
     | "help.support"
     | "help.viewLogs"
-    | "help.testUpload"
 >;
 
 type FreeUpSpaceAction = Extract<
@@ -1827,11 +1824,6 @@ const Help: React.FC<HelpProps> = ({
             case "help.viewLogs":
                 confirmViewLogs();
                 break;
-            case "help.testUpload":
-                if (isDevBuildAndUser()) {
-                    void testUpload();
-                }
-                break;
         }
         onActionHandled?.();
     }, [
@@ -1892,17 +1884,6 @@ const Help: React.FC<HelpProps> = ({
                         onClick={confirmViewLogs}
                     />
                 </RowButtonGroup>
-                {isDevBuildAndUser() && (
-                    <RowButton
-                        variant="secondary"
-                        label={
-                            <Typography variant="mini" color="text.muted">
-                                {ut("Test upload")}
-                            </Typography>
-                        }
-                        onClick={testUpload}
-                    />
-                )}
             </Stack>
         </TitledNestedSidebarDrawer>
     );

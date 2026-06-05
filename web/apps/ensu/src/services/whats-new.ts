@@ -1,9 +1,9 @@
-import { isTauriRuntime } from "services/tauri-runtime";
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import {
     whatsNewEntries,
     whatsNewVersion,
     type WhatsNewEntry,
-} from "services/whats-new-content";
+} from "@/services/whats-new-content";
 
 const storageKey = "ensu.whatsNew.seenVersion";
 

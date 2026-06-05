@@ -1,9 +1,10 @@
+import { useNotification } from "@/components/utils/hooks-app";
+import { useDesktopAppLockRoute } from "@/components/utils/use-app-lock-route";
+import { photosLogout } from "@/services/logout";
 import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
-import { useNotification } from "components/utils/hooks-app";
-import { useDesktopAppLockRoute } from "components/utils/use-app-lock-route";
 import {
     isLocalStorageAndIndexedDBMismatch,
     savedLocalUser,
@@ -54,11 +55,10 @@ import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
-import "styles/global.css";
-import "styles/photoswipe.css";
+import "../styles/global.css";
+import "../styles/photoswipe.css";
 
 type PhotosAppProps = AppProps<Record<string, unknown>>;
 
@@ -147,16 +147,7 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
         if (needsFamilyRedirect && savedPartialLocalUser()?.token)
             redirectToFamilyPortal();
 
-        // Creating this inline, we need this on debug only and temporarily. Can
-        // remove the debug print itself after a while.
-        interface NROptions {
-            shallow: boolean;
-        }
-        router.events.on("routeChangeStart", (url: string, o: NROptions) => {
-            if (process.env.NEXT_PUBLIC_ENTE_TRACE_RT) {
-                log.debug(() => [o.shallow ? "route-shallow" : "route", url]);
-            }
-
+        router.events.on("routeChangeStart", () => {
             if (needsFamilyRedirect && savedPartialLocalUser()?.token) {
                 redirectToFamilyPortal();
 

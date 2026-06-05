@@ -1,12 +1,12 @@
 // TODO: Audit this file
-import { AllAlbums } from "components/Collections/AllAlbums";
-import { AllPeople } from "components/Collections/AllPeople";
+import { AllAlbums } from "@/components/Collections/AllAlbums";
+import { AllPeople } from "@/components/Collections/AllPeople";
 import {
     CollectionShare,
     type CollectionShareIntent,
     type CollectionShareProps,
-} from "components/Collections/CollectionShare";
-import type { FileListHeaderOrFooter } from "components/FileList";
+} from "@/components/Collections/CollectionShare";
+import type { FileListHeaderOrFooter } from "@/components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import {
     isSaveCancelled,

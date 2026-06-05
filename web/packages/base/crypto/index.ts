@@ -323,7 +323,7 @@ export const encryptStreamChunk = (
     data: Uint8Array,
     state: SodiumStateAddress,
     isFinalChunk: boolean,
-): Promise<Uint8Array> =>
+): Promise<Uint8Array<ArrayBuffer>> =>
     inWorker()
         ? libsodium.encryptStreamChunk(data, state, isFinalChunk)
         : sharedWorker().then((w) =>
@@ -349,7 +349,7 @@ export const decryptBox = (
 export const decryptBoxBytes = (
     box: EncryptedBox,
     key: BytesOrB64,
-): Promise<Uint8Array> =>
+): Promise<Uint8Array<ArrayBuffer>> =>
     inWorker()
         ? libsodium.decryptBoxBytes(box, key)
         : sharedWorker().then((w) => w.decryptBoxBytes(box, key));
@@ -373,7 +373,7 @@ export const decryptBlob = (
 export const decryptBlobBytes = (
     blob: EncryptedBlob,
     key: BytesOrB64,
-): Promise<Uint8Array> =>
+): Promise<Uint8Array<ArrayBuffer>> =>
     inWorker()
         ? libsodium.decryptBlobBytes(blob, key)
         : sharedWorker().then((w) => w.decryptBlobBytes(blob, key));
@@ -384,7 +384,7 @@ export const decryptBlobBytes = (
 export const decryptStreamBytes = (
     file: EncryptedFile,
     key: BytesOrB64,
-): Promise<Uint8Array> =>
+): Promise<Uint8Array<ArrayBuffer>> =>
     inWorker()
         ? libsodium.decryptStreamBytes(file, key)
         : sharedWorker().then((w) => w.decryptStreamBytes(file, key));
@@ -409,7 +409,7 @@ export const initChunkDecryption = (
 export const decryptStreamChunk = (
     data: Uint8Array,
     state: SodiumStateAddress,
-): Promise<Uint8Array> =>
+): Promise<Uint8Array<ArrayBuffer>> =>
     inWorker()
         ? libsodium.decryptStreamChunk(data, state)
         : sharedWorker().then((w) => w.decryptStreamChunk(data, state));

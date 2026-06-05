@@ -1,5 +1,5 @@
+import { createPaste } from "@/services/paste";
 import { useState } from "react";
-import { createPaste } from "services/paste";
 import { MAX_PASTE_CHARS } from "../constants";
 import { encryptPasteForCreate } from "../utils/pasteCrypto";
 

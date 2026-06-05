@@ -1,4 +1,18 @@
 /**
+ * Build-time `process.env.*` replacements available to our browser bundles.
+ */
+declare const process: {
+    readonly env: {
+        readonly NODE_ENV: "development" | "production" | "test";
+        readonly NEXT_PUBLIC_ENTE_ENDPOINT?: string;
+        readonly appName: string;
+        readonly desktopAppVersion?: string;
+        readonly gitSHA?: string;
+        readonly isDesktop: "" | "1";
+    };
+};
+
+/**
  * A build is considered as a development build if either the NODE_ENV is
  * environment variable is set to 'development'.
  *
@@ -10,6 +24,13 @@
  *   all other commands.
  */
 export const isDevBuild = process.env.NODE_ENV == "development";
+export const buildEnvIsProductionBuild = process.env.NODE_ENV == "production";
+
+export const buildEnvCustomAPIEndpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+export const buildEnvAppName = process.env.appName;
+export const buildEnvIsDesktop = process.env.isDesktop == "1";
+export const buildEnvDesktopAppVersion = process.env.desktopAppVersion;
+export const buildEnvGitSHA = process.env.gitSHA;
 
 /**
  * `true` if we're running in the default global context (aka the main thread)

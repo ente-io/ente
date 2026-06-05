@@ -1,7 +1,7 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { HTTPError } from "ente-base/http";
 import log from "ente-base/log";
-import { isTauriRuntime } from "services/tauri-runtime";
 import {
     secureStorageDelete,
     secureStorageGet,

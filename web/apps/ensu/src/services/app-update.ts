@@ -1,6 +1,7 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { buildEnvIsProductionBuild } from "ente-base/env";
 import log from "ente-base/log";
-import { isTauriRuntime } from "services/tauri-runtime";
 
 const oneDay = 24 * 60 * 60 * 1000;
 
@@ -123,11 +124,7 @@ export const handleManualAppUpdateCheck = async (
 };
 
 export const setupAutoAppUpdates = (showMiniDialog: ShowMiniDialog) => {
-    if (
-        !isTauriRuntime() ||
-        process.env.NODE_ENV !== "production" ||
-        intervalId
-    ) {
+    if (!isTauriRuntime() || !buildEnvIsProductionBuild || intervalId) {
         return () => {};
     }
 
