@@ -530,6 +530,7 @@ class _FileSelectionActionsWidgetState
       return MediaQuery(
         data: MediaQuery.of(context).removePadding(removeBottom: true),
         child: SafeArea(
+          top: false,
           child: Scrollbar(
             radius: const Radius.circular(1),
             thickness: 2,
