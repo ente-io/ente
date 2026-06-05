@@ -92,6 +92,8 @@ class FlagService {
   bool get enableOnlyBackupFuturePhotos =>
       internalUser || _isServerFlagEnabled(_backupOptionsFlag);
 
+  bool get resetSplitReason => internalUser;
+
   bool get facesTimeline => true;
   bool get ritualsFlag => true;
 
