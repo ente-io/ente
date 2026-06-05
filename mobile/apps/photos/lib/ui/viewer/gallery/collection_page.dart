@@ -58,23 +58,17 @@ class CollectionPage extends StatelessWidget {
     final List<EnteFile>? initialFiles = c.thumbnail != null
         ? [c.thumbnail!]
         : null;
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      galleryType,
+      c.collection.displayName,
+      _selectedFiles,
+      isHierarchicalSearchable: true,
+      collection: c.collection,
+      isFromCollectPhotos: isFromCollectPhotos,
+    );
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        galleryType,
-        c.collection.displayName,
-        _selectedFiles,
-        collection: c.collection,
-        isFromCollectPhotos: isFromCollectPhotos,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: true,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: true,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result = await FilesDB.instance
             .getFilesInCollection(
@@ -169,6 +163,7 @@ class CollectionPage extends StatelessWidget {
                               ? HierarchicalSearchGallery(
                                   tagPrefix: tagPrefix,
                                   selectedFiles: _selectedFiles,
+                                  appBar: appBar,
                                 )
                               : gallery;
                         },

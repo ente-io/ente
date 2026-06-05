@@ -28,6 +28,7 @@ import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dar
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
+import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
@@ -58,9 +59,7 @@ class Gallery extends StatefulWidget {
   final Set<EventType> removalEventTypes;
   final SelectedFiles? selectedFiles;
   final String tagPrefix;
-  final Widget? appBarSliver;
-  final double appBarPinnedHeight;
-  final double appBarExpandedHeight;
+  final GalleryAppBarConfig? appBar;
   final Widget? header;
   final Widget? footer;
   final Widget emptyState;
@@ -103,9 +102,7 @@ class Gallery extends StatefulWidget {
   const Gallery({
     required this.asyncLoader,
     required this.tagPrefix,
-    this.appBarSliver,
-    this.appBarPinnedHeight = 0,
-    this.appBarExpandedHeight = 0,
+    this.appBar,
     this.selectedFiles,
     this.initialFiles,
     this.reloadEvent,
@@ -604,6 +601,29 @@ class GalleryState extends State<Gallery> {
     super.dispose();
   }
 
+  double get _appBarPinnedHeight => widget.appBar?.pinnedHeight ?? 0;
+
+  double get _appBarCollapseExtent => widget.appBar?.collapseExtent ?? 0;
+
+  ScrollPhysics get _scrollPhysics => widget.disableScroll
+      ? const NeverScrollableScrollPhysics()
+      : const ExponentialBouncingScrollPhysics();
+
+  Widget _buildWithAppBar(BuildContext context, Widget child) {
+    final appBar = widget.appBar;
+    if (appBar == null) {
+      return child;
+    }
+
+    return CustomScrollView(
+      physics: _scrollPhysics,
+      slivers: [
+        appBar.buildSliver(context),
+        SliverFillRemaining(hasScrollBody: false, child: child),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _logger.info("Building Gallery  ${widget.tagPrefix}");
@@ -652,7 +672,8 @@ class GalleryState extends State<Gallery> {
       final tileHeight =
           (widthAvailable - (photoGridSize - 1) * GalleryGroups.spacing) /
           photoGridSize;
-      return widget.initialFiles != null && widget.initialFiles!.isNotEmpty
+      final placeholder =
+          widget.initialFiles != null && widget.initialFiles!.isNotEmpty
           ? Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -682,11 +703,12 @@ class GalleryState extends State<Gallery> {
               ],
             )
           : const SizedBox.shrink();
+      return _buildWithAppBar(context, placeholder);
     }
 
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
-      return widget.loadingWidget;
+      return _buildWithAppBar(context, widget.loadingWidget);
     }
 
     if (galleryGroups == null) {
@@ -694,7 +716,7 @@ class GalleryState extends State<Gallery> {
     }
     final groups = galleryGroups;
     if (groups == null) {
-      return widget.loadingWidget;
+      return _buildWithAppBar(context, widget.loadingWidget);
     }
 
     // Check if width changed due to orientation change and update gallery groups
@@ -705,12 +727,12 @@ class GalleryState extends State<Gallery> {
         }
       });
     }
-    if (widget.appBarPinnedHeight > 0 &&
+    if (_appBarPinnedHeight > 0 &&
         (!groups.groupType.showGroupHeader() ||
             widget.disablePinnedGroupHeader)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _boundariesProvider?.setTopBoundary(widget.appBarPinnedHeight);
+          _boundariesProvider?.setTopBoundary(_appBarPinnedHeight);
         }
       });
     }
@@ -736,7 +758,7 @@ class GalleryState extends State<Gallery> {
                 heighOfViewport: MediaQuery.sizeOf(context).height,
                 topPadding: widget.disableVerticalPaddingForScrollbar
                     ? 0.0
-                    : widget.appBarPinnedHeight + groupHeaderExtent!,
+                    : _appBarPinnedHeight + groupHeaderExtent!,
                 bottomPadding: widget.disableVerticalPaddingForScrollbar
                     ? ValueNotifier(0.0)
                     : scrollbarBottomPaddingNotifier,
@@ -769,8 +791,8 @@ class GalleryState extends State<Gallery> {
                                   : const ExponentialBouncingScrollPhysics(),
                               controller: _scrollController,
                               slivers: [
-                                if (widget.appBarSliver != null)
-                                  widget.appBarSliver!,
+                                if (widget.appBar != null)
+                                  widget.appBar!.buildSliver(context),
                                 SliverToBoxAdapter(
                                   child: SizeChangedLayoutNotifier(
                                     child: SizedBox(
@@ -795,13 +817,8 @@ class GalleryState extends State<Gallery> {
                                 scrollController: _scrollController,
                                 galleryGroups: groups,
                                 headerHeightNotifier: _headerHeightNotifier,
-                                scrollOffsetBase:
-                                    widget.appBarExpandedHeight >
-                                        widget.appBarPinnedHeight
-                                    ? widget.appBarExpandedHeight -
-                                          widget.appBarPinnedHeight
-                                    : 0,
-                                topOffset: widget.appBarPinnedHeight,
+                                scrollOffsetBase: _appBarCollapseExtent,
+                                topOffset: _appBarPinnedHeight,
                                 selectedFiles: widget.selectedFiles,
                                 showSelectAll:
                                     widget.showSelectAll &&
@@ -832,20 +849,7 @@ class GalleryState extends State<Gallery> {
       ],
     );
 
-    if (widget.appBarSliver == null) {
-      return emptyColumn;
-    }
-
-    return CustomScrollView(
-      controller: _scrollController,
-      physics: widget.disableScroll
-          ? const NeverScrollableScrollPhysics()
-          : const ExponentialBouncingScrollPhysics(),
-      slivers: [
-        widget.appBarSliver!,
-        SliverFillRemaining(hasScrollBody: false, child: emptyColumn),
-      ],
-    );
+    return _buildWithAppBar(context, emptyColumn);
   }
 }
 
@@ -885,6 +889,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
   String? currentGroupId;
   final _enlargeHeader = ValueNotifier<bool>(false);
   Timer? _enlargeHeaderTimer;
+  InheritedGalleryBoundaries? _boundariesProvider;
   late final ValueNotifier<bool> _atZeroScrollNotifier;
   Timer? _timer;
   bool lastInUseState = false;
@@ -894,9 +899,12 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
     super.initState();
     widget.scrollbarInUseNotifier.addListener(scrollbarInUseListener);
     widget.scrollController.addListener(_setCurrentGroupID);
-    _atZeroScrollNotifier = ValueNotifier<bool>(
-      widget.scrollController.offset == 0,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _setBaseTopBoundary();
+      }
+    });
+    _atZeroScrollNotifier = ValueNotifier<bool>((_scrollOffset ?? 0) == 0);
     widget.scrollController.addListener(
       _scrollControllerListenerForZeroScrollNotifier,
     );
@@ -907,6 +915,12 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
   void didUpdateWidget(covariant PinnedGroupHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
     _setCurrentGroupID();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _boundariesProvider = GalleryBoundariesProvider.of(context);
   }
 
   @override
@@ -926,17 +940,17 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
 
   void _setCurrentGroupID() {
     if (widget.headerHeightNotifier.value == null) return;
+    final scrollOffset = _scrollOffset;
+    if (scrollOffset == null) return;
     final normalizedScrollOffset =
-        widget.scrollController.offset -
+        scrollOffset -
         widget.scrollOffsetBase -
         widget.headerHeightNotifier.value!;
     if (normalizedScrollOffset < 0) {
+      _setBaseTopBoundary();
       // No change in group ID, no need to call setState
       if (currentGroupId == null) return;
       currentGroupId = null;
-      GalleryBoundariesProvider.of(
-        context,
-      )?.setTopBoundary(widget.topOffset > 0 ? widget.topOffset : null);
     } else {
       final groupScrollOffsets = widget.galleryGroups.groupScrollOffsets;
 
@@ -990,8 +1004,23 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
     }
   }
 
+  void _setBaseTopBoundary() {
+    _boundariesProvider?.setTopBoundary(
+      widget.topOffset > 0 ? widget.topOffset : null,
+    );
+  }
+
   void _scrollControllerListenerForZeroScrollNotifier() {
-    _atZeroScrollNotifier.value = widget.scrollController.offset == 0;
+    final scrollOffset = _scrollOffset;
+    if (scrollOffset == null) return;
+    _atZeroScrollNotifier.value = scrollOffset == 0;
+  }
+
+  double? get _scrollOffset {
+    if (widget.scrollController.positions.length != 1) {
+      return null;
+    }
+    return widget.scrollController.offset;
   }
 
   void scrollbarInUseListener() {

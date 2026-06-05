@@ -50,6 +50,7 @@ import "package:photos/ui/sharing/manage_links_widget.dart";
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -91,6 +92,39 @@ class GalleryAppBarWidget extends StatefulWidget {
         (isHierarchicalSearchable
             ? AppBarFilterChips.preferredHeight(context)
             : 0);
+  }
+
+  static GalleryAppBarConfig sliverConfig(
+    BuildContext context,
+    GalleryType type,
+    String? title,
+    SelectedFiles selectedFiles, {
+    required bool isHierarchicalSearchable,
+    DeviceCollection? deviceCollection,
+    Collection? collection,
+    bool isFromCollectPhotos = false,
+    List<EnteFile>? files,
+  }) {
+    return GalleryAppBarConfig(
+      sliverBuilder: (_) => GalleryAppBarWidget(
+        type,
+        title,
+        selectedFiles,
+        deviceCollection: deviceCollection,
+        collection: collection,
+        isFromCollectPhotos: isFromCollectPhotos,
+        files: files,
+        asSliver: true,
+      ),
+      pinnedHeight: sliverPinnedHeight(
+        context,
+        isHierarchicalSearchable: isHierarchicalSearchable,
+      ),
+      expandedHeight: sliverExpandedHeight(
+        context,
+        isHierarchicalSearchable: isHierarchicalSearchable,
+      ),
+    );
   }
 
   final GalleryType type;

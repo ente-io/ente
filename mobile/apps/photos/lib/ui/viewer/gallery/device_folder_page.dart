@@ -36,22 +36,16 @@ class DeviceFolderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int? userID = Configuration.instance.getUserID();
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      GalleryType.localFolder,
+      deviceCollection.name,
+      _selectedFiles,
+      isHierarchicalSearchable: false,
+      deviceCollection: deviceCollection,
+    );
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        GalleryType.localFolder,
-        deviceCollection.name,
-        _selectedFiles,
-        deviceCollection: deviceCollection,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInDeviceCollection(
           deviceCollection,

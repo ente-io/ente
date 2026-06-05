@@ -39,22 +39,16 @@ class UnCategorizedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      appBarType,
+      AppLocalizations.of(context).uncategorized,
+      _selectedFiles,
+      isHierarchicalSearchable: true,
+      collection: collection,
+    );
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        appBarType,
-        AppLocalizations.of(context).uncategorized,
-        _selectedFiles,
-        collection: collection,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: true,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: true,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result = await FilesDB.instance
             .getFilesInCollection(
@@ -122,6 +116,7 @@ class UnCategorizedPage extends StatelessWidget {
                               ? HierarchicalSearchGallery(
                                   tagPrefix: tagPrefix,
                                   selectedFiles: _selectedFiles,
+                                  appBar: appBar,
                                 )
                               : gallery;
                         },

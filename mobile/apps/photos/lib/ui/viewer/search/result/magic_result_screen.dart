@@ -177,22 +177,16 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      MagicResultScreen.appBarType,
+      widget.name,
+      _selectedFiles,
+      isHierarchicalSearchable: true,
+    );
     final gallery = Gallery(
       key: ValueKey(_enableGrouping),
-      appBarSliver: GalleryAppBarWidget(
-        MagicResultScreen.appBarType,
-        widget.name,
-        _selectedFiles,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: true,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: true,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
             .where(
@@ -237,6 +231,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
                               ? HierarchicalSearchGallery(
                                   tagPrefix: widget.heroTag,
                                   selectedFiles: _selectedFiles,
+                                  appBar: appBar,
                                 )
                               : AnimatedSwitcher(
                                   duration: const Duration(milliseconds: 250),

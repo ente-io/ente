@@ -142,6 +142,13 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
     final centerPoint = InheritedLocationScreenState.of(
       context,
     ).locationTagEntity.item.centerPoint;
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      GalleryType.locationTag,
+      locationTag.name,
+      _selectedFiles,
+      isHierarchicalSearchable: true,
+    );
 
     Future<FileLoadResult> filterFiles() async {
       //waiting for allFilesWithLocation to be initialized
@@ -186,24 +193,10 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                             ? HierarchicalSearchGallery(
                                 tagPrefix: widget.tagPrefix,
                                 selectedFiles: _selectedFiles,
+                                appBar: appBar,
                               )
                             : Gallery(
-                                appBarSliver: GalleryAppBarWidget(
-                                  GalleryType.locationTag,
-                                  locationTag.name,
-                                  _selectedFiles,
-                                  asSliver: true,
-                                ),
-                                appBarPinnedHeight:
-                                    GalleryAppBarWidget.sliverPinnedHeight(
-                                      context,
-                                      isHierarchicalSearchable: true,
-                                    ),
-                                appBarExpandedHeight:
-                                    GalleryAppBarWidget.sliverExpandedHeight(
-                                      context,
-                                      isHierarchicalSearchable: true,
-                                    ),
+                                appBar: appBar,
                                 loadingWidget: Column(
                                   children: [
                                     EnteLoadingWidget(
@@ -243,7 +236,15 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             ),
           );
         } else {
-          return const Column(children: [Expanded(child: EnteLoadingWidget())]);
+          return CustomScrollView(
+            slivers: [
+              appBar.buildSliver(context),
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: EnteLoadingWidget(),
+              ),
+            ],
+          );
         }
       },
       future: filterFiles(),

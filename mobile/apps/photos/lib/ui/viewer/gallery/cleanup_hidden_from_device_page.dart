@@ -60,22 +60,16 @@ class _CleanupHiddenFromDevicePageState
     final filesAreSelected = _selectedFiles.files.isNotEmpty;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final deleteAllButtonHeight = 40.0 + max(bottomPadding, 6.0) + 12.0;
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      GalleryType.cleanupHiddenFromDevice,
+      AppLocalizations.of(context).deleteOnDeviceFiles,
+      _selectedFiles,
+      isHierarchicalSearchable: false,
+    );
 
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        GalleryType.cleanupHiddenFromDevice,
-        AppLocalizations.of(context).deleteOnDeviceFiles,
-        _selectedFiles,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final files = await CollectionsService.instance
             .getHiddenFilesOnDevice();

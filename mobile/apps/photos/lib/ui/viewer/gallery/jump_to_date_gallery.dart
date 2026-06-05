@@ -116,12 +116,27 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      JumpToDateGallery.appBarType,
+      "",
+      _selectedFiles,
+      isHierarchicalSearchable: false,
+    );
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
           body: _loadState == GalleryLoadState.loadingFiles
-              ? EnteLoadingWidget(
-                  color: getEnteColorScheme(context).strokeMuted,
+              ? CustomScrollView(
+                  slivers: [
+                    appBar.buildSliver(context),
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EnteLoadingWidget(
+                        color: getEnteColorScheme(context).strokeMuted,
+                      ),
+                    ),
+                  ],
                 )
               : AnimatedOpacity(
                   opacity: _loadState == GalleryLoadState.galleryReady
@@ -135,22 +150,7 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         Gallery(
-                          appBarSliver: GalleryAppBarWidget(
-                            JumpToDateGallery.appBarType,
-                            "",
-                            _selectedFiles,
-                            asSliver: true,
-                          ),
-                          appBarPinnedHeight:
-                              GalleryAppBarWidget.sliverPinnedHeight(
-                                context,
-                                isHierarchicalSearchable: false,
-                              ),
-                          appBarExpandedHeight:
-                              GalleryAppBarWidget.sliverExpandedHeight(
-                                context,
-                                isHierarchicalSearchable: false,
-                              ),
+                          appBar: appBar,
                           asyncLoader:
                               (
                                 creationStartTime,

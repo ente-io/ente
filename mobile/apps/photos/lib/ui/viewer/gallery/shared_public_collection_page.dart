@@ -126,24 +126,18 @@ class _SharedPublicCollectionPageState
     final GroupType groupType = normalizedLayout == "masonry"
         ? GroupType.none
         : GroupType.day;
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      galleryType,
+      widget.c.collection.displayName,
+      _selectedFiles,
+      isHierarchicalSearchable: false,
+      collection: widget.c.collection,
+      files: widget.files,
+    );
 
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        galleryType,
-        widget.c.collection.displayName,
-        _selectedFiles,
-        collection: widget.c.collection,
-        files: widget.files,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         widget.files!.sort(
           (a, b) => b.creationTime!.compareTo(a.creationTime!),

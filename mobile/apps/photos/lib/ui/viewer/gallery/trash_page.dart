@@ -36,22 +36,16 @@ class TrashPage extends StatelessWidget {
     final bool filesAreSelected = _selectedFiles.files.isNotEmpty;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final deleteAllButtonHeight = 40.0 + max(bottomPadding, 6.0) + 12.0;
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      appBarType,
+      AppLocalizations.of(context).trash,
+      _selectedFiles,
+      isHierarchicalSearchable: false,
+    );
 
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        appBarType,
-        AppLocalizations.of(context).trash,
-        _selectedFiles,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return TrashDB.instance.getTrashedFiles(
           creationStartTime,

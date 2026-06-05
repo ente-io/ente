@@ -169,21 +169,15 @@ class _HiddenPageState extends State<HiddenPage> {
     if (_defaultHiddenCollectionId == null) {
       return const EnteLoadingWidget();
     }
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      widget.appBarType,
+      AppLocalizations.of(context).hidden,
+      _selectedFiles,
+      isHierarchicalSearchable: false,
+    );
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        widget.appBarType,
-        AppLocalizations.of(context).hidden,
-        _selectedFiles,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollections(
           [_defaultHiddenCollectionId!],

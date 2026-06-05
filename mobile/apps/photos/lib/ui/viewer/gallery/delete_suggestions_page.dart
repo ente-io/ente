@@ -29,21 +29,15 @@ class DeleteSuggestionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      appBarType,
+      AppLocalizations.of(context).deleteSuggestions,
+      _selectedFiles,
+      isHierarchicalSearchable: false,
+    );
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        appBarType,
-        AppLocalizations.of(context).deleteSuggestions,
-        _selectedFiles,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final fileIDs = await CollectionsService.instance
             .fetchDeleteSuggestionFileIDs();

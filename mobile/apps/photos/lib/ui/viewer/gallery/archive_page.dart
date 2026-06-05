@@ -38,21 +38,15 @@ class ArchivePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final Set<int> hiddenCollectionIDs = CollectionsService.instance
         .getHiddenCollectionIds();
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      appBarType,
+      AppLocalizations.of(context).archive,
+      _selectedFiles,
+      isHierarchicalSearchable: false,
+    );
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        appBarType,
-        AppLocalizations.of(context).archive,
-        _selectedFiles,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: false,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getAllPendingOrUploadedFiles(
           creationStartTime,

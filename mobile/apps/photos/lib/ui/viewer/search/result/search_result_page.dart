@@ -74,21 +74,15 @@ class _SearchResultPageState extends State<SearchResultPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      context,
+      SearchResultPage.appBarType,
+      widget.searchResult.name(),
+      _selectedFiles,
+      isHierarchicalSearchable: true,
+    );
     final gallery = Gallery(
-      appBarSliver: GalleryAppBarWidget(
-        SearchResultPage.appBarType,
-        widget.searchResult.name(),
-        _selectedFiles,
-        asSliver: true,
-      ),
-      appBarPinnedHeight: GalleryAppBarWidget.sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: true,
-      ),
-      appBarExpandedHeight: GalleryAppBarWidget.sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: true,
-      ),
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
             .where(
@@ -136,6 +130,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
                               ? HierarchicalSearchGallery(
                                   tagPrefix: widget.tagPrefix,
                                   selectedFiles: _selectedFiles,
+                                  appBar: appBar,
                                 )
                               : gallery;
                         },
