@@ -3,12 +3,13 @@ import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
-import "package:ente_auth/app/view/app.dart";
+import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
+import 'package:ente_auth/services/auth_theme_preferences.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
@@ -35,7 +36,7 @@ import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:ente_ui/theme/theme_config.dart';
 import 'package:flutter/foundation.dart';
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tray_manager/tray_manager.dart';
@@ -102,8 +103,7 @@ void main() async {
 
 Future<void> _runInForeground() async {
   AppThemeConfig.initialize(EnteApp.auth);
-  final adaptiveThemeMode =
-      await AdaptiveTheme.getThemeMode() ?? AdaptiveThemeMode.system;
+  final adaptiveThemeMode = await AuthThemePreferences.getThemeMode();
   final savedThemeMode = _themeMode(adaptiveThemeMode);
   final configuration = Configuration.instance;
   return await _runWithLogs(() async {
