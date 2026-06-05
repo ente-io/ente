@@ -10,9 +10,9 @@ void main() {
           builder: (context) => Column(
             children: [
               Text(Theme.of(context).brightness.name),
-              TextButton(
-                onPressed: () =>
-                    AppLock.of(context)!.setThemeMode(ThemeMode.light),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => AppLock.of(context)!.setThemeMode(ThemeMode.light),
                 child: const Text('Use light'),
               ),
             ],
