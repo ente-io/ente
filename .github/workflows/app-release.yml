@@ -170,13 +170,19 @@ jobs:
                           exit 1
                       fi
                       release_sha="$(git rev-parse HEAD)"
+                      rc_sha="$(git ls-remote origin "refs/tags/photos-desktop-v${VERSION}-rc" | cut -f1)"
+                      if [ "${rc_sha}" != "${release_sha}" ]; then
+                          echo "::error::photos-desktop-v${VERSION}-rc does not point at ${release_branch}"
+                          exit 1
+                      fi
 
                       git tag "photos-desktop-v${VERSION}" "${release_sha}"
                       git push origin "refs/tags/photos-desktop-v${VERSION}"
 
                       gh release edit "v${VERSION}" --repo ente-io/photos-desktop --draft=false --prerelease=false --latest
-                      gh release delete "photos-desktop-v${VERSION}" --yes --cleanup-tag --repo ente-io/nightly || true
+                      gh release delete "photos-desktop-v${VERSION}-rc" --yes --cleanup-tag --repo ente-io/nightly || true
                       git_push_release_branch ":refs/heads/${release_branch}"
+                      git push origin ":refs/tags/photos-desktop-v${VERSION}-rc" || true
                       exit 0
                   fi
 

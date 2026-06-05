@@ -16,6 +16,12 @@ Nightly builds of `main` are published by a scheduled workflow automatically, an
 
 Nightly and RC builds go to [ente-io/nightly](https://github.com/ente-io/nightly) like the other apps.
 
+## In-app "What's new"
+
+Separate from the GitHub and help-site notes: for a release with user-facing changes, update [WhatsNew.tsx](../../web/packages/new/photos/components/WhatsNew.tsx) and bump `changelogVersion` in [changelog.ts](../../web/packages/new/photos/services/changelog.ts) on `main` before cutting the RC.
+
+The dialog shows once when the installed `changelogVersion` is newer than the one the user last saw.
+
 ## Start release
 
 ```sh
@@ -34,7 +40,7 @@ Cherry-pick fixes to the release branch to rebuild the candidate.
 gh workflow run app-release.yml -f action=promote -f app=photos-desktop -f version=1.7.25
 ```
 
-Publishes the `v1.7.25` draft in `ente-io/photos-desktop` as the latest release, pushes the `photos-desktop-v1.7.25` source tag, removes the `v1.7.25` pre-release from `ente-io/nightly`, and deletes the release branch. The website and the brew cask pick up the new latest release automatically.
+Publishes the `v1.7.25` draft in `ente-io/photos-desktop` as the latest release, pushes the `photos-desktop-v1.7.25` source tag, removes the `photos-desktop-v1.7.25-rc` pre-release from `ente-io/nightly`, and deletes the release branch. The website and the brew cask pick up the new latest release automatically.
 
 It also opens a PR for updating the changelog in the docs.
 
