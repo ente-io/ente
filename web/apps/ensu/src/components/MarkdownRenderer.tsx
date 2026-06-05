@@ -140,18 +140,19 @@ export const MarkdownRenderer = ({
     className,
 }: MarkdownRendererProps) => {
     return (
-        <ReactMarkdown
-            className={className}
-            remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[
-                [
-                    rehypeKatex,
-                    { strict: false, throwOnError: false, trust: true },
-                ],
-            ]}
-            components={{ pre: CodeBlock, a: ExternalLink }}
-        >
-            {content}
-        </ReactMarkdown>
+        <div className={className}>
+            <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[
+                    [
+                        rehypeKatex,
+                        { strict: false, throwOnError: false, trust: true },
+                    ],
+                ]}
+                components={{ pre: CodeBlock, a: ExternalLink }}
+            >
+                {content}
+            </ReactMarkdown>
+        </div>
     );
 };
