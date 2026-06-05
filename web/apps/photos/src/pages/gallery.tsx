@@ -509,8 +509,6 @@ const Page: React.FC = () => {
         ],
     );
 
-    if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
-
     const router = useRouter();
 
     useEffect(() => {

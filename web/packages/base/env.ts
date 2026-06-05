@@ -5,7 +5,6 @@ declare const process: {
     readonly env: {
         readonly NODE_ENV: "development" | "production" | "test";
         readonly NEXT_PUBLIC_ENTE_ENDPOINT?: string;
-        readonly NEXT_PUBLIC_ENTE_TRACE?: string;
         readonly appName: string;
         readonly desktopAppVersion?: string;
         readonly gitSHA?: string;
@@ -27,7 +26,6 @@ declare const process: {
 export const isDevBuild = process.env.NODE_ENV == "development";
 
 export const customAPIEndpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-export const isTraceEnabled = !!process.env.NEXT_PUBLIC_ENTE_TRACE;
 export const buildAppName = process.env.appName;
 export const buildIsDesktop = process.env.isDesktop == "1";
 export const buildDesktopAppVersion = process.env.desktopAppVersion;

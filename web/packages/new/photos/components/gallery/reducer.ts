@@ -1,5 +1,4 @@
 import { type LocalUser } from "ente-accounts/services/user";
-import { isTraceEnabled } from "ente-base/env";
 import {
     groupFilesByCollectionID,
     sortFiles,
@@ -552,7 +551,6 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     state,
     action,
 ) => {
-    if (isTraceEnabled) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
             const { user, familyData } = action;
