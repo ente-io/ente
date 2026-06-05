@@ -77,6 +77,7 @@ import {
 import { getLuminance, useTheme } from "@mui/material/styles";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
+import { desktopAppVersion } from "ente-base/app";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
 import { getKV, removeKV, setKV } from "ente-base/kv";
@@ -737,8 +738,8 @@ const Page: React.FC = () => {
         if (Array.isArray(value)) return value[0];
         return typeof value === "string" ? value : undefined;
     }, [router.isReady, router.query.session]);
-    const buildVersion = process.env.NEXT_PUBLIC_ENSU_DESKTOP_VERSION
-        ? `v${process.env.NEXT_PUBLIC_ENSU_DESKTOP_VERSION}`
+    const buildVersion = desktopAppVersion
+        ? `v${desktopAppVersion}`
         : undefined;
 
     const lastRouteUpdateRef = useRef<{ sessionId?: string; at: number }>({

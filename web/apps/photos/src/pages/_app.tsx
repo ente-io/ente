@@ -147,16 +147,7 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
         if (needsFamilyRedirect && savedPartialLocalUser()?.token)
             redirectToFamilyPortal();
 
-        // Creating this inline, we need this on debug only and temporarily. Can
-        // remove the debug print itself after a while.
-        interface NROptions {
-            shallow: boolean;
-        }
-        router.events.on("routeChangeStart", (url: string, o: NROptions) => {
-            if (process.env.NEXT_PUBLIC_ENTE_TRACE_RT) {
-                log.debug(() => [o.shallow ? "route-shallow" : "route", url]);
-            }
-
+        router.events.on("routeChangeStart", () => {
             if (needsFamilyRedirect && savedPartialLocalUser()?.token) {
                 redirectToFamilyPortal();
 
