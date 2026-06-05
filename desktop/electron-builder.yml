@@ -13,7 +13,7 @@ protocols:
 win:
     files:
         - "!node_modules/onnxruntime-node/bin/napi-v6/**/*"
-        - "node_modules/onnxruntime-node/bin/napi-v6/${platform}/${arch}/**/*"
+        - "node_modules/onnxruntime-node/bin/napi-v6/win32/${arch}/**/*"
     target:
         - target: nsis
           arch: [x64, arm64]
@@ -28,7 +28,7 @@ nsis:
 linux:
     files:
         - "!node_modules/onnxruntime-node/bin/napi-v6/**/*"
-        - "node_modules/onnxruntime-node/bin/napi-v6/${platform}/${arch}/**/*"
+        - "node_modules/onnxruntime-node/bin/napi-v6/linux/${arch}/**/*"
     target:
         - target: AppImage
           arch: [x64, arm64]
