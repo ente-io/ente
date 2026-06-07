@@ -68,10 +68,6 @@ class GalleryAppBarWidget extends StatefulWidget {
   static const double _defaultBackIconSize = IconSizes.medium;
   static const double _sliverExpandedHeight = 92.0;
 
-  static double hierarchicalPreferredHeight(BuildContext context) {
-    return toolbarHeight + AppBarFilterChips.preferredHeight(context);
-  }
-
   static double sliverPinnedHeight(
     BuildContext context, {
     required bool isHierarchicalSearchable,
@@ -198,7 +194,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   late StreamSubscription _userAuthEventSubscription;
   late StreamSubscription<CollectionMetaEvent> _collectionMetaEventSubscription;
   late Function() _selectedFilesListener;
-  String? _appBarTitle;
+  late String _appBarTitle;
   late CollectionActions collectionActions;
   bool isQuickLink = false;
   late GalleryType galleryType;
@@ -226,7 +222,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         )
         .listen(stateRefresh);
 
-    _appBarTitle = widget.title;
+    _appBarTitle = widget.title ?? "";
     galleryType = widget.type;
     _checkIfICloudSharedAlbum();
   }
@@ -243,6 +239,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       setState(() {
         _isICloudSharedAlbum = true;
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant GalleryAppBarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.title != widget.title) {
+      _appBarTitle = widget.title ?? "";
     }
   }
 
@@ -313,7 +317,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     PreferredSizeWidget? bottom,
   }) {
     return SliverAppBarComponent(
-      title: _appBarTitle!,
+      title: _appBarTitle,
       actions: actions,
       bottom: bottom,
       expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,
@@ -347,9 +351,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: TooltipComponent(
-                    message: _appBarTitle!,
+                    message: _appBarTitle,
                     child: Text(
-                      _appBarTitle!,
+                      _appBarTitle,
                       style: TextStyles.h2.copyWith(color: colors.textBase),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -430,7 +434,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
         // indicates user cancelled the rename request
-        if (text == "" || text.trim() == _appBarTitle!.trim()) {
+        if (text == "" || text.trim() == _appBarTitle.trim()) {
           return;
         }
 

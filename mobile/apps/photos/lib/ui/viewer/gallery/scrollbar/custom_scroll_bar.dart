@@ -223,26 +223,21 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
       clipBehavior: Clip.none,
       alignment: Alignment.centerLeft,
       children: [
-        // This media query is used to adjust the bottom padding of the scrollbar
-        MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            padding: EdgeInsets.only(
-              bottom: widget.bottomPadding.value,
-              top: widget.topPadding,
-              right: 3,
-            ),
+        ScrollbarWithUseNotifer(
+          key: _scrollbarKey,
+          controller: widget.scrollController,
+          interactive: true,
+          inUseNotifier: widget.inUseNotifier,
+          minScrollbarLength: _kScrollbarMinLength,
+          showThumb: _showThumb,
+          radius: const Radius.circular(4),
+          thickness: 8,
+          scrollbarPadding: EdgeInsets.only(
+            bottom: widget.bottomPadding.value,
+            top: widget.topPadding,
+            right: 3,
           ),
-          child: ScrollbarWithUseNotifer(
-            key: _scrollbarKey,
-            controller: widget.scrollController,
-            interactive: true,
-            inUseNotifier: widget.inUseNotifier,
-            minScrollbarLength: _kScrollbarMinLength,
-            showThumb: _showThumb,
-            radius: const Radius.circular(4),
-            thickness: 8,
-            child: widget.child,
-          ),
+          child: widget.child,
         ),
         positionToTitleMap == null || heightOfScrollbarDivider == null
             ? const SizedBox.shrink()

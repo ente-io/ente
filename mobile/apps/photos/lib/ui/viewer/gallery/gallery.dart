@@ -603,6 +603,21 @@ class GalleryState extends State<Gallery> {
 
   double get _appBarCollapseExtent => widget.appBar?.collapseExtent ?? 0;
 
+  double get _headerHeight {
+    final cachedHeight = _headerHeightNotifier.value;
+    if (cachedHeight != null) {
+      return cachedHeight;
+    }
+    final renderBox = _headerKey.currentContext?.findRenderObject();
+    return renderBox is RenderBox && renderBox.hasSize
+        ? renderBox.size.height
+        : 0;
+  }
+
+  double _scrollOffsetForSectionOffset(double sectionOffset) {
+    return sectionOffset + _appBarCollapseExtent + _headerHeight;
+  }
+
   ScrollPhysics get _scrollPhysics => widget.disableScroll
       ? const NeverScrollableScrollPhysics()
       : const ExponentialBouncingScrollPhysics();
@@ -644,11 +659,12 @@ class GalleryState extends State<Gallery> {
             widget.fileToJumpTo!,
           );
           if (offset != null) {
-            _logger.info("Jumping to date at offset: $offset");
-            _scrollController.jumpTo(offset - 50);
+            final scrollOffset = _scrollOffsetForSectionOffset(offset);
+            _logger.info("Jumping to date at offset: $scrollOffset");
+            _scrollController.jumpTo(scrollOffset - 50);
             await Future.delayed(16.milliseconds);
             await _scrollController.animateTo(
-              offset,
+              scrollOffset,
               duration: 300.milliseconds,
               curve: Curves.easeOutQuint,
             );
@@ -734,7 +750,6 @@ class GalleryState extends State<Gallery> {
         }
       });
     }
-    final scrollContentMediaQuery = MediaQuery.of(context);
 
     return SwipeSelectionWrapper(
       isEnabled: shouldEnableSwipeSelection,
@@ -775,59 +790,56 @@ class GalleryState extends State<Gallery> {
 
                     return true;
                   },
-                  child: MediaQuery(
-                    data: scrollContentMediaQuery,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        ValueListenableBuilder<bool>(
-                          valueListenable: _swipeActiveNotifier,
-                          builder: (context, isSwipeActive, child) {
-                            return CustomScrollView(
-                              physics: widget.disableScroll || isSwipeActive
-                                  ? const NeverScrollableScrollPhysics()
-                                  : const ExponentialBouncingScrollPhysics(),
-                              controller: _scrollController,
-                              slivers: [
-                                if (widget.appBar != null)
-                                  widget.appBar!.buildSliver(context),
-                                SliverToBoxAdapter(
-                                  child: SizeChangedLayoutNotifier(
-                                    child: SizedBox(
-                                      key: _headerKey,
-                                      child:
-                                          widget.header ??
-                                          const SizedBox.shrink(),
-                                    ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      ValueListenableBuilder<bool>(
+                        valueListenable: _swipeActiveNotifier,
+                        builder: (context, isSwipeActive, child) {
+                          return CustomScrollView(
+                            physics: widget.disableScroll || isSwipeActive
+                                ? const NeverScrollableScrollPhysics()
+                                : const ExponentialBouncingScrollPhysics(),
+                            controller: _scrollController,
+                            slivers: [
+                              if (widget.appBar != null)
+                                widget.appBar!.buildSliver(context),
+                              SliverToBoxAdapter(
+                                child: SizeChangedLayoutNotifier(
+                                  child: SizedBox(
+                                    key: _headerKey,
+                                    child:
+                                        widget.header ??
+                                        const SizedBox.shrink(),
                                   ),
                                 ),
-                                SectionedListSliver(
-                                  sectionLayouts: groups.groupLayouts,
-                                ),
-                                SliverToBoxAdapter(child: widget.footer),
-                              ],
-                            );
-                          },
-                        ),
-                        groups.groupType.showGroupHeader() &&
-                                !widget.disablePinnedGroupHeader
-                            ? PinnedGroupHeader(
-                                scrollController: _scrollController,
-                                galleryGroups: groups,
-                                headerHeightNotifier: _headerHeightNotifier,
-                                scrollOffsetBase: _appBarCollapseExtent,
-                                topOffset: _appBarPinnedHeight,
-                                selectedFiles: widget.selectedFiles,
-                                showSelectAll:
-                                    widget.showSelectAll &&
-                                    !widget.limitSelectionToOne,
-                                scrollbarInUseNotifier: scrollBarInUseNotifier,
-                                showGallerySettingsCTA:
-                                    widget.showGallerySettingsCTA,
-                              )
-                            : const SizedBox.shrink(),
-                      ],
-                    ),
+                              ),
+                              SectionedListSliver(
+                                sectionLayouts: groups.groupLayouts,
+                              ),
+                              SliverToBoxAdapter(child: widget.footer),
+                            ],
+                          );
+                        },
+                      ),
+                      groups.groupType.showGroupHeader() &&
+                              !widget.disablePinnedGroupHeader
+                          ? PinnedGroupHeader(
+                              scrollController: _scrollController,
+                              galleryGroups: groups,
+                              headerHeightNotifier: _headerHeightNotifier,
+                              scrollOffsetBase: _appBarCollapseExtent,
+                              topOffset: _appBarPinnedHeight,
+                              selectedFiles: widget.selectedFiles,
+                              showSelectAll:
+                                  widget.showSelectAll &&
+                                  !widget.limitSelectionToOne,
+                              scrollbarInUseNotifier: scrollBarInUseNotifier,
+                              showGallerySettingsCTA:
+                                  widget.showGallerySettingsCTA,
+                            )
+                          : const SizedBox.shrink(),
+                    ],
                   ),
                 ),
               ),
