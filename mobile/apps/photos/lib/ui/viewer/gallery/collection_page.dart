@@ -59,11 +59,9 @@ class CollectionPage extends StatelessWidget {
         ? [c.thumbnail!]
         : null;
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       galleryType,
       c.collection.displayName,
       _selectedFiles,
-      isHierarchicalSearchable: true,
       collection: c.collection,
       isFromCollectPhotos: isFromCollectPhotos,
     );

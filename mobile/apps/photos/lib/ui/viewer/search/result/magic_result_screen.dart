@@ -178,11 +178,9 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   @override
   Widget build(BuildContext context) {
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       MagicResultScreen.appBarType,
       widget.name,
       _selectedFiles,
-      isHierarchicalSearchable: true,
     );
     final gallery = Gallery(
       key: ValueKey(_enableGrouping),

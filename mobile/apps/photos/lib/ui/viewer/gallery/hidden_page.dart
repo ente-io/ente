@@ -170,11 +170,9 @@ class _HiddenPageState extends State<HiddenPage> {
       return const EnteLoadingWidget();
     }
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       widget.appBarType,
       AppLocalizations.of(context).hidden,
       _selectedFiles,
-      isHierarchicalSearchable: false,
     );
     final gallery = Gallery(
       appBar: appBar,

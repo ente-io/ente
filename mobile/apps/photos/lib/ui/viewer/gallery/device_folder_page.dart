@@ -112,11 +112,9 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       GalleryType.localFolder,
       widget.deviceCollection.name,
       _selectedFiles,
-      isHierarchicalSearchable: false,
       deviceCollection: widget.deviceCollection,
     );
     final gallery = Gallery(

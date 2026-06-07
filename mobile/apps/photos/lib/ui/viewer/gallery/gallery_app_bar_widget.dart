@@ -69,27 +69,14 @@ class GalleryAppBarWidget extends StatefulWidget {
   static const double _sliverExpandedHeight = 92.0;
 
   static GalleryAppBarConfig sliverConfig(
-    BuildContext context,
     GalleryType type,
     String? title,
     SelectedFiles selectedFiles, {
-    required bool isHierarchicalSearchable,
     DeviceCollection? deviceCollection,
     Collection? collection,
     bool isFromCollectPhotos = false,
     List<EnteFile>? files,
   }) {
-    final bottomHeight = isHierarchicalSearchable
-        ? AppBarFilterChips.preferredHeight(context)
-        : 0.0;
-    final geometry = SliverAppBarComponent.resolveGeometry(
-      context,
-      subtitle: null,
-      expandedHeight: _sliverExpandedHeight,
-      collapsedHeight: toolbarHeight,
-      titleBuilderHeight: null,
-      bottomHeight: bottomHeight,
-    );
     return GalleryAppBarConfig(
       sliverBuilder: (_) => GalleryAppBarWidget(
         type,
@@ -101,8 +88,26 @@ class GalleryAppBarWidget extends StatefulWidget {
         files: files,
         asSliver: true,
       ),
-      pinnedHeight: geometry.minExtent,
-      expandedHeight: geometry.maxExtent,
+      geometryBuilder: _resolveSliverGeometry,
+    );
+  }
+
+  static HeaderAppBarGeometry _resolveSliverGeometry(BuildContext context) {
+    final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
+      context,
+    );
+    final isHierarchicalSearchable =
+        inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
+    final bottomHeight = isHierarchicalSearchable
+        ? AppBarFilterChips.preferredHeight(context)
+        : 0.0;
+    return SliverAppBarComponent.resolveGeometry(
+      context,
+      subtitle: null,
+      expandedHeight: _sliverExpandedHeight,
+      collapsedHeight: toolbarHeight,
+      titleBuilderHeight: null,
+      bottomHeight: bottomHeight,
     );
   }
 

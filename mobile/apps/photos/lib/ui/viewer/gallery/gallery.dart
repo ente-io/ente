@@ -599,10 +599,6 @@ class GalleryState extends State<Gallery> {
     super.dispose();
   }
 
-  double get _appBarPinnedHeight => widget.appBar?.pinnedHeight ?? 0;
-
-  double get _appBarCollapseExtent => widget.appBar?.collapseExtent ?? 0;
-
   double get _headerHeight {
     final cachedHeight = _headerHeightNotifier.value;
     if (cachedHeight != null) {
@@ -614,8 +610,11 @@ class GalleryState extends State<Gallery> {
         : 0;
   }
 
-  double _scrollOffsetForSectionOffset(double sectionOffset) {
-    return sectionOffset + _appBarCollapseExtent + _headerHeight;
+  double _scrollOffsetForSectionOffset(
+    double sectionOffset,
+    double appBarCollapseExtent,
+  ) {
+    return sectionOffset + appBarCollapseExtent + _headerHeight;
   }
 
   ScrollPhysics get _scrollPhysics => widget.disableScroll
@@ -640,6 +639,9 @@ class GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building Gallery  ${widget.tagPrefix}");
+    final appBarGeometry = widget.appBar?.resolveGeometry(context);
+    final appBarPinnedHeight = appBarGeometry?.minExtent ?? 0;
+    final appBarCollapseExtent = appBarGeometry?.collapseExtent ?? 0;
 
     // Share scroll controller with boundaries provider after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -659,7 +661,10 @@ class GalleryState extends State<Gallery> {
             widget.fileToJumpTo!,
           );
           if (offset != null) {
-            final scrollOffset = _scrollOffsetForSectionOffset(offset);
+            final scrollOffset = _scrollOffsetForSectionOffset(
+              offset,
+              appBarCollapseExtent,
+            );
             _logger.info("Jumping to date at offset: $scrollOffset");
             _scrollController.jumpTo(scrollOffset - 50);
             await Future.delayed(16.milliseconds);
@@ -741,12 +746,12 @@ class GalleryState extends State<Gallery> {
         }
       });
     }
-    if (_appBarPinnedHeight > 0 &&
+    if (appBarPinnedHeight > 0 &&
         (!groups.groupType.showGroupHeader() ||
             widget.disablePinnedGroupHeader)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _boundariesProvider?.setTopBoundary(_appBarPinnedHeight);
+          _boundariesProvider?.setTopBoundary(appBarPinnedHeight);
         }
       });
     }
@@ -771,7 +776,7 @@ class GalleryState extends State<Gallery> {
                 heighOfViewport: MediaQuery.sizeOf(context).height,
                 topPadding: widget.disableVerticalPaddingForScrollbar
                     ? 0.0
-                    : _appBarPinnedHeight + groupHeaderExtent!,
+                    : appBarPinnedHeight + groupHeaderExtent!,
                 bottomPadding: widget.disableVerticalPaddingForScrollbar
                     ? ValueNotifier(0.0)
                     : scrollbarBottomPaddingNotifier,
@@ -828,8 +833,8 @@ class GalleryState extends State<Gallery> {
                               scrollController: _scrollController,
                               galleryGroups: groups,
                               headerHeightNotifier: _headerHeightNotifier,
-                              scrollOffsetBase: _appBarCollapseExtent,
-                              topOffset: _appBarPinnedHeight,
+                              scrollOffsetBase: appBarCollapseExtent,
+                              topOffset: appBarPinnedHeight,
                               selectedFiles: widget.selectedFiles,
                               showSelectAll:
                                   widget.showSelectAll &&

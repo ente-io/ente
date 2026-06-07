@@ -40,11 +40,9 @@ class UnCategorizedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       appBarType,
       AppLocalizations.of(context).uncategorized,
       _selectedFiles,
-      isHierarchicalSearchable: true,
       collection: collection,
     );
     final gallery = Gallery(

@@ -117,11 +117,9 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
   @override
   Widget build(BuildContext context) {
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       JumpToDateGallery.appBarType,
       "",
       _selectedFiles,
-      isHierarchicalSearchable: false,
     );
     return GalleryBoundariesProvider(
       child: GalleryFilesState(

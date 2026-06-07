@@ -75,11 +75,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       SearchResultPage.appBarType,
       widget.searchResult.name(),
       _selectedFiles,
-      isHierarchicalSearchable: true,
     );
     final gallery = Gallery(
       appBar: appBar,

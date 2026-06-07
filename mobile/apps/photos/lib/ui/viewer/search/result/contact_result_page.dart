@@ -123,11 +123,9 @@ class _ContactResultPageState extends State<ContactResultPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       ContactResultPage.appBarType,
       _searchResultName,
       _selectedFiles,
-      isHierarchicalSearchable: true,
     );
     final gallery = Gallery(
       appBar: appBar,

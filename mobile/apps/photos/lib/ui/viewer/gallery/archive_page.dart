@@ -39,11 +39,9 @@ class ArchivePage extends StatelessWidget {
     final Set<int> hiddenCollectionIDs = CollectionsService.instance
         .getHiddenCollectionIds();
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       appBarType,
       AppLocalizations.of(context).archive,
       _selectedFiles,
-      isHierarchicalSearchable: false,
     );
     final gallery = Gallery(
       appBar: appBar,

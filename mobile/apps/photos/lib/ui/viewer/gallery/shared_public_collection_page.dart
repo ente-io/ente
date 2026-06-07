@@ -127,11 +127,9 @@ class _SharedPublicCollectionPageState
         ? GroupType.none
         : GroupType.day;
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       galleryType,
       widget.c.collection.displayName,
       _selectedFiles,
-      isHierarchicalSearchable: false,
       collection: widget.c.collection,
       files: widget.files,
     );

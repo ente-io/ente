@@ -143,11 +143,9 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       context,
     ).locationTagEntity.item.centerPoint;
     final appBar = GalleryAppBarWidget.sliverConfig(
-      context,
       GalleryType.locationTag,
       locationTag.name,
       _selectedFiles,
-      isHierarchicalSearchable: true,
     );
 
     Future<FileLoadResult> filterFiles() async {
