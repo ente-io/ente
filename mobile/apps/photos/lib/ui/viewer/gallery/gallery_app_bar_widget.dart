@@ -68,42 +68,6 @@ class GalleryAppBarWidget extends StatefulWidget {
   static const double _defaultBackIconSize = IconSizes.medium;
   static const double _sliverExpandedHeight = 92.0;
 
-  static double sliverPinnedHeight(
-    BuildContext context, {
-    required bool isHierarchicalSearchable,
-  }) {
-    final bottomHeight = isHierarchicalSearchable
-        ? AppBarFilterChips.preferredHeight(context)
-        : 0.0;
-    final geometry = SliverAppBarComponent.resolveGeometry(
-      context,
-      subtitle: null,
-      expandedHeight: _sliverExpandedHeight,
-      collapsedHeight: toolbarHeight,
-      titleBuilderHeight: null,
-      bottomHeight: bottomHeight,
-    );
-    return geometry.minExtent;
-  }
-
-  static double sliverExpandedHeight(
-    BuildContext context, {
-    required bool isHierarchicalSearchable,
-  }) {
-    final bottomHeight = isHierarchicalSearchable
-        ? AppBarFilterChips.preferredHeight(context)
-        : 0.0;
-    final geometry = SliverAppBarComponent.resolveGeometry(
-      context,
-      subtitle: null,
-      expandedHeight: _sliverExpandedHeight,
-      collapsedHeight: toolbarHeight,
-      titleBuilderHeight: null,
-      bottomHeight: bottomHeight,
-    );
-    return geometry.maxExtent;
-  }
-
   static GalleryAppBarConfig sliverConfig(
     BuildContext context,
     GalleryType type,
@@ -115,6 +79,17 @@ class GalleryAppBarWidget extends StatefulWidget {
     bool isFromCollectPhotos = false,
     List<EnteFile>? files,
   }) {
+    final bottomHeight = isHierarchicalSearchable
+        ? AppBarFilterChips.preferredHeight(context)
+        : 0.0;
+    final geometry = SliverAppBarComponent.resolveGeometry(
+      context,
+      subtitle: null,
+      expandedHeight: _sliverExpandedHeight,
+      collapsedHeight: toolbarHeight,
+      titleBuilderHeight: null,
+      bottomHeight: bottomHeight,
+    );
     return GalleryAppBarConfig(
       sliverBuilder: (_) => GalleryAppBarWidget(
         type,
@@ -126,14 +101,8 @@ class GalleryAppBarWidget extends StatefulWidget {
         files: files,
         asSliver: true,
       ),
-      pinnedHeight: sliverPinnedHeight(
-        context,
-        isHierarchicalSearchable: isHierarchicalSearchable,
-      ),
-      expandedHeight: sliverExpandedHeight(
-        context,
-        isHierarchicalSearchable: isHierarchicalSearchable,
-      ),
+      pinnedHeight: geometry.minExtent,
+      expandedHeight: geometry.maxExtent,
     );
   }
 
