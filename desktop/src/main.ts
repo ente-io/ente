@@ -34,6 +34,10 @@ import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
 import autoLauncher from "./main/services/auto-launcher";
+import {
+    logRenderProcessGone,
+    startLocalCrashReporter,
+} from "./main/services/crash-report";
 import { shouldHideDockIcon } from "./main/services/store";
 import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
@@ -86,6 +90,7 @@ const main = () => {
 
     initLogging();
     logStartupBanner();
+    const crashReporterReady = startLocalCrashReporter();
     registerForEnteLinks();
     // The order of the next two calls is important
     setupRendererServer();
@@ -126,6 +131,7 @@ const main = () => {
         attachProcessHandlers();
 
         void (async () => {
+            await crashReporterReady;
             if (isDev) await waitForRendererDevServer();
 
             // Create window and prepare for the renderer.
@@ -390,7 +396,7 @@ const createMainWindow = () => {
     if (isDev) window.webContents.openDevTools();
 
     window.webContents.on("render-process-gone", (_, details) => {
-        log.error(`render-process-gone: ${details.reason}`);
+        logRenderProcessGone(window.webContents, details);
         window.webContents.reload();
     });
 
