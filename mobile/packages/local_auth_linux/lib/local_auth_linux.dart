@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:local_auth_platform_interface/local_auth_platform_interface.dart';
 
 const MethodChannel _defaultChannel = MethodChannel('ente.io/local_auth_linux');
-const String linuxLocalAuthPolkitActionId = 'io.ente.auth.unlock';
+const String linuxLocalAuthPolkitActionId = 'com.ente.auth.unlock';
 
 class LinuxLocalAuthSetupStatus {
   const LinuxLocalAuthSetupStatus({
@@ -42,14 +42,14 @@ class LinuxLocalAuthSetupStatus {
       return '''
 app_id="\${FLATPAK_ID:-io.ente.auth}"
 install_dir="\$(flatpak info --show-location "\$app_id")"
-policy="\$install_dir/files/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy"
-sudo install -D -o root -g root -m 0644 "\$policy" /usr/share/polkit-1/actions/io.ente.auth.policy
-if command -v chcon >/dev/null 2>&1; then sudo chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/io.ente.auth.policy || true; fi
+policy="\$install_dir/files/share/enteauth/data/flutter_assets/assets/polkit/com.ente.auth.policy"
+sudo install -D -o root -g root -m 0644 "\$policy" /usr/share/polkit-1/actions/com.ente.auth.policy
+if command -v chcon >/dev/null 2>&1; then sudo chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/com.ente.auth.policy || true; fi
 pkaction --action-id $actionId --verbose''';
     }
     return '''
-sudo install -D -o root -g root -m 0644 "$policyAssetPath" /usr/share/polkit-1/actions/io.ente.auth.policy
-if command -v chcon >/dev/null 2>&1; then sudo chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/io.ente.auth.policy || true; fi
+sudo install -D -o root -g root -m 0644 "$policyAssetPath" /usr/share/polkit-1/actions/com.ente.auth.policy
+if command -v chcon >/dev/null 2>&1; then sudo chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/com.ente.auth.policy || true; fi
 pkaction --action-id $actionId --verbose''';
   }
 }
@@ -59,8 +59,8 @@ bool get _isFlatpak =>
     File('/.flatpak-info').existsSync();
 
 String get _policyAssetPath => _isFlatpak
-    ? '/app/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy'
-    : '/usr/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy';
+    ? '/app/share/enteauth/data/flutter_assets/assets/polkit/com.ente.auth.policy'
+    : '/usr/share/enteauth/data/flutter_assets/assets/polkit/com.ente.auth.policy';
 
 class LocalAuthLinux extends LocalAuthPlatform {
   LocalAuthLinux({@visibleForTesting MethodChannel? channel})

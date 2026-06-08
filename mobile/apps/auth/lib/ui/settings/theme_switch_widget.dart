@@ -1,7 +1,6 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/services/auth_theme_preferences.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -33,29 +32,29 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     return Column(
       children: [
         sectionOptionSpacing,
-        _menuItem(context, AdaptiveThemeMode.light),
+        _menuItem(context, ThemeMode.light),
         sectionOptionSpacing,
-        _menuItem(context, AdaptiveThemeMode.dark),
+        _menuItem(context, ThemeMode.dark),
         sectionOptionSpacing,
-        _menuItem(context, AdaptiveThemeMode.system),
+        _menuItem(context, ThemeMode.system),
         sectionOptionSpacing,
       ],
     );
   }
 
-  String _name(BuildContext ctx, AdaptiveThemeMode mode) {
+  String _name(BuildContext ctx, ThemeMode mode) {
     switch (mode) {
-      case AdaptiveThemeMode.light:
+      case ThemeMode.light:
         return ctx.l10n.lightTheme;
-      case AdaptiveThemeMode.dark:
+      case ThemeMode.dark:
         return ctx.l10n.darkTheme;
-      case AdaptiveThemeMode.system:
+      case ThemeMode.system:
         return ctx.l10n.systemTheme;
     }
   }
 
-  Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
-    final currentThemeMode = AdaptiveTheme.of(context).mode;
+  Widget _menuItem(BuildContext context, ThemeMode themeMode) {
+    final currentThemeMode = App.themeModeOf(context);
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: _name(context, themeMode),
@@ -66,20 +65,13 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
       trailingExtraMargin: 4,
       onTap: () async {
-        final adaptiveTheme = AdaptiveTheme.of(context);
         final appLock = AppLock.of(context);
-        await AuthThemePreferences.setThemeMode(adaptiveTheme, themeMode);
-        appLock?.setThemeMode(_themeMode(themeMode));
+        await App.setThemeMode(context, themeMode);
+        appLock?.setThemeMode(themeMode);
         if (mounted) {
           setState(() {});
         }
       },
     );
-  }
-
-  ThemeMode _themeMode(AdaptiveThemeMode themeMode) {
-    if (themeMode.isLight) return ThemeMode.light;
-    if (themeMode.isDark) return ThemeMode.dark;
-    return ThemeMode.system;
   }
 }
