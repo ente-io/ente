@@ -436,8 +436,3 @@ jobs:
         # Number of go routines to spawn for object cleanup
         # Optional, default value is indicated here.
         worker-count: 1
-    clear-orphan-objects:
-        # By default, this job is disabled.
-        enabled: false
-        # If provided, only objects that begin with this prefix are pruned.
-        prefix: ""
