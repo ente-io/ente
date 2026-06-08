@@ -399,7 +399,7 @@ jobs:
               shell: pwsh
 
             - name: Sign Windows payload with Trusted Signing
-              uses: azure/trusted-signing-action@208f8af4bf26cf2af8597424e3cb5582801523ba # v2.0.0
+              uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
               with:
                   azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -427,7 +427,7 @@ jobs:
               shell: pwsh
 
             - name: Sign Windows installer with Trusted Signing
-              uses: azure/trusted-signing-action@208f8af4bf26cf2af8597424e3cb5582801523ba # v2.0.0
+              uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
               with:
                   azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
