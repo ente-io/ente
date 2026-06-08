@@ -24,6 +24,7 @@ import {
 import UploadService, {
     areLivePhotoAssets,
     isUploadCancelledError,
+    storageLimitExceededErrorMessage,
     upload,
     uploadCancelledErrorMessage,
     uploadItemFileName,
@@ -330,6 +331,7 @@ class UploadManager {
     private onUploadFile: ((file: EnteFile) => void) | undefined;
     private collections = new Map<number, Collection>();
     private uploadInProgress = false;
+    private fatalUploadError: Error | undefined;
     /**
      * When `true`, then the next call to {@link abortIfCancelled} will throw.
      *
@@ -366,6 +368,7 @@ class UploadManager {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
         this.shouldUploadBeCancelled = false;
+        this.fatalUploadError = undefined;
 
         this.uiService.reset();
         this.uiService.setUploadPhase("preparing");
@@ -518,6 +521,9 @@ class UploadManager {
     }
 
     private abortIfCancelled = () => {
+        if (this.fatalUploadError) {
+            throw this.fatalUploadError;
+        }
         if (this.shouldUploadBeCancelled) {
             throw new Error(uploadCancelledErrorMessage);
         }
@@ -603,14 +609,26 @@ class UploadManager {
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
-            const uploadResult = await upload(
-                uploadableItem,
-                undefined,
-                this.existingFiles,
-                this.parsedMetadataJSONMap,
-                worker,
-                uploadContext,
-            );
+            let uploadResult: UploadResult;
+            try {
+                uploadResult = await upload(
+                    uploadableItem,
+                    undefined,
+                    this.existingFiles,
+                    this.parsedMetadataJSONMap,
+                    worker,
+                    uploadContext,
+                );
+            } catch (e) {
+                if (
+                    e instanceof Error &&
+                    e.message == storageLimitExceededErrorMessage
+                ) {
+                    this.fatalUploadError = e;
+                    this.itemsToBeUploaded = [];
+                }
+                throw e;
+            }
             const takeoutFavorited = matchJSONMetadata(
                 uploadableItem.pathPrefix,
                 collectionID,
