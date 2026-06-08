@@ -7,7 +7,6 @@ environment:
   sdk: ">=3.10.0 <4.0.0"
 
 dependencies:
-  adaptive_theme: 3.7.2
   app_links: 6.4.1
   archive: 4.0.7
   auto_size_text: 3.0.0

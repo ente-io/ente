@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/onboarding/view/onboarding_page.dart';
+import 'package:ente_auth/services/auth_theme_preferences.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
@@ -22,16 +22,26 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatefulWidget {
   final Locale? locale;
-  final AdaptiveThemeMode savedThemeMode;
+  final ThemeMode savedThemeMode;
   const App({
     super.key,
     this.locale = const Locale("en"),
-    this.savedThemeMode = AdaptiveThemeMode.system,
+    this.savedThemeMode = ThemeMode.system,
   });
 
   static void setLocale(BuildContext context, Locale newLocale) {
     _AppState state = context.findAncestorStateOfType<_AppState>()!;
     state.setLocale(newLocale);
+  }
+
+  static ThemeMode themeModeOf(BuildContext context) {
+    return context.findAncestorStateOfType<_AppState>()!._themeMode;
+  }
+
+  static Future<void> setThemeMode(BuildContext context, ThemeMode themeMode) {
+    return context.findAncestorStateOfType<_AppState>()!.setThemeMode(
+      themeMode,
+    );
   }
 
   @override
@@ -42,6 +52,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   static final Logger _renderErrorLogger = Logger('RenderError');
   late StreamSubscription<SignedOutEvent> _signedOutEvent;
   late StreamSubscription<SignedInEvent> _signedInEvent;
+  late ThemeMode _themeMode;
   Locale? locale;
   void setLocale(Locale newLocale) {
     setState(() {
@@ -49,9 +60,19 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     });
   }
 
+  Future<void> setThemeMode(ThemeMode themeMode) async {
+    await AuthThemePreferences.setThemeMode(themeMode);
+    if (mounted) {
+      setState(() {
+        _themeMode = themeMode;
+      });
+    }
+  }
+
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    _themeMode = widget.savedThemeMode;
 
     _signedOutEvent = Bus.instance.on<SignedOutEvent>().listen((event) {
       if (mounted) {
@@ -102,38 +123,25 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveTheme(
-      light: lightThemeData,
-      dark: darkThemeData,
-      initial: widget.savedThemeMode,
-      builder: (lightTheme, darkTheme) => Builder(
-        builder: (context) => MaterialApp(
-          title: "ente",
-          themeMode: _themeMode(AdaptiveTheme.of(context).mode),
-          theme: lightTheme,
-          darkTheme: darkTheme,
-          debugShowCheckedModeBanner: false,
-          locale: locale,
-          supportedLocales: appSupportedLocales,
-          localeListResolutionCallback: localResolutionCallBack,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            StringsLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          routes: _getRoutes,
-          builder: _materialAppBuilder,
-        ),
-      ),
+    return MaterialApp(
+      title: "ente",
+      themeMode: _themeMode,
+      theme: lightThemeData,
+      darkTheme: darkThemeData,
+      debugShowCheckedModeBanner: false,
+      locale: locale,
+      supportedLocales: appSupportedLocales,
+      localeListResolutionCallback: localResolutionCallBack,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        StringsLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      routes: _getRoutes,
+      builder: _materialAppBuilder,
     );
-  }
-
-  ThemeMode _themeMode(AdaptiveThemeMode mode) {
-    if (mode.isLight) return ThemeMode.light;
-    if (mode.isDark) return ThemeMode.dark;
-    return ThemeMode.system;
   }
 
   Map<String, WidgetBuilder> get _getRoutes {
