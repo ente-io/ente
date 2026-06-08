@@ -163,23 +163,8 @@ func verifySafeTestDB(db *sql.DB) error {
 func WithServerRoot(t *testing.T) {
 	t.Helper()
 	serverRootMu.Lock()
-
-	originalWD, err := os.Getwd()
-	if err != nil {
-		serverRootMu.Unlock()
-		t.Fatalf("failed to get cwd: %v", err)
-	}
-	if err := os.Chdir(serverRootPath()); err != nil {
-		serverRootMu.Unlock()
-		t.Fatalf("failed to chdir to server root: %v", err)
-	}
-
-	t.Cleanup(func() {
-		if err := os.Chdir(originalWD); err != nil {
-			t.Errorf("failed to restore cwd: %v", err)
-		}
-		serverRootMu.Unlock()
-	})
+	t.Cleanup(serverRootMu.Unlock)
+	t.Chdir(serverRootPath())
 }
 
 func SecretEncryptionKey() []byte {
