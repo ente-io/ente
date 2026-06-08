@@ -323,11 +323,6 @@ func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
 }
 
 func (h *AdminHandler) UnblockStorageWarningLogin(c *gin.Context) {
-	err := h.isFreshAdminToken(c)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
 	var request ente.AdminOpsForUserRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
@@ -343,7 +338,7 @@ func (h *AdminHandler) UnblockStorageWarningLogin(c *gin.Context) {
 		"req_ctx":  "unblock_storage_warning_login",
 	})
 	logger.Info("Start unblock storage warning login")
-	err = h.UserController.UnblockStorageWarningDeletionLogin(request.UserID, logger)
+	err := h.UserController.UnblockStorageWarningDeletionLogin(request.UserID, logger)
 	if err != nil {
 		logger.WithError(err).Error("Failed to unblock storage warning login")
 		handler.Error(c, stacktrace.Propagate(err, ""))
