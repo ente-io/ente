@@ -274,9 +274,7 @@ func (c *InactiveUserOrchestrator) processCandidateBatch(candidates []repo.UserI
 	var wg sync.WaitGroup
 
 	for i := 0; i < workerCount; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			for candidate := range candidateCh {
 				func(candidate repo.UserInactivityCandidate) {
 					defer func() {
@@ -306,7 +304,7 @@ func (c *InactiveUserOrchestrator) processCandidateBatch(candidates []repo.UserI
 					}
 				}(candidate)
 			}
-		}()
+		})
 	}
 
 	for _, candidate := range candidates {

@@ -583,12 +583,11 @@ func (c *ObjectCleanupController) clearOrphanObjectsPage(page *s3.ListObjectVers
 			break
 		}
 
-		wg.Add(1)
-		go func(i int, end int) {
-			defer wg.Done()
-			batch := ods[i:end]
+		start, stop := i, end
+		wg.Go(func() {
+			batch := ods[start:stop]
 			c.clearOrphanObjectsVersionOrDeleteMarkers(batch, dest, logger)
-		}(i, end)
+		})
 
 		i = end
 	}

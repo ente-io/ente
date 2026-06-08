@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"html/template"
 	"mime/quotedprintable"
+	"net"
 	"net/http"
 	"net/smtp"
 	"path"
@@ -225,7 +226,7 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 // - "tls" or "ssl": Uses TLS/SSL encryption for the entire connection
 // - "" (empty string) or any other value: No encryption
 func sendMailWithEncryption(host, port string, auth smtp.Auth, from string, to []string, msg []byte, encryption string) error {
-	addr := host + ":" + port
+	addr := net.JoinHostPort(host, port)
 
 	switch strings.ToLower(encryption) {
 	case "tls", "ssl":

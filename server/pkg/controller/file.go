@@ -902,9 +902,7 @@ func (c *FileController) CleanupDeletedFiles() {
 
 	// Start worker goroutines
 	for w := 0; w < 8; w++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			for item := range itemChan {
 				func(item repo.QueueItem) {
 					defer func() {
@@ -915,7 +913,7 @@ func (c *FileController) CleanupDeletedFiles() {
 					c.cleanupDeletedFile(item)
 				}(item)
 			}
-		}()
+		})
 	}
 	// Send items to the channel
 	for _, item := range items {
