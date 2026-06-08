@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"context"
 	"testing"
 
 	"github.com/ente-io/museum/internal/testutil"
@@ -157,7 +156,7 @@ func TestGetStorageWarningLoginGraceCandidatesIncludesUsersBelowThreshold(t *tes
 		SentTime:   100,
 	})
 
-	candidates, err := (&NotificationHistoryRepository{DB: db}).GetStorageWarningLoginGraceCandidates(context.Background())
+	candidates, err := (&NotificationHistoryRepository{DB: db}).GetStorageWarningLoginGraceCandidates(t.Context())
 	if err != nil {
 		t.Fatalf("GetStorageWarningLoginGraceCandidates() error = %v", err)
 	}
