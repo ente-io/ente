@@ -1,8 +1,8 @@
 module github.com/ente-io/museum
 
-go 1.25.0
+go 1.26.0
 
-toolchain go1.25.10
+toolchain go1.26.4
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
