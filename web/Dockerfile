@@ -129,10 +129,7 @@ RUN chmod +x /docker-entrypoint.d/90-replace-ente-env.sh
 COPY <<'EOF' /docker-entrypoint.d/40-enable-ipv6.sh
 #!/bin/sh
 if [ -f /proc/net/if_inet6 ]; then
-    echo "IPv6 supported, enabling dual-stack..."
     sed -i 's/#listen \[::\]:/listen [::]:/g' /etc/nginx/conf.d/default.conf
-else
-    echo "IPv6 not supported, keeping single-stack..."
 fi
 EOF
 RUN chmod +x /docker-entrypoint.d/40-enable-ipv6.sh
