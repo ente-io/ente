@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"slices"
+	"time"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
-	"time"
 )
 
 // Repository defines the methods for inserting, updating, and retrieving file data.
@@ -276,10 +277,10 @@ func (r *Repository) MarkReplicationAsDone(ctx context.Context, row filedata.Row
 }
 
 func (r *Repository) RegisterReplicationAttempt(ctx context.Context, row filedata.Row, dstBucketID string) error {
-	if array.StringInList(dstBucketID, row.DeleteFromBuckets) {
+	if slices.Contains(row.DeleteFromBuckets, dstBucketID) {
 		return r.MoveBetweenBuckets(row, dstBucketID, DeletionColumn, InflightRepColumn)
 	}
-	if !array.StringInList(dstBucketID, row.InflightReplicas) {
+	if !slices.Contains(row.InflightReplicas, dstBucketID) {
 		return r.AddBucket(row, dstBucketID, InflightRepColumn)
 	}
 	return nil

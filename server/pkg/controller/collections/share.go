@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"slices"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/museum/pkg/controller/public"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -181,7 +181,7 @@ func (c *CollectionController) Leave(ctx *gin.Context, cID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if !array.Int64InList(cID, sharedCollectionIDs) {
+	if !slices.Contains(sharedCollectionIDs, cID) {
 		return nil
 	}
 	err = c.CastRepo.RevokeForGivenUserAndCollection(ctx, cID, userID)

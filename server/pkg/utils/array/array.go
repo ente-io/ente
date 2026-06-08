@@ -1,7 +1,5 @@
 package array
 
-import "slices"
-
 // UniqueInt64 returns unique elements in the input array
 func UniqueInt64(input []int64) []int64 {
 	visited := map[int64]bool{}
@@ -28,16 +26,6 @@ func ContainsDuplicateInInt64Array(input []int64) bool {
 		visited[value] = true
 	}
 	return false
-}
-
-// StringInList returns true is given string is present inside list
-func StringInList(a string, list []string) bool {
-	return slices.Contains(list, a)
-}
-
-// int64InList returns true is given int64 is present inside list
-func Int64InList(a int64, list []int64) bool {
-	return slices.Contains(list, a)
 }
 
 // FindMissingElementsInSecondList identifies elements in 'sourceList' that are not present in 'targetList'.

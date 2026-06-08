@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
+
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -268,7 +270,7 @@ func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, 
 	// If the current primary bucket is different from the latest bucket where data was written,
 	// check and use the preferred bucket if the data is replicated there.
 	if !strings.EqualFold(preferredBucket, dc) {
-		if array.StringInList(preferredBucket, row.ReplicatedBuckets) {
+		if slices.Contains(row.ReplicatedBuckets, preferredBucket) {
 			dc = preferredBucket
 		}
 	}

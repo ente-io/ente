@@ -3,6 +3,7 @@ package collections
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/access"
@@ -10,7 +11,6 @@ import (
 	"github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/cast"
 	socialrepo "github.com/ente-io/museum/pkg/repo/social"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/gin-gonic/gin"
 
@@ -61,7 +61,7 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 	if collection.Type == "CollectionType.album" {
 		collection.Type = "album"
 	}
-	if !array.StringInList(collection.Type, ente.ValidCollectionTypes) {
+	if !slices.Contains(ente.ValidCollectionTypes, collection.Type) {
 		return ente.Collection{}, stacktrace.Propagate(fmt.Errorf("unexpected collection type %s", collection.Type), "")
 	}
 	collection, err := c.CollectionRepo.Create(collection)
@@ -117,7 +117,7 @@ func (c *CollectionController) GetFile(ctx *gin.Context, collectionID int64, fil
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
-		if !array.Int64InList(collectionID, cIDs) {
+		if !slices.Contains(cIDs, collectionID) {
 			return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 		}
 	}

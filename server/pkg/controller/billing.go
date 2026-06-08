@@ -13,7 +13,6 @@ import (
 
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/controller/email"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -304,7 +303,7 @@ func (c *BillingController) VerifySubscription(
 }
 
 func (c *BillingController) getAllPlans(countryCode string, stripeAccountCountry ente.StripeAccountCountry) []ente.BillingPlan {
-	if array.StringInList(countryCode, billing.CountriesInEU) {
+	if slices.Contains(billing.CountriesInEU, countryCode) {
 		countryCode = "EU"
 	}
 	countryWisePlans := c.BillingPlansPerAccount[stripeAccountCountry]

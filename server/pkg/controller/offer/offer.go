@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/ente-io/museum/pkg/controller/usercache"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/config"
 	emailUtil "github.com/ente-io/museum/pkg/utils/email"
@@ -62,7 +62,7 @@ func NewOfferController(
 }
 
 func (c *OfferController) GetBlackFridayOffers(countryCode string) []ente.BlackFridayOffer {
-	if array.StringInList(countryCode, billing.CountriesInEU) {
+	if slices.Contains(billing.CountriesInEU, countryCode) {
 		countryCode = "EU"
 	}
 

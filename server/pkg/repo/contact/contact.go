@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/ente-io/museum/ente"
 	contactmodel "github.com/ente-io/museum/ente/contact"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/crypto"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
@@ -630,10 +630,10 @@ func (r *Repository) MarkAttachmentReplicationAsDone(ctx context.Context, row co
 }
 
 func (r *Repository) RegisterReplicationAttempt(ctx context.Context, row contactmodel.Attachment, dstBucketID string) error {
-	if array.StringInList(dstBucketID, row.DeleteFromBuckets) {
+	if slices.Contains(row.DeleteFromBuckets, dstBucketID) {
 		return r.MoveBetweenBuckets(row, dstBucketID, DeletionColumn, InflightRepColumn)
 	}
-	if !array.StringInList(dstBucketID, row.InflightRepBuckets) {
+	if !slices.Contains(row.InflightRepBuckets, dstBucketID) {
 		return r.AddBucket(row, dstBucketID, InflightRepColumn)
 	}
 	return nil
