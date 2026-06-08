@@ -1,4 +1,4 @@
-FROM golang:1.24.13-alpine3.22 AS builder
+FROM golang:1.25.10-alpine3.22 AS builder
 ENV CGO_ENABLED=0
 
 WORKDIR /etc/ente/
