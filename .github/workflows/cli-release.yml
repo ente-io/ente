@@ -21,7 +21,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Create a draft GitHub release
-              uses: ncipollo/release-action@v1
+              uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
               with:
                   draft: true
 
@@ -38,11 +38,11 @@ jobs:
                       goos: darwin
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v6
+            - name: Checkout
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
             - name: Build binaries and add to the release
-              uses: wangyoucao577/go-release-action@v1
+              uses: wangyoucao577/go-release-action@279495102627de7960cbc33434ab01a12bae144b # v1.55
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   goos: ${{ matrix.goos }}

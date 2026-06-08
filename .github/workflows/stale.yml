@@ -15,7 +15,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Close pull requests missing CLA
-              uses: actions/github-script@v8
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   script: |
                       const repo = context.repo;
@@ -47,7 +47,7 @@ jobs:
                       }
 
             - name: Mark and close stale pull requests
-              uses: actions/stale@v10
+              uses: actions/stale@eb5cf3af3ac0a1aa4c9c45633dd1ae542a27a899 # v10.3.0
               with:
                   days-before-pr-stale: 30
                   days-before-pr-close: 7
