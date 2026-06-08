@@ -42,46 +42,66 @@ COPY --from=builder /build/web/apps/paste/out /out/paste
 COPY --from=builder /build/web/apps/locker/out /out/locker
 COPY --from=builder /build/web/apps/memories/out /out/memories
 
-COPY <<EOF /etc/nginx/conf.d/default.conf
+COPY <<'EOF' /etc/nginx/conf.d/default.conf
 server {
-    listen 3000; root /out/photos;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3000;
+    #listen [::]:3000;
+    root /out/photos;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3001; root /out/accounts;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3001;
+    #listen [::]:3001;
+    root /out/accounts;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3002; root /out/albums;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3002;
+    #listen [::]:3002;
+    root /out/albums;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3003; root /out/auth;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3003;
+    #listen [::]:3003;
+    root /out/auth;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3004; root /out/cast;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3004;
+    #listen [::]:3004;
+    root /out/cast;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3005; root /out/share;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3005;
+    #listen [::]:3005;
+    root /out/share;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3006; root /out/embed;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3006;
+    #listen [::]:3006;
+    root /out/embed;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3008; root /out/paste;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3008;
+    #listen [::]:3008;
+    root /out/paste;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3009; root /out/locker;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3009;
+    #listen [::]:3009;
+    root /out/locker;
+    location / { try_files $uri $uri.html /index.html; }
 }
 server {
-    listen 3010; root /out/memories;
-    location / { try_files \$uri \$uri.html /index.html; }
+    listen 3010;
+    #listen [::]:3010;
+    root /out/memories;
+    location / { try_files $uri $uri.html /index.html; }
 }
 EOF
 
@@ -104,3 +124,12 @@ find /out -name '*.js' |
 EOF
 
 RUN chmod +x /docker-entrypoint.d/90-replace-ente-env.sh
+
+# Dynamically enable IPv6 if the container environment supports it
+COPY <<'EOF' /docker-entrypoint.d/40-enable-ipv6.sh
+#!/bin/sh
+if [ -f /proc/net/if_inet6 ]; then
+    sed -i 's/#listen \[::\]:/listen [::]:/g' /etc/nginx/conf.d/default.conf
+fi
+EOF
+RUN chmod +x /docker-entrypoint.d/40-enable-ipv6.sh
