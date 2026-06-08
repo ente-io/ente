@@ -20,7 +20,6 @@ import "package:photos/models/gallery/gallery_groups.dart";
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart" show localSettings;
-import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
@@ -29,6 +28,7 @@ import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
@@ -928,7 +928,6 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
   final _enlargeHeader = ValueNotifier<bool>(false);
   Timer? _enlargeHeaderTimer;
   InheritedGalleryBoundaries? _boundariesProvider;
-  late final ValueNotifier<bool> _atZeroScrollNotifier;
   Timer? _timer;
   bool lastInUseState = false;
   bool fadeInTrailingIcons = false;
@@ -942,10 +941,6 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
         _setBaseTopBoundary();
       }
     });
-    _atZeroScrollNotifier = ValueNotifier<bool>((_scrollOffset ?? 0) == 0);
-    widget.scrollController.addListener(
-      _scrollControllerListenerForZeroScrollNotifier,
-    );
     widget.headerHeightNotifier.addListener(_headerHeightNotifierListener);
   }
 
@@ -965,12 +960,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
   void dispose() {
     widget.scrollController.removeListener(_setCurrentGroupID);
     widget.scrollbarInUseNotifier.removeListener(scrollbarInUseListener);
-    _atZeroScrollNotifier.removeListener(
-      _scrollControllerListenerForZeroScrollNotifier,
-    );
     widget.headerHeightNotifier.removeListener(_headerHeightNotifierListener);
     _enlargeHeader.dispose();
-    _atZeroScrollNotifier.dispose();
     _enlargeHeaderTimer?.cancel();
     _timer?.cancel();
     super.dispose();
@@ -1048,12 +1039,6 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
     );
   }
 
-  void _scrollControllerListenerForZeroScrollNotifier() {
-    final scrollOffset = _scrollOffset;
-    if (scrollOffset == null) return;
-    _atZeroScrollNotifier.value = scrollOffset == 0;
-  }
-
   double? get _scrollOffset {
     if (widget.scrollController.positions.length != 1) {
       return null;
@@ -1101,6 +1086,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = GalleryAppBarWidget.backgroundColor(context);
     final header = currentGroupId != null
         ? ValueListenableBuilder(
             valueListenable: _enlargeHeader,
@@ -1112,57 +1098,57 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
                   milliseconds: PinnedGroupHeader.kScaleDurationInMilliseconds,
                 ),
                 curve: Curves.easeInOutSine,
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: _atZeroScrollNotifier,
-                  builder: (context, atZeroScroll, child) {
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeOut,
-                      decoration: BoxDecoration(
-                        boxShadow: atZeroScroll
-                            ? []
-                            : [
-                                const BoxShadow(
-                                  color: Color(0x26000000),
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                      ),
-                      child: child,
-                    );
-                  },
-                  child: ColoredBox(
-                    color: getEnteColorScheme(context).backgroundColour,
-                    child: boundaryWidget(
-                      position: BoundaryPosition.top,
-                      child: GroupHeaderWidget(
-                        title: widget
-                            .galleryGroups
-                            .groupIdToGroupDataMap[currentGroupId!]!
-                            .groupType
-                            .getTitle(
-                              context,
-                              widget
-                                  .galleryGroups
-                                  .groupIDToFilesMap[currentGroupId]!
-                                  .first,
-                            ),
-                        gridSize: localSettings.getPhotoGridSize(),
-                        height: widget.galleryGroups.groupHeaderExtent,
-                        filesInGroup: widget
-                            .galleryGroups
-                            .groupIDToFilesMap[currentGroupId!]!,
-                        selectedFiles: widget.selectedFiles,
-                        showSelectAll: widget.showSelectAll,
-                        showGalleryLayoutSettingCTA:
-                            widget.showGallerySettingsCTA,
-                        showTrailingIcons: !inUse,
-                        isPinnedHeader: true,
-                        fadeInTrailingIcons: fadeInTrailingIcons,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Positioned.fill(
+                      child: ClipRect(
+                        clipper: _PinnedHeaderBottomShadowClipper(),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0x14000000),
+                                blurRadius: 4,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    ColoredBox(
+                      color: backgroundColor,
+                      child: boundaryWidget(
+                        position: BoundaryPosition.top,
+                        child: GroupHeaderWidget(
+                          title: widget
+                              .galleryGroups
+                              .groupIdToGroupDataMap[currentGroupId!]!
+                              .groupType
+                              .getTitle(
+                                context,
+                                widget
+                                    .galleryGroups
+                                    .groupIDToFilesMap[currentGroupId]!
+                                    .first,
+                              ),
+                          gridSize: localSettings.getPhotoGridSize(),
+                          height: widget.galleryGroups.groupHeaderExtent,
+                          filesInGroup: widget
+                              .galleryGroups
+                              .groupIDToFilesMap[currentGroupId!]!,
+                          selectedFiles: widget.selectedFiles,
+                          showSelectAll: widget.showSelectAll,
+                          showGalleryLayoutSettingCTA:
+                              widget.showGallerySettingsCTA,
+                          showTrailingIcons: !inUse,
+                          isPinnedHeader: true,
+                          fadeInTrailingIcons: fadeInTrailingIcons,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -1178,6 +1164,18 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
       child: header,
     );
   }
+}
+
+class _PinnedHeaderBottomShadowClipper extends CustomClipper<Rect> {
+  const _PinnedHeaderBottomShadowClipper();
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(0, size.height, size.width, size.height + 8);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
 }
 
 class GalleryIndexUpdatedEvent {

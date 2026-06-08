@@ -65,6 +65,10 @@ class GalleryAppBarWidget extends StatefulWidget {
   static const double toolbarHeight = kToolbarHeight;
   static const double _sliverExpandedHeight = 92.0;
 
+  static Color backgroundColor(BuildContext context) {
+    return getEnteColorScheme(context).backgroundColour;
+  }
+
   static GalleryAppBarConfig sliverConfig(
     GalleryType type,
     String? title,
@@ -1351,7 +1355,7 @@ class _GallerySliverAppBar extends StatelessWidget {
       bottom: bottom,
       expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,
       collapsedHeight: GalleryAppBarWidget.toolbarHeight,
-      backgroundColor: getEnteColorScheme(context).backgroundColour,
+      backgroundColor: GalleryAppBarWidget.backgroundColor(context),
     );
   }
 }
