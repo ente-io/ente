@@ -30,10 +30,10 @@ const (
 )
 
 // GenerateRandomBytes returns securely generated random bytes.
-func GenerateRandomBytes(n int) ([]byte, error) {
+func GenerateRandomBytes(n int) []byte {
 	b := make([]byte, n)
 	rand.Read(b)
-	return b, nil
+	return b
 }
 
 // GenerateRandomInt returns a securely generated random integer in [0, n).
@@ -50,12 +50,8 @@ func GenerateRandomInt(n int64) (int64, error) {
 
 // GenerateURLSafeRandomString returns a URL-safe, base64 encoded
 // securely generated random string.
-// It will return an error if the system's secure random
-// number generator fails to function correctly, in which
-// case the caller should not continue.
-func GenerateURLSafeRandomString(s int) (string, error) {
-	b, err := GenerateRandomBytes(s)
-	return base64.URLEncoding.EncodeToString(b), stacktrace.Propagate(err, "")
+func GenerateURLSafeRandomString(s int) string {
+	return base64.URLEncoding.EncodeToString(GenerateRandomBytes(s))
 }
 
 // GetHashedPassword returns the has of a specified password

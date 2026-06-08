@@ -109,10 +109,7 @@ func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email str
 		return stacktrace.Propagate(ente.ErrCanNotInviteUserWithPaidPlan, "")
 	}
 
-	inviteToken, err := auth.GenerateURLSafeRandomString(InviteTokenLength)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
+	inviteToken := auth.GenerateURLSafeRandomString(InviteTokenLength)
 
 	activeInviteToken, err := c.FamilyRepo.AddMemberInvite(ctx, adminUserID, potentialMemberUser.ID, inviteToken, storageLimit)
 	if err != nil {
