@@ -1457,6 +1457,7 @@
   "filesDeleted": "Tệp đã bị xóa",
   "selectedFilesAreNotOnEnte": "Các tệp đã chọn không có trên Ente",
   "thisActionCannotBeUndone": "Không thể hoàn tác thao tác này",
+  "selectedItemsWillBePermanentlyDeletedAndCannotBeRecovered": "Những mục đã chọn sẽ bị xóa vĩnh viễn và không thể phục hồi.",
   "emptyTrash": "Xóa sạch thùng rác?",
   "permDeleteWarning": "Tất cả các mục trong thùng rác sẽ bị xóa vĩnh viễn\n\nKhông thể hoàn tác thao tác này",
   "empty": "Xóa sạch",
