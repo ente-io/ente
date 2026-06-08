@@ -11,7 +11,10 @@ SENSITIVE_TRIGGERS = %w[
   workflow_run
 ].to_set.freeze
 
-WORKFLOW_PATH = %r{\A\.github/workflows/.*\.ya?ml\z}
+CHECKED_PATHS = [
+  ".github/workflows/*.{yml,yaml}",
+  ".github/actions/**/*.{yml,yaml}",
+].freeze
 USES_REF = %r{\A([A-Za-z0-9._-]+/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._/-]+)?)@(\S+)\z}
 FULL_SHA = /\A[0-9a-fA-F]{40}\z/
 
@@ -62,12 +65,12 @@ end
 
 abort("Usage: #{$PROGRAM_NAME}") unless ARGV.empty?
 
-workflows = Dir.glob(".github/workflows/*.{yml,yaml}").grep(WORKFLOW_PATH).sort
+checked_files = CHECKED_PATHS.flat_map { |path| Dir.glob(path) }.sort
 
 trigger_violations = []
 unpinned_violations = []
 
-workflows.each do |path|
+checked_files.each do |path|
   facts = workflow_facts(path)
   facts[:triggers].each do |trigger|
     trigger_violations << "#{path}: #{trigger}"
@@ -80,7 +83,7 @@ end
 
 failed = trigger_violations.any? || unpinned_violations.any?
 puts "Workflow Security Checks: #{failed ? "Failed" : "Passed"}"
-puts "Checked #{workflows.length} workflow files."
+puts "Checked #{checked_files.length} workflow/action files."
 
 exit 0 unless failed
 

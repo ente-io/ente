@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/**'
+      - '.github/actions/**'
       - '.github/scripts/check_workflow_security.rb'
 
 permissions:
