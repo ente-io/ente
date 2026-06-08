@@ -264,15 +264,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             ),
             builder: (context, isSearching, child) {
               return widget.asSliver
-                  ? _buildSliverAppBar(
-                      context,
+                  ? _GallerySliverAppBar(
+                      title: _appBarTitle,
                       actions: isSearching
                           ? const []
                           : _getDefaultActions(context),
                       bottom: child as PreferredSizeWidget,
                     )
-                  : _buildAppBar(
-                      context,
+                  : _GalleryFixedAppBar(
+                      title: _appBarTitle,
                       actions: isSearching
                           ? const []
                           : _getDefaultActions(context),
@@ -281,85 +281,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             },
           )
         : widget.asSliver
-        ? _buildSliverAppBar(context, actions: _getDefaultActions(context))
-        : _buildAppBar(context, actions: _getDefaultActions(context));
-  }
-
-  Widget _buildSliverAppBar(
-    BuildContext context, {
-    required List<Widget> actions,
-    PreferredSizeWidget? bottom,
-  }) {
-    return SliverAppBarComponent(
-      title: _appBarTitle,
-      actions: actions,
-      bottom: bottom,
-      expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,
-      collapsedHeight: GalleryAppBarWidget.toolbarHeight,
-      backgroundColor: getEnteColorScheme(context).backgroundColour,
-    );
-  }
-
-  AppBar _buildAppBar(
-    BuildContext context, {
-    required List<Widget> actions,
-    PreferredSizeWidget? bottom,
-  }) {
-    final colors = context.componentColors;
-
-    return AppBar(
-      elevation: 0,
-      centerTitle: false,
-      automaticallyImplyLeading: false,
-      toolbarHeight: GalleryAppBarWidget.toolbarHeight,
-      titleSpacing: 0,
-      title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-        child: SizedBox(
-          height: GalleryAppBarWidget._controlRowHeight,
-          child: Row(
-            children: [
-              const _GalleryAppBarBackButton(),
-              const SizedBox(width: Spacing.sm),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: TooltipComponent(
-                    message: _appBarTitle,
-                    child: Text(
-                      _appBarTitle,
-                      style: TextStyles.h2.copyWith(color: colors.textBase),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-              ),
-              if (actions.isNotEmpty) ...[
-                const SizedBox(width: Spacing.md),
-                ..._actionsWithSpacing(actions),
-              ],
-            ],
-          ),
-        ),
-      ),
-      bottom: bottom,
-      surfaceTintColor: Colors.transparent,
-      backgroundColor: getEnteColorScheme(context).backgroundColour,
-    );
-  }
-
-  List<Widget> _actionsWithSpacing(List<Widget> actions) {
-    return [
-      for (var index = 0; index < actions.length; index++) ...[
-        SizedBox.square(
-          dimension: GalleryAppBarWidget._controlRowHeight,
-          child: Center(child: actions[index]),
-        ),
-        if (index != actions.length - 1)
-          const SizedBox(width: GalleryAppBarWidget._actionGap),
-      ],
-    ];
+        ? _GallerySliverAppBar(
+            title: _appBarTitle,
+            actions: _getDefaultActions(context),
+          )
+        : _GalleryFixedAppBar(
+            title: _appBarTitle,
+            actions: _getDefaultActions(context),
+          );
   }
 
   Widget _buildPopupMenuAction<T>({
@@ -1422,6 +1351,95 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         AppLocalizations.of(context).guestViewEnablePreSteps,
       );
     }
+  }
+}
+
+class _GallerySliverAppBar extends StatelessWidget {
+  const _GallerySliverAppBar({
+    required this.title,
+    required this.actions,
+    this.bottom,
+  });
+
+  final String title;
+  final List<Widget> actions;
+  final PreferredSizeWidget? bottom;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBarComponent(
+      title: title,
+      actions: actions,
+      bottom: bottom,
+      expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,
+      collapsedHeight: GalleryAppBarWidget.toolbarHeight,
+      backgroundColor: getEnteColorScheme(context).backgroundColour,
+    );
+  }
+}
+
+class _GalleryFixedAppBar extends StatelessWidget {
+  const _GalleryFixedAppBar({
+    required this.title,
+    required this.actions,
+    this.bottom,
+  });
+
+  final String title;
+  final List<Widget> actions;
+  final PreferredSizeWidget? bottom;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+
+    return AppBar(
+      elevation: 0,
+      centerTitle: false,
+      automaticallyImplyLeading: false,
+      toolbarHeight: GalleryAppBarWidget.toolbarHeight,
+      titleSpacing: 0,
+      title: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+        child: SizedBox(
+          height: GalleryAppBarWidget._controlRowHeight,
+          child: Row(
+            children: [
+              const _GalleryAppBarBackButton(),
+              const SizedBox(width: Spacing.sm),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TooltipComponent(
+                    message: title,
+                    child: Text(
+                      title,
+                      style: TextStyles.h2.copyWith(color: colors.textBase),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+              if (actions.isNotEmpty) ...[
+                const SizedBox(width: Spacing.md),
+                for (var index = 0; index < actions.length; index++) ...[
+                  SizedBox.square(
+                    dimension: GalleryAppBarWidget._controlRowHeight,
+                    child: Center(child: actions[index]),
+                  ),
+                  if (index != actions.length - 1)
+                    const SizedBox(width: GalleryAppBarWidget._actionGap),
+                ],
+              ],
+            ],
+          ),
+        ),
+      ),
+      bottom: bottom,
+      surfaceTintColor: Colors.transparent,
+      backgroundColor: getEnteColorScheme(context).backgroundColour,
+    );
   }
 }
 

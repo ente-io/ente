@@ -621,21 +621,6 @@ class GalleryState extends State<Gallery> {
       ? const NeverScrollableScrollPhysics()
       : const ExponentialBouncingScrollPhysics();
 
-  Widget _buildWithAppBar(BuildContext context, Widget child) {
-    final appBar = widget.appBar;
-    if (appBar == null) {
-      return child;
-    }
-
-    return CustomScrollView(
-      physics: _scrollPhysics,
-      slivers: [
-        appBar.buildSliver(context),
-        SliverFillRemaining(hasScrollBody: false, child: child),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     _logger.info("Building Gallery  ${widget.tagPrefix}");
@@ -722,12 +707,20 @@ class GalleryState extends State<Gallery> {
               ],
             )
           : const SizedBox.shrink();
-      return _buildWithAppBar(context, placeholder);
+      return _GalleryAppBarScrollBody(
+        appBar: widget.appBar,
+        physics: _scrollPhysics,
+        child: placeholder,
+      );
     }
 
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
-      return _buildWithAppBar(context, widget.loadingWidget);
+      return _GalleryAppBarScrollBody(
+        appBar: widget.appBar,
+        physics: _scrollPhysics,
+        child: widget.loadingWidget,
+      );
     }
 
     if (galleryGroups == null) {
@@ -735,7 +728,11 @@ class GalleryState extends State<Gallery> {
     }
     final groups = galleryGroups;
     if (groups == null) {
-      return _buildWithAppBar(context, widget.loadingWidget);
+      return _GalleryAppBarScrollBody(
+        appBar: widget.appBar,
+        physics: _scrollPhysics,
+        child: widget.loadingWidget,
+      );
     }
 
     // Check if width changed due to orientation change and update gallery groups
@@ -768,7 +765,20 @@ class GalleryState extends State<Gallery> {
         type: _groupType,
         galleryType: widget.galleryType,
         child: _allGalleryFiles.isEmpty
-            ? _buildEmptyGalleryContent()
+            ? _GalleryAppBarScrollBody(
+                appBar: widget.appBar,
+                physics: _scrollPhysics,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (widget.addHeaderOrFooterEmptyState)
+                      widget.header ?? const SizedBox.shrink(),
+                    Expanded(child: widget.emptyState),
+                    if (widget.addHeaderOrFooterEmptyState)
+                      widget.footer ?? const SizedBox.shrink(),
+                  ],
+                ),
+              )
             : CustomScrollBar(
                 scrollController: _scrollController,
                 galleryGroups: groups,
@@ -851,20 +861,33 @@ class GalleryState extends State<Gallery> {
       ),
     );
   }
+}
 
-  Widget _buildEmptyGalleryContent() {
-    final emptyColumn = Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        if (widget.addHeaderOrFooterEmptyState)
-          widget.header ?? const SizedBox.shrink(),
-        Expanded(child: widget.emptyState),
-        if (widget.addHeaderOrFooterEmptyState)
-          widget.footer ?? const SizedBox.shrink(),
+class _GalleryAppBarScrollBody extends StatelessWidget {
+  const _GalleryAppBarScrollBody({
+    required this.appBar,
+    required this.physics,
+    required this.child,
+  });
+
+  final GalleryAppBarConfig? appBar;
+  final ScrollPhysics physics;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final appBarConfig = appBar;
+    if (appBarConfig == null) {
+      return child;
+    }
+
+    return CustomScrollView(
+      physics: physics,
+      slivers: [
+        appBarConfig.buildSliver(context),
+        SliverFillRemaining(hasScrollBody: false, child: child),
       ],
     );
-
-    return _buildWithAppBar(context, emptyColumn);
   }
 }
 
