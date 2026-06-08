@@ -151,11 +151,11 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 
 	if fileResult.err != nil {
 		log.Error("Could not find size of file: " + file.File.ObjectKey)
-		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, "%s", fileResult.err.Error())
+		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, "%v", fileResult.err)
 	}
 	if thumbResult.err != nil {
 		log.Error("Could not find size of thumbnail: " + file.Thumbnail.ObjectKey)
-		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, "%s", thumbResult.err.Error())
+		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, "%v", thumbResult.err)
 	}
 	fileSize := fileResult.size
 	thumbnailSize := thumbResult.size

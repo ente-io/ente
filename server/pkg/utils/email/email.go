@@ -210,7 +210,7 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 			errMsg := err.Error()
 			for i := range knownInvalidEmailErrors {
 				if strings.Contains(errMsg, knownInvalidEmailErrors[i]) {
-					return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid email %s", toEmail)), "%s", errMsg)
+					return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid email %s", toEmail)), "%v", err)
 				}
 			}
 			return stacktrace.Propagate(err, "")

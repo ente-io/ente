@@ -251,7 +251,7 @@ func (h *PublicCollectionHandler) GetDiff(c *gin.Context) {
 	sinceTime, err := strconv.ParseInt(c.Query("sinceTime"), 10, 64)
 	if err != nil {
 		errorMessage := fmt.Sprintf("invalid sinceTime val: %s", c.Query("sinceTime"))
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(errorMessage), "%s", err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(errorMessage), "%v", err))
 		return
 	}
 	files, hasMore, err := h.CollectionCtrl.GetPublicDiff(c, sinceTime)
