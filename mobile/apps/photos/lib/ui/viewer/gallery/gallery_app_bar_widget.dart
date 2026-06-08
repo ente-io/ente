@@ -63,9 +63,6 @@ import "package:uuid/uuid.dart";
 
 class GalleryAppBarWidget extends StatefulWidget {
   static const double toolbarHeight = kToolbarHeight;
-  static const double _controlRowHeight = 38.0;
-  static const double _actionGap = 8.0;
-  static const double _defaultBackIconSize = IconSizes.medium;
   static const double _sliverExpandedHeight = 92.0;
 
   static GalleryAppBarConfig sliverConfig(
@@ -78,7 +75,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     List<EnteFile>? files,
   }) {
     return GalleryAppBarConfig(
-      sliverBuilder: (_) => GalleryAppBarWidget(
+      sliverBuilder: (_) => GalleryAppBarWidget._(
         type,
         title,
         selectedFiles,
@@ -86,7 +83,6 @@ class GalleryAppBarWidget extends StatefulWidget {
         collection: collection,
         isFromCollectPhotos: isFromCollectPhotos,
         files: files,
-        asSliver: true,
       ),
       geometryBuilder: _resolveSliverGeometry,
     );
@@ -118,18 +114,15 @@ class GalleryAppBarWidget extends StatefulWidget {
   final Collection? collection;
   final bool isFromCollectPhotos;
   final List<EnteFile>? files;
-  final bool asSliver;
 
-  const GalleryAppBarWidget(
+  const GalleryAppBarWidget._(
     this.type,
     this.title,
     this.selectedFiles, {
-    super.key,
     this.deviceCollection,
     this.collection,
     this.isFromCollectPhotos = false,
     this.files,
-    this.asSliver = false,
   });
 
   @override
@@ -246,49 +239,34 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
 
     if (galleryType == GalleryType.homepage) {
-      return widget.asSliver
-          ? const SliverToBoxAdapter(child: SizedBox.shrink())
-          : const SizedBox.shrink();
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
-    return isHierarchicalSearchable
-        ? ValueListenableBuilder(
-            valueListenable: inheritedSearchFilterData!
-                .searchFilterDataProvider!
-                .isSearchingNotifier,
-            child: PreferredSize(
-              preferredSize: Size.fromHeight(
-                AppBarFilterChips.preferredHeight(context),
-              ),
-              child: const AppBarFilterChips(),
-            ),
-            builder: (context, isSearching, child) {
-              return widget.asSliver
-                  ? _GallerySliverAppBar(
-                      title: _appBarTitle,
-                      actions: isSearching
-                          ? const []
-                          : _getDefaultActions(context),
-                      bottom: child as PreferredSizeWidget,
-                    )
-                  : _GalleryFixedAppBar(
-                      title: _appBarTitle,
-                      actions: isSearching
-                          ? const []
-                          : _getDefaultActions(context),
-                      bottom: child as PreferredSizeWidget,
-                    );
-            },
-          )
-        : widget.asSliver
-        ? _GallerySliverAppBar(
-            title: _appBarTitle,
-            actions: _getDefaultActions(context),
-          )
-        : _GalleryFixedAppBar(
-            title: _appBarTitle,
-            actions: _getDefaultActions(context),
-          );
+    if (!isHierarchicalSearchable) {
+      return _GallerySliverAppBar(
+        title: _appBarTitle,
+        actions: _getDefaultActions(context),
+      );
+    }
+
+    return ValueListenableBuilder(
+      valueListenable: inheritedSearchFilterData!
+          .searchFilterDataProvider!
+          .isSearchingNotifier,
+      child: PreferredSize(
+        preferredSize: Size.fromHeight(
+          AppBarFilterChips.preferredHeight(context),
+        ),
+        child: const AppBarFilterChips(),
+      ),
+      builder: (context, isSearching, child) {
+        return _GallerySliverAppBar(
+          title: _appBarTitle,
+          actions: isSearching ? const [] : _getDefaultActions(context),
+          bottom: child as PreferredSizeWidget,
+        );
+      },
+    );
   }
 
   Widget _buildPopupMenuAction<T>({
@@ -1374,101 +1352,6 @@ class _GallerySliverAppBar extends StatelessWidget {
       expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,
       collapsedHeight: GalleryAppBarWidget.toolbarHeight,
       backgroundColor: getEnteColorScheme(context).backgroundColour,
-    );
-  }
-}
-
-class _GalleryFixedAppBar extends StatelessWidget {
-  const _GalleryFixedAppBar({
-    required this.title,
-    required this.actions,
-    this.bottom,
-  });
-
-  final String title;
-  final List<Widget> actions;
-  final PreferredSizeWidget? bottom;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.componentColors;
-
-    return AppBar(
-      elevation: 0,
-      centerTitle: false,
-      automaticallyImplyLeading: false,
-      toolbarHeight: GalleryAppBarWidget.toolbarHeight,
-      titleSpacing: 0,
-      title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-        child: SizedBox(
-          height: GalleryAppBarWidget._controlRowHeight,
-          child: Row(
-            children: [
-              const _GalleryAppBarBackButton(),
-              const SizedBox(width: Spacing.sm),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: TooltipComponent(
-                    message: title,
-                    child: Text(
-                      title,
-                      style: TextStyles.h2.copyWith(color: colors.textBase),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-              ),
-              if (actions.isNotEmpty) ...[
-                const SizedBox(width: Spacing.md),
-                for (var index = 0; index < actions.length; index++) ...[
-                  SizedBox.square(
-                    dimension: GalleryAppBarWidget._controlRowHeight,
-                    child: Center(child: actions[index]),
-                  ),
-                  if (index != actions.length - 1)
-                    const SizedBox(width: GalleryAppBarWidget._actionGap),
-                ],
-              ],
-            ],
-          ),
-        ),
-      ),
-      bottom: bottom,
-      surfaceTintColor: Colors.transparent,
-      backgroundColor: getEnteColorScheme(context).backgroundColour,
-    );
-  }
-}
-
-class _GalleryAppBarBackButton extends StatelessWidget {
-  const _GalleryAppBarBackButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.componentColors;
-    final tooltip = MaterialLocalizations.of(context).backButtonTooltip;
-
-    return Semantics(
-      button: true,
-      label: tooltip,
-      child: Tooltip(
-        message: tooltip,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => Navigator.maybePop(context),
-          child: SizedBox.square(
-            dimension: GalleryAppBarWidget._defaultBackIconSize,
-            child: Icon(
-              Icons.arrow_back,
-              color: colors.textBase,
-              size: GalleryAppBarWidget._defaultBackIconSize,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
