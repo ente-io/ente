@@ -4,9 +4,9 @@
  "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
 <policyconfig>
   <vendor>Ente</vendor>
-  <vendor_url>https://ente.io</vendor_url>
+  <vendor_url>https://ente.com</vendor_url>
 
-  <action id="io.ente.auth.unlock">
+  <action id="com.ente.auth.unlock">
     <description>Unlock Ente Auth</description>
     <message>Authenticate to unlock Ente Auth.</message>
     <defaults>

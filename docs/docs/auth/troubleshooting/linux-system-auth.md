@@ -24,7 +24,7 @@ shows **Linux setup required**, install the policy manually.
 The policy action is:
 
 ```text
-io.ente.auth.unlock
+com.ente.auth.unlock
 ```
 
 ### Manual Policy Setup
@@ -34,22 +34,22 @@ manual builds may also need manual setup. Download the policy from GitHub and
 verify its SHA-256 checksum before installing it:
 
 ```sh
-policy_url="https://raw.githubusercontent.com/ente-io/ente/main/mobile/apps/auth/assets/polkit/io.ente.auth.policy"
-policy_sha256="31e4fb0757c8a55cee49324ddc310ff660a53d7f143049de202510fa58fe1d24"
+policy_url="https://raw.githubusercontent.com/ente-io/ente/main/mobile/apps/auth/assets/polkit/com.ente.auth.policy"
+policy_sha256="efba0409db9a0a53196fa8a7c9f4d4e874234b48287eb5242cf399f466e4c695"
 policy="$(mktemp)"
 
 if curl -fsSL "$policy_url" -o "$policy" &&
   printf "%s  %s\n" "$policy_sha256" "$policy" | sha256sum -c -; then
   sudo install -D -o root -g root -m 0644 \
     "$policy" \
-    /usr/share/polkit-1/actions/io.ente.auth.policy
+    /usr/share/polkit-1/actions/com.ente.auth.policy
 
   if command -v chcon >/dev/null 2>&1; then
     sudo chcon system_u:object_r:usr_t:s0 \
-      /usr/share/polkit-1/actions/io.ente.auth.policy || true
+      /usr/share/polkit-1/actions/com.ente.auth.policy || true
   fi
 
-  pkaction --action-id io.ente.auth.unlock --verbose
+  pkaction --action-id com.ente.auth.unlock --verbose
 else
   echo "Policy download or checksum verification failed. Not installing."
 fi
@@ -63,7 +63,7 @@ If you manually installed the Polkit policy and no longer want Ente Auth to use
 Linux system authentication, remove it:
 
 ```sh
-sudo rm -f /usr/share/polkit-1/actions/io.ente.auth.policy
+sudo rm -f /usr/share/polkit-1/actions/com.ente.auth.policy
 ```
 
 ## Fingerprint Prompts

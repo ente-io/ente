@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -103,8 +102,7 @@ void main() async {
 
 Future<void> _runInForeground() async {
   AppThemeConfig.initialize(EnteApp.auth);
-  final adaptiveThemeMode = await AuthThemePreferences.getThemeMode();
-  final savedThemeMode = _themeMode(adaptiveThemeMode);
+  final savedThemeMode = await AuthThemePreferences.getThemeMode();
   final configuration = Configuration.instance;
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
@@ -118,8 +116,7 @@ Future<void> _runInForeground() async {
     unawaited(UpdateService.instance.showUpdateNotification());
     runApp(
       AppLock(
-        builder: (args) =>
-            App(locale: locale, savedThemeMode: adaptiveThemeMode),
+        builder: (args) => App(locale: locale, savedThemeMode: savedThemeMode),
         lockScreen: LockScreen(configuration),
         enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,
@@ -136,13 +133,6 @@ Future<void> _runInForeground() async {
       ),
     );
   });
-}
-
-ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
-  if (savedThemeMode == null) return ThemeMode.system;
-  if (savedThemeMode.isLight) return ThemeMode.light;
-  if (savedThemeMode.isDark) return ThemeMode.dark;
-  return ThemeMode.system;
 }
 
 Future _runWithLogs(Function() function, {String prefix = ""}) async {

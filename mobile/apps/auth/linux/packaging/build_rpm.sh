@@ -75,7 +75,7 @@ cp linux/packaging/enteauth.desktop "$STAGING_DIR/usr/share/applications/"
 
 # Copy Polkit policy.
 echo -e "${YELLOW}Copying Polkit policy...${NC}"
-install -D -m 0644 assets/polkit/io.ente.auth.policy "$STAGING_DIR/usr/share/polkit-1/actions/io.ente.auth.policy"
+install -D -m 0644 assets/polkit/com.ente.auth.policy "$STAGING_DIR/usr/share/polkit-1/actions/com.ente.auth.policy"
 
 # Create symlink
 echo -e "${YELLOW}Creating symlink...${NC}"

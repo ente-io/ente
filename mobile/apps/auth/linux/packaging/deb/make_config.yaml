@@ -24,11 +24,11 @@ dependencies:
   - libayatana-ido3-0.4-0
 
 postinstall_scripts:
-  - install -D -o root -g root -m 0644 /usr/share/enteauth/data/flutter_assets/assets/polkit/io.ente.auth.policy /usr/share/polkit-1/actions/io.ente.auth.policy
-  - if command -v chcon >/dev/null 2>&1; then chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/io.ente.auth.policy || true; fi
+  - install -D -o root -g root -m 0644 /usr/share/enteauth/data/flutter_assets/assets/polkit/com.ente.auth.policy /usr/share/polkit-1/actions/com.ente.auth.policy
+  - if command -v chcon >/dev/null 2>&1; then chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/com.ente.auth.policy || true; fi
 
 postuninstall_scripts:
-  - rm -f /usr/share/polkit-1/actions/io.ente.auth.policy
+  - rm -f /usr/share/polkit-1/actions/com.ente.auth.policy
 
 keywords:
   - Authentication
