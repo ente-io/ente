@@ -2,6 +2,8 @@ package s3config
 
 import (
 	"fmt"
+	"slices"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -9,8 +11,6 @@ import (
 	"github.com/ente-io/museum/ente"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-
-	"github.com/ente-io/museum/pkg/utils/array"
 )
 
 // S3Config is the file which abstracts away s3 related configs for clients.
@@ -111,14 +111,14 @@ func (config *S3Config) initialize() {
 	config.secondaryHotDC = dcWasabiEuropeCentral_v3
 	hs1 := viper.GetString("s3.hot_storage.primary")
 	hs2 := viper.GetString("s3.hot_storage.secondary")
-	if hs1 != "" && hs2 != "" && array.StringInList(hs1, dcs[:]) && array.StringInList(hs2, dcs[:]) {
+	if hs1 != "" && hs2 != "" && slices.Contains(dcs[:], hs1) && slices.Contains(dcs[:], hs2) {
 		config.hotDC = hs1
 		config.secondaryHotDC = hs2
 		log.Infof("Hot storage: %s (secondary: %s)", hs1, hs2)
 	}
 	config.derivedStorageDC = config.hotDC
 	embeddingsDC := viper.GetString("s3.derived-storage")
-	if embeddingsDC != "" && array.StringInList(embeddingsDC, dcs[:]) {
+	if embeddingsDC != "" && slices.Contains(dcs[:], embeddingsDC) {
 		config.derivedStorageDC = embeddingsDC
 		log.Infof("Embeddings bucket: %s", embeddingsDC)
 	}

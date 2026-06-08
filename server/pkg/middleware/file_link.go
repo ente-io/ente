@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 
 	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
-	"github.com/ente-io/museum/pkg/utils/array"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -206,7 +206,7 @@ func (m *FileLinkMiddleware) validatePassword(
 ) error {
 	accessTokenJWT := auth.GetAccessTokenJWT(c)
 	if accessTokenJWT == "" {
-		if array.StringInList(reqPath, filePasswordWhiteListedURLs) {
+		if slices.Contains(filePasswordWhiteListedURLs, reqPath) {
 			return nil
 		}
 		return &ente.ErrPassProtectedResource

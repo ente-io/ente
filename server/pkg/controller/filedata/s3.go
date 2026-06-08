@@ -133,7 +133,7 @@ func (c *Controller) uploadObject(obj fileData.S3FileMetadata, objectKey string,
 	}
 	var err error
 	var result *s3manager.UploadOutput
-	for retries := 0; retries < 3; retries++ {
+	for range 3 {
 		result, err = uploader.Upload(&up)
 		if err == nil || !strings.Contains(err.Error(), "connection reset by peer") {
 			break

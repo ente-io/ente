@@ -42,7 +42,7 @@ func (h *PublicCollectionHandler) GetFile(c *gin.Context) {
 func (h *PublicCollectionHandler) GetPreviewURL(c *gin.Context) {
 	var req fileData.GetPreviewURLRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	collectionOwner, err := h.getCollectionOwnerAndVerifyAccess(c, req.FileID)
@@ -251,7 +251,7 @@ func (h *PublicCollectionHandler) GetDiff(c *gin.Context) {
 	sinceTime, err := strconv.ParseInt(c.Query("sinceTime"), 10, 64)
 	if err != nil {
 		errorMessage := fmt.Sprintf("invalid sinceTime val: %s", c.Query("sinceTime"))
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(errorMessage), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(errorMessage), "%v", err))
 		return
 	}
 	files, hasMore, err := h.CollectionCtrl.GetPublicDiff(c, sinceTime)

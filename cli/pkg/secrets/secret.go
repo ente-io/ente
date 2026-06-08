@@ -43,10 +43,7 @@ func GetOrCreateClISecret() []byte {
 			}
 		}
 		key := make([]byte, keyLength)
-		_, err = rand.Read(key)
-		if err != nil {
-			log.Fatal(fmt.Errorf("error generating key: %w", err))
-		}
+		rand.Read(key)
 		// Store the key as a base64 encoded string
 		secret = base64.StdEncoding.EncodeToString(key)
 		keySetErr := keyring.Set(secretService, secretUser, secret)
@@ -89,10 +86,7 @@ func GetSecretFromSecretText(secretFilePath string) []byte {
 		}
 		// File does not exist; create and write a random 32-byte secret
 		key := make([]byte, keyLength)
-		_, err := rand.Read(key)
-		if err != nil {
-			log.Fatal(fmt.Errorf("error generating key: %w", err))
-		}
+		rand.Read(key)
 		err = os.WriteFile(secretFilePath, key, 0644)
 		if err != nil {
 			log.Fatal(fmt.Errorf("error writing to secret file: %w", err))

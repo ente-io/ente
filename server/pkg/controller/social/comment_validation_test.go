@@ -29,7 +29,6 @@ func TestValidateReplyFileContext(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			err := validateReplyFileContext(tc.parent, tc.request)
 			if tc.wantErr {
@@ -63,7 +62,6 @@ func TestValidateCommentReactionContext(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			err := validateCommentReactionContext(tc.comment, tc.request)
 			if tc.wantErr {

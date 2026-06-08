@@ -109,10 +109,7 @@ func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email str
 		return stacktrace.Propagate(ente.ErrCanNotInviteUserWithPaidPlan, "")
 	}
 
-	inviteToken, err := auth.GenerateURLSafeRandomString(InviteTokenLength)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
+	inviteToken := auth.GenerateURLSafeRandomString(InviteTokenLength)
 
 	activeInviteToken, err := c.FamilyRepo.AddMemberInvite(ctx, adminUserID, potentialMemberUser.ID, inviteToken, storageLimit)
 	if err != nil {
@@ -140,7 +137,7 @@ func (c *Controller) RemoveMember(ctx context.Context, adminID int64, id uuid.UU
 		return nil
 	}
 	if familyMember.Status != ente.ACCEPTED {
-		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("can not remove member from %s state", familyMember.Status))
+		return stacktrace.Propagate(ente.ErrBadRequest, "can not remove member from %s state", familyMember.Status)
 	}
 	err = c.FamilyRepo.RemoveMember(ctx, adminID, familyMember.MemberUserID, ente.REMOVED)
 	if err != nil {

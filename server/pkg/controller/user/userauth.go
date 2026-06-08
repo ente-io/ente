@@ -118,7 +118,7 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 	app := auth.GetApp(context)
 	otts, _ := c.UserAuthRepo.GetValidOTTs(emailHash, app)
 	if len(otts) >= OTTActiveCodeLimit {
-		msg := "Too many ott requests in a short duration"
+		const msg = "Too many ott requests in a short duration"
 		go c.DiscordController.NotifyPotentialAbuse(msg)
 		return stacktrace.Propagate(ente.ErrTooManyBadRequest, msg)
 	}
@@ -635,20 +635,14 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 
-		passKeySessionID, err = auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
-		if err != nil {
-			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-		}
+		passKeySessionID = auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
 		err = c.PasskeyRepo.AddPasskeyTwoFactorSession(userID, passKeySessionID, time.Microseconds()+TwoFactorValidityDurationInMicroSeconds)
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
 	if isTwoFactorEnabled {
-		twoFactorSessionID, err = auth.GenerateURLSafeRandomString(TwoFactorSessionIDLength)
-		if err != nil {
-			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-		}
+		twoFactorSessionID = auth.GenerateURLSafeRandomString(TwoFactorSessionIDLength)
 		err = c.TwoFactorRepo.AddTwoFactorSession(userID, twoFactorSessionID, time.Microseconds()+TwoFactorValidityDurationInMicroSeconds)
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
@@ -662,10 +656,7 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		return ente.EmailAuthorizationResponse{ID: userID, TwoFactorSessionID: twoFactorSessionID}, nil
 	}
 
-	token, err := auth.GenerateURLSafeRandomString(TokenLength)
-	if err != nil {
-		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-	}
+	token := auth.GenerateURLSafeRandomString(TokenLength)
 	keyAttributes, err := c.UserRepo.GetKeyAttributes(userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

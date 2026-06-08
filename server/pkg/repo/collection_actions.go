@@ -158,7 +158,7 @@ func (r *CollectionActionsRepository) ListPendingDeleteSuggestions(ctx context.C
 			continue
 		}
 		if ownerID.Int64 != ca.UserID {
-			return result, stacktrace.NewError(fmt.Sprintf("delete suggestion action %s references file %d owned by %d for user %d", ca.ID, fid, ownerID.Int64, ca.UserID))
+			return result, stacktrace.NewError("delete suggestion action %s references file %d owned by %d for user %d", ca.ID, fid, ownerID.Int64, ca.UserID)
 		}
 		if hasTrashEntry {
 			staleActionIDs = append(staleActionIDs, ca.ID)

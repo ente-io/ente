@@ -573,22 +573,18 @@ func (c *ObjectCleanupController) clearOrphanObjectsPage(page *s3.ListObjectVers
 	var wg sync.WaitGroup
 
 	for i := 0; i < n; i++ {
-		end := i + batchSize
-		if end > n {
-			end = n
-		}
+		end := min(i+batchSize, n)
 
 		if i >= end {
 			// Nothing left
 			break
 		}
 
-		wg.Add(1)
-		go func(i int, end int) {
-			defer wg.Done()
-			batch := ods[i:end]
+		start, stop := i, end
+		wg.Go(func() {
+			batch := ods[start:stop]
 			c.clearOrphanObjectsVersionOrDeleteMarkers(batch, dest, logger)
-		}(i, end)
+		})
 
 		i = end
 	}

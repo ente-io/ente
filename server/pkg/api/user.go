@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/ente-io/museum/pkg/controller/emergency"
 	"github.com/gin-contrib/requestid"
 	"github.com/sirupsen/logrus"
@@ -269,7 +268,7 @@ func (h *UserHandler) EnableTwoFactor(c *gin.Context) {
 func (h *UserHandler) VerifyTwoFactor(c *gin.Context) {
 	var request ente.TwoFactorVerificationRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Failed to bind request: %s", err)))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Failed to bind request: %s", err))
 		return
 	}
 	response, err := h.UserController.VerifyTwoFactor(c, request.SessionID, request.Code)
@@ -284,7 +283,7 @@ func (h *UserHandler) VerifyTwoFactor(c *gin.Context) {
 func (h *UserHandler) BeginPasskeyAuthenticationCeremony(c *gin.Context) {
 	var request ente.PasskeyTwoFactorBeginAuthenticationCeremonyRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Failed to bind request: %s", err)))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Failed to bind request: %s", err))
 		return
 	}
 
@@ -326,7 +325,7 @@ func (h *UserHandler) BeginPasskeyAuthenticationCeremony(c *gin.Context) {
 func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 	var request ente.PasskeyTwoFactorFinishAuthenticationCeremonyRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Failed to bind request: %s", err)))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Failed to bind request: %s", err))
 		return
 	}
 
@@ -580,7 +579,7 @@ func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 	var request ente.GetSRPAttributesRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	response, err := h.UserController.GetSRPAttributes(c, request.Email)
@@ -600,7 +599,7 @@ func (h *UserHandler) SetupSRP(c *gin.Context) {
 	var request ente.SetupSRPRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	userID := auth.GetUserID(c.Request.Header)
@@ -617,7 +616,7 @@ func (h *UserHandler) CompleteSRPSetup(c *gin.Context) {
 	var request ente.CompleteSRPSetupRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	resp, err := h.UserController.CompleteSRPSetup(c, request)
@@ -633,7 +632,7 @@ func (h *UserHandler) UpdateSrpAndKeyAttributes(c *gin.Context) {
 	var request ente.UpdateSRPAndKeysRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	userID := auth.GetUserID(c.Request.Header)
@@ -655,7 +654,7 @@ func (h *UserHandler) CreateSRPSession(c *gin.Context) {
 	var request ente.CreateSRPSessionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	resp, err := h.UserController.CreateSrpSession(c, request)
@@ -671,7 +670,7 @@ func (h *UserHandler) VerifySRPSession(c *gin.Context) {
 	var request ente.VerifySRPSessionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	response, err := h.UserController.VerifySRPSession(c, request)

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
@@ -22,7 +21,7 @@ func (h *UserEntityHandler) CreateKey(c *gin.Context) {
 	var request model.EntityKeyRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	if err := request.Type.IsValid(); err != nil {
@@ -42,7 +41,7 @@ func (h *UserEntityHandler) GetKey(c *gin.Context) {
 	var request model.GetEntityKeyRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	resp, err := h.Controller.GetKey(c, request)
@@ -58,7 +57,7 @@ func (h *UserEntityHandler) CreateEntity(c *gin.Context) {
 	var request model.EntityDataRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	resp, err := h.Controller.CreateEntity(c, request)
@@ -74,7 +73,7 @@ func (h *UserEntityHandler) UpdateEntity(c *gin.Context) {
 	var request model.UpdateEntityDataRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	resp, err := h.Controller.UpdateEntity(c, request)
@@ -101,7 +100,7 @@ func (h *UserEntityHandler) GetDiff(c *gin.Context) {
 	var request model.GetEntityDiffRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 

@@ -4,12 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
+	"slices"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/museum/pkg/controller/public"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -45,7 +44,7 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 		return nil, stacktrace.Propagate(err, "")
 	}
 	if !collection.AllowSharing() {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("sharing %s is not allowed", collection.Type))
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "sharing %s is not allowed", collection.Type)
 	}
 	shareActorID := collection.Owner.ID
 	if fromUserID != collection.Owner.ID {
@@ -84,7 +83,7 @@ func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollec
 		return stacktrace.Propagate(ente.ErrBadRequest, "owner can not join via link")
 	}
 	if !collection.AllowSharing() {
-		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("joining %s is not allowed", collection.Type))
+		return stacktrace.Propagate(ente.ErrBadRequest, "joining %s is not allowed", collection.Type)
 	}
 	collectionLinkToken, err := c.CollectionLinkCtrl.GetActiveCollectionLinkToken(ctx, req.CollectionID)
 	if err != nil {
@@ -92,7 +91,7 @@ func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollec
 	}
 
 	if canJoin := collectionLinkToken.CanJoin(); canJoin != nil {
-		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("can not join collection: %s", canJoin.Error()))
+		return stacktrace.Propagate(ente.ErrBadRequest, "can not join collection: %s", canJoin.Error())
 	}
 	accessToken := auth.GetAccessToken(ctx)
 	if collectionLinkToken.Token != accessToken {
@@ -182,7 +181,7 @@ func (c *CollectionController) Leave(ctx *gin.Context, cID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if !array.Int64InList(cID, sharedCollectionIDs) {
+	if !slices.Contains(sharedCollectionIDs, cID) {
 		return nil
 	}
 	err = c.CastRepo.RevokeForGivenUserAndCollection(ctx, cID, userID)
@@ -226,7 +225,7 @@ func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}
 	if !collection.AllowSharing() {
-		return ente.PublicURL{}, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("sharing %s is not allowed", collection.Type))
+		return ente.PublicURL{}, stacktrace.Propagate(ente.ErrBadRequest, "sharing %s is not allowed", collection.Type)
 	}
 	if userID != collection.Owner.ID {
 		return ente.PublicURL{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")

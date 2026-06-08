@@ -4,9 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
-	"github.com/ente-io/museum/ente"
 
+	"github.com/ente-io/museum/ente"
 	model "github.com/ente-io/museum/ente/userentity"
 	"github.com/ente-io/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -64,7 +63,7 @@ func (r *Repository) Delete(ctx context.Context, userID int64, id string) (bool,
 		`UPDATE entity_data SET is_deleted = true, encrypted_data = NULL, header = NULL where id=$1 and user_id = $2`,
 		id, userID)
 	if err != nil {
-		return false, stacktrace.Propagate(err, fmt.Sprintf("faield to delele entity_data with id=%s", id))
+		return false, stacktrace.Propagate(err, "faield to delele entity_data with id=%s", id)
 	}
 	return true, nil
 }
@@ -83,7 +82,7 @@ func (r *Repository) Update(ctx context.Context, userID int64, req model.UpdateE
 	if affected != 1 {
 		dbEntity, dbEntityErr := r.Get(ctx, userID, req.ID)
 		if dbEntityErr != nil {
-			return stacktrace.Propagate(dbEntityErr, fmt.Sprintf("failed to get entity for update with id=%s", req.ID))
+			return stacktrace.Propagate(dbEntityErr, "failed to get entity for update with id=%s", req.ID)
 		}
 		if dbEntity.IsDeleted {
 			return stacktrace.Propagate(ente.NewBadRequestWithMessage("entity is already deleted"), "")

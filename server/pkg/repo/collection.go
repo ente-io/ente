@@ -974,10 +974,7 @@ func (repo *CollectionRepository) TrashV3(ctx context.Context, collectionID int6
 	log.WithField("file_count", len(fileIDs)).Info("Fetched fileIDs")
 	batchSize := 2000
 	for i := 0; i < len(fileIDs); i += batchSize {
-		end := i + batchSize
-		if end > len(fileIDs) {
-			end = len(fileIDs)
-		}
+		end := min(i+batchSize, len(fileIDs))
 		batch := fileIDs[i:end]
 		err := repo.FileRepo.VerifyFileOwner(ctx, batch, ownerID, log)
 		if err != nil {

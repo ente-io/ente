@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
@@ -121,7 +120,7 @@ func (h *FileHandler) GetFileData(ctx *gin.Context) {
 func (h *FileHandler) GetPreviewUploadURL(c *gin.Context) {
 	var request fileData.PreviewUploadUrlRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	resp, err := h.FileDataCtrl.PreviewUploadURL(c, request)
@@ -135,7 +134,7 @@ func (h *FileHandler) GetPreviewUploadURL(c *gin.Context) {
 func (h *FileHandler) GetPreviewURL(c *gin.Context) {
 	var request fileData.GetPreviewURLRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	actorUser := auth.GetUserID(c.Request.Header)

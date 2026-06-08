@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"database/sql"
 	"net/http/httptest"
 	"testing"
@@ -52,7 +51,7 @@ func TestHandleAccountRecoveryTouchesContactsForResolvedEmailSync(t *testing.T) 
 		ObjectCleanupRepo:   objectCleanupRepo,
 		SecretEncryptionKey: testutil.SecretEncryptionKey(),
 	}
-	contactID, err := contactsRepo.Create(context.Background(), ownerID, contactmodel.CreateRequest{
+	contactID, err := contactsRepo.Create(t.Context(), ownerID, contactmodel.CreateRequest{
 		ContactUserID: contactUserID,
 		EncryptedKey:  []byte("wrapped-key"),
 		EncryptedData: []byte("payload"),
@@ -60,7 +59,7 @@ func TestHandleAccountRecoveryTouchesContactsForResolvedEmailSync(t *testing.T) 
 	if err != nil {
 		t.Fatalf("failed to create contact: %v", err)
 	}
-	created, err := contactsRepo.Get(context.Background(), ownerID, contactID)
+	created, err := contactsRepo.Get(t.Context(), ownerID, contactID)
 	if err != nil {
 		t.Fatalf("failed to fetch created contact: %v", err)
 	}
@@ -98,7 +97,7 @@ func TestHandleAccountRecoveryTouchesContactsForResolvedEmailSync(t *testing.T) 
 		t.Fatalf("HandleAccountRecovery() error = %v", err)
 	}
 
-	diff, err := contactsRepo.GetDiff(context.Background(), ownerID, created.UpdatedAt, 10)
+	diff, err := contactsRepo.GetDiff(t.Context(), ownerID, created.UpdatedAt, 10)
 	if err != nil {
 		t.Fatalf("GetDiff() error = %v", err)
 	}

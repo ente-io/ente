@@ -63,7 +63,7 @@ func TestVerifySRPSessionRejectsPasskeyResponseWithoutAccountsURL(t *testing.T) 
 	defer server.Close()
 
 	client := NewClient(Params{Host: server.URL})
-	ctx := context.WithValue(context.Background(), "app", string(AppPhotos))
+	ctx := context.WithValue(t.Context(), "app", string(AppPhotos))
 
 	_, err := client.VerifySRPSession(ctx, uuid.New(), uuid.New(), "client-m1")
 	if err == nil {

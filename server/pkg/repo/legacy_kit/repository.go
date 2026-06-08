@@ -762,8 +762,6 @@ func scanRecoverySessionRow(row *sql.Row) (*RecoverySessionRow, error) {
 
 func randomToken() string {
 	buf := make([]byte, 32)
-	if _, err := rand.Read(buf); err != nil {
-		return uuid.NewString()
-	}
+	rand.Read(buf)
 	return base64.RawURLEncoding.EncodeToString(buf)
 }

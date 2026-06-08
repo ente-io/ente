@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
+	"slices"
 	"strconv"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
@@ -13,7 +13,6 @@ import (
 
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/controller/email"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -76,7 +75,7 @@ func (c *BillingController) GetPlansV2(countryCode string, stripeAccountCountry 
 	result := make([]ente.BillingPlan, 0)
 	ids := billing.GetActivePlanIDs()
 	for _, plan := range plans {
-		if contains(ids, plan.ID) {
+		if slices.Contains(ids, plan.ID) {
 			result = append(result, plan)
 		}
 	}
@@ -135,7 +134,7 @@ func (c *BillingController) GetRedirectURL(ctx *gin.Context) (string, error) {
 			return ar, nil
 		}
 	}
-	return "", stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("not a whitelistedRedirectURL- %s", redirectURL))
+	return "", stacktrace.Propagate(ente.ErrBadRequest, "not a whitelistedRedirectURL- %s", redirectURL)
 }
 
 // GetActiveSubscription returns user's active subscription or throws a error if no active subscription
@@ -260,8 +259,7 @@ func (c *BillingController) VerifySubscription(
 					"current_user":            userID,
 				}).Error("Subscription for given transactionID is attached with different user")
 				log.Info("Subscription attached to different user")
-				return ente.Subscription{}, stacktrace.Propagate(&ente.ErrSubscriptionAlreadyClaimed,
-					fmt.Sprintf("Subscription with txn id %s already associated with user %d", newSubscription.OriginalTransactionID, existingSub.UserID))
+				return ente.Subscription{}, stacktrace.Propagate(&ente.ErrSubscriptionAlreadyClaimed, "Subscription with txn id %s already associated with user %d", newSubscription.OriginalTransactionID, existingSub.UserID)
 			}
 		}
 	}
@@ -305,7 +303,7 @@ func (c *BillingController) VerifySubscription(
 }
 
 func (c *BillingController) getAllPlans(countryCode string, stripeAccountCountry ente.StripeAccountCountry) []ente.BillingPlan {
-	if array.StringInList(countryCode, billing.CountriesInEU) {
+	if slices.Contains(billing.CountriesInEU, countryCode) {
 		countryCode = "EU"
 	}
 	countryWisePlans := c.BillingPlansPerAccount[stripeAccountCountry]
@@ -378,7 +376,7 @@ func (c *BillingController) HandleAccountDeletion(ctx context.Context, userID in
 	// Cancelation of these accounts will require manual intervention. Ideally,
 	// we should never be deleting such accounts.
 	if subscription.ProductID == ente.FamilyPlanProductID || subscription.ProductID == "" {
-		return false, stacktrace.NewError(fmt.Sprintf("unexpected product id %s", subscription.ProductID), "")
+		return false, stacktrace.NewError("unexpected product id %s", subscription.ProductID)
 	}
 	isCancelled = subscription.Attributes.IsCancelled
 	// delete customer data from Stripe if user is on paid plan.
@@ -457,13 +455,4 @@ func (c *BillingController) getPlanForCountry(s ente.Subscription, countryCode s
 		return ente.BillingPlan{}, stacktrace.Propagate(err, "")
 	}
 	return plan, nil
-}
-
-func contains(planIDs []string, planID string) bool {
-	for _, id := range planIDs {
-		if id == planID {
-			return true
-		}
-	}
-	return false
 }

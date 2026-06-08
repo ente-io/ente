@@ -144,9 +144,7 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 	errChan := make(chan error, len(fileCopyList))
 
 	for _, fileCopy := range fileCopyList {
-		wg.Add(1)
-		go func(fileCopy fileCopyInternal) {
-			defer wg.Done()
+		wg.Go(func() {
 			newFile, err := fc.createCopy(c, fileCopy, userID, app)
 			if err != nil {
 				errChan <- err
@@ -155,7 +153,7 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 			mapMutex.Lock()
 			oldToNewFileIDMap[fileCopy.SourceFile.ID] = newFile.ID
 			mapMutex.Unlock()
-		}(fileCopy)
+		})
 	}
 
 	// Wait for all goroutines to finish

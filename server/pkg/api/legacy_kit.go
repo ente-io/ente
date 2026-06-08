@@ -42,7 +42,7 @@ func (h *LegacyKitHandler) List(c *gin.Context) {
 func (h *LegacyKitHandler) DownloadContent(c *gin.Context) {
 	kitID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid legacy kit id"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid legacy kit id"), "%v", err))
 		return
 	}
 	resp, err := h.Controller.DownloadKitContent(c, auth.GetUserID(c.Request.Header), kitID)
@@ -56,7 +56,7 @@ func (h *LegacyKitHandler) DownloadContent(c *gin.Context) {
 func (h *LegacyKitHandler) OwnerRecoverySession(c *gin.Context) {
 	kitID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid legacy kit id"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid legacy kit id"), "%v", err))
 		return
 	}
 	resp, err := h.Controller.GetOwnerRecoverySession(c, auth.GetUserID(c.Request.Header), kitID)
@@ -83,7 +83,7 @@ func (h *LegacyKitHandler) UpdateRecoveryNotice(c *gin.Context) {
 func (h *LegacyKitHandler) Delete(c *gin.Context) {
 	kitID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid legacy kit id"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid legacy kit id"), "%v", err))
 		return
 	}
 	if err := h.Controller.DeleteKit(c, auth.GetUserID(c.Request.Header), kitID); err != nil {

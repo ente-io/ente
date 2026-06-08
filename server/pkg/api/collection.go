@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/ente-io/museum/pkg/controller/collections"
 	"net/http"
 	"strconv"
@@ -273,7 +272,7 @@ func (h *CollectionHandler) MoveFiles(c *gin.Context) {
 	var request ente.MoveFilesRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	if len(request.Files) > DefaultMaxBatchSize {
@@ -378,7 +377,7 @@ func (h *CollectionHandler) TrashV3(c *gin.Context) {
 	var req ente.TrashCollectionV3Request
 	if err := c.ShouldBindQuery(&req); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 

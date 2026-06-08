@@ -985,7 +985,7 @@ func TestProcessStorageWarningSnapshotScheduledDeletionSkipsResetWhenEmailFails(
 		},
 	}
 
-	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(context.Background(), snapshot)
+	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(t.Context(), snapshot)
 	if err == nil {
 		t.Fatal("expected email failure to be returned")
 	}
@@ -1030,7 +1030,7 @@ func TestProcessStorageWarningSnapshotScheduledDeletionResetsAccessAfterEmail(t 
 		},
 	}
 
-	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(context.Background(), snapshot)
+	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(t.Context(), snapshot)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1082,7 +1082,7 @@ func TestProcessStorageWarningSnapshotScheduledDeletionSkipsDuringActiveLoginGra
 		},
 	}
 
-	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(context.Background(), snapshot)
+	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(t.Context(), snapshot)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1127,7 +1127,7 @@ func TestProcessStorageWarningSnapshotSkipsActiveOverageRestartDuringActiveLogin
 		NotificationHistory: map[string]int64{repo.StorageWarningLoginGraceTemplateID: graceSentAt},
 	}
 
-	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(context.Background(), snapshot)
+	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(t.Context(), snapshot)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1177,7 +1177,7 @@ func TestProcessStorageWarningSnapshotScheduledDeletionAllowsExpiredLoginGraceDe
 		},
 	}
 
-	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(context.Background(), snapshot)
+	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(t.Context(), snapshot)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1231,7 +1231,7 @@ func TestProcessStorageWarningSnapshotExpiredLoginGraceReblocksActiveOverageRest
 		NotificationHistory: map[string]int64{repo.StorageWarningLoginGraceTemplateID: graceSentAt},
 	}
 
-	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(context.Background(), snapshot)
+	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(t.Context(), snapshot)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1277,7 +1277,7 @@ func TestProcessStorageWarningSnapshotClearsLoginGraceAfterRecovery(t *testing.T
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	result, err := (&EmailNotificationController{
 		NotificationHistoryRepo: notificationHistoryRepo,
-	}).processStorageWarningSnapshot(context.Background(), storageWarningSnapshot{
+	}).processStorageWarningSnapshot(t.Context(), storageWarningSnapshot{
 		RecipientID: userID,
 		Bucket:      storageWarningBucketNone,
 		EvaluatedAt: graceSentAt + storageWarningOneDayInMicroseconds,
