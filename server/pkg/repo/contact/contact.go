@@ -488,14 +488,14 @@ func (r *Repository) AddBucket(row contactmodel.Attachment, bucketID string, col
 		WHERE attachment_id = $2 AND user_id = $3 AND attachment_type = $4`, columnName, columnName)
 	result, err := r.DB.Exec(query, bucketID, row.AttachmentID, row.UserID, string(row.AttachmentType))
 	if err != nil {
-		return stacktrace.Propagate(err, "%s", "failed to add bucket to "+columnName)
+		return stacktrace.Propagate(err, "failed to add bucket to %s", columnName)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 	if rowsAffected == 0 {
-		return stacktrace.NewError("%s", "bucket not added to "+columnName)
+		return stacktrace.NewError("bucket not added to %s", columnName)
 	}
 	return nil
 }
@@ -512,14 +512,14 @@ func (r *Repository) RemoveBucket(row contactmodel.Attachment, bucketID string, 
 		WHERE attachment_id = $2 AND user_id = $3 AND attachment_type = $4`, columnName, columnName)
 	result, err := r.DB.Exec(query, bucketID, row.AttachmentID, row.UserID, string(row.AttachmentType))
 	if err != nil {
-		return stacktrace.Propagate(err, "%s", "failed to remove bucket from "+columnName)
+		return stacktrace.Propagate(err, "failed to remove bucket from %s", columnName)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 	if rowsAffected == 0 {
-		return stacktrace.NewError("%s", "bucket not removed from "+columnName)
+		return stacktrace.NewError("bucket not removed from %s", columnName)
 	}
 	return nil
 }
@@ -542,14 +542,14 @@ func (r *Repository) MoveBetweenBuckets(row contactmodel.Attachment, bucketID st
 		WHERE attachment_id = $2 AND user_id = $3 AND attachment_type = $4`, destColumn, destColumn, sourceColumn, sourceColumn)
 	result, err := r.DB.Exec(query, bucketID, row.AttachmentID, row.UserID, string(row.AttachmentType))
 	if err != nil {
-		return stacktrace.Propagate(err, "%s", "failed to move bucket from "+sourceColumn+" to "+destColumn)
+		return stacktrace.Propagate(err, "failed to move bucket from %s to %s", sourceColumn, destColumn)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 	if rowsAffected == 0 {
-		return stacktrace.NewError("%s", "bucket not moved from "+sourceColumn+" to "+destColumn)
+		return stacktrace.NewError("bucket not moved from %s to %s", sourceColumn, destColumn)
 	}
 	return nil
 }

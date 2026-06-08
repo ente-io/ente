@@ -86,7 +86,7 @@ func (c *OfferController) ApplyOffer(email string, productID string) error {
 		}
 	}
 	if !found {
-		return stacktrace.Propagate(ente.ErrNotFound, "%s", "Could not find an offer for  "+productID)
+		return stacktrace.Propagate(ente.ErrNotFound, "Could not find an offer for  %s", productID)
 	}
 	var validTill int64
 	if offerToBeApplied.PeriodInYears == ente.Period3Years {
@@ -96,7 +96,7 @@ func (c *OfferController) ApplyOffer(email string, productID string) error {
 	} else if offerToBeApplied.PeriodInYears == ente.Period10Years {
 		validTill = time.NDaysFromNow(10 * 365)
 	} else {
-		return stacktrace.Propagate(ente.ErrNotFound, "%s", "Could not find a valid time period for  "+productID)
+		return stacktrace.Propagate(ente.ErrNotFound, "Could not find a valid time period for  %s", productID)
 	}
 
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
