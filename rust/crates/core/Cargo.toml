@@ -42,7 +42,6 @@ bip39 = { version = "2", default-features = false, features = ["std"] }
 zeroize = { version = "1.8", features = ["derive"] }
 
 [dev-dependencies]
-chacha20 = "0.9.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 mockito = "1.6"
 
