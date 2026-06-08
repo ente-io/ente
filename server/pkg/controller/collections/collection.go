@@ -145,7 +145,7 @@ func (c *CollectionController) TrashV3(ctx *gin.Context, req ente.TrashCollectio
 		return stacktrace.Propagate(err, "")
 	}
 	if !resp.Collection.AllowDelete() {
-		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("deleting albums of type %s is not allowed", resp.Collection.Type))
+		return stacktrace.Propagate(ente.ErrBadRequest, "deleting albums of type %s is not allowed", resp.Collection.Type)
 	}
 	if resp.Collection.IsDeleted {
 		log.WithFields(log.Fields{
@@ -162,7 +162,7 @@ func (c *CollectionController) TrashV3(ctx *gin.Context, req ente.TrashCollectio
 			return stacktrace.Propagate(err, "")
 		}
 		if count != 0 {
-			return stacktrace.Propagate(&ente.ErrCollectionNotEmpty, fmt.Sprintf("Collection file count %d", count))
+			return stacktrace.Propagate(&ente.ErrCollectionNotEmpty, "Collection file count %d", count)
 		}
 
 	}

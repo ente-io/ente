@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -24,7 +23,7 @@ func (h *AuthenticatorHandler) CreateKey(c *gin.Context) {
 	var request model.CreateKeyRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	err := h.Controller.CreateKey(c, request)
@@ -50,7 +49,7 @@ func (h *AuthenticatorHandler) CreateEntity(c *gin.Context) {
 	var request model.CreateEntityRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	resp, err := h.Controller.CreateEntity(c, request)
@@ -66,7 +65,7 @@ func (h *AuthenticatorHandler) UpdateEntity(c *gin.Context) {
 	var request model.UpdateEntityRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 	err := h.Controller.UpdateEntity(c, request)
@@ -97,7 +96,7 @@ func (h *AuthenticatorHandler) GetDiff(c *gin.Context) {
 	var request model.GetEntityDiffRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 

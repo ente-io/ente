@@ -118,9 +118,9 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 	app := auth.GetApp(context)
 	otts, _ := c.UserAuthRepo.GetValidOTTs(emailHash, app)
 	if len(otts) >= OTTActiveCodeLimit {
-		msg := "Too many ott requests in a short duration"
+		const msg = "Too many ott requests in a short duration"
 		go c.DiscordController.NotifyPotentialAbuse(msg)
-		return stacktrace.Propagate(ente.ErrTooManyBadRequest, msg)
+		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "%s", msg)
 	}
 
 	err = c.UserAuthRepo.AddOTT(emailHash, app, ott, time.Microseconds()+OTTValidityDurationInMicroSeconds)

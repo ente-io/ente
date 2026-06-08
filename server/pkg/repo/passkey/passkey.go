@@ -392,7 +392,7 @@ func (r *Repository) CreateBeginAuthenticationData(user *ente.User) (options *pr
 				err = stacktrace.Propagate(ente.NewBadRequestWithMessage("No passkey found for user"), "")
 				return
 			} else {
-				err = stacktrace.Propagate(err, fmt.Sprintf("error while beginning login: type %s, msg %s", protocolErr.Type, protocolErr.Details))
+				err = stacktrace.Propagate(err, "error while beginning login: type %s, msg %s", protocolErr.Type, protocolErr.Details)
 				return
 			}
 		}

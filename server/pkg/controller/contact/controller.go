@@ -454,19 +454,19 @@ func getAttachmentBucketColumnMap(row contactmodel.Attachment) (map[string]strin
 	bucketColumnMap := make(map[string]string)
 	for _, bucketID := range row.DeleteFromBuckets {
 		if existingColumn, exists := bucketColumnMap[bucketID]; exists {
-			return nil, stacktrace.NewError("duplicate delete bucket " + bucketID + " in " + existingColumn)
+			return nil, stacktrace.NewError("%s", "duplicate delete bucket "+bucketID+" in "+existingColumn)
 		}
 		bucketColumnMap[bucketID] = contactrepo.DeletionColumn
 	}
 	for _, bucketID := range row.ReplicatedBuckets {
 		if existingColumn, exists := bucketColumnMap[bucketID]; exists {
-			return nil, stacktrace.NewError("duplicate replicated bucket " + bucketID + " in " + existingColumn)
+			return nil, stacktrace.NewError("%s", "duplicate replicated bucket "+bucketID+" in "+existingColumn)
 		}
 		bucketColumnMap[bucketID] = contactrepo.ReplicationColumn
 	}
 	for _, bucketID := range row.InflightRepBuckets {
 		if existingColumn, exists := bucketColumnMap[bucketID]; exists {
-			return nil, stacktrace.NewError("duplicate inflight bucket " + bucketID + " in " + existingColumn)
+			return nil, stacktrace.NewError("%s", "duplicate inflight bucket "+bucketID+" in "+existingColumn)
 		}
 		bucketColumnMap[bucketID] = contactrepo.InflightRepColumn
 	}

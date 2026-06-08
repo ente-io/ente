@@ -54,7 +54,7 @@ func (repo *UserRepository) Get(userID int64) (ente.User, error) {
 	// use case is for internal/Admin APIs, where please we should instead be
 	// using GetUserByIDInternal.
 	if strings.EqualFold(user.Hash, fmt.Sprintf(DELETED_EMAIL_HASH_FORMAT, userID)) {
-		return user, stacktrace.Propagate(ente.ErrUserDeleted, fmt.Sprintf("user account is deleted %d", userID))
+		return user, stacktrace.Propagate(ente.ErrUserDeleted, "user account is deleted %d", userID)
 	}
 	email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
 	if err != nil {

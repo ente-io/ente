@@ -133,14 +133,14 @@ func (r *Repository) AddBucket(row filedata.Row, bucketID string, columnName str
         WHERE file_id = $2 AND data_type = $3 and user_id = $4`, columnName, columnName)
 	result, err := r.DB.Exec(query, bucketID, row.FileID, string(row.Type), row.UserID)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to add bucket to "+columnName)
+		return stacktrace.Propagate(err, "%s", "failed to add bucket to "+columnName)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 	if rowsAffected == 0 {
-		return stacktrace.NewError("bucket not added to " + columnName)
+		return stacktrace.NewError("%s", "bucket not added to "+columnName)
 	}
 	return nil
 }
@@ -160,14 +160,14 @@ func (r *Repository) RemoveBucket(row filedata.Row, bucketID string, columnName 
         WHERE file_id = $2 AND data_type = $3 and user_id = $4`, columnName, columnName)
 	result, err := r.DB.Exec(query, bucketID, row.FileID, string(row.Type), row.UserID)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to remove bucket from "+columnName)
+		return stacktrace.Propagate(err, "%s", "failed to remove bucket from "+columnName)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 	if rowsAffected == 0 {
-		return stacktrace.NewError("bucket not removed from " + columnName)
+		return stacktrace.NewError("%s", "bucket not removed from "+columnName)
 	}
 	return nil
 }
@@ -216,14 +216,14 @@ func (r *Repository) MoveBetweenBuckets(row filedata.Row, bucketID string, sourc
   WHERE file_id = $2 AND data_type = $3 and user_id = $4`, destColumn, destColumn, sourceColumn, sourceColumn)
 	result, err := r.DB.Exec(query, bucketID, row.FileID, string(row.Type), row.UserID)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to move bucket from "+sourceColumn+" to "+destColumn)
+		return stacktrace.Propagate(err, "%s", "failed to move bucket from "+sourceColumn+" to "+destColumn)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 	if rowsAffected == 0 {
-		return stacktrace.NewError("bucket not moved from " + sourceColumn + " to " + destColumn)
+		return stacktrace.NewError("%s", "bucket not moved from "+sourceColumn+" to "+destColumn)
 	}
 	return nil
 }
@@ -251,7 +251,7 @@ func (r *Repository) GetPendingSyncDataAndExtendLock(ctx context.Context, newSyn
 		return nil, stacktrace.Propagate(err, "")
 	}
 	if fileData.SyncLockedTill > newSyncLockTime {
-		return nil, stacktrace.NewError(fmt.Sprintf("newSyncLockTime (%d) is less than existing SyncLockedTill(%d), newSync", newSyncLockTime, fileData.SyncLockedTill))
+		return nil, stacktrace.NewError("newSyncLockTime (%d) is less than existing SyncLockedTill(%d), newSync", newSyncLockTime, fileData.SyncLockedTill)
 	}
 	_, err = tx.Exec(`UPDATE file_data SET sync_locked_till = $1 WHERE file_id = $2 AND data_type = $3 AND user_id = $4`, newSyncLockTime, fileData.FileID, string(fileData.Type), fileData.UserID)
 	if err != nil {

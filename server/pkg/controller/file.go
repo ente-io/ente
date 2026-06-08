@@ -104,7 +104,7 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 			return stacktrace.Propagate(err, "")
 		}
 		if ente.App(collection.App) != app {
-			return stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("ctx app is different from collection app=%s collectionApp=%s", app, collection.App))
+			return stacktrace.Propagate(ente.ErrInvalidApp, "ctx app is different from collection app=%s collectionApp=%s", app, collection.App)
 		}
 		// Verify that user owns the collection.
 		// Warning: Do not remove this check
@@ -151,11 +151,11 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 
 	if fileResult.err != nil {
 		log.Error("Could not find size of file: " + file.File.ObjectKey)
-		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, fileResult.err.Error())
+		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, "%s", fileResult.err.Error())
 	}
 	if thumbResult.err != nil {
 		log.Error("Could not find size of thumbnail: " + file.Thumbnail.ObjectKey)
-		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, thumbResult.err.Error())
+		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, "%s", thumbResult.err.Error())
 	}
 	fileSize := fileResult.size
 	thumbnailSize := thumbResult.size

@@ -768,9 +768,9 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 			if stripe.ErrorCodeResourceMissing == stripeError.Code {
 				return nil
 			}
-			return stacktrace.Propagate(err, fmt.Sprintf("failed to delete customer %s", subscription.Attributes.CustomerID))
+			return stacktrace.Propagate(err, "failed to delete customer %s", subscription.Attributes.CustomerID)
 		default:
-			return stacktrace.Propagate(err, fmt.Sprintf("failed to delete customer %s", subscription.Attributes.CustomerID))
+			return stacktrace.Propagate(err, "failed to delete customer %s", subscription.Attributes.CustomerID)
 		}
 	}
 	return nil

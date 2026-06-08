@@ -368,7 +368,7 @@ func (c *UserController) getAccountRecoveryLink(userID int64, userEmail string) 
 func (c *UserController) HandleSelfAccountRecovery(ctx *gin.Context, token string) error {
 	jwtToken, err := c.ValidateJWTToken(token, enteJWT.RestoreAccount)
 	if err != nil {
-		return stacktrace.Propagate(ente.NewPermissionDeniedError("invalid token"), fmt.Sprintf("failed to validate jwt token: %s", err.Error()))
+		return stacktrace.Propagate(ente.NewPermissionDeniedError("invalid token"), "failed to validate jwt token: %s", err.Error())
 	}
 	if jwtToken.UserID == 0 || jwtToken.Email == "" {
 		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{

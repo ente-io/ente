@@ -385,17 +385,11 @@ func (c *UserController) fCreateSession(srpUserID string, srpA string) (*ente.Cr
 
 	// Generate realistic fake SRP data
 	serverSecret := make([]byte, 64) // Same size as real srp.GenKey()
-	_, err = rand.Read(serverSecret)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to generate server secret")
-	}
+	rand.Read(serverSecret)
 
 	// Generate fake SRP B value (512 bytes like real)
 	srpBBytes := make([]byte, 512)
-	_, err = rand.Read(srpBBytes)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to generate srpB bytes")
-	}
+	rand.Read(srpBBytes)
 
 	// Parse srpUserID as UUID
 	userUUID, err := uuid.Parse(srpUserID)
