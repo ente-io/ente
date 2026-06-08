@@ -30,26 +30,31 @@ class AuthThemePreferences {
 
   static Future<ThemeMode?> _getAuthThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
-    return _themeModeFromIndex(prefs.getInt(_authThemeModeKey));
+    return _authThemeModeFromIndex(prefs.getInt(_authThemeModeKey));
   }
 
   static Future<void> _setAuthThemeMode(ThemeMode themeMode) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_authThemeModeKey, _themeModeIndex(themeMode));
+    // Auth owns this key, so persist Flutter's ThemeMode.index directly.
+    await prefs.setInt(_authThemeModeKey, themeMode.index);
   }
 
   static Future<ThemeMode?> _getMigratedThemeMode() async {
+    // AdaptiveTheme can live in either the newer async backend or the legacy
+    // cached SharedPreferences backend depending on platform/plugin history.
     final prefs = SharedPreferencesAsync();
-    return _parseThemeMode(await prefs.getString(_adaptiveThemePrefKey)) ??
+    return _parseAdaptiveThemeMode(
+          await prefs.getString(_adaptiveThemePrefKey),
+        ) ??
         await _getLegacyAdaptiveThemeMode();
   }
 
   static Future<ThemeMode?> _getLegacyAdaptiveThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
-    return _parseThemeMode(prefs.getString(_adaptiveThemePrefKey));
+    return _parseAdaptiveThemeMode(prefs.getString(_adaptiveThemePrefKey));
   }
 
-  static ThemeMode? _parseThemeMode(String? themeDataString) {
+  static ThemeMode? _parseAdaptiveThemeMode(String? themeDataString) {
     if (themeDataString == null || themeDataString.isEmpty) {
       return null;
     }
@@ -61,13 +66,24 @@ class AuthThemePreferences {
       }
 
       final themeModeIndex = decoded[_themeModeKey];
-      return _themeModeFromIndex(themeModeIndex);
+      return _adaptiveThemeModeFromIndex(themeModeIndex);
     } on FormatException {
       return null;
     }
   }
 
-  static ThemeMode? _themeModeFromIndex(Object? themeModeIndex) {
+  static ThemeMode? _authThemeModeFromIndex(Object? themeModeIndex) {
+    if (themeModeIndex is! int ||
+        themeModeIndex < 0 ||
+        themeModeIndex >= ThemeMode.values.length) {
+      return null;
+    }
+    return ThemeMode.values[themeModeIndex];
+  }
+
+  static ThemeMode? _adaptiveThemeModeFromIndex(Object? themeModeIndex) {
+    // AdaptiveTheme persisted its own enum order: light=0, dark=1, system=2.
+    // Keep this separate from Flutter's ThemeMode.index used by Auth's key.
     switch (themeModeIndex) {
       case 0:
         return ThemeMode.light;
@@ -77,17 +93,6 @@ class AuthThemePreferences {
         return ThemeMode.system;
       default:
         return null;
-    }
-  }
-
-  static int _themeModeIndex(ThemeMode themeMode) {
-    switch (themeMode) {
-      case ThemeMode.light:
-        return 0;
-      case ThemeMode.dark:
-        return 1;
-      case ThemeMode.system:
-        return 2;
     }
   }
 }

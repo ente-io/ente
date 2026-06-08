@@ -21,85 +21,114 @@ void main() {
     expect(await AuthThemePreferences.getThemeMode(), ThemeMode.system);
   });
 
+  test("reads Auth theme preference using Flutter ThemeMode index", () async {
+    await _setAuthThemeModeIndex(ThemeMode.system.index);
+    expect(await AuthThemePreferences.getThemeMode(), ThemeMode.system);
+
+    await _setAuthThemeModeIndex(ThemeMode.light.index);
+    expect(await AuthThemePreferences.getThemeMode(), ThemeMode.light);
+
+    await _setAuthThemeModeIndex(ThemeMode.dark.index);
+    expect(await AuthThemePreferences.getThemeMode(), ThemeMode.dark);
+  });
+
+  test(
+    "persists Auth theme preference using Flutter ThemeMode index",
+    () async {
+      await AuthThemePreferences.setThemeMode(ThemeMode.system);
+      expect(await _getAuthThemeModeIndex(), ThemeMode.system.index);
+
+      await AuthThemePreferences.setThemeMode(ThemeMode.light);
+      expect(await _getAuthThemeModeIndex(), ThemeMode.light.index);
+
+      await AuthThemePreferences.setThemeMode(ThemeMode.dark);
+      expect(await _getAuthThemeModeIndex(), ThemeMode.dark.index);
+    },
+  );
+
   test("prefers Auth theme preference", () async {
-    await _setAuthThemeMode(ThemeMode.dark);
-    await _setAsyncThemeMode(ThemeMode.light);
-    await _setLegacyThemeMode(ThemeMode.light);
+    await _setAuthThemeModeIndex(ThemeMode.dark.index);
+    await _setAsyncAdaptiveThemeModeIndex(0);
+    await _setLegacyAdaptiveThemeModeIndex(0);
 
     expect(await AuthThemePreferences.getThemeMode(), ThemeMode.dark);
   });
 
   test("migrates adaptive theme async preference", () async {
-    await _setAsyncThemeMode(ThemeMode.dark);
-    await _setLegacyThemeMode(ThemeMode.light);
+    await _setAsyncAdaptiveThemeModeIndex(1);
+    await _setLegacyAdaptiveThemeModeIndex(0);
 
     expect(await AuthThemePreferences.getThemeMode(), ThemeMode.dark);
-    expect(await _getAuthThemeMode(), ThemeMode.dark);
+    expect(await _getAuthThemeModeIndex(), ThemeMode.dark.index);
   });
 
   test("migrates legacy adaptive theme preference", () async {
-    await _setLegacyThemeMode(ThemeMode.light);
+    await _setLegacyAdaptiveThemeModeIndex(0);
 
     expect(await AuthThemePreferences.getThemeMode(), ThemeMode.light);
-    expect(await _getAuthThemeMode(), ThemeMode.light);
+    expect(await _getAuthThemeModeIndex(), ThemeMode.light.index);
   });
+
+  test(
+    "converts adaptive theme indices to Flutter ThemeMode indices",
+    () async {
+      await _setAsyncAdaptiveThemeModeIndex(0);
+      expect(await AuthThemePreferences.getThemeMode(), ThemeMode.light);
+      expect(await _getAuthThemeModeIndex(), ThemeMode.light.index);
+
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      SharedPreferences.setMockInitialValues({});
+
+      await _setAsyncAdaptiveThemeModeIndex(1);
+      expect(await AuthThemePreferences.getThemeMode(), ThemeMode.dark);
+      expect(await _getAuthThemeModeIndex(), ThemeMode.dark.index);
+
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      SharedPreferences.setMockInitialValues({});
+
+      await _setAsyncAdaptiveThemeModeIndex(2);
+      expect(await AuthThemePreferences.getThemeMode(), ThemeMode.system);
+      expect(await _getAuthThemeModeIndex(), ThemeMode.system.index);
+    },
+  );
 
   test("keeps Auth theme preference when adaptive value resets", () async {
     await AuthThemePreferences.setThemeMode(ThemeMode.light);
-    await _setAsyncThemeMode(ThemeMode.system);
-    await _setLegacyThemeMode(ThemeMode.system);
+    await _setAsyncAdaptiveThemeModeIndex(2);
+    await _setLegacyAdaptiveThemeModeIndex(2);
 
     expect(await AuthThemePreferences.getThemeMode(), ThemeMode.light);
   });
 }
 
-Future<void> _setAuthThemeMode(ThemeMode themeMode) async {
+Future<void> _setAuthThemeModeIndex(int themeModeIndex) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setInt(_authThemeModeKey, _themeModeIndex(themeMode));
+  await prefs.setInt(_authThemeModeKey, themeModeIndex);
 }
 
-Future<ThemeMode?> _getAuthThemeMode() async {
+Future<int?> _getAuthThemeModeIndex() async {
   final prefs = await SharedPreferences.getInstance();
-  return _themeModeFromIndex(prefs.getInt(_authThemeModeKey));
+  return prefs.getInt(_authThemeModeKey);
 }
 
-Future<void> _setAsyncThemeMode(ThemeMode themeMode) async {
+Future<void> _setAsyncAdaptiveThemeModeIndex(int themeModeIndex) async {
   final prefs = SharedPreferencesAsync();
-  await prefs.setString(_adaptiveThemePrefKey, _themeModeJson(themeMode));
+  await prefs.setString(
+    _adaptiveThemePrefKey,
+    _adaptiveThemeJson(themeModeIndex),
+  );
 }
 
-Future<void> _setLegacyThemeMode(ThemeMode themeMode) async {
+Future<void> _setLegacyAdaptiveThemeModeIndex(int themeModeIndex) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setString(_adaptiveThemePrefKey, _themeModeJson(themeMode));
+  await prefs.setString(
+    _adaptiveThemePrefKey,
+    _adaptiveThemeJson(themeModeIndex),
+  );
 }
 
-String _themeModeJson(ThemeMode themeMode) {
-  return json.encode({
-    "theme_mode": _themeModeIndex(themeMode),
-    "default_theme_mode": _themeModeIndex(ThemeMode.system),
-  });
-}
-
-ThemeMode? _themeModeFromIndex(Object? themeModeIndex) {
-  switch (themeModeIndex) {
-    case 0:
-      return ThemeMode.light;
-    case 1:
-      return ThemeMode.dark;
-    case 2:
-      return ThemeMode.system;
-    default:
-      return null;
-  }
-}
-
-int _themeModeIndex(ThemeMode themeMode) {
-  switch (themeMode) {
-    case ThemeMode.light:
-      return 0;
-    case ThemeMode.dark:
-      return 1;
-    case ThemeMode.system:
-      return 2;
-  }
+String _adaptiveThemeJson(int themeModeIndex) {
+  return json.encode({"theme_mode": themeModeIndex, "default_theme_mode": 2});
 }
