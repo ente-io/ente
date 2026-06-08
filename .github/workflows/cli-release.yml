@@ -14,7 +14,6 @@ on:
 
 permissions:
     contents: write
-    packages: write
 
 jobs:
     draft-release:
@@ -41,18 +40,41 @@ jobs:
             - name: Checkout
               uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-            - name: Build binaries and add to the release
-              uses: wangyoucao577/go-release-action@279495102627de7960cbc33434ab01a12bae144b # v1.55
+            - name: Setup go
+              uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
               with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  goos: ${{ matrix.goos }}
-                  goarch: ${{ matrix.goarch }}
-                  asset_name: ente-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
-                  release_name: ${{ github.ref_name }}
-                  goversion: "1.23"
-                  project_path: "./cli"
-                  pre_command: export CGO_ENABLED=0
-                  build_flags: "-trimpath"
-                  ldflags: "-X main.AppVersion=${{ github.ref_name }} -s -w"
-                  md5sum: false
-                  sha256sum: true
+                  go-version-file: cli/go.mod
+                  cache: false
+
+            - name: Build binaries and add to the release
+              env:
+                  CGO_ENABLED: 0
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GOARCH: ${{ matrix.goarch }}
+                  GOOS: ${{ matrix.goos }}
+              run: |
+                  set -euo pipefail
+
+                  asset="ente-${GITHUB_REF_NAME}-${GOOS}-${GOARCH}"
+                  binary="ente"
+                  dist="$RUNNER_TEMP/cli-release"
+                  version="${GITHUB_REF_NAME#cli-}"
+
+                  if [ "$GOOS" = windows ]; then
+                      binary="ente.exe"
+                  fi
+
+                  mkdir -p "$dist"
+                  go build -C cli -trimpath -ldflags "-X main.AppVersion=$version -s -w" -o "$dist/$binary"
+
+                  cd "$dist"
+                  if [ "$GOOS" = windows ]; then
+                      asset="$asset.zip"
+                      zip -vr "$asset" "$binary"
+                  else
+                      asset="$asset.tar.gz"
+                      tar cvfz "$asset" "$binary"
+                  fi
+
+                  sha256sum "$asset" | cut -d ' ' -f 1 > "$asset.sha256"
+                  gh release upload "$GITHUB_REF_NAME" "$asset" "$asset.sha256"
