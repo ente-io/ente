@@ -184,7 +184,9 @@ class UploadService {
             metadata.contentLength >= 0 &&
             metadata.contentMd5
         ) {
-            return fetchUploadURLWithMetadata(metadata);
+            return fetchUploadURLWithMetadata(metadata).catch((e: unknown) => {
+                throw translateURLFetchErrorIfNeeded(e);
+            });
         }
         if (this.uploadURLs.length == 0 && this.pendingUploadCount) {
             await this.refillUploadURLs();
