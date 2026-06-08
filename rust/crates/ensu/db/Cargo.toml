@@ -12,9 +12,6 @@ thiserror = "2"
 uuid = { version = "1", features = ["v4", "rng-getrandom"] }
 zeroize = { version = "1.8", features = ["derive"] }
 
-[dev-dependencies]
-tempfile = "3"
-
 [features]
 default = ["sqlite"]
 sqlite = ["dep:rusqlite"]

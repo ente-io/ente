@@ -7,7 +7,6 @@ crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
 ensu-sync.workspace = true
-serde = { version = "1", features = ["derive"] }
 thiserror = "2"
 uniffi = { version = "0.31.0" }
 
