@@ -102,7 +102,7 @@ func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemor
 	}
 
 	var share ente.MemoryShare
-	for attempt := 0; attempt < 5; attempt++ {
+	for range 5 {
 		// Retry on rare access-token collisions to match collection/file link behavior.
 		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 

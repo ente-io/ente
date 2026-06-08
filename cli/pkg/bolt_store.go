@@ -8,7 +8,7 @@ import (
 )
 
 func boltAEKey(entry *model.AlbumFileEntry) []byte {
-	return []byte(fmt.Sprintf("%d:%d", entry.AlbumID, entry.FileID))
+	return fmt.Appendf(nil, "%d:%d", entry.AlbumID, entry.FileID)
 }
 
 func (c *ClICtrl) DeleteAlbumEntry(ctx context.Context, entry *model.AlbumFileEntry) error {

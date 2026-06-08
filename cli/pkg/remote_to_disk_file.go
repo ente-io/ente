@@ -69,7 +69,7 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 				return err
 			}
 		}
-		fileBytes, err := c.GetValue(ctx, model.RemoteFiles, []byte(fmt.Sprintf("%d", albumFileEntry.FileID)))
+		fileBytes, err := c.GetValue(ctx, model.RemoteFiles, fmt.Appendf(nil, "%d", albumFileEntry.FileID))
 		if err != nil {
 			return err
 		}

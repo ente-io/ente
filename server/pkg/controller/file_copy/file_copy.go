@@ -144,7 +144,6 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 	errChan := make(chan error, len(fileCopyList))
 
 	for _, fileCopy := range fileCopyList {
-		fileCopy := fileCopy
 		wg.Go(func() {
 			newFile, err := fc.createCopy(c, fileCopy, userID, app)
 			if err != nil {

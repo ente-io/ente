@@ -335,10 +335,7 @@ func legacyURL() string {
 }
 
 func toRecoverySession(row *legacykitrepo.RecoverySessionRow) ente.LegacyKitRecoverySession {
-	waitRemaining := row.WaitTill - timeutil.Microseconds()
-	if waitRemaining < 0 {
-		waitRemaining = 0
-	}
+	waitRemaining := max(row.WaitTill-timeutil.Microseconds(), 0)
 	status := row.Status
 	if status == ente.LegacyKitRecoveryStatusWaiting && waitRemaining == 0 {
 		status = ente.LegacyKitRecoveryStatusReady

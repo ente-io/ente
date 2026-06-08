@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/smtp"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
@@ -80,10 +81,7 @@ func wrapToMaxLineLength(s string, maxLen int) string {
 	// Grow buffer to avoid re-allocations; add extra space for newline characters.
 	b.Grow(len(clean) + len(clean)/maxLen)
 	for i := 0; i < len(clean); i += maxLen {
-		end := i + maxLen
-		if end > len(clean) {
-			end = len(clean)
-		}
+		end := min(i+maxLen, len(clean))
 		b.WriteString(clean[i:end])
 		if end < len(clean) {
 			b.WriteByte('\n')
@@ -140,10 +138,8 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 	if containsCRLF(fromEmail) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "invalid from email")
 	}
-	for _, addr := range toEmails {
-		if containsCRLF(addr) {
-			return stacktrace.Propagate(ente.ErrBadRequest, "invalid recipient email")
-		}
+	if slices.ContainsFunc(toEmails, containsCRLF) {
+		return stacktrace.Propagate(ente.ErrBadRequest, "invalid recipient email")
 	}
 
 	// If a sender email is provided use it instead of the fromEmail.

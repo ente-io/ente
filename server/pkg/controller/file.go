@@ -901,7 +901,7 @@ func (c *FileController) CleanupDeletedFiles() {
 	itemChan := make(chan repo.QueueItem, len(items))
 
 	// Start worker goroutines
-	for w := 0; w < 8; w++ {
+	for range 8 {
 		wg.Go(func() {
 			for item := range itemChan {
 				func(item repo.QueueItem) {

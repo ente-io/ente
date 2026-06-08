@@ -35,7 +35,7 @@ func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl
 	if actorUserID != file.OwnerID {
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
 	}
-	for attempt := 0; attempt < 5; attempt++ {
+	for range 5 {
 		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 		_, err = c.FileLinkRepo.Insert(ctx, req, actorUserID, accessToken)
 		if errors.Is(err, ente.ErrAccessTokenInUse) {

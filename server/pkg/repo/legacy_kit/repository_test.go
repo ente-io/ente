@@ -149,7 +149,7 @@ func TestCreateKitWithLimitRejectsWhenConcurrentChangeConsumesFinalSlot(t *testi
 		Email:        "legacy-kit-owner@ente.io",
 		CreationTime: 1,
 	})
-	for i := 0; i < 4; i++ {
+	for range 4 {
 		insertLegacyKitForTest(t, db, userID, false)
 	}
 

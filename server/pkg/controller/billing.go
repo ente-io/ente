@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"slices"
 	"strconv"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
@@ -75,7 +76,7 @@ func (c *BillingController) GetPlansV2(countryCode string, stripeAccountCountry 
 	result := make([]ente.BillingPlan, 0)
 	ids := billing.GetActivePlanIDs()
 	for _, plan := range plans {
-		if contains(ids, plan.ID) {
+		if slices.Contains(ids, plan.ID) {
 			result = append(result, plan)
 		}
 	}
@@ -455,13 +456,4 @@ func (c *BillingController) getPlanForCountry(s ente.Subscription, countryCode s
 		return ente.BillingPlan{}, stacktrace.Propagate(err, "")
 	}
 	return plan, nil
-}
-
-func contains(planIDs []string, planID string) bool {
-	for _, id := range planIDs {
-		if id == planID {
-			return true
-		}
-	}
-	return false
 }

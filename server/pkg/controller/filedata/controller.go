@@ -278,10 +278,7 @@ func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, 
 	timeout := opt.InitialTimeout
 	for i := 0; i < totalAttempts; i++ {
 		if i > 0 {
-			timeout = timeout * 2
-			if timeout > opt.MaxTimeout {
-				timeout = opt.MaxTimeout
-			}
+			timeout = min(timeout*2, opt.MaxTimeout)
 		}
 		fetchCtx, cancel := context.WithTimeout(ctx, timeout)
 		select {

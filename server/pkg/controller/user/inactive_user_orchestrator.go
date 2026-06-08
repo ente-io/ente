@@ -264,16 +264,13 @@ func (c *InactiveUserOrchestrator) processCandidateBatch(candidates []repo.UserI
 		return nil
 	}
 
-	workerCount := inactiveUserWorkerCount
-	if len(candidates) < workerCount {
-		workerCount = len(candidates)
-	}
+	workerCount := min(len(candidates), inactiveUserWorkerCount)
 
 	candidateCh := make(chan repo.UserInactivityCandidate, len(candidates))
 	resultCh := make(chan inactiveCandidateResult, len(candidates))
 	var wg sync.WaitGroup
 
-	for i := 0; i < workerCount; i++ {
+	for range workerCount {
 		wg.Go(func() {
 			for candidate := range candidateCh {
 				func(candidate repo.UserInactivityCandidate) {

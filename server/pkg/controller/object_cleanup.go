@@ -573,10 +573,7 @@ func (c *ObjectCleanupController) clearOrphanObjectsPage(page *s3.ListObjectVers
 	var wg sync.WaitGroup
 
 	for i := 0; i < n; i++ {
-		end := i + batchSize
-		if end > n {
-			end = n
-		}
+		end := min(i+batchSize, n)
 
 		if i >= end {
 			// Nothing left
