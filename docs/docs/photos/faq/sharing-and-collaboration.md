@@ -273,7 +273,9 @@ Suggest deletion allows album owners and admins to suggest that other participan
 
 This is useful for curating shared albums after group trips or events by suggesting removal of blurry, duplicate, or unwanted shots.
 
-> **Note**: Suggest deletion is currently available on mobile apps only.
+> [!NOTE]
+>
+> Suggest deletion is currently available on mobile apps only.
 
 Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/collaboration#suggest-deletion)
 
@@ -288,7 +290,9 @@ Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/col
 
 The photos will be removed from the album immediately, and the photo owners will receive delete suggestions to review.
 
-> **Note**: Suggest deletion is currently available on mobile apps only.
+> [!NOTE]
+>
+> Suggest deletion is currently available on mobile apps only.
 
 ### How do I review delete suggestions? {#review-delete-suggestions}
 
@@ -305,7 +309,9 @@ For each suggestion, you can:
 
 The photo was already removed from the shared album when the suggestion was made. Accepting deletes the photo from your account. Rejecting keeps it in your account (but not in the album).
 
-> **Note**: Delete suggestions is currently available on mobile apps only.
+> [!NOTE]
+>
+> Delete suggestions is currently available on mobile apps only.
 
 Learn more: [Storage optimization guide](/photos/features/albums-and-organization/storage-optimization#delete-suggestions)
 
@@ -485,7 +491,9 @@ Ente creates a special album behind the scenes with the selected photos. Quick l
 
 Yes, on Ente's mobile, web, and desktop apps, you can add photos from an album that's shared with you into one of your own albums.
 
-**Important**: This creates a copy of the photo that you fully own, and it will count against your storage quota. This is different from just viewing shared photos, which doesn't use your storage.
+> [!IMPORTANT]
+>
+> This creates a copy of the photo that you fully own, and it will count against your storage quota. This is different from just viewing shared photos, which doesn't use your storage.
 
 The reason for creating copies is to avoid complications around ownership - if the original owner deletes the photo from their library, your copy remains safe in your account.
 

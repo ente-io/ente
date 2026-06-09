@@ -21,7 +21,9 @@ Search looks through:
 - **Item titles**: The name you gave each item
 - **Collection names**: Names of your collections
 
-> **Note**: Search currently matches item titles and names, not the full content within items. Use descriptive titles to make items easier to find.
+> [!NOTE]
+>
+> Search currently matches item titles and names, not the full content within items. Use descriptive titles to make items easier to find.
 
 ## Search tips
 

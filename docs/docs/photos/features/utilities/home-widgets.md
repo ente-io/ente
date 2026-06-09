@@ -7,7 +7,9 @@ description: Add beautiful photo widgets to your phone's home screen with Ente P
 
 Ente Photos offers home screen widgets that display your photos directly on your phone's home screen. Widgets automatically refresh with new photos from your library, bringing your memories to life throughout the day.
 
-> **Note**: Home widgets are available on mobile apps only (iOS and Android).
+> [!NOTE]
+>
+> Home widgets are available on mobile apps only (iOS and Android).
 
 ## Widget Types
 
@@ -72,7 +74,9 @@ Open `Settings > Widgets` in the Ente app to configure your widgets.
 2. Select which people you want to feature
 3. Only people detected by face recognition will appear as options
 
-> **Note**: You must enable [face recognition](/photos/features/search-and-discovery/face-recognition) before configuring the People widget.
+> [!NOTE]
+>
+> You must enable [face recognition](/photos/features/search-and-discovery/face-recognition) before configuring the People widget.
 
 ### Configuring the Memories Widget
 

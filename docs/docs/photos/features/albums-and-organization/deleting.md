@@ -16,7 +16,9 @@ When you delete a photo in Ente:
 3. **Automatic permanent deletion** - After 30 days, the file is permanently deleted and cannot be recovered
 4. **Manual permanent deletion** - You can also manually empty trash or delete specific items at any time
 
-**Important**: Items in Trash count toward your storage quota until permanently deleted.
+> [!IMPORTANT]
+>
+> Items in Trash count toward your storage quota until permanently deleted.
 
 ## Deleting Photos
 
@@ -116,7 +118,9 @@ Restored photos will be moved to an album of choice.
 
 ### Recovery time limit
 
-**Important**: You can only recover files within 30 days of deletion. After 30 days, files are permanently deleted and cannot be recovered. This is an irreversible operation.
+> [!IMPORTANT]
+>
+> You can only recover files within 30 days of deletion. After 30 days, files are permanently deleted and cannot be recovered. This is an irreversible operation.
 
 If you're unsure about deleting certain items, we recommend:
 
@@ -128,7 +132,9 @@ If you're unsure about deleting certain items, we recommend:
 
 To free up storage space immediately, you can permanently delete items from Trash.
 
-> **Warning**: Permanently deleted items cannot be recovered. This action is irreversible.
+> [!WARNING]
+>
+> Permanently deleted items cannot be recovered. This action is irreversible.
 
 ### Emptying all trash
 
@@ -224,7 +230,9 @@ This is useful for:
 - Curating event albums by suggesting removal of low-quality shots
 - Helping participants identify photos they might want to delete
 
-> **Note**: Suggest deletion is currently available on mobile apps only.
+> [!NOTE]
+>
+> Suggest deletion is currently available on mobile apps only.
 
 Learn more in the [collaboration guide](/photos/features/sharing-and-collaboration/collaboration#suggest-deletion).
 
@@ -241,7 +249,9 @@ Learn more about [Sharing and collaboration](/photos/features/sharing-and-collab
 
 ### Device deletion does not sync
 
-**Important**: If you delete a photo from your device's native photos app (iOS Photos, Google Photos, etc.), it will **not** be automatically deleted from Ente.
+> [!IMPORTANT]
+>
+> If you delete a photo from your device's native photos app (iOS Photos, Google Photos, etc.), it will **not** be automatically deleted from Ente.
 
 This is by design for two reasons:
 

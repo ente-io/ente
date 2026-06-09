@@ -46,9 +46,13 @@ If you have an Ente Photos subscription, you can add family members to share you
 
 Family members share the Photos storage quota and get increased Locker limits (1000 items and 10GB storage each).
 
-> **Note**: The Family plan requires an Ente Photos subscription and is managed through Ente Photos, not Locker. Learn more about [Family plans](/photos/features/account/family-plans).
+> [!NOTE]
+>
+> The Family plan requires an Ente Photos subscription and is managed through Ente Photos, not Locker. Learn more about [Family plans](/photos/features/account/family-plans).
 
-> **Tip**: For children, consider storing their recovery key in a parent's Locker as a secure note.
+> [!TIP]
+>
+> For children, consider storing their recovery key in a parent's Locker as a secure note.
 
 ## Step 2: Plan your collection structure
 

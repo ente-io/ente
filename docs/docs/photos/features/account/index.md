@@ -11,7 +11,9 @@ Your Ente account is the foundation for securely storing and accessing your phot
 
 Your Ente account works across both Ente Photos and Ente Auth. You can use the same account for both products, or create separate accounts for each.
 
-> **Note**: If you use the same account for both Photos and Auth and enable 2FA for your Ente account (stored in Ente Auth), this creates a circular dependency. We recommend either:
+> [!NOTE]
+>
+> If you use the same account for both Photos and Auth and enable 2FA for your Ente account (stored in Ente Auth), this creates a circular dependency. We recommend either:
 >
 > - Using separate accounts for Auth and Photos for security
 > - Ensuring your recovery key is stored securely (written down on paper) as it can bypass 2FA if you're locked out

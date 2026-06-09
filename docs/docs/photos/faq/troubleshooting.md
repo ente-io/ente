@@ -279,11 +279,13 @@ When photos are uploaded on the web app, the most common cause of thumbnails not
 - Turn off Brave Shields for Ente's domain, OR
 - Check if you're using browser extensions that block canvas access and whitelist Ente
 
-**Important:** Once thumbnails are incorrectly generated or missing, they cannot be regenerated. You'll need to:
-
-1. Delete the affected files from Ente
-2. Fix the browser settings
-3. Re-upload the files
+> [!IMPORTANT]
+>
+> Once thumbnails are incorrectly generated or missing, they cannot be regenerated. You'll need to:
+>
+> 1. Delete the affected files from Ente
+> 2. Fix the browser settings
+> 3. Re-upload the files
 
 Ente will automatically skip files that have already been uploaded, so you can drag and drop the original folder again after removing the files without thumbnails.
 
@@ -417,7 +419,9 @@ Open device `Settings > Apps > Ente > Storage` and tap "Clear cache" (NOT "Clear
 3. Log back in
 4. Your backed-up photos are safe in the cloud
 
-**Note**: This is a known issue being investigated by our team. If none of these solutions work, please contact [support@ente.com](mailto:support@ente.com) with your device model and Android version.
+> [!NOTE]
+>
+> This is a known issue being investigated by our team. If none of these solutions work, please contact [support@ente.com](mailto:support@ente.com) with your device model and Android version.
 
 ### Why is the Linux desktop app still showing the old icon after updating? {#linux-icon-update}
 
@@ -614,7 +618,9 @@ This deletes temporary files such as thumbnails and preloaded images that can be
 
 If you need to contact support, debug logs help us diagnose issues faster.
 
-> **Note**: Debug logs contain potentially sensitive information like file names. Feel free to not share them if you have privacy concerns. We'll try to diagnose without logs, though they make the process faster.
+> [!NOTE]
+>
+> Debug logs contain potentially sensitive information like file names. Feel free to not share them if you have privacy concerns. We'll try to diagnose without logs, though they make the process faster.
 
 **On mobile:**
 

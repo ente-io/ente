@@ -113,7 +113,9 @@ Photo owners can review delete suggestions in `Settings > Backup > Free up space
 
 Learn more in the [storage optimization guide](/photos/features/albums-and-organization/storage-optimization#delete-suggestions).
 
-> **Note**: Suggest deletion is currently available on mobile apps only.
+> [!NOTE]
+>
+> Suggest deletion is currently available on mobile apps only.
 
 ### Platform availability
 

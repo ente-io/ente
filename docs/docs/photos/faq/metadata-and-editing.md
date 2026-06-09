@@ -39,7 +39,9 @@ Ente will import the date for your photos from three places (in order of priorit
 
 3. **File name**: If the photo does not have a date in the Exif data (and it is not a Google takeout), for example, for screenshots or WhatsApp forwards, Ente will try and deduce the correct date for the file from the name of the file.
 
-> **Note**: The filename-based detection works great most of the time, but it is inherently based on heuristics and is not exact.
+> [!NOTE]
+>
+> The filename-based detection works great most of the time, but it is inherently based on heuristics and is not exact.
 
 If we are unable to decipher the creation time from these 3 sources, we will set the upload time as the photo's creation time.
 
@@ -122,7 +124,9 @@ This is useful for:
 - Adjusting timezone differences
 - Correcting dates on scanned photos
 
-**Note**: This feature is currently only available on the desktop app.
+> [!NOTE]
+>
+> This feature is currently only available on the desktop app.
 
 ### Can I bulk edit photo locations? {#bulk-edit-locations}
 

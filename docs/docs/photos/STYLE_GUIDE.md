@@ -95,8 +95,7 @@ Use consistent format with `>` separator:
 
 ### Emphasis
 
-- **Bold**: UI elements, important warnings, section labels
-    - Example: **On mobile:** or **Important:**
+- **Bold**: UI elements, section labels (e.g. "**On mobile:**")
 - _Italic_: Emphasis, terminology introduction (use sparingly)
 - `Code`: File paths, commands, technical values
 
@@ -241,10 +240,14 @@ Include when relevant:
 This may take 10-30 minutes for large libraries.
 ```
 
-### Version/Platform Notes
+### Callouts
+
+Use GitHub-style alerts (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`) for callouts.
 
 ```markdown
-> **Note**: This feature is available on mobile apps starting v0.9.98.
+> [!NOTE]
+>
+> This feature is available on mobile apps starting v0.9.98.
 ```
 
 ## Examples

@@ -57,7 +57,9 @@ Machine learning powers search in Ente Photos, allowing you to search for photos
 
 **On desktop:** Open `Settings > Preferences > Machine learning` and enable "Machine learning" and/or "Local indexing".
 
-> **Note**: Machine learning is not available on the web app. You must use mobile or desktop apps.
+> [!NOTE]
+>
+> Machine learning is not available on the web app. You must use mobile or desktop apps.
 
 **What happens next:**
 
@@ -67,7 +69,9 @@ After enabling, the app will download and process your photos locally on your de
 - Desktop computers process faster than mobile devices
 - Indexes are encrypted and synced to your other devices
 
-> **Tip**: If you have a large library, enable machine learning on desktop first for faster indexing. Once complete, the indexes sync to your mobile devices.
+> [!TIP]
+>
+> If you have a large library, enable machine learning on desktop first for faster indexing. Once complete, the indexes sync to your mobile devices.
 
 Learn more in the [Machine learning guide](/photos/features/search-and-discovery/machine-learning).
 

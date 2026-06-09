@@ -45,7 +45,9 @@ The item is moved to Trash.
 3. Select **Empty Trash**
 4. Confirm permanent deletion
 
-> **Warning**: Emptying Trash permanently deletes all items. This action cannot be undone.
+> [!WARNING]
+>
+> Emptying Trash permanently deletes all items. This action cannot be undone.
 
 ### Delete individual items
 

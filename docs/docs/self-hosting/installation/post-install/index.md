@@ -136,7 +136,9 @@ The browser blocks these requests unless CORS is properly configured.
 
 Learn more about [configuring CORS for object storage](/self-hosting/administration/object-storage#cors-cross-origin-resource-sharing).
 
-> **Note**: This challenge is unrelated to the local storage path configuration (MinIO volumes in compose.yaml). It's specifically about browser security when accessing object storage over the network.
+> [!NOTE]
+>
+> This challenge is unrelated to the local storage path configuration (MinIO volumes in compose.yaml). It's specifically about browser security when accessing object storage over the network.
 
 ## Step 5: Download mobile and desktop app
 
