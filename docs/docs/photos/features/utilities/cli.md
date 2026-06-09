@@ -116,7 +116,9 @@ The recommended approach for keeping NAS and Ente synced is to use the CLI to **
 0 2 * * * /usr/local/bin/ente export
 ```
 
-**Important:** Two-way sync is not currently supported. The CLI only pulls data from Ente to local storage - changes to local files won't sync back to Ente.
+> [!IMPORTANT]
+>
+> Two-way sync is not currently supported. The CLI only pulls data from Ente to local storage - changes to local files won't sync back to Ente.
 
 ## Export details
 

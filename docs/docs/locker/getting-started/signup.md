@@ -16,7 +16,9 @@ Ente Locker uses the same account system as Ente Photos and Ente Auth. If you al
 5. Verify your email with the code sent to you
 6. **Important**: Save your recovery key when prompted
 
-> **Warning**: Your recovery key is the primary way to access your account if you forget your password. Store it securely in multiple locations, and set up Legacy recovery if someone else may need to recover the account.
+> [!WARNING]
+>
+> Your recovery key is the primary way to access your account if you forget your password. Store it securely in multiple locations, and set up Legacy recovery if someone else may need to recover the account.
 
 ## Logging in
 

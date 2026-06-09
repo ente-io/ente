@@ -30,8 +30,6 @@ Public album links are served by the Albums app at [http://localhost:3002](http:
 
 The data accessed by Museum is stored in `./data` folder inside `my-ente` directory. It contains extra configuration files that is to be used (push notification credentials, etc.)
 
-::: tip
-
-Check out [post-installation steps](/self-hosting/installation/post-install/) for further usage.
-
-:::
+> [!TIP]
+>
+> Check out [post-installation steps](/self-hosting/installation/post-install/) for further usage.

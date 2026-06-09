@@ -44,7 +44,6 @@ When Ensu opens for the first time, it picks a default model based on your devic
 
 Native downloads are resumable: if the download is interrupted, Ensu picks it up from where it stopped the next time you launch the app. Downloads happen in parallel where possible, and retry automatically.
 
-
 ## What happens when you send a message
 
 When you press send:

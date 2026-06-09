@@ -9,15 +9,13 @@ Upgrading Ente depends on the method of installation you have chosen.
 
 ## Quickstart
 
-::: tip For Docker users
-
-You can free up some disk space by deleting older images that were used by obsolete containers.
-
-```sh
-docker image prune
-```
-
-:::
+> [!TIP]
+>
+> You can free up some disk space by deleting older images that were used by obsolete containers.
+>
+> ```sh
+> docker image prune
+> ```
 
 Pull in the latest images in the directory where the Compose file resides. Restart the cluster to recreate containers with newer images.
 

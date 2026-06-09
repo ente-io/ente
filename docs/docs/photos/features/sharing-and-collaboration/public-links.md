@@ -137,7 +137,9 @@ Disable the option to download original quality photos. Recipients can still vie
 - Watermarked preview sharing
 - Limited distribution control
 
-**Note:** This doesn't prevent screenshots or screen recording, but does make it harder for recipients to get high-quality copies.
+> [!NOTE]
+>
+> This doesn't prevent screenshots or screen recording, but does make it harder for recipients to get high-quality copies.
 
 ### Allow joining album
 

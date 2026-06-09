@@ -98,7 +98,9 @@ Photos automatically move to Uncategorized in these situations:
 
 **When deleting from watched folders**: On desktop, if you delete a file from a folder being watched by Ente, the corresponding photo in Ente moves to Uncategorized (it's not permanently deleted).
 
-**Note**: Photos uploaded by others (from shared albums) do not go to Uncategorized when removed.
+> [!NOTE]
+>
+> Photos uploaded by others (from shared albums) do not go to Uncategorized when removed.
 
 ### If all my photos are in Uncategorized, how do I move them to resemble the local album structure I have on my device? {#move-uncategorized-to-albums}
 
@@ -218,7 +220,9 @@ Yes, archived photos still appear in search results and in their respective albu
 
 Open the photo, tap the three dots menu (overflow menu), and select "Hide" (the action with the eye icon). Hidden items will only be accessible from the special "Hidden" category at the bottom of the Albums screen, which requires biometric authentication to view.
 
-**Note**: Hidden items may still appear in "On device" albums within Ente as long as they're present in your native device gallery. Once you remove them from your device, they'll stop showing up there.
+> [!NOTE]
+>
+> Hidden items may still appear in "On device" albums within Ente as long as they're present in your native device gallery. Once you remove them from your device, they'll stop showing up there.
 
 ### How do I archive photos in Ente? {#how-to-archive}
 
@@ -359,7 +363,9 @@ To free up storage space immediately, you can permanently delete items from tras
 - Choose "Delete permanently" from the menu
 - Confirm the action
 
-**Warning**: Permanently deleted items cannot be recovered.
+> [!WARNING]
+>
+> Permanently deleted items cannot be recovered.
 
 ### Can I recover files after 30 days in trash? {#recover-after-30-days}
 

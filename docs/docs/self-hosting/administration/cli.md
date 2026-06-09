@@ -7,11 +7,11 @@ description: Guide to configuring Ente CLI for Self Hosted Instance
 
 If you are self-hosting, you can configure Ente CLI to export data & perform basic administrative actions.
 
-::: tip Installing Ente CLI
-
-For instructions on installing the Ente CLI, see the [README available on Github](https://github.com/ente-io/ente/tree/main/cli/README.md).
-
-:::
+> [!TIP]
+>
+> **Installing Ente CLI**
+>
+> For instructions on installing the Ente CLI, see the [README available on Github](https://github.com/ente-io/ente/tree/main/cli/README.md).
 
 ## Step 1: Configure endpoint
 
@@ -31,13 +31,13 @@ You can whitelist administrator users by following this [guide](/self-hosting/ad
 
 ## Step 3: Add an account
 
-::: info You can not create new accounts using Ente CLI.
-
-You can only log in to your existing accounts.
-
-To create a new account, use Ente Photos (or Ente Auth) web application, desktop or mobile.
-
-:::
+> [!NOTE]
+>
+> You can not create new accounts using Ente CLI.
+>
+> You can only log in to your existing accounts.
+>
+> To create a new account, use Ente Photos (or Ente Auth) web application, desktop or mobile.
 
 You can add your existing account using Ente CLI.
 
@@ -62,14 +62,14 @@ ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --
 ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit False
 ```
 
-::: info The users must be registered on the server with same e-mail address.
-
-If the commands are failing, ensure:
-
-1. `<admin-user-mail>` is whitelisted as administrator user in `museum.yaml`. For more information, check this [guide](/self-hosting/administration/users#whitelist-admins).
-2. `<user-email-to-update>` is a registered user with completed verification.
-
-:::
+> [!NOTE]
+>
+> The users must be registered on the server with same e-mail address.
+>
+> If the commands are failing, ensure:
+>
+> 1. `<admin-user-mail>` is whitelisted as administrator user in `museum.yaml`. For more information, check this [guide](/self-hosting/administration/users#whitelist-admins).
+> 2. `<user-email-to-update>` is a registered user with completed verification.
 
 For more information, check out the documentation for setting [storage and account validity](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md) using the CLI.
 

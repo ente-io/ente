@@ -71,7 +71,9 @@ Example cron job for daily sync:
 
 See the [CLI NAS sync guide](/photos/features/utilities/cli#nas-sync-setup) for detailed setup.
 
-**Note**: Two-way sync is not currently supported. The CLI pulls data from Ente to your local storage.
+> [!NOTE]
+>
+> Two-way sync is not currently supported. The CLI pulls data from Ente to your local storage.
 
 ### CLI not found after installation {#cli-not-found}
 
