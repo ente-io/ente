@@ -333,9 +333,13 @@ class Code {
   }
 
   static String? _getPin(Uri uri) {
+    final type = _getType(uri);
     final String? pin = uri.queryParameters['pin'];
     if (pin == null || pin.isEmpty) {
       return null;
+    }
+    if (type == Type.yandex) {
+      return Uri.decodeComponent(pin);
     }
     return pin;
   }
