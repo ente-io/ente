@@ -1,1 +1,0 @@
-- Add album title tooltips, fix album sorting labels, and consistent typography.
