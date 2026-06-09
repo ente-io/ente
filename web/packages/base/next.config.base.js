@@ -142,11 +142,10 @@ const nextConfig = {
     // available as `process.env.varName` to our code.
     env: { gitSHA, appName, isDesktop, desktopAppVersion },
 
-    // Ask Next to use a separate dist directory for the desktop during
-    // development. This allows us run dev servers simultaneously for both web
-    // and desktop code without them stepping on each others toes.
+    // Desktop development runs via ente://app, and uses a separate dist
+    // directory so web and desktop dev servers can run simultaneously.
     ...(process.env.NODE_ENV != "production" &&
-        isDesktop && { distDir: ".next-desktop" }),
+        isDesktop && { allowedDevOrigins: ["app"], distDir: ".next-desktop" }),
 
     // Customize the webpack configuration used by Next.js.
     webpack: (config, { isServer }) => {
