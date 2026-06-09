@@ -1,1 +1,0 @@
-- Fixed album widgets repeatedly showing the same cached photos from selected albums.

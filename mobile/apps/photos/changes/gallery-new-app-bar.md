@@ -1,1 +1,0 @@
-- Use app bar from new design on Galleries.
