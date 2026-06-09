@@ -42,10 +42,6 @@ class _LocationScreenState extends State<LocationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final heightOfStatusBar = MediaQuery.of(context).viewPadding.top;
-    final heightOfAppBar = GalleryAppBarWidget.hierarchicalPreferredHeight(
-      context,
-    );
     final locationTag = InheritedLocationScreenState.of(
       context,
     ).locationTagEntity.item;
@@ -60,27 +56,9 @@ class _LocationScreenState extends State<LocationScreen> {
             ),
           ),
           child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: Size(double.infinity, heightOfAppBar),
-              child: GalleryAppBarWidget(
-                GalleryType.locationTag,
-                locationTag.name,
-                selectedFiles,
-              ),
-            ),
-            body: Column(
-              children: <Widget>[
-                SizedBox(
-                  height:
-                      MediaQuery.of(context).size.height -
-                      (heightOfAppBar + heightOfStatusBar),
-                  width: double.infinity,
-                  child: LocationGalleryWidget(
-                    tagPrefix: widget.tagPrefix,
-                    selectedFiles: selectedFiles,
-                  ),
-                ),
-              ],
+            body: LocationGalleryWidget(
+              tagPrefix: widget.tagPrefix,
+              selectedFiles: selectedFiles,
             ),
           ),
         ),
@@ -158,9 +136,17 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
     final selectedRadius = InheritedLocationScreenState.of(
       context,
     ).locationTagEntity.item.radius;
+    final locationTag = InheritedLocationScreenState.of(
+      context,
+    ).locationTagEntity.item;
     final centerPoint = InheritedLocationScreenState.of(
       context,
     ).locationTagEntity.item.centerPoint;
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      GalleryType.locationTag,
+      locationTag.name,
+      _selectedFiles,
+    );
 
     Future<FileLoadResult> filterFiles() async {
       //waiting for allFilesWithLocation to be initialized
@@ -205,8 +191,10 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                             ? HierarchicalSearchGallery(
                                 tagPrefix: widget.tagPrefix,
                                 selectedFiles: _selectedFiles,
+                                appBar: appBar,
                               )
                             : Gallery(
+                                appBar: appBar,
                                 loadingWidget: Column(
                                   children: [
                                     EnteLoadingWidget(
@@ -246,7 +234,15 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             ),
           );
         } else {
-          return const Column(children: [Expanded(child: EnteLoadingWidget())]);
+          return CustomScrollView(
+            slivers: [
+              appBar.buildSliver(context),
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: EnteLoadingWidget(),
+              ),
+            ],
+          );
         }
       },
       future: filterFiles(),

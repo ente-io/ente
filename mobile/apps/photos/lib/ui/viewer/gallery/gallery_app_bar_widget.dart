@@ -50,6 +50,7 @@ import "package:photos/ui/sharing/manage_links_widget.dart";
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -62,12 +63,52 @@ import "package:uuid/uuid.dart";
 
 class GalleryAppBarWidget extends StatefulWidget {
   static const double toolbarHeight = kToolbarHeight;
-  static const double _controlRowHeight = 38.0;
-  static const double _actionGap = 8.0;
-  static const double _defaultBackIconSize = IconSizes.medium;
+  static const double _sliverExpandedHeight = 92.0;
 
-  static double hierarchicalPreferredHeight(BuildContext context) {
-    return toolbarHeight + AppBarFilterChips.preferredHeight(context);
+  static Color backgroundColor(BuildContext context) {
+    return getEnteColorScheme(context).backgroundColour;
+  }
+
+  static GalleryAppBarConfig sliverConfig(
+    GalleryType type,
+    String? title,
+    SelectedFiles selectedFiles, {
+    DeviceCollection? deviceCollection,
+    Collection? collection,
+    bool isFromCollectPhotos = false,
+    List<EnteFile>? files,
+  }) {
+    return GalleryAppBarConfig(
+      sliverBuilder: (_) => GalleryAppBarWidget._(
+        type,
+        title,
+        selectedFiles,
+        deviceCollection: deviceCollection,
+        collection: collection,
+        isFromCollectPhotos: isFromCollectPhotos,
+        files: files,
+      ),
+      geometryBuilder: _resolveSliverGeometry,
+    );
+  }
+
+  static HeaderAppBarGeometry _resolveSliverGeometry(BuildContext context) {
+    final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
+      context,
+    );
+    final isHierarchicalSearchable =
+        inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
+    final bottomHeight = isHierarchicalSearchable
+        ? AppBarFilterChips.preferredHeight(context)
+        : 0.0;
+    return SliverAppBarComponent.resolveGeometry(
+      context,
+      subtitle: null,
+      expandedHeight: _sliverExpandedHeight,
+      collapsedHeight: toolbarHeight,
+      titleBuilderHeight: null,
+      bottomHeight: bottomHeight,
+    );
   }
 
   final GalleryType type;
@@ -78,11 +119,10 @@ class GalleryAppBarWidget extends StatefulWidget {
   final bool isFromCollectPhotos;
   final List<EnteFile>? files;
 
-  const GalleryAppBarWidget(
+  const GalleryAppBarWidget._(
     this.type,
     this.title,
     this.selectedFiles, {
-    super.key,
     this.deviceCollection,
     this.collection,
     this.isFromCollectPhotos = false,
@@ -125,7 +165,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   late StreamSubscription _userAuthEventSubscription;
   late StreamSubscription<CollectionMetaEvent> _collectionMetaEventSubscription;
   late Function() _selectedFilesListener;
-  String? _appBarTitle;
+  late String _appBarTitle;
   late CollectionActions collectionActions;
   bool isQuickLink = false;
   late GalleryType galleryType;
@@ -153,7 +193,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         )
         .listen(stateRefresh);
 
-    _appBarTitle = widget.title;
+    _appBarTitle = widget.title ?? "";
     galleryType = widget.type;
     _checkIfICloudSharedAlbum();
   }
@@ -170,6 +210,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       setState(() {
         _isICloudSharedAlbum = true;
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant GalleryAppBarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.title != widget.title) {
+      _appBarTitle = widget.title ?? "";
     }
   }
 
@@ -194,90 +242,35 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final isHierarchicalSearchable =
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
 
-    return galleryType == GalleryType.homepage
-        ? const SizedBox.shrink()
-        : isHierarchicalSearchable
-        ? ValueListenableBuilder(
-            valueListenable: inheritedSearchFilterData!
-                .searchFilterDataProvider!
-                .isSearchingNotifier,
-            child: PreferredSize(
-              preferredSize: Size.fromHeight(
-                AppBarFilterChips.preferredHeight(context),
-              ),
-              child: const AppBarFilterChips(),
-            ),
-            builder: (context, isSearching, child) {
-              return _buildAppBar(
-                context,
-                actions: isSearching ? const [] : _getDefaultActions(context),
-                bottom: child as PreferredSizeWidget,
-              );
-            },
-          )
-        : _buildAppBar(context, actions: _getDefaultActions(context));
-  }
+    if (galleryType == GalleryType.homepage) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
 
-  AppBar _buildAppBar(
-    BuildContext context, {
-    required List<Widget> actions,
-    PreferredSizeWidget? bottom,
-  }) {
-    final colors = context.componentColors;
+    if (!isHierarchicalSearchable) {
+      return _GallerySliverAppBar(
+        title: _appBarTitle,
+        actions: _getDefaultActions(context),
+      );
+    }
 
-    return AppBar(
-      elevation: 0,
-      centerTitle: false,
-      automaticallyImplyLeading: false,
-      toolbarHeight: GalleryAppBarWidget.toolbarHeight,
-      titleSpacing: 0,
-      title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-        child: SizedBox(
-          height: GalleryAppBarWidget._controlRowHeight,
-          child: Row(
-            children: [
-              const _GalleryAppBarBackButton(),
-              const SizedBox(width: Spacing.sm),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: TooltipComponent(
-                    message: _appBarTitle!,
-                    child: Text(
-                      _appBarTitle!,
-                      style: TextStyles.h2.copyWith(color: colors.textBase),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-              ),
-              if (actions.isNotEmpty) ...[
-                const SizedBox(width: Spacing.md),
-                ..._actionsWithSpacing(actions),
-              ],
-            ],
-          ),
+    return ValueListenableBuilder(
+      valueListenable: inheritedSearchFilterData!
+          .searchFilterDataProvider!
+          .isSearchingNotifier,
+      child: PreferredSize(
+        preferredSize: Size.fromHeight(
+          AppBarFilterChips.preferredHeight(context),
         ),
+        child: const AppBarFilterChips(),
       ),
-      bottom: bottom,
-      surfaceTintColor: Colors.transparent,
-      backgroundColor: getEnteColorScheme(context).backgroundColour,
+      builder: (context, isSearching, child) {
+        return _GallerySliverAppBar(
+          title: _appBarTitle,
+          actions: isSearching ? const [] : _getDefaultActions(context),
+          bottom: child as PreferredSizeWidget,
+        );
+      },
     );
-  }
-
-  List<Widget> _actionsWithSpacing(List<Widget> actions) {
-    return [
-      for (var index = 0; index < actions.length; index++) ...[
-        SizedBox.square(
-          dimension: GalleryAppBarWidget._controlRowHeight,
-          child: Center(child: actions[index]),
-        ),
-        if (index != actions.length - 1)
-          const SizedBox(width: GalleryAppBarWidget._actionGap),
-      ],
-    ];
   }
 
   Widget _buildPopupMenuAction<T>({
@@ -326,7 +319,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
         // indicates user cancelled the rename request
-        if (text == "" || text.trim() == _appBarTitle!.trim()) {
+        if (text == "" || text.trim() == _appBarTitle.trim()) {
           return;
         }
 
@@ -1343,32 +1336,26 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 }
 
-class _GalleryAppBarBackButton extends StatelessWidget {
-  const _GalleryAppBarBackButton();
+class _GallerySliverAppBar extends StatelessWidget {
+  const _GallerySliverAppBar({
+    required this.title,
+    required this.actions,
+    this.bottom,
+  });
+
+  final String title;
+  final List<Widget> actions;
+  final PreferredSizeWidget? bottom;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.componentColors;
-    final tooltip = MaterialLocalizations.of(context).backButtonTooltip;
-
-    return Semantics(
-      button: true,
-      label: tooltip,
-      child: Tooltip(
-        message: tooltip,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => Navigator.maybePop(context),
-          child: SizedBox.square(
-            dimension: GalleryAppBarWidget._defaultBackIconSize,
-            child: Icon(
-              Icons.arrow_back,
-              color: colors.textBase,
-              size: GalleryAppBarWidget._defaultBackIconSize,
-            ),
-          ),
-        ),
-      ),
+    return SliverAppBarComponent(
+      title: title,
+      actions: actions,
+      bottom: bottom,
+      expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,
+      collapsedHeight: GalleryAppBarWidget.toolbarHeight,
+      backgroundColor: GalleryAppBarWidget.backgroundColor(context),
     );
   }
 }

@@ -31,14 +31,13 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart"
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
-import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
 import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/search/contact_avatar_widget.dart";
 import "package:photos/ui/viewer/search/result/edit_contact_page.dart";
@@ -123,7 +122,13 @@ class _ContactResultPageState extends State<ContactResultPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      ContactResultPage.appBarType,
+      _searchResultName,
+      _selectedFiles,
+    );
     final gallery = Gallery(
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
             .where(
@@ -154,33 +159,12 @@ class _ContactResultPageState extends State<ContactResultPage> {
           : const EmptyState(),
     );
 
-    final appBarHeight = _ContactResultAppBar.preferredHeight(
-      context,
-      isHierarchicalSearchable: true,
-    );
-
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: InheritedSearchFilterDataWrapper(
           searchFilterDataProvider: _searchFilterDataProvider,
           child: Scaffold(
             backgroundColor: getEnteColorScheme(context).backgroundColour,
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(appBarHeight),
-              child: widget.enableGrouping
-                  ? _ContactResultAppBar(
-                      title: _searchResultName,
-                      isHierarchicalSearchable: true,
-                      height: appBarHeight,
-                    )
-                  : _AppBarWithBoundary(
-                      child: _ContactResultAppBar(
-                        title: _searchResultName,
-                        isHierarchicalSearchable: true,
-                        height: appBarHeight,
-                      ),
-                    ),
-            ),
             body: SelectionState(
               selectedFiles: _selectedFiles,
               child: Stack(
@@ -197,6 +181,7 @@ class _ContactResultPageState extends State<ContactResultPage> {
                               ? HierarchicalSearchGallery(
                                   tagPrefix: widget.tagPrefix,
                                   selectedFiles: _selectedFiles,
+                                  appBar: appBar,
                                 )
                               : gallery;
                         },
@@ -579,104 +564,5 @@ class _UnsavedContactEmptyState extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _ContactResultAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
-  static const _toolbarHeight = 56.0;
-
-  final String title;
-  final bool isHierarchicalSearchable;
-  final double height;
-
-  const _ContactResultAppBar({
-    required this.title,
-    required this.isHierarchicalSearchable,
-    required this.height,
-  });
-
-  static double preferredHeight(
-    BuildContext context, {
-    required bool isHierarchicalSearchable,
-  }) {
-    return isHierarchicalSearchable
-        ? AppBarFilterChips.appBarHeight(context)
-        : _toolbarHeight;
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(height);
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    if (!isHierarchicalSearchable) {
-      return AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: colorScheme.backgroundColour,
-        surfaceTintColor: Colors.transparent,
-        titleSpacing: 0,
-        centerTitle: false,
-        title: _ContactResultAppBarTitle(title: title),
-      );
-    }
-
-    return AppBar(
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      backgroundColor: colorScheme.backgroundColour,
-      surfaceTintColor: Colors.transparent,
-      titleSpacing: 0,
-      centerTitle: false,
-      title: _ContactResultAppBarTitle(title: title),
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(
-          AppBarFilterChips.preferredHeight(context),
-        ),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          child: AppBarFilterChips(),
-        ),
-      ),
-    );
-  }
-}
-
-class _ContactResultAppBarTitle extends StatelessWidget {
-  const _ContactResultAppBarTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: getEnteTextTheme(
-        context,
-      ).largeBold.copyWith(color: getEnteColorScheme(context).textBase),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-}
-
-/// Wrapper widget that reports the app bar as top boundary for auto-scroll
-/// when file grouping is disabled
-class _AppBarWithBoundary extends StatefulWidget {
-  final Widget child;
-
-  const _AppBarWithBoundary({required this.child});
-
-  @override
-  State<_AppBarWithBoundary> createState() => _AppBarWithBoundaryState();
-}
-
-class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
-    with BoundaryReporter {
-  @override
-  Widget build(BuildContext context) {
-    return boundaryWidget(position: BoundaryPosition.top, child: widget.child);
   }
 }

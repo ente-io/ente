@@ -111,8 +111,15 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      GalleryType.localFolder,
+      widget.deviceCollection.name,
+      _selectedFiles,
+      deviceCollection: widget.deviceCollection,
+    );
     final gallery = Gallery(
       key: ValueKey("device_folder:${widget.deviceCollection.id}"),
+      appBar: appBar,
       asyncLoader: _loadFiles,
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [_filterReloadController.stream],
@@ -140,17 +147,6 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              GalleryType.localFolder,
-              widget.deviceCollection.name,
-              _selectedFiles,
-              deviceCollection: widget.deviceCollection,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

@@ -116,22 +116,25 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      JumpToDateGallery.appBarType,
+      "",
+      _selectedFiles,
+    );
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              JumpToDateGallery.appBarType,
-              "",
-              _selectedFiles,
-            ),
-          ),
           body: _loadState == GalleryLoadState.loadingFiles
-              ? EnteLoadingWidget(
-                  color: getEnteColorScheme(context).strokeMuted,
+              ? CustomScrollView(
+                  slivers: [
+                    appBar.buildSliver(context),
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EnteLoadingWidget(
+                        color: getEnteColorScheme(context).strokeMuted,
+                      ),
+                    ),
+                  ],
                 )
               : AnimatedOpacity(
                   opacity: _loadState == GalleryLoadState.galleryReady
@@ -145,6 +148,7 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         Gallery(
+                          appBar: appBar,
                           asyncLoader:
                               (
                                 creationStartTime,

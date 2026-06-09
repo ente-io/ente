@@ -38,7 +38,13 @@ class ArchivePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final Set<int> hiddenCollectionIDs = CollectionsService.instance
         .getHiddenCollectionIds();
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      appBarType,
+      AppLocalizations.of(context).archive,
+      _selectedFiles,
+    );
     final gallery = Gallery(
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getAllPendingOrUploadedFiles(
           creationStartTime,
@@ -102,16 +108,6 @@ class ArchivePage extends StatelessWidget {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(
-              GalleryAppBarWidget.toolbarHeight,
-            ),
-            child: GalleryAppBarWidget(
-              appBarType,
-              AppLocalizations.of(context).archive,
-              _selectedFiles,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(

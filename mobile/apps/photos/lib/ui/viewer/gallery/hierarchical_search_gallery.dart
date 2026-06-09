@@ -17,6 +17,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -30,9 +31,11 @@ import "package:photos/utils/hierarchical_search_util.dart";
 class HierarchicalSearchGallery extends StatefulWidget {
   final String tagPrefix;
   final SelectedFiles? selectedFiles;
+  final GalleryAppBarConfig? appBar;
   const HierarchicalSearchGallery({
     required this.tagPrefix,
     this.selectedFiles,
+    this.appBar,
     super.key,
   });
 
@@ -204,9 +207,10 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
           switchInCurve: Curves.easeInOutExpo,
           switchOutCurve: Curves.easeInOutExpo,
           child: isLoading
-              ? const EnteLoadingWidget()
+              ? _buildLoadingState(context)
               : Gallery(
                   key: ValueKey(_filteredFilesVersion),
+                  appBar: widget.appBar,
                   asyncLoader:
                       (creationStartTime, creationEndTime, {limit, asc}) async {
                         final files = _filterdFiles
@@ -264,6 +268,23 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                 ),
         );
       },
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    final appBar = widget.appBar;
+    if (appBar == null) {
+      return const EnteLoadingWidget();
+    }
+
+    return CustomScrollView(
+      slivers: [
+        appBar.buildSliver(context),
+        const SliverFillRemaining(
+          hasScrollBody: false,
+          child: EnteLoadingWidget(),
+        ),
+      ],
     );
   }
 }

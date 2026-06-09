@@ -96,6 +96,7 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
     this.interactive,
     this.scrollbarOrientation,
     this.showThumb,
+    this.scrollbarPadding,
   });
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -157,6 +158,8 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
 
   final bool? showThumb;
 
+  final EdgeInsets? scrollbarPadding;
+
   @override
   Widget build(BuildContext context) {
     return ScrollbarTheme(
@@ -183,6 +186,7 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
         inUseNotifier: inUseNotifier,
         minScrollbarLength: minScrollbarLength,
         showThumb: showThumb,
+        scrollbarPadding: scrollbarPadding,
         child: child,
       ),
     );
@@ -193,11 +197,13 @@ class _MaterialScrollbar extends RawScrollbar {
   final ValueNotifier<bool> inUseNotifier;
   final double minScrollbarLength;
   final bool? showThumb;
+  final EdgeInsets? scrollbarPadding;
   const _MaterialScrollbar({
     required super.child,
     required this.inUseNotifier,
     required this.minScrollbarLength,
     required this.showThumb,
+    required this.scrollbarPadding,
     super.controller,
     super.thumbVisibility,
     super.trackVisibility,
@@ -392,7 +398,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
           (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = widget.minScrollbarLength
-      ..padding = MediaQuery.paddingOf(context)
+      ..padding = widget.scrollbarPadding ?? MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..ignorePointer = !enableGestures;
   }
