@@ -277,8 +277,6 @@ func main() {
 	objectCleanupController := controller.NewObjectCleanupController(
 		objectCleanupRepo,
 		objectRepo,
-		lockController,
-		objectController,
 		s3Config,
 	)
 
@@ -923,25 +921,24 @@ func main() {
 	privateAPI.POST("/storage-bonus/referral-claim", storageBonusHandler.ClaimReferral)
 
 	adminHandler := &api.AdminHandler{
-		QueueRepo:               queueRepo,
-		UserRepo:                userRepo,
-		CollectionRepo:          collectionRepo,
-		AuthenticatorRepo:       authRepo,
-		UserAuthRepo:            userAuthRepo,
-		UserController:          userController,
-		FamilyController:        familyController,
-		EmergencyController:     emergencyCtrl,
-		RemoteStoreController:   remoteStoreController,
-		FileRepo:                fileRepo,
-		StorageBonusRepo:        storagBonusRepo,
-		BillingRepo:             billingRepo,
-		BillingController:       billingController,
-		ObjectCleanupController: objectCleanupController,
-		MailingListsController:  mailingListsController,
-		DiscordController:       discordController,
-		HashingKey:              hashingKeyBytes,
-		PasskeyController:       passkeyCtrl,
-		StorageBonusCtl:         storageBonusCtrl,
+		QueueRepo:              queueRepo,
+		UserRepo:               userRepo,
+		CollectionRepo:         collectionRepo,
+		AuthenticatorRepo:      authRepo,
+		UserAuthRepo:           userAuthRepo,
+		UserController:         userController,
+		FamilyController:       familyController,
+		EmergencyController:    emergencyCtrl,
+		RemoteStoreController:  remoteStoreController,
+		FileRepo:               fileRepo,
+		StorageBonusRepo:       storagBonusRepo,
+		BillingRepo:            billingRepo,
+		BillingController:      billingController,
+		MailingListsController: mailingListsController,
+		DiscordController:      discordController,
+		HashingKey:             hashingKeyBytes,
+		PasskeyController:      passkeyCtrl,
+		StorageBonusCtl:        storageBonusCtrl,
 	}
 	adminAPI.POST("/mail", adminHandler.SendMail)
 	adminAPI.POST("/mail/subscribe", adminHandler.SubscribeMail)
@@ -966,7 +963,6 @@ func main() {
 	adminAPI.PUT("/user/subscription", adminHandler.UpdateSubscription)
 	adminAPI.POST("/queue/re-queue", adminHandler.ReQueueItem)
 	adminAPI.POST("/user/bonus", adminHandler.UpdateBonus)
-	adminAPI.POST("/job/clear-orphan-objects", adminHandler.ClearOrphanObjects)
 
 	userEntityController := &userEntityCtrl.Controller{Repo: userEntityRepo}
 	userEntityHandler := &api.UserEntityHandler{Controller: userEntityController}
@@ -1214,7 +1210,6 @@ func setupAndStartBackgroundJobs(
 	fileDataCtrl.StartDataDeletion() // Start data deletion for file data;
 	contactController.StartDataDeletion()
 	objectCleanupController.StartRemovingUnreportedObjects()
-	objectCleanupController.StartClearingOrphanObjects()
 }
 
 func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRepo *public.CollectionLinkRepo,
