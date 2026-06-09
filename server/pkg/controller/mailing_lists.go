@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -234,8 +235,10 @@ func (c *MailingListsController) listmonkUnsubscribe(email string) error {
 	id, err := listmonk.GetSubscriberID(c.listmonkCredentials.BaseURL+"/api/subscribers",
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password, email)
 	if err != nil {
-		log.Errorf("Listmonk - Unsub failed, could not find subscriber '%s': %s", email, err)
-		c.notifyListmonkFailure("Listmonk - Unsub failed, could not find subscriber", err)
+		log.Errorf("Listmonk - Unsub failed for '%s': %s", email, err)
+		if !errors.Is(err, listmonk.ErrSubscriberNotFound) {
+			c.notifyListmonkFailure("Listmonk - Unsub failed", err)
+		}
 		return stacktrace.Propagate(err, "")
 	}
 
