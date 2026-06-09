@@ -28,6 +28,8 @@ type Credentials struct {
 
 const listmonkRequestTimeout = 60 * time.Second
 
+var ErrSubscriberNotFound = errors.New("subscriber not found")
+
 // Subscriber captures a listmonk subscriber record required by museum.
 type Subscriber struct {
 	Email   string
@@ -104,7 +106,7 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 
 	// Checking if there are any subscribers found
 	if len(subscriberResp.Data.Results) == 0 {
-		return 0, stacktrace.Propagate(errors.New("subscriber not found"), "")
+		return 0, stacktrace.Propagate(ErrSubscriberNotFound, "")
 	}
 
 	// Extracting the ID from the response

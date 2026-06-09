@@ -1,6 +1,7 @@
 package listmonk
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -17,6 +18,9 @@ func TestGetSubscriberIDReturnsStatusError(t *testing.T) {
 	_, err := GetSubscriberID(server.URL, "user", "pass", "missing@example.com")
 	if err == nil {
 		t.Fatal("expected error")
+	}
+	if errors.Is(err, ErrSubscriberNotFound) {
+		t.Fatal("status failure was reported as subscriber not found")
 	}
 	if !strings.Contains(err.Error(), "status 401") {
 		t.Fatalf("err = %v, want status 401", err)
