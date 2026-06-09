@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"testing"
+	"time"
 	"unsafe"
 
 	"github.com/ulule/limiter/v3"
@@ -65,5 +66,31 @@ func TestNewRateLimiterUsesSafeStore(t *testing.T) {
 	}
 	if !third.Reached {
 		t.Fatalf("third request should be rate limited: %+v", third)
+	}
+}
+
+func TestMemoryLimiterStoreDeletesExpiredCounters(t *testing.T) {
+	store := &memoryLimiterStore{
+		prefix:   limiter.DefaultPrefix,
+		counters: make(map[string]memoryLimiterCounter),
+	}
+	now := time.Now()
+
+	store.counters[store.cacheKey("expired")] = memoryLimiterCounter{
+		value:      1,
+		expiration: now.Add(-time.Second),
+	}
+	store.counters[store.cacheKey("active")] = memoryLimiterCounter{
+		value:      1,
+		expiration: now.Add(time.Second),
+	}
+
+	store.deleteExpiredCountersAt(now)
+
+	if _, ok := store.counters[store.cacheKey("expired")]; ok {
+		t.Fatal("expired counter was not deleted")
+	}
+	if _, ok := store.counters[store.cacheKey("active")]; !ok {
+		t.Fatal("active counter was deleted")
 	}
 }

@@ -13,10 +13,9 @@ import (
 // because the limiter/v3 memory driver stores keys derived from pooled byte
 // buffers, which can mutate after insertion and break sync.Map's hash invariant.
 type memoryLimiterStore struct {
-	mu          sync.Mutex
-	prefix      string
-	nextCleanup time.Time
-	counters    map[string]memoryLimiterCounter
+	mu       sync.Mutex
+	prefix   string
+	counters map[string]memoryLimiterCounter
 }
 
 type memoryLimiterCounter struct {
@@ -25,11 +24,12 @@ type memoryLimiterCounter struct {
 }
 
 func newMemoryLimiterStore() *memoryLimiterStore {
-	return &memoryLimiterStore{
-		prefix:      limiter.DefaultPrefix,
-		nextCleanup: time.Now().Add(limiter.DefaultCleanUpInterval),
-		counters:    make(map[string]memoryLimiterCounter),
+	store := &memoryLimiterStore{
+		prefix:   limiter.DefaultPrefix,
+		counters: make(map[string]memoryLimiterCounter),
 	}
+	go store.deleteExpiredCounters()
+	return store
 }
 
 func (store *memoryLimiterStore) Get(_ context.Context, key string, rate limiter.Rate) (limiter.Context, error) {
@@ -40,7 +40,6 @@ func (store *memoryLimiterStore) Get(_ context.Context, key string, rate limiter
 	store.mu.Lock()
 	defer store.mu.Unlock()
 
-	store.cleanup(now)
 	counter := store.counters[cacheKey]
 	if !counter.expiration.After(now) {
 		counter.value = 1
@@ -61,7 +60,6 @@ func (store *memoryLimiterStore) Peek(_ context.Context, key string, rate limite
 	store.mu.Lock()
 	defer store.mu.Unlock()
 
-	store.cleanup(now)
 	if counter, ok := store.counters[cacheKey]; ok && counter.expiration.After(now) {
 		count = counter.value
 		expiration = counter.expiration
@@ -76,7 +74,6 @@ func (store *memoryLimiterStore) Reset(_ context.Context, key string, rate limit
 	store.mu.Lock()
 	defer store.mu.Unlock()
 
-	store.cleanup(now)
 	delete(store.counters, store.cacheKey(key))
 	return common.GetContextFromState(now, rate, expiration, 0), nil
 }
@@ -85,14 +82,20 @@ func (store *memoryLimiterStore) cacheKey(key string) string {
 	return store.prefix + ":" + key
 }
 
-func (store *memoryLimiterStore) cleanup(now time.Time) {
-	if now.Before(store.nextCleanup) {
-		return
+func (store *memoryLimiterStore) deleteExpiredCounters() {
+	ticker := time.NewTicker(limiter.DefaultCleanUpInterval)
+	for now := range ticker.C {
+		store.deleteExpiredCountersAt(now)
 	}
+}
+
+func (store *memoryLimiterStore) deleteExpiredCountersAt(now time.Time) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+
 	for key, counter := range store.counters {
 		if !counter.expiration.After(now) {
 			delete(store.counters, key)
 		}
 	}
-	store.nextCleanup = now.Add(limiter.DefaultCleanUpInterval)
 }
