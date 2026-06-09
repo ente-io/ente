@@ -103,6 +103,7 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _feedTab = FeedScreen(showBackButton: false);
   final _logger = Logger("HomeWidgetState");
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _selectedAlbums = SelectedAlbums();
   final _selectedFiles = SelectedFiles();
 
@@ -809,7 +810,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
-    bool isSettingsOpen = false;
     final enableDrawer = _shouldEnableDrawer();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
     final isOnOnlineGrantPermissionScreen =
@@ -834,7 +834,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               _selectedFiles.clearAll();
               return;
             }
-            if (isSettingsOpen) {
+            if (_isDrawerOpen()) {
               Navigator.pop(context);
             } else if (Platform.isAndroid && action == IntentAction.main) {
               unawaited(MoveToBackground.moveTaskToBack());
@@ -867,6 +867,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           );
         },
         child: Scaffold(
+          key: _scaffoldKey,
           drawerScrimColor: getEnteColorScheme(context).strokeFainter,
           drawerEnableOpenDragGesture: false,
           //using a hack instead of enabling this as enabling this will create other problems
@@ -883,7 +884,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                 )
               : null,
           onDrawerChanged: (isOpened) {
-            isSettingsOpen = isOpened;
             if (isOpened) {
               Bus.instance.fire(OpenedSettingsEvent());
             }
@@ -977,7 +977,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget _getBody(BuildContext context) {
     final bool localGalleryMode = isLocalGalleryMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
-      _closeDrawerIfOpen(context);
+      _closeDrawerIfOpen();
       final shouldBootstrapLocalGalleryEntryFlow =
           widget.startWithoutAccount && !localGalleryMode;
       final hasPersistedLocalGalleryMode =
@@ -1148,12 +1148,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  void _closeDrawerIfOpen(BuildContext context) {
-    Scaffold.of(context).isDrawerOpen
-        ? SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-            Scaffold.of(context).closeDrawer();
-          })
-        : null;
+  bool _isDrawerOpen() {
+    return _scaffoldKey.currentState?.isDrawerOpen ?? false;
+  }
+
+  void _closeDrawerIfOpen() {
+    if (_isDrawerOpen()) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        _scaffoldKey.currentState?.closeDrawer();
+      });
+    }
   }
 
   Future<bool> _initDeepLinks() async {
