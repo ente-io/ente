@@ -394,9 +394,8 @@ export const PublicAlbumSingleFileViewer: React.FC<
 
     const handleDownload = useCallback(
         async (targetFile: EnteFile) => {
-            const { downloadAndSaveFiles } = await import(
-                "@/public-album/download/services/save"
-            );
+            const { downloadAndSaveFiles } =
+                await import("@/public-album/download/services/save");
             return downloadAndSaveFiles(
                 [targetFile],
                 fileFileName(targetFile),

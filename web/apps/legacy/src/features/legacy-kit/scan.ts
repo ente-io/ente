@@ -301,9 +301,8 @@ const renderPDFPage = async (page: PDFPageProxy) => {
 };
 
 const decodeQrFromPDFBytes = async (bytes: Uint8Array) => {
-    const pdfjs = (await import(
-        "pdfjs-dist/legacy/webpack.mjs"
-    )) as unknown as typeof import("pdfjs-dist");
+    const pdfjs =
+        (await import("pdfjs-dist/legacy/webpack.mjs")) as unknown as typeof import("pdfjs-dist");
     const loadingTask = pdfjs.getDocument({ data: bytes.slice() });
     let pdf: PDFDocumentProxy;
     try {

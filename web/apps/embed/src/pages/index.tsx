@@ -215,7 +215,7 @@ export default function EmbedGallery() {
         } catch (e) {
             log.error("Failed to verify password", e);
             if (isHTTP401Error(e)) {
-                throw new Error(t("incorrect_password"));
+                throw new Error(t("incorrect_password"), { cause: e });
             }
             throw e;
         }

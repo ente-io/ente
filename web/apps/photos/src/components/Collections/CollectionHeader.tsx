@@ -81,19 +81,18 @@ import { Trans } from "react-i18next";
 import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { CollectionMapDialog } from "./CollectionMapDialog";
 
-export interface CollectionHeaderProps
-    extends Pick<
-        FileListWithViewerProps,
-        | "onMarkTempDeleted"
-        | "onAddFileToCollection"
-        | "onRemoteFilesPull"
-        | "onVisualFeedback"
-        | "fileNormalCollectionIDs"
-        | "collectionNameByID"
-        | "emailByUserID"
-        | "onSelectCollection"
-        | "onSelectPerson"
-    > {
+export interface CollectionHeaderProps extends Pick<
+    FileListWithViewerProps,
+    | "onMarkTempDeleted"
+    | "onAddFileToCollection"
+    | "onRemoteFilesPull"
+    | "onVisualFeedback"
+    | "fileNormalCollectionIDs"
+    | "collectionNameByID"
+    | "emailByUserID"
+    | "onSelectCollection"
+    | "onSelectPerson"
+> {
     collectionSummary: CollectionSummary;
     activeCollection: Collection | undefined;
     files: EnteFile[];

@@ -43,14 +43,14 @@
         "test": "npm run test --workspace ente-wasm && npm run test --workspace ente-contacts-web && npm run test --workspace photos"
     },
     "overrides": {
-        "@types/react": "19.2.16",
+        "@types/react": "19.2.17",
         "@types/react-dom": "19.2.3",
         "base-x": "5.0.1"
     },
     "devDependencies": {
-        "concurrently": "9.2.1",
-        "eslint": "9.39.4",
-        "prettier": "3.6.2",
+        "concurrently": "10.0.3",
+        "eslint": "10.4.1",
+        "prettier": "3.8.3",
         "typescript": "6.0.3"
     },
     "packageManager": "npm@11.12.1"

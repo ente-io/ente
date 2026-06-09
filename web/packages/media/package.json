@@ -9,7 +9,7 @@
         "jszip": "3.10.1"
     },
     "devDependencies": {
-        "@types/heic-convert": "2.1.0",
+        "@types/heic-convert": "2.1.1",
         "ente-build-config": "*"
     }
 }

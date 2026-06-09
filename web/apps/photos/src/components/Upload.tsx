@@ -598,16 +598,12 @@ export const Upload: React.FC<UploadProps> = ({
             }
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        let showNextModal = () => {};
-        if (importSuggestion.hasNestedFolders) {
-            showNextModal = () => setOpenCollectionMappingChoice(true);
-        } else {
-            showNextModal = () => {
-                setPrefilledNewAlbumName(importSuggestion.rootFolderName);
-                showNewAlbumNameInput();
-            };
-        }
+        const showNextModal = importSuggestion.hasNestedFolders
+            ? () => setOpenCollectionMappingChoice(true)
+            : () => {
+                  setPrefilledNewAlbumName(importSuggestion.rootFolderName);
+                  showNewAlbumNameInput();
+              };
 
         onOpenCollectionSelector?.({
             action: "upload",
