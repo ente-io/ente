@@ -834,7 +834,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               _selectedFiles.clearAll();
               return;
             }
-            if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+            if (_isDrawerOpen()) {
               Navigator.pop(context);
             } else if (Platform.isAndroid && action == IntentAction.main) {
               unawaited(MoveToBackground.moveTaskToBack());
@@ -1148,12 +1148,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
+  bool _isDrawerOpen() {
+    return _scaffoldKey.currentState?.isDrawerOpen ?? false;
+  }
+
   void _closeDrawerIfOpen() {
-    _scaffoldKey.currentState?.isDrawerOpen == true
-        ? SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-            _scaffoldKey.currentState?.closeDrawer();
-          })
-        : null;
+    if (_isDrawerOpen()) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        _scaffoldKey.currentState?.closeDrawer();
+      });
+    }
   }
 
   Future<bool> _initDeepLinks() async {
