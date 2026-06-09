@@ -1,0 +1,1 @@
+- Reverted preserving date and location metadata when saving gallery downloads.
