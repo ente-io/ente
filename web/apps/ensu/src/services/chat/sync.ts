@@ -556,7 +556,7 @@ const applyDiff = async (response: DiffResponse, chatKey: string) => {
             continue;
         }
 
-        let decrypted: { title?: string } = {};
+        let decrypted: { title?: string };
         try {
             decrypted = (await decryptChatPayload(
                 {

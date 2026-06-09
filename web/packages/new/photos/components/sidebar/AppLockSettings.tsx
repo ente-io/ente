@@ -873,8 +873,7 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
 
 // -- Auto-lock nested drawer --
 
-interface AutoLockOptionsDrawerProps
-    extends NestedSidebarDrawerVisibilityProps {
+interface AutoLockOptionsDrawerProps extends NestedSidebarDrawerVisibilityProps {
     currentValue: number;
 }
 

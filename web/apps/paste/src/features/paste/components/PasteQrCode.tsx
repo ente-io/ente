@@ -64,9 +64,8 @@ export const PasteQrCode = ({
 
         const renderQr = async () => {
             try {
-                const qrCodeStylingModule = (await import(
-                    "qr-code-styling"
-                )) as unknown;
+                const qrCodeStylingModule =
+                    (await import("qr-code-styling")) as unknown;
                 if (!isActive) return;
 
                 const container = qrContainerRef.current;

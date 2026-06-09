@@ -686,7 +686,7 @@ const migrateLegacyIndexedDbChatStore = async () => {
         chatDb(),
     ]);
 
-    let migratedAnyEntries = false;
+    let migratedAnyEntries: boolean;
     try {
         const [sessions, messages, attachmentBytes] = await Promise.all([
             legacyDb.getAll("sessions"),

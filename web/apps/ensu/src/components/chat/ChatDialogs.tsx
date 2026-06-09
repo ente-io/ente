@@ -177,9 +177,8 @@ export const ChatDialogs = memo(
         const openExternalUrl = async (url: string) => {
             if (isTauriRuntime || detectTauriAppRuntime()) {
                 try {
-                    const { openUrl } = await import(
-                        "@tauri-apps/plugin-opener"
-                    );
+                    const { openUrl } =
+                        await import("@tauri-apps/plugin-opener");
                     await openUrl(url);
                     return;
                 } catch {

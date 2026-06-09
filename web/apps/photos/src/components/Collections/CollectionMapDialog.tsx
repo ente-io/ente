@@ -56,7 +56,8 @@ import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { FileListWithViewer } from "../FileListWithViewer";
 
 interface CollectionMapDialogProps
-    extends ModalVisibilityProps,
+    extends
+        ModalVisibilityProps,
         Pick<
             FileListWithViewerProps,
             | "onAddSaveGroup"

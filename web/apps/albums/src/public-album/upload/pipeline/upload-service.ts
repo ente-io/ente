@@ -1633,9 +1633,6 @@ const uploadStreamUsingMultipart = async (
     const { stream } = dataStream;
     const streamReader = stream.getReader();
 
-    let uploadPartCount = Math.ceil(
-        dataStream.chunkCount / multipartChunksPerPart,
-    );
     // Public album uploads always request metadata-aware multipart URLs, so we
     // first materialize each part to compute its checksum.
     const parts: Uint8Array<ArrayBuffer>[] = [];
@@ -1652,7 +1649,7 @@ const uploadStreamUsingMultipart = async (
     const { done } = await streamReader.read();
     if (!done) throw new Error("More chunks than expected");
 
-    uploadPartCount = parts.length;
+    const uploadPartCount = parts.length;
     if (uploadPartCount == 0) {
         throw new Error("Multipart upload produced no parts");
     }

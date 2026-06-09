@@ -1008,7 +1008,9 @@ class ExportService {
                 throw e;
             }
             log.error("error updating Export Record", e);
-            throw Error(CustomError.UPDATE_EXPORTED_RECORD_FAILED);
+            throw new Error(CustomError.UPDATE_EXPORTED_RECORD_FAILED, {
+                cause: e,
+            });
         }
     }
 

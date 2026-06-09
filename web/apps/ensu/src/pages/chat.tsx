@@ -293,8 +293,9 @@ const parseDocumentBlocks = (text: string) => {
     const normalized = text.replace(/\r\n/g, "\n");
     const regex = createDocumentBlockRegex();
     const documents: DocumentAttachment[] = [];
-    let match: RegExpExecArray | null = null;
-    while ((match = regex.exec(normalized)) !== null) {
+    while (true) {
+        const match = regex.exec(normalized);
+        if (!match) break;
         const name = match[1]?.trim() || "Document";
         const content = match[2] ?? "";
         const size = new TextEncoder().encode(content).length;
@@ -3702,9 +3703,8 @@ const Page: React.FC = () => {
         closeAttachmentMenu();
         if (imageAttachmentSlotsRemaining <= 0) return;
         try {
-            const { open: openFileDialog } = await import(
-                "@tauri-apps/plugin-dialog"
-            );
+            const { open: openFileDialog } =
+                await import("@tauri-apps/plugin-dialog");
             const selection = await openFileDialog({
                 directory: false,
                 multiple: true,
@@ -3980,7 +3980,6 @@ const Page: React.FC = () => {
             trimmed.replace(/\u0000/g, ""),
             pendingDocuments,
         );
-        let promptText = messageText;
         let inferenceImagePaths: string[] = [];
 
         let attachments: ChatAttachment[] = [];
@@ -4056,7 +4055,7 @@ const Page: React.FC = () => {
             }
         }
 
-        promptText = buildPromptWithImages(
+        const promptText = buildPromptWithImages(
             messageText,
             inferenceImagePaths.length,
         );
