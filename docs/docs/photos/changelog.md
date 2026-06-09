@@ -9,6 +9,7 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 
 ## v1.3.56 (mobile) - Jun 2026
 
+- Update to media_kit v1.2.2 to fix app crashing on using media_kit video player.
 - Add album title tooltips, fix album sorting labels, and consistent typography.
 - Fixed album widgets repeatedly showing the same cached photos from selected albums.
 - Fixed JPEG export artifacts in the image editor.
