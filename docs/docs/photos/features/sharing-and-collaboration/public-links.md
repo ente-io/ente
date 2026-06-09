@@ -210,11 +210,6 @@ Learn more in the [Custom domains guide](/photos/features/sharing-and-collaborat
 - Go to the Sharing tab (bottom navigation)
 - See "Shared albums" and "Quick links" sections
 
-**On web/desktop:**
-
-- Open the sidebar
-- Click "Sharing" to see all shared links
-
 ### Edit link settings
 
 1. Find the link in your sharing list
