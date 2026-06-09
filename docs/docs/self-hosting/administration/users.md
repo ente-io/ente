@@ -50,17 +50,17 @@ The administrator users have to be explicitly whitelisted in `museum.yaml`. You 
 
 4.  Restart Museum by restarting the cluster
 
-::: tip Restart your Compose clusters whenever you make changes
-
-If you have edited the Compose file or configuration file (`museum.yaml`), make sure to recreate the cluster's containers.
-
-You can do this by the following command:
-
-```sh
-docker compose down && docker compose up -d
-```
-
-:::
+> [!TIP]
+>
+> Restart your Compose clusters whenever you make changes.
+>
+> If you have edited the Compose file or configuration file (`museum.yaml`), make sure to recreate the cluster's containers.
+>
+> You can do this by the following command:
+>
+> ```sh
+> docker compose down && docker compose up -d
+> ```
 
 ## Increase storage and account validity
 

@@ -28,11 +28,9 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/q
 
 This creates a directory `my-ente` in the current working directory, prompts to start the cluster with needed containers after pulling the images required to run Ente.
 
-::: info
-
-Make sure to modify the default values in `compose.yaml` and `museum.yaml` if you wish to change endpoints, bucket configuration or server configuration.
-
-:::
+> [!NOTE]
+>
+> Make sure to modify the default values in `compose.yaml` and `museum.yaml` if you wish to change endpoints, bucket configuration or server configuration.
 
 ## Try the web apps
 

@@ -73,17 +73,17 @@ If running Museum without Docker, the code should be visible in the terminal (st
 
 4.  Restart Museum by restarting the cluster
 
-::: tip Restart your Compose clusters whenever you make changes
-
-If you have edited the Compose file or configuration file (`museum.yaml`), make sure to recreate the cluster's containers.
-
-You can do this by the following command:
-
-```sh
-docker compose down && docker compose up -d
-```
-
-:::
+> [!TIP]
+>
+> Restart your Compose clusters whenever you make changes.
+>
+> If you have edited the Compose file or configuration file (`museum.yaml`), make sure to recreate the cluster's containers.
+>
+> You can do this by the following command:
+>
+> ```sh
+> docker compose down && docker compose up -d
+> ```
 
 ## Step 3: Configure application endpoints
 
@@ -174,8 +174,8 @@ You can download Ente CLI from [here](https://github.com/ente-io/ente/releases?q
 
 Check our [documentation](/self-hosting/administration/cli) on how to use Ente CLI for managing self-hosted instances.
 
-::: info For upgrading
-
-Check out our [upgrading documentation](/self-hosting/installation/upgrade) for various installation methods.
-
-:::
+> [!NOTE]
+>
+> **For upgrading**
+>
+> Check out our [upgrading documentation](/self-hosting/installation/upgrade) for various installation methods.

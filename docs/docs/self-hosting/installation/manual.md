@@ -74,11 +74,9 @@ git clone https://github.com/ente-io/ente
     psql
     ```
 
-    ::: tip
-
-    You may need to use `su <username>` before executing `psql`, where `<username>` is the user that starts PostgreSQL service.
-
-    :::
+    > [!TIP]
+    >
+    > You may need to use `su <username>` before executing `psql`, where `<username>` is the user that starts PostgreSQL service.
 
 2. Create a user in PostgreSQL for ente:
 
@@ -131,20 +129,18 @@ Values you used for `database name` and `username` correspond to the values you 
     cp config/example.yaml ./museum.yaml
     ```
 
-    ::: tip
-
-    Make sure to enter the correct values for the database and object storage.
-
-    You should consider generating values for JWT and encryption keys for emails if you intend to use for long-term needs.
-
-    You can do by running the following command inside `ente/server`, assuming you cloned the repository to `ente`:
-
-    ```shell
-    # Generate secrets
-    go run tools/gen-random-keys/main.go
-    ```
-
-    :::
+    > [!TIP]
+    >
+    > Make sure to enter the correct values for the database and object storage.
+    >
+    > You should consider generating values for JWT and encryption keys for emails if you intend to use for long-term needs.
+    >
+    > You can do by running the following command inside `ente/server`, assuming you cloned the repository to `ente`:
+    >
+    > ```shell
+    > # Generate secrets
+    > go run tools/gen-random-keys/main.go
+    > ```
 
 4. Run the server
 
@@ -279,16 +275,14 @@ Museum should be accessible at `http://localhost:8080`
     }
     ```
 
-    ::: tip Important for Share App
-
-    The share web app (Public Locker) specifically requires all routes to be served through `/index.html` as it uses client-side routing with a single entry point. The `try_files` directive with `/index.html` as the fallback is essential for proper functionality. Without this configuration, direct links to shared albums and routes will result in 404 errors.
-
-    :::
+    > [!TIP]
+    >
+    > **Important for Share App**
+    >
+    > The share web app (Public Locker) specifically requires all routes to be served through `/index.html` as it uses client-side routing with a single entry point. The `try_files` directive with `/index.html` as the fallback is essential for proper functionality. Without this configuration, direct links to shared albums and routes will result in 404 errors.
 
     The Ente Photos web app should be accessible at http://localhost:3000, and the Ente Albums app at http://localhost:3002. Check out the [default ports](/self-hosting/installation/env-var#ports) for more information.
 
-::: tip
-
-Check out [post-installations steps](/self-hosting/installation/post-install/) for further usage.
-
-:::
+> [!TIP]
+>
+> Check out [post-installations steps](/self-hosting/installation/post-install/) for further usage.
