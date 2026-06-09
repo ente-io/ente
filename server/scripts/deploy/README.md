@@ -89,3 +89,22 @@ SSH into the instance, and run
 ```
 
 This'll ask for sudo credentials, pull the latest Docker image, restart the museum service and start tailing the logs (as a sanity check).
+
+## Rollback
+
+The update script tags the currently running image as `museum-prod:previous` before pulling. To roll back:
+
+```sh
+sudo docker tag rg.fr-par.scw.cloud/ente/museum-prod:previous rg.fr-par.scw.cloud/ente/museum-prod:latest
+sudo systemctl restart museum
+```
+
+> [!NOTE]
+>
+> This doesn't work if there are migrations!
+
+To reset the local `latest` back to the registry image, run `./update-and-restart-museum.sh` again, or
+
+```sh
+sudo docker pull rg.fr-par.scw.cloud/ente/museum-prod:latest
+```
