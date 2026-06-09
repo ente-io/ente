@@ -7,6 +7,15 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v1.3.56 (mobile) - Jun 2026
+
+- Add album title tooltips, fix album sorting labels, and consistent typography.
+- Fixed album widgets repeatedly showing the same cached photos from selected albums.
+- Fixed JPEG export artifacts in the image editor.
+- Use app bar from new design on galleries.
+- Stopped repeatedly retrying Apple Photos items that cannot be downloaded from iCloud during backup.
+- Migrated remaining sharing calls from `Share` to `SharePlus`.
+
 ## v1.7.24 (desktop) - May 2026
 
 - Upload files to shared albums
