@@ -304,7 +304,7 @@ describe("profile picture loading", () => {
 });
 
 describe("retry after warm-up failure", () => {
-    test("retries with the last ready input after a transient failure", async () => {
+    test("recovers from a transient failure with bounded background retry", async () => {
         vi.useFakeTimers();
         const { contacts, get_diff } = await setupContactsModule();
         get_diff.mockReset();
@@ -323,15 +323,37 @@ describe("retry after warm-up failure", () => {
             ])
             .mockResolvedValueOnce([]);
 
-        await expect(
+        const ready = contacts.ensureContactsReady({
+            userID: 101,
+            masterKeyB64: "ignored",
+        });
+        await vi.advanceTimersByTimeAsync(10_001);
+        await expect(ready).resolves.toBeUndefined();
+
+        expect(get_diff).toHaveBeenCalledTimes(3);
+    });
+
+    test("stops after bounded background retries keep failing", async () => {
+        vi.useFakeTimers();
+        const { contacts, get_diff } = await setupContactsModule();
+        get_diff.mockReset();
+        get_diff.mockRejectedValue(new Error("down"));
+
+        const ready = expect(
             contacts.ensureContactsReady({
                 userID: 101,
                 masterKeyB64: "ignored",
             }),
-        ).rejects.toThrow("transient");
-        await vi.advanceTimersByTimeAsync(5_001);
+        ).rejects.toThrow("down");
 
-        expect(get_diff).toHaveBeenCalledTimes(3);
+        await vi.advanceTimersByTimeAsync(10_001);
+        await vi.advanceTimersByTimeAsync(30_001);
+        await vi.advanceTimersByTimeAsync(120_001);
+        await ready;
+
+        expect(get_diff).toHaveBeenCalledTimes(4);
+        await vi.advanceTimersByTimeAsync(300_000);
+        expect(get_diff).toHaveBeenCalledTimes(4);
     });
 });
 
