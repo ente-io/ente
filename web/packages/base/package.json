@@ -26,7 +26,7 @@
     "devDependencies": {
         "@types/libsodium-wrappers-sumo": "0.7.8",
         "@types/node": "24.12.4",
-        "@types/react": "19.2.16",
+        "@types/react": "19.2.17",
         "@types/react-dom": "19.2.3",
         "ente-build-config": "*"
     }
