@@ -89,6 +89,12 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 	if err != nil {
 		return 0, stacktrace.Propagate(err, "")
 	}
+	if resp.StatusCode != http.StatusOK {
+		return 0, stacktrace.Propagate(
+			fmt.Errorf("listmonk request failed with status %d: %s", resp.StatusCode, strings.TrimSpace(string(body))),
+			"",
+		)
+	}
 
 	// Parsing the JSON response
 	var subscriberResp SubscriberResponse
