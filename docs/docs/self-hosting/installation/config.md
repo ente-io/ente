@@ -132,7 +132,7 @@ go run tools/gen-random-keys/main.go
 
 ### Email
 
-You may wish to send emails for verification codes instead of [hardcoding them](/self-hosting/administration/users#use-hardcoded-otts). In such cases, you can configure SMTP (or Zoho Transmail, for bulk emails).
+You may wish to send emails for verification codes instead of [hardcoding them](/self-hosting/administration/users#use-hardcoded-otts). In such cases, you can configure SMTP.
 
 Set the host and port accordingly with your credentials in `museum.yaml`
 
@@ -162,7 +162,11 @@ smtp:
 | `smtp.email`       | Sender email address         |         |
 | `smtp.sender-name` | Custom name for email sender |         |
 | `smtp.encryption`  | Encryption method (tls, ssl) |         |
-| `transmail.key`    | Zeptomail API key            |         |
+
+
+> [!NOTE]
+>
+> The legacy `transmail.key` is no longer supported, and should be converted to use [SMTP credentials](https://help.zoho.com/portal/en/kb/zeptomail/faqs/sending-emails/articles/how-to-configure-smtp) instead.
 
 ### WebAuthn Passkey Support
 

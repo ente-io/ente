@@ -2,18 +2,15 @@
 //
 // These functions can be used for directly sending emails to given email
 // addresses. This is used for transactional emails, for example OTP requests.
-// Currently, we use Zoho Transmail to send out the actual mail.
 package email
 
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"mime/quotedprintable"
 	"net"
-	"net/http"
 	"net/smtp"
 	"path"
 	"slices"
@@ -107,19 +104,17 @@ func buildHTMLMIMEPart(htmlBody string) (string, error) {
 
 // Send sends an email
 func Send(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
-	smtpHost := viper.GetString("smtp.host")
-	if smtpHost != "" {
-		return sendViaSMTP(toEmails, fromName, fromEmail, subject, htmlBody, inlineImages)
-	} else {
-		return sendViaTransmail(toEmails, fromName, fromEmail, subject, htmlBody, inlineImages)
-	}
-}
-
-func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
 	if len(toEmails) == 0 {
 		return ente.ErrBadRequest
 	}
+	if viper.GetString("smtp.host") == "" {
+		log.Infof("Skipping sending email to %s: %s", toEmails[0], subject)
+		return nil
+	}
+	return sendViaSMTP(toEmails, fromName, fromEmail, subject, htmlBody, inlineImages)
+}
 
+func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
 	smtpServer := viper.GetString("smtp.host")
 	smtpPort := viper.GetString("smtp.port")
 	smtpUsername := viper.GetString("smtp.username")
@@ -285,62 +280,6 @@ func sendWithClient(client *smtp.Client, auth smtp.Auth, from string, to []strin
 	}
 
 	err = client.Quit()
-	return stacktrace.Propagate(err, "")
-}
-
-func sendViaTransmail(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
-	if len(toEmails) == 0 {
-		return ente.ErrBadRequest
-	}
-
-	authKey := viper.GetString("transmail.key")
-	silent := viper.GetBool("internal.silent")
-	if authKey == "" || silent {
-		log.Infof("Skipping sending email to %s: %s", toEmails[0], subject)
-		return nil
-	}
-
-	// Sanitize subject and from name to avoid accidental multi-line fields
-	cleanSubject := sanitizeHeaderValue(subject)
-	cleanFromName := sanitizeHeaderValue(fromName)
-
-	var to []ente.ToEmailAddress
-	for _, toEmail := range toEmails {
-		// Reject clearly invalid recipients attempting header injection
-		if containsCRLF(toEmail) {
-			return stacktrace.Propagate(ente.ErrBadRequest, "invalid recipient email")
-		}
-		to = append(to, ente.ToEmailAddress{EmailAddress: ente.EmailAddress{Address: toEmail}})
-	}
-	if containsCRLF(fromEmail) {
-		return stacktrace.Propagate(ente.ErrBadRequest, "invalid from email")
-	}
-	mail := &ente.Mail{
-		BounceAddress: ente.TransmailEndBounceAddress,
-		From:          ente.EmailAddress{Address: fromEmail, Name: cleanFromName},
-		Subject:       cleanSubject,
-		Htmlbody:      htmlBody,
-		InlineImages:  inlineImages,
-	}
-	if len(toEmails) == 1 {
-		mail.To = to
-	} else {
-		mail.Bcc = to
-	}
-	postBody, err := json.Marshal(mail)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	reqBody := bytes.NewBuffer(postBody)
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", ente.TransmailEndPoint, reqBody)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	req.Header.Set("accept", "application/json")
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("authorization", authKey)
-	_, err = client.Do(req)
 	return stacktrace.Propagate(err, "")
 }
 
