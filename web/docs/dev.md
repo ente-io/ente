@@ -46,7 +46,7 @@ The monorepo uses npm workspaces.
 To run a command for a workspace `<ws>`, invoke `npm exec --workspace <ws> -- <cmd>` from the root folder. For example, to start a development server for the `photos` app, we can do
 
 ```sh
-npm exec --workspace photos -- next dev
+npm exec --workspace photos -- next dev --webpack
 ```
 
 There is also a convenience alias, `npm run dev:photos`. See `package.json` for the full list of such aliases. The two common patterns are `dev:<app-name>` for running a local development server, and `build:<app-name>` for creating a production build.
