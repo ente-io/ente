@@ -185,7 +185,7 @@ class Code {
       int period = _getPeriod(uri);
       Algorithm algorithm = _getAlgorithm(uri);
       final String? pin = _getPin(uri);
-      if (type == Type.yandex) {
+      if (type == Type.yandex || uri.host == "yaotp") {
         digits = yandexDigits;
         period = yandexPeriod;
         algorithm = Algorithm.sha256;
@@ -197,7 +197,7 @@ class Code {
         period,
         getSanitizedSecret(uri.queryParameters['secret']!),
         algorithm,
-        type,
+        type == Type.yandex || uri.host == "yaotp" ? Type.yandex : type,
         _getCounter(uri),
         rawData,
         pin: pin,
@@ -284,7 +284,7 @@ class Code {
       if (uri.host == "steam") {
         return steamDigits;
       }
-      if (uri.host == "yandex") {
+      if (uri.host == "yandex" || uri.host == "yaotp") {
         return yandexDigits;
       }
       return defaultDigits;
@@ -315,7 +315,7 @@ class Code {
     try {
       final rawAlgorithm = uri.queryParameters['algorithm'];
       if (rawAlgorithm == null || rawAlgorithm.isEmpty) {
-        if (uri.host == "yandex") {
+        if (uri.host == "yandex" || uri.host == "yaotp") {
           return Algorithm.sha256;
         }
         return Algorithm.sha1;
@@ -343,7 +343,7 @@ class Code {
   static Type _getType(Uri uri) {
     if (uri.host == "totp") {
       return Type.totp;
-    } else if (uri.host == "yandex") {
+    } else if (uri.host == "yandex" || uri.host == "yaotp") {
       return Type.yandex;
     } else if (uri.host == "steam") {
       return Type.steam;
