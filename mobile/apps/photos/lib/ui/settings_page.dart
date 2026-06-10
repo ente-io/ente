@@ -122,14 +122,15 @@ class _SettingsBody extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 8),
-              _buildMenuItem(
-                title: AppLocalizations.of(context).cast,
-                icon: HugeIcons.strokeRoundedTv02,
-                onTap: () async {
-                  await routeToPage(context, const CastSettingsPage());
-                },
-              ),
-              const SizedBox(height: 8),
+              if (flagService.enableMultiCast)
+                _buildMenuItem(
+                  title: AppLocalizations.of(context).cast,
+                  icon: HugeIcons.strokeRoundedTv02,
+                  onTap: () async {
+                    await routeToPage(context, const CastSettingsPage());
+                  },
+                ),
+              if (flagService.enableMultiCast) const SizedBox(height: 8),
             ],
             // Privacy and personalization section
             _buildMenuItem(
