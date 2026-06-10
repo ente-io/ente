@@ -4,7 +4,7 @@ If you just want to run the Ente Photos desktop app locally or develop it, from 
 
 ```sh
 cd web && npm ci && cd ..
-cd desktop && npm ci
+cd desktop && npm ci && npm run postinstall
 npm run dev
 ```
 

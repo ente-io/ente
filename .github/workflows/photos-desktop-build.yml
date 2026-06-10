@@ -108,6 +108,9 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
+            - name: Fetch binary dependencies and rebuild native modules
+              run: npm run postinstall
+
             - name: Create universal ffmpeg binaries for macOS
               if: startsWith(matrix.os, 'macos')
               # Currently, the ffmpeg-static binaries are not universal (Not
