@@ -8,6 +8,7 @@
   "accountSetupIncompleteCreateAccount": "Account setup incomplete. Create account to finish setup.",
   "email": "Email",
   "cancel": "Cancel",
+  "cast": "Cast",
   "verify": "Verify",
   "invalidEmailAddress": "Invalid email address",
   "validEmailAddress": "Valid email address",

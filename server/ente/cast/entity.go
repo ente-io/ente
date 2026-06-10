@@ -16,3 +16,10 @@ type AuthContext struct {
 	CollectionID int64
 	UserID       int64
 }
+
+type CastInfo struct {
+	DeviceCode   string `json:"deviceCode"`
+	CollectionID int64  `json:"collectionID"`
+	DeviceIP     string `json:"deviceIP"`
+	LastUsedAt   int64  `json:"lastUsedAt"`
+}
