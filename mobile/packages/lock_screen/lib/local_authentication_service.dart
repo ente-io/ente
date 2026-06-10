@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ente_lock_screen/auth_util.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_lock_screen/ui/local_authentication_unavailable_dialog.dart';
 import 'package:ente_lock_screen/ui/lock_screen_password.dart';
 import 'package:ente_lock_screen/ui/lock_screen_pin.dart';
 import 'package:ente_strings/ente_strings.dart';
@@ -71,7 +72,10 @@ class LocalAuthenticationService {
       }
       if (localAuthUnavailableException != null) {
         if (context.mounted) {
-          showToast(context, localAuthUnavailableException.userMessage);
+          await showLocalAuthenticationUnavailableMessage(
+            context,
+            localAuthUnavailableException,
+          );
         }
         return false;
       }
@@ -164,7 +168,7 @@ class LocalAuthenticationService {
       } on LocalAuthenticationUnavailableException catch (e, s) {
         logger.warning("System local authentication unavailable", e, s);
         if (context.mounted) {
-          showToast(context, e.userMessage);
+          await showLocalAuthenticationUnavailableMessage(context, e);
         }
       } finally {
         if (!didEnableLockScreen) {

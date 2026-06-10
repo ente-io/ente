@@ -6,6 +6,7 @@ import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_lock_screen/auth_util.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_lock_screen/ui/local_authentication_unavailable_dialog.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -362,7 +363,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       _isShowingLockScreen = false;
       _logger.warning("System local authentication unavailable", e, s);
       if (mounted) {
-        showToast(context, e.userMessage);
+        await showLocalAuthenticationUnavailableMessage(context, e);
       }
     } catch (e, s) {
       _isShowingLockScreen = false;

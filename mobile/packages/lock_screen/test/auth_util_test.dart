@@ -1,4 +1,5 @@
 import 'package:ente_lock_screen/auth_util.dart';
+import 'package:ente_lock_screen/ui/local_authentication_unavailable_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_auth/local_auth.dart';
@@ -129,6 +130,32 @@ void main() {
       );
 
       expect(exception, isNull);
+    });
+  });
+
+  group("shouldShowLinuxSystemAuthSetupGuide", () {
+    test("routes Linux setup-required failures to the guide dialog", () {
+      expect(
+        shouldShowLinuxSystemAuthSetupGuide(
+          const LocalAuthenticationUnavailableException(
+            issue: LocalAuthUnavailableIssue.linuxSetupRequired,
+            code: "noCredentialsSet",
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test("keeps generic local auth failures on toast guidance", () {
+      expect(
+        shouldShowLinuxSystemAuthSetupGuide(
+          const LocalAuthenticationUnavailableException(
+            issue: LocalAuthUnavailableIssue.notConfigured,
+            code: "noCredentialsSet",
+          ),
+        ),
+        isFalse,
+      );
     });
   });
 }
