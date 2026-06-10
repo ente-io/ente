@@ -57,6 +57,8 @@ type FileController struct {
 	DiscordController     *discord.DiscordController
 	HostName              string
 	cleanupCronRunning    bool
+	outstandingURLsMu     sync.Mutex
+	outstandingURLs       map[int64]int // userID -> minted-but-uncommitted upload URLs
 }
 
 // StorageOverflowAboveSubscriptionLimit is the amount (50 MB) by which user can go beyond their storage limit
@@ -208,6 +210,7 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 		}
 		return file, stacktrace.Propagate(err, "")
 	}
+	c.addOutstandingURLs(userID, -2)
 	if usage == fileSize+thumbnailSize && app == ente.Photos {
 		go c.maybeSendFirstUploadEmail(file.OwnerID, userAgent)
 	}
@@ -320,6 +323,25 @@ func (c *FileController) Update(ctx context.Context, userID int64, file ente.Fil
 	return response, nil
 }
 
+// addOutstandingURLs adjusts the count of upload URLs the user has minted
+// but not yet committed via /files. It will return false if the user has
+// too many outstanding URLs.
+func (c *FileController) addOutstandingURLs(userID int64, n int) bool {
+	c.outstandingURLsMu.Lock()
+	defer c.outstandingURLsMu.Unlock()
+	if c.outstandingURLs == nil {
+		c.outstandingURLs = map[int64]int{}
+	}
+	total := max(c.outstandingURLs[userID]+n, 0)
+	ok := total <= 250
+	if !ok {
+		go c.DiscordController.NotifyPotentialAbuse(fmt.Sprintf("Too many outstanding upload URLs for user %d", userID))
+		total = 0
+	}
+	c.outstandingURLs[userID] = total
+	return ok
+}
+
 // GetUploadURLs returns a bunch of presigned URLs for uploading files
 func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count int, app ente.App, ignoreLimit bool) ([]ente.UploadURL, error) {
 	err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app)
@@ -369,6 +391,9 @@ func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID in
 	}
 	if err := c.UsageCtrl.CanUploadFile(ctx, userID, &req.ContentLength, app); err != nil {
 		return ente.UploadURL{}, stacktrace.Propagate(err, "")
+	}
+	if !c.addOutstandingURLs(userID, 1) {
+		return ente.UploadURL{}, stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many outstanding upload URLs")
 	}
 	s3Client := c.S3Config.GetHotS3Client()
 	dc := c.S3Config.GetHotDataCenter()
@@ -1252,6 +1277,9 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 	partLengths := computePartLengths(req.ContentLength, req.PartLength, partCount)
 	if err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app); err != nil {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
+	}
+	if !c.addOutstandingURLs(userID, 1) {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many outstanding upload URLs")
 	}
 	s3Client := c.S3Config.GetHotS3Client()
 	dc := c.S3Config.GetHotDataCenter()
