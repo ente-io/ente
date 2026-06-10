@@ -1,0 +1,1 @@
+- Updated the app bar on person and face group screens to match the rest of the galleries.

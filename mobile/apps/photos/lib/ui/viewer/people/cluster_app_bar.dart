@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import "package:ente_components/ente_components.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -13,34 +14,51 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
-import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
+import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/people/cluster_breakup_page.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class ClusterAppBar extends StatefulWidget {
+  static const double _sliverExpandedHeight = 92.0;
+
+  static GalleryAppBarConfig sliverConfig(
+    GalleryType type,
+    String? title,
+    SelectedFiles selectedFiles,
+    String clusterID,
+  ) {
+    return GalleryAppBarConfig(
+      sliverBuilder: (_) =>
+          ClusterAppBar._(type, title, selectedFiles, clusterID),
+      geometryBuilder: (context) => SliverAppBarComponent.resolveGeometry(
+        context,
+        expandedHeight: _sliverExpandedHeight,
+        collapsedHeight: kToolbarHeight,
+      ),
+    );
+  }
+
   final GalleryType type;
   final String? title;
   final SelectedFiles selectedFiles;
   final String clusterID;
-  final PersonEntity? person;
 
-  const ClusterAppBar(
+  const ClusterAppBar._(
     this.type,
     this.title,
     this.selectedFiles,
-    this.clusterID, {
-    this.person,
-    super.key,
-  });
+    this.clusterID,
+  );
 
   @override
   State<ClusterAppBar> createState() => _AppBarWidgetState();
@@ -89,21 +107,21 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   }
 
   @override
+  void didUpdateWidget(covariant ClusterAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.title != widget.title) {
+      _appBarTitle = widget.title;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AppBar(
-      elevation: 0,
-      centerTitle: false,
-      title: Text(
-        _appBarTitle!,
-        style: Theme.of(
-          context,
-        ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
+    return SliverAppBarComponent(
+      title: _appBarTitle ?? "",
       actions: _getDefaultActions(context),
-      scrolledUnderElevation: 0,
-      surfaceTintColor: Colors.transparent,
+      expandedHeight: ClusterAppBar._sliverExpandedHeight,
+      collapsedHeight: kToolbarHeight,
+      backgroundColor: getEnteColorScheme(context).backgroundColour,
     );
   }
 

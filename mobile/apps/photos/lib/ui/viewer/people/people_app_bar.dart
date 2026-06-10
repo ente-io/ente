@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -18,6 +19,7 @@ import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
@@ -30,8 +32,44 @@ const kShowUnnamedIgnoredPersonEventSource =
     "_AppBarWidgetState._showPersonUnnamedDelete";
 
 class PeopleAppBar extends StatefulWidget {
-  static double hierarchicalPreferredHeight(BuildContext context) {
-    return AppBarFilterChips.appBarHeight(context);
+  static const double _sliverExpandedHeight = 92.0;
+
+  static GalleryAppBarConfig sliverConfig(
+    GalleryType type,
+    String? title,
+    SelectedFiles selectedFiles,
+    PersonEntity person, {
+    bool memoryLaneReady = false,
+    Future<void> Function()? onMemoryLaneTap,
+  }) {
+    return GalleryAppBarConfig(
+      sliverBuilder: (_) => PeopleAppBar._(
+        type,
+        title,
+        selectedFiles,
+        person,
+        memoryLaneReady: memoryLaneReady,
+        onMemoryLaneTap: onMemoryLaneTap,
+      ),
+      geometryBuilder: _resolveSliverGeometry,
+    );
+  }
+
+  static HeaderAppBarGeometry _resolveSliverGeometry(BuildContext context) {
+    final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
+      context,
+    );
+    final isHierarchicalSearchable =
+        inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
+    final bottomHeight = isHierarchicalSearchable
+        ? AppBarFilterChips.preferredHeight(context)
+        : 0.0;
+    return SliverAppBarComponent.resolveGeometry(
+      context,
+      expandedHeight: _sliverExpandedHeight,
+      collapsedHeight: kToolbarHeight,
+      bottomHeight: bottomHeight,
+    );
   }
 
   final GalleryType type;
@@ -43,14 +81,13 @@ class PeopleAppBar extends StatefulWidget {
 
   bool get isIgnored => person.data.isIgnored;
 
-  const PeopleAppBar(
+  const PeopleAppBar._(
     this.type,
     this.title,
     this.selectedFiles,
     this.person, {
     this.memoryLaneReady = false,
     this.onMemoryLaneTap,
-    super.key,
   });
 
   @override
@@ -170,48 +207,44 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     );
     final isHierarchicalSearchable =
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
-    return isHierarchicalSearchable
-        ? ValueListenableBuilder(
-            valueListenable: inheritedSearchFilterData!
-                .searchFilterDataProvider!
-                .isSearchingNotifier,
-            child: PreferredSize(
-              preferredSize: Size.fromHeight(
-                AppBarFilterChips.preferredHeight(context),
-              ),
-              child: const AppBarFilterChips(),
-            ),
-            builder: (context, isSearching, child) {
-              return AppBar(
-                elevation: 0,
-                centerTitle: false,
-                title: Text(
-                  _appBarTitle ?? "",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                bottom: child as PreferredSizeWidget,
-                actions: isSearching ? null : _getDefaultActions(context),
-                surfaceTintColor: Colors.transparent,
-              );
-            },
-          )
-        : AppBar(
-            elevation: 0,
-            centerTitle: false,
-            title: Text(
-              _appBarTitle ?? "",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            actions: _getDefaultActions(context),
-          );
+
+    if (!isHierarchicalSearchable) {
+      return _buildSliverAppBar(context, actions: _getDefaultActions(context));
+    }
+
+    return ValueListenableBuilder(
+      valueListenable: inheritedSearchFilterData!
+          .searchFilterDataProvider!
+          .isSearchingNotifier,
+      child: PreferredSize(
+        preferredSize: Size.fromHeight(
+          AppBarFilterChips.preferredHeight(context),
+        ),
+        child: const AppBarFilterChips(),
+      ),
+      builder: (context, isSearching, child) {
+        return _buildSliverAppBar(
+          context,
+          actions: isSearching ? const [] : _getDefaultActions(context),
+          bottom: child as PreferredSizeWidget,
+        );
+      },
+    );
+  }
+
+  Widget _buildSliverAppBar(
+    BuildContext context, {
+    required List<Widget> actions,
+    PreferredSizeWidget? bottom,
+  }) {
+    return SliverAppBarComponent(
+      title: _appBarTitle ?? "",
+      actions: actions,
+      bottom: bottom,
+      expandedHeight: PeopleAppBar._sliverExpandedHeight,
+      collapsedHeight: kToolbarHeight,
+      backgroundColor: getEnteColorScheme(context).backgroundColour,
+    );
   }
 
   Future<dynamic> _editPerson(BuildContext context) async {
