@@ -119,7 +119,6 @@ jobs:
               with:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION }}
-                  cache: true
 
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs photos set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"

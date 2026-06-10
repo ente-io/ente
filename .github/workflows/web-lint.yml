@@ -37,6 +37,14 @@ jobs:
                   cache: "npm"
                   cache-dependency-path: "web/package-lock.json"
 
+            # Restore-only; primed on main by warm-caches.yml.
+            - name: Restore Rust cache
+              uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+              with:
+                  workspaces: rust
+                  shared-key: rust-wasm
+                  save-if: false
+
             - run: npm ci
 
             - run: npm audit --audit-level critical
