@@ -30,17 +30,16 @@ func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string) (str
 	return codeValue, nil
 }
 
-func (r *Repository) GetAllDevices(ctx context.Context, userID int64) ([]cast.CastRequest, error) {
-	rows, err := r.DB.QueryContext(ctx, "SELECT collection_id, token, encrypted_payload, code FROM casting WHERE cast_user = $1 and is_deleted=false", userID)
+func (r *Repository) GetAllDevices(ctx context.Context, userID int64) ([]cast.CastInfo, error) {
+	rows, err := r.DB.QueryContext(ctx, "SELECT code, collection_id, ip, last_used_at FROM casting WHERE cast_user = $1 and is_deleted=false", userID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to query devices")
 	}
 	defer rows.Close()
-
-	var devices []cast.CastRequest
+	devices := make([]cast.CastInfo, 0)
 	for rows.Next() {
-		var device cast.CastRequest
-		if err := rows.Scan(&device.CollectionID, &device.CastToken, &device.EncPayload, &device.DeviceCode); err != nil {
+		var device cast.CastInfo
+		if err := rows.Scan(&device.DeviceCode, &device.CollectionID, &device.DeviceIP, &device.LastUsedAt); err != nil {
 			return nil, stacktrace.Propagate(err, "failed to scan device row")
 		}
 		devices = append(devices, device)

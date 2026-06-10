@@ -31,7 +31,7 @@ func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDevi
 	return c.CastRepo.AddCode(ctx, request.PublicKey, network.GetClientIP(ctx))
 }
 
-func (c *Controller) GetAllDevices(ctx *gin.Context, userID int64) ([]cast.CastRequest, error) {
+func (c *Controller) GetAllDevices(ctx *gin.Context, userID int64) ([]cast.CastInfo, error) {
 	return c.CastRepo.GetAllDevices(ctx, userID)
 }
 

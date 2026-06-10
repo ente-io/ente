@@ -1,5 +1,28 @@
 import "package:dio/dio.dart";
 
+class CastInfo {
+  final int collectionID;
+  final String deviceIP;
+  final String deviceCode;
+  final DateTime lastUsedAt;
+
+  CastInfo({
+    required this.collectionID,
+    required this.deviceIP,
+    required this.deviceCode,
+    required this.lastUsedAt,
+  });
+
+  factory CastInfo.fromJson(dynamic json) {
+    return CastInfo(
+      collectionID: json["collectionID"],
+      deviceIP: json["deviceIP"],
+      deviceCode: json["deviceCode"],
+      lastUsedAt: DateTime.fromMillisecondsSinceEpoch(json["lastUsedAt"]),
+    );
+  }
+}
+
 class CastGateway {
   final Dio _enteDio;
 
@@ -21,6 +44,12 @@ class CastGateway {
       }
       rethrow;
     }
+  }
+
+  Future<List<CastInfo>> getAllCastSessions() async {
+    final response = await _enteDio.get("/cast/device-info");
+    final devices = response.data['devices'] as List<dynamic>;
+    return devices.map((session) => CastInfo.fromJson(session)).toList();
   }
 
   Future<void> publishCastPayload(
@@ -46,6 +75,12 @@ class CastGateway {
     } catch (e) {
       // swallow error
     }
+  }
+
+  Future<void> revokeSession(CastInfo session) async {
+    await _enteDio.delete(
+      "/cast/device-info/${session.deviceCode}?collectionID=${session.collectionID}",
+    );
   }
 }
 
