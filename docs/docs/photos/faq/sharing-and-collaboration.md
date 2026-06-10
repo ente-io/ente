@@ -42,7 +42,7 @@ Multiple Ente users can add photos to the same album:
 - All collaborators can contribute photos
 - Each person's uploads count towards their own storage
 - Owner controls permissions and membership
-- Currently full support on mobile, view-only on web/desktop
+- Supported on mobile, web, and desktop
 
 Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/collaboration)
 
@@ -197,8 +197,8 @@ When a collaborator is removed from a shared album (or when they leave the album
 
 **Collaborative albums** (sharing with other Ente users):
 
-- Fully supported on mobile apps (iOS and Android)
-- View-only mode on web and desktop (we're actively working on adding full support)
+- Fully supported on mobile apps (iOS and Android), web, and desktop
+- Can view, add, and manage photos
 
 **Collaborative links** (collect links):
 
@@ -273,7 +273,9 @@ Suggest deletion allows album owners and admins to suggest that other participan
 
 This is useful for curating shared albums after group trips or events by suggesting removal of blurry, duplicate, or unwanted shots.
 
-> **Note**: Suggest deletion is currently available on mobile apps only.
+> [!NOTE]
+>
+> Suggest deletion is currently available on mobile apps only.
 
 Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/collaboration#suggest-deletion)
 
@@ -288,7 +290,9 @@ Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/col
 
 The photos will be removed from the album immediately, and the photo owners will receive delete suggestions to review.
 
-> **Note**: Suggest deletion is currently available on mobile apps only.
+> [!NOTE]
+>
+> Suggest deletion is currently available on mobile apps only.
 
 ### How do I review delete suggestions? {#review-delete-suggestions}
 
@@ -305,7 +309,9 @@ For each suggestion, you can:
 
 The photo was already removed from the shared album when the suggestion was made. Accepting deletes the photo from your account. Rejecting keeps it in your account (but not in the album).
 
-> **Note**: Delete suggestions is currently available on mobile apps only.
+> [!NOTE]
+>
+> Delete suggestions is currently available on mobile apps only.
 
 Learn more: [Storage optimization guide](/photos/features/albums-and-organization/storage-optimization#delete-suggestions)
 
@@ -349,8 +355,7 @@ Notifications work more reliably on Android, but can still be affected by:
 2. Disable battery optimization for Ente in system settings
 3. Don't force-close the app from recents
 
-**Alternative:**
-If you need real-time updates, keep the app open or check the shared album manually by opening it in the app.
+**Alternative:** If you need real-time updates, keep the app open or check the shared album manually by opening it in the app.
 
 - No platform restrictions for link recipients
 
@@ -397,6 +402,14 @@ When someone adds a photo via a collect link:
 - The storage counts against your plan's total storage limit
 
 Make sure you have sufficient storage available if you're expecting many people to add photos.
+
+### Can I let others view a shared album without allowing download of the photos? {#disable-downloads-public-link}
+
+Yes. When creating or managing a public link, you can turn off downloads.
+
+Open the album, create or manage the public link, and disable **Allow downloads**.
+
+This lets people view the album through the link without showing them a download option.
 
 ### Can I set limits on public links? {#link-limits}
 
@@ -476,11 +489,17 @@ Ente creates a special album behind the scenes with the selected photos. Quick l
 
 ### Can I add photos from a shared album to my own albums? {#add-shared-photos}
 
-Yes, on Ente's mobile apps, you can add photos from an album that's shared with you into one of your own albums.
+Yes, on Ente's mobile, web, and desktop apps, you can add photos from an album that's shared with you into one of your own albums.
 
-**Important**: This creates a copy of the photo that you fully own, and it will count against your storage quota. This is different from just viewing shared photos, which doesn't use your storage.
+> [!IMPORTANT]
+>
+> This creates a copy of the photo that you fully own, and it will count against your storage quota. This is different from just viewing shared photos, which doesn't use your storage.
 
 The reason for creating copies is to avoid complications around ownership - if the original owner deletes the photo from their library, your copy remains safe in your account.
+
+### Can I upload, add, or move files in shared albums on web/desktop? {#manage-shared-album-files}
+
+Yes. On web and desktop, collaborators, admins, and owners can upload files from their device to shared albums, and can add files already in their Ente library to shared albums.
 
 ### Why does adding shared photos to my albums count against my storage? {#shared-storage-count}
 
@@ -495,6 +514,12 @@ We understand this uses extra storage in some use cases (like family photo shari
 ### Why don't photos added via a shared link appear in my feed? {#shared-link-photos-not-in-feed}
 
 Only photos added by Ente users who joined the album directly will appear in your feed. Photos added through a public link by someone without an Ente account are not shown in the feed.
+
+### Why do photos shared by others appear in my main gallery? {#shared-photos-in-gallery}
+
+By default, shared items can appear in your home gallery.
+
+To hide them, open `Settings > Appearance > Gallery` and enable **Hide shared items from home gallery**.
 
 ### Can I remove myself from a shared album? {#leave-shared-album}
 

@@ -88,9 +88,9 @@ class ClipTextTokenizer {
     for (Match match in pat.allMatches(text)) {
       String token = match[0]!;
       token = utf8.encode(token).map((b) => byteEncoder[b]).join();
-      _bpe(token)
-          .split(' ')
-          .forEach((bpeToken) => bpeTokens.add(encoder[bpeToken]!));
+      _bpe(
+        token,
+      ).split(' ').forEach((bpeToken) => bpeTokens.add(encoder[bpeToken]!));
     }
     return bpeTokens;
   }

@@ -12,10 +12,10 @@ class ContactData {
   });
 
   Map<String, dynamic> toJson() => {
-        'contactUserId': contactUserId,
-        'name': name,
-        if (birthDate != null) 'birthDate': birthDate,
-      };
+    'contactUserId': contactUserId,
+    'name': name,
+    if (birthDate != null) 'birthDate': birthDate,
+  };
 
   factory ContactData.fromJson(Map<String, dynamic> json) {
     return ContactData(

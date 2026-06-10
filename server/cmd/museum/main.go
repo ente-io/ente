@@ -138,6 +138,8 @@ func main() {
 
 	db := setupDatabase()
 	defer db.Close()
+	latencySensitiveDB := setupLatencySensitiveDatabase()
+	defer latencySensitiveDB.Close()
 
 	hostName, err := os.Hostname()
 	if err != nil {
@@ -181,7 +183,7 @@ func main() {
 
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
-	objectRepo := &repo.ObjectRepository{DB: db, QueueRepo: queueRepo}
+	objectRepo := &repo.ObjectRepository{DB: db, LatencySensitiveDB: latencySensitiveDB, QueueRepo: queueRepo}
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
 	contactRepository := &contactRepo.Repository{
 		DB:                  db,
@@ -203,6 +205,9 @@ func main() {
 
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
+	accessCollectionLinkRepo := public.NewCollectionLinkRepository(latencySensitiveDB, viper.GetString("apps.public-albums"))
+	accessCollectionRepo := &repo.CollectionRepository{DB: latencySensitiveDB, CollectionLinkRepo: accessCollectionLinkRepo}
+	accessFileRepo := &repo.FileRepository{DB: latencySensitiveDB}
 	pushRepo := &repo.PushTokenRepository{DB: db}
 	collectionActionRepo := &repo.CollectionActionsRepository{
 		DB: db,
@@ -272,8 +277,6 @@ func main() {
 	objectCleanupController := controller.NewObjectCleanupController(
 		objectCleanupRepo,
 		objectRepo,
-		lockController,
-		objectController,
 		s3Config,
 	)
 
@@ -288,7 +291,7 @@ func main() {
 		UploadResultCache: make(map[int64]bool),
 	}
 
-	accessCtrl := access.NewAccessController(collectionRepo, fileRepo)
+	accessCtrl := access.NewAccessController(accessCollectionRepo, accessFileRepo)
 	commentsRepo := &socialrepo.CommentsRepository{DB: db}
 	reactionsRepo := &socialrepo.ReactionsRepository{DB: db}
 	anonUsersRepo := &socialrepo.AnonUsersRepository{DB: db}
@@ -586,9 +589,9 @@ func main() {
 	privateAPI.POST("/files/upload-url", fileHandler.GetUploadURLV2)
 	privateAPI.POST("/files/multipart-upload-url", fileHandler.GetMultipartUploadURLV2)
 	privateAPI.GET("/files/download/:fileID", fileHandler.Get)
-	privateAPI.GET("/files/download/v2/:fileID", fileHandler.Get)
+	privateAPI.GET("/files/download/v2/:fileID", fileHandler.GetUsingFusedLookup)
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
-	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
+	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnailUsingFusedLookup)
 
 	privateAPI.POST("/files/share-url", fileHandler.ShareUrl)
 	privateAPI.GET("/files/share-url", fileHandler.GetUrls)
@@ -918,25 +921,24 @@ func main() {
 	privateAPI.POST("/storage-bonus/referral-claim", storageBonusHandler.ClaimReferral)
 
 	adminHandler := &api.AdminHandler{
-		QueueRepo:               queueRepo,
-		UserRepo:                userRepo,
-		CollectionRepo:          collectionRepo,
-		AuthenticatorRepo:       authRepo,
-		UserAuthRepo:            userAuthRepo,
-		UserController:          userController,
-		FamilyController:        familyController,
-		EmergencyController:     emergencyCtrl,
-		RemoteStoreController:   remoteStoreController,
-		FileRepo:                fileRepo,
-		StorageBonusRepo:        storagBonusRepo,
-		BillingRepo:             billingRepo,
-		BillingController:       billingController,
-		ObjectCleanupController: objectCleanupController,
-		MailingListsController:  mailingListsController,
-		DiscordController:       discordController,
-		HashingKey:              hashingKeyBytes,
-		PasskeyController:       passkeyCtrl,
-		StorageBonusCtl:         storageBonusCtrl,
+		QueueRepo:              queueRepo,
+		UserRepo:               userRepo,
+		CollectionRepo:         collectionRepo,
+		AuthenticatorRepo:      authRepo,
+		UserAuthRepo:           userAuthRepo,
+		UserController:         userController,
+		FamilyController:       familyController,
+		EmergencyController:    emergencyCtrl,
+		RemoteStoreController:  remoteStoreController,
+		FileRepo:               fileRepo,
+		StorageBonusRepo:       storagBonusRepo,
+		BillingRepo:            billingRepo,
+		BillingController:      billingController,
+		MailingListsController: mailingListsController,
+		DiscordController:      discordController,
+		HashingKey:             hashingKeyBytes,
+		PasskeyController:      passkeyCtrl,
+		StorageBonusCtl:        storageBonusCtrl,
 	}
 	adminAPI.POST("/mail", adminHandler.SendMail)
 	adminAPI.POST("/mail/subscribe", adminHandler.SubscribeMail)
@@ -961,7 +963,6 @@ func main() {
 	adminAPI.PUT("/user/subscription", adminHandler.UpdateSubscription)
 	adminAPI.POST("/queue/re-queue", adminHandler.ReQueueItem)
 	adminAPI.POST("/user/bonus", adminHandler.UpdateBonus)
-	adminAPI.POST("/job/clear-orphan-objects", adminHandler.ClearOrphanObjects)
 
 	userEntityController := &userEntityCtrl.Controller{Repo: userEntityRepo}
 	userEntityHandler := &api.UserEntityHandler{Controller: userEntityController}
@@ -1045,10 +1046,11 @@ func main() {
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
 		embeddingController, healthCheckHandler, castDb, inactiveUserOrchestrator)
 
-	// Create a new collector, the name will be used as a label on the metrics
-	collector := sqlstats.NewStatsCollector("prod_db", db)
-	// Register it with Prometheus
-	prometheus.MustRegister(collector)
+	// Create new collectors, the names will be used as labels on the metrics
+	primaryDBCollector := sqlstats.NewStatsCollector("prod_db", db)
+	latencySensitiveDBCollector := sqlstats.NewStatsCollector("latency_sensitive_db", latencySensitiveDB)
+	// Register them with Prometheus
+	prometheus.MustRegister(primaryDBCollector, latencySensitiveDBCollector)
 
 	http.Handle("/metrics", promhttp.Handler())
 	go http.ListenAndServe(":2112", nil)
@@ -1146,12 +1148,37 @@ func setupDatabase() *sql.DB {
 		panic(err)
 	}
 
-	db.SetMaxIdleConns(6)
-	db.SetMaxOpenConns(45)
+	db.SetMaxIdleConns(30)
+	db.SetMaxOpenConns(60)
 	db.SetConnMaxLifetime(30 * time.Minute)
 	db.SetConnMaxIdleTime(10 * time.Minute)
 
 	log.Println("Database was configured successfully.")
+
+	return db
+}
+
+func setupLatencySensitiveDatabase() *sql.DB {
+	log.Println("Setting up latency sensitive db")
+	db, err := sql.Open("postgres", config.GetPGInfo())
+
+	if err != nil {
+		log.Panic(err)
+		panic(err)
+	}
+	log.Println("Connected to latency sensitive DB")
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Pinged latency sensitive DB")
+
+	db.SetMaxIdleConns(50)
+	db.SetMaxOpenConns(100)
+	db.SetConnMaxLifetime(30 * time.Minute)
+	db.SetConnMaxIdleTime(10 * time.Minute)
+
+	log.Println("Latency sensitive database was configured successfully.")
 
 	return db
 }
@@ -1183,7 +1210,6 @@ func setupAndStartBackgroundJobs(
 	fileDataCtrl.StartDataDeletion() // Start data deletion for file data;
 	contactController.StartDataDeletion()
 	objectCleanupController.StartRemovingUnreportedObjects()
-	objectCleanupController.StartClearingOrphanObjects()
 }
 
 func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRepo *public.CollectionLinkRepo,

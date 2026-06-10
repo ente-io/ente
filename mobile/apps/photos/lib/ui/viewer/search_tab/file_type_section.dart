@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -16,17 +17,14 @@ import "package:photos/ui/viewer/search_tab/section_header.dart";
 class FileTypeSection extends StatelessWidget {
   final bool hasAnySearchableFiles;
 
-  const FileTypeSection({
-    required this.hasAnySearchableFiles,
-    super.key,
-  });
+  const FileTypeSection({required this.hasAnySearchableFiles, super.key});
 
   @override
   Widget build(BuildContext context) {
     if (!hasAnySearchableFiles) {
       final textTheme = getEnteTextTheme(context);
       return Padding(
-        padding: const EdgeInsets.only(left: 12, right: 8),
+        padding: const EdgeInsets.only(left: 12, right: 8, bottom: 24),
         child: Row(
           children: [
             Expanded(
@@ -35,14 +33,17 @@ class FileTypeSection extends StatelessWidget {
                 children: [
                   Text(
                     SectionType.fileTypesAndExtension.sectionTitle(context),
-                    style: textTheme.largeBold,
+                    style: TextStyles.h2.copyWith(
+                      color: textTheme.largeBold.color,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
-                      SectionType.fileTypesAndExtension
-                          .getEmptyStateText(context),
+                      SectionType.fileTypesAndExtension.getEmptyStateText(
+                        context,
+                      ),
                       style: textTheme.smallMuted,
                     ),
                   ),
@@ -58,14 +59,11 @@ class FileTypeSection extends StatelessWidget {
 
     final tiles = _previewTiles(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(top: 8, bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-            SectionType.fileTypesAndExtension,
-            hasMore: true,
-          ),
+          const SectionHeader(SectionType.fileTypesAndExtension, hasMore: true),
           const SizedBox(height: 2),
           SizedBox(
             child: SingleChildScrollView(
@@ -75,9 +73,7 @@ class FileTypeSection extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: tiles
-                    .map(
-                      (tile) => _FileTypeRecommendation(tile),
-                    )
+                    .map((tile) => _FileTypeRecommendation(tile))
                     .toList(),
               ),
             ),
@@ -138,15 +134,15 @@ class _FileTypeTile {
     required this.assetKey,
     required this.name,
     required FileType type,
-  })  : fileType = type,
-        extension = null;
+  }) : fileType = type,
+       extension = null;
 
   const _FileTypeTile.extension({
     required this.assetKey,
     required this.name,
     required this.extension,
-  })  : fileType = null,
-        assert(extension != null);
+  }) : fileType = null,
+       assert(extension != null);
 
   Future<GenericSearchResult> resolve() {
     final type = fileType;
@@ -199,10 +195,7 @@ class _FileTypeRecommendationState extends State<_FileTypeRecommendation> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 68),
-        child: GestureDetector(
-          onTap: _onTap,
-          child: Image.asset(assetPath),
-        ),
+        child: GestureDetector(onTap: _onTap, child: Image.asset(assetPath)),
       ),
     );
   }
@@ -214,12 +207,7 @@ class _FileTypeRecommendationState extends State<_FileTypeRecommendation> {
         return;
       }
       RecentSearches().add(searchResult.name());
-      unawaited(
-        routeToPage(
-          context,
-          SearchResultPage(searchResult),
-        ),
-      );
+      unawaited(routeToPage(context, SearchResultPage(searchResult)));
     } catch (e, s) {
       _logger.severe("Failed to resolve file type result", e, s);
     }

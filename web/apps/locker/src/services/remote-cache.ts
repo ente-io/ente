@@ -1,4 +1,4 @@
-import type { LockerCollectionParticipant } from "types";
+import type { LockerCollectionParticipant } from "@/types";
 
 export interface LockerCollectionPayload {
     owner: LockerCollectionParticipant;

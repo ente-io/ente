@@ -16,6 +16,7 @@
   "noFilesFound": "Aucun element ici",
   "addFiles": "Ajouter des elements",
   "name": "Nom",
+  "date": "Date",
   "pleaseWait": "Veuillez patienter...",
   "downloading": "Téléchargement en cours...",
   "downloadingProgress": "Telechargement... {percentage}%",
@@ -28,6 +29,9 @@
       }
     }
   },
+  "keepOffline": "Rester hors-ligne",
+  "cloudOnly": "Supprimer hors-ligne",
+  "savingOffline": "Sauvegarde hors-ligne...",
   "downloadFailed": "Échec du téléchargement",
   "failedToDownloadOrDecrypt": "Echec du telechargement de l'element",
   "errorOpeningFile": "Erreur lors de l'ouverture de l'element",
@@ -119,6 +123,7 @@
       }
     }
   },
+  "collections": "Bibliothèque",
   "retry": "Réessayer",
   "failedToSyncTrash": "Echec de la synchronisation de la corbeille : {error}",
   "@failedToSyncTrash": {
@@ -196,6 +201,7 @@
   "create": "Créer",
   "renameCollection": "Renommer la collection",
   "save": "Sauvegarder",
+  "download": "Télécharger",
   "deleteFile": "Supprimer l'element",
   "deleteFileConfirmation": "Es-tu sur de vouloir supprimer \"{fileName}\" ?",
   "@deleteFileConfirmation": {
@@ -212,13 +218,13 @@
   "createCollection": "Creer une collection",
   "enterCollectionName": "Saisis le nom de la collection",
   "nothingYet": "Rien pour l'instant",
-  "uploadYourFirstDocument": "Televerse ton premier document pour commencer",
+  "uploadYourFirstDocument": "Pour commencer, chargez votre premier document",
   "collectionEmptyStateTitle": "Rien a voir ici",
   "collectionEmptyStateSubtitle": "Il n'y a aucun element dans cette collection",
-  "yourTrashIsEmpty": "Ta corbeille est vide",
-  "homeLockerEmptyTitle": "Ton Locker est vide",
+  "yourTrashIsEmpty": "Votre corbeille est vide",
+  "homeLockerEmptyTitle": "Votre Locker est vide",
   "homeLockerEmptySubtitle": "Clique sur le bouton + pour commencer",
-  "uploadDocument": "Televerser un document",
+  "uploadDocument": "Chargez un document",
   "items": "{count} elements",
   "@items": {
     "description": "Number of items in a collection",
@@ -230,7 +236,7 @@
     }
   },
   "createCollectionTooltip": "Creer une collection",
-  "uploadDocumentTooltip": "Televerser un document",
+  "uploadDocumentTooltip": "Chargez un document",
   "restore": "Restaurer",
   "restoreFile": "Restaurer {fileName}",
   "@restoreFile": {
@@ -248,7 +254,7 @@
   "emptyTrashConfirmation": "Es-tu sur de vouloir supprimer definitivement tous les elements de la corbeille ? Cette action est irreversible.",
   "fileTitle": "Titre de l'element",
   "optionalNote": "Note optionnelle",
-  "upload": "Televerser",
+  "upload": "Charger",
   "searchHint": "Rechercher...",
   "searchEmptyTitle": "Aucun resultat trouve",
   "searchEmptyDescription": "Essaie de rechercher autre chose.",
@@ -313,6 +319,7 @@
   "changePasswordTitle": "Modifier le mot de passe",
   "authToChangeYourPassword": "Veuillez vous authentifier pour modifier votre mot de passe",
   "recoveryKey": "Clé de secours",
+  "ok": "Ok",
   "logout": "Déconnexion",
   "deleteAccount": "Supprimer mon compte",
   "areYouSureYouWantToLogout": "Voulez-vous vraiment vous déconnecter ?",
@@ -332,15 +339,26 @@
   "authToChangeLockscreenSetting": "Veuillez vous authentifier pour modifier les paramètres de l'écran de verrouillage",
   "authToViewPasskey": "Veuillez vous authentifier pour afficher la clé d'accès",
   "theme": "Thème",
+  "appearance": "Apparence",
   "lightTheme": "Clair",
   "darkTheme": "Sombre",
   "systemTheme": "Système",
   "settings": "Paramètres",
   "about": "À propos d'Ente",
+  "aboutUs": "À propos de nous",
   "weAreOpenSource": "Nous sommes open source !",
   "privacy": "Politique de confidentialité",
   "terms": "Conditions d'utilisation",
   "termsOfServicesTitle": "Conditions d'utilisation",
+  "checkForUpdates": "Vérifier les mises à jour",
+  "checkingForUpdates": "Recherche de mises à jour...",
+  "youAreOnTheLatestVersion": "Vous êtes sur la dernière version",
+  "aNewVersionOfEnteLockerIsAvailable": "Une nouvelle version de Ente Locker est disponible.",
+  "criticalUpdateAvailable": "Mise à jour critique disponible",
+  "updateAvailable": "Une mise à jour est disponible",
+  "downloadUpdate": "Télécharger la mise à jour",
+  "support": "Support",
+  "helpAndSupport": "Aide et assistance",
   "contactSupport": "Contacter l'assistance",
   "help": "Documentation",
   "suggestFeatures": "Suggérer une fonctionnalité",
@@ -351,17 +369,26 @@
     "description": "Dialog body text for sending logs in Locker app (without file name warning)"
   },
   "social": "Retrouvez nous",
-  "rateUsOnStore": "Laissez une note sur {storeName}",
+  "rateUsOnStore": "Notez-nous sur {storeName}",
+  "blog": "Blog",
   "merchandise": "Boutique",
+  "twitter": "Twitter",
+  "mastodon": "Mastodon",
+  "matrix": "Matrice",
+  "discord": "Discord",
+  "reddit": "Reddit",
+  "information": "Information",
   "saveInformation": "Enregistrer l'information",
   "saveToLocker": "Enregistrer dans Locker",
-  "saveDocumentDescription": "Televerse des documents importants.",
-  "informationDescription": "Enregistre et partage des informations avec tes proches.",
-  "personalNoteDescription": "Note tes pensees et instructions.",
+  "saveDocumentTitle": "Document",
+  "saveDocumentDescription": "Charger des documents importants.",
+  "informationDescription": "Enregistrez et partagez des informations avec vos proches.",
+  "personalNote": "Note",
+  "personalNoteDescription": "Notez vos pensées et instructions.",
   "physicalRecords": "Objet",
-  "physicalRecordsDescription": "Enregistre l'emplacement d'objets reels.",
+  "physicalRecordsDescription": "Sauvegardez l'emplacement d'éléments réels.",
   "accountCredentials": "Confidentiel",
-  "accountCredentialsDescription": "Conserve les identifiants de compte.",
+  "accountCredentialsDescription": "Conservez les identifiants du compte.",
   "editSecret": "Modifier le secret",
   "@editSecret": {
     "description": "Title shown when editing an existing secret"
@@ -385,9 +412,10 @@
   "keepEditing": "Continuer a modifier",
   "discardChanges": "Abandonner",
   "recordName": "Nom de l'enregistrement",
-  "recordNameHint": "Nom de l'objet reel",
+  "recordNameHint": "Nom de l'élément réel",
   "recordLocation": "Lieu",
   "recordLocationHint": "Ou est conserve cet objet ?",
+  "recordNotes": "Notes",
   "recordNotesHint": "Informations supplementaires sur l'objet",
   "credentialName": "Compte",
   "credentialNameHint": "Nom du service",
@@ -419,6 +447,7 @@
   "sharedByYou": "Partagé par vous",
   "sharedWithYou": "Partagé avec vous",
   "manageLink": "Gérer le lien",
+  "linkLabel": "Lien",
   "linkExpiry": "Expiration du lien",
   "linkNeverExpires": "Jamais",
   "linkExpired": "Expiré",
@@ -473,6 +502,7 @@
   "youCannotShareWithYourself": "Vous ne pouvez pas partager avec vous-même",
   "inviteToEnte": "Inviter à rejoindre Ente",
   "sendInvite": "Envoyer Invitations",
+  "shareTextRecommendUsingEnte": "Telecharge Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "Ceci est votre ID de vérification",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Quelqu'un qui partage des albums avec vous devrait voir le même ID sur son appareil.",
   "howToViewShareeVerificationID": "Demandez-leur d'appuyer longuement sur leur adresse email dans l'écran des paramètres pour vérifier que les identifiants des deux appareils correspondent.",
@@ -535,7 +565,7 @@
   "@uploadStorageLimitErrorTitle": {
     "description": "Title shown when uploads fail due to running out of storage"
   },
-  "uploadStorageLimitErrorBody": "Tu as epuise ton espace de stockage. Libere de l'espace pour continuer a televerser.",
+  "uploadStorageLimitErrorBody": "Vous avez épuisé votre espace de stockage. Libérez de l'espace pour continuer d'en charger.",
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
   },
@@ -573,7 +603,7 @@
   "deselectAll": "Tout déselectionner",
   "selectAll": "Tout sélectionner",
   "unnamedCollection": "Collection sans nom",
-  "uploadedFilesProgress": "{completed}/{total} elements televerses...",
+  "uploadedFilesProgress": "{completed}/{total} éléments chargés...",
   "@uploadedFilesProgress": {
     "description": "Progress message showing uploaded items",
     "placeholders": {
@@ -587,7 +617,7 @@
       }
     }
   },
-  "uploadedFilesProgressWithError": "{completed}/{total} elements televerses... ({error})",
+  "uploadedFilesProgressWithError": "{completed}/{total} éléments chargés... ({error})",
   "@uploadedFilesProgressWithError": {
     "description": "Progress message showing uploaded items with error",
     "placeholders": {
@@ -612,10 +642,10 @@
   "exitApp": "Quitter l'application",
   "lockerLogs": "Journaux Locker",
   "clear": "Effacer",
-  "uploadAFile": "Televerser un element",
+  "uploadAFile": "Charger un élément",
   "clickHereToUpload": "Clique ici pour televerser",
   "saveDocument": "Enregistrer le document",
-  "uploadFiles": "Televerser des elements",
+  "uploadFiles": "Charger des éléments",
   "addToCollection": "Ajouter a la collection",
   "newCollection": "Nouvelle collection",
   "title": "Titre",
@@ -735,5 +765,6 @@
   "clearAllFilters": "Effacer tous les filtres",
   "selectLanguage": "Sélectionnez la langue",
   "general": "Général",
-  "language": "Langue"
+  "language": "Langue",
+  "actionNotSupportedOnFavouritesAlbum": "Action non prise en charge dans l'album des Favoris"
 }

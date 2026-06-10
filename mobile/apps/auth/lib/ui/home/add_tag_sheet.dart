@@ -9,6 +9,7 @@ import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/horizontal_scroll_area.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +17,7 @@ import 'package:flutter/material.dart';
 class AddTagSheet extends StatefulWidget {
   final List<Code> selectedCodes;
 
-  const AddTagSheet({
-    super.key,
-    required this.selectedCodes,
-  });
+  const AddTagSheet({super.key, required this.selectedCodes});
 
   @override
   State<AddTagSheet> createState() => _AddTagSheetState();
@@ -44,8 +42,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
     final initialTagsForSelection = widget.selectedCodes.isEmpty
         ? <String>{}
         : widget.selectedCodes
-            .map((code) => code.display.tags.toSet())
-            .reduce((a, b) => a.intersection(b));
+              .map((code) => code.display.tags.toSet())
+              .reduce((a, b) => a.intersection(b));
 
     if (mounted) {
       setState(() {
@@ -58,8 +56,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
   }
 
   Future<void> _onDonePressed() async {
-    final removedTags =
-        _initialIntersectionTags.difference(_selectedTagsInSheet);
+    final removedTags = _initialIntersectionTags.difference(
+      _selectedTagsInSheet,
+    );
     final addedTags = _selectedTagsInSheet.difference(_initialIntersectionTags);
 
     final updateFutures = widget.selectedCodes.map((code) {
@@ -116,8 +115,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
                         buttonType: ButtonType.primary,
                         labelText: context.l10n.create,
                         isDisabled: textController.text.trim().isEmpty,
-                        onTap: () async => Navigator.of(context)
-                            .pop(textController.text.trim()),
+                        onTap: () async => Navigator.of(
+                          context,
+                        ).pop(textController.text.trim()),
                       ),
                     ),
                   ],
@@ -163,8 +163,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
                 style: IconButton.styleFrom(
-                  backgroundColor:
-                      colorScheme.fillFaint.withValues(alpha: 0.025),
+                  backgroundColor: colorScheme.fillFaint.withValues(
+                    alpha: 0.025,
+                  ),
                 ),
               ),
             ],
@@ -172,45 +173,53 @@ class _AddTagSheetState extends State<AddTagSheet> {
           const SizedBox(height: 16),
           SizedBox(
             height: 80,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: widget.selectedCodes.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (context, index) {
-                final code = widget.selectedCodes[index];
-                final iconData = code.display.isCustomIcon
-                    ? code.display.iconID
-                    : code.issuer;
+            child: HorizontalScrollArea(
+              builder: (context, scrollController) => ListView.separated(
+                controller: scrollController,
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.selectedCodes.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final code = widget.selectedCodes[index];
+                  final iconData = code.display.isCustomIcon
+                      ? code.display.iconID
+                      : code.issuer;
 
-                return SizedBox(
-                  width: 60,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: colorScheme.fillFaint.withValues(alpha: 0.02),
-                          borderRadius: BorderRadius.circular(8),
+                  return SizedBox(
+                    width: 60,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: colorScheme.fillFaint.withValues(
+                              alpha: 0.02,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: IconUtils.instance.getIcon(
+                              context,
+                              iconData.trim(),
+                              width: 28,
+                            ),
+                          ),
                         ),
-                        child: Center(
-                          child: IconUtils.instance
-                              .getIcon(context, iconData.trim(), width: 28),
+                        const SizedBox(height: 8),
+                        Text(
+                          code.issuer,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.mini.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        code.issuer,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.mini.copyWith(
-                          color: colorScheme.textMuted,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 24),

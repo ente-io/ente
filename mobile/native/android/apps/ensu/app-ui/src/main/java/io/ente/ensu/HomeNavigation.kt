@@ -141,6 +141,7 @@ internal fun HomeNavigation(
                         onStartDownload = { userInitiated ->
                             store.startModelDownload(userInitiated = userInitiated)
                         },
+                        onDismissUnsupportedDeviceDialog = store::dismissUnsupportedDeviceDialog,
                         onOverflowTrim = store::confirmOverflowTrim,
                         onOverflowCancel = store::cancelOverflowDialog
                     )

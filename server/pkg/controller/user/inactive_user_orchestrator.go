@@ -63,7 +63,7 @@ const (
 	inactiveUserGap7dTo1d    = 6 * inactiveUserOneDayInMicroSeconds
 	inactiveUserGap1dToFinal = inactiveUserOneDayInMicroSeconds
 
-	inactiveUserRolloutPercentage = 90
+	inactiveUserRolloutPercentage = 100
 	inactiveUserRolloutNonce      = "inactive-user-deletion-v1"
 )
 
@@ -264,19 +264,14 @@ func (c *InactiveUserOrchestrator) processCandidateBatch(candidates []repo.UserI
 		return nil
 	}
 
-	workerCount := inactiveUserWorkerCount
-	if len(candidates) < workerCount {
-		workerCount = len(candidates)
-	}
+	workerCount := min(len(candidates), inactiveUserWorkerCount)
 
 	candidateCh := make(chan repo.UserInactivityCandidate, len(candidates))
 	resultCh := make(chan inactiveCandidateResult, len(candidates))
 	var wg sync.WaitGroup
 
-	for i := 0; i < workerCount; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range workerCount {
+		wg.Go(func() {
 			for candidate := range candidateCh {
 				func(candidate repo.UserInactivityCandidate) {
 					defer func() {
@@ -306,7 +301,7 @@ func (c *InactiveUserOrchestrator) processCandidateBatch(candidates []repo.UserI
 					}
 				}(candidate)
 			}
-		}()
+		})
 	}
 
 	for _, candidate := range candidates {
@@ -379,6 +374,7 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 		return inactivityEmailStageNone, false, false, false, nil
 	}
 
+	accountRecoveryLink := ""
 	if config.IsFinal {
 		if c.UserController == nil {
 			return stage, false, false, false, fmt.Errorf("inactive user deletion requires user controller")
@@ -423,6 +419,11 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 			}
 		}
 
+		accountRecoveryLink, err = c.UserController.getAccountRecoveryLink(user.ID, user.Email)
+		if err != nil {
+			return stage, false, false, false, err
+		}
+
 		deleteLogger := log.WithFields(log.Fields{
 			"user_id": user.ID,
 			"req_ctx": "inactive_account_deletion",
@@ -436,6 +437,9 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 	templateData := map[string]interface{}{
 		"Email":        user.Email,
 		"DeletionDate": deletionDate,
+	}
+	if accountRecoveryLink != "" {
+		templateData["AccountRecoveryLink"] = accountRecoveryLink
 	}
 	if emailSemaphore != nil {
 		emailSemaphore <- struct{}{}

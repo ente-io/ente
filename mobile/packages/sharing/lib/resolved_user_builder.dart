@@ -3,11 +3,12 @@ import 'package:ente_sharing/extensions/user_extension.dart';
 import 'package:ente_sharing/models/user.dart';
 import 'package:flutter/widgets.dart';
 
-typedef ResolvedUserWidgetBuilder = Widget Function(
-  BuildContext context,
-  String displayName,
-  String actualEmail,
-);
+typedef ResolvedUserWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      String displayName,
+      String actualEmail,
+    );
 
 class ResolvedUserBuilder extends StatelessWidget {
   final User user;

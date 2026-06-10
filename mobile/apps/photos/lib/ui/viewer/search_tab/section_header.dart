@@ -1,3 +1,4 @@
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/search/search_types.dart";
@@ -19,15 +20,11 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     return GestureDetector(
       onTap: () {
         if (hasMore) {
-          routeToPage(
-            context,
-            SearchSectionAllPage(
-              sectionType: sectionType,
-            ),
-          );
+          routeToPage(context, SearchSectionAllPage(sectionType: sectionType));
         }
       },
       child: Row(
@@ -37,7 +34,7 @@ class SectionHeader extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Text(
               sectionType.sectionTitle(context),
-              style: getEnteTextTheme(context).largeBold,
+              style: TextStyles.h2.copyWith(color: textTheme.largeBold.color),
             ),
           ),
           hasMore

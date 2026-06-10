@@ -270,7 +270,6 @@
   "after1Month": "1 ay sonra",
   "after1Year": "1 yıl sonra",
   "manageParticipants": "Yönet",
-  "collabLinkSectionDescription": "Ente aplikasyonu veya hesabı olmadan insanların paylaşılan albümde fotoğraf ekleyip görüntülemelerine izin vermek için bir bağlantı oluşturun. Grup veya etkinlik fotoğraflarını toplamak için harika bir seçenek.",
   "collectPhotos": "Fotoğrafları topla",
   "collaborativeLink": "Ortak bağlantı",
   "shareWithNonenteUsers": "Ente kullanıcısı olmayanlar için paylaş",
@@ -391,7 +390,6 @@
   "creatingLink": "Bağlantı oluşturuluyor...",
   "removeWithQuestionMark": "Kaldırılsın mı?",
   "removeParticipantBody": "{userEmail} bu paylaşılan albümden kaldırılacaktır\n\nOnlar tarafından eklenen tüm fotoğraflar da albümden kaldırılacaktır",
-  "keepPhotos": "Fotoğrafları sakla",
   "deletePhotos": "Fotoğrafları sil",
   "inviteToEnte": "Ente'ye davet edin",
   "removePublicLink": "Herkese açık bağlantıyı kaldır",
@@ -399,6 +397,9 @@
   "sharing": "Paylaşılıyor...",
   "youCannotShareWithYourself": "Kendinizle paylaşamazsınız",
   "archive": "Arşivle",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Fotoğrafları seçmek için uzun basın ve + düğmesine tıklayarak bir albüm oluşturun",
   "importing": "İçeri aktarılıyor....",
   "failedToLoadAlbums": "Albüm yüklenirken hata oluştu",
@@ -642,9 +643,7 @@
   "referrals": "Arkadaşını davet et",
   "notifications": "Bildirimler",
   "sharedPhotoNotifications": "Yeni paylaşılan fotoğraf ve albümler",
-  "sharedPhotoNotificationsExplanation": "Sizinle paylaşılan albümlerdeki yeni fotoğraflar ve sizinle paylaşılan yeni albümler için bildirim alın.",
   "socialNotifications": "Beğeni ve yorumlar",
-  "socialNotificationsExplanation": "Dahil olduğunuz albümlere gelen beğeni ve yorumlardan bildirim alın",
   "advanced": "Gelişmiş",
   "general": "Genel",
   "security": "Güvenlik",
@@ -873,7 +872,6 @@
   "shareTheMoment": "Bu anı paylaş",
   "letFriendsAndFamilyReact": "Aile ve arkadaşlarınızın fotoğraflara tepki vermesine ve yorum yapmasına izin verin.",
   "pleaseLoginAgain": "Lütfen tekrar giriş yapın",
-  "autoLogoutMessage": "Teknik aksaklık nedeniyle oturumunuz kapatıldı. Verdiğimiz rahatsızlıktan dolayı özür dileriz.",
   "yourSubscriptionHasExpired": "Aboneliğinizin süresi doldu",
   "storageLimitExceeded": "Depolama sınırı aşıldı",
   "upgrade": "Yükselt",
@@ -896,11 +894,6 @@
   "collectEventPhotos": "Etkinlik fotoğraflarını topla",
   "sessionExpired": "Oturum süresi doldu",
   "loggingOut": "Çıkış yapılıyor...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Cihazda",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -942,6 +935,9 @@
   "moveToAlbum": "Albüme taşı",
   "unhide": "Gizleme",
   "unarchive": "Arşivden cıkar",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Favorile",
   "removeFromFavorite": "Favorilerden Kaldır",
   "shareLink": "Bağlantıyı paylaş",
@@ -1345,8 +1341,6 @@
   "noPhotosFoundHere": "Burada fotoğraf bulunamadı",
   "zoomOutToSeePhotos": "Fotoğrafları görmek için uzaklaştırın",
   "noImagesWithLocation": "Konum içeren resim yok",
-  "unpinAlbum": "Albümün sabitlemesini kaldır",
-  "pinAlbum": "Albümü sabitle",
   "pin": "Sabitle",
   "pinPerson": "Kişiyi sabitle",
   "pinToTop": "Üste sabitle",
@@ -1917,9 +1911,7 @@
   "newPhotosEmoji": " yeni 📸",
   "sorryWeHadToPauseYourBackups": "Üzgünüm, yedeklemenizi duraklatmak zorunda kaldık",
   "clickToInstallOurBestVersionYet": "Bugüne kadarki en iyi sürümümüzü yüklemek için tıklayın",
-  "onThisDayNotificationExplanation": "Önceki yıllarda bu günden anılar hakkında hatırlatıcılar alın.",
   "birthdayNotifications": "Doğum günü bildirimleri",
-  "receiveRemindersOnBirthdays": "Birinin doğum günü olduğunda hatırlatıcılar alın. Bildirime dokunmak sizi doğum günü kişisinin fotoğraflarına götürecektir.",
   "happyBirthday": "Doğum günün kutlu olsun! 🥳",
   "birthdays": "Doğum Günleri",
   "wishThemAHappyBirthday": "{name} doğum günü kutlu olsun! 🎉",

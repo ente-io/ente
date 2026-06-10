@@ -1,13 +1,4 @@
 import {
-    Box,
-    Button,
-    Container,
-    Stack,
-    TextField,
-    Typography,
-} from "@mui/material";
-import { useColorScheme } from "@mui/material/styles";
-import {
     MAX_SECRET_BYTES_FOR_PRINTED_CARD,
     canvasToBlob,
     downloadBlob,
@@ -17,16 +8,25 @@ import {
     renderShareCard,
     sanitizeFilename,
     shareFiles,
-} from "features/twoof3/utils/export";
+} from "@/features/twoof3/utils/export";
 import {
     createQrSvgData,
     decodeQrFromFile,
-} from "features/twoof3/utils/qrCode";
+} from "@/features/twoof3/utils/qrCode";
 import {
     combineShares,
     parseShare,
     splitSecret,
-} from "features/twoof3/utils/shamir";
+} from "@/features/twoof3/utils/shamir";
+import {
+    Box,
+    Button,
+    Container,
+    Stack,
+    TextField,
+    Typography,
+} from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import Head from "next/head";
 import type { ChangeEvent, DragEvent, ReactNode } from "react";
 import {
@@ -743,9 +743,8 @@ const Page = () => {
             recoverSlotDetails[0].length !== recoverSlotDetails[1].length);
     const recoverDuplicateCards =
         !recoverMismatch &&
-        recoverSlotDetails[0] &&
-        recoverSlotDetails[1] &&
-        recoverSlotDetails[0].index === recoverSlotDetails[1].index;
+        recoverSlotDetails[0] != null &&
+        recoverSlotDetails[0].index === recoverSlotDetails[1]?.index;
     const hasTwoRecoverValues = recoverSlots.every((slot) => slot.value.trim());
     const canRecover =
         hasTwoRecoverValues && !recoverMismatch && !recoverDuplicateCards;

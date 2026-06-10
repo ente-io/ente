@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 import 'package:logging/logging.dart';
+import 'package:native_dio_adapter/native_dio_adapter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/endpoint_config.dart";
@@ -17,6 +18,7 @@ class NetworkClient {
   final _logger = Logger("NetworkClient");
   final _http2FallbackPolicy = _Http2FallbackPolicy();
   late Dio _dio;
+  late Dio _downloadDio;
   late Dio _enteDio;
   StreamSubscription<EndpointUpdatedEvent>? _endpointUpdatedSubscription;
   static const kConnectTimeout = 15;
@@ -29,29 +31,12 @@ class NetworkClient {
     final endpointConfig = EndpointConfig(preferences);
     final String ua = await userAgent();
     final endpoint = endpointConfig.endpoint;
-    _dio = Dio(
-      BaseOptions(
-        connectTimeout: _connectTimeout,
-        headers: {
-          HttpHeaders.userAgentHeader: ua,
-          'X-Client-Version': packageInfo.version,
-          'X-Client-Package': packageInfo.packageName,
-        },
-      ),
-    );
-    _enteDio = Dio(
-      BaseOptions(
-        baseUrl: endpoint,
-        connectTimeout: _connectTimeout,
-        headers: {
-          HttpHeaders.userAgentHeader: ua,
-          'X-Client-Version': packageInfo.version,
-          'X-Client-Package': packageInfo.packageName,
-        },
-      ),
-    );
+    _dio = Dio(_newBaseOptions(ua, packageInfo));
+    _downloadDio = Dio(_newBaseOptions(ua, packageInfo));
+    _enteDio = Dio(_newBaseOptions(ua, packageInfo, baseUrl: endpoint));
 
     _dio.httpClientAdapter = _newAdaptiveHttpClientAdapter(_connectTimeout);
+    _downloadDio.httpClientAdapter = NativeAdapter();
     _enteDio.httpClientAdapter = _newAdaptiveHttpClientAdapter(_connectTimeout);
 
     _setupInterceptors(endpoint);
@@ -59,11 +44,12 @@ class NetworkClient {
     if (_endpointUpdatedSubscription != null) {
       await _endpointUpdatedSubscription!.cancel();
     }
-    _endpointUpdatedSubscription =
-        Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
-      _enteDio.options.baseUrl = event.endpoint;
-      _setupInterceptors(event.endpoint);
-    });
+    _endpointUpdatedSubscription = Bus.instance
+        .on<EndpointUpdatedEvent>()
+        .listen((event) {
+          _enteDio.options.baseUrl = event.endpoint;
+          _setupInterceptors(event.endpoint);
+        });
   }
 
   void _setupInterceptors(String endpoint) {
@@ -71,13 +57,27 @@ class NetworkClient {
     _enteDio.interceptors.add(EnteRequestInterceptor(endpoint));
   }
 
+  BaseOptions _newBaseOptions(
+    String ua,
+    PackageInfo packageInfo, {
+    String? baseUrl,
+  }) {
+    return BaseOptions(
+      baseUrl: baseUrl ?? "",
+      connectTimeout: _connectTimeout,
+      headers: {
+        HttpHeaders.userAgentHeader: ua,
+        'X-Client-Version': packageInfo.version,
+        'X-Client-Package': packageInfo.packageName,
+      },
+    );
+  }
+
   HttpClientAdapter _newAdaptiveHttpClientAdapter(Duration connectTimeout) {
     final fallbackAdapter = IOHttpClientAdapter();
     final fallbackPolicy = _http2FallbackPolicy;
     final http2Adapter = Http2Adapter(
-      ConnectionManager(
-        handshakeTimout: connectTimeout,
-      ),
+      ConnectionManager(handshakeTimout: connectTimeout),
       fallbackAdapter: fallbackAdapter,
       onNotSupported: (options, requestStream, cancelFuture, exception) {
         _logHttp2UnsupportedOriginOnce(
@@ -103,6 +103,8 @@ class NetworkClient {
 
   Dio getDio() => _dio;
 
+  Dio get downloadDio => _downloadDio;
+
   Dio get enteDio => _enteDio;
 }
 
@@ -112,10 +114,10 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
     required HttpClientAdapter fallbackAdapter,
     required Logger logger,
     required _Http2FallbackPolicy fallbackPolicy,
-  })  : _http2Adapter = http2Adapter,
-        _fallbackAdapter = fallbackAdapter,
-        _logger = logger,
-        _fallbackPolicy = fallbackPolicy;
+  }) : _http2Adapter = http2Adapter,
+       _fallbackAdapter = fallbackAdapter,
+       _logger = logger,
+       _fallbackPolicy = fallbackPolicy;
 
   final HttpClientAdapter _http2Adapter;
   final HttpClientAdapter _fallbackAdapter;
@@ -134,16 +136,11 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
     if (_fallbackPolicy.isUnsupported(options.uri)) {
       return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
     }
-    // Keep explicit body send-timeout behavior on Dio's IO adapter. The app
-    // does not set this globally, but per-request timeouts should not inherit
-    // dio_http2_adapter's stream-close behavior after a timed-out body stream.
-    if (_hasRequestBodySendTimeout(options, requestStream)) {
-      return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
-    }
-    // Keep cancellable body streams on Dio's IO adapter. dio_http2_adapter closes
-    // the HTTP/2 outgoing stream on cancellation, which can race with active file
-    // streams and surface stream-close errors instead of a clean Dio cancellation.
-    if (_hasCancellableRequestBody(requestStream, cancelFuture)) {
+    if (_shouldUseFallbackForRequestBody(
+      options,
+      requestStream,
+      cancelFuture,
+    )) {
       return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
     }
 
@@ -192,6 +189,18 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
         message.contains("no application protocol");
   }
 
+  // Keep body sources on Dio's IO adapter when dio_http2_adapter can close the
+  // HTTP/2 outgoing stream before the body stops emitting.
+  bool _shouldUseFallbackForRequestBody(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    return _hasRequestBodySendTimeout(options, requestStream) ||
+        _hasCancellableRequestBody(requestStream, cancelFuture) ||
+        _hasSourceStreamingBody(options);
+  }
+
   bool _hasRequestBodySendTimeout(
     RequestOptions options,
     Stream<Uint8List>? requestStream,
@@ -205,6 +214,10 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) {
     return requestStream != null && cancelFuture != null;
+  }
+
+  bool _hasSourceStreamingBody(RequestOptions options) {
+    return options.data is Stream<List<int>> || options.data is FormData;
   }
 }
 
@@ -221,8 +234,9 @@ class _Http2FallbackPolicy {
 
   String originForLog(Uri uri) {
     final scheme = uri.scheme.toLowerCase();
-    final port =
-        uri.hasPort && !_isDefaultPort(scheme, uri.port) ? ":${uri.port}" : "";
+    final port = uri.hasPort && !_isDefaultPort(scheme, uri.port)
+        ? ":${uri.port}"
+        : "";
     return "$scheme://${_formatHost(uri.host)}$port";
   }
 

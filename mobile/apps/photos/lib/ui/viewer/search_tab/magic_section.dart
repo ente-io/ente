@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math";
 
+import "package:ente_components/ente_components.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
@@ -34,10 +35,12 @@ class _MagicSectionState extends State<MagicSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _magicSearchResults = (await SectionType.magic.getData(
-            context,
-            limit: kSearchSectionLimit,
-          )) as List<GenericSearchResult>;
+          _magicSearchResults =
+              (await SectionType.magic.getData(
+                    context,
+                    limit: kSearchSectionLimit,
+                  ))
+                  as List<GenericSearchResult>;
           setState(() {});
         }),
       );
@@ -139,9 +142,10 @@ class MagicRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = magicSearchResult.heroTag() +
+    final heroTag =
+        magicSearchResult.heroTag() +
         (magicSearchResult.previewThumbnail()?.tag ?? "");
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(2.5 - _borderWidth, 0)),
       child: GestureDetector(
@@ -195,7 +199,6 @@ class MagicRecommendation extends StatelessWidget {
                                 tag: heroTag,
                                 child: ThumbnailWidget(
                                   magicSearchResult.previewThumbnail()!,
-                                  shouldShowArchiveStatus: false,
                                   shouldShowSyncStatus: false,
                                 ),
                               )
@@ -213,26 +216,18 @@ class MagicRecommendation extends StatelessWidget {
                               Colors.black.withValues(alpha: 0),
                               Colors.black.withValues(alpha: 0.5),
                             ],
-                            stops: const [
-                              0,
-                              0.1,
-                              1,
-                            ],
+                            stops: const [0, 0.1, 1],
                           ),
                         ),
                       ),
                       ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: 88,
-                        ),
+                        constraints: const BoxConstraints(maxWidth: 88),
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 8,
-                          ),
+                          padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
                             magicSearchResult.name(),
-                            style: enteTextTheme.small.copyWith(
-                              color: Colors.white,
+                            style: TextStyles.body.copyWith(
+                              color: colors.specialWhite,
                             ),
                             maxLines: 3,
                             overflow: TextOverflow.fade,

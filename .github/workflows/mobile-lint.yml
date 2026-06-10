@@ -1,152 +1,128 @@
-name: "Lint (photos)"
+name: "Lint (mobile)"
 
 on:
-    # Run on every pull request (open or push to it) that changes the photos app,
-    # Photos Rust, or shared Rust crates used by Photos
     pull_request:
         paths:
-            - "mobile/apps/photos/**"
-            - "rust/photos/**"
-            - "rust/core/**"
-            - "rust/contacts/**"
-            - "rust/crates/image/**"
             - ".github/workflows/mobile-lint.yml"
-            - "mobile/scripts/check_source_arb_plurals.rb"
+            - "mobile/**"
+            - "rust/apps/codegen/**"
+            - "rust/bindings/frb/**"
+            - "rust/Cargo.lock"
+            - "rust/Cargo.toml"
+            - "rust/crates/contacts/**"
+            - "rust/crates/core/**"
+            - "rust/crates/image/**"
+            - "rust/crates/photos/**"
+    workflow_dispatch:
 
 env:
-    FLUTTER_VERSION: "3.32.8"
-    RUST_VERSION: "1.90.0"
-    RUSTFLAGS: -D warnings
+    FLUTTER_VERSION: "3.38.10"
 
 permissions:
     contents: read
 
 jobs:
-    photos-lint:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: mobile/apps/photos
+    lint:
+        runs-on: macos-26
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v6
+            - name: Checkout code and submodules
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
               with:
-                  fetch-depth: 2
-
-            - name: Detect Rust changes
-              id: rust_changes
-              shell: bash
-              run: |
-                  ente_rust=false
-                  ente_photos_rust=false
-
-                  while IFS= read -r file; do
-                      case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/core/*|rust/contacts/*)
-                              ente_rust=true
-                              ;;
-                      esac
-
-                      case "$file" in
-                          .github/workflows/mobile-lint.yml|mobile/apps/photos/rust/*|mobile/apps/photos/rust_builder/*|rust/photos/*|rust/crates/image/*)
-                              ente_photos_rust=true
-                              ;;
-                      esac
-                  done < <(git diff --name-only "${{ github.event.pull_request.base.sha }}...HEAD")
-
-                  echo "ente_rust=$ente_rust" >> "$GITHUB_OUTPUT"
-                  echo "ente_photos_rust=$ente_photos_rust" >> "$GITHUB_OUTPUT"
-
-                  if [[ "$ente_rust" == "true" || "$ente_photos_rust" == "true" ]]; then
-                      echo "any=true" >> "$GITHUB_OUTPUT"
-                  else
-                      echo "any=false" >> "$GITHUB_OUTPUT"
-                  fi
+                  submodules: recursive
 
             - name: Verify frozen mobile pubspecs
-              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/photos
-              working-directory: ${{ github.workspace }}
+              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile
 
             - name: Verify source ARB plurals
               run: ruby mobile/scripts/check_source_arb_plurals.rb
-              working-directory: ${{ github.workspace }}
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
-              uses: subosito/flutter-action@v2
+            - name: Verify auth custom icons
+              run: |
+                  find assets/custom-icons -type f -name "*.svg" | while read -r file; do
+                      name=$(basename "$file")
+                      if [[ "$name" != "$(printf "%s" "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '_')" ]]; then
+                          echo "File name is not lowercase: $file"
+                          exit 1
+                      fi
+
+                      if [[ "$file" == "assets/custom-icons/icons/bbs_nga.svg" ]]; then
+                          continue
+                      fi
+
+                      size=$(wc -c < "$file")
+                      if (( size > 20480 )); then
+                          echo "File size is greater than 20KB: $file ($size bytes)"
+                          exit 1
+                      fi
+                  done
+
+                  jq empty assets/custom-icons/_data/custom-icons.json
+                  jq -r '.icons[] | select(.hex != null) | .hex' assets/custom-icons/_data/custom-icons.json | while read -r hex; do
+                      if [[ -n "$hex" && ! "$hex" =~ ^[0-9a-fA-F]{6}$ ]]; then
+                          echo "Invalid hex color '$hex'. Must be exactly 6 hexadecimal characters."
+                          exit 1
+                      fi
+                  done
+              working-directory: mobile/apps/auth
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
               with:
                   channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
                   cache: true
 
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              uses: dtolnay/rust-toolchain@stable
+            # Restore-only; primed on main by warm-caches.yml.
+            - name: Restore Rust cache
+              uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
               with:
-                  toolchain: ${{ env.RUST_VERSION }}
-                  components: rustfmt,clippy
+                  workspaces: rust
+                  shared-key: rust-flutter
+                  save-if: false
 
-            - name: Cache
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      mobile/packages/rust/rust/target
-                      mobile/apps/photos/rust/target
-                  key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('mobile/**/Cargo.lock') }}
+            - run: cargo codegen frb
+              working-directory: rust
 
-            - run: flutter pub get --enforce-lockfile
+            - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
+              working-directory: rust
 
-            - name: Install Flutter Rust Bridge
-              run: cargo install flutter_rust_bridge_codegen
+            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
+              working-directory: rust
 
-            - name: Generate Rust bindings (Core)
-              run: flutter_rust_bridge_codegen generate
-              working-directory: mobile/packages/rust
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
 
-            - name: Generate Rust bindings
-              run: flutter_rust_bridge_codegen generate
+            - name: Lint packages
+              run: |
+                  for pubspec in mobile/packages/*/pubspec.yaml; do
+                      package_dir=${pubspec%/pubspec.yaml}
+                      package=${package_dir##*/}
+                      echo "Linting $package"
+                      (
+                          cd "$package_dir"
+                          flutter pub get --enforce-lockfile
+                          dart format --output=none --set-exit-if-changed .
+                          flutter analyze
+                          if [[ -d test ]]; then
+                              flutter test
+                          fi
+                      )
+                  done
 
-            - run: flutter analyze --no-fatal-infos
-
-            - name: Run Flutter tests
-              run: flutter test
-
-            - name: Check formatting (ente_rust)
-              if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: mobile/packages/rust/rust
-              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
-
-            - name: Run clippy (ente_rust)
-              if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: mobile/packages/rust/rust
-              run: cargo clippy --all-targets --all-features
-
-            - name: Build (ente_rust)
-              if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: mobile/packages/rust/rust
-              run: cargo build
-
-            - name: Test (ente_rust)
-              if: steps.rust_changes.outputs.ente_rust == 'true'
-              working-directory: mobile/packages/rust/rust
-              run: cargo test
-
-            - name: Check formatting (ente_photos_rust)
-              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
-
-            - name: Run clippy (ente_photos_rust)
-              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo clippy --all-targets --all-features
-
-            - name: Build (ente_photos_rust)
-              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo build
-
-            - name: Test (ente_photos_rust)
-              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo test
+            - name: Lint apps
+              run: |
+                  for app in photos auth locker; do
+                      echo "Linting $app"
+                      (
+                          cd "mobile/apps/$app"
+                          flutter pub get --enforce-lockfile
+                          (cd ios && pod install --deployment)
+                          if [[ "$app" != "photos" ]]; then
+                              flutter gen-l10n
+                          fi
+                          dart format --output=none --set-exit-if-changed .
+                          flutter analyze
+                          flutter test
+                      )
+                  done

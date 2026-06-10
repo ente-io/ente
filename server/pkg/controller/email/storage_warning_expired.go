@@ -164,10 +164,7 @@ func resolveExpiredWarning(expiredWarningAnchor int64, now int64, history map[st
 
 	standardAutoDeleteDate := expiredWarningAnchor + storageWarningExpiredDeletionDelay
 	if cycleStart, ok := expiredBufferedCycleStart(expiredWarningAnchor, history); ok {
-		autoDeleteDate := cycleStart + storageWarningExpiredBackfillMinRecoveryDelay
-		if standardAutoDeleteDate > autoDeleteDate {
-			autoDeleteDate = standardAutoDeleteDate
-		}
+		autoDeleteDate := max(standardAutoDeleteDate, cycleStart+storageWarningExpiredBackfillMinRecoveryDelay)
 		stage := resolveExpiredBufferedWarningStage(cycleStart, autoDeleteDate, now, history)
 		return expiredWarningResolution{
 			Stage:          stage,
@@ -179,10 +176,7 @@ func resolveExpiredWarning(expiredWarningAnchor int64, now int64, history map[st
 
 	if shouldUseExpiredBufferedCycle(expiredWarningAnchor, now, history) {
 		cycleStart := now
-		autoDeleteDate := cycleStart + storageWarningExpiredBackfillMinRecoveryDelay
-		if standardAutoDeleteDate > autoDeleteDate {
-			autoDeleteDate = standardAutoDeleteDate
-		}
+		autoDeleteDate := max(standardAutoDeleteDate, cycleStart+storageWarningExpiredBackfillMinRecoveryDelay)
 
 		stage := resolveExpiredBufferedWarningStage(cycleStart, autoDeleteDate, now, history)
 		return expiredWarningResolution{

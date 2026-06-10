@@ -120,9 +120,6 @@
       <FileRef
          location = "group:EnteNetwork">
       </FileRef>
-      <FileRef
-         location = "group:EnteCast">
-      </FileRef>
       <Group
          location = "group:EnteConfiguration"
          name = "EnteConfiguration">
@@ -133,9 +130,6 @@
       </Group>
       <FileRef
          location = "group:EnteCore">
-      </FileRef>
-      <FileRef
-         location = "group:EnteCrypto">
       </FileRef>
    </Group>
 </Workspace>

@@ -3,11 +3,11 @@ import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
+import "package:ente_components/ente_components.dart" as components;
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_rust/ente_rust.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/gestures.dart";
 import 'package:flutter/material.dart';
@@ -78,10 +78,7 @@ bool _stopHearBeat = false;
 bool _isRustInitialized = false;
 Future<void>? _rustInitFuture;
 
-enum ForegroundStartupMode {
-  normal,
-  picker,
-}
+enum ForegroundStartupMode { normal, picker }
 
 void main() async {
   debugRepaintRainbowEnabled = false;
@@ -123,6 +120,7 @@ Future<void> _runInForeground(
   AdaptiveThemeMode? savedThemeMode,
   MediaExtentionAction initialMediaExtensionAction,
 ) async {
+  components.ComponentTheme.configure(app: components.ComponentApp.photos);
   return await runWithLogs(() async {
     _logger.info("Starting app in foreground");
     isProcessBg = false;
@@ -147,7 +145,8 @@ Future<void> _runInForeground(
           initialMediaExtensionAction: initialMediaExtensionAction,
         ),
         lockScreen: const LockScreen(),
-        enabled: await Configuration.instance.shouldShowLockScreen() ||
+        enabled:
+            await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
         locale: locale,
         lightTheme: lightThemeData,
@@ -252,6 +251,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       prefs,
       NetworkClient.instance.enteDio,
       NetworkClient.instance.getDio(),
+      NetworkClient.instance.downloadDio,
       packageInfo,
     );
     NotificationService.instance.init(prefs);
@@ -308,8 +308,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
         hasGrantedMLConsent &&
         localSettings.isMLLocalIndexingEnabled) {
       PersonService.init(entityService, MLDataDB.instance, prefs);
-      _logger
-          .info("[BG TASK] person service initialized for memories recompute");
+      _logger.info(
+        "[BG TASK] person service initialized for memories recompute",
+      );
     }
     await _homeWidgetSync(true);
 
@@ -396,6 +397,7 @@ Future<void> _init(
       preferences,
       NetworkClient.instance.enteDio,
       NetworkClient.instance.getDio(),
+      NetworkClient.instance.downloadDio,
       packageInfo,
     );
 
@@ -466,11 +468,9 @@ Future<void> _init(
     }
 
     if (Platform.isIOS) {
-      PushService.instance.init().then((_) {
-        FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler,
-        );
-      }).ignore();
+      PushService.instance
+          .init(onBackgroundPush: _handleBackgroundPush)
+          .ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(MLService.instance.init());
@@ -531,8 +531,9 @@ void logLocalSettings() {
         VideoPreviewService.instance.isVideoStreamingEnabled,
   };
 
-  final formattedSettings =
-      settings.entries.map((e) => '${e.key}: ${e.value}').join(', ');
+  final formattedSettings = settings.entries
+      .map((e) => '${e.key}: ${e.value}')
+      .join(', ');
   _logger.info('Local settings - $formattedSettings');
 }
 
@@ -623,7 +624,7 @@ Future<bool> _isRunningInForeground() async {
       (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> _handleBackgroundPush(Object message) async {
   final bool isRunningInFG = await _isRunningInForeground(); // hb
   final bool isInForeground = AppLifecycleService.instance.isForeground;
   if (isRunningInFG) {
@@ -637,24 +638,21 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
   } else {
     // App is dead or FG is not active
-    runWithLogs(
-      () async {
-        _logger.info("Background push received, no active foreground");
+    runWithLogs(() async {
+      _logger.info("Background push received, no active foreground");
 
-        // Mark BG as active before starting
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(
-          kLastBGTaskHeartBeatTime,
-          DateTime.now().microsecondsSinceEpoch,
-        );
+      // Mark BG as active before starting
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(
+        kLastBGTaskHeartBeatTime,
+        DateTime.now().microsecondsSinceEpoch,
+      );
 
-        await _init(true, via: 'firebasePush');
-        if (PushService.shouldSync(message)) {
-          await _sync('firebaseBgSyncNoActiveProcess');
-        }
-      },
-      prefix: "[fbg]",
-    ).ignore();
+      await _init(true, via: 'firebasePush');
+      if (PushService.shouldSync(message)) {
+        await _sync('firebaseBgSyncNoActiveProcess');
+      }
+    }, prefix: "[fbg]").ignore();
   }
 }
 

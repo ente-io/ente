@@ -55,18 +55,27 @@ class CollectionPage extends StatelessWidget {
       c.collection,
       Configuration.instance.getUserID()!,
     );
-    final List<EnteFile>? initialFiles =
-        c.thumbnail != null ? [c.thumbnail!] : null;
+    final List<EnteFile>? initialFiles = c.thumbnail != null
+        ? [c.thumbnail!]
+        : null;
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      galleryType,
+      c.collection.displayName,
+      _selectedFiles,
+      collection: c.collection,
+      isFromCollectPhotos: isFromCollectPhotos,
+    );
     final gallery = Gallery(
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final FileLoadResult result =
-            await FilesDB.instance.getFilesInCollection(
-          c.collection.id,
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
-        );
+        final FileLoadResult result = await FilesDB.instance
+            .getFilesInCollection(
+              c.collection.id,
+              creationStartTime,
+              creationEndTime,
+              limit: limit,
+              asc: asc,
+            );
         // hide ignored files from home page UI
         final ignoredIDs =
             await IgnoredFilesService.instance.idToIgnoreReasonMap;
@@ -77,15 +86,15 @@ class CollectionPage extends StatelessWidget {
         );
         return result;
       },
-      reloadEvent: Bus.instance
-          .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == c.collection.id),
+      reloadEvent: Bus.instance.on<CollectionUpdatedEvent>().where(
+        (event) => event.collectionID == c.collection.id,
+      ),
       forceReloadEvents: [
         Bus.instance.on<CollectionMetaEvent>().where(
-              (event) =>
-                  event.id == c.collection.id &&
-                  event.type == CollectionMetaEventType.sortChanged,
-            ),
+          (event) =>
+              event.id == c.collection.id &&
+              event.type == CollectionMetaEventType.sortChanged,
+        ),
       ],
       removalEventTypes: const {
         EventType.deletedFromRemote,
@@ -130,16 +139,6 @@ class CollectionPage extends StatelessWidget {
         ),
         child: GalleryBoundariesProvider(
           child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(90.0),
-              child: GalleryAppBarWidget(
-                galleryType,
-                c.collection.displayName,
-                _selectedFiles,
-                collection: c.collection,
-                isFromCollectPhotos: isFromCollectPhotos,
-              ),
-            ),
             bottomNavigationBar: isFromCollectPhotos
                 ? CollectPhotosBottomButtons(
                     c.collection,
@@ -154,23 +153,22 @@ class CollectionPage extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       return ValueListenableBuilder(
-                        valueListenable: InheritedSearchFilterData.of(context)
-                            .searchFilterDataProvider!
-                            .isSearchingNotifier,
+                        valueListenable: InheritedSearchFilterData.of(
+                          context,
+                        ).searchFilterDataProvider!.isSearchingNotifier,
                         builder: (context, value, _) {
                           return value
                               ? HierarchicalSearchGallery(
                                   tagPrefix: tagPrefix,
                                   selectedFiles: _selectedFiles,
+                                  appBar: appBar,
                                 )
                               : gallery;
                         },
                       );
                     },
                   ),
-                  SmartAlbumsStatusWidget(
-                    collection: c.collection,
-                  ),
+                  SmartAlbumsStatusWidget(collection: c.collection),
                   FileSelectionOverlayBar(
                     galleryType,
                     _selectedFiles,

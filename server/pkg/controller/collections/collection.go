@@ -3,6 +3,7 @@ package collections
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/access"
@@ -10,7 +11,6 @@ import (
 	"github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/cast"
 	socialrepo "github.com/ente-io/museum/pkg/repo/social"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/gin-gonic/gin"
 
@@ -45,6 +45,9 @@ type CollectionController struct {
 
 // Create creates a collection
 func (c *CollectionController) Create(collection ente.Collection, ownerID int64) (ente.Collection, error) {
+	if err := validateOwnedCollectionKey(collection.EncryptedKey, collection.KeyDecryptionNonce); err != nil {
+		return ente.Collection{}, err
+	}
 	// The key attribute check is to ensure that user does not end up uploading any files before actually setting the key attributes.
 	if _, keyErr := c.UserRepo.GetKeyAttributes(ownerID); keyErr != nil {
 		return ente.Collection{}, stacktrace.Propagate(keyErr, "Unable to get keyAttributes")
@@ -58,7 +61,7 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 	if collection.Type == "CollectionType.album" {
 		collection.Type = "album"
 	}
-	if !array.StringInList(collection.Type, ente.ValidCollectionTypes) {
+	if !slices.Contains(ente.ValidCollectionTypes, collection.Type) {
 		return ente.Collection{}, stacktrace.Propagate(fmt.Errorf("unexpected collection type %s", collection.Type), "")
 	}
 	collection, err := c.CollectionRepo.Create(collection)
@@ -114,7 +117,7 @@ func (c *CollectionController) GetFile(ctx *gin.Context, collectionID int64, fil
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
-		if !array.Int64InList(collectionID, cIDs) {
+		if !slices.Contains(cIDs, collectionID) {
 			return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 		}
 	}
@@ -142,7 +145,7 @@ func (c *CollectionController) TrashV3(ctx *gin.Context, req ente.TrashCollectio
 		return stacktrace.Propagate(err, "")
 	}
 	if !resp.Collection.AllowDelete() {
-		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("deleting albums of type %s is not allowed", resp.Collection.Type))
+		return stacktrace.Propagate(ente.ErrBadRequest, "deleting albums of type %s is not allowed", resp.Collection.Type)
 	}
 	if resp.Collection.IsDeleted {
 		log.WithFields(log.Fields{
@@ -159,7 +162,7 @@ func (c *CollectionController) TrashV3(ctx *gin.Context, req ente.TrashCollectio
 			return stacktrace.Propagate(err, "")
 		}
 		if count != 0 {
-			return stacktrace.Propagate(&ente.ErrCollectionNotEmpty, fmt.Sprintf("Collection file count %d", count))
+			return stacktrace.Propagate(&ente.ErrCollectionNotEmpty, "Collection file count %d", count)
 		}
 
 	}

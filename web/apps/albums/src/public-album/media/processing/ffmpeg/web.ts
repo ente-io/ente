@@ -1,4 +1,5 @@
 import { FFFSType, FFmpeg } from "@ffmpeg/ffmpeg";
+import { ensureArrayBufferBacked } from "ente-base/bytes";
 import { joinPath } from "ente-base/file-name";
 import { newID } from "ente-base/id";
 import log from "ente-base/log";
@@ -16,7 +17,7 @@ type FFmpegCommand = string[] | { default: string[]; hdr: string[] };
 let _ffmpeg: Promise<FFmpeg> | undefined;
 
 /** Queue of in-flight requests. */
-const _ffmpegTaskQueue = new PromiseQueue<Uint8Array | number>();
+const _ffmpegTaskQueue = new PromiseQueue<Uint8Array<ArrayBuffer> | number>();
 
 /**
  * Return the shared {@link FFmpeg} instance, lazily creating and loading it if
@@ -52,7 +53,7 @@ export const ffmpegExecWeb = async (
     command: FFmpegCommand,
     blob: Blob,
     outputFileExtension: string,
-): Promise<Uint8Array> => {
+): Promise<Uint8Array<ArrayBuffer>> => {
     const ffmpeg = await ffmpegLazy();
     // Interleaving multiple ffmpeg.execs causes errors like
     //
@@ -61,7 +62,7 @@ export const ffmpegExecWeb = async (
     // So serialize them using a promise queue.
     return _ffmpegTaskQueue.add(() =>
         ffmpegExec(ffmpeg, command, outputFileExtension, blob),
-    ) as Promise<Uint8Array>;
+    ) as Promise<Uint8Array<ArrayBuffer>>;
 };
 
 /**
@@ -88,7 +89,7 @@ const ffmpegExec = async (
     command: FFmpegCommand,
     outputFileExtension: string,
     blob: Blob,
-) => {
+): Promise<Uint8Array<ArrayBuffer>> => {
     const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
     const outputPath = newID("out_") + outputSuffix;
 
@@ -130,7 +131,7 @@ const ffmpegExec = async (
 
             const ms = Date.now() - startTime;
             log.debug(() => `[wasm] ffmpeg ${cmd.join(" ")} (${ms} ms)`);
-            return result;
+            return ensureArrayBufferBacked(result);
         } finally {
             try {
                 await ffmpeg.deleteFile(outputPath);

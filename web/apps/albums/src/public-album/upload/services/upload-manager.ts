@@ -216,10 +216,10 @@ class UIService {
 }
 
 function convertInProgressUploadsToList(inProgressUploads: InProgressUploads) {
-    return [...inProgressUploads.entries()].map(
-        ([localFileID, progress]) =>
-            ({ localFileID, progress }) as InProgressUpload,
-    );
+    return [...inProgressUploads.entries()].map(([localFileID, progress]) => ({
+        localFileID,
+        progress,
+    }));
 }
 
 const groupByResult = (finishedUploads: FinishedUploads) => {

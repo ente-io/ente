@@ -13,12 +13,7 @@ import 'package:locker/ui/pages/personal_note_page.dart';
 import 'package:locker/ui/pages/physical_records_page.dart';
 import 'package:locker/utils/info_item_utils.dart';
 
-enum SaveOptionType {
-  document,
-  note,
-  physicalRecord,
-  credentials,
-}
+enum SaveOptionType { document, note, physicalRecord, credentials }
 
 Future<void> showSaveBottomSheet(
   BuildContext context, {
@@ -217,22 +212,13 @@ class SaveBottomSheet extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: textTheme.bodyBold,
-                  ),
+                  Text(title, style: textTheme.bodyBold),
                   const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: textTheme.smallMuted,
-                  ),
+                  Text(description, style: textTheme.smallMuted),
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: colorScheme.textBase,
-            ),
+            Icon(Icons.chevron_right, color: colorScheme.textBase),
           ],
         ),
       ),
@@ -266,27 +252,24 @@ class SaveBottomSheet extends StatelessWidget {
       case SaveOptionType.note:
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => PersonalNotePage(
-              onCancelWithoutSaving: reopenSheet,
-            ),
+            builder: (context) =>
+                PersonalNotePage(onCancelWithoutSaving: reopenSheet),
           ),
         );
         break;
       case SaveOptionType.physicalRecord:
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => PhysicalRecordsPage(
-              onCancelWithoutSaving: reopenSheet,
-            ),
+            builder: (context) =>
+                PhysicalRecordsPage(onCancelWithoutSaving: reopenSheet),
           ),
         );
         break;
       case SaveOptionType.credentials:
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => AccountCredentialsPage(
-              onCancelWithoutSaving: reopenSheet,
-            ),
+            builder: (context) =>
+                AccountCredentialsPage(onCancelWithoutSaving: reopenSheet),
           ),
         );
         break;

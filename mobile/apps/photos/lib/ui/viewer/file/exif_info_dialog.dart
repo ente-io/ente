@@ -16,21 +16,13 @@ class ExifInfoDialog extends StatelessWidget {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context).exif,
-            style: textTheme.h3Bold,
-          ),
-          Text(
-            file.title!,
-            style: textTheme.smallMuted,
-          ),
+          Text(AppLocalizations.of(context).exif, style: textTheme.h3Bold),
+          Text(file.title!, style: textTheme.smallMuted),
         ],
       ),
       content: Scrollbar(
         thumbVisibility: true,
-        child: SingleChildScrollView(
-          child: _getInfo(),
-        ),
+        child: SingleChildScrollView(child: _getInfo()),
       ),
       actions: [
         TextButton(
@@ -68,14 +60,11 @@ class ExifInfoDialog extends StatelessWidget {
                   data,
                   style: TextStyle(
                     fontSize: 14,
-                    fontFeatures: const [
-                      FontFeature.tabularFigures(),
-                    ],
+                    fontFeatures: const [FontFeature.tabularFigures()],
                     height: 1.4,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ),

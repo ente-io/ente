@@ -64,11 +64,9 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
             decoration: InputDecoration(
               hintText: context.l10n.searchHint,
               hintStyle: TextStyle(
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withValues(alpha: 0.6),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20.0),
@@ -88,10 +86,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.color
+                          Theme.of(context).textTheme.bodyMedium?.color
                                   ?.withValues(alpha: 0.6) ??
                               Colors.grey,
                         ),
@@ -100,11 +95,9 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
                   : Icon(
                       Icons.search,
                       size: 20,
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.color
-                          ?.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                     ),
             ),
             style: TextStyle(
@@ -125,10 +118,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
   List<Widget> buildSearchActions() {
     if (_isSearchActive) {
       return [
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: _deactivateSearch,
-        ),
+        IconButton(icon: const Icon(Icons.close), onPressed: _deactivateSearch),
       ];
     }
     return [];
@@ -208,8 +198,10 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
 
       for (final collection in allCollections) {
         if (!mounted) return;
-        final searchResult =
-            await _searchInCollection(collection, normalizedQuery);
+        final searchResult = await _searchInCollection(
+          collection,
+          normalizedQuery,
+        );
         if (searchResult.matches) {
           filteredCollections.add(collection);
           if (searchResult.nameMatches) {
@@ -218,8 +210,9 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
         }
       }
 
-      final Set<String> addedFileIds =
-          collectionFiles.map((f) => f.uploadedFileID.toString()).toSet();
+      final Set<String> addedFileIds = collectionFiles
+          .map((f) => f.uploadedFileID.toString())
+          .toSet();
       final filteredFiles = allFiles.where((file) {
         if (addedFileIds.contains(file.uploadedFileID.toString())) {
           return false;
@@ -254,8 +247,9 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
     String query,
   ) async {
     try {
-      final files =
-          await CollectionService.instance.getFilesInCollection(collection);
+      final files = await CollectionService.instance.getFilesInCollection(
+        collection,
+      );
       final collectionNameMatches = _containsQuery(
         collection.displayName ?? '',
         query,

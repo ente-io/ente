@@ -279,11 +279,13 @@ When photos are uploaded on the web app, the most common cause of thumbnails not
 - Turn off Brave Shields for Ente's domain, OR
 - Check if you're using browser extensions that block canvas access and whitelist Ente
 
-**Important:** Once thumbnails are incorrectly generated or missing, they cannot be regenerated. You'll need to:
-
-1. Delete the affected files from Ente
-2. Fix the browser settings
-3. Re-upload the files
+> [!IMPORTANT]
+>
+> Once thumbnails are incorrectly generated or missing, they cannot be regenerated. You'll need to:
+>
+> 1. Delete the affected files from Ente
+> 2. Fix the browser settings
+> 3. Re-upload the files
 
 Ente will automatically skip files that have already been uploaded, so you can drag and drop the original folder again after removing the files without thumbnails.
 
@@ -291,8 +293,7 @@ If the browser settings cannot be changed, we recommend uploading files through 
 
 ### Why does desktop ML show "Indexing: Error" on Windows? {#windows-ml-indexing-error-13}
 
-If the desktop app shows `Indexing: Error` in `Settings > Preferences > Machine learning`, this is usually caused by Windows roaming profiles preventing access to the ML model files in
-`%APPDATA%\ente\models\`.
+If the desktop app shows `Indexing: Error` in `Settings > Preferences > Machine learning`, this is usually caused by Windows roaming profiles preventing access to the ML model files in `%APPDATA%\ente\models\`.
 
 If you check the logs, you might also see `system error number 13` during ML indexing.
 
@@ -418,7 +419,9 @@ Open device `Settings > Apps > Ente > Storage` and tap "Clear cache" (NOT "Clear
 3. Log back in
 4. Your backed-up photos are safe in the cloud
 
-**Note**: This is a known issue being investigated by our team. If none of these solutions work, please contact [support@ente.com](mailto:support@ente.com) with your device model and Android version.
+> [!NOTE]
+>
+> This is a known issue being investigated by our team. If none of these solutions work, please contact [support@ente.com](mailto:support@ente.com) with your device model and Android version.
 
 ### Why is the Linux desktop app still showing the old icon after updating? {#linux-icon-update}
 
@@ -461,8 +464,7 @@ This creates `libz.so` as an alias for `libz.so.1`. The exact path might differ 
 
 ### Why does AppImage say it requires FUSE? {#appimage-fuse}
 
-**Solution:**
-Install libfuse2. For example, on Ubuntu:
+**Solution:** Install libfuse2. For example, on Ubuntu:
 
 ```sh
 sudo apt install libfuse2
@@ -476,8 +478,7 @@ If you run the AppImage from the command line and see:
 
 > The SUID sandbox helper binary was found, but is not configured correctly.
 
-**Solution:**
-Either:
+**Solution:** Either:
 
 1. Double-click the AppImage in your file browser instead of running from CLI, OR
 2. Run it with the `--no-sandbox` flag:
@@ -489,8 +490,7 @@ Either:
 
 If you see "A JavaScript error occurred in the main process - The specified module could not be found" when starting the app on Windows, you need to install the Microsoft VC++ runtime.
 
-**Solution:**
-Install the [Microsoft VC++ redistributable runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
+**Solution:** Install the [Microsoft VC++ redistributable runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
 
 ### Why can't I log in to photos.ente.com on my mobile browser? {#web-login-mobile}
 
@@ -527,8 +527,7 @@ You can also try opening photos.ente.com in an incognito or private window to ru
 
 ### How do I identify which files failed to upload? {#identify-failed-uploads}
 
-**On desktop:**
-Check the sections within the upload progress bar for:
+**On desktop:** Check the sections within the upload progress bar for:
 
 - "Failed Uploads"
 - "Ignored Uploads"
@@ -536,8 +535,7 @@ Check the sections within the upload progress bar for:
 
 Click on each section to see the specific files and error messages.
 
-**On mobile:**
-Open `Settings > Backup` to see the backup status and any errors.
+**On mobile:** Open `Settings > Backup` to see the backup status and any errors.
 
 ### Why aren't videos playing on web? {#content-blocker-videos}
 
@@ -620,7 +618,9 @@ This deletes temporary files such as thumbnails and preloaded images that can be
 
 If you need to contact support, debug logs help us diagnose issues faster.
 
-> **Note**: Debug logs contain potentially sensitive information like file names. Feel free to not share them if you have privacy concerns. We'll try to diagnose without logs, though they make the process faster.
+> [!NOTE]
+>
+> Debug logs contain potentially sensitive information like file names. Feel free to not share them if you have privacy concerns. We'll try to diagnose without logs, though they make the process faster.
 
 **On mobile:**
 
@@ -640,8 +640,7 @@ Open `Settings > Support > Help` to view logs location, then go back to `Setting
 
 Open `Settings > Support > Help` to download logs, then email the downloaded logs to [support@ente.com](mailto:support@ente.com).
 
-**Email manually:**
-If the automatic email doesn't work, send logs directly to [support@ente.com](mailto:support@ente.com) with:
+**Email manually:** If the automatic email doesn't work, send logs directly to [support@ente.com](mailto:support@ente.com) with:
 
 - Your platform (iOS, Android, Desktop, Web)
 - Description of the issue

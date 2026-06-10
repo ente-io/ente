@@ -92,10 +92,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                 _showTimePicker
                     ? AppLocalizations.of(context).selectTime
                     : AppLocalizations.of(context).selectDate,
-                style: TextStyle(
-                  color: colorScheme.textBase,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: colorScheme.textBase, fontSize: 16),
               ),
             ),
           ),
@@ -177,10 +174,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                     _showTimePicker
                         ? AppLocalizations.of(context).previous
                         : AppLocalizations.of(context).cancel,
-                    style: TextStyle(
-                      color: colorScheme.textBase,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: colorScheme.textBase, fontSize: 14),
                   ),
                   onPressed: () {
                     if (_showTimePicker) {

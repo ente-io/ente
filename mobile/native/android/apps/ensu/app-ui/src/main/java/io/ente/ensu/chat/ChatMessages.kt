@@ -92,6 +92,7 @@ internal fun MessageList(
     streamingParentId: String?,
     isGenerating: Boolean,
     isModelDownloaded: Boolean,
+    isChatUnsupported: Boolean,
     isDownloading: Boolean,
     downloadPercent: Int?,
     downloadStatus: String?,
@@ -104,7 +105,7 @@ internal fun MessageList(
     onStartDownload: (Boolean) -> Unit
 ) {
     if (messages.isEmpty() && !isGenerating) {
-        if (!isModelDownloaded) {
+        if (!isModelDownloaded && !isChatUnsupported) {
             DownloadOnboarding(
                 modifier = modifier,
                 isDownloading = isDownloading,
@@ -129,7 +130,7 @@ internal fun MessageList(
     val haptic = rememberEnsuHaptics()
     var autoScrollEnabled by remember { mutableStateOf(true) }
     var isAutoScrolling by remember { mutableStateOf(false) }
-    var lastHapticLength by remember { mutableStateOf(0) }
+    var didPerformStreamingStartHaptic by remember { mutableStateOf(false) }
     var shouldJumpToBottomOnLoad by remember { mutableStateOf(true) }
     var wasAtBottomBeforeResize by remember { mutableStateOf(true) }
     var lastViewportHeight by remember { mutableStateOf(0) }
@@ -152,12 +153,14 @@ internal fun MessageList(
     val streamingAnchorId = if (isGenerating) streamingParentId else null
 
     val lastMessage = messages.lastOrNull()
-    LaunchedEffect(isGenerating, lastMessage?.id) {
+    LaunchedEffect(isGenerating, streamingParentId) {
         if (isGenerating) {
             autoScrollEnabled = true
-            lastHapticLength = 0
+            didPerformStreamingStartHaptic = false
         }
+    }
 
+    LaunchedEffect(lastMessage?.id) {
         if (lastMessage == null) {
             lastUserMessageId = null
         } else if (lastMessage.author == MessageAuthor.User && lastMessage.id != lastUserMessageId) {
@@ -204,11 +207,10 @@ internal fun MessageList(
     }
 
     LaunchedEffect(streamingResponse, isGenerating) {
-        if (!isGenerating) return@LaunchedEffect
-        val length = streamingResponse.length
-        if (length > lastHapticLength) {
+        if (!isGenerating || didPerformStreamingStartHaptic) return@LaunchedEffect
+        if (hasVisibleStreamingContent(streamingResponse)) {
             haptic.perform(HapticFeedbackType.TextHandleMove)
-            lastHapticLength = length
+            didPerformStreamingStartHaptic = true
         }
     }
 
@@ -417,7 +419,7 @@ private fun DownloadOnboarding(
                 }
                 Text(
                     text = statusText ?: "Downloading...",
-                    style = EnsuTypography.body,
+                    style = EnsuTypography.body.copy(fontFeatureSettings = "tnum"),
                     color = EnsuColor.textMuted(),
                     textAlign = TextAlign.Center
                 )
@@ -838,6 +840,13 @@ private fun stripHiddenMessageParts(text: String): String {
         .replace(Regex("<think>[\\s\\S]*?</think>"), "")
         .replace(Regex("<todo_list>[\\s\\S]*?</todo_list>"), "")
         .trim()
+}
+
+private fun hasVisibleStreamingContent(text: String): Boolean {
+    return stripHiddenMessageParts(text)
+        .replace(Regex("<think>[\\s\\S]*"), "")
+        .replace(Regex("<todo_list>[\\s\\S]*"), "")
+        .isNotBlank()
 }
 
 @Composable

@@ -11,7 +11,6 @@ import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:ente_utils/ente_utils.dart';
-import 'package:ente_utils/share_utils.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -72,15 +71,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     final textTheme = getEnteTextTheme(context);
 
     Future<void> copy() async {
-      await Clipboard.setData(
-        ClipboardData(
-          text: recoveryKey,
-        ),
-      );
-      showShortToast(
-        context,
-        context.strings.recoveryKeyCopiedToClipboard,
-      );
+      await Clipboard.setData(ClipboardData(text: recoveryKey));
+      showShortToast(context, context.strings.recoveryKeyCopiedToClipboard);
       setState(() {
         _hasTriedToSave = true;
       });
@@ -251,9 +243,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         },
         child: Text(
           _hasTriedToSave ? widget.doneText : context.strings.continueLabel,
-          style: textTheme.bodyBold.copyWith(
-            color: colorScheme.primary700,
-          ),
+          style: textTheme.bodyBold.copyWith(color: colorScheme.primary700),
         ),
       ),
     );
@@ -273,10 +263,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     );
 
     if (mounted) {
-      showToast(
-        context,
-        context.strings.recoveryKeySaved,
-      );
+      showToast(context, context.strings.recoveryKeySaved);
       setState(() {
         _hasTriedToSave = true;
       });
@@ -288,15 +275,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
-    await shareFiles(
-      [
-        XFile(
-          _recoveryKeyFile.path,
-          mimeType: 'text/plain',
-        ),
-      ],
-      context: context,
-    );
+    await shareFiles([
+      XFile(_recoveryKeyFile.path, mimeType: 'text/plain'),
+    ], context: context);
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {

@@ -262,7 +262,7 @@ interface PutPartOptions {
 
 export const putFile = async (
     fileUploadURL: string,
-    fileData: Uint8Array,
+    fileData: Uint8Array<ArrayBuffer>,
     retrier: HTTPRequestRetrier,
     options?: PutFileOptions,
 ) =>
@@ -284,7 +284,7 @@ export const putFile = async (
  */
 export const putFileViaWorker = async (
     fileUploadURL: string,
-    fileData: Uint8Array,
+    fileData: Uint8Array<ArrayBuffer>,
     retrier: HTTPRequestRetrier,
     options?: PutFileOptions,
 ) =>
@@ -322,7 +322,7 @@ export const putFileViaWorker = async (
  */
 export const putFilePart = async (
     partUploadURL: string,
-    partData: Uint8Array,
+    partData: Uint8Array<ArrayBuffer>,
     retrier: HTTPRequestRetrier,
     options?: PutPartOptions,
 ) => {
@@ -346,7 +346,7 @@ export const putFilePart = async (
  */
 export const putFilePartViaWorker = async (
     partUploadURL: string,
-    partData: Uint8Array,
+    partData: Uint8Array<ArrayBuffer>,
     retrier: HTTPRequestRetrier,
     options?: PutPartOptions,
 ) => {

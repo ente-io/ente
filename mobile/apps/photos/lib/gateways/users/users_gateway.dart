@@ -59,10 +59,7 @@ class UsersGateway {
     required String ott,
     String? source,
   }) async {
-    final data = <String, dynamic>{
-      "email": email,
-      "ott": ott,
-    };
+    final data = <String, dynamic>{"email": email, "ott": ott};
     if (source != null && source.isNotEmpty) {
       data["source"] = source;
     }
@@ -76,16 +73,10 @@ class UsersGateway {
   /// Change the user's email address.
   ///
   /// Endpoint: POST /users/change-email
-  Future<void> changeEmail({
-    required String email,
-    required String ott,
-  }) async {
+  Future<void> changeEmail({required String email, required String ott}) async {
     await _enteDio.post(
       "/users/change-email",
-      data: {
-        "email": email,
-        "ott": ott,
-      },
+      data: {"email": email, "ott": ott},
     );
   }
 
@@ -122,9 +113,7 @@ class UsersGateway {
   Future<UserDetails> getUserDetails({bool memoryCount = true}) async {
     final response = await _enteDio.get(
       "/users/details/v2",
-      queryParameters: {
-        "memoryCount": memoryCount,
-      },
+      queryParameters: {"memoryCount": memoryCount},
     );
     return UserDetails.fromMap(response.data);
   }
@@ -141,10 +130,7 @@ class UsersGateway {
   ///
   /// Endpoint: DELETE /users/session
   Future<void> terminateSession(String token) async {
-    await _enteDio.delete(
-      "/users/session",
-      queryParameters: {"token": token},
-    );
+    await _enteDio.delete("/users/session", queryParameters: {"token": token});
   }
 
   /// Log out the current session.
@@ -201,9 +187,7 @@ class UsersGateway {
   /// Create a family with the current user as the admin.
   ///
   /// Endpoint: POST /family/create
-  Future<void> createFamily({
-    String? authToken,
-  }) async {
+  Future<void> createFamily({String? authToken}) async {
     final familiesToken = authToken ?? await getFamiliesAuthToken();
     await _enteDio.post(
       "/family/create",
@@ -221,9 +205,7 @@ class UsersGateway {
     final familiesToken = authToken ?? await getFamiliesAuthToken();
     await _enteDio.post(
       "/family/add-member",
-      data: {
-        "email": email,
-      },
+      data: {"email": email},
       options: _familyAuthOptions(familiesToken),
     );
   }
@@ -231,10 +213,7 @@ class UsersGateway {
   /// Remove an active family member.
   ///
   /// Endpoint: DELETE /family/remove-member/:id
-  Future<void> removeFamilyMember(
-    String id, {
-    String? authToken,
-  }) async {
+  Future<void> removeFamilyMember(String id, {String? authToken}) async {
     final familiesToken = authToken ?? await getFamiliesAuthToken();
     await _enteDio.delete(
       "/family/remove-member/$id",
@@ -245,10 +224,7 @@ class UsersGateway {
   /// Revoke a pending family invite.
   ///
   /// Endpoint: DELETE /family/revoke-invite/:id
-  Future<void> revokeFamilyInvite(
-    String id, {
-    String? authToken,
-  }) async {
+  Future<void> revokeFamilyInvite(String id, {String? authToken}) async {
     final familiesToken = authToken ?? await getFamiliesAuthToken();
     await _enteDio.delete(
       "/family/revoke-invite/$id",
@@ -267,10 +243,7 @@ class UsersGateway {
     final familiesToken = authToken ?? await getFamiliesAuthToken();
     await _enteDio.post(
       "/family/modify-storage",
-      data: {
-        "id": id,
-        "storageLimit": storageLimit,
-      },
+      data: {"id": id, "storageLimit": storageLimit},
       options: _familyAuthOptions(familiesToken),
     );
   }
@@ -297,11 +270,7 @@ class UsersGateway {
   }
 
   Options _familyAuthOptions(String familiesToken) {
-    return Options(
-      headers: {
-        "X-Auth-Token": familiesToken,
-      },
-    );
+    return Options(headers: {"X-Auth-Token": familiesToken});
   }
 
   // ============================================================
@@ -314,9 +283,7 @@ class UsersGateway {
   Future<void> setKeyAttributes(KeyAttributes keyAttributes) async {
     await _enteDio.put(
       "/users/attributes",
-      data: {
-        "keyAttributes": keyAttributes.toMap(),
-      },
+      data: {"keyAttributes": keyAttributes.toMap()},
     );
   }
 
@@ -324,10 +291,7 @@ class UsersGateway {
   ///
   /// Endpoint: PUT /users/recovery-key
   Future<void> setRecoveryKey(SetRecoveryKeyRequest request) async {
-    await _enteDio.put(
-      "/users/recovery-key",
-      data: request.toMap(),
-    );
+    await _enteDio.put("/users/recovery-key", data: request.toMap());
   }
 
   // ============================================================
@@ -376,10 +340,7 @@ class UsersGateway {
   }) async {
     await _enteDio.post(
       "/users/srp/complete",
-      data: {
-        "setupID": setupID,
-        "srpM1": srpM1,
-      },
+      data: {"setupID": setupID, "srpM1": srpM1},
     );
   }
 
@@ -416,10 +377,7 @@ class UsersGateway {
   }) async {
     final response = await _publicDio.post(
       "$_endpoint/users/srp/create-session",
-      data: {
-        "srpUserID": srpUserID,
-        "srpA": srpA,
-      },
+      data: {"srpUserID": srpUserID, "srpA": srpA},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -436,11 +394,7 @@ class UsersGateway {
   }) async {
     final response = await _publicDio.post(
       "$_endpoint/users/srp/verify-session",
-      data: {
-        "sessionID": sessionID,
-        "srpUserID": srpUserID,
-        "srpM1": srpM1,
-      },
+      data: {"sessionID": sessionID, "srpUserID": srpUserID, "srpM1": srpM1},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -505,10 +459,7 @@ class UsersGateway {
   }) async {
     final response = await _publicDio.post(
       "$_endpoint/users/two-factor/verify",
-      data: {
-        "sessionID": sessionID,
-        "code": code,
-      },
+      data: {"sessionID": sessionID, "code": code},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -526,10 +477,7 @@ class UsersGateway {
   }) async {
     final response = await _publicDio.get(
       "$_endpoint/users/two-factor/recover",
-      queryParameters: {
-        "sessionID": sessionID,
-        "twoFactorType": twoFactorType,
-      },
+      queryParameters: {"sessionID": sessionID, "twoFactorType": twoFactorType},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -591,10 +539,7 @@ class UsersGateway {
   ///
   /// Endpoint: PUT /users/email-mfa
   Future<void> updateEmailMFA({required bool isEnabled}) async {
-    await _enteDio.put(
-      "/users/email-mfa",
-      data: {"isEnabled": isEnabled},
-    );
+    await _enteDio.put("/users/email-mfa", data: {"isEnabled": isEnabled});
   }
 
   // ============================================================

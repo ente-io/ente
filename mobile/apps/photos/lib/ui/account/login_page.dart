@@ -98,8 +98,9 @@ class _LoginPageState extends State<LoginPage> {
           onTap: _emailIsValid ? _onLoginPressed : null,
         ),
       ),
-      bottomNavigationBar:
-          isKeyboardOpen ? null : _getSignUpPrompt(colorScheme, textTheme),
+      bottomNavigationBar: isKeyboardOpen
+          ? null
+          : _getSignUpPrompt(colorScheme, textTheme),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
@@ -130,9 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                   : TextInputMessageType.guide,
             ),
             const SizedBox(height: 24),
-            const Expanded(
-              child: DeveloperSettingsTapArea(),
-            ),
+            const Expanded(child: DeveloperSettingsTapArea()),
           ],
         ),
       ),
@@ -150,10 +149,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              "Don't have an account?",
-              style: textTheme.bodyMuted,
-            ),
+            Text("Don't have an account?", style: textTheme.bodyMuted),
             ButtonWidgetV2(
               buttonType: ButtonTypeV2.link,
               labelText: AppLocalizations.of(context).signUp,
@@ -208,9 +204,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return LoginPasswordVerificationPage(
-              srpAttributes: attr!,
-            );
+            return LoginPasswordVerificationPage(srpAttributes: attr!);
           },
         ),
       );
@@ -227,10 +221,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _goToSignUpPage() async {
     FocusScope.of(context).unfocus();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const EmailEntryPage(),
-      ),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const EmailEntryPage()));
   }
 }

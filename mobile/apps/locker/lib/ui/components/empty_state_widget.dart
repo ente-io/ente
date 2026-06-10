@@ -48,10 +48,7 @@ class EmptyStateWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (assetPath.isNotEmpty)
-              Image.asset(
-                assetPath,
-                height: illustrationHeight,
-              ),
+              Image.asset(assetPath, height: illustrationHeight),
             if (assetPath.isNotEmpty) SizedBox(height: spacing),
             if (title != null && title!.isNotEmpty)
               Text(
@@ -65,9 +62,7 @@ class EmptyStateWidget extends StatelessWidget {
             if (subtitle != null && subtitle!.isNotEmpty)
               Text(
                 subtitle!,
-                style: textTheme.small.copyWith(
-                  color: colorScheme.textMuted,
-                ),
+                style: textTheme.small.copyWith(color: colorScheme.textMuted),
                 textAlign: TextAlign.center,
               ),
           ],

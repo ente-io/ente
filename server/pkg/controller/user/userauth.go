@@ -118,7 +118,7 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 	app := auth.GetApp(context)
 	otts, _ := c.UserAuthRepo.GetValidOTTs(emailHash, app)
 	if len(otts) >= OTTActiveCodeLimit {
-		msg := "Too many ott requests in a short duration"
+		const msg = "Too many ott requests in a short duration"
 		go c.DiscordController.NotifyPotentialAbuse(msg)
 		return stacktrace.Propagate(ente.ErrTooManyBadRequest, msg)
 	}
@@ -263,9 +263,12 @@ func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott 
 		}
 		return stacktrace.Propagate(ente.ErrIncorrectOTT, "")
 	}
-	err = c.UserAuthRepo.RemoveOTT(emailHash, ott, app)
+	removed, err := c.UserAuthRepo.RemoveOTT(emailHash, ott, app)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	if !removed {
+		return stacktrace.Propagate(ente.ErrExpiredOTT, "")
 	}
 	return nil
 }
@@ -435,6 +438,21 @@ func (c *UserController) ensureStorageWarningDeletionLoginAllowed(userID int64, 
 		return stacktrace.Propagate(err, "failed to read storage warning deletion state")
 	}
 	if deletionScheduled {
+		// Login blocking is terminal-row based. If a daily storage-warning run
+		// races with an admin soft-unblock, the terminal row can reappear while
+		// the grace window is still active, so login must honor grace directly.
+		graceActive, graceUntil, err := c.NotificationHistoryRepo.IsStorageWarningLoginGraceActive(userID, time.Microseconds())
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to read storage warning login grace")
+		}
+		if graceActive {
+			log.WithFields(log.Fields{
+				"user_id":     userID,
+				"app":         app,
+				"grace_until": graceUntil,
+			}).Info("allowing login during storage warning grace")
+			return nil
+		}
 		c.alertStorageWarningDeletionScheduledLoginBlock(userID, app)
 		return storageWarningDeletionScheduledError()
 	}
@@ -617,20 +635,14 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 
-		passKeySessionID, err = auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
-		if err != nil {
-			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-		}
+		passKeySessionID = auth.GenerateURLSafeRandomString(PassKeySessionIDLength)
 		err = c.PasskeyRepo.AddPasskeyTwoFactorSession(userID, passKeySessionID, time.Microseconds()+TwoFactorValidityDurationInMicroSeconds)
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
 	if isTwoFactorEnabled {
-		twoFactorSessionID, err = auth.GenerateURLSafeRandomString(TwoFactorSessionIDLength)
-		if err != nil {
-			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-		}
+		twoFactorSessionID = auth.GenerateURLSafeRandomString(TwoFactorSessionIDLength)
 		err = c.TwoFactorRepo.AddTwoFactorSession(userID, twoFactorSessionID, time.Microseconds()+TwoFactorValidityDurationInMicroSeconds)
 		if err != nil {
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
@@ -644,10 +656,7 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		return ente.EmailAuthorizationResponse{ID: userID, TwoFactorSessionID: twoFactorSessionID}, nil
 	}
 
-	token, err := auth.GenerateURLSafeRandomString(TokenLength)
-	if err != nil {
-		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
-	}
+	token := auth.GenerateURLSafeRandomString(TokenLength)
 	keyAttributes, err := c.UserRepo.GetKeyAttributes(userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

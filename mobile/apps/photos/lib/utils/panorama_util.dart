@@ -57,9 +57,8 @@ Future<void> guardedCheckPanorama(EnteFile file) async {
 
     mediaType = mediaType | (result ? 1 : 0);
 
-    FileMagicService.instance.updatePublicMagicMetadata(
-      [file],
-      {mediaTypeKey: mediaType},
-    ).ignore();
+    FileMagicService.instance
+        .updatePublicMagicMetadata([file], {mediaTypeKey: mediaType})
+        .ignore();
   }
 }

@@ -127,7 +127,7 @@ func (c *Controller) replicateRowData(ctx context.Context, row filedata.Row) err
 	if len(wantInBucketIDs) > 0 {
 		s3FileMetadata, err := c.downloadObject(ctx, row.S3FileMetadataObjectKey(), row.LatestBucket)
 		if err != nil {
-			return stacktrace.Propagate(err, "error fetching metadata object "+row.S3FileMetadataObjectKey())
+			return stacktrace.Propagate(err, "error fetching metadata object %s", row.S3FileMetadataObjectKey())
 		}
 		for key := range wantInBucketIDs {
 			bucketID := key

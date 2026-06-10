@@ -68,21 +68,19 @@ class TitleBarWidget extends StatelessWidget {
       actions: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            children: _actionsWithPaddingInBetween(),
-          ),
+          child: Row(children: _actionsWithPaddingInBetween()),
         ),
       ],
       leading: isTitleH2WithoutLeading
           ? null
           : leading ??
-              IconButtonWidget(
-                icon: Icons.arrow_back_outlined,
-                iconButtonType: IconButtonType.primary,
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
+                IconButtonWidget(
+                  icon: Icons.arrow_back_outlined,
+                  iconButtonType: IconButtonType.primary,
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
       flexibleSpace: isFlexibleSpaceDisabled
           ? null
           : FlexibleSpaceBar(

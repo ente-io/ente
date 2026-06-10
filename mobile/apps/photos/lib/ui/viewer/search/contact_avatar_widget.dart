@@ -38,14 +38,15 @@ class _ContactAvatarWidgetState extends State<ContactAvatarWidget> {
   void initState() {
     super.initState();
     _photoFuture = _loadPhoto();
-    _contactsChangedSubscription =
-        Bus.instance.on<ContactsChangedEvent>().listen((event) {
-      if (event.matchesContactUserId(widget.contactUserId)) {
-        setState(() {
-          _photoFuture = _loadPhoto();
+    _contactsChangedSubscription = Bus.instance
+        .on<ContactsChangedEvent>()
+        .listen((event) {
+          if (event.matchesContactUserId(widget.contactUserId)) {
+            setState(() {
+              _photoFuture = _loadPhoto();
+            });
+          }
         });
-      }
-    });
   }
 
   @override

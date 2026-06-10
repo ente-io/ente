@@ -449,11 +449,17 @@ final class ChatViewModel: ObservableObject {
     @Published var isProcessingAttachments: Bool = false
     @Published var draftText: String = ""
     @Published var draftAttachments: [ChatAttachment] = []
+    private var draftImageAttachmentCount: Int {
+        draftAttachments.filter { $0.kind == .image }.count
+    }
+
     @Published var editingMessageId: UUID?
     @Published var downloadToast: DownloadToastState?
     @Published var isModelDownloaded: Bool = false
     @Published var modelDownloadSizeBytes: Int64?
     @Published var hasRequestedModelDownload: Bool = false
+    @Published var deviceCapability: ChatDeviceCapability = .unknown
+    @Published var showUnsupportedDeviceDialog: Bool = false
     @Published var attachmentDownloads: [AttachmentDownloadItem] = []
     @Published var currentSessionMissingAttachments: [AttachmentDownloadItem] = []
     @Published var syncState: SyncState = .idle
@@ -464,6 +470,7 @@ final class ChatViewModel: ObservableObject {
     @Published var draftCursorMoveToken = UUID()
 
     private let provider: InferenceRsProvider
+    private let deviceCapabilityProvider = ProcessInfoChatDeviceCapabilityProvider()
     private let voiceTranscriber: VoiceTranscriptionService
     private var chatDb: EnsuDb
     private var syncEngine: EnsuSync
@@ -598,8 +605,45 @@ final class ChatViewModel: ObservableObject {
             refreshAttachmentDownloadState()
         }
 
+        refreshDeviceCapability()
         refreshModelDownloadInfo()
     }
+
+    var isChatUnsupported: Bool {
+        !deviceCapability.isChatSupported
+    }
+
+    var unsupportedDeviceMessage: String {
+        Self.unsupportedDeviceMessage
+    }
+
+    func refreshDeviceCapability() {
+        let capability = deviceCapabilityProvider.chatCapability()
+        deviceCapability = capability
+        logger.info("Chat device capability evaluated", details: "\(capability)")
+        guard !capability.isChatSupported else { return }
+        showUnsupportedDeviceDialog = true
+        isDownloading = false
+        downloadToast = nil
+        modelDownloadSizeBytes = nil
+        hasRequestedModelDownload = false
+        modelDownloadTask?.cancel()
+        downloadProgressMonitorTask?.cancel()
+        sharedModelReadyTask?.cancel()
+        clearSharedModelReadyTask()
+        editingMessageId = nil
+        draftText = ""
+        draftAttachments = []
+        provider.cancelDownload()
+    }
+
+    func dismissUnsupportedDeviceDialog() {
+        showUnsupportedDeviceDialog = false
+    }
+
+    static let unsupportedDeviceMessage =
+        "This device doesn't have enough memory to run Ensu's AI model. " +
+        "You can view existing chats, but can't send new messages."
 
     private func reopenSyncStoresIfNeeded(force: Bool = false) {
         let hasSyncDb = FileManager.default.fileExists(atPath: syncDbPath)
@@ -786,6 +830,8 @@ final class ChatViewModel: ObservableObject {
     }
 
     func startNewSession() {
+        guard !isDownloading else { return }
+
         resetGenerationState()
         cancelVoiceInput()
         draftText = ""
@@ -1006,6 +1052,10 @@ final class ChatViewModel: ObservableObject {
     }
 
     func beginEditing(message: RenderedChatMessage) {
+        guard !isChatUnsupported else {
+            showUnsupportedDeviceDialog = true
+            return
+        }
         guard message.role == .user else { return }
         editingMessageId = message.id
         draftText = message.text
@@ -1038,9 +1088,20 @@ final class ChatViewModel: ObservableObject {
             return
         }
 
-        voiceTranscriber.startRecording { [weak self] state in
-            self?.setVoiceInputState(state)
-        }
+        let voiceSessionId = currentSessionId
+        voiceTranscriber.startRecording(
+            onState: { [weak self] state in
+                self?.setVoiceInputState(state)
+            },
+            shouldStartRecording: { [weak self] in
+                guard let self else { return false }
+                return self.currentSessionId == voiceSessionId &&
+                    !self.isGenerating &&
+                    !self.isDownloading &&
+                    !self.isAttachmentDownloadBlocked &&
+                    self.editingMessageId == nil
+            }
+        )
     }
 
     func cancelVoiceInput() {
@@ -1085,7 +1146,10 @@ final class ChatViewModel: ObservableObject {
     }
 
     func addImageAttachment(data: Data, fileName: String?) {
-        guard !isGenerating && !isDownloading && !isAttachmentDownloadBlocked else { return }
+        guard !isGenerating,
+              !isDownloading,
+              !isAttachmentDownloadBlocked,
+              draftImageAttachmentCount < ChatAttachmentLimits.maxImagesPerMessage else { return }
         isProcessingAttachments = true
 
         Task.detached { [weak self] in
@@ -1103,6 +1167,11 @@ final class ChatViewModel: ObservableObject {
                     isUploading: false
                 )
                 await MainActor.run {
+                    if self.draftImageAttachmentCount >= ChatAttachmentLimits.maxImagesPerMessage {
+                        try? FileManager.default.removeItem(at: url)
+                        self.isProcessingAttachments = false
+                        return
+                    }
                     self.draftAttachments.append(attachment)
                     self.isProcessingAttachments = false
                     self.prewarmImageInferenceIfDownloaded()
@@ -1115,6 +1184,7 @@ final class ChatViewModel: ObservableObject {
 
     private func prewarmImageInferenceIfDownloaded() {
         guard !isGenerating && !isDownloading else { return }
+        guard !isChatUnsupported else { return }
         let target = modelSettings.currentTarget()
         guard provider.isModelDownloaded(target: target) else { return }
 
@@ -1171,6 +1241,10 @@ final class ChatViewModel: ObservableObject {
 
     func sendDraft() {
         guard !isGenerating && !isDownloading && !isAttachmentDownloadBlocked else { return }
+        guard !isChatUnsupported else {
+            showUnsupportedDeviceDialog = true
+            return
+        }
 
         let trimmed = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
         let attachments = draftAttachments
@@ -1296,6 +1370,13 @@ final class ChatViewModel: ObservableObject {
     }
 
     func refreshModelDownloadInfo() {
+        guard !isChatUnsupported else {
+            isDownloading = false
+            downloadToast = nil
+            modelDownloadSizeBytes = nil
+            hasRequestedModelDownload = false
+            return
+        }
         let target = modelSettings.currentTarget()
         provider.cancelStaleDownloads(target: target)
         isModelDownloaded = provider.isModelDownloaded(target: target)
@@ -1318,7 +1399,8 @@ final class ChatViewModel: ObservableObject {
                 if let progress {
                     self.handleProgress(progress)
                     self.startDownloadProgressMonitor(target: target)
-                } else if self.downloadToast?.phase == .downloading || self.downloadToast?.phase == .loading {
+                } else if self.sharedModelReadyTask == nil &&
+                    (self.downloadToast?.phase == .downloading || self.downloadToast?.phase == .loading) {
                     self.downloadToast = nil
                     self.isDownloading = false
                     self.clearDownloadProgressMemory()
@@ -1339,6 +1421,9 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func ensureModelReadyShared(target: InferenceModelTarget) async throws {
+        if isChatUnsupported {
+            throw UnsupportedDeviceMemoryError(capability: deviceCapability)
+        }
         let modelKey = modelReadyKey(for: target)
         if let existingTask = sharedModelReadyTask, sharedModelReadyKey == modelKey {
             try await existingTask.value
@@ -1395,6 +1480,10 @@ final class ChatViewModel: ObservableObject {
 
     func startModelDownload(userInitiated: Bool = true) {
         guard !isDownloading && !isGenerating else { return }
+        guard !isChatUnsupported else {
+            showUnsupportedDeviceDialog = true
+            return
+        }
         if userInitiated {
             hasRequestedModelDownload = true
         }
@@ -1444,6 +1533,11 @@ final class ChatViewModel: ObservableObject {
 
     func autoStartModelDownloadIfNeeded() {
         guard !isDownloading && !isGenerating else { return }
+        guard !isChatUnsupported else {
+            isDownloading = false
+            downloadToast = nil
+            return
+        }
         let target = modelSettings.currentTarget()
         let isDownloaded = provider.isModelDownloaded(target: target)
         isModelDownloaded = isDownloaded
@@ -1500,6 +1594,10 @@ final class ChatViewModel: ObservableObject {
         guard message.role == .assistant else { return }
         if isGenerating {
             stopGenerating()
+        }
+        guard !isChatUnsupported else {
+            showUnsupportedDeviceDialog = true
+            return
         }
         guard let sessionId = currentSessionId else { return }
 
@@ -1562,6 +1660,10 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func startGeneration(for userNode: MessageNode) {
+        guard !isChatUnsupported else {
+            showUnsupportedDeviceDialog = true
+            return
+        }
         generationTask?.cancel()
         sessionSummaryTask?.cancel()
         stopRequested = false
@@ -1871,8 +1973,7 @@ final class ChatViewModel: ObservableObject {
             status: resolvedProgress.status,
             offerRetryDownload: false
         )
-        let visiblePercent = resolvedProgress.percent ?? progress.percent
-        isDownloading = visiblePercent >= 0 && visiblePercent < 100
+        isDownloading = true
     }
 
     private func startDownloadProgressMonitor(target: InferenceModelTarget) {
@@ -2461,6 +2562,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func scheduleSessionSummary(for sessionId: UUID) {
+        guard !isChatUnsupported else { return }
         sessionSummaryTask?.cancel()
         let summaryKey = sessionSummaryKey(sessionId)
         guard sessionSummaries[summaryKey] == nil else { return }
@@ -2643,6 +2745,9 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func userFacingModelReadyError(_ error: Error, wasDownloaded: Bool) -> String {
+        if error is UnsupportedDeviceMemoryError {
+            return Self.unsupportedDeviceMessage
+        }
         if isOutOfStorageError(error) {
             return "Not enough storage space to download the model. Please free up space and try again."
         }

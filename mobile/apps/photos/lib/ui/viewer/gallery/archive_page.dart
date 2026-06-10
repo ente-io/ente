@@ -36,9 +36,15 @@ class ArchivePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Set<int> hiddenCollectionIDs =
-        CollectionsService.instance.getHiddenCollectionIds();
+    final Set<int> hiddenCollectionIDs = CollectionsService.instance
+        .getHiddenCollectionIds();
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      appBarType,
+      AppLocalizations.of(context).archive,
+      _selectedFiles,
+    );
     final gallery = Gallery(
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getAllPendingOrUploadedFiles(
           creationStartTime,
@@ -56,21 +62,21 @@ class ArchivePage extends StatelessWidget {
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
-            (event) =>
-                event.updatedFiles.firstWhereOrNull(
-                  (element) => element.uploadedFileID != null,
-                ) !=
-                null,
-          ),
+        (event) =>
+            event.updatedFiles.firstWhereOrNull(
+              (element) => element.uploadedFileID != null,
+            ) !=
+            null,
+      ),
       removalEventTypes: const {EventType.unarchived},
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(
-              (event) =>
-                  event.updatedFiles.firstWhereOrNull(
-                    (element) => element.uploadedFileID != null,
-                  ) !=
-                  null,
-            ),
+          (event) =>
+              event.updatedFiles.firstWhereOrNull(
+                (element) => element.uploadedFileID != null,
+              ) !=
+              null,
+        ),
       ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
@@ -81,15 +87,17 @@ class ArchivePage extends StatelessWidget {
       header: AlbumHorizontalList(
         CollectionsService.instance.getArchivedCollection,
         onViewAllTapped: () async {
-          final collections =
-              await CollectionsService.instance.getArchivedCollection();
+          final collections = await CollectionsService.instance
+              .getArchivedCollection();
           if (context.mounted) {
             await routeToPage(
               context,
               CollectionListPage(
                 collections,
                 sectionType: UISectionType.archivedCollections,
-                appTitle: Text(AppLocalizations.of(context).archive),
+                appTitle: Text(
+                  AppLocalizations.of(context).archiveCollectionName,
+                ),
                 tag: "archived",
               ),
             );
@@ -100,24 +108,13 @@ class ArchivePage extends StatelessWidget {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
-            child: GalleryAppBarWidget(
-              appBarType,
-              AppLocalizations.of(context).archive,
-              _selectedFiles,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
                 gallery,
-                FileSelectionOverlayBar(
-                  overlayType,
-                  _selectedFiles,
-                ),
+                FileSelectionOverlayBar(overlayType, _selectedFiles),
               ],
             ),
           ),

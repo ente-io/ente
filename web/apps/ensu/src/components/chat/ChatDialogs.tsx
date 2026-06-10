@@ -1,3 +1,4 @@
+import { isTauriRuntime as detectTauriAppRuntime } from "@/services/tauri-runtime";
 import {
     ArrowRight01Icon,
     Bug01Icon,
@@ -78,7 +79,7 @@ export interface ChatDialogsProps {
     openLoginFromChat: () => void;
     openPasskeysFromChat: () => void;
     advancedUnlocked: boolean;
-    buildVersion: string;
+    buildVersion?: string;
     handleBuildVersionTap: () => void;
     openModelSettings: () => void;
     openSystemPromptSettings: () => void;
@@ -174,17 +175,11 @@ export const ChatDialogs = memo(
         closeImagePreview,
     }: ChatDialogsProps) => {
         const openExternalUrl = async (url: string) => {
-            const hasTauriBridge =
-                typeof window !== "undefined" &&
-                ("__TAURI__" in window ||
-                    "__TAURI_IPC__" in window ||
-                    "__TAURI_INTERNALS__" in window ||
-                    "__TAURI_METADATA__" in window);
-
-            if (isTauriRuntime || hasTauriBridge) {
+            if (isTauriRuntime || detectTauriAppRuntime()) {
                 try {
-                    const { open } = await import("@tauri-apps/api/shell");
-                    await open(url);
+                    const { openUrl } =
+                        await import("@tauri-apps/plugin-opener");
+                    await openUrl(url);
                     return;
                 } catch {
                     // fall through to browser open fallback
@@ -774,19 +769,21 @@ export const ChatDialogs = memo(
                                 </Stack>
                             )}
 
-                            <Typography
-                                variant="mini"
-                                onClick={handleBuildVersionTap}
-                                sx={{
-                                    color: "text.muted",
-                                    textAlign: "center",
-                                    cursor: "pointer",
-                                    userSelect: "none",
-                                    py: 1,
-                                }}
-                            >
-                                Build {buildVersion}
-                            </Typography>
+                            {buildVersion && (
+                                <Typography
+                                    variant="mini"
+                                    onClick={handleBuildVersionTap}
+                                    sx={{
+                                        color: "text.muted",
+                                        textAlign: "center",
+                                        cursor: "pointer",
+                                        userSelect: "none",
+                                        py: 1,
+                                    }}
+                                >
+                                    Build {buildVersion}
+                                </Typography>
+                            )}
                         </Stack>
                     </DialogContent>
                 </Dialog>

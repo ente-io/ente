@@ -276,7 +276,6 @@
   "creatingLink": "Δημιουργία συνδέσμου...",
   "removeWithQuestionMark": "Αφαίρεση;",
   "removeParticipantBody": "Ο χρήστης {userEmail} θα αφαιρεθεί από το άλμπουμ\n\nΟποιεσδήποτε φωτογραφίες έχει προσθέσει θα αφαιρεθούν επίσης από το άλμπουμ",
-  "keepPhotos": "Διατήρηση Φωτογραφιών",
   "deletePhotos": "Διαγραφή φωτογραφιών",
   "inviteToEnte": "Προσκαλέστε στο Ente",
   "removePublicLink": "Αφαίρεση δημόσιου συνδέσμου",
@@ -284,6 +283,9 @@
   "sharing": "Κοινή χρήση...",
   "youCannotShareWithYourself": "Δεν μπορείτε να κοινοποιήσετε στον εαυτό σας",
   "archive": "Αρχειοθέτηση",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Πατήστε παρατεταμένα για να επιλέξετε φωτογραφίες και κάντε κλικ στο + για να δημιουργήσετε ένα άλμπουμ",
   "importing": "Εισαγωγή....",
   "failedToLoadAlbums": "Αποτυχία φόρτωσης άλμπουμ",
@@ -560,7 +562,6 @@
   "existingUser": "Υπάρχων χρήστης",
   "newToEnte": "Νέος/α στο Ente",
   "pleaseLoginAgain": "Παρακαλούμε συνδεθείτε ξανά",
-  "autoLogoutMessage": "Έχετε αποσυνδεθεί λόγω τεχνικής δυσλειτουργίας. Ζητούμε συγνώμη για την ταλαιπωρία.",
   "yourSubscriptionHasExpired": "Η συνδρομή σας έχει λήξει",
   "storageLimitExceeded": "Υπέρβαση ορίου αποθήκευσης",
   "upgrade": "Αναβάθμιση",
@@ -582,11 +583,6 @@
   "collectEventPhotos": "Συλλογή φωτογραφιών",
   "sessionExpired": "Η συνεδρία έληξε",
   "loggingOut": "Αποσύνδεση...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "Στη συσκευή",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -627,6 +623,9 @@
   "moveToAlbum": "Μετακίνηση σε άλμπουμ",
   "unhide": "Επανεμφάνιση",
   "unarchive": "Κατάργηση αρχειοθέτησης",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Σήμανση ως αγαπημένο",
   "removeFromFavorite": "Αφαίρεση από τα αγαπημένα",
   "shareLink": "Μοιραστείτε έναν σύνδεσμο",

@@ -21,11 +21,7 @@ class PasswordReentryPage extends StatefulWidget {
   final BaseConfiguration config;
   final BaseHomePage homePage;
 
-  const PasswordReentryPage(
-    this.config,
-    this.homePage, {
-    super.key,
-  });
+  const PasswordReentryPage(this.config, this.homePage, {super.key});
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();
@@ -143,10 +139,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return RecoveryPage(
-                widget.config,
-                widget.homePage,
-              );
+              return RecoveryPage(widget.config, widget.homePage);
             },
           ),
         );
@@ -171,11 +164,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         ],
       );
       if (result == true) {
-        await sendLogs(
-          context,
-          "support@ente.com",
-          postShare: () {},
-        );
+        await sendLogs(context, "support@ente.com", postShare: () {});
       }
       return;
     }
@@ -241,9 +230,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         // password
                         visible: false,
                         child: TextFormField(
-                          autofillHints: const [
-                            AutofillHints.email,
-                          ],
+                          autofillHints: const [AutofillHints.email],
                           autocorrect: false,
                           keyboardType: TextInputType.emailAddress,
                           initialValue: email,
@@ -334,8 +321,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                               await dialog.show();
                               await widget.config.logout();
                               await dialog.hide();
-                              Navigator.of(context)
-                                  .popUntil((route) => route.isFirst);
+                              Navigator.of(
+                                context,
+                              ).popUntil((route) => route.isFirst);
                             },
                             child: Text(
                               context.strings.changeEmail,

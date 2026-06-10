@@ -36,10 +36,7 @@ class FileCaptionReadyOnly extends StatelessWidget {
             scrollDirection: Axis.vertical,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: Text(
-                caption,
-                style: textTheme.small,
-              ),
+              child: Text(caption, style: textTheme.small),
             ),
           ),
         ),
@@ -68,8 +65,9 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
   String? editedCaption;
-  late String defaultHintText =
-      AppLocalizations.of(context).fileInfoAddDescHint;
+  late String defaultHintText = AppLocalizations.of(
+    context,
+  ).fileInfoAddDescHint;
   String hintText = '';
   Widget? keyboardTopButtons;
 
@@ -86,8 +84,11 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   @override
   void dispose() {
     if (editedCaption != null) {
-      editFileCaption(null, widget.file, editedCaption!)
-          .then((isSuccess) => _onEditFileFinish(isSuccess));
+      editFileCaption(
+        null,
+        widget.file,
+        editedCaption!,
+      ).then((isSuccess) => _onEditFileFinish(isSuccess));
     }
     _textController.dispose();
     _focusNode.removeListener(_focusNodeListener);
@@ -115,23 +116,18 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         contentPadding: const EdgeInsets.all(16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(2),
-          borderSide: const BorderSide(
-            width: 0,
-            style: BorderStyle.none,
-          ),
+          borderSide: const BorderSide(width: 0, style: BorderStyle.none),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(2),
-          borderSide: const BorderSide(
-            width: 0,
-            style: BorderStyle.none,
-          ),
+          borderSide: const BorderSide(width: 0, style: BorderStyle.none),
         ),
         filled: true,
         fillColor: colorScheme.fillFaint,
         hintText: hintText,
-        hintStyle:
-            hintText == defaultHintText ? textTheme.miniMuted : textTheme.mini,
+        hintStyle: hintText == defaultHintText
+            ? textTheme.miniMuted
+            : textTheme.mini,
       ),
       style: textTheme.mini,
       cursorWidth: 1.5,
@@ -152,9 +148,11 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
 
   Future<void> _onDoneClick(BuildContext context) async {
     if (editedCaption != null) {
-      final isSuccesful =
-          await editFileCaption(context, widget.file, editedCaption!)
-              .then((isSuccess) => _onEditFileFinish(isSuccess));
+      final isSuccesful = await editFileCaption(
+        context,
+        widget.file,
+        editedCaption!,
+      ).then((isSuccess) => _onEditFileFinish(isSuccess));
       if (isSuccesful) {
         if (mounted) {
           Navigator.pop(context);

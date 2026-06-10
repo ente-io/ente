@@ -137,7 +137,9 @@ Disable the option to download original quality photos. Recipients can still vie
 - Watermarked preview sharing
 - Limited distribution control
 
-**Note:** This doesn't prevent screenshots or screen recording, but does make it harder for recipients to get high-quality copies.
+> [!NOTE]
+>
+> This doesn't prevent screenshots or screen recording, but does make it harder for recipients to get high-quality copies.
 
 ### Allow joining album
 
@@ -209,11 +211,6 @@ Learn more in the [Custom domains guide](/photos/features/sharing-and-collaborat
 
 - Go to the Sharing tab (bottom navigation)
 - See "Shared albums" and "Quick links" sections
-
-**On web/desktop:**
-
-- Open the sidebar
-- Click "Sharing" to see all shared links
 
 ### Edit link settings
 

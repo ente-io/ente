@@ -38,8 +38,9 @@ void showToast(
       EasyLoading.showToast(
         message,
         duration: Duration(
-          seconds:
-              (toastLength == Toast.LENGTH_LONG ? iosLongToastLengthInSec : 1),
+          seconds: (toastLength == Toast.LENGTH_LONG
+              ? iosLongToastLengthInSec
+              : 1),
         ),
         toastPosition: position,
         dismissOnTap: false,

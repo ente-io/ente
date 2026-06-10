@@ -239,7 +239,6 @@
   "after1Month": "Праз 1 месяц",
   "after1Year": "Праз 1 год",
   "manageParticipants": "Кіраванне",
-  "collabLinkSectionDescription": "Стварыце спасылку, каб людзі маглі дадаваць і праглядаць фатаграфіі ў вашым абагуленым альбоме без неабходнасці ўсталёўваць праграму або ствараць уліковы запіс Ente. Гэта выдатна пасуе для збору фатаграфій з падзей.",
   "collectPhotos": "Збор фатаграфій",
   "collaborativeLink": "Сумесная спасылка",
   "shareWithNonenteUsers": "Абагуліць з карыстальнікамі, якія не карыстаюцца Ente",
@@ -337,7 +336,6 @@
   "creatingLink": "Стварэнне спасылкі...",
   "removeWithQuestionMark": "Выдаліць?",
   "removeParticipantBody": "{userEmail} будзе выдалены з гэтага абагуленага альбома\n\nЛюбыя фатаграфіі, якія дададзены гэтым карыстальнікам, таксама будуць выдалены з альбома",
-  "keepPhotos": "Пакінуць фатаграфіі",
   "deletePhotos": "Выдаліць фатаграфіі",
   "inviteToEnte": "Запрасіць у Ente",
   "removePublicLink": "Выдаліць публічную спасылку",
@@ -345,6 +343,9 @@
   "sharing": "Абагульванне...",
   "youCannotShareWithYourself": "Нельга абагуліць файлы з самім сабою",
   "archive": "Архіў",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Доўга ўтрымлівайце, каб выбраць фатаграфію, і націсніце «+», каб стварыць альбом",
   "importing": "Імпартаванне....",
   "failedToLoadAlbums": "Не ўдалося загрузіць альбомы",
@@ -696,7 +697,6 @@
   "existingUser": "Бягучы карыстальнік",
   "newToEnte": "Упершыню ў Ente",
   "pleaseLoginAgain": "Аўтарызуйцеся яшчэ раз",
-  "autoLogoutMessage": "З прычыны тэхнічнага збою ваш сеанс у сістэме быў завершаны. Прыносім прабачэнні за нязручнасці.",
   "yourSubscriptionHasExpired": "Тэрмін дзеяння вашай падпіскі завяршыўся",
   "storageLimitExceeded": "Перавышана абмежаванне аб'ёму сховішча",
   "upgrade": "Палепшыць",
@@ -718,11 +718,6 @@
   "collectEventPhotos": "Сабраць фатаграфіі падзеі",
   "sessionExpired": "Сеанс завяршыўся",
   "loggingOut": "Выхад...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "На прыладзе",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -763,6 +758,9 @@
   "moveToAlbum": "Перамясціць у альбом",
   "unhide": "Паказаць",
   "unarchive": "Вывесці з архіва",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "Абраныя",
   "removeFromFavorite": "Выдаліць з абранага",
   "shareLink": "Абагуліць спасылку",
@@ -1135,8 +1133,6 @@
   "noPhotosFoundHere": "Тут фатаграфій не знойдзена",
   "zoomOutToSeePhotos": "Паменшыць маштаб, каб убачыць фатаграфіі",
   "noImagesWithLocation": "Відарысы з месцазнаходжаннем адсутнічаюць",
-  "unpinAlbum": "Адмацаваць альбом",
-  "pinAlbum": "Замацаваць альбом",
   "pin": "Замацаваць",
   "pinPerson": "Замацаваць асобу",
   "pinToTop": "Замацаваць уверсе",
@@ -1673,9 +1669,7 @@
   "newPhotosEmoji": " новая 📸",
   "sorryWeHadToPauseYourBackups": "Прабачце, але давялося прыпыніць ваша рэзервовае капіяванне",
   "clickToInstallOurBestVersionYet": "Націсніце, каб усталяваць нашу лепшую версію",
-  "onThisDayNotificationExplanation": "Атрымлівайце напаміны аб успамінах з гэтага дня ў мінулыя гады.",
   "birthdayNotifications": "Апавяшчэнні аб днях нараджэння",
-  "receiveRemindersOnBirthdays": "Атрымлівайце напаміны, калі ў некага дзень нараджэння. Націск на апавяшчэнне перанясе вас да фатаграфій імянінніка.",
   "happyBirthday": "З днём нараджэння! 🥳",
   "birthdays": "Дні нараджэння",
   "wishThemAHappyBirthday": "Віншуем з днём нараджэння, {name}! 🎉",

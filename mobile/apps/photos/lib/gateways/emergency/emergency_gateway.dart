@@ -79,10 +79,7 @@ class EmergencyGateway {
   }) async {
     await _enteDio.post(
       "/emergency-contacts/start-recovery",
-      data: {
-        "userID": userID,
-        "emergencyContactID": emergencyContactID,
-      },
+      data: {"userID": userID, "emergencyContactID": emergencyContactID},
     );
   }
 
@@ -155,8 +152,9 @@ class EmergencyGateway {
       "/emergency-contacts/recovery-info/$sessionID",
     );
     final String encryptedKey = response.data["encryptedKey"]!;
-    final KeyAttributes keyAttributes =
-        KeyAttributes.fromMap(response.data['userKeyAttr']);
+    final KeyAttributes keyAttributes = KeyAttributes.fromMap(
+      response.data['userKeyAttr'],
+    );
     return (encryptedKey, keyAttributes);
   }
 

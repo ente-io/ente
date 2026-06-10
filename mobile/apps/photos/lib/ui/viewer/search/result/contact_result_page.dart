@@ -1,10 +1,10 @@
 import "dart:async";
 
 import "package:email_validator/email_validator.dart";
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_contacts/contacts.dart" as contacts;
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/contacts_changed_event.dart";
 import "package:photos/events/files_updated_event.dart";
@@ -31,15 +31,13 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart"
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
-import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
-import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
 import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/search/contact_avatar_widget.dart";
 import "package:photos/ui/viewer/search/result/edit_contact_page.dart";
@@ -85,8 +83,9 @@ class _ContactResultPageState extends State<ContactResultPage> {
     _searchResultName = widget.searchResult.name();
     _contactEmail = params[kContactEmail] as String? ?? _searchResultName;
     _contactUserId = params[kContactUserId] as int?;
-    _filesUpdatedEvent =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((
+      event,
+    ) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere ||
           event.type == EventType.deletedFromRemote ||
@@ -104,8 +103,9 @@ class _ContactResultPageState extends State<ContactResultPage> {
 
     if (flagService.enableContact && _contactUserId != null) {
       _refreshSavedContact();
-      _contactsChangedEvent =
-          Bus.instance.on<ContactsChangedEvent>().listen((event) {
+      _contactsChangedEvent = Bus.instance.on<ContactsChangedEvent>().listen((
+        event,
+      ) {
         if (event.matchesContactUserId(_contactUserId)) {
           _refreshSavedContact();
         }
@@ -122,7 +122,13 @@ class _ContactResultPageState extends State<ContactResultPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      ContactResultPage.appBarType,
+      _searchResultName,
+      _selectedFiles,
+    );
     final gallery = Gallery(
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
             .where(
@@ -132,10 +138,7 @@ class _ContactResultPageState extends State<ContactResultPage> {
             )
             .toList();
         return Future.value(
-          FileLoadResult(
-            result,
-            result.length < files.length,
-          ),
+          FileLoadResult(result, result.length < files.length),
         );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -162,22 +165,6 @@ class _ContactResultPageState extends State<ContactResultPage> {
           searchFilterDataProvider: _searchFilterDataProvider,
           child: Scaffold(
             backgroundColor: getEnteColorScheme(context).backgroundColour,
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(
-                _ContactResultAppBar.preferredHeight(
-                  isHierarchicalSearchable: true,
-                ),
-              ),
-              child: widget.enableGrouping
-                  ? const _ContactResultAppBar(
-                      isHierarchicalSearchable: true,
-                    )
-                  : const _AppBarWithBoundary(
-                      child: _ContactResultAppBar(
-                        isHierarchicalSearchable: true,
-                      ),
-                    ),
-            ),
             body: SelectionState(
               selectedFiles: _selectedFiles,
               child: Stack(
@@ -186,14 +173,15 @@ class _ContactResultPageState extends State<ContactResultPage> {
                   Builder(
                     builder: (context) {
                       return ValueListenableBuilder(
-                        valueListenable: InheritedSearchFilterData.of(context)
-                            .searchFilterDataProvider!
-                            .isSearchingNotifier,
+                        valueListenable: InheritedSearchFilterData.of(
+                          context,
+                        ).searchFilterDataProvider!.isSearchingNotifier,
                         builder: (context, value, _) {
                           return value
                               ? HierarchicalSearchGallery(
                                   tagPrefix: widget.tagPrefix,
                                   selectedFiles: _selectedFiles,
+                                  appBar: appBar,
                                 )
                               : gallery;
                         },
@@ -239,8 +227,10 @@ class _ContactResultPageState extends State<ContactResultPage> {
             ContactAvatarWidget(
               contactUserId: _contactUserId,
               email: _contactEmail,
-              personId: (widget.searchResult as GenericSearchResult)
-                  .params[kPersonParamID] as String?,
+              personId:
+                  (widget.searchResult as GenericSearchResult)
+                          .params[kPersonParamID]
+                      as String?,
               size: 36,
             ),
             const SizedBox(width: 12),
@@ -282,9 +272,7 @@ class _ContactResultPageState extends State<ContactResultPage> {
           onTap: () async {
             final PersonEntity? updatedPerson = await routeToPage(
               context,
-              LinkContactToPersonSelectionPage(
-                emailToLink: _searchResultName,
-              ),
+              LinkContactToPersonSelectionPage(emailToLink: _searchResultName),
             );
             if (updatedPerson != null && mounted) {
               setState(() {
@@ -357,18 +345,17 @@ class _ContactResultPageState extends State<ContactResultPage> {
   }
 
   TextStyle _contactHeaderTitleStyle(BuildContext context) {
-    return getEnteTextTheme(context).largeBold.copyWith(
-          fontSize: 20,
-          height: 28 / 20,
-        );
+    return getEnteTextTheme(
+      context,
+    ).largeBold.copyWith(fontSize: 20, height: 28 / 20);
   }
 
   TextStyle _contactHeaderSubtitleStyle(BuildContext context) {
     return getEnteTextTheme(context).mini.copyWith(
-          color: getEnteColorScheme(context).textMuted,
-          height: 16 / 12,
-          fontWeight: FontWeight.w500,
-        );
+      color: getEnteColorScheme(context).textMuted,
+      height: 16 / 12,
+      fontWeight: FontWeight.w500,
+    );
   }
 }
 
@@ -415,10 +402,7 @@ class _ContactHeaderOverflowButton extends StatelessWidget {
 }
 
 class _AlbumsSection extends StatelessWidget {
-  const _AlbumsSection({
-    required this.context,
-    required this.collections,
-  });
+  const _AlbumsSection({required this.context, required this.collections});
 
   final BuildContext context;
   final List<Collection> collections;
@@ -487,12 +471,11 @@ class _UnsavedContactHeader extends StatelessWidget {
         children: [
           Text(
             email,
-            style: textTheme.largeBold.copyWith(
-              fontSize: 20,
-              height: 28 / 20,
-            ),
+            style: TextStyles.body.copyWith(color: colorScheme.textMuted),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           MenuItemWidgetNew(
             title: l10n.addANameAndPhoto,
             subText: l10n.itemCount(count: itemCount),
@@ -580,98 +563,6 @@ class _UnsavedContactEmptyState extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _ContactResultAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
-  static const _toolbarHeight = 56.0;
-  static const _bottomPadding = 8.0;
-
-  final bool isHierarchicalSearchable;
-
-  const _ContactResultAppBar({
-    required this.isHierarchicalSearchable,
-  });
-
-  static double preferredHeight({required bool isHierarchicalSearchable}) {
-    return isHierarchicalSearchable
-        ? _toolbarHeight + kFilterChipHeight + _bottomPadding + 1
-        : _toolbarHeight;
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(
-        preferredHeight(isHierarchicalSearchable: isHierarchicalSearchable),
-      );
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    if (!isHierarchicalSearchable) {
-      return AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: colorScheme.backgroundColour,
-        surfaceTintColor: Colors.transparent,
-        titleSpacing: 0,
-      );
-    }
-
-    final searchFilterData = InheritedSearchFilterData.of(context);
-    return ValueListenableBuilder(
-      valueListenable:
-          searchFilterData.searchFilterDataProvider!.isSearchingNotifier,
-      builder: (context, isSearching, _) {
-        return AppBar(
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          backgroundColor: colorScheme.backgroundColour,
-          surfaceTintColor: Colors.transparent,
-          titleSpacing: 0,
-          bottom: isSearching
-              ? const PreferredSize(
-                  preferredSize: Size.fromHeight(kFilterChipHeight + 1),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: SizedBox(
-                      height: kFilterChipHeight + 1,
-                      child: AppliedFiltersForAppbar(),
-                    ),
-                  ),
-                )
-              : const PreferredSize(
-                  preferredSize: Size.fromHeight(0),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: RecommendedFiltersForAppbar(),
-                  ),
-                ),
-        );
-      },
-    );
-  }
-}
-
-/// Wrapper widget that reports the app bar as top boundary for auto-scroll
-/// when file grouping is disabled
-class _AppBarWithBoundary extends StatefulWidget {
-  final Widget child;
-
-  const _AppBarWithBoundary({required this.child});
-
-  @override
-  State<_AppBarWithBoundary> createState() => _AppBarWithBoundaryState();
-}
-
-class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
-    with BoundaryReporter {
-  @override
-  Widget build(BuildContext context) {
-    return boundaryWidget(
-      position: BoundaryPosition.top,
-      child: widget.child,
     );
   }
 }

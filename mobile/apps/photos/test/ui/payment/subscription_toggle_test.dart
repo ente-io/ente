@@ -9,15 +9,13 @@ void main() {
     testWidgets("uses the provided initial billing period", (tester) async {
       await tester.pumpWidget(
         _buildTestApp(
-          const SubscriptionToggle(
-            isYearly: false,
-            onToggle: _noopToggle,
-          ),
+          const SubscriptionToggle(isYearly: false, onToggle: _noopToggle),
         ),
       );
 
-      final togglePosition =
-          tester.widget<AnimatedPositioned>(find.byType(AnimatedPositioned));
+      final togglePosition = tester.widget<AnimatedPositioned>(
+        find.byType(AnimatedPositioned),
+      );
       expect(togglePosition.left, greaterThan(0));
     });
 
@@ -26,25 +24,20 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _buildTestApp(
-          const SubscriptionToggle(
-            isYearly: false,
-            onToggle: _noopToggle,
-          ),
+          const SubscriptionToggle(isYearly: false, onToggle: _noopToggle),
         ),
       );
 
       await tester.pumpWidget(
         _buildTestApp(
-          const SubscriptionToggle(
-            isYearly: true,
-            onToggle: _noopToggle,
-          ),
+          const SubscriptionToggle(isYearly: true, onToggle: _noopToggle),
         ),
       );
       await tester.pumpAndSettle();
 
-      final togglePosition =
-          tester.widget<AnimatedPositioned>(find.byType(AnimatedPositioned));
+      final togglePosition = tester.widget<AnimatedPositioned>(
+        find.byType(AnimatedPositioned),
+      );
       expect(togglePosition.left, 0);
     });
   });
@@ -55,12 +48,7 @@ Widget _buildTestApp(Widget child) {
     theme: darkThemeData,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: Scaffold(
-      body: SizedBox(
-        width: 320,
-        child: child,
-      ),
-    ),
+    home: Scaffold(body: SizedBox(width: 320, child: child)),
   );
 }
 

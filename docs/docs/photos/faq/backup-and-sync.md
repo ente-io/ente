@@ -119,9 +119,7 @@ If you want to delete a photo from Ente, you must do it manually within the Ente
 
 **What you need to know:**
 
-✅ **Uploading**: Happens automatically for selected albums
-✅ **Re-upload protection**: Ente won't re-upload photos you've already uploaded, even if you delete them from Ente and they're still on your device
-❌ **Two-way sync**: Not supported - changes in Ente don't reflect on your device
+✅ **Uploading**: Happens automatically for selected albums ✅ **Re-upload protection**: Ente won't re-upload photos you've already uploaded, even if you delete them from Ente and they're still on your device ❌ **Two-way sync**: Not supported - changes in Ente don't reflect on your device
 
 **If you want to delete a photo everywhere:**
 
@@ -296,11 +294,34 @@ If Ente isn't picking these up:
 2. If it isn't listed, move or copy the photos into the Camera folder, which Ente recognizes by default.
 3. New photos taken with the camera will continue to back up normally.
 
+### Can I pick photos from Ente in other apps? {#pick-photos-in-other-apps}
+
+On supported Android apps, yes. If an app (such as WhatsApp) opens the system photo picker, you can choose Ente Photos as the source and select photos or videos from your Ente library.
+
+A few details to keep in mind:
+
+- This works through Android's picker integration, so it depends on the third-party app using the standard picker flow.
+- Ente returns the files you select to that app for sending or attaching.
+- The picker shows the photos and videos available in your Ente gallery on that device.
+- On iPhone, iOS does not currently let Ente plug into other apps' photo pickers in the same way.
+
 ### Can Ente replace my default Photos or Camera gallery? {#ente-as-default-gallery}
 
-Not as a system gallery. On iOS, tapping a photo from the camera or another app will still open Apple Photos; the OS doesn't allow third-party apps to take that role. Android behaves similarly for most camera apps.
+Not as a full system gallery. On iPhone, tapping a photo from the camera or another app will still open Apple Photos because iOS does not allow third-party apps to replace that role.
+
+On supported Android devices, some camera apps can hand off the last photo you tapped to Ente for preview. But Ente still does not become the phone's universal default gallery for every app and camera flow.
 
 Ente runs alongside your native gallery and backs up new photos automatically in the background. See [How does background sync work?](#how-background-sync-works).
+
+### Can I open photos from my camera app in Ente? {#open-camera-photos-in-ente}
+
+On supported Android devices, yes. After taking a photo, tapping the preview thumbnail in the camera app can open that image directly in Ente Photos instead of the phone's default gallery.
+
+A few details to keep in mind:
+
+- This depends on your camera app and device supporting the Android handoff that Ente listens for.
+- It is for previewing the image you just tapped from the camera app; it does not make Ente the default gallery everywhere else.
+- On iPhone, the camera app still opens Apple Photos for this flow.
 
 ### On my iPhone, why are my photos not seen in the same albums as selected for backup? {#ios-album-assignment}
 
@@ -335,7 +356,9 @@ Background sync allows Ente to automatically back up your photos without needing
 
 - Use [watch folders](/photos/faq/backup-and-sync#what-are-watch-folders) to automatically sync specific directories
 
-**Important**: On iOS, large videos may not upload in background - they'll sync when you open the app.
+> [!IMPORTANT]
+>
+> On iOS, large videos may not upload in background - they'll sync when you open the app.
 
 Learn more in the [Background sync feature guide](/photos/features/backup-and-sync/#background-sync).
 
@@ -358,7 +381,9 @@ If photos aren't automatically backing up in the background, try these solutions
 4. Don't force-quit the Ente app from the app switcher
 5. For initial large backups, keep the app open in foreground
 
-**Note**: On iOS, videos may not upload in the background due to size - they'll sync when you next open the app.
+> [!NOTE]
+>
+> On iOS, videos may not upload in the background due to size - they'll sync when you next open the app.
 
 Learn more in the [Background sync guide](/photos/features/backup-and-sync/#background-sync).
 
@@ -381,7 +406,9 @@ On iOS, background sync works through silent push notifications:
 - This wakes up the app and gives it 30 seconds to sync
 - Videos may not upload in background due to size limitations
 
-**Important**: If you force-kill the app from recents, iOS won't deliver push notifications and background sync will stop working.
+> [!IMPORTANT]
+>
+> If you force-kill the app from recents, iOS won't deliver push notifications and background sync will stop working.
 
 For large initial backups, keep the app open in foreground on iOS.
 
@@ -395,7 +422,9 @@ On Android, the app can run background processes more freely than iOS. However, 
 - Grant all required permissions
 - Don't force-close the app from recents
 
-**Note**: On Android 15+, if the app is in private space and private space is locked, background sync won't work.
+> [!NOTE]
+>
+> On Android 15+, if the app is in private space and private space is locked, background sync won't work.
 
 ## Desktop Backup (Watch Folders)
 
@@ -428,7 +457,9 @@ Yes. When you add a parent folder in Watch folders and choose **Separate albums*
 
 For example, if you have a `Photos` folder containing `Trip A` and `Trip B` subfolders, watching `Photos` in Separate albums mode creates two albums called "Trip A" and "Trip B".
 
-> **Note**: Ente albums are flat, not nested. All albums appear as top-level albums regardless of how your folders are structured on disk.
+> [!NOTE]
+>
+> Ente albums are flat, not nested. All albums appear as top-level albums regardless of how your folders are structured on disk.
 
 Learn more in the [Watch folders guide](/photos/features/backup-and-sync/watch-folders).
 
@@ -582,8 +613,7 @@ Yes! On desktop, you have two options:
 
 ### Can I pause and resume backups? {#pause-resume-backup}
 
-**On mobile:**
-You can effectively pause backups by:
+**On mobile:** You can effectively pause backups by:
 
 - Turning off WiFi/mobile data
 - Going to `Settings > Backup` and toggling off specific albums
@@ -625,13 +655,39 @@ This usually occurs due to a network connectivity issue:
 
 - Check your internet connection is active
 - Try switching networks (WiFi to mobile data or vice versa)
-- If network connection is fine and sync is still not occurring, please send us
-  your debug logs via **Settings > Help > View logs** so we can investigate
-  further. You can reach us at [support@ente.com](mailto:support@ente.com).
+- If network connection is fine and sync is still not occurring, please send us your debug logs via **Settings > Help > View logs** so we can investigate further. You can reach us at [support@ente.com](mailto:support@ente.com).
 
 ### Is there a way to filter photos that are backed up to Ente but no longer on my device? {#filter-cloud-only-photos}
 
 No. There is currently no way to filter cloud-only photos (photos that exist in Ente but are no longer on your device).
+
+### Can I view my photos in Ente without internet? {#offline-viewing}
+
+Yes, if the original photo is still available locally on your device or has already been cached by Ente.
+
+Photos that exist only in the cloud need an internet connection to load in full quality.
+
+## Exporting Your Data
+
+### How do I import an Ente export back into Ente? {#import-ente-export}
+
+Open the desktop app and upload the exported folder. You can also set up a Watch Folder from `Settings > Watch folders` if you want Ente to automatically upload files from a specific folder.
+
+There is no separate "Import from Ente" option.
+
+Learn more in the [Watch folders guide](/photos/features/backup-and-sync/watch-folders).
+
+### What happens to deleted photos in continuous export? {#continuous-export-deleted-photos}
+
+If you delete a photo from Ente, it moves to Trash in Ente. In your continuous export folder, the exported copy is similarly moved into a local export Trash folder.
+
+If you later permanently delete or empty Trash in Ente, Ente will not automatically delete the copy from your local export Trash folder. Manually delete those files from your device if you no longer need them.
+
+### Why is the Trash folder in my local export larger than my Ente Trash? {#local-export-trash-larger}
+
+Ente does not automatically remove files from your local filesystem export. This is intentional, so the export process does not unexpectedly delete local files from your device.
+
+If you are sure you no longer need those files, manually delete them from the local exported Trash folder.
 
 ## File Support & Upload Limits
 

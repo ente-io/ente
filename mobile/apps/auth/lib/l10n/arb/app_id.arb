@@ -489,7 +489,7 @@
   "pinLock": "PIN",
   "enterPin": "Masukkan PIN",
   "setNewPin": "Pasang PIN yang baru",
-  "importFailureDescNew": "Berkas yang dipilih tidak dapat diurai",
+  "importFailureDesc": "Berkas yang dipilih tidak dapat diurai",
   "appLockNotEnabled": "Kunci aplikasi tidak diaktifkan",
   "appLockNotEnabledDescription": "Mohon nyalakan pengunci apl di Keamanan > Pengunci Apl",
   "authToViewPasskey": "Mohon autentikasikan untuk menampilkan kunci sandi",

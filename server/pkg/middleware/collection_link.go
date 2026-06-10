@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -26,7 +27,6 @@ import (
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -278,7 +278,7 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 	// /public-collection/info is allowed before password unlock so clients can
 	// fetch the KDF parameters needed to verify the password. Device-limit
 	// admission is intentionally still applied to this public entrypoint.
-	if array.StringInList(reqPath, passwordWhiteListedURLs) {
+	if slices.Contains(passwordWhiteListedURLs, reqPath) {
 		return nil
 	}
 	accessTokenJWT := auth.GetAccessTokenJWT(c)

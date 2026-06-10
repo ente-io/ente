@@ -474,7 +474,7 @@
   "pinLock": "Låsning med pinkode",
   "enterPin": "Indtast pinkode",
   "setNewPin": "Indstil ny pinkode",
-  "importFailureDescNew": "Kunne ikke afkode den valgte fil.",
+  "importFailureDesc": "Kunne ikke afkode den valgte fil.",
   "appLockNotEnabled": "Låsning af app er ikke slået til",
   "appLockNotEnabledDescription": "Slå venligst låsning af app til under \"Sikkerhed > Låsning af app\"",
   "authToViewPasskey": "Bekræft venligst identitet for at se passkey"

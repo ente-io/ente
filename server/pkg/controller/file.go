@@ -104,7 +104,7 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 			return stacktrace.Propagate(err, "")
 		}
 		if ente.App(collection.App) != app {
-			return stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("ctx app is different from collection app=%s collectionApp=%s", app, collection.App))
+			return stacktrace.Propagate(ente.ErrInvalidApp, "ctx app is different from collection app=%s collectionApp=%s", app, collection.App)
 		}
 		// Verify that user owns the collection.
 		// Warning: Do not remove this check
@@ -151,11 +151,11 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 
 	if fileResult.err != nil {
 		log.Error("Could not find size of file: " + file.File.ObjectKey)
-		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, fileResult.err.Error())
+		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, "%v", fileResult.err)
 	}
 	if thumbResult.err != nil {
 		log.Error("Could not find size of thumbnail: " + file.Thumbnail.ObjectKey)
-		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, thumbResult.err.Error())
+		return file, stacktrace.Propagate(ente.ErrObjSizeFetchFailed, "%v", thumbResult.err)
 	}
 	fileSize := fileResult.size
 	thumbnailSize := thumbResult.size
@@ -419,6 +419,30 @@ func (c *FileController) GetThumbnailURL(ctx *gin.Context, userID int64, fileID 
 	return url, nil
 }
 
+// GetFileURLUsingFusedLookup verifies permissions and returns a presigned URL
+// using the temporary fused access-check and object lookup path.
+func (c *FileController) GetFileURLUsingFusedLookup(ctx *gin.Context, userID int64, fileID int64) (string, error) {
+	return c.getSignedURLForAccessibleObject(ctx, userID, fileID, ente.FILE)
+}
+
+// GetThumbnailURLUsingFusedLookup verifies permissions and returns a presigned
+// URL using the temporary fused access-check and object lookup path.
+func (c *FileController) GetThumbnailURLUsingFusedLookup(ctx *gin.Context, userID int64, fileID int64) (string, error) {
+	return c.getSignedURLForAccessibleObject(ctx, userID, fileID, ente.THUMBNAIL)
+}
+
+// GetFileURLForOwner verifies ownership and returns a presigned URL using a
+// fused ownership-check and object lookup path.
+func (c *FileController) GetFileURLForOwner(ctx *gin.Context, ownerID int64, fileID int64) (string, error) {
+	return c.getSignedURLForOwnedObject(ctx, ownerID, fileID, ente.FILE)
+}
+
+// GetThumbnailURLForOwner verifies ownership and returns a presigned URL using
+// a fused ownership-check and object lookup path.
+func (c *FileController) GetThumbnailURLForOwner(ctx *gin.Context, ownerID int64, fileID int64) (string, error) {
+	return c.getSignedURLForOwnedObject(ctx, ownerID, fileID, ente.THUMBNAIL)
+}
+
 func (c *FileController) CleanUpStaleCollectionFiles(userID int64, fileID int64) {
 	logger := log.WithFields(log.Fields{
 		"userID": userID,
@@ -450,11 +474,7 @@ func (c *FileController) CleanUpStaleCollectionFiles(userID int64, fileID int64)
 
 // GetPublicOrCastFileURL verifies permissions and returns a presigned url to the requested file
 func (c *FileController) GetPublicOrCastFileURL(ctx *gin.Context, fileID int64, objType ente.ObjectType, collectionID int64) (string, error) {
-	// validate that the given fileID is present in the corresponding collection for public album or cast session
-	if err := c.DoesFileExistInCollection(ctx, fileID, collectionID); err != nil {
-		return "", stacktrace.Propagate(err, "")
-	}
-	return c.getSignedURLForType(ctx, fileID, objType)
+	return c.getSignedURLForCollectionObject(ctx, collectionID, fileID, objType)
 }
 
 func (c *FileController) DoesFileExistInCollection(ctx *gin.Context, fileID int64, collectionID int64) error {
@@ -485,6 +505,85 @@ func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, obj
 	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
 }
 
+func (c *FileController) getSignedURLForAccessibleObject(ctx *gin.Context, userID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	var url string
+	var err error
+	if isCliRequest(ctx) {
+		url, err = c.getWasabiSignedUrlForAccessibleObject(ctx, userID, fileID, objType)
+	} else {
+		var s3Object ente.S3ObjectKey
+		s3Object, err = c.ObjectRepo.GetAccessibleObject(ctx, fileID, userID, objType)
+		if err == nil {
+			url, err = c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+		}
+	}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			go c.CleanUpStaleCollectionFiles(userID, fileID)
+		}
+		return "", stacktrace.Propagate(err, "")
+	}
+	return url, nil
+}
+
+func (c *FileController) getSignedURLForOwnedObject(ctx *gin.Context, ownerID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	var url string
+	var err error
+	if isCliRequest(ctx) {
+		var s3Object ente.S3ObjectKey
+		var dcs []string
+		s3Object, dcs, err = c.ObjectRepo.GetOwnedObjectWithDCs(ctx, fileID, ownerID, objType)
+		if err == nil {
+			url, err = c.getSignedURLFromObjectAndDCs(s3Object, dcs, objType)
+		}
+	} else {
+		var s3Object ente.S3ObjectKey
+		s3Object, err = c.ObjectRepo.GetOwnedObject(ctx, fileID, ownerID, objType)
+		if err == nil {
+			url, err = c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+		}
+	}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			go c.CleanUpStaleCollectionFiles(ownerID, fileID)
+		}
+		return "", stacktrace.Propagate(err, "")
+	}
+	return url, nil
+}
+
+func (c *FileController) getSignedURLForCollectionObject(ctx *gin.Context, collectionID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	var url string
+	var err error
+	if isCliRequest(ctx) {
+		var s3Object ente.S3ObjectKey
+		var dcs []string
+		s3Object, dcs, err = c.ObjectRepo.GetCollectionObjectWithDCs(ctx, collectionID, fileID, objType)
+		if err == nil {
+			url, err = c.getSignedURLFromObjectAndDCs(s3Object, dcs, objType)
+		}
+	} else {
+		var s3Object ente.S3ObjectKey
+		s3Object, err = c.ObjectRepo.GetCollectionObject(ctx, collectionID, fileID, objType)
+		if err == nil {
+			url, err = c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+		}
+	}
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	return url, nil
+}
+
+func (c *FileController) getSignedURLFromObjectAndDCs(s3Object ente.S3ObjectKey, dcs []string, objType ente.ObjectType) (string, error) {
+	for _, dc := range dcs {
+		if dc == c.S3Config.GetHotWasabiDC() {
+			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc, objType)
+		}
+	}
+	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+}
+
 // ignore lint unused inspection
 func isCliRequest(ctx *gin.Context) bool {
 	// check if user-agent contains go-resty
@@ -505,6 +604,14 @@ func (c *FileController) getWasabiSignedUrlIfAvailable(fileID int64, objType ent
 		}
 	}
 	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
+}
+
+func (c *FileController) getWasabiSignedUrlForAccessibleObject(ctx *gin.Context, userID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	s3Object, dcs, err := c.ObjectRepo.GetAccessibleObjectWithDCs(ctx, fileID, userID, objType)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	return c.getSignedURLFromObjectAndDCs(s3Object, dcs, objType)
 }
 
 // Trash deletes file and move them to trash
@@ -785,7 +892,7 @@ func (c *FileController) CleanupDeletedFiles() {
 	defer func() {
 		c.LockController.ReleaseLock(DeletedObjectQueueLock)
 	}()
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 5000)
+	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 10000)
 	if err != nil {
 		log.WithError(err).Error("Failed to fetch items from queue")
 		return
@@ -794,10 +901,8 @@ func (c *FileController) CleanupDeletedFiles() {
 	itemChan := make(chan repo.QueueItem, len(items))
 
 	// Start worker goroutines
-	for w := 0; w < 4; w++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 8 {
+		wg.Go(func() {
 			for item := range itemChan {
 				func(item repo.QueueItem) {
 					defer func() {
@@ -808,7 +913,7 @@ func (c *FileController) CleanupDeletedFiles() {
 					c.cleanupDeletedFile(item)
 				}(item)
 			}
-		}()
+		})
 	}
 	// Send items to the channel
 	for _, item := range items {

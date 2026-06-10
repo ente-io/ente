@@ -189,6 +189,11 @@ async function generateFAQSchema(pageData: any) {
                 .replace(/\*\*([^*]+)\*\*/g, "$1") // Bold
                 .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Links
                 .replace(/`([^`]+)`/g, "$1") // Inline code
+                .replace(
+                    /^\s*>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/gim,
+                    "",
+                ) // GitHub alert labels
+                .replace(/^\s*>\s?/gm, "") // Blockquotes
                 .replace(/^[-*]\s+/gm, "") // List items
                 .replace(/\n+/g, " ") // Newlines to spaces
                 .replace(/\s+/g, " ") // Multiple spaces to single

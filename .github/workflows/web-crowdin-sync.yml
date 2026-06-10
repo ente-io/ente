@@ -4,12 +4,9 @@ on:
     push:
         branches: [main]
         paths:
-            # Run workflow when web's en-US/translation.json is changed
-            - "web/packages/base/locales/en-US/translation.json"
-            # Or the Crowdin config is changed
-            - "web/crowdin.yml"
-            # Or the workflow itself is changed
             - ".github/workflows/web-crowdin-sync.yml"
+            - "web/packages/base/locales/en-US/translation.json"
+            - "web/crowdin.yml"
     schedule:
         # Run Mondays at ~6:00 AM IST
         #
@@ -39,10 +36,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
             - name: Crowdin's action
-              uses: crowdin/github-action@v2
+              uses: crowdin/github-action@8868a33591d21088edfc398968173a3b98d51706 # v2.16.2
               with:
                   base_path: "web/"
                   config: "web/crowdin.yml"

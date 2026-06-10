@@ -5,6 +5,8 @@ import "dart:typed_data";
 
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart'
+    show isFileSystemPathMissing;
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -23,7 +25,6 @@ final _logger = Logger("ThumbnailUtil");
 final _uploadIDToDownloadItem = <int, FileDownloadItem>{};
 final _downloadQueue = Queue<int>();
 const int kMaximumConcurrentDownloads = 500;
-const int _noSuchFileOrDirectoryErrorCode = 2;
 
 class FileDownloadItem {
   final EnteFile file;
@@ -38,15 +39,12 @@ Future<Uint8List?> getThumbnail(EnteFile file) async {
   if (file.isRemoteFile) {
     return getThumbnailFromServer(file);
   } else {
-    return getThumbnailFromLocal(
-      file,
-      size: thumbnailLargeSize,
-    );
+    return getThumbnailFromLocal(file, size: thumbnailLargeSize);
   }
 }
 
 Future<({bool acquiredPendingRequestRef, Future<void> pendingRequest})>
-    preloadThumbnailWithPendingRequestRef(EnteFile file) async {
+preloadThumbnailWithPendingRequestRef(EnteFile file) async {
   if (!file.isRemoteFile) {
     unawaited(getThumbnailFromLocal(file));
     return (
@@ -55,10 +53,7 @@ Future<({bool acquiredPendingRequestRef, Future<void> pendingRequest})>
     );
   }
   final request = await _getThumbnailFromServerRequest(file);
-  final pendingRequest = request.future.then<void>(
-    (_) {},
-    onError: (_, __) {},
-  );
+  final pendingRequest = request.future.then<void>((_) {}, onError: (_, __) {});
   unawaited(pendingRequest);
   return (
     acquiredPendingRequestRef: request.acquiredPendingRequestRef,
@@ -103,7 +98,7 @@ Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
 }
 
 Future<({Future<Uint8List> future, bool acquiredPendingRequestRef})>
-    _getThumbnailFromServerRequest(EnteFile file) async {
+_getThumbnailFromServerRequest(EnteFile file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   final cachedData = await _readCachedThumbnailIfPresent(cachedThumbnail, file);
   if (cachedData != null) {
@@ -115,8 +110,12 @@ Future<({Future<Uint8List> future, bool acquiredPendingRequestRef})>
   // Check if there's already in flight request for fetching thumbnail from the
   // server
   if (!_uploadIDToDownloadItem.containsKey(file.uploadedFileID)) {
-    final item =
-        FileDownloadItem(file, Completer<Uint8List>(), CancelToken(), 1);
+    final item = FileDownloadItem(
+      file,
+      Completer<Uint8List>(),
+      CancelToken(),
+      1,
+    );
     _uploadIDToDownloadItem[file.uploadedFileID!] = item;
     if (_downloadQueue.length > kMaximumConcurrentDownloads) {
       final id = _downloadQueue.removeFirst();
@@ -126,10 +125,7 @@ Future<({Future<Uint8List> future, bool acquiredPendingRequestRef})>
     }
     _downloadQueue.add(file.uploadedFileID!);
     _downloadItem(item);
-    return (
-      future: item.completer.future,
-      acquiredPendingRequestRef: true,
-    );
+    return (future: item.completer.future, acquiredPendingRequestRef: true);
   } else {
     _uploadIDToDownloadItem[file.uploadedFileID]!.counter++;
     return (
@@ -175,9 +171,9 @@ Future<Uint8List?> getThumbnailFromLocal(
       return asset
           .thumbnailDataWithSize(ThumbnailSize(size, size), quality: quality)
           .then((data) {
-        ThumbnailInMemoryLruCache.put(file, data, size);
-        return data;
-      });
+            ThumbnailInMemoryLruCache.put(file, data, size);
+            return data;
+          });
     });
   }
 }
@@ -214,32 +210,22 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   Uint8List encryptedThumbnail;
   try {
     if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
-      final headers = CollectionsService.instance
-          .publicCollectionHeaders(file.collectionID!);
-      encryptedThumbnail = (await NetworkClient.instance.getDio().get(
-                FileUrl.getUrl(
-                  file.uploadedFileID!,
-                  FileUrlType.publicThumbnail,
-                ),
-                options: Options(
-                  headers: headers,
-                  responseType: ResponseType.bytes,
-                ),
-              ))
-          .data;
+      final headers = CollectionsService.instance.publicCollectionHeaders(
+        file.collectionID!,
+      );
+      encryptedThumbnail = (await NetworkClient.instance.downloadDio.get(
+        FileUrl.getUrl(file.uploadedFileID!, FileUrlType.publicThumbnail),
+        options: Options(headers: headers, responseType: ResponseType.bytes),
+      )).data;
     } else {
-      encryptedThumbnail = (await NetworkClient.instance.getDio().get(
-                FileUrl.getUrl(
-                  file.uploadedFileID!,
-                  FileUrlType.thumbnail,
-                ),
-                options: Options(
-                  headers: {"X-Auth-Token": Configuration.instance.getToken()},
-                  responseType: ResponseType.bytes,
-                ),
-                cancelToken: item.cancelToken,
-              ))
-          .data;
+      encryptedThumbnail = (await NetworkClient.instance.downloadDio.get(
+        FileUrl.getUrl(file.uploadedFileID!, FileUrlType.thumbnail),
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+          responseType: ResponseType.bytes,
+        ),
+        cancelToken: item.cancelToken,
+      )).data;
     }
   } catch (e) {
     if (e is DioException && CancelToken.isCancel(e)) {
@@ -252,8 +238,8 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   }
   final thumbnailDecryptionKey =
       CollectionsService.instance.isSharedPublicLink(file.collectionID!)
-          ? await getPublicFileKeyUsingBgWorker(file)
-          : await getFileKeyUsingBgWorker(file);
+      ? await getPublicFileKeyUsingBgWorker(file)
+      : await getFileKeyUsingBgWorker(file);
   Uint8List data;
   try {
     data = await CryptoUtil.decryptChaCha(
@@ -298,7 +284,7 @@ Future<Uint8List?> _readCachedThumbnailIfPresent(
     ThumbnailInMemoryLruCache.put(file, data, size);
     return data;
   } on FileSystemException catch (e) {
-    if (_isPathMissing(e)) {
+    if (isFileSystemPathMissing(e)) {
       _logger.info(
         "Thumbnail cache file missing during read; treating as cache miss: "
         "${cachedThumbnail.path}",
@@ -318,7 +304,7 @@ Future<bool> _writeCachedThumbnail(
     await cachedThumbnail.writeAsBytes(data, flush: flush);
     return true;
   } on FileSystemException catch (e) {
-    if (!_isPathMissing(e)) {
+    if (!isFileSystemPathMissing(e)) {
       rethrow;
     }
     _logger.info(
@@ -330,7 +316,7 @@ Future<bool> _writeCachedThumbnail(
       await cachedThumbnail.writeAsBytes(data, flush: flush);
       return true;
     } on FileSystemException catch (retryError) {
-      if (_isPathMissing(retryError)) {
+      if (isFileSystemPathMissing(retryError)) {
         _logger.info(
           "Thumbnail cache path still missing after recreate; skipping write: "
           "${cachedThumbnail.path}",
@@ -342,13 +328,9 @@ Future<bool> _writeCachedThumbnail(
   }
 }
 
-bool _isPathMissing(FileSystemException e) =>
-    e is PathNotFoundException ||
-    e.osError?.errorCode == _noSuchFileOrDirectoryErrorCode;
-
 File cachedThumbnailPath(EnteFile file) {
-  final thumbnailCacheDirectory =
-      Configuration.instance.getThumbnailCacheDirectory();
+  final thumbnailCacheDirectory = Configuration.instance
+      .getThumbnailCacheDirectory();
   final uploadedFileID = file.uploadedFileID;
   if (uploadedFileID != null && uploadedFileID != -1) {
     return File("$thumbnailCacheDirectory/$uploadedFileID");
@@ -369,13 +351,11 @@ File cachedThumbnailPath(EnteFile file) {
 File cachedFaceCropPath(String faceID, bool useTempCache) {
   late final String thumbnailCacheDirectory;
   if (useTempCache) {
-    thumbnailCacheDirectory =
-        Configuration.instance.getThumbnailCacheDirectory();
+    thumbnailCacheDirectory = Configuration.instance
+        .getThumbnailCacheDirectory();
   } else {
-    thumbnailCacheDirectory =
-        Configuration.instance.getPersonFaceThumbnailCacheDirectory();
+    thumbnailCacheDirectory = Configuration.instance
+        .getPersonFaceThumbnailCacheDirectory();
   }
-  return File(
-    thumbnailCacheDirectory + "/" + faceID,
-  );
+  return File(thumbnailCacheDirectory + "/" + faceID);
 }

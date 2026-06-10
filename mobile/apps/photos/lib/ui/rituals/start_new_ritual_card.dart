@@ -1,6 +1,7 @@
 import "dart:math" as math;
 
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
@@ -27,21 +28,21 @@ class StartNewRitualCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final componentColors = context.componentColors;
     const fillColor = Colors.transparent;
-    final dottedBorderColor =
-        isDark ? colorScheme.strokeFaint : const Color(0xFFF0F0F0);
-    final contentRightPadding =
-        variant == StartNewRitualCardVariant.compact ? 14.0 : 0.0;
+    final dottedBorderColor = componentColors.textLightest;
+    final contentRightPadding = variant == StartNewRitualCardVariant.compact
+        ? 14.0
+        : 0.0;
     const duckyHeight = _cardHeight - _wideDuckyHeightReduction;
     const duckyNaturalWidth = duckyHeight * _wideDuckyAspectRatio;
     const duckyChildWidth = duckyNaturalWidth + _wideDuckyRightOverflow;
 
     return SizedBox(
-      width:
-          variant == StartNewRitualCardVariant.compact ? _compactWidth : null,
+      width: variant == StartNewRitualCardVariant.compact
+          ? _compactWidth
+          : null,
       height: _cardHeight,
       child: DottedBorder(
         borderType: BorderType.RRect,
@@ -71,7 +72,8 @@ class StartNewRitualCard extends StatelessWidget {
                         0.0,
                         constraints.maxWidth - candidateDuckyWidth,
                       );
-                      final titleMaxWidth = leftWidth -
+                      final titleMaxWidth =
+                          leftWidth -
                           leftPadding -
                           contentRightPadding -
                           iconWidth -
@@ -112,8 +114,10 @@ class StartNewRitualCard extends StatelessWidget {
                       return !subtitlePainter.didExceedMaxLines;
                     }
 
-                    final upperBound =
-                        math.min(duckyChildWidth, constraints.maxWidth);
+                    final upperBound = math.min(
+                      duckyChildWidth,
+                      constraints.maxWidth,
+                    );
                     if (fits(upperBound)) {
                       duckyWidth = upperBound;
                     } else if (fits(0.0)) {
@@ -133,7 +137,8 @@ class StartNewRitualCard extends StatelessWidget {
                     }
                   }
 
-                  final showDucky = variant == StartNewRitualCardVariant.wide &&
+                  final showDucky =
+                      variant == StartNewRitualCardVariant.wide &&
                       duckyWidth > 0;
 
                   return Row(

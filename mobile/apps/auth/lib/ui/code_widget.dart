@@ -15,6 +15,7 @@ import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/code_widget_layout_utils.dart';
 import 'package:ente_auth/ui/components/auth_qr_dialog.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/shortcuts.dart';
@@ -170,10 +171,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                     duration: const Duration(milliseconds: 180),
                     switchInCurve: Curves.easeIn,
                     switchOutCurve: Curves.easeOut,
-                    transitionBuilder: (child, animation) => FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
+                    transitionBuilder: (child, animation) =>
+                        FadeTransition(opacity: animation, child: child),
                     child: isSelectionActive
                         ? const SizedBox.shrink()
                         : CodeTimerProgress(
@@ -337,7 +336,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       );
     }
 
-    return Container(
+    final bool isIOS = !kIsWeb && Platform.isIOS;
+    final Widget content = Container(
       margin: widget.isCompactMode
           ? const EdgeInsets.only(left: 16, right: 16, bottom: 6, top: 6)
           : const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
@@ -367,6 +367,16 @@ class _CodeWidgetState extends State<CodeWidget> {
           return clippedCard(l10n);
         },
       ),
+    );
+    if (!isIOS) return content;
+    final double scale = capCodeWidgetTextScaleForIOS(
+      MediaQuery.textScalerOf(context).scale(1.0),
+    );
+    return MediaQuery(
+      data: MediaQuery.of(
+        context,
+      ).copyWith(textScaler: TextScaler.linear(scale)),
+      child: content,
     );
   }
 
@@ -485,8 +495,10 @@ class _CodeWidgetState extends State<CodeWidget> {
                         switchOutCurve: Curves.easeOut,
                         transitionBuilder: (child, animation) => FadeTransition(
                           opacity: animation,
-                          child:
-                              ScaleTransition(scale: animation, child: child),
+                          child: ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          ),
                         ),
                         child: isSelected
                             ? Align(
@@ -536,9 +548,9 @@ class _CodeWidgetState extends State<CodeWidget> {
                 Text(
                   safeDecode(widget.code.account).trim(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: isCompactMode ? 12 : 12,
-                        color: Colors.grey,
-                      ),
+                    fontSize: isCompactMode ? 12 : 12,
+                    color: Colors.grey,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -878,8 +890,8 @@ class _CodeWidgetState extends State<CodeWidget> {
     String content, {
     required String confirmationMessage,
   }) async {
-    final shouldMinimizeOnCopy =
-        PreferenceService.instance.shouldMinimizeOnCopy();
+    final shouldMinimizeOnCopy = PreferenceService.instance
+        .shouldMinimizeOnCopy();
 
     await FlutterClipboard.copy(content);
     showToast(context, confirmationMessage);
@@ -973,7 +985,9 @@ class _CodeWidgetState extends State<CodeWidget> {
       display: display.copyWith(pinned: !currentlyPinned),
     );
     unawaited(
-      CodeStore.instance.addCode(code).then(
+      CodeStore.instance
+          .addCode(code)
+          .then(
             (value) => showToast(
               context,
               !currentlyPinned
@@ -992,11 +1006,11 @@ class _CodeWidgetState extends State<CodeWidget> {
       showToast(context, 'Code can only be deleted from trash');
       return;
     }
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
     if (!isAuthSuccessful) {
       return;
     }
@@ -1028,11 +1042,11 @@ class _CodeWidgetState extends State<CodeWidget> {
       showToast(context, 'Code is already trashed');
       return;
     }
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
     if (!isAuthSuccessful) {
       return;
     }

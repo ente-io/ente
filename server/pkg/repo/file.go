@@ -770,9 +770,8 @@ func (repo *FileRepository) GetDuplicateFiles(userID int64) ([]ente.DuplicateFil
 		if err != nil {
 			return result, stacktrace.Propagate(err, "")
 		}
-		fileIDStrs := strings.Split(res, ",")
 		fileIDs := make([]int64, 0)
-		for _, fileIDStr := range fileIDStrs {
+		for fileIDStr := range strings.SplitSeq(res, ",") {
 			fileID, err := strconv.ParseInt(fileIDStr, 10, 64)
 			if err != nil {
 				return result, stacktrace.Propagate(err, "")

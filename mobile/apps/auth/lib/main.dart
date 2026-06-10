@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
-import "package:ente_auth/app/view/app.dart";
+import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
+import 'package:ente_auth/services/auth_theme_preferences.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
@@ -35,7 +35,7 @@ import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:ente_ui/theme/theme_config.dart';
 import 'package:flutter/foundation.dart';
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tray_manager/tray_manager.dart';
@@ -45,30 +45,29 @@ final _logger = Logger("main");
 
 Future<void> initSystemTray() async {
   if (PlatformDetector.isMobile()) return;
-  String path = Platform.isWindows
-      ? 'assets/icons/auth-icon-monochrome.ico'
+  final String path = Platform.isWindows
+      ? 'assets/icons/auth-icon.ico'
       : Platform.isMacOS
-          ? 'assets/icons/auth-icon-monochrome-padded.png'
-          : 'assets/icons/auth-icon-monochrome.png';
+      ? 'assets/icons/auth-icon-monochrome-padded.png'
+      : _linuxTrayIconPath();
   await trayManager.setIcon(path, isTemplate: true);
   Menu menu = Menu(
     items: [
-      MenuItem(
-        key: 'hide_window',
-        label: 'Hide Window',
-      ),
-      MenuItem(
-        key: 'show_window',
-        label: 'Show Window',
-      ),
+      MenuItem(key: 'hide_window', label: 'Hide Window'),
+      MenuItem(key: 'show_window', label: 'Show Window'),
       MenuItem.separator(),
-      MenuItem(
-        key: 'exit_app',
-        label: 'Exit App',
-      ),
+      MenuItem(key: 'exit_app', label: 'Exit App'),
     ],
   );
   await trayManager.setContextMenu(menu);
+}
+
+String _linuxTrayIconPath() {
+  if (Platform.environment.containsKey('FLATPAK_ID') ||
+      Platform.environment.containsKey('SNAP')) {
+    return 'io.ente.auth';
+  }
+  return 'assets/icons/auth-icon-monochrome.png';
 }
 
 void main() async {
@@ -103,7 +102,7 @@ void main() async {
 
 Future<void> _runInForeground() async {
   AppThemeConfig.initialize(EnteApp.auth);
-  final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
+  final savedThemeMode = await AuthThemePreferences.getThemeMode();
   final configuration = Configuration.instance;
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
@@ -117,7 +116,7 @@ Future<void> _runInForeground() async {
     unawaited(UpdateService.instance.showUpdateNotification());
     runApp(
       AppLock(
-        builder: (args) => App(locale: locale),
+        builder: (args) => App(locale: locale, savedThemeMode: savedThemeMode),
         lockScreen: LockScreen(configuration),
         enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,
@@ -134,13 +133,6 @@ Future<void> _runInForeground() async {
       ),
     );
   });
-}
-
-ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
-  if (savedThemeMode == null) return ThemeMode.system;
-  if (savedThemeMode.isLight) return ThemeMode.light;
-  if (savedThemeMode.isDark) return ThemeMode.dark;
-  return ThemeMode.system;
 }
 
 Future _runWithLogs(Function() function, {String prefix = ""}) async {
@@ -164,8 +156,11 @@ void _registerWindowsProtocol() {
   const kWindowsScheme = 'enteauth';
   // Register our protocol only on Windows platform
   if (!kIsWeb && Platform.isWindows) {
-    WindowsProtocolHandler()
-        .register(kWindowsScheme, executable: null, arguments: null);
+    WindowsProtocolHandler().register(
+      kWindowsScheme,
+      executable: null,
+      arguments: null,
+    );
   }
 }
 

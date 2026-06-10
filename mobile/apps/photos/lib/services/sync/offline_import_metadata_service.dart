@@ -102,8 +102,12 @@ class OfflineImportMetadataService {
       }
 
       final fileSize = await originFile.length();
-      final exifData = await tryExifFromFile(originFile);
-      final exifTime = await tryParseExifDateTime(null, exifData);
+      final exifData = shouldReadExif(file)
+          ? await tryExifFromFile(originFile)
+          : null;
+      final exifTime = exifData != null
+          ? await tryParseExifDateTime(null, exifData)
+          : null;
 
       await _updateLocationForOfflineFile(file, originFile, exifData);
 
@@ -146,7 +150,8 @@ class OfflineImportMetadataService {
     File originFile,
     Map<String, IfdTag>? exifData,
   ) async {
-    final shouldFetchAssetLocation = file.location == null ||
+    final shouldFetchAssetLocation =
+        file.location == null ||
         ((file.location?.latitude ?? 0) == 0 &&
             (file.location?.longitude ?? 0) == 0);
     if (shouldFetchAssetLocation) {

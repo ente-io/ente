@@ -47,7 +47,7 @@ type CollectionLinkController struct {
 
 func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	app := auth.GetApp(ctx)
-	for attempt := 0; attempt < 5; attempt++ {
+	for range 5 {
 		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 		err := c.CollectionLinkRepo.
 			Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableComment, req.EnableJoin)

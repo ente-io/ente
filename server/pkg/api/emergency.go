@@ -43,7 +43,7 @@ func (h *EmergencyHandler) GetInfo(c *gin.Context) {
 func (h *EmergencyHandler) UpdateContact(c *gin.Context) {
 	var request ente.UpdateContact
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	err := h.Controller.UpdateContact(c, auth.GetUserID(c.Request.Header), request)
@@ -57,7 +57,7 @@ func (h *EmergencyHandler) UpdateContact(c *gin.Context) {
 func (h *EmergencyHandler) UpdateRecoveryNotice(c *gin.Context) {
 	var request ente.UpdateRecoveryNotice
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	err := h.Controller.UpdateRecoveryNotice(c, auth.GetUserID(c.Request.Header), request)
@@ -71,7 +71,7 @@ func (h *EmergencyHandler) UpdateRecoveryNotice(c *gin.Context) {
 func (h *EmergencyHandler) StartRecovery(c *gin.Context) {
 	var request ente.ContactIdentifier
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	err := h.Controller.StartRecovery(c, auth.GetUserID(c.Request.Header), request)
@@ -85,7 +85,7 @@ func (h *EmergencyHandler) StartRecovery(c *gin.Context) {
 func (h *EmergencyHandler) StopRecovery(c *gin.Context) {
 	var request ente.RecoveryIdentifier
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	err := h.Controller.StopRecovery(c, auth.GetUserID(c.Request.Header), request)
@@ -99,7 +99,7 @@ func (h *EmergencyHandler) StopRecovery(c *gin.Context) {
 func (h *EmergencyHandler) RejectRecovery(c *gin.Context) {
 	var request ente.RecoveryIdentifier
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	err := h.Controller.RejectRecovery(c, auth.GetUserID(c.Request.Header), request)
@@ -113,7 +113,7 @@ func (h *EmergencyHandler) RejectRecovery(c *gin.Context) {
 func (h *EmergencyHandler) ApproveRecovery(c *gin.Context) {
 	var request ente.RecoveryIdentifier
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	err := h.Controller.ApproveRecovery(c, auth.GetUserID(c.Request.Header), request)
@@ -127,7 +127,7 @@ func (h *EmergencyHandler) ApproveRecovery(c *gin.Context) {
 func (h *EmergencyHandler) GetRecoveryInfo(c *gin.Context) {
 	sessionID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	encRecovery, keyAttr, err := h.Controller.GetRecoveryInfo(c, auth.GetUserID(c.Request.Header), sessionID)
@@ -144,7 +144,7 @@ func (h *EmergencyHandler) GetRecoveryInfo(c *gin.Context) {
 func (h *EmergencyHandler) InitChangePassword(c *gin.Context) {
 	var request ente.RecoverySrpSetupRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	resp, err := h.Controller.InitChangePassword(c, auth.GetUserID(c.Request.Header), request)
@@ -158,7 +158,7 @@ func (h *EmergencyHandler) InitChangePassword(c *gin.Context) {
 func (h *EmergencyHandler) ChangePassword(c *gin.Context) {
 	var request ente.RecoveryUpdateSRPAndKeysRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), err.Error()))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("failed to validate req param"), "%v", err))
 		return
 	}
 	resp, err := h.Controller.ChangePassword(c, auth.GetUserID(c.Request.Header), request)

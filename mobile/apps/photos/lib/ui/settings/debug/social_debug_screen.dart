@@ -13,13 +13,9 @@ class SocialDebugScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
 
     return Scaffold(
-      backgroundColor: pageBackgroundColor,
+      backgroundColor: colorScheme.backgroundColour,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -36,10 +32,7 @@ class SocialDebugScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                "Social debug",
-                style: textTheme.h3Bold,
-              ),
+              Text("Social debug", style: textTheme.h3Bold),
               const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
@@ -81,8 +74,8 @@ class SocialDebugScreen extends StatelessWidget {
                         trailingIcon: Icons.chevron_right_outlined,
                         trailingIconIsMuted: true,
                         onTap: () async {
-                          final count =
-                              await SocialDB.instance.deleteAllComments();
+                          final count = await SocialDB.instance
+                              .deleteAllComments();
                           showShortToast(context, "Deleted $count comments");
                         },
                       ),
@@ -92,8 +85,8 @@ class SocialDebugScreen extends StatelessWidget {
                         trailingIcon: Icons.chevron_right_outlined,
                         trailingIconIsMuted: true,
                         onTap: () async {
-                          final count =
-                              await SocialDB.instance.deleteAllReactions();
+                          final count = await SocialDB.instance
+                              .deleteAllReactions();
                           showShortToast(context, "Deleted $count reactions");
                         },
                       ),

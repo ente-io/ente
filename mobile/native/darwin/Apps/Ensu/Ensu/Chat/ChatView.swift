@@ -28,6 +28,7 @@ struct ChatView: View {
 
     private var shouldAutoFocusInput: Bool {
         viewModel.isModelDownloaded
+            && !viewModel.isChatUnsupported
             && !viewModel.isDownloading
             && !viewModel.isGenerating
             && !viewState.didAutoFocusInput
@@ -125,6 +126,7 @@ struct ChatView: View {
                     viewState.wasDrawerOpen = true
                 } else if viewState.wasDrawerOpen {
                     let shouldRestoreFocus = viewModel.isModelDownloaded
+                        && !viewModel.isChatUnsupported
                         && !viewModel.isDownloading
                         && !viewModel.isGenerating
                         && !viewState.didDismissKeyboard
@@ -184,6 +186,13 @@ struct ChatView: View {
                 onDismiss: { viewState.showAttachmentDownloads = false }
             )
         }
+        .sheet(item: $viewState.pendingWhatsNew, onDismiss: {
+            markWhatsNewSeen()
+        }) { pending in
+            WhatsNewSheet(entries: pending.entries) {
+                markWhatsNewSeen()
+            }
+        }
         .alert(item: $viewState.deleteSession) { session in
             Alert(
                 title: Text("Delete Chat"),
@@ -193,6 +202,13 @@ struct ChatView: View {
                 },
                 secondaryButton: .cancel()
             )
+        }
+        .alert("Chat unavailable on this device", isPresented: $viewModel.showUnsupportedDeviceDialog) {
+            Button("Got it") {
+                viewModel.dismissUnsupportedDeviceDialog()
+            }
+        } message: {
+            Text(viewModel.unsupportedDeviceMessage)
         }
         .confirmationDialog("Conversation too long", isPresented: overflowDialogPresented, titleVisibility: .visible) {
             Button("Continue") {
@@ -219,6 +235,16 @@ struct ChatView: View {
                 ToastView(message: toastMessage.text)
                     .padding(.bottom, EnsuSpacing.xl)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .task {
+            do {
+                try await Task.sleep(nanoseconds: 600_000_000)
+            } catch {
+                return
+            }
+            if viewState.pendingWhatsNew == nil {
+                viewState.pendingWhatsNew = WhatsNewService.shared.pendingWhatsNew()
             }
         }
         #if os(iOS)
@@ -260,7 +286,7 @@ struct ChatView: View {
             .animation(.easeInOut(duration: 0.32))
 
             ZStack(alignment: .bottom) {
-                let shouldShowDownloadOnboarding = !viewModel.isModelDownloaded
+                let shouldShowDownloadOnboarding = !viewModel.isModelDownloaded && !viewModel.isChatUnsupported
 
                 MessageListView(
                     messages: viewModel.messages,
@@ -269,7 +295,7 @@ struct ChatView: View {
                     isGenerating: viewModel.isGenerating,
                     sessionId: viewModel.currentSessionId,
                     keyboardHeight: keyboard.height,
-                    inputBarHeight: viewModel.isModelDownloaded ? viewState.inputBarHeight : 0,
+                    inputBarHeight: (viewModel.isModelDownloaded || viewModel.isChatUnsupported) ? viewState.inputBarHeight : 0,
                     emptyStateTitle: "Welcome",
                     emptyStateSubtitle: "Start typing to begin a conversation",
                     onEdit: { message in
@@ -301,7 +327,15 @@ struct ChatView: View {
                 }
                 .zIndex(0)
 
-                if viewModel.isModelDownloaded {
+                if viewModel.isChatUnsupported {
+                    UnsupportedChatInputNotice(message: viewModel.unsupportedDeviceMessage)
+                        .frame(maxWidth: .infinity, alignment: .bottom)
+                        .onPreferenceChange(InputBarHeightKey.self) { newValue in
+                            viewState.inputBarHeight = newValue
+                        }
+                        .padding(.bottom, keyboard.isVisible ? keyboard.height : 0)
+                        .zIndex(1)
+                } else if viewModel.isModelDownloaded {
                     let shouldAutoFocus = shouldAutoFocusInput
 
                     MessageInputView(
@@ -478,6 +512,11 @@ struct ChatView: View {
             viewState.showSignInComingSoon = true
         }
     }
+
+    private func markWhatsNewSeen() {
+        WhatsNewService.shared.markSeen()
+        viewState.pendingWhatsNew = nil
+    }
 }
 
 private final class ChatViewState: ObservableObject {
@@ -493,6 +532,7 @@ private final class ChatViewState: ObservableObject {
     @Published var wasDrawerOpen = false
     @Published var didDismissKeyboard = false
     @Published var sessionTransitionId = UUID()
+    @Published var pendingWhatsNew: PendingWhatsNew?
 
     var toastTask: Task<Void, Never>?
 }

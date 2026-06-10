@@ -10,8 +10,9 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version =
-        await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await methodChannel.invokeMethod<String>(
+      'getPlatformVersion',
+    );
     return version;
   }
 
@@ -31,8 +32,9 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
 
   @override
   Future<bool?> release(String modelType) async {
-    final bool? result = await methodChannel
-        .invokeMethod<bool>('release', {'modelType': modelType});
+    final bool? result = await methodChannel.invokeMethod<bool>('release', {
+      'modelType': modelType,
+    });
     return result;
   }
 
@@ -45,16 +47,13 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
     int sessionAddress = 0,
     Int32List? inputShapeList,
   }) {
-    return methodChannel.invokeMethod<Float32List?>(
-      'predict',
-      {
-        'sessionAddress': sessionAddress,
-        'inputData': inputData,
-        'inputDataInt': inputDataInt,
-        'inputDataUint8': inputDataUint8,
-        'modelType': modelType,
-        "inputShapeList": inputShapeList,
-      },
-    );
+    return methodChannel.invokeMethod<Float32List?>('predict', {
+      'sessionAddress': sessionAddress,
+      'inputData': inputData,
+      'inputDataInt': inputDataInt,
+      'inputDataUint8': inputDataUint8,
+      'modelType': modelType,
+      "inputShapeList": inputShapeList,
+    });
   }
 }

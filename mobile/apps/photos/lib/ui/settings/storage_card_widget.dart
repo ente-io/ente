@@ -60,15 +60,14 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     final userDetails = inheritedUserDetails?.userDetails;
 
     if (inheritedUserDetails == null) {
-      _logger.severe(
-        (InheritedUserDetails).toString() + 'is null',
-      );
+      _logger.severe((InheritedUserDetails).toString() + 'is null');
       throw Error();
     } else {
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
-          final isFamilyMember = (userDetails?.isPartOfFamily() ?? false) &&
+          final isFamilyMember =
+              (userDetails?.isPartOfFamily() ?? false) &&
               !((userDetails?.currentFamilyMember()?.isAdmin) ?? false);
           if (isFamilyMember) {
             await billingService.launchFamilyPortal(
@@ -92,9 +91,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     }
   }
 
-  Widget containerForUserDetails(
-    UserDetails? userDetails,
-  ) {
+  Widget containerForUserDetails(UserDetails? userDetails) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
       child: Container(
@@ -105,27 +102,17 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
           gradient: const LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-            colors: [
-              Color(0xFF212121),
-              Color(0xFF434343),
-            ],
+            colors: [Color(0xFF212121), Color(0xFF434343)],
           ),
         ),
         child: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(
-                painter: _DotsPainter(),
-                size: Size.infinite,
-              ),
+              child: CustomPaint(painter: _DotsPainter(), size: Size.infinite),
             ),
             userDetails is UserDetails
                 ? _userDetails(userDetails)
-                : const Center(
-                    child: EnteLoadingWidget(
-                      color: strokeBaseDark,
-                    ),
-                  ),
+                : const Center(child: EnteLoadingWidget(color: strokeBaseDark)),
           ],
         ),
       ),
@@ -293,20 +280,18 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   }
 
   List<TextSpan> _usedStorageDetails({
-    @required isMobileScreenSmall,
-    @required shouldShowUsedStorageInTBs,
-    @required shouldShowTotalStorageInTBs,
-    @required shouldShowUsedStorageInMBs,
-    @required usedStorageInBytes,
-    @required usedStorageInGB,
-    @required totalStorageInGB,
-    @required usedStorageInTB,
-    @required totalStorageInTB,
+    required bool isMobileScreenSmall,
+    required bool shouldShowUsedStorageInTBs,
+    required bool shouldShowTotalStorageInTBs,
+    required bool shouldShowUsedStorageInMBs,
+    required int usedStorageInBytes,
+    required num usedStorageInGB,
+    required int totalStorageInGB,
+    required num usedStorageInTB,
+    required num totalStorageInTB,
   }) {
     if (isMobileScreenSmall) {
-      return [
-        TextSpan(text: '$usedStorageInGB/$totalStorageInGB GB'),
-      ];
+      return [TextSpan(text: '$usedStorageInGB/$totalStorageInGB GB')];
     }
     late num currentUsage, totalStorage;
     late String currentUsageUnit, totalStorageUnit;

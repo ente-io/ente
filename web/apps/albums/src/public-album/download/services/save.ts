@@ -26,13 +26,13 @@ type JSZipConstructor = new () => JSZip;
 let jsZipConstructorPromise: Promise<JSZipConstructor> | undefined;
 
 const createJSZip = async (): Promise<JSZip> => {
-    const JSZipConstructor = await (jsZipConstructorPromise ??= import(
-        "jszip"
-    ).then((module) => {
-        const candidate = (module as unknown as { default?: JSZipConstructor })
-            .default;
-        return candidate ?? (module as unknown as JSZipConstructor);
-    }));
+    const JSZipConstructor = await (jsZipConstructorPromise ??=
+        import("jszip").then((module) => {
+            const candidate = (
+                module as unknown as { default?: JSZipConstructor }
+            ).default;
+            return candidate ?? (module as unknown as JSZipConstructor);
+        }));
     return new JSZipConstructor();
 };
 

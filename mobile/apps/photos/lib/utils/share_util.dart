@@ -45,8 +45,9 @@ Future<void> share(
             _logger.warning(
               "path was null for $file with localID: ${file.localID}. Getting file from server now",
             );
-            return getFileFromServer(file)
-                .then((remoteFile) => remoteFile?.path);
+            return getFileFromServer(
+              file,
+            ).then((remoteFile) => remoteFile?.path);
           }
           return path;
         }),
@@ -96,8 +97,8 @@ Future<void> share(
 /// If key is null, returned rect will be at the center of the screen
 Rect shareButtonRect(BuildContext context, GlobalKey? shareButtonKey) {
   Size size = MediaQuery.sizeOf(context);
-  final RenderObject? renderObject =
-      shareButtonKey?.currentContext?.findRenderObject();
+  final RenderObject? renderObject = shareButtonKey?.currentContext
+      ?.findRenderObject();
   RenderBox? renderBox;
   if (renderObject != null && renderObject is RenderBox) {
     renderBox = renderObject;
@@ -122,10 +123,7 @@ Future<ShareResult> shareText(
   try {
     final sharePosOrigin = _sharePosOrigin(context, key);
     return SharePlus.instance.share(
-      ShareParams(
-        text: text,
-        sharePositionOrigin: sharePosOrigin,
-      ),
+      ShareParams(text: text, sharePositionOrigin: sharePosOrigin),
     );
   } catch (e, s) {
     _logger.severe("failed to share text", e, s);
@@ -189,8 +187,9 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
     }
     enteFile.localID = sharedMediaIdentifier + sharedLocalId;
     enteFile.collectionID = collectionID;
-    enteFile.fileType =
-        media.type == SharedMediaType.image ? FileType.image : FileType.video;
+    enteFile.fileType = media.type == SharedMediaType.image
+        ? FileType.image
+        : FileType.video;
     if (enteFile.fileType == FileType.image) {
       final dateResult = await tryParseExifDateTime(ioFile, null);
       if (dateResult != null && dateResult.time != null) {
@@ -200,8 +199,9 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
       enteFile.duration = (media.duration ?? 0) ~/ 1000;
     }
     if (enteFile.creationTime == null || enteFile.creationTime == 0) {
-      final parsedDateTime =
-          parseDateTimeFromFileNameV2(basenameWithoutExtension(media.path));
+      final parsedDateTime = parseDateTimeFromFileNameV2(
+        basenameWithoutExtension(media.path),
+      );
       if (parsedDateTime != null) {
         enteFile.creationTime = parsedDateTime.microsecondsSinceEpoch;
       } else {
@@ -253,11 +253,7 @@ void shareSelected(
   GlobalKey shareButtonKey,
   List<EnteFile> selectedFiles,
 ) {
-  share(
-    context,
-    selectedFiles.toList(),
-    shareButtonKey: shareButtonKey,
-  );
+  share(context, selectedFiles.toList(), shareButtonKey: shareButtonKey);
 }
 
 Future<void> shareAlbumLink(
@@ -265,11 +261,7 @@ Future<void> shareAlbumLink(
   String url,
   GlobalKey key,
 ) async {
-  await shareLinkWithDescription(
-    url,
-    context: context,
-    key: key,
-  );
+  await shareLinkWithDescription(url, context: context, key: key);
 }
 
 /// required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383

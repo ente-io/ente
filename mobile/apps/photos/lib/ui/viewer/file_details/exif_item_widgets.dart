@@ -1,5 +1,6 @@
 import "package:exif_reader/exif_reader.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/colors.dart";
@@ -17,29 +18,20 @@ class BasicExifItemWidget extends StatelessWidget {
     final subtitleTextTheme = getEnteTextTheme(context).miniMuted;
     return InfoItemWidget(
       key: const ValueKey("Basic EXIF"),
-      leadingIcon: Icons.camera_outlined,
+      leadingIconWidget: const HugeIcon(icon: HugeIcons.strokeRoundedLicense),
       title: exifData["takenOnDevice"] ?? "--",
       subtitleSection: Future.value([
         if (exifData["fNumber"] != null)
-          Text(
-            'ƒ/' + exifData["fNumber"].toString(),
-            style: subtitleTextTheme,
-          ),
+          Text('ƒ/' + exifData["fNumber"].toString(), style: subtitleTextTheme),
         if (exifData["exposureTime"] != null)
-          Text(
-            exifData["exposureTime"],
-            style: subtitleTextTheme,
-          ),
+          Text(exifData["exposureTime"], style: subtitleTextTheme),
         if (exifData["focalLength"] != null)
           Text(
             exifData["focalLength"].toString() + "mm",
             style: subtitleTextTheme,
           ),
         if (exifData["ISO"] != null)
-          Text(
-            "ISO" + exifData["ISO"].toString(),
-            style: subtitleTextTheme,
-          ),
+          Text("ISO" + exifData["ISO"].toString(), style: subtitleTextTheme),
       ]),
     );
   }
@@ -48,11 +40,7 @@ class BasicExifItemWidget extends StatelessWidget {
 class AllExifItemWidget extends StatefulWidget {
   final EnteFile file;
   final Map<String, IfdTag>? exif;
-  const AllExifItemWidget(
-    this.file,
-    this.exif, {
-    super.key,
-  });
+  const AllExifItemWidget(this.file, this.exif, {super.key});
 
   @override
   State<AllExifItemWidget> createState() => _AllExifItemWidgetState();
@@ -69,7 +57,7 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
   @override
   Widget build(BuildContext context) {
     return InfoItemWidget(
-      leadingIcon: Icons.text_snippet_outlined,
+      leadingIconWidget: const HugeIcon(icon: HugeIcons.strokeRoundedLicense),
       title: AppLocalizations.of(context).exif,
       subtitleSection: _exifButton(context, widget.file, widget.exif),
       onTap: _onTap,
@@ -89,19 +77,19 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
     } else if (exif.isNotEmpty) {
       label = AppLocalizations.of(context).viewAllExifData;
       onTap = () => showDialog(
-            useRootNavigator: false,
-            context: context,
-            builder: (BuildContext context) {
-              return ExifInfoDialog(file);
-            },
-            barrierColor: backdropFaintDark,
-          );
+        useRootNavigator: false,
+        context: context,
+        builder: (BuildContext context) {
+          return ExifInfoDialog(file);
+        },
+        barrierColor: backdropFaintDark,
+      );
     } else {
       label = AppLocalizations.of(context).noExifData;
       onTap = () => showShortToast(
-            context,
-            AppLocalizations.of(context).thisImageHasNoExifData,
-          );
+        context,
+        AppLocalizations.of(context).thisImageHasNoExifData,
+      );
     }
     setState(() {
       _onTap = onTap;

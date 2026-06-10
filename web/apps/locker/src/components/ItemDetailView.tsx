@@ -1,3 +1,13 @@
+import { downloadLockerFile } from "@/services/remote";
+import type {
+    AccountCredentialData,
+    EmergencyContactData,
+    GenericFileData,
+    LockerItem,
+    PersonalNoteData,
+    PhysicalRecordData,
+} from "@/types";
+import { getItemTitle } from "@/types";
 import CloseIcon from "@mui/icons-material/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -22,16 +32,6 @@ import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { t } from "i18next";
 import React, { useCallback, useState } from "react";
-import { downloadLockerFile } from "services/remote";
-import type {
-    AccountCredentialData,
-    EmergencyContactData,
-    GenericFileData,
-    LockerItem,
-    PersonalNoteData,
-    PhysicalRecordData,
-} from "types";
-import { getItemTitle } from "types";
 
 interface ItemDetailViewProps {
     item: LockerItem | null;

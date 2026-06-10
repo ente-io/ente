@@ -22,6 +22,7 @@ import "package:photos/ui/collections/album/column_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/thumbnail_list_item.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/sharing/share_collection_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -42,6 +43,7 @@ class AlbumVerticalListWidget extends StatefulWidget {
   final List<Collection> selectedCollections;
   final Function()? onSelectionChanged;
   final List<String>? selectedPeople;
+  final ScrollController? scrollController;
 
   const AlbumVerticalListWidget(
     this.collections,
@@ -56,6 +58,7 @@ class AlbumVerticalListWidget extends StatefulWidget {
     this.sharedCollections = const [],
     this.enableSelection = false,
     this.onSelectionChanged,
+    this.scrollController,
     super.key,
   });
 
@@ -67,16 +70,17 @@ class AlbumVerticalListWidget extends StatefulWidget {
 class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
   final _logger = Logger("CollectionsListWidgetState");
 
-  final CollectionActions _collectionActions =
-      CollectionActions(CollectionsService.instance);
+  final CollectionActions _collectionActions = CollectionActions(
+    CollectionsService.instance,
+  );
 
   @override
   Widget build(BuildContext context) {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
         : widget.selectedPeople != null
-            ? widget.selectedPeople!.length
-            : widget.selectedFiles?.files.length ?? 0;
+        ? widget.selectedPeople!.length
+        : widget.selectedFiles?.files.length ?? 0;
 
     final hasRecentCollections = widget.recentCollections.isNotEmpty;
     final hasSharedCollections = widget.sharedCollections.isNotEmpty;
@@ -106,7 +110,8 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     final sharedHeaderOffset = hasSharedCollections ? 1 : 0;
     final sharedItemsCount = widget.sharedCollections.length;
 
-    final totalItemCount = createAlbumOffset +
+    final totalItemCount =
+        createAlbumOffset +
         recentHeaderOffset +
         recentItemsCount +
         dividerOffset +
@@ -115,6 +120,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         sharedItemsCount;
 
     return ListView.separated(
+      controller: widget.scrollController,
       itemBuilder: (context, index) {
         // Create new album button
         if (index == 0 && widget.shouldShowCreateAlbum) {
@@ -162,10 +168,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         // Shared header
         final sharedHeaderIndex = collectionsEndIndex;
         if (hasSharedCollections && adjustedIndex == sharedHeaderIndex) {
-          return _buildSectionHeader(
-            context,
-            "Shared with you",
-          );
+          return _buildSectionHeader(context, "Shared with you");
         }
 
         // Shared collections
@@ -178,7 +181,8 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
 
         return const SizedBox.shrink();
       },
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: ThumbnailListItem.defaultItemSpacing),
       itemCount: totalItemCount,
       shrinkWrap: false,
       physics: const BouncingScrollPhysics(),
@@ -201,11 +205,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Divider(
-        height: 1,
-        thickness: 1,
-        color: colorScheme.strokeFaint,
-      ),
+      child: Divider(height: 1, thickness: 1, color: colorScheme.strokeFaint),
     );
   }
 
@@ -233,10 +233,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     );
   }
 
-  Future<void> _sharedAlbumOnTap(
-    BuildContext context,
-    Collection item,
-  ) async {
+  Future<void> _sharedAlbumOnTap(BuildContext context, Collection item) async {
     // Show dialog asking if user wants to add instead of move
     final result = await showChoiceActionSheet(
       context,
@@ -252,24 +249,20 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       if (success) {
         showShortToast(
           context,
-          AppLocalizations.of(context)
-              .addedSuccessfullyTo(albumName: item.displayName),
+          AppLocalizations.of(
+            context,
+          ).addedSuccessfullyTo(albumName: item.displayName),
         );
         Navigator.pop(context);
         await _navigateToCollection(context, item);
       }
     } else if (result?.action == ButtonAction.error &&
         result?.exception != null) {
-      await showGenericErrorDialog(
-        context: context,
-        error: result!.exception,
-      );
+      await showGenericErrorDialog(context: context, error: result!.exception);
     }
   }
 
-  Future<void> _toggleCollectionSelection(
-    Collection collection,
-  ) async {
+  Future<void> _toggleCollectionSelection(Collection collection) async {
     if (widget.selectedCollections.contains(collection)) {
       widget.selectedCollections.remove(collection);
     } else {
@@ -284,13 +277,11 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     setState(() {});
   }
 
-  GestureDetector _getNewAlbumWidget(BuildContext context, int filesCount) {
-    return GestureDetector(
-      onTap: () async {
+  Widget _getNewAlbumWidget(BuildContext context, int filesCount) {
+    return NewAlbumListItemWidget(
+      onTap: (context) async {
         await _createNewAlbumOnTap(context, filesCount);
       },
-      behavior: HitTestBehavior.opaque,
-      child: const NewAlbumListItemWidget(),
     );
   }
 
@@ -312,26 +303,14 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         popnavAfterSubmission: true,
       );
       if (result is Exception) {
-        await showGenericErrorDialog(
-          context: context,
-          error: result,
-        );
-        _logger.severe(
-          "Failed to name album",
-          result,
-        );
+        await showGenericErrorDialog(context: context, error: result);
+        _logger.severe("Failed to name album", result);
       }
     } else {
       Navigator.pop(context);
-      showToast(
-        context,
-        AppLocalizations.of(context).createAlbumActionHint,
-      );
+      showToast(context, AppLocalizations.of(context).createAlbumActionHint);
       Bus.instance.fire(
-        TabChangedEvent(
-          0,
-          TabChangedEventSource.collectionsPage,
-        ),
+        TabChangedEvent(0, TabChangedEventSource.collectionsPage),
       );
     }
   }
@@ -343,8 +322,9 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
 
       if (widget.actionType == CollectionActionType.moveToHiddenCollection ||
           widget.actionType == CollectionActionType.addToHiddenAlbum) {
-        collection =
-            await CollectionsService.instance.createHiddenAlbum(albumName);
+        collection = await CollectionsService.instance.createHiddenAlbum(
+          albumName,
+        );
         hasVerifiedLock = true;
       } else {
         collection = await _createAlbum(albumName);
@@ -360,15 +340,9 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
             showProgressDialog: false,
           )) {
             if (widget.actionType == CollectionActionType.restoreFiles) {
-              showShortToast(
-                context,
-                'Restored files to album ' + albumName,
-              );
+              showShortToast(context, 'Restored files to album ' + albumName);
             } else {
-              showShortToast(
-                context,
-                "Album '" + albumName + "' created.",
-              );
+              showShortToast(context, "Album '" + albumName + "' created.");
             }
 
             Navigator.pop(context);
@@ -406,34 +380,35 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       bool hasVerifiedLock = false;
 
       if (widget.actionType == CollectionActionType.addFiles) {
-        toastMessage = AppLocalizations.of(context)
-            .addedSuccessfullyTo(albumName: item.displayName);
+        toastMessage = AppLocalizations.of(
+          context,
+        ).addedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
       } else if (widget.actionType == CollectionActionType.moveFiles ||
           widget.actionType == CollectionActionType.restoreFiles ||
           widget.actionType == CollectionActionType.unHide) {
-        toastMessage = AppLocalizations.of(context)
-            .movedSuccessfullyTo(albumName: item.displayName);
+        toastMessage = AppLocalizations.of(
+          context,
+        ).movedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
       } else if (widget.actionType ==
           CollectionActionType.moveToHiddenCollection) {
-        toastMessage = AppLocalizations.of(context)
-            .movedSuccessfullyTo(albumName: item.displayName);
+        toastMessage = AppLocalizations.of(
+          context,
+        ).movedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
         hasVerifiedLock = true;
       } else if (widget.actionType == CollectionActionType.addToHiddenAlbum) {
-        toastMessage = AppLocalizations.of(context)
-            .addedSuccessfullyTo(albumName: item.displayName);
+        toastMessage = AppLocalizations.of(
+          context,
+        ).addedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
         hasVerifiedLock = true;
       } else {
         toastMessage = "";
       }
       if (toastMessage.isNotEmpty) {
-        showShortToast(
-          context,
-          toastMessage,
-        );
+        showShortToast(context, toastMessage);
       }
       if (shouldNavigateToCollection) {
         Navigator.pop(context);
@@ -455,11 +430,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       case CollectionActionType.addFiles:
       case CollectionActionType.addToHiddenAlbum:
       case CollectionActionType.autoAddPeople:
-        return _addToCollection(
-          context,
-          collection.id,
-          showProgressDialog,
-        );
+        return _addToCollection(context, collection.id, showProgressDialog);
       case CollectionActionType.moveFiles:
         return _moveFilesToCollection(context, collection.id);
       case CollectionActionType.unHide:
@@ -492,12 +463,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     Collection collection,
   ) {
     if (Configuration.instance.getUserID() == collection.owner.id) {
-      unawaited(
-        routeToPage(
-          context,
-          ShareCollectionPage(collection),
-        ),
-      );
+      unawaited(routeToPage(context, ShareCollectionPage(collection)));
     } else {
       showGenericErrorDialog(
         context: context,
@@ -583,8 +549,10 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     );
     await dialog.show();
     try {
-      await CollectionsService.instance
-          .restore(toCollectionID, widget.selectedFiles!.files.toList());
+      await CollectionsService.instance.restore(
+        toCollectionID,
+        widget.selectedFiles!.files.toList(),
+      );
       CollectionsService.instance.recordCollectionUsage(toCollectionID);
       unawaited(RemoteSyncService.instance.sync(silently: true));
       widget.selectedFiles?.clearAll();

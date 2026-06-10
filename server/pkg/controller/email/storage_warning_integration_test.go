@@ -1,7 +1,6 @@
 package email
 
 import (
-	"context"
 	"database/sql"
 	"testing"
 
@@ -101,7 +100,7 @@ func TestBuildIndividualStorageWarningSnapshotExpiredBackfillUsesBufferedRecover
 	})
 
 	controller := newStorageWarningIntegrationController(db)
-	snapshot, err := controller.buildIndividualStorageWarningSnapshot(context.Background(), userID, now)
+	snapshot, err := controller.buildIndividualStorageWarningSnapshot(t.Context(), userID, now)
 	if err != nil {
 		t.Fatalf("buildIndividualStorageWarningSnapshot() error = %v", err)
 	}
@@ -153,7 +152,7 @@ func TestBuildIndividualStorageWarningSnapshotExpiredBackfillContinuesBufferedCy
 	})
 
 	controller := newStorageWarningIntegrationController(db)
-	snapshot, err := controller.buildIndividualStorageWarningSnapshot(context.Background(), userID, anchorNow)
+	snapshot, err := controller.buildIndividualStorageWarningSnapshot(t.Context(), userID, anchorNow)
 	if err != nil {
 		t.Fatalf("buildIndividualStorageWarningSnapshot() error = %v", err)
 	}
@@ -189,7 +188,7 @@ func TestBuildIndividualStorageWarningSnapshotExpiredBackfillWithExisting0dAnd30
 	userID := setupExpiredBackfillWithOld0dAnd30dHistory(t, db, anchor-(30*day), t0)
 
 	controller := newStorageWarningIntegrationController(db)
-	snapshot, err := controller.buildIndividualStorageWarningSnapshot(context.Background(), userID, now)
+	snapshot, err := controller.buildIndividualStorageWarningSnapshot(t.Context(), userID, now)
 	if err != nil {
 		t.Fatalf("buildIndividualStorageWarningSnapshot() error = %v", err)
 	}
@@ -232,7 +231,7 @@ func TestBuildIndividualStorageWarningSnapshotExpiredBackfillWithExisting0dAnd30
 	userID := setupExpiredBackfillWithOld0dAnd30dHistory(t, db, anchor-(30*day), t0)
 
 	controller := newStorageWarningIntegrationController(db)
-	snapshot, err := controller.buildIndividualStorageWarningSnapshot(context.Background(), userID, now)
+	snapshot, err := controller.buildIndividualStorageWarningSnapshot(t.Context(), userID, now)
 	if err != nil {
 		t.Fatalf("buildIndividualStorageWarningSnapshot() error = %v", err)
 	}

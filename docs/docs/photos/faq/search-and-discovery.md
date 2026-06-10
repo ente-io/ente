@@ -102,6 +102,18 @@ Ente's servers cannot see your location tags or where your photos were taken.
 
 ## Machine Learning and Face Recognition
 
+### What happens if I enable Machine Learning but turn off local processing? {#ml-local-processing-off}
+
+Machine Learning enables features like face recognition and magic search.
+
+Local processing controls whether the current device performs the indexing work itself. When local processing is on, the device downloads photos, runs the ML models, and builds indexes locally.
+
+If local processing is turned off, that device skips the heavy work and can instead use indexes created by another device, such as your desktop.
+
+This can be useful on phones with low memory or limited performance.
+
+Learn more in the [Machine learning guide](/photos/features/search-and-discovery/machine-learning#the-indexing-process).
+
 ### Why doesn't search work for me? {#search-not-working}
 
 If you're searching for objects (like "food", "car", "dog") or trying to find faces but nothing appears, you likely need to enable **Machine Learning (ML)**.
@@ -146,8 +158,7 @@ Faces should start appearing shortly after logging back in.
 
 ### Why is the People section empty even though Machine Learning shows 100%? {#people-section-empty}
 
-If Machine Learning shows 100% on both Android and Desktop, the People
-section should normally populate shortly after.
+If Machine Learning shows 100% on both Android and Desktop, the People section should normally populate shortly after.
 
 Try these steps first:
 
@@ -155,9 +166,7 @@ Try these steps first:
 2. Log out and log back in
 3. Check if People start showing up
 
-If the People section is still empty, please
-[send logs](/photos/faq/troubleshooting#sharing-logs) from your desktop app
-so we can investigate further.
+If the People section is still empty, please [send logs](/photos/faq/troubleshooting#sharing-logs) from your desktop app so we can investigate further.
 
 ### How do I enable face recognition? {#enable-face-recognition}
 
@@ -354,12 +363,7 @@ Learn more in [Metadata and Editing FAQ](/photos/faq/metadata-and-editing#descri
 
 Ente supports multiple search types:
 
-**Date search**: Search by date, month, or year
-**Location search**: Find photos taken in specific locations (if they have GPS data)
-**Magic search**: Natural language descriptions of photo content
-**Face search**: Find photos of specific people
-**Description search**: Search descriptions/captions you've added
-**File name search**: Search by original file name
+**Date search**: Search by date, month, or year **Location search**: Find photos taken in specific locations (if they have GPS data) **Magic search**: Natural language descriptions of photo content **Face search**: Find photos of specific people **Description search**: Search descriptions/captions you've added **File name search**: Search by original file name
 
 Simply type in the search bar and Ente will show matching results across all these categories.
 

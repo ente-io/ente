@@ -38,10 +38,7 @@ class QrCodeDetectionHelper {
     });
   }
 
-  Future<void> _scanFile(
-    EnteFile file,
-    int requestId,
-  ) async {
+  Future<void> _scanFile(EnteFile file, int requestId) async {
     if (_disposed || requestId != _requestId) return;
 
     try {

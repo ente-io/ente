@@ -16,11 +16,15 @@ class SearchThumbnailWidget extends StatelessWidget {
   final EnteFile? file;
   final SearchResult? searchResult;
   final String tagPrefix;
+  final double size;
+  final double borderRadius;
 
   const SearchThumbnailWidget(
     this.file,
     this.tagPrefix, {
     this.searchResult,
+    this.size = 56,
+    this.borderRadius = 12,
     super.key,
   });
 
@@ -29,25 +33,21 @@ class SearchThumbnailWidget extends StatelessWidget {
     return Hero(
       tag: tagPrefix + (file?.tag ?? ""),
       child: SizedBox(
-        height: 56,
-        width: 56,
+        height: size,
+        width: size,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           child: file != null
               ? (searchResult != null &&
-                      searchResult!.type() == ResultType.faces)
-                  ? PersonFaceWidget(
-                      personId: (searchResult as GenericSearchResult)
-                          .params[kPersonParamID],
-                      clusterID: (searchResult as GenericSearchResult)
-                          .params[kClusterParamId],
-                    )
-                  : ThumbnailWidget(
-                      file!,
-                    )
-              : const NoThumbnailWidget(
-                  addBorder: false,
-                ),
+                        searchResult!.type() == ResultType.faces)
+                    ? PersonFaceWidget(
+                        personId: (searchResult as GenericSearchResult)
+                            .params[kPersonParamID],
+                        clusterID: (searchResult as GenericSearchResult)
+                            .params[kClusterParamId],
+                      )
+                    : ThumbnailWidget(file!)
+              : const NoThumbnailWidget(addBorder: false),
         ),
       ),
     );
@@ -57,9 +57,14 @@ class SearchThumbnailWidget extends StatelessWidget {
 class ContactSearchThumbnailWidget extends StatefulWidget {
   final GenericSearchResult searchResult;
   final String tagPrefix;
+  final double size;
+  final double borderRadius;
+
   const ContactSearchThumbnailWidget(
     this.tagPrefix, {
     required this.searchResult,
+    this.size = 56,
+    this.borderRadius = 12,
     super.key,
   });
 
@@ -100,10 +105,10 @@ class _ContactSearchThumbnailWidgetState
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 56,
-      width: 56,
+      height: widget.size,
+      width: widget.size,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(widget.borderRadius),
         child: _canUsePersonFaceWidget
             ? PersonFaceWidget(
                 personId: _personID,
@@ -118,9 +123,7 @@ class _ContactSearchThumbnailWidgetState
                   }
                 },
               )
-            : NoFaceForContactWidget(
-                user: User(email: _email),
-              ),
+            : NoFaceForContactWidget(user: User(email: _email)),
       ),
     );
   }
@@ -142,10 +145,7 @@ class NoFaceForContactWidget extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: addBorder
-            ? Border.all(
-                color: enteColorScheme.strokeFaint,
-                width: 1,
-              )
+            ? Border.all(color: enteColorScheme.strokeFaint, width: 1)
             : null,
         color: enteColorScheme.fillFaint,
       ),

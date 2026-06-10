@@ -5,6 +5,7 @@
  * when needed (login/crypto flows), while Tauri uses native Rust bindings.
  */
 
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { loadEnteWasm } from "ente-wasm/load";
 
 export type EnteWasmModule = typeof import("ente-wasm");
@@ -81,10 +82,6 @@ export interface EnteCryptoAdapter {
     ) => SrpSessionAdapter;
 }
 
-const isTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_IPC__" in window);
-
 const createWasmAdapter = (wasm: EnteWasmModule): EnteCryptoAdapter => {
     class WasmSrpSession implements SrpSessionAdapter {
         private inner: InstanceType<typeof wasm.SrpSession>;
@@ -154,7 +151,7 @@ const createWasmAdapter = (wasm: EnteWasmModule): EnteCryptoAdapter => {
 };
 
 const createTauriAdapter = async (): Promise<EnteCryptoAdapter> => {
-    const { invoke } = (await import("@tauri-apps/api/tauri")) as {
+    const { invoke } = (await import("@tauri-apps/api/core")) as {
         invoke: <T>(
             command: string,
             args?: Record<string, unknown>,
@@ -177,12 +174,14 @@ const createTauriAdapter = async (): Promise<EnteCryptoAdapter> => {
                 "code" in error &&
                 "message" in error
             ) {
-                const code = String(
-                    (error as { code?: string }).code ?? "native_error",
-                );
-                const message = String(
-                    (error as { message?: string }).message ?? "Unknown error",
-                );
+                const code =
+                    typeof error.code === "string"
+                        ? error.code
+                        : "native_error";
+                const message =
+                    typeof error.message === "string"
+                        ? error.message
+                        : "Unknown error";
 
                 if (error instanceof Error) {
                     (error as Error & { code?: string }).code = code;

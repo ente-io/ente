@@ -2,42 +2,47 @@
 
 The sweetness of Ente Photos, right on your computer. Linux, Windows and macOS.
 
-You can
-[**download** a pre-built binary from releases](https://github.com/ente-io/photos-desktop/releases/latest).
+You can [**download** a pre-built binary from releases](https://github.com/ente-io/photos-desktop/releases/latest).
 
-To know more about Ente, see [our main README](../README.md) or visit
-[ente.com](https://ente.com).
+To know more about Ente, see [our main README](../README.md) or visit [ente.com](https://ente.com).
 
 ## Building from source
 
-Clone this repository and change to this directory
+Clone this repository
 
 ```sh
 git clone https://github.com/ente-io/ente
-cd ente/desktop
+cd ente
 ```
 
-Install dependencies (requires Yarn v1):
+Install the web dependencies
 
 ```sh
-yarn install --frozen-lockfile
+cd web
+npm ci
 ```
 
-Use plain `yarn install` only when you are intentionally updating dependencies
-and reviewing the resulting `yarn.lock` changes.
-
-Now you can run in development mode (supports hot reload for the renderer
-process)
+Install the desktop dependencies
 
 ```sh
-yarn dev
+cd ../desktop
+npm ci
+```
+
+Now you can run in development mode (supports hot reload for the renderer process)
+
+```sh
+npm run dev
 ```
 
 Or create a binary for your platform
 
 ```sh
-yarn build
+npm run build
 ```
 
-That's the gist of it. For more development related documentation, see
-[docs](docs/README.md).
+That's the gist of it. For more development related documentation, see [docs](docs/README.md).
+
+> [!NOTE]
+>
+> If the relevant `package-lock.json` has not changed since your last `npm ci`, you can use `npm install` as a faster incremental alternative. For caveats, see [docs/dev.md](docs/dev.md#npm-ci-npm-install).

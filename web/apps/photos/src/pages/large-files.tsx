@@ -474,14 +474,10 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
         null,
     );
     const isLongPress = React.useRef(false);
-
-    // Use refs for callbacks to avoid stale closures in long-press timer
     const onOpenRef = React.useRef(onOpen);
-    const onToggleRef = React.useRef(onToggle);
     useEffect(() => {
         onOpenRef.current = onOpen;
-        onToggleRef.current = onToggle;
-    }, [onOpen, onToggle]);
+    }, [onOpen]);
 
     // Memoize touch device detection to avoid media query on every render
     const isTouchDevice = useMemo(

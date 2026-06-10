@@ -95,8 +95,9 @@ class _RecoveryPageState extends State<RecoveryPage> {
                 showAlertBottomSheet(
                   context,
                   title: AppLocalizations.of(context).sorry,
-                  message:
-                      AppLocalizations.of(context).noRecoveryKeyNoDecryption,
+                  message: AppLocalizations.of(
+                    context,
+                  ).noRecoveryKeyNoDecryption,
                   assetPath: 'assets/warning-green.png',
                 );
               },
@@ -117,19 +118,14 @@ class _RecoveryPageState extends State<RecoveryPage> {
     try {
       await Configuration.instance.recover(_recoveryKeyController.text.trim());
       await dialog.hide();
-      showShortToast(
-        context,
-        AppLocalizations.of(context).recoverySuccessful,
-      );
+      showShortToast(context, AppLocalizations.of(context).recoverySuccessful);
       // ignore: unawaited_futures
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (BuildContext context) {
             return const PopScope(
               canPop: false,
-              child: PasswordEntryPage(
-                mode: PasswordEntryMode.reset,
-              ),
+              child: PasswordEntryPage(mode: PasswordEntryMode.reset),
             );
           },
         ),

@@ -102,12 +102,8 @@ class LockScreenSettings {
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
-            iosOptions: const PrivacyIosOptions(
-              enablePrivacy: true,
-            ),
-            androidOptions: const PrivacyAndroidOptions(
-              enableSecure: true,
-            ),
+            iosOptions: const PrivacyIosOptions(enablePrivacy: true),
+            androidOptions: const PrivacyAndroidOptions(enableSecure: true),
             backgroundColor: const Color(0xff000000),
             blurEffect: PrivacyBlurEffect.extraLight,
           );

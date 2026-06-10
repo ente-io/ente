@@ -1,10 +1,10 @@
 const fsp = require("fs/promises");
 
 /**
- * This hook is invoked during the initial build (e.g. when triggered by "yarn
- * build"), and importantly, on each rebuild for a different architecture during
- * the build. We use it to ensure that the vips binary is for the current
- * architecture being built. See "[Note: vips]" for more details.
+ * This hook is invoked during the initial build (e.g. when triggered by
+ * "npm run build"), and importantly, on each rebuild for a different
+ * architecture during the build. We use it to ensure the vips binary matches
+ * the current architecture. See "[Note: vips]" for more details.
  *
  * The documentation for this hook is at:
  * https://www.electron.build/app-builder-lib.interface.configuration#beforebuild

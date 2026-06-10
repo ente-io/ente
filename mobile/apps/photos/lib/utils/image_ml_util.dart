@@ -29,8 +29,10 @@ typedef RGB = (int, int, int);
 const gaussianKernelSize = 5;
 const gaussianKernelRadius = gaussianKernelSize ~/ 2;
 const gaussianSigma = 10.0;
-final List<List<double>> gaussianKernel =
-    create2DGaussianKernel(gaussianKernelSize, gaussianSigma);
+final List<List<double>> gaussianKernel = create2DGaussianKernel(
+  gaussianKernelSize,
+  gaussianSigma,
+);
 
 const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
@@ -44,11 +46,7 @@ class DecodedImage {
   final Image? image;
   final Uint8List? rawRgbaBytes;
 
-  const DecodedImage({
-    required this.dimensions,
-    this.image,
-    this.rawRgbaBytes,
-  });
+  const DecodedImage({required this.dimensions, this.image, this.rawRgbaBytes});
 }
 
 Future<DecodedImage> decodeImageFromPath(
@@ -58,7 +56,8 @@ Future<DecodedImage> decodeImageFromPath(
 }) async {
   final imageData = await File(imagePath).readAsBytes();
   final format = imagePath.split('.').last.toLowerCase();
-  final bool skipExifRead = Platform.isIOS &&
+  final bool skipExifRead =
+      Platform.isIOS &&
       format == 'jxl'; // JXL on iOS has issues with EXIF reading
   Map<String, IfdTag> exifData = <String, IfdTag>{};
   if (skipExifRead) {
@@ -70,8 +69,9 @@ Future<DecodedImage> decodeImageFromPath(
       exifData['Image Orientation']?.values.firstAsInt() ?? 1;
   if (orientation > 1 && includeRgbaBytes) {
     if (format == 'heic' || format == 'heif') {
-      _logger
-          .info("Decoding HEIC/HEIF image with EXIF orientation $orientation");
+      _logger.info(
+        "Decoding HEIC/HEIF image with EXIF orientation $orientation",
+      );
     } else {
       _logger.warning(
         "Decoding image with EXIF orientation $orientation, for format $format",
@@ -99,17 +99,18 @@ Future<DecodedImage> decodeImageFromPath(
     try {
       final Uint8List? convertedData =
           await FlutterImageCompress.compressWithFile(
-        imagePath,
-        format: CompressFormat.jpeg,
-        minWidth: 20000, // High value to ensure image is not scaled down
-        minHeight: 20000, // High value to ensure image is not scaled down
-      );
+            imagePath,
+            format: CompressFormat.jpeg,
+            minWidth: 20000, // High value to ensure image is not scaled down
+            minHeight: 20000, // High value to ensure image is not scaled down
+          );
       image = await decodeImageFromData(convertedData!);
       _logger.info('Conversion successful, jpeg decoded');
       if (image.width >= 20000 || image.height >= 20000) {
         // Failing and storing empty result when the image dimensions are higher than max compression limits
-        _logger
-            .severe('Image res too high, W:${image.width} H:${image.height}');
+        _logger.severe(
+          'Image res too high, W:${image.width} H:${image.height}',
+        );
         throw Exception('Res too high W:${image.width} H:${image.height}');
       }
     } catch (e) {
@@ -259,11 +260,13 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
       const minimumPadding = 0.1;
       final num xCrop = (xMinAbs - widthAbs * regularPadding);
       final num xOvershoot = min(0, xCrop).abs() / widthAbs;
-      final num widthCrop = widthAbs * (1 + 2 * regularPadding) -
+      final num widthCrop =
+          widthAbs * (1 + 2 * regularPadding) -
           2 * min(xOvershoot, regularPadding - minimumPadding) * widthAbs;
       final num yCrop = (yMinAbs - heightAbs * regularPadding);
       final num yOvershoot = min(0, yCrop).abs() / heightAbs;
-      final num heightCrop = heightAbs * (1 + 2 * regularPadding) -
+      final num heightCrop =
+          heightAbs * (1 + 2 * regularPadding) -
           2 * min(yOvershoot, regularPadding - minimumPadding) * heightAbs;
 
       // Prevent the face from going out of image bounds
@@ -283,8 +286,9 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
       );
       i++;
     }
-    final List<Uint8List> faceThumbnails =
-        await Future.wait(futureFaceThumbnails);
+    final List<Uint8List> faceThumbnails = await Future.wait(
+      futureFaceThumbnails,
+    );
     return faceThumbnails;
   } catch (e, s) {
     _logger.severe(
@@ -318,12 +322,7 @@ Future<(Float32List, Dimensions)> preprocessImageYoloFace(
       if (w >= scaledWidth || h >= scaledHeight) {
         pixel = const (114, 114, 114);
       } else {
-        pixel = _getPixelBilinear(
-          w / scale,
-          h / scale,
-          dim,
-          rawRgbaBytes,
-        );
+        pixel = _getPixelBilinear(w / scale, h / scale, dim, rawRgbaBytes);
       }
       buffer[pixelIndex] = pixel.$1 / 255;
       buffer[pixelIndex + channelOffsetGreen] = pixel.$2 / 255;
@@ -374,7 +373,7 @@ Future<Float32List> preprocessImageClip(
 }
 
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
-    preprocessToMobileFaceNetFloat32List(
+preprocessToMobileFaceNetFloat32List(
   Dimensions dim,
   Uint8List rawRgbaBytes,
   List<FaceDetectionRelative> relativeFaces, {
@@ -385,21 +384,23 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
 
   final List<FaceDetectionAbsolute> absoluteFaces =
       relativeToAbsoluteDetections(
-    relativeDetections: relativeFaces,
-    imageWidth: dim.width,
-    imageHeight: dim.height,
-  );
+        relativeDetections: relativeFaces,
+        imageWidth: dim.width,
+        imageHeight: dim.height,
+      );
 
-  final alignedImagesFloat32List =
-      Float32List(3 * width * height * absoluteFaces.length);
+  final alignedImagesFloat32List = Float32List(
+    3 * width * height * absoluteFaces.length,
+  );
   final alignmentResults = <AlignmentResult>[];
   final isBlurs = <bool>[];
   final blurValues = <double>[];
 
   int alignedImageIndex = 0;
   for (final face in absoluteFaces) {
-    final (alignmentResult, correctlyEstimated) =
-        SimilarityTransform.estimate(face.allKeypoints);
+    final (alignmentResult, correctlyEstimated) = SimilarityTransform.estimate(
+      face.allKeypoints,
+    );
     if (!correctlyEstimated) {
       _logger.severe(
         'Face alignment failed because not able to estimate SimilarityTransform, for face: $face',
@@ -424,8 +425,10 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     );
 
     alignedImageIndex += 3 * width * height;
-    final (isBlur, blurValue) =
-        await BlurDetectionService.predictIsBlurGrayLaplacian(
+    final (
+      isBlur,
+      blurValue,
+    ) = await BlurDetectionService.predictIsBlurGrayLaplacian(
       faceGrayMatrix,
       faceDirection: face.getFaceDirection(),
     );
@@ -437,17 +440,12 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     alignmentResults,
     isBlurs,
     blurValues,
-    originalSize
+    originalSize,
   );
 }
 
 /// Reads the pixel color at the specified coordinates.
-RGB _readPixelColor(
-  int x,
-  int y,
-  Dimensions dim,
-  Uint8List rgbaBytes,
-) {
+RGB _readPixelColor(int x, int y, Dimensions dim, Uint8List rgbaBytes) {
   if (y < 0 || y >= dim.height || x < 0 || x >= dim.width) {
     if (y < -maxKernelRadius ||
         y >= dim.height + maxKernelRadius ||
@@ -466,16 +464,11 @@ RGB _readPixelColor(
   return (
     rgbaBytes[byteOffset], // red
     rgbaBytes[byteOffset + 1], // green
-    rgbaBytes[byteOffset + 2] // blue
+    rgbaBytes[byteOffset + 2], // blue
   );
 }
 
-RGB _getPixelBlurred(
-  int x,
-  int y,
-  Dimensions dim,
-  Uint8List rgbaBytes,
-) {
+RGB _getPixelBlurred(int x, int y, Dimensions dim, Uint8List rgbaBytes) {
   double r = 0, g = 0, b = 0;
   for (int ky = 0; ky < gaussianKernelSize; ky++) {
     for (int kx = 0; kx < gaussianKernelSize; kx++) {
@@ -501,18 +494,15 @@ List<List<int>> _createGrayscaleIntMatrixFromNormalized2List(
 }) {
   return List.generate(
     height,
-    (y) => List.generate(
-      width,
-      (x) {
-        // 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue
-        final pixelIndex = startIndex + 3 * (y * width + x);
-        return (0.299 * ((imageList[pixelIndex] + 1) * 127.5) +
-                0.587 * ((imageList[pixelIndex + 1] + 1) * 127.5) +
-                0.114 * ((imageList[pixelIndex + 2] + 1) * 127.5))
-            .round()
-            .clamp(0, 255);
-      },
-    ),
+    (y) => List.generate(width, (x) {
+      // 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue
+      final pixelIndex = startIndex + 3 * (y * width + x);
+      return (0.299 * ((imageList[pixelIndex] + 1) * 127.5) +
+              0.587 * ((imageList[pixelIndex + 1] + 1) * 127.5) +
+              0.114 * ((imageList[pixelIndex + 2] + 1) * 127.5))
+          .round()
+          .clamp(0, 255);
+    }),
   );
 }
 
@@ -526,22 +516,13 @@ Future<Image> _cropImage(
   final recorder = PictureRecorder();
   final canvas = Canvas(
     recorder,
-    Rect.fromPoints(
-      const Offset(0, 0),
-      Offset(width, height),
-    ),
+    Rect.fromPoints(const Offset(0, 0), Offset(width, height)),
   );
 
   canvas.drawImageRect(
     image,
-    Rect.fromPoints(
-      Offset(x, y),
-      Offset(x + width, y + height),
-    ),
-    Rect.fromPoints(
-      const Offset(0, 0),
-      Offset(width, height),
-    ),
+    Rect.fromPoints(Offset(x, y), Offset(x + width, y + height)),
+    Rect.fromPoints(const Offset(0, 0), Offset(width, height)),
     Paint()..filterQuality = FilterQuality.medium,
   );
 
@@ -582,9 +563,10 @@ void _warpAffineFloat32List(
   ]);
   final aInverse = A.inverse();
   // final aInverseMinus = aInverse * -1;
-  final B = Vector.fromList(
-    [transformationMatrix[0][2], transformationMatrix[1][2]],
-  );
+  final B = Vector.fromList([
+    transformationMatrix[0][2],
+    transformationMatrix[1][2],
+  ]);
   final b00 = B[0];
   final b10 = B[1];
   final a00Prime = aInverse[0][0];
@@ -682,19 +664,15 @@ RGB _getPixelBilinear(
   final dy1 = 1.0 - dy;
 
   // Get the original pixels (with gaussian blur if antialias)
-  final RGB Function(int, int, Dimensions, Uint8List) readPixel =
-      antiAlias ? _getPixelBlurred : _readPixelColor;
+  final RGB Function(int, int, Dimensions, Uint8List) readPixel = antiAlias
+      ? _getPixelBlurred
+      : _readPixelColor;
   final RGB pixel1 = readPixel(x0, y0, dim, rawRgbaBytes);
   final RGB pixel2 = readPixel(x1, y0, dim, rawRgbaBytes);
   final RGB pixel3 = readPixel(x0, y1, dim, rawRgbaBytes);
   final RGB pixel4 = readPixel(x1, y1, dim, rawRgbaBytes);
 
-  int bilinear(
-    num val1,
-    num val2,
-    num val3,
-    num val4,
-  ) =>
+  int bilinear(num val1, num val2, num val3, num val4) =>
       (val1 * dx1 * dy1 + val2 * dx * dy1 + val3 * dx1 * dy + val4 * dx * dy)
           .round();
 
@@ -730,8 +708,9 @@ RGB _getPixelBicubic(num fx, num fy, Dimensions dim, Uint8List rawRgbaBytes) {
 
   final icc = _readPixelColor(x, y, dim, rawRgbaBytes);
 
-  final ipp =
-      px < 0 || py < 0 ? icc : _readPixelColor(px, py, dim, rawRgbaBytes);
+  final ipp = px < 0 || py < 0
+      ? icc
+      : _readPixelColor(px, py, dim, rawRgbaBytes);
   final icp = px < 0 ? icc : _readPixelColor(x, py, dim, rawRgbaBytes);
   final inp = py < 0 || nx >= dim.width
       ? icc
@@ -757,8 +736,9 @@ RGB _getPixelBicubic(num fx, num fy, Dimensions dim, Uint8List rawRgbaBytes) {
   final ipn = px < 0 || ny >= dim.height
       ? icc
       : _readPixelColor(px, ny, dim, rawRgbaBytes);
-  final icn =
-      ny >= dim.height ? icc : _readPixelColor(x, ny, dim, rawRgbaBytes);
+  final icn = ny >= dim.height
+      ? icc
+      : _readPixelColor(x, ny, dim, rawRgbaBytes);
   final inn = nx >= dim.width || ny >= dim.height
       ? icc
       : _readPixelColor(nx, ny, dim, rawRgbaBytes);
@@ -774,8 +754,9 @@ RGB _getPixelBicubic(num fx, num fy, Dimensions dim, Uint8List rawRgbaBytes) {
   final ipa = px < 0 || ay >= dim.height
       ? icc
       : _readPixelColor(px, ay, dim, rawRgbaBytes);
-  final ica =
-      ay >= dim.height ? icc : _readPixelColor(x, ay, dim, rawRgbaBytes);
+  final ica = ay >= dim.height
+      ? icc
+      : _readPixelColor(x, ay, dim, rawRgbaBytes);
   final ina = nx >= dim.width || ay >= dim.height
       ? icc
       : _readPixelColor(nx, ay, dim, rawRgbaBytes);
@@ -797,8 +778,10 @@ RGB _getPixelBicubic(num fx, num fy, Dimensions dim, Uint8List rawRgbaBytes) {
 }
 
 List<List<double>> create2DGaussianKernel(int size, double sigma) {
-  final List<List<double>> kernel =
-      List.generate(size, (_) => List<double>.filled(size, 0));
+  final List<List<double>> kernel = List.generate(
+    size,
+    (_) => List<double>.filled(size, 0),
+  );
   double sum = 0.0;
   final int center = size ~/ 2;
 
@@ -806,7 +789,8 @@ List<List<double>> create2DGaussianKernel(int size, double sigma) {
     for (int x = 0; x < size; x++) {
       final int dx = x - center;
       final int dy = y - center;
-      final double g = (1 / (2 * pi * sigma * sigma)) *
+      final double g =
+          (1 / (2 * pi * sigma * sigma)) *
           exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
       kernel[y][x] = g;
       sum += g;

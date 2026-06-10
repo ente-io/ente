@@ -10,15 +10,24 @@ void main() {
     expect(find.text('Components'), findsOneWidget);
   });
 
+  testWidgets('catalog header theme button toggles theme mode', (tester) async {
+    await tester.pumpWidget(const ComponentsCatalogApp());
+
+    expect(find.byTooltip('Theme: Light. Tap for Dark'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Theme: Light. Tap for Dark'));
+    await tester.pump();
+
+    expect(find.byTooltip('Theme: Dark. Tap for Light'), findsOneWidget);
+  });
+
   testWidgets('button transition preview surfaces loading and success', (
     tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ComponentTheme.lightTheme(),
-        home: const Scaffold(
-          body: ButtonStateCyclePreview(),
-        ),
+        home: const Scaffold(body: ButtonStateCyclePreview()),
       ),
     );
 

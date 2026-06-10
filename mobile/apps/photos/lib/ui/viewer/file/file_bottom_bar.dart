@@ -64,8 +64,9 @@ class FileBottomBarState extends State<FileBottomBar> {
   void initState() {
     super.initState();
     _updateSocialState();
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
+    _guestViewEventSubscription = Bus.instance.on<GuestViewEvent>().listen((
+      event,
+    ) {
       setState(() {
         isGuestView = event.isGuestView;
       });
@@ -102,9 +103,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
     // Check if user has liked
     final reactions = await provider.getReactionsForFile(fileID);
-    _hasLiked = reactions.any(
-      (r) => r.userID == widget.userID && !r.isDeleted,
-    );
+    _hasLiked = reactions.any((r) => r.userID == widget.userID && !r.isDeleted);
 
     // Get comment count
     _commentCount = await provider.getCommentCountForFile(fileID);
@@ -129,8 +128,9 @@ class FileBottomBarState extends State<FileBottomBar> {
       }
     }
 
-    final sharedCollectionNotifier =
-        InheritedDetailPageState.maybeOf(context)?.isInSharedCollectionNotifier;
+    final sharedCollectionNotifier = InheritedDetailPageState.maybeOf(
+      context,
+    )?.isInSharedCollectionNotifier;
 
     if (sharedCollectionNotifier == null) {
       return _getBottomBar();
@@ -149,12 +149,14 @@ class FileBottomBarState extends State<FileBottomBar> {
   }
 
   Widget _getBottomBar() {
-    Logger("FileBottomBar")
-        .fine("building bottom bar ${widget.file.generatedID}");
+    Logger(
+      "FileBottomBar",
+    ).fine("building bottom bar ${widget.file.generatedID}");
 
-    final isInSharedCollection = InheritedDetailPageState.maybeOf(context)
-            ?.isInSharedCollectionNotifier
-            .value ??
+    final isInSharedCollection =
+        InheritedDetailPageState.maybeOf(
+          context,
+        )?.isInSharedCollectionNotifier.value ??
         false;
 
     final Collection? collection = widget.file.collectionID != null
@@ -165,7 +167,8 @@ class FileBottomBarState extends State<FileBottomBar> {
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
-    final bool isFileHidden = widget.file.isOwner &&
+    final bool isFileHidden =
+        widget.file.isOwner &&
         widget.file.isUploaded &&
         (collection?.isHidden() ?? false);
     if (widget.file is TrashFile) {
@@ -195,13 +198,11 @@ class FileBottomBarState extends State<FileBottomBar> {
         );
       }
 
-      final bool canShowSuggestDelete = collection != null &&
+      final bool canShowSuggestDelete =
+          collection != null &&
           flagService.internalUser &&
           isInSharedCollection &&
-          canSuggestDeleteForFile(
-            file: widget.file,
-            collection: collection,
-          );
+          canSuggestDeleteForFile(file: widget.file, collection: collection);
 
       if (canShowSuggestDelete) {
         children.add(_buildSuggestDeleteButton(collection));
@@ -320,10 +321,7 @@ class FileBottomBarState extends State<FileBottomBar> {
         child: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: IconButton(
-            icon: const Icon(
-              Icons.restore_outlined,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.restore_outlined, color: Colors.white),
             onPressed: () {
               final selectedFiles = SelectedFiles();
               selectedFiles.toggleSelection(widget.file);
@@ -367,10 +365,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       child: Padding(
         padding: const EdgeInsets.only(top: 12),
         child: IconButton(
-          icon: const Icon(
-            Icons.flag_outlined,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.flag_outlined, color: Colors.white),
           onPressed: () => _onSuggestDelete(collection),
         ),
       ),
@@ -473,9 +468,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       final sharedCollections = collectionIDs
           .map((id) => CollectionsService.instance.getCollectionByID(id))
           .whereType<Collection>()
-          .where(
-            (c) => c.hasSharees || c.hasLink || !c.isOwner(currentUserID),
-          )
+          .where((c) => c.hasSharees || c.hasLink || !c.isOwner(currentUserID))
           .toList();
 
       // Track failures
@@ -558,10 +551,7 @@ class FileBottomBarState extends State<FileBottomBar> {
           icon: Stack(
             clipBehavior: Clip.none,
             children: [
-              const Icon(
-                EnteIcons.commentBubbleStroke,
-                color: Colors.white,
-              ),
+              const Icon(EnteIcons.commentBubbleStroke, color: Colors.white),
               if (_commentCount > 0)
                 Positioned(
                   right: -4,

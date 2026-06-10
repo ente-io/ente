@@ -22,13 +22,13 @@ class IsolateLogString {
   });
 
   String toJsonString() => jsonEncode({
-        'logString': logString,
-        'error': error,
-        'stackTrace': stackTrace,
-        'loggerName': loggerName,
-        'levelName': levelName,
-        'message': message,
-      });
+    'logString': logString,
+    'error': error,
+    'stackTrace': stackTrace,
+    'loggerName': loggerName,
+    'levelName': levelName,
+    'message': message,
+  });
 
   static IsolateLogString fromJsonString(String jsonString) {
     final json = jsonDecode(jsonString);

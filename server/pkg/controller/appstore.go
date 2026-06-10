@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -24,7 +25,6 @@ import (
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/repo/remotestore"
-	"github.com/ente-io/museum/pkg/utils/array"
 )
 
 // AppStoreController provides abstractions for handling billing on AppStore
@@ -109,7 +109,7 @@ func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification a
 		return stacktrace.Propagate(err, "")
 	}
 	latestReceiptInfo := c.getLatestReceiptInfo(purchase.LatestReceiptInfo)
-	if latestReceiptInfo.TransactionID == latestReceiptInfo.OriginalTransactionID && !array.StringInList(string(notification.NotificationType), SubsUpdateNotificationTypes) {
+	if latestReceiptInfo.TransactionID == latestReceiptInfo.OriginalTransactionID && !slices.Contains(SubsUpdateNotificationTypes, string(notification.NotificationType)) {
 		var logMsg = fmt.Sprintf("Ignoring notification of type %s", notification.NotificationType)
 		if notification.NotificationType != appstore.NotificationTypeInitialBuy {
 			// log unexpected notification types

@@ -16,9 +16,7 @@ import "package:photos/ui/notification/toast.dart";
 import 'package:photos/utils/dialog_util.dart';
 
 class DeleteAccountPage extends StatefulWidget {
-  const DeleteAccountPage({
-    super.key,
-  });
+  const DeleteAccountPage({super.key});
 
   @override
   State<DeleteAccountPage> createState() => _DeleteAccountPageState();
@@ -75,9 +73,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 child: Text(
                   AppLocalizations.of(context).deleteAccountWarning,
                   style: getEnteTextTheme(context).body.copyWith(
-                        color: colorScheme.warning700,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    color: colorScheme.warning700,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -105,8 +103,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     });
                   },
                   underline: const SizedBox(),
-                  items: _deletionReason
-                      .map<DropdownMenuItem<String>>((String value) {
+                  items: _deletionReason.map<DropdownMenuItem<String>>((
+                    String value,
+                  ) {
                     return DropdownMenuItem<String>(
                       value: value,
                       enabled: value != _defaultSelection,
@@ -136,13 +135,17 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 style: getEnteTextTheme(context).smallMuted,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: colorScheme.strokeFaint, width: 1),
+                    borderSide: BorderSide(
+                      color: colorScheme.strokeFaint,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: colorScheme.strokeFaint, width: 1),
+                    borderSide: BorderSide(
+                      color: colorScheme.strokeFaint,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   filled: true,
@@ -170,11 +173,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          AppLocalizations.of(context)
-                              .kindlyHelpUsWithThisInformation,
-                          style: getEnteTextTheme(context)
-                              .smallBold
-                              .copyWith(color: colorScheme.warning700),
+                          AppLocalizations.of(
+                            context,
+                          ).kindlyHelpUsWithThisInformation,
+                          style: getEnteTextTheme(
+                            context,
+                          ).smallBold.copyWith(color: colorScheme.warning700),
                         ),
                       ),
                     )
@@ -217,8 +221,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   children: [
                     ButtonWidget(
                       buttonType: ButtonType.critical,
-                      labelText:
-                          AppLocalizations.of(context).confirmAccountDeletion,
+                      labelText: AppLocalizations.of(
+                        context,
+                      ).confirmAccountDeletion,
                       isDisabled: _shouldBlockDeletion(),
                       onTap: () async {
                         await _initiateDelete(context);
@@ -233,11 +238,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         Navigator.of(context).pop();
                       },
                     ),
-                    const SafeArea(
-                      child: SizedBox(
-                        height: 12,
-                      ),
-                    ),
+                    const SafeArea(child: SizedBox(height: 12)),
                   ],
                 ),
               ),
@@ -263,12 +264,13 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       context,
       title: AppLocalizations.of(context).confirmAccountDeletion,
       body: AppLocalizations.of(context).deleteConfirmDialogBody,
-      firstButtonLabel:
-          AppLocalizations.of(context).deleteAccountPermanentlyButton,
+      firstButtonLabel: AppLocalizations.of(
+        context,
+      ).deleteAccountPermanentlyButton,
       firstButtonType: ButtonType.critical,
       firstButtonOnTap: () async {
-        final deleteChallengeResponse =
-            await UserService.instance.getDeleteChallenge(context);
+        final deleteChallengeResponse = await UserService.instance
+            .getDeleteChallenge(context);
         if (deleteChallengeResponse == null) {
           return;
         }

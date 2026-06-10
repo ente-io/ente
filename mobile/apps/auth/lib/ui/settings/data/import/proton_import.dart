@@ -65,13 +65,14 @@ Future<void> _pickProtonJsonFile(BuildContext context) async {
       await importSuccessDialog(context, count);
     }
   } catch (e, s) {
-    Logger('ProtonImport')
-        .severe('Exception while processing Proton import', e, s);
+    Logger(
+      'ProtonImport',
+    ).severe('Exception while processing Proton import', e, s);
     await progressDialog.hide();
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      "${context.l10n.importFailureDescNew}\n Error: ${e.toString()}",
+      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
     );
   }
 }
@@ -107,10 +108,7 @@ Future<int?> _processProtonExportFile(
       try {
         final decryptedJsonResult = await compute(
           _decryptProtonExportInBackground,
-          {
-            'jsonString': jsonString,
-            'password': password,
-          },
+          {'jsonString': jsonString, 'password': password},
         );
         switch (decryptedJsonResult['status']) {
           case 'incorrect_password':
@@ -122,8 +120,9 @@ Future<int?> _processProtonExportFile(
             );
             continue;
           case 'ok':
-            decodedJson =
-                decodeProtonExportJson(decryptedJsonResult['jsonString']!);
+            decodedJson = decodeProtonExportJson(
+              decryptedJsonResult['jsonString']!,
+            );
             break;
           default:
             throw StateError('Unexpected Proton decrypt result status');

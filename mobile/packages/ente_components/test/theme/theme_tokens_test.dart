@@ -7,14 +7,22 @@ void main() {
     test("expose expected spacing, radii, motion, and shadow values", () {
       expect(2, 2);
       expect(Spacing.sm, 8);
-      expect(Spacing.xl, 24);
+      expect(Spacing.xl, 20);
+      expect(Spacing.xxl, 24);
       expect(40, 40);
 
       expect(Radii.xs, 4);
       expect(Radii.md, 12);
       expect(Radii.button, 20);
+      expect(Radii.bottomSheet, 20);
       expect(Radii.buttonRadius, const Radius.circular(20));
       expect(Radii.buttonBorder, const BorderRadius.all(Radius.circular(20)));
+
+      expect(IconSizes.micro, 8);
+      expect(IconSizes.tiny, 12);
+      expect(IconSizes.small, 18);
+      expect(IconSizes.medium, 24);
+      expect(IconSizes.large, 36);
 
       expect(Motion.quick, const Duration(milliseconds: 120));
       expect(Motion.standard, const Duration(milliseconds: 180));
@@ -29,7 +37,7 @@ void main() {
     test("expose light and dark semantic color values", () {
       expect(ColorTokens.light.primary, const Color(0xFF08C225));
       expect(ColorTokens.light.warning, const Color(0xFFF63A3A));
-      expect(ColorTokens.light.backgroundBase, const Color(0xFFFAFAFA));
+      expect(ColorTokens.light.backgroundBase, const Color(0xFFF4F4F4));
       expect(ColorTokens.light.textBase, const Color(0xFF000000));
       expect(ColorTokens.light.textReverse, const Color(0xFFFFFFFF));
       expect(ColorTokens.light.iconColor, const Color.fromRGBO(0, 0, 0, 0.75));
@@ -43,11 +51,11 @@ void main() {
     });
 
     test("selects app primary tokens without changing shared colors", () {
-      final photosLight = ColorTokens.forApp(EnteApp.photos);
-      final authLight = ColorTokens.forApp(EnteApp.auth);
-      final lockerLight = ColorTokens.forApp(EnteApp.locker);
+      final photosLight = ColorTokens.forApp(ComponentApp.photos);
+      final authLight = ColorTokens.forApp(ComponentApp.auth);
+      final lockerLight = ColorTokens.forApp(ComponentApp.locker);
       final authDark = ColorTokens.forApp(
-        EnteApp.auth,
+        ComponentApp.auth,
         brightness: Brightness.dark,
       );
 
@@ -77,6 +85,8 @@ void main() {
 
       expect(authDark.primary, purpleDefaultDark);
       expect(authDark.primaryLight, purpleLightDark);
+      expect(authDark.primaryLightHover, purpleLightHoverDark);
+      expect(authDark.primaryLightPressed, purpleLightPressedDark);
 
       expect(authLight.backgroundBase, ColorTokens.light.backgroundBase);
       expect(authLight.warning, ColorTokens.light.warning);
@@ -96,11 +106,11 @@ void main() {
         "greens/green": Color.fromRGBO(8, 194, 37, 1),
         "greens/green-dark": Color.fromRGBO(6, 157, 30, 1),
         "greens/green-darker": Color.fromRGBO(5, 124, 24, 1),
-        "purples/purple-light": Color.fromRGBO(248, 243, 254, 1),
+        "purples/purple-light": Color.fromRGBO(244, 231, 252, 1),
         "purples/purple-light-hover": Color.fromRGBO(232, 210, 250, 1),
         "purples/purple-light-pressed": Color.fromRGBO(217, 188, 241, 1),
         "purples/purple-stroke": Color.fromRGBO(216, 181, 244, 1),
-        "purples/purple": Color.fromRGBO(138, 56, 245, 1),
+        "purples/purple": Color.fromRGBO(150, 16, 214, 1),
         "purples/purple-dark": Color.fromRGBO(122, 12, 174, 1),
         "purples/purple-darker": Color.fromRGBO(93, 8, 132, 1),
         "blues/blue-light": Color.fromRGBO(231, 239, 250, 1),
@@ -119,16 +129,16 @@ void main() {
         "greens/green": Color.fromRGBO(8, 194, 37, 1),
         "greens/green-dark": Color.fromRGBO(6, 157, 30, 1),
         "greens/green-darker": Color.fromRGBO(5, 124, 24, 1),
-        "purples/purple-light": Color.fromRGBO(41, 41, 41, 1),
-        "purples/purple-light-hover": Color.fromRGBO(61, 27, 92, 1),
-        "purples/purple-light-pressed": Color.fromRGBO(79, 40, 115, 1),
+        "purples/purple-light": Color.fromRGBO(39, 28, 50, 1),
+        "purples/purple-light-hover": Color.fromRGBO(47, 31, 63, 1),
+        "purples/purple-light-pressed": Color.fromRGBO(37, 23, 52, 1),
         "purples/purple-stroke": Color.fromRGBO(61, 27, 92, 1),
-        "purples/purple": Color.fromRGBO(138, 56, 245, 1),
+        "purples/purple": Color.fromRGBO(150, 16, 214, 1),
         "purples/purple-dark": Color.fromRGBO(122, 12, 174, 1),
         "purples/purple-darker": Color.fromRGBO(93, 8, 132, 1),
         "blues/blue-light": Color.fromRGBO(41, 41, 41, 1),
         "blues/blue-light-hover": Color.fromRGBO(26, 38, 56, 1),
-        "blues/blue-light-pressed": Color.fromRGBO(42, 59, 85, 1),
+        "blues/blue-light-pressed": Color.fromRGBO(17, 30, 49, 1),
         "blues/blue-stroke": Color.fromRGBO(16, 113, 255, 1),
         "blues/blue": Color.fromRGBO(16, 113, 255, 1),
         "blues/blue-dark": Color.fromRGBO(14, 95, 217, 1),
@@ -147,12 +157,12 @@ void main() {
         "accent/pink-light": Color.fromRGBO(253, 246, 251, 1),
         "accent/teal": Color.fromRGBO(95, 183, 187, 1),
         "accent/teal-light": Color.fromRGBO(245, 251, 251, 1),
-        "background/base": Color.fromRGBO(250, 250, 250, 1),
+        "background/base": Color.fromRGBO(244, 244, 244, 1),
         "caution/default": Color.fromRGBO(240, 138, 30, 1),
         "caution/light": Color.fromRGBO(250, 244, 235, 1),
         "fill/base": Color.fromRGBO(0, 0, 0, 1),
-        "fill/dark": Color.fromRGBO(245, 245, 245, 1),
-        "fill/darker": Color.fromRGBO(233, 233, 233, 1),
+        "fill/dark": Color.fromRGBO(234, 234, 234, 1),
+        "fill/darker": Color.fromRGBO(222, 222, 222, 1),
         "fill/darkest": Color.fromRGBO(210, 210, 210, 1),
         "fill/light": Color.fromRGBO(255, 255, 255, 1),
         "primary/dark": Color.fromRGBO(6, 157, 30, 1),
@@ -173,7 +183,7 @@ void main() {
         "text/darker": Color.fromRGBO(21, 21, 21, 1),
         "text/light": Color.fromRGBO(102, 102, 102, 1),
         "text/lighter": Color.fromRGBO(150, 150, 150, 1),
-        "text/lightest": Color.fromRGBO(222, 222, 222, 1),
+        "text/lightest": Color.fromRGBO(214, 214, 214, 1),
         "text/reverse": Color.fromRGBO(255, 255, 255, 1),
         "warning/dark": Color.fromRGBO(221, 52, 52, 1),
         "warning/darker": Color.fromRGBO(197, 46, 46, 1),
@@ -213,7 +223,7 @@ void main() {
         "text/darker": Color.fromRGBO(204, 204, 204, 1),
         "text/light": Color.fromRGBO(153, 153, 153, 1),
         "text/lighter": Color.fromRGBO(150, 150, 150, 1),
-        "text/lightest": Color.fromRGBO(10, 10, 10, 1),
+        "text/lightest": Color.fromRGBO(65, 65, 65, 1),
         "text/reverse": Color.fromRGBO(0, 0, 0, 1),
         "warning/dark": Color.fromRGBO(221, 52, 52, 1),
         "warning/darker": Color.fromRGBO(197, 46, 46, 1),
@@ -229,7 +239,22 @@ void main() {
   group("text styles", () {
     test("match the published type scale", () {
       expect(TextStyles.fontFamily, "Inter");
+      expect(TextStyles.outfitFontFamily, "Outfit");
+      expect(TextStyles.fontPackage, "ente_components");
 
+      expect(TextStyles.display1.fontFamily, "packages/ente_components/Outfit");
+      expect(TextStyles.display1.fontSize, 32);
+      expect(TextStyles.display1.height, 40 / 32);
+      expect(TextStyles.display1.fontWeight, FontWeight.w600);
+      expect(TextStyles.display1.letterSpacing, 0);
+
+      expect(TextStyles.display2.fontFamily, "packages/ente_components/Outfit");
+      expect(TextStyles.display2.fontSize, 24);
+      expect(TextStyles.display2.height, 32 / 24);
+      expect(TextStyles.display2.fontWeight, FontWeight.w600);
+      expect(TextStyles.display2.letterSpacing, 0);
+
+      expect(TextStyles.h1.fontFamily, "packages/ente_components/Inter");
       expect(TextStyles.h1.fontSize, 20);
       expect(TextStyles.h1.height, 28 / 20);
       expect(TextStyles.h1.fontWeight, FontWeight.w700);
@@ -239,6 +264,12 @@ void main() {
       expect(TextStyles.h2.height, 24 / 18);
       expect(TextStyles.h2.fontWeight, FontWeight.w600);
 
+      expect(TextStyles.display3.fontFamily, "packages/ente_components/Outfit");
+      expect(TextStyles.display3.fontSize, 20);
+      expect(TextStyles.display3.height, 28 / 20);
+      expect(TextStyles.display3.fontWeight, FontWeight.w600);
+
+      expect(TextStyles.body.fontFamily, "packages/ente_components/Inter");
       expect(TextStyles.body.fontSize, 14);
       expect(TextStyles.body.height, 20 / 14);
       expect(TextStyles.body.fontWeight, FontWeight.w500);
@@ -257,13 +288,19 @@ void main() {
       expect(theme.scaffoldBackgroundColor, ColorTokens.light.backgroundBase);
       expect(theme.colorScheme.primary, ColorTokens.light.primary);
       expect(theme.colorScheme.error, ColorTokens.light.warning);
-      expect(theme.textTheme.headlineLarge?.fontFamily, TextStyles.fontFamily);
+      expect(
+        theme.textTheme.headlineLarge?.fontFamily,
+        TextStyles.h1.fontFamily,
+      );
       expect(theme.textTheme.headlineLarge?.fontSize, TextStyles.h1.fontSize);
       expect(
         theme.textTheme.headlineLarge?.fontWeight,
         TextStyles.h1.fontWeight,
       );
-      expect(theme.textTheme.bodyMedium?.fontFamily, TextStyles.fontFamily);
+      expect(
+        theme.textTheme.bodyMedium?.fontFamily,
+        TextStyles.body.fontFamily,
+      );
       expect(theme.textTheme.bodyMedium?.fontSize, TextStyles.body.fontSize);
     });
 
@@ -274,7 +311,10 @@ void main() {
       expect(theme.scaffoldBackgroundColor, ColorTokens.dark.backgroundBase);
       expect(theme.colorScheme.primary, ColorTokens.dark.primary);
       expect(theme.colorScheme.error, ColorTokens.dark.warning);
-      expect(theme.textTheme.labelSmall?.fontFamily, TextStyles.fontFamily);
+      expect(
+        theme.textTheme.labelSmall?.fontFamily,
+        TextStyles.tiny.fontFamily,
+      );
       expect(theme.textTheme.labelSmall?.fontSize, TextStyles.tiny.fontSize);
       expect(
         theme.textTheme.labelSmall?.fontWeight,
@@ -283,8 +323,8 @@ void main() {
     });
 
     test("maps selected app primary tokens into ThemeData", () {
-      final authTheme = ComponentTheme.lightTheme(app: EnteApp.auth);
-      final lockerTheme = ComponentTheme.darkTheme(app: EnteApp.locker);
+      final authTheme = ComponentTheme.lightTheme(app: ComponentApp.auth);
+      final lockerTheme = ComponentTheme.darkTheme(app: ComponentApp.locker);
 
       expect(authTheme.colorScheme.primary, purpleDefaultLight);
       expect(
@@ -342,7 +382,7 @@ void main() {
 
       await tester.pumpWidget(
         Theme(
-          data: ComponentTheme.lightTheme(app: EnteApp.auth),
+          data: ComponentTheme.lightTheme(app: ComponentApp.auth),
           child: Builder(
             builder: (context) {
               authColors = context.componentColors;
@@ -354,7 +394,7 @@ void main() {
 
       await tester.pumpWidget(
         Theme(
-          data: ComponentTheme.darkTheme(app: EnteApp.locker),
+          data: ComponentTheme.darkTheme(app: ComponentApp.locker),
           child: Builder(
             builder: (context) {
               lockerColors = context.componentColors;
@@ -368,6 +408,29 @@ void main() {
       expect(authColors.backgroundBase, ColorTokens.light.backgroundBase);
       expect(lockerColors.primary, blueDefaultDark);
       expect(lockerColors.backgroundBase, ColorTokens.dark.backgroundBase);
+    });
+
+    testWidgets("uses configured app tokens when ThemeData has no extension", (
+      tester,
+    ) async {
+      addTearDown(() => ComponentTheme.configure(app: ComponentApp.photos));
+      ComponentTheme.configure(app: ComponentApp.locker);
+
+      late ColorTokens colors;
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(brightness: Brightness.dark),
+          child: Builder(
+            builder: (context) {
+              colors = context.componentColors;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(colors.primary, blueDefaultDark);
+      expect(colors.backgroundBase, ColorTokens.dark.backgroundBase);
     });
 
     test("defaults to photos primary tokens when no app is passed", () {

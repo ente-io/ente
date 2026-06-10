@@ -12,7 +12,7 @@
   "featureOpenSource": "Открытый исходный код\nпроверенный экспертами по безопасности",
   "signUp": "Регистрация",
   "onBoardingGetStarted": "Начать",
-  "setupFirstAccount": "Настройте свою первую\nучетную запись",
+  "setupFirstAccount": "Настройте свой аккаунт",
   "allTabEmptyHint": "Ничего не найдено. Нажмите +, чтобы добавить код, или откройте Корзину, чтобы восстановить его.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -333,7 +333,6 @@
     }
   },
   "sorry": "Извините",
-  "importFailureDesc": "Не удалось обработать выбранный файл.\nПожалуйста, напишите на support@ente.com, если Вам нужна помощь!",
   "pendingSyncs": "Предупреждение",
   "pendingSyncsWarningBody": "Некоторые из ваших кодов не были сохранены.\n\nПожалуйста, убедитесь, что у вас есть резервная копия для этих кодов перед выходом.",
   "checkInboxAndSpamFolder": "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации",
@@ -509,7 +508,7 @@
   "pinLock": "Pin блокировка",
   "enterPin": "Введите PIN",
   "setNewPin": "Установите новый PIN",
-  "importFailureDescNew": "Не удалось обработать выбранный файл.",
+  "importFailureDesc": "Не удалось обработать выбранный файл.",
   "appLockNotEnabled": "Блокировка приложения отключена",
   "appLockNotEnabledDescription": "Пожалуйста, включите блокировку приложения в разделе Безопасность > Блокировка приложений",
   "authToViewPasskey": "Пожалуйста, авторизуйтесь, чтобы просмотреть пароль",

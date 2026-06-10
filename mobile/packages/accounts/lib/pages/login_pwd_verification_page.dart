@@ -214,11 +214,7 @@ class _LoginPasswordVerificationPageState
       ],
     );
     if (result == true) {
-      await sendLogs(
-        context,
-        "support@ente.com",
-        postShare: () {},
-      );
+      await sendLogs(context, "support@ente.com", postShare: () {});
     }
   }
 
@@ -267,9 +263,7 @@ class _LoginPasswordVerificationPageState
                         // password
                         visible: false,
                         child: TextFormField(
-                          autofillHints: const [
-                            AutofillHints.email,
-                          ],
+                          autofillHints: const [AutofillHints.email],
                           autocorrect: false,
                           keyboardType: TextInputType.emailAddress,
                           initialValue: email,
@@ -361,8 +355,9 @@ class _LoginPasswordVerificationPageState
                               await dialog.show();
                               await widget.config.logout();
                               await dialog.hide();
-                              Navigator.of(context)
-                                  .popUntil((route) => route.isFirst);
+                              Navigator.of(
+                                context,
+                              ).popUntil((route) => route.isFirst);
                             },
                             child: Text(
                               context.strings.changeEmail,

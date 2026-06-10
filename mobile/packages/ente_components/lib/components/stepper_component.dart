@@ -1,3 +1,4 @@
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
@@ -74,7 +75,7 @@ class _StepButton extends StatelessWidget {
     return material.IconButton(
       visualDensity: VisualDensity.compact,
       onPressed: enabled ? onPressed : null,
-      icon: Icon(icon, size: 18),
+      icon: Icon(icon, size: IconSizes.small),
       color: colors.textBase,
       disabledColor: colors.textLighter,
     );

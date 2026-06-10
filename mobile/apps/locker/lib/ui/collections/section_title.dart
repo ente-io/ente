@@ -21,10 +21,7 @@ class SectionTitle extends StatelessWidget {
     if (titleWithBrand != null) {
       child = titleWithBrand!;
     } else if (title != null) {
-      child = Text(
-        title!,
-        style: getEnteTextTheme(context).h3Bold,
-      );
+      child = Text(title!, style: getEnteTextTheme(context).h3Bold);
     } else {
       child = const SizedBox.shrink();
     }
@@ -58,23 +55,15 @@ class SectionOptions extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                title,
-                trailingWidget!,
-              ],
+              children: [title, trailingWidget!],
             ),
             if (hasBody)
-              Text(
-                body!,
-                style: getEnteTextTheme(context).bodyMuted,
-              ),
+              Text(body!, style: getEnteTextTheme(context).bodyMuted),
           ],
         ),
       );
     } else {
-      return Container(
-        child: title,
-      );
+      return Container(child: title);
     }
   }
 }

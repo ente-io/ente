@@ -9,6 +9,7 @@ enum InvalidReason {
   livePhotoVideoMissing,
   thumbnailMissing,
   tooLargeFile,
+  photosResourceUnavailable,
   unknown,
 }
 
@@ -123,7 +124,8 @@ class DuplicateUploadURLError extends Error {
   });
 
   @override
-  String toString() => "DuplicateUploadURLError: Upload URL was reused. "
+  String toString() =>
+      "DuplicateUploadURLError: Upload URL was reused. "
       "First used at: $firstUsedAt, Duplicate attempt at: $duplicateUsedAt. "
       "This indicates a race condition in parallel uploads.";
 }

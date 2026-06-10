@@ -72,10 +72,11 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     };
     collectionActions = CollectionActions(CollectionsService.instance);
     widget.selectedFiles.addListener(_selectedFilesListener);
-    _userAuthEventSubscription =
-        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
-      setState(() {});
-    });
+    _userAuthEventSubscription = Bus.instance
+        .on<SubscriptionPurchasedEvent>()
+        .listen((event) {
+          setState(() {});
+        });
     _appBarTitle = widget.title;
     galleryType = widget.type;
   }
@@ -121,7 +122,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       EntePopupMenuItem(
         AppLocalizations.of(context).ignorePerson,
         value: ClusterPopupAction.ignore,
-        icon: Icons.hide_image_outlined,
+        icon: Icons.person_off_outlined,
       ),
       EntePopupMenuItem(
         AppLocalizations.of(context).mixedGrouping,

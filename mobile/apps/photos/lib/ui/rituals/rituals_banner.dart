@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math" as math;
 
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
@@ -64,9 +65,11 @@ class RitualsBanner extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      for (final (index, item)
-                          in _buildRowItems(context, rituals, summary)
-                              .indexed) ...[
+                      for (final (index, item) in _buildRowItems(
+                        context,
+                        rituals,
+                        summary,
+                      ).indexed) ...[
                         if (index != 0) const SizedBox(width: 10),
                         item,
                       ],
@@ -129,10 +132,7 @@ class RitualsBanner extends StatelessWidget {
 }
 
 class _RitualsHeader extends StatelessWidget {
-  const _RitualsHeader({
-    required this.showChevron,
-    required this.onTap,
-  });
+  const _RitualsHeader({required this.showChevron, required this.onTap});
 
   final bool showChevron;
   final VoidCallback? onTap;
@@ -151,7 +151,7 @@ class _RitualsHeader extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Text(
               context.l10n.ritualsTitle,
-              style: textTheme.largeBold,
+              style: TextStyles.h2.copyWith(color: textTheme.largeBold.color),
             ),
           ),
           if (showChevron)
@@ -172,10 +172,7 @@ class _RitualsHeader extends StatelessWidget {
 }
 
 class _RitualSummaryCard extends StatelessWidget {
-  const _RitualSummaryCard({
-    required this.ritual,
-    required this.progress,
-  });
+  const _RitualSummaryCard({required this.ritual, required this.progress});
 
   final Ritual ritual;
   final RitualProgress? progress;
@@ -282,10 +279,7 @@ class _RitualIcon extends StatelessWidget {
 }
 
 class _StreakIndicator extends StatelessWidget {
-  const _StreakIndicator({
-    required this.streak,
-    required this.isDark,
-  });
+  const _StreakIndicator({required this.streak, required this.isDark});
 
   final int streak;
   final bool isDark;
@@ -304,10 +298,7 @@ class _StreakIndicator extends StatelessWidget {
 }
 
 class _StreakNumber extends StatelessWidget {
-  const _StreakNumber({
-    required this.streak,
-    required this.isDark,
-  });
+  const _StreakNumber({required this.streak, required this.isDark});
 
   final int streak;
   final bool isDark;
@@ -334,10 +325,7 @@ class _StreakNumber extends StatelessWidget {
 
     final gradient = _linearGradientFromCssAngle(
       degrees: 178,
-      colors: const [
-        Color(0xFF545454),
-        Color(0xFF000000),
-      ],
+      colors: const [Color(0xFF545454), Color(0xFF000000)],
       stops: const [0.1192, 0.8251],
     );
 
@@ -390,10 +378,7 @@ class _LightningIcon extends StatelessWidget {
 }
 
 class _RitualCameraButton extends StatelessWidget {
-  const _RitualCameraButton({
-    required this.onTap,
-    required this.tooltip,
-  });
+  const _RitualCameraButton({required this.onTap, required this.tooltip});
 
   final VoidCallback onTap;
   final String tooltip;
@@ -402,8 +387,9 @@ class _RitualCameraButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor =
-        isDark ? colorScheme.strokeFaint : Colors.black.withValues(alpha: 0.04);
+    final borderColor = isDark
+        ? colorScheme.strokeFaint
+        : Colors.black.withValues(alpha: 0.04);
     return Tooltip(
       message: tooltip,
       child: Material(

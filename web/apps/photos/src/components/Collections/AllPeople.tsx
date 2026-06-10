@@ -451,17 +451,16 @@ type PeopleListItem =
     | { type: "people"; people: Person[]; topSpacing?: boolean }
     | { type: "showMoreButton" };
 
-interface ItemData
-    extends Pick<
-        AllPeopleContentProps,
-        | "showingAllPeople"
-        | "onToggleShowingAllPeople"
-        | "onSelectPerson"
-        | "onRenamePerson"
-        | "onPinPerson"
-        | "onAddName"
-        | "onIgnorePerson"
-    > {
+interface ItemData extends Pick<
+    AllPeopleContentProps,
+    | "showingAllPeople"
+    | "onToggleShowingAllPeople"
+    | "onSelectPerson"
+    | "onRenamePerson"
+    | "onPinPerson"
+    | "onAddName"
+    | "onIgnorePerson"
+> {
     items: PeopleListItem[];
 }
 

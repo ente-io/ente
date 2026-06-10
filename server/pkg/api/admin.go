@@ -39,25 +39,24 @@ import (
 
 // AdminHandler exposes request handlers for all admin related requests
 type AdminHandler struct {
-	QueueRepo               *repo.QueueRepository
-	UserRepo                *repo.UserRepository
-	CollectionRepo          *repo.CollectionRepository
-	AuthenticatorRepo       *authenticator.Repository
-	UserAuthRepo            *repo.UserAuthRepository
-	FileRepo                *repo.FileRepository
-	BillingRepo             *repo.BillingRepository
-	StorageBonusRepo        *storagebonus.Repository
-	BillingController       *controller.BillingController
-	UserController          *user.UserController
-	EmergencyController     *emergency.Controller
-	FamilyController        *family.Controller
-	RemoteStoreController   *remotestore.Controller
-	ObjectCleanupController *controller.ObjectCleanupController
-	MailingListsController  *controller.MailingListsController
-	DiscordController       *discord.DiscordController
-	HashingKey              []byte
-	PasskeyController       *controller.PasskeyController
-	StorageBonusCtl         *storagebonusCtrl.Controller
+	QueueRepo              *repo.QueueRepository
+	UserRepo               *repo.UserRepository
+	CollectionRepo         *repo.CollectionRepository
+	AuthenticatorRepo      *authenticator.Repository
+	UserAuthRepo           *repo.UserAuthRepository
+	FileRepo               *repo.FileRepository
+	BillingRepo            *repo.BillingRepository
+	StorageBonusRepo       *storagebonus.Repository
+	BillingController      *controller.BillingController
+	UserController         *user.UserController
+	EmergencyController    *emergency.Controller
+	FamilyController       *family.Controller
+	RemoteStoreController  *remotestore.Controller
+	MailingListsController *controller.MailingListsController
+	DiscordController      *discord.DiscordController
+	HashingKey             []byte
+	PasskeyController      *controller.PasskeyController
+	StorageBonusCtl        *storagebonusCtrl.Controller
 }
 
 // Duration for which an admin's token is considered valid
@@ -323,11 +322,6 @@ func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
 }
 
 func (h *AdminHandler) UnblockStorageWarningLogin(c *gin.Context) {
-	err := h.isFreshAdminToken(c)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
 	var request ente.AdminOpsForUserRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
@@ -343,7 +337,7 @@ func (h *AdminHandler) UnblockStorageWarningLogin(c *gin.Context) {
 		"req_ctx":  "unblock_storage_warning_login",
 	})
 	logger.Info("Start unblock storage warning login")
-	err = h.UserController.ClearStorageWarningDeletionLoginBlock(request.UserID)
+	err := h.UserController.UnblockStorageWarningDeletionLogin(request.UserID, logger)
 	if err != nil {
 		logger.WithError(err).Error("Failed to unblock storage warning login")
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -683,19 +677,4 @@ func (h *AdminHandler) attachSubscription(ctx *gin.Context, userID int64, respon
 	if err == nil {
 		response["authCodes"] = authEntryCount
 	}
-}
-
-func (h *AdminHandler) ClearOrphanObjects(c *gin.Context) {
-	var req ente.ClearOrphanObjectsRequest
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, ""))
-		return
-	}
-	if !h.ObjectCleanupController.IsValidClearOrphanObjectsDC(req.DC) {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "unsupported dc %s", req.DC))
-		return
-	}
-	go h.ObjectCleanupController.ClearOrphanObjects(req.DC, req.Prefix, req.ForceTaskLock)
-	c.JSON(http.StatusOK, gin.H{})
 }

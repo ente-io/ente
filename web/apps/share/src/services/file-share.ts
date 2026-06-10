@@ -91,6 +91,18 @@ export const fetchFileInfo = async (
         if (await isDeviceLimitExceededResponse(response)) {
             throw new Error(deviceLimitExceededMessage);
         }
+        if (response.status === 410) {
+            let errorBody: { error?: string } | undefined;
+            try {
+                errorBody = (await response.json()) as { error?: string };
+            } catch {
+                // Ignore JSON parsing errors and use generic message
+            }
+            if (errorBody?.error === "expired token") {
+                throw new Error("This link has expired.");
+            }
+            throw new Error("This link has been deleted by the owner.");
+        }
         throw new Error(`Failed to fetch file`);
     }
 
@@ -443,7 +455,7 @@ export const downloadFile = async (
 
     const encryptedData = new Uint8Array(await response.arrayBuffer());
 
-    let decryptedData: Uint8Array;
+    let decryptedData: Uint8Array<ArrayBuffer>;
 
     if (fileDecryptionHeader) {
         // Modern format: Decrypt the file using the decryption header
@@ -463,7 +475,7 @@ export const downloadFile = async (
     }
 
     // Create a blob from the decrypted data
-    const blob = new Blob([new Uint8Array(decryptedData)]);
+    const blob = new Blob([decryptedData]);
 
     // Create download link
     const blobUrl = URL.createObjectURL(blob);

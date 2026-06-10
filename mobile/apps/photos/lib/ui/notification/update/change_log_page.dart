@@ -85,9 +85,9 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       if (isLocalGallery) {
                         await updateService.launchReviewUrl();
                       } else if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop(
-                          ChangeLogPageAction.openReferrals,
-                        );
+                        Navigator.of(
+                          context,
+                        ).pop(ChangeLogPageAction.openReferrals);
                       }
                     },
                   ),
@@ -109,38 +109,39 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     if (strings == null) {
       return const SizedBox.shrink();
     }
-    final items = <ChangeLogEntry>[
-      ChangeLogEntry(
-        strings.title1,
-        description: strings.desc1,
-        items: [strings.desc1Item1, strings.desc1Item2]
-            .where((item) => item.trim().isNotEmpty)
-            .toList(growable: false),
-        isFeature: true,
-      ),
-      ChangeLogEntry(
-        strings.title2,
-        description: strings.desc2,
-        isFeature: true,
-      ),
-      ChangeLogEntry(
-        strings.title3,
-        description: strings.desc3,
-        isFeature: true,
-      ),
-      ChangeLogEntry(
-        strings.title4,
-        description: strings.desc4,
-        isFeature: true,
-      ),
-    ]
-        .where(
-          (entry) =>
-              entry.title.trim().isNotEmpty ||
-              (entry.description?.trim().isNotEmpty ?? false) ||
-              entry.items.isNotEmpty,
-        )
-        .toList(growable: false);
+    final items =
+        <ChangeLogEntry>[
+              ChangeLogEntry(
+                strings.title1,
+                description: strings.desc1,
+                items: [strings.desc1Item1, strings.desc1Item2]
+                    .where((item) => item.trim().isNotEmpty)
+                    .toList(growable: false),
+                isFeature: true,
+              ),
+              ChangeLogEntry(
+                strings.title2,
+                description: strings.desc2,
+                isFeature: true,
+              ),
+              ChangeLogEntry(
+                strings.title3,
+                description: strings.desc3,
+                isFeature: true,
+              ),
+              ChangeLogEntry(
+                strings.title4,
+                description: strings.desc4,
+                isFeature: true,
+              ),
+            ]
+            .where(
+              (entry) =>
+                  entry.title.trim().isNotEmpty ||
+                  (entry.description?.trim().isNotEmpty ?? false) ||
+                  entry.items.isNotEmpty,
+            )
+            .toList(growable: false);
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(

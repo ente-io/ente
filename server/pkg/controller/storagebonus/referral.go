@@ -72,10 +72,7 @@ func (c *Controller) GetUserReferralView(ctx *gin.Context) (*entity.GetUserRefer
 	if codeChangeCount > 1 {
 		codeChangeAttempts = codeChangeCount - 1
 	}
-	remainingAttempts := storagebonus.MaxReferralCodeChangeAllowed - codeChangeAttempts
-	if remainingAttempts < 0 {
-		remainingAttempts = 0
-	}
+	remainingAttempts := max(storagebonus.MaxReferralCodeChangeAllowed-codeChangeAttempts, 0)
 
 	return &entity.GetUserReferralView{
 		PlanInfo: entity.PlanInfo{

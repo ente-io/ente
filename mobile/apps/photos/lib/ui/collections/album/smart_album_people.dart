@@ -22,10 +22,7 @@ import "package:photos/ui/viewer/search/result/people_section_all_page.dart"
 import "package:photos/utils/dialog_util.dart";
 
 class SmartAlbumPeople extends StatefulWidget {
-  const SmartAlbumPeople({
-    super.key,
-    required this.collectionId,
-  });
+  const SmartAlbumPeople({super.key, required this.collectionId});
 
   final int collectionId;
 
@@ -130,12 +127,13 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                             if (toDelete) {
                               for (final personId in removedPersonIds) {
                                 final files = currentConfig!
-                                    .infoMap[personId]?.addedFiles;
+                                    .infoMap[personId]
+                                    ?.addedFiles;
 
                                 final enteFiles = await FilesDB.instance
                                     .getAllFilesGroupByCollectionID(
-                                  files?.toList() ?? [],
-                                );
+                                      files?.toList() ?? [],
+                                    );
 
                                 final collection = CollectionsService.instance
                                     .getCollectionByID(widget.collectionId);
@@ -197,8 +195,9 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
               title: AppLocalizations.of(context).people,
             ),
             expandedHeight: MediaQuery.textScalerOf(context).scale(120),
-            flexibleSpaceCaption:
-                AppLocalizations.of(context).peopleAutoAddDesc,
+            flexibleSpaceCaption: AppLocalizations.of(
+              context,
+            ).peopleAutoAddDesc,
             actionIcons: const [],
           ),
           SliverFillRemaining(
@@ -213,9 +212,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
   }
 }
 
-Future<bool> removeFilesDialog(
-  BuildContext context,
-) async {
+Future<bool> removeFilesDialog(BuildContext context) async {
   final completer = Completer<bool>();
   await showActionSheet(
     context: context,

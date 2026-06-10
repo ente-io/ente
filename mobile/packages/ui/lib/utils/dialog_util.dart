@@ -39,11 +39,7 @@ Future<ButtonResult?> showErrorDialog(
         isInAlert: true,
         buttonAction: ButtonAction.first,
         onTap: () async {
-          await sendEmail(
-            context,
-            to: "support@ente.com",
-            body: body,
-          );
+          await sendEmail(context, to: "support@ente.com", body: body);
         },
       ),
       const ButtonWidget(

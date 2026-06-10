@@ -15,10 +15,7 @@ import 'package:logging/logging.dart';
 
 class SessionsPage extends StatefulWidget {
   final BaseConfiguration config;
-  const SessionsPage(
-    this.config, {
-    super.key,
-  });
+  const SessionsPage(this.config, {super.key});
 
   @override
   State<SessionsPage> createState() => _SessionsPageState();
@@ -39,13 +36,8 @@ class _SessionsPageState extends State<SessionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(context.strings.activeSessions),
-      ),
-      body: CenteredConstrainedWidget(
-        child: _getBody(),
-      ),
+      appBar: AppBar(elevation: 0, title: Text(context.strings.activeSessions)),
+      body: CenteredConstrainedWidget(child: _getBody()),
     );
   }
 
@@ -58,16 +50,13 @@ class _SessionsPageState extends State<SessionsPage> {
     for (final session in _sessions!.sessions) {
       rows.add(_getSessionWidget(session));
     }
-    return SingleChildScrollView(
-      child: Column(
-        children: rows,
-      ),
-    );
+    return SingleChildScrollView(child: Column(children: rows));
   }
 
   Widget _getSessionWidget(Session session) {
-    final lastUsedTime =
-        DateTime.fromMicrosecondsSinceEpoch(session.lastUsedTime);
+    final lastUsedTime = DateTime.fromMicrosecondsSinceEpoch(
+      session.lastUsedTime,
+    );
     return Column(
       children: [
         InkWell(
@@ -88,10 +77,9 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         session.ip,
                         style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.8),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.8),
                           fontSize: 14,
                         ),
                       ),
@@ -101,10 +89,9 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         getFormattedTime(lastUsedTime),
                         style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.8),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.8),
                           fontSize: 12,
                         ),
                       ),
@@ -178,10 +165,7 @@ class _SessionsPageState extends State<SessionsPage> {
               style: textTheme.body,
             ),
             const SizedBox(height: 8),
-            Text(
-              session.ua,
-              style: textTheme.small,
-            ),
+            Text(session.ua, style: textTheme.small),
           ],
           const SizedBox(height: 24),
           SizedBox(

@@ -1,3 +1,4 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import {
     authenticatedRequestHeaders,
@@ -40,10 +41,6 @@ import {
     type LocalMessageRecord,
     type LocalSessionRecord,
 } from "./store";
-
-const isTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_IPC__" in window);
 
 type DiffCursor = {
     base_since_time: number;
@@ -162,7 +159,7 @@ const syncChatNative = async (chatKey: string, token: string) => {
     const masterKey = await masterKeyFromSession();
     if (!masterKey) return;
 
-    const { invoke } = await import("@tauri-apps/api/tauri");
+    const { invoke } = await import("@tauri-apps/api/core");
     const { getName, getVersion } = await import("@tauri-apps/api/app");
 
     const [baseUrl, clientPackage, clientVersion] = await Promise.all([
@@ -368,7 +365,7 @@ const pushChat = async (chatKey: string) => {
                             `Message-specific limit reached for ${message.messageUuid}`,
                             error,
                         );
-                        sessionError = error as Error;
+                        sessionError = error;
                         // For limit errors, we stop pushing further messages in this session
                         // to maintain causal consistency on the server.
                         break;
@@ -559,7 +556,7 @@ const applyDiff = async (response: DiffResponse, chatKey: string) => {
             continue;
         }
 
-        let decrypted: { title?: string } = {};
+        let decrypted: { title?: string };
         try {
             decrypted = (await decryptChatPayload(
                 {
@@ -960,7 +957,7 @@ const ensureAttachmentEncryptedForUpload = async (
     attachmentId: string,
     sessionUuid: string,
     chatKey: string,
-): Promise<Uint8Array> => {
+): Promise<Uint8Array<ArrayBuffer>> => {
     const bytes = await readAttachmentBytes(attachmentId);
 
     try {

@@ -263,7 +263,6 @@
   "after1Month": "1ヶ月後",
   "after1Year": "1年後",
   "manageParticipants": "管理",
-  "collabLinkSectionDescription": "Enteアプリやアカウントを持っていない人にも、共有アルバムに写真を追加したり表示したりできるリンクを作成します。",
   "collectPhotos": "写真を集めよう",
   "collaborativeLink": "共同作業リンク",
   "shareWithNonenteUsers": "Enteを使っていない人に共有",
@@ -371,7 +370,6 @@
   "creatingLink": "リンクを作成中...",
   "removeWithQuestionMark": "削除しますか?",
   "removeParticipantBody": "{userEmail} はこの共有アルバムから退出します\n\n{userEmail} が追加した写真もアルバムから削除されます",
-  "keepPhotos": "写真を残す",
   "deletePhotos": "写真を削除",
   "inviteToEnte": "Enteに招待する",
   "removePublicLink": "公開リンクを削除",
@@ -379,6 +377,9 @@
   "sharing": "共有中...",
   "youCannotShareWithYourself": "自分自身と共有することはできません",
   "archive": "アーカイブ",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "長押しで写真を選択し、+をクリックしてアルバムを作成します",
   "importing": "インポート中...",
   "failedToLoadAlbums": "アルバムの読み込みに失敗しました",
@@ -831,7 +832,6 @@
   "continueWithoutAccount": "アカウントなしで続ける",
   "loginToExistingAccount": "既存のアカウントでログイン",
   "pleaseLoginAgain": "もう一度試してください",
-  "autoLogoutMessage": "技術的な不具合により、ログアウトしました。ご不便をおかけして申し訳ございません。",
   "yourSubscriptionHasExpired": "サブスクリプションの有効期限が終了しました",
   "storageLimitExceeded": "ストレージの上限を超えました",
   "upgrade": "アップグレード",
@@ -852,11 +852,6 @@
   "collectEventPhotos": "イベントの写真を集めよう",
   "sessionExpired": "セッション切れ",
   "loggingOut": "ログアウト中...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "デバイス上",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -898,6 +893,9 @@
   "moveToAlbum": "アルバムに移動",
   "unhide": "再表示",
   "unarchive": "アーカイブ解除",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "お気に入り",
   "removeFromFavorite": "お気に入りリストから外す",
   "shareMemories": "思い出を共有",
@@ -1325,8 +1323,6 @@
   "noPhotosFoundHere": "写真が見つかりません",
   "zoomOutToSeePhotos": "ズームアウトして写真を表示",
   "noImagesWithLocation": "位置情報のある画像がありません",
-  "unpinAlbum": "アルバムのピン留めを解除",
-  "pinAlbum": "アルバムをピンする",
   "pin": "固定",
   "pinToTop": "トップに固定",
   "showInMemories": "思い出を表示",

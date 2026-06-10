@@ -25,14 +25,14 @@ class SavePersonBanner extends StatelessWidget {
     this.onSecondaryTap,
     this.onDismissed,
     this.dismissibleKey,
-  })  : assert(
-          faceWidget != null &&
-              primaryActionLabel != null &&
-              secondaryActionLabel != null &&
-              onPrimaryTap != null &&
-              onSecondaryTap != null,
-        ),
-        assert(onDismissed == null || dismissibleKey != null);
+  }) : assert(
+         faceWidget != null &&
+             primaryActionLabel != null &&
+             secondaryActionLabel != null &&
+             onPrimaryTap != null &&
+             onSecondaryTap != null,
+       ),
+       assert(onDismissed == null || dismissibleKey != null);
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +43,7 @@ class SavePersonBanner extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final captionColor = colorScheme.textBase.withValues(alpha: 0.8);
-    final buttonTextStyle = textTheme.smallBold.copyWith(
-      height: 20 / 14,
-    );
+    final buttonTextStyle = textTheme.smallBold.copyWith(height: 20 / 14);
     const double faceSize = 52;
     const double closeButtonSize = 24;
     final bool showDismiss = onDismissed != null;
@@ -73,9 +71,7 @@ class SavePersonBanner extends StatelessWidget {
                         SizedBox(
                           width: faceSize,
                           height: faceSize,
-                          child: FaceThumbnailSquircleClip(
-                            child: faceWidget!,
-                          ),
+                          child: FaceThumbnailSquircleClip(child: faceWidget!),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -83,10 +79,7 @@ class SavePersonBanner extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                text,
-                                style: textTheme.body,
-                              ),
+                              Text(text, style: textTheme.body),
                               if (subText != null) ...[
                                 const SizedBox(height: 4),
                                 Text(
@@ -182,12 +175,7 @@ class _SavePersonBannerActionButton extends StatelessWidget {
         child: InkWell(
           borderRadius: borderRadius,
           onTap: onTap,
-          child: Center(
-            child: Text(
-              label,
-              style: textStyle,
-            ),
-          ),
+          child: Center(child: Text(label, style: textStyle)),
         ),
       ),
     );
@@ -198,10 +186,7 @@ class _SavePersonBannerCloseButton extends StatelessWidget {
   final double size;
   final VoidCallback? onTap;
 
-  const _SavePersonBannerCloseButton({
-    required this.size,
-    this.onTap,
-  });
+  const _SavePersonBannerCloseButton({required this.size, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -217,11 +202,7 @@ class _SavePersonBannerCloseButton extends StatelessWidget {
           color: colorScheme.fillFaint,
           borderRadius: borderRadius,
         ),
-        child: const Icon(
-          Icons.close,
-          size: 14,
-          color: Colors.black,
-        ),
+        child: const Icon(Icons.close, size: 14, color: Colors.black),
       ),
     );
   }

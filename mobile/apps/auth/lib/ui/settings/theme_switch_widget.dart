@@ -1,4 +1,4 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -6,6 +6,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:flutter/material.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
@@ -16,27 +17,6 @@ class ThemeSwitchWidget extends StatefulWidget {
 }
 
 class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
-  AdaptiveThemeMode? currentThemeMode;
-
-  @override
-  void initState() {
-    super.initState();
-    AdaptiveTheme.getThemeMode().then(
-      (value) {
-        currentThemeMode = value ?? AdaptiveThemeMode.system;
-        debugPrint('theme value $value');
-        if (mounted) {
-          setState(() => {});
-        }
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
@@ -52,28 +32,29 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     return Column(
       children: [
         sectionOptionSpacing,
-        _menuItem(context, AdaptiveThemeMode.light),
+        _menuItem(context, ThemeMode.light),
         sectionOptionSpacing,
-        _menuItem(context, AdaptiveThemeMode.dark),
+        _menuItem(context, ThemeMode.dark),
         sectionOptionSpacing,
-        _menuItem(context, AdaptiveThemeMode.system),
+        _menuItem(context, ThemeMode.system),
         sectionOptionSpacing,
       ],
     );
   }
 
-  String _name(BuildContext ctx, AdaptiveThemeMode mode) {
+  String _name(BuildContext ctx, ThemeMode mode) {
     switch (mode) {
-      case AdaptiveThemeMode.light:
+      case ThemeMode.light:
         return ctx.l10n.lightTheme;
-      case AdaptiveThemeMode.dark:
+      case ThemeMode.dark:
         return ctx.l10n.darkTheme;
-      case AdaptiveThemeMode.system:
+      case ThemeMode.system:
         return ctx.l10n.systemTheme;
     }
   }
 
-  Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
+  Widget _menuItem(BuildContext context, ThemeMode themeMode) {
+    final currentThemeMode = App.themeModeOf(context);
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: _name(context, themeMode),
@@ -84,8 +65,9 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
       trailingExtraMargin: 4,
       onTap: () async {
-        AdaptiveTheme.of(context).setThemeMode(themeMode);
-        currentThemeMode = themeMode;
+        final appLock = AppLock.of(context);
+        await App.setThemeMode(context, themeMode);
+        appLock?.setThemeMode(themeMode);
         if (mounted) {
           setState(() {});
         }

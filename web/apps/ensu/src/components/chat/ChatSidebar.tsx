@@ -1,3 +1,4 @@
+import type { ChatSession } from "@/services/chat/store";
 import {
     ArrowLeft01Icon,
     ArrowRight01Icon,
@@ -21,7 +22,6 @@ import {
 import type { SxProps, Theme } from "@mui/material/styles";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import React, { memo } from "react";
-import type { ChatSession } from "services/chat/store";
 
 type IconProps = { size: number; strokeWidth: number };
 

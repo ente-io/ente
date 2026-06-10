@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:ui";
 
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
@@ -28,6 +29,21 @@ void main() {
     await tester.pump();
 
     expect(tapCount, 1);
+  });
+
+  testWidgets("ButtonComponent renders leading content", (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        ButtonComponent(
+          label: "Share",
+          leading: const Icon(Icons.share_outlined),
+          onTap: () {},
+        ),
+      ),
+    );
+
+    expect(find.text("Share"), findsOneWidget);
+    expect(find.byIcon(Icons.share_outlined), findsOneWidget);
   });
 
   testWidgets(
@@ -184,6 +200,34 @@ void main() {
     },
   );
 
+  testWidgets("ButtonComponent can surface loading without success", (
+    tester,
+  ) async {
+    final completer = Completer<void>();
+
+    await tester.pumpWidget(
+      _wrap(
+        ButtonComponent(
+          label: "Saving",
+          shouldShowSuccessState: false,
+          onTap: () => completer.future,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text("Saving"));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const ValueKey('loading')), findsOneWidget);
+
+    completer.complete();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byKey(const ValueKey('success')), findsNothing);
+    expect(find.text("Saving"), findsOneWidget);
+  });
+
   testWidgets(
     "ButtonComponent can hide execution visuals while still blocking taps",
     (tester) async {
@@ -262,6 +306,12 @@ void main() {
 
       expect(find.text("No callback"), findsOneWidget);
       expect(find.text("Disabled"), findsOneWidget);
+      expect(
+        _buttonContainerColor(tester, "Disabled"),
+        ColorTokens.light.fillDark,
+      );
+      expect(_textColor(tester, "No callback"), ColorTokens.light.textLightest);
+      expect(_textColor(tester, "Disabled"), ColorTokens.light.textLightest);
       await tester.tap(find.text("Disabled"));
       await tester.pump();
 
@@ -305,7 +355,8 @@ void main() {
       ),
     );
 
-    expect(_containerColor(tester), ColorTokens.light.primaryLight);
+    expect(_containerColor(tester), ColorTokens.light.fillDark);
+    expect(_textColor(tester, "Cancel"), ColorTokens.light.textBase);
     expect(tester.getSize(find.byType(AnimatedContainer)).height, 52);
 
     await tester.pumpWidget(
@@ -320,6 +371,81 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(AnimatedContainer)).height, 52);
+  });
+
+  testWidgets("Secondary button states follow Figma fill and text tokens", (
+    tester,
+  ) async {
+    Future<void> pumpSecondary({
+      required String label,
+      required ComponentApp app,
+      Brightness brightness = Brightness.light,
+    }) {
+      return tester.pumpWidget(
+        _wrap(
+          ButtonComponent(
+            label: label,
+            variant: ButtonComponentVariant.secondary,
+            size: ButtonComponentSize.large,
+            onTap: () {},
+          ),
+          app: app,
+          brightness: brightness,
+        ),
+      );
+    }
+
+    await pumpSecondary(label: "Photos", app: ComponentApp.photos);
+    expect(_containerColor(tester), ColorTokens.light.fillDark);
+    expect(_textColor(tester, "Photos"), ColorTokens.light.textBase);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: Offset.zero);
+    await tester.pump();
+    await mouse.moveTo(tester.getCenter(find.text("Photos")));
+    await tester.pumpAndSettle();
+
+    expect(_containerColor(tester), ColorTokens.light.fillDarker);
+
+    final photosGesture = await tester.startGesture(
+      tester.getCenter(find.text("Photos")),
+    );
+    await tester.pump();
+
+    expect(_containerColor(tester), ColorTokens.light.fillDarkest);
+    expect(_textColor(tester, "Photos"), ColorTokens.light.textBase);
+
+    await photosGesture.up();
+    await tester.pump(const Duration(milliseconds: 140));
+    await mouse.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    await pumpSecondary(label: "Locker", app: ComponentApp.locker);
+    expect(_containerColor(tester), ColorTokens.light.fillDark);
+    expect(_textColor(tester, "Locker"), ColorTokens.light.textBase);
+
+    await pumpSecondary(label: "Auth", app: ComponentApp.auth);
+    expect(_containerColor(tester), ColorTokens.light.fillDark);
+    expect(_textColor(tester, "Auth"), ColorTokens.light.textBase);
+
+    await pumpSecondary(
+      label: "Auth dark",
+      app: ComponentApp.auth,
+      brightness: Brightness.dark,
+    );
+    expect(_containerColor(tester), ColorTokens.dark.fillDark);
+    expect(_textColor(tester, "Auth dark"), ColorTokens.dark.textBase);
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text("Auth dark")),
+    );
+    await tester.pump();
+
+    expect(_containerColor(tester), ColorTokens.dark.fillDarkest);
+    expect(_textColor(tester, "Auth dark"), ColorTokens.dark.textBase);
+
+    await gesture.up();
   });
 
   testWidgets("IconButtonComponent renders Figma size and pressed state", (
@@ -380,6 +506,30 @@ void main() {
     await tester.pump();
 
     expect(tapCount, 1);
+  });
+
+  testWidgets("IconButtonComponent can handle tap down without onTap", (
+    tester,
+  ) async {
+    TapDownDetails? tapDownDetails;
+
+    await tester.pumpWidget(
+      _wrap(
+        IconButtonComponent(
+          icon: const Icon(Icons.add),
+          onTapDown: (details) => tapDownDetails = details,
+        ),
+      ),
+    );
+
+    final surfaceFinder = find.byKey(const ValueKey('icon-button-surface'));
+    final gesture = await tester.startGesture(tester.getCenter(surfaceFinder));
+    await tester.pump();
+
+    expect(tapDownDetails, isNotNull);
+    expect(_iconButtonColor(tester), Colors.transparent);
+
+    await gesture.up();
   });
 
   testWidgets("IconButtonComponent mutes disabled foreground", (tester) async {
@@ -489,9 +639,14 @@ void main() {
   });
 }
 
-Widget _wrap(Widget child) {
+Widget _wrap(
+  Widget child, {
+  ComponentApp app = ComponentApp.photos,
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
-    theme: ComponentTheme.lightTheme(),
+    themeAnimationDuration: Duration.zero,
+    theme: ComponentTheme.themeForApp(app, brightness: brightness),
     home: Scaffold(body: Center(child: child)),
   );
 }
@@ -503,9 +658,24 @@ Color _containerColor(WidgetTester tester) {
   return (container.decoration! as BoxDecoration).color!;
 }
 
+Color _buttonContainerColor(WidgetTester tester, String label) {
+  final container = tester.widget<AnimatedContainer>(
+    find.ancestor(
+      of: find.text(label),
+      matching: find.byType(AnimatedContainer),
+    ),
+  );
+  return (container.decoration! as BoxDecoration).color!;
+}
+
 Color _iconButtonColor(WidgetTester tester) {
   final container = tester.widget<AnimatedContainer>(
     find.byKey(const ValueKey('icon-button-surface')),
   );
   return (container.decoration! as BoxDecoration).color!;
+}
+
+Color _textColor(WidgetTester tester, String label) {
+  final text = tester.widget<Text>(find.text(label));
+  return text.style!.color!;
 }

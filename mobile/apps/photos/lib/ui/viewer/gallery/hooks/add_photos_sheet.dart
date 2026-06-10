@@ -38,9 +38,7 @@ Future<dynamic> showAddPhotosSheet(
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(5),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
     ),
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
@@ -52,10 +50,7 @@ Future<dynamic> showAddPhotosSheet(
 class AddPhotosPhotoWidget extends StatelessWidget {
   final Collection collection;
 
-  const AddPhotosPhotoWidget(
-    this.collection, {
-    super.key,
-  });
+  const AddPhotosPhotoWidget(this.collection, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +59,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
     selectedFiles.addListener(() {
       isFileSelected.value = selectedFiles.files.isNotEmpty;
     });
-    final Set<int> hiddenCollectionIDs =
-        CollectionsService.instance.getHiddenCollectionIds();
+    final Set<int> hiddenCollectionIDs = CollectionsService.instance
+        .getHiddenCollectionIds();
     // Hide the current collection files from suggestions
     hiddenCollectionIDs.add(collection.id);
 
@@ -125,8 +120,9 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                                   key: ValueKey(value),
                                   // isDisabled: !value,
                                   buttonType: ButtonType.primary,
-                                  labelText:
-                                      AppLocalizations.of(context).addSelected,
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  ).addSelected,
                                   onTap: () async {
                                     final selectedFile = selectedFiles.files;
                                     final ca = CollectionActions(
@@ -148,8 +144,9 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                           ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.second,
-                            labelText:
-                                AppLocalizations.of(context).addFromDevice,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).addFromDevice,
                             onTap: () async {
                               await _onPickFromDeviceClicked(context);
                             },
@@ -181,9 +178,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
         ),
       );
       if (result != null && result.isNotEmpty) {
-        final ca = CollectionActions(
-          CollectionsService.instance,
-        );
+        final ca = CollectionActions(CollectionsService.instance);
         await ca.addToCollection(
           context,
           collection.id,
@@ -194,8 +189,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       }
     } catch (e) {
       if (e is StateError) {
-        final PermissionState ps =
-            await permissionService.requestPhotoMangerPermissions();
+        final PermissionState ps = await permissionService
+            .requestPhotoMangerPermissions();
         if (ps != PermissionState.authorized && ps != PermissionState.limited) {
           await showChoiceDialog(
             context,
@@ -285,35 +280,31 @@ class _DelayedGalleryState extends State<DelayedGallery> {
   Widget build(BuildContext context) {
     if (_showGallery) {
       return GalleryFilesState(
-        child: Gallery(
-          inSelectionMode: true,
-          asyncLoader: (
-            creationStartTime,
-            creationEndTime, {
-            limit,
-            asc,
-          }) {
-            return FilesDB.instance.getAllPendingOrUploadedFiles(
-              creationStartTime,
-              creationEndTime,
-              Configuration.instance.getUserID()!,
-              limit: limit,
-              asc: asc,
-              filterOptions: DBFilterOptions(
-                hideIgnoredForUpload: true,
-                dedupeUploadID: true,
-                ignoredCollectionIDs: widget.hiddenCollectionIDs,
-              ),
-              applyOwnerCheck: true,
-            );
-          },
-          tagPrefix: "pick_add_photos_gallery",
-          selectedFiles: widget.selectedFiles,
-          showSelectAll: true,
-          sortAsyncFn: () => false,
-          disablePinnedGroupHeader: true,
-          disableVerticalPaddingForScrollbar: true,
-        ).animate().fadeIn(
+        child:
+            Gallery(
+              inSelectionMode: true,
+              asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+                return FilesDB.instance.getAllPendingOrUploadedFiles(
+                  creationStartTime,
+                  creationEndTime,
+                  Configuration.instance.getUserID()!,
+                  limit: limit,
+                  asc: asc,
+                  filterOptions: DBFilterOptions(
+                    hideIgnoredForUpload: true,
+                    dedupeUploadID: true,
+                    ignoredCollectionIDs: widget.hiddenCollectionIDs,
+                  ),
+                  applyOwnerCheck: true,
+                );
+              },
+              tagPrefix: "pick_add_photos_gallery",
+              selectedFiles: widget.selectedFiles,
+              showSelectAll: true,
+              sortAsyncFn: () => false,
+              disablePinnedGroupHeader: true,
+              disableVerticalPaddingForScrollbar: true,
+            ).animate().fadeIn(
               duration: const Duration(milliseconds: 175),
               curve: Curves.easeOutCirc,
             ),
@@ -337,9 +328,6 @@ class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
     with BoundaryReporter {
   @override
   Widget build(BuildContext context) {
-    return boundaryWidget(
-      position: BoundaryPosition.top,
-      child: widget.child,
-    );
+    return boundaryWidget(position: BoundaryPosition.top, child: widget.child);
   }
 }

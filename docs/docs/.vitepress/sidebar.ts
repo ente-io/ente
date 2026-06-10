@@ -219,6 +219,10 @@ export const sidebar = [
                         collapsed: true,
                         items: [
                             {
+                                text: "Android gallery integration",
+                                link: "/photos/features/utilities/android-gallery",
+                            },
+                            {
                                 text: "Cast",
                                 link: "/photos/features/utilities/cast/",
                             },
@@ -327,10 +331,16 @@ export const sidebar = [
         text: "Auth",
         items: [
             { text: "Introduction", link: "/auth/" },
-            { text: "Features", link: "/auth/features/" },
             {
-                text: "Offline mode",
-                link: "/auth/features/offline-mode",
+                text: "Features",
+                collapsed: true,
+                items: [
+                    { text: "Overview", link: "/auth/features/" },
+                    {
+                        text: "Offline mode",
+                        link: "/auth/features/offline-mode",
+                    },
+                ],
             },
             {
                 text: "FAQ",
@@ -372,6 +382,20 @@ export const sidebar = [
                     {
                         text: "Export",
                         link: "/auth/migration/export",
+                    },
+                ],
+            },
+            {
+                text: "Troubleshooting",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Linux system authentication",
+                        link: "/auth/troubleshooting/linux-system-auth",
+                    },
+                    {
+                        text: "Windows login",
+                        link: "/auth/troubleshooting/windows-login",
                     },
                 ],
             },
@@ -504,6 +528,10 @@ export const sidebar = [
                                 text: "Overview",
                                 link: "/locker/features/legacy/",
                             },
+                            {
+                                text: "Legacy Kits",
+                                link: "/locker/features/legacy/legacy-kits",
+                            },
                         ],
                     },
                 ],
@@ -550,9 +578,50 @@ export const sidebar = [
         collapsed: true,
         items: [
             { text: "Introduction", link: "/ensu/" },
+            { text: "How it works", link: "/ensu/how-it-works" },
+            {
+                text: "Features",
+                collapsed: true,
+                items: [{ text: "Overview", link: "/ensu/features/" }],
+            },
             {
                 text: "FAQ",
                 link: "/ensu/faq/",
+            },
+        ],
+    },
+    {
+        text: "Toys",
+        collapsed: false,
+        items: [
+            {
+                text: "Paste",
+                collapsed: true,
+                items: [
+                    { text: "Introduction", link: "/paste/" },
+                    {
+                        text: "Send your first paste",
+                        link: "/paste/getting-started",
+                    },
+                    {
+                        text: "How encryption works",
+                        link: "/paste/features/security",
+                    },
+                    { text: "FAQ", link: "/paste/faq" },
+                ],
+            },
+            {
+                text: "2of3",
+                collapsed: true,
+                items: [
+                    { text: "Introduction", link: "/2of3/" },
+                    {
+                        text: "Getting started",
+                        link: "/2of3/getting-started",
+                    },
+                    { text: "How it works", link: "/2of3/how-it-works" },
+                    { text: "FAQ", link: "/2of3/faq" },
+                ],
             },
         ],
     },

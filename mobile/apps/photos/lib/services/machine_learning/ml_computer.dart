@@ -63,7 +63,7 @@ class MLComputer extends SuperIsolate {
   }
 
   Future<(Uint64List, List<Uint64List>, List<Float32List>)>
-      bulkVectorSearchWithKeys(Uint64List potentialKeys, bool exact) async {
+  bulkVectorSearchWithKeys(Uint64List potentialKeys, bool exact) async {
     try {
       final result = await runInIsolate(
         IsolateOperation.bulkVectorSearchWithKeys,
@@ -178,8 +178,8 @@ class MLComputer extends SuperIsolate {
           _isClipTokenizerInitialized = true;
         }
 
-        final String? downloadedModelPath =
-            await ClipTextEncoder.instance.downloadModelSafe();
+        final String? downloadedModelPath = await ClipTextEncoder.instance
+            .downloadModelSafe();
         if (downloadedModelPath == null) {
           throw WiFiUnavailableError(
             "Could not download clip text model because high bandwidth "
@@ -193,10 +193,12 @@ class MLComputer extends SuperIsolate {
         }
 
         final String modelName = ClipTextEncoder.instance.modelName;
-        final address = await runInIsolate(IsolateOperation.loadModel, {
-          'modelName': modelName,
-          'modelPath': downloadedModelPath,
-        }) as int;
+        final address =
+            await runInIsolate(IsolateOperation.loadModel, {
+                  'modelName': modelName,
+                  'modelPath': downloadedModelPath,
+                })
+                as int;
         ClipTextEncoder.instance.storeSessionAddress(address);
       } catch (e, s) {
         _logger.severe("Could not load clip text model in MLComputer", e, s);
@@ -212,9 +214,10 @@ class MLComputer extends SuperIsolate {
     try {
       final queryToResults =
           await runInIsolate(IsolateOperation.computeBulkSimilarities, {
-        "textQueryToEmbeddingMap": textQueryToEmbeddingMap,
-        "minimumSimilarityMap": minimumSimilarityMap,
-      }) as Map<String, List<QueryResult>>;
+                "textQueryToEmbeddingMap": textQueryToEmbeddingMap,
+                "minimumSimilarityMap": minimumSimilarityMap,
+              })
+              as Map<String, List<QueryResult>>;
       return queryToResults;
     } catch (e, s) {
       _logger.severe(
@@ -233,9 +236,10 @@ class MLComputer extends SuperIsolate {
     try {
       final queryToResults =
           await runInIsolate(IsolateOperation.computeBulkSimilaritiesWithRust, {
-        "textQueryToEmbeddingMap": textQueryToEmbeddingMap,
-        "minimumSimilarityMap": minimumSimilarityMap,
-      }) as Map<String, List<QueryResult>>;
+                "textQueryToEmbeddingMap": textQueryToEmbeddingMap,
+                "minimumSimilarityMap": minimumSimilarityMap,
+              })
+              as Map<String, List<QueryResult>>;
       return queryToResults;
     } catch (e, s) {
       _logger.severe(
@@ -253,9 +257,10 @@ class MLComputer extends SuperIsolate {
   }) async {
     try {
       await runInIsolate(IsolateOperation.cacheImageEmbeddings, {
-        'embeddings': embeddings,
-        'cacheRustExact': cacheRustExact,
-      }) as bool;
+            'embeddings': embeddings,
+            'cacheRustExact': cacheRustExact,
+          })
+          as bool;
       _logger.info(
         'Cached ${embeddings.length} image embeddings inside MLComputer',
       );
@@ -269,8 +274,9 @@ class MLComputer extends SuperIsolate {
   Future<void> clearImageEmbeddingsCache() async {
     try {
       await runInIsolate(IsolateOperation.clearIsolateCache, {
-        'key': imageEmbeddingsKey,
-      }) as bool;
+            'key': imageEmbeddingsKey,
+          })
+          as bool;
       return;
     } catch (e, s) {
       _logger.severe(

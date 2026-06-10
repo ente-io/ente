@@ -66,6 +66,7 @@ describe("resolveContactDisplayFromSnapshot", () => {
 
 beforeEach(() => {
     vi.resetModules();
+    vi.restoreAllMocks();
     vi.clearAllMocks();
     vi.useRealTimers();
 });
@@ -202,7 +203,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).toContain("contacts/");
@@ -227,7 +228,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).not.toContain("wrapped-root-key");
@@ -244,7 +245,7 @@ describe("ensureContactsReady", () => {
         });
 
         const persisted = setKV.mock.calls
-            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
             .join("\n");
 
         expect(persisted).toContain("wrapped-root-key");
@@ -280,11 +281,9 @@ describe("profile picture loading", () => {
     });
 
     test("uses the inferred image mime type for avatar blobs", async () => {
-        const createObjectURL = vi.fn((blob: Blob) => {
-            void blob;
-            return "blob:contact";
-        });
-        vi.stubGlobal("URL", { createObjectURL, revokeObjectURL: vi.fn() });
+        const createObjectURL = vi
+            .spyOn(URL, "createObjectURL")
+            .mockReturnValue("blob:contact");
         const pngBytes = Uint8Array.from([
             0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00,
             0x0d,
@@ -299,13 +298,13 @@ describe("profile picture loading", () => {
         });
         await contacts.__testing.preloadResolvedContactAvatar({ userID: 101 });
 
-        const blobArg = createObjectURL.mock.calls[0]?.[0];
+        const blobArg = createObjectURL.mock.calls[0]?.[0] as Blob | undefined;
         expect(blobArg?.type).toBe("image/png");
     });
 });
 
 describe("retry after warm-up failure", () => {
-    test("retries with the last ready input after a transient failure", async () => {
+    test("recovers from a transient failure with bounded background retry", async () => {
         vi.useFakeTimers();
         const { contacts, get_diff } = await setupContactsModule();
         get_diff.mockReset();
@@ -324,15 +323,37 @@ describe("retry after warm-up failure", () => {
             ])
             .mockResolvedValueOnce([]);
 
-        await expect(
+        const ready = contacts.ensureContactsReady({
+            userID: 101,
+            masterKeyB64: "ignored",
+        });
+        await vi.advanceTimersByTimeAsync(10_001);
+        await expect(ready).resolves.toBeUndefined();
+
+        expect(get_diff).toHaveBeenCalledTimes(3);
+    });
+
+    test("stops after bounded background retries keep failing", async () => {
+        vi.useFakeTimers();
+        const { contacts, get_diff } = await setupContactsModule();
+        get_diff.mockReset();
+        get_diff.mockRejectedValue(new Error("down"));
+
+        const ready = expect(
             contacts.ensureContactsReady({
                 userID: 101,
                 masterKeyB64: "ignored",
             }),
-        ).rejects.toThrow("transient");
-        await vi.advanceTimersByTimeAsync(5_001);
+        ).rejects.toThrow("down");
 
-        expect(get_diff).toHaveBeenCalledTimes(3);
+        await vi.advanceTimersByTimeAsync(10_001);
+        await vi.advanceTimersByTimeAsync(30_001);
+        await vi.advanceTimersByTimeAsync(120_001);
+        await ready;
+
+        expect(get_diff).toHaveBeenCalledTimes(4);
+        await vi.advanceTimersByTimeAsync(300_000);
+        expect(get_diff).toHaveBeenCalledTimes(4);
     });
 });
 

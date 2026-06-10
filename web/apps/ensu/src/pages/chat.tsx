@@ -1,52 +1,22 @@
-import { Menu01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-    Box,
-    Button,
-    Drawer,
-    IconButton,
-    Stack,
-    useMediaQuery,
-} from "@mui/material";
-import { getLuminance, useTheme } from "@mui/material/styles";
-import { open as openFileDialog, save } from "@tauri-apps/api/dialog";
-import { ChatComposer } from "components/chat/ChatComposer";
-import { ChatDialogs } from "components/chat/ChatDialogs";
-import { ChatMessageList } from "components/chat/ChatMessageList";
-import { ChatSidebar } from "components/chat/ChatSidebar";
-import { useFileInput } from "components/utils/use-file-input";
-import { savedLocalUser } from "ente-accounts/services/accounts-db";
-import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
-import { NavbarBase } from "ente-base/components/Navbar";
-import { useBaseContext } from "ente-base/context";
-import { getKV, removeKV, setKV } from "ente-base/kv";
-import log from "ente-base/log";
-import { savedLogs } from "ente-base/log-web";
-import { savedAuthToken } from "ente-base/token";
-import { saveStringAsFile } from "ente-base/utils/web";
-import { type NotificationAttributes } from "ente-new/photos/components/Notification";
-import { useRouter } from "next/router";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import { handleManualAppUpdateCheck } from "services/app-update";
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { ChatDialogs } from "@/components/chat/ChatDialogs";
+import { ChatMessageList } from "@/components/chat/ChatMessageList";
+import { ChatSidebar } from "@/components/chat/ChatSidebar";
+import { useFileInput } from "@/components/utils/use-file-input";
+import { handleManualAppUpdateCheck } from "@/services/app-update";
 import {
     buildSelectedPath,
     ROOT_SELECTION_KEY,
     STREAMING_SELECTION_KEY,
     type BranchSwitcher,
-} from "services/chat/branching";
+} from "@/services/chat/branching";
 import {
     cachedChatKey,
     cachedLocalChatKey,
     getOrCreateChatKey,
     getOrCreateLocalChatKey,
     initChatKeyStore,
-} from "services/chat/chatKey";
+} from "@/services/chat/chatKey";
 import {
     addMessage,
     createSession,
@@ -63,35 +33,67 @@ import {
     type ChatAttachment,
     type ChatMessage,
     type ChatSession,
-} from "services/chat/store";
+} from "@/services/chat/store";
 import {
     ChatSyncLimitError,
     downloadAttachment,
     syncChat,
-} from "services/chat/sync";
+} from "@/services/chat/sync";
 import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
     SIGN_IN_ENABLED,
-} from "services/featureFlags";
+} from "@/services/featureFlags";
 import {
     DEFAULT_MODEL,
     FALLBACK_DESKTOP_MODEL_PRESETS,
     FALLBACK_MOBILE_MODEL_PRESETS,
     LlmProvider,
     type ResolvedModelPreset,
-} from "services/llm/provider";
+} from "@/services/llm/provider";
 import type {
     DownloadProgress,
     GenerateEvent,
     LlmMessage,
     ModelInfo,
     ModelSettings,
-} from "services/llm/types";
+} from "@/services/llm/types";
 import {
     clearMasterKeyFromEverywhere,
     masterKeyFromSession,
     updateSessionFromTauriSecureStorageIfNeeded,
-} from "services/session";
+} from "@/services/session";
+import { isTauriRuntime as detectTauriAppRuntime } from "@/services/tauri-runtime";
+import { Menu01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+    Box,
+    Button,
+    Drawer,
+    IconButton,
+    Stack,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
+import { getLuminance, useTheme } from "@mui/material/styles";
+import { savedLocalUser } from "ente-accounts/services/accounts-db";
+import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
+import { NavbarBase } from "ente-base/components/Navbar";
+import { useBaseContext } from "ente-base/context";
+import { buildEnvEnsuDesktopVersion } from "ente-base/env";
+import { getKV, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
+import { savedLogs } from "ente-base/log-web";
+import { savedAuthToken } from "ente-base/token";
+import { saveStringAsFile } from "ente-base/utils/web";
+import { type NotificationAttributes } from "ente-new/photos/components/Notification";
+import { useRouter } from "next/router";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 const formatTime = (timestamp: number) => {
     const date = new Date(Math.floor(timestamp / 1000));
@@ -108,6 +110,68 @@ const DEFAULT_WEB_CONTEXT_SIZE = 4096;
 const ADVANCED_SETTINGS_UNLOCK_KEY = "ensu.advancedSettingsUnlocked";
 const MODEL_SETTINGS_STORAGE_KEY = "ensu.modelSettings";
 const SYSTEM_PROMPT_STORAGE_KEY = "ensu.systemPrompt";
+
+interface TauriCommandError {
+    code?: string;
+    message?: string;
+}
+
+const tauriCommandError = (error: unknown): TauriCommandError => {
+    if (!error || typeof error != "object") return {};
+    const record = error as Record<string, unknown>;
+    return {
+        code: typeof record.code == "string" ? record.code : undefined,
+        message: typeof record.message == "string" ? record.message : undefined,
+    };
+};
+
+const formatImageProcessingErrorForLog = (error: unknown) => {
+    const { code, message } = tauriCommandError(error);
+    if (code == "io") return "io: selected image file could not be read";
+    if (code && message) return `${code}: ${message}`;
+    if (message) return message;
+    if (error instanceof Error) return error.message;
+    if (typeof error == "string") return error;
+    return String(error);
+};
+
+const imageProcessingFailureDialog = (
+    error: unknown,
+    selectedImageCount: number,
+) => {
+    const { code, message } = tauriCommandError(error);
+    const lowerMessage = message?.toLowerCase() ?? "";
+    const subject =
+        selectedImageCount == 1
+            ? "The selected image"
+            : "One of the selected images";
+
+    if (code == "image" && lowerMessage.includes("memory limit")) {
+        return {
+            title: "Image too large",
+            message: `${subject} is too large for Ensu to process. Try resizing it or exporting a smaller copy, then attach it again.`,
+        };
+    }
+
+    if (code == "image") {
+        return {
+            title: "Image could not be attached",
+            message: `${subject} could not be decoded. Try converting it to a different image format, then attach it again.`,
+        };
+    }
+
+    if (code == "io") {
+        return {
+            title: "Image file could not be read",
+            message: `${subject} could not be read. Check that the file still exists and try again.`,
+        };
+    }
+
+    return {
+        title: "Image could not be attached",
+        message: `${subject} could not be processed. Try a different image or attach it again after resizing it.`,
+    };
+};
 
 const loadingPhraseVerbs = [
     "Generating",
@@ -169,6 +233,7 @@ const IMAGE_SELECTOR_EXTENSIONS = [
 const IMAGE_SELECTOR_ACCEPT = IMAGE_SELECTOR_EXTENSIONS.map(
     (ext) => `.${ext}`,
 ).join(",");
+const MAX_IMAGE_ATTACHMENTS_PER_MESSAGE = 2;
 
 const buildPromptWithImages = (text: string, imageCount: number) => {
     if (imageCount <= 0) return text;
@@ -228,8 +293,9 @@ const parseDocumentBlocks = (text: string) => {
     const normalized = text.replace(/\r\n/g, "\n");
     const regex = createDocumentBlockRegex();
     const documents: DocumentAttachment[] = [];
-    let match: RegExpExecArray | null = null;
-    while ((match = regex.exec(normalized)) !== null) {
+    while (true) {
+        const match = regex.exec(normalized);
+        if (!match) break;
         const name = match[1]?.trim() || "Document";
         const content = match[2] ?? "";
         const size = new TextEncoder().encode(content).length;
@@ -358,12 +424,7 @@ const groupSessionsByDate = (sessions: ChatSession[]) => {
     ).filter(([, group]) => group.length > 0);
 };
 
-const detectTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window ||
-        "__TAURI_IPC__" in window ||
-        "__TAURI_INTERNALS__" in window ||
-        "__TAURI_METADATA__" in window);
+const detectTauriRuntime = () => detectTauriAppRuntime();
 
 const Page: React.FC = () => {
     const router = useRouter();
@@ -496,6 +557,7 @@ const Page: React.FC = () => {
         bgcolor: "transparent",
         color: "text.base",
         "&:hover": { bgcolor: "fill.faint" },
+        "&.Mui-disabled": { color: "text.faint" },
     } as const;
     const smallIconProps = { size: 24, strokeWidth: 2 } as const;
     const actionIconProps = { size: 24, strokeWidth: 2 } as const;
@@ -589,6 +651,9 @@ const Page: React.FC = () => {
     const [pendingImagePreviews, setPendingImagePreviews] = useState<
         Record<string, string>
     >({});
+    const [isImageDragActive, setIsImageDragActive] = useState(false);
+    const [isProcessingDroppedImages, setIsProcessingDroppedImages] =
+        useState(false);
     const [imagePreview, setImagePreview] = useState<{
         url: string;
         name: string;
@@ -674,10 +739,9 @@ const Page: React.FC = () => {
         if (Array.isArray(value)) return value[0];
         return typeof value === "string" ? value : undefined;
     }, [router.isReady, router.query.session]);
-
-    const buildVersion = process.env.NEXT_PUBLIC_ENSU_VERSION
-        ? `v${process.env.NEXT_PUBLIC_ENSU_VERSION}`
-        : "dev";
+    const buildVersion = buildEnvEnsuDesktopVersion
+        ? `v${buildEnvEnsuDesktopVersion}`
+        : undefined;
 
     const lastRouteUpdateRef = useRef<{ sessionId?: string; at: number }>({
         sessionId: undefined,
@@ -1950,12 +2014,10 @@ const Page: React.FC = () => {
         async (images: ImageAttachment[]) => {
             if (!isTauriRuntime || images.length === 0) return [] as string[];
             const { appDataDir, join } = await import("@tauri-apps/api/path");
-            const { createDir, writeBinaryFile } = await import(
-                "@tauri-apps/api/fs"
-            );
+            const { mkdir, writeFile } = await import("@tauri-apps/plugin-fs");
             const root = await appDataDir();
             const dir = await join(root, "ensu_llmchat_inference_images");
-            await createDir(dir, { recursive: true });
+            await mkdir(dir, { recursive: true });
 
             const paths = await Promise.all(
                 images.map(async (image) => {
@@ -1963,7 +2025,7 @@ const Page: React.FC = () => {
                         await image.file.arrayBuffer(),
                     );
                     const path = await join(dir, `${image.id}.jpg`);
-                    await writeBinaryFile({ path, contents: bytes });
+                    await writeFile(path, bytes);
                     return path;
                 }),
             );
@@ -1976,11 +2038,11 @@ const Page: React.FC = () => {
     const cleanupInferenceImages = useCallback(
         async (paths: string[]) => {
             if (!isTauriRuntime || paths.length === 0) return;
-            const { removeFile } = await import("@tauri-apps/api/fs");
+            const { remove } = await import("@tauri-apps/plugin-fs");
             await Promise.all(
                 paths.map(async (path) => {
                     try {
-                        await removeFile(path);
+                        await remove(path);
                     } catch {
                         // ignore cleanup failures
                     }
@@ -2635,27 +2697,20 @@ const Page: React.FC = () => {
                 if (isTauriRuntime) {
                     const [
                         { appDataDir, join },
-                        { createDir, writeBinaryFile },
-                        { open },
+                        { mkdir, writeFile },
+                        { openPath },
                     ] = await Promise.all([
                         import("@tauri-apps/api/path"),
-                        import("@tauri-apps/api/fs"),
-                        import("@tauri-apps/api/shell"),
+                        import("@tauri-apps/plugin-fs"),
+                        import("@tauri-apps/plugin-opener"),
                     ]);
                     const root = await appDataDir();
                     const dir = await join(root, "ensu_llmchat_attachments_v2");
-                    await createDir(dir, { recursive: true });
+                    await mkdir(dir, { recursive: true });
                     const filePath = await join(dir, filename);
 
-                    await writeBinaryFile({ path: filePath, contents: bytes });
-
-                    const normalizedPath = filePath.replace(/\\/g, "/");
-                    const fileUrl = new URL("file:///");
-                    fileUrl.pathname = normalizedPath.startsWith("/")
-                        ? normalizedPath
-                        : `/${normalizedPath}`;
-                    const openTarget = fileUrl.toString();
-                    await open(openTarget);
+                    await writeFile(filePath, bytes);
+                    await openPath(filePath);
                     return;
                 }
 
@@ -3279,15 +3334,16 @@ const Page: React.FC = () => {
 
         if (isTauriRuntime) {
             try {
+                const { save } = await import("@tauri-apps/plugin-dialog");
                 const filename = `ensu-web-logs-${Date.now()}.txt`;
                 const path = await save({
                     defaultPath: filename,
                     filters: [{ name: "Logs", extensions: ["txt"] }],
                 });
                 if (!path) return;
-                const { writeBinaryFile } = await import("@tauri-apps/api/fs");
+                const { writeFile } = await import("@tauri-apps/plugin-fs");
                 const encoded = new TextEncoder().encode(savedLogs());
-                await writeBinaryFile({ path, contents: encoded });
+                await writeFile(path, encoded);
                 return;
             } catch (error) {
                 log.error("Failed to export logs", error);
@@ -3343,7 +3399,7 @@ const Page: React.FC = () => {
     }, [advancedUnlocked]);
 
     // Hardcoded fallbacks used when Rust defaults are not available (web-only
-    // mode). These must stay in sync with rust/ensu/inference/src/defaults.rs.
+    // mode). These must stay in sync with rust/crates/ensu/inference/src/defaults.rs.
     const fallbackSuggestedModels = useMemo(
         () =>
             isTauriRuntime
@@ -3500,10 +3556,41 @@ const Page: React.FC = () => {
         onSelect: handleDocumentSelect,
         onCancel: handleDocumentCancel,
     });
+    const imageAttachmentSlotsRemaining = Math.max(
+        0,
+        MAX_IMAGE_ATTACHMENTS_PER_MESSAGE - pendingImages.length,
+    );
+    const isImageAttachmentLimitReached = imageAttachmentSlotsRemaining === 0;
+    const canHandleImageDrop =
+        showImageAttachment &&
+        !isGenerating &&
+        !isDownloading &&
+        !showModelGate;
+    const canAttachDroppedImages =
+        canHandleImageDrop &&
+        !isImageAttachmentLimitReached &&
+        !isProcessingDroppedImages;
+    const showImageDropOverlay =
+        canHandleImageDrop && (isImageDragActive || isProcessingDroppedImages);
+    const imageDropOverlayTitle = isProcessingDroppedImages
+        ? "Attaching images..."
+        : isImageAttachmentLimitReached
+          ? "Image limit reached"
+          : "Drop images to attach";
+    const imageDropOverlayDescription = isImageAttachmentLimitReached
+        ? `You can attach up to ${MAX_IMAGE_ATTACHMENTS_PER_MESSAGE} images per message.`
+        : "PNG, JPG, WebP, GIF, BMP, HEIC, HEIF, AVIF";
+
+    useEffect(() => {
+        if (!canHandleImageDrop) {
+            setIsImageDragActive(false);
+        }
+    }, [canHandleImageDrop]);
 
     const handleImageSelect = useCallback(
         (files: File[]) => {
             closeAttachmentMenu();
+            if (imageAttachmentSlotsRemaining <= 0) return;
             const images = files.map((file) => ({
                 id: createAttachmentId(),
                 name: file.name.replace(/\0/g, ""),
@@ -3511,10 +3598,17 @@ const Page: React.FC = () => {
                 file,
             }));
             if (images.length) {
-                setPendingImages((prev) => [...prev, ...images]);
+                setPendingImages((prev) => {
+                    const slotsRemaining = Math.max(
+                        0,
+                        MAX_IMAGE_ATTACHMENTS_PER_MESSAGE - prev.length,
+                    );
+                    if (slotsRemaining === 0) return prev;
+                    return [...prev, ...images.slice(0, slotsRemaining)];
+                });
             }
         },
-        [closeAttachmentMenu],
+        [closeAttachmentMenu, imageAttachmentSlotsRemaining],
     );
 
     const handleImageCancel = useCallback(() => {
@@ -3531,9 +3625,86 @@ const Page: React.FC = () => {
         onCancel: handleImageCancel,
     });
 
+    const processTauriImagePaths = useCallback(
+        async (selectedPaths: string[], source: "picker" | "drop") => {
+            if (imageAttachmentSlotsRemaining <= 0) return;
+            const pathsToProcess = selectedPaths.slice(
+                0,
+                imageAttachmentSlotsRemaining,
+            );
+            if (pathsToProcess.length === 0) {
+                handleImageCancel();
+                return;
+            }
+
+            const isDrop = source === "drop";
+            if (isDrop) setIsProcessingDroppedImages(true);
+
+            try {
+                const { invoke } = await import("@tauri-apps/api/core");
+                const files = await Promise.all(
+                    pathsToProcess.map(async (selectedPath) => {
+                        const normalized = selectedPath.replace(/\\/g, "/");
+                        const name =
+                            normalized.split("/").pop()?.replace(/\0/g, "") ||
+                            "image";
+                        const compressed = await invoke<number[]>(
+                            "chat_db_compress_attachment_image_file",
+                            { path: selectedPath },
+                        );
+                        const bytes = new Uint8Array(compressed);
+                        return new File(
+                            [toSafeBlobPart(bytes)],
+                            normalizedJpegAttachmentName(name),
+                            { type: "image/jpeg" },
+                        );
+                    }),
+                );
+
+                log.info(
+                    `Compressed ${source === "drop" ? "dropped" : "selected"} image attachments`,
+                    {
+                        count: files.length,
+                        totalBytes: files.reduce(
+                            (sum, file) => sum + file.size,
+                            0,
+                        ),
+                    },
+                );
+
+                if (files.length > 0) {
+                    handleImageSelect(files);
+                    prewarmSelectedImageInference();
+                } else {
+                    handleImageCancel();
+                }
+            } catch (error) {
+                log.error(
+                    `Failed to process ${source === "drop" ? "dropped" : "selected"} image attachment: ${formatImageProcessingErrorForLog(error)}`,
+                );
+                showMiniDialog(
+                    imageProcessingFailureDialog(error, pathsToProcess.length),
+                );
+                return;
+            } finally {
+                if (isDrop) setIsProcessingDroppedImages(false);
+            }
+        },
+        [
+            handleImageCancel,
+            handleImageSelect,
+            imageAttachmentSlotsRemaining,
+            prewarmSelectedImageInference,
+            showMiniDialog,
+        ],
+    );
+
     const openTauriImageSelector = useCallback(async () => {
         closeAttachmentMenu();
+        if (imageAttachmentSlotsRemaining <= 0) return;
         try {
+            const { open: openFileDialog } =
+                await import("@tauri-apps/plugin-dialog");
             const selection = await openFileDialog({
                 directory: false,
                 multiple: true,
@@ -3555,38 +3726,7 @@ const Page: React.FC = () => {
                 handleImageCancel();
                 return;
             }
-
-            const { invoke } = await import("@tauri-apps/api/tauri");
-            const files = await Promise.all(
-                selectedPaths.map(async (selectedPath) => {
-                    const normalized = selectedPath.replace(/\\/g, "/");
-                    const name =
-                        normalized.split("/").pop()?.replace(/\0/g, "") ||
-                        "image";
-                    const compressed = await invoke<number[]>(
-                        "chat_db_compress_attachment_image_file",
-                        { path: selectedPath },
-                    );
-                    const bytes = new Uint8Array(compressed);
-                    return new File(
-                        [toSafeBlobPart(bytes)],
-                        normalizedJpegAttachmentName(name),
-                        { type: "image/jpeg" },
-                    );
-                }),
-            );
-
-            log.info("Compressed selected image attachments", {
-                count: files.length,
-                totalBytes: files.reduce((sum, file) => sum + file.size, 0),
-            });
-
-            if (files.length > 0) {
-                handleImageSelect(files);
-                prewarmSelectedImageInference();
-            } else {
-                handleImageCancel();
-            }
+            await processTauriImagePaths(selectedPaths, "picker");
         } catch (error) {
             log.error("Failed to open image picker", error);
             showMiniDialog({
@@ -3597,8 +3737,89 @@ const Page: React.FC = () => {
     }, [
         closeAttachmentMenu,
         handleImageCancel,
-        handleImageSelect,
-        prewarmSelectedImageInference,
+        imageAttachmentSlotsRemaining,
+        processTauriImagePaths,
+        showMiniDialog,
+    ]);
+
+    useEffect(() => {
+        if (!isTauriRuntime || !showImageAttachment) return;
+
+        let disposed = false;
+        let unlisten: (() => void) | undefined;
+
+        void import("@tauri-apps/api/webview")
+            .then(({ getCurrentWebview }) =>
+                getCurrentWebview().onDragDropEvent((event) => {
+                    if (
+                        event.payload.type === "enter" ||
+                        event.payload.type === "over"
+                    ) {
+                        if (canHandleImageDrop) {
+                            setIsImageDragActive(true);
+                        }
+                        return;
+                    }
+
+                    if (event.payload.type === "leave") {
+                        setIsImageDragActive(false);
+                        return;
+                    }
+
+                    setIsImageDragActive(false);
+                    if (!canHandleImageDrop) return;
+                    if (isImageAttachmentLimitReached) {
+                        showMiniDialog({
+                            title: "Image limit reached",
+                            message: `You can attach up to ${MAX_IMAGE_ATTACHMENTS_PER_MESSAGE} images per message.`,
+                        });
+                        return;
+                    }
+                    if (!canAttachDroppedImages) return;
+
+                    const imagePaths = event.payload.paths.filter((path) => {
+                        const lowerPath = path.toLowerCase();
+                        return IMAGE_SELECTOR_EXTENSIONS.some((extension) =>
+                            lowerPath.endsWith(`.${extension}`),
+                        );
+                    });
+                    if (imagePaths.length === 0) {
+                        showMiniDialog({
+                            title: "No supported images",
+                            message:
+                                "Drop PNG, JPG, WebP, GIF, BMP, HEIC, HEIF, or AVIF images.",
+                        });
+                        return;
+                    }
+
+                    void processTauriImagePaths(imagePaths, "drop");
+                }),
+            )
+            .then((dispose) => {
+                if (disposed) {
+                    dispose();
+                } else {
+                    unlisten = dispose;
+                }
+            })
+            .catch((error: unknown) => {
+                log.error(
+                    "Failed to subscribe to Tauri image drop events",
+                    error,
+                );
+            });
+
+        return () => {
+            disposed = true;
+            unlisten?.();
+        };
+    }, [
+        canAttachDroppedImages,
+        canHandleImageDrop,
+        isImageAttachmentLimitReached,
+        isTauriRuntime,
+        processTauriImagePaths,
+        showImageAttachment,
         showMiniDialog,
     ]);
 
@@ -3606,6 +3827,7 @@ const Page: React.FC = () => {
         (_event: React.MouseEvent<HTMLElement>) => {
             closeAttachmentMenu();
             if (showImageAttachment) {
+                if (isImageAttachmentLimitReached) return;
                 if (isTauriRuntime) {
                     void openTauriImageSelector();
                 } else {
@@ -3618,6 +3840,7 @@ const Page: React.FC = () => {
         [
             closeAttachmentMenu,
             isTauriRuntime,
+            isImageAttachmentLimitReached,
             openDocumentSelector,
             openImageSelector,
             openTauriImageSelector,
@@ -3627,15 +3850,20 @@ const Page: React.FC = () => {
 
     const handleAttachmentChoice = useCallback(
         (choice: "image" | "document") => {
+            closeAttachmentMenu();
             if (choice === "image") {
-                closeAttachmentMenu();
+                if (isImageAttachmentLimitReached) return;
                 openImageSelector();
             } else {
-                closeAttachmentMenu();
                 openDocumentSelector();
             }
         },
-        [closeAttachmentMenu, openDocumentSelector, openImageSelector],
+        [
+            closeAttachmentMenu,
+            isImageAttachmentLimitReached,
+            openDocumentSelector,
+            openImageSelector,
+        ],
     );
 
     const removePendingDocument = useCallback((id: string) => {
@@ -3752,7 +3980,6 @@ const Page: React.FC = () => {
             trimmed.replace(/\u0000/g, ""),
             pendingDocuments,
         );
-        let promptText = messageText;
         let inferenceImagePaths: string[] = [];
 
         let attachments: ChatAttachment[] = [];
@@ -3828,7 +4055,7 @@ const Page: React.FC = () => {
             }
         }
 
-        promptText = buildPromptWithImages(
+        const promptText = buildPromptWithImages(
             messageText,
             inferenceImagePaths.length,
         );
@@ -4190,6 +4417,9 @@ const Page: React.FC = () => {
                         closeAttachmentMenu={closeAttachmentMenu}
                         handleAttachmentChoice={handleAttachmentChoice}
                         showImageAttachment={showImageAttachment}
+                        isImageAttachmentLimitReached={
+                            isImageAttachmentLimitReached
+                        }
                         getDocumentInputProps={getDocumentInputProps}
                         getImageInputProps={getImageInputProps}
                         actionButtonSx={actionButtonSx}
@@ -4199,6 +4429,50 @@ const Page: React.FC = () => {
                         actionIconProps={actionIconProps}
                         stopButtonColor={theme.palette.error.main}
                     />
+                    {showImageDropOverlay && (
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                inset: 0,
+                                zIndex: 40,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                pointerEvents: "none",
+                                bgcolor: "rgba(0, 0, 0, 0.38)",
+                                backdropFilter: "blur(10px)",
+                                WebkitBackdropFilter: "blur(10px)",
+                            }}
+                        >
+                            <Stack
+                                sx={{
+                                    alignItems: "center",
+                                    gap: 0.75,
+                                    px: 3,
+                                    py: 2,
+                                    borderRadius: 2,
+                                    border: "1px solid rgba(255, 255, 255, 0.32)",
+                                    bgcolor: "rgba(0, 0, 0, 0.42)",
+                                    color: "#fff",
+                                    boxShadow:
+                                        "0 18px 48px rgba(0, 0, 0, 0.22)",
+                                }}
+                            >
+                                <Typography
+                                    variant="small"
+                                    sx={{ fontWeight: 700, color: "inherit" }}
+                                >
+                                    {imageDropOverlayTitle}
+                                </Typography>
+                                <Typography
+                                    variant="mini"
+                                    sx={{ color: "rgba(255, 255, 255, 0.78)" }}
+                                >
+                                    {imageDropOverlayDescription}
+                                </Typography>
+                            </Stack>
+                        </Box>
+                    )}
                 </Box>
             </Box>
 

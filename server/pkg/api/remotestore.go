@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
@@ -21,7 +20,7 @@ func (h *RemoteStoreHandler) InsertOrUpdate(c *gin.Context) {
 	var request ente.UpdateKeyValueRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 
@@ -52,7 +51,7 @@ func (h *RemoteStoreHandler) GetKey(c *gin.Context) {
 	var request ente.GetValueRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
 		return
 	}
 

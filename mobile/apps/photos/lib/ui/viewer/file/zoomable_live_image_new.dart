@@ -66,8 +66,9 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     _logger.info(
       'initState for ${_enteFile.generatedID} with tag ${_enteFile.tag} and name ${_enteFile.displayName}',
     );
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
+    _guestViewEventSubscription = Bus.instance.on<GuestViewEvent>().listen((
+      event,
+    ) {
       setState(() {
         isGuestView = event.isGuestView;
       });
@@ -118,10 +119,11 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
   void _onLongPressEvent(bool isPressed, [Offset? localPosition]) {
     // If pressing within a QR code region, let the QR overlay handle it,
     // but only when the overlay is actually visible (not in fullscreen mode).
-    final isQrOverlayVisible = !(InheritedDetailPageState.maybeOf(context)
-            ?.enableFullScreenNotifier
-            .value ??
-        true);
+    final isQrOverlayVisible =
+        !(InheritedDetailPageState.maybeOf(
+              context,
+            )?.enableFullScreenNotifier.value ??
+            true);
     if (isPressed &&
         isQrOverlayVisible &&
         localPosition != null &&
@@ -203,10 +205,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
   Widget _getVideoPlayer() {
     return Container(
       color: Colors.black,
-      child: Video(
-        controller: _videoController!,
-        controls: null,
-      ),
+      child: Video(controller: _videoController!, controls: null),
     );
   }
 
@@ -243,9 +242,9 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     File? videoFile = await getFile(widget.enteFile, liveVideo: true)
         .timeout(const Duration(seconds: 15))
         .onError((dynamic e, s) {
-      _logger.info("getFile failed ${_enteFile.tag}", e);
-      return null;
-    });
+          _logger.info("getFile failed ${_enteFile.tag}", e);
+          return null;
+        });
 
     // FixMe: Here, we are fetching video directly when getFile failed
     // getFile with liveVideo as true can fail for file with localID when
@@ -255,9 +254,9 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       videoFile = await getFileFromServer(widget.enteFile, liveVideo: true)
           .timeout(const Duration(seconds: 15))
           .onError((dynamic e, s) {
-        _logger.info("getRemoteFile failed ${_enteFile.tag}", e);
-        return null;
-      });
+            _logger.info("getRemoteFile failed ${_enteFile.tag}", e);
+            return null;
+          });
     }
     return videoFile;
   }
@@ -267,22 +266,25 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       showShortToast(context, AppLocalizations.of(context).downloading);
     }
 
-    final File? imageFile = await getFile(
-      widget.enteFile,
-      isOrigin: !Platform.isAndroid,
-    ).timeout(const Duration(seconds: 15)).onError((dynamic e, s) {
-      _logger.info("getFile failed ${_enteFile.tag}", e);
-      return null;
-    });
+    final File? imageFile =
+        await getFile(
+          widget.enteFile,
+          isOrigin: !Platform.isAndroid,
+        ).timeout(const Duration(seconds: 15)).onError((dynamic e, s) {
+          _logger.info("getFile failed ${_enteFile.tag}", e);
+          return null;
+        });
     if (imageFile != null) {
       final index = await getMotionVideoIndex(filePath: imageFile.path);
       if (index != null) {
         // Update the metadata if it is not updated
         if (!_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {
-          FileMagicService.instance.updatePublicMagicMetadata(
-            [_enteFile],
-            {motionVideoIndexKey: index.start.toInt()},
-          ).ignore();
+          FileMagicService.instance
+              .updatePublicMagicMetadata(
+                [_enteFile],
+                {motionVideoIndexKey: index.start.toInt()},
+              )
+              .ignore();
         }
         final outputPath = await extractMotionVideoFile(
           filePath: imageFile.path,
@@ -294,10 +296,9 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
         }
       } else if (_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {
         _logger.info('Incorrectly tagged as MP, reset tag ${_enteFile.tag}');
-        FileMagicService.instance.updatePublicMagicMetadata(
-          [_enteFile],
-          {motionVideoIndexKey: 0},
-        ).ignore();
+        FileMagicService.instance
+            .updatePublicMagicMetadata([_enteFile], {motionVideoIndexKey: 0})
+            .ignore();
       }
     }
     return null;
@@ -335,8 +336,9 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     }
 
     try {
-      await controller.waitUntilFirstFrameRendered
-          .timeout(const Duration(seconds: 2));
+      await controller.waitUntilFirstFrameRendered.timeout(
+        const Duration(seconds: 2),
+      );
     } catch (e, s) {
       _logger.info("First frame wait failed for ${_enteFile.tag}", e, s);
     }

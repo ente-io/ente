@@ -267,8 +267,8 @@ const readBruteForceStateFromKV = async () => {
     ]);
 
     return {
-        invalidAttemptCount: clampNonNegativeInt(Number(invalidAttempts ?? 0)),
-        cooldownExpiresAt: clampNonNegativeInt(Number(cooldownExpiry ?? 0)),
+        invalidAttemptCount: clampNonNegativeInt(invalidAttempts ?? 0),
+        cooldownExpiresAt: clampNonNegativeInt(cooldownExpiry ?? 0),
     };
 };
 

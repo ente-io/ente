@@ -273,7 +273,6 @@
   "after1Month": "Через 1 месяц",
   "after1Year": "Через 1 год",
   "manageParticipants": "Управлять",
-  "collabLinkSectionDescription": "Создайте ссылку, чтобы люди могли добавлять и просматривать фото в вашем общем альбоме без использования приложения или аккаунта Ente. Это отлично подходит для сбора фото с мероприятий.",
   "collectPhotos": "Сбор фото",
   "collaborativeLink": "Совместная ссылка",
   "shareWithNonenteUsers": "Поделиться с пользователями, не использующими Ente",
@@ -400,7 +399,6 @@
   "creatingLink": "Создание ссылки...",
   "removeWithQuestionMark": "Удалить?",
   "removeParticipantBody": "{userEmail} будет удалён из этого общего альбома\n\nВсе фото, добавленные этим пользователем, также будут удалены из альбома",
-  "keepPhotos": "Оставить фото",
   "deletePhotos": "Удалить фото",
   "inviteToEnte": "Пригласить в Ente",
   "removePublicLink": "Удалить публичную ссылку",
@@ -408,6 +406,9 @@
   "sharing": "Отправка...",
   "youCannotShareWithYourself": "Вы не можете поделиться с самим собой",
   "archive": "Архив",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Нажмите и удерживайте, чтобы выбрать фото, и нажмите «+», чтобы создать альбом",
   "importing": "Импортирование...",
   "failedToLoadAlbums": "Не удалось загрузить альбомы",
@@ -760,7 +761,6 @@
   "notifications": "Уведомления",
   "sharedPhotoNotifications": "Новые общие фото и альбомы",
   "socialNotifications": "Отметки \"Нравится\" и комментарии",
-  "socialNotificationsExplanation": "Получать уведомления об отметке \"Нравится\" на ваших фотографиях и комментариях в альбомах, в которых вы участвуете",
   "advanced": "Расширенные",
   "general": "Общие",
   "security": "Безопасность",
@@ -974,7 +974,6 @@
   "shareTheMoment": "Поделиться моментом",
   "letFriendsAndFamilyReact": "Дайте друзьям и семье возможность оставлять реакции и комментарии к вашим фотографиям.",
   "pleaseLoginAgain": "Пожалуйста, войдите снова",
-  "autoLogoutMessage": "Из-за технического сбоя вы были выведены из системы. Приносим извинения за неудобства.",
   "yourSubscriptionHasExpired": "Срок действия вашей подписки истёк",
   "storageLimitExceeded": "Превышен лимит хранилища",
   "upgrade": "Улучшить",
@@ -996,11 +995,6 @@
   "collectEventPhotos": "Собрать фото с мероприятия",
   "sessionExpired": "Сессия истекла",
   "loggingOut": "Выход...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "На устройстве",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -1042,6 +1036,9 @@
   "moveToAlbum": "Переместить в альбом",
   "unhide": "Не скрывать",
   "unarchive": "Извлечь из архива",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "В избранное",
   "removeFromFavorite": "Убрать из избранного",
   "shareMemories": "Поделиться воспоминаниями",
@@ -1473,8 +1470,6 @@
   "noPhotosFoundHere": "Здесь фото не найдены",
   "zoomOutToSeePhotos": "Уменьшите масштаб, чтобы увидеть фото",
   "noImagesWithLocation": "Нет фото с местоположением",
-  "unpinAlbum": "Открепить альбом",
-  "pinAlbum": "Закрепить альбом",
   "pin": "Прикрепить",
   "pinPerson": "Закрепить человека",
   "pinToTop": "Закрепить сверху",
@@ -2070,9 +2065,7 @@
   "newPhotosEmoji": " новая 📸",
   "sorryWeHadToPauseYourBackups": "Извините, нам пришлось приостановить резервное копирование",
   "clickToInstallOurBestVersionYet": "Нажмите, чтобы установить нашу лучшую версию",
-  "onThisDayNotificationExplanation": "Получайте напоминания о воспоминаниях, связанных с этим днем в прошлые годы.",
   "birthdayNotifications": "Уведомления о днях рождения",
-  "receiveRemindersOnBirthdays": "Получайте напоминания, когда у кого-то день рождения. Нажатие на уведомление перенесет вас к фотографиям именинника.",
   "happyBirthday": "С днём рождения! 🥳",
   "birthdays": "Дни рождения",
   "wishThemAHappyBirthday": "Поздравляем {name} с днем ​​рождения! 🎉",

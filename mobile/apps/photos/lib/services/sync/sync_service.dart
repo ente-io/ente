@@ -9,6 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
@@ -40,6 +41,33 @@ class SyncService {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       _uploader.clearQueue(SilentlyCancelUploadsError());
       sync();
+    });
+
+    Bus.instance.on<AccountConfiguredEvent>().listen((event) {
+      // This listener is only a transition hook for local-gallery -> online
+      // login. First import must have materialized local rows before remote
+      // sync can merge server files into them.
+      if (!Configuration.instance.hasConfiguredAccount() ||
+          isLocalGalleryMode) {
+        _logger.info(
+          "Account configured event ignored; account is not ready for online sync",
+        );
+        return;
+      }
+      if (!_localSyncService.hasCompletedFirstImport()) {
+        _logger.info(
+          "Account configured event ignored; first gallery import is not completed",
+        );
+        return;
+      }
+      if (isSyncInProgress()) {
+        _logger.info(
+          "Account configured while sync is already in progress, skipping extra trigger",
+        );
+        return;
+      }
+      _logger.info("Account configured, triggering sync");
+      unawaited(sync());
     });
 
     Connectivity().onConnectivityChanged.listen((
@@ -169,21 +197,15 @@ class SyncService {
   }
 
   void onDeviceCollectionSet(Set<int> collectionIDs) {
-    _uploader.removeFromQueueWhere(
-      (file) {
-        return !collectionIDs.contains(file.collectionID);
-      },
-      UserCancelledUploadError(),
-    );
+    _uploader.removeFromQueueWhere((file) {
+      return !collectionIDs.contains(file.collectionID);
+    }, UserCancelledUploadError());
   }
 
   void onVideoBackupPaused() {
-    _uploader.removeFromQueueWhere(
-      (file) {
-        return file.fileType == FileType.video;
-      },
-      UserCancelledUploadError(),
-    );
+    _uploader.removeFromQueueWhere((file) {
+      return file.fileType == FileType.video;
+    }, UserCancelledUploadError());
   }
 
   Future<void> _doSync() async {
@@ -209,7 +231,7 @@ class SyncService {
 
     final bool allowRemoteSync =
         _localSyncService.hasCompletedFirstImportOrBypassed() &&
-            !isLocalGalleryMode;
+        !isLocalGalleryMode;
 
     if (allowRemoteSync) {
       _logger.info("[SYNC] Starting remote sync");

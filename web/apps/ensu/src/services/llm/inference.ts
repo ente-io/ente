@@ -1,5 +1,6 @@
+import { isTauriRuntime } from "@/services/tauri-runtime";
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/tauri";
 import type { AssetsPathConfig } from "@wllama/wllama/esm/index.js";
 import {
     ModelManager,
@@ -7,6 +8,7 @@ import {
     Wllama,
     WllamaAbortError,
 } from "@wllama/wllama/esm/index.js";
+import wllamaPackage from "@wllama/wllama/package.json";
 import log from "ente-base/log";
 import type {
     GenerateChatRequest,
@@ -15,8 +17,7 @@ import type {
     LlmMessage,
 } from "./types";
 
-const WLLAMA_VERSION = "2.3.7";
-const CDN_BASE = `https://cdn.jsdelivr.net/npm/@wllama/wllama@${WLLAMA_VERSION}/src`;
+const CDN_BASE = `https://cdn.jsdelivr.net/npm/@wllama/wllama@${wllamaPackage.version}/src`;
 const MIN_GGUF_BYTES = 1024 * 1024;
 const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 
@@ -80,13 +81,6 @@ export interface InferenceBackend {
         templateOverride?: string,
     ): Promise<string>;
 }
-
-const isTauriRuntime = () =>
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window ||
-        "__TAURI_IPC__" in window ||
-        "__TAURI_INTERNALS__" in window ||
-        "__TAURI_METADATA__" in window);
 
 export const createInferenceBackend = (
     options: InferenceOptions = {},
@@ -543,7 +537,7 @@ class TauriInference implements InferenceBackend {
     }
 
     async isModelAvailable(modelPath: string): Promise<boolean> {
-        const { exists } = await import("@tauri-apps/api/fs");
+        const { exists } = await import("@tauri-apps/plugin-fs");
         if (!(await exists(modelPath))) return false;
         try {
             const size = await invoke<number | null>("fs_file_size", {

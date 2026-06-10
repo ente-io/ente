@@ -56,7 +56,7 @@ class _AllSectionsExamplesProviderState
   bool isOnSearchTab = false;
   bool _firstLoadInProgressOrComplete = false;
   final _logger = Logger("AllSectionsExamplesProvider");
-  static const _initialLoadDelay = Duration(seconds: 10);
+  static const _initialLoadDelay = Duration(seconds: 30);
   Timer? _initialLoadTimer;
 
   final _debouncer = Debouncer(
@@ -72,14 +72,16 @@ class _AllSectionsExamplesProviderState
     _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
       onDataUpdate();
     });
-    _onPeopleChangedEvent =
-        Bus.instance.on<PeopleChangedEvent>().listen((event) {
+    _onPeopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((
+      event,
+    ) {
       onDataUpdate();
     });
-    _peopleSortChangedEvent =
-        Bus.instance.on<PeopleSortOrderChangeEvent>().listen((event) {
-      onDataUpdate();
-    });
+    _peopleSortChangedEvent = Bus.instance
+        .on<PeopleSortOrderChangeEvent>()
+        .listen((event) {
+          onDataUpdate();
+        });
     _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source == TabChangedEventSource.pageView &&
           event.selectedIndex == 3) {
@@ -120,12 +122,13 @@ class _AllSectionsExamplesProviderState
       setState(() {
         _logger.info("'_debounceTimer: reloading all sections in search tab");
         final allSectionsExamples = <Future<List<SearchResult>>>[];
-        final hasAnySearchableFilesFuture =
-            SearchService.instance.hasAnyFilesForSearch();
+        final hasAnySearchableFilesFuture = SearchService.instance
+            .hasAnyFilesForSearch();
         for (SectionType sectionType in SectionType.values) {
-          // Contacts section has been moved to shared collections tab.
-          // File types are rendered as lazy placeholders in the search tab.
+          // Albums moved to the Albums tab. Contacts and file types render as
+          // lazy sections in Search so they do not block the section preload.
           if (sectionType == SectionType.contacts ||
+              sectionType == SectionType.album ||
               sectionType == SectionType.fileTypesAndExtension) {
             allSectionsExamples.add(Future.value([]));
           } else {

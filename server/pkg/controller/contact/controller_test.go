@@ -891,7 +891,7 @@ func TestAttachmentReplicationLifecycle(t *testing.T) {
 		t.Fatalf("replicated buckets = %v, want [scw-eu-fr]", replicatedTo)
 	}
 
-	attachment, err := ctrl.Repo.GetAttachment(context.Background(), 1, "ua_replication")
+	attachment, err := ctrl.Repo.GetAttachment(t.Context(), 1, "ua_replication")
 	if err != nil {
 		t.Fatalf("GetAttachment() error = %v", err)
 	}
@@ -922,7 +922,7 @@ func TestAttachmentDeletionLifecycle(t *testing.T) {
 		t.Fatalf("tryDelete() error = %v", err)
 	}
 
-	if _, err := ctrl.Repo.GetAttachment(context.Background(), 1, "ua_delete"); err == nil {
+	if _, err := ctrl.Repo.GetAttachment(t.Context(), 1, "ua_delete"); err == nil {
 		t.Fatal("attachment row should be removed after deletion")
 	} else if !errors.Is(err, &ente.ErrNotFoundError) {
 		t.Fatalf("unexpected GetAttachment error = %v", err)

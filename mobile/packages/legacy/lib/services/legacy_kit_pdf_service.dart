@@ -54,9 +54,7 @@ class LegacyKitPdfService {
   }) async {
     final assets = await _loadAssets();
     final sortedShares = _sortedShares(allShares);
-    final pdf = _document(
-      keywords: _shareMetadata(share),
-    );
+    final pdf = _document(keywords: _shareMetadata(share));
     pdf.addPage(
       _buildPage(accountEmail, recoveryUrl, share, sortedShares, assets),
     );
@@ -91,10 +89,7 @@ class LegacyKitPdfService {
       nunitoBlack: nunitoBlack,
       theme: baseFont == null && interBold == null
           ? null
-          : pw.ThemeData.withFont(
-              base: baseFont,
-              bold: interBold ?? baseFont,
-            ),
+          : pw.ThemeData.withFont(base: baseFont, bold: interBold ?? baseFont),
     );
   }
 
@@ -109,10 +104,7 @@ class LegacyKitPdfService {
   Future<Uint8List?> _loadImage(String asset) async {
     try {
       final bytes = await rootBundle.load(asset);
-      return bytes.buffer.asUint8List(
-        bytes.offsetInBytes,
-        bytes.lengthInBytes,
-      );
+      return bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
     } catch (_) {
       return null;
     }
@@ -188,16 +180,8 @@ class LegacyKitPdfService {
         child: pw.Stack(
           fit: pw.StackFit.expand,
           children: [
-            pw.Positioned(
-              left: 42,
-              top: 66,
-              child: _header(assets),
-            ),
-            pw.Positioned(
-              left: 550,
-              top: 52,
-              child: _enteLockup(assets),
-            ),
+            pw.Positioned(left: 42, top: 66, child: _header(assets)),
+            pw.Positioned(left: 550, top: 52, child: _enteLockup(assets)),
             pw.Positioned(
               left: 456,
               top: 97,
@@ -280,8 +264,9 @@ class LegacyKitPdfService {
                     height: 16,
                     decoration: const pw.BoxDecoration(
                       color: _green,
-                      borderRadius:
-                          pw.BorderRadius.all(pw.Radius.circular(999)),
+                      borderRadius: pw.BorderRadius.all(
+                        pw.Radius.circular(999),
+                      ),
                     ),
                     child: pw.Center(
                       child: pw.Text(
@@ -480,11 +465,7 @@ class LegacyKitPdfService {
               ),
             ),
           ),
-          pw.Positioned(
-            left: 15,
-            top: 10,
-            child: _legacyKitBadgeIcon(assets),
-          ),
+          pw.Positioned(left: 15, top: 10, child: _legacyKitBadgeIcon(assets)),
           pw.Positioned(
             left: 31,
             top: 8,
@@ -497,10 +478,7 @@ class LegacyKitPdfService {
                   child: pw.Text(
                     "Legacy Kit for $accountEmail",
                     maxLines: 1,
-                    style: const pw.TextStyle(
-                      color: _white,
-                      fontSize: 14,
-                    ),
+                    style: const pw.TextStyle(color: _white, fontSize: 14),
                   ),
                 ),
               ),
@@ -601,12 +579,11 @@ class LegacyKitPdfService {
                       width: 1,
                       style: pw.BorderStyle.dashed,
                     ),
-                    borderRadius:
-                        const pw.BorderRadius.all(pw.Radius.circular(12)),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(12),
+                    ),
                   ),
-                  child: pw.Center(
-                    child: _copyCodeText(copyCode),
-                  ),
+                  child: pw.Center(child: _copyCodeText(copyCode)),
                 ),
               ],
             ),
@@ -641,20 +618,12 @@ class LegacyKitPdfService {
     );
   }
 
-  pw.Widget _instruction(
-    String number,
-    String text, {
-    pw.Widget? extra,
-  }) {
+  pw.Widget _instruction(String number, String text, {pw.Widget? extra}) {
     return _instructionContent(
       number,
       pw.Text(
         text,
-        style: const pw.TextStyle(
-          color: _white,
-          fontSize: 14,
-          lineSpacing: 3,
-        ),
+        style: const pw.TextStyle(color: _white, fontSize: 14, lineSpacing: 3),
       ),
       extra: extra,
     );
@@ -696,19 +665,16 @@ class LegacyKitPdfService {
     final chunks = <String>[];
     for (var index = 0; index < compactCode.length; index += chunkSize) {
       final nextIndex = index + chunkSize;
-      final end =
-          nextIndex > compactCode.length ? compactCode.length : nextIndex;
+      final end = nextIndex > compactCode.length
+          ? compactCode.length
+          : nextIndex;
       chunks.add(compactCode.substring(index, end));
     }
     return chunks;
   }
 
   pw.Widget _visitInstruction(String recoveryUrl) {
-    const textStyle = pw.TextStyle(
-      color: _white,
-      fontSize: 14,
-      lineSpacing: 3,
-    );
+    const textStyle = pw.TextStyle(color: _white, fontSize: 14, lineSpacing: 3);
     return _instructionContent(
       "2.",
       pw.RichText(

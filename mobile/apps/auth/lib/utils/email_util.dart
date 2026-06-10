@@ -115,8 +115,9 @@ Future<void> openSupportPage(String? subject, String? body) async {
     "/ente-io/ente/discussions/new",
     {"category": "q-a"},
   );
-  final queryParameters =
-      Map<String, String>.from(baseSupportUri.queryParameters);
+  final queryParameters = Map<String, String>.from(
+    baseSupportUri.queryParameters,
+  );
   if (subject != null && body != null) {
     queryParameters["title"] = subject;
     queryParameters["body"] = body;
@@ -228,18 +229,11 @@ Future<void> exportLogs(
         'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
 
     final bytes = await File(zipFilePath).readAsBytes();
-    await FileSaverUtil.saveFile(
-      logFileName,
-      'zip',
-      bytes,
-      MimeType.zip,
-    );
+    await FileSaverUtil.saveFile(logFileName, 'zip', bytes, MimeType.zip);
   } else {
     await SharePlus.instance.share(
       ShareParams(
-        files: <XFile>[
-          XFile(zipFilePath, mimeType: 'application/zip'),
-        ],
+        files: <XFile>[XFile(zipFilePath, mimeType: 'application/zip')],
         sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
       ),
     );

@@ -1,3 +1,10 @@
+import {
+    lockerItemIcon,
+    lockerItemIconConfig,
+} from "@/components/lockerItemIcons";
+import { downloadLockerFile } from "@/services/remote";
+import type { GenericFileData, LockerItem } from "@/types";
+import { getItemTitle, hasDownloadableObject } from "@/types";
 import { CircleArrowDownLeftIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
@@ -18,19 +25,12 @@ import {
     Typography,
 } from "@mui/material";
 import {
-    lockerItemIcon,
-    lockerItemIconConfig,
-} from "components/lockerItemIcons";
-import {
     OverflowMenu,
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
 import log from "ente-base/log";
 import { t } from "i18next";
 import React, { useCallback, useState } from "react";
-import { downloadLockerFile } from "services/remote";
-import type { GenericFileData, LockerItem } from "types";
-import { getItemTitle, hasDownloadableObject } from "types";
 
 interface ItemCardProps {
     item: LockerItem;

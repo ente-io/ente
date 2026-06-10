@@ -1,4 +1,4 @@
-FROM golang:1.23.4-bookworm
+FROM golang:1.26.4-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -17,4 +17,3 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
-

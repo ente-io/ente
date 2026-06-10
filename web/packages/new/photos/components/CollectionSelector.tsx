@@ -163,11 +163,14 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             (cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
-                } else if (attributes.action == "add") {
+                } else if (
+                    attributes.action == "add" ||
+                    attributes.action == "move"
+                ) {
                     return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
-                        (canMoveToCollection(cs) ||
+                        (canAddToCollection(cs) ||
                             cs.type == "uncategorized") &&
                         cs.type != "userFavorites"
                     );
@@ -178,7 +181,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                         cs.type != "userFavorites"
                     );
                 } else {
-                    // "move" and "unhide"
+                    // "unhide"
                     return (
                         canMoveToCollection(cs) && cs.type != "userFavorites"
                     );
@@ -369,7 +372,9 @@ const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
     onClick,
 }) => {
     const isFavorite = collectionSummary.type === "userFavorites";
-    const isPinned = collectionSummary.attributes.has("pinned");
+    const isPinned =
+        collectionSummary.attributes.has("pinned") ||
+        collectionSummary.attributes.has("shareePinned");
 
     return (
         <ItemCard

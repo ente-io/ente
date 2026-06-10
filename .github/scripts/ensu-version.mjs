@@ -7,9 +7,10 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const files = {
     packageJson: path.join(root, "rust/apps/ensu/package.json"),
+    packageLock: path.join(root, "rust/apps/ensu/package-lock.json"),
     tauri: path.join(root, "rust/apps/ensu/src-tauri/tauri.conf.json"),
     cargoToml: path.join(root, "rust/apps/ensu/src-tauri/Cargo.toml"),
-    cargoLock: path.join(root, "rust/apps/ensu/src-tauri/Cargo.lock"),
+    cargoLock: path.join(root, "rust/Cargo.lock"),
     android: path.join(root, "mobile/native/android/apps/ensu/app-ui/build.gradle.kts"),
     xcode: path.join(root, "mobile/native/darwin/Apps/Ensu/Ensu.xcodeproj/project.pbxproj"),
     plist: path.join(root, "mobile/native/darwin/Apps/Ensu/Ensu/Info.plist"),
@@ -56,9 +57,11 @@ function check() {
     const version = sourceVersion();
     const releaseVersion = trimVersion(version);
 
-    expect("tauri.conf.json", JSON.parse(read(files.tauri)).package?.version, version);
+    expect("tauri.conf.json", value(files.tauri, /^\s*"version"\s*:\s*"([^"]+)"/m), version);
+    expect("package-lock.json", value(files.packageLock, /"name": "ensu-desktop",\n\s+"version": "([^"]+)"/), version);
+    expect("package-lock.json packages[\"\"]", value(files.packageLock, /"": \{\n\s+"name": "ensu-desktop",\n\s+"version": "([^"]+)"/), version);
     expect("Cargo.toml", value(files.cargoToml, /\[package\][\s\S]*?^version = "([^"]+)"/m), version);
-    expect("Cargo.lock", value(files.cargoLock, /\[\[package\]\]\nname = "ensu-tauri"\nversion = "([^"]+)"/), version);
+    expect("Cargo.lock", value(files.cargoLock, /\[\[package\]\]\nname = "ensu-desktop"\nversion = "([^"]+)"/), version);
     expect("Android versionName", value(files.android, /versionName = "([^"]+)"/), releaseVersion);
     expect("Info.plist", value(files.plist, /<key>CFBundleShortVersionString<\/key>\s*<string>([^<]+)<\/string>/), releaseVersion);
 
@@ -72,13 +75,12 @@ function check() {
 function setVersion(version) {
     const releaseVersion = trimVersion(version);
 
-    const packageJson = JSON.parse(read(files.packageJson));
-    packageJson.version = version;
-    write(files.packageJson, `${JSON.stringify(packageJson, null, 2)}\n`);
-
-    replace(files.tauri, /("package"\s*:\s*\{[\s\S]*?"version"\s*:\s*")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.packageJson, /("name": "ensu-desktop",\n\s+"version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.packageLock, /("name": "ensu-desktop",\n\s+"version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.packageLock, /("": \{\n\s+"name": "ensu-desktop",\n\s+"version": ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.tauri, /^(\s*"version"\s*:\s*")[^"]+(")/m, (_m, a, b) => `${a}${version}${b}`);
     replace(files.cargoToml, /(\[package\][\s\S]*?^version = ")[^"]+(")/m, (_m, a, b) => `${a}${version}${b}`);
-    replace(files.cargoLock, /(\[\[package\]\]\nname = "ensu-tauri"\nversion = ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
+    replace(files.cargoLock, /(\[\[package\]\]\nname = "ensu-desktop"\nversion = ")[^"]+(")/, (_m, a, b) => `${a}${version}${b}`);
     replace(files.android, /versionName = "[^"]+"/, `versionName = "${releaseVersion}"`);
     replace(files.xcode, /MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${releaseVersion};`);
     replace(files.plist, /(<key>CFBundleShortVersionString<\/key>\s*<string>)[^<]+(<\/string>)/, (_m, a, b) => `${a}${releaseVersion}${b}`);

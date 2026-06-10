@@ -38,35 +38,32 @@ class LanguageSelectorPage extends StatelessWidget {
                 ),
               ),
               SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 20,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ClipRRect(
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(8),
-                            ),
-                            child: ItemsWidget(
-                              supportedLocales,
-                              onLocaleChanged,
-                              currentLocale,
-                            ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 20,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(8),
                           ),
-                          // MenuSectionDescriptionWidget(
-                          //   content: context.l10n.maxDeviceLimitSpikeHandling(50),
-                          // )
-                        ],
-                      ),
-                    );
-                  },
-                  childCount: 1,
-                ),
+                          child: ItemsWidget(
+                            supportedLocales,
+                            onLocaleChanged,
+                            currentLocale,
+                          ),
+                        ),
+                        // MenuSectionDescriptionWidget(
+                        //   content: context.l10n.maxDeviceLimitSpikeHandling(50),
+                        // )
+                      ],
+                    ),
+                  );
+                }, childCount: 1),
               ),
               const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
             ],

@@ -213,7 +213,6 @@
   "after1Month": "Након 1 месеца",
   "after1Year": "Након 1 године",
   "manageParticipants": "Управљај",
-  "collabLinkSectionDescription": "Креирајте везу која омогућава људима да додају и прегледају фотографије у вашем дељеном албуму без потребе за Енте апликацијом или налогом. Одлично за прикупљање фотографија са догађаја.",
   "collectPhotos": "Прикупи фотографије",
   "collaborativeLink": "Сарадничка веза",
   "shareWithNonenteUsers": "Пошаљи корисницима који немају Енте налог",
@@ -287,13 +286,15 @@
   "creatingLink": "Креирам линк...",
   "removeWithQuestionMark": "Уклони?",
   "removeParticipantBody": "{userEmail} ће бити уклоњен из овог дељеног албума.\n\nСве фотографије које су они додали ће такође бити уклоњене",
-  "keepPhotos": "Задржи фотографије",
   "deletePhotos": "Обриши фотгорафије",
   "inviteToEnte": "Позови у Енте",
   "disableLinkMessage": "Ово ће уклонити јавни линк за приступ \"{albumName}\".",
   "sharing": "Делим...",
   "youCannotShareWithYourself": "Не можеш делити сам са собом",
   "archive": "Архивирај",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "Дуго притисните да бисте изабрали фотографије и кликните на + да бисте направили албум",
   "importing": "Увоз....",
   "failedToLoadAlbums": "Грешка при учитавању албума",
@@ -600,7 +601,6 @@
   "existingUser": "Постојећи корисник",
   "newToEnte": "Нови на Енте",
   "pleaseLoginAgain": "Молимо, улогујте се поново",
-  "autoLogoutMessage": "Излоговани сте услед техничке грешке. Извињавамо се за непријатност.",
   "yourSubscriptionHasExpired": "Ваша претплата је истекла",
   "storageLimitExceeded": "Расположив простор је прекорачен",
   "upgrade": "Ажурирај",
@@ -620,11 +620,6 @@
   "allowPeopleToAddPhotos": "Дозволи људима да додају фотографије",
   "shareAnAlbumNow": "Подели албум сада",
   "collectEventPhotos": "Прикупи фотографије са догађаја",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "На уређају",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -645,6 +640,9 @@
   },
   "moveToAlbum": "Премести у албум",
   "unarchive": "Врати из архиве",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "createCollage": "Направи колаж",
   "saveCollage": "Сачувај колаж",
   "addToEnte": "Додај у Енте",

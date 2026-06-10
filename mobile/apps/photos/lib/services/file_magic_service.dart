@@ -83,8 +83,9 @@ class FileMagicService {
           newUpdates != null && newUpdates.isNotEmpty,
           "can not apply empty updates",
         );
-        final Map<String, dynamic> jsonToUpdate =
-            jsonDecode(file.pubMmdEncodedJson ?? '{}');
+        final Map<String, dynamic> jsonToUpdate = jsonDecode(
+          file.pubMmdEncodedJson ?? '{}',
+        );
         newUpdates!.forEach((key, value) {
           jsonToUpdate[key] = value;
         });
@@ -148,8 +149,9 @@ class FileMagicService {
           // read the existing magic metadata and apply new updates to existing data
           // current update is simple replace. This will be enhanced in the future,
           // as required.
-          final Map<String, dynamic> jsonToUpdate =
-              jsonDecode(file.mMdEncodedJson ?? '{}');
+          final Map<String, dynamic> jsonToUpdate = jsonDecode(
+            file.mMdEncodedJson ?? '{}',
+          );
           newMetadataUpdate.forEach((key, value) {
             jsonToUpdate[key] = value;
           });

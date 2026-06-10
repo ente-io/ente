@@ -12,11 +12,11 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.3.45+1785
+version: 1.3.57+2158
 publish_to: none
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.10.0 <4.0.0"
 
 dependencies:
   adaptive_theme: 3.7.2
@@ -49,7 +49,7 @@ dependencies:
   defer_pointer: 0.0.2
   device_info_plus: 11.3.0
   dio: 5.9.2
-  dio_http2_adapter: 2.7.0
+  dio_http2_adapter: 2.7.1
   dots_indicator: 4.0.1
   dotted_border: 2.1.0
   dropdown_button2: 2.3.9
@@ -57,6 +57,8 @@ dependencies:
   encrypt: 5.0.3
   ente_cast:
     path: plugins/ente_cast
+  ente_components:
+    path: ../../packages/ente_components
   ente_contacts:
     path: ../../packages/contacts
   ente_crypto:
@@ -87,7 +89,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
-      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
+      ref: 15afc08775a75fe9c12de3366fa99e39bf171ccc
   figma_squircle: 0.6.3
   file_saver: 0.2.14
   firebase_core: 3.15.1
@@ -130,7 +132,7 @@ dependencies:
   home_widget: 0.8.0
   html_unescape: 2.0.0
   http: 1.6.0
-  hugeicons: 1.1.5
+  hugeicons: 1.1.7
   image: 4.5.4
   in_app_purchase: 3.2.1
   intl: 0.20.2
@@ -149,27 +151,10 @@ dependencies:
   media_extension:
     git:
       url: https://github.com/ente-io/media_extension.git
-      ref: 9561bd13f0b5f1f7efe5ba7d2867d4ffacf8c8ee
-  media_kit:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: media_kit
-      ref: c9617f570b8c0ba02857e721997f78c053a856c1
-  media_kit_libs_ios_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/ios/media_kit_libs_ios_video
-      ref: c9617f570b8c0ba02857e721997f78c053a856c1
-  media_kit_libs_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/universal/media_kit_libs_video
-      ref: c9617f570b8c0ba02857e721997f78c053a856c1
-  media_kit_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: media_kit_video
-      ref: c9617f570b8c0ba02857e721997f78c053a856c1
+      ref: 7dfca297926ad113780e8151d58262bf5f8c8e9c
+  media_kit: 1.2.2
+  media_kit_libs_video: 1.0.7
+  media_kit_video: 2.0.0
   mesh_gradient: 1.3.8
   ml_linalg: 13.12.6
   mobile_ocr:
@@ -186,6 +171,7 @@ dependencies:
       url: https://github.com/ente-io/move_to_background.git
       ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
   nanoid: 1.0.0
+  native_dio_adapter: 1.5.1
   native_video_editor:
     path: ../../packages/native_video_editor
   native_video_player: 4.0.0
@@ -218,7 +204,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/privacy_screen.git
       ref: 2389eaa88f07724a38b9dcab49fef8e96c723921
-  pro_image_editor: 11.3.0
+  pro_image_editor: 11.23.0
   random_access_source: 4.2.1
   receive_sharing_intent: # pub.dev is behind
     git:
@@ -255,13 +241,12 @@ dependencies:
   video_thumbnail: 0.5.6
   visibility_detector: 0.4.0+2
   wakelock_plus: 1.3.2
-  wechat_assets_picker: 9.5.1
+  wechat_assets_picker: 9.8.0
   widgets_to_image: 1.0.0
   workmanager: 0.9.0+3
   xml: 6.5.0
 
 dependency_overrides:
-  cronet_http: 1.6.0
   # Remove this after removing dependency from flutter_sodium.
   # Newer flutter packages depends on ffi > 2.0.0 while flutter_sodium depends on ffi < 2.0.0
   ffi: 2.1.0
@@ -271,27 +256,18 @@ dependency_overrides:
       ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   intl: 0.20.2
   js: 0.6.7
-  media_kit: # update media_kit* if there is any update
+  motion_sensors:
     git:
-      url: https://github.com/media-kit/media-kit
-      path: media_kit
-      ref: c9617f570b8c0ba02857e721997f78c053a856c1
-  media_kit_libs_ios_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/ios/media_kit_libs_ios_video
-      ref: c9617f570b8c0ba02857e721997f78c053a856c1
-  media_kit_libs_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/universal/media_kit_libs_video
-      ref: c9617f570b8c0ba02857e721997f78c053a856c1
-  media_kit_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: media_kit_video
-      ref: c9617f570b8c0ba02857e721997f78c053a856c1
+      url: https://github.com/deckerst/aves_panorama_motion_sensors.git
+      ref: 4b11d59f4bda152627f701070272f657f8358e67
   protobuf: 3.1.0
+  # Fixes an iOS AVFoundation crash for videos whose minFrameDuration is zero.
+  # https://github.com/flutter/flutter/issues/151031
+  video_player_avfoundation:
+    git:
+      url: https://github.com/ente-io/packages.git
+      path: packages/video_player/video_player_avfoundation
+      ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
   watcher: 1.1.2
   win32: "5.10.1"
 
@@ -311,7 +287,7 @@ dev_dependencies:
   json_annotation: 4.9.0
   json_serializable: 6.10.0
   mockito: 5.5.0
-  test: 1.25.15
+  test: 1.26.3
 
 # ------------------------------
 # ICONs
@@ -387,8 +363,11 @@ flutter:
     - assets/video-editor/
     - assets/image-editor/
     - assets/icons/
+    - assets/icons/nav_bar/
     - assets/launcher_icon/
   fonts:
+    # TODO: Migrate legacy Photos text styles to ente_components fonts, then
+    # remove this app-local Inter declaration.
     - family: Inter
       fonts:
         - asset: fonts/Inter-Regular.ttf

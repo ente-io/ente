@@ -84,13 +84,9 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
 
     return Scaffold(
-      backgroundColor: pageBackgroundColor,
+      backgroundColor: colorScheme.backgroundColour,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -376,7 +372,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   }
 
   Future<({bool clipDone, bool clusterCentroidDone})>
-      _getVectorDbMigrationStatus() async {
+  _getVectorDbMigrationStatus() async {
     final clipVectorDB = isLocalGalleryMode
         ? ClipVectorDB.localGalleryInstance
         : ClipVectorDB.instance;
@@ -894,8 +890,8 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       firstButtonLabel: "Yes, confirm",
       firstButtonOnTap: () async {
         try {
-          final List<PersonEntity> persons =
-              await PersonService.instance.getPersons();
+          final List<PersonEntity> persons = await PersonService.instance
+              .getPersons();
           for (final PersonEntity p in persons) {
             await PersonService.instance.deletePerson(p.remoteID);
           }

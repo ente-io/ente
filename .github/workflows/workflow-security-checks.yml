@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/**'
+      - '.github/actions/**'
       - '.github/scripts/check_workflow_security.rb'
 
 permissions:
@@ -17,9 +18,7 @@ jobs:
       name: workflow-change-approval
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Run workflow security checks
-        run: ruby .github/scripts/check_workflow_security.rb "origin/${{ github.base_ref }}" HEAD
+        run: ruby .github/scripts/check_workflow_security.rb

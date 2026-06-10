@@ -1,0 +1,1 @@
+- Migrated remaining sharing calls from `Share` to `SharePlus`.

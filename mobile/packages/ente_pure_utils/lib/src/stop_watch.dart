@@ -8,10 +8,10 @@ class EnteWatch extends Stopwatch {
 
   void log(String msg) {
     if (kDebugMode) {
-      debugPrint("[$context]: $msg took ${Duration(
-        microseconds: elapsedMicroseconds - previousElapsed,
-      ).inMilliseconds} ms  total: "
-          "${elapsed.inMilliseconds} ms");
+      debugPrint(
+        "[$context]: $msg took ${Duration(microseconds: elapsedMicroseconds - previousElapsed).inMilliseconds} ms  total: "
+        "${elapsed.inMilliseconds} ms",
+      );
     }
     previousElapsed = elapsedMicroseconds;
   }
@@ -41,7 +41,7 @@ class TimeLogger {
   final int logThreshold;
   DateTime _start;
   TimeLogger({this.context = "TLog", this.logThreshold = 5})
-      : _start = DateTime.now();
+    : _start = DateTime.now();
 
   @override
   String toString() {

@@ -28,10 +28,7 @@ import "package:photos/utils/dialog_util.dart";
 class CleanupHiddenFromDevicePage extends StatefulWidget {
   final VoidCallback? onCleanupComplete;
 
-  const CleanupHiddenFromDevicePage({
-    this.onCleanupComplete,
-    super.key,
-  });
+  const CleanupHiddenFromDevicePage({this.onCleanupComplete, super.key});
 
   @override
   State<CleanupHiddenFromDevicePage> createState() =>
@@ -63,11 +60,17 @@ class _CleanupHiddenFromDevicePageState
     final filesAreSelected = _selectedFiles.files.isNotEmpty;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final deleteAllButtonHeight = 40.0 + max(bottomPadding, 6.0) + 12.0;
+    final appBar = GalleryAppBarWidget.sliverConfig(
+      GalleryType.cleanupHiddenFromDevice,
+      AppLocalizations.of(context).deleteOnDeviceFiles,
+      _selectedFiles,
+    );
 
     final gallery = Gallery(
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final files =
-            await CollectionsService.instance.getHiddenFilesOnDevice();
+        final files = await CollectionsService.instance
+            .getHiddenFilesOnDevice();
         return FileLoadResult(files, false);
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -83,23 +86,13 @@ class _CleanupHiddenFromDevicePageState
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
-            child: GalleryAppBarWidget(
-              GalleryType.cleanupHiddenFromDevice,
-              AppLocalizations.of(context).deleteOnDeviceFiles,
-              _selectedFiles,
-            ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
                 gallery,
-                const BottomShadowWidget(
-                  offsetDy: 20,
-                ),
+                const BottomShadowWidget(offsetDy: 20),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
@@ -154,8 +147,8 @@ class _CleanupHiddenFromDevicePageState
                     child: Text(
                       AppLocalizations.of(context).deleteAll,
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            color: const Color.fromRGBO(255, 101, 101, 1),
-                          ),
+                        color: const Color.fromRGBO(255, 101, 101, 1),
+                      ),
                     ),
                   ),
                 ),
@@ -174,6 +167,7 @@ class _CleanupHiddenFromDevicePageState
     final l10n = AppLocalizations.of(context);
     final actionResult = await showActionSheet(
       context: context,
+      title: l10n.deleteFromDeviceQuestion,
       buttons: [
         ButtonWidget(
           labelText: l10n.deleteFromDevice,

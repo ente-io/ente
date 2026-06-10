@@ -102,7 +102,6 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                     tag: "memories" + memory.file.tag,
                     child: ThumbnailWidget(
                       memory.file,
-                      shouldShowArchiveStatus: false,
                       shouldShowSyncStatus: false,
                       key: Key("memories" + memory.file.tag),
                     ),
@@ -125,19 +124,17 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                     child: SizedBox(
                       width: widget.width,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Hero(
                           tag: title,
                           child: Center(
                             child: Text(
                               title,
-                              style: getEnteTextTheme(context)
-                                  .miniBold
+                              style: getEnteTextTheme(context).miniBold
                                   .copyWith(
-                                    color:
-                                        isSeen ? textFaintDark : Colors.white,
+                                    color: isSeen
+                                        ? textFaintDark
+                                        : Colors.white,
                                   ),
                               textAlign: TextAlign.left,
                             ),

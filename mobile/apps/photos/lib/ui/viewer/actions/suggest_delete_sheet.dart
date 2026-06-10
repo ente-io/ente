@@ -10,10 +10,7 @@ import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
 
-bool canSuggestDeleteForFile({
-  required EnteFile file,
-  Collection? collection,
-}) {
+bool canSuggestDeleteForFile({required EnteFile file, Collection? collection}) {
   if (collection == null || file.uploadedFileID == null) {
     return false;
   }
@@ -66,7 +63,8 @@ Future<bool> showSuggestDeleteSheet({
   if (actionResult?.action == ButtonAction.error) {
     await showGenericErrorDialog(
       context: context,
-      error: actionResult?.exception ??
+      error:
+          actionResult?.exception ??
           Exception("Failed to send delete suggestion"),
     );
     return false;

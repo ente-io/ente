@@ -36,7 +36,7 @@ import {
     createMagicMetadata,
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
-import { splitByPredicate } from "ente-utils/array";
+import { batch, splitByPredicate } from "ente-utils/array";
 import { z } from "zod";
 import { batched, type UpdateMagicMetadataRequest } from "./file";
 import {
@@ -56,6 +56,7 @@ const uncategorizedCollectionName = "Uncategorized";
 const defaultHiddenCollectionName = ".hidden";
 export const defaultHiddenCollectionUserFacingName = "Hidden";
 const favoritesCollectionName = "Favorites";
+const copyRequestBatchSize = 100;
 
 /**
  * Create a new album (a collection of type "album") on remote, and return its
@@ -549,6 +550,48 @@ interface CollectionFileItem {
     keyDecryptionNonce: string;
 }
 
+const CopyFilesResponse = z.object({
+    oldToNewFileIDMap: z.record(z.string(), z.number()),
+});
+
+/**
+ *
+ * @param collection
+ * @returns the current role of the user in the collection.
+ * if the currentUser is the owner then OWNER, else if
+ * it was shared then checks the sharees list to find the role
+ * which could be either VIEWER or COLLABORATOR.
+ */
+const currentUserRoleInCollection = (collection: Collection) => {
+    const userID = ensureLocalUser().id;
+    if (collection.owner.id == userID) return "OWNER";
+    return collection.sharees.find((sharee) => sharee.id == userID)?.role;
+};
+
+/**
+ *
+ * @param collection
+ * @returns true if the user can add files to a collection,
+ * only the OWNER, ADMIN and COLLABORATOR can actually add
+ * file to a collection.
+ */
+export const canAddFilesToCollection = (collection: Collection) => {
+    const role = currentUserRoleInCollection(collection);
+    return role == "OWNER" || role == "ADMIN" || role == "COLLABORATOR";
+};
+
+/**
+ *
+ * @param collection
+ * @returns whether the current user can directly
+ * upload to the collection.
+ *
+ * A user can directly upload to a collection if he/she
+ * is the owner of that particular collection.
+ */
+export const canDirectlyUploadToCollection = (collection: Collection) =>
+    collection.owner.id == ensureLocalUser().id;
+
 /**
  * Make a remote request to add the given {@link files} to the given
  * {@link collection}.
@@ -653,6 +696,547 @@ export const moveFromCollection = async (
             }),
         );
     });
+/**
+ *
+ * @param files
+ * @returns list of unique files from the files argument.
+ *
+ * This function just iterates through the files and then
+ * stores the file.id and skips any files for which the
+ * file.id has been already been seen to prevent duplicates.
+ */
+const uniqueFilesByID = (files: EnteFile[]) => {
+    const seen = new Set<number>();
+    const uniqueFiles: EnteFile[] = [];
+
+    for (const file of files) {
+        if (seen.has(file.id)) continue;
+        seen.add(file.id);
+        uniqueFiles.push(file);
+    }
+
+    return uniqueFiles;
+};
+
+/**
+ *
+ * @param collectionID
+ * @param collectionFiles
+ * @returns Filters the collectionFiles and create a
+ * new set with the fileIds of files which belong
+ * to the collection having it's id collectionID.
+ */
+const fileIDsInCollection = (
+    collectionID: number,
+    collectionFiles: EnteFile[],
+): Set<number> =>
+    new Set(
+        collectionFiles
+            .filter((file) => file.collectionID == collectionID)
+            .map((file) => file.id),
+    );
+
+/**
+ *
+ * @param file
+ * @returns A composite key of the form `${metadataHash}:${fileType}`, used to
+ * detect content-equivalent files. Returns undefined if the file has no
+ * metadata hash.
+ */
+const hashAndTypeKey = (file: EnteFile) => {
+    const hash = metadataHash(file.metadata);
+    if (!hash) return undefined;
+    return `${hash}:${file.metadata.fileType}`;
+};
+
+/**
+ *
+ * @param files
+ * @param currentUserID
+ * @returns A Mapping which has a unique ${hash}:${file.metadata.fileType} key
+ * for each of the file which is owned by the current user.
+ *
+ * This map is currently used in flows where the current user performs actions
+ * on shared-files/shared albums, where we check if the current user by any chance
+ * have a copy of the files on which the action is being performed on.
+ */
+const userOwnedEquivalentFilesByHashAndType = (
+    files: EnteFile[],
+    currentUserID: number,
+) => {
+    const equivalents = new Map<string, EnteFile>();
+
+    for (const file of files) {
+        if (file.ownerID != currentUserID) continue;
+
+        const key = hashAndTypeKey(file);
+        if (!key || equivalents.has(key)) continue;
+        equivalents.set(key, file);
+    }
+
+    return equivalents;
+};
+
+// Bridges shared favorite toggles before the remote add/move has been pulled
+// into local DB.
+const pendingFavoriteFilesByHashAndType = new Map<string, EnteFile>();
+
+/**
+ *
+ * @param sourceFiles The files the user originally performed the actions on. It could be owned/non-owned files.
+ *
+ * @param favoriteFiles The actual files that were added/removed from the favorites. For shared files
+ * this maybe a different user-owned equivalent file.
+ *
+ * @param userID The userId of the current loggedIn user.
+ *
+ * If the user favorites a shared file X, the actual Favorites entry may be user-owned file Y.
+ * Before remote pull updates local DB, the UI may still only know about shared file X. This
+ * helper remembers:
+ *
+ * X hash:type -> Y
+ *
+ * Then if the user immediately unfavorites or favorites again, the code can resolve the real
+ * favorite file Y instead of trying to operate on shared file X.
+ *
+ * This also records owned source files, so an owned favorite can immediately
+ * resolve shared hash-equivalent rows before the remote pull updates local DB.
+ *
+ */
+const rememberPendingFavoriteFiles = (
+    sourceFiles: EnteFile[],
+    favoriteFiles: EnteFile[],
+    userID: number,
+) => {
+    // Creating a map by hashAndType for the files which where favorited now
+    const favoriteFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
+        favoriteFiles,
+        userID,
+    );
+
+    // Iterating through the sourceFiles to check whether the files which where
+    // favorited have a hashAndType match in favoriteFilesByHashAndType
+    // if so storing the file in the pendingFavoriteFilesByHashAndType
+    for (const sourceFile of sourceFiles) {
+        const hashAndType = hashAndTypeKey(sourceFile);
+        const favoriteFile = hashAndType
+            ? favoriteFilesByHashAndType.get(hashAndType)
+            : undefined;
+        if (hashAndType && favoriteFile) {
+            pendingFavoriteFilesByHashAndType.set(hashAndType, favoriteFile);
+        }
+    }
+};
+
+/**
+ *
+ * @param files The files which are to be favorited/un-favorited
+ * @param userID The userId of the current loggedIn user.
+ * @returns
+ *
+ *  remainingFiles: The files which doesn't have an user-owned copy yet and therefore considered
+ * as a shared-file/non-owned file
+ *
+ *  pendingFiles: The files which already have an owned copy. It could the file was
+ *  already owned by the user or because of a prior favoriting the file now has a owned copy.
+ */
+const splitPendingFavoriteFiles = (files: EnteFile[], userID: number) => {
+    const pendingFiles: EnteFile[] = [];
+
+    // Files for which the current user is the owner.
+    const remainingFiles: EnteFile[] = [];
+    const seenPendingFileIDs = new Set<number>();
+
+    /**
+     * Iterating through the files and then pushing the file to the remainingFiles array
+     * if it's an owned file or if it's a shared file without an remembered user-owned equivalent
+     *
+     * For non-owned/shared files, getting the metadataKey of the file and checking
+     * if the pendingFavoriteFilesByHashAndType has it, if so it means the file already
+     * has a owned copy, like it was favorited before and the remote pull is yet to happen.
+     *
+     * If so then pushing the file to the pendingFiles else pushing it to the remainingFiles.
+     */
+    for (const file of files) {
+        if (file.ownerID == userID) {
+            remainingFiles.push(file);
+            continue;
+        }
+
+        const key = hashAndTypeKey(file);
+        const pendingFavoriteFile = key
+            ? pendingFavoriteFilesByHashAndType.get(key)
+            : undefined;
+
+        if (pendingFavoriteFile) {
+            if (!seenPendingFileIDs.has(pendingFavoriteFile.id)) {
+                seenPendingFileIDs.add(pendingFavoriteFile.id);
+                pendingFiles.push(pendingFavoriteFile);
+            }
+        } else {
+            remainingFiles.push(file);
+        }
+    }
+
+    return { pendingFiles, remainingFiles };
+};
+
+/**
+ *
+ * @param fileIDs
+ * @returns
+ *
+ * We had introduced a variable to store the files which
+ * where just favorited, so that they aren't copied again
+ * as the remotePull doesn't occur after the favoriting action.
+ */
+const forgetPendingFavoriteFileIDs = (fileIDs: number[]) => {
+    if (!fileIDs.length) return;
+
+    const deletedFileIDs = new Set(fileIDs);
+    for (const [
+        key,
+        pendingFavoriteFile,
+    ] of pendingFavoriteFilesByHashAndType.entries()) {
+        if (deletedFileIDs.has(pendingFavoriteFile.id)) {
+            pendingFavoriteFilesByHashAndType.delete(key);
+        }
+    }
+};
+
+/**
+ *
+ * @param dstCollection
+ * @param files
+ * @returns a new List with each file having their id, ownerID and collectionId
+ * updated. the fileId points to the id of the newly created file,
+ * the ownerId points to the id of the currentUser and collectionId points to the
+ * dstCollection.id
+ */
+export const copyFiles = async (
+    dstCollection: Collection,
+    files: EnteFile[],
+): Promise<EnteFile[]> => {
+    if (!files.length) return [];
+
+    /**
+     * Getting the currentUserId and then ensuring that the
+     * dstCollection is indeed owned by that person. We only support
+     * uploading to owned collection so hence this verification.
+     */
+    const currentUserID = ensureLocalUser().id;
+    if (dstCollection.owner.id != currentUserID) {
+        throw new Error("Destination collection must be owned by the actor");
+    }
+
+    // Filtering out any duplicates from the list of files to be copied
+    const uniqueFiles = uniqueFilesByID(files);
+    const copiedFiles: EnteFile[] = [];
+
+    /**
+     * Callers are expected to pass only files which aren't owned by the
+     * currentUser (the batch validation below enforces this). Since these files
+     * are already uploaded to Ente, they will belong to some source collection,
+     * so we group them by their source collectionID and iterate per-group.
+     */
+    for (const [srcCollectionID, sourceFiles] of groupFilesByCollectionID(
+        uniqueFiles,
+    ).entries()) {
+        for (const batchFiles of batch(sourceFiles, copyRequestBatchSize)) {
+            /**
+             * As said earlier this is strictly for files which aren't owned
+             * by the currentUser and only such files can be copied so thus
+             * doing a final validation.
+             */
+            if (
+                batchFiles.some(
+                    (file) =>
+                        file.ownerID == currentUserID ||
+                        file.collectionID != srcCollectionID,
+                )
+            ) {
+                throw new Error(
+                    "Can only copy files owned by other users from the source collection",
+                );
+            }
+
+            // Encrypting the files with the dstCollection Key
+            const encryptedFileKeys = await encryptWithCollectionKey(
+                dstCollection,
+                batchFiles,
+            );
+
+            const res = await fetch(await apiURL("/files/copy"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    dstCollectionID: dstCollection.id,
+                    srcCollectionID,
+                    files: encryptedFileKeys,
+                }),
+            });
+            ensureOk(res);
+
+            // This is just the server responding back with,
+            // the old file with ID X is now a new file with ID Y.
+            const { oldToNewFileIDMap } = CopyFilesResponse.parse(
+                await res.json(),
+            );
+
+            // Iterating through files and checking if they exist
+            // in the mapping, which indicates the file was copied successfully.
+            for (const file of batchFiles) {
+                const copiedFileID = oldToNewFileIDMap[file.id.toString()];
+                if (!copiedFileID) {
+                    throw new Error(`Failed to copy file ${file.id}`);
+                }
+
+                // If success then updating the copiedFiles array.
+                copiedFiles.push({
+                    ...file,
+                    id: copiedFileID,
+                    ownerID: currentUserID,
+                    collectionID: dstCollection.id,
+                });
+            }
+        }
+    }
+
+    return copiedFiles;
+};
+
+/**
+ * This function is currenly used in the upload to shared album flow.
+ * For uploading a file to a shared-album for which the currentUser
+ * doesn't have an equivalent copy, the file first has to be uploaded to the
+ * user's uncategorized so the user now owns a copy of the file.
+ *
+ * @returns the uncategorized album of the currentUser.
+ */
+const savedUserUncategorizedCollection = async () => {
+    const userID = ensureLocalUser().id;
+    return (await savedCollections()).find(
+        (collection) =>
+            collection.type == "uncategorized" && collection.owner.id == userID,
+    );
+};
+
+/**
+ *
+ * Checking whether the currentUser already has a uncategorized Collection,
+ * if so then returning the reference to that else creating the same
+ * and then returning the instance of the newly created collection.
+ *
+ * @returns the uncategorized collection of the currentUser if it already
+ * exists, otherwise the newly created uncategorized collection.
+ */
+export const savedOrCreateUserUncategorizedCollection = async () =>
+    (await savedUserUncategorizedCollection()) ??
+    createUncategorizedCollection();
+
+/**
+ *
+ * @param dstCollection
+ * @param files
+ *
+ * This function classified the files which are to be added to the
+ * dstCollection based on the ownership of each of the files.
+ *
+ * The filesToAdd() list is for files in otherOwnedFiles whose content can be
+ * represented by an equivalent file already owned by the current user. If the
+ * code finds a user-owned equivalent with the same metadata hash and file type,
+ * it reuses that file and links it to the dstCollection.
+ *
+ * The filesToCopy() are for files owned by someone else for which
+ * the current user has no equivalent copy. Those cannot be directly reused.
+ * So a copy of them is created for the current user and then linked
+ * with the dstCollection.
+ */
+export const addOrCopyToCollection = async (
+    dstCollection: Collection,
+    files: EnteFile[],
+) => {
+    const addedFiles: EnteFile[] = [];
+    if (!files.length) return addedFiles;
+
+    /**
+     * The user who is adding the files to the dstCollection must be
+     * either the OWNER, ADMIN or atleast a COLLABORATOR to add the file
+     * to the album.
+     *
+     * Therefore checking before proceeding and if not then throwing error.
+     */
+    if (!canAddFilesToCollection(dstCollection)) {
+        throw new Error("Current user cannot add files to this collection");
+    }
+
+    // Getting the ID of the currently logged-in user, collection files.
+    const currentUserID = ensureLocalUser().id;
+    const collectionFiles = await savedCollectionFiles();
+
+    /**
+     * Now since we have the files across all the collections and the
+     * id of the collection to which we want to upload the files to
+     *
+     * Getting the file IDs which are already present in the dstCollection
+     */
+    const destinationFileIDs = fileIDsInCollection(
+        dstCollection.id,
+        collectionFiles,
+    );
+    /**
+     * Getting the list of the files which aren't actually already present
+     * in the destination. We don't want to upload files which already exist
+     * in the destination therefore this check.
+     *
+     * Here files indiciate the files which the user wants to add to the album
+     */
+    const filesMissingFromDestination = uniqueFilesByID(files).filter(
+        (file) => !destinationFileIDs.has(file.id),
+    );
+
+    // If all the files, already exists then,
+    // we have nothing pending so returning.
+    if (!filesMissingFromDestination.length) return addedFiles;
+
+    /**
+     * Files which are owned by the current user and not owned
+     * both have different upload process therefore this filtering.
+     */
+    const [ownedFiles, otherOwnedFiles] = splitByPredicate(
+        filesMissingFromDestination,
+        (file) => file.ownerID == currentUserID,
+    );
+
+    /**
+     * For files already owned by the current user, we only link existing files
+     * to the destination collection. No content upload, no new file IDs, and no
+     * removal from current collections—just membership entries on the server.
+     *
+     * It's a far more straightforward process compared to the upload of
+     * non-owned files.
+     */
+    if (ownedFiles.length) {
+        await addToCollection(dstCollection, ownedFiles);
+        ownedFiles.forEach((file) => destinationFileIDs.add(file.id));
+        addedFiles.push(...ownedFiles);
+    }
+
+    // If there are no files which are owned but by others
+    // then skipping the rest of the process.
+    if (!otherOwnedFiles.length) return addedFiles;
+
+    /**
+     * Say if user A uploaded a file X to a shared album and you
+     * also have a copy of the same file let it be Y. Then when you try to
+     * add the file X to a shared album instead of X it's Y being added.
+     *
+     * It's done by checking the metadatahash and fileType to see if the
+     * user who is initating the action has a copy of the same file.
+     */
+    const userOwnedFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
+        collectionFiles,
+        currentUserID,
+    );
+
+    // Storing the user owned files which can be directly added
+    const filesToAdd: EnteFile[] = [];
+    // Storing other owned-files without an user-owned equivalent
+    const filesToCopy: EnteFile[] = [];
+    /**
+     * Both the below Set(s) are for preventing duplication. Assume there are
+     * two shared files X1 and X2 and then if both of them match the same owned
+     * file Y then we need to prevent Y from being pushed to filesToAdd twice.
+     * similarly for the filesToCopy as well
+     */
+    const seenAddFileIDs = new Set<number>();
+    const seenCopyFileIDs = new Set<number>();
+
+    for (const file of otherOwnedFiles) {
+        const fileHashAndTypeKey = hashAndTypeKey(file);
+
+        // Checking if the user has a file with matching hash
+        const userOwnedEquivalent = fileHashAndTypeKey
+            ? userOwnedFilesByHashAndType.get(fileHashAndTypeKey)
+            : undefined;
+        const shouldAddOwnedEquivalent = !!userOwnedEquivalent;
+
+        // If the file needs to be added or copied then pushing
+        // the file ID into corresponding variables.
+        if (shouldAddOwnedEquivalent) {
+            if (!seenAddFileIDs.has(userOwnedEquivalent.id)) {
+                seenAddFileIDs.add(userOwnedEquivalent.id);
+                filesToAdd.push(userOwnedEquivalent);
+            }
+        } else if (!seenCopyFileIDs.has(file.id)) {
+            seenCopyFileIDs.add(file.id);
+            filesToCopy.push(file);
+        }
+    }
+
+    /**
+     * If you are wondering why we need this check again because we did it
+     * once at the filesMissingFromDestination. the filesToAdd might have
+     * different or new IDs which weren't there in the files earlier.
+     *
+     * For otherOwnedFiles, the code may replace thesource file X
+     * with a different user owned equivalent Y.
+     */
+    const reusableOwnedFiles = uniqueFilesByID(filesToAdd).filter(
+        (file) => !destinationFileIDs.has(file.id),
+    );
+
+    /**
+     * Adding the files to the dstCollection.
+     * fyi: these are the files for which the currentUser
+     * had a equivalent copy with a matching metadata + fileType.
+     */
+    if (reusableOwnedFiles.length) {
+        await addToCollection(dstCollection, reusableOwnedFiles);
+        reusableOwnedFiles.forEach((file) => destinationFileIDs.add(file.id));
+        addedFiles.push(...reusableOwnedFiles);
+    }
+
+    if (!filesToCopy.length) return addedFiles;
+
+    /**
+     * To directly upload to a collection, the currentUser must be the
+     * the owner of the same, checking that and if not then,
+     */
+    const copyDestination = canDirectlyUploadToCollection(dstCollection)
+        ? dstCollection
+        : await savedOrCreateUserUncategorizedCollection();
+
+    /**
+     * If the user owns the dstCollection then copyDestination will have reference
+     * of that collection in it else, it will be having the reference for the uncategorized
+     * collection to which the files is copied to.
+     */
+    const copiedFiles = await copyFiles(copyDestination, filesToCopy);
+
+    if (copyDestination.id != dstCollection.id) {
+        /**
+         * The copiedFiles variable have the reference of the files which are
+         * uploaded to the uncatgroized and now these files have a proper EnteFile
+         * schema, therefore now we can add these files to the dstCollection after checking
+         * the fileIds doesn't already exist there.
+         */
+        const filesToAddAfterCopy = uniqueFilesByID(copiedFiles).filter(
+            (file) => !destinationFileIDs.has(file.id),
+        );
+        if (filesToAddAfterCopy.length) {
+            await addToCollection(dstCollection, filesToAddAfterCopy);
+            filesToAddAfterCopy.forEach((file) =>
+                destinationFileIDs.add(file.id),
+            );
+            addedFiles.push(...filesToAddAfterCopy);
+        }
+    } else {
+        addedFiles.push(...copiedFiles);
+    }
+
+    return addedFiles;
+};
 
 /**
  * Return an array of {@link CollectionFileItem}s, one for each file in
@@ -683,8 +1267,8 @@ const encryptWithCollectionKey = async (
  *
  * Remote only, does not modify local state.
  */
-export const moveToTrash = async (files: EnteFile[]) =>
-    batched(files, async (batchFiles) =>
+export const moveToTrash = async (files: EnteFile[]) => {
+    await batched(files, async (batchFiles) =>
         ensureOk(
             await fetch(await apiURL("/files/trash"), {
                 method: "POST",
@@ -698,14 +1282,16 @@ export const moveToTrash = async (files: EnteFile[]) =>
             }),
         ),
     );
+    forgetPendingFavoriteFileIDs(files.map((file) => file.id));
+};
 
 /**
  * Make a remote request to delete the given {@link fileIDs} from trash.
  *
  * Remote only, does not modify local state.
  */
-export const deleteFromTrash = async (fileIDs: number[]) =>
-    batched(fileIDs, async (batchIDs) =>
+export const deleteFromTrash = async (fileIDs: number[]) => {
+    await batched(fileIDs, async (batchIDs) =>
         ensureOk(
             await fetch(await apiURL("/trash/delete"), {
                 method: "POST",
@@ -714,6 +1300,8 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
             }),
         ),
     );
+    forgetPendingFavoriteFileIDs(fileIDs);
+};
 
 /**
  * Remove the given files from the specified collection owned by the user.
@@ -1298,8 +1886,7 @@ const savedOrCreateUserFavoritesCollection = async () =>
     (await savedUserFavoritesCollection()) ?? createFavoritesCollection();
 
 /**
- * Return the user's own favorites collection, if any, present in the local
- * database.
+ * Return the user's own favorites collection if present in the local database.
  */
 export const savedUserFavoritesCollection = async () => {
     const userID = ensureLocalUser().id;
@@ -1319,13 +1906,144 @@ export const savedUserFavoritesCollection = async () => {
  *
  * Reads local state but does not modify it. The effects are on remote.
  */
-export const addToFavoritesCollection = async (files: EnteFile[]) =>
-    addToCollection(await savedOrCreateUserFavoritesCollection(), files);
+export const addToFavoritesCollection = async (files: EnteFile[]) => {
+    const userID = ensureLocalUser().id;
 
-export const removeFromFavoritesCollection = async (files: EnteFile[]) =>
-    // Non-null assertion because if we get here and a favorites collection does
-    // not already exist, then something is wrong.
-    removeFromOwnCollection((await savedUserFavoritesCollection())!.id, files);
+    // Currenly we can only favorite shared files which have a proper metadataHash
+    // therefore filtering to check if there are files without this data.
+    const hashlessSharedFile = files.find(
+        (file) => file.ownerID != userID && !hashAndTypeKey(file),
+    );
+
+    // If there are files without metadata hash to be favorited, then rejecting the change
+    if (hashlessSharedFile) {
+        throw new Error("Cannot favorite shared files without metadata hash");
+    }
+
+    // Getting the favorites collection of the user, if there is no favorite collection
+    // for this particular user at the moment this function actaully creates one.
+
+    const favoritesCollection = await savedOrCreateUserFavoritesCollection();
+
+    // Splitting the files based on their ownership.
+    const { pendingFiles, remainingFiles } = splitPendingFavoriteFiles(
+        files,
+        userID,
+    );
+
+    // Pending files need to be just added to the favorite collection,
+    // since they already have a user-owned copy so routing them that way.
+    if (pendingFiles.length) {
+        await addToCollection(favoritesCollection, pendingFiles);
+    }
+
+    // Remaining files are those files which aren't owned by the current user
+    // right now, therefore they have to be copied to the Favorites album instead
+    // of adding. Therefore they are going to the addOrCopyToCollection.
+    const addedFiles = await addOrCopyToCollection(
+        favoritesCollection,
+        remainingFiles,
+    );
+
+    // This function update the local variable pendingFavoriteFilesByHashAndType which maintains a map
+    // of the files which were recently favorited/un-favorited to prevent
+    // duplicate copying of the shared files into the user's album
+    rememberPendingFavoriteFiles(
+        files,
+        pendingFiles.concat(addedFiles),
+        userID,
+    );
+};
+
+export const removeFromFavoritesCollection = async (files: EnteFile[]) => {
+    const userID = ensureLocalUser().id;
+
+    // Getting the saved Favorites collection of the user and if there is
+    // no such collection existing then we throw an error.
+    const favoritesCollection = await savedUserFavoritesCollection();
+    if (!favoritesCollection) {
+        throw new Error("Favorites collection does not exist");
+    }
+
+    // The files now might have files which are from shared-albums as well
+    // Before removing them from the favorites we need to resolve to a
+    // owned-equivalent of the same file.
+    const resolvedFiles = await resolveFavoritesFilesForRemoval(
+        favoritesCollection,
+        files,
+    );
+    if (!resolvedFiles.length) return;
+
+    await removeFromOwnCollection(
+        favoritesCollection.id,
+        uniqueFilesByID(resolvedFiles),
+    );
+    rememberPendingFavoriteFiles(files, resolvedFiles, userID);
+};
+
+/**
+ *
+ * @param favoritesCollection
+ * @param files
+ * @returns
+ *
+ *
+ * If the user has marked a shared-file/non-owned file as favorite,
+ * every single instance of that file with the matching metadataHash key
+ * will be shown as favorite for the user
+ *
+ * This includes any files which are in the shared album as well.
+ * Such files owner as well as the collection id will be different.
+ *
+ * Therefore we are looping through the files which the user wants to unfavorite
+ * and then checking if there are any files like the above.
+ *
+ * if so then
+ */
+
+const resolveFavoritesFilesForRemoval = async (
+    favoritesCollection: Collection,
+    files: EnteFile[],
+) => {
+    const userID = ensureLocalUser().id;
+
+    // Looping through user's favorites and then creating a map with the user's
+    // favorite files and their metadataHash key. This is used below to resolve
+    // to the user-owned files which is to be unfavorited.
+    const favoriteFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
+        (await savedCollectionFiles()).filter(
+            (file) => file.collectionID == favoritesCollection.id,
+        ),
+        userID,
+    );
+
+    /**
+     * Iterating through the files which are to be unfavorited
+     * and checking if they contain any files which belong to a
+     * shared album(i.e. their owner as well as collectionId will differ)
+     *
+     * if so then getting the user-owned
+     * equivalent of the file using it's metadataHash and favoriteFilesByHashAndType
+     * mapping and then returning it.
+     */
+    return files.map((file) => {
+        if (
+            file.ownerID != userID &&
+            file.collectionID != favoritesCollection.id
+        ) {
+            const key = hashAndTypeKey(file);
+            const favoriteFile = key
+                ? (favoriteFilesByHashAndType.get(key) ??
+                  pendingFavoriteFilesByHashAndType.get(key))
+                : undefined;
+            if (!favoriteFile) {
+                throw new Error("Could not resolve favorite file for removal");
+            }
+            return favoriteFile;
+        }
+        return file;
+    });
+};
 
 /**
  * Return the default hidden collection for the user if one is found in the
@@ -1452,9 +2170,51 @@ export const canRemoveFilesFromAllParticipants = (collection: Collection) => {
  * If the default hidden collection does not already exist, it is created.
  *
  * Reads local state but does not modify it. The effects are on remote.
+ *
+ * Since now we also support upload to shared album on desktop/web, the files
+ * got as params will also have shared files in them, whose collectionID
+ * points to the shared album. And moving files from those collections aren't
+ * possible.
+ *
+ * Therefore for such files are being removed instead of moving.
  */
-export const hideFiles = async (files: EnteFile[]) =>
-    moveToCollection(await savedOrCreateDefaultHiddenCollection(), files);
+export const hideFiles = async (files: EnteFile[]) => {
+    const userID = ensureLocalUser().id;
+    const defaultHiddenCollection =
+        await savedOrCreateDefaultHiddenCollection();
+    const collections = await savedCollections();
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+
+    /**
+     * Grouping the files based on their collectionID, so if a file exists
+     * in a user-owned collection and non-user owned collection for those files
+     * where will be two entries based on their collectionID
+     *
+     * the owned-collection file will be moved using /move-files endpoint
+     * wherease the non-owned collection file will be removed from the shared collection
+     * using the /
+     */
+    for (const [collectionID, collectionFiles] of groupFilesByCollectionID(
+        files,
+    ).entries()) {
+        if (collectionID == defaultHiddenCollection.id) continue;
+
+        const collection = collectionsByID.get(collectionID);
+        if (!collection) {
+            throw new Error(`Collection ${collectionID} not found`);
+        }
+
+        if (collection.owner.id == userID) {
+            await moveFromCollection(
+                collectionID,
+                defaultHiddenCollection,
+                collectionFiles,
+            );
+        } else {
+            await removeFromCollection(collection, collectionFiles);
+        }
+    }
+};
 
 /**
  * Share the provided collection with another Ente user.

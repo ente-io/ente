@@ -73,10 +73,7 @@ class ClipTextEncoder extends MlModel {
     }
   }
 
-  static List<double> _runFFIBasedPredict(
-    Int32List int32list,
-    int address,
-  ) {
+  static List<double> _runFFIBasedPredict(Int32List int32list, int address) {
     final runOptions = OrtRunOptions();
     final data = List.filled(1, int32list);
     final inputOrt = OrtValueTensor.createTensorWithDataList(data, [1, 77]);
@@ -97,10 +94,7 @@ class ClipTextEncoder extends MlModel {
     Int32List int32list,
   ) async {
     final OnnxDart plugin = OnnxDart();
-    final result = await plugin.predictInt(
-      int32list,
-      _modelName,
-    );
+    final result = await plugin.predictInt(int32list, _modelName);
     final List<double> embedding = result!.sublist(0, 512);
     normalizeEmbedding(embedding);
     return embedding;

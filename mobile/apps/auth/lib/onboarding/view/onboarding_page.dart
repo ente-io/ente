@@ -60,8 +60,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
     _pageController.addListener(_handlePageControllerScroll);
     _currentPage = initialPage;
     _activeDotIndex = _currentPage % _featureCount;
-    _triggerLogoutEvent =
-        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+    _triggerLogoutEvent = Bus.instance.on<TriggerLogoutEvent>().listen((
+      event,
+    ) async {
       await autoLogoutAlert(context);
     });
     _startAutoScroll();
@@ -97,31 +98,25 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 GestureDetector(
                   onTap: () async {
                     final locale = (await getLocale())!;
-                    // ignore: unawaited_futures
-                    routeToPage(
-                      context,
-                      LanguageSelectorPage(
-                        appSupportedLocales,
-                        (locale) async {
+                    unawaited(
+                      routeToPage(
+                        context,
+                        LanguageSelectorPage(appSupportedLocales, (
+                          locale,
+                        ) async {
                           await setLocale(locale);
-                          App.setLocale(
-                            context,
-                            locale,
-                          );
-                        },
-                        locale,
-                      ),
-                    ).then((value) {
-                      setState(() {});
-                    });
+                          App.setLocale(context, locale);
+                        }, locale),
+                      ).then((value) {
+                        setState(() {});
+                      }),
+                    );
                   },
                   child: const Padding(
                     padding: EdgeInsets.only(bottom: 12),
                     child: Text(
                       "Lang(i)",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
@@ -137,9 +132,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 32,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -158,9 +151,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 580),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 28,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
                         child: Row(
                           children: [
                             Expanded(
@@ -245,7 +236,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Future<void> _optForOfflineMode() async {
-    bool canCheckBio = Platform.isMacOS ||
+    bool canCheckBio =
+        Platform.isMacOS ||
         Platform.isLinux ||
         Platform.isWindows ||
         await LocalAuthentication().canCheckBiometrics;
@@ -269,12 +261,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
     if (hasOptedBefore || result?.action == ButtonAction.first) {
       await Configuration.instance.optForOfflineMode();
-      // ignore: unawaited_futures
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return const HomePage();
-          },
+      unawaited(
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const HomePage();
+            },
+          ),
         ),
       );
     }
@@ -351,10 +344,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         controller: _pageController,
         itemBuilder: (context, index) {
           final feature = features[index % features.length];
-          return _FeatureItemWidget(
-            assetPath: feature.$1,
-            title: feature.$2,
-          );
+          return _FeatureItemWidget(assetPath: feature.$1, title: feature.$2);
         },
         onPageChanged: (index) {
           setState(() {
@@ -403,9 +393,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         activeShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         size: const Size(10, 10),
         activeSize: const Size(20, 10),
         spacing: const EdgeInsets.all(6),
@@ -435,10 +423,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         );
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
-        page = PasswordReentryPage(
-          Configuration.instance,
-          const HomePage(),
-        );
+        page = PasswordReentryPage(Configuration.instance, const HomePage());
       } else {
         // All is well, user just has not subscribed
         page = const HomePage();
@@ -468,10 +453,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         );
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
-        page = PasswordReentryPage(
-          Configuration.instance,
-          const HomePage(),
-        );
+        page = PasswordReentryPage(Configuration.instance, const HomePage());
       } else {
         // All is well, user just has not subscribed
         // page = getSubscriptionPage(isOnBoarding: true);
@@ -489,10 +471,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 }
 
 class _FeatureItemWidget extends StatelessWidget {
-  const _FeatureItemWidget({
-    required this.assetPath,
-    required this.title,
-  });
+  const _FeatureItemWidget({required this.assetPath, required this.title});
 
   final String assetPath;
   final String title;
@@ -503,18 +482,15 @@ class _FeatureItemWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Image.asset(
-          assetPath,
-          height: 188,
-        ),
+        Image.asset(assetPath, height: 188),
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Text(
             title,
-            style: getEnteTextTheme(context).largeBold.copyWith(
-                  color: Colors.white,
-                ),
+            style: getEnteTextTheme(
+              context,
+            ).largeBold.copyWith(color: Colors.white),
             textAlign: TextAlign.center,
           ),
         ),

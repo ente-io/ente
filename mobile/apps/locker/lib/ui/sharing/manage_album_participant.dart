@@ -60,17 +60,14 @@ class _ManageIndividualParticipantState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      TitleBarTitleWidget(
-                        title: context.l10n.manage,
-                      ),
+                      const SizedBox(height: 12),
+                      TitleBarTitleWidget(title: context.l10n.manage),
                       Text(
                         widget.user.resolvedDisplayName,
                         textAlign: TextAlign.left,
-                        style: textTheme.small
-                            .copyWith(color: colorScheme.textMuted),
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -87,13 +84,13 @@ class _ManageIndividualParticipantState
                   onTap: widget.user.isCollaborator
                       ? null
                       : () async {
-                          final result =
-                              await collectionActions.addEmailToCollection(
-                            context,
-                            widget.collection,
-                            widget.user.email,
-                            CollectionParticipantRole.collaborator,
-                          );
+                          final result = await collectionActions
+                              .addEmailToCollection(
+                                context,
+                                widget.collection,
+                                widget.user.email,
+                                CollectionParticipantRole.collaborator,
+                              );
                           if (result && mounted) {
                             widget.user.role = CollectionParticipantRole
                                 .collaborator
@@ -125,8 +122,8 @@ class _ManageIndividualParticipantState
                             firstButtonLabel: context.l10n.yesConvertToViewer,
                             body: context.l10n
                                 .cannotAddMoreFilesAfterBecomingViewer(
-                              widget.user.resolvedDisplayName,
-                            ),
+                                  widget.user.resolvedDisplayName,
+                                ),
                             isCritical: true,
                           );
                           if (actionResult?.action != null) {
@@ -134,11 +131,11 @@ class _ManageIndividualParticipantState
                               try {
                                 isConvertToViewSuccess = await collectionActions
                                     .addEmailToCollection(
-                                  context,
-                                  widget.collection,
-                                  widget.user.email,
-                                  CollectionParticipantRole.viewer,
-                                );
+                                      context,
+                                      widget.collection,
+                                      widget.user.email,
+                                      CollectionParticipantRole.viewer,
+                                    );
                               } catch (e) {
                                 await showGenericErrorDialog(
                                   context: context,

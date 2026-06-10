@@ -3,6 +3,8 @@ import { getUserRecoveryKey } from "ente-accounts-rs/services/recovery-key";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { clientPackageName, desktopAppVersion, isDesktop } from "ente-base/app";
+import { ensureArrayBufferBacked } from "ente-base/bytes";
+import { retryAsyncOperation } from "ente-base/http";
 import log from "ente-base/log";
 import { apiOrigin } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
@@ -52,7 +54,6 @@ export type {
 
 const CONTACT_DIFF_LIMIT = 500;
 const AVATAR_FAILURE_TTL_MS = 60_000;
-const READY_RETRY_COOLDOWN_MS = 5_000;
 const CONTACTS_CACHE_SCHEMA_VERSION = 2;
 
 interface RemoteContactRecord {
@@ -122,8 +123,6 @@ interface ContactsState {
     avatarLoadsByContactID: Map<string, Promise<void>>;
     avatarFailureUntilByContactID: Map<string, number>;
     avatarListenersByContactID: Map<string, Set<() => void>>;
-    lastReadyInput: ContactsReadyInput | undefined;
-    retryTimer: ReturnType<typeof setTimeout> | undefined;
 }
 
 const emptySnapshot = (): ContactsDisplaySnapshot => ({
@@ -148,8 +147,6 @@ const state: ContactsState = {
     avatarLoadsByContactID: new Map(),
     avatarFailureUntilByContactID: new Map(),
     avatarListenersByContactID: new Map(),
-    lastReadyInput: undefined,
-    retryTimer: undefined,
 };
 
 const buildSessionKey = (baseURL: string, userID: number) =>
@@ -195,10 +192,6 @@ const clearInMemoryState = () => {
     state.avatarURLByContactID = new Map();
     state.avatarLoadsByContactID = new Map();
     state.avatarFailureUntilByContactID = new Map();
-    if (state.retryTimer) {
-        clearTimeout(state.retryTimer);
-        state.retryTimer = undefined;
-    }
 };
 
 const emitSnapshot = (isHydrated = true) => {
@@ -478,7 +471,6 @@ export const ensureContactsReady = async ({
     userID,
     masterKeyB64,
 }: ContactsReadyInput) => {
-    state.lastReadyInput = { userID, masterKeyB64 };
     const authToken = await savedAuthToken();
     if (!authToken) {
         state.sessionGeneration += 1;
@@ -499,37 +491,21 @@ export const ensureContactsReady = async ({
         return state.readyPromise;
     }
 
-    const readyPromise = syncContacts({
-        sessionKey,
-        baseURL,
-        authToken,
-        userID,
-        masterKeyB64,
-    })
-        .then(() => {
-            if (state.retryTimer) {
-                clearTimeout(state.retryTimer);
-                state.retryTimer = undefined;
-            }
-        })
-        .catch((error: unknown) => {
-            if (state.retryTimer) {
-                clearTimeout(state.retryTimer);
-            }
-            const retryInput = state.lastReadyInput;
-            state.retryTimer = setTimeout(() => {
-                state.retryTimer = undefined;
-                if (retryInput) {
-                    void ensureContactsReady(retryInput).catch(() => undefined);
-                }
-            }, READY_RETRY_COOLDOWN_MS);
-            throw error;
-        })
-        .finally(() => {
-            if (state.readyPromise === readyPromise) {
-                state.readyPromise = undefined;
-            }
-        });
+    const readyPromise = retryAsyncOperation(
+        () =>
+            syncContacts({
+                sessionKey,
+                baseURL,
+                authToken,
+                userID,
+                masterKeyB64,
+            }),
+        { retryProfile: "background" },
+    ).finally(() => {
+        if (state.readyPromise === readyPromise) {
+            state.readyPromise = undefined;
+        }
+    });
 
     state.readyPromise = readyPromise;
 
@@ -820,7 +796,9 @@ const ensureProfilePictureLoaded = async (contactID: string) => {
             ) {
                 return;
             }
-            const blob = new Blob([bytes], { type: inferImageMimeType(bytes) });
+            const blob = new Blob([ensureArrayBufferBacked(bytes)], {
+                type: inferImageMimeType(bytes),
+            });
             const url = URL.createObjectURL(blob);
             cleanupAvatarURL(contactID);
             state.avatarURLByContactID.set(contactID, url);

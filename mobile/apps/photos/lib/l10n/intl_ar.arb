@@ -218,7 +218,6 @@
   "after1Month": "بعد شهر",
   "after1Year": "بعد سنة",
   "manageParticipants": "إدارة المشاركين",
-  "collabLinkSectionDescription": "أنشئ رابطًا يسمح للأشخاص بإضافة الصور ومشاهدتها في ألبومك المشترك دون الحاجة إلى تطبيق أو حساب Ente. خيار مثالي لجمع صور الفعاليات بسهولة.",
   "collectPhotos": "جمع الصور",
   "collaborativeLink": "رابط تعاوني",
   "shareWithNonenteUsers": "المشاركة مع غير مستخدمي Ente",
@@ -311,7 +310,6 @@
   "creatingLink": "جارٍ إنشاء الرابط...",
   "removeWithQuestionMark": "إزالة؟",
   "removeParticipantBody": "سيتم إزالة {userEmail} من هذا الألبوم المشترك.\n\nسيتم أيضًا إزالة أي صور أضافها إلى الألبوم.",
-  "keepPhotos": "الاحتفاظ بالصور",
   "deletePhotos": "حذف الصور",
   "inviteToEnte": "دعوة إلى Ente",
   "removePublicLink": "إزالة الرابط العام",
@@ -319,6 +317,9 @@
   "sharing": "جارٍ المشاركة...",
   "youCannotShareWithYourself": "لا يمكنك المشاركة مع نفسك.",
   "archive": "الأرشيف",
+  "@archive": {
+    "description": "Action of 'Archiving' an element"
+  },
   "createAlbumActionHint": "اضغط مطولاً لتحديد الصور ثم انقر على '+' لإنشاء ألبوم",
   "importing": "جارٍ الاستيراد...",
   "failedToLoadAlbums": "فشل تحميل الألبومات",
@@ -670,7 +671,6 @@
   "existingUser": "مستخدم حالي",
   "newToEnte": "جديد في Ente",
   "pleaseLoginAgain": "يرجى تسجيل الدخول مرة أخرى",
-  "autoLogoutMessage": "بسبب خلل تقني، تم تسجيل خروجك. نعتذر عن الإزعاج.",
   "yourSubscriptionHasExpired": "انتهت صلاحية اشتراكك",
   "storageLimitExceeded": "تم تجاوز حد التخزين",
   "upgrade": "ترقية",
@@ -692,11 +692,6 @@
   "collectEventPhotos": "جمع صور الفعالية",
   "sessionExpired": "انتهت صلاحية الجلسة",
   "loggingOut": "جارٍ تسجيل الخروج...",
-  "@onDevice": {
-    "description": "The text displayed above folders/albums stored on device",
-    "type": "text"
-  },
-  "onDevice": "على الجهاز",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -737,6 +732,9 @@
   "moveToAlbum": "نقل إلى ألبوم",
   "unhide": "إظهار",
   "unarchive": "إلغاء الأرشفة",
+  "@unarchive": {
+    "description": "Action of 'Unarchiving' an element"
+  },
   "favorite": "المفضلة",
   "removeFromFavorite": "إزالة من المفضلة",
   "shareLink": "مشاركة الرابط",
@@ -1108,8 +1106,6 @@
   "noPhotosFoundHere": "لم يتم العثور على صور هنا",
   "zoomOutToSeePhotos": "قم بالتصغير لرؤية الصور",
   "noImagesWithLocation": "لا توجد صور تحتوي على موقع",
-  "unpinAlbum": "إلغاء تثبيت الألبوم",
-  "pinAlbum": "تثبيت الألبوم",
   "create": "إنشاء",
   "viewAll": "عرض الكل",
   "nothingSharedWithYouYet": "لم تتم مشاركة أي شيء معك بعد",
@@ -1634,9 +1630,7 @@
   "newPhotosEmoji": " جديد 📸",
   "sorryWeHadToPauseYourBackups": "عذراً، لقد اضطررنا إلى إيقاف النسخ الاحتياطي الخاصة بك",
   "clickToInstallOurBestVersionYet": "انقر لتثبيت أفضل إصدار لنا حتى الآن",
-  "onThisDayNotificationExplanation": "تلقي  تذكيرات حول ذكريات مثل اليوم في السنوات السابقة.",
   "birthdayNotifications": "إشعارات عيد الميلاد",
-  "receiveRemindersOnBirthdays": "استلم تذكيرات عندما يحين عيد ميلاد أحدهم. النقر على الإشعار سينقلك إلى صور الشخص المحتفل بعيد ميلاده.",
   "happyBirthday": "عيد ميلاد سعيد! 🥳",
   "birthdays": "أعياد الميلاد",
   "wishThemAHappyBirthday": "أتمنى لـ{name} عيد ميلاد سعيد! 🎉",

@@ -1,10 +1,6 @@
 import "package:flutter/material.dart";
 
-enum SearchState {
-  empty,
-  searching,
-  notEmpty,
-}
+enum SearchState { empty, searching, notEmpty }
 
 class IndexOfStackNotifier with ChangeNotifier {
   int _prevIndex = 0;

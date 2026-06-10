@@ -5,7 +5,8 @@ import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=8113-59605&t=OMX5f5KdDJYWSQQN-4
 class InfoItemWidget extends StatelessWidget {
-  final IconData leadingIcon;
+  final IconData? leadingIcon;
+  final Widget? leadingIconWidget;
   final VoidCallback? editOnTap;
   final String? title;
   final Widget? endSection;
@@ -14,7 +15,8 @@ class InfoItemWidget extends StatelessWidget {
   final bool biggerSpinner;
   final VoidCallback? onTap;
   const InfoItemWidget({
-    required this.leadingIcon,
+    this.leadingIcon,
+    this.leadingIconWidget,
     this.editOnTap,
     this.title,
     this.endSection,
@@ -23,7 +25,7 @@ class InfoItemWidget extends StatelessWidget {
     this.biggerSpinner = false,
     this.onTap,
     super.key,
-  });
+  }) : assert(leadingIcon != null || leadingIconWidget != null);
 
   @override
   Widget build(BuildContext context) {
@@ -49,11 +51,7 @@ class InfoItemWidget extends StatelessWidget {
             if (snapshot.hasData) {
               final subtitle = snapshot.data as List<Widget>;
               if (subtitle.isNotEmpty) {
-                child = Wrap(
-                  runSpacing: 8,
-                  spacing: 8,
-                  children: subtitle,
-                );
+                child = Wrap(runSpacing: 8, spacing: 8, children: subtitle);
               } else {
                 child = const SizedBox.shrink();
               }
@@ -62,8 +60,9 @@ class InfoItemWidget extends StatelessWidget {
                 padding: biggerSpinner ? 6 : 3,
                 size: biggerSpinner ? 20 : 11,
                 color: getEnteColorScheme(context).strokeMuted,
-                alignment:
-                    biggerSpinner ? Alignment.center : Alignment.centerLeft,
+                alignment: biggerSpinner
+                    ? Alignment.center
+                    : Alignment.centerLeft,
               );
             }
             return AnimatedSwitcher(
@@ -88,6 +87,7 @@ class InfoItemWidget extends StatelessWidget {
             children: [
               IconButtonWidget(
                 icon: leadingIcon,
+                iconWidget: leadingIconWidget,
                 iconButtonType: IconButtonType.secondary,
               ),
               Flexible(

@@ -31,8 +31,10 @@ class _PersonalNotePageState
   static const double _editorMinHeight = 260.0;
   static const double _editorMaxHeight = 560.0;
   static const double _editorBorderRadius = 24.0;
-  static const EdgeInsets _editorContentPadding =
-      EdgeInsets.symmetric(horizontal: 28, vertical: 24);
+  static const EdgeInsets _editorContentPadding = EdgeInsets.symmetric(
+    horizontal: 28,
+    vertical: 24,
+  );
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final FocusNode _titleFocusNode = FocusNode();
@@ -52,19 +54,13 @@ class _PersonalNotePageState
 
   @override
   void loadExistingData() {
-    _syncControllers(
-      triggerSetState: false,
-      updateInitial: true,
-    );
+    _syncControllers(triggerSetState: false, updateInitial: true);
   }
 
   @override
   void refreshUIWithCurrentData() {
     super.refreshUIWithCurrentData();
-    _syncControllers(
-      triggerSetState: true,
-      updateInitial: true,
-    );
+    _syncControllers(triggerSetState: true, updateInitial: true);
   }
 
   @override
@@ -124,10 +120,7 @@ class _PersonalNotePageState
       title = _generateTitleFromContent(content);
     }
 
-    return PersonalNoteData(
-      title: title,
-      content: content,
-    );
+    return PersonalNoteData(title: title, content: content);
   }
 
   String _generateTitleFromContent(
@@ -169,11 +162,7 @@ class _PersonalNotePageState
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
-            child: _buildEditorSurface(
-              context,
-              constraints,
-              isEditing: true,
-            ),
+            child: _buildEditorSurface(context, constraints, isEditing: true),
           ),
           SizedBox(height: collectionSpacing),
           CollectionSelectionWidget(
@@ -200,11 +189,7 @@ class _PersonalNotePageState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: _buildEditorSurface(
-              context,
-              constraints,
-              isEditing: false,
-            ),
+            child: _buildEditorSurface(context, constraints, isEditing: false),
           ),
         ],
       ),
@@ -230,8 +215,9 @@ class _PersonalNotePageState
       _contentFocusNode.unfocus();
     }
     final isEditorFocused = isEditing && _contentFocusNode.hasFocus;
-    final editorFillColor =
-        isEditorFocused ? accentBlue.withOpacity(0.14) : colorScheme.fillFaint;
+    final editorFillColor = isEditorFocused
+        ? accentBlue.withValues(alpha: 0.14)
+        : colorScheme.fillFaint;
 
     final contentPadding = isEditing
         ? _editorContentPadding
@@ -306,7 +292,9 @@ class _PersonalNotePageState
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: colorScheme.fillBase.withOpacity(0.2),
+                              color: colorScheme.fillBase.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -384,8 +372,9 @@ class _PersonalNotePageState
     BoxConstraints constraints,
   ) {
     final screenSize = MediaQuery.of(context).size;
-    final availableWidth =
-        constraints.hasBoundedWidth ? constraints.maxWidth : screenSize.width;
+    final availableWidth = constraints.hasBoundedWidth
+        ? constraints.maxWidth
+        : screenSize.width;
     final availableHeight = constraints.hasBoundedHeight
         ? constraints.maxHeight
         : screenSize.height;
@@ -443,10 +432,7 @@ class _PersonalNotePageState
       return;
     }
     Clipboard.setData(ClipboardData(text: contentText));
-    showToast(
-      context,
-      context.l10n.copiedToClipboard(context.l10n.note),
-    );
+    showToast(context, context.l10n.copiedToClipboard(context.l10n.note));
   }
 
   @override
@@ -460,10 +446,7 @@ class _PersonalNotePageState
       return false;
     }
 
-    _syncControllers(
-      triggerSetState: true,
-      updateInitial: false,
-    );
+    _syncControllers(triggerSetState: true, updateInitial: false);
     return true;
   }
 

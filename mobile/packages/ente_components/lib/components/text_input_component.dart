@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ente_components/theme/colors.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
@@ -47,6 +48,7 @@ class TextInputComponent extends StatefulWidget {
     this.isRequired = false,
     this.prefix,
     this.suffix,
+    this.onSuffixTap,
     this.messageType = TextInputComponentMessageType.helper,
     this.messageIcon,
     this.isDisabled = false,
@@ -94,6 +96,10 @@ class TextInputComponent extends StatefulWidget {
 
   /// Caller-owned trailing widget. Multiline fields pin this slot to the top.
   final Widget? suffix;
+
+  /// Optional tap handler for [suffix]. When provided, the trailing affordance
+  /// gets a 48px tap target without changing the field's visual layout.
+  final VoidCallback? onSuffixTap;
   final TextInputComponentMessageType messageType;
   final IconData? messageIcon;
   final bool isDisabled;
@@ -108,7 +114,8 @@ class TextInputComponent extends StatefulWidget {
 
 class _TextInputComponentState extends State<TextInputComponent> {
   static const _kHeight = 52.0;
-  static const _kIconContainerSize = 24.0;
+  static const _kIconContainerSize = IconSizes.medium;
+  static const _kSuffixTapTargetSize = 48.0;
 
   TextEditingController? _internalController;
   FocusNode? _internalFocusNode;
@@ -200,6 +207,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
     final messageColor = _messageColor(colors);
     final prefix = _buildPrefix();
     final suffix = _buildSuffix(colors);
+    final suffixTap = _suffixTapHandler;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,68 +240,82 @@ class _TextInputComponentState extends State<TextInputComponent> {
             constraints: _isMultiline
                 ? const BoxConstraints(minHeight: _kHeight)
                 : null,
-            padding: EdgeInsets.symmetric(
-              horizontal: Spacing.lg,
-              vertical: _isMultiline ? Spacing.lg : 0,
-            ),
             decoration: BoxDecoration(
               color: _backgroundColor(colors),
               borderRadius: BorderRadius.circular(Radii.lg),
               border: Border.all(color: _borderColor(colors)),
             ),
-            child: Row(
-              crossAxisAlignment: _isMultiline
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.center,
+            child: Stack(
+              clipBehavior: Clip.none,
+              fit: _isMultiline ? StackFit.loose : StackFit.expand,
               children: [
-                if (prefix != null) ...[
-                  prefix,
-                  const SizedBox(width: Spacing.sm),
-                ],
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    enabled: !widget.isDisabled,
-                    autofocus: widget.autofocus,
-                    obscureText: _obscureText,
-                    maxLines: widget.isPasswordInput
-                        ? 1
-                        : widget.maxLines ?? (_isMultiline ? null : 1),
-                    minLines: widget.isPasswordInput ? null : widget.minLines,
-                    keyboardType: widget.keyboardType,
-                    textCapitalization: widget.textCapitalization,
-                    inputFormatters: _inputFormatters,
-                    autofillHints:
-                        widget.autofillHints ??
-                        (widget.isPasswordInput
-                            ? const [AutofillHints.password]
-                            : const []),
-                    autocorrect: widget.autocorrect && !widget.isPasswordInput,
-                    enableSuggestions: !widget.isPasswordInput,
-                    textAlignVertical: _isMultiline
-                        ? TextAlignVertical.top
-                        : TextAlignVertical.center,
-                    onEditingComplete: _handleEditingComplete,
-                    style: TextStyles.body.copyWith(color: _textColor(colors)),
-                    decoration: InputDecoration(
-                      hintText: widget.hintText,
-                      hintStyle: TextStyles.body.copyWith(
-                        color: _hintColor(colors),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Spacing.lg,
+                    vertical: _isMultiline ? Spacing.lg : 0,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: _isMultiline
+                        ? CrossAxisAlignment.start
+                        : CrossAxisAlignment.center,
+                    children: [
+                      if (prefix != null) ...[
+                        prefix,
+                        const SizedBox(width: Spacing.sm),
+                      ],
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          focusNode: _focusNode,
+                          enabled: !widget.isDisabled,
+                          autofocus: widget.autofocus,
+                          obscureText: _obscureText,
+                          maxLines: widget.isPasswordInput
+                              ? 1
+                              : widget.maxLines ?? (_isMultiline ? null : 1),
+                          minLines: widget.isPasswordInput
+                              ? null
+                              : widget.minLines,
+                          keyboardType: widget.keyboardType,
+                          textCapitalization: widget.textCapitalization,
+                          inputFormatters: _inputFormatters,
+                          autofillHints:
+                              widget.autofillHints ??
+                              (widget.isPasswordInput
+                                  ? const [AutofillHints.password]
+                                  : const []),
+                          autocorrect:
+                              widget.autocorrect && !widget.isPasswordInput,
+                          enableSuggestions: !widget.isPasswordInput,
+                          textAlignVertical: _isMultiline
+                              ? TextAlignVertical.top
+                              : TextAlignVertical.center,
+                          onEditingComplete: _handleEditingComplete,
+                          style: TextStyles.body.copyWith(
+                            color: _textColor(colors),
+                          ),
+                          decoration: InputDecoration(
+                            hintText: widget.hintText,
+                            hintStyle: TextStyles.body.copyWith(
+                              color: _hintColor(colors),
+                            ),
+                            border: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
                       ),
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
+                      if (suffix != null) ...[
+                        const SizedBox(width: Spacing.sm),
+                        suffix,
+                      ],
+                    ],
                   ),
                 ),
-                if (suffix != null) ...[
-                  const SizedBox(width: Spacing.sm),
-                  suffix,
-                ],
+                if (suffixTap != null) _suffixTapTarget(suffixTap),
               ],
             ),
           ),
@@ -357,8 +379,11 @@ class _TextInputComponentState extends State<TextInputComponent> {
     if (_isError) {
       return colors.warning;
     }
-    if (_hasSuccess || _focusNode.hasFocus) {
+    if (_hasSuccess) {
       return colors.primary;
+    }
+    if (_focusNode.hasFocus) {
+      return colors.textLighter;
     }
     return colors.strokeFaint;
   }
@@ -392,33 +417,18 @@ class _TextInputComponentState extends State<TextInputComponent> {
   Widget? _buildSuffix(ColorTokens colors) {
     final Widget child;
     if (widget.isPasswordInput) {
-      child = GestureDetector(
-        key: const ValueKey('text-field-password-toggle'),
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.isDisabled
-            ? null
-            : () => setState(() => _obscureText = !_obscureText),
-        child: Icon(
-          _obscureText
-              ? Icons.visibility_off_outlined
-              : Icons.visibility_outlined,
-          size: 20,
-          color: colors.textLighter,
-        ),
+      child = Icon(
+        _obscureText
+            ? Icons.visibility_off_outlined
+            : Icons.visibility_outlined,
+        size: IconSizes.small,
+        color: colors.textLighter,
       );
     } else if (widget.isClearable && _hasText) {
-      child = GestureDetector(
-        key: const ValueKey('text-field-clear'),
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.isDisabled
-            ? null
-            : () {
-                _controller.clear();
-                if (widget.shouldUnfocusOnClearOrSubmit) {
-                  FocusScope.of(context).unfocus();
-                }
-              },
-        child: Icon(Icons.close_rounded, size: 20, color: colors.textLighter),
+      child = Icon(
+        Icons.close_rounded,
+        size: IconSizes.small,
+        color: colors.textLighter,
       );
     } else if (widget.suffix != null) {
       child = widget.suffix!;
@@ -429,19 +439,67 @@ class _TextInputComponentState extends State<TextInputComponent> {
     return _slot(child);
   }
 
+  VoidCallback? get _suffixTapHandler {
+    if (widget.isDisabled) return null;
+    if (widget.isPasswordInput) {
+      return () => setState(() => _obscureText = !_obscureText);
+    }
+    if (widget.isClearable && _hasText) {
+      return () {
+        _controller.clear();
+        if (widget.shouldUnfocusOnClearOrSubmit) {
+          FocusScope.of(context).unfocus();
+        }
+      };
+    }
+    return widget.onSuffixTap;
+  }
+
+  Widget _suffixTapTarget(VoidCallback onTap) {
+    return PositionedDirectional(
+      top: _suffixTapTargetTop,
+      end: Spacing.lg - (_kSuffixTapTargetSize - _kIconContainerSize) / 2,
+      width: _kSuffixTapTargetSize,
+      height: _kSuffixTapTargetSize,
+      child: GestureDetector(
+        key: _suffixTapTargetKey,
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+
+  double get _suffixTapTargetTop {
+    if (_isMultiline) {
+      return Spacing.lg - (_kSuffixTapTargetSize - _kIconContainerSize) / 2;
+    }
+    return (_kHeight - _kSuffixTapTargetSize) / 2;
+  }
+
+  Key? get _suffixTapTargetKey {
+    if (widget.isPasswordInput) {
+      return const ValueKey('text-field-password-toggle');
+    }
+    if (widget.isClearable && _hasText) {
+      return const ValueKey('text-field-clear');
+    }
+    return null;
+  }
+
   Widget? _messageIcon(Color color) {
     if (widget.messageIcon != null) {
-      return Icon(widget.messageIcon, size: 18, color: color);
+      return Icon(widget.messageIcon, size: IconSizes.small, color: color);
     }
     return switch (widget.messageType) {
       TextInputComponentMessageType.alert => Icon(
         Icons.warning_amber_rounded,
-        size: 18,
+        size: IconSizes.small,
         color: color,
       ),
       TextInputComponentMessageType.success => Icon(
         Icons.check_circle_outline_rounded,
-        size: 18,
+        size: IconSizes.small,
         color: color,
       ),
       TextInputComponentMessageType.error ||

@@ -2,14 +2,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/memories/memory.dart";
 
-enum MemoryType {
-  people,
-  trips,
-  clip,
-  time,
-  filler,
-  onThisDay,
-}
+enum MemoryType { people, trips, clip, time, filler, onThisDay }
 
 MemoryType memoryTypeFromString(String type) {
   switch (type) {

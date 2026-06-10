@@ -130,18 +130,20 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
           );
           var useAccessibilityDescriptionLayout =
               _descriptionNeedsAccessibilityFallback(
-            context: context,
-            text: l10n.offlineHomeSignupBannerDescription,
-            style: sculptedDescriptionStyle,
-            firstLineMaxWidth: firstLineMaxWidth,
-            secondLineMaxWidth: secondLineMaxWidth,
-            textScaler: textScaler,
-          );
+                context: context,
+                text: l10n.offlineHomeSignupBannerDescription,
+                style: sculptedDescriptionStyle,
+                firstLineMaxWidth: firstLineMaxWidth,
+                secondLineMaxWidth: secondLineMaxWidth,
+                textScaler: textScaler,
+              );
           if (useAccessibilityDescriptionLayout) {
-            for (double candidateDuckWidth =
-                    sculptedDuckWidth - _duckWidthSearchStep;
-                candidateDuckWidth >= 0;
-                candidateDuckWidth -= _duckWidthSearchStep) {
+            for (
+              double candidateDuckWidth =
+                  sculptedDuckWidth - _duckWidthSearchStep;
+              candidateDuckWidth >= 0;
+              candidateDuckWidth -= _duckWidthSearchStep
+            ) {
               final candidateFirstLineMaxWidth = math.min(
                 _subtitleMaxWidth,
                 _subtitleLineWidth(
@@ -163,13 +165,13 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
               );
               final fitsWithCandidateDuck =
                   !_descriptionNeedsAccessibilityFallback(
-                context: context,
-                text: l10n.offlineHomeSignupBannerDescription,
-                style: candidateDescriptionStyle,
-                firstLineMaxWidth: candidateFirstLineMaxWidth,
-                secondLineMaxWidth: candidateSecondLineMaxWidth,
-                textScaler: textScaler,
-              );
+                    context: context,
+                    text: l10n.offlineHomeSignupBannerDescription,
+                    style: candidateDescriptionStyle,
+                    firstLineMaxWidth: candidateFirstLineMaxWidth,
+                    secondLineMaxWidth: candidateSecondLineMaxWidth,
+                    textScaler: textScaler,
+                  );
               if (!fitsWithCandidateDuck) {
                 continue;
               }
@@ -216,7 +218,8 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
               : 2;
           final titleLineHeight = _scaledLineHeight(titleStyle, textScaler);
           final buttonLineHeight = _scaledLineHeight(buttonStyle, textScaler);
-          final requiredHeight = 18.0 /*top padding*/ +
+          final requiredHeight =
+              18.0 /*top padding*/ +
               titleLineHeight * titleLines +
               13.0 /*title-desc gap*/ +
               descriptionLineHeight * descriptionLines +

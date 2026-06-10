@@ -3,6 +3,7 @@ import 'dart:io';
 
 import "package:app_links/app_links.dart";
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_components/ente_components.dart";
 import 'package:ente_events/event_bus.dart';
 import "package:ente_events/models/trigger_logout_event.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
@@ -185,9 +186,7 @@ class CustomLockerAppBar extends StatelessWidget
                       minHeight: 44,
                     ),
                   ),
-                  style: TextStyle(
-                    color: colorScheme.iconColor,
-                  ),
+                  style: TextStyle(color: colorScheme.iconColor),
                 ),
               ),
             ),
@@ -226,8 +225,9 @@ class _HomePageState extends UploaderPageState<HomePage>
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
-  final ValueNotifier<List<EnteFile>> _displayedFilesNotifier =
-      ValueNotifier([]);
+  final ValueNotifier<List<EnteFile>> _displayedFilesNotifier = ValueNotifier(
+    [],
+  );
 
   String? _error;
   final _logger = Logger('HomePage');
@@ -315,8 +315,9 @@ class _HomePageState extends UploaderPageState<HomePage>
       await _loadCollections();
     });
 
-    _triggerLogoutSubscription =
-        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+    _triggerLogoutSubscription = Bus.instance.on<TriggerLogoutEvent>().listen((
+      event,
+    ) async {
       await _autoLogoutAlert();
     });
   }
@@ -352,10 +353,7 @@ class _HomePageState extends UploaderPageState<HomePage>
             text: context.l10n.ok,
             onTap: () async {
               navigator.pop();
-              final dialog = createProgressDialog(
-                context,
-                l10n.pleaseWait,
-              );
+              final dialog = createProgressDialog(context, l10n.pleaseWait);
               await dialog.show();
               await Configuration.instance.logout();
               await dialog.hide();
@@ -371,22 +369,24 @@ class _HomePageState extends UploaderPageState<HomePage>
     _logger.info('Initializing sharing functionality...');
 
     try {
-      _mediaStreamSubscription =
-          ReceiveSharingIntent.instance.getMediaStream().listen(
-        (List<SharedMediaFile> value) {
-          _logger
-              .info('Received shared media files via stream: ${value.length}');
-          for (var file in value) {
-            _logger.info('Shared file received, type: ${file.type}');
-          }
-          if (value.isNotEmpty) {
-            _handleSharedFiles(value);
-          }
-        },
-        onError: (err) {
-          _logger.severe('Error receiving shared media: $err');
-        },
-      );
+      _mediaStreamSubscription = ReceiveSharingIntent.instance
+          .getMediaStream()
+          .listen(
+            (List<SharedMediaFile> value) {
+              _logger.info(
+                'Received shared media files via stream: ${value.length}',
+              );
+              for (var file in value) {
+                _logger.info('Shared file received, type: ${file.type}');
+              }
+              if (value.isNotEmpty) {
+                _handleSharedFiles(value);
+              }
+            },
+            onError: (err) {
+              _logger.severe('Error receiving shared media: $err');
+            },
+          );
 
       _logger.info('Media stream subscription created successfully');
     } catch (e) {
@@ -400,13 +400,14 @@ class _HomePageState extends UploaderPageState<HomePage>
     try {
       _logger.info('Checking for initial shared content...');
 
-      final initialMedia =
-          await ReceiveSharingIntent.instance.getInitialMedia();
+      final initialMedia = await ReceiveSharingIntent.instance
+          .getInitialMedia();
       _logger.info('Initial media check result: ${initialMedia.length} files');
 
       if (initialMedia.isNotEmpty) {
-        _logger
-            .info('Found initial shared media files: ${initialMedia.length}');
+        _logger.info(
+          'Found initial shared media files: ${initialMedia.length}',
+        );
         for (var file in initialMedia) {
           _logger.info('Initial shared file, type: ${file.type}');
         }
@@ -457,11 +458,7 @@ class _HomePageState extends UploaderPageState<HomePage>
             GradientButton(
               text: context.l10n.contactSupport,
               onTap: () async {
-                await sendLogs(
-                  context,
-                  "support@ente.com",
-                  postShare: () {},
-                );
+                await sendLogs(context, "support@ente.com", postShare: () {});
               },
             ),
           ],
@@ -519,8 +516,8 @@ class _HomePageState extends UploaderPageState<HomePage>
       // collections are created. This handles the case where default collections
       // setup was skipped during initialization due to the master key not being
       // available yet.
-      final hasCompletedFirstSync =
-          CollectionService.instance.hasCompletedFirstSync();
+      final hasCompletedFirstSync = CollectionService.instance
+          .hasCompletedFirstSync();
       if (collections.isEmpty && hasCompletedFirstSync) {
         _logger.info("No collections found after sync, setting up defaults");
         await CollectionService.instance.ensureDefaultCollections();
@@ -529,8 +526,9 @@ class _HomePageState extends UploaderPageState<HomePage>
         await _loadRecentFiles(collections);
       }
 
-      final sortedCollections =
-          CollectionSortUtil.getSortedCollections(collections);
+      final sortedCollections = CollectionSortUtil.getSortedCollections(
+        collections,
+      );
 
       if (mounted) {
         setState(() {
@@ -546,8 +544,8 @@ class _HomePageState extends UploaderPageState<HomePage>
         setState(() {
           _error = 'Error fetching collections: $error';
           _isLoading = false;
-          _hasCompletedInitialLoad =
-              CollectionService.instance.hasCompletedFirstSync();
+          _hasCompletedInitialLoad = CollectionService.instance
+              .hasCompletedFirstSync();
         });
       }
     }
@@ -615,6 +613,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final componentColors = context.componentColors;
     return UserDetailsStateWidget(
       child: ListenableBuilder(
         listenable: _selectedFiles,
@@ -650,7 +649,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 backgroundColor: colorScheme.backgroundBase,
                 drawer: Drawer(
                   width: 428,
-                  backgroundColor: colorScheme.backgroundBase,
+                  backgroundColor: componentColors.backgroundBase,
                   child: _settingsPage,
                 ),
                 drawerEnableOpenDragGesture: true,
@@ -731,10 +730,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 showBorder: false,
               ),
               const SizedBox(height: 20),
-              GradientButton(
-                onTap: _loadCollections,
-                text: context.l10n.retry,
-              ),
+              GradientButton(onTap: _loadCollections, text: context.l10n.retry),
             ],
           ),
         ),
@@ -799,9 +795,6 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   void _openSavePage() {
-    showSaveBottomSheet(
-      context,
-      onUploadDocument: addFile,
-    );
+    showSaveBottomSheet(context, onUploadDocument: addFile);
   }
 }

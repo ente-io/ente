@@ -491,7 +491,7 @@
   "pinLock": "قفل رقم التعريف الشخصي",
   "enterPin": "أدخل رقم التعريف الشخصي",
   "setNewPin": "عين رقم تعريف شخصي جديد",
-  "importFailureDescNew": "تعذر إعراب الملف المنتقى.",
+  "importFailureDesc": "تعذر إعراب الملف المنتقى.",
   "appLockNotEnabled": "قُفْل التطبيق غير مفعل ",
   "appLockNotEnabledDescription": "لحماية بياناتك، فعِّل قُفْل التطبيق من إعدادات الأمان ← قُفْل التطبيق",
   "authToViewPasskey": "الرجاء المصادقة لعرض مفتاح الاسترداد الخاص بك",
@@ -537,5 +537,12 @@
   "chooseBackupLocation": "اختر موقع النسخة الاحتياطية",
   "loadDefaultLocation": "تحميل الموقع الافتراضي...",
   "couldNotDetermineLocation": "تعذر تحديد الموقع...",
-  "saveBackup": "احفظ النسخ الاحتياطي"
+  "saveBackup": "احفظ النسخ الاحتياطي",
+  "chooseIcon": "اختر أيقونة",
+  "customOrder": "ترتيب مخصّص",
+  "appIcon": "أيقونة التطبيق",
+  "importAndOTPGuide": "صدّر النسخة الاحتياطية من andOTP باستخدام خيار \"النسخ الاحتياطي\" في الإعدادات.\n\nإذا تم تشفير النسخة الاحتياطية، سوف تحتاج إلى إدخال كلمة مرور النسخ الاحتياطي لفك تشفيرها.",
+  "enterPasswordToDecryptAndOTP": "أدخل كلمة المرور لفك تشفير النسخ الاحتياطي لـ andOTP",
+  "failedToDecryptAndOTPBackup": "فشل فك تشفير النسخ الاحتياطي لـ andOTP",
+  "notSupportedForHOTP": "غير مدعوم لـ HOTP"
 }

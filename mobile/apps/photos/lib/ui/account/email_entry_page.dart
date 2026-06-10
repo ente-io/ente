@@ -131,8 +131,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               : null,
         ),
       ),
-      bottomNavigationBar:
-          isKeyboardOpen ? null : _getLoginPrompt(colorScheme, textTheme),
+      bottomNavigationBar: isKeyboardOpen
+          ? null
+          : _getLoginPrompt(colorScheme, textTheme),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
@@ -163,8 +164,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         confirmPasswordMessage = AppLocalizations.of(context).passwordsMatch;
         confirmPasswordMessageType = TextInputMessageType.success;
       } else {
-        confirmPasswordMessage =
-            AppLocalizations.of(context).passwordsDontMatch;
+        confirmPasswordMessage = AppLocalizations.of(
+          context,
+        ).passwordsDontMatch;
         confirmPasswordMessageType = TextInputMessageType.error;
       }
     }
@@ -210,9 +212,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         _passwordStrengthTimer?.cancel();
                         setState(() {
                           _password = password;
-                          _passwordStrength =
-                              estimatePasswordStrength(password);
-                          _passwordIsValid = _passwordStrength >=
+                          _passwordStrength = estimatePasswordStrength(
+                            password,
+                          );
+                          _passwordIsValid =
+                              _passwordStrength >=
                               kMildPasswordStrengthThreshold;
                           _passwordsMatch = _password == _cnfPassword;
                           _showPasswordStrength = false;
@@ -285,9 +289,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               hasScrollBody: false,
               child: Column(
                 children: [
-                  Expanded(
-                    child: DeveloperSettingsTapArea(),
-                  ),
+                  Expanded(child: DeveloperSettingsTapArea()),
                   SizedBox(height: 80),
                 ],
               ),
@@ -298,10 +300,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     );
   }
 
-  Widget _getLoginPrompt(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  Widget _getLoginPrompt(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
     return SafeArea(
       top: false,
       child: Padding(
@@ -390,15 +389,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 'u-terms': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
                       Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return WebPage(
-                          AppLocalizations.of(context).termsOfServicesTitle,
-                          "https://ente.com/terms",
-                        );
-                      },
-                    ),
-                  ),
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return WebPage(
+                              AppLocalizations.of(context).termsOfServicesTitle,
+                              "https://ente.com/terms",
+                            );
+                          },
+                        ),
+                      ),
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     color: colorScheme.textMuted,
@@ -407,15 +406,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 'u-policy': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
                       Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return WebPage(
-                          AppLocalizations.of(context).privacyPolicyTitle,
-                          "https://ente.com/privacy",
-                        );
-                      },
-                    ),
-                  ),
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return WebPage(
+                              AppLocalizations.of(context).privacyPolicyTitle,
+                              "https://ente.com/privacy",
+                            );
+                          },
+                        ),
+                      ),
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     color: colorScheme.textMuted,
@@ -438,10 +437,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   Future<void> _goToLoginPage() async {
     FocusScope.of(context).unfocus();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const LoginPage(),
-      ),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const LoginPage()));
   }
 }

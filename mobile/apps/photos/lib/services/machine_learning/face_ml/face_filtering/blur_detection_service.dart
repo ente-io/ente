@@ -12,8 +12,10 @@ class BlurDetectionService {
     int threshold = kLaplacianHardThreshold,
     FaceDirection faceDirection = FaceDirection.straight,
   }) async {
-    final List<List<int>> laplacian =
-        _applyLaplacian(grayImage, faceDirection: faceDirection);
+    final List<List<int>> laplacian = _applyLaplacian(
+      grayImage,
+      faceDirection: faceDirection,
+    );
     final double variance = _calculateVariance(laplacian);
     return (variance < threshold, variance);
   }
@@ -63,11 +65,7 @@ class BlurDetectionService {
     // Create a new matrix with extra padding
     final List<List<int>> paddedImage = List.generate(
       paddedNumRows,
-      (i) => List.generate(
-        paddedNumCols,
-        (j) => 0,
-        growable: false,
-      ),
+      (i) => List.generate(paddedNumCols, (j) => 0, growable: false),
       growable: false,
     );
 
@@ -115,8 +113,10 @@ class BlurDetectionService {
     List<List<int>> image, {
     FaceDirection faceDirection = FaceDirection.straight,
   }) {
-    final List<List<int>> paddedImage =
-        _padImage(image, faceDirection: faceDirection);
+    final List<List<int>> paddedImage = _padImage(
+      image,
+      faceDirection: faceDirection,
+    );
     final int numRows = paddedImage.length - 2;
     final int numCols = paddedImage[0].length - 2;
     final List<List<int>> outputImage = List.generate(

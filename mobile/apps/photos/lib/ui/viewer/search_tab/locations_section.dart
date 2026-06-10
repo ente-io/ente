@@ -3,6 +3,7 @@ import "dart:math";
 import "dart:ui";
 
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
@@ -46,10 +47,12 @@ class _LocationsSectionState extends State<LocationsSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _locationsSearchResults = (await SectionType.location.getData(
-            context,
-            limit: kSearchSectionLimit,
-          )) as List<GenericSearchResult>;
+          _locationsSearchResults =
+              (await SectionType.location.getData(
+                    context,
+                    limit: kSearchSectionLimit,
+                  ))
+                  as List<GenericSearchResult>;
           setState(() {});
         }),
       );
@@ -73,9 +76,9 @@ class _LocationsSectionState extends State<LocationsSection> {
   @override
   Widget build(BuildContext context) {
     if (_locationsSearchResults.isEmpty) {
-      final textTheme = getEnteTextTheme(context);
+      final colors = context.componentColors;
       return Padding(
-        padding: const EdgeInsets.only(left: 12, right: 8),
+        padding: const EdgeInsets.only(left: 12, right: 8, bottom: 24),
         child: Row(
           children: [
             Expanded(
@@ -84,14 +87,14 @@ class _LocationsSectionState extends State<LocationsSection> {
                 children: [
                   Text(
                     SectionType.location.sectionTitle(context),
-                    style: textTheme.largeBold,
+                    style: TextStyles.h2.copyWith(color: colors.textBase),
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
                       SectionType.location.getEmptyStateText(context),
-                      style: textTheme.smallMuted,
+                      style: TextStyles.body.copyWith(color: colors.textLight),
                     ),
                   ),
                 ],
@@ -113,7 +116,7 @@ class _LocationsSectionState extends State<LocationsSection> {
         const RepaintBoundary(child: LocationCTA()),
       ];
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.only(top: 8, bottom: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -144,7 +147,7 @@ class _LocationsSectionState extends State<LocationsSection> {
 
 class LocationRecommendation extends StatelessWidget {
   static const width = 100.0;
-  static const height = 123.0;
+  static const height = 124.0;
   static const thumbnailBorderWidth = 1.0;
   static const outerCornerRadius = 12.0;
   static const cornerSmoothing = 1.0;
@@ -158,9 +161,10 @@ class LocationRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = locationSearchResult.heroTag() +
+    final heroTag =
+        locationSearchResult.heroTag() +
         (locationSearchResult.previewThumbnail()?.tag ?? "");
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(0, 2.5 - outerStrokeWidth)),
       child: GestureDetector(
@@ -169,10 +173,7 @@ class LocationRecommendation extends StatelessWidget {
           if (locationSearchResult.onResultTap != null) {
             locationSearchResult.onResultTap!(context);
           } else {
-            routeToPage(
-              context,
-              SearchResultPage(locationSearchResult),
-            );
+            routeToPage(context, SearchResultPage(locationSearchResult));
           }
         },
         child: RepaintBoundary(
@@ -221,20 +222,19 @@ class LocationRecommendation extends StatelessWidget {
                         Stack(
                           children: [
                             ImageFiltered(
-                              imageFilter:
-                                  ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                              child: locationSearchResult.previewThumbnail() !=
+                              imageFilter: ImageFilter.blur(
+                                sigmaX: 24,
+                                sigmaY: 24,
+                              ),
+                              child:
+                                  locationSearchResult.previewThumbnail() !=
                                       null
                                   ? ThumbnailWidget(
                                       locationSearchResult.previewThumbnail()!,
-                                      shouldShowArchiveStatus: false,
                                       shouldShowSyncStatus: false,
                                       shouldShowFavoriteIcon: false,
                                     )
                                   : const NoThumbnailWidget(),
-                            ),
-                            Container(
-                              color: Colors.black.withValues(alpha: 0.2),
                             ),
                           ],
                         ),
@@ -258,18 +258,22 @@ class LocationRecommendation extends StatelessWidget {
                                       cornerSmoothing: cornerSmoothing,
                                     ),
                                     child: Container(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.1),
-                                      width: sideOfThumbnail +
+                                      color: Colors.black.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      width:
+                                          sideOfThumbnail +
                                           thumbnailBorderWidth * 2,
-                                      height: sideOfThumbnail +
+                                      height:
+                                          sideOfThumbnail +
                                           thumbnailBorderWidth * 2,
                                     ),
                                   ),
                                   SizedBox(
                                     width: sideOfThumbnail,
                                     height: sideOfThumbnail,
-                                    child: locationSearchResult
+                                    child:
+                                        locationSearchResult
                                                 .previewThumbnail() !=
                                             null
                                         ? Hero(
@@ -278,8 +282,8 @@ class LocationRecommendation extends StatelessWidget {
                                               radius: SmoothBorderRadius(
                                                 cornerRadius:
                                                     outerCornerRadius -
-                                                        outerPadding -
-                                                        thumbnailBorderWidth,
+                                                    outerPadding -
+                                                    thumbnailBorderWidth,
                                                 cornerSmoothing:
                                                     cornerSmoothing,
                                               ),
@@ -288,7 +292,6 @@ class LocationRecommendation extends StatelessWidget {
                                               child: ThumbnailWidget(
                                                 locationSearchResult
                                                     .previewThumbnail()!,
-                                                shouldShowArchiveStatus: false,
                                                 shouldShowSyncStatus: false,
                                                 shouldShowFavoriteIcon: false,
                                               ),
@@ -307,8 +310,8 @@ class LocationRecommendation extends StatelessWidget {
                                     children: [
                                       Text(
                                         locationSearchResult.name(),
-                                        style: enteTextTheme.mini.copyWith(
-                                          color: Colors.white,
+                                        style: TextStyles.body.copyWith(
+                                          color: colors.textBase,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -373,7 +376,7 @@ class GoToMapWithBG extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: max(0, 2.5 - LocationRecommendation.outerStrokeWidth),
@@ -405,15 +408,18 @@ class GoToMapWithBG extends StatelessWidget {
           children: [
             ClipSmoothRect(
               radius: SmoothBorderRadius(
-                cornerRadius: LocationRecommendation.outerCornerRadius +
+                cornerRadius:
+                    LocationRecommendation.outerCornerRadius +
                     LocationRecommendation.outerStrokeWidth,
                 cornerSmoothing: LocationRecommendation.cornerSmoothing,
               ),
               child: Container(
                 color: Colors.white.withValues(alpha: 0.1),
-                width: LocationRecommendation.width +
+                width:
+                    LocationRecommendation.width +
                     LocationRecommendation.outerStrokeWidth * 2,
-                height: LocationRecommendation.height +
+                height:
+                    LocationRecommendation.height +
                     LocationRecommendation.outerStrokeWidth * 2,
               ),
             ),
@@ -471,8 +477,8 @@ class GoToMapWithBG extends StatelessWidget {
                                   children: [
                                     Text(
                                       AppLocalizations.of(context).yourMap,
-                                      style: enteTextTheme.mini.copyWith(
-                                        color: Colors.white,
+                                      style: TextStyles.mini.copyWith(
+                                        color: colors.specialWhite,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -502,7 +508,7 @@ class LocationCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     final enteColorScheme = getEnteColorScheme(context);
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -515,15 +521,18 @@ class LocationCTA extends StatelessWidget {
           children: [
             ClipSmoothRect(
               radius: SmoothBorderRadius(
-                cornerRadius: LocationRecommendation.outerCornerRadius +
+                cornerRadius:
+                    LocationRecommendation.outerCornerRadius +
                     LocationRecommendation.outerStrokeWidth,
                 cornerSmoothing: LocationRecommendation.cornerSmoothing,
               ),
               child: Container(
                 color: Colors.white.withValues(alpha: 0.1),
-                width: LocationRecommendation.width +
+                width:
+                    LocationRecommendation.width +
                     LocationRecommendation.outerStrokeWidth * 2,
-                height: LocationRecommendation.height +
+                height:
+                    LocationRecommendation.height +
                     LocationRecommendation.outerStrokeWidth * 2,
               ),
             ),
@@ -591,7 +600,9 @@ class LocationCTA extends StatelessWidget {
                               children: [
                                 Text(
                                   AppLocalizations.of(context).addNew,
-                                  style: enteTextTheme.miniFaint,
+                                  style: TextStyles.mini.copyWith(
+                                    color: colors.textLighter,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,

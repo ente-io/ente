@@ -10,9 +10,7 @@ import "package:locker/utils/collection_list_util.dart";
 class AddToCollectionSheetResult {
   final List<Collection> selectedCollections;
 
-  AddToCollectionSheetResult({
-    required this.selectedCollections,
-  });
+  AddToCollectionSheetResult({required this.selectedCollections});
 }
 
 class AddToCollectionSheet extends StatefulWidget {
@@ -68,11 +66,9 @@ class _AddToCollectionSheetState extends State<AddToCollectionSheet> {
       return;
     }
 
-    Navigator.of(context).pop(
-      AddToCollectionSheetResult(
-        selectedCollections: selectedCollections,
-      ),
-    );
+    Navigator.of(
+      context,
+    ).pop(AddToCollectionSheetResult(selectedCollections: selectedCollections));
   }
 
   @override

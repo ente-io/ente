@@ -32,10 +32,11 @@ struct DownloadOnboardingView: View {
                     return "Downloading..."
                 }()
 
-                Text(statusLine)
-                    .font(EnsuTypography.body)
-                    .foregroundStyle(EnsuColor.textMuted)
-                    .multilineTextAlignment(.center)
+                StableDownloadStatusText(
+                    text: statusLine,
+                    font: EnsuTypography.body,
+                    color: EnsuColor.textMuted
+                )
 
                 progressView
             } else {
@@ -75,6 +76,34 @@ struct DownloadOnboardingView: View {
         }
     }
 
+}
+
+struct UnsupportedChatInputNotice: View {
+    let message: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: EnsuSpacing.xs) {
+            Text("Chat unavailable on this device")
+                .font(EnsuTypography.large)
+                .foregroundStyle(EnsuColor.textPrimary)
+
+            Text(message)
+                .font(EnsuTypography.body)
+                .foregroundStyle(EnsuColor.textMuted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(EnsuSpacing.md)
+        .background(EnsuColor.fillFaint)
+        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card))
+        .padding(.horizontal, EnsuSpacing.pageHorizontal)
+        .padding(.vertical, EnsuSpacing.md)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(key: InputBarHeightKey.self, value: proxy.size.height)
+            }
+        )
+        .background(EnsuColor.backgroundBase)
+    }
 }
 
 struct SignInComingSoonDialog: View {

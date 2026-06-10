@@ -322,7 +322,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         )}
                     </AutoSizer>
                     {canScrollRight && (
-                        <ScrollButtonRight onClick={scroll(+1)} />
+                        <ScrollButtonRight onClick={scroll(1)} />
                     )}
                 </ListWrapper>
                 {controls2}

@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -7,19 +8,13 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/dialog_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/email_util.dart";
 import "package:photos/utils/file_uploader.dart";
 
 class BackupItemCard extends StatefulWidget {
-  const BackupItemCard({
-    super.key,
-    required this.item,
-  });
+  const BackupItemCard({super.key, required this.item});
 
   final BackupItem item;
 
@@ -143,40 +138,43 @@ class _BackupItemCardState extends State<BackupItemCard> {
                     color: getEnteColorScheme(context).fillBase,
                   ),
                   onPressed: () {
-                    showDialogWidget(
+                    showBottomSheetComponent<void>(
                       context: context,
-                      body: AppLocalizations.of(context).sorryBackupFailedDesc,
-                      title: AppLocalizations.of(context).backupFailed,
-                      icon: Icons.error_outline_outlined,
                       isDismissible: true,
-                      buttons: [
-                        ButtonWidget(
-                          buttonType: ButtonType.primary,
-                          labelText:
-                              AppLocalizations.of(context).contactSupport,
-                          buttonAction: ButtonAction.second,
-                          onTap: () async {
-                            _logger.warning(
-                              "Backup failed for ${widget.item.file.displayName}",
-                              widget.item.error,
-                            );
-                            await sendLogs(
-                              context,
-                              AppLocalizations.of(context).contactSupport,
-                              "support@ente.com",
-                              postShare: () {},
-                            );
-                          },
-                        ),
-                        ButtonWidget(
-                          buttonType: ButtonType.secondary,
-                          labelText: AppLocalizations.of(context).ok,
-                          buttonAction: ButtonAction.first,
-                          onTap: () async {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
+                      builder: (_) => BottomSheetComponent(
+                        title: AppLocalizations.of(context).backupFailed,
+                        message: AppLocalizations.of(
+                          context,
+                        ).sorryBackupFailedDesc,
+                        illustration: Image.asset("assets/warning-grey.png"),
+                        actions: [
+                          ButtonComponent(
+                            label: AppLocalizations.of(context).contactSupport,
+                            onTap: () async {
+                              _logger.warning(
+                                "Backup failed for ${widget.item.file.displayName}",
+                                widget.item.error,
+                              );
+                              await sendLogs(
+                                context,
+                                AppLocalizations.of(context).contactSupport,
+                                "support@ente.com",
+                                postShare: () {},
+                              );
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                          ),
+                          ButtonComponent(
+                            label: AppLocalizations.of(context).ok,
+                            variant: ButtonComponentVariant.secondary,
+                            onTap: () async {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -188,53 +186,47 @@ class _BackupItemCardState extends State<BackupItemCard> {
               child: Center(
                 child: switch (widget.item.status) {
                   BackupItemStatus.uploading => SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        color: colorScheme.primary700,
-                      ),
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.0,
+                      color: colorScheme.primary700,
                     ),
+                  ),
                   BackupItemStatus.uploaded => const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Icon(
-                        Icons.check,
-                        color: Color(0xFF00B33C),
-                      ),
-                    ),
+                    width: 24,
+                    height: 24,
+                    child: Icon(Icons.check, color: Color(0xFF00B33C)),
+                  ),
                   BackupItemStatus.inQueue => SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Icon(
-                        Icons.history,
-                        color: Theme.of(context).brightness == Brightness.light
-                            ? const Color.fromRGBO(0, 0, 0, .6)
-                            : const Color.fromRGBO(255, 255, 255, .6),
-                      ),
+                    width: 24,
+                    height: 24,
+                    child: Icon(
+                      Icons.history,
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? const Color.fromRGBO(0, 0, 0, .6)
+                          : const Color.fromRGBO(255, 255, 255, .6),
                     ),
+                  ),
                   BackupItemStatus.retry => IconButton(
-                      icon: const Icon(
-                        Icons.sync,
-                        color: Color(0xFFFDB816),
-                      ),
-                      onPressed: () async {
-                        await FileUploader.instance.upload(
-                          widget.item.file,
-                          widget.item.collectionID,
-                        );
-                      },
-                    ),
+                    icon: const Icon(Icons.sync, color: Color(0xFFFDB816)),
+                    onPressed: () async {
+                      await FileUploader.instance.upload(
+                        widget.item.file,
+                        widget.item.collectionID,
+                      );
+                    },
+                  ),
                   BackupItemStatus.inBackground => SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        color: Theme.of(context).brightness == Brightness.light
-                            ? const Color.fromRGBO(0, 0, 0, .6)
-                            : const Color.fromRGBO(255, 255, 255, .6),
-                      ),
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.0,
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? const Color.fromRGBO(0, 0, 0, .6)
+                          : const Color.fromRGBO(255, 255, 255, .6),
                     ),
+                  ),
                 },
               ),
             ),

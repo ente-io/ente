@@ -164,9 +164,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 
     const handleDownload = useCallback(
         async (file: EnteFile) => {
-            const { downloadAndSaveFiles } = await import(
-                "@/public-album/download/services/save"
-            );
+            const { downloadAndSaveFiles } =
+                await import("@/public-album/download/services/save");
             return downloadAndSaveFiles(
                 [file],
                 fileFileName(file),

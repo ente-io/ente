@@ -31,18 +31,13 @@ showAddLocationSheet(
     builder: (context) {
       return LocationTagStateProvider(
         centerPoint: coordinates,
-        AddLocationSheet(
-          radius: radius,
-          name: name,
-        ),
+        AddLocationSheet(radius: radius, name: name),
         radius: radius,
       );
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(5),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
     ),
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
@@ -131,8 +126,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           children: [
                             Expanded(
                               child: TextInputWidget(
-                                hintText:
-                                    AppLocalizations.of(context).locationName,
+                                hintText: AppLocalizations.of(
+                                  context,
+                                ).locationName,
                                 focusNode: _focusNode,
                                 submitNotifier: _submitNotifer,
                                 cancelNotifier: _cancelNotifier,
@@ -156,8 +152,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                     key: ValueKey(value),
                                     buttonType: ButtonType.secondary,
                                     buttonSize: ButtonSize.small,
-                                    labelText: AppLocalizations.of(context)
-                                        .addLocationButton,
+                                    labelText: AppLocalizations.of(
+                                      context,
+                                    ).addLocationButton,
                                     isDisabled: value,
                                     onTap: () async {
                                       _focusNode.unfocus();
@@ -170,14 +167,13 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        RadiusPickerWidget(
-                          _selectedRadiusNotifier,
-                        ),
+                        RadiusPickerWidget(_selectedRadiusNotifier),
                         if (widget.name.isEmpty) const SizedBox(height: 16),
                         if (widget.name.isEmpty)
                           Text(
-                            AppLocalizations.of(context)
-                                .locationTagFeatureDescription,
+                            AppLocalizations.of(
+                              context,
+                            ).locationTagFeatureDescription,
                             style: textTheme.smallMuted,
                           ),
                       ],
@@ -210,8 +206,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                 Text(
                                   AppLocalizations.of(context).memoryCount(
                                     count: value,
-                                    formattedCount:
-                                        NumberFormat().format(value),
+                                    formattedCount: NumberFormat().format(
+                                      value,
+                                    ),
                                   ),
                                   style: textTheme.body,
                                 ),
@@ -219,8 +216,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
                                     child: Text(
-                                      AppLocalizations.of(context)
-                                          .galleryMemoryLimitInfo,
+                                      AppLocalizations.of(
+                                        context,
+                                      ).galleryMemoryLimitInfo,
                                       style: textTheme.miniMuted,
                                     ),
                                   ),
@@ -287,9 +285,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   void _selectedRadiusListener() {
     InheritedLocationTagData.of(
       context,
-    ).updateSelectedRadius(
-      _selectedRadiusNotifier.value,
-    );
+    ).updateSelectedRadius(_selectedRadiusNotifier.value);
     _memoriesCountNotifier.value = null;
   }
 }

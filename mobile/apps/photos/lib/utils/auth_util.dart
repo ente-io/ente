@@ -21,32 +21,38 @@ Future<bool> requestAuthentication(
   if (savedPassword != null || savedPin != null) {
     return await LocalAuthenticationService.instance
         .requestEnteAuthForLockScreen(
-      context,
-      savedPin,
-      savedPassword,
-      isAuthenticatingOnAppLaunch: isOpeningApp,
-      isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
-    );
+          context,
+          savedPin,
+          savedPassword,
+          isAuthenticatingOnAppLaunch: isOpeningApp,
+          isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
+        );
   } else {
     return await LocalAuthentication().authenticate(
       localizedReason: reason,
       authMessages: [
         AndroidAuthMessages(
           biometricHint: AppLocalizations.of(context).androidBiometricHint,
-          biometricNotRecognized:
-              AppLocalizations.of(context).androidBiometricNotRecognized,
-          biometricRequiredTitle:
-              AppLocalizations.of(context).androidBiometricRequiredTitle,
-          biometricSuccess:
-              AppLocalizations.of(context).androidBiometricSuccess,
+          biometricNotRecognized: AppLocalizations.of(
+            context,
+          ).androidBiometricNotRecognized,
+          biometricRequiredTitle: AppLocalizations.of(
+            context,
+          ).androidBiometricRequiredTitle,
+          biometricSuccess: AppLocalizations.of(
+            context,
+          ).androidBiometricSuccess,
           cancelButton: AppLocalizations.of(context).androidCancelButton,
-          deviceCredentialsRequiredTitle: AppLocalizations.of(context)
-              .androidDeviceCredentialsRequiredTitle,
-          deviceCredentialsSetupDescription: AppLocalizations.of(context)
-              .androidDeviceCredentialsSetupDescription,
+          deviceCredentialsRequiredTitle: AppLocalizations.of(
+            context,
+          ).androidDeviceCredentialsRequiredTitle,
+          deviceCredentialsSetupDescription: AppLocalizations.of(
+            context,
+          ).androidDeviceCredentialsSetupDescription,
           goToSettingsButton: AppLocalizations.of(context).goToSettings,
-          goToSettingsDescription:
-              AppLocalizations.of(context).androidGoToSettingsDescription,
+          goToSettingsDescription: AppLocalizations.of(
+            context,
+          ).androidGoToSettingsDescription,
           signInTitle: AppLocalizations.of(context).androidSignInTitle,
         ),
         IOSAuthMessages(

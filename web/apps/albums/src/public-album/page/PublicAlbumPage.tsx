@@ -96,9 +96,7 @@ import { type FileWithPath } from "react-dropzone";
 const LazyPublicAlbumSingleFileViewer =
     dynamic<PublicAlbumSingleFileViewerProps>(
         () =>
-            import(
-                "@/public-album/viewer/components/PublicAlbumSingleFileViewer"
-            ).then(
+            import("@/public-album/viewer/components/PublicAlbumSingleFileViewer").then(
                 ({ PublicAlbumSingleFileViewer }) =>
                     PublicAlbumSingleFileViewer,
             ),
@@ -544,9 +542,7 @@ export default function PublicAlbumPage() {
                 { verifyPublicAlbumPassword },
                 { savePublicCollectionAccessTokenJWT },
             ] = await Promise.all([
-                import(
-                    "@/public-album/access/services/verify-public-album-password"
-                ),
+                import("@/public-album/access/services/verify-public-album-password"),
                 loadPublicAlbumsFDB(),
             ]);
             const accessTokenJWT = await verifyPublicAlbumPassword(
@@ -586,9 +582,8 @@ export default function PublicAlbumPage() {
 
     const downloadFilesHelper = async () => {
         try {
-            const { downloadAndSaveFiles } = await import(
-                "@/public-album/download/services/save"
-            );
+            const { downloadAndSaveFiles } =
+                await import("@/public-album/download/services/save");
             const selectedFiles = getSelectedFiles(selected, publicFiles!);
             const singleFile =
                 selectedFiles.length === 1 ? selectedFiles[0] : undefined;
@@ -1459,7 +1454,7 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
                 return false;
             };
 
-            let didSetThumbnail = false;
+            let didSetThumbnail: boolean;
             try {
                 const cachedURL = await thumbnailManager.renderableThumbnailURL(
                     coverFile,

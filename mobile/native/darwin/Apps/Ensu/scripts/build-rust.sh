@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 
-# Build Ensu's UniFFI Rust static libs for the current Xcode build.
-# Invoked from an Xcode "Run Script" build phase.
-#
-# Inputs  (from Xcode):  SRCROOT, TARGET_TEMP_DIR, PLATFORM_NAME, ARCHS,
-#                        CONFIGURATION, IPHONEOS_DEPLOYMENT_TARGET,
-#                        ENTE_API_ENDPOINT.
-# Outputs (to $TARGET_TEMP_DIR/ensu_rust):
-#           libcore.a  libdb.a  libsync.a  libinference.a  libtranscription.a
-#
-# UniFFI Swift bindings under $SRCROOT/Ensu/Generated/ are generated
-# out-of-band by `cargo codegen ensu-ios`; this script only checks that
-# they exist.
+# This script is invoked from Xcode's "Run Script" build phase.
+# It builds the Rust static libraries used by Ensu's generated UniFFI bindings.
 
 set -euo pipefail
 
@@ -20,6 +10,7 @@ set -euo pipefail
 REPO_ROOT=$(cd "$SRCROOT/../../../../.." && pwd)
 GENERATED_DIR="$SRCROOT/Ensu/Generated"
 OUT_DIR="$TARGET_TEMP_DIR/ensu_rust"
+TARGET_DIR="$REPO_ROOT/rust/target"
 mkdir -p "$GENERATED_DIR" "$OUT_DIR"
 
 # Xcode's build-phase PATH omits Homebrew and rustup's install dir.
@@ -33,7 +24,7 @@ for name in core db sync inference transcription; do
     for ext in .swift FFI.h FFI.modulemap; do
         [[ -f "$GENERATED_DIR/$name$ext" ]] || {
             echo "error: missing $GENERATED_DIR/$name$ext" >&2
-            echo "  run: (cd $REPO_ROOT/rust && cargo codegen ensu-ios)" >&2
+            echo "  run: (cd $REPO_ROOT/rust && cargo codegen native)" >&2
             exit 1
         }
     done
@@ -109,9 +100,9 @@ build_crate() {
             rustflags+=" -C link-arg=$min_flag=$IPHONEOS_DEPLOYMENT_TARGET"
         fi
 
-        (cd "$crate_dir" && RUSTFLAGS="$rustflags" cargo rustc "${cargo_flags[@]}" --target "$target" --lib --crate-type staticlib)
+        (cd "$crate_dir" && RUSTFLAGS="$rustflags" CARGO_TARGET_DIR="$TARGET_DIR" cargo rustc "${cargo_flags[@]}" --target "$target" --lib --crate-type staticlib)
 
-        local built="$crate_dir/target/$target/$profile/$lib"
+        local built="$TARGET_DIR/$target/$profile/$lib"
         [[ -f "$built" ]] || { echo "error: expected $built" >&2; exit 1; }
 
         local arch_lib="$OUT_DIR/${lib%.a}_${arch}.a"
@@ -129,8 +120,8 @@ build_crate() {
     echo "    -> $out"
 }
 
-build_crate core      "$REPO_ROOT/rust/uniffi/core"           libcore.a
-build_crate db        "$REPO_ROOT/rust/uniffi/ensu/db"        libdb.a
-build_crate sync      "$REPO_ROOT/rust/uniffi/ensu/sync"      libsync.a
-build_crate inference "$REPO_ROOT/rust/uniffi/ensu/inference" libinference.a
-build_crate transcription "$REPO_ROOT/rust/uniffi/ensu/transcription" libtranscription.a
+build_crate core      "$REPO_ROOT/rust/bindings/uniffi/core"           libcore.a
+build_crate db        "$REPO_ROOT/rust/bindings/uniffi/ensu/db"        libdb.a
+build_crate sync      "$REPO_ROOT/rust/bindings/uniffi/ensu/sync"      libsync.a
+build_crate inference "$REPO_ROOT/rust/bindings/uniffi/ensu/inference" libinference.a
+build_crate transcription "$REPO_ROOT/rust/bindings/uniffi/ensu/transcription" libtranscription.a
