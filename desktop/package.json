@@ -15,13 +15,12 @@
         "build-renderer": "npm run check-web-deps && cross-env-shell _ENTE_IS_DESKTOP=1 \"cd ../web && npm run build:photos && cd ../desktop && shx rm -rf out && shx cp -r ../web/apps/photos/out out\"",
         "build-renderer:ci": "cross-env-shell _ENTE_IS_DESKTOP=1 \"cd ../web && npm ci && npm run build:photos && cd ../desktop && shx rm -rf out && shx cp -r ../web/apps/photos/out out\"",
         "check-web-deps": "node ../web/scripts/check-deps.mjs",
-        "dev": "concurrently --kill-others --success first --names 'main,rndr' \"npm run dev-main\" \"npm run dev-renderer\"",
+        "dev": "node scripts/postinstall.mjs --if-needed && concurrently --kill-others --success first --names 'main,rndr' \"npm run dev-main\" \"npm run dev-renderer\"",
         "dev-main": "tsc && electron .",
         "dev-renderer": "npm run check-web-deps && cross-env-shell _ENTE_IS_DESKTOP=1 \"cd ../web && npm exec --workspace photos -- next dev --webpack -p 3008\"",
-        "postinstall": "electron-builder install-app-deps",
+        "postinstall": "node scripts/postinstall.mjs",
         "lint": "prettier --check --log-level warn . && eslint && tsc",
-        "lint:fix": "prettier --write --log-level warn . && eslint && tsc",
-        "prepare": "node scripts/vips.js"
+        "lint:fix": "prettier --write --log-level warn . && eslint && tsc"
     },
     "overrides": {
         "yauzl": "3.3.1"

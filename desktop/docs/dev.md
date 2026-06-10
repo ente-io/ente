@@ -19,12 +19,14 @@ cd ../web
 npm ci
 cd ../desktop
 npm ci
+npm run postinstall
 ```
 
 ### npm run dev
 
 Launch the app in development mode:
 
+- Runs the postinstall script if needed.
 - Transpiles the files in `src/` and starts the main process.
 
 - Runs a development server for the renderer, with hot module reload.
@@ -39,9 +41,15 @@ Note that our actual releases use a [GitHub workflow](../../.github/workflows/ph
 
 During development, you might find `npm run build:quick` helpful. It is a variant of `npm run build` that omits some steps to build a binary quicker, something that can be useful during development.
 
-### postinstall
+### npm run postinstall
 
-When using native node modules (those written in C/C++), we need to ensure they are built against `electron`'s packaged `node` version. We use [electron-builder](https://www.electron.build/cli)'s `install-app-deps` command to rebuild those modules automatically after each dependency install by invoking it in as the `postinstall` step in our package.json.
+Installs skip dependency lifecycle scripts (`ignore-scripts` in `.npmrc`) so that installing cannot run arbitrary code from packages. The flip side is that our own postinstall does not run automatically either, so it must be invoked explicitly. `npm run dev` runs it automatically if it hasn't run for the currently installed dependencies; for other flows (e.g. `npm run build`) run it yourself after `npm ci`. It:
+
+- Runs the install scripts of the dependencies that fetch prebuilt binaries (`ffmpeg-static`, `onnxruntime-node`, `electron-winstaller`).
+
+- Runs [electron-builder](https://www.electron.build/cli)'s `install-app-deps` command to rebuild native node modules (those written in C/C++) against `electron`'s packaged `node` version.
+
+- Downloads the `vips` binary used during development (see `scripts/vips.js`).
 
 ### lint, lint:fix
 

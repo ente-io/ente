@@ -23,6 +23,8 @@ Use `npm ci` to install dependencies using the committed lockfile. You need this
 
 Use `npm install <package> --workspace <workspace>` only when intentionally adding or updating dependencies, and review the resulting `package.json` and `package-lock.json` changes.
 
+Installs skip dependency lifecycle scripts (`ignore-scripts` in `.npmrc`) so that installing cannot run arbitrary code from packages. The packages we use work fine without their lifecycle scripts: they either ship prebuilt binaries (e.g. `esbuild`, `sharp`) or fetch them on first use (`wasm-pack`). `save-exact` in `.npmrc` keeps newly added dependencies pinned to exact versions.
+
 ### npm run dev:\*
 
 Launch the app in development mode. There is one `npm run dev:foo` for each app, e.g. `npm run dev:auth`. `npm run dev` is a shortcut for `npm run dev:photos`.
