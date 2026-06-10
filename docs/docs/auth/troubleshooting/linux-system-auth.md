@@ -45,11 +45,11 @@ policy="$(mktemp)"
 if curl -fsSL "$policy_url" -o "$policy" &&
   printf "%s  %s\n" "$policy_sha256" "$policy" | sha256sum -c -; then
  
-  # Use /etc on immutable distros, /usr/share on traditional ones
-  if [ -w /usr/share/polkit-1/actions ]; then
-    install_path="/usr/share/polkit-1/actions/com.ente.auth.policy"
+  # Use /etc on immutable distros (read-only /usr), /usr/share on traditional ones
+  if findmnt -n -o OPTIONS --target /usr/share/polkit-1/actions 2>/dev/null | grep -qw ro; then
+     install_path="/etc/polkit-1/actions/com.ente.auth.policy"
   else
-    install_path="/etc/polkit-1/actions/com.ente.auth.policy"
+     install_path="/usr/share/polkit-1/actions/com.ente.auth.policy"
   fi
  
   sudo install -D -o root -g root -m 0644 "$policy" "$install_path"
