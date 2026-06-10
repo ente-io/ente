@@ -3226,7 +3226,7 @@
   "@createRitualBuildStreaksShareProgress": {
     "description": "Content of the placeholder section shown when no ritual has been created."
   },
-  "waitingForNetwork: "Waiting for network...",
+  "waitingForNetwork": "Waiting for network...",
   "@waitingForNetwork": {
     "description": "Sync status shown when uploads are pending and no network is available."
   },
