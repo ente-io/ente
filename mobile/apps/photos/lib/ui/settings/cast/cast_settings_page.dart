@@ -1,3 +1,4 @@
+import "package:collection/collection.dart";
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -51,29 +52,36 @@ class _CastSettingsPageState extends State<CastSettingsPage> {
             }
 
             return Column(
-              children: snapshot.data!.map((session) {
-                final collection = CollectionsService.instance
-                    .getCollectionByID(session.collectionID);
-                final title =
-                    collection?.displayName ?? session.collectionID.toString();
-                return SettingsItem(
-                  title: "$title on ${session.deviceIP}",
-                  subtitle: timeago.format(session.lastUsedAt),
-                  icon: HugeIcons.strokeRoundedTv01,
-                  trailing: IconButtonComponent(
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
-                      color: context.componentColors.warning,
-                      size: IconSizes.small,
-                      strokeWidth: 1.6,
-                    ),
-                    onTap: () async {
-                      await _revokeSession(gw, session, title);
-                    },
-                    shouldShowSuccessConfirmation: false,
-                  ),
-                );
-              }).toList(),
+              children: snapshot.data!
+                  .map((session) {
+                    final collection = CollectionsService.instance
+                        .getCollectionByID(session.collectionID);
+                    final title =
+                        collection?.displayName ??
+                        session.collectionID.toString();
+                    return [
+                      SettingsItem(
+                        title: "$title on ${session.deviceIP}",
+                        subtitle: timeago.format(session.lastUsedAt),
+                        icon: HugeIcons.strokeRoundedTv01,
+                        trailing: IconButtonComponent(
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedCancel01,
+                            color: context.componentColors.warning,
+                            size: IconSizes.small,
+                            strokeWidth: 1.6,
+                          ),
+                          onTap: () async {
+                            await _revokeSession(gw, session, title);
+                          },
+                          shouldShowSuccessConfirmation: false,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ];
+                  })
+                  .flattened
+                  .toList(),
             );
           },
         ),
