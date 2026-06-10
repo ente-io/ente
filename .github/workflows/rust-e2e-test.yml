@@ -1,4 +1,4 @@
-name: "Test (Rust Integration)"
+name: "Test (Rust E2E)"
 
 on:
     pull_request:

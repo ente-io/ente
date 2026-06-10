@@ -1,4 +1,4 @@
-name: "Release (server)"
+name: "Release (Server)"
 
 on:
     workflow_dispatch:

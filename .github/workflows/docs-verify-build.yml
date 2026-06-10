@@ -1,4 +1,4 @@
-name: "Verify build (docs)"
+name: "Verify build (Docs)"
 
 # Preflight build of docs. This allows us to ensure that npm run build is
 # succeeding before we merge the PR into main.

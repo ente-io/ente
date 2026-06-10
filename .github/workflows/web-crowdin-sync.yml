@@ -1,4 +1,4 @@
-name: "Sync Crowdin (web)"
+name: "Sync Crowdin (Web)"
 
 on:
     push:

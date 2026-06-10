@@ -1,4 +1,4 @@
-name: "Sync Crowdin (mobile)"
+name: "Sync Crowdin (Mobile)"
 
 on:
     schedule:

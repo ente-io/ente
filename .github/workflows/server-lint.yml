@@ -1,4 +1,4 @@
-name: "Lint (server)"
+name: "Lint (Server)"
 
 on:
     # Run on every pull request (open or push to it) that changes server/

@@ -1,4 +1,4 @@
-name: "Publish ghcr (web)"
+name: "Publish GHCR (Web)"
 
 on:
     # Run automatically every Wednesday, at 07:00 UTC.

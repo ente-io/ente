@@ -1,4 +1,4 @@
-name: "Push sources and translations to Crowdin (web)"
+name: "Push sources and translations to Crowdin (Web)"
 
 # This is a variant of web-crowdin-sync.yml that uploads the translated strings in
 # addition to the source strings.
