@@ -3,6 +3,7 @@ import 'dart:async';
 import "package:ente_components/ente_components.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -21,8 +22,9 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
+import "package:photos/ui/components/popup_menu/ente_popup_menu_button.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_actions.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/people/cluster_breakup_page.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
@@ -126,6 +128,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   }
 
   List<Widget> _getDefaultActions(BuildContext context) {
+    final iconColor = getEnteColorScheme(context).contentLight;
     final List<Widget> actions = <Widget>[];
     // If the user has selected files, don't show any actions
     if (widget.selectedFiles.files.isNotEmpty ||
@@ -134,51 +137,50 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       return actions;
     }
 
-    final List<EntePopupMenuItem<ClusterPopupAction>> items = [];
-
-    items.addAll([
-      EntePopupMenuItem(
-        AppLocalizations.of(context).ignorePerson,
+    final List<EntePopupMenuOption<ClusterPopupAction>> items = [
+      EntePopupMenuOption(
         value: ClusterPopupAction.ignore,
-        icon: Icons.person_off_outlined,
+        label: AppLocalizations.of(context).ignorePerson,
+        leadingWidget: galleryAppBarMenuIcon(
+          HugeIcons.strokeRoundedUserBlock01,
+          iconColor,
+        ),
       ),
-      EntePopupMenuItem(
-        AppLocalizations.of(context).mixedGrouping,
+      EntePopupMenuOption(
         value: ClusterPopupAction.breakupCluster,
-        icon: Icons.analytics_outlined,
+        label: AppLocalizations.of(context).mixedGrouping,
+        leadingWidget: galleryAppBarMenuIcon(
+          HugeIcons.strokeRoundedUserMultiple,
+          iconColor,
+        ),
       ),
-    ]);
-    if (kDebugMode) {
-      items.add(
-        EntePopupMenuItem(
-          "Debug mixed grouping",
+      if (kDebugMode)
+        EntePopupMenuOption(
           value: ClusterPopupAction.breakupClusterDebug,
-          icon: Icons.analytics_outlined,
+          label: "Debug mixed grouping",
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedAiBrain01,
+            iconColor,
+          ),
         ),
-      );
-    }
+    ];
 
-    if (items.isNotEmpty) {
-      actions.add(
-        PopupMenuButton(
-          itemBuilder: (context) {
-            return items;
-          },
-          onSelected: (ClusterPopupAction value) async {
-            if (value == ClusterPopupAction.breakupCluster) {
-              // ignore: unawaited_futures
-              await _breakUpCluster(context);
-            } else if (value == ClusterPopupAction.ignore) {
-              await _onIgnoredClusterClicked(context);
-            } else if (value == ClusterPopupAction.breakupClusterDebug) {
-              await _breakUpClusterDebug(context);
-            }
-            // else if (value == ClusterPopupAction.setCover) {
-            //   await setCoverPhoto(context);
-          },
-        ),
-      );
-    }
+    actions.add(
+      galleryAppBarPopupMenuAction<ClusterPopupAction>(
+        tooltip: AppLocalizations.of(context).more,
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedMoreVertical),
+        optionsBuilder: () => items,
+        onSelected: (ClusterPopupAction value) async {
+          if (value == ClusterPopupAction.breakupCluster) {
+            await _breakUpCluster(context);
+          } else if (value == ClusterPopupAction.ignore) {
+            await _onIgnoredClusterClicked(context);
+          } else if (value == ClusterPopupAction.breakupClusterDebug) {
+            await _breakUpClusterDebug(context);
+          }
+        },
+      ),
+    );
 
     return actions;
   }
