@@ -1,48 +1,44 @@
 #!/bin/sh
 
-# Package the built "Ente Auth.app" into a styled DMG using only tools that
-# ship with macOS.
+# Package the built "Ente Auth.app" into a release DMG.
 #
 #     make-dmg.sh path/to/Ente\ Auth.app out.dmg
 #
 # The Finder appearance (window size, icon positions) comes from the
-# committed DS_Store; the commit that introduced it has the regeneration
-# recipe.
+# committed DS_Store.
 
 set -eu
 
 app=$1
 out=$2
 
-dir=$(cd "$(dirname "$0")" && pwd)
-staging=$(mktemp -d)
-trap 'rm -rf "$staging"' EXIT
+here=$(dirname "$0")
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
 
-mkdir "$staging/root"
-cp -R "$app" "$staging/root/Ente Auth.app"
-ln -s /Applications "$staging/root/Applications"
-cp "$dir/DS_Store" "$staging/root/.DS_Store"
+# Stage the volume contents: the app, an /Applications link to drag it
+# into, the Finder layout, and the volume icon.
+vol="$tmp/vol"
+mkdir "$vol"
+cp -R "$app" "$vol/Ente Auth.app"
+ln -s /Applications "$vol/Applications"
+cp "$here/DS_Store" "$vol/.DS_Store"
 
-icon="$dir/../../../assets/generation-icons/icon-macos.png"
-mkdir "$staging/vol.iconset"
+icon="$here/../../../assets/generation-icons/icon-macos.png"
+iconset="$tmp/icon.iconset"
+mkdir "$iconset"
 for size in 16 32 128 256 512; do
-    sips -z "$size" "$size" "$icon" \
-        --out "$staging/vol.iconset/icon_${size}x${size}.png" >/dev/null
-    sips -z "$((size * 2))" "$((size * 2))" "$icon" \
-        --out "$staging/vol.iconset/icon_${size}x${size}@2x.png" >/dev/null
+    sips -z "$size" "$size" "$icon" --out "$iconset/icon_${size}x${size}.png" >/dev/null
+    sips -z "$((size * 2))" "$((size * 2))" "$icon" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
 done
-iconutil --convert icns "$staging/vol.iconset" \
-    --output "$staging/root/.VolumeIcon.icns"
+iconutil --convert icns "$iconset" --output "$vol/.VolumeIcon.icns"
 
-hdiutil create -volname Auth -fs HFS+ -format UDRW \
-    -srcfolder "$staging/root" -ov "$staging/rw.dmg"
-
-# The kHasCustomIcon Finder flag must be set on the mounted volume root; it
-# does not survive the -srcfolder copy.
-hdiutil attach "$staging/rw.dmg" -noautoopen -mountpoint "$staging/mnt"
-xattr -wx com.apple.FinderInfo \
-    "0000000000000000040000000000000000000000000000000000000000000000" \
-    "$staging/mnt"
-hdiutil detach "$staging/mnt"
-
-hdiutil convert "$staging/rw.dmg" -format UDZO -ov -o "$out"
+# Package in two steps: Finder shows .VolumeIcon.icns only if the volume
+# root has the custom-icon flag, which must be set on the live volume (it
+# does not survive the -srcfolder copy into the image).
+custom_icon_flag="0000000000000000040000000000000000000000000000000000000000000000"
+hdiutil create -volname Auth -fs HFS+ -format UDRW -srcfolder "$vol" "$tmp/rw.dmg"
+hdiutil attach "$tmp/rw.dmg" -noautoopen -mountpoint "$tmp/mnt"
+xattr -wx com.apple.FinderInfo "$custom_icon_flag" "$tmp/mnt"
+hdiutil detach "$tmp/mnt"
+hdiutil convert "$tmp/rw.dmg" -format UDZO -ov -o "$out"
