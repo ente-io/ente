@@ -2519,6 +2519,14 @@
     {
       "title": "Zyxel Nebula",
       "slug": "zyxel-nebula"
+    },
+    {
+      "title": "Gateway Sentry",
+      "slug": "gatewaysentry"
+    },
+    {
+      "title": "Onidel",
+      "slug": "onidel"
     }
   ]
 }
