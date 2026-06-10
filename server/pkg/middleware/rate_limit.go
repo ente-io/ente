@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -25,9 +24,10 @@ type RateLimitMiddleware struct {
 	reset             time.Duration
 	ticker            *time.Ticker
 	limit10ReqPerMin  *limiter.Limiter
+	limit200ReqPerMin *limiter.Limiter
 	limit250ReqPerMin *limiter.Limiter
 	limit300ReqPerMin *limiter.Limiter
-	limit200ReqPerMin *limiter.Limiter
+	limit500ReqPerMin *limiter.Limiter
 	limit200ReqPerSec *limiter.Limiter
 	discordCtrl       *discord.DiscordController
 }
@@ -35,9 +35,10 @@ type RateLimitMiddleware struct {
 func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64, reset time.Duration) *RateLimitMiddleware {
 	rl := &RateLimitMiddleware{
 		limit10ReqPerMin:  util.NewRateLimiter("10-M"),
+		limit200ReqPerMin: util.NewRateLimiter("200-M"),
 		limit250ReqPerMin: util.NewRateLimiter("250-M"),
 		limit300ReqPerMin: util.NewRateLimiter("300-M"),
-		limit200ReqPerMin: util.NewRateLimiter("200-M"),
+		limit500ReqPerMin: util.NewRateLimiter("500-M"),
 		limit200ReqPerSec: util.NewRateLimiter("200-S"),
 		discordCtrl:       discordCtrl,
 		limit:             limit,
@@ -135,7 +136,7 @@ func (r *RateLimitMiddleware) APIRateLimitForUserMiddleware(urlSanitizer func(_ 
 				log.Error("userID must be present in request header for applying rate-limit")
 				return
 			}
-			limitContext, err := rateLimiter.Get(c, strconv.FormatInt(userID, 10))
+			limitContext, err := rateLimiter.Get(c, fmt.Sprintf("%d-%s", userID, requestPath))
 			if err != nil {
 				log.Error("Failed to check rate limit", err)
 				c.Next() // assume that limit hasn't reached
@@ -206,7 +207,7 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 	}
 	if reqPath == "/users/ott" ||
 		reqPath == "/users/verify-email" ||
-		reqPath == "/user/change-email" ||
+		reqPath == "/users/change-email" ||
 		reqPath == "/paste/create" ||
 		reqPath == "/discount/claim" ||
 		reqPath == "/public-collection/verify-password" ||
@@ -222,7 +223,7 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		strings.HasPrefix(reqPath, "/users/srp/") ||
 		strings.HasPrefix(reqPath, "/users/two-factor/") {
 		return r.limit10ReqPerMin
-	} else if reqPath == "/files/preview" {
+	} else if strings.HasPrefix(reqPath, "/files/preview/") {
 		return r.limit200ReqPerSec
 	}
 	if reqPath == "/public-collection/anon-identity" {
@@ -237,7 +238,7 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		return r.limit250ReqPerMin
 	}
 	if isAuthenticatedUploadURLPath(reqPath) {
-		return r.limit250ReqPerMin
+		return r.limit500ReqPerMin
 	}
 	return nil
 }
