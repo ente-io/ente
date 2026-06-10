@@ -2,6 +2,7 @@ package cast
 
 import (
 	"context"
+
 	"github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/controller/access"
 	castRepo "github.com/ente-io/museum/pkg/repo/cast"
@@ -28,6 +29,14 @@ func NewController(castRepo *castRepo.Repository,
 
 func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDeviceRequest) (string, error) {
 	return c.CastRepo.AddCode(ctx, request.PublicKey, network.GetClientIP(ctx))
+}
+
+func (c *Controller) GetAllDevices(ctx *gin.Context, userID int64) ([]cast.CastRequest, error) {
+	return c.CastRepo.GetAllDevices(ctx, userID)
+}
+
+func (c *Controller) DeleteDevice(ctx *gin.Context, userID int64, collectionID int64, deviceCode string) error {
+	return c.CastRepo.RevokeForGivenUserAndCollectionAndDevice(ctx, userID, collectionID, deviceCode)
 }
 
 func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, error) {
