@@ -223,9 +223,11 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		strings.HasPrefix(reqPath, "/users/srp/") ||
 		strings.HasPrefix(reqPath, "/users/two-factor/") {
 		return r.limit10ReqPerMin
-	} else if strings.HasPrefix(reqPath, "/files/preview/") {
-		return r.limit200ReqPerSec
 	}
+	// Temporarily disable for tweaking.
+	// if strings.HasPrefix(reqPath, "/files/preview/") {
+	// 	return r.limit200ReqPerSec
+	// }
 	if reqPath == "/public-collection/anon-identity" {
 		return r.limit10ReqPerMin
 	}
