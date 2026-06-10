@@ -1,4 +1,4 @@
-name: "Push sources to Crowdin (mobile)"
+name: "Push sources to Crowdin (Mobile)"
 
 on:
     push:

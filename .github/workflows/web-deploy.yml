@@ -1,4 +1,4 @@
-name: "Deploy (web)"
+name: "Deploy (Web)"
 
 on:
     schedule:

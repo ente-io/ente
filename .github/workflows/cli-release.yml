@@ -1,4 +1,4 @@
-name: "Release (cli)"
+name: "Release (CLI)"
 
 on:
     push:

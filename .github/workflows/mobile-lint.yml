@@ -1,4 +1,4 @@
-name: "Lint (mobile)"
+name: "Lint (Mobile)"
 
 on:
     pull_request:

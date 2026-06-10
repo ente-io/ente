@@ -1,4 +1,4 @@
-name: "Publish ghcr (server)"
+name: "Publish GHCR (Server)"
 
 on:
     # Run automatically on 15th of every month, at 05:00 UTC.

@@ -1,4 +1,4 @@
-name: "Push sources and translations to Crowdin (mobile)"
+name: "Push sources and translations to Crowdin (Mobile)"
 
 # This is a variant of the mobile Crowdin sync workflows that uploads the
 # translated strings in addition to the source strings.

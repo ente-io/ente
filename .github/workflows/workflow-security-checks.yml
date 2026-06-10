@@ -1,4 +1,4 @@
-name: Workflow Security Checks
+name: Workflow security checks
 
 on:
   pull_request:
