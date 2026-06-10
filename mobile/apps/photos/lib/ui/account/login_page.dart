@@ -149,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Don't have an account?", style: textTheme.bodyMuted),
+            Text(AppLocalizations.of(context).dontHaveAnAccount, style: textTheme.bodyMuted),
             ButtonWidgetV2(
               buttonType: ButtonTypeV2.link,
               labelText: AppLocalizations.of(context).signUp,

@@ -695,7 +695,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                             return const SizedBox.shrink();
                           }
                           return FloatingActionButton(
-                            tooltip: 'Add item',
+                            tooltip: context.l10n.addItem,
                             onPressed: _openSavePage,
                             shape: const CircleBorder(),
                             backgroundColor: colorScheme.primary700,

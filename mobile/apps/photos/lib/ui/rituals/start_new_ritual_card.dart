@@ -5,6 +5,7 @@ import "package:ente_components/ente_components.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 
 enum StartNewRitualCardVariant { compact, wide }
@@ -89,7 +90,7 @@ class StartNewRitualCard extends StatelessWidget {
 
                       final titlePainter = TextPainter(
                         text: TextSpan(
-                          text: "Start new ritual",
+                          text: context.l10n.startNewRitual,
                           style: textTheme.body,
                         ),
                         maxLines: 1,
@@ -103,7 +104,7 @@ class StartNewRitualCard extends StatelessWidget {
                       final subtitlePainter = TextPainter(
                         text: TextSpan(
                           text:
-                              "Create a ritual, build streaks, and share your progress.",
+                              context.l10n.createRitualBuildStreaksShareProgress,
                           style: textTheme.miniMuted,
                         ),
                         maxLines: 3,

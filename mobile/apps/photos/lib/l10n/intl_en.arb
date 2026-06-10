@@ -1621,9 +1621,9 @@
   "@storageBreakupYou": {
     "description": "Label to indicate how much storage you are using when you are part of a family plan"
   },
-  "storageUsageInfo": "{usedAmount} {usedStorageUnit} of {totalAmount} {totalStorageUnit} used",
+  "storageUsageInfo": "{usedAmount} {usedStorageUnit} <muted>of</muted> {totalAmount} {totalStorageUnit} used",
   "@storageUsageInfo": {
-    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used. Part between <muted> and </muted> will be shown in a slightly different color."
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} free",
   "appVersion": "Version {versionValue}",
@@ -3217,5 +3217,21 @@
   "archiveCollectionName": "Archive",
   "@archiveCollectionName": {
     "description": "Name of the 'Archive' collection"
+  },
+  "startNewRitual": "Start new ritual",
+  "@startNewRitual": {
+    "description": "Title of the placeholder section shown when no ritual has been created. Should be short."
+  },
+  "createRitualBuildStreaksShareProgress": "Create a ritual, build streaks, and share your progress.",
+  "@createRitualBuildStreaksShareProgress": {
+    "description": "Content of the placeholder section shown when no ritual has been created."
+  },
+  "waitingForNetwork: "Waiting for network...",
+  "@waitingForNetwork": {
+    "description": "Sync status shown when uploads are pending and no network is available."
+  },
+  "sharePreparing": "Preparing...",
+  "@sharePreparing": {
+    "description": "Message shown while files are being prepared for sharing."
   }
 }

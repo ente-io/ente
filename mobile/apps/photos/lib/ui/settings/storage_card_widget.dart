@@ -11,6 +11,8 @@ import 'package:photos/theme/colors.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/settings/storage_progress_widget.dart';
+import 'package:styled_text/tags/styled_text_tag.dart';
+import 'package:styled_text/widgets/styled_text.dart';
 
 class StorageCardWidget extends StatefulWidget {
   const StorageCardWidget({super.key});
@@ -317,13 +319,18 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
       totalStorageUnit = "GB";
     }
 
-    return [
-      TextSpan(text: '$currentUsage $currentUsageUnit  '),
-      const TextSpan(
-        text: 'of',
-        style: TextStyle(color: textMutedDark),
+    return StyledText(
+      text: context.l10n.storageUsageInfo(
+        currentUsage,
+        currentUsageUnit,
+        totalStorage,
+        totalStorageUnit,
       ),
-      TextSpan(text: '  $totalStorage $totalStorageUnit used'),
-    ];
+      tags: {
+        'muted': StyledTextTag(
+          style: const TextStyle(color: textMutedDark),
+        ),
+      },
+    );
   }
 }

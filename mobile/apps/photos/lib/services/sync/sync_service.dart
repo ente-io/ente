@@ -121,8 +121,9 @@ class SyncService {
       successful = true;
     } on WiFiUnavailableError {
       _logger.warning("Not uploading over mobile data");
+      final s = await LanguageService.locals;
       Bus.instance.fire(
-        SyncStatusUpdate(SyncStatus.paused, reason: "Waiting for WiFi..."),
+        SyncStatusUpdate(SyncStatus.paused, reason: s.waitingForWiFi),
       );
     } on SyncStopRequestedError {
       _syncStopRequested = false;
@@ -153,10 +154,11 @@ class SyncService {
             e.type == DioExceptionType.receiveTimeout ||
             e.type == DioExceptionType.connectionError ||
             e.type == DioExceptionType.unknown) {
+          final s = await LanguageService.locals;
           Bus.instance.fire(
             SyncStatusUpdate(
               SyncStatus.paused,
-              reason: "Waiting for network...",
+              reason: s.waitingForNetwork,
             ),
           );
           _logger.severe("unable to connect", e, StackTrace.current);

@@ -8,6 +8,7 @@ import 'package:path/path.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -28,7 +29,7 @@ Future<void> share(
   final remoteFileCount = files.where((element) => element.isRemoteFile).length;
   final dialog = createProgressDialog(
     context,
-    "Preparing...",
+    context.l10n.sharePreparing,
     isDismissible: remoteFileCount > 2,
   );
   await dialog.show();
