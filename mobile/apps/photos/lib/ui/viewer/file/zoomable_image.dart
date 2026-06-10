@@ -28,6 +28,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/image_dimension_util.dart";
 import 'package:photos/utils/image_util.dart';
 import "package:photos/utils/ram_check_util.dart";
 import 'package:photos/utils/thumbnail_util.dart';
@@ -101,6 +102,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
       hasLessThan5GBRAM ? _lowRamMaxPixels : _defaultMaxPixels;
 
   bool get isTooLargeImage => _photo.width * _photo.height > _maxImagePixels;
+
+  String get _photoLogID =>
+      "fileID=${_photo.uploadedFileID}, generatedID=${_photo.generatedID}";
 
   @override
   void initState() {
@@ -554,6 +558,46 @@ class _ZoomableImageState extends State<ZoomableImage> {
     _loadWithPlatformDecoder(file);
   }
 
+  Future<ImageDimensionMetadata> _displayDimensionsForDecode(File file) async {
+    final storedDimensions = ImageDimensionMetadata(
+      width: _photo.width,
+      height: _photo.height,
+    );
+    // Read the file's EXIF only when stored dimensions are missing (the 0x0
+    // uploads): without the true size the too-large check misses and the
+    // full-resolution decode could OOM-crash. Images that have stored
+    // dimensions but are wrong/swapped are left to display (possibly squished)
+    // and get corrected by the backfill when their file details sheet is
+    // opened, so the viewer doesn't pay an EXIF read for every large image.
+    final hasStoredDimensions =
+        storedDimensions.width > 0 && storedDimensions.height > 0;
+
+    if (flagService.useFileDerivedImageDimensions && !hasStoredDimensions) {
+      final dimensions = await tryReadImageDimensionMetadata(file);
+      if (dimensions != null) {
+        return dimensions;
+      }
+      _logger.info(
+        "Could not read file-backed dimensions for $_photoLogID; falling back to stored dimensions ${storedDimensions.width}x${storedDimensions.height}",
+      );
+    }
+    return storedDimensions;
+  }
+
+  bool _isTooLargeDisplayImage(ImageDimensionMetadata dimensions) {
+    return dimensions.pixels > _maxImagePixels;
+  }
+
+  ({int width, int height}) _targetDimensionsForMaxPixels(
+    ImageDimensionMetadata dimensions,
+  ) {
+    final aspectRatio = dimensions.width / dimensions.height;
+    final maxPixels = min(50000000, _maxImagePixels);
+    final targetHeight = sqrt(maxPixels / aspectRatio);
+    final targetWidth = aspectRatio * targetHeight;
+    return (width: targetWidth.round(), height: targetHeight.round());
+  }
+
   Future<bool> _heicNeedsExifRotation(File file) async {
     try {
       final exif = await readExifAsync(file);
@@ -569,43 +613,44 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
   }
 
-  void _loadWithPlatformDecoder(File file) {
+  void _loadWithPlatformDecoder(File file) async {
     ImageProvider imageProvider;
-    if (isTooLargeImage) {
+    final displayDimensions = await _displayDimensionsForDecode(file);
+    if (!mounted) {
+      return;
+    }
+    if (_isTooLargeDisplayImage(displayDimensions)) {
+      final targetDimensions = _targetDimensionsForMaxPixels(displayDimensions);
       _logger.info(
-        "Handling very large image (${_photo.width}x${_photo.height}) by decreasing resolution to ${_maxImagePixels ~/ 1000000}MP to prevent crash",
+        "Handling very large image (${displayDimensions.width}x${displayDimensions.height}) by decreasing resolution to ${targetDimensions.width}x${targetDimensions.height} to prevent crash",
       );
-      final aspectRatio = _photo.width / _photo.height;
-      final maxPixels = min(50000000, _maxImagePixels);
-      final targetHeight = sqrt(maxPixels / aspectRatio);
-      final targetWidth = aspectRatio * targetHeight;
 
       imageProvider = Image.file(
         file,
         gaplessPlayback: true,
-        cacheWidth: targetWidth.round(),
-        cacheHeight: targetHeight.round(),
+        cacheWidth: targetDimensions.width,
+        cacheHeight: targetDimensions.height,
       ).image;
     } else {
       imageProvider = Image.file(file, gaplessPlayback: true).image;
     }
 
-    if (mounted) {
+    unawaited(
       precacheImage(
         imageProvider,
         context,
         onError: (exception, s) async {
           _logger.warning(
-            "Failed to load image ${_photo.displayName} with error: $exception, attempting fallback",
+            "Failed to load image $_photoLogID with error: $exception, attempting fallback",
           );
           unawaited(_loadInSupportedFormat(file, exception));
         },
       ).then((value) {
         if (mounted && !_loadedFinalImage && !_convertToSupportedFormat) {
-          _updateViewWithFinalImage(imageProvider);
+          unawaited(_updateViewWithFinalImage(imageProvider));
         }
-      });
-    }
+      }),
+    );
   }
 
   void _onFinalImageFetchFailed() {
@@ -820,19 +865,17 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
     // Fallback to FlutterImageCompress (platform-based decoder).
     Uint8List? compressedFile;
-    if (isTooLargeImage) {
+    final displayDimensions = await _displayDimensionsForDecode(file);
+    if (_isTooLargeDisplayImage(displayDimensions)) {
+      final targetDimensions = _targetDimensionsForMaxPixels(displayDimensions);
       _logger.info(
-        "Compressing very large image (${_photo.width}x${_photo.height}) more aggressively down to ${_maxImagePixels ~/ 1000000}MP",
+        "Compressing very large image (${displayDimensions.width}x${displayDimensions.height}) more aggressively down to ${targetDimensions.width}x${targetDimensions.height}",
       );
-      final aspectRatio = _photo.width / _photo.height;
-      final maxPixels = min(50000000, _maxImagePixels);
-      final targetHeight = sqrt(maxPixels / aspectRatio);
-      final targetWidth = aspectRatio * targetHeight;
 
       compressedFile = await FlutterImageCompress.compressWithFile(
         file.path,
-        minWidth: targetWidth.round(),
-        minHeight: targetHeight.round(),
+        minWidth: targetDimensions.width,
+        minHeight: targetDimensions.height,
         quality: 85,
       );
     } else {

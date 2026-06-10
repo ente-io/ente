@@ -19,10 +19,16 @@ import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/file_key.dart";
+import "package:synchronized/synchronized.dart";
 
 class FileMagicService {
   final _logger = Logger("FileMagicService");
   late FilesDB _filesDB;
+
+  // Serializes public magic metadata writes so concurrent read-modify-write
+  // updates to the same file (e.g. dimension/location backfill vs panorama
+  // detection) cannot clobber each other's fields.
+  final _pubMagicMetadataLock = Lock();
 
   FileMagicGateway get _gateway => fileMagicGateway;
 
@@ -61,72 +67,78 @@ class FileMagicService {
     List<EnteFile> files,
     Map<String, dynamic>? newMetadataUpdate, {
     Map<int, Map<String, dynamic>>? metadataUpdateMap,
-  }) async {
-    final metadataList = <UpdateMagicMetadataRequest>[];
-    final int ownerID = Configuration.instance.getUserID()!;
-    try {
-      for (final file in files) {
-        if (file.uploadedFileID == null) {
-          throw AssertionError(
-            "operation is only supported on backed up files",
+  }) {
+    return _pubMagicMetadataLock.synchronized(() async {
+      final metadataList = <UpdateMagicMetadataRequest>[];
+      final int ownerID = Configuration.instance.getUserID()!;
+      try {
+        for (final file in files) {
+          if (file.uploadedFileID == null) {
+            throw AssertionError(
+              "operation is only supported on backed up files",
+            );
+          } else if (file.ownerID != ownerID) {
+            throw AssertionError("cannot modify memories not owned by you");
+          }
+          final newUpdates = metadataUpdateMap != null
+              ? metadataUpdateMap[file.uploadedFileID]
+              : newMetadataUpdate;
+          assert(
+            newUpdates != null && newUpdates.isNotEmpty,
+            "can not apply empty updates",
           );
-        } else if (file.ownerID != ownerID) {
-          throw AssertionError("cannot modify memories not owned by you");
-        }
-        // read the existing magic metadata and apply new updates to existing data
-        // current update is simple replace. This will be enhanced in the future,
-        // as required.
-        final newUpdates = metadataUpdateMap != null
-            ? metadataUpdateMap[file.uploadedFileID]
-            : newMetadataUpdate;
-        assert(
-          newUpdates != null && newUpdates.isNotEmpty,
-          "can not apply empty updates",
-        );
-        final Map<String, dynamic> jsonToUpdate = jsonDecode(
-          file.pubMmdEncodedJson ?? '{}',
-        );
-        newUpdates!.forEach((key, value) {
-          jsonToUpdate[key] = value;
-        });
+          // Merge onto the latest persisted metadata, not the possibly-stale
+          // in-memory copy, so a concurrent update's fields are not clobbered.
+          final latest = await _filesDB.getAnyUploadedFile(
+            file.uploadedFileID!,
+          );
+          final int baseVersion = latest?.pubMmdVersion ?? file.pubMmdVersion;
+          final Map<String, dynamic> jsonToUpdate = jsonDecode(
+            latest?.pubMmdEncodedJson ?? file.pubMmdEncodedJson ?? '{}',
+          );
+          newUpdates!.forEach((key, value) {
+            jsonToUpdate[key] = value;
+          });
 
-        // update the local information so that it's reflected on UI
-        file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
-        file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
+          // update the local information so that it's reflected on UI
+          file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
+          file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
+          file.pubMmdVersion = baseVersion;
 
-        final fileKey = getFileKey(file);
-        final encryptedMMd = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(jsonToUpdate)),
-          fileKey,
-        );
-        metadataList.add(
-          UpdateMagicMetadataRequest(
-            id: file.uploadedFileID!,
-            magicMetadata: MetadataRequest(
-              version: file.pubMmdVersion,
-              count: jsonToUpdate.length,
-              data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
-              header: CryptoUtil.bin2base64(encryptedMMd.header!),
+          final fileKey = getFileKey(file);
+          final encryptedMMd = await CryptoUtil.encryptChaCha(
+            utf8.encode(jsonEncode(jsonToUpdate)),
+            fileKey,
+          );
+          metadataList.add(
+            UpdateMagicMetadataRequest(
+              id: file.uploadedFileID!,
+              magicMetadata: MetadataRequest(
+                version: file.pubMmdVersion,
+                count: jsonToUpdate.length,
+                data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+                header: CryptoUtil.bin2base64(encryptedMMd.header!),
+              ),
             ),
-          ),
-        );
-        file.pubMmdVersion = file.pubMmdVersion + 1;
-      }
+          );
+          file.pubMmdVersion = file.pubMmdVersion + 1;
+        }
 
-      await _gateway.updatePublicMagicMetadata(metadataList);
-      // update the state of the selected file. Same file in other collection
-      // should be eventually synced after remote sync has completed
-      await _filesDB.insertMultiple(files);
-      RemoteSyncService.instance.sync(silently: true).ignore();
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.statusCode == 409) {
+        await _gateway.updatePublicMagicMetadata(metadataList);
+        // update the state of the selected file. Same file in other collection
+        // should be eventually synced after remote sync has completed
+        await _filesDB.insertMultiple(files);
         RemoteSyncService.instance.sync(silently: true).ignore();
+      } on DioException catch (e) {
+        if (e.response != null && e.response!.statusCode == 409) {
+          RemoteSyncService.instance.sync(silently: true).ignore();
+        }
+        rethrow;
+      } catch (e, s) {
+        _logger.severe("failed to sync magic metadata", e, s);
+        rethrow;
       }
-      rethrow;
-    } catch (e, s) {
-      _logger.severe("failed to sync magic metadata", e, s);
-      rethrow;
-    }
+    });
   }
 
   Future<void> _updateMagicData(

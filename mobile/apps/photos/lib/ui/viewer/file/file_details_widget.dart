@@ -18,11 +18,13 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/added_by_widget.dart";
 import "package:photos/ui/viewer/file_details/albums_item_widget.dart";
@@ -37,6 +39,7 @@ import "package:photos/ui/viewer/file_details/preview_properties_item_widget.dar
 import "package:photos/ui/viewer/file_details/video_exif_item.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/image_dimension_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
   final EnteFile file;
@@ -108,6 +111,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       _exifNotifier.addListener(() {
         if (_exifNotifier.value != null) {
           _generateExifForDetails(_exifNotifier.value!);
+          _updateDimensionsFromExif(_exifNotifier.value!).ignore();
         }
         showExifListTile =
             _exifData["focalLength"] != null ||
@@ -384,6 +388,50 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
   }
 
+  Future<void> _updateDimensionsFromExif(Map<String, IfdTag> exif) async {
+    if (!flagService.useFileDerivedImageDimensions ||
+        widget.file.fileType != FileType.image ||
+        !widget.file.isUploaded ||
+        widget.file.ownerID == null ||
+        widget.file.ownerID != _currentUserID) {
+      return;
+    }
+    final dimensions = imageDimensionMetadataFromExif(exif);
+    if (dimensions == null ||
+        dimensions.pixels <= largeImageDimensionBackfillMinPixels) {
+      return;
+    }
+    final updates = <String, dynamic>{
+      if (widget.file.width != dimensions.width) widthKey: dimensions.width,
+      if (widget.file.height != dimensions.height) heightKey: dimensions.height,
+    };
+    if (updates.isEmpty) {
+      return;
+    }
+    final logID =
+        "fileID=${widget.file.uploadedFileID}, generatedID=${widget.file.generatedID}";
+    try {
+      await FileMagicService.instance.updatePublicMagicMetadata([
+        widget.file,
+      ], updates);
+      _logger.info("Backfilled EXIF dimensions for $logID: $updates");
+      if (flagService.internalUser) {
+        // Root context so the toast survives the info sheet being dismissed.
+        final toastContext =
+            AppNavigationService.instance.navigator?.context ??
+            (mounted ? context : null);
+        if (toastContext != null) {
+          showShortToast(
+            toastContext,
+            "Backfilled dimensions to ${dimensions.width} x ${dimensions.height}",
+          );
+        }
+      }
+    } catch (e, s) {
+      _logger.warning("Failed to update dimensions from EXIF for $logID", e, s);
+    }
+  }
+
   _generateExifForDetails(Map<String, IfdTag> exif) {
     if (exif["EXIF FocalLength"] != null) {
       _exifData["focalLength"] =
@@ -396,19 +444,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).numerator /
           (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).denominator;
     }
-    final imageWidth = _firstPositiveDimensionTag(exif, const [
-      "EXIF ExifImageWidth",
-      "Image ImageWidth",
-    ]);
-    final imageLength = _firstPositiveDimensionTag(exif, const [
-      "EXIF ExifImageLength",
-      "Image ImageLength",
-    ]);
-    if (imageWidth != null && imageLength != null) {
-      _exifData["resolution"] = '$imageWidth x $imageLength';
-      final double megaPixels =
-          (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
-          1000000;
+    final imageDimensions = imageDimensionMetadataFromExif(exif);
+    if (imageDimensions != null) {
+      _exifData["resolution"] =
+          '${imageDimensions.width} x ${imageDimensions.height}';
+      final double megaPixels = imageDimensions.pixels / 1000000;
       final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
       _exifData['megaPixels'] = roundedMegaPixels..toStringAsFixed(1);
     } else {
@@ -465,19 +505,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       final reciprocal = (1 / seconds).round();
       return "1/$reciprocal";
     }
-  }
-
-  IfdTag? _firstPositiveDimensionTag(
-    Map<String, IfdTag> exif,
-    List<String> keys,
-  ) {
-    for (final key in keys) {
-      final tag = exif[key];
-      if (tag != null && tag.values.firstAsInt() > 0) {
-        return tag;
-      }
-    }
-    return null;
   }
 }
 
