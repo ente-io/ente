@@ -119,7 +119,6 @@ jobs:
               with:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION }}
-                  cache: true
 
             - name: Generate strings localizations
               run: flutter gen-l10n

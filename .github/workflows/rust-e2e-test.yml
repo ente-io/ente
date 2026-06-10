@@ -42,6 +42,14 @@ jobs:
               with:
                   node-version: 24
 
+            # Restore-only; primed on main by warm-caches.yml.
+            - name: Restore Rust cache
+              uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+              with:
+                  workspaces: rust
+                  shared-key: rust-cli
+                  save-if: false
+
             - name: Install PGlite test dependency
               run: npm ci --prefix tests/pglite
 
