@@ -820,6 +820,8 @@ func main() {
 	}
 
 	publicAPI.POST("/cast/device-info", castHandler.RegisterDevice)
+	privateAPI.GET("/cast/device-info", castHandler.GetAllDevices)
+	privateAPI.DELETE("/cast/device-info/:deviceCode", castHandler.DeleteDevice)
 	// Deprecated Nov 2024. Remove in a few months.
 	//
 	// This (and below) are deprecated copy of endpoints with a trailing slash.

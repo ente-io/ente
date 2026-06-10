@@ -1,6 +1,10 @@
 package api
 
 import (
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/ente-io/museum/ente"
 	entity "github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/controller"
@@ -10,9 +14,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 // CastHandler exposes request handlers for publicly accessible collections
@@ -48,6 +49,38 @@ func (h *CastHandler) GetDeviceInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"publicKey": publicKey,
 	})
+}
+
+func (h *CastHandler) GetAllDevices(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+	devices, err := h.Ctrl.GetAllDevices(c, userID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to get devices"))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"devices": devices,
+	})
+}
+
+func (h *CastHandler) DeleteDevice(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+	deviceCode := getDeviceCode(c)
+	collectionID, err := strconv.ParseInt(c.Query("collectionID"), 10, 64)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to parse collection ID"))
+		return
+	}
+	if err := h.Ctrl.CastRepo.RevokeForGivenUserAndCollectionAndDevice(
+		c,
+		userID,
+		collectionID,
+		deviceCode,
+	); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to delete device"))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (h *CastHandler) InsertCastData(c *gin.Context) {
