@@ -212,6 +212,11 @@ Learn more in the [Custom domains guide](/photos/features/sharing-and-collaborat
 - Go to the Sharing tab (bottom navigation)
 - See "Shared albums" and "Quick links" sections
 
+**On web/desktop:**
+
+- Shared albums appear in your album list
+- They're marked with a sharing icon
+
 ### Edit link settings
 
 1. Find the link in your sharing list
