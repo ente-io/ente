@@ -1120,5 +1120,6 @@
     }
   },
   "sendFeedback": "Send feedback",
-  "deleteAccountPermanentWarning": "This will permanently delete your Ente Auth, Photos, and Locker data"
+  "deleteAccountPermanentWarning": "This will permanently delete your Ente Auth, Photos, and Locker data",
+  "addItem": "Add item"
 }
