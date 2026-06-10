@@ -18,16 +18,20 @@ bool shouldShowLinuxSystemAuthSetupGuide(
 
 Future<void> showLocalAuthenticationUnavailableMessage(
   BuildContext context,
-  LocalAuthenticationUnavailableException exception,
-) async {
+  LocalAuthenticationUnavailableException exception, {
+  VoidCallback? onOpenGuide,
+}) async {
   if (shouldShowLinuxSystemAuthSetupGuide(exception)) {
-    await showLinuxSystemAuthSetupDialog(context);
+    await showLinuxSystemAuthSetupDialog(context, onOpenGuide: onOpenGuide);
     return;
   }
   showToast(context, exception.userMessage);
 }
 
-Future<void> showLinuxSystemAuthSetupDialog(BuildContext context) async {
+Future<void> showLinuxSystemAuthSetupDialog(
+  BuildContext context, {
+  VoidCallback? onOpenGuide,
+}) async {
   await showDialogWidget(
     context: context,
     title: pendingTranslation('Linux setup required'),
@@ -41,6 +45,7 @@ Future<void> showLinuxSystemAuthSetupDialog(BuildContext context) async {
         labelText: pendingTranslation('Open guide'),
         isInAlert: true,
         onTap: () async {
+          onOpenGuide?.call();
           await PlatformUtil.openWebView(
             context,
             pendingTranslation('Linux setup required'),

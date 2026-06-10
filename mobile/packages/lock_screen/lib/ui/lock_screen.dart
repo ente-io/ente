@@ -37,6 +37,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   final _lockscreenSetting = LockScreenSettings.instance;
   // Suppress auto-auth only for the initial manual presentation.
   bool _suppressAutoPrompt = false;
+  // Opening the Linux setup guide can background the app; skip that resume.
+  bool _suppressNextLifecyclePrompt = false;
 
   @override
   void initState() {
@@ -193,6 +195,11 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _logger.info(state.toString());
     if (state == AppLifecycleState.resumed && !_isShowingLockScreen) {
+      if (_suppressNextLifecyclePrompt) {
+        _suppressNextLifecyclePrompt = false;
+        _hasPlacedAppInBackground = false;
+        return;
+      }
       // This is triggered either when the lock screen is dismissed or when
       // the app is brought to foreground
       _hasPlacedAppInBackground = false;
@@ -363,7 +370,13 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       _isShowingLockScreen = false;
       _logger.warning("System local authentication unavailable", e, s);
       if (mounted) {
-        await showLocalAuthenticationUnavailableMessage(context, e);
+        await showLocalAuthenticationUnavailableMessage(
+          context,
+          e,
+          onOpenGuide: () {
+            _suppressNextLifecyclePrompt = true;
+          },
+        );
       }
     } catch (e, s) {
       _isShowingLockScreen = false;
