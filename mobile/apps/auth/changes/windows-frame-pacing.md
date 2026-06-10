@@ -1,0 +1,1 @@
+- Improved animation smoothness for Auth on Windows high-refresh-rate displays.
