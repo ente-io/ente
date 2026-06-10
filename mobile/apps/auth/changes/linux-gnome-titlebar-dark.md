@@ -1,0 +1,1 @@
+- Matched the Auth Linux title bar to GNOME's dark mode preference.
