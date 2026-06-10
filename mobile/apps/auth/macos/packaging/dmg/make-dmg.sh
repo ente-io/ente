@@ -19,10 +19,12 @@ trap 'rm -rf "$tmp"' EXIT
 # Stage the volume contents: the app, an /Applications link to drag it
 # into, the Finder layout, and the volume icon.
 vol="$tmp/vol"
-mkdir "$vol"
+mkdir "$vol" "$vol/.background"
 cp -R "$app" "$vol/Ente Auth.app"
 ln -s /Applications "$vol/Applications"
 cp "$here/DS_Store" "$vol/.DS_Store"
+tiffutil -cathidpicheck "$here/background.png" "$here/background@2x.png" \
+    -out "$vol/.background/background.tiff"
 
 icon="$here/../../../assets/generation-icons/icon-macos.png"
 iconset="$tmp/icon.iconset"
