@@ -177,7 +177,7 @@ class StartNewRitualCard extends StatelessWidget {
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
-                                      "Start new ritual",
+                                      context.l10n.startNewRitual,
                                       style: textTheme.body,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -189,7 +189,7 @@ class StartNewRitualCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                "Create a ritual, build streaks, and share your progress.",
+                                context.l10n.createRitualBuildStreaksShareProgress,
                                 style: textTheme.miniMuted,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
