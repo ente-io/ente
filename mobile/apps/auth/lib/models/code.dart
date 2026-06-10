@@ -120,6 +120,8 @@ class Code {
     final String pinQuery =
         updatedPin != null ? "&pin=${Uri.encodeQueryComponent(updatedPin)}" : "";
 
+    final String host = updatedType == Type.yandex ? "yaotp" : updatedType.name;
+
     return Code(
       updateAccount,
       updateIssuer,
@@ -129,7 +131,7 @@ class Code {
       resolvedAlgorithm,
       updatedType,
       updatedCounter,
-      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${resolvedAlgorithm.name.toUpperCase()}"
+      "otpauth://$host/${Uri.encodeComponent("$updateIssuer:$updateAccount")}?algorithm=${resolvedAlgorithm.name.toUpperCase()}"
       "&digits=$resolvedDigits&issuer=$encodedIssuer"
       "&period=$resolvedPeriod&secret=$updatedSecret$pinQuery${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
@@ -159,6 +161,7 @@ class Code {
     final String pinQuery = normalizedPin != null
         ? "&pin=${Uri.encodeQueryComponent(normalizedPin)}"
         : "";
+    final String host = type == Type.yandex ? "yaotp" : type.name;
     return Code(
       account,
       issuer,
@@ -168,7 +171,7 @@ class Code {
       resolvedAlgorithm,
       type,
       0,
-      "otpauth://${type.name}/$issuer:$account?algorithm=${resolvedAlgorithm.name.toUpperCase()}&digits=$resolvedDigits&issuer=$encodedIssuer&period=$resolvedPeriod&secret=$secret$pinQuery",
+      "otpauth://$host/${Uri.encodeComponent("$issuer:$account")}?algorithm=${resolvedAlgorithm.name.toUpperCase()}&digits=$resolvedDigits&issuer=$encodedIssuer&period=$resolvedPeriod&secret=$secret$pinQuery",
       display: display ?? CodeDisplay(),
       pin: normalizedPin,
     );
@@ -185,7 +188,7 @@ class Code {
       int period = _getPeriod(uri);
       Algorithm algorithm = _getAlgorithm(uri);
       final String? pin = _getPin(uri);
-      if (type == Type.yandex || uri.host == "yaotp") {
+      if (type == Type.yandex) {
         digits = yandexDigits;
         period = yandexPeriod;
         algorithm = Algorithm.sha256;
@@ -197,7 +200,7 @@ class Code {
         period,
         getSanitizedSecret(uri.queryParameters['secret']!),
         algorithm,
-        type == Type.yandex || uri.host == "yaotp" ? Type.yandex : type,
+        type,
         _getCounter(uri),
         rawData,
         pin: pin,
@@ -284,7 +287,7 @@ class Code {
       if (uri.host == "steam") {
         return steamDigits;
       }
-      if (uri.host == "yandex" || uri.host == "yaotp") {
+      if (uri.host == "yandex") {
         return yandexDigits;
       }
       return defaultDigits;
@@ -315,9 +318,6 @@ class Code {
     try {
       final rawAlgorithm = uri.queryParameters['algorithm'];
       if (rawAlgorithm == null || rawAlgorithm.isEmpty) {
-        if (uri.host == "yandex" || uri.host == "yaotp") {
-          return Algorithm.sha256;
-        }
         return Algorithm.sha1;
       }
       final algorithm = rawAlgorithm.toLowerCase();
@@ -347,7 +347,7 @@ class Code {
   static Type _getType(Uri uri) {
     if (uri.host == "totp") {
       return Type.totp;
-    } else if (uri.host == "yandex" || uri.host == "yaotp") {
+    } else if (uri.host == "yaotp" || uri.host == "yandex") {
       return Type.yandex;
     } else if (uri.host == "steam") {
       return Type.steam;

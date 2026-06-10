@@ -67,18 +67,15 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       text: widget.code != null ? safeDecode(widget.code!.issuer).trim() : null,
     );
     _accountController = TextEditingController(
-      text:
-          widget.code != null ? safeDecode(widget.code!.account).trim() : null,
+      text: widget.code != null
+          ? safeDecode(widget.code!.account).trim()
+          : null,
     );
-    _secretController = TextEditingController(
-      text: widget.code?.secret,
-    );
+    _secretController = TextEditingController(text: widget.code?.secret);
     _pinController = TextEditingController(
       text: widget.code?.pin ?? '',
     );
-    _notesController = TextEditingController(
-      text: widget.code?.display.note,
-    );
+    _notesController = TextEditingController(text: widget.code?.display.note);
     _digitsController = TextEditingController(
       text: widget.code != null
           ? widget.code!.digits.toString()
@@ -161,11 +158,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     super.dispose();
   }
 
-  bool _isYandexIssuer(String issuer) {
-    final String lower = issuer.trim().toLowerCase();
-    return lower == 'yandex';
-  }
-
   void _applyYandexDefaults() {
     _digitsController.text = Code.yandexDigits.toString();
     _periodController.text = Code.yandexPeriod.toString();
@@ -214,8 +206,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                             return null;
                           },
                           decoration: const InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: 12.0),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 12.0,
+                            ),
                           ),
                           style: getEnteTextTheme(context).small,
                           controller: _issuerController,
@@ -238,8 +231,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                           },
                           style: getEnteTextTheme(context).small,
                           decoration: InputDecoration(
-                            contentPadding:
-                                const EdgeInsets.symmetric(vertical: 12.0),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12.0,
+                            ),
                             suffixIcon: GestureDetector(
                               // padding: EdgeInsets.zero,
                               onTap: () {
@@ -267,8 +261,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _issuerController,
                     builder: (context, value, child) {
-                      final bool showPinField =
-                          _type == Type.yandex || _isYandexIssuer(value.text);
+                      final bool showPinField = _type == Type.yandex;
                       if (!showPinField) {
                         return const SizedBox.shrink();
                       }
@@ -325,8 +318,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                             return null;
                           },
                           decoration: const InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: 12.0),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 12.0,
+                            ),
                           ),
                           style: getEnteTextTheme(context).small,
                           controller: _accountController,
@@ -354,8 +348,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                           minLines: 1,
                           maxLines: 5,
                           decoration: const InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: 12.0),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 12.0,
+                            ),
                           ),
                           style: getEnteTextTheme(context).small,
                           controller: _notesController,
@@ -423,8 +418,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         padding: const EdgeInsets.symmetric(vertical: 0),
                       ),
                       onPressed: () async {
-                        final digits =
-                            int.tryParse(_digitsController.text.trim());
+                        final digits = int.tryParse(
+                          _digitsController.text.trim(),
+                        );
                         if (digits != null && (digits < 1 || digits > 10)) {
                           String message = "Digits must be between 1 and 10";
                           _showIncorrectDetailsDialog(
@@ -434,8 +430,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                           return;
                         }
 
-                        final period =
-                            int.tryParse(_periodController.text.trim());
+                        final period = int.tryParse(
+                          _periodController.text.trim(),
+                        );
                         if (period != null && (period < 10 || period > 60)) {
                           String message =
                               "Period must be between 10 and 60 seconds";
@@ -499,13 +496,12 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final period = int.tryParse(_periodController.text.trim());
 
       final String issuerLower = issuer.toLowerCase();
-      final isStreamCode = issuerLower == "steam" ||
-          issuerLower.contains('steampowered.com');
-      final bool isYandexCode =
-          _type == Type.yandex || _isYandexIssuer(issuer);
+      final isStreamCode =
+          issuerLower == "steam" || issuerLower.contains('steampowered.com');
+      final bool isYandexCode = _type == Type.yandex;
       final CodeDisplay display =
           widget.code?.display.copyWith(tags: selectedTags) ??
-              CodeDisplay(tags: selectedTags);
+          CodeDisplay(tags: selectedTags);
       display.note = notes;
       if (widget.code != null) {
         if (widget.code!.display.iconID != _customIconID.toLowerCase()) {
@@ -515,8 +511,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         }
       }
 
-      display.iconSrc =
-          _iconSrc == IconType.simpleIcon ? 'simpleIcon' : 'customIcon';
+      display.iconSrc = _iconSrc == IconType.simpleIcon
+          ? 'simpleIcon'
+          : 'customIcon';
 
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
@@ -584,10 +581,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     }
   }
 
-  void _showIncorrectDetailsDialog(
-    BuildContext context, {
-    String? message,
-  }) {
+  void _showIncorrectDetailsDialog(BuildContext context, {String? message}) {
     showErrorDialog(
       context,
       context.l10n.incorrectDetails,
@@ -606,10 +600,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     final AllIconData newCustomIcon = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          return CustomIconPage(
-            currentIcon: currentIcon,
-            allIcons: allIcons,
-          );
+          return CustomIconPage(currentIcon: currentIcon, allIcons: allIcons);
         },
       ),
     );
@@ -655,18 +646,13 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               return AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: (child, animation) {
-                  return SizeTransition(
-                    sizeFactor: animation,
-                    child: child,
-                  );
+                  return SizeTransition(sizeFactor: animation, child: child);
                 },
                 child: isExpanded
                     ? SizedBox(
                         width: 400,
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 16,
-                          ),
+                          padding: const EdgeInsets.only(top: 16),
                           child: GridView.count(
                             crossAxisCount: 2,
                             shrinkWrap: true,
@@ -731,9 +717,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                                         return null;
                                       },
                                       maxLines: 1,
-                                      style: getEnteTextTheme(
-                                        context,
-                                      ).small,
+                                      style: getEnteTextTheme(context).small,
                                       controller: _periodController,
                                     ),
                                   ),
@@ -761,9 +745,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                                         return null;
                                       },
                                       maxLines: 1,
-                                      style: getEnteTextTheme(
-                                        context,
-                                      ).small,
+                                      style: getEnteTextTheme(context).small,
                                       controller: _digitsController,
                                     ),
                                   ),
