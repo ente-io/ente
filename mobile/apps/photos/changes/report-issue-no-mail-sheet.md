@@ -1,0 +1,1 @@
+- Fix the "No email app found" sheet on the Report an issue screen, where the Subject, Message and device info were unreadable.
