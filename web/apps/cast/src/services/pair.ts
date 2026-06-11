@@ -148,13 +148,23 @@ export const getCastPayload = async (
     const encryptedCastData = await getEncryptedCastData(pairingCode);
     if (!encryptedCastData) return undefined;
 
-    // Decrypt it using the private key of the pair and return the plaintext
-    // payload, which'll be a JSON object containing the data we need to start a
-    // slideshow for some collection.
-    const jsonString = new TextDecoder().decode(
-        await boxSealOpenBytes(encryptedCastData, { publicKey, privateKey }),
-    );
-    return CastPayload.parse(JSON.parse(jsonString));
+    if (encryptedCastData.startsWith('post-quantum/')) {
+        const encrypted = encryptedCastData.slice('post-quantum/'.length);
+        const jsonString = new TextDecoder().decode(
+            await boxSealOpenBytes(encrypted, { publicKey, privateKey }),
+        );
+        return CastPayload.parse(JSON.parse(jsonString));
+    } else {
+        // Decrypt it using the private key of the pair and return the plaintext
+        // payload, which'll be a JSON object containing the data we need to start a
+        // slideshow for some collection.
+        const jsonString = new TextDecoder().decode(
+            await boxSealOpenBytes(encryptedCastData, { publicKey, privateKey }),
+        );
+        return CastPayload.parse(JSON.parse(jsonString));
+    }
+
+
 };
 
 /**

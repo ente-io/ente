@@ -845,7 +845,7 @@ class CollectionsService {
       CryptoUtil.base642bin(base64Encode(payload.codeUnits)),
       CryptoUtil.base642bin(publicKey),
     );
-    return CryptoUtil.bin2base64(encPayload);
+    return 'post-quantum/' + CryptoUtil.bin2base64(encPayload);
   }
 
   Future<List<User>> share(
