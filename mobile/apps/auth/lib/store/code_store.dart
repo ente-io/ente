@@ -6,6 +6,7 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_parse_error.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:ente_events/event_bus.dart';
@@ -87,8 +88,12 @@ class CodeStore {
           code = Code.fromExportJson(decodeJson);
         }
       } catch (e, s) {
-        code = Code.withError(e, entity.rawData);
-        _logger.severe("Could not parse code", e, s);
+        final parseError = CodeParseError.from(
+          error: e,
+          storedRawData: entity.rawData,
+        );
+        code = Code.withError(parseError, entity.rawData);
+        _logger.severe("Could not parse code: $parseError", e, s);
       }
       code.generatedID = entity.generatedID;
       code.hasSynced = entity.hasSynced;
