@@ -6,7 +6,7 @@ use crate::{
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64;
 use dialoguer::Password;
-use ente_core::crypto::{self, argon, blob, keys, secretbox};
+use ente_core::crypto::{self, SecretVec, argon, blob, keys, secretbox};
 use reqwest::{Client, StatusCode, header};
 use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
@@ -437,7 +437,7 @@ fn derive_paste_key_encryption_key(
     paste_key: &PasteKey,
     password: Option<&str>,
     payload: &PastePayload,
-) -> Result<Vec<u8>> {
+) -> Result<SecretVec> {
     let salt = BASE64.decode(&payload.kdf_nonce)?;
     let kdf_secret = paste_key.kdf_secret(password)?;
     Ok(argon::derive_key(

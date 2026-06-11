@@ -633,7 +633,7 @@ fn encrypt_file_internal<R: Read, W: Write>(
 
     let key = match key {
         Some(k) => k.to_vec(),
-        None => generate_stream_key(),
+        None => generate_stream_key().into_vec(),
     };
 
     let mut encryptor = StreamEncryptor::new(&key)?;
@@ -857,10 +857,10 @@ mod tests {
 
         // Create a stream with just the header, no encrypted data
         let encryptor = StreamEncryptor::new(&key).expect("encryptor creation failed");
-        let header = encryptor.header.clone();
+        let header = encryptor.header;
 
         // Don't write any encrypted chunks - just the header
-        let truncated_data = header.clone();
+        let truncated_data = header;
 
         let reader = Cursor::new(&truncated_data);
         let mut decryptor =
@@ -1081,7 +1081,7 @@ mod tests {
         }
     }
 
-    // ============ P2: Expanded unit tests ============
+    // Expanded unit tests
 
     #[test]
     fn test_empty_input() {
@@ -1638,7 +1638,7 @@ mod tests {
         ));
     }
 
-    // ============ Truncation detection tests for decrypt_file / decrypt ============
+    // Truncation detection tests for decrypt_file / decrypt
 
     #[test]
     fn test_decrypt_file_truncation_empty_ciphertext() {
@@ -1868,7 +1868,7 @@ mod tests {
         );
     }
 
-    // ============ Size estimation consistency tests ============
+    // Size estimation consistency tests
 
     #[test]
     fn test_encrypt_file_size_matches_estimate_empty() {

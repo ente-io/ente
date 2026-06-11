@@ -26,7 +26,7 @@ pub fn decrypt_secrets(
     let kek_salt = crypto::decode_b64(&attributes.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
-    let key_encryption_key = argon::derive_key_secure(password, &kek_salt, mem_limit, ops_limit)?;
+    let key_encryption_key = argon::derive_key(password, &kek_salt, mem_limit, ops_limit)?;
 
     decrypt_secrets_with_kek(&key_encryption_key, attributes, encrypted_token)
 }
@@ -83,13 +83,13 @@ pub fn derive_login_key_for_srp(
     let kek_salt = crypto::decode_b64(&srp_attributes.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
-    let kek = argon::derive_key_secure(
+    let kek = argon::derive_key(
         password,
         &kek_salt,
         srp_attributes.mem_limit,
         srp_attributes.ops_limit,
     )?;
-    let login_key = kdf::derive_login_key_secure(&kek)?;
+    let login_key = kdf::derive_login_key(&kek)?;
 
     Ok(login_key)
 }
@@ -102,13 +102,13 @@ pub fn derive_keys_for_login(
     let kek_salt = crypto::decode_b64(&srp_attributes.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
-    let kek = argon::derive_key_secure(
+    let kek = argon::derive_key(
         password,
         &kek_salt,
         srp_attributes.mem_limit,
         srp_attributes.ops_limit,
     )?;
-    let login_key = kdf::derive_login_key_secure(&kek)?;
+    let login_key = kdf::derive_login_key(&kek)?;
 
     Ok((kek, login_key))
 }

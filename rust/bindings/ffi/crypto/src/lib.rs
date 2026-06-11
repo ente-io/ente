@@ -102,8 +102,7 @@ pub unsafe extern "C" fn ente_crypto_generate_keypair_b64(
     out_error: *mut *mut c_char,
 ) -> c_int {
     run_ffi(out_error, || {
-        let (public_key, secret_key) =
-            crypto::keys::generate_keypair().map_err(|e| e.to_string())?;
+        let (public_key, secret_key) = crypto::keys::generate_keypair();
         unsafe {
             c_output(
                 out_public_key_b64,

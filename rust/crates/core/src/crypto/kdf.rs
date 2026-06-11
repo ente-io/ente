@@ -41,13 +41,13 @@ pub const LOGIN_SUBKEY_CONTEXT: &[u8] = b"loginctx";
 /// * `context` - Context string (up to 8 bytes, will be truncated/padded).
 ///
 /// # Returns
-/// Derived subkey of the specified length.
+/// Derived subkey of the specified length, zeroized on drop.
 pub fn derive_subkey(
     key: &[u8],
     subkey_len: usize,
     subkey_id: u64,
     context: &[u8],
-) -> Result<Vec<u8>> {
+) -> Result<SecretVec> {
     if !(SUBKEY_BYTES_MIN..=SUBKEY_BYTES_MAX).contains(&subkey_len) {
         return Err(crate::crypto::CryptoError::InvalidKeyLength {
             expected: SUBKEY_BYTES_MAX,
@@ -79,21 +79,7 @@ pub fn derive_subkey(
         .to_state()
         .finalize();
 
-    Ok(hash.as_bytes()[..subkey_len].to_vec())
-}
-
-/// Derive a subkey from a master key, returning a [`SecretVec`].
-///
-/// This is a convenience wrapper around [`derive_subkey`] for call sites that
-/// want the derived subkey to be zeroized when dropped.
-pub fn derive_subkey_secure(
-    key: &[u8],
-    subkey_len: usize,
-    subkey_id: u64,
-    context: &[u8],
-) -> Result<SecretVec> {
-    let subkey = derive_subkey(key, subkey_len, subkey_id, context)?;
-    Ok(SecretVec::new(subkey))
+    Ok(SecretVec::new(hash.as_bytes()[..subkey_len].to_vec()))
 }
 
 /// Derive a login key from a master key.
@@ -105,23 +91,22 @@ pub fn derive_subkey_secure(
 /// * `master_key` - Master key to derive from (must be exactly 32 bytes).
 ///
 /// # Returns
-/// 16-byte login key.
-pub fn derive_login_key(master_key: &[u8]) -> Result<Vec<u8>> {
-    if master_key.len() != 32 {
+/// 16-byte login key, zeroized on drop.
+pub fn derive_login_key(master_key: &[u8]) -> Result<SecretVec> {
+    if master_key.len() != KEY_BYTES {
         return Err(crate::crypto::CryptoError::InvalidKeyLength {
-            expected: 32,
+            expected: KEY_BYTES,
             actual: master_key.len(),
         });
     }
 
-    let subkey = derive_subkey(master_key, 32, 1, b"loginctx")?;
-    Ok(subkey[..16].to_vec())
-}
-
-/// Derive a login key from a master key, returning a [`SecretVec`].
-pub fn derive_login_key_secure(master_key: &[u8]) -> Result<SecretVec> {
-    let login_key = derive_login_key(master_key)?;
-    Ok(SecretVec::new(login_key))
+    let subkey = derive_subkey(
+        master_key,
+        LOGIN_SUBKEY_LEN,
+        LOGIN_SUBKEY_ID,
+        LOGIN_SUBKEY_CONTEXT,
+    )?;
+    Ok(SecretVec::new(subkey[..16].to_vec()))
 }
 
 #[cfg(test)]
@@ -262,7 +247,7 @@ mod tests {
         let subkey = derive_subkey(&master_key, 32, 1, b"loginctx").unwrap();
 
         // Login key should be first 16 bytes of subkey
-        assert_eq!(login_key, &subkey[..16]);
+        assert_eq!(login_key.as_ref(), &subkey[..16]);
     }
 
     #[test]

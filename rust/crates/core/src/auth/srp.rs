@@ -301,7 +301,7 @@ mod tests {
 
         session.verify_m2(&expected_m2).unwrap();
 
-        let mut bad_m2 = expected_m2.clone();
+        let mut bad_m2 = expected_m2;
         bad_m2[0] ^= 0x01;
         assert!(session.verify_m2(&bad_m2).is_err());
     }

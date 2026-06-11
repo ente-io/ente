@@ -130,23 +130,14 @@ fn derive_key_bytes(
 /// * `ops_limit` - Operations/iterations limit.
 ///
 /// # Returns
-/// 32-byte derived key.
-pub fn derive_key(password: &str, salt: &[u8], mem_limit: u32, ops_limit: u32) -> Result<Vec<u8>> {
-    derive_key_bytes(password.as_bytes(), salt, mem_limit, ops_limit)
-}
-
-/// Derive a key from a password using Argon2id, returning a [`SecretVec`].
-///
-/// This is a convenience wrapper around [`derive_key`] for call sites that want
-/// the derived key to be zeroized when dropped.
-pub fn derive_key_secure(
+/// 32-byte derived key, zeroized on drop.
+pub fn derive_key(
     password: &str,
     salt: &[u8],
     mem_limit: u32,
     ops_limit: u32,
 ) -> Result<SecretVec> {
-    let key = derive_key(password, salt, mem_limit, ops_limit)?;
-    Ok(SecretVec::new(key))
+    derive_key_bytes(password.as_bytes(), salt, mem_limit, ops_limit).map(SecretVec::new)
 }
 
 /// Derive a key with interactive parameters (fast, for UI responsiveness).
@@ -163,7 +154,7 @@ pub fn derive_interactive_key(password: &str) -> Result<DerivedKeyResult> {
     let salt = super::keys::generate_salt();
     let key = derive_key(password, &salt, MEMLIMIT_INTERACTIVE, OPSLIMIT_INTERACTIVE)?;
     Ok(DerivedKeyResult {
-        key: SecretVec::new(key),
+        key,
         salt,
         mem_limit: MEMLIMIT_INTERACTIVE,
         ops_limit: OPSLIMIT_INTERACTIVE,
@@ -179,7 +170,12 @@ pub fn derive_interactive_key(password: &str) -> Result<DerivedKeyResult> {
 /// # Returns
 /// 32-byte derived key.
 pub fn derive_interactive_key_with_salt(password: &str, salt: &[u8]) -> Result<Vec<u8>> {
-    derive_key(password, salt, MEMLIMIT_INTERACTIVE, OPSLIMIT_INTERACTIVE)
+    derive_key_bytes(
+        password.as_bytes(),
+        salt,
+        MEMLIMIT_INTERACTIVE,
+        OPSLIMIT_INTERACTIVE,
+    )
 }
 
 /// Derive a key with moderate parameters and a generated salt.
@@ -213,7 +209,12 @@ pub fn derive_moderate_key(password: &str) -> Result<DerivedKeyResult> {
 /// # Returns
 /// 32-byte derived key.
 pub fn derive_moderate_key_with_salt(password: &str, salt: &[u8]) -> Result<Vec<u8>> {
-    derive_key(password, salt, MEMLIMIT_MODERATE, OPSLIMIT_MODERATE)
+    derive_key_bytes(
+        password.as_bytes(),
+        salt,
+        MEMLIMIT_MODERATE,
+        OPSLIMIT_MODERATE,
+    )
 }
 
 /// Derive a sensitive key using adaptive parameters with provided salt.
@@ -313,7 +314,12 @@ pub fn derive_sensitive_key(password: &str) -> Result<DerivedKeyResult> {
 /// # Returns
 /// 32-byte derived key.
 pub fn derive_sensitive_key_with_salt(password: &str, salt: &[u8]) -> Result<Vec<u8>> {
-    derive_key(password, salt, MEMLIMIT_SENSITIVE, OPSLIMIT_SENSITIVE)
+    derive_key_bytes(
+        password.as_bytes(),
+        salt,
+        MEMLIMIT_SENSITIVE,
+        OPSLIMIT_SENSITIVE,
+    )
 }
 
 /// Derive a key from a password with base64-encoded salt.
@@ -333,13 +339,13 @@ pub fn derive_key_from_b64_salt(
     ops_limit: u32,
 ) -> Result<Vec<u8>> {
     let salt = crate::crypto::decode_b64(salt_b64)?;
-    derive_key(password, &salt, mem_limit, ops_limit)
+    derive_key_bytes(password.as_bytes(), &salt, mem_limit, ops_limit)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::impl_pure::keys;
+    use crate::crypto::keys;
 
     #[test]
     fn test_derive_key() {

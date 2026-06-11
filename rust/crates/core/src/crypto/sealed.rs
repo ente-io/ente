@@ -35,9 +35,6 @@ pub const SECRET_KEY_BYTES: usize = 32;
 /// Overhead added by sealing (ephemeral_pk + MAC).
 pub const SEAL_OVERHEAD: usize = 32 + 16;
 
-/// Size of sealed box overhead (API compatibility).
-pub const SEAL_BYTES: usize = SEAL_OVERHEAD;
-
 /// Derive nonce from ephemeral and recipient public keys.
 ///
 /// Nonce = BLAKE2b-24(ephemeral_pk || recipient_pk)
@@ -220,11 +217,11 @@ pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::impl_pure::keys;
+    use crate::crypto::keys;
 
     #[test]
     fn test_seal_open() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
         let plaintext = b"Hello, sealed world!";
 
         let sealed = seal(plaintext, &pk).unwrap();
@@ -235,7 +232,7 @@ mod tests {
 
     #[test]
     fn test_seal_overhead() {
-        let (pk, _sk) = keys::generate_keypair().unwrap();
+        let (pk, _sk) = keys::generate_keypair();
         let plaintext = b"Test";
 
         let sealed = seal(plaintext, &pk).unwrap();
@@ -244,7 +241,7 @@ mod tests {
 
     #[test]
     fn test_seal_non_deterministic() {
-        let (pk, _sk) = keys::generate_keypair().unwrap();
+        let (pk, _sk) = keys::generate_keypair();
         let plaintext = b"Same message";
 
         let sealed1 = seal(plaintext, &pk).unwrap();
@@ -256,8 +253,8 @@ mod tests {
 
     #[test]
     fn test_wrong_secret_key() {
-        let (pk1, _sk1) = keys::generate_keypair().unwrap();
-        let (_pk2, sk2) = keys::generate_keypair().unwrap();
+        let (pk1, _sk1) = keys::generate_keypair();
+        let (_pk2, sk2) = keys::generate_keypair();
         let plaintext = b"Secret";
 
         let sealed = seal(plaintext, &pk1).unwrap();
@@ -268,8 +265,8 @@ mod tests {
 
     #[test]
     fn test_wrong_public_key() {
-        let (pk1, sk1) = keys::generate_keypair().unwrap();
-        let (pk2, _sk2) = keys::generate_keypair().unwrap();
+        let (pk1, sk1) = keys::generate_keypair();
+        let (pk2, _sk2) = keys::generate_keypair();
         let plaintext = b"Secret";
 
         let sealed = seal(plaintext, &pk1).unwrap();
@@ -280,7 +277,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_ciphertext() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
         let plaintext = b"Original";
 
         let mut sealed = seal(plaintext, &pk).unwrap();
@@ -295,7 +292,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_ephemeral_key() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
         let plaintext = b"Original";
 
         let mut sealed = seal(plaintext, &pk).unwrap();
@@ -309,7 +306,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_mac() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
         let plaintext = b"Original";
 
         let mut sealed = seal(plaintext, &pk).unwrap();
@@ -332,7 +329,7 @@ mod tests {
 
     #[test]
     fn test_invalid_public_key_length_open() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
         let plaintext = b"Test";
         let sealed = seal(plaintext, &pk).unwrap();
 
@@ -343,7 +340,7 @@ mod tests {
 
     #[test]
     fn test_invalid_secret_key_length() {
-        let (pk, _sk) = keys::generate_keypair().unwrap();
+        let (pk, _sk) = keys::generate_keypair();
         let plaintext = b"Test";
         let sealed = seal(plaintext, &pk).unwrap();
 
@@ -354,7 +351,7 @@ mod tests {
 
     #[test]
     fn test_ciphertext_too_short() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
         let bad_ciphertext = vec![0u8; 40]; // Less than SEAL_OVERHEAD
 
         let result = open(&bad_ciphertext, &pk, &sk);
@@ -366,7 +363,7 @@ mod tests {
 
     #[test]
     fn test_empty_plaintext() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
         let plaintext = b"";
 
         let sealed = seal(plaintext, &pk).unwrap();
@@ -378,7 +375,7 @@ mod tests {
 
     #[test]
     fn test_large_plaintext() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
         let plaintext = vec![0x42u8; 1024 * 1024]; // 1 MB
 
         let sealed = seal(&plaintext, &pk).unwrap();
@@ -402,7 +399,7 @@ mod tests {
 
     #[test]
     fn test_open_rejects_small_order_ephemeral_key() {
-        let (pk, sk) = keys::generate_keypair().unwrap();
+        let (pk, sk) = keys::generate_keypair();
 
         // Craft a ciphertext with an all-zero ephemeral public key (32 zero
         // bytes) followed by enough garbage to pass the length check.
@@ -423,8 +420,8 @@ mod tests {
 
     #[test]
     fn test_multiple_recipients() {
-        let (pk1, sk1) = keys::generate_keypair().unwrap();
-        let (pk2, sk2) = keys::generate_keypair().unwrap();
+        let (pk1, sk1) = keys::generate_keypair();
+        let (pk2, sk2) = keys::generate_keypair();
         let plaintext = b"Broadcast message";
 
         // Seal for different recipients

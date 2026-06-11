@@ -47,7 +47,7 @@ pub(crate) fn create_legacy_kit_request(
 
     let kit_id = Uuid::new_v4().to_string();
     let variant = LegacyKitVariant::TwoOfThree;
-    let kit_secret = crypto::keys::generate_key_secure();
+    let kit_secret = crypto::keys::generate_key();
     let checksum = checksum(LEGACY_KIT_PAYLOAD_VERSION, variant, &kit_id, &kit_secret);
     let shares = split_secret_2_of_3(&kit_secret)?;
     let result_shares = shares
@@ -354,15 +354,12 @@ pub(crate) fn validate_notice_period(hours: i32) -> Result<()> {
 }
 
 fn derive_kit_enc_key(kit_secret: &[u8]) -> Result<SecretVec> {
-    let key = kdf::derive_subkey(kit_secret, 32, 1, b"lgkenc01").map_err(ContactsError::from)?;
-    Ok(SecretVec::new(key))
+    kdf::derive_subkey(kit_secret, 32, 1, b"lgkenc01").map_err(ContactsError::from)
 }
 
 fn derive_kit_auth_keypair(kit_secret: &[u8]) -> Result<(Vec<u8>, SecretVec)> {
-    let seed = SecretVec::new(
-        kdf::derive_subkey(kit_secret, 32, 2, b"lgkauth1").map_err(ContactsError::from)?,
-    );
-    crypto::keys::derive_keypair_from_seed_secure(seed.as_ref()).map_err(Into::into)
+    let seed = kdf::derive_subkey(kit_secret, 32, 2, b"lgkauth1").map_err(ContactsError::from)?;
+    crypto::keys::derive_keypair_from_seed(seed.as_ref()).map_err(Into::into)
 }
 
 fn decrypt_challenge(
