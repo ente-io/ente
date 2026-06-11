@@ -22,8 +22,8 @@ class RitualsBanner extends StatelessWidget {
   const RitualsBanner({super.key});
 
   static const _cardRadius = 25.0;
-  static const _cardHeight = 100.0;
-  static const _cardWidth = 180.0;
+  static const _cardHeight = 94.0;
+  static const _cardWidth = 167.5;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class RitualsBanner extends StatelessWidget {
             const SizedBox(height: 2),
             if (rituals.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.zero,
                 child: StartNewRitualCard(
                   variant: StartNewRitualCardVariant.wide,
                   onTap: () async {
@@ -60,7 +60,7 @@ class RitualsBanner extends StatelessWidget {
               SizedBox(
                 height: _cardHeight,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: EdgeInsets.zero,
                   physics: const BouncingScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -139,33 +139,31 @@ class _RitualsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
+      child: SizedBox(
+        height: 38,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
               context.l10n.ritualsTitle,
-              style: TextStyles.h2.copyWith(color: textTheme.largeBold.color),
+              style: TextStyles.display3.copyWith(color: colorScheme.textBase),
             ),
-          ),
-          if (showChevron)
-            Container(
-              color: Colors.transparent,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 12, 12, 12),
+            if (showChevron)
+              Container(
+                color: Colors.transparent,
+                width: 38,
+                height: 38,
                 child: Icon(
                   Icons.chevron_right_outlined,
                   color: colorScheme.blurStrokePressed,
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

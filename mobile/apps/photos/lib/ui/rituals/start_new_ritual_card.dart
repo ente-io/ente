@@ -6,6 +6,7 @@ import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/utils/pending_translation.dart";
 
 enum StartNewRitualCardVariant { compact, wide }
 
@@ -21,7 +22,8 @@ class StartNewRitualCard extends StatelessWidget {
 
   static const _cardRadius = 25.0;
   static const _cardHeight = 100.0;
-  static const _compactWidth = 220.0;
+  static const _compactHeight = 94.0;
+  static const _compactWidth = 167.5;
   static const _wideDuckyHeightReduction = 12.0;
   static const _wideDuckyAspectRatio = 149 / 81;
   static const _wideDuckyRightOverflow = 4.0;
@@ -29,20 +31,19 @@ class StartNewRitualCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+
+    if (variant == StartNewRitualCardVariant.compact) {
+      return _CompactStartNewRitualCard(onTap: onTap);
+    }
+
     final componentColors = context.componentColors;
     const fillColor = Colors.transparent;
     final dottedBorderColor = componentColors.textLightest;
-    final contentRightPadding = variant == StartNewRitualCardVariant.compact
-        ? 14.0
-        : 0.0;
     const duckyHeight = _cardHeight - _wideDuckyHeightReduction;
     const duckyNaturalWidth = duckyHeight * _wideDuckyAspectRatio;
     const duckyChildWidth = duckyNaturalWidth + _wideDuckyRightOverflow;
 
     return SizedBox(
-      width: variant == StartNewRitualCardVariant.compact
-          ? _compactWidth
-          : null,
       height: _cardHeight,
       child: DottedBorder(
         borderType: BorderType.RRect,
@@ -60,97 +61,80 @@ class StartNewRitualCard extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   var duckyWidth = 0.0;
-                  if (variant == StartNewRitualCardVariant.wide) {
-                    final textScaler = MediaQuery.textScalerOf(context);
-                    final textDirection = Directionality.of(context);
-                    const leftPadding = 14.0;
-                    const iconWidth = 24.0;
-                    const iconSpacing = 10.0;
+                  final textScaler = MediaQuery.textScalerOf(context);
+                  final textDirection = Directionality.of(context);
+                  const leftPadding = 14.0;
+                  const iconWidth = 24.0;
+                  const iconSpacing = 10.0;
 
-                    bool fits(double candidateDuckyWidth) {
-                      final leftWidth = math.max(
-                        0.0,
-                        constraints.maxWidth - candidateDuckyWidth,
-                      );
-                      final titleMaxWidth =
-                          leftWidth -
-                          leftPadding -
-                          contentRightPadding -
-                          iconWidth -
-                          iconSpacing;
-                      const titleWidthEpsilon = 8.0;
-                      final adjustedTitleMaxWidth =
-                          titleMaxWidth - titleWidthEpsilon;
-                      final subtitleMaxWidth =
-                          leftWidth - leftPadding - contentRightPadding;
-                      if (adjustedTitleMaxWidth <= 0 || subtitleMaxWidth <= 0) {
-                        return false;
-                      }
-
-                      final titlePainter = TextPainter(
-                        text: TextSpan(
-                          text: "Start new ritual",
-                          style: textTheme.body,
-                        ),
-                        maxLines: 1,
-                        ellipsis: "…",
-                        textDirection: textDirection,
-                        textScaler: textScaler,
-                        textHeightBehavior: _tightTextHeightBehavior,
-                      )..layout(maxWidth: adjustedTitleMaxWidth);
-                      if (titlePainter.didExceedMaxLines) return false;
-
-                      final subtitlePainter = TextPainter(
-                        text: TextSpan(
-                          text:
-                              "Create a ritual, build streaks, and share your progress.",
-                          style: textTheme.miniMuted,
-                        ),
-                        maxLines: 3,
-                        ellipsis: "…",
-                        textDirection: textDirection,
-                        textScaler: textScaler,
-                      )..layout(maxWidth: subtitleMaxWidth);
-                      return !subtitlePainter.didExceedMaxLines;
-                    }
-
-                    final upperBound = math.min(
-                      duckyChildWidth,
-                      constraints.maxWidth,
+                  bool fits(double candidateDuckyWidth) {
+                    final leftWidth = math.max(
+                      0.0,
+                      constraints.maxWidth - candidateDuckyWidth,
                     );
-                    if (fits(upperBound)) {
-                      duckyWidth = upperBound;
-                    } else if (fits(0.0)) {
-                      var low = 0.0;
-                      var high = upperBound;
-                      for (var i = 0; i < 10; i++) {
-                        final mid = (low + high) / 2;
-                        if (fits(mid)) {
-                          low = mid;
-                        } else {
-                          high = mid;
-                        }
-                      }
-                      duckyWidth = low;
-                    } else {
-                      duckyWidth = 0.0;
+                    final titleMaxWidth =
+                        leftWidth - leftPadding - iconWidth - iconSpacing;
+                    const titleWidthEpsilon = 8.0;
+                    final adjustedTitleMaxWidth =
+                        titleMaxWidth - titleWidthEpsilon;
+                    final subtitleMaxWidth = leftWidth - leftPadding;
+                    if (adjustedTitleMaxWidth <= 0 || subtitleMaxWidth <= 0) {
+                      return false;
                     }
+
+                    final titlePainter = TextPainter(
+                      text: TextSpan(
+                        text: pendingTranslation("Start new ritual"),
+                        style: textTheme.body,
+                      ),
+                      maxLines: 1,
+                      ellipsis: "…",
+                      textDirection: textDirection,
+                      textScaler: textScaler,
+                      textHeightBehavior: _tightTextHeightBehavior,
+                    )..layout(maxWidth: adjustedTitleMaxWidth);
+                    if (titlePainter.didExceedMaxLines) return false;
+
+                    final subtitlePainter = TextPainter(
+                      text: TextSpan(
+                        text: pendingTranslation(
+                          "Create a ritual, build streaks, and share your progress.",
+                        ),
+                        style: textTheme.miniMuted,
+                      ),
+                      maxLines: 3,
+                      ellipsis: "…",
+                      textDirection: textDirection,
+                      textScaler: textScaler,
+                    )..layout(maxWidth: subtitleMaxWidth);
+                    return !subtitlePainter.didExceedMaxLines;
                   }
 
-                  final showDucky =
-                      variant == StartNewRitualCardVariant.wide &&
-                      duckyWidth > 0;
+                  final upperBound = math.min(
+                    duckyChildWidth,
+                    constraints.maxWidth,
+                  );
+                  if (fits(upperBound)) {
+                    duckyWidth = upperBound;
+                  } else if (fits(0.0)) {
+                    var low = 0.0;
+                    var high = upperBound;
+                    for (var i = 0; i < 10; i++) {
+                      final mid = (low + high) / 2;
+                      if (fits(mid)) {
+                        low = mid;
+                      } else {
+                        high = mid;
+                      }
+                    }
+                    duckyWidth = low;
+                  }
 
                   return Row(
                     children: [
                       Expanded(
                         child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            14,
-                            11,
-                            contentRightPadding,
-                            11,
-                          ),
+                          padding: const EdgeInsets.fromLTRB(14, 11, 0, 11),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +160,7 @@ class StartNewRitualCard extends StatelessWidget {
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
-                                      "Start new ritual",
+                                      pendingTranslation("Start new ritual"),
                                       style: textTheme.body,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -188,7 +172,9 @@ class StartNewRitualCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                "Create a ritual, build streaks, and share your progress.",
+                                pendingTranslation(
+                                  "Create a ritual, build streaks, and share your progress.",
+                                ),
                                 style: textTheme.miniMuted,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
@@ -197,7 +183,7 @@ class StartNewRitualCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (showDucky)
+                      if (duckyWidth > 0)
                         SizedBox(
                           width: duckyWidth,
                           height: double.infinity,
@@ -239,6 +225,86 @@ class StartNewRitualCard extends StatelessWidget {
                 },
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CompactStartNewRitualCard extends StatelessWidget {
+  const _CompactStartNewRitualCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final borderRadius = BorderRadius.circular(StartNewRitualCard._cardRadius);
+    return SizedBox(
+      width: StartNewRitualCard._compactWidth,
+      height: StartNewRitualCard._compactHeight,
+      child: Material(
+        color: colorScheme.fill,
+        borderRadius: borderRadius,
+        child: InkWell(
+          borderRadius: borderRadius,
+          onTap: onTap,
+          child: Stack(
+            children: [
+              const Positioned(
+                left: 22,
+                top: 19,
+                child: Icon(
+                  Icons.auto_awesome,
+                  size: 13,
+                  color: Color(0xFFFFBC03),
+                ),
+              ),
+              const Positioned(
+                right: 28,
+                top: 19,
+                child: Icon(
+                  Icons.auto_awesome,
+                  size: 10,
+                  color: Color(0xFFFFD25A),
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: colorScheme.greenBase,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        size: 17,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        pendingTranslation("Start new ritual"),
+                        style: textTheme.bodyBold.copyWith(
+                          color: colorScheme.textBase,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -8,12 +8,12 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
+import "package:photos/utils/pending_translation.dart";
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({super.key, this.shouldConsumeBackNotifier});
@@ -147,27 +147,24 @@ class SearchWidgetState extends State<SearchWidget> {
         MediaQuery.viewInsetsOf(context).bottom > 0 ||
         textController.text.trim().isNotEmpty;
     return RepaintBoundary(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: TextInputComponent(
-          controller: textController,
-          focusNode: focusNode,
-          hintText: AppLocalizations.of(context).search,
-          shouldUnfocusOnClearOrSubmit: true,
-          prefix: HugeIcon(
-            icon: HugeIcons.strokeRoundedSearch01,
-            size: 18,
-            color: componentColors.textLight,
-          ),
-          suffix: ValueListenableBuilder(
-            valueListenable: isLoading,
-            builder: (BuildContext context, bool isSearching, Widget? child) {
-              return SearchSuffixIcon(
-                isSearching,
-                showClearButton: shouldShowClearButton,
-              );
-            },
-          ),
+      child: TextInputComponent(
+        controller: textController,
+        focusNode: focusNode,
+        hintText: pendingTranslation("Search photos, people, places..."),
+        shouldUnfocusOnClearOrSubmit: true,
+        prefix: HugeIcon(
+          icon: HugeIcons.strokeRoundedSearch01,
+          size: 18,
+          color: componentColors.textLight,
+        ),
+        suffix: ValueListenableBuilder(
+          valueListenable: isLoading,
+          builder: (BuildContext context, bool isSearching, Widget? child) {
+            return SearchSuffixIcon(
+              isSearching,
+              showClearButton: shouldShowClearButton,
+            );
+          },
         ),
       ),
     );

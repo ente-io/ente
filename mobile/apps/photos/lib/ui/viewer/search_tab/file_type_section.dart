@@ -3,6 +3,7 @@ import "dart:async";
 import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -59,23 +60,23 @@ class FileTypeSection extends StatelessWidget {
 
     final tiles = _previewTiles(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 24),
+      padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionHeader(SectionType.fileTypesAndExtension, hasMore: true),
-          const SizedBox(height: 2),
+          const SizedBox(height: 8),
           SizedBox(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 4.5),
+            height: 56,
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
               physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: tiles
-                    .map((tile) => _FileTypeRecommendation(tile))
-                    .toList(),
-              ),
+              itemCount: tiles.length,
+              itemBuilder: (context, index) {
+                return _FileTypeRecommendation(tiles[index]);
+              },
+              separatorBuilder: (context, index) => const SizedBox(width: 10),
             ),
           ),
         ],
@@ -84,65 +85,77 @@ class FileTypeSection extends StatelessWidget {
   }
 
   List<_FileTypeTile> _previewTiles(BuildContext context) {
+    final photos = getHumanReadableString(context, FileType.image);
+    final videos = getHumanReadableString(context, FileType.video);
+    final livePhotos = getHumanReadableString(context, FileType.livePhoto);
     return [
       _FileTypeTile.fileType(
-        assetKey: "PHOTO",
-        name: getHumanReadableString(context, FileType.image),
+        label: photos,
+        name: photos,
         type: FileType.image,
+        icon: HugeIcons.strokeRoundedImage01,
       ),
       _FileTypeTile.fileType(
-        assetKey: "VIDEO",
-        name: getHumanReadableString(context, FileType.video),
+        label: videos,
+        name: videos,
         type: FileType.video,
+        icon: HugeIcons.strokeRoundedVideo02,
       ),
       _FileTypeTile.fileType(
-        assetKey: "LIVE",
-        name: getHumanReadableString(context, FileType.livePhoto),
+        label: livePhotos,
+        name: livePhotos,
         type: FileType.livePhoto,
+        icon: HugeIcons.strokeRoundedLiveStreaming01,
       ),
       const _FileTypeTile.extension(
-        assetKey: "PNG",
+        label: "PNG",
         name: "PNGs",
         extension: "PNG",
+        icon: HugeIcons.strokeRoundedFile01,
       ),
       const _FileTypeTile.extension(
-        assetKey: "JPG",
+        label: "JPG",
         name: "JPGs",
         extension: "JPG",
+        icon: HugeIcons.strokeRoundedFile01,
       ),
       const _FileTypeTile.extension(
-        assetKey: "HEIC",
+        label: "HEIC",
         name: "HEICs",
         extension: "HEIC",
+        icon: HugeIcons.strokeRoundedFile01,
       ),
       const _FileTypeTile.extension(
-        assetKey: "MP4",
+        label: "MP4",
         name: "MP4s",
         extension: "MP4",
+        icon: HugeIcons.strokeRoundedFile01,
       ),
     ];
   }
 }
 
 class _FileTypeTile {
-  final String assetKey;
+  final String label;
   final String name;
   final FileType? fileType;
   final String? extension;
+  final List<List<dynamic>> icon;
 
   const _FileTypeTile.fileType({
-    required this.assetKey,
+    required this.label,
     required this.name,
     required FileType type,
+    required this.icon,
   }) : fileType = type,
        extension = null;
 
   const _FileTypeTile.extension({
-    required this.assetKey,
+    required this.label,
     required this.name,
     required this.extension,
-  }) : fileType = null,
-       assert(extension != null);
+    required this.icon,
+  }) : fileType = null;
 
   Future<GenericSearchResult> resolve() {
     final type = fileType;
@@ -170,32 +183,37 @@ class _FileTypeRecommendation extends StatefulWidget {
 }
 
 class _FileTypeRecommendationState extends State<_FileTypeRecommendation> {
-  static const knownTypesToAssetPath = {
-    "PHOTO": "assets/type_photos.png",
-    "VIDEO": "assets/type_videos.png",
-    "LIVE": "assets/type_live.png",
-    "AVI": "assets/type_AVI.png",
-    "GIF": "assets/type_GIF.png",
-    "HEIC": "assets/type_HEIC.png",
-    "JPEG": "assets/type_JPEG.png",
-    "JPG": "assets/type_JPG.png",
-    "MKV": "assets/type_MKV.png",
-    "MP4": "assets/type_MP4.png",
-    "PNG": "assets/type_PNG.png",
-    "WEBP": "assets/type_WEBP.png",
-  };
-
   final _logger = Logger("FileTypeRecommendation");
 
   @override
   Widget build(BuildContext context) {
-    final fileTypeKey = widget.tile.assetKey;
-    final assetPath = knownTypesToAssetPath[fileTypeKey]!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 68),
-        child: GestureDetector(onTap: _onTap, child: Image.asset(assetPath)),
+    final colorScheme = getEnteColorScheme(context);
+    return GestureDetector(
+      onTap: _onTap,
+      child: Container(
+        width: 78.75,
+        height: 56,
+        decoration: BoxDecoration(
+          color: colorScheme.fill,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            HugeIcon(
+              icon: widget.tile.icon,
+              size: 22,
+              color: colorScheme.textBase,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              widget.tile.label,
+              style: TextStyles.tiny.copyWith(color: colorScheme.textBase),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }

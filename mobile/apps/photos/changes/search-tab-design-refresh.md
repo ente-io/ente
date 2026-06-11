@@ -1,0 +1,1 @@
+- Refreshed the search tab layout to match the updated visual design.

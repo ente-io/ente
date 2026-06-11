@@ -12,6 +12,9 @@ class GoToMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mapTileAsset = EnteTheme.isDark(context)
+        ? "assets/search_map_tile_dark.png"
+        : "assets/search_map_tile_light.png";
     return GestureDetector(
       onTap: () async {
         if (!mapEnabled) {
@@ -40,11 +43,15 @@ class GoToMap extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Transform.scale(
-              scale: 1.2,
-              child: Image.asset("assets/map_world.png", width: 64, height: 64),
+            ClipOval(
+              child: Image.asset(
+                mapTileAsset,
+                width: 66.5,
+                height: 66.5,
+                fit: BoxFit.cover,
+              ),
             ),
-            const SizedBox(height: 11.5),
+            const SizedBox(height: 10),
             Text(
               AppLocalizations.of(context).yourMap,
               maxLines: 2,

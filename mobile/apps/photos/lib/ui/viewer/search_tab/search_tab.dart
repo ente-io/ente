@@ -1,3 +1,4 @@
+import "package:ente_components/theme/text_styles.dart";
 import "package:fade_indexed_stack/fade_indexed_stack.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -6,6 +7,7 @@ import "package:logging/logging.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
+import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
@@ -72,8 +74,23 @@ class _SearchTabState extends State<SearchTab> {
           color: headerColor,
           child: SafeArea(
             bottom: false,
-            child: SearchWidget(
-              shouldConsumeBackNotifier: widget.shouldConsumeBackNotifier,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15, 12, 15, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context).search,
+                    style: TextStyles.display1.copyWith(
+                      color: colorScheme.textBase,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SearchWidget(
+                    shouldConsumeBackNotifier: widget.shouldConsumeBackNotifier,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -108,160 +125,119 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
 
   @override
   Widget build(BuildContext context) {
-    final searchTypes = SectionType.values.toList(growable: true);
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final bottomPadding = keyboardInset > 130.0 ? keyboardInset + 50.0 : 180.0;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Stack(
-        children: [
-          FutureBuilder<AllSectionsExamplesData>(
-            future: InheritedAllSectionsExamples.of(
-              context,
-            ).allSectionsExamplesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.hasData &&
-                  snapshot.data!.sectionResults.isNotEmpty) {
-                final sectionResultsByType = snapshot.data!.sectionResults;
-                final hasAnySearchableFiles =
-                    snapshot.data!.hasAnySearchableFiles;
-                final shouldRenderContacts = !isLocalGalleryMode;
-                if (!hasAnySearchableFiles &&
-                    sectionResultsByType.every((element) => element.isEmpty) &&
-                    !shouldRenderContacts) {
-                  return const Padding(
-                    padding: EdgeInsets.only(bottom: 72),
-                    child: SearchTabEmptyState(),
-                  );
+    return FutureBuilder<AllSectionsExamplesData>(
+      future: InheritedAllSectionsExamples.of(
+        context,
+      ).allSectionsExamplesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.sectionResults.isNotEmpty) {
+          final sectionResults = snapshot.data!.sectionResults;
+          final hasAnySearchableFiles = snapshot.data!.hasAnySearchableFiles;
+          final shouldRenderContacts = !isLocalGalleryMode;
+          if (!hasAnySearchableFiles &&
+              sectionResults.every((element) => element.isEmpty) &&
+              !shouldRenderContacts) {
+            return const Padding(
+              padding: EdgeInsets.only(bottom: 72),
+              child: SearchTabEmptyState(),
+            );
+          }
+          if (sectionResults.length != SectionType.values.length) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 72),
+              child: Text(
+                AppLocalizations.of(context).searchSectionsLengthMismatch(
+                  snapshotLength: sectionResults.length,
+                  searchLength: SectionType.values.length,
+                ),
+              ),
+            );
+          }
+          final resultsBySection =
+              Map<SectionType, List<SearchResult>>.fromIterables(
+                SectionType.values,
+                sectionResults,
+              );
+          List<GenericSearchResult> examplesFor(SectionType type) =>
+              resultsBySection[type]! as List<GenericSearchResult>;
+
+          final hasSurfacedOfflineFaces =
+              isLocalGalleryMode &&
+              resultsBySection[SectionType.face]!.isNotEmpty;
+          final sectionWidgets = [
+            if (hasGrantedMLConsent)
+              PeopleSection(examples: examplesFor(SectionType.face)),
+            MagicSection(examplesFor(SectionType.magic)),
+            LocationsSection(examplesFor(SectionType.location)),
+            if (!isLocalGalleryMode) const _RitualsDiscoverySection(),
+            ValueListenableBuilder<WrappedEntryState>(
+              valueListenable: wrappedService.stateListenable,
+              builder: (BuildContext context, WrappedEntryState state, _) {
+                if (!wrappedService.shouldShowDiscoveryEntry) {
+                  return const SizedBox.shrink();
                 }
-                if (sectionResultsByType.length != searchTypes.length) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 72),
-                    child: Text(
-                      AppLocalizations.of(context).searchSectionsLengthMismatch(
-                        snapshotLength: sectionResultsByType.length,
-                        searchLength: searchTypes.length,
-                      ),
-                    ),
-                  );
-                }
-                final faceSectionIndex = searchTypes.indexOf(SectionType.face);
-                final hasSurfacedOfflineFaces =
-                    isLocalGalleryMode &&
-                    faceSectionIndex >= 0 &&
-                    faceSectionIndex < sectionResultsByType.length &&
-                    sectionResultsByType.elementAt(faceSectionIndex).isNotEmpty;
-                return ListView.builder(
-                      padding: EdgeInsets.only(bottom: bottomPadding),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: searchTypes.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          if (!isLocalGalleryMode) {
-                            return const SizedBox.shrink();
-                          }
-                          if (hasSurfacedOfflineFaces) {
-                            return const SizedBox.shrink();
-                          }
-                          return const MLProgressBanner();
-                        }
-                        final sectionIndex = index - 1;
-                        final sectionType = searchTypes[sectionIndex];
-                        switch (sectionType) {
-                          case SectionType.face:
-                            if (!hasGrantedMLConsent) {
-                              return const SizedBox.shrink();
-                            }
-                            return PeopleSection(
-                              examples:
-                                  sectionResultsByType.elementAt(sectionIndex)
-                                      as List<GenericSearchResult>,
-                            );
-                          case SectionType.album:
-                            return const SizedBox.shrink();
-                          case SectionType.ritual:
-                            if (isLocalGalleryMode) {
-                              return const SizedBox.shrink();
-                            }
-                            return const _RitualsDiscoverySection();
-                          case SectionType.wrapped:
-                            return ValueListenableBuilder<WrappedEntryState>(
-                              valueListenable: wrappedService.stateListenable,
-                              builder:
-                                  (
-                                    BuildContext context,
-                                    WrappedEntryState state,
-                                    Widget? child,
-                                  ) {
-                                    if (!wrappedService
-                                        .shouldShowDiscoveryEntry) {
-                                      return const SizedBox.shrink();
-                                    }
-                                    return WrappedDiscoverySection(
-                                      state: state,
-                                    );
-                                  },
-                            );
-                          case SectionType.location:
-                            return LocationsSection(
-                              sectionResultsByType.elementAt(sectionIndex)
-                                  as List<GenericSearchResult>,
-                            );
-                          case SectionType.contacts:
-                            return const ContactsSectionLoader();
-                          case SectionType.fileTypesAndExtension:
-                            return FileTypeSection(
-                              hasAnySearchableFiles: hasAnySearchableFiles,
-                            );
-                          case SectionType.magic:
-                            return MagicSection(
-                              sectionResultsByType.elementAt(sectionIndex)
-                                  as List<GenericSearchResult>,
-                            );
-                        }
-                      },
-                    )
-                    .animate(delay: const Duration(milliseconds: 150))
-                    .slide(
-                      begin: const Offset(0, -0.015),
-                      end: const Offset(0, 0),
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                    )
-                    .fadeIn(
-                      duration: const Duration(milliseconds: 150),
-                      curve: Curves.easeOut,
-                    );
-              } else if (snapshot.hasError) {
-                _logger.severe(
-                  'Failed to load sections: ',
-                  snapshot.error,
-                  snapshot.stackTrace,
-                );
-                if (kDebugMode) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 72),
-                    child: Text(
-                      AppLocalizations.of(context).error +
-                          ': ${snapshot.error}',
-                    ),
-                  );
-                }
-                return const Padding(
-                  padding: EdgeInsets.only(bottom: 72),
-                  child: EnteLoadingWidget(),
-                );
-              } else {
-                return const Padding(
-                  padding: EdgeInsets.only(bottom: 72),
-                  child: EnteLoadingWidget(),
-                );
-              }
-            },
-          ),
-        ],
-      ),
+                return WrappedDiscoverySection(state: state);
+              },
+            ),
+            const ContactsSectionLoader(),
+            FileTypeSection(hasAnySearchableFiles: hasAnySearchableFiles),
+          ];
+          return ListView.builder(
+                padding: EdgeInsets.fromLTRB(15, 0, 15, bottomPadding),
+                physics: const BouncingScrollPhysics(),
+                itemCount: sectionWidgets.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    if (!isLocalGalleryMode) {
+                      return const SizedBox.shrink();
+                    }
+                    if (hasSurfacedOfflineFaces) {
+                      return const SizedBox.shrink();
+                    }
+                    return const MLProgressBanner();
+                  }
+                  return sectionWidgets[index - 1];
+                },
+              )
+              .animate(delay: const Duration(milliseconds: 150))
+              .slide(
+                begin: const Offset(0, -0.015),
+                end: const Offset(0, 0),
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              )
+              .fadeIn(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOut,
+              );
+        } else if (snapshot.hasError) {
+          _logger.severe(
+            'Failed to load sections: ',
+            snapshot.error,
+            snapshot.stackTrace,
+          );
+          if (kDebugMode) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 72),
+              child: Text(
+                AppLocalizations.of(context).error + ': ${snapshot.error}',
+              ),
+            );
+          }
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 72),
+            child: EnteLoadingWidget(),
+          );
+        } else {
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 72),
+            child: EnteLoadingWidget(),
+          );
+        }
+      },
     );
   }
 }
@@ -275,7 +251,7 @@ class _RitualsDiscoverySection extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return const Padding(
-      padding: EdgeInsets.only(top: 8, bottom: 24),
+      padding: EdgeInsets.only(bottom: 20),
       child: RitualsBanner(),
     );
   }

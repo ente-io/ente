@@ -27,6 +27,7 @@ import 'package:photos/ui/viewer/people/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
+import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class PeopleSection extends StatefulWidget {
   final SectionType sectionType = SectionType.face;
@@ -80,45 +81,20 @@ class _PeopleSectionState extends State<PeopleSection> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("Building section for ${widget.sectionType.name}");
-    final shouldShowMore = _examples.isNotEmpty;
     final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
     return _examples.isNotEmpty
         ? GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              if (shouldShowMore) {
-                routeToPage(context, const PeopleSectionAllPage());
-              }
+              routeToPage(context, const PeopleSectionAllPage());
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        widget.sectionType.sectionTitle(context),
-                        style: TextStyles.h2.copyWith(
-                          color: textTheme.largeBold.color,
-                        ),
-                      ),
-                    ),
-                    if (shouldShowMore)
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Icon(
-                          Icons.chevron_right_outlined,
-                          color: colorScheme.blurStrokePressed,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 2),
+                SectionHeader(widget.sectionType, hasMore: true),
+                const SizedBox(height: 4),
                 SearchExampleRow(_examples, widget.sectionType),
+                const SizedBox(height: 20),
               ],
             ),
           )
@@ -170,9 +146,9 @@ class SearchExampleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 128,
+      height: 158,
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
+        padding: EdgeInsets.zero,
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         itemCount: examples.length,
@@ -182,7 +158,7 @@ class SearchExampleRow extends StatelessWidget {
             selectedPeople: null,
           );
         },
-        separatorBuilder: (context, index) => const SizedBox(width: 3),
+        separatorBuilder: (context, index) => const SizedBox(width: 10),
       ),
     );
   }
@@ -197,7 +173,7 @@ class PersonSearchExample extends StatelessWidget {
     super.key,
     required this.searchResult,
     required this.selectedPeople,
-    this.size = 102,
+    this.size = 108,
   });
 
   void toggleSelection() {
@@ -352,22 +328,58 @@ class PersonSearchExample extends StatelessWidget {
                             ),
                           )
                   : Padding(
-                      padding: const EdgeInsets.only(top: 6, bottom: 0),
-                      child: SizedBox(
+                      padding: EdgeInsets.zero,
+                      child: _PersonLabel(
+                        name: searchResult.name(),
+                        count: searchResult.fileCount(),
                         width: size,
-                        child: Text(
-                          searchResult.name(),
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).small,
-                        ),
                       ),
                     ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _PersonLabel extends StatelessWidget {
+  const _PersonLabel({
+    required this.name,
+    required this.count,
+    required this.width,
+  });
+
+  final String name;
+  final int count;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: SizedBox(
+        width: width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyles.body.copyWith(color: textTheme.body.color),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              AppLocalizations.of(context).itemCount(count: count),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyles.mini.copyWith(color: textTheme.miniMuted.color),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

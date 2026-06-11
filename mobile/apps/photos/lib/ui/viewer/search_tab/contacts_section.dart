@@ -1,9 +1,9 @@
 import "dart:async";
 
-import "package:dotted_border/dotted_border.dart";
 import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
@@ -56,12 +56,12 @@ class ContactsLoadingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.only(top: 8, bottom: 24),
+      padding: EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SectionHeader(SectionType.contacts, hasMore: false),
-          SizedBox(height: 80, child: EnteLoadingWidget()),
+          SizedBox(height: 92, child: EnteLoadingWidget()),
         ],
       ),
     );
@@ -152,17 +152,8 @@ class _ContactsSectionState extends State<ContactsSection> {
         ),
       );
     } else {
-      final recommendations = <Widget>[
-        ..._contactSearchResults.map(
-          (contactSearchResult) => ContactRecommendation(
-            contactSearchResult,
-            key: ValueKey(contactSearchResult.name()),
-          ),
-        ),
-        const ContactCTA(),
-      ];
       return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 24),
+        padding: const EdgeInsets.only(bottom: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -171,16 +162,25 @@ class _ContactsSectionState extends State<ContactsSection> {
               hasMore:
                   (_contactSearchResults.length >= kSearchSectionLimit - 1),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             SizedBox(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 4.5),
+              height: 92,
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
                 physics: const BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: recommendations,
-                ),
+                itemCount: _contactSearchResults.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == _contactSearchResults.length) {
+                    return const ContactCTA();
+                  }
+                  final contactSearchResult = _contactSearchResults[index];
+                  return ContactRecommendation(
+                    contactSearchResult,
+                    key: ValueKey(contactSearchResult.name()),
+                  );
+                },
+                separatorBuilder: (context, index) => const SizedBox(width: 12),
               ),
             ),
           ],
@@ -208,64 +208,41 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
         widget.contactSearchResult.params[kContactUserId] as int?;
     final contactEmail =
         widget.contactSearchResult.params[kContactEmail] as String;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2.5),
-      child: GestureDetector(
-        onTap: () {
-          RecentSearches().add(widget.contactSearchResult.name());
-          if (widget.contactSearchResult.onResultTap != null) {
-            widget.contactSearchResult.onResultTap!(context);
-          } else {
-            routeToPage(context, ContactResultPage(widget.contactSearchResult));
-          }
-        },
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxHeight: double.infinity,
-            minHeight: 115.5,
-            maxWidth: 100,
-            minWidth: 100,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 4.25,
-              vertical: 10.5,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ClipOval(
-                  child: SizedBox(
-                    width: 67.75,
-                    height: 67.75,
-                    child: ContactAvatarWidget(
-                      contactUserId: contactUserId,
-                      email: contactEmail,
-                      personId: personId,
-                      size: 67.75,
-                    ),
-                  ),
+    return GestureDetector(
+      onTap: () {
+        RecentSearches().add(widget.contactSearchResult.name());
+        if (widget.contactSearchResult.onResultTap != null) {
+          widget.contactSearchResult.onResultTap!(context);
+        } else {
+          routeToPage(context, ContactResultPage(widget.contactSearchResult));
+        }
+      },
+      child: SizedBox(
+        width: 92,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ClipOval(
+              child: SizedBox(
+                width: 62,
+                height: 62,
+                child: ContactAvatarWidget(
+                  contactUserId: contactUserId,
+                  email: contactEmail,
+                  personId: personId,
+                  size: 62,
                 ),
-                const SizedBox(height: 10.5),
-                SizedBox(
-                  width: 91.5,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.contactSearchResult.name(),
-                        style: TextStyles.body.copyWith(color: colors.textBase),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(height: 10),
+            Text(
+              widget.contactSearchResult.name(),
+              style: TextStyles.mini.copyWith(color: colors.textBase),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
@@ -277,52 +254,38 @@ class ContactCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.componentColors;
-    final enteColorScheme = getEnteColorScheme(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2.5),
-      child: GestureDetector(
-        onTap: SectionType.contacts.ctaOnTap(context),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxHeight: double.infinity,
-            minHeight: 115.5,
-            maxWidth: 100,
-            minWidth: 100,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 4.25,
-              vertical: 10.5,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                DottedBorder(
-                  borderType: BorderType.Circle,
-                  strokeWidth: 1.5,
-                  borderPadding: const EdgeInsets.all(0.75),
-                  dashPattern: const [4, 4],
-                  radius: const Radius.circular(2.35),
-                  padding: EdgeInsets.zero,
-                  color: enteColorScheme.strokeFaint,
-                  child: SizedBox(
-                    height: 67.75,
-                    width: 67.75,
-                    child: Icon(
-                      Icons.adaptive.share,
-                      color: enteColorScheme.strokeFaint,
-                    ),
-                  ),
+    final colorScheme = getEnteColorScheme(context);
+    return GestureDetector(
+      onTap: SectionType.contacts.ctaOnTap(context),
+      child: SizedBox(
+        width: 62,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                color: colorScheme.fill,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedUserAdd01,
+                  size: 24,
+                  color: colorScheme.textMuted,
                 ),
-                const SizedBox(height: 10.5),
-                Text(
-                  AppLocalizations.of(context).invite,
-                  style: TextStyles.body.copyWith(color: colors.textLighter),
-                ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(height: 10),
+            Text(
+              AppLocalizations.of(context).invite,
+              style: TextStyles.mini.copyWith(color: colorScheme.textMuted),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );

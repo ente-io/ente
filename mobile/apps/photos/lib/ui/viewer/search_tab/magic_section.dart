@@ -1,11 +1,11 @@
 import "dart:async";
-import "dart:math";
 
 import "package:ente_components/ente_components.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
@@ -98,7 +98,7 @@ class _MagicSectionState extends State<MagicSection> {
       return const SizedBox.shrink();
     } else {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.only(bottom: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -106,22 +106,18 @@ class _MagicSectionState extends State<MagicSection> {
               SectionType.magic,
               hasMore: (_magicSearchResults.length >= kSearchSectionLimit - 1),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             SizedBox(
-              child: SingleChildScrollView(
-                clipBehavior: Clip.none,
-                padding: const EdgeInsets.symmetric(horizontal: 4.5),
+              height: 158,
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
                 physics: const BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _magicSearchResults
-                      .map(
-                        (magicSearchResult) =>
-                            MagicRecommendation(magicSearchResult),
-                      )
-                      .toList(),
-                ),
+                itemCount: _magicSearchResults.length,
+                itemBuilder: (context, index) {
+                  return MagicRecommendation(_magicSearchResults[index]);
+                },
+                separatorBuilder: (context, index) => const SizedBox(width: 10),
               ),
             ),
           ],
@@ -132,10 +128,9 @@ class _MagicSectionState extends State<MagicSection> {
 }
 
 class MagicRecommendation extends StatelessWidget {
-  static const _width = 100.0;
-  static const _height = 110.0;
-  static const _borderWidth = 1.0;
-  static const _cornerRadius = 12.0;
+  static const _width = 108.0;
+  static const _thumbnailSize = 108.0;
+  static const _cornerRadius = 20.0;
   static const _cornerSmoothing = 1.0;
   final GenericSearchResult magicSearchResult;
   const MagicRecommendation(this.magicSearchResult, {super.key});
@@ -145,101 +140,54 @@ class MagicRecommendation extends StatelessWidget {
     final heroTag =
         magicSearchResult.heroTag() +
         (magicSearchResult.previewThumbnail()?.tag ?? "");
-    final colors = context.componentColors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: max(2.5 - _borderWidth, 0)),
-      child: GestureDetector(
-        onTap: () {
-          RecentSearches().add(magicSearchResult.name());
+    final textTheme = getEnteTextTheme(context);
+    return GestureDetector(
+      onTap: () {
+        RecentSearches().add(magicSearchResult.name());
 
-          magicSearchResult.onResultTap!(context);
-        },
-        child: SizedBox(
-          width: _width + _borderWidth * 2,
-          height: _height + _borderWidth * 2,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              ClipSmoothRect(
-                radius: SmoothBorderRadius(
-                  cornerRadius: _cornerRadius + _borderWidth,
-                  cornerSmoothing: _cornerSmoothing,
-                ),
-                child: Container(
-                  color: getEnteColorScheme(context).strokeFaint,
-                  width: _width + _borderWidth * 2,
-                  height: _height + _borderWidth * 2,
-                ),
+        magicSearchResult.onResultTap!(context);
+      },
+      child: SizedBox(
+        width: _width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipSmoothRect(
+              radius: SmoothBorderRadius(
+                cornerRadius: _cornerRadius,
+                cornerSmoothing: _cornerSmoothing,
               ),
-              Container(
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 6.25,
-                      offset: const Offset(-1.25, 2.5),
-                    ),
-                  ],
-                ),
-                child: ClipSmoothRect(
-                  radius: SmoothBorderRadius(
-                    cornerRadius: _cornerRadius,
-                    cornerSmoothing: _cornerSmoothing,
-                  ),
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    clipBehavior: Clip.none,
-                    children: [
-                      SizedBox(
-                        width: _width,
-                        height: _height,
-                        child: magicSearchResult.previewThumbnail() != null
-                            ? Hero(
-                                tag: heroTag,
-                                child: ThumbnailWidget(
-                                  magicSearchResult.previewThumbnail()!,
-                                  shouldShowSyncStatus: false,
-                                ),
-                              )
-                            : const NoThumbnailWidget(),
-                      ),
-                      Container(
-                        height: _height,
-                        width: _width,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withValues(alpha: 0),
-                              Colors.black.withValues(alpha: 0),
-                              Colors.black.withValues(alpha: 0.5),
-                            ],
-                            stops: const [0, 0.1, 1],
-                          ),
+              child: SizedBox(
+                width: _thumbnailSize,
+                height: _thumbnailSize,
+                child: magicSearchResult.previewThumbnail() != null
+                    ? Hero(
+                        tag: heroTag,
+                        child: ThumbnailWidget(
+                          magicSearchResult.previewThumbnail()!,
+                          shouldShowSyncStatus: false,
                         ),
-                      ),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 88),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            magicSearchResult.name(),
-                            style: TextStyles.body.copyWith(
-                              color: colors.specialWhite,
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.fade,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                      )
+                    : const NoThumbnailWidget(),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              magicSearchResult.name(),
+              style: TextStyles.body.copyWith(color: textTheme.body.color),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              AppLocalizations.of(
+                context,
+              ).itemCount(count: magicSearchResult.fileCount()),
+              style: TextStyles.mini.copyWith(color: textTheme.miniMuted.color),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
