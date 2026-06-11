@@ -36,8 +36,8 @@ pub fn generate_keys_with_strength(
     strength: KeyDerivationStrength,
 ) -> Result<KeyGenResult> {
     // Create master key and recovery key
-    let master_key = keys::generate_key_secure();
-    let recovery_key = keys::generate_key_secure();
+    let master_key = keys::generate_key();
+    let recovery_key = keys::generate_key();
 
     // Encrypt master key with recovery key and vice versa
     let (enc_master_with_recovery, nonce_master_recovery) =
@@ -50,13 +50,13 @@ pub fn generate_keys_with_strength(
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
-    let login_key = kdf::derive_login_key_secure(&derived.key)?;
+    let login_key = kdf::derive_login_key(&derived.key)?;
 
     // Encrypt master key with derived key
     let (enc_key, key_nonce) = encrypt_to_b64(&master_key, &derived.key)?;
 
     // Generate X25519 keypair
-    let (public_key, secret_key) = keys::generate_keypair_secure()?;
+    let (public_key, secret_key) = keys::generate_keypair();
 
     // Encrypt secret key with master key
     let (enc_secret_key, secret_key_nonce) = encrypt_to_b64(&secret_key, &master_key)?;
@@ -122,7 +122,7 @@ pub fn generate_key_attributes_for_new_password_with_strength(
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
-    let login_key = kdf::derive_login_key_secure(&derived.key)?;
+    let login_key = kdf::derive_login_key(&derived.key)?;
 
     // Encrypt master key with new derived key
     let (enc_key, key_nonce) = encrypt_to_b64(master_key, &derived.key)?;
@@ -153,7 +153,7 @@ pub fn generate_key_attributes_for_new_password_with_strength(
 pub fn create_new_recovery_key(
     master_key: &[u8],
 ) -> Result<(String, String, String, String, String)> {
-    let recovery_key = keys::generate_key_secure();
+    let recovery_key = keys::generate_key();
 
     let (enc_master, nonce_master) = encrypt_to_b64(master_key, &recovery_key)?;
     let (enc_recovery, nonce_recovery) = encrypt_to_b64(&recovery_key, master_key)?;
@@ -332,7 +332,7 @@ mod tests {
             &recovery_key,
         )
         .unwrap();
-        assert_eq!(decrypted, master_key);
+        assert_eq!(decrypted, master_key.as_ref());
 
         let decrypted_recovery = secretbox::decrypt(
             &crypto::decode_b64(&enc_recovery).unwrap(),

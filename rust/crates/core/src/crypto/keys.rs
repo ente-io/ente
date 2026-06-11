@@ -27,18 +27,8 @@ pub const BOX_SECRET_KEY_BYTES: usize = 32;
 /// Generate a random SecretBox encryption key.
 ///
 /// # Returns
-/// A 32-byte random key.
-pub fn generate_key() -> Vec<u8> {
-    let mut key = vec![0u8; SECRETBOX_KEY_BYTES];
-    OsRng.fill_bytes(&mut key);
-    key
-}
-
-/// Generate a random SecretBox encryption key that is zeroized on drop.
-///
-/// This is identical to [`generate_key`], but returns a [`SecretVec`] to reduce
-/// the risk of key material lingering in heap memory after it goes out of scope.
-pub fn generate_key_secure() -> SecretVec {
+/// A 32-byte random key, zeroized on drop.
+pub fn generate_key() -> SecretVec {
     let mut key = vec![0u8; SECRETBOX_KEY_BYTES];
     OsRng.fill_bytes(&mut key);
     SecretVec::new(key)
@@ -47,15 +37,8 @@ pub fn generate_key_secure() -> SecretVec {
 /// Generate a random SecretStream encryption key.
 ///
 /// # Returns
-/// A 32-byte random key.
-pub fn generate_stream_key() -> Vec<u8> {
-    let mut key = vec![0u8; STREAM_KEY_BYTES];
-    OsRng.fill_bytes(&mut key);
-    key
-}
-
-/// Generate a random SecretStream encryption key that is zeroized on drop.
-pub fn generate_stream_key_secure() -> SecretVec {
+/// A 32-byte random key, zeroized on drop.
+pub fn generate_stream_key() -> SecretVec {
     let mut key = vec![0u8; STREAM_KEY_BYTES];
     OsRng.fill_bytes(&mut key);
     SecretVec::new(key)
@@ -64,48 +47,29 @@ pub fn generate_stream_key_secure() -> SecretVec {
 /// Generate a random salt for key derivation.
 ///
 /// # Returns
-/// A 16-byte random salt.
+/// A 16-byte random salt. Salts are not secret.
 pub fn generate_salt() -> Vec<u8> {
     let mut salt = vec![0u8; SALT_BYTES];
     OsRng.fill_bytes(&mut salt);
     salt
 }
 
-/// Generate a random salt buffer that is zeroized on drop.
-///
-/// Note: salts are not secret, but zeroizing can still be helpful for defense in
-/// depth when salts are kept alongside other sensitive material.
-pub fn generate_salt_secure() -> SecretVec {
-    let mut salt = vec![0u8; SALT_BYTES];
-    OsRng.fill_bytes(&mut salt);
-    SecretVec::new(salt)
-}
-
 /// Generate a random nonce for SecretBox encryption.
 ///
 /// # Returns
-/// A 24-byte random nonce.
+/// A 24-byte random nonce. Nonces are not secret.
 pub fn generate_secretbox_nonce() -> Vec<u8> {
     let mut nonce = vec![0u8; SECRETBOX_NONCE_BYTES];
     OsRng.fill_bytes(&mut nonce);
     nonce
 }
 
-/// Generate a random SecretBox nonce buffer that is zeroized on drop.
-///
-/// Note: nonces are not secret, but this is provided for API symmetry.
-pub fn generate_secretbox_nonce_secure() -> SecretVec {
-    let mut nonce = vec![0u8; SECRETBOX_NONCE_BYTES];
-    OsRng.fill_bytes(&mut nonce);
-    SecretVec::new(nonce)
-}
-
 /// Generate a random X25519 key pair.
 ///
 /// # Returns
-/// A tuple of (public_key, secret_key), both as 32-byte vectors.
-pub fn generate_keypair() -> Result<(Vec<u8>, Vec<u8>)> {
-    let mut secret_bytes = [0u8; 32];
+/// A tuple of (public_key, secret_key); the secret key is zeroized on drop.
+pub fn generate_keypair() -> (Vec<u8>, SecretVec) {
+    let mut secret_bytes = [0u8; BOX_SECRET_KEY_BYTES];
     OsRng.fill_bytes(&mut secret_bytes);
 
     let secret = StaticSecret::from(secret_bytes);
@@ -113,23 +77,10 @@ pub fn generate_keypair() -> Result<(Vec<u8>, Vec<u8>)> {
 
     secret_bytes.zeroize();
 
-    Ok((public.as_bytes().to_vec(), secret.to_bytes().to_vec()))
-}
-
-/// Generate a random X25519 key pair, returning the secret key as a [`SecretVec`].
-pub fn generate_keypair_secure() -> Result<(Vec<u8>, SecretVec)> {
-    let mut secret_bytes = [0u8; 32];
-    OsRng.fill_bytes(&mut secret_bytes);
-
-    let secret = StaticSecret::from(secret_bytes);
-    let public = PublicKey::from(&secret);
-
-    secret_bytes.zeroize();
-
-    Ok((
+    (
         public.as_bytes().to_vec(),
         SecretVec::new(secret.to_bytes().to_vec()),
-    ))
+    )
 }
 
 /// Deterministically derive an X25519 key pair from a 32-byte seed.
@@ -137,7 +88,7 @@ pub fn generate_keypair_secure() -> Result<(Vec<u8>, SecretVec)> {
 /// The seed is clamped by `StaticSecret::from` per the X25519 construction,
 /// making this suitable for deriving stable box keys from a higher-entropy
 /// master secret.
-pub fn derive_keypair_from_seed_secure(seed: &[u8]) -> Result<(Vec<u8>, SecretVec)> {
+pub fn derive_keypair_from_seed(seed: &[u8]) -> Result<(Vec<u8>, SecretVec)> {
     if seed.len() != BOX_SECRET_KEY_BYTES {
         return Err(CryptoError::InvalidKeyLength {
             expected: BOX_SECRET_KEY_BYTES,
@@ -172,13 +123,6 @@ pub fn random_bytes(len: usize) -> Vec<u8> {
     buf
 }
 
-/// Generate random bytes of specified length that are zeroized on drop.
-pub fn random_bytes_secure(len: usize) -> SecretVec {
-    let mut buf = vec![0u8; len];
-    OsRng.fill_bytes(&mut buf);
-    SecretVec::new(buf)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -190,7 +134,7 @@ mod tests {
 
         // Test randomness - two keys should be different
         let key2 = generate_key();
-        assert_ne!(key, key2);
+        assert_ne!(key.as_ref(), key2.as_ref());
     }
 
     #[test]
@@ -199,7 +143,7 @@ mod tests {
         assert_eq!(key.len(), STREAM_KEY_BYTES);
 
         let key2 = generate_stream_key();
-        assert_ne!(key, key2);
+        assert_ne!(key.as_ref(), key2.as_ref());
     }
 
     #[test]
@@ -222,29 +166,29 @@ mod tests {
 
     #[test]
     fn test_generate_keypair() {
-        let (pk, sk) = generate_keypair().unwrap();
+        let (pk, sk) = generate_keypair();
         assert_eq!(pk.len(), BOX_PUBLIC_KEY_BYTES);
         assert_eq!(sk.len(), BOX_SECRET_KEY_BYTES);
 
         // Test that keys are different
-        let (pk2, sk2) = generate_keypair().unwrap();
+        let (pk2, sk2) = generate_keypair();
         assert_ne!(pk, pk2);
-        assert_ne!(sk, sk2);
+        assert_ne!(sk.as_ref(), sk2.as_ref());
     }
 
     #[test]
-    fn test_derive_keypair_from_seed_secure() {
+    fn test_derive_keypair_from_seed() {
         let seed = [7u8; BOX_SECRET_KEY_BYTES];
-        let (pk1, sk1) = derive_keypair_from_seed_secure(&seed).unwrap();
-        let (pk2, sk2) = derive_keypair_from_seed_secure(&seed).unwrap();
+        let (pk1, sk1) = derive_keypair_from_seed(&seed).unwrap();
+        let (pk2, sk2) = derive_keypair_from_seed(&seed).unwrap();
 
         assert_eq!(pk1, pk2);
         assert_eq!(sk1.as_ref(), sk2.as_ref());
     }
 
     #[test]
-    fn test_derive_keypair_from_seed_secure_rejects_wrong_length() {
-        let err = derive_keypair_from_seed_secure(&[1u8; 16]).unwrap_err();
+    fn test_derive_keypair_from_seed_rejects_wrong_length() {
+        let err = derive_keypair_from_seed(&[1u8; 16]).unwrap_err();
         assert!(matches!(err, CryptoError::InvalidKeyLength { .. }));
     }
 

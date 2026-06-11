@@ -142,14 +142,14 @@ pub fn derive_srp_credentials(password: &str, srp_attrs: &SrpAttributes) -> Resu
     let kek_salt = crypto::decode_b64(&srp_attrs.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
-    let kek = argon::derive_key_secure(
+    let kek = argon::derive_key(
         password,
         &kek_salt,
         srp_attrs.mem_limit,
         srp_attrs.ops_limit,
     )?;
 
-    let login_key = kdf::derive_login_key_secure(&kek)?;
+    let login_key = kdf::derive_login_key(&kek)?;
 
     Ok(SrpCredentials { kek, login_key })
 }
@@ -173,7 +173,7 @@ pub fn derive_kek(
     let salt =
         crypto::decode_b64(kek_salt).map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
-    argon::derive_key_secure(password, &salt, mem_limit, ops_limit).map_err(AuthError::from)
+    argon::derive_key(password, &salt, mem_limit, ops_limit).map_err(AuthError::from)
 }
 
 /// Generate a KEK using the current adaptive sensitive client policy.
@@ -206,7 +206,7 @@ pub fn generate_interactive_kek(password: &str) -> Result<GeneratedKek> {
 /// Generate the SRP setup payload for a given KEK and SRP user ID.
 #[cfg(feature = "srp")]
 pub fn generate_srp_setup(kek: &[u8], srp_user_id: &str) -> Result<GeneratedSrpSetup> {
-    let login_sub_key = kdf::derive_login_key_secure(kek)?;
+    let login_sub_key = kdf::derive_login_key(kek)?;
     generate_srp_setup_with_login_key(&login_sub_key, srp_user_id)
 }
 

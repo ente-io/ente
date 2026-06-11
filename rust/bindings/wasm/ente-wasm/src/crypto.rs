@@ -210,12 +210,12 @@ impl CryptoKeyPair {
 
 /// Generate a random X25519 keypair and return it as base64.
 #[wasm_bindgen]
-pub fn crypto_generate_keypair() -> Result<CryptoKeyPair, CryptoError> {
-    let (public_key, secret_key) = core_crypto::keys::generate_keypair()?;
-    Ok(CryptoKeyPair {
+pub fn crypto_generate_keypair() -> CryptoKeyPair {
+    let (public_key, secret_key) = core_crypto::keys::generate_keypair();
+    CryptoKeyPair {
         public_key: core_crypto::encode_b64(&public_key),
         secret_key: core_crypto::encode_b64(&secret_key),
-    })
+    }
 }
 
 /// A SecretBox encryption result.

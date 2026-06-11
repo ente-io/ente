@@ -1665,7 +1665,7 @@ fn get_or_create_chat_key_with_state(
         return Ok((key, ChatKeyStatus::Remote));
     }
 
-    let chat_key = keys::generate_stream_key();
+    let chat_key = keys::generate_stream_key().into_vec();
     let encrypted = encrypt_chat_key(&chat_key, master_key)?;
     let payload = ChatKeyPayload::from_encrypted(&encrypted);
 

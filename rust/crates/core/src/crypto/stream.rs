@@ -633,7 +633,7 @@ fn encrypt_file_internal<R: Read, W: Write>(
 
     let key = match key {
         Some(k) => k.to_vec(),
-        None => generate_stream_key(),
+        None => generate_stream_key().into_vec(),
     };
 
     let mut encryptor = StreamEncryptor::new(&key)?;
