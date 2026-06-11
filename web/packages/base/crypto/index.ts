@@ -85,6 +85,7 @@
  *    dealing with them.
  */
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import * as wasm from "ente-wasm";
 import { inWorker } from "../env";
 import * as libsodium from "./libsodium";
 import type {
@@ -538,3 +539,40 @@ export const deriveSubKeyBytes = async (
         : sharedWorker().then((w) =>
               w.deriveSubKeyBytes(key, subKeyLength, subKeyID, context),
           );
+
+export const generateKeypairPQ = async (): Promise<KeyPair> => {
+    const keypair = inWorker()
+        ? await wasm.crypto_generate_keypair_pq()
+        : await sharedWorker().then((w) => w.generateKeypairPQ());
+    return { publicKey: keypair.public_key, privateKey: keypair.secret_key };
+};
+
+/**
+ * Post-quantum public key encryption.
+ */
+export const boxSealPQ = async (
+    data: string,
+    publicKey: string,
+): Promise<string> =>
+    inWorker()
+        ? wasm.crypto_box_seal_pq(data, publicKey)
+        : sharedWorker().then((w) => w.boxSealPQ(data, publicKey));
+
+/**
+ * Decrypt the result of {@link boxSealPQ}.
+ */
+export const boxSealOpenPQ = async (
+    encryptedData: string,
+    keyPair: KeyPair,
+): Promise<string> => {
+    if (inWorker()) {
+        return wasm.crypto_box_seal_open_pq(
+            encryptedData,
+            keyPair.publicKey,
+            keyPair.privateKey,
+        );
+    }
+    return sharedWorker().then((w) =>
+        w.boxSealOpenPQ(encryptedData, keyPair.publicKey, keyPair.privateKey),
+    );
+};

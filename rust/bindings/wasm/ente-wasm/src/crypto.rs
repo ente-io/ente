@@ -527,3 +527,36 @@ pub fn crypto_derive_login_key(master_key_b64: &str) -> Result<String, CryptoErr
     let login_key = core_crypto::kdf::derive_login_key(&key)?;
     Ok(core_crypto::encode_b64(&login_key))
 }
+
+#[wasm_bindgen]
+pub fn crypto_generate_keypair_pq() -> Result<CryptoKeyPair, CryptoError> {
+    let (public_key, secret_key) = core_crypto::keys_pq::generate_keypair_pq()?;
+    Ok(CryptoKeyPair {
+        public_key: core_crypto::encode_b64(&public_key),
+        secret_key: core_crypto::encode_b64(&secret_key),
+    })
+}
+
+#[wasm_bindgen]
+pub fn crypto_box_seal_pq(
+    data_b64: &str,
+    recipient_public_key_b64: &str,
+) -> Result<String, CryptoError> {
+    let data = core_crypto::decode_b64(data_b64)?;
+    let pk = core_crypto::decode_b64(recipient_public_key_b64)?;
+    let sealed = core_crypto::sealed_pq::seal_pq(&data, &pk)?;
+    Ok(core_crypto::encode_b64(&sealed))
+}
+
+#[wasm_bindgen]
+pub fn crypto_box_seal_open_pq(
+    sealed_b64: &str,
+    recipient_public_key_b64: &str,
+    recipient_secret_key_b64: &str,
+) -> Result<String, CryptoError> {
+    let sealed = core_crypto::decode_b64(sealed_b64)?;
+    let pk = core_crypto::decode_b64(recipient_public_key_b64)?;
+    let sk = core_crypto::decode_b64(recipient_secret_key_b64)?;
+    let opened = core_crypto::sealed_pq::open_pq(&sealed, &pk, &sk)?;
+    Ok(core_crypto::encode_b64(&opened))
+}
