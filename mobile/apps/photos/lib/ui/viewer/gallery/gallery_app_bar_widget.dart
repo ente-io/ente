@@ -1145,6 +1145,25 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Future<void> _castChoiceDialog() async {
     final gw = CastGateway(NetworkClient.instance.enteDio);
 
+    if (!flagService.enableMultiCast) {
+      if (castService.getActiveSessions().isNotEmpty) {
+        await showChoiceDialog(
+          context,
+          title: AppLocalizations.of(context).stopCastingTitle,
+          firstButtonLabel: AppLocalizations.of(context).yes,
+          secondButtonLabel: AppLocalizations.of(context).no,
+          body: AppLocalizations.of(context).stopCastingBody,
+          firstButtonOnTap: () async {
+            gw.revokeAllTokens().ignore();
+            await castService.closeActiveCasts();
+          },
+        );
+        return;
+      }
+      // stop any existing cast session
+      gw.revokeAllTokens().ignore();
+    }
+
     if (!Platform.isAndroid && !kDebugMode) {
       await _pairWithPin(gw, '');
     } else {
