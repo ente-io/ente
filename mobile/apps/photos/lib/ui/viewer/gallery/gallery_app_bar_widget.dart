@@ -755,7 +755,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           AlbumPopupAction.castAlbum,
           strings.castAlbum,
           galleryAppBarMenuIcon(
-            castService.getActiveSessions().isNotEmpty
+            !flagService.enableMultiCast &&
+                    castService.getActiveSessions().isNotEmpty
                 ? HugeIcons.strokeRoundedTvSmart
                 : HugeIcons.strokeRoundedTv02,
             iconColor,
@@ -1162,6 +1163,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
       // stop any existing cast session
       gw.revokeAllTokens().ignore();
+    } else {
+      await castService.closeActiveCasts();
     }
 
     if (!Platform.isAndroid && !kDebugMode) {
