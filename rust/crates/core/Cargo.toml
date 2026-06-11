@@ -45,11 +45,6 @@ zeroize = { version = "1.8", features = ["derive"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 mockito = "1.6"
 
-# Keep SRP deps available for unit tests (the SRP module is compiled under cfg(test))
-srp = { git = "https://github.com/RustCrypto/PAKEs", package = "srp", rev = "5b3bd1f3a9d51121a698ffe5d6ecc33cafcd6413", default-features = false }
-sha2 = "0.11"
-getrandom = "0.2"
-
 [features]
 default = ["blob-require-final-tag"]
 
@@ -63,12 +58,5 @@ srp = ["dep:srp", "dep:sha2"]
 # Enforce TAG_FINAL on blob decrypt (reject non-final chunks).
 blob-require-final-tag = []
 
-# No features needed - pure Rust is always enabled
-
 [lints.rust]
 missing_docs = "warn"
-
-[lints.clippy]
-# Require tests for public functions (enforced via CI/review)
-# missing_panics_doc = "warn"
-# missing_errors_doc = "warn"
