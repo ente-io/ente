@@ -201,6 +201,8 @@ class SuperLogging {
 
     if (enable && sentryIsEnabled) {
       await SentryFlutter.init((options) {
+        options.anrEnabled = true;
+        options.anrTimeoutInterval = const Duration(seconds: 5);
         options.dsn = appConfig!.sentryDsn;
         options.httpClient = http.Client();
         if (appConfig.tunnel != null) {
