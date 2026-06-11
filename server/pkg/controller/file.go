@@ -40,25 +40,26 @@ import (
 
 // FileController exposes functions to retrieve and access encrypted files
 type FileController struct {
-	FileRepo              *repo.FileRepository
-	ObjectRepo            *repo.ObjectRepository
-	ObjectCleanupRepo     *repo.ObjectCleanupRepository
-	TrashRepository       *repo.TrashRepository
-	UserRepo              *repo.UserRepository
-	UsageCtrl             *UsageController
-	CollectionRepo        *repo.CollectionRepository
-	TaskLockingRepo       *repo.TaskLockRepository
-	QueueRepo             *repo.QueueRepository
-	AccessCtrl            access.Controller
-	S3Config              *s3config.S3Config
-	ObjectCleanupCtrl     *ObjectCleanupController
-	LockController        *lock.LockController
-	EmailNotificationCtrl *email.EmailNotificationController
-	DiscordController     *discord.DiscordController
-	HostName              string
-	cleanupCronRunning    bool
-	outstandingURLsMu     sync.Mutex
-	outstandingURLs       map[int64]int // userID -> minted-but-uncommitted upload URLs
+	FileRepo               *repo.FileRepository
+	ObjectRepo             *repo.ObjectRepository
+	ObjectCleanupRepo      *repo.ObjectCleanupRepository
+	TrashRepository        *repo.TrashRepository
+	UserRepo               *repo.UserRepository
+	UsageCtrl              *UsageController
+	CollectionRepo         *repo.CollectionRepository
+	TaskLockingRepo        *repo.TaskLockRepository
+	QueueRepo              *repo.QueueRepository
+	AccessCtrl             access.Controller
+	S3Config               *s3config.S3Config
+	ObjectCleanupCtrl      *ObjectCleanupController
+	LockController         *lock.LockController
+	EmailNotificationCtrl  *email.EmailNotificationController
+	DiscordController      *discord.DiscordController
+	HostName               string
+	cleanupCronRunning     bool
+	outstandingURLsMu      sync.Mutex
+	outstandingURLs        map[int64]int // userID -> minted-but-uncommitted upload URLs
+	outstandingURLsResetAt gTime.Time
 }
 
 // StorageOverflowAboveSubscriptionLimit is the amount (50 MB) by which user can go beyond their storage limit
@@ -210,7 +211,6 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 		}
 		return file, stacktrace.Propagate(err, "")
 	}
-	c.addOutstandingURLs(userID, -2)
 	if usage == fileSize+thumbnailSize && app == ente.Photos {
 		go c.maybeSendFirstUploadEmail(file.OwnerID, userAgent)
 	}
@@ -323,14 +323,15 @@ func (c *FileController) Update(ctx context.Context, userID int64, file ente.Fil
 	return response, nil
 }
 
-// addOutstandingURLs adjusts the count of upload URLs the user has minted
+// AddOutstandingURLs adjusts the count of upload URLs the user has minted
 // but not yet committed via /files. It will return false if the user has
 // too many outstanding URLs.
-func (c *FileController) addOutstandingURLs(userID int64, n int) bool {
+func (c *FileController) AddOutstandingURLs(userID int64, n int) bool {
 	c.outstandingURLsMu.Lock()
 	defer c.outstandingURLsMu.Unlock()
-	if c.outstandingURLs == nil {
-		c.outstandingURLs = map[int64]int{}
+	if now := gTime.Now(); now.After(c.outstandingURLsResetAt) {
+		c.outstandingURLs = map[int64]int{} // periodically discard stranded counts
+		c.outstandingURLsResetAt = now.Add(gTime.Hour)
 	}
 	total := max(c.outstandingURLs[userID]+n, 0)
 	ok := total <= 250
@@ -391,9 +392,6 @@ func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID in
 	}
 	if err := c.UsageCtrl.CanUploadFile(ctx, userID, &req.ContentLength, app); err != nil {
 		return ente.UploadURL{}, stacktrace.Propagate(err, "")
-	}
-	if !c.addOutstandingURLs(userID, 1) {
-		return ente.UploadURL{}, stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many outstanding upload URLs")
 	}
 	s3Client := c.S3Config.GetHotS3Client()
 	dc := c.S3Config.GetHotDataCenter()
@@ -1277,9 +1275,6 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 	partLengths := computePartLengths(req.ContentLength, req.PartLength, partCount)
 	if err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app); err != nil {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
-	}
-	if !c.addOutstandingURLs(userID, 1) {
-		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many outstanding upload URLs")
 	}
 	s3Client := c.S3Config.GetHotS3Client()
 	dc := c.S3Config.GetHotDataCenter()
