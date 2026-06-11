@@ -23,7 +23,6 @@ import "package:photos/ui/components/banners/name_face_banner.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
-import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
@@ -197,7 +196,14 @@ class _ClusterPageState extends State<ClusterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = ClusterAppBar.sliverConfig(
+      SearchResultPage.appBarType,
+      "${files.length} memories${widget.appendTitle}",
+      _selectedFiles,
+      widget.clusterID,
+    );
     final gallery = Gallery(
+      appBar: appBar,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
             .where(
@@ -253,26 +259,6 @@ class _ClusterPageState extends State<ClusterPage> {
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
-            child: widget.enableGrouping
-                ? ClusterAppBar(
-                    SearchResultPage.appBarType,
-                    "${files.length} memories${widget.appendTitle}",
-                    _selectedFiles,
-                    widget.clusterID,
-                    key: ValueKey(files.length),
-                  )
-                : _AppBarWithBoundary(
-                    child: ClusterAppBar(
-                      SearchResultPage.appBarType,
-                      "${files.length} memories${widget.appendTitle}",
-                      _selectedFiles,
-                      widget.clusterID,
-                      key: ValueKey(files.length),
-                    ),
-                  ),
-          ),
           body: SelectionState(
             selectedFiles: _selectedFiles,
             child: Stack(
@@ -290,24 +276,5 @@ class _ClusterPageState extends State<ClusterPage> {
         ),
       ),
     );
-  }
-}
-
-/// Wrapper widget that reports the app bar as top boundary for auto-scroll
-/// when file grouping is disabled
-class _AppBarWithBoundary extends StatefulWidget {
-  final Widget child;
-
-  const _AppBarWithBoundary({required this.child});
-
-  @override
-  State<_AppBarWithBoundary> createState() => _AppBarWithBoundaryState();
-}
-
-class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
-    with BoundaryReporter {
-  @override
-  Widget build(BuildContext context) {
-    return boundaryWidget(position: BoundaryPosition.top, child: widget.child);
   }
 }

@@ -693,14 +693,13 @@ class _AlbumsTabState extends State<AlbumsTab>
     }
   }
 
-  Future<void> _showAlbumsOptionsMenu(TapDownDetails details) async {
+  Future<void> _showAlbumsOptionsMenu(BuildContext buttonContext) async {
     final options = _buildAlbumsMenuOptions();
     if (options.isEmpty) {
       return;
     }
     final selected = await showEntePopupMenu<_AlbumsMenuAction>(
-      context: context,
-      details: details,
+      context: buttonContext,
       options: options,
     );
     if (selected == null || !mounted) return;
@@ -747,11 +746,13 @@ class _AlbumsTabState extends State<AlbumsTab>
     final strings = AppLocalizations.of(context);
     final selectedAlbums = widget.selectedAlbums;
     final localGalleryMode = _isLocalGalleryMode;
-    final albumsOptionsButton = IconButtonComponent(
-      variant: IconButtonComponentVariant.primary,
-      shouldSurfaceExecutionStates: false,
-      icon: const HugeIcon(icon: HugeIcons.strokeRoundedFilterHorizontal),
-      onTapDown: (details) => unawaited(_showAlbumsOptionsMenu(details)),
+    final albumsOptionsButton = Builder(
+      builder: (buttonContext) => IconButtonComponent(
+        variant: IconButtonComponentVariant.primary,
+        shouldSurfaceExecutionStates: false,
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedFilterHorizontal),
+        onTap: () => unawaited(_showAlbumsOptionsMenu(buttonContext)),
+      ),
     );
     return Stack(
       alignment: Alignment.bottomCenter,

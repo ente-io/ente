@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:math" as math;
 
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -39,9 +38,7 @@ class EntePopupMenuButton<T> extends StatelessWidget {
     this.itemHeight = 52.0,
     this.borderRadius = 20.0,
     this.elevation = 8.0,
-    this.screenPadding = 16.0,
     this.itemHorizontalPadding = 16.0,
-    this.menuVerticalOffset = 12.0,
     super.key,
   });
 
@@ -52,9 +49,7 @@ class EntePopupMenuButton<T> extends StatelessWidget {
   final double itemHeight;
   final double borderRadius;
   final double elevation;
-  final double screenPadding;
   final double itemHorizontalPadding;
-  final double menuVerticalOffset;
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +62,18 @@ class EntePopupMenuButton<T> extends StatelessWidget {
           size: 18,
           color: colorScheme.textBase,
         ),
-        onTap: () {},
-        onTapDown: (details) => _showMenu(context, details),
+        onTap: () => _showMenu(context),
       );
     }
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (details) => _showMenu(context, details),
+      onTap: () => _showMenu(context),
       child: child,
     );
   }
 
-  Future<void> _showMenu(BuildContext context, TapDownDetails details) async {
+  Future<void> _showMenu(BuildContext context) async {
     final options = await optionsBuilder();
     if (options.isEmpty) {
       return;
@@ -87,15 +81,12 @@ class EntePopupMenuButton<T> extends StatelessWidget {
 
     final selected = await showEntePopupMenu<T>(
       context: context,
-      details: details,
       options: options,
       menuWidth: menuWidth,
       itemHeight: itemHeight,
       borderRadius: borderRadius,
       elevation: elevation,
-      screenPadding: screenPadding,
       itemHorizontalPadding: itemHorizontalPadding,
-      menuVerticalOffset: menuVerticalOffset,
     );
     if (selected == null) return;
     await onSelected(selected);
@@ -104,45 +95,43 @@ class EntePopupMenuButton<T> extends StatelessWidget {
 
 Future<T?> showEntePopupMenu<T>({
   required BuildContext context,
-  required TapDownDetails details,
   required List<EntePopupMenuOption<T>> options,
   double menuWidth = 196.0,
   double itemHeight = 52.0,
   double borderRadius = 20.0,
   double elevation = 0.0,
-  double screenPadding = 16.0,
   double itemHorizontalPadding = 16.0,
-  double menuVerticalOffset = 12.0,
 }) {
   final colorScheme = getEnteColorScheme(context);
-  final overlay = Overlay.of(context).context.findRenderObject() as RenderBox?;
-  final overlaySize = overlay?.size ?? MediaQuery.sizeOf(context);
-  final effectiveMenuWidth = math.min<double>(
-    menuWidth,
-    math.max(0.0, overlaySize.width - (screenPadding * 2)),
-  );
-  final left = _getMenuLeft(
-    tapX: details.globalPosition.dx,
-    menuWidth: effectiveMenuWidth,
-    overlayWidth: overlaySize.width,
-    screenPadding: screenPadding,
-  );
-  final top = details.globalPosition.dy + menuVerticalOffset;
-  final right = math.max(
-    screenPadding,
-    overlaySize.width - left - effectiveMenuWidth,
+  final button = context.findRenderObject()! as RenderBox;
+  final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
+  // Anchor the menu to the button's bottom edge so it drops below the button
+  // instead of opening on top of it (showMenu flips it upward if there's no
+  // room below).
+  final position = RelativeRect.fromRect(
+    Rect.fromPoints(
+      button.localToGlobal(
+        button.size.bottomLeft(Offset.zero),
+        ancestor: overlay,
+      ),
+      button.localToGlobal(
+        button.size.bottomRight(Offset.zero),
+        ancestor: overlay,
+      ),
+    ),
+    Offset.zero & overlay.size,
   );
 
   return showMenu<T>(
     context: context,
     color: colorScheme.fill,
     elevation: elevation,
-    constraints: BoxConstraints.tightFor(width: effectiveMenuWidth),
+    constraints: BoxConstraints.tightFor(width: menuWidth),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(borderRadius),
       side: BorderSide(color: colorScheme.strokeFaint),
     ),
-    position: RelativeRect.fromLTRB(left, top, right, overlaySize.height - top),
+    position: position,
     items: List.generate(options.length, (index) {
       final option = options[index];
       return PopupMenuItem<T>(
@@ -162,21 +151,6 @@ Future<T?> showEntePopupMenu<T>({
       );
     }),
   );
-}
-
-double _getMenuLeft({
-  required double tapX,
-  required double menuWidth,
-  required double overlayWidth,
-  required double screenPadding,
-}) {
-  const trailingAnchorOffset = 32.0;
-  final preferredLeft = tapX - menuWidth + trailingAnchorOffset;
-  final maxLeft = math.max(
-    screenPadding,
-    overlayWidth - menuWidth - screenPadding,
-  );
-  return math.min(math.max(screenPadding, preferredLeft), maxLeft);
 }
 
 class _EntePopupMenuRow<T> extends StatelessWidget {

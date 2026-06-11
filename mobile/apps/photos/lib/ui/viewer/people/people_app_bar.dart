@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -17,7 +19,10 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/popup_menu/ente_popup_menu_button.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_actions.dart";
+import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
@@ -30,8 +35,44 @@ const kShowUnnamedIgnoredPersonEventSource =
     "_AppBarWidgetState._showPersonUnnamedDelete";
 
 class PeopleAppBar extends StatefulWidget {
-  static double hierarchicalPreferredHeight(BuildContext context) {
-    return AppBarFilterChips.appBarHeight(context);
+  static const double _sliverExpandedHeight = 92.0;
+
+  static GalleryAppBarConfig sliverConfig(
+    GalleryType type,
+    String? title,
+    SelectedFiles selectedFiles,
+    PersonEntity person, {
+    bool memoryLaneReady = false,
+    Future<void> Function()? onMemoryLaneTap,
+  }) {
+    return GalleryAppBarConfig(
+      sliverBuilder: (_) => PeopleAppBar._(
+        type,
+        title,
+        selectedFiles,
+        person,
+        memoryLaneReady: memoryLaneReady,
+        onMemoryLaneTap: onMemoryLaneTap,
+      ),
+      geometryBuilder: _resolveSliverGeometry,
+    );
+  }
+
+  static HeaderAppBarGeometry _resolveSliverGeometry(BuildContext context) {
+    final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
+      context,
+    );
+    final isHierarchicalSearchable =
+        inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
+    final bottomHeight = isHierarchicalSearchable
+        ? AppBarFilterChips.preferredHeight(context)
+        : 0.0;
+    return SliverAppBarComponent.resolveGeometry(
+      context,
+      expandedHeight: _sliverExpandedHeight,
+      collapsedHeight: kToolbarHeight,
+      bottomHeight: bottomHeight,
+    );
   }
 
   final GalleryType type;
@@ -43,14 +84,13 @@ class PeopleAppBar extends StatefulWidget {
 
   bool get isIgnored => person.data.isIgnored;
 
-  const PeopleAppBar(
+  const PeopleAppBar._(
     this.type,
     this.title,
     this.selectedFiles,
     this.person, {
     this.memoryLaneReady = false,
     this.onMemoryLaneTap,
-    super.key,
   });
 
   @override
@@ -170,48 +210,44 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     );
     final isHierarchicalSearchable =
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
-    return isHierarchicalSearchable
-        ? ValueListenableBuilder(
-            valueListenable: inheritedSearchFilterData!
-                .searchFilterDataProvider!
-                .isSearchingNotifier,
-            child: PreferredSize(
-              preferredSize: Size.fromHeight(
-                AppBarFilterChips.preferredHeight(context),
-              ),
-              child: const AppBarFilterChips(),
-            ),
-            builder: (context, isSearching, child) {
-              return AppBar(
-                elevation: 0,
-                centerTitle: false,
-                title: Text(
-                  _appBarTitle ?? "",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                bottom: child as PreferredSizeWidget,
-                actions: isSearching ? null : _getDefaultActions(context),
-                surfaceTintColor: Colors.transparent,
-              );
-            },
-          )
-        : AppBar(
-            elevation: 0,
-            centerTitle: false,
-            title: Text(
-              _appBarTitle ?? "",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall!.copyWith(fontSize: 16),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            actions: _getDefaultActions(context),
-          );
+
+    if (!isHierarchicalSearchable) {
+      return _buildSliverAppBar(context, actions: _getDefaultActions(context));
+    }
+
+    return ValueListenableBuilder(
+      valueListenable: inheritedSearchFilterData!
+          .searchFilterDataProvider!
+          .isSearchingNotifier,
+      child: PreferredSize(
+        preferredSize: Size.fromHeight(
+          AppBarFilterChips.preferredHeight(context),
+        ),
+        child: const AppBarFilterChips(),
+      ),
+      builder: (context, isSearching, child) {
+        return _buildSliverAppBar(
+          context,
+          actions: isSearching ? const [] : _getDefaultActions(context),
+          bottom: child as PreferredSizeWidget,
+        );
+      },
+    );
+  }
+
+  Widget _buildSliverAppBar(
+    BuildContext context, {
+    required List<Widget> actions,
+    PreferredSizeWidget? bottom,
+  }) {
+    return SliverAppBarComponent(
+      title: _appBarTitle ?? "",
+      actions: actions,
+      bottom: bottom,
+      expandedHeight: PeopleAppBar._sliverExpandedHeight,
+      collapsedHeight: kToolbarHeight,
+      backgroundColor: getEnteColorScheme(context).backgroundColour,
+    );
   }
 
   Future<dynamic> _editPerson(BuildContext context) async {
@@ -231,11 +267,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   }
 
   List<Widget> _getDefaultActions(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final currentPerson = person;
-    final bool isIgnored = currentPerson.data.isIgnored;
-    final bool isPinned = currentPerson.data.isPinned;
-    final bool hideFromMemories = currentPerson.data.hideFromMemories;
+    final iconColor = getEnteColorScheme(context).contentLight;
+    final bool isIgnored = person.data.isIgnored;
+    final bool isPinned = person.data.isPinned;
+    final bool hideFromMemories = person.data.hideFromMemories;
     final List<Widget> actions = <Widget>[];
     // If the user has selected files, don't show any actions
     if (widget.selectedFiles.files.isNotEmpty ||
@@ -243,22 +278,17 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       return actions;
     }
 
-    final List<PopupMenuItem<PeoplePopupAction>> items = [];
+    final List<EntePopupMenuOption<PeoplePopupAction>> items = [];
     final bool showTimelineAction =
         widget.memoryLaneReady && widget.onMemoryLaneTap != null;
     if (showTimelineAction) {
       items.add(
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.memoryLane,
-          child: Row(
-            children: [
-              const Icon(Icons.auto_awesome_outlined),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                context.l10n.facesTimelineAppBarTitle,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: context.l10n.facesTimelineAppBarTitle,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedSparkles,
+            iconColor,
           ),
         ),
       );
@@ -266,202 +296,147 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
     if (!isIgnored) {
       items.addAll([
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.rename,
-          child: Row(
-            children: [
-              const Icon(Icons.edit),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                AppLocalizations.of(context).edit,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: AppLocalizations.of(context).edit,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedPencilEdit01,
+            iconColor,
           ),
         ),
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.reviewSuggestions,
-          child: Row(
-            children: [
-              const Icon(Icons.search_outlined),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                AppLocalizations.of(context).review,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: AppLocalizations.of(context).review,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedSearch01,
+            iconColor,
           ),
         ),
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.setCover,
-          child: Row(
-            children: [
-              const Icon(Icons.image_outlined),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                AppLocalizations.of(context).setCover,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: AppLocalizations.of(context).setCover,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedImage01,
+            iconColor,
           ),
         ),
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.pinPerson,
-          child: Row(
-            children: [
-              Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                isPinned ? context.l10n.unpinPerson : context.l10n.pinPerson,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: isPinned ? context.l10n.unpinPerson : context.l10n.pinPerson,
+          leadingWidget: galleryAppBarMenuIcon(
+            isPinned
+                ? HugeIcons.strokeRoundedPinOff
+                : HugeIcons.strokeRoundedPin,
+            iconColor,
           ),
         ),
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.hideFromMemories,
-          child: Row(
-            children: [
-              Icon(
-                hideFromMemories
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                hideFromMemories
-                    ? context.l10n.showInMemories
-                    : context.l10n.hideFromMemories,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: hideFromMemories
+              ? context.l10n.showInMemories
+              : context.l10n.hideFromMemories,
+          leadingWidget: galleryAppBarMenuIcon(
+            hideFromMemories
+                ? HugeIcons.strokeRoundedView
+                : HugeIcons.strokeRoundedViewOffSlash,
+            iconColor,
           ),
         ),
-        if (currentPerson.data.email != null &&
-            (currentPerson.data.email == Configuration.instance.getEmail()))
-          PopupMenuItem(
+        if (person.data.email != null &&
+            (person.data.email == Configuration.instance.getEmail()))
+          EntePopupMenuOption(
             value: PeoplePopupAction.reassignMe,
-            child: Row(
-              children: [
-                const Icon(Icons.person_2_outlined),
-                const Padding(padding: EdgeInsets.all(8)),
-                Text(context.l10n.reassignMe, style: textTheme.bodyBold),
-              ],
+            label: context.l10n.reassignMe,
+            leadingWidget: galleryAppBarMenuIcon(
+              HugeIcons.strokeRoundedUser,
+              iconColor,
             ),
           ),
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.ignore,
-          child: Row(
-            children: [
-              const Icon(Icons.person_off_outlined),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                AppLocalizations.of(context).ignore,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: AppLocalizations.of(context).ignore,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedUserBlock01,
+            iconColor,
           ),
         ),
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.removeLabel,
-          child: Row(
-            children: [
-              const Icon(Icons.delete_outline),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                AppLocalizations.of(context).remove,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: AppLocalizations.of(context).remove,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedDelete01,
+            iconColor,
           ),
         ),
       ]);
     } else {
       items.addAll([
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.rename,
-          child: Row(
-            children: [
-              const Icon(Icons.edit),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                AppLocalizations.of(context).edit,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: AppLocalizations.of(context).edit,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedPencilEdit01,
+            iconColor,
           ),
         ),
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.reviewSuggestions,
-          child: Row(
-            children: [
-              const Icon(Icons.search_outlined),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                AppLocalizations.of(context).review,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: AppLocalizations.of(context).review,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedSearch01,
+            iconColor,
           ),
         ),
-        PopupMenuItem(
+        EntePopupMenuOption(
           value: PeoplePopupAction.unignore,
-          child: Row(
-            children: [
-              const Icon(Icons.visibility_outlined),
-              const Padding(padding: EdgeInsets.all(8)),
-              Text(
-                AppLocalizations.of(context).showPerson,
-                style: textTheme.bodyBold,
-              ),
-            ],
+          label: AppLocalizations.of(context).showPerson,
+          leadingWidget: galleryAppBarMenuIcon(
+            HugeIcons.strokeRoundedView,
+            iconColor,
           ),
         ),
       ]);
     }
 
-    if (items.isNotEmpty) {
-      actions.add(
-        PopupMenuButton(
-          itemBuilder: (context) {
-            return items;
-          },
-          onSelected: (PeoplePopupAction value) async {
-            if (value == PeoplePopupAction.reviewSuggestions) {
-              // ignore: unawaited_futures
-              unawaited(
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => PersonReviewClusterSuggestion(person),
-                  ),
+    actions.add(
+      galleryAppBarPopupMenuAction<PeoplePopupAction>(
+        tooltip: AppLocalizations.of(context).more,
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedMoreVertical),
+        optionsBuilder: () => items,
+        onSelected: (PeoplePopupAction value) async {
+          if (value == PeoplePopupAction.reviewSuggestions) {
+            unawaited(
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => PersonReviewClusterSuggestion(person),
                 ),
-              );
-            } else if (value == PeoplePopupAction.memoryLane) {
-              final callback = widget.onMemoryLaneTap;
-              if (callback != null) {
-                unawaited(callback());
-              }
-            } else if (value == PeoplePopupAction.rename) {
-              await _editPerson(context);
-            } else if (value == PeoplePopupAction.setCover) {
-              await setCoverPhoto(context);
-            } else if (value == PeoplePopupAction.pinPerson) {
-              await _togglePinState();
-            } else if (value == PeoplePopupAction.hideFromMemories) {
-              await _toggleHideFromMemories();
-            } else if (value == PeoplePopupAction.ignore) {
-              await _ignorePerson(context);
-            } else if (value == PeoplePopupAction.unignore) {
-              await _showPerson(context);
-            } else if (value == PeoplePopupAction.removeLabel) {
-              await _resetPerson(context);
-            } else if (value == PeoplePopupAction.reassignMe) {
-              await _reassignMe(context);
+              ),
+            );
+          } else if (value == PeoplePopupAction.memoryLane) {
+            final callback = widget.onMemoryLaneTap;
+            if (callback != null) {
+              unawaited(callback());
             }
-          },
-        ),
-      );
-    }
+          } else if (value == PeoplePopupAction.rename) {
+            await _editPerson(context);
+          } else if (value == PeoplePopupAction.setCover) {
+            await setCoverPhoto(context);
+          } else if (value == PeoplePopupAction.pinPerson) {
+            await _togglePinState();
+          } else if (value == PeoplePopupAction.hideFromMemories) {
+            await _toggleHideFromMemories();
+          } else if (value == PeoplePopupAction.ignore) {
+            await _ignorePerson(context);
+          } else if (value == PeoplePopupAction.unignore) {
+            await _showPerson(context);
+          } else if (value == PeoplePopupAction.removeLabel) {
+            await _resetPerson(context);
+          } else if (value == PeoplePopupAction.reassignMe) {
+            await _reassignMe(context);
+          }
+        },
+      ),
+    );
 
     return actions;
   }
