@@ -263,7 +263,7 @@ pub struct HttpClient {
     client: reqwest::Client,
     no_redirect_client: reqwest::Client,
     base_url: String,
-    base_origin: Url,
+    base_origin: Option<Url>,
     auth_token: RwLock<Option<Zeroizing<String>>>,
     #[cfg(not(target_arch = "wasm32"))]
     user_agent: Option<String>,
@@ -289,13 +289,13 @@ impl HttpClient {
     /// Create a client with auth/header configuration.
     pub fn new_with_config(config: HttpConfig) -> Result<Self, Error> {
         let base_url = config.base_url.trim_end_matches('/').to_string();
-        let base_origin = Url::parse(&base_url)
-            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
-        if base_origin.query().is_some() || base_origin.fragment().is_some() {
-            return Err(Error::InvalidUrl(
-                "base URL must not contain a query or fragment".to_string(),
-            ));
-        }
+        let base_origin = Url::parse(&base_url).ok().and_then(|base| {
+            if base.query().is_none() && base.fragment().is_none() {
+                Some(base)
+            } else {
+                None
+            }
+        });
 
         #[cfg(not(target_arch = "wasm32"))]
         let mut builder = reqwest::Client::builder();
@@ -571,6 +571,14 @@ impl HttpClient {
             "request paths must be trusted endpoint paths without dot segments"
         );
 
+        let base = Url::parse(&self.base_url)
+            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
+        if base.query().is_some() || base.fragment().is_some() {
+            return Err(Error::InvalidUrl(
+                "base URL must not contain a query or fragment".to_string(),
+            ));
+        }
+
         Ok(format!("{}{}", self.base_url, path))
     }
 
@@ -580,10 +588,11 @@ impl HttpClient {
     }
 
     fn is_same_origin(&self, url: &Url) -> bool {
-        let base = &self.base_origin;
-        base.scheme() == url.scheme()
-            && base.host_str() == url.host_str()
-            && base.port_or_known_default() == url.port_or_known_default()
+        self.base_origin.as_ref().is_some_and(|base| {
+            base.scheme() == url.scheme()
+                && base.host_str() == url.host_str()
+                && base.port_or_known_default() == url.port_or_known_default()
+        })
     }
 
     fn build_headers_for_url(&self, url: &Url) -> Result<HeaderMap, Error> {
@@ -853,32 +862,25 @@ mod tests {
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
-    fn try_client(base_url: &str) -> Result<HttpClient, Error> {
-        HttpClient::new_with_config(HttpConfig {
-            base_url: base_url.to_string(),
-            ..HttpConfig::default()
-        })
+    #[test]
+    fn test_request_url_rejects_invalid_base_url() {
+        let client = test_client("not a url");
+        let err = client.request_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
     #[test]
-    fn test_new_rejects_invalid_base_url() {
-        assert!(matches!(try_client("not a url"), Err(Error::InvalidUrl(_))));
+    fn test_request_url_rejects_base_url_with_query() {
+        let client = test_client("https://api.ente.com/v1?stale=true");
+        let err = client.request_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
     #[test]
-    fn test_new_rejects_base_url_with_query() {
-        assert!(matches!(
-            try_client("https://api.ente.com/v1?stale=true"),
-            Err(Error::InvalidUrl(_))
-        ));
-    }
-
-    #[test]
-    fn test_new_rejects_base_url_with_fragment() {
-        assert!(matches!(
-            try_client("https://api.ente.com/v1#old"),
-            Err(Error::InvalidUrl(_))
-        ));
+    fn test_request_url_rejects_base_url_with_fragment() {
+        let client = test_client("https://api.ente.com/v1#old");
+        let err = client.request_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
     #[test]
