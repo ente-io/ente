@@ -1,0 +1,1 @@
+- Swipe down to dismiss the keyboard on settings screens, so the "Continue in mail app" button stays reachable on the Report an issue screen.
