@@ -34,6 +34,7 @@ jobs:
             release_title: ${{ steps.prepare.outputs.release_title }}
             release_body: ${{ steps.prepare.outputs.release_body }}
             release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            has_new_changes: ${{ steps.prepare.outputs.has_new_changes }}
             play_store_release_notes: ${{ steps.prepare.outputs.play_store_release_notes }}
             artifact_stem: ${{ steps.prepare.outputs.artifact_stem }}
 
@@ -358,6 +359,7 @@ jobs:
               run: gh release upload "${RELEASE_TAG}" SHA256SUMS --clobber
 
             - name: Notify Discord
+              if: github.event_name != 'schedule' || needs.build-metadata.outputs.has_new_changes == 'true'
               continue-on-error: true
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}

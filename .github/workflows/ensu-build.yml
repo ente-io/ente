@@ -34,6 +34,7 @@ jobs:
             release_title: ${{ steps.prepare.outputs.release_title }}
             release_body: ${{ steps.prepare.outputs.release_body }}
             release_body_grouped: ${{ steps.prepare.outputs.release_body_grouped }}
+            has_new_changes: ${{ steps.prepare.outputs.has_new_changes }}
             play_store_release_notes: ${{ steps.prepare.outputs.play_store_release_notes }}
             android_apk_name: ${{ steps.prepare.outputs.android_apk_name }}
 
@@ -463,6 +464,7 @@ jobs:
                   git push --force origin "refs/tags/${RELEASE_TAG}"
 
             - name: Notify Discord
+              if: github.event_name != 'schedule' || needs.build-metadata.outputs.has_new_changes == 'true'
               continue-on-error: true
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
