@@ -10,7 +10,7 @@ dependencies:
   app_links: 6.4.1
   bip39: 1.0.6
   collection: 1.19.1
-  dio: 5.9.0
+  dio: 5.9.2
   dots_indicator: 3.1.0
   dotted_border: 3.1.0
   email_validator: 3.0.0

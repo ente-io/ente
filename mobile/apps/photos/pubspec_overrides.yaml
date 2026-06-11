@@ -26,7 +26,7 @@ dependency_overrides:
       path: packages/video_player/video_player_avfoundation
       ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
   watcher: 1.1.2
-  win32: 5.10.1
+  win32: 5.15.0
   log_viewer:
     path: ../../packages/log_viewer
   native_video_editor:
