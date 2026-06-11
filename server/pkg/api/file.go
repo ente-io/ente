@@ -223,19 +223,6 @@ func (h *FileHandler) Get(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-// GetV2 returns the URL of the file to client
-func (h *FileHandler) GetV2(c *gin.Context) {
-	userID, fileID := getUserAndFileIDs(c)
-	url, err := h.Controller.GetFileURL(c, userID, fileID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"url": url,
-	})
-}
-
 // GetThumbnail redirects the request to the file's thumbnail location
 func (h *FileHandler) GetThumbnail(c *gin.Context) {
 	userID, fileID := getUserAndFileIDs(c)
@@ -246,19 +233,6 @@ func (h *FileHandler) GetThumbnail(c *gin.Context) {
 	}
 	h.logBadRedirect(c)
 	c.Redirect(http.StatusTemporaryRedirect, url)
-}
-
-// GetThumbnailV2 returns the URL of the thumbnail to the client
-func (h *FileHandler) GetThumbnailV2(c *gin.Context) {
-	userID, fileID := getUserAndFileIDs(c)
-	url, err := h.Controller.GetThumbnailURL(c, userID, fileID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"url": url,
-	})
 }
 
 // Trash moves the given files to the trash bin
