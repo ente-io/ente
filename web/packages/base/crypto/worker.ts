@@ -48,9 +48,24 @@ export class CryptoWorker {
     deriveInteractiveKey = libsodium.deriveInteractiveKey;
     deriveModerateKey = libsodium.deriveModerateKey;
     deriveSubKeyBytes = libsodium.deriveSubKeyBytes;
-    generateKeypairPQ = wasm.crypto_generate_keypair_pq;
-    boxSealPQ = wasm.crypto_box_seal_pq;
-    boxSealOpenPQ = wasm.crypto_box_seal_open_pq;
+    generateKeypairPQ = () =>
+        Promise.resolve().then(() => {
+            const keypair = wasm.crypto_generate_keypair_pq();
+            return {
+                public_key: keypair.public_key,
+                secret_key: keypair.secret_key,
+            };
+        });
+    boxSealPQBytes = async (data: Uint8Array, publicKey: string) =>
+        wasm.crypto_box_seal_pq(await libsodium.toB64(data), publicKey);
+    boxSealOpenPQBytes = async (
+        encryptedData: string,
+        publicKey: string,
+        privateKey: string,
+    ) =>
+        libsodium.fromB64(
+            wasm.crypto_box_seal_open_pq(encryptedData, publicKey, privateKey),
+        );
 }
 
 expose(CryptoWorker);

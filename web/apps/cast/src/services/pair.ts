@@ -1,4 +1,4 @@
-import { boxSealOpenBytes, generateKeyPair } from "ente-base/crypto";
+import { boxSealOpenPQBytes, generateKeypairPQ } from "ente-base/crypto";
 import { ensureOk, publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
@@ -83,7 +83,7 @@ export interface Registration {
  */
 export const register = async (): Promise<Registration> => {
     // Generate keypair.
-    const { publicKey, privateKey } = await generateKeyPair();
+    const { publicKey, privateKey } = await generateKeypairPQ();
 
     // Register keypair with museum to get a pairing code.
     let pairingCode: string | undefined;
@@ -152,7 +152,7 @@ export const getCastPayload = async (
     // payload, which'll be a JSON object containing the data we need to start a
     // slideshow for some collection.
     const jsonString = new TextDecoder().decode(
-        await boxSealOpenBytes(encryptedCastData, { publicKey, privateKey }),
+        await boxSealOpenPQBytes(encryptedCastData, { publicKey, privateKey }),
     );
     return CastPayload.parse(JSON.parse(jsonString));
 };

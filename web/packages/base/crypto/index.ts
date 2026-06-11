@@ -542,7 +542,7 @@ export const deriveSubKeyBytes = async (
 
 export const generateKeypairPQ = async (): Promise<KeyPair> => {
     const keypair = inWorker()
-        ? await wasm.crypto_generate_keypair_pq()
+        ? wasm.crypto_generate_keypair_pq()
         : await sharedWorker().then((w) => w.generateKeypairPQ());
     return { publicKey: keypair.public_key, privateKey: keypair.secret_key };
 };
@@ -550,29 +550,36 @@ export const generateKeypairPQ = async (): Promise<KeyPair> => {
 /**
  * Post-quantum public key encryption.
  */
-export const boxSealPQ = async (
-    data: string,
+export const boxSealPQBytes = async (
+    data: Uint8Array,
     publicKey: string,
-): Promise<string> =>
-    inWorker()
-        ? wasm.crypto_box_seal_pq(data, publicKey)
-        : sharedWorker().then((w) => w.boxSealPQ(data, publicKey));
+): Promise<string> => {
+    return inWorker()
+        ? wasm.crypto_box_seal_pq(await toB64(data), publicKey)
+        : sharedWorker().then((w) => w.boxSealPQBytes(data, publicKey));
+};
 
 /**
- * Decrypt the result of {@link boxSealPQ}.
+ * Decrypt the result of {@link boxSealPQBytes}.
  */
-export const boxSealOpenPQ = async (
+export const boxSealOpenPQBytes = async (
     encryptedData: string,
     keyPair: KeyPair,
-): Promise<string> => {
+): Promise<Uint8Array> => {
     if (inWorker()) {
-        return wasm.crypto_box_seal_open_pq(
-            encryptedData,
-            keyPair.publicKey,
-            keyPair.privateKey,
+        return fromB64(
+            wasm.crypto_box_seal_open_pq(
+                encryptedData,
+                keyPair.publicKey,
+                keyPair.privateKey,
+            ),
         );
     }
     return sharedWorker().then((w) =>
-        w.boxSealOpenPQ(encryptedData, keyPair.publicKey, keyPair.privateKey),
+        w.boxSealOpenPQBytes(
+            encryptedData,
+            keyPair.publicKey,
+            keyPair.privateKey,
+        ),
     );
 };
