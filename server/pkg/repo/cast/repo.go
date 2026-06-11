@@ -31,7 +31,7 @@ func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string) (str
 }
 
 func (r *Repository) GetAllDevices(ctx context.Context, userID int64) ([]cast.CastInfo, error) {
-	rows, err := r.DB.QueryContext(ctx, "SELECT code, collection_id, ip, last_used_at FROM casting WHERE cast_user = $1 and is_deleted=false", userID)
+	rows, err := r.DB.QueryContext(ctx, "SELECT code, collection_id, ip, last_used_at FROM casting WHERE cast_user = $1 and is_deleted=false ORDER BY created_at DESC", userID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to query devices")
 	}
