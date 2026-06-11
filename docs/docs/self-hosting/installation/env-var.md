@@ -45,6 +45,7 @@ If you are using `quickstart.sh`, note that only `3000` (Photos) and `3002` (Alb
 | Ente Public Locker                                       | Web      | 3005      | 3005           |
 | Ente Embed                                               | Web      | 3006      | 3006           |
 | Ente Paste (if deployed separately)                      | Web      | 3008      | 3008           |
+| Ente Locker                                              | Web      | 3009      | 3009           |
 | Ente Memories                                            | Web      | 3010      | 3010           |
 | MinIO                                                    | S3       | 3200      | 3200           |
 | PostgreSQL                                               | Database |           | 5432           |
