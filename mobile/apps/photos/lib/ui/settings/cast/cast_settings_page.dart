@@ -89,10 +89,7 @@ class _CastSettingsPageState extends State<CastSettingsPage> {
     );
   }
 
-  Future<void> _revokeSession(
-    CastGateway gw,
-    CastInfo session,
-  ) async {
+  Future<void> _revokeSession(CastGateway gw, CastInfo session) async {
     final l10n = AppLocalizations.of(context);
     final result = await showChoiceDialog(
       context,
