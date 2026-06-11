@@ -1,7 +1,7 @@
 import { expose } from "comlink";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
-import * as wasm from "ente-wasm";
 import * as libsodium from "./libsodium";
+import * as wasm from "./wasm";
 
 /**
  * A web worker that exposes the functions defined by libsodium.ts.
@@ -48,24 +48,9 @@ export class CryptoWorker {
     deriveInteractiveKey = libsodium.deriveInteractiveKey;
     deriveModerateKey = libsodium.deriveModerateKey;
     deriveSubKeyBytes = libsodium.deriveSubKeyBytes;
-    generateKeypairPQ = () =>
-        Promise.resolve().then(() => {
-            const keypair = wasm.crypto_generate_keypair_pq();
-            return {
-                public_key: keypair.public_key,
-                secret_key: keypair.secret_key,
-            };
-        });
-    boxSealPQBytes = async (data: Uint8Array, publicKey: string) =>
-        wasm.crypto_box_seal_pq(await libsodium.toB64(data), publicKey);
-    boxSealOpenPQBytes = async (
-        encryptedData: string,
-        publicKey: string,
-        privateKey: string,
-    ) =>
-        libsodium.fromB64(
-            wasm.crypto_box_seal_open_pq(encryptedData, publicKey, privateKey),
-        );
+    generateKeypairPQ = wasm.generateKeypairPQ;
+    boxSealPQBytes = wasm.boxSealPQBytes;
+    boxSealOpenPQBytes = wasm.boxSealOpenPQBytes;
 }
 
 expose(CryptoWorker);

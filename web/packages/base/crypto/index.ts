@@ -85,7 +85,6 @@
  *    dealing with them.
  */
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import * as wasm from "ente-wasm";
 import { inWorker } from "../env";
 import * as libsodium from "./libsodium";
 import type {
@@ -102,6 +101,7 @@ import type {
     KeyPair,
     SodiumStateAddress,
 } from "./types";
+import * as wasm from "./wasm";
 import type { CryptoWorker } from "./worker";
 
 /**
@@ -328,8 +328,8 @@ export const encryptStreamChunk = (
     inWorker()
         ? libsodium.encryptStreamChunk(data, state, isFinalChunk)
         : sharedWorker().then((w) =>
-              w.encryptStreamChunk(data, state, isFinalChunk),
-          );
+            w.encryptStreamChunk(data, state, isFinalChunk),
+        );
 
 /**
  * Decrypt a box encrypted using {@link encryptBox} and returns the decrypted
@@ -467,8 +467,8 @@ export const boxSealOpenBytes = (
     inWorker()
         ? libsodium.boxSealOpenBytes(encryptedData, keyPair)
         : sharedWorker().then((w) =>
-              w.boxSealOpenBytes(encryptedData, keyPair),
-          );
+            w.boxSealOpenBytes(encryptedData, keyPair),
+        );
 
 /**
  * Return a new randomly generated 128-bit salt (as a base64 string).
@@ -493,8 +493,8 @@ export const deriveKey = (
     inWorker()
         ? libsodium.deriveKey(passphrase, salt, opsLimit, memLimit)
         : sharedWorker().then((w) =>
-              w.deriveKey(passphrase, salt, opsLimit, memLimit),
-          );
+            w.deriveKey(passphrase, salt, opsLimit, memLimit),
+        );
 
 /**
  * Derive a sensitive key from the given {@link passphrase}.
@@ -537,15 +537,10 @@ export const deriveSubKeyBytes = async (
     inWorker()
         ? libsodium.deriveSubKeyBytes(key, subKeyLength, subKeyID, context)
         : sharedWorker().then((w) =>
-              w.deriveSubKeyBytes(key, subKeyLength, subKeyID, context),
-          );
+            w.deriveSubKeyBytes(key, subKeyLength, subKeyID, context),
+        );
 
-export const generateKeypairPQ = async (): Promise<KeyPair> => {
-    const keypair = inWorker()
-        ? wasm.crypto_generate_keypair_pq()
-        : await sharedWorker().then((w) => w.generateKeypairPQ());
-    return { publicKey: keypair.public_key, privateKey: keypair.secret_key };
-};
+export const generateKeypairPQ = async (): Promise<KeyPair> => inWorker() ? wasm.generateKeypairPQ() : sharedWorker().then((w) => w.generateKeypairPQ());
 
 /**
  * Post-quantum public key encryption.
@@ -553,11 +548,10 @@ export const generateKeypairPQ = async (): Promise<KeyPair> => {
 export const boxSealPQBytes = async (
     data: Uint8Array,
     publicKey: string,
-): Promise<string> => {
-    return inWorker()
-        ? wasm.crypto_box_seal_pq(await toB64(data), publicKey)
+): Promise<Uint8Array> =>
+    inWorker()
+        ? wasm.boxSealPQBytes(data, publicKey)
         : sharedWorker().then((w) => w.boxSealPQBytes(data, publicKey));
-};
 
 /**
  * Decrypt the result of {@link boxSealPQBytes}.
@@ -565,21 +559,8 @@ export const boxSealPQBytes = async (
 export const boxSealOpenPQBytes = async (
     encryptedData: string,
     keyPair: KeyPair,
-): Promise<Uint8Array> => {
-    if (inWorker()) {
-        return fromB64(
-            wasm.crypto_box_seal_open_pq(
-                encryptedData,
-                keyPair.publicKey,
-                keyPair.privateKey,
-            ),
+): Promise<Uint8Array> => inWorker()
+        ? wasm.boxSealOpenPQBytes(encryptedData, keyPair.publicKey, keyPair.privateKey)
+        : sharedWorker().then((w) =>
+            w.boxSealOpenPQBytes(encryptedData, keyPair.publicKey, keyPair.privateKey),
         );
-    }
-    return sharedWorker().then((w) =>
-        w.boxSealOpenPQBytes(
-            encryptedData,
-            keyPair.publicKey,
-            keyPair.privateKey,
-        ),
-    );
-};
