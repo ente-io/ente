@@ -10,7 +10,9 @@ pub mod blob;
 pub mod hash;
 pub mod kdf;
 pub mod keys;
+pub mod keys_pq;
 pub mod sealed;
+pub mod sealed_pq;
 pub mod secretbox;
 pub mod stream;
 

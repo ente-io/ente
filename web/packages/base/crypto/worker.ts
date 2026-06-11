@@ -1,5 +1,6 @@
 import { expose } from "comlink";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
+import * as wasm from "ente-wasm";
 import * as libsodium from "./libsodium";
 
 /**
@@ -47,6 +48,9 @@ export class CryptoWorker {
     deriveInteractiveKey = libsodium.deriveInteractiveKey;
     deriveModerateKey = libsodium.deriveModerateKey;
     deriveSubKeyBytes = libsodium.deriveSubKeyBytes;
+    generateKeypairPQ = wasm.crypto_generate_keypair_pq;
+    boxSealPQ = wasm.crypto_box_seal_pq;
+    boxSealOpenPQ = wasm.crypto_box_seal_open_pq;
 }
 
 expose(CryptoWorker);

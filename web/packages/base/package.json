@@ -21,7 +21,8 @@
         "react": "19.2.7",
         "react-dom": "19.2.7",
         "react-i18next": "16.6.6",
-        "zod": "4.4.3"
+        "zod": "4.4.3",
+        "ente-wasm": "*"
     },
     "devDependencies": {
         "@types/libsodium-wrappers-sumo": "0.7.8",
