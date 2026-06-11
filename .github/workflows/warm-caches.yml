@@ -133,6 +133,47 @@ jobs:
 
             - run: cargo test --features museum,pglite --locked --no-run
 
+    ensu-android:
+        # For ensu-android-build.yml.
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+            - name: Setup Rust cache
+              uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+              with:
+                  workspaces: rust
+                  shared-key: ensu-android
+
+            - run: cargo codegen native
+              working-directory: rust
+
+            - name: Build Ensu
+              working-directory: mobile/native/android/apps/ensu
+              run: ./gradlew :app-ui:assembleDebug
+
+    ensu-ios:
+        # For ensu-ios-build.yml.
+        runs-on: macos-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+            - name: Setup Rust cache
+              uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+              with:
+                  workspaces: rust
+                  shared-key: ensu-ios
+
+            - run: cargo codegen native
+              working-directory: rust
+
+            # Compile the app and tests without running them.
+            - name: Build Ensu
+              working-directory: mobile/native/darwin/Apps/Ensu
+              run: xcodebuild build-for-testing -scheme Ensu -destination 'platform=iOS Simulator,name=iPhone 17'
+
     go-server:
         # For server-lint.yml.
         runs-on: ubuntu-latest
