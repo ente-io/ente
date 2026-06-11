@@ -336,7 +336,7 @@ func (c *FileController) addOutstandingURLs(userID int64, n int) bool {
 	ok := total <= 250
 	if !ok {
 		go c.DiscordController.NotifyPotentialAbuse(fmt.Sprintf("Too many outstanding upload URLs for user %d", userID))
-		total = 0
+		total = 0 // so that stranded counts don't lock the user out
 	}
 	c.outstandingURLs[userID] = total
 	return ok
