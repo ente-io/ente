@@ -1,20 +1,23 @@
 #!/bin/sh
 
-# Runs the server test suite against a disposable Postgres database.
-# Uses a throwaway Docker Postgres by default; ENTE_TEST_POSTGRES=local
-# uses the existing local Postgres instead. See RUNNING.md.
+# Runs the server test suite against a disposable Postgres database on either:
+#
+# * docker - creates a temporary Postgres container in Docker;
+#
+# * host - uses the existing Postgres on localhost.
+#
+# See RUNNING.md for more details.
 
 set -eu
 
 cd "$(dirname "$0")/.."
 
 test_db="ente_test_$(date +%Y%m%d%H%M%S)_$$"
-mode="${ENTE_TEST_POSTGRES:-auto}"
+mode="${1:-}"
 
 case "$mode" in
-    auto) if docker info >/dev/null 2>&1; then mode=docker; else mode=local; fi ;;
-    docker | local) ;;
-    *) echo "Unsupported ENTE_TEST_POSTGRES=$mode. Use auto, docker, or local." >&2; exit 1 ;;
+    docker | host) shift ;;
+    *) echo "usage: $0 <docker|host> [go test flags]" >&2; exit 1 ;;
 esac
 
 if [ "$mode" = docker ]; then

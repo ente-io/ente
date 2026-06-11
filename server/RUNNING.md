@@ -232,11 +232,15 @@ For quick local iteration without Postgres-backed tests, run `go test ./...` or 
 To run the full `server/` Go test suite, including Postgres-backed tests, use:
 
 ```sh
-./scripts/test-with-postgres.sh
-./scripts/test-with-postgres.sh -v
+./scripts/test-with-postgres.sh docker
+./scripts/test-with-postgres.sh host -v
 ```
 
-The script creates a temporary `ente_test_*` database, runs the tests, and drops the database when it exits. By default it starts a disposable Docker Postgres if Docker is available. To use an existing local Postgres instead, set `ENTE_TEST_POSTGRES=local`.
+- `docker` runs the tests against a throwaway Docker Postgres
+- `host` runs them against the existing Postgres on your machine
+- any other args after `<docker|host>` are forwarded to the `go test` invocation
+
+The script creates a temporary `ente_test_*` database on the selected Postgres instance, runs the tests, and drops the database when it exits.
 
 ## Configuration
 

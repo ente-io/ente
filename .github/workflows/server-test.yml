@@ -32,4 +32,4 @@ jobs:
                   cache: true
 
             - name: Run server tests
-              run: ./scripts/test-with-postgres.sh
+              run: ./scripts/test-with-postgres.sh docker
