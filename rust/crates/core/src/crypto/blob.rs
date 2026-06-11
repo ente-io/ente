@@ -385,7 +385,7 @@ mod tests {
         let plaintext = b"Original data";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
-        let mut corrupted = encrypted.clone();
+        let mut corrupted = encrypted;
 
         // Corrupt a byte in the encrypted data
         corrupted.encrypted_data[10] ^= 1;

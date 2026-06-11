@@ -100,33 +100,6 @@ impl fmt::Debug for GeneratedSrpSetup {
     }
 }
 
-fn decrypt_keys_only_secure(
-    kek: &[u8],
-    key_attrs: &KeyAttributes,
-) -> Result<(SecretVec, SecretVec)> {
-    let encrypted_key = crypto::decode_b64(&key_attrs.encrypted_key)
-        .map_err(|e| AuthError::Decode(format!("encrypted_key: {}", e)))?;
-    let key_nonce = crypto::decode_b64(&key_attrs.key_decryption_nonce)
-        .map_err(|e| AuthError::Decode(format!("key_decryption_nonce: {}", e)))?;
-
-    let master_key = SecretVec::new(
-        secretbox::decrypt(&encrypted_key, &key_nonce, kek)
-            .map_err(|_| AuthError::IncorrectPassword)?,
-    );
-
-    let encrypted_secret_key = crypto::decode_b64(&key_attrs.encrypted_secret_key)
-        .map_err(|e| AuthError::Decode(format!("encrypted_secret_key: {}", e)))?;
-    let secret_key_nonce = crypto::decode_b64(&key_attrs.secret_key_decryption_nonce)
-        .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
-
-    let secret_key = SecretVec::new(
-        secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
-            .map_err(|_| AuthError::InvalidKeyAttributes)?,
-    );
-
-    Ok((master_key, secret_key))
-}
-
 /// Derive SRP credentials from password.
 ///
 /// This is the first step in the SRP login flow. Call this after password entry
@@ -239,7 +212,27 @@ pub fn generate_srp_setup_with_login_key(
 /// Use this when you only need access to the decrypted keys (e.g. when the
 /// auth token comes from a different source than a sealed box).
 pub fn decrypt_keys_only(kek: &[u8], key_attrs: &KeyAttributes) -> Result<(SecretVec, SecretVec)> {
-    decrypt_keys_only_secure(kek, key_attrs)
+    let encrypted_key = crypto::decode_b64(&key_attrs.encrypted_key)
+        .map_err(|e| AuthError::Decode(format!("encrypted_key: {}", e)))?;
+    let key_nonce = crypto::decode_b64(&key_attrs.key_decryption_nonce)
+        .map_err(|e| AuthError::Decode(format!("key_decryption_nonce: {}", e)))?;
+
+    let master_key = SecretVec::new(
+        secretbox::decrypt(&encrypted_key, &key_nonce, kek)
+            .map_err(|_| AuthError::IncorrectPassword)?,
+    );
+
+    let encrypted_secret_key = crypto::decode_b64(&key_attrs.encrypted_secret_key)
+        .map_err(|e| AuthError::Decode(format!("encrypted_secret_key: {}", e)))?;
+    let secret_key_nonce = crypto::decode_b64(&key_attrs.secret_key_decryption_nonce)
+        .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
+
+    let secret_key = SecretVec::new(
+        secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
+            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+    );
+
+    Ok((master_key, secret_key))
 }
 
 /// Decrypt secrets after successful authentication.
@@ -259,7 +252,7 @@ pub fn decrypt_secrets(
     key_attrs: &KeyAttributes,
     encrypted_token: &str,
 ) -> Result<DecryptedSecrets> {
-    let (master_key, secret_key) = decrypt_keys_only_secure(kek, key_attrs)?;
+    let (master_key, secret_key) = decrypt_keys_only(kek, key_attrs)?;
 
     // Decrypt token with sealed box (public key crypto)
     let public_key = crypto::decode_b64(&key_attrs.public_key)
@@ -483,7 +476,7 @@ mod tests {
             srp_salt: crypto::encode_b64(&[0u8; 16]),
             mem_limit: gen_result.key_attributes.mem_limit.unwrap(),
             ops_limit: gen_result.key_attributes.ops_limit.unwrap(),
-            kek_salt: gen_result.key_attributes.kek_salt.clone(),
+            kek_salt: gen_result.key_attributes.kek_salt,
             is_email_mfa_enabled: false,
         };
 

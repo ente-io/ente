@@ -66,6 +66,7 @@ use std::{
     fmt,
     ops::{Deref, DerefMut},
 };
+use subtle::ConstantTimeEq;
 use zeroize::Zeroize;
 
 mod error;
@@ -98,8 +99,23 @@ pub fn init() -> Result<()> {
 /// `SecretVec` zeroizes its contents on drop and requires an explicit
 /// [`SecretVec::into_vec`] when crossing out of the trusted Rust layer.
 #[repr(transparent)]
-#[derive(Default, Eq, PartialEq, Hash)]
+#[derive(Default)]
 pub struct SecretVec(Vec<u8>);
+
+impl PartialEq for SecretVec {
+    /// Constant-time comparison (the length itself is not hidden).
+    fn eq(&self, other: &Self) -> bool {
+        self.0.ct_eq(&other.0).into()
+    }
+}
+
+impl Eq for SecretVec {}
+
+impl std::hash::Hash for SecretVec {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+    }
+}
 
 impl SecretVec {
     /// Wrap a byte vector so it is zeroized on drop.
@@ -168,8 +184,23 @@ impl Drop for SecretVec {
 /// `SecretString` zeroizes its contents on drop and requires an explicit
 /// [`SecretString::into_string`] when crossing out of the trusted Rust layer.
 #[repr(transparent)]
-#[derive(Default, Eq, PartialEq, Hash)]
+#[derive(Default)]
 pub struct SecretString(String);
+
+impl PartialEq for SecretString {
+    /// Constant-time comparison (the length itself is not hidden).
+    fn eq(&self, other: &Self) -> bool {
+        self.0.as_bytes().ct_eq(other.0.as_bytes()).into()
+    }
+}
+
+impl Eq for SecretString {}
+
+impl std::hash::Hash for SecretString {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+    }
+}
 
 impl SecretString {
     /// Wrap a string so it is zeroized on drop.

@@ -415,7 +415,7 @@ impl HttpClient {
     }
 
     /// POST JSON request.
-    pub async fn post_json<T: DeserializeOwned, B: Serialize + ?Sized>(
+    pub async fn post_json<T: DeserializeOwned, B: Serialize + Sync + ?Sized>(
         &self,
         path: &str,
         body: &B,
@@ -437,7 +437,7 @@ impl HttpClient {
     }
 
     /// POST JSON request expecting an empty response body.
-    pub async fn post_empty<B: Serialize + ?Sized>(
+    pub async fn post_empty<B: Serialize + Sync + ?Sized>(
         &self,
         path: &str,
         body: &B,
@@ -459,7 +459,7 @@ impl HttpClient {
     }
 
     /// PUT JSON request.
-    pub async fn put_json<T: DeserializeOwned, B: Serialize + ?Sized>(
+    pub async fn put_json<T: DeserializeOwned, B: Serialize + Sync + ?Sized>(
         &self,
         path: &str,
         body: &B,
@@ -481,7 +481,7 @@ impl HttpClient {
     }
 
     /// PUT JSON request expecting an empty response body.
-    pub async fn put_empty<B: Serialize + ?Sized>(
+    pub async fn put_empty<B: Serialize + Sync + ?Sized>(
         &self,
         path: &str,
         body: &B,
