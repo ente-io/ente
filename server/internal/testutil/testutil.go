@@ -18,11 +18,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const testDBDSN = "user=test_user password=test_pass host=localhost dbname=ente_test_db sslmode=disable"
-const testDBName = "ente_test_db"
-const testDBUser = "test_user"
-const testDBSentinelTable = "ente_test_db_sentinel"
-const testDBSentinelMarker = "ente-server-test-db-v1"
+const testDBDSN = "sslmode=disable"
+const testDBNamePrefix = "ente_test_"
 
 var (
 	testDBInitOnce sync.Once
@@ -70,6 +67,11 @@ func RequireTestDB(t *testing.T) *sql.DB {
 	}
 
 	testDBInitOnce.Do(func() {
+		testDBName, err := expectedTestDBName()
+		if err != nil {
+			testDBErr = err
+			return
+		}
 		testDB, testDBErr = sql.Open("postgres", testDBDSN)
 		if testDBErr != nil {
 			return
@@ -91,7 +93,7 @@ func RequireTestDB(t *testing.T) *sql.DB {
 
 		migrationPath := "file://" + filepath.Join(serverRootPath())
 		migrationPath = migrationPath + "/migrations"
-		mig, err := migrate.NewWithDatabaseInstance(migrationPath, "ente_test_db", driver)
+		mig, err := migrate.NewWithDatabaseInstance(migrationPath, testDBName, driver)
 		if err != nil {
 			testDBErr = err
 			return
@@ -138,26 +140,44 @@ func ResetTables(t *testing.T, db *sql.DB) {
 }
 
 func verifySafeTestDB(db *sql.DB) error {
-	var currentDBName, currentDBUser string
-	err := db.QueryRow(`SELECT current_database(), current_user`).Scan(&currentDBName, &currentDBUser)
+	expectedDBName, err := expectedTestDBName()
+	if err != nil {
+		return err
+	}
+
+	var currentDBName string
+	err = db.QueryRow(`SELECT current_database()`).Scan(&currentDBName)
 	if err != nil {
 		return fmt.Errorf("failed to verify test database identity: %w", err)
 	}
-	if currentDBName != testDBName {
-		return fmt.Errorf("expected test database %q, connected to %q", testDBName, currentDBName)
-	}
-	if currentDBUser != testDBUser {
-		return fmt.Errorf("expected test database user %q, connected as %q", testDBUser, currentDBUser)
-	}
-	var marker string
-	err = db.QueryRow(fmt.Sprintf(`SELECT marker FROM public.%s WHERE id = 1`, testDBSentinelTable)).Scan(&marker)
-	if err != nil {
-		return fmt.Errorf("missing test database sentinel in %q: run ./scripts/setup-test-db.sh or use the docker test runner: %w", testDBName, err)
-	}
-	if marker != testDBSentinelMarker {
-		return fmt.Errorf("unexpected test database sentinel marker %q", marker)
+	if currentDBName != expectedDBName {
+		return fmt.Errorf("expected test database %q, connected to %q", expectedDBName, currentDBName)
 	}
 	return nil
+}
+
+func expectedTestDBName() (string, error) {
+	dbName := os.Getenv("PGDATABASE")
+	if dbName == "" {
+		return "", fmt.Errorf("PGDATABASE must be set when ENV=test")
+	}
+	if !isTemporaryTestDBName(dbName) {
+		return "", fmt.Errorf("refusing to use non-temporary test database %q", dbName)
+	}
+	return dbName, nil
+}
+
+func isTemporaryTestDBName(dbName string) bool {
+	if dbName == "ente_test_db" || !strings.HasPrefix(dbName, testDBNamePrefix) || len(dbName) == len(testDBNamePrefix) {
+		return false
+	}
+	for _, r := range dbName {
+		if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_' {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func WithServerRoot(t *testing.T) {

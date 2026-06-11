@@ -227,28 +227,20 @@ air
 
 ### Testing
 
-Set up a local database for testing. This is not required for running the server. Create a test database with the following name and credentials:
+For quick local iteration without Postgres-backed tests, run `go test ./...` or a narrower package like `go test ./pkg/controller/email`. Tests that require Postgres skip unless the test environment is explicitly enabled.
 
-```sql
-$ psql -U postgres
-CREATE DATABASE ente_test_db;
-CREATE USER test_user WITH PASSWORD 'test_pass';
-GRANT ALL PRIVILEGES ON DATABASE ente_test_db TO test_user;
-```
-
-For running the tests, you can use the following command:
+To run the full `server/` Go test suite, including Postgres-backed tests, use:
 
 ```sh
-ENV="test" go test -v ./pkg/...
-go clean -testcache  && ENV="test" go test -v ./pkg/...
+./scripts/test-with-postgres.sh docker
+./scripts/test-with-postgres.sh host -v
 ```
 
-To run the full `server/` Go test suite inside Docker instead of relying on a host Postgres setup, use:
+- `docker` runs the tests against a throwaway Docker Postgres
+- `host` runs them against the existing Postgres on your machine
+- any other args after `<docker|host>` are forwarded to the `go test` invocation
 
-```sh
-./scripts/test-in-docker.sh
-./scripts/test-in-docker.sh -v
-```
+The script creates a temporary `ente_test_*` database on the selected Postgres instance, runs the tests, and drops the database when it exits.
 
 ## Configuration
 

@@ -1,14 +1,17 @@
 name: "Lint (Server)"
 
 on:
-    # Run on every pull request (open or push to it) that changes server/
     pull_request:
         paths:
-            - "server/**"
             - ".github/workflows/server-lint.yml"
+            - "server/**"
 
 permissions:
     contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
     lint:
@@ -27,8 +30,8 @@ jobs:
                   cache-dependency-path: server/go.sum
                   cache: true
 
-            - name: Install dependencies
-              run: sudo apt-get update && sudo apt-get install libsodium-dev
-
             - name: Lint
-              run: "./scripts/lint.sh"
+              run: ./scripts/lint.sh
+
+            - name: Test
+              run: ./scripts/test-with-postgres.sh docker
