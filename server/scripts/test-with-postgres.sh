@@ -41,9 +41,11 @@ if [ "$mode" = docker ]; then
     done
     export PGHOST=localhost PGPORT="$port" PGUSER=postgres PGPASSWORD=test_pass
 else
-    # psql defaults to the unix socket while lib/pq defaults to TCP
-    # localhost; pin both to the same server.
-    [ -n "${PGHOST:-}" ] || export PGHOST=localhost
+    [ -z "${PGHOST:-}${PGHOSTADDR:-}${PGPORT:-}${PGSERVICE:-}${PGSERVICEFILE:-}" ] || {
+        echo "host mode always uses the default local Postgres; unset PG* env." >&2
+        exit 1
+    }
+    export PGHOST=localhost
     psql -qd postgres -c "CREATE DATABASE \"$test_db\""
     trap 'psql -qd postgres -c "DROP DATABASE IF EXISTS \"$test_db\" WITH (FORCE)" >/dev/null 2>&1 || true' EXIT INT TERM
 fi
