@@ -12,9 +12,10 @@ description: Set up Linux system authentication for Ente Auth desktop
 > guide.
 
 Ente Auth uses Polkit to ask your Linux desktop to authenticate the current
-user. Polkit then uses your host PAM configuration, so the prompt may accept
-your account password, fingerprint, or another method configured by your
-distribution.
+user. Ente Auth does not choose whether the prompt asks for a password,
+fingerprint, or another method. Polkit uses your host PAM configuration, so
+fingerprint unlock is offered only when fingerprint authentication is configured
+for Polkit on your system.
 
 ## Register the Polkit Policy
 
@@ -44,28 +45,28 @@ policy="$(mktemp)"
 
 if curl -fsSL "$policy_url" -o "$policy" &&
   printf "%s  %s\n" "$policy_sha256" "$policy" | sha256sum -c -; then
- 
+
   # Use /etc on immutable distros (read-only /usr), /usr/share on traditional ones
   if findmnt -n -o OPTIONS --target /usr/share/polkit-1/actions 2>/dev/null | grep -qw ro; then
      install_path="/etc/polkit-1/actions/com.ente.auth.policy"
   else
      install_path="/usr/share/polkit-1/actions/com.ente.auth.policy"
   fi
- 
+
   sudo install -D -o root -g root -m 0644 "$policy" "$install_path"
- 
+
   if command -v restorecon >/dev/null 2>&1; then
     sudo restorecon -v "$install_path" || true
   fi
- 
+
   # Give polkit time to pick up the new action via inotify
   sleep 1
- 
+
   pkaction --action-id com.ente.auth.unlock --verbose
 else
   echo "Policy download or checksum verification failed. Not installing."
 fi
- 
+
 rm -f "$policy"
 ```
 
@@ -87,15 +88,16 @@ The Polkit policy only registers Ente Auth as an application that can request
 system authentication. Password versus fingerprint is controlled by your Linux
 PAM and fprintd setup.
 
-On Ubuntu, if password authentication works but fingerprint is not offered:
+If fingerprint authentication is configured for Polkit, Ente Auth should offer
+it automatically, like other Polkit-based apps. Ente Auth does not install or
+edit `/etc/pam.d/polkit-1`, because that file is system-wide and
+distro-specific.
 
-```sh
-fprintd-list "$USER"
-sudo apt install fprintd libpam-fprintd
-sudo pam-auth-update
-grep -n "pam_fprintd" /etc/pam.d/common-auth
-cat /etc/pam.d/polkit-1
-```
+If password authentication works but fingerprint is not offered, configure
+fingerprint authentication for Polkit using your distro's documentation. On
+Ubuntu or Debian, this is usually handled through `fprintd`, `libpam-fprintd`,
+and `pam-auth-update`.
 
-Enable **Fingerprint authentication** in `pam-auth-update`. Polkit should route
-through `common-auth`; otherwise `/etc/pam.d/polkit-1` may remain password-only.
+Some distros route Polkit through `/etc/pam.d/polkit-1`; others include shared
+PAM profiles such as `common-auth`. Check your distro's PAM documentation before
+editing these files.
