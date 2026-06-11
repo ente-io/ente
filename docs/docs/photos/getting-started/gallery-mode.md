@@ -77,7 +77,7 @@ Create an Ente account at any time without losing your local data.
 After signing up:
 
 - Device folders become available for backup selection
-- ML indexes built in gallery mode are preserved
+- ML and magic search will only run for backed up photos; indexes built in gallery mode are not preserved
 - All cloud features (sharing, cross-device sync, etc.) become available
 - The Sharing tab shows shared albums instead of the gallery mode placeholder
 
