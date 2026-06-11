@@ -23,6 +23,19 @@ import "package:photos/ui/social/widgets/collection_selector_widget.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
 
+typedef _CommentDraftFileKey = ({int fileID, int userID});
+typedef _CommentDraftKey = ({int collectionID, int fileID, int userID});
+
+final Map<_CommentDraftKey, _CommentDraft> _commentDrafts = {};
+final Map<_CommentDraftFileKey, int> _lastSelectedDraftCollectionIDs = {};
+
+class _CommentDraft {
+  final String text;
+  final Comment? replyingTo;
+
+  const _CommentDraft({required this.text, required this.replyingTo});
+}
+
 /// Shows the file comments bottom sheet
 Future<void> showFileCommentsBottomSheet(
   BuildContext context, {
@@ -160,10 +173,13 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
     super.initState();
     unawaited(SocialNotificationCoordinator.instance.markSocialSeen());
     _textController = TextEditingController();
+    _textController.addListener(_saveOrClearDraft);
     _inputFocusNode = FocusNode()..addListener(_onInputFocusChange);
     _scrollController = ScrollController()..addListener(_onScroll);
     _currentUserID = Configuration.instance.getUserID()!;
-    _selectedCollectionID = widget.collectionID;
+    _selectedCollectionID = _canRestoreDraftCollection
+        ? _lastSelectedDraftCollectionIDs[_draftFileKey] ?? widget.collectionID
+        : widget.collectionID;
     _highlightedCommentID = widget.highlightCommentID;
     _loadSharedCollections();
   }
@@ -181,6 +197,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   @override
   void dispose() {
     _sendLoadingTimer?.cancel();
+    _textController.removeListener(_saveOrClearDraft);
     _textController.dispose();
     _inputFocusNode.removeListener(_onInputFocusChange);
     _inputFocusNode.dispose();
@@ -237,16 +254,25 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
         return;
       }
 
-      final isSelectedInShared = sharedCollections.any(
-        (info) => info.collection.id == _selectedCollectionID,
-      );
+      final savedSelectedCollectionID =
+          _lastSelectedDraftCollectionIDs[_draftFileKey];
+      final nextSelectedCollectionID =
+          _canRestoreDraftCollection &&
+              savedSelectedCollectionID != null &&
+              sharedCollections.any(
+                (info) => info.collection.id == savedSelectedCollectionID,
+              )
+          ? savedSelectedCollectionID
+          : sharedCollections.any(
+              (info) => info.collection.id == _selectedCollectionID,
+            )
+          ? _selectedCollectionID
+          : sharedCollections.first.collection.id;
 
       setState(() {
         _sharedCollections = sharedCollections;
-
-        if (!isSelectedInShared) {
-          _selectedCollectionID = sharedCollections.first.collection.id;
-        }
+        _selectedCollectionID = nextSelectedCollectionID;
+        _restoreDraftForSelectedCollection();
       });
 
       unawaited(_loadInitialComments());
@@ -488,8 +514,10 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   }
 
   void _onCollectionSelected(int collectionID) {
+    _saveOrClearDraft();
     setState(() {
       _selectedCollectionID = collectionID;
+      _restoreDraftForSelectedCollection();
       _comments.clear();
       _offset = 0;
       _hasMoreComments = true;
@@ -509,6 +537,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
 
   void _onReplyTap(Comment comment) {
     setState(() => _replyingTo = comment);
+    _saveOrClearDraft();
     _inputFocusNode.requestFocus();
   }
 
@@ -523,11 +552,14 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
 
   void _dismissReply() {
     setState(() => _replyingTo = null);
+    _saveOrClearDraft();
   }
 
   Future<void> _sendComment() async {
     final text = _textController.text.trim();
     if (text.isEmpty || _sendState != SendButtonState.idle) return;
+    final collectionID = _selectedCollectionID;
+    final replyingTo = _replyingTo;
 
     // Mark as sending internally (blocks duplicate sends) but don't show UI yet
     _sendState = SendButtonState.sending;
@@ -541,10 +573,10 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
 
     try {
       final result = await SocialDataProvider.instance.addComment(
-        collectionID: _selectedCollectionID,
+        collectionID: collectionID,
         text: text,
         fileID: widget.fileID,
-        parentCommentID: _replyingTo?.id,
+        parentCommentID: replyingTo?.id,
       );
       _sendLoadingTimer?.cancel();
 
@@ -555,15 +587,20 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
       }
 
       // Update UI only after successful persistence
+      _clearDraftForCollection(collectionID);
       if (mounted) {
         setState(() {
           _sendState = SendButtonState.idle;
-          _comments.insert(0, result);
-          _replyingTo = null;
+          if (_selectedCollectionID == collectionID) {
+            _comments.insert(0, result);
+            if (_replyingTo?.id == replyingTo?.id) {
+              _replyingTo = null;
+            }
+          }
 
           // Update comment count in shared collections list
           final index = _sharedCollections.indexWhere(
-            (c) => c.collection.id == _selectedCollectionID,
+            (c) => c.collection.id == collectionID,
           );
           if (index != -1) {
             final old = _sharedCollections[index];
@@ -574,10 +611,13 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
             );
           }
         });
-        _textController.clear();
+        if (_selectedCollectionID == collectionID) {
+          _textController.clear();
+        }
 
         // Scroll to the newly added comment (position 0 in reversed list)
-        if (_scrollController.hasClients) {
+        if (_selectedCollectionID == collectionID &&
+            _scrollController.hasClients) {
           unawaited(
             _scrollController.animateTo(
               0,
@@ -635,6 +675,70 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
           orElse: () => _sharedCollections.first,
         )
         .collection;
+  }
+
+  _CommentDraftFileKey get _draftFileKey =>
+      (userID: _currentUserID, fileID: widget.fileID);
+
+  bool get _canRestoreDraftCollection => widget.highlightCommentID == null;
+
+  _CommentDraftKey get _draftKey => (
+    userID: _currentUserID,
+    fileID: widget.fileID,
+    collectionID: _selectedCollectionID,
+  );
+
+  _CommentDraftKey _draftKeyForCollection(int collectionID) => (
+    userID: _currentUserID,
+    fileID: widget.fileID,
+    collectionID: collectionID,
+  );
+
+  void _restoreDraftForSelectedCollection() {
+    final draft = _commentDrafts[_draftKey];
+    final text = draft?.text ?? '';
+    _replyingTo = draft?.replyingTo;
+    _textController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+
+  void _saveOrClearDraft() {
+    if (_textController.text.isEmpty && _replyingTo == null) {
+      _removeDraftForCollection(_selectedCollectionID);
+      return;
+    }
+    _lastSelectedDraftCollectionIDs[_draftFileKey] = _selectedCollectionID;
+    _commentDrafts[_draftKey] = _CommentDraft(
+      text: _textController.text,
+      replyingTo: _replyingTo,
+    );
+  }
+
+  void _clearDraftForCollection(int collectionID) {
+    _removeDraftForCollection(collectionID);
+  }
+
+  void _removeDraftForCollection(int collectionID) {
+    _commentDrafts.remove(_draftKeyForCollection(collectionID));
+    if (_lastSelectedDraftCollectionIDs[_draftFileKey] == collectionID) {
+      final nextCollectionID = _firstDraftCollectionIDForFile();
+      if (nextCollectionID == null) {
+        _lastSelectedDraftCollectionIDs.remove(_draftFileKey);
+      } else {
+        _lastSelectedDraftCollectionIDs[_draftFileKey] = nextCollectionID;
+      }
+    }
+  }
+
+  int? _firstDraftCollectionIDForFile() {
+    for (final key in _commentDrafts.keys) {
+      if (key.userID == _currentUserID && key.fileID == widget.fileID) {
+        return key.collectionID;
+      }
+    }
+    return null;
   }
 
   Widget _buildHeader(BuildContext context) {
