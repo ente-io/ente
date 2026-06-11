@@ -1,0 +1,1 @@
+- Added a way to view and delete Auth codes that could not be parsed.

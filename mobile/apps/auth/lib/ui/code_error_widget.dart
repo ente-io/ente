@@ -86,9 +86,7 @@ class CodeErrorWidget extends StatelessWidget {
                         await showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            return RawCodesViewer(
-                              errors.map((e) => e.rawData).join('\n'),
-                            );
+                            return RawCodesViewer(errors);
                           },
                           barrierColor: Colors.black87,
                           barrierDismissible: false,
