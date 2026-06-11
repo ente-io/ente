@@ -1739,7 +1739,9 @@ class _HomePageState extends State<HomePage> {
     final crossAxisCount = _calculateGridColumnCount(context);
     _currentGridColumns = crossAxisCount;
     final double keyboardInset = MediaQuery.of(context).viewInsets.bottom;
-    final double gridBottomPadding = 80 + (_showSearchBox ? keyboardInset : 0);
+    final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final double gridBottomPadding =
+        80 + bottomSafeArea + (_showSearchBox ? keyboardInset : 0);
     if (_hasLoaded) {
       final bool noCodesAnywhere = !hasNonTrashedCodes && !hasTrashedCodes;
       if (_filteredCodes.isEmpty && _searchText.isEmpty && noCodesAnywhere) {
