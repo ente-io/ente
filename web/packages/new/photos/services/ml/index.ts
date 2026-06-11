@@ -26,7 +26,7 @@ import {
     type CGroup,
 } from "../user-entity";
 import { deleteUserEntity } from "../user-entity/remote";
-import type { FaceCluster } from "./cluster";
+import type { ClusterFacesReason, FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import {
     clearMLDB,
@@ -232,7 +232,7 @@ export const enableML = async () => {
     setInterimScheduledStatus();
     resetPeopleStateSnapshot();
     // Trigger updates, but don't wait for them to finish.
-    void updateMLStatusSnapshot().then(mlSync);
+    void updateMLStatusSnapshot().then(() => mlSync("enable-ml"));
 };
 
 /**
@@ -349,7 +349,7 @@ export const pullMLStatus = async () => {
  * This will only have an effect if {@link pullMLStatus} has been called at
  * least once prior to calling this in the pull sequence.
  */
-export const mlSync = async () => {
+export const mlSync = async (reason: ClusterFacesReason = "ml-sync") => {
     if (!_state.isMLEnabled) return;
     if (_state.isSyncing) return;
     _state.isSyncing = true;
@@ -369,19 +369,19 @@ export const mlSync = async () => {
     // Fetch indexes, or index locally if needed.
     await worker().then((w) => w.index());
 
-    await updateClustersAndPeople();
+    await updateClustersAndPeople(reason);
 
     _state.isSyncing = false;
 };
 
-const updateClustersAndPeople = async () => {
+const updateClustersAndPeople = async (reason: ClusterFacesReason) => {
     const masterKey = await ensureMasterKeyFromSession();
 
     // Fetch existing cgroups from remote.
     await pullUserEntities("cgroup", masterKey);
 
     // Generate or update local clusters.
-    await (await worker()).clusterFaces(masterKey);
+    await (await worker()).clusterFaces(masterKey, reason);
 
     // Update the people shown in the UI.
     await updatePeopleState();
@@ -407,7 +407,8 @@ const debounceUpdateClustersAndPeople = pDebounce(
     30 * 1e3,
 );
 
-const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
+const workerDidUnawaitedIndex = () =>
+    void debounceUpdateClustersAndPeople("live-upload-index");
 
 /**
  * Run indexing on a file which was uploaded from this client.
@@ -789,7 +790,7 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
         },
         await ensureMasterKeyFromSession(),
     );
-    await mlSync();
+    await mlSync("add-cgroup");
     return id;
 };
 
@@ -820,7 +821,7 @@ export const addClusterToCGroup = async (
         [{ ...cgroup, data: { ...cgroup.data, assigned, rejectedFaceIDs } }],
         await ensureMasterKeyFromSession(),
     );
-    return mlSync();
+    return mlSync("add-cluster-to-cgroup");
 };
 
 /**
@@ -837,7 +838,7 @@ export const renameCGroup = async (cgroup: CGroup, name: string) => {
         [{ ...cgroup, data: { ...cgroup.data, name } }],
         await ensureMasterKeyFromSession(),
     );
-    return mlSync();
+    return mlSync("rename-cgroup");
 };
 
 /**
@@ -847,7 +848,7 @@ export const renameCGroup = async (cgroup: CGroup, name: string) => {
  */
 export const deleteCGroup = async ({ id }: CGroup) => {
     await deleteUserEntity(id);
-    return mlSync();
+    return mlSync("delete-cgroup");
 };
 
 /**
@@ -859,7 +860,7 @@ export const setCGroupPinned = async (cgroup: CGroup, isPinned: boolean) => {
         [{ ...cgroup, data: { ...cgroup.data, isPinned } }],
         await ensureMasterKeyFromSession(),
     );
-    return mlSync();
+    return mlSync("set-cgroup-pinned");
 };
 
 export const pinCGroup = async (cgroup: CGroup) =>
@@ -978,7 +979,7 @@ export const applyPersonSuggestionUpdates = async (
         updates,
         await ensureMasterKeyFromSession(),
     );
-    return mlSync();
+    return mlSync("apply-person-suggestion-updates");
 };
 
 /**
@@ -1001,5 +1002,5 @@ export const ignoreCluster = async (cluster: FaceCluster) => {
         },
         await ensureMasterKeyFromSession(),
     );
-    return mlSync();
+    return mlSync("ignore-cluster");
 };

@@ -26,6 +26,7 @@ import {
 import {
     _clusterFaces,
     reconcileClusters,
+    type ClusterFacesReason,
     type ClusteringProgress,
 } from "./cluster";
 import { saveFaceCrops } from "./crop";
@@ -321,11 +322,12 @@ export class MLWorker {
      * @param masterKey The user's master key (as a base64 string), required for
      * updating remote cgroups if needed.
      */
-    async clusterFaces(masterKey: string) {
+    async clusterFaces(masterKey: string, reason: ClusterFacesReason) {
         const { clusters, modifiedClusterIDs } = await _clusterFaces(
             await savedFaceIndexes(),
             await savedCollectionFiles(),
             (progress) => this.updateClusteringProgress(progress),
+            reason,
         );
         await reconcileClusters(clusters, modifiedClusterIDs, masterKey);
         this.updateClusteringProgress(undefined);

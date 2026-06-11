@@ -1587,7 +1587,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 
     const handleRemotePull = useCallback(
         () =>
-            onRemotePull ? onRemotePull({ silent: true }) : Promise.resolve(),
+            onRemotePull
+                ? onRemotePull({ silent: true, source: "map-dialog" })
+                : Promise.resolve(),
         [onRemotePull],
     );
     const visualFeedback = useMemo(() => onVisualFeedback, [onVisualFeedback]);

@@ -600,7 +600,7 @@ const Page: React.FC = () => {
             }
 
             // Fetch data from remote (this will include the newly joined album if any)
-            await remotePull();
+            await remotePull({ source: "gallery-mount" });
 
             // Navigate directly to the joined album
             if (joinedAlbumId) {
@@ -615,13 +615,13 @@ const Page: React.FC = () => {
 
             // Start the interval that does a periodic pull.
             syncIntervalID = setInterval(
-                () => remotePull({ silent: true }),
+                () => remotePull({ silent: true, source: "gallery-periodic" }),
                 5 * 60 * 1000 /* 5 minutes */,
             );
 
             if (electron) {
                 unsubscribeMainWindowFocus = subscribeMainWindowFocus(() => {
-                    remotePull({ silent: true });
+                    remotePull({ silent: true, source: "desktop-focus" });
                     void watcher.checkAccessibility();
                 });
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
@@ -896,7 +896,7 @@ const Page: React.FC = () => {
     const remotePull = useCallback(
         async (opts?: RemotePullOpts) =>
             remotePullQueue.current.add(async () => {
-                const { silent } = opts ?? {};
+                const { silent, source } = opts ?? {};
 
                 // Pre-flight checks.
                 if (!navigator.onLine) return;
@@ -915,7 +915,7 @@ const Page: React.FC = () => {
                     if (!silent) showLoadingBar();
                     await prePullFiles();
                     await remoteFilesPull();
-                    await postPullFiles();
+                    await postPullFiles(source);
                 } catch (e) {
                     log.error("Remote pull failed", e);
                 } finally {
@@ -964,7 +964,10 @@ const Page: React.FC = () => {
                 );
                 notifyOthersFiles = processedCount != selectedFiles.length;
                 clearSelection();
-                await remotePull({ silent: true });
+                await remotePull({
+                    silent: true,
+                    source: "remove-from-collection",
+                });
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -1006,7 +1009,10 @@ const Page: React.FC = () => {
                         showMiniDialog(notifyOthersFilesDialogAttributes());
                     }
                     clearSelection();
-                    await remotePull({ silent: true });
+                    await remotePull({
+                        silent: true,
+                        source: `collection-op:${op}`,
+                    });
                 } finally {
                     hideLoadingBar();
                 }
@@ -1072,7 +1078,10 @@ const Page: React.FC = () => {
                         pendingSingleFileAdd.current.sourceCollectionSummaryID,
                     );
 
-                    await remotePull({ silent: true });
+                    await remotePull({
+                        silent: true,
+                        source: "single-file-add-new-album",
+                    });
                     // Show custom toast with album name and navigation
                     setAddToAlbumProgress({
                         open: true,
@@ -1216,7 +1225,10 @@ const Page: React.FC = () => {
                         setPublicLinkToast({ open: true, url: resolvedURL });
 
                         clearSelection();
-                        await remotePull({ silent: true });
+                        await remotePull({
+                            silent: true,
+                            source: "selected-files-quick-link",
+                        });
                         return;
                     }
 
@@ -1235,7 +1247,10 @@ const Page: React.FC = () => {
                             await handleFavoriteFileOp(op, selectedFiles);
                         clearSelection();
                         if (processed) {
-                            await remotePull({ silent: true });
+                            await remotePull({
+                                silent: true,
+                                source: `file-op:${op}`,
+                            });
                         }
                         if (skippedUnsupportedSharedFile) {
                             showMiniDialog(
@@ -1280,7 +1295,7 @@ const Page: React.FC = () => {
                         showMiniDialog(notifyOthersFilesDialogAttributes());
                     }
                     clearSelection();
-                    await remotePull({ silent: true });
+                    await remotePull({ silent: true, source: `file-op:${op}` });
                 } catch (e) {
                     onGenericError(e);
                 } finally {
@@ -1351,7 +1366,7 @@ const Page: React.FC = () => {
                     location.longitude,
                 );
             }
-            void remotePull({ silent: true });
+            void remotePull({ silent: true, source: "edit-location" });
         },
         [selectedFilesInView, user, remotePull],
     );
@@ -1560,7 +1575,7 @@ const Page: React.FC = () => {
                     customDomain,
                 );
                 setPublicLinkToast({ open: true, url: resolvedURL });
-                await remotePull({ silent: true });
+                await remotePull({ silent: true, source: "viewer-send-link" });
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -1627,7 +1642,10 @@ const Page: React.FC = () => {
             showLoadingBar();
             try {
                 await updateCollectionCover(activeCollection, coverID);
-                await remotePull({ silent: true });
+                await remotePull({
+                    silent: true,
+                    source: "update-collection-cover",
+                });
                 return true;
             } catch (e) {
                 onGenericError(e);
@@ -1887,7 +1905,10 @@ const Page: React.FC = () => {
                         [file],
                         sourceCollectionSummaryID,
                     );
-                    await remotePull({ silent: true });
+                    await remotePull({
+                        silent: true,
+                        source: "single-file-add-to-album",
+                    });
                     // Show custom toast with album name and navigation
                     setAddToAlbumProgress({
                         open: true,
