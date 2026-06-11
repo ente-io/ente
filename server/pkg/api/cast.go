@@ -71,7 +71,7 @@ func (h *CastHandler) DeleteDevice(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, "failed to parse collection ID"))
 		return
 	}
-	if err := h.Ctrl.CastRepo.RevokeForGivenUserAndCollectionAndDevice(
+	if err := h.Ctrl.DeleteDevice(
 		c,
 		userID,
 		collectionID,
