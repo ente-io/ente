@@ -49,9 +49,11 @@ function previousBody() {
         .trim();
 }
 
-function groupedBody(body, previous) {
+function releaseNotes(body, previous) {
     const previousLines = new Set(previous.split("\n").filter(Boolean));
-    if (!previousLines.size) return body;
+    if (!previousLines.size) {
+        return { groupedBody: body, hasNewChanges: Boolean(body) };
+    }
 
     const latest = [];
     const previousAgain = [];
@@ -59,13 +61,18 @@ function groupedBody(body, previous) {
         (previousLines.has(line) ? previousAgain : latest).push(line);
     }
 
-    if (!previousAgain.length) return body;
-    return [
-        latest.length ? latest.join("\n") : "",
-        `Previous changes:\n${previousAgain.join("\n")}`,
-    ]
-        .filter(Boolean)
-        .join("\n\n");
+    if (!previousAgain.length) {
+        return { groupedBody: body, hasNewChanges: Boolean(body) };
+    }
+    return {
+        groupedBody: [
+            latest.length ? latest.join("\n") : "",
+            `Previous changes:\n${previousAgain.join("\n")}`,
+        ]
+            .filter(Boolean)
+            .join("\n\n"),
+        hasNewChanges: latest.length > 0,
+    };
 }
 
 function playStoreBody(body) {
@@ -80,7 +87,9 @@ function output(name, value) {
 }
 
 const body = currentBody();
+const notes = releaseNotes(body, previousBody());
 
 output("release_body", body);
-output("release_body_grouped", groupedBody(body, previousBody()));
+output("release_body_grouped", notes.groupedBody);
 output("play_store_release_notes", playStoreBody(body));
+output("has_new_changes", notes.hasNewChanges ? "true" : "false");
