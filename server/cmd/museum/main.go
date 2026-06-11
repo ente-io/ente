@@ -589,9 +589,7 @@ func main() {
 	privateAPI.POST("/files/upload-url", fileHandler.GetUploadURLV2)
 	privateAPI.POST("/files/multipart-upload-url", fileHandler.GetMultipartUploadURLV2)
 	privateAPI.GET("/files/download/:fileID", fileHandler.Get)
-	privateAPI.GET("/files/download/v2/:fileID", fileHandler.GetUsingFusedLookup)
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
-	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnailUsingFusedLookup)
 
 	privateAPI.POST("/files/share-url", fileHandler.ShareUrl)
 	privateAPI.GET("/files/share-url", fileHandler.GetUrls)

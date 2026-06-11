@@ -385,49 +385,11 @@ func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID in
 
 // GetFileURL verifies permissions and returns a presigned url to the requested file
 func (c *FileController) GetFileURL(ctx *gin.Context, userID int64, fileID int64) (string, error) {
-	if err := c.AccessCtrl.CanAccessFile(ctx, &access.CanAccessFileParams{
-		ActorUserID: userID,
-		FileIDs:     []int64{fileID},
-	}); err != nil {
-		return "", stacktrace.Propagate(err, "")
-	}
-	url, err := c.getSignedURLForType(ctx, fileID, ente.FILE)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			go c.CleanUpStaleCollectionFiles(userID, fileID)
-		}
-		return "", stacktrace.Propagate(err, "")
-	}
-	return url, nil
+	return c.getSignedURLForAccessibleObject(ctx, userID, fileID, ente.FILE)
 }
 
 // GetThumbnailURL verifies permissions and returns a presigned url to the requested thumbnail
 func (c *FileController) GetThumbnailURL(ctx *gin.Context, userID int64, fileID int64) (string, error) {
-	if err := c.AccessCtrl.CanAccessFile(ctx, &access.CanAccessFileParams{
-		ActorUserID: userID,
-		FileIDs:     []int64{fileID},
-	}); err != nil {
-		return "", stacktrace.Propagate(err, "")
-	}
-	url, err := c.getSignedURLForType(ctx, fileID, ente.THUMBNAIL)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			go c.CleanUpStaleCollectionFiles(userID, fileID)
-		}
-		return "", stacktrace.Propagate(err, "")
-	}
-	return url, nil
-}
-
-// GetFileURLUsingFusedLookup verifies permissions and returns a presigned URL
-// using the temporary fused access-check and object lookup path.
-func (c *FileController) GetFileURLUsingFusedLookup(ctx *gin.Context, userID int64, fileID int64) (string, error) {
-	return c.getSignedURLForAccessibleObject(ctx, userID, fileID, ente.FILE)
-}
-
-// GetThumbnailURLUsingFusedLookup verifies permissions and returns a presigned
-// URL using the temporary fused access-check and object lookup path.
-func (c *FileController) GetThumbnailURLUsingFusedLookup(ctx *gin.Context, userID int64, fileID int64) (string, error) {
 	return c.getSignedURLForAccessibleObject(ctx, userID, fileID, ente.THUMBNAIL)
 }
 
