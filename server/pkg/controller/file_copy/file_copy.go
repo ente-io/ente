@@ -56,6 +56,7 @@ func (fci fileCopyInternal) newFile(ownedID int64) ente.File {
 		File:               newFileAttributes,
 		Thumbnail:          newThumbAttributes,
 		Metadata:           fci.SourceFile.Metadata,
+		PubicMagicMetadata: fci.SourceFile.PubicMagicMetadata,
 		UpdationTime:       enteTime.Microseconds(),
 		IsDeleted:          false,
 	}
