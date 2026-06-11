@@ -220,7 +220,7 @@ pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::impl_pure::keys;
+    use crate::crypto::keys;
 
     #[test]
     fn test_seal_open() {

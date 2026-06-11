@@ -61,6 +61,7 @@ use base64::{
     Engine,
     engine::general_purpose::{STANDARD as BASE64, URL_SAFE as BASE64_URL_SAFE},
 };
+use std::sync::Once;
 use std::{
     fmt,
     ops::{Deref, DerefMut},
@@ -69,13 +70,28 @@ use zeroize::Zeroize;
 
 mod error;
 
-// Pure Rust implementation
-mod impl_pure;
-
-// Re-export the pure Rust implementation
-pub use impl_pure::*;
+pub mod argon;
+pub mod blob;
+pub mod hash;
+pub mod kdf;
+pub mod keys;
+pub mod sealed;
+pub mod secretbox;
+pub mod stream;
 
 pub use error::{CryptoError, Result};
+
+static INIT: Once = Once::new();
+
+/// Initialize crypto backend. For the pure Rust implementation, this is a no-op.
+///
+/// This function is provided for API compatibility with the libsodium backend.
+pub fn init() -> Result<()> {
+    INIT.call_once(|| {
+        // Pure Rust implementation doesn't require initialization
+    });
+    Ok(())
+}
 
 /// A heap-allocated byte buffer for sensitive material.
 ///

@@ -194,7 +194,7 @@ pub fn decrypt_json_combined<T: serde::de::DeserializeOwned>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::impl_pure::keys;
+    use crate::crypto::keys;
 
     #[test]
     fn test_encrypt_decrypt() {

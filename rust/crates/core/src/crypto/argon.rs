@@ -339,7 +339,7 @@ pub fn derive_key_from_b64_salt(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::impl_pure::keys;
+    use crate::crypto::keys;
 
     #[test]
     fn test_derive_key() {
