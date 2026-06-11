@@ -28,7 +28,7 @@ type RateLimitMiddleware struct {
 	limit250ReqPerMin *limiter.Limiter
 	limit300ReqPerMin *limiter.Limiter
 	limit500ReqPerMin *limiter.Limiter
-	limit200ReqPerSec *limiter.Limiter
+	limit500ReqPerSec *limiter.Limiter
 	discordCtrl       *discord.DiscordController
 }
 
@@ -39,7 +39,7 @@ func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64,
 		limit250ReqPerMin: util.NewRateLimiter("250-M"),
 		limit300ReqPerMin: util.NewRateLimiter("300-M"),
 		limit500ReqPerMin: util.NewRateLimiter("500-M"),
-		limit200ReqPerSec: util.NewRateLimiter("200-S"),
+		limit500ReqPerSec: util.NewRateLimiter("500-S"),
 		discordCtrl:       discordCtrl,
 		limit:             limit,
 		reset:             reset,
@@ -225,7 +225,7 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		return r.limit10ReqPerMin
 	}
 	if strings.HasPrefix(reqPath, "/files/preview/") {
-		return r.limit200ReqPerSec
+		return r.limit500ReqPerSec
 	}
 	if reqPath == "/public-collection/anon-identity" {
 		return r.limit10ReqPerMin
