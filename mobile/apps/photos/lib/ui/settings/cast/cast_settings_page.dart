@@ -72,7 +72,7 @@ class _CastSettingsPageState extends State<CastSettingsPage> {
                             strokeWidth: 1.6,
                           ),
                           onTap: () async {
-                            await _revokeSession(gw, session, title);
+                            await _revokeSession(gw, session);
                           },
                           shouldShowSuccessConfirmation: false,
                         ),
@@ -92,7 +92,6 @@ class _CastSettingsPageState extends State<CastSettingsPage> {
   Future<void> _revokeSession(
     CastGateway gw,
     CastInfo session,
-    String collectionTitle,
   ) async {
     final l10n = AppLocalizations.of(context);
     final result = await showChoiceDialog(
