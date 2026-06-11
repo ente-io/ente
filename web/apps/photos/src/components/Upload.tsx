@@ -401,7 +401,10 @@ export const Upload: React.FC<UploadProps> = ({
                 setDesktopFilePaths(filePaths);
             };
 
-            watcher.init(upload, () => void onRemotePull());
+            watcher.init(
+                upload,
+                () => void onRemotePull({ source: "watcher-upload" }),
+            );
 
             electron.pendingUploads().then((pending) => {
                 if (!pending) return;
@@ -878,12 +881,12 @@ export const Upload: React.FC<UploadProps> = ({
     ) => {
         uploadManager.prepareForNewUpload(parsedMetadataJSONMap);
         uploadManager.showUploadProgressDialog();
-        await onRemotePull({ silent: true });
+        await onRemotePull({ silent: true, source: "pre-upload" });
     };
 
     function postUploadAction() {
         resetUploadUIState();
-        void onRemotePull();
+        void onRemotePull({ source: "post-upload" });
     }
 
     const uploadFiles = async (

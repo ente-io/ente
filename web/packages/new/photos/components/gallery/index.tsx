@@ -47,6 +47,10 @@ export interface RemotePullOpts {
      * Default: `false`.
      */
     silent?: boolean;
+    /**
+     * The action that triggered this pull. Used to annotate downstream logs.
+     */
+    source?: string;
 }
 /**
  * The context in which a selection was made.

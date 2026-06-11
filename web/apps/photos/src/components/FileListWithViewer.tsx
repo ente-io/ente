@@ -16,6 +16,7 @@ import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationPhotoDate, fileFileName } from "ente-media/file-metadata";
+import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -65,7 +66,7 @@ export type FileListWithViewerProps = {
      * Called when an action in the file viewer requires us to perform a full
      * pull from remote.
      */
-    onRemotePull: () => Promise<void>;
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     activeCollectionSummary?: CollectionSummary;
     activeCollection?: Collection;
     /**
@@ -265,7 +266,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     );
 
     const handleTriggerRemotePull = useCallback(
-        () => void onRemotePull(),
+        () => void onRemotePull({ source: "file-viewer-action" }),
         [onRemotePull],
     );
 
