@@ -56,6 +56,7 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 			handler.Error(c, stacktrace.Propagate(err, ""))
 			return
 		}
+		h.Controller.AddOutstandingURLs(userID, -2)
 		c.JSON(http.StatusOK, file)
 		return
 	}
@@ -64,6 +65,7 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	h.Controller.AddOutstandingURLs(userID, -2)
 	c.JSON(http.StatusOK, response)
 }
 
@@ -131,6 +133,7 @@ func (h *FileHandler) Update(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	h.Controller.AddOutstandingURLs(userID, -2)
 	c.JSON(http.StatusOK, response)
 }
 
@@ -175,6 +178,10 @@ func (h *FileHandler) GetUploadURLV2(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if !h.Controller.AddOutstandingURLs(userID, 1) {
+		handler.Error(c, stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many outstanding upload URLs"))
+		return
+	}
 	c.JSON(http.StatusOK, url)
 }
 
@@ -206,6 +213,10 @@ func (h *FileHandler) GetMultipartUploadURLV2(c *gin.Context) {
 	upload, err := h.Controller.GetMultipartUploadURLWithMetadata(c, userID, req, enteApp)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	if !h.Controller.AddOutstandingURLs(userID, 1) {
+		handler.Error(c, stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many outstanding upload URLs"))
 		return
 	}
 	c.JSON(http.StatusOK, upload)
