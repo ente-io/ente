@@ -1,1 +1,0 @@
-- Add a copy button to the Subject and Description fields on the Report an issue screen.

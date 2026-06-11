@@ -227,9 +227,6 @@ class _CopyField extends StatelessWidget {
                 ],
               ),
             ),
-            // 44x44 tap target overlaid on the trailing icon. It overflows the
-            // field bounds rather than enlarging the row, matching the minimum
-            // touch target without changing the visual layout.
             Positioned.fill(
               child: Align(
                 alignment: Alignment.centerRight,
