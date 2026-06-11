@@ -18,7 +18,7 @@ class CastInfo {
       collectionID: json["collectionID"],
       deviceIP: json["deviceIP"],
       deviceCode: json["deviceCode"],
-      lastUsedAt: DateTime.fromMillisecondsSinceEpoch(json["lastUsedAt"]),
+      lastUsedAt: DateTime.fromMicrosecondsSinceEpoch(json["lastUsedAt"]),
     );
   }
 }
