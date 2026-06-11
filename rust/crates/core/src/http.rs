@@ -263,7 +263,7 @@ pub struct HttpClient {
     client: reqwest::Client,
     no_redirect_client: reqwest::Client,
     base_url: String,
-    base_origin: Option<Url>,
+    base_origin: Url,
     auth_token: RwLock<Option<Zeroizing<String>>>,
     #[cfg(not(target_arch = "wasm32"))]
     user_agent: Option<String>,
@@ -289,13 +289,13 @@ impl HttpClient {
     /// Create a client with auth/header configuration.
     pub fn new_with_config(config: HttpConfig) -> Result<Self, Error> {
         let base_url = config.base_url.trim_end_matches('/').to_string();
-        let base_origin = Url::parse(&base_url).ok().and_then(|base| {
-            if base.query().is_none() && base.fragment().is_none() {
-                Some(base)
-            } else {
-                None
-            }
-        });
+        let base_origin = Url::parse(&base_url)
+            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
+        if base_origin.query().is_some() || base_origin.fragment().is_some() {
+            return Err(Error::InvalidUrl(
+                "base URL must not contain a query or fragment".to_string(),
+            ));
+        }
 
         #[cfg(not(target_arch = "wasm32"))]
         let mut builder = reqwest::Client::builder();
@@ -332,8 +332,10 @@ impl HttpClient {
 
     /// Replace the auth token used for authenticated requests.
     pub fn set_auth_token(&self, auth_token: Option<String>) {
-        *self.auth_token.write().expect("auth token lock poisoned") =
-            auth_token.map(Zeroizing::new);
+        *self
+            .auth_token
+            .write()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = auth_token.map(Zeroizing::new);
     }
 
     /// Create a bare client for presigned object-store requests.
@@ -542,37 +544,10 @@ impl HttpClient {
 
     /// Download bytes from a URL, following redirects safely.
     pub async fn get_bytes(&self, url: &str) -> Result<Vec<u8>, Error> {
-        self.get_bytes_with_headers(url, |current_url| self.build_headers_for_url(current_url))
-            .await
-    }
-
-    async fn get_bytes_with_headers<F>(
-        &self,
-        url: &str,
-        headers_for_url: F,
-    ) -> Result<Vec<u8>, Error>
-    where
-        F: Fn(&Url) -> Result<HeaderMap, Error>,
-    {
-        let mut current_url = self.parse_url(url)?;
-        for _ in 0..5 {
-            let headers = headers_for_url(&current_url)?;
-            let response = self
-                .no_redirect_client
-                .get(current_url.clone())
-                .headers(headers)
-                .send()
-                .await?;
-            if response.status().is_redirection()
-                && let Some(location) = response.headers().get(LOCATION)
-            {
-                current_url = self.resolve_redirect(&current_url, location)?;
-                continue;
-            }
-            return parse_bytes_response(response).await;
-        }
-
-        Err(Error::InvalidUrl("too many redirects".to_string()))
+        get_bytes_with_client(&self.no_redirect_client, url, |current_url| {
+            self.build_headers_for_url(current_url)
+        })
+        .await
     }
 
     /// Upload raw bytes to a presigned URL, following redirects safely.
@@ -582,34 +557,7 @@ impl HttpClient {
         body: &[u8],
         headers: &[(&str, String)],
     ) -> Result<(), Error> {
-        let mut header_map = HeaderMap::new();
-        for (name, value) in headers {
-            let header_name =
-                HeaderName::from_bytes(name.as_bytes()).map_err(|e| Error::Parse(e.to_string()))?;
-            let header_value =
-                HeaderValue::from_str(value).map_err(|e| Error::Parse(e.to_string()))?;
-            header_map.insert(header_name, header_value);
-        }
-
-        let mut current_url = self.parse_url(url)?;
-        for _ in 0..5 {
-            let response = self
-                .no_redirect_client
-                .put(current_url.clone())
-                .headers(header_map.clone())
-                .body(body.to_vec())
-                .send()
-                .await?;
-            if response.status().is_redirection()
-                && let Some(location) = response.headers().get(LOCATION)
-            {
-                current_url = self.resolve_redirect(&current_url, location)?;
-                continue;
-            }
-            return parse_empty_response(response).await;
-        }
-
-        Err(Error::InvalidUrl("too many redirects".to_string()))
+        put_bytes_with_client(&self.no_redirect_client, url, body, headers).await
     }
 
     fn request_url(&self, path: &str) -> Result<String, Error> {
@@ -623,40 +571,19 @@ impl HttpClient {
             "request paths must be trusted endpoint paths without dot segments"
         );
 
-        let base = Url::parse(&self.base_url)
-            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
-        if base.query().is_some() || base.fragment().is_some() {
-            return Err(Error::InvalidUrl(
-                "base URL must not contain a query or fragment".to_string(),
-            ));
-        }
-
         Ok(format!("{}{}", self.base_url, path))
     }
+
     /// Ping the API, returns [PingResponse].
     pub async fn ping(&self) -> Result<PingResponse, Error> {
         self.get_json("/ping", &[]).await
     }
 
-    fn parse_url(&self, url: &str) -> Result<Url, Error> {
-        Url::parse(url).map_err(|e| Error::InvalidUrl(format!("invalid url: {e}")))
-    }
-
-    fn resolve_redirect(&self, current_url: &Url, location: &HeaderValue) -> Result<Url, Error> {
-        let next = location
-            .to_str()
-            .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))?;
-        Url::parse(next)
-            .or_else(|_| current_url.join(next))
-            .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))
-    }
-
     fn is_same_origin(&self, url: &Url) -> bool {
-        self.base_origin.as_ref().is_some_and(|base| {
-            base.scheme() == url.scheme()
-                && base.host_str() == url.host_str()
-                && base.port_or_known_default() == url.port_or_known_default()
-        })
+        let base = &self.base_origin;
+        base.scheme() == url.scheme()
+            && base.host_str() == url.host_str()
+            && base.port_or_known_default() == url.port_or_known_default()
     }
 
     fn build_headers_for_url(&self, url: &Url) -> Result<HeaderMap, Error> {
@@ -672,7 +599,7 @@ impl HttpClient {
         if let Some(auth_token) = self
             .auth_token
             .read()
-            .expect("auth token lock poisoned")
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
             .as_ref()
         {
             let token =
@@ -800,21 +727,30 @@ fn resolve_redirect(current_url: &Url, location: &HeaderValue) -> Result<Url, Er
         .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))
 }
 
-async fn parse_text_response(response: Response) -> Result<String, Error> {
-    if !response.status().is_success() {
-        let status = response.status().as_u16();
-        let body = response
-            .text()
-            .await
-            .unwrap_or_else(|_| "failed to read error body".to_string());
-        let (code, message) = parse_api_error_body(&body);
-        return Err(Error::Http {
-            status,
-            code,
-            message,
-        });
+/// Pass through successful responses; turn error statuses into [`Error::Http`].
+async fn check_success(response: Response) -> Result<Response, Error> {
+    if response.status().is_success() {
+        return Ok(response);
     }
-    response.text().await.map_err(Into::into)
+    let status = response.status().as_u16();
+    let body = response
+        .text()
+        .await
+        .unwrap_or_else(|_| "failed to read error body".to_string());
+    let (code, message) = parse_api_error_body(&body);
+    Err(Error::Http {
+        status,
+        code,
+        message,
+    })
+}
+
+async fn parse_text_response(response: Response) -> Result<String, Error> {
+    check_success(response)
+        .await?
+        .text()
+        .await
+        .map_err(Into::into)
 }
 
 async fn parse_json_response<T: DeserializeOwned>(response: Response) -> Result<T, Error> {
@@ -823,37 +759,12 @@ async fn parse_json_response<T: DeserializeOwned>(response: Response) -> Result<
 }
 
 async fn parse_empty_response(response: Response) -> Result<(), Error> {
-    if !response.status().is_success() {
-        let status = response.status().as_u16();
-        let body = response
-            .text()
-            .await
-            .unwrap_or_else(|_| "failed to read error body".to_string());
-        let (code, message) = parse_api_error_body(&body);
-        return Err(Error::Http {
-            status,
-            code,
-            message,
-        });
-    }
-    Ok(())
+    check_success(response).await.map(drop)
 }
 
 async fn parse_bytes_response(response: Response) -> Result<Vec<u8>, Error> {
-    if !response.status().is_success() {
-        let status = response.status().as_u16();
-        let body = response
-            .text()
-            .await
-            .unwrap_or_else(|_| "failed to read error body".to_string());
-        let (code, message) = parse_api_error_body(&body);
-        return Err(Error::Http {
-            status,
-            code,
-            message,
-        });
-    }
-    response
+    check_success(response)
+        .await?
         .bytes()
         .await
         .map(|bytes| bytes.to_vec())
@@ -942,25 +853,32 @@ mod tests {
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
-    #[test]
-    fn test_request_url_rejects_invalid_base_url() {
-        let client = test_client("not a url");
-        let err = client.request_url("/ping").unwrap_err();
-        assert!(matches!(err, Error::InvalidUrl(_)));
+    fn try_client(base_url: &str) -> Result<HttpClient, Error> {
+        HttpClient::new_with_config(HttpConfig {
+            base_url: base_url.to_string(),
+            ..HttpConfig::default()
+        })
     }
 
     #[test]
-    fn test_request_url_rejects_base_url_with_query() {
-        let client = test_client("https://api.ente.com/v1?stale=true");
-        let err = client.request_url("/ping").unwrap_err();
-        assert!(matches!(err, Error::InvalidUrl(_)));
+    fn test_new_rejects_invalid_base_url() {
+        assert!(matches!(try_client("not a url"), Err(Error::InvalidUrl(_))));
     }
 
     #[test]
-    fn test_request_url_rejects_base_url_with_fragment() {
-        let client = test_client("https://api.ente.com/v1#old");
-        let err = client.request_url("/ping").unwrap_err();
-        assert!(matches!(err, Error::InvalidUrl(_)));
+    fn test_new_rejects_base_url_with_query() {
+        assert!(matches!(
+            try_client("https://api.ente.com/v1?stale=true"),
+            Err(Error::InvalidUrl(_))
+        ));
+    }
+
+    #[test]
+    fn test_new_rejects_base_url_with_fragment() {
+        assert!(matches!(
+            try_client("https://api.ente.com/v1#old"),
+            Err(Error::InvalidUrl(_))
+        ));
     }
 
     #[test]
