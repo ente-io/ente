@@ -559,20 +559,14 @@ jobs:
                   BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
                   P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
 
-            - name: Install build dependencies
-              run: |
-                  pip3 install setuptools --break-system-packages
-                  npm install -g appdmg
-
             - name: Create artifacts directory
               run: mkdir artifacts
 
             - name: Build macOS DMG
               run: |
                   flutter config --enable-macos-desktop
-                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
-                  fastforge package --platform=macos --targets=dmg --skip-clean
-                  mv dist/**/*-macos.dmg "artifacts/${ARTIFACT_STEM}.dmg"
+                  flutter build macos --release
+                  ./macos/packaging/dmg/make-dmg.sh "build/macos/Build/Products/Release/Ente Auth.app" "artifacts/${ARTIFACT_STEM}.dmg"
 
             - name: Code sign DMG
               run: |
