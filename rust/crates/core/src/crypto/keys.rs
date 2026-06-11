@@ -1,35 +1,21 @@
 //! Key and nonce generation functions.
+//!
+//! Sizes come from the modules that own the corresponding algorithm
+//! ([`secretbox`], [`stream`], [`argon`], [`sealed`]).
 
 use rand_core::{OsRng, RngCore};
 use x25519_dalek::{PublicKey, StaticSecret};
 use zeroize::Zeroize;
 
+use super::{argon, sealed, secretbox, stream};
 use crate::crypto::{CryptoError, Result, SecretVec};
-
-/// Size of a SecretBox key in bytes.
-pub const SECRETBOX_KEY_BYTES: usize = 32;
-
-/// Size of a SecretBox nonce in bytes.
-pub const SECRETBOX_NONCE_BYTES: usize = 24;
-
-/// Size of a SecretStream key in bytes.
-pub const STREAM_KEY_BYTES: usize = 32;
-
-/// Size of a salt in bytes.
-pub const SALT_BYTES: usize = 16;
-
-/// Size of a public key in bytes.
-pub const BOX_PUBLIC_KEY_BYTES: usize = 32;
-
-/// Size of a secret key in bytes.
-pub const BOX_SECRET_KEY_BYTES: usize = 32;
 
 /// Generate a random SecretBox encryption key.
 ///
 /// # Returns
 /// A 32-byte random key, zeroized on drop.
 pub fn generate_key() -> SecretVec {
-    let mut key = vec![0u8; SECRETBOX_KEY_BYTES];
+    let mut key = vec![0u8; secretbox::KEY_BYTES];
     OsRng.fill_bytes(&mut key);
     SecretVec::new(key)
 }
@@ -39,7 +25,7 @@ pub fn generate_key() -> SecretVec {
 /// # Returns
 /// A 32-byte random key, zeroized on drop.
 pub fn generate_stream_key() -> SecretVec {
-    let mut key = vec![0u8; STREAM_KEY_BYTES];
+    let mut key = vec![0u8; stream::KEY_BYTES];
     OsRng.fill_bytes(&mut key);
     SecretVec::new(key)
 }
@@ -49,7 +35,7 @@ pub fn generate_stream_key() -> SecretVec {
 /// # Returns
 /// A 16-byte random salt. Salts are not secret.
 pub fn generate_salt() -> Vec<u8> {
-    let mut salt = vec![0u8; SALT_BYTES];
+    let mut salt = vec![0u8; argon::SALT_BYTES];
     OsRng.fill_bytes(&mut salt);
     salt
 }
@@ -59,7 +45,7 @@ pub fn generate_salt() -> Vec<u8> {
 /// # Returns
 /// A 24-byte random nonce. Nonces are not secret.
 pub fn generate_secretbox_nonce() -> Vec<u8> {
-    let mut nonce = vec![0u8; SECRETBOX_NONCE_BYTES];
+    let mut nonce = vec![0u8; secretbox::NONCE_BYTES];
     OsRng.fill_bytes(&mut nonce);
     nonce
 }
@@ -69,7 +55,7 @@ pub fn generate_secretbox_nonce() -> Vec<u8> {
 /// # Returns
 /// A tuple of (public_key, secret_key); the secret key is zeroized on drop.
 pub fn generate_keypair() -> (Vec<u8>, SecretVec) {
-    let mut secret_bytes = [0u8; BOX_SECRET_KEY_BYTES];
+    let mut secret_bytes = [0u8; sealed::SECRET_KEY_BYTES];
     OsRng.fill_bytes(&mut secret_bytes);
 
     let secret = StaticSecret::from(secret_bytes);
@@ -89,14 +75,14 @@ pub fn generate_keypair() -> (Vec<u8>, SecretVec) {
 /// making this suitable for deriving stable box keys from a higher-entropy
 /// master secret.
 pub fn derive_keypair_from_seed(seed: &[u8]) -> Result<(Vec<u8>, SecretVec)> {
-    if seed.len() != BOX_SECRET_KEY_BYTES {
+    if seed.len() != sealed::SECRET_KEY_BYTES {
         return Err(CryptoError::InvalidKeyLength {
-            expected: BOX_SECRET_KEY_BYTES,
+            expected: sealed::SECRET_KEY_BYTES,
             actual: seed.len(),
         });
     }
 
-    let mut secret_bytes = [0u8; BOX_SECRET_KEY_BYTES];
+    let mut secret_bytes = [0u8; sealed::SECRET_KEY_BYTES];
     secret_bytes.copy_from_slice(seed);
 
     let secret = StaticSecret::from(secret_bytes);
@@ -130,7 +116,7 @@ mod tests {
     #[test]
     fn test_generate_key() {
         let key = generate_key();
-        assert_eq!(key.len(), SECRETBOX_KEY_BYTES);
+        assert_eq!(key.len(), secretbox::KEY_BYTES);
 
         // Test randomness - two keys should be different
         let key2 = generate_key();
@@ -140,7 +126,7 @@ mod tests {
     #[test]
     fn test_generate_stream_key() {
         let key = generate_stream_key();
-        assert_eq!(key.len(), STREAM_KEY_BYTES);
+        assert_eq!(key.len(), stream::KEY_BYTES);
 
         let key2 = generate_stream_key();
         assert_ne!(key.as_ref(), key2.as_ref());
@@ -149,7 +135,7 @@ mod tests {
     #[test]
     fn test_generate_salt() {
         let salt = generate_salt();
-        assert_eq!(salt.len(), SALT_BYTES);
+        assert_eq!(salt.len(), argon::SALT_BYTES);
 
         let salt2 = generate_salt();
         assert_ne!(salt, salt2);
@@ -158,7 +144,7 @@ mod tests {
     #[test]
     fn test_generate_secretbox_nonce() {
         let nonce = generate_secretbox_nonce();
-        assert_eq!(nonce.len(), SECRETBOX_NONCE_BYTES);
+        assert_eq!(nonce.len(), secretbox::NONCE_BYTES);
 
         let nonce2 = generate_secretbox_nonce();
         assert_ne!(nonce, nonce2);
@@ -167,8 +153,8 @@ mod tests {
     #[test]
     fn test_generate_keypair() {
         let (pk, sk) = generate_keypair();
-        assert_eq!(pk.len(), BOX_PUBLIC_KEY_BYTES);
-        assert_eq!(sk.len(), BOX_SECRET_KEY_BYTES);
+        assert_eq!(pk.len(), sealed::PUBLIC_KEY_BYTES);
+        assert_eq!(sk.len(), sealed::SECRET_KEY_BYTES);
 
         // Test that keys are different
         let (pk2, sk2) = generate_keypair();
@@ -178,7 +164,7 @@ mod tests {
 
     #[test]
     fn test_derive_keypair_from_seed() {
-        let seed = [7u8; BOX_SECRET_KEY_BYTES];
+        let seed = [7u8; sealed::SECRET_KEY_BYTES];
         let (pk1, sk1) = derive_keypair_from_seed(&seed).unwrap();
         let (pk2, sk2) = derive_keypair_from_seed(&seed).unwrap();
 

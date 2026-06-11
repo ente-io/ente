@@ -35,9 +35,6 @@ pub const SECRET_KEY_BYTES: usize = 32;
 /// Overhead added by sealing (ephemeral_pk + MAC).
 pub const SEAL_OVERHEAD: usize = 32 + 16;
 
-/// Size of sealed box overhead (API compatibility).
-pub const SEAL_BYTES: usize = SEAL_OVERHEAD;
-
 /// Derive nonce from ephemeral and recipient public keys.
 ///
 /// Nonce = BLAKE2b-24(ephemeral_pk || recipient_pk)
