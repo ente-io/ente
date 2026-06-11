@@ -69,5 +69,8 @@ pub fn open_pq(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> R
     if post_quant_pk.is_empty() && post_quant_sk.is_empty() {
         return Ok(pre_quant_plaintext);
     }
-    open(&pre_quant_plaintext, post_quant_pk, post_quant_sk)
+    match open(&pre_quant_plaintext, post_quant_pk, post_quant_sk) {
+        Ok(post_quant_plaintext) => Ok(post_quant_plaintext),
+        Err(_) => Ok(pre_quant_plaintext),
+    }
 }

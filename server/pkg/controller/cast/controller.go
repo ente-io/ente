@@ -2,10 +2,12 @@ package cast
 
 import (
 	"context"
+
 	"github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/controller/access"
 	castRepo "github.com/ente-io/museum/pkg/repo/cast"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	"github.com/ente-io/museum/pkg/utils/crypto"
 	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -30,7 +32,7 @@ func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDevi
 	return c.CastRepo.AddCode(ctx, request.PublicKey, network.GetClientIP(ctx))
 }
 
-func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, error) {
+func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string, postQuant bool) (string, error) {
 	pubKey, ip, err := c.CastRepo.GetPubKeyAndIp(ctx, deviceCode)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
@@ -41,6 +43,13 @@ func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, 
 			"ip":         ip,
 			"clientIP":   network.GetClientIP(ctx),
 		}).Warn("GetPublicKey: IP mismatch")
+	}
+	if !postQuant {
+		preQuantKey, err := crypto.ExtractPreQuantKey(pubKey)
+		if err != nil {
+			return "", stacktrace.Propagate(err, "failed to extract pre-quantum key")
+		}
+		return preQuantKey, nil
 	}
 	return pubKey, nil
 }

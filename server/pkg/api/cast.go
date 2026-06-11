@@ -1,6 +1,10 @@
 package api
 
 import (
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/ente-io/museum/ente"
 	entity "github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/controller"
@@ -10,9 +14,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 // CastHandler exposes request handlers for publicly accessible collections
@@ -39,8 +40,9 @@ func (h *CastHandler) RegisterDevice(c *gin.Context) {
 }
 
 func (h *CastHandler) GetDeviceInfo(c *gin.Context) {
+	postQuant := c.Query("postQuant") == "true"
 	deviceCode := getDeviceCode(c)
-	publicKey, err := h.Ctrl.GetPublicKey(c, deviceCode)
+	publicKey, err := h.Ctrl.GetPublicKey(c, deviceCode, postQuant)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to get public key"))
 		return
