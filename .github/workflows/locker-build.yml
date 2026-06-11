@@ -361,7 +361,7 @@ jobs:
               run: gh release upload "${RELEASE_TAG}" SHA256SUMS --clobber
 
             - name: Notify Discord
-              if: startsWith(github.ref_name, 'release/') || needs.build-metadata.outputs.has_new_changes == 'true'
+              if: github.event_name != 'schedule' || needs.build-metadata.outputs.has_new_changes == 'true'
               continue-on-error: true
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
