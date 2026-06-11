@@ -137,8 +137,8 @@ Derived credentials for SRP authentication.
 
 ```rust
 pub struct SrpCredentials {
-    pub kek: Vec<u8>,        // Key encryption key (32 bytes)
-    pub login_key: Vec<u8>,  // SRP password (16 bytes)
+    pub kek: SecretVec,        // Key encryption key (32 bytes)
+    pub login_key: SecretVec,  // SRP password (16 bytes)
 }
 ```
 
@@ -163,9 +163,9 @@ Result of successful decryption.
 
 ```rust
 pub struct DecryptedSecrets {
-    pub master_key: Vec<u8>,  // For data encryption
-    pub secret_key: Vec<u8>,  // X25519 private key
-    pub token: Vec<u8>,       // Auth token
+    pub master_key: SecretVec,  // For data encryption
+    pub secret_key: SecretVec,  // X25519 private key
+    pub token: SecretVec,       // Auth token
 }
 ```
 
@@ -194,7 +194,7 @@ pub fn derive_kek(
     kek_salt: &str,
     mem_limit: u32,
     ops_limit: u32,
-) -> Result<Vec<u8>>
+) -> Result<SecretVec>
 ```
 
 #### `decrypt_secrets`

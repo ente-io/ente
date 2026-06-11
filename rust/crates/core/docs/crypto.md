@@ -93,7 +93,7 @@ let login_key = kdf::derive_login_key(&kek)?;
 | `KEY_BYTES`             | 32    | all modules |
 | `NONCE_BYTES`           | 24    | secretbox   |
 | `HEADER_BYTES`          | 24    | stream/blob |
-| `SALT_BYTES`            | 16    | argon/keys  |
+| `SALT_BYTES`            | 16    | argon       |
 | `MEMLIMIT_INTERACTIVE`  | 64 MB | argon       |
 | `MEMLIMIT_SENSITIVE`    | 1 GB  | argon       |
 | `OPSLIMIT_INTERACTIVE`  | 2     | argon       |
