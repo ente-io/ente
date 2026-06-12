@@ -3,7 +3,7 @@ import "dart:async";
 import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
@@ -17,7 +17,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/contact_avatar_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
-import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class ContactsSectionLoader extends StatefulWidget {
@@ -147,7 +146,10 @@ class _ContactsSectionState extends State<ContactsSection> {
               ),
             ),
             const SizedBox(width: 8),
-            const SearchSectionEmptyCTAIcon(SectionType.contacts),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(8, 14, 8, 0),
+              child: ContactCTA(),
+            ),
           ],
         ),
       );
@@ -250,6 +252,8 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
 }
 
 class ContactCTA extends StatelessWidget {
+  static const _inviteAsset = "assets/invite_contact.svg";
+
   const ContactCTA({super.key});
 
   @override
@@ -270,11 +274,7 @@ class ContactCTA extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedUserAdd01,
-                  size: 24,
-                  color: colorScheme.textMuted,
-                ),
+                child: SvgPicture.asset(_inviteAsset, width: 24, height: 24),
               ),
             ),
             const SizedBox(height: 10),
