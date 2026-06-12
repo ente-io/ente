@@ -14,6 +14,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CastHandler exposes request handlers for publicly accessible collections
@@ -64,18 +65,14 @@ func (h *CastHandler) GetAllDevices(c *gin.Context) {
 }
 
 func (h *CastHandler) DeleteDevice(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	deviceCode := getDeviceCode(c)
-	collectionID, err := strconv.ParseInt(c.Query("collectionID"), 10, 64)
+	deviceID, err := uuid.Parse(c.Param("deviceID"))
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "failed to parse collection ID"))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "failed to parse device id"))
 		return
 	}
 	if err := h.Ctrl.DeleteDevice(
 		c,
-		userID,
-		collectionID,
-		deviceCode,
+		deviceID,
 	); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to delete device"))
 		return

@@ -10,6 +10,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,8 +36,8 @@ func (c *Controller) GetAllDevices(ctx *gin.Context, userID int64) ([]cast.CastI
 	return c.CastRepo.GetAllDevices(ctx, userID)
 }
 
-func (c *Controller) DeleteDevice(ctx *gin.Context, userID int64, collectionID int64, deviceCode string) error {
-	return c.CastRepo.RevokeForGivenUserAndCollectionAndDevice(ctx, userID, collectionID, deviceCode)
+func (c *Controller) DeleteDevice(ctx *gin.Context, deviceID uuid.UUID) error {
+	return c.CastRepo.RevokeForGivenDeviceID(ctx, deviceID)
 }
 
 func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, error) {

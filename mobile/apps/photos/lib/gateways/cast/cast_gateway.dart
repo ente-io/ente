@@ -3,13 +3,13 @@ import "package:dio/dio.dart";
 class CastInfo {
   final int collectionID;
   final String deviceIP;
-  final String deviceCode;
+  final String deviceID;
   final DateTime lastUsedAt;
 
   CastInfo({
     required this.collectionID,
     required this.deviceIP,
-    required this.deviceCode,
+    required this.deviceID,
     required this.lastUsedAt,
   });
 
@@ -17,7 +17,7 @@ class CastInfo {
     return CastInfo(
       collectionID: json["collectionID"],
       deviceIP: json["deviceIP"],
-      deviceCode: json["deviceCode"],
+      deviceID: json["deviceID"],
       lastUsedAt: DateTime.fromMicrosecondsSinceEpoch(json["lastUsedAt"]),
     );
   }
@@ -78,9 +78,7 @@ class CastGateway {
   }
 
   Future<void> revokeSession(CastInfo session) async {
-    await _enteDio.delete(
-      "/cast/device-info/${session.deviceCode}?collectionID=${session.collectionID}",
-    );
+    await _enteDio.delete("/cast/device-info/${session.deviceID}");
   }
 }
 

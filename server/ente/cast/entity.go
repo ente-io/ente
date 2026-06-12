@@ -1,5 +1,7 @@
 package cast
 
+import "github.com/google/uuid"
+
 // CastRequest ..
 type CastRequest struct {
 	CollectionID int64  `json:"collectionID" binding:"required"`
@@ -18,8 +20,8 @@ type AuthContext struct {
 }
 
 type CastInfo struct {
-	DeviceCode   string `json:"deviceCode"`
-	CollectionID int64  `json:"collectionID"`
-	DeviceIP     string `json:"deviceIP"`
-	LastUsedAt   int64  `json:"lastUsedAt"`
+	DeviceID     uuid.UUID `json:"deviceID"`
+	CollectionID int64     `json:"collectionID"`
+	DeviceIP     string    `json:"deviceIP"`
+	LastUsedAt   int64     `json:"lastUsedAt"`
 }
