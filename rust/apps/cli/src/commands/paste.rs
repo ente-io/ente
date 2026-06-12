@@ -389,7 +389,7 @@ fn encrypt_paste_for_create(
     text: &str,
     password: Option<&str>,
 ) -> Result<(PasteKey, PastePayload)> {
-    let paste_key = Key::generate().as_bytes().to_vec();
+    let paste_key = Key::generate();
     let fragment_secret = create_fragment_secret();
     let paste_key_reference = PasteKey {
         fragment_secret,
@@ -407,13 +407,13 @@ fn encrypt_paste_for_create(
     } else {
         argon::derive_interactive_key(&kdf_secret)?
     };
-    let encrypted_paste_key = secretbox::encrypt(&paste_key, &key_encryption_key.key);
+    let encrypted_paste_key = secretbox::encrypt(paste_key.as_bytes(), &key_encryption_key.key);
 
     Ok((
         paste_key_reference,
         PastePayload {
             encrypted_data: crypto::encode_b64(&encrypted.encrypted_data),
-            decryption_header: crypto::encode_b64(&encrypted.decryption_header),
+            decryption_header: crypto::encode_b64(encrypted.decryption_header.as_bytes()),
             encrypted_paste_key: crypto::encode_b64(&encrypted_paste_key.encrypted_data),
             encrypted_paste_key_nonce: crypto::encode_b64(encrypted_paste_key.nonce.as_bytes()),
             kdf_nonce: crypto::encode_b64(key_encryption_key.salt.as_bytes()),
@@ -485,9 +485,9 @@ fn decrypt_consumed_text(paste_key: &[u8], payload: &PastePayload) -> Result<Str
     let text: PasteText = blob::decrypt_json(
         &blob::EncryptedBlob {
             encrypted_data,
-            decryption_header,
+            decryption_header: crypto::Header::try_from_slice(&decryption_header)?,
         },
-        paste_key,
+        &Key::try_from_slice(paste_key)?,
     )?;
     Ok(text.text)
 }
@@ -976,7 +976,7 @@ mod tests {
     }
 
     fn test_payload(text: &str, key_reference: &PasteKey, password: Option<&str>) -> PastePayload {
-        let paste_key = [7u8; Key::BYTES];
+        let paste_key = Key::from_bytes([7u8; Key::BYTES]);
         let encrypted = blob::encrypt_json(
             &PasteText {
                 text: text.to_string(),
@@ -990,11 +990,11 @@ mod tests {
         // is not a human-chosen password), and tests need to be fast.
         let key_encryption_key =
             argon::derive_key(&kdf_secret, &salt, argon::Params::MIN).unwrap();
-        let encrypted_paste_key = secretbox::encrypt(&paste_key, &key_encryption_key);
+        let encrypted_paste_key = secretbox::encrypt(paste_key.as_bytes(), &key_encryption_key);
 
         PastePayload {
             encrypted_data: crypto::encode_b64(&encrypted.encrypted_data),
-            decryption_header: crypto::encode_b64(&encrypted.decryption_header),
+            decryption_header: crypto::encode_b64(encrypted.decryption_header.as_bytes()),
             encrypted_paste_key: crypto::encode_b64(&encrypted_paste_key.encrypted_data),
             encrypted_paste_key_nonce: crypto::encode_b64(encrypted_paste_key.nonce.as_bytes()),
             kdf_nonce: crypto::encode_b64(salt.as_bytes()),

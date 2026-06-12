@@ -51,8 +51,8 @@
 //! assert_eq!(decrypted, plaintext);
 //!
 //! // Blob encryption (for metadata)
-//! let encrypted = crypto::blob::encrypt(plaintext, key.as_bytes()).unwrap();
-//! let decrypted = crypto::blob::decrypt(&encrypted.encrypted_data, &encrypted.decryption_header, key.as_bytes()).unwrap();
+//! let encrypted = crypto::blob::encrypt(plaintext, &key).unwrap();
+//! let decrypted = encrypted.decrypt(&key).unwrap();
 //! assert_eq!(decrypted, plaintext);
 //! ```
 

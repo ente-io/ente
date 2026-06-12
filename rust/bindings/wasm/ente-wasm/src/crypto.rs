@@ -303,10 +303,10 @@ pub fn crypto_encrypt_blob(data_b64: &str, key_b64: &str) -> Result<EncryptedBlo
     let data = core_crypto::decode_b64(data_b64)?;
     let key = core_crypto::decode_b64(key_b64)?;
 
-    let out = core_crypto::blob::encrypt(&data, &key)?;
+    let out = core_crypto::blob::encrypt(&data, &core_crypto::Key::try_from_slice(&key)?)?;
     Ok(EncryptedBlob {
         encrypted_data: core_crypto::encode_b64(&out.encrypted_data),
-        decryption_header: core_crypto::encode_b64(&out.decryption_header),
+        decryption_header: core_crypto::encode_b64(out.decryption_header.as_bytes()),
     })
 }
 
@@ -323,7 +323,11 @@ pub fn crypto_decrypt_blob(
     let header = core_crypto::decode_b64(decryption_header_b64)?;
     let key = core_crypto::decode_b64(key_b64)?;
 
-    let plaintext = core_crypto::blob::decrypt(&ciphertext, &header, &key)?;
+    let plaintext = core_crypto::blob::decrypt(
+        &ciphertext,
+        &core_crypto::Header::try_from_slice(&header)?,
+        &core_crypto::Key::try_from_slice(&key)?,
+    )?;
     Ok(core_crypto::encode_b64(&plaintext))
 }
 
@@ -342,8 +346,11 @@ pub fn crypto_decrypt_blob_legacy(
     let header = core_crypto::decode_b64(decryption_header_b64)?;
     let key = core_crypto::decode_b64(key_b64)?;
 
-    let mut decryptor = core_crypto::stream::StreamDecryptor::new(&header, &key)?;
-    let (plaintext, _tag) = decryptor.pull(&ciphertext)?;
+    let plaintext = core_crypto::blob::decrypt_legacy(
+        &ciphertext,
+        &core_crypto::Header::try_from_slice(&header)?,
+        &core_crypto::Key::try_from_slice(&key)?,
+    )?;
     Ok(core_crypto::encode_b64(&plaintext))
 }
 

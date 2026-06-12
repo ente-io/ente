@@ -1,4 +1,4 @@
-use ente_core::crypto::{self, blob};
+use ente_core::crypto::{self, Header, Key, blob};
 use hkdf::Hkdf;
 use serde::{Serialize, de::DeserializeOwned};
 use sha2::Sha256;
@@ -12,10 +12,10 @@ pub fn encrypt_payload<T: Serialize>(
     key: &[u8],
 ) -> Result<EncryptedPayload, SyncError> {
     let json = serde_json::to_vec(payload)?;
-    let encrypted = blob::encrypt(&json, key)?;
+    let encrypted = blob::encrypt(&json, &Key::try_from_slice(key)?)?;
     Ok(EncryptedPayload {
         encrypted_data: crypto::encode_b64(&encrypted.encrypted_data),
-        header: crypto::encode_b64(&encrypted.decryption_header),
+        header: crypto::encode_b64(encrypted.decryption_header.as_bytes()),
     })
 }
 
@@ -26,16 +26,20 @@ pub fn decrypt_payload<T: DeserializeOwned>(
 ) -> Result<T, SyncError> {
     let ciphertext = crypto::decode_b64(encrypted_data)?;
     let header = crypto::decode_b64(header)?;
-    let plaintext = blob::decrypt(&ciphertext, &header, key)?;
+    let plaintext = blob::decrypt(
+        &ciphertext,
+        &Header::try_from_slice(&header)?,
+        &Key::try_from_slice(key)?,
+    )?;
     let payload = serde_json::from_slice(&plaintext)?;
     Ok(payload)
 }
 
 pub fn encrypt_chat_key(chat_key: &[u8], master_key: &[u8]) -> Result<EncryptedPayload, SyncError> {
-    let encrypted = blob::encrypt(chat_key, master_key)?;
+    let encrypted = blob::encrypt(chat_key, &Key::try_from_slice(master_key)?)?;
     Ok(EncryptedPayload {
         encrypted_data: crypto::encode_b64(&encrypted.encrypted_data),
-        header: crypto::encode_b64(&encrypted.decryption_header),
+        header: crypto::encode_b64(encrypted.decryption_header.as_bytes()),
     })
 }
 
@@ -45,7 +49,11 @@ pub fn decrypt_chat_key(
 ) -> Result<Vec<u8>, SyncError> {
     let ciphertext = crypto::decode_b64(&payload.encrypted_data)?;
     let header = crypto::decode_b64(&payload.header)?;
-    let plaintext = blob::decrypt(&ciphertext, &header, master_key)?;
+    let plaintext = blob::decrypt(
+        &ciphertext,
+        &Header::try_from_slice(&header)?,
+        &Key::try_from_slice(master_key)?,
+    )?;
     Ok(plaintext)
 }
 

@@ -1,4 +1,4 @@
-use ente_core::crypto::{self, blob};
+use ente_core::crypto::{self, Header, Key, blob};
 
 use crate::{Error, Result};
 
@@ -6,11 +6,10 @@ pub const HEADER_BYTES: usize = blob::HEADER_BYTES;
 pub const KEY_BYTES: usize = blob::KEY_BYTES;
 
 pub fn encrypt_blob(plaintext: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    let encrypted = blob::encrypt(plaintext, key)?;
-    let mut combined = Vec::with_capacity(HEADER_BYTES + encrypted.encrypted_data.len());
-    combined.extend_from_slice(&encrypted.decryption_header);
-    combined.extend_from_slice(&encrypted.encrypted_data);
-    Ok(combined)
+    Ok(blob::encrypt_combined(
+        plaintext,
+        &Key::try_from_slice(key)?,
+    )?)
 }
 
 pub fn decrypt_blob(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
@@ -21,7 +20,11 @@ pub fn decrypt_blob(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
         });
     }
     let (header, ciphertext) = data.split_at(HEADER_BYTES);
-    Ok(blob::decrypt(ciphertext, header, key)?)
+    Ok(blob::decrypt(
+        ciphertext,
+        &Header::try_from_slice(header)?,
+        &Key::try_from_slice(key)?,
+    )?)
 }
 
 pub fn encrypt_string(value: &str, key: &[u8]) -> Result<Vec<u8>> {
@@ -34,9 +37,9 @@ pub fn decrypt_string(data: &[u8], key: &[u8]) -> Result<String> {
 }
 
 pub fn encrypt_json_field(value: &str, key: &[u8]) -> Result<String> {
-    let encrypted = blob::encrypt(value.as_bytes(), key)?;
+    let encrypted = blob::encrypt(value.as_bytes(), &Key::try_from_slice(key)?)?;
     let ciphertext_b64 = crypto::encode_b64(&encrypted.encrypted_data);
-    let header_b64 = crypto::encode_b64(&encrypted.decryption_header);
+    let header_b64 = crypto::encode_b64(encrypted.decryption_header.as_bytes());
     Ok(format!("enc:v1:{ciphertext_b64}:{header_b64}"))
 }
 
@@ -53,10 +56,8 @@ pub fn decrypt_json_field(value: &str, key: &[u8]) -> Result<String> {
     let header_b64 = header_b64.ok_or(Error::InvalidEncryptedField)?;
     let ciphertext = crypto::decode_b64(ciphertext_b64)?;
     let header = crypto::decode_b64(header_b64)?;
-    if header.len() != HEADER_BYTES {
-        return Err(Error::InvalidEncryptedField);
-    }
-    let plaintext = blob::decrypt(&ciphertext, &header, key)?;
+    let header = Header::try_from_slice(&header).map_err(|_| Error::InvalidEncryptedField)?;
+    let plaintext = blob::decrypt(&ciphertext, &header, &Key::try_from_slice(key)?)?;
     Ok(String::from_utf8(plaintext)?)
 }
 

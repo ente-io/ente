@@ -504,10 +504,11 @@ pub fn crypto_decrypt_box(input: CryptoBoxDecryptInput) -> Result<String, ApiErr
 pub fn crypto_encrypt_blob(input: CryptoBlobInput) -> Result<EncryptedBlob, ApiError> {
     let data = core_crypto::decode_b64(&input.data_b64).map_err(ApiError::from)?;
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
     let out = core_crypto::blob::encrypt(&data, &key).map_err(ApiError::from)?;
     Ok(EncryptedBlob {
         encrypted_data: core_crypto::encode_b64(&out.encrypted_data),
-        decryption_header: core_crypto::encode_b64(&out.decryption_header),
+        decryption_header: core_crypto::encode_b64(out.decryption_header.as_bytes()),
     })
 }
 
@@ -516,6 +517,8 @@ pub fn crypto_decrypt_blob(input: CryptoBlobDecryptInput) -> Result<String, ApiE
     let ciphertext = core_crypto::decode_b64(&input.encrypted_data_b64).map_err(ApiError::from)?;
     let header = core_crypto::decode_b64(&input.header_b64).map_err(ApiError::from)?;
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+    let header = core_crypto::Header::try_from_slice(&header).map_err(ApiError::from)?;
+    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
     let plaintext =
         core_crypto::blob::decrypt(&ciphertext, &header, &key).map_err(ApiError::from)?;
     Ok(core_crypto::encode_b64(&plaintext))
