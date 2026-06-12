@@ -39,7 +39,7 @@ getrandom = { version = "0.2", features = ["js"] }
 base64 = "0.22"
 hex = "0.4"
 bip39 = { version = "2", default-features = false, features = ["std"] }
-zeroize = { version = "1.8", features = ["derive"] }
+zeroize = { version = "1.8.2", features = ["derive"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

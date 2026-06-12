@@ -8,7 +8,7 @@
 
 use rand_core::{OsRng, RngCore};
 use subtle::ConstantTimeEq;
-use zeroize::Zeroize;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::crypto::{CryptoError, Result, SecretVec};
 
@@ -21,7 +21,7 @@ use crate::crypto::{CryptoError, Result, SecretVec};
 ///
 /// `Clone` is provided because real pipelines cache and share keys; `Copy` is
 /// deliberately not, so every duplication of secret material is explicit.
-#[derive(Clone)]
+#[derive(Clone, Zeroize, ZeroizeOnDrop)]
 pub struct Key([u8; Self::BYTES]);
 
 impl Key {
@@ -79,18 +79,6 @@ impl PartialEq for Key {
 }
 
 impl Eq for Key {}
-
-impl Zeroize for Key {
-    fn zeroize(&mut self) {
-        self.0.zeroize();
-    }
-}
-
-impl Drop for Key {
-    fn drop(&mut self) {
-        self.zeroize();
-    }
-}
 
 /// A 192-bit SecretBox nonce. Not secret.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -227,7 +215,7 @@ impl PublicKey {
 }
 
 /// An X25519 secret key. Zeroized on drop.
-#[derive(Clone)]
+#[derive(Clone, Zeroize, ZeroizeOnDrop)]
 pub struct SecretKey([u8; Self::BYTES]);
 
 impl SecretKey {
@@ -287,18 +275,6 @@ impl PartialEq for SecretKey {
 }
 
 impl Eq for SecretKey {}
-
-impl Zeroize for SecretKey {
-    fn zeroize(&mut self) {
-        self.0.zeroize();
-    }
-}
-
-impl Drop for SecretKey {
-    fn drop(&mut self) {
-        self.zeroize();
-    }
-}
 
 /// Generate random bytes of specified length.
 pub fn random_bytes(len: usize) -> Vec<u8> {

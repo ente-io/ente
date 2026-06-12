@@ -10,9 +10,7 @@
 //!   encrypted fields are stored alongside their nonces.
 //!
 //! - Combined ([`encrypt_combined`] / [`decrypt_combined`]): a single
-//!   self-contained buffer (`nonce ‖ MAC ‖ ct`). Newer encryption is moving
-//!   toward this shape since everything needed for decryption (except the
-//!   key) is in one place.
+//!   self-contained buffer (`nonce ‖ MAC ‖ ct`).
 
 use xsalsa20poly1305::XSalsa20Poly1305;
 use xsalsa20poly1305::aead::generic_array::GenericArray;

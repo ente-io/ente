@@ -811,6 +811,9 @@ mod tests {
     #[test]
     fn test_large_slice_write_no_quadratic() {
         // Regression test: verify StreamingEncryptor::write() is O(n) for large slices.
+        // The optimization processes full chunks directly from input slice without
+        // buffering them first, and buffers only the remainder (< chunk size).
+        // This avoids O(n²) behavior that would occur with copy_within compaction.
         let key = test_key();
 
         // Create data spanning multiple chunks to exercise the optimization
