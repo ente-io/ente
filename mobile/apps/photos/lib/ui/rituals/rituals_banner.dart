@@ -17,6 +17,7 @@ import "package:photos/ui/rituals/ritual_emoji_icon.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/rituals/ritual_privacy.dart";
 import "package:photos/ui/rituals/start_new_ritual_card.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 
 class RitualsBanner extends StatelessWidget {
   const RitualsBanner({super.key});
@@ -57,24 +58,19 @@ class RitualsBanner extends StatelessWidget {
                 ),
               )
             else
-              SizedBox(
+              SearchTabHorizontalScrollView(
                 height: _cardHeight,
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.zero,
-                  physics: const BouncingScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      for (final (index, item) in _buildRowItems(
-                        context,
-                        rituals,
-                        summary,
-                      ).indexed) ...[
-                        if (index != 0) const SizedBox(width: 10),
-                        item,
-                      ],
+                child: Row(
+                  children: [
+                    for (final (index, item) in _buildRowItems(
+                      context,
+                      rituals,
+                      summary,
+                    ).indexed) ...[
+                      if (index != 0) const SizedBox(width: 10),
+                      item,
                     ],
-                  ),
+                  ],
                 ),
               ),
           ],

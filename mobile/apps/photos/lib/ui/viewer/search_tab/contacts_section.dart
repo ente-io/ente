@@ -17,6 +17,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/contact_avatar_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class ContactsSectionLoader extends StatefulWidget {
@@ -165,25 +166,20 @@ class _ContactsSectionState extends State<ContactsSection> {
                   (_contactSearchResults.length >= kSearchSectionLimit - 1),
             ),
             const SizedBox(height: 4),
-            SizedBox(
+            SearchTabHorizontalListView(
               height: 92,
-              child: ListView.separated(
-                padding: EdgeInsets.zero,
-                physics: const BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                itemCount: _contactSearchResults.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == _contactSearchResults.length) {
-                    return const ContactCTA();
-                  }
-                  final contactSearchResult = _contactSearchResults[index];
-                  return ContactRecommendation(
-                    contactSearchResult,
-                    key: ValueKey(contactSearchResult.name()),
-                  );
-                },
-                separatorBuilder: (context, index) => const SizedBox(width: 12),
-              ),
+              itemCount: _contactSearchResults.length + 1,
+              itemBuilder: (context, index) {
+                if (index == _contactSearchResults.length) {
+                  return const ContactCTA();
+                }
+                final contactSearchResult = _contactSearchResults[index];
+                return ContactRecommendation(
+                  contactSearchResult,
+                  key: ValueKey(contactSearchResult.name()),
+                );
+              },
+              separatorBuilder: (context, index) => const SizedBox(width: 12),
             ),
           ],
         ),

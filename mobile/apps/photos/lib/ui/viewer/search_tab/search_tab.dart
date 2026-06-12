@@ -25,6 +25,7 @@ import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/wrapped/wrapped_discovery_section.dart";
 
 class SearchTab extends StatefulWidget {
@@ -186,7 +187,12 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
             FileTypeSection(hasAnySearchableFiles: hasAnySearchableFiles),
           ];
           return ListView.builder(
-                padding: EdgeInsets.fromLTRB(15, 0, 15, bottomPadding),
+                padding: EdgeInsets.fromLTRB(
+                  searchTabHorizontalPadding,
+                  0,
+                  searchTabHorizontalPadding,
+                  bottomPadding,
+                ),
                 physics: const BouncingScrollPhysics(),
                 itemCount: sectionWidgets.length + 1,
                 itemBuilder: (context, index) {

@@ -27,6 +27,7 @@ import 'package:photos/ui/viewer/people/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class PeopleSection extends StatefulWidget {
@@ -145,21 +146,16 @@ class SearchExampleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return SearchTabHorizontalListView(
       height: 158,
-      child: ListView.separated(
-        padding: EdgeInsets.zero,
-        physics: const BouncingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        itemCount: examples.length,
-        itemBuilder: (context, index) {
-          return PersonSearchExample(
-            searchResult: examples[index],
-            selectedPeople: null,
-          );
-        },
-        separatorBuilder: (context, index) => const SizedBox(width: 10),
-      ),
+      itemCount: examples.length,
+      itemBuilder: (context, index) {
+        return PersonSearchExample(
+          searchResult: examples[index],
+          selectedPeople: null,
+        );
+      },
+      separatorBuilder: (context, index) => const SizedBox(width: 10),
     );
   }
 }

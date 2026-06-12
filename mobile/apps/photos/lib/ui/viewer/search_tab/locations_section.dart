@@ -21,6 +21,7 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/go_to_map_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class LocationsSection extends StatefulWidget {
@@ -115,23 +116,18 @@ class _LocationsSectionState extends State<LocationsSection> {
                   (_locationsSearchResults.length >= kSearchSectionLimit - 1),
             ),
             const SizedBox(height: 4),
-            SizedBox(
+            SearchTabHorizontalListView(
               height: LocationRecommendation.height,
-              child: ListView.separated(
-                padding: EdgeInsets.zero,
-                physics: const BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                itemCount: _locationsSearchResults.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return const GoToMapTile();
-                  }
-                  return LocationRecommendation(
-                    _locationsSearchResults[index - 1],
-                  );
-                },
-                separatorBuilder: (context, index) => const SizedBox(width: 10),
-              ),
+              itemCount: _locationsSearchResults.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return const GoToMapTile();
+                }
+                return LocationRecommendation(
+                  _locationsSearchResults[index - 1],
+                );
+              },
+              separatorBuilder: (context, index) => const SizedBox(width: 10),
             ),
           ],
         ),

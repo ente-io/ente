@@ -12,6 +12,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class MagicSection extends StatefulWidget {
@@ -107,18 +108,13 @@ class _MagicSectionState extends State<MagicSection> {
               hasMore: (_magicSearchResults.length >= kSearchSectionLimit - 1),
             ),
             const SizedBox(height: 4),
-            SizedBox(
+            SearchTabHorizontalListView(
               height: 158,
-              child: ListView.separated(
-                padding: EdgeInsets.zero,
-                physics: const BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                itemCount: _magicSearchResults.length,
-                itemBuilder: (context, index) {
-                  return MagicRecommendation(_magicSearchResults[index]);
-                },
-                separatorBuilder: (context, index) => const SizedBox(width: 10),
-              ),
+              itemCount: _magicSearchResults.length,
+              itemBuilder: (context, index) {
+                return MagicRecommendation(_magicSearchResults[index]);
+              },
+              separatorBuilder: (context, index) => const SizedBox(width: 10),
             ),
           ],
         ),

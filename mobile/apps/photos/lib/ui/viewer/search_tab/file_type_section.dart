@@ -15,6 +15,7 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/pending_translation.dart";
 
@@ -69,18 +70,13 @@ class FileTypeSection extends StatelessWidget {
         children: [
           const SectionHeader(SectionType.fileTypesAndExtension, hasMore: true),
           const SizedBox(height: 8),
-          SizedBox(
+          SearchTabHorizontalListView(
             height: 56,
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              physics: const BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              itemCount: previewTiles.length,
-              itemBuilder: (context, index) {
-                return _FileTypeRecommendation(previewTiles[index]);
-              },
-              separatorBuilder: (context, index) => const SizedBox(width: 10),
-            ),
+            itemCount: previewTiles.length,
+            itemBuilder: (context, index) {
+              return _FileTypeRecommendation(previewTiles[index]);
+            },
+            separatorBuilder: (context, index) => const SizedBox(width: 10),
           ),
         ],
       ),
