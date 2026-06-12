@@ -23,6 +23,7 @@ import "package:photos/ui/settings/app_version_widget.dart";
 import "package:photos/ui/settings/appearance/appearance_settings_page.dart";
 import "package:photos/ui/settings/backup/backup_settings_page.dart";
 import "package:photos/ui/settings/backup/free_space_options.dart";
+import "package:photos/ui/settings/cast/cast_settings_page.dart";
 import "package:photos/ui/settings/components/settings_item.dart";
 import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/settings/debug/debug_settings_page.dart";
@@ -121,6 +122,15 @@ class _SettingsBody extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 8),
+              if (flagService.enableMultiCast)
+                _buildMenuItem(
+                  title: AppLocalizations.of(context).cast,
+                  icon: HugeIcons.strokeRoundedTv02,
+                  onTap: () async {
+                    await routeToPage(context, const CastSettingsPage());
+                  },
+                ),
+              if (flagService.enableMultiCast) const SizedBox(height: 8),
             ],
             // Privacy and personalization section
             _buildMenuItem(

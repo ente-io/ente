@@ -3,12 +3,14 @@ package cast
 import (
 	"context"
 	"database/sql"
+	"strings"
+
 	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/utils/random"
 	"github.com/ente-io/stacktrace"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 type Repository struct {
@@ -26,6 +28,26 @@ func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string) (str
 		return "", err
 	}
 	return codeValue, nil
+}
+
+func (r *Repository) GetAllDevices(ctx context.Context, userID int64) ([]cast.CastInfo, error) {
+	rows, err := r.DB.QueryContext(ctx, "SELECT id, collection_id, ip, last_used_at FROM casting WHERE cast_user = $1 and is_deleted=false ORDER BY created_at DESC", userID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to query devices")
+	}
+	defer rows.Close()
+	devices := make([]cast.CastInfo, 0)
+	for rows.Next() {
+		var device cast.CastInfo
+		if err := rows.Scan(&device.DeviceID, &device.CollectionID, &device.DeviceIP, &device.LastUsedAt); err != nil {
+			return nil, stacktrace.Propagate(err, "failed to scan device row")
+		}
+		devices = append(devices, device)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "error iterating over device rows")
+	}
+	return devices, nil
 }
 
 // InsertCastData insert collection_id, cast_user, token and encrypted_payload for given code if collection_id is not null
@@ -128,4 +150,12 @@ func (r *Repository) RevokeTokenForCollection(ctx context.Context, collectionID 
 func (r *Repository) RevokeForGivenUserAndCollection(ctx context.Context, collectionID int64, userID int64) error {
 	_, err := r.DB.ExecContext(ctx, "UPDATE casting SET is_deleted=true where collection_id=$1 and cast_user=$2", collectionID, userID)
 	return stacktrace.Propagate(err, "")
+}
+
+func (r *Repository) RevokeForGivenUserAndDevice(ctx context.Context, userID int64, deviceID uuid.UUID) error {
+	_, err := r.DB.ExecContext(ctx, "UPDATE casting SET is_deleted=true where id=$1 and cast_user=$2", deviceID, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to revoke token for given user and device")
+	}
+	return nil
 }
