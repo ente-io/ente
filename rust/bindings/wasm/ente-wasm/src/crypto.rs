@@ -49,7 +49,6 @@ impl From<core_crypto::CryptoError> for CryptoError {
             E::StreamTrailingData => "stream_trailing_data",
             E::SealedBoxOpenFailed => "sealed_box_open_failed",
             E::InvalidPublicKey => "invalid_public_key",
-            E::HashFailed => "hash_failed",
             E::Json(_) => "json",
             E::Argon2(_) => "argon2",
             E::Aead => "aead",

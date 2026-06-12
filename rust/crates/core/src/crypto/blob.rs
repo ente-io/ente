@@ -27,7 +27,8 @@ pub use super::stream::ABYTES;
 /// The result of blob encryption: ciphertext and decryption header, separate.
 #[derive(Debug, Clone)]
 pub struct EncryptedBlob {
-    /// The encrypted data: `ciphertext ‖ MAC ‖ tag` (secretstream message).
+    /// The encrypted data: a single secretstream message (plaintext length +
+    /// [`ABYTES`] bytes).
     pub encrypted_data: Vec<u8>,
     /// The decryption header. Required for decryption; not secret.
     pub decryption_header: Header,

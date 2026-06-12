@@ -243,8 +243,10 @@ impl SecretKey {
 
     /// Deterministically derive a secret key from a 32-byte seed.
     ///
-    /// The seed is clamped per the X25519 construction, making this suitable
-    /// for deriving stable box keys from a higher-entropy master secret.
+    /// The seed bytes are stored as-is and used as the X25519 secret scalar
+    /// (clamping happens during scalar multiplication, per the X25519
+    /// construction). Suitable for deriving stable box keys from a
+    /// higher-entropy master secret.
     pub fn from_seed(seed: &[u8]) -> Result<Self> {
         Ok(Self(seed.try_into().map_err(|_| {
             CryptoError::InvalidKeyLength {

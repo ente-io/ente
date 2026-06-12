@@ -47,7 +47,7 @@ pub(crate) fn create_legacy_kit_request(
 
     let kit_id = Uuid::new_v4().to_string();
     let variant = LegacyKitVariant::TwoOfThree;
-    let kit_secret = crypto::Key::generate().as_bytes().to_vec();
+    let kit_secret = SecretVec::new(crypto::random_bytes(32));
     let checksum = checksum(LEGACY_KIT_PAYLOAD_VERSION, variant, &kit_id, &kit_secret);
     let shares = split_secret_2_of_3(&kit_secret)?;
     let result_shares = shares

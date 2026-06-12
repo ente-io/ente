@@ -7,7 +7,8 @@
 //!
 //! # Wire Format
 //! - Header: 24 bytes
-//! - Each message: `ciphertext ‖ MAC ‖ tag` (plaintext length + [`ABYTES`])
+//! - Each message: plaintext length + [`ABYTES`] bytes (an encrypted tag
+//!   byte, the ciphertext, and a trailing 16-byte MAC)
 
 use crypto_secretstream::{
     Header as UpstreamHeader, Key as UpstreamKey, PullStream, PushStream, Stream, Tag,
