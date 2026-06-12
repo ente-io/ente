@@ -127,7 +127,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
   @override
   Widget build(BuildContext context) {
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final bottomPadding = keyboardInset > 130.0 ? keyboardInset + 50.0 : 180.0;
+    final bottomPadding = keyboardInset > 130.0 ? keyboardInset + 50.0 : 124.0;
 
     return FutureBuilder<AllSectionsExamplesData>(
       future: InheritedAllSectionsExamples.of(
