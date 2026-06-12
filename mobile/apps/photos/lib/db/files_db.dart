@@ -73,8 +73,9 @@ class FilesDB with SqlDbBase {
   // we need to write query based on that field
   static const columnMMdVisibility = 'mmd_visibility';
 
-  //If adding or removing a new column, make sure to update the `_columnNames` list
-  //and update `_generateColumnsAndPlaceholdersForInsert` and
+  //If adding or removing a new column, make sure to update the `_columnNames`
+  //list, the parallel value list in `_getParameterSetForFile`, and the column
+  //builders `_generateColumnsAndPlaceholdersForInsert` and
   //`_generateUpdateAssignmentsWithPlaceholders`
   static final _migrationScripts = [
     ...createTable(filesTable),
@@ -507,10 +508,14 @@ class FilesDB with SqlDbBase {
   Future<void> insert(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.sqliteAsyncDB;
+    final bool omitGeneratedId = file.generatedID == null;
     final columnsAndPlaceholders = _generateColumnsAndPlaceholdersForInsert(
-      fileGenId: file.generatedID,
+      omitGeneratedId: omitGeneratedId,
     );
-    final values = _getParameterSetForFile(file);
+    final values = _getParameterSetForFile(
+      file,
+      omitGeneratedId: omitGeneratedId,
+    );
 
     await db.execute(
       'INSERT OR REPLACE INTO $filesTable (${columnsAndPlaceholders["columns"]}) VALUES (${columnsAndPlaceholders["placeholders"]})',
@@ -521,10 +526,14 @@ class FilesDB with SqlDbBase {
   Future<int> insertAndGetId(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.sqliteAsyncDB;
+    final bool omitGeneratedId = file.generatedID == null;
     final columnsAndPlaceholders = _generateColumnsAndPlaceholdersForInsert(
-      fileGenId: file.generatedID,
+      omitGeneratedId: omitGeneratedId,
     );
-    final values = _getParameterSetForFile(file);
+    final values = _getParameterSetForFile(
+      file,
+      omitGeneratedId: omitGeneratedId,
+    );
     return await db.writeTransaction((tx) async {
       await tx.execute(
         'INSERT OR REPLACE INTO $filesTable (${columnsAndPlaceholders["columns"]}) VALUES (${columnsAndPlaceholders["placeholders"]})',
@@ -1360,9 +1369,13 @@ class FilesDB with SqlDbBase {
 
   Future<void> update(EnteFile file) async {
     final db = await instance.sqliteAsyncDB;
-    final parameterSet = _getParameterSetForFile(file)..add(file.generatedID);
+    final bool omitGeneratedId = file.generatedID == null;
+    final parameterSet = _getParameterSetForFile(
+      file,
+      omitGeneratedId: omitGeneratedId,
+    )..add(file.generatedID);
     final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
-      fileGenId: file.generatedID,
+      omitGeneratedId: omitGeneratedId,
     );
     await db.execute(
       'UPDATE $filesTable '
@@ -1373,11 +1386,21 @@ class FilesDB with SqlDbBase {
 
   Future<void> updateUploadedFileAcrossCollections(EnteFile file) async {
     final db = await instance.sqliteAsyncDB;
-    final parameterSet = _getParameterSetForFile(file, omitCollectionId: true)
-      ..add(file.uploadedFileID);
-    final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
-      fileGenId: file.generatedID,
+    // _id, collection_id and the encrypted key material must not be written
+    // here: the same uploadedFileID can exist as multiple rows (one per
+    // collection), each with its own _id, collection_id and encrypted_key/
+    // key_decryption_nonce (the file key wrapped with that collection's key).
+    // Writing one collection's values across all rows would corrupt the others.
+    final parameterSet = _getParameterSetForFile(
+      file,
       omitCollectionId: true,
+      omitGeneratedId: true,
+      omitKeyMaterial: true,
+    )..add(file.uploadedFileID);
+    final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
+      omitGeneratedId: true,
+      omitCollectionId: true,
+      omitKeyMaterial: true,
     );
     await db.execute(
       'UPDATE $filesTable '
@@ -2136,16 +2159,22 @@ class FilesDB with SqlDbBase {
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."
   String _generateUpdateAssignmentsWithPlaceholders({
-    required int? fileGenId,
+    required bool omitGeneratedId,
     bool omitCollectionId = false,
+    bool omitKeyMaterial = false,
   }) {
     final assignments = <String>[];
 
     for (String columnName in _columnNames) {
-      if (columnName == columnGeneratedID && fileGenId == null) {
+      if (columnName == columnGeneratedID && omitGeneratedId) {
         continue;
       }
       if (columnName == columnCollectionID && omitCollectionId) {
+        continue;
+      }
+      if (omitKeyMaterial &&
+          (columnName == columnEncryptedKey ||
+              columnName == columnKeyDecryptionNonce)) {
         continue;
       }
       assignments.add("$columnName = ?");
@@ -2155,12 +2184,12 @@ class FilesDB with SqlDbBase {
   }
 
   Map<String, String> _generateColumnsAndPlaceholdersForInsert({
-    required int? fileGenId,
+    required bool omitGeneratedId,
   }) {
     final columnNames = <String>[];
 
     for (String columnName in _columnNames) {
-      if (columnName == columnGeneratedID && fileGenId == null) {
+      if (columnName == columnGeneratedID && omitGeneratedId) {
         continue;
       }
 
@@ -2176,6 +2205,8 @@ class FilesDB with SqlDbBase {
   List<Object?> _getParameterSetForFile(
     EnteFile file, {
     bool omitCollectionId = false,
+    bool omitGeneratedId = false,
+    bool omitKeyMaterial = false,
   }) {
     final values = <Object?>[];
 
@@ -2194,22 +2225,25 @@ class FilesDB with SqlDbBase {
       }
     }
 
-    if (file.generatedID != null) {
+    if (file.generatedID != null && !omitGeneratedId) {
       values.add(file.generatedID);
     }
     values.addAll([
       file.localID,
       file.uploadedFileID ?? -1,
       file.ownerID,
-      file.collectionID ?? -1,
+      if (!omitCollectionId) file.collectionID ?? -1,
       file.title,
       file.deviceFolder,
       latitude,
       longitude,
       getInt(file.fileType),
       file.modificationTime,
-      file.encryptedKey,
-      file.keyDecryptionNonce,
+      // encrypted_key/key_decryption_nonce are per-collection (the file key
+      // wrapped with that collection's key), so they must be omitted from a
+      // cross-collection update to avoid overwriting sibling rows.
+      if (!omitKeyMaterial) file.encryptedKey,
+      if (!omitKeyMaterial) file.keyDecryptionNonce,
       file.fileDecryptionHeader,
       file.thumbnailDecryptionHeader,
       file.metadataDecryptionHeader,
@@ -2228,10 +2262,6 @@ class FilesDB with SqlDbBase {
       file.fileSize,
       file.addedTime ?? -1,
     ]);
-
-    if (omitCollectionId) {
-      values.removeAt(3);
-    }
 
     return values;
   }

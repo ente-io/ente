@@ -35,6 +35,7 @@ import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/exif_util.dart";
@@ -855,6 +856,10 @@ class FileUploader {
         throw LockFreedError();
       }
 
+      final Map<String, dynamic> pubMetadata = _buildPublicMagicData(
+        mediaUploadData,
+        exifTime,
+      );
       EnteFile remoteFile;
       if (isUpdatedFile) {
         // Verify that the encrypted file can be decrypted before uploading
@@ -880,6 +885,24 @@ class FileUploader {
         );
         // Update across all collections
         await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
+        // _updateFile does not carry public magic metadata, so derived values
+        // (width/height, mediaType, exif, camera) that change when the file is
+        // edited would stay stale. Refresh them here. updatePublicMagicMetadata
+        // merges into the existing pub mmd, preserving user-editable keys
+        // (editedTime/editedName/caption).
+        if (pubMetadata.isNotEmpty) {
+          try {
+            await FileMagicService.instance.updatePublicMagicMetadata([
+              remoteFile,
+            ], pubMetadata);
+          } catch (e, s) {
+            _logger.warning(
+              "Failed to refresh public metadata on re-upload of ${file.tag}",
+              e,
+              s,
+            );
+          }
+        }
       } else {
         final encryptedFileKeyData = CryptoUtil.encryptSync(
           fileAttributes.key,
@@ -890,10 +913,6 @@ class FileUploader {
         );
         final keyDecryptionNonce = CryptoUtil.bin2base64(
           encryptedFileKeyData.nonce!,
-        );
-        final Map<String, dynamic> pubMetadata = _buildPublicMagicData(
-          mediaUploadData,
-          exifTime,
         );
         MetadataRequest? pubMetadataRequest;
         if (pubMetadata.isNotEmpty) {

@@ -30,10 +30,13 @@ import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
 import "package:tuple/tuple.dart";
 
-// This map is used to track if a iOS origin file is being fetched for uploading
-// or ML processing. In such cases, we want to ignore these files if they come in response
-// from the local sync service. When a file is download
-final LRUMap<String, bool> trackOriginFetchForUploadOrML = LRUMap(200);
+// Tracks iOS assets whose origin bytes were recently fetched for upload or
+// ML, mapped to the asset's modificationTime (in microseconds) at fetch time.
+// Fetching origin bytes can itself fire a photo library change notification;
+// such self-inflicted notifications carry an unchanged modificationTime and
+// are skipped during update tracking. A real edit moves modificationTime
+// forward, so it is always tracked even when the localID is present here.
+final LRUMap<String, int> trackOriginFetchForUploadOrML = LRUMap(200);
 
 class LocalSyncService {
   final _logger = Logger("LocalSyncService");
@@ -395,10 +398,7 @@ class LocalSyncService {
     if (allFiles.isEmpty) return;
     final bool discoveredNewFiles = newlyInsertedFiles.isNotEmpty;
     if (!discoveredNewFiles) {
-      allFiles.removeWhere(
-        (file) =>
-            trackOriginFetchForUploadOrML.get(file.localID ?? '') ?? false,
-      );
+      allFiles.removeWhere(_isSelfInflictedUpdate);
       if (allFiles.isEmpty) {
         _logger.info("skipping firing LocalPhotosUpdatedEvent as no new files");
         return;
@@ -429,30 +429,58 @@ class LocalSyncService {
     List<EnteFile> files,
     Set<String> existingLocalFileIDs,
   ) async {
-    final List<String> updatedLocalIDs = files
+    final List<EnteFile> updatedFiles = files
         .where(
           (file) =>
               file.localID != null &&
               existingLocalFileIDs.contains(file.localID),
         )
-        .map((e) => e.localID!)
         .toList();
 
-    if (updatedLocalIDs.isNotEmpty) {
-      final int updateCount = updatedLocalIDs.length;
-      updatedLocalIDs.removeWhere(
-        (x) => trackOriginFetchForUploadOrML.get(x) ?? false,
+    if (updatedFiles.isNotEmpty) {
+      final int updateCount = updatedFiles.length;
+      updatedFiles.removeWhere(
+        (file) => _isSelfInflictedUpdate(file, logDecision: true),
       );
       _logger.info(
-        "track ${updatedLocalIDs.length}/ $updateCount files due to modification change",
+        "track ${updatedFiles.length}/ $updateCount files due to modification change",
       );
-      if (updatedLocalIDs.isNotEmpty) {
+      if (updatedFiles.isNotEmpty) {
         await FileUpdationDB.instance.insertMultiple(
-          updatedLocalIDs,
+          updatedFiles.map((e) => e.localID!).toList(),
           FileUpdationDB.modificationTimeUpdated,
         );
       }
     }
+  }
+
+  // A change notification for a file whose modificationTime still matches the
+  // value recorded when we last fetched its origin bytes was caused by that
+  // fetch itself, not by a user edit.
+  bool _isSelfInflictedUpdate(EnteFile file, {bool logDecision = false}) {
+    final int? trackedModificationTime = trackOriginFetchForUploadOrML.get(
+      file.localID ?? '',
+    );
+    if (trackedModificationTime == null) {
+      return false;
+    }
+    final bool isSelfInflicted =
+        trackedModificationTime == file.modificationTime;
+    if (logDecision) {
+      if (isSelfInflicted) {
+        _logger.info(
+          "Skipping self-inflicted update for ${file.localID}, "
+          "modificationTime unchanged at $trackedModificationTime",
+        );
+      } else {
+        _logger.info(
+          "Tracking edit of recently fetched ${file.localID}, "
+          "modificationTime moved $trackedModificationTime -> "
+          "${file.modificationTime}",
+        );
+      }
+    }
+    return isSelfInflicted;
   }
 
   void _registerChangeCallback() {

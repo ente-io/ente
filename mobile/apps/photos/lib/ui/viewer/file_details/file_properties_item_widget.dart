@@ -56,16 +56,16 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
   Future<List<Widget>> _subTitleSection() async {
     final textStyle = getEnteTextTheme(context).miniMuted;
     final StringBuffer dimString = StringBuffer();
-    if (widget.exifData["resolution"] != null &&
-        widget.exifData["megaPixels"] != null) {
-      dimString.write('${widget.exifData["megaPixels"]}MP   ');
-      dimString.write('${widget.exifData["resolution"]}');
-    } else if (widget.file.hasDimensions) {
+    if (widget.file.hasDimensions) {
       final double megaPixels =
           (widget.file.width * widget.file.height) / 1000000;
       final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
       dimString.write('${roundedMegaPixels.toStringAsFixed(1)}MP   ');
       dimString.write('${widget.file.width} x ${widget.file.height}');
+    } else if (widget.exifData["resolution"] != null &&
+        widget.exifData["megaPixels"] != null) {
+      dimString.write('${widget.exifData["megaPixels"]}MP   ');
+      dimString.write('${widget.exifData["resolution"]}');
     }
     final subSectionWidgets = <Widget>[];
 
