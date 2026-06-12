@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/components/scanner_camera_view.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 class ScannerGoogleAuthPage extends StatefulWidget {
   const ScannerGoogleAuthPage({super.key});
@@ -18,7 +20,9 @@ class ScannerGoogleAuthPage extends StatefulWidget {
 class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
+  StreamSubscription<Barcode>? _scanSubscription;
   String? totp;
+  bool _hasCompletedScan = false;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -26,9 +30,9 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      controller!.pauseCamera();
+      unawaited(controller?.pauseCamera());
     } else if (Platform.isIOS) {
-      controller!.resumeCamera();
+      unawaited(controller?.resumeCamera());
     }
   }
 
@@ -41,8 +45,8 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
         children: <Widget>[
           Expanded(
             flex: 5,
-            child: QRView(
-              key: qrKey,
+            child: ScannerCameraView(
+              qrKey: qrKey,
               overlay: QrScannerOverlayShape(
                 borderColor: getEnteColorScheme(context).primary700,
               ),
@@ -63,34 +67,74 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
-    // h4ck to remove black screen on Android scanners: https://github.com/juliuscanute/qr_code_scanner/issues/560#issuecomment-1159611301
+    // Retain the Android camera restart workaround for scanner black screens.
     if (Platform.isAndroid) {
-      controller.pauseCamera();
-      controller.resumeCamera();
+      unawaited(controller.pauseCamera());
+      unawaited(controller.resumeCamera());
     }
-    controller.scannedDataStream.listen((scanData) {
-      try {
-        if (scanData.code == null) {
-          return;
-        }
-        if (scanData.code!.startsWith(kGoogleAuthExportPrefix)) {
-          List<Code> codes = parseGoogleAuth(scanData.code!);
-          controller.dispose();
-          Navigator.of(context).pop(codes);
-        } else {
-          showToast(context, "Invalid QR code");
-        }
-      } catch (e) {
-        controller.dispose();
-        Navigator.of(context).pop();
-        showToast(context, "Error $e");
+    _cancelScanSubscription();
+    _scanSubscription = controller.scannedDataStream.listen(_handleScanData);
+  }
+
+  void _handleScanData(Barcode scanData) {
+    if (_hasCompletedScan) {
+      return;
+    }
+
+    final qrCode = scanData.code;
+    if (qrCode == null) {
+      return;
+    }
+
+    if (!qrCode.startsWith(kGoogleAuthExportPrefix)) {
+      if (mounted) {
+        showToast(context, "Invalid QR code");
       }
-    });
+      return;
+    }
+
+    try {
+      final codes = parseGoogleAuth(qrCode);
+      _completeWithCodes(codes);
+    } catch (e) {
+      _completeWithError(e);
+    }
+  }
+
+  void _completeWithCodes(List<Code> codes) {
+    if (_hasCompletedScan) {
+      return;
+    }
+    _hasCompletedScan = true;
+    _cancelScanSubscription();
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(context).pop(codes);
+  }
+
+  void _completeWithError(Object error) {
+    if (_hasCompletedScan) {
+      return;
+    }
+    _hasCompletedScan = true;
+    _cancelScanSubscription();
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(context).pop();
+    showToast(context, "Error $error");
+  }
+
+  void _cancelScanSubscription() {
+    final scanSubscription = _scanSubscription;
+    _scanSubscription = null;
+    unawaited(scanSubscription?.cancel());
   }
 
   @override
   void dispose() {
-    controller?.dispose();
+    _cancelScanSubscription();
     super.dispose();
   }
 }
