@@ -4,6 +4,7 @@ import "dart:math" as math;
 import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file/file_type.dart";
@@ -60,7 +61,7 @@ class FileTypeSection extends StatelessWidget {
       );
     }
 
-    final tiles = _previewTiles(context);
+    final previewTiles = _previewTiles(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -74,9 +75,9 @@ class FileTypeSection extends StatelessWidget {
               padding: EdgeInsets.zero,
               physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
-              itemCount: tiles.length,
+              itemCount: previewTiles.length,
               itemBuilder: (context, index) {
-                return _FileTypeRecommendation(tiles[index]);
+                return _FileTypeRecommendation(previewTiles[index]);
               },
               separatorBuilder: (context, index) => const SizedBox(width: 10),
             ),
@@ -109,30 +110,10 @@ class FileTypeSection extends StatelessWidget {
         type: FileType.livePhoto,
         icon: HugeIcons.strokeRoundedPlayCircle,
       ),
-      const _FileTypeTile.extension(
-        label: "PNG",
-        name: "PNGs",
-        extension: "PNG",
-        icon: HugeIcons.strokeRoundedFile01,
-      ),
-      const _FileTypeTile.extension(
-        label: "JPG",
-        name: "JPGs",
-        extension: "JPG",
-        icon: HugeIcons.strokeRoundedFile01,
-      ),
-      const _FileTypeTile.extension(
-        label: "HEIC",
-        name: "HEICs",
-        extension: "HEIC",
-        icon: HugeIcons.strokeRoundedFile01,
-      ),
-      const _FileTypeTile.extension(
-        label: "MP4",
-        name: "MP4s",
-        extension: "MP4",
-        icon: HugeIcons.strokeRoundedFile01,
-      ),
+      const _FileTypeTile.extension("PNG"),
+      const _FileTypeTile.extension("JPG"),
+      const _FileTypeTile.extension("HEIC"),
+      const _FileTypeTile.extension("MP4"),
     ];
   }
 }
@@ -141,8 +122,8 @@ class _FileTypeTile {
   final String label;
   final String name;
   final FileType? fileType;
-  final String? extension;
-  final List<List<dynamic>> icon;
+  final String extension;
+  final List<List<dynamic>>? icon;
   bool get isFileType => fileType != null;
 
   const _FileTypeTile.fileType({
@@ -151,14 +132,13 @@ class _FileTypeTile {
     required FileType type,
     required this.icon,
   }) : fileType = type,
-       extension = null;
+       extension = "";
 
-  const _FileTypeTile.extension({
-    required this.label,
-    required this.name,
-    required this.extension,
-    required this.icon,
-  }) : fileType = null;
+  const _FileTypeTile.extension(this.extension)
+    : label = extension,
+      name = "",
+      fileType = null,
+      icon = null;
 
   Future<GenericSearchResult> resolve() {
     final type = fileType;
@@ -168,9 +148,10 @@ class _FileTypeTile {
         typeName: name,
       );
     }
+    final normalizedExtension = _normalizedExtension(extension);
     return SearchService.instance.getFileExtensionResult(
-      extension: extension!,
-      extensionName: name,
+      extension: normalizedExtension,
+      extensionName: "${normalizedExtension}s",
     );
   }
 }
@@ -254,7 +235,7 @@ class _FileTypeCard extends StatelessWidget {
               height: 34,
               child: Center(
                 child: HugeIcon(
-                  icon: tile.icon,
+                  icon: tile.icon!,
                   size: 18,
                   color: colorScheme.textBase,
                 ),
@@ -282,20 +263,77 @@ class _FileExtensionPill extends StatelessWidget {
         color: colorScheme.fill,
         borderRadius: BorderRadius.circular(25),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Center(
+        child: _FileExtensionIcon(
+          extension: tile.extension,
+          color: colorScheme.textBase,
+        ),
+      ),
+    );
+  }
+}
+
+class _FileExtensionIcon extends StatelessWidget {
+  static const _outlineAsset = "assets/file_extension_outline.svg";
+  static const _maxExtensionLength = 5;
+
+  final String extension;
+  final Color color;
+
+  const _FileExtensionIcon({required this.extension, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = _displayExtension(extension);
+    return SizedBox(
+      width: 34,
+      height: 23.2041,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          HugeIcon(icon: tile.icon, size: 22, color: colorScheme.textBase),
-          const SizedBox(height: 2),
-          Text(
-            tile.label,
-            style: TextStyles.tiny.copyWith(color: colorScheme.textBase),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Positioned(
+            top: 0,
+            child: SvgPicture.asset(
+              _outlineAsset,
+              width: 22,
+              height: 13,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 8,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontFamily: TextStyles.fontFamily,
+                  package: TextStyles.fontPackage,
+                  fontSize: 7.8,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                  letterSpacing: 0,
+                ),
+                maxLines: 1,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  String _displayExtension(String extension) {
+    final normalizedExtension = _normalizedExtension(extension);
+    if (normalizedExtension.length <= _maxExtensionLength) {
+      return normalizedExtension;
+    }
+    return normalizedExtension.substring(0, _maxExtensionLength);
   }
 }
 
@@ -386,4 +424,10 @@ class _FileTypeCardPath {
     path.close();
     return path;
   }
+}
+
+String _normalizedExtension(String extension) {
+  final trimmed = extension.trim();
+  final withoutDot = trimmed.startsWith(".") ? trimmed.substring(1) : trimmed;
+  return withoutDot.toUpperCase();
 }
