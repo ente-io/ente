@@ -276,11 +276,11 @@ jobs:
                   ./linux/packaging/build_rpm.sh
                   mv dist/*/*.rpm "artifacts/${ARTIFACT_STEM}-x86_64.rpm"
                   dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
-                  dart pub global run fastforge package --platform=linux --targets=appimage --skip-clean
+                  dart pub global run fastforge:main package --platform=linux --targets=appimage --skip-clean
                   appimage_path="$(find dist -name '*-*-linux.AppImage' -print -quit)"
                   ./linux/packaging/post_process_appimage.sh "$appimage_path"
                   mv "$appimage_path" "artifacts/${ARTIFACT_STEM}-x86_64.AppImage"
-                  dart pub global run fastforge package --platform=linux --targets=deb --skip-clean
+                  dart pub global run fastforge:main package --platform=linux --targets=deb --skip-clean
                   mv dist/**/*-*-linux.deb "artifacts/${ARTIFACT_STEM}-x86_64.deb"
 
             - name: Generate checksums
