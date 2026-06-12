@@ -58,8 +58,7 @@ class _NoResultWidgetState extends State<NoResultWidget> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final bottomPadding = keyboardInset + (keyboardInset > 0 ? 50 : 0);
+    const bottomPadding = 124.0;
     final searchTypeAndSuggestion = <Widget>[];
     searchTypeToQuerySuggestion.forEach((key, value) {
       searchTypeAndSuggestion.add(
@@ -83,7 +82,7 @@ class _NoResultWidgetState extends State<NoResultWidget> {
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(12, 8, 12, bottomPadding),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, bottomPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
