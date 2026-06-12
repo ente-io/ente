@@ -386,7 +386,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _buildDotsIndicator() {
     return DotsIndicator(
       dotsCount: _featureCount,
-      position: _activeDotIndex,
+      position: _activeDotIndex.toDouble(),
       decorator: DotsDecorator(
         activeColor: Colors.white,
         color: Colors.white.withValues(alpha: 0.32),

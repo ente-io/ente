@@ -48,11 +48,12 @@ class ReferralCodeWidget extends StatelessWidget {
             right: shouldShowEdit ? overlapAmount + tapPadding : 0,
           ),
           child: DottedBorder(
-            color: greenColor,
-            strokeWidth: 1,
-            dashPattern: const [6, 6],
-            borderType: BorderType.RRect,
-            radius: const Radius.circular(16),
+            options: const RoundedRectDottedBorderOptions(
+              color: greenColor,
+              strokeWidth: 1,
+              dashPattern: [6, 6],
+              radius: Radius.circular(16),
+            ),
             child: Container(
               decoration: BoxDecoration(
                 color: cardColor,

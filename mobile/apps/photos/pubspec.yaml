@@ -50,7 +50,7 @@ dependencies:
   dio: 5.9.2
   dio_http2_adapter: 2.7.1
   dots_indicator: 4.0.1
-  dotted_border: 2.1.0
+  dotted_border: 3.1.0
   dropdown_button2: 2.3.9
   email_validator: 3.0.0
   encrypt: 5.0.3
@@ -90,7 +90,7 @@ dependencies:
       path: flutter/flutter
       ref: 15afc08775a75fe9c12de3366fa99e39bf171ccc
   figma_squircle: 0.6.3
-  file_saver: 0.2.14
+  file_saver: 0.3.1
   firebase_core: 3.15.1
   firebase_messaging: 15.2.9
   fixnum: 1.1.1
@@ -218,7 +218,7 @@ dependencies:
   sqlite3_flutter_libs: 0.5.41
   sqlite_async: 0.11.7
   styled_text: 8.1.0
-  synchronized: 3.3.1
+  synchronized: 3.4.0
   system_info_plus: 0.0.6
   thermal: 1.1.11
   timezone: 0.10.1
