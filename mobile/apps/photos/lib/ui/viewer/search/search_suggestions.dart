@@ -135,7 +135,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       sectionWidgets.insert(
         0,
         Padding(
-          padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
           child: Text(
             AppLocalizations.of(
               context,
@@ -148,7 +148,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
     return Scaffold(
       backgroundColor: resultsBackground,
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

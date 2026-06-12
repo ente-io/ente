@@ -76,7 +76,7 @@ class _SearchTabState extends State<SearchTab> {
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(15, 12, 15, 20),
+              padding: const EdgeInsets.fromLTRB(15, 12, 15, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
