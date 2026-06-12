@@ -66,14 +66,12 @@ PODS:
     - FlutterMacOS
   - move_to_background (0.0.1):
     - Flutter
-  - MTBBarcodeScanner (5.0.11)
   - package_info_plus (0.4.5):
     - Flutter
   - privacy_screen (0.0.1):
     - Flutter
-  - qr_code_scanner (0.2.0):
+  - qr_code_scanner_plus (0.2.6):
     - Flutter
-    - MTBBarcodeScanner
   - scoped_dir_access (1.0.0):
     - Flutter
   - SDWebImage (5.21.5):
@@ -146,7 +144,7 @@ DEPENDENCIES:
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
-  - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
+  - qr_code_scanner_plus (from `.symlinks/plugins/qr_code_scanner_plus/ios`)
   - scoped_dir_access (from `.symlinks/plugins/scoped_dir_access/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -161,7 +159,6 @@ SPEC REPOS:
   trunk:
     - DKImagePickerController
     - DKPhotoGallery
-    - MTBBarcodeScanner
     - SDWebImage
     - Sentry
     - sqlite3
@@ -206,8 +203,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info_plus/ios"
   privacy_screen:
     :path: ".symlinks/plugins/privacy_screen/ios"
-  qr_code_scanner:
-    :path: ".symlinks/plugins/qr_code_scanner/ios"
+  qr_code_scanner_plus:
+    :path: ".symlinks/plugins/qr_code_scanner_plus/ios"
   scoped_dir_access:
     :path: ".symlinks/plugins/scoped_dir_access/ios"
   sentry_flutter:
@@ -247,10 +244,9 @@ SPEC CHECKSUMS:
   launcher_icon_switcher: 84c218d233505aa7d8655d8fa61a3ba802c022da
   local_auth_darwin: c3ee6cce0a8d56be34c8ccb66ba31f7f180aaebb
   move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
-  MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
-  qr_code_scanner: d77f94ecc9abf96d9b9b8fc04ef13f611e5a147a
+  qr_code_scanner_plus: 1fb59fd4576edb53ec7560c3746f454dee54300c
   scoped_dir_access: 4a89af7a2435a101b0cff856d6b6e7021df676de
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854

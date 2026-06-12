@@ -1191,15 +1191,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  qr_code_scanner:
+  qr_code_scanner_plus:
     dependency: "direct main"
     description:
-      path: "."
-      ref: a2d31633d4744f72ada87cfa85d221358ab082af
-      resolved-ref: a2d31633d4744f72ada87cfa85d221358ab082af
-      url: "https://github.com/juliuscanute/qr_code_scanner"
-    source: git
-    version: "1.0.0"
+      name: qr_code_scanner_plus
+      sha256: "2bcf9df32aa639fba07c183b1ab9c3f03eb6b1d688ab4f4f6bc868a75afd824d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
   qr_flutter:
     dependency: "direct main"
     description:
