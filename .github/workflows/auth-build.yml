@@ -11,9 +11,6 @@ on:
         # Run every weekday at ~3:45 AM IST
         - cron: "15 22 * * 0-4"
 
-env:
-    FLUTTER_VERSION: "3.38.10"
-
 permissions:
     contents: write
 
@@ -116,11 +113,8 @@ jobs:
                   distribution: "temurin"
                   java-version: "17"
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
+            - name: Install Flutter
+              uses: ./.github/actions/setup-flutter
 
             - name: Generate strings localizations
               run: flutter gen-l10n
@@ -244,11 +238,8 @@ jobs:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
                   submodules: recursive
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
+            - name: Install Flutter
+              uses: ./.github/actions/setup-flutter
 
             - name: Generate strings localizations
               run: flutter gen-l10n
@@ -284,12 +275,12 @@ jobs:
                   flutter build linux --release
                   ./linux/packaging/build_rpm.sh
                   mv dist/*/*.rpm "artifacts/${ARTIFACT_STEM}-x86_64.rpm"
-                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
-                  fastforge package --platform=linux --targets=appimage --skip-clean
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref 3e94e0555db45d0f969307cfc1ca41a2c7c9d2a5 --git-path packages/fastforge
+                  dart pub global run fastforge:main package --platform=linux --targets=appimage --skip-clean
                   appimage_path="$(find dist -name '*-*-linux.AppImage' -print -quit)"
                   ./linux/packaging/post_process_appimage.sh "$appimage_path"
                   mv "$appimage_path" "artifacts/${ARTIFACT_STEM}-x86_64.AppImage"
-                  fastforge package --platform=linux --targets=deb --skip-clean
+                  dart pub global run fastforge:main package --platform=linux --targets=deb --skip-clean
                   mv dist/**/*-*-linux.deb "artifacts/${ARTIFACT_STEM}-x86_64.deb"
 
             - name: Generate checksums
@@ -362,11 +353,8 @@ jobs:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
                   submodules: recursive
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
+            - name: Install Flutter
+              uses: ./.github/actions/setup-flutter
 
             - name: Generate strings localizations
               run: flutter gen-l10n
@@ -514,12 +502,8 @@ jobs:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
                   submodules: recursive
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
-                  cache: true
+            - name: Install Flutter
+              uses: ./.github/actions/setup-flutter
 
             - name: Generate strings localizations
               run: flutter gen-l10n
@@ -654,12 +638,8 @@ jobs:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
                   submodules: recursive
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
-                  cache: true
+            - name: Install Flutter
+              uses: ./.github/actions/setup-flutter
 
             - name: Generate strings localizations
               run: flutter gen-l10n

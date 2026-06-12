@@ -11,9 +11,6 @@ on:
         # Run every weekday at ~4:45 AM IST
         - cron: "15 23 * * 0-4"
 
-env:
-    FLUTTER_VERSION: "3.38.10"
-
 permissions:
     contents: write
 
@@ -115,11 +112,8 @@ jobs:
                   distribution: "temurin"
                   java-version: "17"
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
+            - name: Install Flutter
+              uses: ./.github/actions/setup-flutter
 
             - name: Generate strings localizations
               run: flutter gen-l10n
@@ -240,12 +234,8 @@ jobs:
               with:
                   ref: ${{ needs.build-metadata.outputs.commit_sha }}
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
-                  cache: true
+            - name: Install Flutter
+              uses: ./.github/actions/setup-flutter
 
             - name: Generate strings localizations
               run: flutter gen-l10n

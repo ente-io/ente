@@ -15,9 +15,6 @@ on:
             - "rust/crates/photos/**"
     workflow_dispatch:
 
-env:
-    FLUTTER_VERSION: "3.38.10"
-
 permissions:
     contents: read
 
@@ -65,12 +62,8 @@ jobs:
                   done
               working-directory: mobile/apps/auth
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
-                  cache: true
+            - name: Install Flutter
+              uses: ./.github/actions/setup-flutter
 
             # Restore-only; primed on main by warm-caches.yml.
             - name: Restore Rust cache

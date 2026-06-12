@@ -62,11 +62,7 @@ jobs:
                   submodules: recursive
 
             - name: Install Flutter
-              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-              with:
-                  channel: "stable"
-                  flutter-version: "3.38.10" # Keep in sync with mobile-lint.yml
-                  cache: true
+              uses: ./.github/actions/setup-flutter
 
             - name: Setup Rust cache
               uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
