@@ -21,7 +21,6 @@ environment:
 dependencies:
   adaptive_theme: 3.7.2
   android_intent_plus: 5.3.0
-  animated_list_plus: 0.5.2
   app_links: 6.4.1
   archive: 4.0.7
   async: 2.13.0
@@ -47,7 +46,7 @@ dependencies:
   cupertino_icons: 1.0.8
   dart_ui_isolate: 1.1.1
   defer_pointer: 0.0.2
-  device_info_plus: 11.3.0
+  device_info_plus: 11.5.0
   dio: 5.9.2
   dio_http2_adapter: 2.7.1
   dots_indicator: 4.0.1
@@ -109,7 +108,6 @@ dependencies:
     sdk: flutter
   flutter_map: 7.0.2
   flutter_map_marker_cluster: 1.4.0
-  flutter_password_strength: 0.1.6
   flutter_rust_bridge: 2.12.0
   # Do not upgrade this package unless this issue is resolved:
   # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870
@@ -139,7 +137,6 @@ dependencies:
   just_audio: 0.10.5
   latlong2: 0.9.1
   launcher_icon_switcher: 0.0.2
-  like_button: 2.1.0
   local_auth: 2.3.0
   local_auth_android: 1.0.49
   local_auth_ios: 1.1.7
@@ -211,7 +208,6 @@ dependencies:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396843cd3ab1b5ec4334be4233864637874e
   rive: 0.14.0-dev.13
-  screenshot: 3.0.0
   scrollable_positioned_list: 0.3.8
   sentry: 8.14.2
   sentry_flutter: 8.14.2
@@ -221,10 +217,7 @@ dependencies:
   sqflite_migration: 0.3.0
   sqlite3_flutter_libs: 0.5.41
   sqlite_async: 0.11.7
-  step_progress_indicator: 1.0.2
   styled_text: 8.1.0
-  syncfusion_flutter_core: 29.2.11
-  syncfusion_flutter_sliders: 29.2.11
   synchronized: 3.3.1
   system_info_plus: 0.0.6
   thermal: 1.1.11
@@ -244,8 +237,7 @@ dependencies:
   wechat_assets_picker: 9.8.0
   widgets_to_image: 1.0.0
   workmanager: 0.9.0+3
-  xml: 6.5.0
-
+  xml: 6.6.1
 dependency_overrides:
   # Remove this after removing dependency from flutter_sodium.
   # Newer flutter packages depends on ffi > 2.0.0 while flutter_sodium depends on ffi < 2.0.0
@@ -269,24 +261,22 @@ dependency_overrides:
       path: packages/video_player/video_player_avfoundation
       ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
   watcher: 1.1.2
-  win32: "5.10.1"
-
+  win32: "5.15.0"
 dev_dependencies:
-  build_runner: 2.6.0
+  build_runner: 2.13.1
   flutter_driver:
     sdk: flutter
   flutter_launcher_icons: 0.14.4
   flutter_lints: 5.0.0
-  flutter_native_splash: 2.4.6
+  flutter_native_splash: 2.4.7
   flutter_test:
     sdk: flutter
-  freezed: 3.2.0
+  freezed: 3.2.3
   integration_test:
     sdk: flutter
-  intl_utils: 2.8.10
   json_annotation: 4.9.0
-  json_serializable: 6.10.0
-  mockito: 5.5.0
+  json_serializable: 6.11.2
+  mockito: 5.5.1
   test: 1.26.3
 
 # ------------------------------

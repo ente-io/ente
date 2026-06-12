@@ -12,7 +12,7 @@ dependencies:
   collection: 1.19.1
   convert: 3.1.2
   crypto: 3.0.7
-  dio: 5.9.0
+  dio: 5.9.2
   dots_indicator: 3.1.0
   dotted_border: 3.1.0
   email_validator: 3.0.0
@@ -67,7 +67,6 @@ dependencies:
   flutter_svg: 2.2.3
   hugeicons: 1.1.7
   intl: 0.20.2
-  io: 1.0.5
   listen_sharing_intent: 1.9.2
   logging: 1.3.0
   open_file: 3.5.11

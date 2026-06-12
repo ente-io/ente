@@ -20,7 +20,7 @@ dependencies:
   connectivity_plus: 6.1.4
   convert: 3.1.2
   device_info_plus: 11.5.0
-  dio: 5.9.0
+  dio: 5.9.2
   dots_indicator: 3.1.0
   dotted_border: 3.1.0
   dropdown_button2: 2.3.9
@@ -55,16 +55,11 @@ dependencies:
     path: ../../packages/utils
   event_bus: 2.0.1
   expandable: 5.0.1
-  expansion_tile_card: 3.0.0
-  ffi: 2.1.4
+  ffi: 2.2.0
   figma_squircle: 0.6.3
   file_picker: 10.3.10
   file_saver: 0.3.1
   fixnum: 1.1.1
-  fk_user_agent: # no package updates on pub.dev
-    git:
-      url: https://github.com/flutter-fast-kit/fk_user_agent
-      ref: 458046cd9a88924e5074d96ba45397219d53b230
   flutter:
     sdk: flutter
   flutter_animate: 4.5.2
@@ -75,7 +70,7 @@ dependencies:
   flutter_local_notifications: 18.0.1
   flutter_localizations:
     sdk: flutter
-  flutter_native_splash: 2.4.6
+  flutter_native_splash: 2.4.7
   # Do not upgrade this package unless this issue is resolved:
   # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870
   # On v9.2.4, keys related to lockscreen persist even after reintsall. For context see:
@@ -87,7 +82,6 @@ dependencies:
   flutter_staggered_grid_view: 0.7.0
   flutter_svg: 2.2.3
   fluttertoast: 8.2.14
-  google_nav_bar: 5.0.7 #supported
   gradient_borders: 1.0.1
   http: 1.6.0
   hugeicons: 1.1.7
@@ -105,7 +99,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/move_to_background.git
       ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
-  native_dio_adapter: 1.4.0
+  native_dio_adapter: 1.5.1
   otp: 3.1.4
   package_info_plus: 8.3.1
   password_strength: 0.2.0
@@ -129,9 +123,9 @@ dependencies:
   share_plus: 11.1.0
   shared_preferences: 2.5.3
   sqflite: 2.4.2
-  sqflite_common_ffi: 2.3.6
-  sqlite3: 2.7.6
-  sqlite3_flutter_libs: 0.5.34
+  sqflite_common_ffi: 2.3.7+1
+  sqlite3: 2.9.4
+  sqlite3_flutter_libs: 0.5.41
   steam_totp: 0.0.2
   step_progress_indicator: 1.0.2
   styled_text: 8.1.0
@@ -145,12 +139,9 @@ dependencies:
   xdg_directories: 1.1.0
 
 dev_dependencies:
-  build_runner: 2.5.4
   flutter_test:
     sdk: flutter
-  json_serializable: 6.9.5
   lints: 5.1.1
-  mocktail: 1.0.4
   shared_preferences_platform_interface: 2.4.2
 
 # The following section is specific to Flutter.

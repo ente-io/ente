@@ -10,9 +10,8 @@ dependencies:
   app_links: 6.4.1
   bip39: 1.0.6
   collection: 1.19.1
-  dio: 5.9.0
+  dio: 5.9.2
   dots_indicator: 3.1.0
-  dotted_border: 3.1.0
   email_validator: 3.0.0
   ente_base:
     path: ../base
@@ -45,7 +44,6 @@ dependencies:
   pointycastle: 3.9.1
   share_plus: 11.1.0
   shared_preferences: 2.5.3
-  step_progress_indicator: 1.0.2
   styled_text: 8.1.0
   url_launcher: 6.3.2
   url_launcher_ios: 6.3.4
