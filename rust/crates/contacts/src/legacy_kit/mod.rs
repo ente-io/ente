@@ -47,7 +47,7 @@ pub(crate) fn create_legacy_kit_request(
 
     let kit_id = Uuid::new_v4().to_string();
     let variant = LegacyKitVariant::TwoOfThree;
-    let kit_secret = crypto::keys::generate_key();
+    let kit_secret = SecretVec::new(crypto::random_bytes(32));
     let checksum = checksum(LEGACY_KIT_PAYLOAD_VERSION, variant, &kit_id, &kit_secret);
     let shares = split_secret_2_of_3(&kit_secret)?;
     let result_shares = shares
@@ -68,7 +68,8 @@ pub(crate) fn create_legacy_kit_request(
     let enc_key = derive_kit_enc_key(&kit_secret)?;
     let (auth_public_key, _auth_secret_key) = derive_kit_auth_keypair(&kit_secret)?;
 
-    let encrypted_recovery_blob = secretbox::encrypt(recovery_key, enc_key.as_ref())?;
+    let encrypted_recovery_blob =
+        secretbox::encrypt_combined(recovery_key, &crypto::Key::try_from_slice(&enc_key)?);
     let owner_blob = create_owner_blob(&result_shares);
     let encrypted_owner_blob = encrypt_owner_blob(&owner_blob, master_key)?;
 
@@ -77,8 +78,8 @@ pub(crate) fn create_legacy_kit_request(
             id: kit_id,
             variant,
             notice_period_in_hours,
-            encrypted_recovery_blob: crypto::encode_b64(&encrypted_recovery_blob.encrypted_data),
-            auth_public_key: crypto::encode_b64(&auth_public_key),
+            encrypted_recovery_blob: crypto::encode_b64(&encrypted_recovery_blob),
+            auth_public_key: crypto::encode_b64(auth_public_key.as_bytes()),
             encrypted_owner_blob,
         },
         result_shares,
@@ -243,7 +244,10 @@ impl LegacyKitRecoveryHandle {
             .map_err(ContactsError::from)?;
         let enc_key = derive_kit_enc_key(&self.kit_secret)?;
         let encrypted_recovery_blob = crypto::decode_b64(&response.encrypted_recovery_blob)?;
-        let recovery_key = secretbox::decrypt_box(&encrypted_recovery_blob, enc_key.as_ref())?;
+        let recovery_key = secretbox::decrypt_combined(
+            &encrypted_recovery_blob,
+            &crypto::Key::try_from_slice(&enc_key)?,
+        )?;
         Ok(LegacyKitRecoveryBundle {
             recovery_key: SecretVec::new(recovery_key),
             user_key_attributes: response.user_key_attr,
@@ -354,17 +358,20 @@ pub(crate) fn validate_notice_period(hours: i32) -> Result<()> {
 }
 
 fn derive_kit_enc_key(kit_secret: &[u8]) -> Result<SecretVec> {
-    kdf::derive_subkey(kit_secret, 32, 1, b"lgkenc01").map_err(ContactsError::from)
+    let kit_key = crypto::Key::try_from_slice(kit_secret)?;
+    kdf::derive_subkey(&kit_key, 32, 1, b"lgkenc01").map_err(ContactsError::from)
 }
 
-fn derive_kit_auth_keypair(kit_secret: &[u8]) -> Result<(Vec<u8>, SecretVec)> {
-    let seed = kdf::derive_subkey(kit_secret, 32, 2, b"lgkauth1").map_err(ContactsError::from)?;
-    crypto::keys::derive_keypair_from_seed(seed.as_ref()).map_err(Into::into)
+fn derive_kit_auth_keypair(kit_secret: &[u8]) -> Result<(crypto::PublicKey, crypto::SecretKey)> {
+    let kit_key = crypto::Key::try_from_slice(kit_secret)?;
+    let seed = kdf::derive_subkey(&kit_key, 32, 2, b"lgkauth1").map_err(ContactsError::from)?;
+    let sk = crypto::SecretKey::from_seed(seed.as_ref())?;
+    Ok((sk.public_key(), sk))
 }
 
 fn decrypt_challenge(
-    auth_public_key: &[u8],
-    auth_secret_key: &[u8],
+    auth_public_key: &crypto::PublicKey,
+    auth_secret_key: &crypto::SecretKey,
     encrypted_challenge_b64: &str,
 ) -> Result<String> {
     let encrypted_challenge = crypto::decode_b64(encrypted_challenge_b64)?;
@@ -396,9 +403,13 @@ fn decrypt_master_key_with_recovery_key(
         })?;
     let encrypted_master_key = crypto::decode_b64(encrypted_master_key)?;
     let master_key_nonce = crypto::decode_b64(master_key_nonce)?;
-    secretbox::decrypt(&encrypted_master_key, &master_key_nonce, recovery_key)
-        .map(SecretVec::new)
-        .map_err(Into::into)
+    secretbox::decrypt(
+        &encrypted_master_key,
+        &crypto::Nonce::try_from_slice(&master_key_nonce)?,
+        &crypto::Key::try_from_slice(recovery_key)?,
+    )
+    .map(SecretVec::new)
+    .map_err(Into::into)
 }
 
 fn password_reset_setup_request(

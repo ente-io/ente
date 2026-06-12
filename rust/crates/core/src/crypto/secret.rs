@@ -4,14 +4,14 @@ use std::fmt;
 use std::ops::{Deref, DerefMut};
 
 use subtle::ConstantTimeEq;
-use zeroize::Zeroize;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 /// A heap-allocated byte buffer for sensitive material.
 ///
 /// `SecretVec` zeroizes its contents on drop and requires an explicit
 /// [`SecretVec::into_vec`] when crossing out of the trusted Rust layer.
 #[repr(transparent)]
-#[derive(Default)]
+#[derive(Default, Zeroize, ZeroizeOnDrop)]
 pub struct SecretVec(Vec<u8>);
 
 impl PartialEq for SecretVec {
@@ -79,24 +79,12 @@ impl From<Vec<u8>> for SecretVec {
     }
 }
 
-impl Zeroize for SecretVec {
-    fn zeroize(&mut self) {
-        self.0.zeroize();
-    }
-}
-
-impl Drop for SecretVec {
-    fn drop(&mut self) {
-        self.zeroize();
-    }
-}
-
 /// A heap-allocated string for sensitive material.
 ///
 /// `SecretString` zeroizes its contents on drop and requires an explicit
 /// [`SecretString::into_string`] when crossing out of the trusted Rust layer.
 #[repr(transparent)]
-#[derive(Default)]
+#[derive(Default, Zeroize, ZeroizeOnDrop)]
 pub struct SecretString(String);
 
 impl PartialEq for SecretString {
@@ -155,18 +143,6 @@ impl AsRef<str> for SecretString {
 impl From<String> for SecretString {
     fn from(value: String) -> Self {
         Self::new(value)
-    }
-}
-
-impl Zeroize for SecretString {
-    fn zeroize(&mut self) {
-        self.0.zeroize();
-    }
-}
-
-impl Drop for SecretString {
-    fn drop(&mut self) {
-        self.zeroize();
     }
 }
 

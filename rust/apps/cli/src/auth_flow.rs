@@ -303,7 +303,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ente_core::crypto;
     use mockito::{Matcher, Server};
     use serde::{Deserialize, de::DeserializeOwned};
     use sha2::{Digest, Sha256};
@@ -429,8 +428,6 @@ mod tests {
 
     #[tokio::test]
     async fn create_account_persists_token_for_setup_two_factor() {
-        crypto::init().unwrap();
-
         let email = "fresh-user@example.org";
         let encoded_email = urlencoding::encode(email).into_owned();
         let signup_token_bytes = b"signup-session-token";

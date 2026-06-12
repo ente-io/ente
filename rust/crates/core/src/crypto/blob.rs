@@ -3,188 +3,139 @@
 //! This module provides encryption using SecretStream for small-ish data
 //! that doesn't need to be chunked. Use this for encrypting metadata
 //! associated with Ente objects.
+//!
+//! Two payload shapes are supported, mirroring [`super::secretbox`]:
+//!
+//! - Split ([`encrypt`] / [`decrypt`]): the ciphertext and the decryption
+//!   header travel separately, matching the server's wire format.
+//!
+//! - Combined ([`encrypt_combined`] / [`decrypt_combined`]): a single
+//!   self-contained `header ‖ ciphertext` buffer.
 
-use super::stream::{StreamDecryptor, StreamEncryptor};
-use crate::crypto::{CryptoError, Result};
+use super::stream::{Decryptor, Encryptor};
+use crate::crypto::{CryptoError, Header, Key, Result};
 
-// Re-export stream constants for public API compatibility
-pub use super::stream::{ABYTES, HEADER_BYTES, KEY_BYTES, TAG_FINAL, TAG_MESSAGE};
+/// Size of the encryption key in bytes.
+pub const KEY_BYTES: usize = Key::BYTES;
 
-/// Result of blob encryption.
+/// Size of the decryption header in bytes.
+pub const HEADER_BYTES: usize = Header::BYTES;
+
+/// Overhead (tag + MAC) added to the plaintext by encryption.
+pub use super::stream::ABYTES;
+
+/// The result of blob encryption: ciphertext and decryption header, separate.
 #[derive(Debug, Clone)]
 pub struct EncryptedBlob {
-    /// The encrypted data.
+    /// The encrypted data: a single secretstream message (plaintext length +
+    /// [`ABYTES`] bytes).
     pub encrypted_data: Vec<u8>,
-    /// The decryption header.
-    pub decryption_header: Vec<u8>,
+    /// The decryption header. Required for decryption; not secret.
+    pub decryption_header: Header,
 }
 
-/// Encrypt data using SecretStream (XChaCha20-Poly1305) without chunking.
-///
-/// This is suitable for encrypting metadata and small files.
-///
-/// # Arguments
-/// * `plaintext` - Data to encrypt.
-/// * `key` - 32-byte encryption key.
-///
-/// # Returns
-/// An [`EncryptedBlob`] containing the ciphertext and decryption header.
-pub fn encrypt(plaintext: &[u8], key: &[u8]) -> Result<EncryptedBlob> {
-    if key.len() != KEY_BYTES {
-        return Err(CryptoError::InvalidKeyLength {
-            expected: KEY_BYTES,
-            actual: key.len(),
-        });
+impl EncryptedBlob {
+    /// Decrypt this blob.
+    pub fn decrypt(&self, key: &Key) -> Result<Vec<u8>> {
+        decrypt(&self.encrypted_data, &self.decryption_header, key)
     }
+}
 
-    // Create encryptor
-    let mut encryptor = StreamEncryptor::new(key)?;
-    let header = encryptor.header.clone();
-
-    // Encrypt with final tag (single message)
-    let ciphertext = encryptor.push(plaintext, true)?;
+/// Encrypt the given data as a single secretstream message.
+///
+/// This is suitable for encrypting metadata and small files. Use [`decrypt`]
+/// or [`EncryptedBlob::decrypt`] to decrypt the result.
+pub fn encrypt(data: &[u8], key: &Key) -> Result<EncryptedBlob> {
+    let mut encryptor = Encryptor::new(key);
+    let decryption_header = *encryptor.header();
+    let encrypted_data = encryptor.push(data, true)?;
 
     Ok(EncryptedBlob {
-        encrypted_data: ciphertext,
-        decryption_header: header,
+        encrypted_data,
+        decryption_header,
     })
 }
 
 /// Decrypt data encrypted with [`encrypt`].
 ///
-/// # Arguments
-/// * `ciphertext` - The encrypted data.
-/// * `header` - The decryption header.
-/// * `key` - The 32-byte encryption key.
-///
-/// # Returns
-/// The decrypted plaintext.
-///
-/// # Errors
-/// Returns `CryptoError::StreamTruncated` when the `blob-require-final-tag`
-/// feature is enabled and the ciphertext does not carry `TAG_FINAL`.
-pub fn decrypt(ciphertext: &[u8], header: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    if key.len() != KEY_BYTES {
-        return Err(CryptoError::InvalidKeyLength {
-            expected: KEY_BYTES,
-            actual: key.len(),
-        });
-    }
-
-    if header.len() != HEADER_BYTES {
-        return Err(CryptoError::InvalidHeaderLength {
-            expected: HEADER_BYTES,
-            actual: header.len(),
-        });
-    }
-
-    if ciphertext.len() < ABYTES {
-        return Err(CryptoError::CiphertextTooShort {
-            minimum: ABYTES,
-            actual: ciphertext.len(),
-        });
-    }
-
-    // Create decryptor
-    let mut decryptor = StreamDecryptor::new(header, key)?;
-
-    // Decrypt
-    let (plaintext, tag) = decryptor.pull(ciphertext)?;
-    if cfg!(feature = "blob-require-final-tag") && tag != TAG_FINAL {
+/// The data must carry the secretstream final tag; truncated or non-final
+/// payloads are rejected with `CryptoError::StreamTruncated`. For older data
+/// written without the final tag, use [`decrypt_legacy`].
+pub fn decrypt(data: &[u8], header: &Header, key: &Key) -> Result<Vec<u8>> {
+    let (plaintext, is_final) = decrypt_impl(data, header, key)?;
+    if !is_final {
         return Err(CryptoError::StreamTruncated);
     }
-
     Ok(plaintext)
 }
 
-/// Encrypt data with arguments ordered as (plaintext, key).
+/// Decrypt a blob that may not carry the secretstream final tag.
 ///
-/// This is a compatibility wrapper matching Dart's encryptData signature.
-pub fn encrypt_data(plaintext: &[u8], key: &[u8]) -> Result<EncryptedBlob> {
-    encrypt(plaintext, key)
+/// Prefer [`decrypt`]. This exists as a migration fallback for older data
+/// written without the final tag; it skips the truncation check.
+pub fn decrypt_legacy(data: &[u8], header: &Header, key: &Key) -> Result<Vec<u8>> {
+    Ok(decrypt_impl(data, header, key)?.0)
 }
 
-/// Decrypt data with arguments ordered as (ciphertext, key, header).
-///
-/// This is a compatibility wrapper matching Dart's decryptData signature.
-pub fn decrypt_data(ciphertext: &[u8], key: &[u8], header: &[u8]) -> Result<Vec<u8>> {
-    decrypt(ciphertext, header, key)
+fn decrypt_impl(data: &[u8], header: &Header, key: &Key) -> Result<(Vec<u8>, bool)> {
+    if data.len() < ABYTES {
+        return Err(CryptoError::CiphertextTooShort {
+            minimum: ABYTES,
+            actual: data.len(),
+        });
+    }
+
+    let mut decryptor = Decryptor::new(header, key);
+    decryptor.pull(data)
 }
 
-/// Decrypt an [`EncryptedBlob`].
-///
-/// # Arguments
-/// * `blob` - The encrypted blob.
-/// * `key` - The 32-byte encryption key.
-///
-/// # Returns
-/// The decrypted plaintext.
-pub fn decrypt_blob(blob: &EncryptedBlob, key: &[u8]) -> Result<Vec<u8>> {
-    decrypt(&blob.encrypted_data, &blob.decryption_header, key)
-}
-
-/// Encrypt data and return a single combined `header || ciphertext` payload.
-pub fn encrypt_combined(plaintext: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    let encrypted = encrypt(plaintext, key)?;
-    let mut combined =
-        Vec::with_capacity(encrypted.decryption_header.len() + encrypted.encrypted_data.len());
-    combined.extend_from_slice(&encrypted.decryption_header);
+/// Encrypt data and return a single combined `header ‖ ciphertext` payload.
+pub fn encrypt_combined(data: &[u8], key: &Key) -> Result<Vec<u8>> {
+    let encrypted = encrypt(data, key)?;
+    let mut combined = Vec::with_capacity(Header::BYTES + encrypted.encrypted_data.len());
+    combined.extend_from_slice(encrypted.decryption_header.as_bytes());
     combined.extend_from_slice(&encrypted.encrypted_data);
     Ok(combined)
 }
 
-/// Decrypt a combined `header || ciphertext` payload.
-pub fn decrypt_combined(combined: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    if combined.len() < HEADER_BYTES + ABYTES {
+/// Decrypt a combined `header ‖ ciphertext` payload.
+pub fn decrypt_combined(data: &[u8], key: &Key) -> Result<Vec<u8>> {
+    if data.len() < Header::BYTES + ABYTES {
         return Err(CryptoError::CiphertextTooShort {
-            minimum: HEADER_BYTES + ABYTES,
-            actual: combined.len(),
+            minimum: Header::BYTES + ABYTES,
+            actual: data.len(),
         });
     }
 
-    let (header, ciphertext) = combined.split_at(HEADER_BYTES);
-    decrypt(ciphertext, header, key)
+    let (header, ciphertext) = data.split_at(Header::BYTES);
+    decrypt(ciphertext, &Header::try_from_slice(header)?, key)
 }
 
 /// Encrypt a JSON value.
-///
-/// # Arguments
-/// * `value` - The value to serialize and encrypt.
-/// * `key` - The 32-byte encryption key.
-///
-/// # Returns
-/// An [`EncryptedBlob`] containing the encrypted JSON.
-pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<EncryptedBlob> {
+pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &Key) -> Result<EncryptedBlob> {
     let json = serde_json::to_vec(value)
         .map_err(|e| CryptoError::Json(format!("JSON serialization failed: {}", e)))?;
     encrypt(&json, key)
 }
 
-/// Encrypt a JSON value and return a combined `header || ciphertext` payload.
-pub fn encrypt_json_combined<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<Vec<u8>> {
+/// Encrypt a JSON value and return a combined `header ‖ ciphertext` payload.
+pub fn encrypt_json_combined<T: serde::Serialize>(value: &T, key: &Key) -> Result<Vec<u8>> {
     let json = serde_json::to_vec(value)
         .map_err(|e| CryptoError::Json(format!("JSON serialization failed: {}", e)))?;
     encrypt_combined(&json, key)
 }
 
-/// Decrypt to a JSON value.
-///
-/// # Arguments
-/// * `blob` - The encrypted blob.
-/// * `key` - The 32-byte encryption key.
-///
-/// # Returns
-/// The deserialized JSON value.
-pub fn decrypt_json<T: serde::de::DeserializeOwned>(blob: &EncryptedBlob, key: &[u8]) -> Result<T> {
-    let plaintext = decrypt_blob(blob, key)?;
+/// Decrypt an [`EncryptedBlob`] into a JSON value.
+pub fn decrypt_json<T: serde::de::DeserializeOwned>(blob: &EncryptedBlob, key: &Key) -> Result<T> {
+    let plaintext = blob.decrypt(key)?;
     serde_json::from_slice(&plaintext)
         .map_err(|e| CryptoError::Json(format!("JSON deserialization failed: {}", e)))
 }
 
-/// Decrypt a combined `header || ciphertext` payload into a JSON value.
+/// Decrypt a combined `header ‖ ciphertext` payload into a JSON value.
 pub fn decrypt_json_combined<T: serde::de::DeserializeOwned>(
     combined: &[u8],
-    key: &[u8],
+    key: &Key,
 ) -> Result<T> {
     let plaintext = decrypt_combined(combined, key)?;
     serde_json::from_slice(&plaintext)
@@ -194,76 +145,64 @@ pub fn decrypt_json_combined<T: serde::de::DeserializeOwned>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::keys;
 
     #[test]
     fn test_encrypt_decrypt() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate();
         let plaintext = b"Hello, World!";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
-        assert_eq!(encrypted.decryption_header.len(), HEADER_BYTES);
         assert_eq!(encrypted.encrypted_data.len(), plaintext.len() + ABYTES);
 
-        let decrypted = decrypt_blob(&encrypted, &key).unwrap();
+        let decrypted = encrypted.decrypt(&key).unwrap();
         assert_eq!(decrypted, plaintext);
     }
 
     #[test]
-    fn test_decrypt_non_final_tag_behavior() {
-        let key = keys::generate_stream_key();
-        let mut encryptor = StreamEncryptor::new(&key).unwrap();
-        let header = encryptor.header.clone();
+    fn test_decrypt_requires_final_tag() {
+        let key = Key::generate();
+        let mut encryptor = Encryptor::new(&key);
+        let header = *encryptor.header();
         let ciphertext = encryptor.push(b"partial", false).unwrap();
 
-        let result = decrypt(&ciphertext, &header, &key);
-        if cfg!(feature = "blob-require-final-tag") {
-            assert!(matches!(result, Err(CryptoError::StreamTruncated)));
-        } else {
-            assert!(result.is_ok());
-        }
+        assert!(matches!(
+            decrypt(&ciphertext, &header, &key),
+            Err(CryptoError::StreamTruncated)
+        ));
     }
 
     #[test]
-    fn test_encrypt_data_wrapper() {
-        let key = keys::generate_stream_key();
-        let plaintext = b"Wrapper test";
+    fn test_decrypt_legacy_tolerates_missing_final_tag() {
+        let key = Key::generate();
+        let mut encryptor = Encryptor::new(&key);
+        let header = *encryptor.header();
+        let ciphertext = encryptor.push(b"partial", false).unwrap();
 
-        let encrypted = encrypt_data(plaintext, &key).unwrap();
-        let decrypted = decrypt_data(
-            &encrypted.encrypted_data,
-            &key,
-            &encrypted.decryption_header,
-        )
-        .unwrap();
-
-        assert_eq!(decrypted, plaintext);
+        let decrypted = decrypt_legacy(&ciphertext, &header, &key).unwrap();
+        assert_eq!(decrypted, b"partial");
     }
 
     #[test]
     fn test_encrypt_decrypt_large() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate();
         let plaintext = vec![0x42u8; 1024 * 1024]; // 1 MB
 
         let encrypted = encrypt(&plaintext, &key).unwrap();
-        let decrypted = decrypt_blob(&encrypted, &key).unwrap();
-        assert_eq!(decrypted, plaintext);
+        assert_eq!(encrypted.decrypt(&key).unwrap(), plaintext);
     }
 
     #[test]
     fn test_encrypt_decrypt_combined() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate();
         let plaintext = b"Combined blob payload";
 
         let encrypted = encrypt_combined(plaintext, &key).unwrap();
-        let decrypted = decrypt_combined(&encrypted, &key).unwrap();
-
-        assert_eq!(decrypted, plaintext);
+        assert_eq!(decrypt_combined(&encrypted, &key).unwrap(), plaintext);
     }
 
     #[test]
     fn test_encrypt_decrypt_json_combined() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate();
         let value = serde_json::json!({
             "name": "Alice",
             "birthDate": "2001-04-01"
@@ -277,28 +216,27 @@ mod tests {
 
     #[test]
     fn test_wrong_key_fails() {
-        let key1 = keys::generate_stream_key();
-        let key2 = keys::generate_stream_key();
-        let plaintext = b"Secret message";
+        let key1 = Key::generate();
+        let key2 = Key::generate();
 
-        let encrypted = encrypt(plaintext, &key1).unwrap();
-        let result = decrypt_blob(&encrypted, &key2);
-        assert!(matches!(result, Err(CryptoError::StreamPullFailed)));
+        let encrypted = encrypt(b"Secret message", &key1).unwrap();
+        assert!(matches!(
+            encrypted.decrypt(&key2),
+            Err(CryptoError::StreamPullFailed)
+        ));
     }
 
     #[test]
     fn test_empty_plaintext() {
-        let key = keys::generate_stream_key();
-        let plaintext = b"";
+        let key = Key::generate();
 
-        let encrypted = encrypt(plaintext, &key).unwrap();
-        let decrypted = decrypt_blob(&encrypted, &key).unwrap();
-        assert_eq!(decrypted, plaintext);
+        let encrypted = encrypt(b"", &key).unwrap();
+        assert_eq!(encrypted.decrypt(&key).unwrap(), b"");
     }
 
     #[test]
     fn test_encrypt_decrypt_json() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate();
 
         #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq)]
         struct TestData {
@@ -318,7 +256,7 @@ mod tests {
 
     #[test]
     fn test_decrypt_json_wrong_type_returns_json_error() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate();
 
         #[derive(serde::Serialize)]
         struct Original {
@@ -349,79 +287,47 @@ mod tests {
     }
 
     #[test]
-    fn test_invalid_key_length() {
-        let short_key = vec![0u8; 16];
-        let result = encrypt(b"test", &short_key);
-        assert!(matches!(result, Err(CryptoError::InvalidKeyLength { .. })));
-    }
-
-    #[test]
-    fn test_invalid_header_length() {
-        let key = keys::generate_stream_key();
-        let short_header = vec![0u8; 12];
-        let result = decrypt(b"test_ciphertext_here", &short_header, &key);
-        assert!(matches!(
-            result,
-            Err(CryptoError::InvalidHeaderLength { .. })
-        ));
-    }
-
-    #[test]
     fn test_ciphertext_too_short() {
-        let key = keys::generate_stream_key();
-        let header = vec![0u8; HEADER_BYTES];
-        let short_ciphertext = vec![0u8; ABYTES - 1];
+        let key = Key::generate();
+        let header = Header::try_from_slice(&[0u8; Header::BYTES]).unwrap();
 
-        let result = decrypt(&short_ciphertext, &header, &key);
         assert!(matches!(
-            result,
+            decrypt(&[0u8; ABYTES - 1], &header, &key),
             Err(CryptoError::CiphertextTooShort { .. })
         ));
     }
 
     #[test]
     fn test_corrupted_ciphertext() {
-        let key = keys::generate_stream_key();
-        let plaintext = b"Original data";
+        let key = Key::generate();
 
-        let encrypted = encrypt(plaintext, &key).unwrap();
-        let mut corrupted = encrypted;
+        let mut encrypted = encrypt(b"Original data", &key).unwrap();
+        encrypted.encrypted_data[10] ^= 1;
 
-        // Corrupt a byte in the encrypted data
-        corrupted.encrypted_data[10] ^= 1;
-
-        let result = decrypt_blob(&corrupted, &key);
-        assert!(result.is_err());
+        assert!(encrypted.decrypt(&key).is_err());
     }
 
     #[test]
     fn test_corrupted_header() {
-        let key = keys::generate_stream_key();
-        let plaintext = b"Original data";
+        let key = Key::generate();
 
-        let encrypted = encrypt(plaintext, &key).unwrap();
-        let mut corrupted_header = encrypted.decryption_header.clone();
+        let encrypted = encrypt(b"Original data", &key).unwrap();
+        let mut header_bytes = *encrypted.decryption_header.as_bytes();
+        header_bytes[5] ^= 1;
 
-        // Corrupt a byte in the header
-        corrupted_header[5] ^= 1;
-
-        let result = decrypt(&encrypted.encrypted_data, &corrupted_header, &key);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_different_plaintexts_produce_different_ciphertexts() {
-        let key = keys::generate_stream_key();
-
-        let encrypted1 = encrypt(b"Message 1", &key).unwrap();
-        let encrypted2 = encrypt(b"Message 2", &key).unwrap();
-
-        assert_ne!(encrypted1.encrypted_data, encrypted2.encrypted_data);
+        assert!(
+            decrypt(
+                &encrypted.encrypted_data,
+                &Header::from_bytes(header_bytes),
+                &key
+            )
+            .is_err()
+        );
     }
 
     #[test]
     fn test_same_plaintext_produces_different_ciphertexts() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate();
         let plaintext = b"Same message";
 
         let encrypted1 = encrypt(plaintext, &key).unwrap();
@@ -431,10 +337,7 @@ mod tests {
         assert_ne!(encrypted1.decryption_header, encrypted2.decryption_header);
         assert_ne!(encrypted1.encrypted_data, encrypted2.encrypted_data);
 
-        // But both decrypt to same plaintext
-        let decrypted1 = decrypt_blob(&encrypted1, &key).unwrap();
-        let decrypted2 = decrypt_blob(&encrypted2, &key).unwrap();
-        assert_eq!(decrypted1, plaintext);
-        assert_eq!(decrypted2, plaintext);
+        assert_eq!(encrypted1.decrypt(&key).unwrap(), plaintext);
+        assert_eq!(encrypted2.decrypt(&key).unwrap(), plaintext);
     }
 }

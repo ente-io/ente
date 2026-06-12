@@ -145,9 +145,9 @@ fn verify_srp_m2(session: &auth::SrpSession, srp_m2_b64: &str) -> Result<(), Ens
 }
 
 pub fn init_crypto() -> Result<(), EnsuError> {
-    crypto::init().map_err(|e| EnsuError::Message {
-        reason: e.to_string(),
-    })
+    // No-op, kept only for binding compatibility: the pure-Rust crypto needs
+    // no initialization.
+    Ok(())
 }
 
 pub fn srp_start(
