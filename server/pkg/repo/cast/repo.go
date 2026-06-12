@@ -152,10 +152,10 @@ func (r *Repository) RevokeForGivenUserAndCollection(ctx context.Context, collec
 	return stacktrace.Propagate(err, "")
 }
 
-func (r *Repository) RevokeForGivenDeviceID(ctx context.Context, deviceID uuid.UUID) error {
-	_, err := r.DB.ExecContext(ctx, "UPDATE casting SET is_deleted=true where id=$1", deviceID)
+func (r *Repository) RevokeForGivenUserAndDevice(ctx context.Context, userID int64, deviceID uuid.UUID) error {
+	_, err := r.DB.ExecContext(ctx, "UPDATE casting SET is_deleted=true where id=$1 and cast_user=$2", deviceID, userID)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to revoke token for given user, collection and device")
+		return stacktrace.Propagate(err, "failed to revoke token for given user and device")
 	}
 	return nil
 }

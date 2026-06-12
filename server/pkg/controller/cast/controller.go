@@ -36,8 +36,8 @@ func (c *Controller) GetAllDevices(ctx *gin.Context, userID int64) ([]cast.CastI
 	return c.CastRepo.GetAllDevices(ctx, userID)
 }
 
-func (c *Controller) DeleteDevice(ctx *gin.Context, deviceID uuid.UUID) error {
-	return c.CastRepo.RevokeForGivenDeviceID(ctx, deviceID)
+func (c *Controller) DeleteDevice(ctx *gin.Context, userID int64, deviceID uuid.UUID) error {
+	return c.CastRepo.RevokeForGivenUserAndDevice(ctx, userID, deviceID)
 }
 
 func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, error) {

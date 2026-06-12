@@ -70,8 +70,10 @@ func (h *CastHandler) DeleteDevice(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "failed to parse device id"))
 		return
 	}
+	userID := auth.GetUserID(c.Request.Header)
 	if err := h.Ctrl.DeleteDevice(
 		c,
+		userID,
 		deviceID,
 	); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to delete device"))
