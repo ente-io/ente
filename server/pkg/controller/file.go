@@ -40,26 +40,23 @@ import (
 
 // FileController exposes functions to retrieve and access encrypted files
 type FileController struct {
-	FileRepo               *repo.FileRepository
-	ObjectRepo             *repo.ObjectRepository
-	ObjectCleanupRepo      *repo.ObjectCleanupRepository
-	TrashRepository        *repo.TrashRepository
-	UserRepo               *repo.UserRepository
-	UsageCtrl              *UsageController
-	CollectionRepo         *repo.CollectionRepository
-	TaskLockingRepo        *repo.TaskLockRepository
-	QueueRepo              *repo.QueueRepository
-	AccessCtrl             access.Controller
-	S3Config               *s3config.S3Config
-	ObjectCleanupCtrl      *ObjectCleanupController
-	LockController         *lock.LockController
-	EmailNotificationCtrl  *email.EmailNotificationController
-	DiscordController      *discord.DiscordController
-	HostName               string
-	cleanupCronRunning     bool
-	outstandingURLsMu      sync.Mutex
-	outstandingURLs        map[int64]int // userID -> minted-but-uncommitted upload URLs
-	outstandingURLsResetAt gTime.Time
+	FileRepo              *repo.FileRepository
+	ObjectRepo            *repo.ObjectRepository
+	ObjectCleanupRepo     *repo.ObjectCleanupRepository
+	TrashRepository       *repo.TrashRepository
+	UserRepo              *repo.UserRepository
+	UsageCtrl             *UsageController
+	CollectionRepo        *repo.CollectionRepository
+	TaskLockingRepo       *repo.TaskLockRepository
+	QueueRepo             *repo.QueueRepository
+	AccessCtrl            access.Controller
+	S3Config              *s3config.S3Config
+	ObjectCleanupCtrl     *ObjectCleanupController
+	LockController        *lock.LockController
+	EmailNotificationCtrl *email.EmailNotificationController
+	DiscordController     *discord.DiscordController
+	HostName              string
+	cleanupCronRunning    bool
 }
 
 // StorageOverflowAboveSubscriptionLimit is the amount (50 MB) by which user can go beyond their storage limit
@@ -321,26 +318,6 @@ func (c *FileController) Update(ctx context.Context, userID int64, file ente.Fil
 	response.ID = file.ID
 	response.UpdationTime = file.UpdationTime
 	return response, nil
-}
-
-// AddOutstandingURLs adjusts the count of upload URLs the user has minted
-// but not yet committed via /files. It will return false if the user has
-// too many outstanding URLs.
-func (c *FileController) AddOutstandingURLs(userID int64, n int) bool {
-	c.outstandingURLsMu.Lock()
-	defer c.outstandingURLsMu.Unlock()
-	if now := gTime.Now(); now.After(c.outstandingURLsResetAt) {
-		c.outstandingURLs = map[int64]int{} // periodically discard stranded counts
-		c.outstandingURLsResetAt = now.Add(gTime.Hour)
-	}
-	total := max(c.outstandingURLs[userID]+n, 0)
-	ok := total <= 250
-	if !ok {
-		go c.DiscordController.NotifyPotentialAbuse(fmt.Sprintf("Too many outstanding upload URLs for user %d", userID))
-		total = 0 // so that stranded counts don't lock the user out
-	}
-	c.outstandingURLs[userID] = total
-	return ok
 }
 
 // GetUploadURLs returns a bunch of presigned URLs for uploading files
