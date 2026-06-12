@@ -65,13 +65,13 @@ impl From<core_crypto::CryptoError> for CryptoError {
     }
 }
 
-/// Initialize the crypto backend.
+/// No-op, kept only for binding compatibility.
 ///
-/// This is a no-op for the pure-Rust implementation, but is provided for API
-/// symmetry with other platforms.
+/// The pure-Rust crypto needs no initialization; existing web callers invoke
+/// this before using the other functions. Remove once the web callers drop it.
 #[wasm_bindgen]
 pub fn crypto_init() -> Result<(), CryptoError> {
-    core_crypto::init().map_err(Into::into)
+    Ok(())
 }
 
 /// Generate a random 32-byte SecretBox key and return it as base64.

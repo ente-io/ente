@@ -157,8 +157,6 @@ mod tests {
 
     #[test]
     fn test_decrypt_secrets_roundtrip() {
-        crypto::init().unwrap();
-
         let password = "test_password_123";
         let gen_result = generate_test_keys(password);
 
@@ -188,8 +186,6 @@ mod tests {
 
     #[test]
     fn test_wrong_password() {
-        crypto::init().unwrap();
-
         let gen_result = generate_test_keys("correct_password");
         let public_key = crypto::decode_b64(&gen_result.key_attributes.public_key).unwrap();
         let encrypted_token = create_sealed_token(b"token", &public_key);
@@ -204,8 +200,6 @@ mod tests {
 
     #[test]
     fn test_derive_login_key_for_srp() {
-        crypto::init().unwrap();
-
         let password = "test_password";
         let gen_result = generate_test_keys(password);
 

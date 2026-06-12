@@ -332,8 +332,6 @@ mod tests {
 
     #[test]
     fn test_derive_srp_credentials() {
-        crate::crypto::init().unwrap();
-
         let password = "test_password";
         let gen_result =
             generate_keys_with_strength(password, KeyDerivationStrength::Interactive).unwrap();
@@ -356,8 +354,6 @@ mod tests {
 
     #[test]
     fn test_decrypt_secrets_roundtrip() {
-        crate::crypto::init().unwrap();
-
         let password = "test_password";
         let gen_result =
             generate_keys_with_strength(password, KeyDerivationStrength::Interactive).unwrap();
@@ -398,8 +394,6 @@ mod tests {
 
     #[test]
     fn test_wrong_password_fails() {
-        crate::crypto::init().unwrap();
-
         let gen_result =
             generate_keys_with_strength("correct_password", KeyDerivationStrength::Interactive)
                 .unwrap();
@@ -428,8 +422,6 @@ mod tests {
 
     #[test]
     fn test_generate_sensitive_kek() {
-        crate::crypto::init().unwrap();
-
         let generated = generate_sensitive_kek("test_password").unwrap();
 
         assert_eq!(generated.key.len(), 32);
@@ -455,8 +447,6 @@ mod tests {
 
     #[test]
     fn test_generate_interactive_kek() {
-        crate::crypto::init().unwrap();
-
         let generated = generate_interactive_kek("test_password").unwrap();
 
         assert_eq!(generated.key.len(), 32);
@@ -474,8 +464,6 @@ mod tests {
     #[cfg(feature = "srp")]
     #[test]
     fn test_generate_srp_setup() {
-        crate::crypto::init().unwrap();
-
         let generated = generate_sensitive_kek("test_password").unwrap();
         let srp_setup = generate_srp_setup(&generated.key, "test-user-id").unwrap();
 
@@ -487,8 +475,6 @@ mod tests {
     #[cfg(feature = "srp")]
     #[test]
     fn test_generate_srp_setup_with_login_key() {
-        crate::crypto::init().unwrap();
-
         let login_key = [1u8; 16];
         let srp_setup = generate_srp_setup_with_login_key(&login_key, "test-user-id").unwrap();
 
@@ -500,8 +486,6 @@ mod tests {
     #[cfg(feature = "srp")]
     #[test]
     fn test_start_srp_session() {
-        crate::crypto::init().unwrap();
-
         let password = "test_password";
         let gen_result =
             generate_keys_with_strength(password, KeyDerivationStrength::Interactive).unwrap();

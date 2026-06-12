@@ -307,8 +307,6 @@ where
 
     /// Login to an existing account.
     pub async fn login(&mut self, params: LoginParams) -> Result<AuthenticatedAccount> {
-        crypto::init()?;
-
         let srp_attrs = self.client.get_srp_attributes(&params.email).await?;
 
         let (auth_response, kek) = if srp_attrs.is_email_mfa_enabled {
@@ -343,8 +341,6 @@ where
         &mut self,
         params: SetupTwoFactorParams,
     ) -> Result<SetupTwoFactorResult> {
-        crypto::init()?;
-
         let key_attributes = if let Some(key_attributes) = params.key_attributes {
             key_attributes
         } else {
@@ -393,8 +389,6 @@ where
         &self,
         params: ChangePasswordParams,
     ) -> Result<ChangePasswordResult> {
-        crypto::init()?;
-
         let (updated_key_attributes_core, _) = auth::generate_key_attributes_for_new_password(
             &params.master_key,
             &to_core_key_attributes(&params.key_attributes),
@@ -638,8 +632,6 @@ where
         params: CreateAccountParams,
         key_derivation_strength: KeyDerivationStrength,
     ) -> Result<AuthenticatedAccount> {
-        crypto::init()?;
-
         let email = params.email;
         let password = params.password;
 
@@ -1252,8 +1244,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_email_mfa_and_totp_decrypts_account() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let (key_attributes, encrypted_token, recovery_key, _, _) =
             build_login_response(password, "plain-auth-token");
@@ -1342,8 +1332,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_email_mfa_treats_429_as_terminal_error() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1419,8 +1407,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_totp_treats_404_as_expired_session() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1507,8 +1493,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_totp_treats_429_as_terminal_error() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1599,8 +1583,6 @@ mod tests {
 
     #[tokio::test]
     async fn setup_two_factor_encrypts_secret_with_recovery_key() {
-        crypto::init().unwrap();
-
         let password = "pw";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1659,8 +1641,6 @@ mod tests {
 
     #[tokio::test]
     async fn configure_passkey_recovery_accepts_hex_recovery_key() {
-        crypto::init().unwrap();
-
         let key_gen =
             auth::generate_keys_with_strength("pw", auth::KeyDerivationStrength::Interactive)
                 .unwrap();
@@ -1704,8 +1684,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_passkey_treats_404_as_expired_session() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1797,8 +1775,6 @@ mod tests {
 
     #[tokio::test]
     async fn create_account_uploads_keys_and_completes_srp_setup() {
-        crypto::init().unwrap();
-
         let email = "fresh-user@example.org";
         let encoded_email = urlencoding::encode(email).into_owned();
         let signup_token_bytes = b"signup-session-token";
@@ -2021,8 +1997,6 @@ mod tests {
 
     #[tokio::test]
     async fn change_password_updates_srp_and_keys() {
-        crypto::init().unwrap();
-
         let original = auth::generate_keys_with_strength(
             "old-password",
             auth::KeyDerivationStrength::Interactive,

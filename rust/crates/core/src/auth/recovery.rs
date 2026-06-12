@@ -181,8 +181,6 @@ mod tests {
 
     #[test]
     fn test_recovery_roundtrip() {
-        crypto::init().unwrap();
-
         let gen_result = generate_test_keys("original_password");
         let public_key = crypto::decode_b64(&gen_result.key_attributes.public_key).unwrap();
         let encrypted_token = create_sealed_token(b"my_token", &public_key);
@@ -204,8 +202,6 @@ mod tests {
 
     #[test]
     fn test_wrong_recovery_key() {
-        crypto::init().unwrap();
-
         let gen_result = generate_test_keys("password");
         let public_key = crypto::decode_b64(&gen_result.key_attributes.public_key).unwrap();
         let encrypted_token = create_sealed_token(b"token", &public_key);
@@ -217,8 +213,6 @@ mod tests {
 
     #[test]
     fn test_get_recovery_key() {
-        crypto::init().unwrap();
-
         let gen_result = generate_test_keys("password");
         let master_key = crypto::decode_b64(&gen_result.private_key_attributes.key).unwrap();
 
@@ -231,8 +225,6 @@ mod tests {
 
     #[test]
     fn test_recovery_key_mnemonic_roundtrip() {
-        crypto::init().unwrap();
-
         let gen_result = generate_test_keys("password");
         let master_key = crypto::decode_b64(&gen_result.private_key_attributes.key).unwrap();
         let recovery_key_hex = get_recovery_key(&master_key, &gen_result.key_attributes).unwrap();
@@ -249,8 +241,6 @@ mod tests {
 
     #[test]
     fn test_recovery_key_from_hex_accepts_legacy_format() {
-        crypto::init().unwrap();
-
         let gen_result = generate_test_keys("password");
         let decoded =
             recovery_key_from_mnemonic_or_hex(&gen_result.private_key_attributes.recovery_key)

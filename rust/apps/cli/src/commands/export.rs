@@ -99,8 +99,6 @@ async fn load_album_metadata(
 
 pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> Result<()> {
     // Initialize crypto
-    crypto::init()?;
-
     // Open database
     let config_dir = crate::utils::get_cli_config_dir()?;
     let db_path = config_dir.join("ente.db");

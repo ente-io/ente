@@ -467,7 +467,9 @@ pub struct CryptoBlobDecryptInput {
 
 #[tauri::command]
 pub fn crypto_init() -> Result<(), ApiError> {
-    core_crypto::init().map_err(ApiError::from)
+    // No-op, kept only for frontend compatibility: the pure-Rust crypto
+    // needs no initialization.
+    Ok(())
 }
 
 #[tauri::command]

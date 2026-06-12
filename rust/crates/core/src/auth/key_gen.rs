@@ -194,8 +194,6 @@ mod tests {
 
     #[test]
     fn test_generate_keys() {
-        crypto::init().unwrap();
-
         let result = generate_test_keys("test_password_123").unwrap();
 
         assert!(!result.key_attributes.kek_salt.is_empty());
@@ -212,8 +210,6 @@ mod tests {
 
     #[test]
     fn test_generate_keys_can_decrypt_master_key() {
-        crypto::init().unwrap();
-
         let result = generate_test_keys("my_secure_password").unwrap();
 
         let encrypted_key = crypto::decode_b64(&result.key_attributes.encrypted_key).unwrap();
@@ -226,8 +222,6 @@ mod tests {
 
     #[test]
     fn test_generate_keys_can_decrypt_secret_key() {
-        crypto::init().unwrap();
-
         let result = generate_test_keys("password").unwrap();
         let master_key = crypto::decode_b64(&result.private_key_attributes.key).unwrap();
 
@@ -241,8 +235,6 @@ mod tests {
 
     #[test]
     fn test_generate_keys_recovery_key_can_decrypt_master() {
-        crypto::init().unwrap();
-
         let result = generate_test_keys("password").unwrap();
         let recovery_key = crypto::decode_hex(&result.private_key_attributes.recovery_key).unwrap();
 
@@ -270,8 +262,6 @@ mod tests {
 
     #[test]
     fn test_generate_keys_master_can_decrypt_recovery() {
-        crypto::init().unwrap();
-
         let result = generate_test_keys("password").unwrap();
         let master_key = crypto::decode_b64(&result.private_key_attributes.key).unwrap();
 
@@ -299,8 +289,6 @@ mod tests {
 
     #[test]
     fn test_password_change() {
-        crypto::init().unwrap();
-
         let initial = generate_test_keys("old_password").unwrap();
         let master_key = crypto::decode_b64(&initial.private_key_attributes.key).unwrap();
 
@@ -335,8 +323,6 @@ mod tests {
 
     #[test]
     fn test_create_new_recovery_key() {
-        crypto::init().unwrap();
-
         let master_key = Key::generate().as_bytes().to_vec();
         let (recovery_hex, enc_master, nonce_master, enc_recovery, nonce_recovery) =
             create_new_recovery_key(&master_key).unwrap();
@@ -361,8 +347,6 @@ mod tests {
 
     #[test]
     fn test_different_passwords_produce_different_keys() {
-        crypto::init().unwrap();
-
         let result1 = generate_test_keys("password1").unwrap();
         let result2 = generate_test_keys("password2").unwrap();
 

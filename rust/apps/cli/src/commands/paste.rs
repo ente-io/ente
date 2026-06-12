@@ -662,8 +662,6 @@ mod tests {
 
     #[test]
     fn encrypt_then_decrypt_paste_payload() {
-        crypto::init().unwrap();
-
         let (paste_key, payload) = encrypt_paste_for_create("hello paste", None).unwrap();
         let text = decrypt_consumed_paste(&paste_key, None, &payload).unwrap();
 
@@ -674,8 +672,6 @@ mod tests {
 
     #[test]
     fn encrypt_then_decrypt_password_protected_paste_payload() {
-        crypto::init().unwrap();
-
         let (paste_key, payload) =
             encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
         let text = decrypt_consumed_paste(&paste_key, Some("correct horse"), &payload).unwrap();
@@ -693,8 +689,6 @@ mod tests {
 
     #[test]
     fn reject_wrong_paste_password() {
-        crypto::init().unwrap();
-
         let (paste_key, payload) =
             encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
         let error = decrypt_consumed_paste(&paste_key, Some("wrong horse"), &payload).unwrap_err();
@@ -704,8 +698,6 @@ mod tests {
 
     #[test]
     fn reject_wrong_env_paste_password() {
-        crypto::init().unwrap();
-
         let (paste_key, payload) =
             encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
         let error = decrypt_password_protected_paste(
@@ -720,8 +712,6 @@ mod tests {
 
     #[test]
     fn prompted_password_retry_can_recover() {
-        crypto::init().unwrap();
-
         let (paste_key, payload) =
             encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
         let mut retry_passwords = ["correct horse"].into_iter();
@@ -739,8 +729,6 @@ mod tests {
 
     #[test]
     fn prompted_password_retry_ignores_empty_password() {
-        crypto::init().unwrap();
-
         let (paste_key, payload) =
             encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
         let mut retry_passwords = ["", "correct horse"].into_iter();
@@ -758,8 +746,6 @@ mod tests {
 
     #[test]
     fn prompted_password_retry_does_not_hide_structural_payload_errors() {
-        crypto::init().unwrap();
-
         let (paste_key, mut payload) =
             encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
         payload.kdf_nonce = "not base64".to_string();
@@ -781,8 +767,6 @@ mod tests {
 
     #[test]
     fn prompted_password_retry_does_not_hide_wrapped_key_payload_errors() {
-        crypto::init().unwrap();
-
         let (paste_key, mut payload) =
             encrypt_paste_for_create("protected paste", Some("correct horse")).unwrap();
         payload.encrypted_paste_key = "not base64".to_string();
@@ -875,8 +859,6 @@ mod tests {
 
     #[tokio::test]
     async fn consume_paste_uses_guard_cookie_and_decrypts_payload() {
-        crypto::init().unwrap();
-
         let access_token = "ABC123";
         let paste_key = PasteKey::parse("AbCd1234EfGh").unwrap();
         let payload = test_payload("guarded paste", &paste_key, None);
@@ -916,8 +898,6 @@ mod tests {
 
     #[tokio::test]
     async fn password_paste_refreshes_guard_after_password_resolution() {
-        crypto::init().unwrap();
-
         let access_token = "ABC123";
         let paste_key = PasteKey::parse("p-AbCd1234EfGh").unwrap();
         let payload = test_payload("guarded paste", &paste_key, Some("correct horse"));

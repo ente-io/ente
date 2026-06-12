@@ -38,9 +38,6 @@
 //! ```rust
 //! use ente_core::crypto;
 //!
-//! // Initialize crypto backend (no-op for the pure Rust backend)
-//! crypto::init().unwrap();
-//!
 //! // Generate a key and encrypt some data
 //! let key = crypto::Key::generate();
 //! let plaintext = b"Hello, World!";
@@ -55,8 +52,6 @@
 //! let decrypted = encrypted.decrypt(&key).unwrap();
 //! assert_eq!(decrypted, plaintext);
 //! ```
-
-use std::sync::Once;
 
 mod encoding;
 mod error;
@@ -78,28 +73,3 @@ pub use encoding::{
 pub use error::{CryptoError, Result};
 pub use secret::{SecretString, SecretVec};
 pub use types::{Header, Key, Nonce, PublicKey, Salt, SecretKey, random_bytes};
-
-static INIT: Once = Once::new();
-
-/// Initialize crypto backend. For the pure Rust implementation, this is a no-op.
-///
-/// This function is provided for API compatibility with the libsodium backend.
-pub fn init() -> Result<()> {
-    INIT.call_once(|| {
-        // Pure Rust implementation doesn't require initialization
-    });
-    Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_init() {
-        // Should not panic
-        init().unwrap();
-        // Safe to call multiple times
-        init().unwrap();
-    }
-}
