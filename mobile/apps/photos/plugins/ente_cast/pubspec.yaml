@@ -14,8 +14,6 @@ dependencies:
   dio: 5.9.2
   flutter:
     sdk: flutter
-  shared_preferences: 2.5.3
-  stack_trace: 1.12.1
 
 dev_dependencies:
   flutter_lints: 4.0.0

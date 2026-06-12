@@ -48,8 +48,6 @@ PODS:
     - Flutter
   - file_saver (0.0.1):
     - Flutter
-  - fk_user_agent (2.0.0):
-    - Flutter
   - Flutter (1.0.0)
   - flutter_email_sender (0.0.1):
     - Flutter
@@ -137,7 +135,6 @@ DEPENDENCIES:
   - ente_auth_qr (from `.symlinks/plugins/ente_auth_qr/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
-  - fk_user_agent (from `.symlinks/plugins/fk_user_agent/ios`)
   - Flutter (from `Flutter`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
@@ -187,8 +184,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   file_saver:
     :path: ".symlinks/plugins/file_saver/ios"
-  fk_user_agent:
-    :path: ".symlinks/plugins/fk_user_agent/ios"
   Flutter:
     :path: Flutter
   flutter_email_sender:
@@ -243,7 +238,6 @@ SPEC CHECKSUMS:
   ente_auth_qr: f79ccafca07144447980c66c66d3cf28f4eda82d
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
-  fk_user_agent: 137145b086229251761678fe034da53753f4ce59
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
   flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4

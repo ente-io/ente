@@ -739,14 +739,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.2"
-  io:
-    dependency: "direct main"
-    description:
-      name: io
-      sha256: dfd5a80599cf0165756e3181807ed3e77daf6dd4137caaad72d0b7931597650b
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.5"
   jni:
     dependency: transitive
     description:
@@ -1415,14 +1407,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.1"
-  step_progress_indicator:
-    dependency: transitive
-    description:
-      name: step_progress_indicator
-      sha256: b51bb1fcfc78454359f0658c5a2c21548c3825ebf76e826308e9ca10f383bbb8
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   stream_channel:
     dependency: transitive
     description:

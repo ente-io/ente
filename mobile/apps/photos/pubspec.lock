@@ -41,14 +41,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.3.0"
-  animated_list_plus:
-    dependency: "direct main"
-    description:
-      name: animated_list_plus
-      sha256: fb3d7f1fbaf5af84907f3c739236bacda8bf32cbe1f118dd51510752883ff50c
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.2"
   animated_stack_widget:
     dependency: transitive
     description:
@@ -1105,14 +1097,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.7"
-  flutter_password_strength:
-    dependency: "direct main"
-    description:
-      name: flutter_password_strength
-      sha256: "271b32c4003d7227e5a71d0303af0144e91a104b522da1a8d092b7847ebfee12"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.6"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -1454,14 +1438,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.2"
-  intl_utils:
-    dependency: "direct dev"
-    description:
-      name: intl_utils
-      sha256: "07469a81dcb011ab3708ed4a324403f0f556f2e3663b769006f92c9e62a0066a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.8.14"
   io:
     dependency: transitive
     description:
@@ -1582,14 +1558,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  like_button:
-    dependency: "direct main"
-    description:
-      name: like_button
-      sha256: "8b349521182ea6252b7fe1eaaad5932a9f55f94c3e87849376cfc25c78bac53a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
   lints:
     dependency: transitive
     description:
@@ -2382,14 +2350,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
-  screenshot:
-    dependency: "direct main"
-    description:
-      name: screenshot
-      sha256: "63817697a7835e6ce82add4228e15d233b74d42975c143ad8cfe07009fab866b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   scrollable_positioned_list:
     dependency: "direct main"
     description:
@@ -2667,14 +2627,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.1"
-  step_progress_indicator:
-    dependency: "direct main"
-    description:
-      name: step_progress_indicator
-      sha256: b51bb1fcfc78454359f0658c5a2c21548c3825ebf76e826308e9ca10f383bbb8
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   stream_channel:
     dependency: transitive
     description:
@@ -2715,22 +2667,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
-  syncfusion_flutter_core:
-    dependency: "direct main"
-    description:
-      name: syncfusion_flutter_core
-      sha256: bee87cdfe527b31705190162e3bd27bf468d591ae7c68182244bdfd94e21f737
-      url: "https://pub.dev"
-    source: hosted
-    version: "29.2.11"
-  syncfusion_flutter_sliders:
-    dependency: "direct main"
-    description:
-      name: syncfusion_flutter_sliders
-      sha256: "84ba05823f00e30cb0fdb98ad300a204617db4a6407de7c184f9836276f386b9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "29.2.11"
   synchronized:
     dependency: "direct main"
     description:
