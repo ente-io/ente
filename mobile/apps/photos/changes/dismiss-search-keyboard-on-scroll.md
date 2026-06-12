@@ -1,0 +1,1 @@
+- Dismiss the keyboard when scrolling Photos search result screens.

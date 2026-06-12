@@ -232,7 +232,10 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
                 child: Center(child: EnteLoadingWidget()),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           } else if (snapshot.hasError) {
             AddFilesToPersonPage._logger.severe(
               "Failed to load persons for manual tagging",
@@ -244,7 +247,10 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
                 child: Center(child: Icon(Icons.error_outline_rounded)),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           }
 
           final persons = snapshot.data ?? [];
@@ -259,7 +265,10 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
                 ),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           }
           final screenWidth = MediaQuery.of(context).size.width;
           final estimatedCount = (screenWidth / 100).floor();
@@ -306,7 +315,10 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
               ),
             ),
           );
-          return CustomScrollView(slivers: slivers);
+          return CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: slivers,
+          );
         },
       ),
     );

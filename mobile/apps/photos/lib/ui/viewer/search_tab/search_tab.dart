@@ -194,6 +194,8 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   bottomPadding,
                 ),
                 physics: const BouncingScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 itemCount: sectionWidgets.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {

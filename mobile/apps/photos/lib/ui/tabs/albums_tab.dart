@@ -986,6 +986,8 @@ class _AlbumsTabState extends State<AlbumsTab>
                         child: CustomScrollView(
                           controller: _scrollController,
                           physics: const BouncingScrollPhysics(),
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
                           slivers: [_buildContentSliver(strings)],
                         ),
                       ),

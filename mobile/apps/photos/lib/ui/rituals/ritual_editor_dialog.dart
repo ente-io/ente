@@ -814,6 +814,8 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                             child: buildEmptyState(),
                           )
                         : ListView.separated(
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             itemBuilder: (context, index) {
                               if (showNewAlbumRow && index == 0) {

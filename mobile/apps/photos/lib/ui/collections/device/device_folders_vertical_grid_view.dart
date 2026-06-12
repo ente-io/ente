@@ -47,6 +47,7 @@ class _DeviceFolderVerticalGridViewState
     return Scaffold(
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         slivers: <Widget>[
           SearchableAppBar(
             title: widget.appTitle ?? const SizedBox.shrink(),
