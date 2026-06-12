@@ -1,0 +1,1 @@
+- Avoid re-running Photos search when dismissing the keyboard without changing the query.

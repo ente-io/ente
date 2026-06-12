@@ -40,6 +40,7 @@ class SearchWidgetState extends State<SearchWidget> {
   StreamSubscription<TabChangedEvent>? _tabChangedEvent;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   TextEditingController textController = TextEditingController();
+  String? _lastRequestedQuery;
   late final StreamSubscription<ClearAndUnfocusSearchBar>
   _clearAndUnfocusSearchBar;
   late final Logger _logger = Logger("SearchWidgetState");
@@ -126,10 +127,15 @@ class SearchWidgetState extends State<SearchWidget> {
 
   Future<void> textControllerListener() async {
     _syncSearchBackNotifier();
+    final nextQuery = textController.text.trim();
+    if (nextQuery == _lastRequestedQuery) {
+      return;
+    }
+    _lastRequestedQuery = nextQuery;
     isLoading.value = true;
     _debouncer.run(() async {
       if (mounted) {
-        query = textController.text.trim();
+        query = nextQuery;
         IndexOfStackNotifier().isSearchQueryEmpty = query.isEmpty;
         searchResultsStreamNotifier.value = _getSearchResultsStream(
           context,
