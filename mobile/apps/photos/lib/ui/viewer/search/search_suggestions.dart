@@ -130,12 +130,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
         ? colorScheme.backgroundColour
         : colorScheme.backgroundElevated2;
     final sectionWidgets = _buildSectionWidgets(context);
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final defaultBottomPadding = (MediaQuery.sizeOf(context).height / 2) + 50.0;
-    final keyboardBottomPadding = keyboardInset + 50.0;
-    final bottomPadding = keyboardBottomPadding > defaultBottomPadding
-        ? keyboardBottomPadding
-        : defaultBottomPadding;
+    const bottomPadding = 124.0;
     if (_resultsCount > 0) {
       sectionWidgets.insert(
         0,
@@ -162,7 +157,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
                 physics: const BouncingScrollPhysics(),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: EdgeInsets.only(bottom: bottomPadding),
+                padding: const EdgeInsets.only(bottom: bottomPadding),
                 children: sectionWidgets,
               ),
             ),

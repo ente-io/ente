@@ -126,8 +126,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
 
   @override
   Widget build(BuildContext context) {
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final bottomPadding = keyboardInset > 130.0 ? keyboardInset + 50.0 : 124.0;
+    const bottomPadding = 124.0;
 
     return FutureBuilder<AllSectionsExamplesData>(
       future: InheritedAllSectionsExamples.of(
@@ -187,7 +186,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
             FileTypeSection(hasAnySearchableFiles: hasAnySearchableFiles),
           ];
           return ListView.builder(
-                padding: EdgeInsets.fromLTRB(
+                padding: const EdgeInsets.fromLTRB(
                   searchTabHorizontalPadding,
                   0,
                   searchTabHorizontalPadding,
