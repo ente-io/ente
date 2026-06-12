@@ -51,8 +51,12 @@ pub fn decrypt_secrets_with_kek(
         .map_err(|e| AuthError::Decode(format!("key_decryption_nonce: {}", e)))?;
 
     let master_key = SecretVec::new(
-        secretbox::decrypt(&encrypted_key, &key_nonce, key_encryption_key)
-            .map_err(|_| AuthError::IncorrectPassword)?,
+        secretbox::decrypt(
+            &encrypted_key,
+            &crypto::Nonce::try_from_slice(&key_nonce)?,
+            &crypto::Key::try_from_slice(key_encryption_key)?,
+        )
+        .map_err(|_| AuthError::IncorrectPassword)?,
     );
 
     let encrypted_secret_key = crypto::decode_b64(&attributes.encrypted_secret_key)
@@ -61,8 +65,12 @@ pub fn decrypt_secrets_with_kek(
         .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
 
     let secret_key = SecretVec::new(
-        secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
-            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+        secretbox::decrypt(
+            &encrypted_secret_key,
+            &crypto::Nonce::try_from_slice(&secret_key_nonce)?,
+            &crypto::Key::try_from_slice(&master_key)?,
+        )
+        .map_err(|_| AuthError::InvalidKeyAttributes)?,
     );
 
     let public_key = crypto::decode_b64(&attributes.public_key)

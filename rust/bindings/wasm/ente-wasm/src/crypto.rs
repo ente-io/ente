@@ -248,11 +248,11 @@ pub fn crypto_encrypt_box(data_b64: &str, key_b64: &str) -> Result<EncryptedBox,
     let data = core_crypto::decode_b64(data_b64)?;
     let key = core_crypto::decode_b64(key_b64)?;
 
-    let out = core_crypto::secretbox::encrypt_with_key(&data, &key)?;
+    let out = core_crypto::secretbox::encrypt(&data, &core_crypto::Key::try_from_slice(&key)?);
 
     Ok(EncryptedBox {
-        encrypted_data: core_crypto::encode_b64(&out.ciphertext),
-        nonce: core_crypto::encode_b64(&out.nonce),
+        encrypted_data: core_crypto::encode_b64(&out.encrypted_data),
+        nonce: core_crypto::encode_b64(out.nonce.as_bytes()),
     })
 }
 
@@ -269,7 +269,11 @@ pub fn crypto_decrypt_box(
     let nonce = core_crypto::decode_b64(nonce_b64)?;
     let key = core_crypto::decode_b64(key_b64)?;
 
-    let plaintext = core_crypto::secretbox::decrypt(&ciphertext, &nonce, &key)?;
+    let plaintext = core_crypto::secretbox::decrypt(
+        &ciphertext,
+        &core_crypto::Nonce::try_from_slice(&nonce)?,
+        &core_crypto::Key::try_from_slice(&key)?,
+    )?;
     Ok(core_crypto::encode_b64(&plaintext))
 }
 

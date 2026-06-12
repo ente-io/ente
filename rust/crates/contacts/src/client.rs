@@ -926,7 +926,11 @@ impl ContactsCtx {
         let secret_key_nonce =
             crypto::decode_b64(&current_user_key_attrs.secret_key_decryption_nonce)?;
         let master_key = self.master_key.read().expect("master key lock poisoned");
-        let secret_key = secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)?;
+        let secret_key = secretbox::decrypt(
+            &encrypted_secret_key,
+            &crypto::Nonce::try_from_slice(&secret_key_nonce)?,
+            &crypto::Key::try_from_slice(&master_key)?,
+        )?;
         Ok(SecretVec::new(secret_key))
     }
 }
@@ -1035,9 +1039,13 @@ fn decrypt_master_key_with_recovery_key(
         })?;
     let encrypted_master_key = crypto::decode_b64(encrypted_master_key)?;
     let master_key_nonce = crypto::decode_b64(master_key_nonce)?;
-    secretbox::decrypt(&encrypted_master_key, &master_key_nonce, recovery_key)
-        .map(SecretVec::new)
-        .map_err(Into::into)
+    secretbox::decrypt(
+        &encrypted_master_key,
+        &crypto::Nonce::try_from_slice(&master_key_nonce)?,
+        &crypto::Key::try_from_slice(recovery_key)?,
+    )
+    .map(SecretVec::new)
+    .map_err(Into::into)
 }
 
 fn password_reset_setup_request(

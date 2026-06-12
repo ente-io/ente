@@ -256,7 +256,14 @@ fn decrypt_collection_keys(
         let encrypted_bytes = BASE64.decode(&collection.encrypted_key)?;
         let nonce_bytes = BASE64.decode(&collection.key_decryption_nonce)?;
 
-        match crypto::secretbox::decrypt(&encrypted_bytes, &nonce_bytes, master_key) {
+        let decrypted = crypto::Nonce::try_from_slice(&nonce_bytes).and_then(|nonce| {
+            crypto::secretbox::decrypt(
+                &encrypted_bytes,
+                &nonce,
+                &crypto::Key::try_from_slice(master_key)?,
+            )
+        });
+        match decrypted {
             Ok(key) => {
                 keys.insert(collection.id, key);
             }
@@ -316,7 +323,11 @@ async fn prepare_download_tasks(
             let file_key = {
                 let key_bytes = BASE64.decode(&file.encrypted_key)?;
                 let nonce = BASE64.decode(&file.key_decryption_nonce)?;
-                crypto::secretbox::decrypt(&key_bytes, &nonce, col_key)?
+                crypto::secretbox::decrypt(
+                    &key_bytes,
+                    &crypto::Nonce::try_from_slice(&nonce)?,
+                    &crypto::Key::try_from_slice(col_key)?,
+                )?
             };
 
             // Decrypt regular metadata

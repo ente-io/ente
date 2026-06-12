@@ -146,6 +146,8 @@ pub unsafe extern "C" fn ente_crypto_secretbox_open_b64(
         let ciphertext = decode_b64(&ciphertext_b64, "ciphertext_b64")?;
         let nonce = decode_b64(&nonce_b64, "nonce_b64")?;
         let key = decode_b64(&key_b64, "key_b64")?;
+        let nonce = crypto::Nonce::try_from_slice(&nonce).map_err(|e| e.to_string())?;
+        let key = crypto::Key::try_from_slice(&key).map_err(|e| e.to_string())?;
         let plaintext =
             crypto::secretbox::decrypt(&ciphertext, &nonce, &key).map_err(|e| e.to_string())?;
 

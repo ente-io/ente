@@ -479,11 +479,12 @@ pub fn crypto_generate_key() -> String {
 pub fn crypto_encrypt_box(input: CryptoBoxInput) -> Result<EncryptedBox, ApiError> {
     let data = core_crypto::decode_b64(&input.data_b64).map_err(ApiError::from)?;
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
-    let out = core_crypto::secretbox::encrypt_with_key(&data, &key).map_err(ApiError::from)?;
+    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
+    let out = core_crypto::secretbox::encrypt(&data, &key);
 
     Ok(EncryptedBox {
-        encrypted_data: core_crypto::encode_b64(&out.ciphertext),
-        nonce: core_crypto::encode_b64(&out.nonce),
+        encrypted_data: core_crypto::encode_b64(&out.encrypted_data),
+        nonce: core_crypto::encode_b64(out.nonce.as_bytes()),
     })
 }
 
@@ -492,6 +493,8 @@ pub fn crypto_decrypt_box(input: CryptoBoxDecryptInput) -> Result<String, ApiErr
     let ciphertext = core_crypto::decode_b64(&input.encrypted_data_b64).map_err(ApiError::from)?;
     let nonce = core_crypto::decode_b64(&input.nonce_b64).map_err(ApiError::from)?;
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+    let nonce = core_crypto::Nonce::try_from_slice(&nonce).map_err(ApiError::from)?;
+    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
     let plaintext =
         core_crypto::secretbox::decrypt(&ciphertext, &nonce, &key).map_err(ApiError::from)?;
     Ok(core_crypto::encode_b64(&plaintext))

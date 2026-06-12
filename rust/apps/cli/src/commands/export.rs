@@ -959,8 +959,8 @@ fn decrypt_collection_key(
     // Collection keys are encrypted with secret_box (XSalsa20-Poly1305) using master key
     Ok(crypto::secretbox::decrypt(
         &encrypted_bytes,
-        &nonce_bytes,
-        master_key,
+        &crypto::Nonce::try_from_slice(&nonce_bytes)?,
+        &crypto::Key::try_from_slice(master_key)?,
     )?)
 }
 
@@ -995,7 +995,11 @@ fn decrypt_collection_name(
     let nonce_bytes = BASE64.decode(nonce)?;
 
     // Collection names are encrypted with secret_box using the collection key
-    let decrypted = crypto::secretbox::decrypt(&encrypted_bytes, &nonce_bytes, collection_key)?;
+    let decrypted = crypto::secretbox::decrypt(
+        &encrypted_bytes,
+        &crypto::Nonce::try_from_slice(&nonce_bytes)?,
+        &crypto::Key::try_from_slice(collection_key)?,
+    )?;
 
     // Convert to string
     String::from_utf8(decrypted)
@@ -1012,8 +1016,8 @@ fn decrypt_file_key(encrypted_key: &str, nonce: &str, collection_key: &[u8]) -> 
     // File keys are encrypted with secret_box (XSalsa20-Poly1305) using collection key
     Ok(crypto::secretbox::decrypt(
         &encrypted_bytes,
-        &nonce_bytes,
-        collection_key,
+        &crypto::Nonce::try_from_slice(&nonce_bytes)?,
+        &crypto::Key::try_from_slice(collection_key)?,
     )?)
 }
 

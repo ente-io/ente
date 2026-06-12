@@ -43,8 +43,8 @@ pub fn recover_with_key(
     let master_key = SecretVec::new(
         secretbox::decrypt(
             &encrypted_master_key_bytes,
-            &master_key_nonce_bytes,
-            &recovery_key,
+            &crypto::Nonce::try_from_slice(&master_key_nonce_bytes)?,
+            &crypto::Key::try_from_slice(&recovery_key)?,
         )
         .map_err(|_| AuthError::IncorrectRecoveryKey)?,
     );
@@ -55,8 +55,12 @@ pub fn recover_with_key(
         .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
 
     let secret_key = SecretVec::new(
-        secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
-            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+        secretbox::decrypt(
+            &encrypted_secret_key,
+            &crypto::Nonce::try_from_slice(&secret_key_nonce)?,
+            &crypto::Key::try_from_slice(&master_key)?,
+        )
+        .map_err(|_| AuthError::InvalidKeyAttributes)?,
     );
 
     let public_key = crypto::decode_b64(&attributes.public_key)
@@ -97,8 +101,12 @@ pub fn get_recovery_key(master_key: &[u8], attributes: &KeyAttributes) -> Result
         .map_err(|e| AuthError::Decode(format!("recovery_key_decryption_nonce: {}", e)))?;
 
     let recovery_key = SecretVec::new(
-        secretbox::decrypt(&encrypted_bytes, &nonce_bytes, master_key)
-            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+        secretbox::decrypt(
+            &encrypted_bytes,
+            &crypto::Nonce::try_from_slice(&nonce_bytes)?,
+            &crypto::Key::try_from_slice(master_key)?,
+        )
+        .map_err(|_| AuthError::InvalidKeyAttributes)?,
     );
 
     Ok(crypto::encode_hex(&recovery_key))

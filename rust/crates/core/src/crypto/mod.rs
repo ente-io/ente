@@ -42,18 +42,17 @@
 //! crypto::init().unwrap();
 //!
 //! // Generate a key and encrypt some data
-//! let key = crypto::Key::generate().as_bytes().to_vec();
+//! let key = crypto::Key::generate();
 //! let plaintext = b"Hello, World!";
 //!
 //! // SecretBox encryption (for independent data)
-//! let encrypted = crypto::secretbox::encrypt(plaintext, &key).unwrap();
-//! let decrypted = crypto::secretbox::decrypt_box(&encrypted, &key).unwrap();
+//! let encrypted = crypto::secretbox::encrypt(plaintext, &key);
+//! let decrypted = encrypted.decrypt(&key).unwrap();
 //! assert_eq!(decrypted, plaintext);
 //!
 //! // Blob encryption (for metadata)
-//! let key = crypto::Key::generate().as_bytes().to_vec();
-//! let encrypted = crypto::blob::encrypt(plaintext, &key).unwrap();
-//! let decrypted = crypto::blob::decrypt(&encrypted.encrypted_data, &encrypted.decryption_header, &key).unwrap();
+//! let encrypted = crypto::blob::encrypt(plaintext, key.as_bytes()).unwrap();
+//! let decrypted = crypto::blob::decrypt(&encrypted.encrypted_data, &encrypted.decryption_header, key.as_bytes()).unwrap();
 //! assert_eq!(decrypted, plaintext);
 //! ```
 

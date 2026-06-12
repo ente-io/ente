@@ -68,7 +68,8 @@ pub(crate) fn create_legacy_kit_request(
     let enc_key = derive_kit_enc_key(&kit_secret)?;
     let (auth_public_key, _auth_secret_key) = derive_kit_auth_keypair(&kit_secret)?;
 
-    let encrypted_recovery_blob = secretbox::encrypt(recovery_key, enc_key.as_ref())?;
+    let encrypted_recovery_blob =
+        secretbox::encrypt_combined(recovery_key, &crypto::Key::try_from_slice(&enc_key)?);
     let owner_blob = create_owner_blob(&result_shares);
     let encrypted_owner_blob = encrypt_owner_blob(&owner_blob, master_key)?;
 
@@ -77,7 +78,7 @@ pub(crate) fn create_legacy_kit_request(
             id: kit_id,
             variant,
             notice_period_in_hours,
-            encrypted_recovery_blob: crypto::encode_b64(&encrypted_recovery_blob.encrypted_data),
+            encrypted_recovery_blob: crypto::encode_b64(&encrypted_recovery_blob),
             auth_public_key: crypto::encode_b64(&auth_public_key),
             encrypted_owner_blob,
         },
@@ -243,7 +244,10 @@ impl LegacyKitRecoveryHandle {
             .map_err(ContactsError::from)?;
         let enc_key = derive_kit_enc_key(&self.kit_secret)?;
         let encrypted_recovery_blob = crypto::decode_b64(&response.encrypted_recovery_blob)?;
-        let recovery_key = secretbox::decrypt_box(&encrypted_recovery_blob, enc_key.as_ref())?;
+        let recovery_key = secretbox::decrypt_combined(
+            &encrypted_recovery_blob,
+            &crypto::Key::try_from_slice(&enc_key)?,
+        )?;
         Ok(LegacyKitRecoveryBundle {
             recovery_key: SecretVec::new(recovery_key),
             user_key_attributes: response.user_key_attr,
@@ -400,9 +404,13 @@ fn decrypt_master_key_with_recovery_key(
         })?;
     let encrypted_master_key = crypto::decode_b64(encrypted_master_key)?;
     let master_key_nonce = crypto::decode_b64(master_key_nonce)?;
-    secretbox::decrypt(&encrypted_master_key, &master_key_nonce, recovery_key)
-        .map(SecretVec::new)
-        .map_err(Into::into)
+    secretbox::decrypt(
+        &encrypted_master_key,
+        &crypto::Nonce::try_from_slice(&master_key_nonce)?,
+        &crypto::Key::try_from_slice(recovery_key)?,
+    )
+    .map(SecretVec::new)
+    .map_err(Into::into)
 }
 
 fn password_reset_setup_request(
