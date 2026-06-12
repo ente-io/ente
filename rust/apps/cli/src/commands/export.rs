@@ -712,19 +712,25 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
             // Decrypt the file data using streaming XChaCha20-Poly1305
             // Use chunked decryption for large files
-            let decrypted =
-                match crypto::stream::decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
-                    Ok(data) => data,
-                    Err(e) => {
-                        log::error!("Failed to decrypt file {}: {}", file.id, e);
-                        log::debug!(
-                            "File size: {}, header length: {}",
-                            encrypted_data.len(),
-                            file_nonce.len()
-                        );
-                        continue;
-                    }
-                };
+            let decrypt_result = crypto::Header::try_from_slice(&file_nonce).and_then(|header| {
+                crypto::stream::decrypt_file_data(
+                    &encrypted_data,
+                    &header,
+                    &crypto::Key::try_from_slice(&file_key)?,
+                )
+            });
+            let decrypted = match decrypt_result {
+                Ok(data) => data,
+                Err(e) => {
+                    log::error!("Failed to decrypt file {}: {}", file.id, e);
+                    log::debug!(
+                        "File size: {}, header length: {}",
+                        encrypted_data.len(),
+                        file_nonce.len()
+                    );
+                    continue;
+                }
+            };
 
             // Check if this is a live photo that needs extraction
             let is_live_photo = metadata
@@ -1067,7 +1073,11 @@ fn decrypt_file_metadata(
     let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
 
     // Decrypt the metadata using streaming XChaCha20-Poly1305
-    let decrypted = crypto::stream::decrypt(&encrypted_bytes, &header_bytes, file_key)?;
+    let decrypted = crypto::blob::decrypt(
+        &encrypted_bytes,
+        &crypto::Header::try_from_slice(&header_bytes)?,
+        &crypto::Key::try_from_slice(file_key)?,
+    )?;
 
     // Parse JSON metadata
     let metadata: FileMetadata = serde_json::from_slice(&decrypted)?;
@@ -1090,7 +1100,11 @@ fn decrypt_magic_metadata(
     let header_bytes = BASE64.decode(&magic_metadata.header)?;
 
     // Decrypt the metadata using streaming XChaCha20-Poly1305
-    let decrypted = crypto::stream::decrypt(&encrypted_bytes, &header_bytes, file_key)?;
+    let decrypted = crypto::blob::decrypt(
+        &encrypted_bytes,
+        &crypto::Header::try_from_slice(&header_bytes)?,
+        &crypto::Key::try_from_slice(file_key)?,
+    )?;
 
     // Parse as generic JSON since magic metadata structure can vary
     let metadata: serde_json::Value = serde_json::from_slice(&decrypted)?;

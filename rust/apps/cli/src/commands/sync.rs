@@ -336,7 +336,15 @@ async fn prepare_download_tasks(
                     let encrypted_bytes = BASE64.decode(&file.metadata.encrypted_data)?;
                     let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
 
-                    match crypto::stream::decrypt(&encrypted_bytes, &header_bytes, &file_key) {
+                    let decrypted =
+                        crypto::Header::try_from_slice(&header_bytes).and_then(|header| {
+                            crypto::blob::decrypt(
+                                &encrypted_bytes,
+                                &header,
+                                &crypto::Key::try_from_slice(&file_key)?,
+                            )
+                        });
+                    match decrypted {
                         Ok(decrypted) => serde_json::from_slice::<FileMetadata>(&decrypted).ok(),
                         Err(e) => {
                             log::warn!("Failed to decrypt metadata for file {}: {}", file.id, e);
@@ -356,7 +364,15 @@ async fn prepare_download_tasks(
                     let encrypted_bytes = BASE64.decode(&magic.data)?;
                     let header_bytes = BASE64.decode(&magic.header)?;
 
-                    match crypto::stream::decrypt(&encrypted_bytes, &header_bytes, &file_key) {
+                    let decrypted =
+                        crypto::Header::try_from_slice(&header_bytes).and_then(|header| {
+                            crypto::blob::decrypt(
+                                &encrypted_bytes,
+                                &header,
+                                &crypto::Key::try_from_slice(&file_key)?,
+                            )
+                        });
+                    match decrypted {
                         Ok(decrypted) => {
                             serde_json::from_slice::<serde_json::Value>(&decrypted).ok()
                         }

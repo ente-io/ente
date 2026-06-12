@@ -12,7 +12,7 @@
 //! - Combined ([`encrypt_combined`] / [`decrypt_combined`]): a single
 //!   self-contained `header ‖ ciphertext` buffer.
 
-use super::stream::{StreamDecryptor, StreamEncryptor, TAG_FINAL};
+use super::stream::{Decryptor, Encryptor};
 use crate::crypto::{CryptoError, Header, Key, Result};
 
 /// Size of the encryption key in bytes.
@@ -45,8 +45,8 @@ impl EncryptedBlob {
 /// This is suitable for encrypting metadata and small files. Use [`decrypt`]
 /// or [`EncryptedBlob::decrypt`] to decrypt the result.
 pub fn encrypt(data: &[u8], key: &Key) -> Result<EncryptedBlob> {
-    let mut encryptor = StreamEncryptor::new(key.as_bytes())?;
-    let decryption_header = Header::try_from_slice(&encryptor.header)?;
+    let mut encryptor = Encryptor::new(key);
+    let decryption_header = *encryptor.header();
     let encrypted_data = encryptor.push(data, true)?;
 
     Ok(EncryptedBlob {
@@ -61,8 +61,8 @@ pub fn encrypt(data: &[u8], key: &Key) -> Result<EncryptedBlob> {
 /// payloads are rejected with `CryptoError::StreamTruncated`. For older data
 /// written without the final tag, use [`decrypt_legacy`].
 pub fn decrypt(data: &[u8], header: &Header, key: &Key) -> Result<Vec<u8>> {
-    let (plaintext, tag) = decrypt_impl(data, header, key)?;
-    if tag != TAG_FINAL {
+    let (plaintext, is_final) = decrypt_impl(data, header, key)?;
+    if !is_final {
         return Err(CryptoError::StreamTruncated);
     }
     Ok(plaintext)
@@ -76,7 +76,7 @@ pub fn decrypt_legacy(data: &[u8], header: &Header, key: &Key) -> Result<Vec<u8>
     Ok(decrypt_impl(data, header, key)?.0)
 }
 
-fn decrypt_impl(data: &[u8], header: &Header, key: &Key) -> Result<(Vec<u8>, u8)> {
+fn decrypt_impl(data: &[u8], header: &Header, key: &Key) -> Result<(Vec<u8>, bool)> {
     if data.len() < ABYTES {
         return Err(CryptoError::CiphertextTooShort {
             minimum: ABYTES,
@@ -84,7 +84,7 @@ fn decrypt_impl(data: &[u8], header: &Header, key: &Key) -> Result<(Vec<u8>, u8)
         });
     }
 
-    let mut decryptor = StreamDecryptor::new(header.as_bytes(), key.as_bytes())?;
+    let mut decryptor = Decryptor::new(header, key);
     decryptor.pull(data)
 }
 
@@ -160,8 +160,8 @@ mod tests {
     #[test]
     fn test_decrypt_requires_final_tag() {
         let key = Key::generate();
-        let mut encryptor = StreamEncryptor::new(key.as_bytes()).unwrap();
-        let header = Header::try_from_slice(&encryptor.header).unwrap();
+        let mut encryptor = Encryptor::new(&key);
+        let header = *encryptor.header();
         let ciphertext = encryptor.push(b"partial", false).unwrap();
 
         assert!(matches!(
@@ -173,8 +173,8 @@ mod tests {
     #[test]
     fn test_decrypt_legacy_tolerates_missing_final_tag() {
         let key = Key::generate();
-        let mut encryptor = StreamEncryptor::new(key.as_bytes()).unwrap();
-        let header = Header::try_from_slice(&encryptor.header).unwrap();
+        let mut encryptor = Encryptor::new(&key);
+        let header = *encryptor.header();
         let ciphertext = encryptor.push(b"partial", false).unwrap();
 
         let decrypted = decrypt_legacy(&ciphertext, &header, &key).unwrap();

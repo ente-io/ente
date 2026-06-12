@@ -228,9 +228,12 @@ pub unsafe extern "C" fn ente_crypto_secretstream_decrypt_b64(
         let encrypted_data = decode_b64(&encrypted_data_b64, "encrypted_data_b64")?;
         let decryption_header = decode_b64(&decryption_header_b64, "decryption_header_b64")?;
         let key = decode_b64(&key_b64, "key_b64")?;
-        let plaintext =
-            crypto::stream::decrypt_file_data(&encrypted_data, &decryption_header, &key)
-                .map_err(|e| e.to_string())?;
+        let plaintext = crypto::stream::decrypt_file_data(
+            &encrypted_data,
+            &crypto::Header::try_from_slice(&decryption_header).map_err(|e| e.to_string())?,
+            &crypto::Key::try_from_slice(&key).map_err(|e| e.to_string())?,
+        )
+        .map_err(|e| e.to_string())?;
 
         unsafe {
             c_output(

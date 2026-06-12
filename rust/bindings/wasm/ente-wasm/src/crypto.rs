@@ -93,7 +93,7 @@ pub fn crypto_generate_stream_key() -> String {
 /// the caller to upload.
 #[wasm_bindgen]
 pub struct CryptoStreamEncryptor {
-    encryptor: core_crypto::stream::StreamEncryptor,
+    encryptor: core_crypto::stream::Encryptor,
     key: String,
     decryption_header: String,
 }
@@ -102,13 +102,13 @@ pub struct CryptoStreamEncryptor {
 impl CryptoStreamEncryptor {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Result<CryptoStreamEncryptor, CryptoError> {
-        let key = core_crypto::Key::generate().as_bytes().to_vec();
-        let encryptor = core_crypto::stream::StreamEncryptor::new(&key)?;
-        let decryption_header = core_crypto::encode_b64(&encryptor.header);
+        let key = core_crypto::Key::generate();
+        let encryptor = core_crypto::stream::Encryptor::new(&key);
+        let decryption_header = core_crypto::encode_b64(encryptor.header().as_bytes());
 
         Ok(Self {
             encryptor,
-            key: core_crypto::encode_b64(&key),
+            key: core_crypto::encode_b64(key.as_bytes()),
             decryption_header,
         })
     }
@@ -137,7 +137,7 @@ impl CryptoStreamEncryptor {
 /// Incremental chunk decryptor for large file downloads.
 #[wasm_bindgen]
 pub struct CryptoStreamDecryptor {
-    decryptor: core_crypto::stream::StreamDecryptor,
+    decryptor: core_crypto::stream::Decryptor,
     finalized: bool,
 }
 
@@ -150,7 +150,10 @@ impl CryptoStreamDecryptor {
     ) -> Result<CryptoStreamDecryptor, CryptoError> {
         let header = core_crypto::decode_b64(decryption_header_b64)?;
         let key = core_crypto::decode_b64(key_b64)?;
-        let decryptor = core_crypto::stream::StreamDecryptor::new(&header, &key)?;
+        let decryptor = core_crypto::stream::Decryptor::new(
+            &core_crypto::Header::try_from_slice(&header)?,
+            &core_crypto::Key::try_from_slice(&key)?,
+        );
 
         Ok(Self {
             decryptor,
@@ -169,8 +172,8 @@ impl CryptoStreamDecryptor {
     }
 
     pub fn decrypt_chunk(&mut self, ciphertext: Vec<u8>) -> Result<Vec<u8>, CryptoError> {
-        let (plaintext, tag) = self.decryptor.pull(&ciphertext)?;
-        self.finalized = tag == core_crypto::stream::TAG_FINAL;
+        let (plaintext, is_final) = self.decryptor.pull(&ciphertext)?;
+        self.finalized = is_final;
         Ok(plaintext)
     }
 }
@@ -371,7 +374,11 @@ pub fn crypto_decrypt_stream(
     let header = core_crypto::decode_b64(decryption_header_b64)?;
     let key = core_crypto::decode_b64(key_b64)?;
 
-    let plaintext = core_crypto::stream::decrypt_file_data(&ciphertext, &header, &key)?;
+    let plaintext = core_crypto::stream::decrypt_file_data(
+        &ciphertext,
+        &core_crypto::Header::try_from_slice(&header)?,
+        &core_crypto::Key::try_from_slice(&key)?,
+    )?;
     Ok(core_crypto::encode_b64(&plaintext))
 }
 
@@ -497,17 +504,18 @@ impl EncryptedStreamResult {
 pub fn crypto_encrypt_stream(data_b64: &str) -> Result<EncryptedStreamResult, CryptoError> {
     let plaintext = core_crypto::decode_b64(data_b64)?;
 
+    let key = core_crypto::Key::generate();
     let mut reader = std::io::Cursor::new(&plaintext);
-    let mut writer = Vec::new();
+    let mut writer = ente_core::io::Md5Writer::new(Vec::new());
 
-    let (key, header, md5) =
-        core_crypto::stream::encrypt_file_with_md5(&mut reader, &mut writer, None)?;
+    let header = core_crypto::stream::encrypt_file(&mut reader, &mut writer, &key)?;
+    let (encrypted, md5) = writer.finalize();
 
     Ok(EncryptedStreamResult {
-        encrypted_data: core_crypto::encode_b64(&writer),
-        decryption_header: core_crypto::encode_b64(&header),
+        encrypted_data: core_crypto::encode_b64(&encrypted),
+        decryption_header: core_crypto::encode_b64(header.as_bytes()),
         md5_hash: core_crypto::encode_b64(&md5),
-        key: core_crypto::encode_b64(&key),
+        key: core_crypto::encode_b64(key.as_bytes()),
     })
 }
 
@@ -521,19 +529,19 @@ pub fn crypto_encrypt_stream_with_key(
     key_b64: &str,
 ) -> Result<EncryptedStreamResult, CryptoError> {
     let plaintext = core_crypto::decode_b64(data_b64)?;
-    let key = core_crypto::decode_b64(key_b64)?;
+    let key = core_crypto::Key::try_from_slice(&core_crypto::decode_b64(key_b64)?)?;
 
     let mut reader = std::io::Cursor::new(&plaintext);
-    let mut writer = Vec::new();
+    let mut writer = ente_core::io::Md5Writer::new(Vec::new());
 
-    let (out_key, header, md5) =
-        core_crypto::stream::encrypt_file_with_md5(&mut reader, &mut writer, Some(&key))?;
+    let header = core_crypto::stream::encrypt_file(&mut reader, &mut writer, &key)?;
+    let (encrypted, md5) = writer.finalize();
 
     Ok(EncryptedStreamResult {
-        encrypted_data: core_crypto::encode_b64(&writer),
-        decryption_header: core_crypto::encode_b64(&header),
+        encrypted_data: core_crypto::encode_b64(&encrypted),
+        decryption_header: core_crypto::encode_b64(header.as_bytes()),
         md5_hash: core_crypto::encode_b64(&md5),
-        key: core_crypto::encode_b64(&out_key),
+        key: core_crypto::encode_b64(key.as_bytes()),
     })
 }
 

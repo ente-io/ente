@@ -279,7 +279,11 @@ impl DownloadManager {
 
         // Decrypt file data using file key (Streaming XChaCha20-Poly1305)
         let file_nonce = BASE64.decode(&file.file.decryption_header)?;
-        let decrypted = crypto::stream::decrypt_file_data(encrypted_data, &file_nonce, &file_key)?;
+        let decrypted = crypto::stream::decrypt_file_data(
+            encrypted_data,
+            &crypto::Header::try_from_slice(&file_nonce)?,
+            &crypto::Key::try_from_slice(&file_key)?,
+        )?;
 
         Ok(decrypted)
     }

@@ -988,8 +988,7 @@ mod tests {
         let kdf_secret = key_reference.kdf_secret(password).unwrap();
         // Minimal-cost KDF params: the kdf secret is already high-entropy (it
         // is not a human-chosen password), and tests need to be fast.
-        let key_encryption_key =
-            argon::derive_key(&kdf_secret, &salt, argon::Params::MIN).unwrap();
+        let key_encryption_key = argon::derive_key(&kdf_secret, &salt, argon::Params::MIN).unwrap();
         let encrypted_paste_key = secretbox::encrypt(paste_key.as_bytes(), &key_encryption_key);
 
         PastePayload {
