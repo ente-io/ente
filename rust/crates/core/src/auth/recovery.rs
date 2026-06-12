@@ -197,7 +197,7 @@ mod tests {
         let public_key = crypto::decode_b64(&gen_result.key_attributes.public_key).unwrap();
         let encrypted_token = create_sealed_token(b"token", &public_key);
 
-        let wrong_key = crypto::encode_hex(&Key::generate().as_bytes().to_vec());
+        let wrong_key = crypto::encode_hex(Key::generate().as_bytes());
         let result = recover_with_key(&wrong_key, &gen_result.key_attributes, &encrypted_token);
         assert!(matches!(result, Err(AuthError::IncorrectRecoveryKey)));
     }

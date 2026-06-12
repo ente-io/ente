@@ -114,17 +114,23 @@ impl fmt::Debug for GeneratedSrpSetup {
 pub fn derive_srp_credentials(password: &str, srp_attrs: &SrpAttributes) -> Result<SrpCredentials> {
     let kek_salt = crypto::decode_b64(&srp_attrs.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
+    let salt = crypto::Salt::try_from_slice(&kek_salt)?;
 
     let kek = argon::derive_key(
         password,
-        &kek_salt,
-        srp_attrs.mem_limit,
-        srp_attrs.ops_limit,
+        &salt,
+        argon::Params {
+            mem_limit: srp_attrs.mem_limit,
+            ops_limit: srp_attrs.ops_limit,
+        },
     )?;
 
-    let login_key = kdf::derive_login_key(&kek)?;
+    let login_key = kdf::derive_login_key(kek.as_bytes())?;
 
-    Ok(SrpCredentials { kek, login_key })
+    Ok(SrpCredentials {
+        kek: SecretVec::new(kek.as_bytes().to_vec()),
+        login_key,
+    })
 }
 
 /// Derive only the KEK from password.
@@ -143,10 +149,19 @@ pub fn derive_kek(
     mem_limit: u32,
     ops_limit: u32,
 ) -> Result<SecretVec> {
-    let salt =
+    let salt_bytes =
         crypto::decode_b64(kek_salt).map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
+    let salt = crypto::Salt::try_from_slice(&salt_bytes)?;
 
-    argon::derive_key(password, &salt, mem_limit, ops_limit).map_err(AuthError::from)
+    let key = argon::derive_key(
+        password,
+        &salt,
+        argon::Params {
+            mem_limit,
+            ops_limit,
+        },
+    )?;
+    Ok(SecretVec::new(key.as_bytes().to_vec()))
 }
 
 /// Generate a KEK using the current adaptive sensitive client policy.
@@ -157,10 +172,10 @@ pub fn generate_sensitive_kek(password: &str) -> Result<GeneratedKek> {
     })?;
 
     Ok(GeneratedKek {
-        key: derived.key,
-        salt: derived.salt,
-        mem_limit: derived.mem_limit,
-        ops_limit: derived.ops_limit,
+        key: SecretVec::new(derived.key.as_bytes().to_vec()),
+        salt: derived.salt.as_bytes().to_vec(),
+        mem_limit: derived.params.mem_limit,
+        ops_limit: derived.params.ops_limit,
     })
 }
 
@@ -169,10 +184,10 @@ pub fn generate_interactive_kek(password: &str) -> Result<GeneratedKek> {
     let derived = argon::derive_interactive_key(password)?;
 
     Ok(GeneratedKek {
-        key: derived.key,
-        salt: derived.salt,
-        mem_limit: derived.mem_limit,
-        ops_limit: derived.ops_limit,
+        key: SecretVec::new(derived.key.as_bytes().to_vec()),
+        salt: derived.salt.as_bytes().to_vec(),
+        mem_limit: derived.params.mem_limit,
+        ops_limit: derived.params.ops_limit,
     })
 }
 
@@ -428,11 +443,11 @@ mod tests {
         assert_eq!(generated.salt.len(), 16);
         assert_eq!(
             generated.mem_limit,
-            crate::crypto::argon::MEMLIMIT_INTERACTIVE
+            crate::crypto::argon::Params::INTERACTIVE.mem_limit
         );
         assert_eq!(
             generated.ops_limit,
-            crate::crypto::argon::OPSLIMIT_INTERACTIVE
+            crate::crypto::argon::Params::INTERACTIVE.ops_limit
         );
     }
 

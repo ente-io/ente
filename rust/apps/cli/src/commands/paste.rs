@@ -6,7 +6,7 @@ use crate::{
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64;
 use dialoguer::Password;
-use ente_core::crypto::{self, Key, SecretVec, argon, blob, secretbox};
+use ente_core::crypto::{self, Key, argon, blob, secretbox};
 use reqwest::{Client, StatusCode, header};
 use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
@@ -278,7 +278,8 @@ where
     loop {
         let key_encryption_key =
             derive_paste_key_encryption_key(paste_key, Some(password.value()), payload)?;
-        let paste_key = match decrypt_paste_key_for_password(payload, &key_encryption_key) {
+        let paste_key = match decrypt_paste_key_for_password(payload, key_encryption_key.as_bytes())
+        {
             Ok(paste_key) => paste_key,
             Err(Error::AuthenticationFailed(_)) if password.can_retry() => {
                 eprintln!("Incorrect paste password. Try again.");
@@ -407,7 +408,8 @@ fn encrypt_paste_for_create(
     } else {
         argon::derive_interactive_key(&kdf_secret)?
     };
-    let encrypted_paste_key = secretbox::encrypt_with_key(&paste_key, &key_encryption_key.key)?;
+    let encrypted_paste_key =
+        secretbox::encrypt_with_key(&paste_key, key_encryption_key.key.as_bytes())?;
 
     Ok((
         paste_key_reference,
@@ -416,9 +418,9 @@ fn encrypt_paste_for_create(
             decryption_header: crypto::encode_b64(&encrypted.decryption_header),
             encrypted_paste_key: crypto::encode_b64(&encrypted_paste_key.ciphertext),
             encrypted_paste_key_nonce: crypto::encode_b64(&encrypted_paste_key.nonce),
-            kdf_nonce: crypto::encode_b64(&key_encryption_key.salt),
-            kdf_mem_limit: key_encryption_key.mem_limit,
-            kdf_ops_limit: key_encryption_key.ops_limit,
+            kdf_nonce: crypto::encode_b64(key_encryption_key.salt.as_bytes()),
+            kdf_mem_limit: key_encryption_key.params.mem_limit,
+            kdf_ops_limit: key_encryption_key.params.ops_limit,
         },
     ))
 }
@@ -429,7 +431,7 @@ fn decrypt_consumed_paste(
     payload: &PastePayload,
 ) -> Result<String> {
     let key_encryption_key = derive_paste_key_encryption_key(paste_key, password, payload)?;
-    let paste_key = decrypt_wrapped_paste_key(payload, &key_encryption_key)?;
+    let paste_key = decrypt_wrapped_paste_key(payload, key_encryption_key.as_bytes())?;
     decrypt_consumed_text(&paste_key, payload)
 }
 
@@ -437,14 +439,16 @@ fn derive_paste_key_encryption_key(
     paste_key: &PasteKey,
     password: Option<&str>,
     payload: &PastePayload,
-) -> Result<SecretVec> {
-    let salt = BASE64.decode(&payload.kdf_nonce)?;
+) -> Result<crypto::Key> {
+    let salt = crypto::Salt::try_from_slice(&BASE64.decode(&payload.kdf_nonce)?)?;
     let kdf_secret = paste_key.kdf_secret(password)?;
     Ok(argon::derive_key(
         &kdf_secret,
         &salt,
-        payload.kdf_mem_limit,
-        payload.kdf_ops_limit,
+        argon::Params {
+            mem_limit: payload.kdf_mem_limit,
+            ops_limit: payload.kdf_ops_limit,
+        },
     )?)
 }
 
@@ -671,8 +675,8 @@ mod tests {
         let text = decrypt_consumed_paste(&paste_key, None, &payload).unwrap();
 
         assert_eq!(text, "hello paste");
-        assert_eq!(payload.kdf_mem_limit, argon::MEMLIMIT_INTERACTIVE);
-        assert_eq!(payload.kdf_ops_limit, argon::OPSLIMIT_INTERACTIVE);
+        assert_eq!(payload.kdf_mem_limit, argon::Params::INTERACTIVE.mem_limit);
+        assert_eq!(payload.kdf_ops_limit, argon::Params::INTERACTIVE.ops_limit);
     }
 
     #[test]
@@ -690,8 +694,8 @@ mod tests {
                 .link_fragment()
                 .starts_with(PASSWORD_FRAGMENT_PREFIX)
         );
-        assert_eq!(payload.kdf_mem_limit, argon::MEMLIMIT_MODERATE);
-        assert_eq!(payload.kdf_ops_limit, argon::OPSLIMIT_MODERATE);
+        assert_eq!(payload.kdf_mem_limit, argon::Params::MODERATE.mem_limit);
+        assert_eq!(payload.kdf_ops_limit, argon::Params::MODERATE.ops_limit);
     }
 
     #[test]
@@ -987,22 +991,23 @@ mod tests {
             &paste_key,
         )
         .unwrap();
-        let salt = [9u8; argon::SALT_BYTES];
+        let salt = crypto::Salt::from_bytes([9u8; crypto::Salt::BYTES]);
         let kdf_secret = key_reference.kdf_secret(password).unwrap();
+        // Minimal-cost KDF params: the kdf secret is already high-entropy (it
+        // is not a human-chosen password), and tests need to be fast.
         let key_encryption_key =
-            argon::derive_key(&kdf_secret, &salt, argon::MEMLIMIT_MIN, argon::OPSLIMIT_MIN)
-                .unwrap();
+            argon::derive_key(&kdf_secret, &salt, argon::Params::MIN).unwrap();
         let encrypted_paste_key =
-            secretbox::encrypt_with_key(&paste_key, &key_encryption_key).unwrap();
+            secretbox::encrypt_with_key(&paste_key, key_encryption_key.as_bytes()).unwrap();
 
         PastePayload {
             encrypted_data: crypto::encode_b64(&encrypted.encrypted_data),
             decryption_header: crypto::encode_b64(&encrypted.decryption_header),
             encrypted_paste_key: crypto::encode_b64(&encrypted_paste_key.ciphertext),
             encrypted_paste_key_nonce: crypto::encode_b64(&encrypted_paste_key.nonce),
-            kdf_nonce: crypto::encode_b64(&salt),
-            kdf_mem_limit: argon::MEMLIMIT_MIN,
-            kdf_ops_limit: argon::OPSLIMIT_MIN,
+            kdf_nonce: crypto::encode_b64(salt.as_bytes()),
+            kdf_mem_limit: argon::Params::MIN.mem_limit,
+            kdf_ops_limit: argon::Params::MIN.ops_limit,
         }
     }
 }

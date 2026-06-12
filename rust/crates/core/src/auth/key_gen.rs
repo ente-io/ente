@@ -50,10 +50,10 @@ pub fn generate_keys_with_strength(
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
-    let login_key = kdf::derive_login_key(&derived.key)?;
+    let login_key = kdf::derive_login_key(derived.key.as_bytes())?;
 
     // Encrypt master key with derived key
-    let (enc_key, key_nonce) = encrypt_to_b64(&master_key, &derived.key)?;
+    let (enc_key, key_nonce) = encrypt_to_b64(&master_key, derived.key.as_bytes())?;
 
     // Generate X25519 keypair
     let secret_key = crypto::SecretKey::generate();
@@ -64,14 +64,14 @@ pub fn generate_keys_with_strength(
 
     // Build key attributes for server
     let key_attributes = KeyAttributes {
-        kek_salt: crypto::encode_b64(&derived.salt),
+        kek_salt: crypto::encode_b64(derived.salt.as_bytes()),
         encrypted_key: enc_key,
         key_decryption_nonce: key_nonce,
         public_key: crypto::encode_b64(public_key.as_bytes()),
         encrypted_secret_key: enc_secret_key,
         secret_key_decryption_nonce: secret_key_nonce,
-        mem_limit: Some(derived.mem_limit),
-        ops_limit: Some(derived.ops_limit),
+        mem_limit: Some(derived.params.mem_limit),
+        ops_limit: Some(derived.params.ops_limit),
         master_key_encrypted_with_recovery_key: Some(enc_master_with_recovery),
         master_key_decryption_nonce: Some(nonce_master_recovery),
         recovery_key_encrypted_with_master_key: Some(enc_recovery_with_master),
@@ -88,7 +88,7 @@ pub fn generate_keys_with_strength(
     Ok(KeyGenResult {
         key_attributes,
         private_key_attributes,
-        key_encryption_key: derived.key,
+        key_encryption_key: SecretVec::new(derived.key.as_bytes().to_vec()),
         login_key,
     })
 }
@@ -123,17 +123,17 @@ pub fn generate_key_attributes_for_new_password_with_strength(
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
-    let login_key = kdf::derive_login_key(&derived.key)?;
+    let login_key = kdf::derive_login_key(derived.key.as_bytes())?;
 
     // Encrypt master key with new derived key
-    let (enc_key, key_nonce) = encrypt_to_b64(master_key, &derived.key)?;
+    let (enc_key, key_nonce) = encrypt_to_b64(master_key, derived.key.as_bytes())?;
 
     let key_attributes = KeyAttributes {
-        kek_salt: crypto::encode_b64(&derived.salt),
+        kek_salt: crypto::encode_b64(derived.salt.as_bytes()),
         encrypted_key: enc_key,
         key_decryption_nonce: key_nonce,
-        mem_limit: Some(derived.mem_limit),
-        ops_limit: Some(derived.ops_limit),
+        mem_limit: Some(derived.params.mem_limit),
+        ops_limit: Some(derived.params.ops_limit),
         public_key: existing_attributes.public_key.clone(),
         encrypted_secret_key: existing_attributes.encrypted_secret_key.clone(),
         secret_key_decryption_nonce: existing_attributes.secret_key_decryption_nonce.clone(),
@@ -303,16 +303,19 @@ mod tests {
 
         // Verify we can decrypt with new password
         let kek_salt = crypto::decode_b64(&new_attrs.kek_salt).unwrap();
+        let salt = crypto::Salt::try_from_slice(&kek_salt).unwrap();
         let kek = argon::derive_key(
             "new_password",
-            &kek_salt,
-            new_attrs.mem_limit.unwrap(),
-            new_attrs.ops_limit.unwrap(),
+            &salt,
+            argon::Params {
+                mem_limit: new_attrs.mem_limit.unwrap(),
+                ops_limit: new_attrs.ops_limit.unwrap(),
+            },
         )
         .unwrap();
         let encrypted = crypto::decode_b64(&new_attrs.encrypted_key).unwrap();
         let nonce = crypto::decode_b64(&new_attrs.key_decryption_nonce).unwrap();
-        let decrypted = secretbox::decrypt(&encrypted, &nonce, &kek).unwrap();
+        let decrypted = secretbox::decrypt(&encrypted, &nonce, kek.as_bytes()).unwrap();
         assert_eq!(decrypted, master_key);
     }
 

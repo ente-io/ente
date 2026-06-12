@@ -77,13 +77,13 @@ pub fn crypto_init() -> Result<(), CryptoError> {
 /// Generate a random 32-byte SecretBox key and return it as base64.
 #[wasm_bindgen]
 pub fn crypto_generate_key() -> String {
-    core_crypto::encode_b64(&core_crypto::Key::generate().as_bytes().to_vec())
+    core_crypto::encode_b64(core_crypto::Key::generate().as_bytes())
 }
 
 /// Generate a random 32-byte SecretStream key and return it as base64.
 #[wasm_bindgen]
 pub fn crypto_generate_stream_key() -> String {
-    core_crypto::encode_b64(&core_crypto::Key::generate().as_bytes().to_vec())
+    core_crypto::encode_b64(core_crypto::Key::generate().as_bytes())
 }
 
 /// Incremental chunk encryptor for large file uploads.
@@ -178,7 +178,7 @@ impl CryptoStreamDecryptor {
 /// Generate a random 16-byte salt and return it as base64.
 #[wasm_bindgen]
 pub fn crypto_generate_salt() -> String {
-    core_crypto::encode_b64(&core_crypto::Salt::generate().as_bytes().to_vec())
+    core_crypto::encode_b64(core_crypto::Salt::generate().as_bytes())
 }
 
 /// Compute the MD5 digest of the provided bytes and return it as base64.
@@ -405,8 +405,16 @@ pub fn crypto_derive_key(
     ops_limit: u32,
 ) -> Result<String, CryptoError> {
     let salt = core_crypto::decode_b64(salt_b64)?;
-    let key = core_crypto::argon::derive_key(password, &salt, mem_limit, ops_limit)?;
-    Ok(core_crypto::encode_b64(&key))
+    let salt = core_crypto::Salt::try_from_slice(&salt)?;
+    let key = core_crypto::argon::derive_key(
+        password,
+        &salt,
+        core_crypto::argon::Params {
+            mem_limit,
+            ops_limit,
+        },
+    )?;
+    Ok(core_crypto::encode_b64(key.as_bytes()))
 }
 
 /// Derive a subkey using BLAKE2b KDF (libsodium compatible).

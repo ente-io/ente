@@ -25,10 +25,18 @@ pub fn decrypt_secrets(
 
     let kek_salt = crypto::decode_b64(&attributes.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
+    let salt = crypto::Salt::try_from_slice(&kek_salt)?;
 
-    let key_encryption_key = argon::derive_key(password, &kek_salt, mem_limit, ops_limit)?;
+    let key_encryption_key = argon::derive_key(
+        password,
+        &salt,
+        argon::Params {
+            mem_limit,
+            ops_limit,
+        },
+    )?;
 
-    decrypt_secrets_with_kek(&key_encryption_key, attributes, encrypted_token)
+    decrypt_secrets_with_kek(key_encryption_key.as_bytes(), attributes, encrypted_token)
 }
 
 /// Decrypt secrets using a pre-derived key-encryption-key.
@@ -83,13 +91,16 @@ pub fn derive_login_key_for_srp(
     let kek_salt = crypto::decode_b64(&srp_attributes.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
+    let salt = crypto::Salt::try_from_slice(&kek_salt)?;
     let kek = argon::derive_key(
         password,
-        &kek_salt,
-        srp_attributes.mem_limit,
-        srp_attributes.ops_limit,
+        &salt,
+        argon::Params {
+            mem_limit: srp_attributes.mem_limit,
+            ops_limit: srp_attributes.ops_limit,
+        },
     )?;
-    let login_key = kdf::derive_login_key(&kek)?;
+    let login_key = kdf::derive_login_key(kek.as_bytes())?;
 
     Ok(login_key)
 }
@@ -102,15 +113,18 @@ pub fn derive_keys_for_login(
     let kek_salt = crypto::decode_b64(&srp_attributes.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
+    let salt = crypto::Salt::try_from_slice(&kek_salt)?;
     let kek = argon::derive_key(
         password,
-        &kek_salt,
-        srp_attributes.mem_limit,
-        srp_attributes.ops_limit,
+        &salt,
+        argon::Params {
+            mem_limit: srp_attributes.mem_limit,
+            ops_limit: srp_attributes.ops_limit,
+        },
     )?;
-    let login_key = kdf::derive_login_key(&kek)?;
+    let login_key = kdf::derive_login_key(kek.as_bytes())?;
 
-    Ok((kek, login_key))
+    Ok((SecretVec::new(kek.as_bytes().to_vec()), login_key))
 }
 
 #[cfg(test)]

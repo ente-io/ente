@@ -107,6 +107,11 @@ impl Nonce {
         Self(bytes)
     }
 
+    /// Wrap an existing 24-byte array as a nonce.
+    pub fn from_bytes(bytes: [u8; Self::BYTES]) -> Self {
+        Self(bytes)
+    }
+
     /// Construct a nonce from a byte slice, validating its length.
     pub fn try_from_slice(bytes: &[u8]) -> Result<Self> {
         Ok(Self(bytes.try_into().map_err(|_| {
@@ -135,6 +140,11 @@ impl Salt {
     pub fn generate() -> Self {
         let mut bytes = [0u8; Self::BYTES];
         OsRng.fill_bytes(&mut bytes);
+        Self(bytes)
+    }
+
+    /// Wrap an existing 16-byte array as a salt.
+    pub fn from_bytes(bytes: [u8; Self::BYTES]) -> Self {
         Self(bytes)
     }
 
