@@ -299,13 +299,13 @@ class ContactCTA extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 DottedBorder(
-                  borderType: BorderType.Circle,
-                  strokeWidth: 1.5,
-                  borderPadding: const EdgeInsets.all(0.75),
-                  dashPattern: const [4, 4],
-                  radius: const Radius.circular(2.35),
-                  padding: EdgeInsets.zero,
-                  color: enteColorScheme.strokeFaint,
+                  options: CircularDottedBorderOptions(
+                    strokeWidth: 1.5,
+                    borderPadding: const EdgeInsets.all(0.75),
+                    dashPattern: const [4, 4],
+                    padding: EdgeInsets.zero,
+                    color: enteColorScheme.strokeFaint,
+                  ),
                   child: SizedBox(
                     height: 67.75,
                     width: 67.75,

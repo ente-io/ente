@@ -11,7 +11,7 @@ dependencies:
   bip39: 1.0.6
   collection: 1.19.1
   dio: 5.9.2
-  dots_indicator: 3.1.0
+  dots_indicator: 4.0.1
   email_validator: 3.0.0
   ente_base:
     path: ../base

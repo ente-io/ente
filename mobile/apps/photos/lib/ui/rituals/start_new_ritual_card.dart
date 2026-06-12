@@ -45,12 +45,13 @@ class StartNewRitualCard extends StatelessWidget {
           : null,
       height: _cardHeight,
       child: DottedBorder(
-        borderType: BorderType.RRect,
-        radius: const Radius.circular(_cardRadius),
-        dashPattern: const [3.75, 3.75],
-        strokeWidth: 1.5,
-        borderPadding: const EdgeInsets.all(0.75),
-        color: dottedBorderColor,
+        options: RoundedRectDottedBorderOptions(
+          radius: const Radius.circular(_cardRadius),
+          dashPattern: const [3.75, 3.75],
+          strokeWidth: 1.5,
+          borderPadding: const EdgeInsets.all(0.75),
+          color: dottedBorderColor,
+        ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(_cardRadius),
           child: Material(

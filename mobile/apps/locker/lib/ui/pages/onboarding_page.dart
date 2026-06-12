@@ -172,7 +172,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           const SizedBox(height: 12),
                           DotsIndicator(
                             dotsCount: _featureCount,
-                            position: _activeDotIndex,
+                            position: _activeDotIndex.toDouble(),
                             animate: true,
                             animationDuration: const Duration(
                               milliseconds: 300,

@@ -575,12 +575,13 @@ class LocationCTA extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         DottedBorder(
-                          dashPattern: const [2, 2],
-                          color: enteColorScheme.strokeFaint,
-                          strokeWidth: 1,
-                          padding: const EdgeInsets.all(0),
-                          borderType: BorderType.RRect,
-                          radius: const Radius.circular(4.5),
+                          options: RoundedRectDottedBorderOptions(
+                            dashPattern: const [2, 2],
+                            color: enteColorScheme.strokeFaint,
+                            strokeWidth: 1,
+                            padding: const EdgeInsets.all(0),
+                            radius: const Radius.circular(4.5),
+                          ),
                           child: SizedBox(
                             width: 90,
                             height: 84,
