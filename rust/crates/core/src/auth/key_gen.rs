@@ -1,6 +1,6 @@
 //! Key generation for new account sign-up.
 
-use crate::crypto::{self, SecretString, SecretVec, argon, kdf, keys, secretbox};
+use crate::crypto::{self, Key, Nonce, SecretString, SecretVec, argon, kdf, secretbox};
 
 use super::{KeyAttributes, KeyGenResult, PrivateKeyAttributes, Result};
 
@@ -17,7 +17,7 @@ pub enum KeyDerivationStrength {
 /// Encrypt data and return (encrypted_data, nonce) as base64 strings.
 /// The encrypted_data is MAC || ciphertext format (compatible with Dart).
 fn encrypt_to_b64(plaintext: &[u8], key: &[u8]) -> Result<(String, String)> {
-    let nonce = keys::generate_secretbox_nonce();
+    let nonce = Nonce::generate().as_bytes().to_vec();
     let encrypted = secretbox::encrypt_with_nonce(plaintext, &nonce, key)?;
     Ok((crypto::encode_b64(&encrypted), crypto::encode_b64(&nonce)))
 }
@@ -36,8 +36,8 @@ pub fn generate_keys_with_strength(
     strength: KeyDerivationStrength,
 ) -> Result<KeyGenResult> {
     // Create master key and recovery key
-    let master_key = keys::generate_key();
-    let recovery_key = keys::generate_key();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let recovery_key = Key::generate().as_bytes().to_vec();
 
     // Encrypt master key with recovery key and vice versa
     let (enc_master_with_recovery, nonce_master_recovery) =
@@ -56,17 +56,18 @@ pub fn generate_keys_with_strength(
     let (enc_key, key_nonce) = encrypt_to_b64(&master_key, &derived.key)?;
 
     // Generate X25519 keypair
-    let (public_key, secret_key) = keys::generate_keypair();
+    let secret_key = crypto::SecretKey::generate();
+    let public_key = secret_key.public_key();
 
     // Encrypt secret key with master key
-    let (enc_secret_key, secret_key_nonce) = encrypt_to_b64(&secret_key, &master_key)?;
+    let (enc_secret_key, secret_key_nonce) = encrypt_to_b64(secret_key.as_bytes(), &master_key)?;
 
     // Build key attributes for server
     let key_attributes = KeyAttributes {
         kek_salt: crypto::encode_b64(&derived.salt),
         encrypted_key: enc_key,
         key_decryption_nonce: key_nonce,
-        public_key: crypto::encode_b64(&public_key),
+        public_key: crypto::encode_b64(public_key.as_bytes()),
         encrypted_secret_key: enc_secret_key,
         secret_key_decryption_nonce: secret_key_nonce,
         mem_limit: Some(derived.mem_limit),
@@ -81,7 +82,7 @@ pub fn generate_keys_with_strength(
     let private_key_attributes = PrivateKeyAttributes {
         key: SecretString::new(crypto::encode_b64(&master_key)),
         recovery_key: SecretString::new(crypto::encode_hex(&recovery_key)),
-        secret_key: SecretString::new(crypto::encode_b64(&secret_key)),
+        secret_key: SecretString::new(crypto::encode_b64(secret_key.as_bytes())),
     };
 
     Ok(KeyGenResult {
@@ -153,7 +154,7 @@ pub fn generate_key_attributes_for_new_password_with_strength(
 pub fn create_new_recovery_key(
     master_key: &[u8],
 ) -> Result<(String, String, String, String, String)> {
-    let recovery_key = keys::generate_key();
+    let recovery_key = Key::generate().as_bytes().to_vec();
 
     let (enc_master, nonce_master) = encrypt_to_b64(master_key, &recovery_key)?;
     let (enc_recovery, nonce_recovery) = encrypt_to_b64(&recovery_key, master_key)?;
@@ -319,7 +320,7 @@ mod tests {
     fn test_create_new_recovery_key() {
         crypto::init().unwrap();
 
-        let master_key = keys::generate_key();
+        let master_key = Key::generate().as_bytes().to_vec();
         let (recovery_hex, enc_master, nonce_master, enc_recovery, nonce_recovery) =
             create_new_recovery_key(&master_key).unwrap();
 
@@ -332,7 +333,7 @@ mod tests {
             &recovery_key,
         )
         .unwrap();
-        assert_eq!(decrypted, master_key.as_ref());
+        assert_eq!(decrypted, master_key);
 
         let decrypted_recovery = secretbox::decrypt(
             &crypto::decode_b64(&enc_recovery).unwrap(),

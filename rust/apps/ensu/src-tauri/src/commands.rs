@@ -472,7 +472,7 @@ pub fn crypto_init() -> Result<(), ApiError> {
 
 #[tauri::command]
 pub fn crypto_generate_key() -> String {
-    core_crypto::encode_b64(&core_crypto::keys::generate_key())
+    core_crypto::encode_b64(&core_crypto::Key::generate().as_bytes().to_vec())
 }
 
 #[tauri::command]

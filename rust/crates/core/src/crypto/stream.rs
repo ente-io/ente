@@ -629,11 +629,9 @@ fn encrypt_file_internal<R: Read, W: Write>(
     key: Option<&[u8]>,
     mut md5_state: Option<Md5>,
 ) -> EncryptFileResult {
-    use crate::crypto::keys::generate_stream_key;
-
     let key = match key {
         Some(k) => k.to_vec(),
-        None => generate_stream_key().into_vec(),
+        None => crate::crypto::Key::generate().as_bytes().to_vec(),
     };
 
     let mut encryptor = StreamEncryptor::new(&key)?;

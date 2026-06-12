@@ -151,7 +151,7 @@ pub fn derive_key(
 /// # Returns
 /// DerivedKeyResult containing the key, salt, and parameters used.
 pub fn derive_interactive_key(password: &str) -> Result<DerivedKeyResult> {
-    let salt = super::keys::generate_salt();
+    let salt = super::Salt::generate().as_bytes().to_vec();
     let key = derive_key(password, &salt, MEMLIMIT_INTERACTIVE, OPSLIMIT_INTERACTIVE)?;
     Ok(DerivedKeyResult {
         key,
@@ -188,7 +188,7 @@ pub fn derive_interactive_key_with_salt(password: &str, salt: &[u8]) -> Result<V
 /// # Returns
 /// DerivedKeyResult containing the key, salt, and parameters used.
 pub fn derive_moderate_key(password: &str) -> Result<DerivedKeyResult> {
-    let salt = super::keys::generate_salt();
+    let salt = super::Salt::generate().as_bytes().to_vec();
     let key = derive_moderate_key_with_salt(password, &salt)?;
     Ok(DerivedKeyResult {
         key: SecretVec::new(key),
@@ -301,7 +301,7 @@ pub fn derive_sensitive_key_with_salt_adaptive(
 /// # Returns
 /// DerivedKeyResult containing the key, salt, and parameters used.
 pub fn derive_sensitive_key(password: &str) -> Result<DerivedKeyResult> {
-    let salt = super::keys::generate_salt();
+    let salt = super::Salt::generate().as_bytes().to_vec();
     derive_sensitive_key_with_salt_adaptive(password.as_bytes(), &salt)
 }
 
@@ -345,12 +345,12 @@ pub fn derive_key_from_b64_salt(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::keys;
+    use crate::crypto::Salt;
 
     #[test]
     fn test_derive_key() {
         let password = "correct horse battery staple";
-        let salt = keys::generate_salt();
+        let salt = Salt::generate().as_bytes().to_vec();
 
         let key = derive_key(password, &salt, MEMLIMIT_INTERACTIVE, OPSLIMIT_INTERACTIVE).unwrap();
         assert_eq!(key.len(), KEY_BYTES);
@@ -519,7 +519,7 @@ mod tests {
     #[test]
     fn test_memlimit_too_low() {
         let password = "test";
-        let salt = keys::generate_salt();
+        let salt = Salt::generate().as_bytes().to_vec();
 
         let result = derive_key(password, &salt, 4096, OPSLIMIT_INTERACTIVE);
         assert!(result.is_err());
@@ -528,7 +528,7 @@ mod tests {
     #[test]
     fn test_memlimit_not_aligned() {
         let password = "test";
-        let salt = keys::generate_salt();
+        let salt = Salt::generate().as_bytes().to_vec();
 
         let result = derive_key(
             password,
@@ -545,7 +545,7 @@ mod tests {
     #[test]
     fn test_opslimit_zero() {
         let password = "test";
-        let salt = keys::generate_salt();
+        let salt = Salt::generate().as_bytes().to_vec();
 
         let result = derive_key(password, &salt, MEMLIMIT_INTERACTIVE, 0);
         assert!(result.is_err());
@@ -554,7 +554,7 @@ mod tests {
     #[test]
     fn test_empty_password() {
         let password = "";
-        let salt = keys::generate_salt();
+        let salt = Salt::generate().as_bytes().to_vec();
 
         let key = derive_interactive_key_with_salt(password, &salt).unwrap();
         assert_eq!(key.len(), KEY_BYTES);
@@ -563,7 +563,7 @@ mod tests {
     #[test]
     fn test_long_password() {
         let password = "a".repeat(1000);
-        let salt = keys::generate_salt();
+        let salt = Salt::generate().as_bytes().to_vec();
 
         let key = derive_interactive_key_with_salt(&password, &salt).unwrap();
         assert_eq!(key.len(), KEY_BYTES);
@@ -572,7 +572,7 @@ mod tests {
     #[test]
     fn test_unicode_password() {
         let password = "пароль 密码 🔐";
-        let salt = keys::generate_salt();
+        let salt = Salt::generate().as_bytes().to_vec();
 
         let key = derive_interactive_key_with_salt(password, &salt).unwrap();
         assert_eq!(key.len(), KEY_BYTES);

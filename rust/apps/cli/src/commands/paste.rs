@@ -6,7 +6,7 @@ use crate::{
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64;
 use dialoguer::Password;
-use ente_core::crypto::{self, SecretVec, argon, blob, keys, secretbox};
+use ente_core::crypto::{self, Key, SecretVec, argon, blob, secretbox};
 use reqwest::{Client, StatusCode, header};
 use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
@@ -389,7 +389,7 @@ fn encrypt_paste_for_create(
     text: &str,
     password: Option<&str>,
 ) -> Result<(PasteKey, PastePayload)> {
-    let paste_key = keys::generate_key();
+    let paste_key = Key::generate().as_bytes().to_vec();
     let fragment_secret = create_fragment_secret();
     let paste_key_reference = PasteKey {
         fragment_secret,
@@ -504,7 +504,7 @@ fn create_fragment_secret() -> String {
     let threshold = 256 - (256 % FRAGMENT_SECRET_ALPHABET.len());
 
     while secret.len() < FRAGMENT_SECRET_LENGTH {
-        for byte in keys::random_bytes(FRAGMENT_SECRET_LENGTH) {
+        for byte in crypto::random_bytes(FRAGMENT_SECRET_LENGTH) {
             let byte = usize::from(byte);
             if byte >= threshold {
                 continue;

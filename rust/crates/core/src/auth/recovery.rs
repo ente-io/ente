@@ -155,7 +155,7 @@ pub fn recovery_key_to_mnemonic(recovery_key_b64: &str) -> Result<String> {
 mod tests {
     use super::*;
     use crate::auth::{KeyDerivationStrength, generate_keys_with_strength};
-    use crate::crypto::keys;
+    use crate::crypto::Key;
 
     fn generate_test_keys(password: &str) -> super::super::KeyGenResult {
         generate_keys_with_strength(password, KeyDerivationStrength::Interactive).unwrap()
@@ -197,7 +197,7 @@ mod tests {
         let public_key = crypto::decode_b64(&gen_result.key_attributes.public_key).unwrap();
         let encrypted_token = create_sealed_token(b"token", &public_key);
 
-        let wrong_key = crypto::encode_hex(&keys::generate_key());
+        let wrong_key = crypto::encode_hex(&Key::generate().as_bytes().to_vec());
         let result = recover_with_key(&wrong_key, &gen_result.key_attributes, &encrypted_token);
         assert!(matches!(result, Err(AuthError::IncorrectRecoveryKey)));
     }

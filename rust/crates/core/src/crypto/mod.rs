@@ -11,10 +11,10 @@
 //! # Overview
 //!
 //! ## Key Generation
-//! - [`keys::generate_key`] - Generate a 256-bit key for SecretBox encryption
-//! - [`keys::generate_stream_key`] - Generate a key for SecretStream encryption
-//! - [`keys::generate_keypair`] - Generate a public/private key pair
-//! - [`keys::generate_salt`] - Generate a salt for key derivation
+//! - [`Key::generate`] - Generate a 256-bit symmetric key
+//! - [`SecretKey::generate`] - Generate an X25519 secret key (public key via
+//!   [`SecretKey::public_key`])
+//! - [`Salt::generate`] - Generate a salt for key derivation
 //!
 //! ## Key Derivation
 //! - [`argon::derive_key`] - Derive a key from password using Argon2id
@@ -42,7 +42,7 @@
 //! crypto::init().unwrap();
 //!
 //! // Generate a key and encrypt some data
-//! let key = crypto::keys::generate_key();
+//! let key = crypto::Key::generate().as_bytes().to_vec();
 //! let plaintext = b"Hello, World!";
 //!
 //! // SecretBox encryption (for independent data)
@@ -51,7 +51,7 @@
 //! assert_eq!(decrypted, plaintext);
 //!
 //! // Blob encryption (for metadata)
-//! let key = crypto::keys::generate_stream_key();
+//! let key = crypto::Key::generate().as_bytes().to_vec();
 //! let encrypted = crypto::blob::encrypt(plaintext, &key).unwrap();
 //! let decrypted = crypto::blob::decrypt(&encrypted.encrypted_data, &encrypted.decryption_header, &key).unwrap();
 //! assert_eq!(decrypted, plaintext);
@@ -62,12 +62,12 @@ use std::sync::Once;
 mod encoding;
 mod error;
 mod secret;
+mod types;
 
 pub mod argon;
 pub mod blob;
 pub mod hash;
 pub mod kdf;
-pub mod keys;
 pub mod sealed;
 pub mod secretbox;
 pub mod stream;
@@ -78,6 +78,7 @@ pub use encoding::{
 };
 pub use error::{CryptoError, Result};
 pub use secret::{SecretString, SecretVec};
+pub use types::{Header, Key, Nonce, PublicKey, Salt, SecretKey, random_bytes};
 
 static INIT: Once = Once::new();
 

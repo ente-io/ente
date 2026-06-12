@@ -6,7 +6,7 @@
 use std::fmt;
 
 #[cfg(feature = "srp")]
-use crate::crypto::keys;
+use crate::crypto::Salt;
 use crate::crypto::{self, SecretVec, argon, kdf, sealed, secretbox};
 
 use super::{AuthError, KeyAttributes, Result, SrpAttributes};
@@ -196,7 +196,7 @@ pub fn generate_srp_setup_with_login_key(
         )));
     }
 
-    let srp_salt = keys::generate_salt();
+    let srp_salt = Salt::generate().as_bytes().to_vec();
     let client = ClientG4096::<Sha256>::new();
     let srp_verifier = client.compute_verifier(srp_user_id.as_bytes(), login_key, &srp_salt);
 

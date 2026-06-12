@@ -194,11 +194,11 @@ pub fn decrypt_json_combined<T: serde::de::DeserializeOwned>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::keys;
+    use crate::crypto::Key;
 
     #[test]
     fn test_encrypt_decrypt() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Hello, World!";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn test_decrypt_non_final_tag_behavior() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let mut encryptor = StreamEncryptor::new(&key).unwrap();
         let header = encryptor.header.clone();
         let ciphertext = encryptor.push(b"partial", false).unwrap();
@@ -226,7 +226,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_data_wrapper() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Wrapper test";
 
         let encrypted = encrypt_data(plaintext, &key).unwrap();
@@ -242,7 +242,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt_large() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = vec![0x42u8; 1024 * 1024]; // 1 MB
 
         let encrypted = encrypt(&plaintext, &key).unwrap();
@@ -252,7 +252,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt_combined() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Combined blob payload";
 
         let encrypted = encrypt_combined(plaintext, &key).unwrap();
@@ -263,7 +263,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt_json_combined() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let value = serde_json::json!({
             "name": "Alice",
             "birthDate": "2001-04-01"
@@ -277,8 +277,8 @@ mod tests {
 
     #[test]
     fn test_wrong_key_fails() {
-        let key1 = keys::generate_stream_key();
-        let key2 = keys::generate_stream_key();
+        let key1 = Key::generate().as_bytes().to_vec();
+        let key2 = Key::generate().as_bytes().to_vec();
         let plaintext = b"Secret message";
 
         let encrypted = encrypt(plaintext, &key1).unwrap();
@@ -288,7 +288,7 @@ mod tests {
 
     #[test]
     fn test_empty_plaintext() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
@@ -298,7 +298,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt_json() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
 
         #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq)]
         struct TestData {
@@ -318,7 +318,7 @@ mod tests {
 
     #[test]
     fn test_decrypt_json_wrong_type_returns_json_error() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
 
         #[derive(serde::Serialize)]
         struct Original {
@@ -357,7 +357,7 @@ mod tests {
 
     #[test]
     fn test_invalid_header_length() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let short_header = vec![0u8; 12];
         let result = decrypt(b"test_ciphertext_here", &short_header, &key);
         assert!(matches!(
@@ -368,7 +368,7 @@ mod tests {
 
     #[test]
     fn test_ciphertext_too_short() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let header = vec![0u8; HEADER_BYTES];
         let short_ciphertext = vec![0u8; ABYTES - 1];
 
@@ -381,7 +381,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_ciphertext() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Original data";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
@@ -396,7 +396,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_header() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Original data";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
@@ -411,7 +411,7 @@ mod tests {
 
     #[test]
     fn test_different_plaintexts_produce_different_ciphertexts() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
 
         let encrypted1 = encrypt(b"Message 1", &key).unwrap();
         let encrypted2 = encrypt(b"Message 2", &key).unwrap();
@@ -421,7 +421,7 @@ mod tests {
 
     #[test]
     fn test_same_plaintext_produces_different_ciphertexts() {
-        let key = keys::generate_stream_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Same message";
 
         let encrypted1 = encrypt(plaintext, &key).unwrap();

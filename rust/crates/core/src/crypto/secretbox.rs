@@ -9,7 +9,7 @@ use xsalsa20poly1305::XSalsa20Poly1305;
 use xsalsa20poly1305::aead::generic_array::GenericArray;
 use xsalsa20poly1305::aead::{Aead, KeyInit};
 
-use super::keys;
+use crate::crypto::Nonce;
 use crate::crypto::{CryptoError, Result};
 
 /// Result of SecretBox encryption.
@@ -51,7 +51,7 @@ pub const MAC_BYTES: usize = 16;
 /// # Returns
 /// EncryptedData containing encrypted_data (nonce || MAC || ciphertext) and nonce.
 pub fn encrypt(plaintext: &[u8], key: &[u8]) -> Result<EncryptedData> {
-    let nonce = keys::generate_secretbox_nonce();
+    let nonce = Nonce::generate().as_bytes().to_vec();
     let encrypted = encrypt_with_nonce(plaintext, &nonce, key)?;
 
     let mut result = Vec::with_capacity(NONCE_BYTES + encrypted.len());
@@ -76,7 +76,7 @@ pub fn encrypt(plaintext: &[u8], key: &[u8]) -> Result<EncryptedData> {
 /// # Returns
 /// SecretBoxCiphertext containing ciphertext (MAC || ciphertext), nonce, and key.
 pub fn encrypt_with_key(plaintext: &[u8], key: &[u8]) -> Result<SecretBoxCiphertext> {
-    let nonce = keys::generate_secretbox_nonce();
+    let nonce = Nonce::generate().as_bytes().to_vec();
     let ciphertext = encrypt_with_nonce(plaintext, &nonce, key)?;
 
     Ok(SecretBoxCiphertext { ciphertext, nonce })
@@ -225,10 +225,11 @@ pub fn decrypt_with_key(ciphertext: &[u8], key: &[u8], nonce: &[u8]) -> Result<V
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::crypto::Key;
 
     #[test]
     fn test_encrypt_result_structs_do_not_store_key() {
-        let key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
 
         let encrypted = encrypt(b"test", &key).unwrap();
         let EncryptedData {
@@ -245,7 +246,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt() {
-        let key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Hello, World!";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
@@ -256,8 +257,8 @@ mod tests {
 
     #[test]
     fn test_encrypt_with_nonce() {
-        let key = keys::generate_key();
-        let nonce = keys::generate_secretbox_nonce();
+        let key = Key::generate().as_bytes().to_vec();
+        let nonce = Nonce::generate().as_bytes().to_vec();
         let plaintext = b"Test message";
 
         let encrypted = encrypt_with_nonce(plaintext, &nonce, &key).unwrap();
@@ -269,7 +270,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_with_key_wrapper() {
-        let key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Wrapper test";
 
         let encrypted = encrypt_with_key(plaintext, &key).unwrap();
@@ -282,8 +283,8 @@ mod tests {
 
     #[test]
     fn test_deterministic_with_same_nonce() {
-        let key = keys::generate_key();
-        let nonce = keys::generate_secretbox_nonce();
+        let key = Key::generate().as_bytes().to_vec();
+        let nonce = Nonce::generate().as_bytes().to_vec();
         let plaintext = b"Deterministic test";
 
         let encrypted1 = encrypt_with_nonce(plaintext, &nonce, &key).unwrap();
@@ -294,7 +295,7 @@ mod tests {
 
     #[test]
     fn test_different_nonces_produce_different_ciphertexts() {
-        let key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Same plaintext";
 
         let encrypted1 = encrypt(plaintext, &key).unwrap();
@@ -312,8 +313,8 @@ mod tests {
 
     #[test]
     fn test_wrong_key_fails() {
-        let key = keys::generate_key();
-        let wrong_key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
+        let wrong_key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Secret";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
@@ -324,7 +325,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_ciphertext_fails() {
-        let key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"Original";
 
         let mut encrypted = encrypt(plaintext, &key).unwrap();
@@ -340,7 +341,7 @@ mod tests {
     #[test]
     fn test_invalid_key_length() {
         let bad_key = vec![0u8; 16]; // Wrong size
-        let nonce = keys::generate_secretbox_nonce();
+        let nonce = Nonce::generate().as_bytes().to_vec();
         let plaintext = b"Test";
 
         let result = encrypt_with_nonce(plaintext, &nonce, &bad_key);
@@ -349,7 +350,7 @@ mod tests {
 
     #[test]
     fn test_invalid_nonce_length() {
-        let key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
         let bad_nonce = vec![0u8; 12]; // Wrong size
         let plaintext = b"Test";
 
@@ -362,8 +363,8 @@ mod tests {
 
     #[test]
     fn test_ciphertext_too_short() {
-        let key = keys::generate_key();
-        let nonce = keys::generate_secretbox_nonce();
+        let key = Key::generate().as_bytes().to_vec();
+        let nonce = Nonce::generate().as_bytes().to_vec();
         let bad_ciphertext = vec![0u8; 10]; // Less than MAC_BYTES
 
         let result = decrypt(&bad_ciphertext, &nonce, &key);
@@ -375,7 +376,7 @@ mod tests {
 
     #[test]
     fn test_empty_plaintext() {
-        let key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = b"";
 
         let encrypted = encrypt(plaintext, &key).unwrap();
@@ -386,7 +387,7 @@ mod tests {
 
     #[test]
     fn test_large_plaintext() {
-        let key = keys::generate_key();
+        let key = Key::generate().as_bytes().to_vec();
         let plaintext = vec![0x42u8; 1024 * 1024]; // 1 MB
 
         let encrypted = encrypt(&plaintext, &key).unwrap();

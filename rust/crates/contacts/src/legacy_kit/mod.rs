@@ -47,7 +47,7 @@ pub(crate) fn create_legacy_kit_request(
 
     let kit_id = Uuid::new_v4().to_string();
     let variant = LegacyKitVariant::TwoOfThree;
-    let kit_secret = crypto::keys::generate_key();
+    let kit_secret = crypto::Key::generate().as_bytes().to_vec();
     let checksum = checksum(LEGACY_KIT_PAYLOAD_VERSION, variant, &kit_id, &kit_secret);
     let shares = split_secret_2_of_3(&kit_secret)?;
     let result_shares = shares
@@ -359,7 +359,11 @@ fn derive_kit_enc_key(kit_secret: &[u8]) -> Result<SecretVec> {
 
 fn derive_kit_auth_keypair(kit_secret: &[u8]) -> Result<(Vec<u8>, SecretVec)> {
     let seed = kdf::derive_subkey(kit_secret, 32, 2, b"lgkauth1").map_err(ContactsError::from)?;
-    crypto::keys::derive_keypair_from_seed(seed.as_ref()).map_err(Into::into)
+    let sk = crypto::SecretKey::from_seed(seed.as_ref())?;
+    Ok((
+        sk.public_key().as_bytes().to_vec(),
+        SecretVec::new(sk.as_bytes().to_vec()),
+    ))
 }
 
 fn decrypt_challenge(

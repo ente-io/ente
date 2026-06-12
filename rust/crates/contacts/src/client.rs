@@ -1,7 +1,7 @@
 use std::sync::{Arc, RwLock};
 
 use ente_core::auth::{self, KeyAttributes, SrpSession};
-use ente_core::crypto::{self, SecretVec, keys, sealed, secretbox};
+use ente_core::crypto::{self, Key, SecretVec, sealed, secretbox};
 use ente_core::http::{Error as HttpError, HttpClient, HttpConfig};
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
@@ -156,7 +156,7 @@ impl ContactsCtx {
         contacts_crypto::validate_contact_data(data)?;
         self.ensure_confirmed_root_contact_key().await?;
 
-        let contact_key = keys::generate_stream_key();
+        let contact_key = Key::generate().as_bytes().to_vec();
         let wrapped_contact_key = {
             let root_contact_key_guard = self
                 .root_contact_key
@@ -831,7 +831,7 @@ impl ContactsCtx {
                 remote_root_key,
             ))?;
         } else {
-            let generated_root_contact_key = keys::generate_key();
+            let generated_root_contact_key = Key::generate().as_bytes().to_vec();
             let generated_wrapped_root_contact_key = {
                 let master_key = self.master_key.read().expect("master key lock poisoned");
                 contacts_crypto::encrypt_root_contact_key(&generated_root_contact_key, &master_key)?

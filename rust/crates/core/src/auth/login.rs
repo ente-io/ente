@@ -117,7 +117,7 @@ pub fn derive_keys_for_login(
 mod tests {
     use super::*;
     use crate::auth::{KeyDerivationStrength, generate_keys_with_strength};
-    use crate::crypto::keys;
+    use crate::crypto::random_bytes;
 
     fn generate_test_keys(password: &str) -> super::super::KeyGenResult {
         generate_keys_with_strength(password, KeyDerivationStrength::Interactive).unwrap()
@@ -184,7 +184,7 @@ mod tests {
 
         let srp_attrs = SrpAttributes {
             srp_user_id: "test_user".to_string(),
-            srp_salt: crypto::encode_b64(&keys::random_bytes(16)),
+            srp_salt: crypto::encode_b64(&random_bytes(16)),
             mem_limit: gen_result.key_attributes.mem_limit.unwrap(),
             ops_limit: gen_result.key_attributes.ops_limit.unwrap(),
             kek_salt: gen_result.key_attributes.kek_salt.clone(),

@@ -77,13 +77,13 @@ pub fn crypto_init() -> Result<(), CryptoError> {
 /// Generate a random 32-byte SecretBox key and return it as base64.
 #[wasm_bindgen]
 pub fn crypto_generate_key() -> String {
-    core_crypto::encode_b64(&core_crypto::keys::generate_key())
+    core_crypto::encode_b64(&core_crypto::Key::generate().as_bytes().to_vec())
 }
 
 /// Generate a random 32-byte SecretStream key and return it as base64.
 #[wasm_bindgen]
 pub fn crypto_generate_stream_key() -> String {
-    core_crypto::encode_b64(&core_crypto::keys::generate_stream_key())
+    core_crypto::encode_b64(&core_crypto::Key::generate().as_bytes().to_vec())
 }
 
 /// Incremental chunk encryptor for large file uploads.
@@ -102,7 +102,7 @@ pub struct CryptoStreamEncryptor {
 impl CryptoStreamEncryptor {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Result<CryptoStreamEncryptor, CryptoError> {
-        let key = core_crypto::keys::generate_stream_key();
+        let key = core_crypto::Key::generate().as_bytes().to_vec();
         let encryptor = core_crypto::stream::StreamEncryptor::new(&key)?;
         let decryption_header = core_crypto::encode_b64(&encryptor.header);
 
@@ -178,7 +178,7 @@ impl CryptoStreamDecryptor {
 /// Generate a random 16-byte salt and return it as base64.
 #[wasm_bindgen]
 pub fn crypto_generate_salt() -> String {
-    core_crypto::encode_b64(&core_crypto::keys::generate_salt())
+    core_crypto::encode_b64(&core_crypto::Salt::generate().as_bytes().to_vec())
 }
 
 /// Compute the MD5 digest of the provided bytes and return it as base64.
@@ -211,10 +211,10 @@ impl CryptoKeyPair {
 /// Generate a random X25519 keypair and return it as base64.
 #[wasm_bindgen]
 pub fn crypto_generate_keypair() -> CryptoKeyPair {
-    let (public_key, secret_key) = core_crypto::keys::generate_keypair();
+    let secret_key = core_crypto::SecretKey::generate();
     CryptoKeyPair {
-        public_key: core_crypto::encode_b64(&public_key),
-        secret_key: core_crypto::encode_b64(&secret_key),
+        public_key: core_crypto::encode_b64(secret_key.public_key().as_bytes()),
+        secret_key: core_crypto::encode_b64(secret_key.as_bytes()),
     }
 }
 
