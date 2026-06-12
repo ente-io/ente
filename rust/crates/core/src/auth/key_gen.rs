@@ -53,7 +53,7 @@ pub fn generate_keys_with_strength(
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
-    let login_key = kdf::derive_login_key(derived.key.as_bytes())?;
+    let login_key = kdf::derive_login_key(&derived.key);
 
     // Encrypt master key with derived key
     let (enc_key, key_nonce) = encrypt_to_b64(master_key.as_bytes(), &derived.key)?;
@@ -126,7 +126,7 @@ pub fn generate_key_attributes_for_new_password_with_strength(
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
-    let login_key = kdf::derive_login_key(derived.key.as_bytes())?;
+    let login_key = kdf::derive_login_key(&derived.key);
 
     // Encrypt master key with new derived key
     let (enc_key, key_nonce) = encrypt_to_b64(master_key, &derived.key)?;

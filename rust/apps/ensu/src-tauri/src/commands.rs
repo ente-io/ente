@@ -545,7 +545,7 @@ pub fn auth_decrypt_secrets(input: DecryptSecretsInput) -> Result<DecryptedSecre
     Ok(DecryptedSecrets {
         master_key: core_crypto::encode_b64(&secrets.master_key),
         secret_key: core_crypto::encode_b64(&secrets.secret_key),
-        token: core_crypto::bin2base64(&secrets.token, true),
+        token: core_crypto::encode_b64_url_safe(&secrets.token),
     })
 }
 

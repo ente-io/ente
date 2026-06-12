@@ -984,8 +984,8 @@ fn decrypt_shared_collection_key(
     // which uses the recipient's public key and an ephemeral keypair
     Ok(crypto::sealed::open(
         &encrypted_bytes,
-        public_key,
-        secret_key,
+        &crypto::PublicKey::try_from_slice(public_key)?,
+        &crypto::SecretKey::try_from_slice(secret_key)?,
     )?)
 }
 

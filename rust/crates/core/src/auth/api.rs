@@ -125,7 +125,7 @@ pub fn derive_srp_credentials(password: &str, srp_attrs: &SrpAttributes) -> Resu
         },
     )?;
 
-    let login_key = kdf::derive_login_key(kek.as_bytes())?;
+    let login_key = kdf::derive_login_key(&kek);
 
     Ok(SrpCredentials {
         kek: SecretVec::new(kek.as_bytes().to_vec()),
@@ -194,7 +194,7 @@ pub fn generate_interactive_kek(password: &str) -> Result<GeneratedKek> {
 /// Generate the SRP setup payload for a given KEK and SRP user ID.
 #[cfg(feature = "srp")]
 pub fn generate_srp_setup(kek: &[u8], srp_user_id: &str) -> Result<GeneratedSrpSetup> {
-    let login_sub_key = kdf::derive_login_key(kek)?;
+    let login_sub_key = kdf::derive_login_key(&crypto::Key::try_from_slice(kek)?);
     generate_srp_setup_with_login_key(&login_sub_key, srp_user_id)
 }
 
@@ -283,8 +283,12 @@ pub fn decrypt_secrets(
     let sealed_token = crypto::decode_b64(encrypted_token)
         .map_err(|e| AuthError::Decode(format!("encrypted_token: {}", e)))?;
 
-    let token = sealed::open(&sealed_token, &public_key, &secret_key)
-        .map_err(|_| AuthError::InvalidKeyAttributes)?;
+    let token = sealed::open(
+        &sealed_token,
+        &crypto::PublicKey::try_from_slice(&public_key)?,
+        &crypto::SecretKey::try_from_slice(&secret_key)?,
+    )
+    .map_err(|_| AuthError::InvalidKeyAttributes)?;
 
     Ok(DecryptedSecrets {
         master_key,
@@ -361,7 +365,11 @@ mod tests {
         // Create a sealed token
         let token = b"auth_token_12345";
         let public_key = crypto::decode_b64(&gen_result.key_attributes.public_key).unwrap();
-        let sealed_token = sealed::seal(token, &public_key).unwrap();
+        let sealed_token = sealed::seal(
+            token,
+            &crypto::PublicKey::try_from_slice(&public_key).unwrap(),
+        )
+        .unwrap();
         let encrypted_token = crypto::encode_b64(&sealed_token);
 
         // Derive KEK
@@ -397,7 +405,11 @@ mod tests {
                 .unwrap();
 
         let public_key = crypto::decode_b64(&gen_result.key_attributes.public_key).unwrap();
-        let sealed_token = sealed::seal(b"token", &public_key).unwrap();
+        let sealed_token = sealed::seal(
+            b"token",
+            &crypto::PublicKey::try_from_slice(&public_key).unwrap(),
+        )
+        .unwrap();
         let encrypted_token = crypto::encode_b64(&sealed_token);
 
         // Derive KEK with wrong password

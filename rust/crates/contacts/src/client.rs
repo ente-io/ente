@@ -453,7 +453,10 @@ impl ContactsCtx {
             .ok_or_else(|| ContactsError::InvalidInput("legacy contact is not on Ente".into()))?;
         let recovery_key = self.current_recovery_key(current_user_key_attrs)?;
         let recipient_public_key = crypto::decode_b64(&public_key)?;
-        let encrypted_key = sealed::seal(&recovery_key, &recipient_public_key)?;
+        let encrypted_key = sealed::seal(
+            &recovery_key,
+            &crypto::PublicKey::try_from_slice(&recipient_public_key)?,
+        )?;
 
         self.http
             .post_empty(
@@ -916,7 +919,11 @@ impl ContactsCtx {
         let public_key = crypto::decode_b64(&current_user_key_attrs.public_key)?;
         let encrypted_key = crypto::decode_b64(encrypted_key_b64)?;
         let secret_key = self.current_secret_key(current_user_key_attrs)?;
-        let decrypted = sealed::open(&encrypted_key, &public_key, &secret_key)?;
+        let decrypted = sealed::open(
+            &encrypted_key,
+            &crypto::PublicKey::try_from_slice(&public_key)?,
+            &crypto::SecretKey::try_from_slice(&secret_key)?,
+        )?;
         Ok(SecretVec::new(decrypted))
     }
 

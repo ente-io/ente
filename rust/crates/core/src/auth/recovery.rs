@@ -69,8 +69,12 @@ pub fn recover_with_key(
         .map_err(|e| AuthError::Decode(format!("encrypted_token: {}", e)))?;
 
     let token = SecretVec::new(
-        sealed::open(&sealed_token, &public_key, &secret_key)
-            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+        sealed::open(
+            &sealed_token,
+            &crypto::PublicKey::try_from_slice(&public_key)?,
+            &crypto::SecretKey::try_from_slice(&secret_key)?,
+        )
+        .map_err(|_| AuthError::InvalidKeyAttributes)?,
     );
 
     Ok(LoginResult {
@@ -170,7 +174,8 @@ mod tests {
     }
 
     fn create_sealed_token(token: &[u8], public_key: &[u8]) -> String {
-        let sealed = sealed::seal(token, public_key).unwrap();
+        let pk = crypto::PublicKey::try_from_slice(public_key).unwrap();
+        let sealed = sealed::seal(token, &pk).unwrap();
         crypto::encode_b64(&sealed)
     }
 

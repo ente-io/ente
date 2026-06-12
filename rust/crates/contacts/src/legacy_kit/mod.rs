@@ -79,7 +79,7 @@ pub(crate) fn create_legacy_kit_request(
             variant,
             notice_period_in_hours,
             encrypted_recovery_blob: crypto::encode_b64(&encrypted_recovery_blob),
-            auth_public_key: crypto::encode_b64(&auth_public_key),
+            auth_public_key: crypto::encode_b64(auth_public_key.as_bytes()),
             encrypted_owner_blob,
         },
         result_shares,
@@ -358,21 +358,20 @@ pub(crate) fn validate_notice_period(hours: i32) -> Result<()> {
 }
 
 fn derive_kit_enc_key(kit_secret: &[u8]) -> Result<SecretVec> {
-    kdf::derive_subkey(kit_secret, 32, 1, b"lgkenc01").map_err(ContactsError::from)
+    let kit_key = crypto::Key::try_from_slice(kit_secret)?;
+    kdf::derive_subkey(&kit_key, 32, 1, b"lgkenc01").map_err(ContactsError::from)
 }
 
-fn derive_kit_auth_keypair(kit_secret: &[u8]) -> Result<(Vec<u8>, SecretVec)> {
-    let seed = kdf::derive_subkey(kit_secret, 32, 2, b"lgkauth1").map_err(ContactsError::from)?;
+fn derive_kit_auth_keypair(kit_secret: &[u8]) -> Result<(crypto::PublicKey, crypto::SecretKey)> {
+    let kit_key = crypto::Key::try_from_slice(kit_secret)?;
+    let seed = kdf::derive_subkey(&kit_key, 32, 2, b"lgkauth1").map_err(ContactsError::from)?;
     let sk = crypto::SecretKey::from_seed(seed.as_ref())?;
-    Ok((
-        sk.public_key().as_bytes().to_vec(),
-        SecretVec::new(sk.as_bytes().to_vec()),
-    ))
+    Ok((sk.public_key(), sk))
 }
 
 fn decrypt_challenge(
-    auth_public_key: &[u8],
-    auth_secret_key: &[u8],
+    auth_public_key: &crypto::PublicKey,
+    auth_secret_key: &crypto::SecretKey,
     encrypted_challenge_b64: &str,
 ) -> Result<String> {
     let encrypted_challenge = crypto::decode_b64(encrypted_challenge_b64)?;

@@ -1233,7 +1233,11 @@ mod tests {
         let key_attributes = to_api_key_attributes(&key_gen.key_attributes);
         let encrypted_token = {
             let public_key = crypto::decode_b64(&key_attributes.public_key).unwrap();
-            let sealed = crypto::sealed::seal(token.as_bytes(), &public_key).unwrap();
+            let sealed = crypto::sealed::seal(
+                token.as_bytes(),
+                &crypto::PublicKey::try_from_slice(&public_key).unwrap(),
+            )
+            .unwrap();
             crypto::encode_b64(&sealed)
         };
 

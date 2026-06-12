@@ -188,6 +188,10 @@ pub unsafe extern "C" fn ente_crypto_sealed_box_open_b64(
         let ciphertext = decode_b64(&ciphertext_b64, "ciphertext_b64")?;
         let public_key = decode_b64(&public_key_b64, "public_key_b64")?;
         let secret_key = decode_b64(&secret_key_b64, "secret_key_b64")?;
+        let public_key =
+            crypto::PublicKey::try_from_slice(&public_key).map_err(|e| e.to_string())?;
+        let secret_key =
+            crypto::SecretKey::try_from_slice(&secret_key).map_err(|e| e.to_string())?;
         let plaintext = crypto::sealed::open(&ciphertext, &public_key, &secret_key)
             .map_err(|e| e.to_string())?;
 

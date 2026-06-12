@@ -79,8 +79,12 @@ pub fn decrypt_secrets_with_kek(
         .map_err(|e| AuthError::Decode(format!("encrypted_token: {}", e)))?;
 
     let token = SecretVec::new(
-        sealed::open(&sealed_token, &public_key, &secret_key)
-            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+        sealed::open(
+            &sealed_token,
+            &crypto::PublicKey::try_from_slice(&public_key)?,
+            &crypto::SecretKey::try_from_slice(&secret_key)?,
+        )
+        .map_err(|_| AuthError::InvalidKeyAttributes)?,
     );
 
     Ok(LoginResult {
@@ -108,7 +112,7 @@ pub fn derive_login_key_for_srp(
             ops_limit: srp_attributes.ops_limit,
         },
     )?;
-    let login_key = kdf::derive_login_key(kek.as_bytes())?;
+    let login_key = kdf::derive_login_key(&kek);
 
     Ok(login_key)
 }
@@ -130,7 +134,7 @@ pub fn derive_keys_for_login(
             ops_limit: srp_attributes.ops_limit,
         },
     )?;
-    let login_key = kdf::derive_login_key(kek.as_bytes())?;
+    let login_key = kdf::derive_login_key(&kek);
 
     Ok((SecretVec::new(kek.as_bytes().to_vec()), login_key))
 }
@@ -146,7 +150,8 @@ mod tests {
     }
 
     fn create_sealed_token(token: &[u8], public_key: &[u8]) -> String {
-        let sealed = sealed::seal(token, public_key).unwrap();
+        let pk = crypto::PublicKey::try_from_slice(public_key).unwrap();
+        let sealed = sealed::seal(token, &pk).unwrap();
         crypto::encode_b64(&sealed)
     }
 

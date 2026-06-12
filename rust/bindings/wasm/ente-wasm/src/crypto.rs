@@ -392,7 +392,7 @@ pub fn crypto_box_seal(
 ) -> Result<String, CryptoError> {
     let data = core_crypto::decode_b64(data_b64)?;
     let pk = core_crypto::decode_b64(recipient_public_key_b64)?;
-    let sealed = core_crypto::sealed::seal(&data, &pk)?;
+    let sealed = core_crypto::sealed::seal(&data, &core_crypto::PublicKey::try_from_slice(&pk)?)?;
     Ok(core_crypto::encode_b64(&sealed))
 }
 
@@ -408,7 +408,11 @@ pub fn crypto_box_seal_open(
     let sealed = core_crypto::decode_b64(sealed_b64)?;
     let pk = core_crypto::decode_b64(recipient_public_key_b64)?;
     let sk = core_crypto::decode_b64(recipient_secret_key_b64)?;
-    let opened = core_crypto::sealed::open(&sealed, &pk, &sk)?;
+    let opened = core_crypto::sealed::open(
+        &sealed,
+        &core_crypto::PublicKey::try_from_slice(&pk)?,
+        &core_crypto::SecretKey::try_from_slice(&sk)?,
+    )?;
     Ok(core_crypto::encode_b64(&opened))
 }
 
@@ -446,7 +450,17 @@ pub fn crypto_derive_subkey(
     context: &str,
 ) -> Result<String, CryptoError> {
     let key = core_crypto::decode_b64(key_b64)?;
-    let subkey = core_crypto::kdf::derive_subkey(&key, subkey_len, subkey_id, context.as_bytes())?;
+    let context: [u8; 8] = context.as_bytes().try_into().map_err(|_| {
+        core_crypto::CryptoError::InvalidKeyDerivationParams(
+            "KDF context must be exactly 8 bytes".into(),
+        )
+    })?;
+    let subkey = core_crypto::kdf::derive_subkey(
+        &core_crypto::Key::try_from_slice(&key)?,
+        subkey_len,
+        subkey_id,
+        &context,
+    )?;
     Ok(core_crypto::encode_b64(&subkey))
 }
 
@@ -551,6 +565,6 @@ pub fn crypto_encrypt_stream_with_key(
 #[wasm_bindgen]
 pub fn crypto_derive_login_key(master_key_b64: &str) -> Result<String, CryptoError> {
     let key = core_crypto::decode_b64(master_key_b64)?;
-    let login_key = core_crypto::kdf::derive_login_key(&key)?;
+    let login_key = core_crypto::kdf::derive_login_key(&core_crypto::Key::try_from_slice(&key)?);
     Ok(core_crypto::encode_b64(&login_key))
 }
