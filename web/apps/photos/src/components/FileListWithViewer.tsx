@@ -476,9 +476,7 @@ const MapIcon = styled("img")<{ $isDarkMode: boolean }>(
 const fileTimelineDateString = (file: EnteFile) => {
     const date = fileCreationPhotoDate(file);
     if (!Number.isFinite(date.getTime()))
-        log.error(
-            `Invalid file creation date for ${fileFileName(file)} (${file.id})`,
-        );
+        log.error(`Invalid file creation date for ${file.id}`);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))
