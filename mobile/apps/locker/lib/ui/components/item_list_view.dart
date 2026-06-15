@@ -17,27 +17,6 @@ import "package:locker/ui/components/file_list_widget.dart";
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 
-class OverflowMenuAction {
-  final String id;
-  final String label;
-  final Widget icon;
-  final bool isWarning;
-  final void Function(
-    BuildContext context,
-    EnteFile? file,
-    Collection? collection,
-  )
-  onTap;
-
-  const OverflowMenuAction({
-    required this.id,
-    required this.label,
-    required this.icon,
-    required this.onTap,
-    this.isWarning = false,
-  });
-}
-
 class ItemListView extends StatefulWidget {
   static const double _selectionOverlayPadding = 200.0;
 
