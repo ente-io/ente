@@ -361,8 +361,8 @@ jobs:
               working-directory: mobile/packages/strings
 
             - name: Set build version
-              run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
               shell: bash
+              run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
@@ -371,18 +371,18 @@ jobs:
               run: mkdir artifacts
 
             - name: Build Windows release
+              shell: bash
               run: |
                   flutter config --enable-windows-desktop
                   choco install innosetup -y
                   flutter build windows --release
-              shell: bash
 
             - name: Verify Windows PE allowlist
+              shell: pwsh
               run: |
                   & ./scripts/verify_windows_pe_allowlist.ps1 `
                     -PayloadDir "build/windows/x64/runner/Release" `
                     -AllowlistPath "windows/signing/allowed-pe-files.txt"
-              shell: pwsh
 
             - name: Sign Windows payload with Trusted Signing
               uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
@@ -402,15 +402,15 @@ jobs:
                   cache-dependencies: false
 
             - name: Verify signed Windows payload
-              run: ./scripts/verify_windows_authenticode.ps1 -Path "build/windows/x64/runner/Release"
               shell: pwsh
+              run: ./scripts/verify_windows_authenticode.ps1 -Path "build/windows/x64/runner/Release"
 
             - name: Build Windows installer
+              shell: pwsh
               run: |
                   & ./scripts/build_windows_installer.ps1 `
                     -SourceDir "build/windows/x64/runner/Release" `
                     -InstallerPath "artifacts/${{ env.ARTIFACT_STEM }}-installer.exe"
-              shell: pwsh
 
             - name: Sign Windows installer with Trusted Signing
               uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
@@ -428,8 +428,8 @@ jobs:
                   cache-dependencies: false
 
             - name: Verify signed Windows installer
-              run: ./scripts/verify_windows_authenticode.ps1 -Path "artifacts/${{ env.ARTIFACT_STEM }}-installer.exe"
               shell: pwsh
+              run: ./scripts/verify_windows_authenticode.ps1 -Path "artifacts/${{ env.ARTIFACT_STEM }}-installer.exe"
 
             - name: Zip Windows EXE and DLLs
               shell: pwsh
@@ -447,8 +447,8 @@ jobs:
                   $zip.Dispose()
 
             - name: Generate checksums
-              run: cd artifacts && sha256sum ente-auth-* > SHA256SUMS-windows
               shell: bash
+              run: cd artifacts && sha256sum ente-auth-* > SHA256SUMS-windows
 
             - name: Upload checksum snippet
               uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
