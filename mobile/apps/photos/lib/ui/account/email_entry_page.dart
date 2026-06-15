@@ -186,6 +186,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     hintText: AppLocalizations.of(context).email,
                     textEditingController: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [AutofillHints.email],
                     autoCorrect: false,
                     isRequired: true,
                     onChange: _onEmailChanged,
