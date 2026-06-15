@@ -199,7 +199,7 @@ Future<void> _init(bool bool, {String? via}) async {
     await OfflineFilesService.instance.init();
     await LinksClient.instance.init();
     await LinksService.instance.init();
-    await ServiceLocator.instance.init(
+    ServiceLocator.instance.init(
       preferences,
       Network.instance.enteDio,
       Network.instance.getDio(),

@@ -350,7 +350,7 @@ bool _shouldReloadGallery(String key) {
   return key == editTimeKey;
 }
 
-_visActionProgressDialogText(BuildContext context, _VisibilityAction action) {
+String _visActionProgressDialogText(BuildContext context, _VisibilityAction action) {
   switch (action) {
     case _VisibilityAction.archive:
       return AppLocalizations.of(context).archiving;
@@ -363,7 +363,7 @@ _visActionProgressDialogText(BuildContext context, _VisibilityAction action) {
   }
 }
 
-_visActionSuccessfulText(BuildContext context, _VisibilityAction action) {
+String _visActionSuccessfulText(BuildContext context, _VisibilityAction action) {
   switch (action) {
     case _VisibilityAction.archive:
       return AppLocalizations.of(context).successfullyArchived;

@@ -264,8 +264,7 @@ class FamilyData {
     return members!.firstWhereOrNull((element) => element.id == id);
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
+  static FamilyData fromMap(Map<String, dynamic> map) {
     assert(map['members'] != null && map['members'].length >= 0);
     final members = List<FamilyMember>.from(
       map['members'].map((x) => FamilyMember.fromMap(x)),
