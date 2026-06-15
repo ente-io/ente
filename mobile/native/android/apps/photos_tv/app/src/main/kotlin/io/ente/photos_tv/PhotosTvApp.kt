@@ -5,6 +5,10 @@ import android.text.format.DateFormat
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -271,10 +275,17 @@ private fun SlideshowScreen(
             showDownArrowHint = false
         }
     }
-    AnimatedContent(targetState = imageBytes, label = "slide") { bytes ->
-        if (bytes != null) {
-            SlideImage(
-                bytes = bytes,
+    Box(Modifier.fillMaxSize().background(Color.Black)) {
+        AnimatedContent(targetState = imageBytes, label = "slide") { bytes ->
+            when {
+                bytes != null -> SlideImage(bytes = bytes)
+                message != null -> StatusMessage(message = message!!, showCheckmark = false)
+                showPairingComplete -> StatusMessage(message = "Pairing Complete", showCheckmark = true)
+                else -> LoadingStatus()
+            }
+        }
+        if (imageBytes != null) {
+            SlideOverlay(
                 showMenu = showMenu,
                 showDownArrowHint = showDownArrowHint,
                 isScreensaver = isScreensaver,
@@ -290,7 +301,7 @@ private fun SlideshowScreen(
                 },
                 onChangeAlbum = onChangeAlbum,
             )
-        } else if (message != null) StatusMessage(message = message!!, showCheckmark = false) else if (showPairingComplete) StatusMessage(message = "Pairing Complete", showCheckmark = true) else LoadingStatus()
+        }
     }
 }
 
@@ -343,6 +354,17 @@ private fun Checkmark() {
 @Composable
 private fun SlideImage(
     bytes: ByteArray,
+) {
+    val bitmap = remember(bytes) { BitmapFactory.decodeByteArray(bytes, 0, bytes.size).asImageBitmap() }
+    Box(Modifier.fillMaxSize().background(Color.Black)) {
+        Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize().alpha(0.25f), contentScale = ContentScale.Crop)
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.54f)))
+        Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+    }
+}
+
+@Composable
+private fun SlideOverlay(
     showMenu: Boolean,
     showDownArrowHint: Boolean,
     isScreensaver: Boolean,
@@ -350,7 +372,6 @@ private fun SlideImage(
     onHideMenu: () -> Unit,
     onChangeAlbum: () -> Unit,
 ) {
-    val bitmap = remember(bytes) { BitmapFactory.decodeByteArray(bytes, 0, bytes.size).asImageBitmap() }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -358,7 +379,6 @@ private fun SlideImage(
     Box(
         Modifier
             .fillMaxSize()
-            .background(Color.Black)
             .onPreviewKeyEvent { event ->
                 if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                 when (event.key) {
@@ -383,11 +403,13 @@ private fun SlideImage(
             .focusRequester(focusRequester)
             .focusable(),
     ) {
-        Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize().alpha(0.25f), contentScale = ContentScale.Crop)
-        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.54f)))
-        Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
         AlbumClock(Modifier.align(Alignment.BottomEnd).padding(end = 40.dp, bottom = 34.dp))
-        AnimatedVisibility(visible = showDownArrowHint && !isScreensaver, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 34.dp)) {
+        AnimatedVisibility(
+            visible = showDownArrowHint && !isScreensaver,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp),
+            enter = fadeIn(animationSpec = tween(240)) + slideInVertically(animationSpec = tween(240), initialOffsetY = { it / 2 }),
+            exit = fadeOut(animationSpec = tween(180)) + slideOutVertically(animationSpec = tween(180), targetOffsetY = { it / 2 }),
+        ) {
             DownArrowHint()
         }
         AnimatedVisibility(visible = showMenu, modifier = Modifier.fillMaxSize()) {
@@ -406,11 +428,12 @@ private fun DownArrowHint(modifier: Modifier = Modifier) {
         Text(
             text = "Press down arrow to open menu",
             color = Color.White,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Medium,
+            fontFamily = FontFamily.SansSerif,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Normal,
         )
         Spacer(Modifier.width(8.dp))
-        DownArrowIcon(Modifier.size(24.dp))
+        DownArrowIcon(Modifier.size(18.dp))
     }
 }
 
