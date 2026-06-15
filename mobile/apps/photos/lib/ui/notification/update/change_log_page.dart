@@ -158,7 +158,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
               child: ChangeLogEntryWidget(entry: items[index]),
             );
           },
-          separatorBuilder: (_, __) => const SizedBox(height: 16),
+          separatorBuilder: (_, _) => const SizedBox(height: 16),
           itemCount: items.length,
         ),
       ),

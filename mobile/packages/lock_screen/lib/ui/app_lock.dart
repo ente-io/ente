@@ -137,13 +137,12 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
         switch (settings.name) {
           case '/lock-screen':
             return PageRouteBuilder(
-              pageBuilder: (_, __, ___) => this._lockScreen,
+              pageBuilder: (_, _, _) => this._lockScreen,
               settings: settings,
             );
           case '/unlocked':
             return PageRouteBuilder(
-              pageBuilder: (_, __, ___) =>
-                  this.widget.builder(settings.arguments),
+              pageBuilder: (_, _, _) => this.widget.builder(settings.arguments),
               settings: settings,
             );
         }

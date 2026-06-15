@@ -77,7 +77,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         : null;
 
     final children = <Widget>[
-      if (debugLocaleText != null) debugLocaleText,
+      ?debugLocaleText,
       MenuGroupComponent(items: items),
     ];
     return Column(mainAxisSize: MainAxisSize.min, children: children);

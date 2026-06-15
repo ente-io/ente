@@ -711,8 +711,8 @@ class _VideoEditorSubPageRoute extends PageRouteBuilder<void> {
         fullscreenDialog: true,
         transitionDuration: const Duration(milliseconds: 220),
         reverseTransitionDuration: const Duration(milliseconds: 180),
-        pageBuilder: (_, __, ___) => child,
-        transitionsBuilder: (_, animation, __, child) {
+        pageBuilder: (_, _, _) => child,
+        transitionsBuilder: (_, animation, _, child) {
           return FadeTransition(
             opacity: CurvedAnimation(
               parent: animation,

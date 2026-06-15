@@ -138,7 +138,7 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
       body: Stack(
         children: [
           Panorama(
-            onTap: (_, __, ___) {
+            onTap: (_, _, _) {
               setState(() {
                 if (isVisible) {
                   timer?.cancel();

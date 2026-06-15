@@ -1718,8 +1718,8 @@ class CollectionsService {
     final String? albumToken = _cachedPublicAlbumToken[collectionID];
     final String? albumJwtToken = _cachedPublicAlbumJWT[collectionID];
     return {
-      if (albumToken != null) "X-Auth-Access-Token": albumToken,
-      if (albumJwtToken != null) "X-Auth-Access-Token-JWT": albumJwtToken,
+      "X-Auth-Access-Token": ?albumToken,
+      "X-Auth-Access-Token-JWT": ?albumJwtToken,
     };
   }
 

@@ -49,6 +49,7 @@ analyzer:
     unawaited_futures: warning # convert to warning after fixing existing issues
 
     avoid_renaming_method_parameters: ignore # incorrect warnings for `equals` overrides
+    strict_top_level_inference: ignore # deferred: surfaces latent nullable-return mismatches needing per-site fixes
 
   exclude:
     - thirdparty/**

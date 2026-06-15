@@ -173,7 +173,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       const FileDetailsDivider(),
       ValueListenableBuilder(
         valueListenable: _exifNotifier,
-        builder: (context, _, __) =>
+        builder: (context, _, _) =>
             FilePropertiesItemWidget(file, _isImage, _exifData, _currentUserID),
       ),
       const FileDetailsDivider(),
@@ -183,7 +183,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           ))) ...[
         ValueListenableBuilder(
           valueListenable: _exifNotifier,
-          builder: (context, _, __) => PreviewPropertiesItemWidget(
+          builder: (context, _, _) => PreviewPropertiesItemWidget(
             file,
             _isImage,
             _exifData,
@@ -212,7 +212,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     fileDetailsTiles.addAll([
       ValueListenableBuilder(
         valueListenable: hasLocationData,
-        builder: (context, bool value, __) {
+        builder: (context, bool value, _) {
           return value
               ? Column(
                   children: [

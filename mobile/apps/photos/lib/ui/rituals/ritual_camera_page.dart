@@ -1163,7 +1163,7 @@ class _ThumbnailStrip extends StatelessWidget {
         itemCount: captures.length,
         clipBehavior: Clip.none,
         controller: controller,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final capture = captures[index];
           return GestureDetector(

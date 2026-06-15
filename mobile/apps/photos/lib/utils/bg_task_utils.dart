@@ -36,7 +36,7 @@ void callbackDispatcher() {
         await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
         result = Future.error(e.toString());
       }
-    }, prefix: "[bg]").onError((_, __) {
+    }, prefix: "[bg]").onError((_, _) {
       result = Future.error("Didn't finished correctly!");
       return;
     });

@@ -401,7 +401,7 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
               ),
               ..._buildEditableBlockOverlays(),
               ..._buildSelectionHandles(),
-              if (copyButton != null) copyButton,
+              ?copyButton,
             ],
           ),
         );
@@ -502,7 +502,7 @@ class _TextOverlayWidgetState extends State<TextOverlayWidget> {
             visualLayer,
             gestureLayer,
             ..._buildSelectionHandles(),
-            if (copyButton != null) copyButton,
+            ?copyButton,
           ],
         );
       },

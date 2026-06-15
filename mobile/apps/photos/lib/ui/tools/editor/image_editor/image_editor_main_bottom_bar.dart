@@ -52,10 +52,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
         layoutBuilder: (currentChild, previousChildren) => Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.bottomCenter,
-          children: <Widget>[
-            ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
+          children: <Widget>[...previousChildren, ?currentChild],
         ),
         duration: const Duration(milliseconds: 400),
         reverseDuration: const Duration(milliseconds: 0),

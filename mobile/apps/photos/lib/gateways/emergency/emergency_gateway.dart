@@ -23,8 +23,7 @@ class EmergencyGateway {
       data: {
         "email": email,
         "encryptedKey": encryptedKey,
-        if (recoveryNoticeInDays != null)
-          "recoveryNoticeInDays": recoveryNoticeInDays,
+        "recoveryNoticeInDays": ?recoveryNoticeInDays,
       },
     );
   }

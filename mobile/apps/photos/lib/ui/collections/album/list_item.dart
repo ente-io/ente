@@ -128,10 +128,7 @@ class AlbumListItemWidget extends StatelessWidget {
             layoutBuilder: (currentChild, previousChildren) {
               return Stack(
                 alignment: Alignment.centerRight,
-                children: [
-                  ...previousChildren,
-                  if (currentChild != null) currentChild,
-                ],
+                children: [...previousChildren, ?currentChild],
               );
             },
             child: _buildTrailingIndicator(

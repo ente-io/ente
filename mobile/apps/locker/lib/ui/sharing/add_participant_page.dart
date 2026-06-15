@@ -66,7 +66,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: ContactsDisplayService.instance.changes,
-      builder: (context, __, ___) {
+      builder: (context, _, _) {
         final filterSuggestedUsers =
             _suggestedUsers
                 .where(

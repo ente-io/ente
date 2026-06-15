@@ -66,7 +66,7 @@ class _ChangeLogSheetBody extends StatelessWidget {
               final entry = entries[index];
               return _ChangeLogEntryTile(entry: entry);
             },
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemCount: entries.length,
           ),
         ),

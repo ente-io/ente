@@ -366,7 +366,7 @@ class _AlbumsTabState extends State<AlbumsTab>
 
     return SliverMainAxisGroup(
       slivers: [
-        if (leadingSliver != null) leadingSliver,
+        ?leadingSliver,
         CollectionsFlexiGridViewWidget(
           filteredCollections,
           albumViewType: _viewType.value,
@@ -771,10 +771,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                     switchOutCurve: Curves.easeInCubic,
                     layoutBuilder: (currentChild, previousChildren) => Stack(
                       alignment: Alignment.centerLeft,
-                      children: [
-                        ...previousChildren,
-                        if (currentChild != null) currentChild,
-                      ],
+                      children: [...previousChildren, ?currentChild],
                     ),
                     transitionBuilder: (child, animation) {
                       final curvedAnimation = CurvedAnimation(

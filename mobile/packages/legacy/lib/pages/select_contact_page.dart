@@ -74,7 +74,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: ContactsDisplayService.instance.changes,
-      builder: (context, __, ___) {
+      builder: (context, _, _) {
         final colorScheme = getEnteColorScheme(context);
         final textTheme = getEnteTextTheme(context);
         final List<User> suggestedUsers = _getSuggestedUser();

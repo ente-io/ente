@@ -1598,7 +1598,7 @@ class _RollingCounter extends StatelessWidget {
       switchOutCurve: Curves.easeInCubic,
       layoutBuilder: (currentChild, previousChildren) => Stack(
         alignment: Alignment.center,
-        children: [...previousChildren, if (currentChild != null) currentChild],
+        children: [...previousChildren, ?currentChild],
       ),
       transitionBuilder: (child, animation) {
         final bool isCurrent = child.key == currentKey;

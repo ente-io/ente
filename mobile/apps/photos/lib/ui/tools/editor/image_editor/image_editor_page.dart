@@ -263,12 +263,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
               widgets: MainEditorWidgets(
                 removeLayerArea:
-                    (
-                      removeAreaKey,
-                      __,
-                      rebuildStream,
-                      isLayerBeingTransformed,
-                    ) {
+                    (removeAreaKey, _, rebuildStream, isLayerBeingTransformed) {
                       return Align(
                         alignment: Alignment.bottomCenter,
                         child: StreamBuilder(

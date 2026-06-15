@@ -3,7 +3,7 @@
 /// - iOS: Uses security-scoped bookmarks for persistent directory access
 /// - Android: Uses Storage Access Framework (SAF) via saf_util/saf_stream
 /// - Other platforms: Uses standard file system access via file_picker
-library scoped_dir_access;
+library;
 
 import 'dart:io';
 
