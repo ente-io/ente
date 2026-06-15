@@ -1697,9 +1697,17 @@ const createCollectionSummaries = (
             attributes.add("shared");
             attributes.add("sharedOutgoing");
         }
-        if (collection.publicURLs.length && !collection.sharees.length) {
+        if (collection.publicURLs.length) {
             attributes.add("shared");
-            attributes.add("sharedOnlyViaLink");
+            attributes.add("sharedViaLink");
+            // "sharedOnlyViaLink" stays reserved for the case where the only
+            // way the collection is shared is via a public link (no sharees),
+            // which decides the primary icon. "sharedViaLink" instead tracks
+            // the mere presence of a link, so an album that is shared with
+            // people and also has a link still shows the link indicator.
+            if (!collection.sharees.length) {
+                attributes.add("sharedOnlyViaLink");
+            }
         }
         if (isArchivedCollection(collection)) {
             attributes.add("archived");
