@@ -16,6 +16,13 @@ pub struct AuthSecrets {
     pub token: Vec<u8>,
 }
 
+/// Keypair used to decrypt sealed cast registration payloads.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct RegistrationKeyPair {
+    pub public_key: Vec<u8>,
+    pub private_key: Vec<u8>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct KeyAttributes {
     pub kek_salt: String,
@@ -73,6 +80,12 @@ fn lock_srp_state() -> Result<MutexGuard<'static, Option<SrpState>>, EnsuError> 
     SRP_STATE.lock().map_err(|_| EnsuError::Message {
         reason: "SRP state lock poisoned".to_string(),
     })
+}
+
+fn crypto_error(err: crypto::CryptoError) -> EnsuError {
+    EnsuError::Message {
+        reason: err.to_string(),
+    }
 }
 
 fn to_core_key_attrs(attrs: &KeyAttributes) -> auth::KeyAttributes {
@@ -285,6 +298,49 @@ pub fn decrypt_secrets_with_kek(
     })
 }
 
+/// Generate an X25519 keypair for sealed-box registration.
+pub fn generate_key_pair() -> Result<RegistrationKeyPair, EnsuError> {
+    let private_key = crypto::SecretKey::generate();
+    let public_key = private_key.public_key();
+    Ok(RegistrationKeyPair {
+        public_key: public_key.as_bytes().to_vec(),
+        private_key: private_key.as_bytes().to_vec(),
+    })
+}
+
+/// Decrypt a libsodium-format sealed box.
+pub fn open_seal(
+    input: Vec<u8>,
+    public_key: Vec<u8>,
+    private_key: Vec<u8>,
+) -> Result<Vec<u8>, EnsuError> {
+    let public_key = crypto::PublicKey::try_from_slice(&public_key).map_err(crypto_error)?;
+    let private_key = crypto::SecretKey::try_from_slice(&private_key).map_err(crypto_error)?;
+    crypto::sealed::open(&input, &public_key, &private_key).map_err(crypto_error)
+}
+
+/// Decrypt a libsodium-format secretbox payload.
+pub fn secretbox_decrypt(
+    input: Vec<u8>,
+    key: Vec<u8>,
+    nonce: Vec<u8>,
+) -> Result<Vec<u8>, EnsuError> {
+    let key = crypto::Key::try_from_slice(&key).map_err(crypto_error)?;
+    let nonce = crypto::Nonce::try_from_slice(&nonce).map_err(crypto_error)?;
+    crypto::secretbox::decrypt(&input, &nonce, &key).map_err(crypto_error)
+}
+
+/// Decrypt one legacy secretstream blob without requiring final tag.
+pub fn blob_decrypt_legacy(
+    input: Vec<u8>,
+    key: Vec<u8>,
+    header: Vec<u8>,
+) -> Result<Vec<u8>, EnsuError> {
+    let key = crypto::Key::try_from_slice(&key).map_err(crypto_error)?;
+    let header = crypto::Header::try_from_slice(&header).map_err(crypto_error)?;
+    crypto::blob::decrypt_legacy(&input, &header, &key).map_err(crypto_error)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -337,5 +393,34 @@ mod tests {
         .unwrap_err();
         assert_eq!(err.to_string(), "Missing server proof");
         assert!(SRP_STATE.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn test_cast_crypto_helpers_roundtrip() {
+        let key_pair = generate_key_pair().unwrap();
+        let public_key = crypto::PublicKey::try_from_slice(&key_pair.public_key).unwrap();
+        let sealed = crypto::sealed::seal(b"cast", &public_key).unwrap();
+        assert_eq!(
+            open_seal(sealed, key_pair.public_key, key_pair.private_key).unwrap(),
+            b"cast"
+        );
+        let key = crypto::Key::generate();
+        let key_bytes = key.as_bytes().to_vec();
+        let nonce = crypto::Nonce::generate();
+        let encrypted = crypto::secretbox::encrypt_with_nonce(b"secret", &nonce, &key);
+        assert_eq!(
+            secretbox_decrypt(encrypted, key_bytes.clone(), nonce.as_bytes().to_vec()).unwrap(),
+            b"secret"
+        );
+        let blob = crypto::blob::encrypt(b"blob", &key).unwrap();
+        assert_eq!(
+            blob_decrypt_legacy(
+                blob.encrypted_data,
+                key_bytes,
+                blob.decryption_header.as_bytes().to_vec()
+            )
+            .unwrap(),
+            b"blob"
+        );
     }
 }

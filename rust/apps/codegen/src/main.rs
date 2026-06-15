@@ -121,9 +121,16 @@ fn generate_native_android() -> Result<(), DynError> {
         .ok_or("failed to resolve repo root from rust/apps/codegen")?;
     let core_out_dir =
         repo_root.join("mobile/native/android/apps/ensu/crypto-auth-core/src/main/java");
+    let photos_tv_core_path = repo_root
+        .join("mobile/native/android/apps/photos_tv/app/src/main/java/io/ente/ensu/crypto/core.kt");
     let rust_out_dir = repo_root.join("mobile/native/android/packages/rust/src/main/kotlin");
 
     fs::create_dir_all(&core_out_dir)?;
+    fs::create_dir_all(
+        photos_tv_core_path
+            .parent()
+            .ok_or("failed to resolve Photos TV core binding directory")?,
+    )?;
     fs::create_dir_all(&rust_out_dir)?;
 
     let crates = [
@@ -177,6 +184,14 @@ fn generate_native_android() -> Result<(), DynError> {
             &crate_spec.out_dir,
             &crate_spec.uniffi,
         )?;
+        if crate_spec.uniffi.crate_name == "core" {
+            fs::copy(&crate_spec.stale_path, &photos_tv_core_path).map_err(|error| {
+                format!(
+                    "failed to copy generated core bindings to {}: {error}",
+                    photos_tv_core_path.display()
+                )
+            })?;
+        }
     }
 
     Ok(())

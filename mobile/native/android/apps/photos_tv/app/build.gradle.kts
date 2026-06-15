@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
@@ -31,11 +30,13 @@ android {
     buildFeatures {
         compose = true
     }
-}
 
-kotlin {
-    compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.11"
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
@@ -56,11 +57,8 @@ dependencies {
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("com.google.errorprone:error_prone_annotations:2.18.0")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
-    implementation("com.goterl:lazysodium-android:5.2.0") {
-        exclude(group = "net.java.dev.jna")
-    }
-    implementation("net.java.dev.jna:jna:5.17.0@aar")
+    implementation(project(":rust"))
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }

@@ -1,9 +1,11 @@
 gradle-wrapper.jar
 /.gradle
+/build/
 /captures/
 /gradlew
 /gradlew.bat
 /local.properties
+app/src/main/java/io/ente/ensu/crypto/core.kt
 GeneratedPluginRegistrant.java
 .cxx/
 

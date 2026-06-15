@@ -4,6 +4,11 @@ dictionary AuthSecrets {
   sequence<u8> token;
 };
 
+dictionary RegistrationKeyPair {
+  sequence<u8> public_key;
+  sequence<u8> private_key;
+};
+
 dictionary KeyAttributes {
   string kek_salt;
   string encrypted_key;
@@ -57,4 +62,16 @@ namespace core {
 
   [Throws=EnsuError]
   AuthSecrets decrypt_secrets_with_kek(sequence<u8> kek, KeyAttributes key_attrs, string? encrypted_token, string? plain_token);
+
+  [Throws=EnsuError]
+  RegistrationKeyPair generate_key_pair();
+
+  [Throws=EnsuError]
+  sequence<u8> open_seal(sequence<u8> input, sequence<u8> public_key, sequence<u8> private_key);
+
+  [Throws=EnsuError]
+  sequence<u8> secretbox_decrypt(sequence<u8> input, sequence<u8> key, sequence<u8> nonce);
+
+  [Throws=EnsuError]
+  sequence<u8> blob_decrypt_legacy(sequence<u8> input, sequence<u8> key, sequence<u8> header);
 };
