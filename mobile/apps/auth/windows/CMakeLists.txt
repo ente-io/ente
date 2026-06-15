@@ -57,6 +57,11 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# local_auth_windows 2.0.1 still passes /await, which MSVC 14.51 rejects via
+# STL1011 unless this deprecation warning is silenced.
+target_compile_definitions(local_auth_windows_plugin PRIVATE
+  _SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
