@@ -51,7 +51,7 @@ jobs:
 
     rust-flutter:
         # For the cargo steps of mobile-lint.yml.
-        runs-on: macos-26
+        runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: rust
