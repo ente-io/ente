@@ -271,7 +271,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
 
   Future<void> _onSettingTapped(_SearchableSetting setting) async {
     if (setting.onTap != null) {
-      setting.onTap!();
+      await setting.onTap!();
     } else if (setting.page != null) {
       await Navigator.of(
         context,
@@ -279,8 +279,8 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     }
   }
 
-  void _onLogoutTapped() {
-    unawaited(_confirmLogout());
+  Future<void> _onLogoutTapped() async {
+    await _confirmLogout();
   }
 
   Future<void> _confirmLogout() async {
@@ -482,7 +482,7 @@ class _SearchableSetting {
   final String category;
   final List<List<dynamic>>? icon;
   final Widget? page;
-  final VoidCallback? onTap;
+  final FutureOr<void> Function()? onTap;
 
   const _SearchableSetting({
     required this.title,
