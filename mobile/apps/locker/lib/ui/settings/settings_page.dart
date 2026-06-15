@@ -118,8 +118,8 @@ class SettingsWidget extends StatelessWidget {
     _navigateTo(context, const GeneralSettingsPage());
   }
 
-  void _onLogoutTapped(BuildContext context) {
-    showBottomSheetComponent<void>(
+  Future<void> _onLogoutTapped(BuildContext context) async {
+    final shouldLogout = await showBottomSheetComponent<bool>(
       context: context,
       builder: (sheetContext) => BottomSheetComponent(
         title: context.l10n.warning,
@@ -129,15 +129,16 @@ class SettingsWidget extends StatelessWidget {
           ButtonComponent(
             label: context.l10n.yesLogout,
             variant: ButtonComponentVariant.critical,
-            onTap: () async {
-              await UserService.instance.logout(context);
-              if (sheetContext.mounted) {
-                Navigator.of(sheetContext).pop();
-              }
+            shouldSurfaceExecutionStates: false,
+            onTap: () {
+              Navigator.of(sheetContext).pop(true);
             },
           ),
         ],
       ),
     );
+    if (shouldLogout == true && context.mounted) {
+      await UserService.instance.logout(context);
+    }
   }
 }
