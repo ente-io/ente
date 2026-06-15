@@ -6,14 +6,12 @@ on:
     pull_request:
         paths:
             - ".github/workflows/mobile-podfile-lock.yml"
-            - "mobile/apps/*/pubspec.yaml"
-            - "mobile/apps/*/pubspec.lock"
-            - "mobile/apps/*/pubspec_overrides.yaml"
-            - "mobile/apps/*/ios/Podfile"
-            - "mobile/apps/*/ios/Podfile.lock"
-            - "mobile/packages/*/pubspec.yaml"
-            - "mobile/packages/*/ios/*.podspec"
-            - "mobile/packages/*/darwin/*.podspec"
+            - "mobile/**/pubspec.yaml"
+            - "mobile/**/pubspec.lock"
+            - "mobile/**/pubspec_overrides.yaml"
+            - "mobile/**/Podfile"
+            - "mobile/**/Podfile.lock"
+            - "mobile/**/*.podspec"
     workflow_dispatch:
 
 permissions:
