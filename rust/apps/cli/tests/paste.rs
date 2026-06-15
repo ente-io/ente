@@ -19,7 +19,7 @@ fn paste() -> TestResult {
 }
 
 fn full_link_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli_session("full-link")?;
+    let cli = support::cli_session(fixture, "full-link")?;
     let text = unique_text("full-link");
     let link = create_paste(&cli, fixture, &text)?;
 
@@ -54,7 +54,7 @@ fn full_link_roundtrip(fixture: &Fixture) -> TestResult {
 }
 
 fn token_and_key_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli_session("token-key")?;
+    let cli = support::cli_session(fixture, "token-key")?;
     let text = unique_text("token-key");
     let link = create_paste(&cli, fixture, &text)?;
 
@@ -73,7 +73,7 @@ fn token_and_key_roundtrip(fixture: &Fixture) -> TestResult {
 }
 
 fn stdin_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli_session("stdin")?;
+    let cli = support::cli_session(fixture, "stdin")?;
     let text = format!(
         "paste stdin scenario {}\n\nsecond line stays intact\n",
         Uuid::new_v4()
@@ -104,7 +104,7 @@ fn stdin_roundtrip(fixture: &Fixture) -> TestResult {
 }
 
 fn password_protected_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli_session("password-protected")?;
+    let cli = support::cli_session(fixture, "password-protected")?;
     let text = unique_text("password-protected");
     let password = format!("password {}", Uuid::new_v4());
     let link = create_password_paste(&cli, fixture, &text, &password)?;
@@ -127,7 +127,7 @@ fn password_protected_roundtrip(fixture: &Fixture) -> TestResult {
 }
 
 fn wrong_password_consumes_password_protected_paste(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli_session("wrong-password")?;
+    let cli = support::cli_session(fixture, "wrong-password")?;
     let text = unique_text("wrong-password");
     let password = format!("password {}", Uuid::new_v4());
     let link = create_password_paste(&cli, fixture, &text, &password)?;
@@ -179,7 +179,7 @@ fn wrong_password_consumes_password_protected_paste(fixture: &Fixture) -> TestRe
 }
 
 fn consumed_password_paste_checks_availability_before_password(fixture: &Fixture) -> TestResult {
-    let cli = fixture.cli_session("consumed-password")?;
+    let cli = support::cli_session(fixture, "consumed-password")?;
     let text = unique_text("consumed-password");
     let password = format!("password {}", Uuid::new_v4());
     let link = create_password_paste(&cli, fixture, &text, &password)?;

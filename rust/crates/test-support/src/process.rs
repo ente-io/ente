@@ -4,7 +4,7 @@ use std::{
     process::{Child, Command, Stdio},
 };
 
-use super::TestResult;
+use crate::TestResult;
 
 pub struct ChildProcess {
     name: &'static str,

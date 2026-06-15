@@ -2489,6 +2489,7 @@ dependencies = [
  "ente-contacts",
  "ente-core",
  "ente-rs",
+ "ente-test-support",
  "hmac 0.13.0",
  "reqwest 0.12.28",
  "serde",
@@ -2510,6 +2511,7 @@ dependencies = [
  "dirs 5.0.1",
  "ente-accounts",
  "ente-core",
+ "ente-test-support",
  "env_logger 0.11.10",
  "futures",
  "indicatif",
@@ -2528,6 +2530,14 @@ dependencies = [
  "uuid",
  "zeroize",
  "zip 2.4.2",
+]
+
+[[package]]
+name = "ente-test-support"
+version = "0.0.0"
+dependencies = [
+ "serde_json",
+ "uuid",
 ]
 
 [[package]]

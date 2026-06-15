@@ -7,7 +7,9 @@ use std::{
     time::{Duration, Instant},
 };
 
-use super::{LOCAL_HOST, TestResult, process::ChildProcess};
+use crate::{
+    HARDCODED_OTT, HARDCODED_OTT_EMAIL_SUFFIX, LOCAL_HOST, TestResult, process::ChildProcess,
+};
 
 pub fn start(
     server_dir: &Path,
@@ -60,6 +62,11 @@ s3:
         endpoint: localhost:3200
         region: eu-central-2
         bucket: b2-eu-cen
+
+internal:
+    hardcoded-ott:
+        local-domain-suffix: "{HARDCODED_OTT_EMAIL_SUFFIX}"
+        local-domain-value: {HARDCODED_OTT}
 
 jobs:
     cron:

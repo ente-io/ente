@@ -51,6 +51,7 @@ open = "5.0"
 zip = "2.2"
 
 [dev-dependencies]
+ente-test-support.workspace = true
 mockito = "1.6"
 sha2 = "0.11"
 # Pinned to upstream commit that includes the padded-u interop fix for

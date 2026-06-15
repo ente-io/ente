@@ -8,6 +8,7 @@ use ente_accounts::{
 };
 use ente_core::crypto::SecretVec;
 use ente_rs::models::account::App;
+use ente_test_support::HARDCODED_OTT;
 use hmac::{Hmac, KeyInit, Mac};
 use sha1::Sha1;
 use zeroize::Zeroizing;
@@ -33,7 +34,7 @@ struct TestUi {
 impl TestUi {
     fn otp_only() -> Self {
         Self {
-            otp: "123456".into(),
+            otp: HARDCODED_OTT.into(),
             totp_secret: None,
             allow_totp: false,
         }
@@ -41,7 +42,7 @@ impl TestUi {
 
     fn with_totp(secret: Option<String>) -> Self {
         Self {
-            otp: "123456".into(),
+            otp: HARDCODED_OTT.into(),
             totp_secret: secret,
             allow_totp: true,
         }

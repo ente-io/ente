@@ -8,7 +8,7 @@ use std::{
 
 use serde_json::Value;
 
-use super::{LOCAL_HOST, TestResult, process::ChildProcess};
+use crate::{LOCAL_HOST, TestResult, process::ChildProcess};
 
 pub fn start(package_dir: &Path, log_dir: &Path, port: u16) -> TestResult<ChildProcess> {
     let bin = pglite_server_bin(package_dir)?;
@@ -62,7 +62,7 @@ fn package_version(path: impl AsRef<Path>) -> TestResult<String> {
 }
 
 fn install_error() -> Box<dyn std::error::Error> {
-    "PGlite is not installed. Run `npm ci --prefix rust/apps/cli/tests/pglite` from the repository root.".into()
+    "PGlite is not installed. Run `npm ci --prefix rust/crates/test-support/pglite` from the repository root.".into()
 }
 
 fn wait_for_pglite(process: &mut ChildProcess, port: u16) -> TestResult {

@@ -6,7 +6,7 @@ use std::{
 
 use uuid::Uuid;
 
-use super::{Cli, LOCAL_HOST, TestResult, museum, pglite, process::ChildProcess};
+use crate::{LOCAL_HOST, TestResult, museum, pglite, process::ChildProcess};
 
 pub struct Fixture {
     _museum: ChildProcess,
@@ -28,7 +28,7 @@ impl Fixture {
 
     pub fn start() -> TestResult<Self> {
         let paths = Paths::discover()?;
-        let mut temp_dir = TempDir::new("ente-cli-test")?;
+        let mut temp_dir = TempDir::new("ente-test")?;
         let log_dir = temp_dir.path().join("logs");
         let pglite_port = free_port()?;
         let museum_port = free_port()?;
@@ -73,10 +73,8 @@ impl Fixture {
         &self.paste_origin
     }
 
-    pub fn cli_session(&self, scenario: &str) -> TestResult<Cli> {
-        let config_dir = self.temp_dir.path().join("cli").join(scenario);
-        fs::create_dir_all(&config_dir)?;
-        Ok(Cli::new(config_dir))
+    pub fn temp_dir(&self) -> &Path {
+        self.temp_dir.path()
     }
 
     pub fn retain_temp_dir(&mut self) {
@@ -91,18 +89,16 @@ struct Paths {
 
 impl Paths {
     fn discover() -> TestResult<Self> {
-        let cli_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let rust_dir = cli_dir
+        let crate_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let repo_dir = crate_dir
             .parent()
             .and_then(Path::parent)
-            .ok_or("failed to resolve rust directory")?;
-        let repo_dir = rust_dir
-            .parent()
+            .and_then(Path::parent)
             .ok_or("failed to resolve repository directory")?;
 
         Ok(Self {
             server_dir: repo_dir.join("server"),
-            pglite_dir: cli_dir.join("tests").join("pglite"),
+            pglite_dir: crate_dir.join("pglite"),
         })
     }
 }
@@ -128,7 +124,7 @@ impl TempDir {
 
     fn retain(&mut self) {
         eprintln!(
-            "retaining CLI integration test temp dir: {}",
+            "retaining integration test temp dir: {}",
             self.path.display()
         );
         self.retained = true;
