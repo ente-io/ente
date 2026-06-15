@@ -73,9 +73,8 @@ class FilesDB with SqlDbBase {
   // we need to write query based on that field
   static const columnMMdVisibility = 'mmd_visibility';
 
-  //If adding or removing a new column, make sure to update the `_columnNames`
-  //list, the parallel value list in `_getParameterSetForFile`, and the column
-  //builders `_generateColumnsAndPlaceholdersForInsert` and
+  //If adding or removing a new column, make sure to update the `_columnNames` list
+  //and update `_generateColumnsAndPlaceholdersForInsert` and
   //`_generateUpdateAssignmentsWithPlaceholders`
   static final _migrationScripts = [
     ...createTable(filesTable),
@@ -508,14 +507,10 @@ class FilesDB with SqlDbBase {
   Future<void> insert(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.sqliteAsyncDB;
-    final bool omitGeneratedId = file.generatedID == null;
     final columnsAndPlaceholders = _generateColumnsAndPlaceholdersForInsert(
-      omitGeneratedId: omitGeneratedId,
+      fileGenId: file.generatedID,
     );
-    final values = _getParameterSetForFile(
-      file,
-      omitGeneratedId: omitGeneratedId,
-    );
+    final values = _getParameterSetForFile(file);
 
     await db.execute(
       'INSERT OR REPLACE INTO $filesTable (${columnsAndPlaceholders["columns"]}) VALUES (${columnsAndPlaceholders["placeholders"]})',
@@ -526,14 +521,10 @@ class FilesDB with SqlDbBase {
   Future<int> insertAndGetId(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.sqliteAsyncDB;
-    final bool omitGeneratedId = file.generatedID == null;
     final columnsAndPlaceholders = _generateColumnsAndPlaceholdersForInsert(
-      omitGeneratedId: omitGeneratedId,
+      fileGenId: file.generatedID,
     );
-    final values = _getParameterSetForFile(
-      file,
-      omitGeneratedId: omitGeneratedId,
-    );
+    final values = _getParameterSetForFile(file);
     return await db.writeTransaction((tx) async {
       await tx.execute(
         'INSERT OR REPLACE INTO $filesTable (${columnsAndPlaceholders["columns"]}) VALUES (${columnsAndPlaceholders["placeholders"]})',
@@ -1369,13 +1360,9 @@ class FilesDB with SqlDbBase {
 
   Future<void> update(EnteFile file) async {
     final db = await instance.sqliteAsyncDB;
-    final bool omitGeneratedId = file.generatedID == null;
-    final parameterSet = _getParameterSetForFile(
-      file,
-      omitGeneratedId: omitGeneratedId,
-    )..add(file.generatedID);
+    final parameterSet = _getParameterSetForFile(file)..add(file.generatedID);
     final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
-      omitGeneratedId: omitGeneratedId,
+      fileGenId: file.generatedID,
     );
     await db.execute(
       'UPDATE $filesTable '
@@ -1398,7 +1385,7 @@ class FilesDB with SqlDbBase {
       omitKeyMaterial: true,
     )..add(file.uploadedFileID);
     final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
-      omitGeneratedId: true,
+      fileGenId: null,
       omitCollectionId: true,
       omitKeyMaterial: true,
     );
@@ -2159,14 +2146,14 @@ class FilesDB with SqlDbBase {
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."
   String _generateUpdateAssignmentsWithPlaceholders({
-    required bool omitGeneratedId,
+    required int? fileGenId,
     bool omitCollectionId = false,
     bool omitKeyMaterial = false,
   }) {
     final assignments = <String>[];
 
     for (String columnName in _columnNames) {
-      if (columnName == columnGeneratedID && omitGeneratedId) {
+      if (columnName == columnGeneratedID && fileGenId == null) {
         continue;
       }
       if (columnName == columnCollectionID && omitCollectionId) {
@@ -2184,12 +2171,12 @@ class FilesDB with SqlDbBase {
   }
 
   Map<String, String> _generateColumnsAndPlaceholdersForInsert({
-    required bool omitGeneratedId,
+    required int? fileGenId,
   }) {
     final columnNames = <String>[];
 
     for (String columnName in _columnNames) {
-      if (columnName == columnGeneratedID && omitGeneratedId) {
+      if (columnName == columnGeneratedID && fileGenId == null) {
         continue;
       }
 
