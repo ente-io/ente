@@ -725,10 +725,6 @@ But some of these formats cannot be streamed on the web browser and you will be 
 
 Ente does not apply compression to uploaded photos. The file size of your photos in Ente will be similar to the original file sizes you have.
 
-### Can I upload TIFF files? {#tiff-support}
-
-Ente Photos does not currently support uploading or rendering `.tif` / `.tiff` files. This is expected to be addressed alongside broader RAW image support.
-
 ## Deduplication
 
 ### How does the deduplication feature work on the desktop app? {#deduplication-desktop}
