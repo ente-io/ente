@@ -1,6 +1,13 @@
-# photos_tv
+# Photos TV
 
-Minimal Ente Photos TV receiver.
+Native Android TV receiver for Ente Photos.
+
+## Build
+
+```sh
+cd android
+./gradlew :app:assembleDebug
+```
 
 ## Set as Android TV screensaver with adb
 

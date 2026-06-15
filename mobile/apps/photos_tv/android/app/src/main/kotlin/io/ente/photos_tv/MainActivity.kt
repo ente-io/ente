@@ -1,5 +1,14 @@
 package io.ente.photos_tv
 
-import io.flutter.embedding.android.FlutterActivity
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 
-class MainActivity : FlutterActivity()
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            PhotosTvApp(isScreensaver = false)
+        }
+    }
+}
