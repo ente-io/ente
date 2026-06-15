@@ -130,10 +130,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   }
   _assertFileType(asset, file);
   if (Platform.isIOS) {
-    trackOriginFetchForUploadOrML.put(
-      file.localID!,
-      asset.modifiedDateTime.microsecondsSinceEpoch,
-    );
+    trackOriginFetchForUploadOrML.put(file.localID!, true);
   }
   try {
     sourceFile = await asset.originFile

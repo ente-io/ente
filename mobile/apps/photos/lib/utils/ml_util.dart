@@ -722,13 +722,7 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
     }
     try {
       if (Platform.isIOS && enteFile.localID != null) {
-        final asset = await enteFile.getAsset;
-        if (asset != null) {
-          trackOriginFetchForUploadOrML.put(
-            enteFile.localID!,
-            asset.modifiedDateTime.microsecondsSinceEpoch,
-          );
-        }
+        trackOriginFetchForUploadOrML.put(enteFile.localID!, true);
       }
       file = await getFile(enteFile, isOrigin: true);
     } catch (e, s) {
