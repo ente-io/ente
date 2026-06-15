@@ -119,6 +119,7 @@ class _LoginPageState extends State<LoginPage> {
               hintText: AppLocalizations.of(context).enterYourEmailAddress,
               textEditingController: _emailController,
               keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
               autoCorrect: false,
               autoFocus: true,
               isRequired: true,
