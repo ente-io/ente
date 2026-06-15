@@ -179,8 +179,8 @@ class HomeWidgetService {
         "title": title,
         "subText": subText,
         "generatedId": file.generatedID!,
-        if (mainKey != null) "mainKey": mainKey,
-        if (uploadedFileID != null) UPLOADED_FILE_ID_KEY: uploadedFileID,
+        "mainKey": ?mainKey,
+        UPLOADED_FILE_ID_KEY: ?uploadedFileID,
       };
 
       // Save metadata in platform-specific format

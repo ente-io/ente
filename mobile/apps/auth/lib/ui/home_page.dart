@@ -2325,9 +2325,9 @@ class _HomePageState extends State<HomePage> {
     if (PlatformDetector.isDesktop()) {
       return FloatingActionButton(
         onPressed: () => _redirectToManualEntryPage(),
-        child: const Icon(Icons.add),
         elevation: 8.0,
         shape: const CircleBorder(),
+        child: const Icon(Icons.add),
       );
     }
     return SpeedDial(

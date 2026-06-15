@@ -282,7 +282,7 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
       layoutBuilder: (currentChild, previousChildren) => Stack(
         alignment: Alignment.centerLeft,
         clipBehavior: Clip.none,
-        children: [...previousChildren, if (currentChild != null) currentChild],
+        children: [...previousChildren, ?currentChild],
       ),
       transitionBuilder: (child, animation) {
         final curvedAnimation = CurvedAnimation(

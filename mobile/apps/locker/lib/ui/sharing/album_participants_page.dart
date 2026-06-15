@@ -68,7 +68,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: ContactsDisplayService.instance.changes,
-      builder: (context, __, ___) {
+      builder: (context, _, _) {
         final isOwner =
             widget.collection.owner.id == Configuration.instance.getUserID();
         final colorScheme = getEnteColorScheme(context);

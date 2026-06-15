@@ -202,7 +202,7 @@ class BottomSheetComponent extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: effectiveCrossAxisAlignment,
               children: [
-                if (effectiveHeader != null) effectiveHeader,
+                ?effectiveHeader,
                 if (effectiveContent != null) ...[
                   if (effectiveHeader != null)
                     SizedBox(height: effectiveContentSpacing),

@@ -65,7 +65,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _animationController,
-      builder: (_, __) {
+      builder: (_, _) {
         return SliderTheme(
           data: SliderTheme.of(context).copyWith(
             trackHeight: 1.0,

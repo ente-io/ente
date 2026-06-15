@@ -178,7 +178,7 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 controller: scrollController,
                 scrollDirection: Axis.horizontal,
                 itemCount: widget.selectedCodes.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                separatorBuilder: (_, _) => const SizedBox(width: 16),
                 itemBuilder: (context, index) {
                   final code = widget.selectedCodes[index];
                   final iconData = code.display.isCustomIcon

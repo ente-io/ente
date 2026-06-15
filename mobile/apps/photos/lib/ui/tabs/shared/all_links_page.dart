@@ -236,7 +236,7 @@ class _AllLinksPageState extends State<AllLinksPage> {
                     onLongPress: () => _toggleMemoryShareSelection(share),
                   );
                 },
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),

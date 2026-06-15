@@ -47,7 +47,7 @@ class EntityGateway {
       "/user-entity/entity",
       data: {
         "encryptedData": encryptedData,
-        if (id != null) "id": id,
+        "id": ?id,
         "header": header,
         "type": type.name,
       },

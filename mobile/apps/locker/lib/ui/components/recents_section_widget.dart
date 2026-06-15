@@ -189,10 +189,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       layoutBuilder: (currentChild, previousChildren) {
         return Stack(
           alignment: Alignment.topCenter,
-          children: <Widget>[
-            ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
+          children: <Widget>[...previousChildren, ?currentChild],
         );
       },
       child: _displayedFiles.isEmpty

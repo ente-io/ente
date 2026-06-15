@@ -75,7 +75,7 @@ class _MapViewState extends State<MapView> {
           mapController: widget.controller,
           options: MapOptions(
             onTap: widget.onTap != null
-                ? (_, __) {
+                ? (_, _) {
                     widget.onTap!.call();
                   }
                 : null,

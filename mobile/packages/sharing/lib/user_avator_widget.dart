@@ -77,7 +77,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
     final double size = getAvatarSize(widget.type);
     return ValueListenableBuilder<int>(
       valueListenable: ContactsDisplayService.instance.changes,
-      builder: (context, __, ___) {
+      builder: (context, _, _) {
         _preloadProfilePictureIfPossible();
         return SizedBox(
           height: size,
@@ -231,7 +231,7 @@ class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: ContactsDisplayService.instance.changes,
-      builder: (context, __, ___) {
+      builder: (context, _, _) {
         _preloadProfilePictureIfPossible();
         final profilePictureBytes = ContactsDisplayService.instance
             .getCachedProfilePictureBytes(

@@ -811,8 +811,7 @@ class MemoryLaneService {
         "faces": faces.map((face) => face.toJson()).toList(),
         "minYears": _minimumYears,
         "minFaces": _minimumFacesPerYear,
-        if (minCreationTimeMicros != null)
-          "minCreationTime": minCreationTimeMicros,
+        "minCreationTime": ?minCreationTimeMicros,
       },
       taskName: "faces_timeline_select_${person.remoteID}",
     );

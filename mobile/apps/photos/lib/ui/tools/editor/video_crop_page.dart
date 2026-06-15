@@ -107,7 +107,7 @@ class _VideoCropPageState extends State<VideoCropPage> {
               ),
               AnimatedBuilder(
                 animation: widget.controller,
-                builder: (_, __) => VideoEditorMainActions(
+                builder: (_, _) => VideoEditorMainActions(
                   children: [
                     _buildCropButton(context, CropValue.free),
                     const SizedBox(width: 24),

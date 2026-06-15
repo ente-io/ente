@@ -837,7 +837,7 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                                 ),
                               );
                             },
-                            separatorBuilder: (_, __) => const SizedBox(
+                            separatorBuilder: (_, _) => const SizedBox(
                               height: ThumbnailListItem.defaultItemSpacing,
                             ),
                             itemCount:
