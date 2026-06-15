@@ -56,10 +56,7 @@ struct CreateLegacyKitRequest {
 
 #[test]
 fn full_e2e() -> TestResult {
-    match std::env::var("ENTE_E2E_ENDPOINT") {
-        Ok(endpoint) => run_stages(&endpoint),
-        Err(_) => Fixture::run(|fixture| run_stages(fixture.endpoint())),
-    }
+    Fixture::run(|fixture| run_stages(fixture.endpoint()))
 }
 
 fn run_stages(endpoint: &str) -> TestResult {

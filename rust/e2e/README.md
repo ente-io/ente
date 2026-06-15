@@ -15,12 +15,6 @@ run it:
 cargo test -p ente-e2e --features museum,pglite
 ```
 
-For ad hoc runs against an already-running server (skips the fixture):
-
-```sh
-ENTE_E2E_ENDPOINT=http://localhost:8080 cargo test -p ente-e2e --features museum,pglite -- --nocapture
-```
-
 To skip or select stages:
 
 ```sh
