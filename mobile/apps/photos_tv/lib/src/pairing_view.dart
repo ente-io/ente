@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos_tv/src/loading_widget.dart';
 
 /// Pairing screen for entering TV code in Ente Photos.
 class PairingView extends StatelessWidget {
@@ -35,10 +36,12 @@ class PairingView extends StatelessWidget {
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 32),
-              if (pairingCode == null)
-                const CircularProgressIndicator()
-              else
-                _PairingCode(code: pairingCode!),
+              SizedBox(
+                height: _pairingCodeHeight,
+                child: pairingCode == null
+                    ? const EnteLoadingWidget(size: 24)
+                    : _PairingCode(code: pairingCode!),
+              ),
               const SizedBox(height: 24),
               if (error != null)
                 TextButton(onPressed: onRetry, child: Text('Retry: $error'))
@@ -73,7 +76,7 @@ class _PairingCode extends StatelessWidget {
               _pairingCodeColors[index % _pairingCodeColors.length];
           return Container(
             width: 80,
-            height: 92,
+            height: _pairingCodeHeight,
             alignment: Alignment.center,
             color: backgroundColor,
             child: Text(
@@ -93,6 +96,7 @@ class _PairingCode extends StatelessWidget {
   }
 }
 
+const _pairingCodeHeight = 92.0;
 const _pairingCodeDarkBackground = Color(0xFF2E2E2E);
 const _pairingCodeLightBackground = Color(0xFF5E5E5E);
 const _pairingCodeColors = [
