@@ -1,7 +1,7 @@
 /// API origin for Ente Photos TV.
 const apiOrigin = String.fromEnvironment(
   'endpoint',
-  defaultValue: 'https://api.ente.io',
+  defaultValue: 'https://api.ente.com',
 );
 
 /// Cast worker origin for Ente Photos TV.
