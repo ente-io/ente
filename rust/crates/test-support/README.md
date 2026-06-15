@@ -1,22 +1,19 @@
 # ente-test-support
 
-A test fixture that runs a local Museum backed by in-memory Postgres
-([pglite](https://pglite.dev)), used by the `ente-rs` and `ente-e2e` integration
-tests.
+Runs a local Museum backed by a temporary Postgres
+([postgresql_embedded](https://crates.io/crates/postgresql_embedded)) for the
+`ente-rs` and `ente-e2e` integration tests.
 
 ## Setup
 
-Requires `go` and `node` on PATH. Install the pglite dependency once:
-
-```sh
-npm ci --prefix rust/crates/test-support/pglite
-```
+Requires `go` on PATH (to build and run Museum). The Postgres binary is
+downloaded and cached automatically on first use.
 
 ## Usage
 
-Tests that use the fixture are gated behind the `museum` and `pglite` Cargo
-features, so a plain `cargo test` skips them:
+Tests that use it are gated behind the `museum` Cargo feature, so a plain
+`cargo test` skips them:
 
 ```sh
-cargo test -p ente-e2e --features museum,pglite
+cargo test -p ente-e2e --features museum
 ```

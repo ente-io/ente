@@ -1,33 +1,33 @@
 mod support;
 
 use reqwest::Url;
-use support::{Cli, Fixture, TestResult};
+use support::{Cli, Museum, TestResult};
 use uuid::Uuid;
 
 const PASTE_PASSWORD_ENV: &str = "ENTE_PASTE_PASSWORD";
 
 #[test]
 fn paste() -> TestResult {
-    Fixture::run(|fixture| {
-        full_link_roundtrip(fixture)?;
-        token_and_key_roundtrip(fixture)?;
-        stdin_roundtrip(fixture)?;
-        password_protected_roundtrip(fixture)?;
-        wrong_password_consumes_password_protected_paste(fixture)?;
-        consumed_password_paste_checks_availability_before_password(fixture)
+    Museum::run(|museum| {
+        full_link_roundtrip(museum)?;
+        token_and_key_roundtrip(museum)?;
+        stdin_roundtrip(museum)?;
+        password_protected_roundtrip(museum)?;
+        wrong_password_consumes_password_protected_paste(museum)?;
+        consumed_password_paste_checks_availability_before_password(museum)
     })
 }
 
-fn full_link_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = support::cli_session(fixture, "full-link")?;
+fn full_link_roundtrip(museum: &Museum) -> TestResult {
+    let cli = support::cli_session(museum, "full-link")?;
     let text = unique_text("full-link");
-    let link = create_paste(&cli, fixture, &text)?;
+    let link = create_paste(&cli, museum, &text)?;
 
     let consumed = cli.run_ok(&[
         "paste",
         "consume",
         "--endpoint",
-        fixture.endpoint(),
+        museum.endpoint(),
         &link.raw,
     ])?;
     assert_eq!(consumed, text);
@@ -36,7 +36,7 @@ fn full_link_roundtrip(fixture: &Fixture) -> TestResult {
         "paste",
         "consume",
         "--endpoint",
-        fixture.endpoint(),
+        museum.endpoint(),
         &link.raw,
     ])?;
     assert!(
@@ -53,16 +53,16 @@ fn full_link_roundtrip(fixture: &Fixture) -> TestResult {
     Ok(())
 }
 
-fn token_and_key_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = support::cli_session(fixture, "token-key")?;
+fn token_and_key_roundtrip(museum: &Museum) -> TestResult {
+    let cli = support::cli_session(museum, "token-key")?;
     let text = unique_text("token-key");
-    let link = create_paste(&cli, fixture, &text)?;
+    let link = create_paste(&cli, museum, &text)?;
 
     let consumed = cli.run_ok(&[
         "paste",
         "consume",
         "--endpoint",
-        fixture.endpoint(),
+        museum.endpoint(),
         "--key",
         &link.key,
         &link.token,
@@ -72,8 +72,8 @@ fn token_and_key_roundtrip(fixture: &Fixture) -> TestResult {
     Ok(())
 }
 
-fn stdin_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = support::cli_session(fixture, "stdin")?;
+fn stdin_roundtrip(museum: &Museum) -> TestResult {
+    let cli = support::cli_session(museum, "stdin")?;
     let text = format!(
         "paste stdin scenario {}\n\nsecond line stays intact\n",
         Uuid::new_v4()
@@ -83,19 +83,19 @@ fn stdin_roundtrip(fixture: &Fixture) -> TestResult {
             "paste",
             "create",
             "--endpoint",
-            fixture.endpoint(),
+            museum.endpoint(),
             "--paste-origin",
-            fixture.paste_origin(),
+            museum.paste_origin(),
         ],
         &text,
     )?;
-    let link = PasteLink::parse(link.trim(), fixture.paste_origin());
+    let link = PasteLink::parse(link.trim(), museum.paste_origin());
 
     let consumed = cli.run_ok(&[
         "paste",
         "consume",
         "--endpoint",
-        fixture.endpoint(),
+        museum.endpoint(),
         &link.raw,
     ])?;
     assert_eq!(consumed, text);
@@ -103,11 +103,11 @@ fn stdin_roundtrip(fixture: &Fixture) -> TestResult {
     Ok(())
 }
 
-fn password_protected_roundtrip(fixture: &Fixture) -> TestResult {
-    let cli = support::cli_session(fixture, "password-protected")?;
+fn password_protected_roundtrip(museum: &Museum) -> TestResult {
+    let cli = support::cli_session(museum, "password-protected")?;
     let text = unique_text("password-protected");
     let password = format!("password {}", Uuid::new_v4());
-    let link = create_password_paste(&cli, fixture, &text, &password)?;
+    let link = create_password_paste(&cli, museum, &text, &password)?;
     let env = [(PASTE_PASSWORD_ENV, password.as_str())];
     assert!(link.password_required);
 
@@ -116,7 +116,7 @@ fn password_protected_roundtrip(fixture: &Fixture) -> TestResult {
             "paste",
             "consume",
             "--endpoint",
-            fixture.endpoint(),
+            museum.endpoint(),
             &link.raw,
         ],
         &env,
@@ -126,11 +126,11 @@ fn password_protected_roundtrip(fixture: &Fixture) -> TestResult {
     Ok(())
 }
 
-fn wrong_password_consumes_password_protected_paste(fixture: &Fixture) -> TestResult {
-    let cli = support::cli_session(fixture, "wrong-password")?;
+fn wrong_password_consumes_password_protected_paste(museum: &Museum) -> TestResult {
+    let cli = support::cli_session(museum, "wrong-password")?;
     let text = unique_text("wrong-password");
     let password = format!("password {}", Uuid::new_v4());
-    let link = create_password_paste(&cli, fixture, &text, &password)?;
+    let link = create_password_paste(&cli, museum, &text, &password)?;
 
     let wrong_env = [(PASTE_PASSWORD_ENV, "wrong password")];
     let wrong = cli.run_with_env(
@@ -138,7 +138,7 @@ fn wrong_password_consumes_password_protected_paste(fixture: &Fixture) -> TestRe
             "paste",
             "consume",
             "--endpoint",
-            fixture.endpoint(),
+            museum.endpoint(),
             &link.raw,
         ],
         &wrong_env,
@@ -159,7 +159,7 @@ fn wrong_password_consumes_password_protected_paste(fixture: &Fixture) -> TestRe
             "paste",
             "consume",
             "--endpoint",
-            fixture.endpoint(),
+            museum.endpoint(),
             &link.raw,
         ],
         &correct_env,
@@ -178,11 +178,11 @@ fn wrong_password_consumes_password_protected_paste(fixture: &Fixture) -> TestRe
     Ok(())
 }
 
-fn consumed_password_paste_checks_availability_before_password(fixture: &Fixture) -> TestResult {
-    let cli = support::cli_session(fixture, "consumed-password")?;
+fn consumed_password_paste_checks_availability_before_password(museum: &Museum) -> TestResult {
+    let cli = support::cli_session(museum, "consumed-password")?;
     let text = unique_text("consumed-password");
     let password = format!("password {}", Uuid::new_v4());
-    let link = create_password_paste(&cli, fixture, &text, &password)?;
+    let link = create_password_paste(&cli, museum, &text, &password)?;
     let env = [(PASTE_PASSWORD_ENV, password.as_str())];
 
     let consumed = cli.run_ok_with_env(
@@ -190,7 +190,7 @@ fn consumed_password_paste_checks_availability_before_password(fixture: &Fixture
             "paste",
             "consume",
             "--endpoint",
-            fixture.endpoint(),
+            museum.endpoint(),
             &link.raw,
         ],
         &env,
@@ -203,7 +203,7 @@ fn consumed_password_paste_checks_availability_before_password(fixture: &Fixture
             "paste",
             "consume",
             "--endpoint",
-            fixture.endpoint(),
+            museum.endpoint(),
             &link.raw,
         ],
         &invalid_env,
@@ -226,22 +226,22 @@ fn consumed_password_paste_checks_availability_before_password(fixture: &Fixture
     Ok(())
 }
 
-fn create_paste(cli: &Cli, fixture: &Fixture, text: &str) -> TestResult<PasteLink> {
+fn create_paste(cli: &Cli, museum: &Museum, text: &str) -> TestResult<PasteLink> {
     let link = cli.run_ok(&[
         "paste",
         "create",
         "--endpoint",
-        fixture.endpoint(),
+        museum.endpoint(),
         "--paste-origin",
-        fixture.paste_origin(),
+        museum.paste_origin(),
         text,
     ])?;
-    Ok(PasteLink::parse(link.trim(), fixture.paste_origin()))
+    Ok(PasteLink::parse(link.trim(), museum.paste_origin()))
 }
 
 fn create_password_paste(
     cli: &Cli,
-    fixture: &Fixture,
+    museum: &Museum,
     text: &str,
     password: &str,
 ) -> TestResult<PasteLink> {
@@ -251,15 +251,15 @@ fn create_password_paste(
             "paste",
             "create",
             "--endpoint",
-            fixture.endpoint(),
+            museum.endpoint(),
             "--paste-origin",
-            fixture.paste_origin(),
+            museum.paste_origin(),
             "--password",
             text,
         ],
         &env,
     )?;
-    Ok(PasteLink::parse(link.trim(), fixture.paste_origin()))
+    Ok(PasteLink::parse(link.trim(), museum.paste_origin()))
 }
 
 fn unique_text(scope: &str) -> String {

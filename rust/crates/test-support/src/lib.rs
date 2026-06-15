@@ -1,15 +1,14 @@
-//! Shared fixture for integration tests that need a live Museum.
+//! A live Museum for integration tests.
 //!
-//! [`Fixture`] spins up a local Museum server backed by an in-memory Postgres
-//! using [pglite](https://pglite.dev). See the crate README for requirements
-//! and the one-time npm setup.
+//! [`Museum`] spins up a local Museum server backed by a temporary local
+//! Postgres ([postgresql_embedded]). See the crate README for requirements.
 
-mod fixture;
 mod museum;
-mod pglite;
+mod postgres;
 mod process;
+mod server;
 
-pub use fixture::Fixture;
+pub use museum::Museum;
 
 pub type TestResult<T = ()> = Result<T, Box<dyn std::error::Error>>;
 

@@ -4,11 +4,10 @@ edition = "2024"
 
 [features]
 museum = []
-pglite = []
 
 [[test]]
 name = "full_e2e"
-required-features = ["museum", "pglite"]
+required-features = ["museum"]
 
 [dependencies]
 ente-accounts.workspace = true

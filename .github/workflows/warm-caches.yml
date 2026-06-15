@@ -127,9 +127,9 @@ jobs:
                   workspaces: rust
                   shared-key: rust-cli
 
-            - run: cargo test -p ente-rs --features museum,pglite --locked --no-run
+            - run: cargo test -p ente-rs --features museum --locked --no-run
 
-            - run: cargo test -p ente-e2e --features museum,pglite --locked --no-run
+            - run: cargo test -p ente-e2e --features museum --locked --no-run
 
     ensu-android:
         # For ensu-android-build.yml.

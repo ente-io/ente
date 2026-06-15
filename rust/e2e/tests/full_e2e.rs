@@ -8,7 +8,7 @@ use ente_contacts::{
 };
 use ente_core::http::Error as CoreHttpError;
 use ente_rs::models::account::App;
-use ente_test_support::{Fixture, TestResult};
+use ente_test_support::{Museum, TestResult};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
@@ -56,7 +56,7 @@ struct CreateLegacyKitRequest {
 
 #[test]
 fn full_e2e() -> TestResult {
-    Fixture::run(|fixture| run_stages(fixture.endpoint()))
+    Museum::run(|museum| run_stages(museum.endpoint()))
 }
 
 fn run_stages(endpoint: &str) -> TestResult {

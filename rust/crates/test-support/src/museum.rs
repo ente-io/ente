@@ -1,116 +1,142 @@
 use std::{
     fs,
-    io::{Read, Write},
-    net::TcpStream,
-    path::Path,
-    process::Command,
-    time::{Duration, Instant},
+    net::TcpListener,
+    path::{Path, PathBuf},
 };
 
-use crate::{
-    HARDCODED_OTT, HARDCODED_OTT_EMAIL_SUFFIX, LOCAL_HOST, TestResult, process::ChildProcess,
-};
+use uuid::Uuid;
 
-pub fn start(
-    server_dir: &Path,
-    log_dir: &Path,
-    config_file: &Path,
-    museum_port: u16,
-) -> TestResult<ChildProcess> {
-    require_go()?;
+use crate::{LOCAL_HOST, TestResult, postgres, process::ChildProcess, server};
 
-    let mut command = Command::new("go");
-    command
-        .arg("run")
-        .arg("./cmd/museum")
-        .current_dir(server_dir)
-        .env("ENTE_CREDENTIALS_FILE", config_file);
-
-    let mut museum = ChildProcess::spawn("museum", &mut command, log_dir)?;
-    wait_for_museum(&mut museum, museum_port)?;
-    Ok(museum)
+pub struct Museum {
+    _museum: ChildProcess,
+    _postgres: postgres::Postgres,
+    temp_dir: TempDir,
+    endpoint: String,
+    paste_origin: String,
 }
 
-pub fn write_config(
-    path: &Path,
-    museum_port: u16,
-    pglite_port: u16,
-    paste_origin: &str,
-) -> TestResult {
-    fs::write(
-        path,
-        format!(
-            r#"http:
-    port: {museum_port}
+impl Museum {
+    pub fn run(test: impl FnOnce(&Self) -> TestResult) -> TestResult {
+        let mut museum = Self::start()?;
+        let result = test(&museum);
+        if result.is_err() {
+            museum.retain_temp_dir();
+        }
+        result
+    }
 
-apps:
-    public-paste: "{paste_origin}"
+    pub fn start() -> TestResult<Self> {
+        let paths = Paths::discover()?;
+        let mut temp_dir = TempDir::new("ente-test")?;
+        let log_dir = temp_dir.path().join("logs");
+        let museum_port = free_port()?;
+        let paste_origin = format!("http://{LOCAL_HOST}");
+        let endpoint = format!("http://{LOCAL_HOST}:{museum_port}");
+        let museum_config_file = temp_dir.path().join("museum.yaml");
 
-db:
-    host: {LOCAL_HOST}
-    port: {pglite_port}
-    name: postgres
-    user: postgres
-    password: ""
-    sslmode: disable
+        let result = (|| {
+            server::write_config(&museum_config_file, museum_port, &paste_origin)?;
+            let postgres = postgres::start()?;
+            let museum = server::start(
+                &paths.server_dir,
+                &log_dir,
+                &museum_config_file,
+                museum_port,
+                &postgres,
+            )?;
+            Ok((postgres, museum))
+        })();
 
-s3:
-    are_local_buckets: true
-    b2-eu-cen:
-        key: changeme
-        secret: changeme1234
-        endpoint: localhost:3200
-        region: eu-central-2
-        bucket: b2-eu-cen
+        let (postgres, museum) = match result {
+            Ok(processes) => processes,
+            Err(error) => {
+                temp_dir.retain();
+                return Err(error);
+            }
+        };
 
-internal:
-    hardcoded-ott:
-        local-domain-suffix: "{HARDCODED_OTT_EMAIL_SUFFIX}"
-        local-domain-value: {HARDCODED_OTT}
+        Ok(Self {
+            _museum: museum,
+            _postgres: postgres,
+            temp_dir,
+            endpoint,
+            paste_origin,
+        })
+    }
 
-jobs:
-    cron:
-        skip: true
-"#
-        ),
-    )?;
-    Ok(())
-}
+    pub fn endpoint(&self) -> &str {
+        &self.endpoint
+    }
 
-fn require_go() -> TestResult {
-    match Command::new("go").arg("version").output() {
-        Ok(output) if output.status.success() => Ok(()),
-        _ => Err("Museum live tests require `go` on PATH".into()),
+    pub fn paste_origin(&self) -> &str {
+        &self.paste_origin
+    }
+
+    pub fn temp_dir(&self) -> &Path {
+        self.temp_dir.path()
+    }
+
+    pub fn retain_temp_dir(&mut self) {
+        self.temp_dir.retain();
     }
 }
 
-fn wait_for_museum(process: &mut ChildProcess, port: u16) -> TestResult {
-    let deadline = Instant::now() + Duration::from_secs(90);
-    loop {
-        process.ensure_running()?;
-        if ping(port)? {
-            return Ok(());
-        }
-        if Instant::now() >= deadline {
-            return Err(format!(
-                "Museum did not become ready at http://{LOCAL_HOST}:{port}/ping\n{}",
-                process.log_summary()
-            )
-            .into());
-        }
-        std::thread::sleep(Duration::from_millis(500));
+struct Paths {
+    server_dir: PathBuf,
+}
+
+impl Paths {
+    fn discover() -> TestResult<Self> {
+        let crate_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let repo_dir = crate_dir
+            .parent()
+            .and_then(Path::parent)
+            .and_then(Path::parent)
+            .ok_or("failed to resolve repository directory")?;
+
+        Ok(Self {
+            server_dir: repo_dir.join("server"),
+        })
     }
 }
 
-fn ping(port: u16) -> TestResult<bool> {
-    let mut stream = match TcpStream::connect((LOCAL_HOST, port)) {
-        Ok(stream) => stream,
-        Err(_) => return Ok(false),
-    };
-    stream.set_read_timeout(Some(Duration::from_secs(2)))?;
-    stream.write_all(b"GET /ping HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n")?;
+struct TempDir {
+    path: PathBuf,
+    retained: bool,
+}
 
-    let mut response = String::new();
-    stream.read_to_string(&mut response)?;
-    Ok(response.starts_with("HTTP/1.1 200") || response.starts_with("HTTP/1.0 200"))
+impl TempDir {
+    fn new(prefix: &str) -> TestResult<Self> {
+        let path = std::env::temp_dir().join(format!("{prefix}-{}", Uuid::new_v4()));
+        fs::create_dir_all(&path)?;
+        Ok(Self {
+            path,
+            retained: false,
+        })
+    }
+
+    fn path(&self) -> &Path {
+        &self.path
+    }
+
+    fn retain(&mut self) {
+        eprintln!(
+            "retaining integration test temp dir: {}",
+            self.path.display()
+        );
+        self.retained = true;
+    }
+}
+
+impl Drop for TempDir {
+    fn drop(&mut self) {
+        if !self.retained {
+            let _ = fs::remove_dir_all(&self.path);
+        }
+    }
+}
+
+fn free_port() -> TestResult<u16> {
+    Ok(TcpListener::bind((LOCAL_HOST, 0))?.local_addr()?.port())
 }

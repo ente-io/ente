@@ -9,11 +9,10 @@ license = "AGPL-3.0-only"
 
 [features]
 museum = []
-pglite = []
 
 [[test]]
 name = "paste"
-required-features = ["museum", "pglite"]
+required-features = ["museum"]
 
 [dependencies]
 # CLI
