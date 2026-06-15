@@ -2542,10 +2542,7 @@
     {
       "title": "Coincheck",
       "slug": "coincheck",
-      "altNames": [
-      "コインチェック",
-      "coincheck"
-      ]
+      "altNames": "コインチェック"
     }
   ]
 }
