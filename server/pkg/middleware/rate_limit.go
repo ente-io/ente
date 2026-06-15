@@ -198,12 +198,23 @@ func isAuthenticatedUploadURLPath(reqPath string) bool {
 // getLimiter, based on reqPath & reqMethod, return instance of limiter.Limiter which needs to
 // be applied for a request. It returns nil if the request is not rate limited
 func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limiter.Limiter {
-	if reqPath == "/users/public-key" ||
-		reqPath == "/custom-domain" {
+	if strings.HasPrefix(reqPath, "/files/preview/") {
+		return r.limit700ReqPerSec
+	}
+	if isAuthenticatedUploadURLPath(reqPath) {
+		return r.limit500ReqPerMin
+	}
+	if isPublicCollectionUploadURLPath(reqPath) {
+		return r.limit250ReqPerMin
+	}
+	if reqPath == "/users/public-key" {
 		return r.limit200ReqPerMin
 	}
 	if reqPath == "/paste/guard" || reqPath == "/paste/consume" {
 		return r.limit200ReqPerMin
+	}
+	if reqPath == "/custom-domain" {
+		return r.limit500ReqPerMin
 	}
 	if reqPath == "/users/ott" ||
 		reqPath == "/users/verify-email" ||
@@ -224,9 +235,6 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		strings.HasPrefix(reqPath, "/users/two-factor/") {
 		return r.limit10ReqPerMin
 	}
-	if strings.HasPrefix(reqPath, "/files/preview/") {
-		return r.limit700ReqPerSec
-	}
 	if reqPath == "/public-collection/anon-identity" {
 		return r.limit10ReqPerMin
 	}
@@ -234,12 +242,6 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		strings.HasPrefix(reqPath, "/public-collection/reactions")) &&
 		(reqMethod == http.MethodPost || reqMethod == http.MethodPut || reqMethod == http.MethodDelete) {
 		return r.limit200ReqPerMin
-	}
-	if isPublicCollectionUploadURLPath(reqPath) {
-		return r.limit250ReqPerMin
-	}
-	if isAuthenticatedUploadURLPath(reqPath) {
-		return r.limit500ReqPerMin
 	}
 	return nil
 }
