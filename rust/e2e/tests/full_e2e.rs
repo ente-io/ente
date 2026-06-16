@@ -469,7 +469,7 @@ async fn run_legacy_kit_stage(endpoint: &str, owner: &mut legacy_kit::LegacyKitO
             kit_id: waiting_kit.kit.id.clone(),
             challenge: invalid_challenge.encrypted_challenge,
             used_part_indexes: None,
-            email: Some("bad-beneficiary@ente-rust-test.org".into()),
+            email: Some("bad-beneficiary@example.org".into()),
         })
         .send()
         .await
@@ -532,7 +532,7 @@ async fn run_legacy_kit_stage(endpoint: &str, owner: &mut legacy_kit::LegacyKitO
         .open_from_encrypted_challenge(
             &downloaded_shares[0..2],
             &first_waiting_challenge.encrypted_challenge,
-            Some("beneficiary@ente-rust-test.org"),
+            Some("beneficiary@example.org"),
         )
         .await
         .expect("legacy kit waiting recovery open failed");
@@ -662,10 +662,7 @@ async fn run_legacy_kit_stage(endpoint: &str, owner: &mut legacy_kit::LegacyKitO
         .await
         .expect("immediate legacy kit create failed");
     let ready_handle = recovery_client
-        .open_from_shares(
-            &immediate_kit.shares[0..2],
-            Some("beneficiary@ente-rust-test.org"),
-        )
+        .open_from_shares(&immediate_kit.shares[0..2], Some("beneficiary@example.org"))
         .await
         .expect("immediate legacy kit recovery open failed");
     assert_eq!(

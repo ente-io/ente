@@ -1,15 +1,19 @@
 use std::{
     fs,
-    net::TcpListener,
     path::{Path, PathBuf},
 };
 
 use uuid::Uuid;
 
-use crate::{LOCAL_HOST, TestResult, postgres, process::ChildProcess, server};
+use crate::{LOCAL_HOST, TestResult, free_port, postgres, process::ChildProcess, server};
 
+/// A running Museum for integration tests, backed by a temporary Postgres.
+///
+/// Created with [`Museum::run`], which boots both, runs the test, and tears
+/// everything down on drop. The temporary directory is removed unless the test
+/// fails, in which case it is retained for inspection.
 pub struct Museum {
-    _museum: ChildProcess,
+    _server: ChildProcess,
     _postgres: postgres::Postgres,
     temp_dir: TempDir,
     endpoint: String,
@@ -17,17 +21,21 @@ pub struct Museum {
 }
 
 impl Museum {
+    /// Boot a Museum, run `test` against it, then tear everything down.
+    ///
+    /// On failure the temporary directory is retained (its path is printed to
+    /// stderr) so the museum and Postgres logs can be inspected.
     pub fn run(test: impl FnOnce(&Self) -> TestResult) -> TestResult {
         let mut museum = Self::start()?;
         let result = test(&museum);
         if result.is_err() {
-            museum.retain_temp_dir();
+            museum.temp_dir.retain();
         }
         result
     }
 
-    pub fn start() -> TestResult<Self> {
-        let paths = Paths::discover()?;
+    fn start() -> TestResult<Self> {
+        let server_dir = server_dir()?;
         let mut temp_dir = TempDir::new("ente-test")?;
         let log_dir = temp_dir.path().join("logs");
         let museum_port = free_port()?;
@@ -38,17 +46,17 @@ impl Museum {
         let result = (|| {
             server::write_config(&museum_config_file, museum_port, &paste_origin)?;
             let postgres = postgres::start()?;
-            let museum = server::start(
-                &paths.server_dir,
+            let server = server::start(
+                &server_dir,
                 &log_dir,
                 &museum_config_file,
                 museum_port,
                 &postgres,
             )?;
-            Ok((postgres, museum))
+            Ok((postgres, server))
         })();
 
-        let (postgres, museum) = match result {
+        let (postgres, server) = match result {
             Ok(processes) => processes,
             Err(error) => {
                 temp_dir.retain();
@@ -57,7 +65,7 @@ impl Museum {
         };
 
         Ok(Self {
-            _museum: museum,
+            _server: server,
             _postgres: postgres,
             temp_dir,
             endpoint,
@@ -65,40 +73,31 @@ impl Museum {
         })
     }
 
+    /// The base URL of the running Museum, e.g. `http://127.0.0.1:1234`.
     pub fn endpoint(&self) -> &str {
         &self.endpoint
     }
 
+    /// The origin Museum uses when generating public paste links.
     pub fn paste_origin(&self) -> &str {
         &self.paste_origin
     }
 
+    /// A scratch directory tied to this Museum's lifetime, for test-local files.
     pub fn temp_dir(&self) -> &Path {
         self.temp_dir.path()
     }
-
-    pub fn retain_temp_dir(&mut self) {
-        self.temp_dir.retain();
-    }
 }
 
-struct Paths {
-    server_dir: PathBuf,
-}
-
-impl Paths {
-    fn discover() -> TestResult<Self> {
-        let crate_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let repo_dir = crate_dir
-            .parent()
-            .and_then(Path::parent)
-            .and_then(Path::parent)
-            .ok_or("failed to resolve repository directory")?;
-
-        Ok(Self {
-            server_dir: repo_dir.join("server"),
-        })
-    }
+/// The repository's `server/` directory, which Museum is run from.
+fn server_dir() -> TestResult<PathBuf> {
+    let crate_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let repo_dir = crate_dir
+        .parent()
+        .and_then(Path::parent)
+        .and_then(Path::parent)
+        .ok_or("failed to resolve repository directory")?;
+    Ok(repo_dir.join("server"))
 }
 
 struct TempDir {
@@ -135,8 +134,4 @@ impl Drop for TempDir {
             let _ = fs::remove_dir_all(&self.path);
         }
     }
-}
-
-fn free_port() -> TestResult<u16> {
-    Ok(TcpListener::bind((LOCAL_HOST, 0))?.local_addr()?.port())
 }

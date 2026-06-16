@@ -1,9 +1,7 @@
-use std::net::TcpListener;
-
 use postgresql_embedded::Settings;
 use postgresql_embedded::blocking::PostgreSQL;
 
-use crate::{LOCAL_HOST, TestResult};
+use crate::{LOCAL_HOST, TestResult, free_port};
 
 const DATABASE: &str = "ente";
 
@@ -46,8 +44,4 @@ pub fn start() -> TestResult<Postgres> {
     inner.start()?;
     inner.create_database(DATABASE)?;
     Ok(Postgres { inner })
-}
-
-fn free_port() -> TestResult<u16> {
-    Ok(TcpListener::bind((LOCAL_HOST, 0))?.local_addr()?.port())
 }

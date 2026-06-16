@@ -53,6 +53,7 @@ apps:
     public-paste: "{paste_origin}"
 
 s3:
+    # Museum requires S3 credentials at boot; no current test exercises object storage.
     are_local_buckets: true
     b2-eu-cen:
         key: changeme
