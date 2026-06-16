@@ -59,9 +59,9 @@ class BillingService {
   }
 
   Future<Subscription> verifySubscription(
-    final productID,
-    final verificationData, {
-    final paymentProvider,
+    final String productID,
+    final String verificationData, {
+    final String? paymentProvider,
   }) async {
     try {
       return await _gateway.verifySubscription(

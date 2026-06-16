@@ -61,9 +61,9 @@ class BillingService {
   }
 
   Future<Subscription> verifySubscription(
-    final productID,
-    final verificationData, {
-    final paymentProvider,
+    final String productID,
+    final String verificationData, {
+    final String? paymentProvider,
   }) async {
     try {
       final response = await _dio.post(

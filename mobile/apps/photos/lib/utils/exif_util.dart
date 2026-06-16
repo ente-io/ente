@@ -84,7 +84,7 @@ Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
       return null;
     }
 
-    final properties = await FFProbeProps.parseData(mediaInfo);
+    final properties = FFProbeProps.parseData(mediaInfo);
     _logger.info("getVideoPropsAsync took ${stopwatch.elapsedMilliseconds}ms");
 
     stopwatch.stop();
