@@ -12,7 +12,11 @@ class PlatformUtil {
       ? cupertinoTextSelectionControls
       : desktopTextSelectionControls;
 
-  static openWebView(BuildContext context, String title, String url) async {
+  static Future<void> openWebView(
+    BuildContext context,
+    String title,
+    String url,
+  ) async {
     // For desktop, always open in external browser
     // For mobile, open in external browser (apps can override this if they have web view)
     await launchUrlString(url);

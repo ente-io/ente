@@ -24,7 +24,7 @@ class IndexOfStackNotifier with ChangeNotifier {
     setIndex();
   }
 
-  setIndex() {
+  void setIndex() {
     _prevIndex = _index;
 
     if (_isSearchQueryEmpty) {
@@ -39,5 +39,5 @@ class IndexOfStackNotifier with ChangeNotifier {
     _prevIndex != _index ? notifyListeners() : null;
   }
 
-  get index => _index;
+  int get index => _index;
 }

@@ -180,7 +180,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
     );
   }
 
-  _selectedFilesListener() {
+  void _selectedFilesListener() {
     _hasSelectedFilesNotifier.value = widget.selectedFiles.files.isNotEmpty;
   }
 

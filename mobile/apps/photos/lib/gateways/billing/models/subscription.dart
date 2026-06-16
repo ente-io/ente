@@ -52,8 +52,7 @@ class Subscription {
     return productID == freeProductID;
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
+  static Subscription fromMap(Map<String, dynamic> map) {
     return Subscription(
       productID: map['productID'],
       storage: map['storage'],

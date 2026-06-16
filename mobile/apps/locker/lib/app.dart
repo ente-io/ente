@@ -44,7 +44,7 @@ class _AppState extends State<App>
   late StreamSubscription<SignedOutEvent> _signedOutEvent;
   late StreamSubscription<SignedInEvent> _signedInEvent;
   Locale? locale;
-  setLocale(Locale newLocale) {
+  void setLocale(Locale newLocale) {
     setState(() {
       locale = newLocale;
     });

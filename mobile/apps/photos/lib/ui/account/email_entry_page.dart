@@ -7,6 +7,7 @@ import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/account/user_service.dart';
+import "package:photos/services/install_source_service.dart";
 import "package:photos/ui/account/login_page.dart";
 import 'package:photos/ui/common/web_page.dart';
 import "package:photos/ui/settings/developer_settings_tap_area.dart";
@@ -43,6 +44,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   bool _emailIsValid = false;
   bool _showEmailValidation = false;
   bool _hasAgreedToTOS = true;
+  bool _hasInstallSource = false;
   bool _passwordsMatch = false;
   bool _passwordIsValid = false;
   bool _showPasswordStrength = false;
@@ -55,6 +57,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   void initState() {
     super.initState();
     _referralSource = widget.referralSource?.trim() ?? '';
+    if (widget.showReferralSourceField) {
+      unawaited(_updateReferralSourceFieldVisibility());
+    }
     final storedEmail = _config.getEmail();
     if (storedEmail != null && storedEmail.isNotEmpty) {
       _email = storedEmail;
@@ -112,7 +117,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               ? () async {
                   _config.setVolatilePassword(_passwordController1.text);
                   await UserService.instance.setEmail(_email!);
-                  await UserService.instance.setRefSource(_referralSource);
+                  await UserService.instance.setRefSource(
+                    await _referralSourceForSubmission(),
+                  );
                   await UserService.instance.sendOtt(
                     context,
                     _email!,
@@ -279,7 +286,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       );
                     },
                   ),
-                  if (widget.showReferralSourceField) ...[
+                  if (_showReferralSourceField) ...[
                     const SizedBox(height: 24),
                     TextInputComponent(
                       label: AppLocalizations.of(context).hearUsWhereTitle,
@@ -329,6 +336,38 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         ],
       ),
     );
+  }
+
+  bool get _showReferralSourceField =>
+      widget.showReferralSourceField && !_hasInstallSource;
+
+  String get _routeSource => widget.referralSource?.trim() ?? '';
+
+  Future<void> _updateReferralSourceFieldVisibility() async {
+    final hasInstallSource = await InstallSourceService.instance
+        .hasInstallSource();
+    _setHasInstallSource(hasInstallSource);
+  }
+
+  Future<String> _referralSourceForSubmission() async {
+    if (!widget.showReferralSourceField) {
+      return _routeSource;
+    }
+    if (_hasInstallSource) {
+      return _routeSource;
+    }
+    final hasInstallSource = await InstallSourceService.instance
+        .hasInstallSource();
+    _setHasInstallSource(hasInstallSource);
+    return hasInstallSource ? _routeSource : _referralSource;
+  }
+
+  void _setHasInstallSource(bool hasInstallSource) {
+    if (mounted && hasInstallSource != _hasInstallSource) {
+      setState(() {
+        _hasInstallSource = hasInstallSource;
+      });
+    }
   }
 
   Widget _getLoginPrompt() {

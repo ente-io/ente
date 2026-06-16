@@ -36,7 +36,7 @@ class MLResult {
   });
 
   MLResult.fromEnteFileID(
-    fileID, {
+    int fileID, {
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   }) : fileId = fileID;
 

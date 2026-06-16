@@ -9,7 +9,9 @@ import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
+import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/theme/text_style.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:locker/l10n/l10n.dart";
@@ -110,7 +112,10 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
     );
   }
 
-  Widget _buildEmailInputField(colorScheme, textTheme) {
+  Widget _buildEmailInputField(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.fillFaint,
@@ -156,7 +161,10 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
     );
   }
 
-  Widget _buildExistingContactsSection(colorScheme, textTheme) {
+  Widget _buildExistingContactsSection(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     final filteredUsers =
         _suggestedUsers
             .where(
@@ -316,7 +324,10 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
     );
   }
 
-  Widget _buildScheduleDateTimeRow(colorScheme, textTheme) {
+  Widget _buildScheduleDateTimeRow(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     final dateText = _scheduledDate != null
         ? DateFormat("dd/MM/yy").format(_scheduledDate!)
         : "DD/MM/YY";

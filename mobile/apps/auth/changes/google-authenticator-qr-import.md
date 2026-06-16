@@ -1,0 +1,1 @@
+- Improved support for importing codes from Google Authenticator QR exports.

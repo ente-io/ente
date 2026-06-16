@@ -262,7 +262,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (hasOptedBefore || result?.action == ButtonAction.first) {
       await Configuration.instance.optForOfflineMode();
       unawaited(
-        Navigator.of(context).push(
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (BuildContext context) {
               return const HomePage();

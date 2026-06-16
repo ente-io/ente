@@ -290,8 +290,7 @@ class Collection {
     return result;
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
+  static Collection fromMap(Map<String, dynamic> map) {
     final sharees = (map['sharees'] == null || map['sharees'].length == 0)
         ? <User>[]
         : List<User>.from(map['sharees'].map((x) => User.fromMap(x)));
@@ -415,9 +414,7 @@ class CollectionAttributes {
     return map;
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
+  static CollectionAttributes fromMap(Map<String, dynamic> map) {
     return CollectionAttributes(
       encryptedPath: map['encryptedPath'],
       pathDecryptionNonce: map['pathDecryptionNonce'],

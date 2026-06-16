@@ -22,7 +22,7 @@ import 'package:photos/ui/viewer/location/dynamic_location_gallery_widget.dart';
 import "package:photos/ui/viewer/location/edit_center_point_tile_widget.dart";
 import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
-showEditLocationSheet(
+void showEditLocationSheet(
   BuildContext context,
   LocalEntity<LocationTag> locationTagEntity,
 ) {
