@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
 import 'package:ente_auth/ui/components/scanner_camera_view.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
@@ -46,6 +47,8 @@ class ScannerPageState extends State<ScannerPage> {
   bool _isImportingFromGallery = false;
   bool _hasCompletedScan = false;
   bool _isHandlingGoogleAuthImport = false;
+  bool _isTogglingFlash = false;
+  bool? _isFlashOn;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -63,15 +66,18 @@ class ScannerPageState extends State<ScannerPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bool showGalleryImport = PlatformDetector.isMobile();
+    final bool showTorch = showGalleryImport && _isFlashOn != null;
+    final bool isFlashOn = _isFlashOn == true;
     final theme = Theme.of(context);
+    final colorScheme = getEnteColorScheme(context);
     final bool isLight = theme.brightness == Brightness.light;
-    final Color galleryBackgroundColor = isLight
+    final Color actionBackgroundColor = isLight
         ? Colors.black.withValues(alpha: 0.035)
         : Colors.white.withValues(alpha: 0.18);
-    final Color galleryPressedColor = isLight
+    final Color actionPressedColor = isLight
         ? Colors.black.withValues(alpha: 0.07)
         : Colors.white.withValues(alpha: 0.26);
-    final Color galleryIconColor = isLight ? Colors.black : Colors.white;
+    final Color actionIconColor = isLight ? Colors.black : Colors.white;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.scan)),
       body: Column(
@@ -80,6 +86,14 @@ class ScannerPageState extends State<ScannerPage> {
             flex: 5,
             child: ScannerCameraView(
               qrKey: qrKey,
+              overlay: QrScannerOverlayShape(
+                borderColor: colorScheme.primary700,
+                borderRadius: 12,
+                borderLength: 36,
+                borderWidth: 4,
+                cutOutSize: 260,
+                overlayColor: Colors.black.withValues(alpha: 0.45),
+              ),
               onQRViewCreated: _onQRViewCreated,
               formatsAllowed: const [BarcodeFormat.qrcode],
             ),
@@ -110,27 +124,36 @@ class ScannerPageState extends State<ScannerPage> {
                                     )
                                   : const SizedBox.shrink(),
                             ),
-                            Semantics(
-                              button: true,
-                              label: l10n.importFromGallery,
-                              child: Opacity(
-                                opacity: _isImportingFromGallery ? 0.5 : 1,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 12),
-                                  child: IconButtonWidget(
-                                    icon: Icons.photo_library_outlined,
-                                    iconButtonType: IconButtonType.rounded,
-                                    onTap: _isImportingFromGallery
-                                        ? null
-                                        : _handleImportFromGallery,
-                                    defaultColor: galleryBackgroundColor,
-                                    iconColor: galleryIconColor,
-                                    pressedColor: galleryPressedColor,
-                                    size: 28,
-                                    padding: const EdgeInsets.all(14),
-                                  ),
-                                ),
+                            if (showTorch)
+                              _scannerActionButton(
+                                label: isFlashOn
+                                    ? 'Turn off torch'
+                                    : 'Turn on torch',
+                                icon: isFlashOn
+                                    ? Icons.flashlight_on_outlined
+                                    : Icons.flashlight_off_outlined,
+                                onTap: _isTogglingFlash ? null : _toggleFlash,
+                                disabled: _isTogglingFlash,
+                                defaultColor: isFlashOn
+                                    ? colorScheme.primary700
+                                    : actionBackgroundColor,
+                                pressedColor: isFlashOn
+                                    ? colorScheme.primary500
+                                    : actionPressedColor,
+                                iconColor: isFlashOn
+                                    ? Colors.white
+                                    : actionIconColor,
                               ),
+                            _scannerActionButton(
+                              label: l10n.importFromGallery,
+                              icon: Icons.photo_library_outlined,
+                              onTap: _isImportingFromGallery
+                                  ? null
+                                  : _handleImportFromGallery,
+                              disabled: _isImportingFromGallery,
+                              defaultColor: actionBackgroundColor,
+                              pressedColor: actionPressedColor,
+                              iconColor: actionIconColor,
                             ),
                           ],
                         )
@@ -156,6 +179,84 @@ class ScannerPageState extends State<ScannerPage> {
     }
     _cancelScanSubscription();
     _scanSubscription = controller.scannedDataStream.listen(_handleScanData);
+    unawaited(_refreshFlashStatus());
+  }
+
+  Widget _scannerActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback? onTap,
+    required bool disabled,
+    required Color defaultColor,
+    required Color pressedColor,
+    required Color iconColor,
+  }) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: Opacity(
+        opacity: disabled ? 0.5 : 1,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: IconButtonWidget(
+            icon: icon,
+            iconButtonType: IconButtonType.rounded,
+            onTap: onTap,
+            defaultColor: defaultColor,
+            iconColor: iconColor,
+            pressedColor: pressedColor,
+            size: 28,
+            padding: const EdgeInsets.all(14),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _refreshFlashStatus() async {
+    if (!PlatformDetector.isMobile()) {
+      return;
+    }
+    try {
+      final flashStatus = await controller?.getFlashStatus();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isFlashOn = flashStatus;
+      });
+    } catch (e, s) {
+      _logger.warning('Failed to get scanner torch status', e, s);
+      if (mounted) {
+        setState(() {
+          _isFlashOn = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleFlash() async {
+    if (_isTogglingFlash || _isFlashOn == null) {
+      return;
+    }
+    setState(() {
+      _isTogglingFlash = true;
+    });
+    try {
+      await controller?.toggleFlash();
+      await _refreshFlashStatus();
+    } catch (e, s) {
+      _logger.warning('Failed to toggle scanner torch', e, s);
+      await _refreshFlashStatus();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTogglingFlash = false;
+        });
+      } else {
+        _isTogglingFlash = false;
+      }
+    }
   }
 
   void _handleScanData(Barcode scanData) {
