@@ -8,7 +8,7 @@ use std::{
 };
 
 use crate::{
-    HARDCODED_OTT, HARDCODED_OTT_EMAIL_SUFFIX, LOCAL_HOST, TestResult, postgres::Postgres,
+    HARDCODED_OTT, HARDCODED_OTT_EMAIL_SUFFIX, TestResult, net::LOCAL_HOST, postgres::Postgres,
     process::ChildProcess,
 };
 

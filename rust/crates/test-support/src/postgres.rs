@@ -1,9 +1,12 @@
 use postgresql_embedded::Settings;
 use postgresql_embedded::blocking::PostgreSQL;
 
-use crate::{LOCAL_HOST, TestResult, free_port};
+use crate::{
+    TestResult,
+    net::{LOCAL_HOST, free_port},
+};
 
-const DATABASE: &str = "ente";
+const DATABASE: &str = "ente_test";
 
 /// A temporary local Postgres, torn down on drop.
 pub struct Postgres {

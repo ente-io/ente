@@ -1,19 +1,15 @@
 # ente-test-support
 
-Runs a local Museum backed by a temporary Postgres
-([postgresql_embedded](https://crates.io/crates/postgresql_embedded)) for the
-`ente-rs` and `ente-e2e` integration tests.
+Runs a local Museum backed by a temporary Postgres for use by various Rust integration tests.
 
 ## Setup
 
-Requires `go` on PATH (to build and run Museum). The Postgres binary is
-downloaded and cached automatically on first use.
+Requires `go` on PATH to build and run Museum. The Postgres binary ([postgresql_embedded](https://crates.io/crates/postgresql_embedded)) is downloaded and cached on first use.
 
 ## Usage
 
-Tests that use it are gated behind the `museum` Cargo feature, so a plain
-`cargo test` skips them:
+Tests that use it are gated behind a Cargo feature so that a plain `cargo test` skips them. They can be run by enabling the `museum` feature, e.g.:
 
 ```sh
-cargo test -p ente-e2e --features museum
+cargo test -p ente-rs --features museum
 ```

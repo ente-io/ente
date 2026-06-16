@@ -5,7 +5,13 @@ use std::{
 
 use uuid::Uuid;
 
-use crate::{LOCAL_HOST, TestResult, free_port, postgres, process::ChildProcess, server};
+use crate::{
+    TestResult,
+    net::{LOCAL_HOST, free_port},
+    postgres,
+    process::ChildProcess,
+    server,
+};
 
 /// A running Museum for integration tests, backed by a temporary Postgres.
 ///
