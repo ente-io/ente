@@ -39,6 +39,8 @@ import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/home/widgets/auth_logo_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
+import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
+import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/sort_option_menu.dart';
@@ -1353,13 +1355,26 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (result != null) {
+      final googleAuthCodes = result.googleAuthCodes;
+      if (googleAuthCodes != null) {
+        final importedCodeCount = await importGoogleAuthCodes(googleAuthCodes);
+        if (importedCodeCount > 0) {
+          LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
+        }
+        await importSuccessDialog(context, importedCodeCount);
+        return;
+      }
+      final code = result.code;
+      if (code == null) {
+        return;
+      }
       await CodeStore.instance.addCode(
-        result.code,
+        code,
         shouldSync: result.fromGallery ? false : true,
       );
       // Focus the new code by searching
       if (_shouldFocusAddedCode) {
-        _focusNewCode(result.code);
+        _focusNewCode(code);
       }
       LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     }

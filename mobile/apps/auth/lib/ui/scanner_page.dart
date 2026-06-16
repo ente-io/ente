@@ -5,6 +5,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
 import 'package:ente_auth/ui/components/scanner_camera_view.dart';
+import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/utils/gallery_import_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
@@ -13,10 +14,20 @@ import 'package:logging/logging.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 class ScannerPageResult {
-  final Code code;
+  final Code? code;
   final bool fromGallery;
+  final List<Code>? googleAuthCodes;
 
-  const ScannerPageResult({required this.code, required this.fromGallery});
+  const ScannerPageResult.single({
+    required Code this.code,
+    required this.fromGallery,
+  }) : googleAuthCodes = null;
+
+  int get importedCodeCount => googleAuthCodes?.length ?? 0;
+
+  const ScannerPageResult.googleAuthCodes(this.googleAuthCodes)
+    : code = null,
+      fromGallery = false;
 }
 
 class ScannerPage extends StatefulWidget {
@@ -34,6 +45,7 @@ class ScannerPageState extends State<ScannerPage> {
   String? totp;
   bool _isImportingFromGallery = false;
   bool _hasCompletedScan = false;
+  bool _isHandlingGoogleAuthImport = false;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -156,13 +168,57 @@ class ScannerPageState extends State<ScannerPage> {
       return;
     }
 
+    if (isGoogleAuthExportQr(qrCode)) {
+      unawaited(_handleGoogleAuthImport(qrCode));
+      return;
+    }
+
     try {
       final code = Code.fromOTPAuthUrl(qrCode);
-      _completeWithResult(ScannerPageResult(code: code, fromGallery: false));
+      _completeWithResult(
+        ScannerPageResult.single(code: code, fromGallery: false),
+      );
     } catch (e) {
       if (mounted) {
         showToast(context, context.l10n.invalidQRCode);
       }
+    }
+  }
+
+  Future<void> _handleGoogleAuthImport(String qrCode) async {
+    if (_hasCompletedScan || _isHandlingGoogleAuthImport) {
+      return;
+    }
+    _isHandlingGoogleAuthImport = true;
+    bool shouldResumeCamera = true;
+    try {
+      await controller?.pauseCamera();
+      final codes = parseGoogleAuth(qrCode);
+      if (codes.isEmpty) {
+        if (mounted) {
+          showToast(context, context.l10n.invalidQRCode);
+        }
+        return;
+      }
+      if (!mounted || _hasCompletedScan) {
+        return;
+      }
+      final shouldImport = await confirmGoogleAuthImport(context, codes.length);
+      if (!shouldImport || !mounted || _hasCompletedScan) {
+        return;
+      }
+      shouldResumeCamera = false;
+      _completeWithResult(ScannerPageResult.googleAuthCodes(codes));
+    } catch (e, s) {
+      _logger.severe("Error importing Google Authenticator QR", e, s);
+      if (mounted) {
+        showToast(context, context.l10n.invalidQRCode);
+      }
+    } finally {
+      if (shouldResumeCamera && mounted && !_hasCompletedScan) {
+        await controller?.resumeCamera();
+      }
+      _isHandlingGoogleAuthImport = false;
     }
   }
 
@@ -181,7 +237,9 @@ class ScannerPageState extends State<ScannerPage> {
         return;
       }
       shouldResumeCamera = false;
-      _completeWithResult(ScannerPageResult(code: code, fromGallery: true));
+      _completeWithResult(
+        ScannerPageResult.single(code: code, fromGallery: true),
+      );
     } finally {
       if (shouldResumeCamera && mounted && !_hasCompletedScan) {
         await controller?.resumeCamera();

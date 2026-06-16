@@ -19,6 +19,10 @@ import 'package:logging/logging.dart';
 
 const kGoogleAuthExportPrefix = 'otpauth-migration://offline?data=';
 
+bool isGoogleAuthExportQr(String qrCodeData) {
+  return qrCodeData.startsWith(kGoogleAuthExportPrefix);
+}
+
 Future<void> showGoogleAuthInstruction(BuildContext context) async {
   final l10n = context.l10n;
   final result = await showDialogWidget(
@@ -55,14 +59,55 @@ Future<void> showGoogleAuthInstruction(BuildContext context) async {
       if (codes == null || codes.isEmpty) {
         return;
       }
-      for (final code in codes) {
-        await CodeStore.instance.addCode(code, shouldSync: false);
-      }
-      unawaited(AuthenticatorService.instance.onlineSync());
+      final importedCount = await importGoogleAuthCodes(codes);
       // ignore: unawaited_futures
-      importSuccessDialog(context, codes.length);
+      importSuccessDialog(context, importedCount);
     }
   }
+}
+
+Future<bool> confirmGoogleAuthImport(
+  BuildContext context,
+  int codeCount,
+) async {
+  final l10n = context.l10n;
+  final result = await showDialogWidget(
+    context: context,
+    title: l10n.importFromApp("Google Authenticator"),
+    body:
+        "Import $codeCount ${codeCount == 1 ? "code" : "codes"} from Google Authenticator?",
+    buttons: [
+      ButtonWidget(
+        buttonType: ButtonType.primary,
+        labelText: l10n.importLabel,
+        isInAlert: true,
+        buttonSize: ButtonSize.large,
+        buttonAction: ButtonAction.first,
+      ),
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: l10n.cancel,
+        buttonSize: ButtonSize.large,
+        isInAlert: true,
+        buttonAction: ButtonAction.cancel,
+      ),
+    ],
+  );
+  return result?.action == ButtonAction.first;
+}
+
+Future<int> importGoogleAuthCodes(List<Code> codes) async {
+  int importedCount = 0;
+  for (final code in codes) {
+    final result = await CodeStore.instance.addCode(code, shouldSync: false);
+    if (result != AddResult.duplicate) {
+      importedCount++;
+    }
+  }
+  if (importedCount > 0) {
+    unawaited(AuthenticatorService.instance.onlineSync());
+  }
+  return importedCount;
 }
 
 List<Code> parseGoogleAuth(String qrCodeData) {
