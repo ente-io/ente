@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
-import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
+import 'package:ente_auth/ui/settings/data/import/google_auth_qr_parser.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_qr/ente_qr.dart';
 import 'package:file_picker/file_picker.dart';
