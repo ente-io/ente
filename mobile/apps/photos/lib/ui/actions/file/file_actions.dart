@@ -148,6 +148,9 @@ Future<void> showSingleFileDeleteSheet(
             ),
           ] else
             ButtonComponent(
+              key: ValueKey(
+                'singleFileDelete.default.${deletePreferenceForFile.name}',
+              ),
               label: deletePreferenceForFile == .DeleteFromBoth
                   ? l10n.deleteFromBoth
                   : deletePreferenceForFile == .DeleteFromLocalOnly
