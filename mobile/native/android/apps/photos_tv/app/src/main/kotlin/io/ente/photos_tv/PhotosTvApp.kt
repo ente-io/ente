@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -282,7 +283,11 @@ private fun SlideshowScreen(
         }
     }
     Box(Modifier.fillMaxSize().background(Color.Black)) {
-        AnimatedContent(targetState = imageBytes, label = "slide") { bytes ->
+        AnimatedContent(
+            targetState = imageBytes,
+            transitionSpec = { fadeIn(animationSpec = tween(800)) togetherWith fadeOut(animationSpec = tween(800)) },
+            label = "slide",
+        ) { bytes ->
             when {
                 bytes != null -> SlideImage(bytes = bytes)
                 message != null -> StatusMessage(message = message!!, showCheckmark = false)
