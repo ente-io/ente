@@ -19,7 +19,6 @@ dependencies:
   confetti: 0.8.0
   connectivity_plus: 6.1.4
   convert: 3.1.2
-  device_info_plus: 11.5.0
   dio: 5.9.2
   dots_indicator: 4.0.1
   dotted_border: 3.1.0
