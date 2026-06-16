@@ -14,6 +14,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart'
     show ButtonAction;
+import "package:photos/ui/components/delete_bottom_sheet.dart";
 import "package:photos/ui/components/ghost_button.dart";
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/viewer/file/file_details_widget.dart';
@@ -57,11 +58,11 @@ Future<void> showSingleFileDeleteSheet(
   late final String body;
 
   if (isBothLocalAndRemote) {
-    body = l10n.singleFileBoth(fileType: fileType);
+    body = l10n.singleFileInBothLocalAndRemote(fileType: fileType);
   } else if (isRemoteOnly) {
-    body = l10n.singleFileRemoteOnly(fileType: fileType);
+    body = l10n.singleFileInRemoteOnly(fileType: fileType);
   } else if (isLocalOnly) {
-    body = l10n.singleFileLocalOnly(fileType: fileType);
+    body = l10n.singleFileDeleteFromDevice(fileType: fileType);
   } else {
     throw AssertionError("Unexpected state");
   }
@@ -82,12 +83,21 @@ Future<void> showSingleFileDeleteSheet(
     useRootNavigator: Platform.isIOS,
     builder: (sheetContext) => StatefulBuilder(
       builder: (builderContext, setState) => BottomSheetComponent(
-        title: l10n.deleteFileQuestion(fileType: fileType),
-        message: isLocalOnly ? body : "$body\n$bodyHighlight",
-        padding: const EdgeInsets.all(Spacing.md),
-        illustration: Image.asset("assets/warning-red.png"),
-        closeTooltip: l10n.close,
-        closeResult: ButtonResult(ButtonAction.fourth),
+        header: DeleteBottomSheetHeader(
+          title: l10n.deleteFileQuestion(fileType: fileType),
+          closeTooltip: l10n.close,
+          closeResult: ButtonResult(ButtonAction.fourth),
+        ),
+        content: Text(
+          isLocalOnly ? body : "$body\n$bodyHighlight",
+          textAlign: TextAlign.center,
+          style: TextStyles.body.copyWith(
+            color: builderContext.componentColors.textLight,
+          ),
+        ),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        contentSpacing: Spacing.sm,
+        actionsTopSpacing: Spacing.xxl,
         actions: [
           if (isMoreOptionsShown) ...[
             ButtonComponent(

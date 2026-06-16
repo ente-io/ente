@@ -29,6 +29,7 @@ import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart'
     show ButtonAction;
+import "package:photos/ui/components/delete_bottom_sheet.dart";
 import "package:photos/ui/components/ghost_button.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/utils/device_info.dart";
@@ -979,11 +980,21 @@ Future<ButtonResult?> _showSingleDeleteConfirmationSheet({
     context: context,
     useRootNavigator: Platform.isIOS,
     builder: (sheetContext) => BottomSheetComponent(
-      title: title,
-      message: body,
-      illustration: Image.asset("assets/warning-red.png"),
-      closeTooltip: l10n.close,
-      closeResult: ButtonResult(ButtonAction.fourth),
+      header: DeleteBottomSheetHeader(
+        title: title,
+        closeTooltip: l10n.close,
+        closeResult: ButtonResult(ButtonAction.fourth),
+      ),
+      content: Text(
+        body,
+        textAlign: TextAlign.center,
+        style: TextStyles.body.copyWith(
+          color: sheetContext.componentColors.textLight,
+        ),
+      ),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      contentSpacing: Spacing.sm,
+      actionsTopSpacing: Spacing.xxl,
       actions: [
         ButtonComponent(
           label: l10n.yesDelete,
@@ -1068,10 +1079,20 @@ class _MixedDeleteTargetSheetContentState
       (option) => option.target == defaultTarget,
     );
     return BottomSheetComponent(
-      title: widget.title,
-      message: '${widget.body}\n${widget.bodyHighlight}',
-      illustration: Image.asset("assets/warning-red.png"),
-      closeTooltip: widget.closeTooltip,
+      header: DeleteBottomSheetHeader(
+        title: widget.title,
+        closeTooltip: widget.closeTooltip,
+      ),
+      content: Text(
+        '${widget.body}\n${widget.bodyHighlight}',
+        textAlign: TextAlign.center,
+        style: TextStyles.body.copyWith(
+          color: context.componentColors.textLight,
+        ),
+      ),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      contentSpacing: Spacing.sm,
+      actionsTopSpacing: Spacing.xxl,
       actions: [
         if (_isMoreOptionsShown) ...[
           for (final option in widget.options)
