@@ -1,6 +1,15 @@
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
+import {
+    extractRawExif,
+    parseExifOrientation,
+    type ExifOrientation,
+} from "ente-gallery/services/exif";
 import * as ffmpeg from "ente-gallery/services/ffmpeg";
+import {
+    dimensionsForExifOrientation,
+    drawImageWithExifOrientation,
+} from "ente-gallery/services/image-orientation";
 import {
     toPathOrZipEntry,
     type FileSystemUploadItem,
@@ -60,15 +69,29 @@ const generateImageThumbnailWeb = async (
     blob: Blob,
     { extension }: FileTypeInfo,
 ) => {
+    const orientation = await exifOrientation(blob);
+
     if (isHEICExtension(extension)) {
         log.debug(() => `Pre-converting HEIC to JPEG for thumbnail generation`);
         blob = await heicToJPEG(blob);
     }
 
-    return generateImageThumbnailUsingCanvas(blob);
+    return generateImageThumbnailUsingCanvas(blob, orientation ?? 1);
 };
 
-const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
+const exifOrientation = async (blob: Blob) => {
+    try {
+        return parseExifOrientation(await extractRawExif(new File([blob], "")));
+    } catch (e) {
+        log.warn("Failed to extract exif for thumbnail orientation", e);
+        return undefined;
+    }
+};
+
+const generateImageThumbnailUsingCanvas = async (
+    blob: Blob,
+    orientation: ExifOrientation,
+) => {
     const canvas = document.createElement("canvas");
     const canvasCtx = canvas.getContext("2d")!;
 
@@ -80,14 +103,30 @@ const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
             image.onload = () => {
                 try {
                     URL.revokeObjectURL(imageURL);
-                    const { width, height } = scaledImageDimensions(
+                    const orientedDimensions = dimensionsForExifOrientation(
                         image.width,
                         image.height,
+                        orientation,
+                    );
+                    const { width, height } = scaledImageDimensions(
+                        orientedDimensions.width,
+                        orientedDimensions.height,
                         maxThumbnailDimension,
+                    );
+                    const drawDimensions = dimensionsForExifOrientation(
+                        width,
+                        height,
+                        orientation,
                     );
                     canvas.width = width;
                     canvas.height = height;
-                    canvasCtx.drawImage(image, 0, 0, width, height);
+                    drawImageWithExifOrientation(
+                        canvasCtx,
+                        image,
+                        orientation,
+                        drawDimensions.width,
+                        drawDimensions.height,
+                    );
                     resolve(undefined);
                 } catch (e: unknown) {
                     // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors

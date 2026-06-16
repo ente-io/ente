@@ -52,6 +52,34 @@ export const parseExif = (tags: RawExifTags) => {
     return metadata;
 };
 
+export type ExifOrientation = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+/**
+ * Parse the Exif orientation tag from already extracted {@link RawExifTags}.
+ *
+ * Exif orientation can also be present in XMP as a TIFF tag. The Exif value, if
+ * present, takes precedence.
+ */
+export const parseExifOrientation = (
+    tags: RawExifTags,
+): ExifOrientation | undefined => {
+    const exifOrientation = tags.exif?.Orientation?.value;
+    if (exifOrientation != undefined) {
+        return isExifOrientation(exifOrientation) ? exifOrientation : undefined;
+    }
+
+    const xmpOrientation = tags.xmp?.Orientation?.value;
+    if (typeof xmpOrientation != "string") return undefined;
+
+    const orientation = Number(xmpOrientation);
+    return isExifOrientation(orientation) ? orientation : undefined;
+};
+
+const isExifOrientation = (
+    orientation: number,
+): orientation is ExifOrientation =>
+    Number.isInteger(orientation) && orientation >= 1 && orientation <= 8;
+
 /**
  * Parse GPS location from the metadata embedded in the file.
  *

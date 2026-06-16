@@ -1,7 +1,16 @@
 import log from "ente-base/log";
 import type { FileInfoExif } from "ente-gallery/components/FileInfo";
 import { downloadManager } from "ente-gallery/services/download";
-import { extractRawExif, parseExif } from "ente-gallery/services/exif";
+import {
+    extractRawExif,
+    parseExif,
+    parseExifOrientation,
+    type ExifOrientation,
+} from "ente-gallery/services/exif";
+import {
+    dimensionsForExifOrientation,
+    drawImageWithExifOrientation,
+} from "ente-gallery/services/image-orientation";
 import {
     hlsPlaylistDataForFile,
     type HLSPlaylistDataForFile,
@@ -89,6 +98,14 @@ export type ItemData = PhotoSwipeSlideData & {
      * - For videos, this will be not be present.
      */
     originalImageBlob?: Blob;
+    /**
+     * An object URL created by this module for an orientation-corrected image.
+     *
+     * This is separate from {@link imageURL} because object URLs returned by
+     * the download manager are owned by the download manager, while this one
+     * needs to be revoked when we forget the item data.
+     */
+    orientedImageURL?: string;
     /**
      * The renderable object URL of the video associated with the file.
      *
@@ -208,6 +225,7 @@ class FileViewerDataSourceState {
 let _state = new FileViewerDataSourceState();
 
 const resetState = () => {
+    _state.itemDataByFileID.forEach(revokeOrientedImageURL);
     _state = new FileViewerDataSourceState();
 };
 
@@ -357,8 +375,14 @@ export const itemDataForFile = (
  * and so would like to clear any previously cached data.
  */
 export const forgetItemDataForFileID = (fileID: number) => {
+    const itemData = _state.itemDataByFileID.get(fileID);
+    if (itemData) revokeOrientedImageURL(itemData);
     _state.itemDataByFileID.delete(fileID);
     _state.itemDataValidTillByFileID.delete(fileID);
+};
+
+const revokeOrientedImageURL = ({ orientedImageURL }: ItemData) => {
+    if (orientedImageURL) URL.revokeObjectURL(orientedImageURL);
 };
 
 /**
@@ -547,8 +571,20 @@ const enqueueUpdates = async (
         switch (sourceURLs.type) {
             case "image": {
                 const { imageURL, originalImageBlob } = sourceURLs;
-                const itemData = await withDimensionsIfPossible(imageURL);
-                update({ ...itemData, imageURL, originalImageBlob });
+                const oriented = await orientedImageURL(
+                    imageURL,
+                    originalImageBlob,
+                );
+                updateFileInfoExifIfAvailable(fileID, oriented.exif);
+                const itemData = await withDimensionsIfPossible(
+                    oriented.imageURL,
+                );
+                update({
+                    ...itemData,
+                    imageURL: oriented.imageURL,
+                    originalImageBlob,
+                    orientedImageURL: oriented.orientedImageURL,
+                });
                 break;
             }
 
@@ -576,11 +612,17 @@ const enqueueUpdates = async (
                 });
                 const imageURL = await sourceURLs.imageURL();
                 const originalImageBlob = sourceURLs.originalImageBlob;
-                update({
-                    ...(await withDimensionsIfPossible(imageURL)),
+                const oriented = await orientedImageURL(
                     imageURL,
                     originalImageBlob,
+                );
+                updateFileInfoExifIfAvailable(fileID, oriented.exif);
+                update({
+                    ...(await withDimensionsIfPossible(oriented.imageURL)),
+                    imageURL: oriented.imageURL,
+                    originalImageBlob,
                     videoURL,
+                    orientedImageURL: oriented.orientedImageURL,
                 });
                 break;
             }
@@ -608,6 +650,83 @@ const enqueueUpdates = async (
         markFailed();
     }
 };
+
+interface OrientedImageURLResult {
+    imageURL: string;
+    exif?: FileInfoExif;
+    orientedImageURL?: string;
+}
+
+const orientedImageURL = async (
+    imageURL: string,
+    originalImageBlob: Blob,
+): Promise<OrientedImageURLResult> => {
+    let exif: FileInfoExif | undefined;
+    let orientation: ExifOrientation | undefined;
+
+    try {
+        const file = new File([originalImageBlob], "");
+        const tags = await extractRawExif(file);
+        const parsed = parseExif(tags);
+        exif = { tags, parsed };
+        orientation = parseExifOrientation(tags);
+    } catch (e) {
+        log.warn("Failed to extract exif for image orientation", e);
+        return { imageURL };
+    }
+
+    if (!orientation || orientation == 1) return { imageURL, exif };
+
+    const correctedImageURL = await canvasOrientedImageURL(
+        imageURL,
+        orientation,
+    );
+    return {
+        imageURL: correctedImageURL,
+        exif,
+        orientedImageURL: correctedImageURL,
+    };
+};
+
+const canvasOrientedImageURL = async (
+    imageURL: string,
+    orientation: ExifOrientation,
+) => {
+    const image = await loadImage(imageURL);
+    const width = image.naturalWidth;
+    const height = image.naturalHeight;
+    const canvasDimensions = dimensionsForExifOrientation(
+        width,
+        height,
+        orientation,
+    );
+
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasDimensions.width;
+    canvas.height = canvasDimensions.height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Failed to get canvas 2D context");
+
+    drawImageWithExifOrientation(ctx, image, orientation, width, height);
+
+    return URL.createObjectURL(await canvasBlob(canvas));
+};
+
+const loadImage = (imageURL: string) =>
+    new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = imageURL;
+    });
+
+const canvasBlob = (canvas: HTMLCanvasElement) =>
+    new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob((blob) =>
+            blob ? resolve(blob) : reject(new Error("toBlob failed")),
+        ),
+    );
 
 /**
  * Take a image URL, determine its dimensions using browser APIs if possible,
@@ -723,14 +842,9 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     // We already have it available.
     if (_state.fileInfoExifByFileID.has(fileID)) return;
 
-    const update = (exifData: FileInfoExif) => {
-        _state.fileInfoExifByFileID.set(fileID, exifData);
-        _state.exifObserverByFileID.get(fileID)?.(exifData);
-    };
-
     // For videos, insert a placeholder.
     if (fileType == FileType.video) {
-        update(createPlaceholderFileInfoExif());
+        updateFileInfoExif(fileID, createPlaceholderFileInfoExif());
         return;
     }
 
@@ -741,13 +855,27 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
         const file = new File([originalImageBlob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
-        update({ tags, parsed });
+        updateFileInfoExif(fileID, { tags, parsed });
     } catch (e) {
         log.error("Failed to extract exif", e);
         // Save the empty placeholder exif corresponding to the file, no point
         // in unnecessarily retrying this, it will deterministically fail again.
-        update(createPlaceholderFileInfoExif());
+        updateFileInfoExif(fileID, createPlaceholderFileInfoExif());
     }
+};
+
+const updateFileInfoExifIfAvailable = (
+    fileID: number,
+    exifData: FileInfoExif | undefined,
+) => {
+    if (exifData && !_state.fileInfoExifByFileID.has(fileID)) {
+        updateFileInfoExif(fileID, exifData);
+    }
+};
+
+const updateFileInfoExif = (fileID: number, exifData: FileInfoExif) => {
+    _state.fileInfoExifByFileID.set(fileID, exifData);
+    _state.exifObserverByFileID.get(fileID)?.(exifData);
 };
 
 const createPlaceholderFileInfoExif = (): FileInfoExif => ({
