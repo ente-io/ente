@@ -1331,7 +1331,26 @@ class _HomePageState extends State<HomePage> {
     _isImportingFromGallery = true;
 
     try {
-      final Code? newCode = await pickCodeFromGallery(context, logger: _logger);
+      final GalleryImportResult? importResult = await pickCodeFromGallery(
+        context,
+        logger: _logger,
+      );
+      if (importResult == null) {
+        return;
+      }
+      final googleAuthCodes = importResult.googleAuthCodes;
+      if (googleAuthCodes != null) {
+        final shouldImport = await confirmGoogleAuthImport(
+          context,
+          googleAuthCodes.length,
+        );
+        if (!shouldImport) {
+          return;
+        }
+        await _completeGoogleAuthImport(googleAuthCodes);
+        return;
+      }
+      final newCode = importResult.code;
       if (newCode == null) {
         return;
       }
@@ -1346,6 +1365,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _completeGoogleAuthImport(List<Code> codes) async {
+    final importedCodeCount = await importGoogleAuthCodes(codes);
+    if (importedCodeCount > 0) {
+      LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
+    }
+    await importSuccessDialog(context, importedCodeCount);
+  }
+
   Future<void> _redirectToScannerPage() async {
     final ScannerPageResult? result = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -1357,11 +1384,7 @@ class _HomePageState extends State<HomePage> {
     if (result != null) {
       final googleAuthCodes = result.googleAuthCodes;
       if (googleAuthCodes != null) {
-        final importedCodeCount = await importGoogleAuthCodes(googleAuthCodes);
-        if (importedCodeCount > 0) {
-          LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
-        }
-        await importSuccessDialog(context, importedCodeCount);
+        await _completeGoogleAuthImport(googleAuthCodes);
         return;
       }
       final code = result.code;
