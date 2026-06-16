@@ -31,8 +31,8 @@ class _LoginPageState extends State<LoginPage> {
   final Logger _logger = Logger('_LoginPageState');
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
     if ((_config.getEmail() ?? '').isNotEmpty) {
       _updateEmail(_config.getEmail()!);
     } else if (kDebugMode) {
