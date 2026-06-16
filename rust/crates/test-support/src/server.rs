@@ -17,6 +17,7 @@ pub fn start(
     log_dir: &Path,
     config_file: &Path,
     museum_port: u16,
+    paste_origin: &str,
     db: &Postgres,
 ) -> TestResult<ChildProcess> {
     require_go()?;
@@ -27,32 +28,35 @@ pub fn start(
         .arg("./cmd/museum")
         .current_dir(server_dir)
         .env("ENTE_CREDENTIALS_FILE", config_file)
-        // Point museum at our Postgres through env vars, which outrank every
-        // config file. A developer's `server/museum.yaml` is merged after our
-        // credentials file and would otherwise redirect the db elsewhere.
         .env("ENTE_DB_HOST", db.host())
         .env("ENTE_DB_PORT", db.port().to_string())
         .env("ENTE_DB_NAME", db.database())
         .env("ENTE_DB_USER", db.username())
         .env("ENTE_DB_PASSWORD", db.password())
-        .env("ENTE_DB_SSLMODE", "disable");
+        .env("ENTE_DB_SSLMODE", "disable")
+        .env("ENTE_HTTP_PORT", museum_port.to_string())
+        .env(
+            "ENTE_INTERNAL_HARDCODED_OTT_LOCAL_DOMAIN_SUFFIX",
+            HARDCODED_OTT_EMAIL_SUFFIX,
+        )
+        .env(
+            "ENTE_INTERNAL_HARDCODED_OTT_LOCAL_DOMAIN_VALUE",
+            HARDCODED_OTT,
+        )
+        .env("ENTE_APPS_PUBLIC_PASTE", paste_origin)
+        .env("ENTE_JOBS_CRON_SKIP", "true");
 
     let mut museum = ChildProcess::spawn("museum", &mut command, log_dir)?;
     wait_for_museum(&mut museum, museum_port)?;
     Ok(museum)
 }
 
-pub fn write_config(path: &Path, museum_port: u16, paste_origin: &str) -> TestResult {
+/// A local `museum.yaml` can clobber anything written here; keys that must
+/// survive that are set via env in [`start`] instead.
+pub fn write_config(path: &Path) -> TestResult {
     fs::write(
         path,
-        format!(
-            r#"http:
-    port: {museum_port}
-
-apps:
-    public-paste: "{paste_origin}"
-
-s3:
+        r#"s3:
     # Museum requires S3 credentials at boot; no current test exercises object storage.
     are_local_buckets: true
     b2-eu-cen:
@@ -61,17 +65,7 @@ s3:
         endpoint: localhost:3200
         region: eu-central-2
         bucket: b2-eu-cen
-
-internal:
-    hardcoded-ott:
-        local-domain-suffix: "{HARDCODED_OTT_EMAIL_SUFFIX}"
-        local-domain-value: {HARDCODED_OTT}
-
-jobs:
-    cron:
-        skip: true
-"#
-        ),
+"#,
     )?;
     Ok(())
 }

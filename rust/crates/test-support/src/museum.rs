@@ -33,11 +33,17 @@ impl Museum {
     /// stderr) so the museum and Postgres logs can be inspected.
     pub fn run(test: impl FnOnce(&Self) -> TestResult) -> TestResult {
         let mut museum = Self::start()?;
-        let result = test(&museum);
-        if result.is_err() {
-            museum.temp_dir.retain();
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| test(&museum))) {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(error)) => {
+                museum.temp_dir.retain();
+                Err(error)
+            }
+            Err(panic) => {
+                museum.temp_dir.retain();
+                std::panic::resume_unwind(panic);
+            }
         }
-        result
     }
 
     fn start() -> TestResult<Self> {
@@ -50,13 +56,14 @@ impl Museum {
         let museum_config_file = temp_dir.path().join("museum.yaml");
 
         let result = (|| {
-            server::write_config(&museum_config_file, museum_port, &paste_origin)?;
+            server::write_config(&museum_config_file)?;
             let postgres = postgres::start()?;
             let server = server::start(
                 &server_dir,
                 &log_dir,
                 &museum_config_file,
                 museum_port,
+                &paste_origin,
                 &postgres,
             )?;
             Ok((postgres, server))
