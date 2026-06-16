@@ -12,7 +12,7 @@ import 'package:hugeicons/hugeicons.dart';
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=4809-7992&m=dev
 /// Section: Bottom sheet / Bottom Sheet Header
 /// Specs: H2 title, optional 36px circular close action, and optional centered
-/// illustration slot for warning and error sheets.
+/// illustration for warning and error sheets.
 class _BottomSheetHeaderComponent extends StatelessWidget {
   const _BottomSheetHeaderComponent({
     this.title,
@@ -284,7 +284,7 @@ class _CenteredHeader extends StatelessWidget {
         if (showCloseButton && (illustration != null || title != null))
           const SizedBox(height: Spacing.xs),
         if (illustration != null)
-          _BottomSheetIllustrationSlot(child: illustration!),
+          _BottomSheetIllustration(child: illustration!),
         if (title != null) ...[
           SizedBox(height: illustration == null ? 0 : Spacing.lg),
           Text(
@@ -300,24 +300,20 @@ class _CenteredHeader extends StatelessWidget {
   }
 }
 
-class _BottomSheetIllustrationSlot extends StatelessWidget {
-  const _BottomSheetIllustrationSlot({required this.child});
+class _BottomSheetIllustration extends StatelessWidget {
+  const _BottomSheetIllustration({required this.child});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: _illustrationSlotWidth,
-        height: _illustrationSlotHeight,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: _illustrationSlotBottomInset),
-          child: FittedBox(
-            alignment: Alignment.bottomCenter,
-            fit: BoxFit.scaleDown,
-            child: child,
-          ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: _illustrationSlotBottomInset),
+        child: FittedBox(
+          alignment: Alignment.bottomCenter,
+          fit: BoxFit.scaleDown,
+          child: child,
         ),
       ),
     );
@@ -384,6 +380,4 @@ class _BottomSheetActions extends StatelessWidget {
 }
 
 const double _headerHeight = 38;
-const double _illustrationSlotWidth = 180;
-const double _illustrationSlotHeight = 120;
 const double _illustrationSlotBottomInset = 11;

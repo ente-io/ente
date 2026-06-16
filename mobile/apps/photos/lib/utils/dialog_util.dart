@@ -216,7 +216,7 @@ Future<void> showGenericErrorBottomSheet({
     context,
     title: AppLocalizations.of(context).error,
     message: errorBody,
-    assetPath: 'assets/warning-green.png',
+    assetPath: 'assets/warning-grey.png',
     buttons: [
       ButtonWidgetV2(
         buttonType: ButtonTypeV2.secondary,
