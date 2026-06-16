@@ -1,0 +1,1 @@
+- Fixed logout navigation from Locker settings search.
