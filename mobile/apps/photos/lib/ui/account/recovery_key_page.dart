@@ -80,6 +80,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
 
   Widget _getBody(String recoveryKey) {
     final colors = context.componentColors;
+    final lightComponentTheme = ComponentTheme.lightTheme(
+      app: ComponentApp.photos,
+    );
     return Column(
       children: [
         Expanded(
@@ -153,13 +156,16 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      ButtonComponent(
-                        variant: ButtonComponentVariant.secondary,
-                        shouldSurfaceExecutionStates: false,
-                        label: AppLocalizations.of(context).shareKey,
-                        onTap: () async {
-                          unawaited(_shareRecoveryKey(recoveryKey));
-                        },
+                      Theme(
+                        data: lightComponentTheme,
+                        child: ButtonComponent(
+                          variant: ButtonComponentVariant.secondary,
+                          shouldSurfaceExecutionStates: false,
+                          label: AppLocalizations.of(context).shareKey,
+                          onTap: () async {
+                            unawaited(_shareRecoveryKey(recoveryKey));
+                          },
+                        ),
                       ),
                     ],
                   ),
