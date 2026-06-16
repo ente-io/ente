@@ -106,7 +106,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                           AppLocalizations.of(context).invalidEndpointMessage +
                           "\n" +
                           e.toString(),
-                      assetPath: 'assets/warning-green.png',
+                      assetPath: 'assets/warning-grey.png',
                     );
                   }
                 },

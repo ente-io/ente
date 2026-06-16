@@ -424,7 +424,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           message: AppLocalizations.of(
             context,
           ).sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
       } else {
         await showGenericErrorBottomSheet(context: context, error: e);
