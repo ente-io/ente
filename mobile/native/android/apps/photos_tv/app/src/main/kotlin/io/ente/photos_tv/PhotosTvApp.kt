@@ -91,7 +91,7 @@ private fun ReceiverScreen(isScreensaver: Boolean) {
     val cryptoBox = remember { CryptoBox() }
     val client = remember { OkHttpClient() }
     val pairingService = remember { PairingService(client, cryptoBox) }
-    val payloadStore = remember { CastPayloadStore(context.applicationContext) }
+    val castStateStore = remember { CastStateStore(context.applicationContext) }
     var registration by remember { mutableStateOf<Registration?>(null) }
     var payload by remember { mutableStateOf<CastPayload?>(null) }
     var showPairingComplete by remember { mutableStateOf(false) }
@@ -108,7 +108,7 @@ private fun ReceiverScreen(isScreensaver: Boolean) {
                 withContext(Dispatchers.IO) { pairingService.register() }
             }.onSuccess { value ->
                 registration = value
-                pollJob = launchPoll(scope, pairingService, payloadStore, value, {
+                pollJob = launchPoll(scope, pairingService, castStateStore, value, {
                     showPairingComplete = true
                     payload = it
                 }, { error = it }, { startPairing() })
@@ -118,8 +118,8 @@ private fun ReceiverScreen(isScreensaver: Boolean) {
         }
     }
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) { payloadStore.load() }
-        val savedPayload = payloadStore.payload
+        withContext(Dispatchers.IO) { castStateStore.load() }
+        val savedPayload = castStateStore.state.payload
         if (savedPayload == null) startPairing() else {
             showPairingComplete = false
             payload = savedPayload
@@ -138,14 +138,14 @@ private fun ReceiverScreen(isScreensaver: Boolean) {
                 showPairingComplete = showPairingComplete,
                 onPairingExpired = {
                     scope.launch {
-                        withContext(Dispatchers.IO) { payloadStore.clear() }
+                        withContext(Dispatchers.IO) { castStateStore.clear() }
                         showPairingComplete = false
                         startPairing()
                     }
                 },
                 onChangeAlbum = {
                     scope.launch {
-                        withContext(Dispatchers.IO) { payloadStore.clear() }
+                        withContext(Dispatchers.IO) { castStateStore.clear() }
                         showPairingComplete = false
                         startPairing()
                     }
@@ -163,7 +163,7 @@ private fun ReceiverScreen(isScreensaver: Boolean) {
 private fun launchPoll(
     scope: CoroutineScope,
     pairingService: PairingService,
-    payloadStore: CastPayloadStore,
+    castStateStore: CastStateStore,
     registration: Registration,
     onPayload: (CastPayload) -> Unit,
     onError: (String) -> Unit,
@@ -174,7 +174,7 @@ private fun launchPoll(
             try {
                 val payload = withContext(Dispatchers.IO) { pairingService.getCastPayload(registration) }
                 if (payload != null) {
-                    withContext(Dispatchers.IO) { payloadStore.save(payload) }
+                    withContext(Dispatchers.IO) { castStateStore.save(CastState(payload)) }
                     onPayload(payload)
                     return@launch
                 }
