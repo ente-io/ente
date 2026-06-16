@@ -1,0 +1,1 @@
+- Respect the EXIF orientation when displaying photos and generating their thumbnails.

@@ -76,11 +76,18 @@ const generateImageThumbnailWeb = async (
         blob = await heicToJPEG(blob);
     }
 
+    // Thumbnails are now rotated to match the EXIF orientation, so pass the
+    // extracted orientation through (defaulting to 1, i.e. no-op, when absent).
     return generateImageThumbnailUsingCanvas(blob, orientation ?? 1);
 };
 
 const exifOrientation = async (blob: Blob) => {
     try {
+        /**
+         * extractRawExif extracts and returns the file's tags using the
+         * ExifReader library; parseExifOrientation then pulls the orientation
+         * value out of those tags.
+         */
         return parseExifOrientation(await extractRawExif(new File([blob], "")));
     } catch (e) {
         log.warn("Failed to extract exif for thumbnail orientation", e);
@@ -103,16 +110,28 @@ const generateImageThumbnailUsingCanvas = async (
             image.onload = () => {
                 try {
                     URL.revokeObjectURL(imageURL);
+                    // Passing the width and height of the original image to
+                    // get them swapped if the EXIF Orientation is >= 5
                     const orientedDimensions = dimensionsForExifOrientation(
                         image.width,
                         image.height,
                         orientation,
                     );
+
+                    // Using the orientation-corrected width and height to
+                    // compute the thumbnail's dimensions, scaling down to fit
+                    // within maxThumbnailDimension.
                     const { width, height } = scaledImageDimensions(
                         orientedDimensions.width,
                         orientedDimensions.height,
                         maxThumbnailDimension,
                     );
+
+                    // drawImageWithExifOrientation rotates the canvas
+                    // coordinate system when orientation is >= 5, so drawImage's
+                    // destination rectangle must be expressed in the
+                    // pre-rotation (un-swapped) frame. Swap back here so the
+                    // image is not distorted.
                     const drawDimensions = dimensionsForExifOrientation(
                         width,
                         height,

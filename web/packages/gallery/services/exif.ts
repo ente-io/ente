@@ -63,6 +63,9 @@ export type ExifOrientation = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export const parseExifOrientation = (
     tags: RawExifTags,
 ): ExifOrientation | undefined => {
+    // Getting the EXIF Orientation value from the tags and checking validity of the same
+    // and if valid(i.e. between 1 to 8) then returning it. Else falling back to the
+    // xmpOrientation and doing the same validations.
     const exifOrientation = tags.exif?.Orientation?.value;
     if (exifOrientation != undefined) {
         return isExifOrientation(exifOrientation) ? exifOrientation : undefined;
@@ -75,6 +78,14 @@ export const parseExifOrientation = (
     return isExifOrientation(orientation) ? orientation : undefined;
 };
 
+/**
+ *
+ * @param orientation
+ * @returns the validity of a orientation.
+ *
+ * To be a valid orientation, it's value should be between
+ * 1 and 8.
+ */
 const isExifOrientation = (
     orientation: number,
 ): orientation is ExifOrientation =>
