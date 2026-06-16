@@ -34,6 +34,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +63,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.DeviceFontFamilyName
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -79,7 +82,10 @@ import java.util.Date
 
 @Composable
 internal fun PhotosTvApp(isScreensaver: Boolean) {
-    MaterialTheme(colorScheme = MaterialTheme.colorScheme.copy(background = Color.Black, surface = Color.Black, onBackground = Color.White, onSurface = Color.White)) {
+    MaterialTheme(
+        colorScheme = MaterialTheme.colorScheme.copy(background = Color.Black, surface = Color.Black, onBackground = Color.White, onSurface = Color.White),
+        typography = googleSansTypography,
+    ) {
         ReceiverScreen(isScreensaver = isScreensaver)
     }
 }
@@ -224,7 +230,7 @@ private fun PairingCode(code: String) {
                 modifier = Modifier.width(80.dp).height(92.dp).background(backgroundColor),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(character.toString(), color = foregroundColor, fontFamily = FontFamily.Monospace, fontSize = 64.sp, fontWeight = FontWeight.Bold)
+                Text(character.toString(), color = foregroundColor, fontSize = 64.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -428,7 +434,6 @@ private fun DownArrowHint(modifier: Modifier = Modifier) {
         Text(
             text = "Press down arrow to open menu",
             color = Color.White,
-            fontFamily = FontFamily.SansSerif,
             fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
         )
@@ -502,6 +507,33 @@ private val pairingCodeColors = listOf(
     Color(0xFF008080),
     Color(0xFF808000),
 )
+
+private val googleSansFontFamily = FontFamily(
+    Font(DeviceFontFamilyName("google-sans"), FontWeight.Normal),
+    Font(DeviceFontFamilyName("google-sans"), FontWeight.Medium),
+    Font(DeviceFontFamilyName("google-sans"), FontWeight.SemiBold),
+    Font(DeviceFontFamilyName("google-sans"), FontWeight.Bold),
+)
+
+private val googleSansTypography = Typography().let {
+    it.copy(
+        displayLarge = it.displayLarge.copy(fontFamily = googleSansFontFamily),
+        displayMedium = it.displayMedium.copy(fontFamily = googleSansFontFamily),
+        displaySmall = it.displaySmall.copy(fontFamily = googleSansFontFamily),
+        headlineLarge = it.headlineLarge.copy(fontFamily = googleSansFontFamily),
+        headlineMedium = it.headlineMedium.copy(fontFamily = googleSansFontFamily),
+        headlineSmall = it.headlineSmall.copy(fontFamily = googleSansFontFamily),
+        titleLarge = it.titleLarge.copy(fontFamily = googleSansFontFamily),
+        titleMedium = it.titleMedium.copy(fontFamily = googleSansFontFamily),
+        titleSmall = it.titleSmall.copy(fontFamily = googleSansFontFamily),
+        bodyLarge = it.bodyLarge.copy(fontFamily = googleSansFontFamily),
+        bodyMedium = it.bodyMedium.copy(fontFamily = googleSansFontFamily),
+        bodySmall = it.bodySmall.copy(fontFamily = googleSansFontFamily),
+        labelLarge = it.labelLarge.copy(fontFamily = googleSansFontFamily),
+        labelMedium = it.labelMedium.copy(fontFamily = googleSansFontFamily),
+        labelSmall = it.labelSmall.copy(fontFamily = googleSansFontFamily),
+    )
+}
 
 private const val LOG_TAG = "PhotosTv"
 private const val DOWN_ARROW_HINT_DURATION = 5000L
