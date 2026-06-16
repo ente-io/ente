@@ -7,52 +7,55 @@ use std::{
     time::{Duration, Instant},
 };
 
-use super::{LOCAL_HOST, TestResult, process::ChildProcess};
+use crate::{
+    HARDCODED_OTT, HARDCODED_OTT_EMAIL_SUFFIX, TestResult, net::LOCAL_HOST, postgres::Postgres,
+    process::ChildProcess,
+};
 
 pub fn start(
     server_dir: &Path,
     log_dir: &Path,
     config_file: &Path,
     museum_port: u16,
+    museum_bin: &Path,
+    db: &Postgres,
 ) -> TestResult<ChildProcess> {
     require_go()?;
+    build_museum(server_dir, museum_bin)?;
 
-    let mut command = Command::new("go");
+    let mut command = Command::new(museum_bin);
     command
-        .arg("run")
-        .arg("./cmd/museum")
         .current_dir(server_dir)
-        .env("ENTE_CREDENTIALS_FILE", config_file);
+        .env("ENTE_CREDENTIALS_FILE", config_file)
+        .env("ENTE_DB_HOST", db.host())
+        .env("ENTE_DB_PORT", db.port().to_string())
+        .env("ENTE_DB_NAME", db.database())
+        .env("ENTE_DB_USER", db.username())
+        .env("ENTE_DB_PASSWORD", db.password())
+        .env("ENTE_DB_SSLMODE", "disable")
+        .env("ENTE_HTTP_PORT", museum_port.to_string())
+        .env(
+            "ENTE_INTERNAL_HARDCODED_OTT_LOCAL_DOMAIN_SUFFIX",
+            HARDCODED_OTT_EMAIL_SUFFIX,
+        )
+        .env(
+            "ENTE_INTERNAL_HARDCODED_OTT_LOCAL_DOMAIN_VALUE",
+            HARDCODED_OTT,
+        )
+        .env("ENTE_JOBS_CRON_SKIP", "true");
 
     let mut museum = ChildProcess::spawn("museum", &mut command, log_dir)?;
     wait_for_museum(&mut museum, museum_port)?;
     Ok(museum)
 }
 
-pub fn write_config(
-    path: &Path,
-    museum_port: u16,
-    pglite_port: u16,
-    paste_origin: &str,
-) -> TestResult {
+/// A local `museum.yaml` can clobber anything written here; keys that must
+/// survive that are set via env in [`start`] instead.
+pub fn write_config(path: &Path) -> TestResult {
     fs::write(
         path,
-        format!(
-            r#"http:
-    port: {museum_port}
-
-apps:
-    public-paste: "{paste_origin}"
-
-db:
-    host: {LOCAL_HOST}
-    port: {pglite_port}
-    name: postgres
-    user: postgres
-    password: ""
-    sslmode: disable
-
-s3:
+        r#"s3:
+    # Museum requires S3 credentials at boot; no current test exercises object storage.
     are_local_buckets: true
     b2-eu-cen:
         key: changeme
@@ -60,12 +63,7 @@ s3:
         endpoint: localhost:3200
         region: eu-central-2
         bucket: b2-eu-cen
-
-jobs:
-    cron:
-        skip: true
-"#
-        ),
+"#,
     )?;
     Ok(())
 }
@@ -75,6 +73,20 @@ fn require_go() -> TestResult {
         Ok(output) if output.status.success() => Ok(()),
         _ => Err("Museum live tests require `go` on PATH".into()),
     }
+}
+
+fn build_museum(server_dir: &Path, out: &Path) -> TestResult {
+    let status = Command::new("go")
+        .arg("build")
+        .arg("-o")
+        .arg(out)
+        .arg("./cmd/museum")
+        .current_dir(server_dir)
+        .status()?;
+    if !status.success() {
+        return Err("go build ./cmd/museum failed".into());
+    }
+    Ok(())
 }
 
 fn wait_for_museum(process: &mut ChildProcess, port: u16) -> TestResult {

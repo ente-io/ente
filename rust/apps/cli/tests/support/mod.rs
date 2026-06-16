@@ -1,12 +1,10 @@
 mod cli;
-mod fixture;
-mod museum;
-mod pglite;
-mod process;
 
 pub use cli::Cli;
-pub use fixture::Fixture;
+pub use ente_test_support::{Museum, TestResult};
 
-pub type TestResult<T = ()> = Result<T, Box<dyn std::error::Error>>;
-
-const LOCAL_HOST: &str = "127.0.0.1";
+pub fn cli_session(museum: &Museum, scenario: &str) -> TestResult<Cli> {
+    let config_dir = museum.temp_dir().join("cli").join(scenario);
+    std::fs::create_dir_all(&config_dir)?;
+    Ok(Cli::new(config_dir))
+}

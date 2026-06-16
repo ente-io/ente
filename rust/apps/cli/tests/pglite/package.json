@@ -1,7 +1,0 @@
-{
-    "name": "ente-cli-pglite-fixture",
-    "private": true,
-    "devDependencies": {
-        "@electric-sql/pglite-socket": "0.1.3"
-    }
-}

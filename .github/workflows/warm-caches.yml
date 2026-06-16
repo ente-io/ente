@@ -104,11 +104,11 @@ jobs:
             - run: npm run build:wasm
 
     rust-cli:
-        # For rust-e2e-test.yml's cli-integration job.
+        # For rust-e2e-test.yml.
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: rust/apps/cli
+                working-directory: rust
         env:
             RUSTFLAGS: -D warnings
         steps:
@@ -127,7 +127,9 @@ jobs:
                   workspaces: rust
                   shared-key: rust-cli
 
-            - run: cargo test --features museum,pglite --locked --no-run
+            - run: cargo test -p ente-rs --features museum --locked --no-run
+
+            - run: cargo test -p ente-e2e --features museum --locked --no-run
 
     ensu-android:
         # For ensu-android-build.yml.

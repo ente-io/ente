@@ -4,7 +4,6 @@ use crate::support::{
 };
 use ente_contacts::client::ContactsCtx;
 
-#[derive(Clone)]
 pub struct LegacyPairState {
     pub owner: TestAccount,
     pub trusted: TestAccount,
@@ -55,9 +54,4 @@ pub async fn open_pair(endpoint: &str, state: &LegacyPairState) -> LegacyPair {
         owner_ctx,
         trusted_ctx,
     }
-}
-
-pub fn persist_pair_state(state: &mut LegacyPairState, runtime: &LegacyPair) {
-    state.owner = runtime.owner.clone();
-    state.trusted = runtime.trusted.clone();
 }
