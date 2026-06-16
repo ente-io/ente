@@ -7,8 +7,8 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/scanner_camera_view.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_qr_scanner/ente_qr_scanner.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 class ScannerGoogleAuthPage extends StatefulWidget {
   const ScannerGoogleAuthPage({super.key});
@@ -18,10 +18,8 @@ class ScannerGoogleAuthPage extends StatefulWidget {
 }
 
 class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
-  StreamSubscription<Barcode>? _scanSubscription;
-  String? totp;
+  EnteQrScannerController? controller;
+  StreamSubscription<String>? _scanSubscription;
   bool _hasCompletedScan = false;
 
   // In order to get hot reload to work we need to pause the camera if the platform
@@ -30,9 +28,9 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      unawaited(controller?.pauseCamera());
+      unawaited(controller?.pause());
     } else if (Platform.isIOS) {
-      unawaited(controller?.resumeCamera());
+      unawaited(controller?.resume());
     }
   }
 
@@ -46,43 +44,27 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
           Expanded(
             flex: 5,
             child: ScannerCameraView(
-              qrKey: qrKey,
-              overlay: QrScannerOverlayShape(
+              overlay: EnteQrScannerOverlay(
                 borderColor: getEnteColorScheme(context).primary700,
+                overlayColor: Colors.black.withValues(alpha: 0.45),
               ),
-              onQRViewCreated: _onQRViewCreated,
-              formatsAllowed: const [BarcodeFormat.qrcode],
+              onScannerCreated: _onScannerCreated,
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: (totp != null) ? Text(totp!) : Text(l10n.scanACode),
-            ),
-          ),
+          Expanded(flex: 1, child: Center(child: Text(l10n.scanACode))),
         ],
       ),
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
+  void _onScannerCreated(EnteQrScannerController controller) {
     this.controller = controller;
-    // Retain the Android camera restart workaround for scanner black screens.
-    if (Platform.isAndroid) {
-      unawaited(controller.pauseCamera());
-      unawaited(controller.resumeCamera());
-    }
     _cancelScanSubscription();
-    _scanSubscription = controller.scannedDataStream.listen(_handleScanData);
+    _scanSubscription = controller.codes.listen(_handleScanData);
   }
 
-  void _handleScanData(Barcode scanData) {
+  void _handleScanData(String qrCode) {
     if (_hasCompletedScan) {
-      return;
-    }
-
-    final qrCode = scanData.code;
-    if (qrCode == null) {
       return;
     }
 

@@ -10,9 +10,9 @@ import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/utils/gallery_import_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
+import 'package:ente_qr_scanner/ente_qr_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 class ScannerPageResult {
   final Code? code;
@@ -39,11 +39,9 @@ class ScannerPage extends StatefulWidget {
 }
 
 class ScannerPageState extends State<ScannerPage> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   final Logger _logger = Logger('ScannerPage');
-  QRViewController? controller;
-  StreamSubscription<Barcode>? _scanSubscription;
-  String? totp;
+  EnteQrScannerController? controller;
+  StreamSubscription<String>? _scanSubscription;
   bool _isImportingFromGallery = false;
   bool _hasCompletedScan = false;
   bool _isHandlingGoogleAuthImport = false;
@@ -56,9 +54,9 @@ class ScannerPageState extends State<ScannerPage> {
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      unawaited(controller?.pauseCamera());
+      unawaited(controller?.pause());
     } else if (Platform.isIOS) {
-      unawaited(controller?.resumeCamera());
+      unawaited(controller?.resume());
     }
   }
 
@@ -85,17 +83,13 @@ class ScannerPageState extends State<ScannerPage> {
           Expanded(
             flex: 5,
             child: ScannerCameraView(
-              qrKey: qrKey,
-              overlay: QrScannerOverlayShape(
+              overlay: EnteQrScannerOverlay(
                 borderColor: colorScheme.primary700,
-                borderRadius: 12,
-                borderLength: 36,
-                borderWidth: 4,
                 cutOutSize: 260,
                 overlayColor: Colors.black.withValues(alpha: 0.45),
               ),
-              onQRViewCreated: _onQRViewCreated,
-              formatsAllowed: const [BarcodeFormat.qrcode],
+              onScannerCreated: _onScannerCreated,
+              onError: _handleScannerError,
             ),
           ),
           Expanded(
@@ -114,16 +108,7 @@ class ScannerPageState extends State<ScannerPage> {
                   child: showGalleryImport
                       ? Row(
                           children: [
-                            Expanded(
-                              child: totp != null
-                                  ? Text(
-                                      totp!,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium,
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
+                            const Spacer(),
                             if (showTorch)
                               _scannerActionButton(
                                 label: isFlashOn
@@ -158,7 +143,7 @@ class ScannerPageState extends State<ScannerPage> {
                           ],
                         )
                       : Text(
-                          totp ?? l10n.scanACode,
+                          l10n.scanACode,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                 ),
@@ -170,16 +155,16 @@ class ScannerPageState extends State<ScannerPage> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
+  void _onScannerCreated(EnteQrScannerController controller) {
     this.controller = controller;
-    // Retain the Android camera restart workaround for scanner black screens.
-    if (Platform.isAndroid) {
-      unawaited(controller.pauseCamera());
-      unawaited(controller.resumeCamera());
-    }
+    controller.onTorchStatusChanged = _updateFlashStatus;
     _cancelScanSubscription();
-    _scanSubscription = controller.scannedDataStream.listen(_handleScanData);
+    _scanSubscription = controller.codes.listen(_handleScanData);
     unawaited(_refreshFlashStatus());
+  }
+
+  void _handleScannerError(String message) {
+    _logger.warning('Scanner error: $message');
   }
 
   Widget _scannerActionButton({
@@ -218,21 +203,26 @@ class ScannerPageState extends State<ScannerPage> {
       return;
     }
     try {
-      final flashStatus = await controller?.getFlashStatus();
+      final flashStatus = await controller?.getTorchStatus();
       if (!mounted) {
         return;
       }
-      setState(() {
-        _isFlashOn = flashStatus;
-      });
+      _updateFlashStatus(flashStatus);
     } catch (e, s) {
       _logger.warning('Failed to get scanner torch status', e, s);
       if (mounted) {
-        setState(() {
-          _isFlashOn = null;
-        });
+        _updateFlashStatus(null);
       }
     }
+  }
+
+  void _updateFlashStatus(bool? isFlashOn) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isFlashOn = isFlashOn;
+    });
   }
 
   Future<void> _toggleFlash() async {
@@ -243,7 +233,7 @@ class ScannerPageState extends State<ScannerPage> {
       _isTogglingFlash = true;
     });
     try {
-      await controller?.toggleFlash();
+      await controller?.toggleTorch();
       await _refreshFlashStatus();
     } catch (e, s) {
       _logger.warning('Failed to toggle scanner torch', e, s);
@@ -259,13 +249,8 @@ class ScannerPageState extends State<ScannerPage> {
     }
   }
 
-  void _handleScanData(Barcode scanData) {
+  void _handleScanData(String qrCode) {
     if (_hasCompletedScan || _isImportingFromGallery) {
-      return;
-    }
-
-    final qrCode = scanData.code;
-    if (qrCode == null) {
       return;
     }
 
@@ -293,7 +278,7 @@ class ScannerPageState extends State<ScannerPage> {
     _isHandlingGoogleAuthImport = true;
     bool shouldResumeCamera = true;
     try {
-      await controller?.pauseCamera();
+      await controller?.pause();
       final codes = parseGoogleAuth(qrCode);
       if (codes.isEmpty) {
         if (mounted) {
@@ -317,7 +302,7 @@ class ScannerPageState extends State<ScannerPage> {
       }
     } finally {
       if (shouldResumeCamera && mounted && !_hasCompletedScan) {
-        await controller?.resumeCamera();
+        await controller?.resume();
       }
       _isHandlingGoogleAuthImport = false;
     }
@@ -332,7 +317,7 @@ class ScannerPageState extends State<ScannerPage> {
     });
     bool shouldResumeCamera = true;
     try {
-      await controller?.pauseCamera();
+      await controller?.pause();
       final GalleryImportResult? importResult = await pickCodeFromGallery(
         context,
         logger: _logger,
@@ -363,7 +348,7 @@ class ScannerPageState extends State<ScannerPage> {
       );
     } finally {
       if (shouldResumeCamera && mounted && !_hasCompletedScan) {
-        await controller?.resumeCamera();
+        await controller?.resume();
       }
       if (mounted && !_hasCompletedScan) {
         setState(() {

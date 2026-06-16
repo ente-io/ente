@@ -47,6 +47,8 @@ dependencies:
     path: ../../packages/ente_pure_utils
   ente_qr:
     path: ../../packages/ente_qr
+  ente_qr_scanner:
+    path: ../../packages/ente_qr_scanner
   ente_strings:
     path: ../../packages/strings
   ente_ui:
@@ -109,7 +111,6 @@ dependencies:
   pointycastle: 3.9.1
   privacy_screen: 0.0.8
   protobuf: 4.1.0
-  qr_code_scanner_plus: 2.1.2
   qr_flutter: 4.1.0
   saf_stream: 2.0.0
   saf_util: 2.0.0

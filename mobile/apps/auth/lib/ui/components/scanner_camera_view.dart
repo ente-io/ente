@@ -1,22 +1,20 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:ente_qr_scanner/ente_qr_scanner.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 class ScannerCameraView extends StatefulWidget {
   const ScannerCameraView({
-    required this.qrKey,
-    required this.onQRViewCreated,
-    required this.formatsAllowed,
-    this.overlay,
+    required this.overlay,
+    required this.onScannerCreated,
+    this.onError,
     super.key,
   });
 
-  final GlobalKey qrKey;
-  final QRViewCreatedCallback onQRViewCreated;
-  final List<BarcodeFormat> formatsAllowed;
-  final QrScannerOverlayShape? overlay;
+  final EnteQrScannerOverlay overlay;
+  final ValueChanged<EnteQrScannerController> onScannerCreated;
+  final ValueChanged<String>? onError;
 
   @override
   State<ScannerCameraView> createState() => _ScannerCameraViewState();
@@ -29,26 +27,25 @@ class _ScannerCameraViewState extends State<ScannerCameraView> {
   @override
   Widget build(BuildContext context) {
     if (!Platform.isIOS) {
-      return _buildQRView();
+      return _buildScannerView();
     }
 
     return FutureBuilder<bool>(
       future: _isCameraScannerAvailable,
       builder: (context, snapshot) {
         if (snapshot.data == true) {
-          return _buildQRView();
+          return _buildScannerView();
         }
         return const ColoredBox(color: Colors.black);
       },
     );
   }
 
-  Widget _buildQRView() {
-    return QRView(
-      key: widget.qrKey,
+  Widget _buildScannerView() {
+    return EnteQrScannerView(
       overlay: widget.overlay,
-      onQRViewCreated: widget.onQRViewCreated,
-      formatsAllowed: widget.formatsAllowed,
+      onScannerCreated: widget.onScannerCreated,
+      onError: widget.onError,
     );
   }
 }
