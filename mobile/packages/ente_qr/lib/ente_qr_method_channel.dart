@@ -17,11 +17,17 @@ class MethodChannelEnteQr extends EnteQrPlatform {
   }
 
   @override
-  Future<QrScanResult> scanQrFromImage(String imagePath) async {
+  Future<QrScanResult> scanQrFromImage(
+    String imagePath, {
+    bool tryOriginalResolution = false,
+  }) async {
     try {
       final dynamic result = await methodChannel.invokeMethod(
         'scanQrFromImage',
-        {'imagePath': imagePath},
+        {
+          'imagePath': imagePath,
+          'tryOriginalResolution': tryOriginalResolution,
+        },
       );
 
       if (result == null) {

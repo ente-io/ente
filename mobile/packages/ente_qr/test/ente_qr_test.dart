@@ -11,8 +11,10 @@ class MockEnteQrPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<QrScanResult> scanQrFromImage(String imagePath) =>
-      Future.value(QrScanResult.error('Mock implementation'));
+  Future<QrScanResult> scanQrFromImage(
+    String imagePath, {
+    bool tryOriginalResolution = false,
+  }) => Future.value(QrScanResult.error('Mock implementation'));
 
   @override
   Future<QrScanResults> scanAllQrFromImage(String imagePath) =>

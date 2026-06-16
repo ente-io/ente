@@ -24,8 +24,14 @@ class EnteQr {
   ///
   /// Returns a [QrScanResult] containing either the QR code content on success
   /// or an error message on failure.
-  Future<QrScanResult> scanQrFromImage(String imagePath) {
-    return _scanPlatform.scanQrFromImage(imagePath);
+  Future<QrScanResult> scanQrFromImage(
+    String imagePath, {
+    bool tryOriginalResolution = false,
+  }) {
+    return _scanPlatform.scanQrFromImage(
+      imagePath,
+      tryOriginalResolution: tryOriginalResolution,
+    );
   }
 
   /// Scans all QR codes from an image file at the given path.

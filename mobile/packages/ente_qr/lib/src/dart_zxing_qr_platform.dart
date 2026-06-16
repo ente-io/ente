@@ -11,7 +11,10 @@ final class DartZxingQrPlatform extends EnteQrPlatform {
   }
 
   @override
-  Future<QrScanResult> scanQrFromImage(String imagePath) async {
+  Future<QrScanResult> scanQrFromImage(
+    String imagePath, {
+    bool tryOriginalResolution = false,
+  }) async {
     try {
       final content = await _decodeQrFromImagePath(imagePath);
       return QrScanResult.success(content);

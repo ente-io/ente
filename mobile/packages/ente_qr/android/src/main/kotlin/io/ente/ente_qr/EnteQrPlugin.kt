@@ -42,8 +42,11 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
         }
 
         executor.execute {
+          val tryOriginalResolution =
+            call.argument<Boolean>("tryOriginalResolution") ?: false
+
           val qrResult = try {
-            scanQrCode(imagePath)
+            scanQrCode(imagePath, tryOriginalResolution)
           } catch (e: Exception) {
             mapOf("success" to false, "error" to "Error scanning QR code: ${e.message}")
           }
@@ -83,7 +86,7 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
    * Load a bitmap with efficient downsampling and EXIF orientation correction.
    * Uses two-pass decoding: first get dimensions, then load at target size.
    */
-  private fun loadBitmap(imagePath: String, maxDimension: Int = 1024): Bitmap? {
+  private fun loadBitmap(imagePath: String, maxDimension: Int? = 1024): Bitmap? {
     // Pass 1: get dimensions without loading pixels
     val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeFile(imagePath, opts)
@@ -93,12 +96,18 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
 
     // Pass 2: load with downsampling
     var sampleSize = 1
-    while (rawW / (sampleSize * 2) >= maxDimension ||
-           rawH / (sampleSize * 2) >= maxDimension) {
-      sampleSize *= 2
+    if (maxDimension != null) {
+      while (rawW / (sampleSize * 2) >= maxDimension ||
+             rawH / (sampleSize * 2) >= maxDimension) {
+        sampleSize *= 2
+      }
     }
     val decodeOpts = BitmapFactory.Options().apply { inSampleSize = sampleSize }
-    val bitmap = BitmapFactory.decodeFile(imagePath, decodeOpts) ?: return null
+    val bitmap = try {
+      BitmapFactory.decodeFile(imagePath, decodeOpts)
+    } catch (_: OutOfMemoryError) {
+      null
+    } ?: return null
 
     // Apply EXIF orientation
     return try {
@@ -123,6 +132,34 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
+  private fun readQrContent(bitmap: Bitmap): String? {
+    val options = createReaderOptions()
+    val results = ZxingCpp.readBitmap(
+      bitmap, 0, 0, bitmap.width, bitmap.height, 0, options
+    )
+
+    if (results != null && results.isNotEmpty()) {
+      val text = results[0].text
+      if (text.isNotEmpty()) {
+        return text
+      }
+    }
+
+    // Fallback: try GlobalHistogram binarizer
+    options.binarizer = Binarizer.GLOBAL_HISTOGRAM
+    val fallbackResults = ZxingCpp.readBitmap(
+      bitmap, 0, 0, bitmap.width, bitmap.height, 0, options
+    )
+    if (fallbackResults != null && fallbackResults.isNotEmpty()) {
+      val text = fallbackResults[0].text
+      if (text.isNotEmpty()) {
+        return text
+      }
+    }
+
+    return null
+  }
+
   private fun createReaderOptions(): ReaderOptions {
     return ReaderOptions().apply {
       formats = setOf(ZxingCpp.BarcodeFormat.QRCode)
@@ -136,38 +173,36 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
 
   // ── Main scan methods ─────────────────────────────────────────────
 
-  private fun scanQrCode(imagePath: String): Map<String, Any> {
+  private fun scanQrCode(
+    imagePath: String,
+    tryOriginalResolution: Boolean = false,
+  ): Map<String, Any> {
     val file = File(imagePath)
     if (!file.exists()) {
       return mapOf("success" to false, "error" to "Image file not found: $imagePath")
+    }
+
+    if (tryOriginalResolution) {
+      val originalBitmap = loadBitmap(imagePath, maxDimension = null)
+      if (originalBitmap != null) {
+        try {
+          val text = readQrContent(originalBitmap)
+          if (text != null) {
+            return mapOf("success" to true, "content" to text)
+          }
+        } finally {
+          originalBitmap.recycle()
+        }
+      }
     }
 
     val bitmap = loadBitmap(imagePath)
       ?: return mapOf("success" to false, "error" to "Unable to decode image file")
 
     try {
-      val options = createReaderOptions()
-      val results = ZxingCpp.readBitmap(
-        bitmap, 0, 0, bitmap.width, bitmap.height, 0, options
-      )
-
-      if (results != null && results.isNotEmpty()) {
-        val text = results[0].text
-        if (text.isNotEmpty()) {
-          return mapOf("success" to true, "content" to text)
-        }
-      }
-
-      // Fallback: try GlobalHistogram binarizer
-      options.binarizer = Binarizer.GLOBAL_HISTOGRAM
-      val fallbackResults = ZxingCpp.readBitmap(
-        bitmap, 0, 0, bitmap.width, bitmap.height, 0, options
-      )
-      if (fallbackResults != null && fallbackResults.isNotEmpty()) {
-        val text = fallbackResults[0].text
-        if (text.isNotEmpty()) {
-          return mapOf("success" to true, "content" to text)
-        }
+      val text = readQrContent(bitmap)
+      if (text != null) {
+        return mapOf("success" to true, "content" to text)
       }
 
       return mapOf("success" to false, "error" to "No QR code found in image")

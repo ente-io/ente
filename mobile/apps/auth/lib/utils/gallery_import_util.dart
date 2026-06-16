@@ -136,7 +136,10 @@ Future<GalleryImportResult?> pickCodeFromGallery(
     }
 
     try {
-      final qrResult = await EnteQr().scanQrFromImage(imagePath);
+      final qrResult = await EnteQr().scanQrFromImage(
+        imagePath,
+        tryOriginalResolution: true,
+      );
 
       if (qrResult.success && qrResult.content != null) {
         try {

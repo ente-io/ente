@@ -102,7 +102,10 @@ abstract class EnteQrPlatform extends PlatformInterface {
 
   /// Scans a QR code from an image file at the given path.
   /// Returns the QR code content as a string if successful, null otherwise.
-  Future<QrScanResult> scanQrFromImage(String imagePath) {
+  Future<QrScanResult> scanQrFromImage(
+    String imagePath, {
+    bool tryOriginalResolution = false,
+  }) {
     throw UnimplementedError('scanQrFromImage() has not been implemented.');
   }
 
