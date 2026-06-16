@@ -331,7 +331,8 @@ jobs:
     build-windows:
         needs: build-metadata
         if: needs.build-metadata.outputs.should_build == 'true'
-        runs-on: windows-latest
+        # VS2022 is required until local_auth_windows builds cleanly on VS2026.
+        runs-on: windows-2022
         environment:
             name: production
         env:
