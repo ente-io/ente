@@ -153,7 +153,7 @@ class UserService {
             context,
             title: context.l10n.oops,
             message: context.l10n.emailAlreadyRegistered,
-            assetPath: 'assets/warning-green.png',
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
@@ -162,7 +162,7 @@ class UserService {
             context,
             title: context.l10n.oops,
             message: context.l10n.emailNotRegistered,
-            assetPath: 'assets/warning-green.png',
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (enteErrCode == "USER_SIGNUP_INCOMPLETE") {
@@ -171,7 +171,7 @@ class UserService {
             context,
             title: context.l10n.oops,
             message: context.l10n.accountSetupIncompleteCreateAccount,
-            assetPath: 'assets/warning-green.png',
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (e.response != null && e.response!.statusCode == 403) {
@@ -180,7 +180,7 @@ class UserService {
             context,
             title: AppLocalizations.of(context).oops,
             message: AppLocalizations.of(context).thisEmailIsAlreadyInUse,
-            assetPath: 'assets/warning-green.png',
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else {
@@ -455,7 +455,7 @@ class UserService {
           context,
           title: AppLocalizations.of(context).oops,
           message: AppLocalizations.of(context).yourVerificationCodeHasExpired,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
         Navigator.of(context).pop();
       } else {
@@ -466,7 +466,7 @@ class UserService {
           message: AppLocalizations.of(
             context,
           ).sorryTheCodeYouveEnteredIsIncorrect,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
@@ -477,7 +477,7 @@ class UserService {
         context,
         title: AppLocalizations.of(context).oops,
         message: AppLocalizations.of(context).verificationFailedPleaseTryAgain,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
@@ -523,7 +523,7 @@ class UserService {
           context,
           title: AppLocalizations.of(context).oops,
           message: AppLocalizations.of(context).thisEmailIsAlreadyInUse,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
       } else {
         // ignore: unawaited_futures
@@ -533,7 +533,7 @@ class UserService {
           message: AppLocalizations.of(
             context,
           ).authenticationFailedPleaseTryAgain,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
@@ -544,7 +544,7 @@ class UserService {
         context,
         title: AppLocalizations.of(context).oops,
         message: AppLocalizations.of(context).verificationFailedPleaseTryAgain,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
@@ -823,7 +823,7 @@ class UserService {
           message: AppLocalizations.of(
             context,
           ).authenticationFailedPleaseTryAgain,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
@@ -836,7 +836,7 @@ class UserService {
         message: AppLocalizations.of(
           context,
         ).authenticationFailedPleaseTryAgain,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
@@ -895,7 +895,7 @@ class UserService {
           message: AppLocalizations.of(
             context,
           ).somethingWentWrongPleaseTryAgain,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
@@ -907,7 +907,7 @@ class UserService {
         context,
         title: AppLocalizations.of(context).oops,
         message: AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
     } finally {
       await dialog.hide();
@@ -952,7 +952,7 @@ class UserService {
         message: AppLocalizations.of(
           context,
         ).theRecoveryKeyYouEnteredIsIncorrect,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
       return;
     }
@@ -999,7 +999,7 @@ class UserService {
           message: AppLocalizations.of(
             context,
           ).somethingWentWrongPleaseTryAgain,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
@@ -1011,7 +1011,7 @@ class UserService {
         context,
         title: AppLocalizations.of(context).oops,
         message: AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
     } finally {
       await dialog.hide();
@@ -1093,7 +1093,7 @@ class UserService {
             message: AppLocalizations.of(
               context,
             ).pleaseVerifyTheCodeYouHaveEntered,
-            assetPath: 'assets/warning-green.png',
+            assetPath: 'assets/warning-grey.png',
           );
           return false;
         }
@@ -1105,7 +1105,7 @@ class UserService {
         message: AppLocalizations.of(
           context,
         ).pleaseContactSupportIfTheProblemPersists,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
     }
     return false;
@@ -1135,7 +1135,7 @@ class UserService {
         message: AppLocalizations.of(
           context,
         ).pleaseContactSupportIfTheProblemPersists,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
