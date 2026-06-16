@@ -23,7 +23,6 @@ pub struct Museum {
     _postgres: postgres::Postgres,
     temp_dir: TempDir,
     endpoint: String,
-    paste_origin: String,
 }
 
 impl Museum {
@@ -51,7 +50,6 @@ impl Museum {
         let mut temp_dir = TempDir::new("ente-test")?;
         let log_dir = temp_dir.path().join("logs");
         let museum_port = free_port()?;
-        let paste_origin = format!("http://{LOCAL_HOST}");
         let endpoint = format!("http://{LOCAL_HOST}:{museum_port}");
         let museum_config_file = temp_dir.path().join("museum.yaml");
         let museum_bin = temp_dir.path().join("museum");
@@ -64,7 +62,6 @@ impl Museum {
                 &log_dir,
                 &museum_config_file,
                 museum_port,
-                &paste_origin,
                 &museum_bin,
                 &postgres,
             )?;
@@ -84,18 +81,12 @@ impl Museum {
             _postgres: postgres,
             temp_dir,
             endpoint,
-            paste_origin,
         })
     }
 
     /// The base URL of the running Museum, e.g. `http://127.0.0.1:1234`.
     pub fn endpoint(&self) -> &str {
         &self.endpoint
-    }
-
-    /// The origin Museum uses when generating public paste links.
-    pub fn paste_origin(&self) -> &str {
-        &self.paste_origin
     }
 
     /// A scratch directory tied to this Museum's lifetime, for test-local files.

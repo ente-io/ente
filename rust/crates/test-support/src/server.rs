@@ -17,7 +17,6 @@ pub fn start(
     log_dir: &Path,
     config_file: &Path,
     museum_port: u16,
-    paste_origin: &str,
     museum_bin: &Path,
     db: &Postgres,
 ) -> TestResult<ChildProcess> {
@@ -43,7 +42,6 @@ pub fn start(
             "ENTE_INTERNAL_HARDCODED_OTT_LOCAL_DOMAIN_VALUE",
             HARDCODED_OTT,
         )
-        .env("ENTE_APPS_PUBLIC_PASTE", paste_origin)
         .env("ENTE_JOBS_CRON_SKIP", "true");
 
     let mut museum = ChildProcess::spawn("museum", &mut command, log_dir)?;

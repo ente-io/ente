@@ -5,6 +5,7 @@ use support::{Cli, Museum, TestResult};
 use uuid::Uuid;
 
 const PASTE_PASSWORD_ENV: &str = "ENTE_PASTE_PASSWORD";
+const PASTE_ORIGIN: &str = "http://127.0.0.1";
 
 #[test]
 fn paste() -> TestResult {
@@ -85,11 +86,11 @@ fn stdin_roundtrip(museum: &Museum) -> TestResult {
             "--endpoint",
             museum.endpoint(),
             "--paste-origin",
-            museum.paste_origin(),
+            PASTE_ORIGIN,
         ],
         &text,
     )?;
-    let link = PasteLink::parse(link.trim(), museum.paste_origin());
+    let link = PasteLink::parse(link.trim(), PASTE_ORIGIN);
 
     let consumed = cli.run_ok(&[
         "paste",
@@ -233,10 +234,10 @@ fn create_paste(cli: &Cli, museum: &Museum, text: &str) -> TestResult<PasteLink>
         "--endpoint",
         museum.endpoint(),
         "--paste-origin",
-        museum.paste_origin(),
+        PASTE_ORIGIN,
         text,
     ])?;
-    Ok(PasteLink::parse(link.trim(), museum.paste_origin()))
+    Ok(PasteLink::parse(link.trim(), PASTE_ORIGIN))
 }
 
 fn create_password_paste(
@@ -253,13 +254,13 @@ fn create_password_paste(
             "--endpoint",
             museum.endpoint(),
             "--paste-origin",
-            museum.paste_origin(),
+            PASTE_ORIGIN,
             "--password",
             text,
         ],
         &env,
     )?;
-    Ok(PasteLink::parse(link.trim(), museum.paste_origin()))
+    Ok(PasteLink::parse(link.trim(), PASTE_ORIGIN))
 }
 
 fn unique_text(scope: &str) -> String {
