@@ -625,7 +625,7 @@ class FileAppBarState extends State<FileAppBar> {
     );
   }
 
-  _onToggleLoopVideo() {
+  void _onToggleLoopVideo() {
     localSettings.setShouldLoopVideo(!shouldLoopVideo);
     setState(() {
       _reloadActions = true;

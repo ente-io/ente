@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
 import 'package:ente_auth/ui/components/scanner_camera_view.dart';
+import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/utils/gallery_import_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
@@ -13,10 +15,20 @@ import 'package:logging/logging.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 class ScannerPageResult {
-  final Code code;
+  final Code? code;
   final bool fromGallery;
+  final List<Code>? googleAuthCodes;
 
-  const ScannerPageResult({required this.code, required this.fromGallery});
+  const ScannerPageResult.single({
+    required Code this.code,
+    required this.fromGallery,
+  }) : googleAuthCodes = null;
+
+  int get importedCodeCount => googleAuthCodes?.length ?? 0;
+
+  const ScannerPageResult.googleAuthCodes(this.googleAuthCodes)
+    : code = null,
+      fromGallery = false;
 }
 
 class ScannerPage extends StatefulWidget {
@@ -34,6 +46,9 @@ class ScannerPageState extends State<ScannerPage> {
   String? totp;
   bool _isImportingFromGallery = false;
   bool _hasCompletedScan = false;
+  bool _isHandlingGoogleAuthImport = false;
+  bool _isTogglingFlash = false;
+  bool? _isFlashOn;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -51,15 +66,18 @@ class ScannerPageState extends State<ScannerPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bool showGalleryImport = PlatformDetector.isMobile();
+    final bool showTorch = showGalleryImport && _isFlashOn != null;
+    final bool isFlashOn = _isFlashOn == true;
     final theme = Theme.of(context);
+    final colorScheme = getEnteColorScheme(context);
     final bool isLight = theme.brightness == Brightness.light;
-    final Color galleryBackgroundColor = isLight
+    final Color actionBackgroundColor = isLight
         ? Colors.black.withValues(alpha: 0.035)
         : Colors.white.withValues(alpha: 0.18);
-    final Color galleryPressedColor = isLight
+    final Color actionPressedColor = isLight
         ? Colors.black.withValues(alpha: 0.07)
         : Colors.white.withValues(alpha: 0.26);
-    final Color galleryIconColor = isLight ? Colors.black : Colors.white;
+    final Color actionIconColor = isLight ? Colors.black : Colors.white;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.scan)),
       body: Column(
@@ -68,6 +86,14 @@ class ScannerPageState extends State<ScannerPage> {
             flex: 5,
             child: ScannerCameraView(
               qrKey: qrKey,
+              overlay: QrScannerOverlayShape(
+                borderColor: colorScheme.primary700,
+                borderRadius: 12,
+                borderLength: 36,
+                borderWidth: 4,
+                cutOutSize: 260,
+                overlayColor: Colors.black.withValues(alpha: 0.45),
+              ),
               onQRViewCreated: _onQRViewCreated,
               formatsAllowed: const [BarcodeFormat.qrcode],
             ),
@@ -98,27 +124,36 @@ class ScannerPageState extends State<ScannerPage> {
                                     )
                                   : const SizedBox.shrink(),
                             ),
-                            Semantics(
-                              button: true,
-                              label: l10n.importFromGallery,
-                              child: Opacity(
-                                opacity: _isImportingFromGallery ? 0.5 : 1,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 12),
-                                  child: IconButtonWidget(
-                                    icon: Icons.photo_library_outlined,
-                                    iconButtonType: IconButtonType.rounded,
-                                    onTap: _isImportingFromGallery
-                                        ? null
-                                        : _handleImportFromGallery,
-                                    defaultColor: galleryBackgroundColor,
-                                    iconColor: galleryIconColor,
-                                    pressedColor: galleryPressedColor,
-                                    size: 28,
-                                    padding: const EdgeInsets.all(14),
-                                  ),
-                                ),
+                            if (showTorch)
+                              _scannerActionButton(
+                                label: isFlashOn
+                                    ? l10n.scannerTorchOff
+                                    : l10n.scannerTorchOn,
+                                icon: isFlashOn
+                                    ? Icons.flashlight_on_outlined
+                                    : Icons.flashlight_off_outlined,
+                                onTap: _isTogglingFlash ? null : _toggleFlash,
+                                disabled: _isTogglingFlash,
+                                defaultColor: isFlashOn
+                                    ? colorScheme.primary700
+                                    : actionBackgroundColor,
+                                pressedColor: isFlashOn
+                                    ? colorScheme.primary500
+                                    : actionPressedColor,
+                                iconColor: isFlashOn
+                                    ? Colors.white
+                                    : actionIconColor,
                               ),
+                            _scannerActionButton(
+                              label: l10n.importFromGallery,
+                              icon: Icons.photo_library_outlined,
+                              onTap: _isImportingFromGallery
+                                  ? null
+                                  : _handleImportFromGallery,
+                              disabled: _isImportingFromGallery,
+                              defaultColor: actionBackgroundColor,
+                              pressedColor: actionPressedColor,
+                              iconColor: actionIconColor,
                             ),
                           ],
                         )
@@ -144,6 +179,84 @@ class ScannerPageState extends State<ScannerPage> {
     }
     _cancelScanSubscription();
     _scanSubscription = controller.scannedDataStream.listen(_handleScanData);
+    unawaited(_refreshFlashStatus());
+  }
+
+  Widget _scannerActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback? onTap,
+    required bool disabled,
+    required Color defaultColor,
+    required Color pressedColor,
+    required Color iconColor,
+  }) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: Opacity(
+        opacity: disabled ? 0.5 : 1,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: IconButtonWidget(
+            icon: icon,
+            iconButtonType: IconButtonType.rounded,
+            onTap: onTap,
+            defaultColor: defaultColor,
+            iconColor: iconColor,
+            pressedColor: pressedColor,
+            size: 28,
+            padding: const EdgeInsets.all(14),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _refreshFlashStatus() async {
+    if (!PlatformDetector.isMobile()) {
+      return;
+    }
+    try {
+      final flashStatus = await controller?.getFlashStatus();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isFlashOn = flashStatus;
+      });
+    } catch (e, s) {
+      _logger.warning('Failed to get scanner torch status', e, s);
+      if (mounted) {
+        setState(() {
+          _isFlashOn = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleFlash() async {
+    if (_isTogglingFlash || _isFlashOn == null) {
+      return;
+    }
+    setState(() {
+      _isTogglingFlash = true;
+    });
+    try {
+      await controller?.toggleFlash();
+      await _refreshFlashStatus();
+    } catch (e, s) {
+      _logger.warning('Failed to toggle scanner torch', e, s);
+      await _refreshFlashStatus();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTogglingFlash = false;
+        });
+      } else {
+        _isTogglingFlash = false;
+      }
+    }
   }
 
   void _handleScanData(Barcode scanData) {
@@ -156,13 +269,57 @@ class ScannerPageState extends State<ScannerPage> {
       return;
     }
 
+    if (isGoogleAuthExportQr(qrCode)) {
+      unawaited(_handleGoogleAuthImport(qrCode));
+      return;
+    }
+
     try {
       final code = Code.fromOTPAuthUrl(qrCode);
-      _completeWithResult(ScannerPageResult(code: code, fromGallery: false));
+      _completeWithResult(
+        ScannerPageResult.single(code: code, fromGallery: false),
+      );
     } catch (e) {
       if (mounted) {
         showToast(context, context.l10n.invalidQRCode);
       }
+    }
+  }
+
+  Future<void> _handleGoogleAuthImport(String qrCode) async {
+    if (_hasCompletedScan || _isHandlingGoogleAuthImport) {
+      return;
+    }
+    _isHandlingGoogleAuthImport = true;
+    bool shouldResumeCamera = true;
+    try {
+      await controller?.pauseCamera();
+      final codes = parseGoogleAuth(qrCode);
+      if (codes.isEmpty) {
+        if (mounted) {
+          showToast(context, context.l10n.invalidQRCode);
+        }
+        return;
+      }
+      if (!mounted || _hasCompletedScan) {
+        return;
+      }
+      final shouldImport = await confirmGoogleAuthImport(context, codes.length);
+      if (!shouldImport || !mounted || _hasCompletedScan) {
+        return;
+      }
+      shouldResumeCamera = false;
+      _completeWithResult(ScannerPageResult.googleAuthCodes(codes));
+    } catch (e, s) {
+      _logger.severe("Error importing Google Authenticator QR", e, s);
+      if (mounted) {
+        showToast(context, context.l10n.invalidQRCode);
+      }
+    } finally {
+      if (shouldResumeCamera && mounted && !_hasCompletedScan) {
+        await controller?.resumeCamera();
+      }
+      _isHandlingGoogleAuthImport = false;
     }
   }
 
@@ -176,12 +333,34 @@ class ScannerPageState extends State<ScannerPage> {
     bool shouldResumeCamera = true;
     try {
       await controller?.pauseCamera();
-      final Code? code = await pickCodeFromGallery(context, logger: _logger);
+      final GalleryImportResult? importResult = await pickCodeFromGallery(
+        context,
+        logger: _logger,
+      );
+      if (importResult == null) {
+        return;
+      }
+      final googleAuthCodes = importResult.googleAuthCodes;
+      if (googleAuthCodes != null) {
+        final shouldImport = await confirmGoogleAuthImport(
+          context,
+          googleAuthCodes.length,
+        );
+        if (!shouldImport || !mounted || _hasCompletedScan) {
+          return;
+        }
+        shouldResumeCamera = false;
+        _completeWithResult(ScannerPageResult.googleAuthCodes(googleAuthCodes));
+        return;
+      }
+      final code = importResult.code;
       if (code == null) {
         return;
       }
       shouldResumeCamera = false;
-      _completeWithResult(ScannerPageResult(code: code, fromGallery: true));
+      _completeWithResult(
+        ScannerPageResult.single(code: code, fromGallery: true),
+      );
     } finally {
       if (shouldResumeCamera && mounted && !_hasCompletedScan) {
         await controller?.resumeCamera();

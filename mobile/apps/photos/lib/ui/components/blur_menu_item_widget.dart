@@ -97,13 +97,13 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
     );
   }
 
-  void _onTapDown(details) {
+  void _onTapDown(TapDownDetails details) {
     setState(() {
       menuItemColor = widget.pressedColor ?? widget.menuItemColor;
     });
   }
 
-  void _onTapUp(details) {
+  void _onTapUp(TapUpDetails details) {
     Future.delayed(
       const Duration(milliseconds: 100),
       () => setState(() {

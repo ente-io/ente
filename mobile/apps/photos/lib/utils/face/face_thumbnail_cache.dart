@@ -276,8 +276,8 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
 }
 
 Future<Uint8List?> precomputeClusterFaceCrop(
-  file,
-  clusterID, {
+  EnteFile file,
+  String clusterID, {
   required bool useFullFile,
 }) async {
   try {

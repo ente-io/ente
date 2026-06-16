@@ -10,11 +10,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeEmptyStateWidget extends StatelessWidget {
   final VoidCallback? onScanTap;
+  final VoidCallback? onImportImageTap;
   final VoidCallback? onManuallySetupTap;
 
   const HomeEmptyStateWidget({
     super.key,
     required this.onScanTap,
+    required this.onImportImageTap,
     required this.onManuallySetupTap,
   });
 
@@ -107,12 +109,20 @@ class HomeEmptyStateWidget extends StatelessWidget {
                             width: double.infinity,
                             type: RoundedButtonType.secondary,
                           ),
-                        ] else
+                        ] else ...[
+                          RoundedButton(
+                            label: l10n.importFromGallery,
+                            onPressed: onImportImageTap,
+                            width: double.infinity,
+                          ),
+                          const SizedBox(height: 12),
                           RoundedButton(
                             label: l10n.importEnterSetupKey,
                             onPressed: onManuallySetupTap,
                             width: double.infinity,
+                            type: RoundedButtonType.secondary,
                           ),
+                        ],
                         const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

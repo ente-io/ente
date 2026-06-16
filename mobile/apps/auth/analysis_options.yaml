@@ -50,7 +50,6 @@ analyzer:
 
     avoid_renaming_method_parameters: ignore # incorrect warnings for `equals` overrides
     use_build_context_synchronously: ignore # experimental lint, requires many changes
-    strict_top_level_inference: ignore # deferred: surfaces latent nullable-return mismatches needing per-site fixes
 
   exclude:
     - thirdparty/**

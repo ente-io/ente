@@ -1733,10 +1733,10 @@ class CollectionsService {
   }
 
   Future<Collection> _fromRemoteCollection(
-    Map<String, dynamic>? collectionData,
+    Map<String, dynamic> collectionData,
   ) async {
     final Collection collection = Collection.fromMap(collectionData);
-    if (collectionData != null && !collection.isDeleted) {
+    if (!collection.isDeleted) {
       final collectionKey = _getAndCacheDecryptedKey(
         collection,
         source: "fetchDecryptMeta",

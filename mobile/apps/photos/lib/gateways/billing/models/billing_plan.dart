@@ -13,9 +13,7 @@ class BillingPlans {
     };
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
+  static BillingPlans fromMap(Map<String, dynamic> map) {
     return BillingPlans(
       plans: List<BillingPlan>.from(
         map['plans']?.map((x) => BillingPlan.fromMap(x)),
@@ -42,9 +40,7 @@ class FreePlan {
     return {'storage': storage, 'duration': duration, 'period': period};
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
+  static FreePlan fromMap(Map<String, dynamic> map) {
     return FreePlan(
       storage: map['storage'],
       duration: map['duration'],
@@ -84,9 +80,7 @@ class BillingPlan {
     };
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
+  static BillingPlan fromMap(Map<String, dynamic> map) {
     return BillingPlan(
       id: map['id'],
       androidID: map['androidID'],

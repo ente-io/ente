@@ -6,7 +6,9 @@ import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
+import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/theme/text_style.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -93,7 +95,10 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
 
   bool get _hasPublicLink => widget.collection.publicURLs.isNotEmpty;
 
-  Widget _buildShareesList(colorScheme, textTheme) {
+  Widget _buildShareesList(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     final currentUserId = Configuration.instance.getUserID() ?? -1;
 
     final List<User> allUsers = [];
@@ -175,7 +180,10 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
     );
   }
 
-  Widget _buildOwnerActions(colorScheme, textTheme) {
+  Widget _buildOwnerActions(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     return Row(
       children: [
         _ShareActionOption(

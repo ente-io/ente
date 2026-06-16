@@ -384,7 +384,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
   }
 
-  _generateExifForDetails(Map<String, IfdTag> exif) {
+  void _generateExifForDetails(Map<String, IfdTag> exif) {
     if (exif["EXIF FocalLength"] != null) {
       _exifData["focalLength"] =
           (exif["EXIF FocalLength"]!.values.toList()[0] as Ratio).numerator /

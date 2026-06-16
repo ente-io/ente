@@ -10,6 +10,7 @@ import "package:ente_legacy/services/legacy_kit_service.dart";
 import "package:ente_rust/ente_rust.dart" as rust;
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
@@ -134,7 +135,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     );
   }
 
-  List<Widget> _buildPartRows(colorScheme) {
+  List<Widget> _buildPartRows(EnteColorScheme colorScheme) {
     final cardColor = colorScheme.isLightTheme
         ? Colors.white
         : colorScheme.backgroundElevated2;

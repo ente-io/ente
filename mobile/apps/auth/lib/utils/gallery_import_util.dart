@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/ui/settings/data/import/google_auth_qr_parser.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth_qr/ente_qr.dart';
+import 'package:ente_qr/ente_qr.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -12,6 +13,16 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 const _pickedImagesDirectoryName = 'picked_images';
+
+class GalleryImportResult {
+  final Code? code;
+  final List<Code>? googleAuthCodes;
+
+  const GalleryImportResult.code(Code this.code) : googleAuthCodes = null;
+
+  const GalleryImportResult.googleAuthCodes(List<Code> this.googleAuthCodes)
+    : code = null;
+}
 
 Future<Directory> _getPickedImagesDirectory({
   Future<Directory> Function()? documentsDirectoryProvider,
@@ -90,9 +101,20 @@ Future<void> cleanupPickedImagesOnStartup({Logger? logger}) async {
   );
 }
 
-/// Prompts the user to pick an image and tries to extract an OTP code from it.
-/// Returns the parsed code when successful, otherwise null.
-Future<Code?> pickCodeFromGallery(
+GalleryImportResult parseQrImportPayload(String qrCodeData) {
+  if (isGoogleAuthExportQr(qrCodeData)) {
+    final codes = parseGoogleAuth(qrCodeData);
+    if (codes.isEmpty) {
+      throw const FormatException('No Google Authenticator codes found');
+    }
+    return GalleryImportResult.googleAuthCodes(codes);
+  }
+  return GalleryImportResult.code(Code.fromOTPAuthUrl(qrCodeData));
+}
+
+/// Prompts the user to pick an image and tries to extract auth codes from it.
+/// Returns the parsed QR import result when successful, otherwise null.
+Future<GalleryImportResult?> pickCodeFromGallery(
   BuildContext context, {
   Logger? logger,
 }) async {
@@ -114,11 +136,14 @@ Future<Code?> pickCodeFromGallery(
     }
 
     try {
-      final qrResult = await EnteQr().scanQrFromImage(imagePath);
+      final qrResult = await EnteQr().scanQrFromImage(
+        imagePath,
+        tryOriginalResolution: true,
+      );
 
       if (qrResult.success && qrResult.content != null) {
         try {
-          return Code.fromOTPAuthUrl(qrResult.content!);
+          return parseQrImportPayload(qrResult.content!);
         } catch (e, stackTrace) {
           logger?.severe('Error adding code from QR scan', e, stackTrace);
           await showErrorDialog(
