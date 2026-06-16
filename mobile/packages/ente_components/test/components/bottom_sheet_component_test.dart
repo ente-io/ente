@@ -79,7 +79,7 @@ void main() {
       matching: find.byType(FittedBox),
     );
     expect(illustrationSlot, findsOneWidget);
-    expect(tester.getSize(illustrationSlot), const Size(180, 109));
+    expect(tester.getSize(illustrationSlot), const Size(80, 80));
     expect(
       tester.getSize(find.byKey(const ValueKey('warning-illustration'))),
       const Size(80, 80),
