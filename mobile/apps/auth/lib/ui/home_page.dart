@@ -1747,6 +1747,7 @@ class _HomePageState extends State<HomePage> {
       if (_filteredCodes.isEmpty && _searchText.isEmpty && noCodesAnywhere) {
         return HomeEmptyStateWidget(
           onScanTap: _redirectToScannerPage,
+          onImportImageTap: _importFromGalleryNative,
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
@@ -2322,14 +2323,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getFab() {
-    if (PlatformDetector.isDesktop()) {
-      return FloatingActionButton(
-        onPressed: () => _redirectToManualEntryPage(),
-        elevation: 8.0,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add),
-      );
-    }
+    final isDesktop = PlatformDetector.isDesktop();
     return SpeedDial(
       icon: Icons.add,
       activeIcon: Icons.close,
@@ -2344,13 +2338,14 @@ class _HomePageState extends State<HomePage> {
       elevation: 8.0,
       animationCurve: Curves.elasticInOut,
       children: [
-        SpeedDialChild(
-          child: const HugeIcon(icon: HugeIcons.strokeRoundedQrCode),
-          foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
-          backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-          labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
-          onTap: _redirectToScannerPage,
-        ),
+        if (!isDesktop)
+          SpeedDialChild(
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedQrCode),
+            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+            labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
+            onTap: _redirectToScannerPage,
+          ),
         SpeedDialChild(
           child: const Icon(Icons.keyboard_alt_outlined),
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
@@ -2358,7 +2353,7 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
           onTap: _redirectToManualEntryPage,
         ),
-        if (PlatformDetector.isMobile())
+        if (isDesktop || PlatformDetector.isMobile())
           SpeedDialChild(
             child: const HugeIcon(icon: HugeIcons.strokeRoundedAlbum02),
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
