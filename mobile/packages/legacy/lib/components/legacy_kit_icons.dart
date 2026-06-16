@@ -96,7 +96,7 @@ class LegacyKitAlertIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      "assets/warning-red.png",
+      "assets/emergency-warning.png",
       width: size,
       height: size,
       fit: BoxFit.contain,

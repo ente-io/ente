@@ -37,6 +37,12 @@ enum LocalGalleryFlag {
   localGallerySettingsBannerDismissed,
 }
 
+enum DeletePreference {
+  DeleteFromBoth,
+  DeleteFromLocalOnly,
+  DeleteFromRemoteOnly,
+}
+
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kGalleryGroupType = "gallery_group_type";
@@ -68,6 +74,7 @@ class LocalSettings {
       "people_sort_similarity_selected";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
+  static const _kDeletePreference = "delete_preference";
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
   static const _kBGDebugNotificationsEnabled =
       "ls.bg_debug_notifications_enabled";
@@ -608,4 +615,31 @@ class LocalSettings {
 
   Future<void> setLocalGallerySettingsBannerDismissed(bool value) =>
       _setFlag(LocalGalleryFlag.localGallerySettingsBannerDismissed, value);
+
+  DeletePreference? getDeletePreference() {
+    if (!_prefs.containsKey(_kDeletePreference)) {
+      return null;
+    }
+    final flag = _prefs.getString(_kDeletePreference);
+    if (flag == "delete_from_both") {
+      return DeletePreference.DeleteFromBoth;
+    } else if (flag == "delete_from_local_only") {
+      return DeletePreference.DeleteFromLocalOnly;
+    } else if (flag == "delete_from_ente_only") {
+      return DeletePreference.DeleteFromRemoteOnly;
+    }
+    return null;
+  }
+
+  Future<void> setDeletePreference(DeletePreference? preference) async {
+    if (preference == .DeleteFromBoth) {
+      await _prefs.setString(_kDeletePreference, "delete_from_both");
+    } else if (preference == .DeleteFromLocalOnly) {
+      await _prefs.setString(_kDeletePreference, "delete_from_local_only");
+    } else if (preference == .DeleteFromRemoteOnly) {
+      await _prefs.setString(_kDeletePreference, "delete_from_remote_only");
+    } else {
+      await _prefs.remove(_kDeletePreference);
+    }
+  }
 }

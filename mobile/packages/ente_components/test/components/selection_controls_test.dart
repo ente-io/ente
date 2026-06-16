@@ -240,6 +240,46 @@ void main() {
     );
   });
 
+  testWidgets("LabeledControlComponent taps label", (tester) async {
+    var selected = false;
+    await tester.pumpWidget(
+      _wrap(
+        LabeledControlComponent(
+          control: CheckboxComponent(
+            selected: selected,
+            onChanged: (value) => selected = value,
+          ),
+          label: "Back up automatically",
+          onTap: () => selected = !selected,
+        ),
+      ),
+    );
+    await tester.tap(find.text("Back up automatically"));
+    await tester.pump();
+    expect(selected, isTrue);
+  });
+
+  testWidgets("LabeledControlComponent applies foreground", (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const LabeledControlComponent(
+          control: CheckboxComponent(selected: true, onChanged: null),
+          label: "Back up automatically",
+          subtitle: "Includes new photos",
+          foreground: Colors.red,
+        ),
+      ),
+    );
+    expect(
+      tester.widget<Text>(find.text("Back up automatically")).style?.color,
+      Colors.red,
+    );
+    expect(
+      tester.widget<Text>(find.text("Includes new photos")).style?.color,
+      Colors.red,
+    );
+  });
+
   testWidgets("FilterChipComponent renders selected state with token colors", (
     tester,
   ) async {
