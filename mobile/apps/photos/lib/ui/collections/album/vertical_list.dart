@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
@@ -15,14 +16,13 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/hidden_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/collections/album/column_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
-import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/thumbnail_list_item.dart";
+import "package:photos/ui/components/buttons/button_widget.dart"
+    show ButtonAction;
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/sharing/share_collection_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -89,7 +89,10 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         !hasRecentCollections &&
         !hasSharedCollections) {
       if (widget.shouldShowCreateAlbum) {
-        return _getNewAlbumWidget(context, filesCount);
+        return Align(
+          alignment: Alignment.topCenter,
+          child: _getNewAlbumWidget(context, filesCount),
+        );
       }
       return const EmptyState();
     }
@@ -181,8 +184,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
 
         return const SizedBox.shrink();
       },
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: ThumbnailListItem.defaultItemSpacing),
+      separatorBuilder: (context, index) => const SizedBox(height: Spacing.sm),
       itemCount: totalItemCount,
       shrinkWrap: false,
       physics: const BouncingScrollPhysics(),
@@ -190,22 +192,20 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      padding: const EdgeInsets.only(top: 12, bottom: 8),
       child: Text(
         title,
-        style: textTheme.smallMuted.copyWith(color: colorScheme.textMuted),
+        style: TextStyles.large.copyWith(
+          color: context.componentColors.textBase,
+        ),
       ),
     );
   }
 
   Widget _buildDivider(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Divider(height: 1, thickness: 1, color: colorScheme.strokeFaint),
+    return const DividerComponent(
+      padding: EdgeInsets.symmetric(vertical: Spacing.sm),
     );
   }
 
