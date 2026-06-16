@@ -18,14 +18,14 @@ pub fn start(
     config_file: &Path,
     museum_port: u16,
     paste_origin: &str,
+    museum_bin: &Path,
     db: &Postgres,
 ) -> TestResult<ChildProcess> {
     require_go()?;
+    build_museum(server_dir, museum_bin)?;
 
-    let mut command = Command::new("go");
+    let mut command = Command::new(museum_bin);
     command
-        .arg("run")
-        .arg("./cmd/museum")
         .current_dir(server_dir)
         .env("ENTE_CREDENTIALS_FILE", config_file)
         .env("ENTE_DB_HOST", db.host())
@@ -75,6 +75,20 @@ fn require_go() -> TestResult {
         Ok(output) if output.status.success() => Ok(()),
         _ => Err("Museum live tests require `go` on PATH".into()),
     }
+}
+
+fn build_museum(server_dir: &Path, out: &Path) -> TestResult {
+    let status = Command::new("go")
+        .arg("build")
+        .arg("-o")
+        .arg(out)
+        .arg("./cmd/museum")
+        .current_dir(server_dir)
+        .status()?;
+    if !status.success() {
+        return Err("go build ./cmd/museum failed".into());
+    }
+    Ok(())
 }
 
 fn wait_for_museum(process: &mut ChildProcess, port: u16) -> TestResult {

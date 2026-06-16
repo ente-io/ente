@@ -54,6 +54,7 @@ impl Museum {
         let paste_origin = format!("http://{LOCAL_HOST}");
         let endpoint = format!("http://{LOCAL_HOST}:{museum_port}");
         let museum_config_file = temp_dir.path().join("museum.yaml");
+        let museum_bin = temp_dir.path().join("museum");
 
         let result = (|| {
             server::write_config(&museum_config_file)?;
@@ -64,6 +65,7 @@ impl Museum {
                 &museum_config_file,
                 museum_port,
                 &paste_origin,
+                &museum_bin,
                 &postgres,
             )?;
             Ok((postgres, server))
