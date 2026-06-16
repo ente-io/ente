@@ -78,7 +78,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
         context,
         title: context.l10n.loginSessionExpired,
         message: context.l10n.loginSessionExpiredDetails,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
       Navigator.of(context).pop();
       return;
