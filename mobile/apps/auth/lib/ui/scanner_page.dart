@@ -127,8 +127,8 @@ class ScannerPageState extends State<ScannerPage> {
                             if (showTorch)
                               _scannerActionButton(
                                 label: isFlashOn
-                                    ? 'Turn off torch'
-                                    : 'Turn on torch',
+                                    ? l10n.scannerTorchOff
+                                    : l10n.scannerTorchOn,
                                 icon: isFlashOn
                                     ? Icons.flashlight_on_outlined
                                     : Icons.flashlight_off_outlined,

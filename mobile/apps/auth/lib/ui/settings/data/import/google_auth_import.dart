@@ -106,8 +106,7 @@ Future<bool> confirmGoogleAuthImport(
   final result = await showDialogWidget(
     context: context,
     title: l10n.importFromApp("Google Authenticator"),
-    body:
-        "Import $codeCount ${codeCount == 1 ? "code" : "codes"} from Google Authenticator?",
+    body: l10n.importGoogleAuthConfirmation(codeCount),
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.primary,
