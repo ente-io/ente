@@ -64,10 +64,10 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.DeviceFontFamilyName
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font as DownloadableFont
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -414,7 +414,7 @@ private fun SlideOverlay(
             .focusRequester(focusRequester)
             .focusable(),
     ) {
-        AlbumClock(Modifier.align(Alignment.BottomEnd).padding(end = 40.dp, bottom = 34.dp))
+        AlbumClock(Modifier.align(Alignment.BottomEnd).padding(end = 40.dp, bottom = 24.dp))
         AnimatedVisibility(
             visible = showDownArrowHint && !isScreensaver,
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp),
@@ -486,7 +486,7 @@ private fun AlbumClock(modifier: Modifier = Modifier) {
         modifier = modifier.padding(horizontal = 18.dp, vertical = 10.dp),
         color = Color.White,
         fontSize = 46.sp,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
     )
 }
 
@@ -513,11 +513,19 @@ private val pairingCodeColors = listOf(
     Color(0xFF808000),
 )
 
+private val googleFontsProvider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs,
+)
+
+private val googleSans = GoogleFont("Google Sans")
+
 private val googleSansFontFamily = FontFamily(
-    Font(DeviceFontFamilyName("google-sans"), FontWeight.Normal),
-    Font(DeviceFontFamilyName("google-sans"), FontWeight.Medium),
-    Font(DeviceFontFamilyName("google-sans"), FontWeight.SemiBold),
-    Font(DeviceFontFamilyName("google-sans"), FontWeight.Bold),
+    DownloadableFont(googleFont = googleSans, fontProvider = googleFontsProvider, weight = FontWeight.Normal),
+    DownloadableFont(googleFont = googleSans, fontProvider = googleFontsProvider, weight = FontWeight.Medium),
+    DownloadableFont(googleFont = googleSans, fontProvider = googleFontsProvider, weight = FontWeight.SemiBold),
+    DownloadableFont(googleFont = googleSans, fontProvider = googleFontsProvider, weight = FontWeight.Bold),
 )
 
 private val googleSansTypography = Typography().let {

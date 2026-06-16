@@ -5,7 +5,7 @@ gradle-wrapper.jar
 /gradlew
 /gradlew.bat
 /local.properties
-app/src/main/java/io/ente/ensu/crypto/core.kt
+app/src/main/java/io/ente/photos_tv/crypto/core.kt
 GeneratedPluginRegistrant.java
 .cxx/
 

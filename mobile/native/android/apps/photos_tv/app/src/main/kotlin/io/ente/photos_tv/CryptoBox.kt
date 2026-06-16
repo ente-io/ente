@@ -2,11 +2,11 @@
 
 package io.ente.photos_tv
 import android.util.Base64
-import io.ente.ensu.crypto.blobDecryptLegacy as rustBlobDecryptLegacy
-import io.ente.ensu.crypto.generateKeyPair as rustGenerateKeyPair
-import io.ente.ensu.crypto.openSeal as rustOpenSeal
-import io.ente.ensu.crypto.secretboxDecrypt as rustSecretboxDecrypt
-import io.ente.ensu.crypto.uniffiEnsureInitialized
+import io.ente.photos_tv.crypto.blobDecryptLegacy as rustBlobDecryptLegacy
+import io.ente.photos_tv.crypto.generateKeyPair as rustGenerateKeyPair
+import io.ente.photos_tv.crypto.openSeal as rustOpenSeal
+import io.ente.photos_tv.crypto.secretboxDecrypt as rustSecretboxDecrypt
+import io.ente.photos_tv.crypto.uniffiEnsureInitialized
 
 internal class CryptoBox {
     init {

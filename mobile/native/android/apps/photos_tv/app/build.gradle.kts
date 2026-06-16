@@ -65,6 +65,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-text-google-fonts")
     implementation("androidx.datastore:datastore:1.1.1")
     implementation("androidx.lifecycle:lifecycle-runtime:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
