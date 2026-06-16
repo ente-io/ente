@@ -99,18 +99,21 @@ class FileMagicService {
           utf8.encode(jsonEncode(jsonToUpdate)),
           fileKey,
         );
+        final int currentVersion = file.pubMmdVersion == 0
+            ? 1
+            : file.pubMmdVersion;
         metadataList.add(
           UpdateMagicMetadataRequest(
             id: file.uploadedFileID!,
             magicMetadata: MetadataRequest(
-              version: file.pubMmdVersion,
+              version: currentVersion,
               count: jsonToUpdate.length,
               data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
               header: CryptoUtil.bin2base64(encryptedMMd.header!),
             ),
           ),
         );
-        file.pubMmdVersion = file.pubMmdVersion + 1;
+        file.pubMmdVersion = currentVersion + 1;
       }
 
       await _gateway.updatePublicMagicMetadata(metadataList);
