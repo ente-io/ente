@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dotted_border/dotted_border.dart';
+import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import 'package:locker/extensions/collection_extension.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -176,7 +178,10 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     );
   }
 
-  Widget _buildNewCollectionChip({required colorScheme, required textTheme}) {
+  Widget _buildNewCollectionChip({
+    required EnteColorScheme colorScheme,
+    required EnteTextTheme textTheme,
+  }) {
     return GestureDetector(
       onTap: () async {
         await _createNewCollection();

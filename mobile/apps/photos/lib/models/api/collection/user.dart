@@ -24,9 +24,7 @@ class User {
     return {'id': id, 'email': email, 'name': name, "role": role};
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
+  static User fromMap(Map<String, dynamic> map) {
     return User(
       id: map['id'],
       email: map['email'],

@@ -56,7 +56,7 @@ class ServiceLocator {
 
   static final ServiceLocator instance = ServiceLocator._privateConstructor();
 
-  init(
+  void init(
     SharedPreferences prefs,
     Dio enteDio,
     Dio nonEnteDio,

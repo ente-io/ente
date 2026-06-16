@@ -75,7 +75,7 @@ class DuplicateFiles {
   @override
   String toString() => 'DuplicateFiles(files: $files, size: $size)';
 
-  sortByCollectionName() {
+  void sortByCollectionName() {
     files.sort((first, second) {
       final firstName = collectionsService
           .getCollectionByID(first.collectionID!)!

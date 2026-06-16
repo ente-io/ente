@@ -90,7 +90,7 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
     );
   }
 
-  _selectedAlbumsListener() {
+  void _selectedAlbumsListener() {
     _hasSelectedAlbumsNotifier.value = widget.selectedAlbums.albums.isNotEmpty;
   }
 }

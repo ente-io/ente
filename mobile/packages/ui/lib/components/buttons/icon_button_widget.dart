@@ -77,7 +77,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     );
   }
 
-  _onTapDown(details) {
+  void _onTapDown(TapDownDetails details) {
     final colorTheme = getEnteColorScheme(context);
     setState(() {
       iconStateColor =
@@ -88,7 +88,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     });
   }
 
-  _onTapUp(details) {
+  void _onTapUp(TapUpDetails details) {
     Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
         iconStateColor = null;
@@ -96,7 +96,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     });
   }
 
-  _onTapCancel() {
+  void _onTapCancel() {
     setState(() {
       iconStateColor = null;
     });

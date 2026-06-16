@@ -316,7 +316,7 @@ class SuperLogging {
     }
   }
 
-  static _shouldSkipSentry(Object error) {
+  static bool _shouldSkipSentry(Object error) {
     if (error is DioException) {
       return true;
     }

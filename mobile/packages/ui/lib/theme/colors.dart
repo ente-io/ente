@@ -344,7 +344,7 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
     );
   }
 
-  get inverseEnteTheme => null;
+  Null get inverseEnteTheme => null;
 
   @override
   EnteColorScheme copyWith({
