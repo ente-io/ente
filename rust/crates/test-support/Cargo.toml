@@ -5,5 +5,6 @@ description = "Runs a local Museum backed by a temporary Postgres for integratio
 publish = false
 
 [dependencies]
-postgresql_embedded = { version = "0.20", default-features = false, features = ["blocking", "rustls", "theseus"] }
-uuid = { version = "1.11", features = ["v4"] }
+dirs = "5.0.1"
+postgresql_embedded = { version = "0.20.4", default-features = false, features = ["blocking", "rustls", "theseus"] }
+uuid = { version = "1.23.1", features = ["v4"] }

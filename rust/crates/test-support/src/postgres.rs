@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use postgresql_embedded::Settings;
 use postgresql_embedded::blocking::PostgreSQL;
 
@@ -40,6 +42,7 @@ pub fn start() -> TestResult<Postgres> {
         temporary: true,
         host: LOCAL_HOST.to_string(),
         port: free_port()?,
+        installation_dir: install_dir()?,
         ..Settings::default()
     };
     let mut inner = PostgreSQL::new(settings);
@@ -47,4 +50,13 @@ pub fn start() -> TestResult<Postgres> {
     inner.start()?;
     inner.create_database(DATABASE)?;
     Ok(Postgres { inner })
+}
+
+// postgresql_embedded defaults its binary to a `~/.theseus` dir in $HOME; keep
+// that name but under the conventional cache directory instead.
+fn install_dir() -> TestResult<PathBuf> {
+    Ok(dirs::cache_dir()
+        .ok_or("could not resolve a cache directory")?
+        .join(".theseus")
+        .join("postgresql"))
 }
