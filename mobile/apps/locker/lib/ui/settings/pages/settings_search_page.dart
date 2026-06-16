@@ -29,7 +29,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
   final FocusNode _focusNode = FocusNode();
   Timer? _debounceTimer;
   String _searchQuery = "";
-  List<_SearchableSetting> _searchResults = [];
+  List<_SearchResultEntry> _searchResults = [];
   late List<_SearchableSetting> _allSettings;
   late List<_SearchableSetting> _suggestions;
 
@@ -63,125 +63,149 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
         _SearchableSetting(
           title: l10n.account,
           category: l10n.account,
+          icon: HugeIcons.strokeRoundedUser,
           page: const AccountSettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.changeEmail,
           category: l10n.account,
+          icon: HugeIcons.strokeRoundedUser,
           page: const AccountSettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.recoveryKey,
           category: l10n.account,
+          icon: HugeIcons.strokeRoundedUser,
           page: const AccountSettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.changePassword,
           category: l10n.account,
+          icon: HugeIcons.strokeRoundedUser,
           page: const AccountSettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.deleteAccount,
           category: l10n.account,
+          icon: HugeIcons.strokeRoundedUser,
           page: const AccountSettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.security,
           category: l10n.security,
+          icon: HugeIcons.strokeRoundedSecurityCheck,
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.emailVerificationToggle,
           category: l10n.security,
+          icon: HugeIcons.strokeRoundedSecurityCheck,
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.passkey,
           category: l10n.security,
+          icon: HugeIcons.strokeRoundedSecurityCheck,
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.appLock,
           category: l10n.security,
+          icon: HugeIcons.strokeRoundedSecurityCheck,
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
           title: l10n.viewActiveSessions,
           category: l10n.security,
+          icon: HugeIcons.strokeRoundedSecurityCheck,
           page: const SecuritySettingsPage(),
         ),
         if (Platform.isAndroid || kDebugMode)
           _SearchableSetting(
             title: l10n.appearance,
             category: l10n.appearance,
+            icon: HugeIcons.strokeRoundedSun03,
             page: const ThemeSettingsPage(),
           ),
       ],
       _SearchableSetting(
         title: l10n.general,
         category: l10n.general,
+        icon: HugeIcons.strokeRoundedSettings01,
         page: const GeneralSettingsPage(),
       ),
       _SearchableSetting(
         title: l10n.selectLanguage,
         category: l10n.general,
+        icon: HugeIcons.strokeRoundedSettings01,
         page: const GeneralSettingsPage(),
       ),
       _SearchableSetting(
         title: l10n.helpAndSupport,
         category: l10n.helpAndSupport,
+        icon: HugeIcons.strokeRoundedHelpCircle,
         page: const SupportPage(),
       ),
       _SearchableSetting(
         title: l10n.askAQuestion,
         category: l10n.helpAndSupport,
+        icon: HugeIcons.strokeRoundedHelpCircle,
         page: const SupportPage(),
       ),
       _SearchableSetting(
         title: l10n.requestAFeature,
         category: l10n.helpAndSupport,
+        icon: HugeIcons.strokeRoundedHelpCircle,
         page: const SupportPage(),
       ),
       _SearchableSetting(
         title: l10n.reportAnIssue,
         category: l10n.helpAndSupport,
+        icon: HugeIcons.strokeRoundedHelpCircle,
         page: const SupportPage(),
       ),
       _SearchableSetting(
         title: l10n.about,
         category: l10n.about,
+        icon: HugeIcons.strokeRoundedInformationCircle,
         page: const AboutPage(),
       ),
       _SearchableSetting(
         title: l10n.weAreOpenSource,
         category: l10n.about,
+        icon: HugeIcons.strokeRoundedInformationCircle,
         page: const AboutPage(),
       ),
       _SearchableSetting(
         title: l10n.blog,
         category: l10n.about,
+        icon: HugeIcons.strokeRoundedInformationCircle,
         page: const AboutPage(),
       ),
       _SearchableSetting(
         title: l10n.privacy,
         category: l10n.about,
+        icon: HugeIcons.strokeRoundedInformationCircle,
         page: const AboutPage(),
       ),
       _SearchableSetting(
         title: l10n.termsOfServicesTitle,
         category: l10n.about,
+        icon: HugeIcons.strokeRoundedInformationCircle,
         page: const AboutPage(),
       ),
       if (UpdateService.instance.isIndependent())
         _SearchableSetting(
           title: l10n.checkForUpdates,
           category: l10n.about,
+          icon: HugeIcons.strokeRoundedInformationCircle,
           page: const AboutPage(),
         ),
       if (hasLoggedIn)
         _SearchableSetting(
           title: l10n.logout,
           category: l10n.logout,
+          icon: HugeIcons.strokeRoundedLogout05,
           onTap: _onLogoutTapped,
         ),
     ];
@@ -214,10 +238,21 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           if (_searchQuery.isEmpty) {
             _searchResults = [];
           } else {
-            _searchResults = _allSettings.where((setting) {
-              return _containsQuery(setting.title, _searchQuery) ||
-                  _containsQuery(setting.category, _searchQuery);
-            }).toList();
+            _searchResults = _allSettings
+                .asMap()
+                .entries
+                .where((entry) {
+                  final setting = entry.value;
+                  return _containsQuery(setting.title, _searchQuery) ||
+                      _containsQuery(setting.category, _searchQuery);
+                })
+                .map(
+                  (entry) => _SearchResultEntry(
+                    setting: entry.value,
+                    category: entry.value.category,
+                  ),
+                )
+                .toList();
           }
         });
       }
@@ -236,7 +271,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
 
   Future<void> _onSettingTapped(_SearchableSetting setting) async {
     if (setting.onTap != null) {
-      setting.onTap!();
+      await setting.onTap!();
     } else if (setting.page != null) {
       await Navigator.of(
         context,
@@ -244,8 +279,12 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     }
   }
 
-  void _onLogoutTapped() {
-    showBottomSheetComponent<void>(
+  Future<void> _onLogoutTapped() async {
+    await _confirmLogout();
+  }
+
+  Future<void> _confirmLogout() async {
+    final shouldLogout = await showBottomSheetComponent<bool>(
       context: context,
       builder: (sheetContext) => BottomSheetComponent(
         title: context.l10n.warning,
@@ -255,16 +294,17 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           ButtonComponent(
             label: context.l10n.yesLogout,
             variant: ButtonComponentVariant.critical,
-            onTap: () async {
-              await UserService.instance.logout(context);
-              if (sheetContext.mounted) {
-                Navigator.of(sheetContext).pop();
-              }
+            shouldSurfaceExecutionStates: false,
+            onTap: () {
+              Navigator.of(sheetContext).pop(true);
             },
           ),
         ],
       ),
     );
+    if (shouldLogout == true && mounted) {
+      await UserService.instance.logout(context);
+    }
   }
 
   @override
@@ -341,7 +381,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           const SizedBox(height: 8),
           Text(
             context.l10n.suggestions,
-            style: TextStyles.bodyBold.copyWith(
+            style: TextStyles.large.copyWith(
               color: context.componentColors.textBase,
             ),
           ),
@@ -378,19 +418,61 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       );
     }
 
-    return ListView.separated(
+    final rows = _buildResultRows();
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: _searchResults.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      itemCount: rows.length,
       itemBuilder: (context, index) {
-        final setting = _searchResults[index];
-        return SettingsItem(
-          title: setting.title,
-          subtitle: setting.title != setting.category ? setting.category : null,
-          showOnlyLoadingState: true,
-          onTap: () => _onSettingTapped(setting),
-        );
+        return rows[index];
       },
+    );
+  }
+
+  List<Widget> _buildResultRows() {
+    final categoryCounts = <String, int>{};
+    for (final entry in _searchResults) {
+      categoryCounts.update(
+        entry.category,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+
+    final rows = <Widget>[];
+    String? currentCategory;
+    for (final entry in _searchResults) {
+      final shouldShowHeader =
+          categoryCounts[entry.category] != null &&
+          categoryCounts[entry.category]! >= 2;
+      if (shouldShowHeader && currentCategory != entry.category) {
+        currentCategory = entry.category;
+        rows.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 8),
+            child: Text(
+              entry.category,
+              style: TextStyles.large.copyWith(
+                color: context.componentColors.textBase,
+              ),
+            ),
+          ),
+        );
+      }
+      rows.add(_buildSearchResultItem(entry.setting));
+    }
+    return rows;
+  }
+
+  Widget _buildSearchResultItem(_SearchableSetting setting) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      child: SettingsItem(
+        title: setting.title,
+        subtitle: setting.title != setting.category ? setting.category : null,
+        icon: setting.icon,
+        showOnlyLoadingState: true,
+        onTap: () => _onSettingTapped(setting),
+      ),
     );
   }
 }
@@ -398,13 +480,22 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
 class _SearchableSetting {
   final String title;
   final String category;
+  final List<List<dynamic>>? icon;
   final Widget? page;
-  final VoidCallback? onTap;
+  final FutureOr<void> Function()? onTap;
 
   const _SearchableSetting({
     required this.title,
     required this.category,
+    this.icon,
     this.page,
     this.onTap,
   });
+}
+
+class _SearchResultEntry {
+  final _SearchableSetting setting;
+  final String category;
+
+  const _SearchResultEntry({required this.setting, required this.category});
 }
