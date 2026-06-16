@@ -2,9 +2,9 @@ package io.ente.photos_tv
 
 import kotlin.time.Duration.Companion.seconds
 
-internal const val API_ORIGIN = "https://api.ente.com"
+internal const val API_ORIGIN = BuildConfig.API_ORIGIN
 
-internal const val CAST_WORKER_ORIGIN = "https://cast-albums.ente.com"
+internal const val CAST_WORKER_ORIGIN = BuildConfig.CAST_WORKER_ORIGIN
 
 internal val SLIDE_DURATION = 12.seconds
 

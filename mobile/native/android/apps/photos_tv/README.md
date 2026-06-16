@@ -22,6 +22,14 @@ To know more about Ente, see [our main README](../../../../../README.md) or visi
    ../ensu/gradlew :app:assembleDebug
    ```
 
+   Optional build-time origins:
+
+   ```sh
+   PHOTOS_TV_API_ORIGIN=https://api.example.com \
+   PHOTOS_TV_CAST_WORKER_ORIGIN=https://cast.example.com \
+   ../ensu/gradlew :app:assembleDebug
+   ```
+
 That's it. Apart from `cargo codegen`, this is a normal Android project. Gradle cross-compiles the Rust libraries to JNI `.so` files automatically when building the app.
 
 > [!NOTE]

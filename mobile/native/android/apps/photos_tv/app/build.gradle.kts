@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
+fun buildConfigString(value: String) = "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+
 android {
     namespace = "io.ente.photos_tv"
     compileSdk = 36
@@ -19,6 +21,18 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
+        buildConfigField(
+            "String",
+            "API_ORIGIN",
+            buildConfigString(providers.environmentVariable("PHOTOS_TV_API_ORIGIN").orElse("https://api.ente.com").get()),
+        )
+        buildConfigField(
+            "String",
+            "CAST_WORKER_ORIGIN",
+            buildConfigString(
+                providers.environmentVariable("PHOTOS_TV_CAST_WORKER_ORIGIN").orElse("https://cast-albums.ente.com").get(),
+            ),
+        )
     }
 
     buildTypes {
@@ -28,6 +42,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
