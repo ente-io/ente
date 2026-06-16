@@ -113,22 +113,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           key: const ValueKey("createAccountButton"),
           label: AppLocalizations.of(context).createAccountTitle,
           isDisabled: !_isFormValid(),
-          onTap: _isFormValid()
-              ? () async {
-                  _config.setVolatilePassword(_passwordController1.text);
-                  await UserService.instance.setEmail(_email!);
-                  await UserService.instance.setRefSource(
-                    await _referralSourceForSubmission(),
-                  );
-                  await UserService.instance.sendOtt(
-                    context,
-                    _email!,
-                    isCreateAccountScreen: true,
-                    purpose: "signup",
-                  );
-                  FocusScope.of(context).unfocus();
-                }
-              : null,
+          onTap: _isFormValid() ? _submitCreateAccount : null,
         ),
       ),
       bottomNavigationBar: isKeyboardOpen ? null : _getLoginPrompt(),
@@ -246,22 +231,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     finishAutofillContextOnEditingComplete: true,
                     shouldUnfocusOnClearOrSubmit: true,
                     onSubmit: _isFormValid()
-                        ? (_) async {
-                            _config.setVolatilePassword(
-                              _passwordController1.text,
-                            );
-                            await UserService.instance.setEmail(_email!);
-                            await UserService.instance.setRefSource(
-                              _referralSource,
-                            );
-                            await UserService.instance.sendOtt(
-                              context,
-                              _email!,
-                              isCreateAccountScreen: true,
-                              purpose: "signup",
-                            );
-                            FocusScope.of(context).unfocus();
-                          }
+                        ? (_) => _submitCreateAccount()
                         : null,
                     message: confirmPasswordMessage,
                     messageType: confirmPasswordMessageType,
@@ -293,22 +263,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       autocorrect: false,
                       shouldUnfocusOnClearOrSubmit: true,
                       onSubmit: _isFormValid()
-                          ? (_) async {
-                              _config.setVolatilePassword(
-                                _passwordController1.text,
-                              );
-                              await UserService.instance.setEmail(_email!);
-                              await UserService.instance.setRefSource(
-                                _referralSource,
-                              );
-                              await UserService.instance.sendOtt(
-                                context,
-                                _email!,
-                                isCreateAccountScreen: true,
-                                purpose: "signup",
-                              );
-                              FocusScope.of(context).unfocus();
-                            }
+                          ? (_) => _submitCreateAccount()
                           : null,
                       onChanged: (value) {
                         _referralSource = value.trim();
@@ -342,6 +297,24 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       widget.showReferralSourceField && !_hasInstallSource;
 
   String get _routeSource => widget.referralSource?.trim() ?? '';
+
+  Future<void> _submitCreateAccount() async {
+    if (!_isFormValid()) {
+      return;
+    }
+    _config.setVolatilePassword(_passwordController1.text);
+    await UserService.instance.setEmail(_email!);
+    await UserService.instance.setRefSource(
+      await _referralSourceForSubmission(),
+    );
+    await UserService.instance.sendOtt(
+      context,
+      _email!,
+      isCreateAccountScreen: true,
+      purpose: "signup",
+    );
+    FocusScope.of(context).unfocus();
+  }
 
   Future<void> _updateReferralSourceFieldVisibility() async {
     final hasInstallSource = await InstallSourceService.instance
