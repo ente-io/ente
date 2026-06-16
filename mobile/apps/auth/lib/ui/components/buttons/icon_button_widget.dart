@@ -88,7 +88,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     );
   }
 
-  void _onTapDown(details) {
+  void _onTapDown(TapDownDetails details) {
     final colorTheme = getEnteColorScheme(context);
     setState(() {
       iconStateColor =
@@ -99,7 +99,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     });
   }
 
-  void _onTapUp(details) {
+  void _onTapUp(TapUpDetails details) {
     Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
         iconStateColor = null;

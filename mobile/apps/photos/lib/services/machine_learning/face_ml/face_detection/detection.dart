@@ -24,8 +24,8 @@ abstract class Detection {
 
   const Detection.empty() : score = 0;
 
-  get width;
-  get height;
+  double get width;
+  double get height;
 
   @override
   String toString();

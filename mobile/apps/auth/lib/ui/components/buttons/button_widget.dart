@@ -518,7 +518,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     }
   }
 
-  void _onTapDown(details) {
+  void _onTapDown(TapDownDetails details) {
     setState(() {
       buttonColor =
           widget.buttonStyle.pressedButtonColor ??
@@ -535,7 +535,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     });
   }
 
-  void _onTapUp(details) {
+  void _onTapUp(TapUpDetails details) {
     Future.delayed(
       const Duration(milliseconds: 84),
       () => setState(() {
