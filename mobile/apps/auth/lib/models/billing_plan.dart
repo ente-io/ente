@@ -2,20 +2,18 @@ import 'dart:convert';
 
 class BillingPlans {
   final List<BillingPlan> plans;
-  final FreePlan? freePlan;
+  final FreePlan freePlan;
 
   BillingPlans({required this.plans, required this.freePlan});
 
   Map<String, dynamic> toMap() {
     return {
       'plans': plans.map((x) => x.toMap()).toList(),
-      'freePlan': freePlan?.toMap(),
+      'freePlan': freePlan.toMap(),
     };
   }
 
-  static BillingPlans fromMap(Map<String, dynamic>? map) {
-    if (map == null) return BillingPlans(plans: [], freePlan: null);
-
+  static BillingPlans fromMap(Map<String, dynamic> map) {
     return BillingPlans(
       plans: List<BillingPlan>.from(
         map['plans']?.map((x) => BillingPlan.fromMap(x)),

@@ -135,7 +135,7 @@ class UserDetails {
       (map['storageBonus'] ?? 0) as int,
       (map['sharedCollectionsCount'] ?? 0) as int,
       Subscription.fromMap(map['subscription']),
-      FamilyData.fromMap(map['familyData']),
+      map['familyData'] != null ? FamilyData.fromMap(map['familyData']) : null,
       ProfileData.fromJson(map['profileData']),
       BonusData.fromJson(map['bonusData']),
       LockerFamilyUsage.fromJson(map['lockerFamilyUsage']),
