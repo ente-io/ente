@@ -16,6 +16,7 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
   private let channel: FlutterMethodChannel
   private let session = AVCaptureSession()
   private let sessionQueue = DispatchQueue(label: "io.ente.qr_scanner.session")
+  private let metadataQueue = DispatchQueue(label: "io.ente.qr_scanner.metadata")
   private var previewLayer: AVCaptureVideoPreviewLayer?
   private var metadataOutput: AVCaptureMetadataOutput?
   private var captureDevice: AVCaptureDevice?
@@ -24,22 +25,17 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
   private var isDisposed = false
   private var lastEmittedText: String?
   private var lastEmittedAt = Date.distantPast
-  private let supportedMetadataTypes: [AVMetadataObject.ObjectType] = [
-    .qr,
-    .aztec,
-    .dataMatrix,
-    .pdf417,
-  ]
+  private let supportedMetadataTypes: [AVMetadataObject.ObjectType] = [.qr]
 
   init(
     frame: CGRect,
-    viewId: Int64,
+    platformViewId: Int64,
     args: Any?,
     messenger: FlutterBinaryMessenger
   ) {
     containerView = EnteQrScannerPreviewView(frame: frame)
     channel = FlutterMethodChannel(
-      name: "io.ente.qr_scanner/view_\(viewId)",
+      name: "io.ente.qr_scanner/view_\(platformViewId)",
       binaryMessenger: messenger
     )
     super.init()
@@ -141,7 +137,7 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
       return
     }
     session.addOutput(output)
-    output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+    output.setMetadataObjectsDelegate(self, queue: metadataQueue)
     let enabledMetadataTypes = supportedMetadataTypes.filter {
       output.availableMetadataObjectTypes.contains($0)
     }
@@ -224,6 +220,7 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
     }
 
     previewLayer?.frame = containerView.bounds
+    metadataOutput?.rectOfInterest = CGRect(x: 0, y: 0, width: 1, height: 1)
   }
 
   private func pause() {

@@ -12,11 +12,11 @@ class EnteQrScannerViewFactory(
     private val activityProvider: () -> Activity?,
     private val permissionRequester: ((Boolean) -> Unit) -> Unit,
 ) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-    override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
+    override fun create(context: Context, platformViewId: Int, args: Any?): PlatformView {
         return EnteQrScannerView(
             context = context,
             messenger = messenger,
-            viewId = viewId,
+            platformViewId = platformViewId,
             overlay = EnteQrScannerOverlay.from(args),
             activityProvider = activityProvider,
             permissionRequester = permissionRequester,

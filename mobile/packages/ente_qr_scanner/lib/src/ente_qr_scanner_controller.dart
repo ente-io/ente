@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 class EnteQrScannerController {
-  EnteQrScannerController(int viewId)
-    : _channel = MethodChannel('io.ente.qr_scanner/view_$viewId') {
+  EnteQrScannerController(int platformViewId)
+    : _channel = MethodChannel('io.ente.qr_scanner/view_$platformViewId') {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 

@@ -63,8 +63,8 @@ class _EnteQrScannerViewState extends State<EnteQrScannerView> {
     );
   }
 
-  void _onPlatformViewCreated(int viewId) {
-    final controller = EnteQrScannerController(viewId);
+  void _onPlatformViewCreated(int platformViewId) {
+    final controller = EnteQrScannerController(platformViewId);
     controller.onError = widget.onError;
     _controller = controller;
     widget.onScannerCreated(controller);

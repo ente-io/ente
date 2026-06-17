@@ -11,12 +11,12 @@ final class EnteQrScannerViewFactory: NSObject, FlutterPlatformViewFactory {
 
   func create(
     withFrame frame: CGRect,
-    viewIdentifier viewId: Int64,
+    viewIdentifier platformViewId: Int64,
     arguments args: Any?
   ) -> FlutterPlatformView {
     EnteQrScannerView(
       frame: frame,
-      viewId: viewId,
+      platformViewId: platformViewId,
       args: args,
       messenger: messenger
     )

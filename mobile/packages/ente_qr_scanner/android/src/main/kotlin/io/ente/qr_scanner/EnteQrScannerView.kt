@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 class EnteQrScannerView(
     private val context: Context,
     messenger: BinaryMessenger,
-    viewId: Int,
+    platformViewId: Int,
     private val overlay: EnteQrScannerOverlay,
     private val activityProvider: () -> Activity?,
     private val permissionRequester: ((Boolean) -> Unit) -> Unit,
@@ -37,7 +37,7 @@ class EnteQrScannerView(
     MethodChannel.MethodCallHandler {
     private val rootView = FrameLayout(context)
     private val previewView = PreviewView(context)
-    private val channel = MethodChannel(messenger, "io.ente.qr_scanner/view_$viewId")
+    private val channel = MethodChannel(messenger, "io.ente.qr_scanner/view_$platformViewId")
     private val mainHandler = Handler(Looper.getMainLooper())
     private val analysisExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var cameraProvider: ProcessCameraProvider? = null
