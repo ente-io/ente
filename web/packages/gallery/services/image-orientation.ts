@@ -1,16 +1,12 @@
 import log from "ente-base/log";
 import {
     extractRawExif,
-    parseExif,
     parseExifOrientation,
     type ExifOrientation,
-    type RawExifTags,
 } from "ente-gallery/services/exif";
-import type { ParsedMetadata } from "ente-media/file-metadata";
 
 export interface OrientedImageURLResult {
     imageURL: string;
-    exif?: { tags: RawExifTags; parsed: ParsedMetadata };
     orientedImageURL?: string;
 }
 
@@ -98,15 +94,12 @@ export const orientedImageURL = async (
     imageURL: string,
     originalImageBlob: Blob,
 ): Promise<OrientedImageURLResult> => {
-    let exif: OrientedImageURLResult["exif"] | undefined;
     let orientation: ExifOrientation | undefined;
 
     // Extract and parse the embedded metadata once, then read the orientation
     // tag from the raw Exif/XMP tags.
     try {
         const tags = await extractRawExif(originalImageBlob);
-        const parsed = parseExif(tags);
-        exif = { tags, parsed };
         orientation = parseExifOrientation(tags);
     } catch (e) {
         log.warn("Failed to extract exif for image orientation", e);
@@ -114,14 +107,14 @@ export const orientedImageURL = async (
     }
 
     // Missing orientation and orientation 1 are both no-op cases, so keep the
-    // original display URL and return any metadata we were able to parse.
-    if (!orientation || orientation == 1) return { imageURL, exif };
+    // original display URL.
+    if (!orientation || orientation == 1) return { imageURL };
 
     const correctedImageURL = await canvasOrientedImageURL(
         imageURL,
         orientation,
     );
-    return { imageURL, exif, orientedImageURL: correctedImageURL };
+    return { imageURL, orientedImageURL: correctedImageURL };
 };
 
 /**

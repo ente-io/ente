@@ -569,7 +569,6 @@ const enqueueUpdates = async (
                 );
                 const displayImageURL =
                     oriented.orientedImageURL ?? oriented.imageURL;
-                updateFileInfoExifIfAvailable(fileID, oriented.exif);
                 const itemData =
                     await withDimensionsIfPossible(displayImageURL);
                 update({
@@ -611,7 +610,6 @@ const enqueueUpdates = async (
                 );
                 const displayImageURL =
                     oriented.orientedImageURL ?? oriented.imageURL;
-                updateFileInfoExifIfAvailable(fileID, oriented.exif);
                 update({
                     ...(await withDimensionsIfPossible(displayImageURL)),
                     imageURL: displayImageURL,
@@ -760,9 +758,14 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     // We already have it available.
     if (_state.fileInfoExifByFileID.has(fileID)) return;
 
+    const update = (exifData: FileInfoExif) => {
+        _state.fileInfoExifByFileID.set(fileID, exifData);
+        _state.exifObserverByFileID.get(fileID)?.(exifData);
+    };
+
     // For videos, insert a placeholder.
     if (fileType == FileType.video) {
-        updateFileInfoExif(fileID, createPlaceholderFileInfoExif());
+        update(createPlaceholderFileInfoExif());
         return;
     }
 
@@ -773,27 +776,13 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
         const file = new File([originalImageBlob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
-        updateFileInfoExif(fileID, { tags, parsed });
+        update({ tags, parsed });
     } catch (e) {
         log.error("Failed to extract exif", e);
         // Save the empty placeholder exif corresponding to the file, no point
         // in unnecessarily retrying this, it will deterministically fail again.
-        updateFileInfoExif(fileID, createPlaceholderFileInfoExif());
+        update(createPlaceholderFileInfoExif());
     }
-};
-
-const updateFileInfoExifIfAvailable = (
-    fileID: number,
-    exifData: FileInfoExif | undefined,
-) => {
-    if (exifData && !_state.fileInfoExifByFileID.has(fileID)) {
-        updateFileInfoExif(fileID, exifData);
-    }
-};
-
-const updateFileInfoExif = (fileID: number, exifData: FileInfoExif) => {
-    _state.fileInfoExifByFileID.set(fileID, exifData);
-    _state.exifObserverByFileID.get(fileID)?.(exifData);
 };
 
 const createPlaceholderFileInfoExif = (): FileInfoExif => ({
