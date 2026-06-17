@@ -16,7 +16,6 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
   private let channel: FlutterMethodChannel
   private let session = AVCaptureSession()
   private let sessionQueue = DispatchQueue(label: "io.ente.qr_scanner.session")
-  private let metadataQueue = DispatchQueue(label: "io.ente.qr_scanner.metadata")
   private var previewLayer: AVCaptureVideoPreviewLayer?
   private var metadataOutput: AVCaptureMetadataOutput?
   private var captureDevice: AVCaptureDevice?
@@ -25,6 +24,12 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
   private var isDisposed = false
   private var lastEmittedText: String?
   private var lastEmittedAt = Date.distantPast
+  private let supportedMetadataTypes: [AVMetadataObject.ObjectType] = [
+    .qr,
+    .aztec,
+    .dataMatrix,
+    .pdf417,
+  ]
 
   init(
     frame: CGRect,
@@ -43,6 +48,10 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
       self?.updatePreviewLayout()
     }
     channel.setMethodCallHandler(handle)
+    containerView.addGestureRecognizer(UITapGestureRecognizer(
+      target: self,
+      action: #selector(handleTapToFocus(_:))
+    ))
     requestPermissionAndStart()
   }
 
@@ -107,10 +116,14 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
 
   private func configureSession() {
     session.beginConfiguration()
-    session.sessionPreset = .high
+    if session.canSetSessionPreset(.hd1920x1080) {
+      session.sessionPreset = .hd1920x1080
+    } else if session.canSetSessionPreset(.high) {
+      session.sessionPreset = .high
+    }
 
     guard
-      let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+      let device = makeCaptureDevice(),
       let input = try? AVCaptureDeviceInput(device: device),
       session.canAddInput(input)
     else {
@@ -128,10 +141,16 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
       return
     }
     session.addOutput(output)
-    output.setMetadataObjectsDelegate(self, queue: metadataQueue)
-    if output.availableMetadataObjectTypes.contains(.qr) {
-      output.metadataObjectTypes = [.qr]
+    output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+    let enabledMetadataTypes = supportedMetadataTypes.filter {
+      output.availableMetadataObjectTypes.contains($0)
     }
+    guard !enabledMetadataTypes.isEmpty else {
+      session.commitConfiguration()
+      emitError("QR metadata output is unavailable")
+      return
+    }
+    output.metadataObjectTypes = enabledMetadataTypes
     metadataOutput = output
 
     session.commitConfiguration()
@@ -151,18 +170,41 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
     }
   }
 
-  private func configureFocusAndExposure(_ device: AVCaptureDevice) {
+  private func makeCaptureDevice() -> AVCaptureDevice? {
+    AVCaptureDevice.DiscoverySession(
+      deviceTypes: [.builtInWideAngleCamera],
+      mediaType: .video,
+      position: .back
+    ).devices.first ?? AVCaptureDevice.default(for: .video)
+  }
+
+  @objc private func handleTapToFocus(_ recognizer: UITapGestureRecognizer) {
+    guard
+      recognizer.state == .ended,
+      let device = captureDevice,
+      let previewLayer = previewLayer
+    else {
+      return
+    }
+    let layerPoint = recognizer.location(in: containerView)
+    let devicePoint = previewLayer.captureDevicePointConverted(fromLayerPoint: layerPoint)
+    configureFocusAndExposure(device, at: devicePoint)
+  }
+
+  private func configureFocusAndExposure(
+    _ device: AVCaptureDevice,
+    at point: CGPoint = CGPoint(x: 0.5, y: 0.5)
+  ) {
     do {
       try device.lockForConfiguration()
-      let centerPoint = CGPoint(x: 0.5, y: 0.5)
       if device.isFocusPointOfInterestSupported {
-        device.focusPointOfInterest = centerPoint
+        device.focusPointOfInterest = point
       }
       if device.isFocusModeSupported(.continuousAutoFocus) {
         device.focusMode = .continuousAutoFocus
       }
       if device.isExposurePointOfInterestSupported {
-        device.exposurePointOfInterest = centerPoint
+        device.exposurePointOfInterest = point
       }
       if device.isExposureModeSupported(.continuousAutoExposure) {
         device.exposureMode = .continuousAutoExposure
@@ -182,7 +224,6 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
     }
 
     previewLayer?.frame = containerView.bounds
-    metadataOutput?.rectOfInterest = CGRect(x: 0, y: 0, width: 1, height: 1)
   }
 
   private func pause() {
@@ -257,7 +298,7 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
       !isDisposed,
       !isPaused,
       let readableObject = metadataObjects.compactMap({ $0 as? AVMetadataMachineReadableCodeObject }).first,
-      readableObject.type == .qr,
+      supportedMetadataTypes.contains(readableObject.type),
       let payload = readableObject.stringValue,
       !payload.isEmpty
     else {
