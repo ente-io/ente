@@ -567,13 +567,14 @@ const enqueueUpdates = async (
                     imageURL,
                     originalImageBlob,
                 );
+                const displayImageURL =
+                    oriented.orientedImageURL ?? oriented.imageURL;
                 updateFileInfoExifIfAvailable(fileID, oriented.exif);
-                const itemData = await withDimensionsIfPossible(
-                    oriented.imageURL,
-                );
+                const itemData =
+                    await withDimensionsIfPossible(displayImageURL);
                 update({
                     ...itemData,
-                    imageURL: oriented.imageURL,
+                    imageURL: displayImageURL,
                     originalImageBlob,
                     orientedImageURL: oriented.orientedImageURL,
                 });
@@ -608,10 +609,12 @@ const enqueueUpdates = async (
                     imageURL,
                     originalImageBlob,
                 );
+                const displayImageURL =
+                    oriented.orientedImageURL ?? oriented.imageURL;
                 updateFileInfoExifIfAvailable(fileID, oriented.exif);
                 update({
-                    ...(await withDimensionsIfPossible(oriented.imageURL)),
-                    imageURL: oriented.imageURL,
+                    ...(await withDimensionsIfPossible(displayImageURL)),
+                    imageURL: displayImageURL,
                     originalImageBlob,
                     videoURL,
                     orientedImageURL: oriented.orientedImageURL,

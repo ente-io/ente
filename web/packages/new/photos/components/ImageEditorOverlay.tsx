@@ -418,8 +418,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                 }
                 revokeEditorOrientedImageURL();
                 editorOrientedImageURLRef.current = oriented.orientedImageURL;
-                img.src = oriented.imageURL;
-                setFileURL(oriented.imageURL);
+                const displayImageURL =
+                    oriented.orientedImageURL ?? oriented.imageURL;
+                img.src = displayImageURL;
+                setFileURL(displayImageURL);
                 setMIMEType(sourceURLs.mimeType);
             } else {
                 img.src = fileURL;

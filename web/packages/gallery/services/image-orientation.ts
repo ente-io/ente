@@ -83,6 +83,17 @@ export const drawImageWithExifOrientation = (
     ctx.drawImage(image, 0, 0, width, height);
 };
 
+/**
+ * Return the original display URL and, when needed, an orientation-corrected
+ * object URL for the image.
+ *
+ * @param imageURL The renderable object URL of the image associated with the file.
+ * @param originalImageBlob The original image associated with the file, as a Blob.
+ *
+ * This is currently shared by the file viewer and the image editor. Callers
+ * should use `orientedImageURL ?? imageURL` for display, and only revoke
+ * `orientedImageURL` because it is created here.
+ */
 export const orientedImageURL = async (
     imageURL: string,
     originalImageBlob: Blob,
@@ -90,6 +101,8 @@ export const orientedImageURL = async (
     let exif: OrientedImageURLResult["exif"] | undefined;
     let orientation: ExifOrientation | undefined;
 
+    // Extract and parse the embedded metadata once, then read the orientation
+    // tag from the raw Exif/XMP tags.
     try {
         const tags = await extractRawExif(originalImageBlob);
         const parsed = parseExif(tags);
@@ -100,19 +113,24 @@ export const orientedImageURL = async (
         return { imageURL };
     }
 
+    // Missing orientation and orientation 1 are both no-op cases, so keep the
+    // original display URL and return any metadata we were able to parse.
     if (!orientation || orientation == 1) return { imageURL, exif };
 
     const correctedImageURL = await canvasOrientedImageURL(
         imageURL,
         orientation,
     );
-    return {
-        imageURL: correctedImageURL,
-        exif,
-        orientedImageURL: correctedImageURL,
-    };
+    return { imageURL, exif, orientedImageURL: correctedImageURL };
 };
 
+/**
+ * Draw the image into a new canvas with the requested Exif orientation applied,
+ * returning a new object URL for that canvas output.
+ *
+ * @param imageURL The renderable object URL of the image associated with the file.
+ * @param orientation The Exif orientation extracted from the image metadata.
+ */
 const canvasOrientedImageURL = async (
     imageURL: string,
     orientation: ExifOrientation,
