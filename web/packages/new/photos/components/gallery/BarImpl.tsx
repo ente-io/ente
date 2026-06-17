@@ -567,31 +567,31 @@ interface CollectionBarCardIconProps {
 const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     attributes,
 }) => (
-    // Under current scenarios, there are no cases where more than 3 of these
-    // will be true simultaneously even in the rarest of cases (a pinned and
-    // shared album that is also archived), and there is enough space for 3.
+    // In the rarest of cases up to 4 of these can be true at once: a pinned
+    // album that is shared both with people and via a public link, and is also
+    // archived. The container is sized so that all 4 still fit on the tile.
     <CollectionBarCardIcon_>
         {attributes.has("userFavorites") && <StarIcon fontSize="small" />}
         {(attributes.has("pinned") || attributes.has("shareePinned")) && (
             // Need && to override the 20px set in the container.
             <HugeiconsIcon icon={PinIcon} size={18} />
         )}
-        {attributes.has("shared") &&
-            (attributes.has("sharedOnlyViaLink") ? (
-                <HugeiconsIcon icon={Link05Icon} size={20} />
-            ) : (
-                <PeopleIcon />
-            ))}
+        {attributes.has("shared") && !attributes.has("sharedOnlyViaLink") && (
+            <PeopleIcon />
+        )}
+        {attributes.has("sharedViaLink") && (
+            <HugeiconsIcon icon={Link05Icon} size={20} />
+        )}
         {attributes.has("archived") && <ArchiveIcon sx={{ opacity: 0.48 }} />}
     </CollectionBarCardIcon_>
 );
 
 const CollectionBarCardIcon_ = styled(Overlay)`
-    padding: 4px;
+    padding: 3px;
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
-    gap: 4px;
+    gap: 2px;
     & > .MuiSvgIcon-root {
         font-size: 20px;
     }
