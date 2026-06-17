@@ -345,6 +345,21 @@ When you edit metadata on one device:
 
 We're working on bringing all editing features to all platforms.
 
+### A photo I shared into Ente from WhatsApp shows the wrong date in the timeline. Why? {#whatsapp-wrong-date}
+
+Apps like WhatsApp strip the hidden "date taken" information from photos for privacy. When Ente can't find that information, and can't reliably extract it from the filename either (especially for videos), it falls back to the upload date.
+
+To fix dates already uploaded, the easiest path is the desktop app, which supports bulk editing:
+
+1. Install the desktop app and sign in.
+2. Select the affected photos and videos.
+3. Click **Edit time** in the action bar.
+4. Set the correct date and apply.
+
+The correction syncs to all your devices.
+
+To prevent this for future shared media, save photos to your phone's gallery first and let Ente back them up from the gallery. Ente reads dates correctly when files come from the gallery rather than directly from a sharing intent.
+
 ### Does Ente modify any file metadata? {#modify-file-metadata}
 
 No. Ente never modifies your original files or their embedded metadata. All edits you make are stored separately in Ente's database and:
