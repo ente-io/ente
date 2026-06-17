@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
           key: const ValueKey("logInButton"),
           label: AppLocalizations.of(context).continueLabel,
           isDisabled: !_emailIsValid,
-          onTap: _emailIsValid ? _onLoginPressed : null,
+          onTap: _emailIsValid ? _submitLoginEmail : null,
         ),
       ),
       bottomNavigationBar: isKeyboardOpen ? null : _getSignUpPrompt(),
@@ -115,20 +115,7 @@ class _LoginPageState extends State<LoginPage> {
               autofocus: true,
               isRequired: true,
               shouldUnfocusOnClearOrSubmit: true,
-              onSubmit: (_) async {
-                final trimmed = _emailController.text.trim();
-                final isValid = EmailValidator.validate(trimmed);
-                if (!isValid) {
-                  setState(() {
-                    _email = trimmed;
-                    _emailIsValid = false;
-                    _showValidationMessage = true;
-                  });
-                  return;
-                }
-                _email = trimmed;
-                await _onLoginPressed();
-              },
+              onSubmit: (_) => _submitLoginEmail(),
               onChanged: _onEmailChanged,
               message: _showValidationMessage && !_emailIsValid
                   ? AppLocalizations.of(context).invalidEmailAddress
@@ -194,6 +181,21 @@ class _LoginPageState extends State<LoginPage> {
         }
       });
     }
+  }
+
+  Future<void> _submitLoginEmail() async {
+    final trimmed = _emailController.text.trim();
+    final isValid = EmailValidator.validate(trimmed);
+    if (!isValid) {
+      setState(() {
+        _email = trimmed;
+        _emailIsValid = false;
+        _showValidationMessage = true;
+      });
+      return;
+    }
+    _email = trimmed;
+    await _onLoginPressed();
   }
 
   Future<void> _onLoginPressed() async {

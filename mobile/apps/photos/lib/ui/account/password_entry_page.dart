@@ -118,22 +118,23 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
               child: ButtonComponent(
                 label: title,
                 isDisabled: !isFormValid,
-                onTap: isFormValid
-                    ? () async {
-                        if (widget.mode == PasswordEntryMode.set) {
-                          await _showRecoveryCodeDialog(
-                            _passwordController1.text,
-                          );
-                        } else {
-                          _updatePassword();
-                        }
-                        FocusScope.of(context).unfocus();
-                      }
-                    : null,
+                onTap: isFormValid ? _submitPassword : null,
               ),
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  Future<void> _submitPassword() async {
+    if (!_passwordsMatch || !_isPasswordValid) {
+      return;
+    }
+    if (widget.mode == PasswordEntryMode.set) {
+      await _showRecoveryCodeDialog(_passwordController1.text);
+    } else {
+      _updatePassword();
+    }
+    FocusScope.of(context).unfocus();
   }
 
   Widget _getBody() {
@@ -258,16 +259,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 finishAutofillContextOnEditingComplete: true,
                 shouldUnfocusOnClearOrSubmit: true,
                 onSubmit: _passwordsMatch && _isPasswordValid
-                    ? (_) async {
-                        if (widget.mode == PasswordEntryMode.set) {
-                          await _showRecoveryCodeDialog(
-                            _passwordController1.text,
-                          );
-                        } else {
-                          _updatePassword();
-                        }
-                        FocusScope.of(context).unfocus();
-                      }
+                    ? (_) => _submitPassword()
                     : null,
                 message: confirmPasswordMessage,
                 messageType: confirmPasswordMessageType,

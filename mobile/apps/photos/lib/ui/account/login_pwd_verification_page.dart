@@ -82,16 +82,19 @@ class _LoginPasswordVerificationPageState
           key: const ValueKey("verifyPasswordButton"),
           label: AppLocalizations.of(context).logInLabel,
           isDisabled: !_hasPassword,
-          onTap: _hasPassword
-              ? () async {
-                  FocusScope.of(context).unfocus();
-                  await verifyPassword(context, _passwordController.text);
-                }
-              : null,
+          onTap: _hasPassword ? _verifyEnteredPassword : null,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  Future<void> _verifyEnteredPassword() async {
+    if (!_hasPassword) {
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    await verifyPassword(context, _passwordController.text);
   }
 
   Widget _getBody() {
@@ -120,12 +123,7 @@ class _LoginPasswordVerificationPageState
             autocorrect: false,
             autofocus: true,
             shouldUnfocusOnClearOrSubmit: true,
-            onSubmit: _hasPassword
-                ? (_) async {
-                    FocusScope.of(context).unfocus();
-                    await verifyPassword(context, _passwordController.text);
-                  }
-                : null,
+            onSubmit: _hasPassword ? (_) => _verifyEnteredPassword() : null,
             onChanged: (value) {
               final hasPassword = value.isNotEmpty;
               if (_hasPassword != hasPassword) {
