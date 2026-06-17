@@ -64,6 +64,7 @@ type GalleryBarAndListHeaderProps = Omit<
     activeCollection: Collection | undefined;
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
+    hasActiveFileSelection: boolean;
     saveGroups: SaveGroup[];
     canCreateAlbum: boolean;
 } & Pick<
@@ -122,6 +123,7 @@ export const GalleryBarAndListHeader: React.FC<
     allPeople,
     saveGroups,
     canCreateAlbum,
+    hasActiveFileSelection,
     files,
     mapFileSource,
     activePerson,
@@ -241,6 +243,7 @@ export const GalleryBarAndListHeader: React.FC<
                     onCollectionCast={showCollectionCast}
                     canSetAlbumCover={canSetAlbumCover}
                     onSetAlbumCover={onSetAlbumCover}
+                    hasActiveFileSelection={hasActiveFileSelection}
                 />
             ) : mode != "people" && collectionSummary ? (
                 <GalleryItemsHeaderAdapter>
@@ -274,6 +277,7 @@ export const GalleryBarAndListHeader: React.FC<
         openCollectionShare,
         openCollectionManageLink,
         showCollectionCast,
+        hasActiveFileSelection,
         onRemotePull,
         onAddSaveGroup,
         onMarkTempDeleted,

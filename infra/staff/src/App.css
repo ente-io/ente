@@ -25,7 +25,7 @@
     margin-top: 90px;
     padding: 20px;
     border-radius: 10px;
-    background-color: #fcfcfc;
+    background-color: light-dark(#fcfcfc, #1f1f1f);
 }
 
 .link-text {
@@ -60,6 +60,26 @@
 
 .fetch-button-container button:hover {
     background-color: #00b33c;
+}
+
+@media (prefers-color-scheme: dark) {
+    .horizontal-group .MuiInputLabel-root {
+        color: rgb(255 255 255 / 70%);
+    }
+
+    .horizontal-group .MuiOutlinedInput-root {
+        color: rgb(255 255 255 / 87%);
+    }
+
+    .horizontal-group .MuiOutlinedInput-notchedOutline {
+        border-color: rgb(255 255 255 / 23%);
+    }
+
+    .horizontal-group
+        .MuiOutlinedInput-root:hover
+        .MuiOutlinedInput-notchedOutline {
+        border-color: rgb(255 255 255 / 87%);
+    }
 }
 
 .content-container {
