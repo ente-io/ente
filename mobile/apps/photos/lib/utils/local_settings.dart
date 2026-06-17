@@ -101,7 +101,7 @@ class LocalSettings {
   static const _kLocalGalleryGetStartedBannerDismissedAt =
       "ls.offline_get_started_banner_dismissed_at";
   static const _kLocalGalleryGetStartedBannerDismissDuration = Duration(
-    days: 30,
+    days: 7,
   );
 
   final SharedPreferences _prefs;
