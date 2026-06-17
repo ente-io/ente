@@ -2,6 +2,15 @@ import "package:flutter/material.dart";
 
 const searchTabHorizontalPadding = 15.0;
 
+double searchTabSingleLineTextHeight(BuildContext context, TextStyle style) {
+  final textPainter = TextPainter(
+    text: TextSpan(text: "Ag", style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  return textPainter.height;
+}
+
 class SearchTabHorizontalListView extends StatelessWidget {
   const SearchTabHorizontalListView({
     required this.height,

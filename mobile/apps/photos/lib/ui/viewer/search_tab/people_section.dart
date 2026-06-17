@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:math" as math;
 
 import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
@@ -147,7 +148,7 @@ class SearchExampleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SearchTabHorizontalListView(
-      height: 158,
+      height: PersonSearchExample.heightFor(context),
       itemCount: examples.length,
       itemBuilder: (context, index) {
         return PersonSearchExample(
@@ -171,6 +172,18 @@ class PersonSearchExample extends StatelessWidget {
     required this.selectedPeople,
     this.size = 108,
   });
+
+  static double heightFor(BuildContext context, {double size = 108}) {
+    final labelHeight =
+        size +
+        8 +
+        searchTabSingleLineTextHeight(context, TextStyles.body) +
+        2 +
+        searchTabSingleLineTextHeight(context, TextStyles.mini);
+    final clusterLabelHeight =
+        size + 6 + searchTabSingleLineTextHeight(context, TextStyles.body);
+    return math.max(158, math.max(labelHeight, clusterLabelHeight));
+  }
 
   void toggleSelection() {
     selectedPeople?.toggleSelection(

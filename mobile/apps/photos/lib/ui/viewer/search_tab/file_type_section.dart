@@ -71,7 +71,7 @@ class FileTypeSection extends StatelessWidget {
           const SectionHeader(SectionType.fileTypesAndExtension, hasMore: true),
           const SizedBox(height: 8),
           SearchTabHorizontalListView(
-            height: 56,
+            height: _FileTypeCard.heightFor(context),
             itemCount: previewTiles.length,
             itemBuilder: (context, index) {
               return _FileTypeRecommendation(previewTiles[index]);
@@ -191,15 +191,26 @@ class _FileTypeRecommendationState extends State<_FileTypeRecommendation> {
 
 class _FileTypeCard extends StatelessWidget {
   static const width = 108.0;
-  static const height = 56.0;
+  static const _height = 56.0;
+  static const _labelTop = 31.0;
+  static const _labelBottomPadding = 8.0;
 
   final _FileTypeTile tile;
 
   const _FileTypeCard(this.tile);
 
+  static double heightFor(BuildContext context) {
+    return (_labelTop +
+            searchTabSingleLineTextHeight(context, _labelStyle(Colors.black)) +
+            _labelBottomPadding)
+        .clamp(_height, double.infinity)
+        .toDouble();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final height = heightFor(context);
     return CustomPaint(
       painter: _FileTypeCardBackgroundPainter(colorScheme.fill),
       child: SizedBox(
@@ -210,16 +221,10 @@ class _FileTypeCard extends StatelessWidget {
             Positioned(
               left: 13,
               right: 38,
-              top: 31,
-              height: 17,
+              top: _labelTop,
               child: Text(
                 tile.label,
-                style: TextStyles.mini.copyWith(
-                  color: colorScheme.textBase,
-                  fontSize: 12.461538,
-                  fontWeight: FontWeight.w700,
-                  height: 16.615385 / 12.461538,
-                ),
+                style: _labelStyle(colorScheme.textBase),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -240,6 +245,15 @@ class _FileTypeCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  static TextStyle _labelStyle(Color color) {
+    return TextStyles.mini.copyWith(
+      color: color,
+      fontSize: 12.461538,
+      fontWeight: FontWeight.w700,
+      height: 16.615385 / 12.461538,
     );
   }
 }

@@ -109,7 +109,7 @@ class _MagicSectionState extends State<MagicSection> {
             ),
             const SizedBox(height: 4),
             SearchTabHorizontalListView(
-              height: 158,
+              height: MagicRecommendation.heightFor(context),
               itemCount: _magicSearchResults.length,
               itemBuilder: (context, index) {
                 return MagicRecommendation(_magicSearchResults[index]);
@@ -125,11 +125,22 @@ class _MagicSectionState extends State<MagicSection> {
 
 class MagicRecommendation extends StatelessWidget {
   static const _width = 108.0;
+  static const _height = 158.0;
   static const _thumbnailSize = 108.0;
   static const _cornerRadius = 20.0;
   static const _cornerSmoothing = 1.0;
   final GenericSearchResult magicSearchResult;
   const MagicRecommendation(this.magicSearchResult, {super.key});
+
+  static double heightFor(BuildContext context) {
+    return (_thumbnailSize +
+            8 +
+            searchTabSingleLineTextHeight(context, TextStyles.body) +
+            2 +
+            searchTabSingleLineTextHeight(context, TextStyles.mini))
+        .clamp(_height, double.infinity)
+        .toDouble();
+  }
 
   @override
   Widget build(BuildContext context) {

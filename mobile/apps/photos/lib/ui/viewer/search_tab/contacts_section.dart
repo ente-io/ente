@@ -167,7 +167,7 @@ class _ContactsSectionState extends State<ContactsSection> {
             ),
             const SizedBox(height: 4),
             SearchTabHorizontalListView(
-              height: 92,
+              height: ContactRecommendation.heightFor(context),
               itemCount: _contactSearchResults.length + 1,
               itemBuilder: (context, index) {
                 if (index == _contactSearchResults.length) {
@@ -189,8 +189,19 @@ class _ContactsSectionState extends State<ContactsSection> {
 }
 
 class ContactRecommendation extends StatefulWidget {
+  static const _avatarSize = 62.0;
+  static const _height = 92.0;
+
   final GenericSearchResult contactSearchResult;
   const ContactRecommendation(this.contactSearchResult, {super.key});
+
+  static double heightFor(BuildContext context) {
+    return (_avatarSize +
+            10 +
+            searchTabSingleLineTextHeight(context, TextStyles.mini))
+        .clamp(_height, double.infinity)
+        .toDouble();
+  }
 
   @override
   State<ContactRecommendation> createState() => _ContactRecommendationState();
@@ -222,13 +233,13 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
           children: [
             ClipOval(
               child: SizedBox(
-                width: 62,
-                height: 62,
+                width: ContactRecommendation._avatarSize,
+                height: ContactRecommendation._avatarSize,
                 child: ContactAvatarWidget(
                   contactUserId: contactUserId,
                   email: contactEmail,
                   personId: personId,
-                  size: 62,
+                  size: ContactRecommendation._avatarSize,
                 ),
               ),
             ),
@@ -249,6 +260,7 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
 
 class ContactCTA extends StatelessWidget {
   static const _inviteAsset = "assets/invite_contact.svg";
+  static const _iconSize = 62.0;
 
   const ContactCTA({super.key});
 
@@ -263,8 +275,8 @@ class ContactCTA extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 62,
-              height: 62,
+              width: _iconSize,
+              height: _iconSize,
               decoration: BoxDecoration(
                 color: colorScheme.fill,
                 shape: BoxShape.circle,

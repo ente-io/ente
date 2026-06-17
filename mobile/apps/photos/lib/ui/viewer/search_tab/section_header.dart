@@ -6,6 +6,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_section_all_page.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 
 class SectionHeader extends StatelessWidget {
   final SectionType sectionType;
@@ -21,6 +22,7 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final headerHeight = _sectionHeaderHeightFor(context);
     return GestureDetector(
       onTap: () {
         if (hasMore) {
@@ -28,13 +30,18 @@ class SectionHeader extends StatelessWidget {
         }
       },
       child: SizedBox(
-        height: 38,
+        height: headerHeight,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              sectionType.sectionTitle(context),
-              style: TextStyles.display3.copyWith(color: colorScheme.textBase),
+            Expanded(
+              child: Text(
+                sectionType.sectionTitle(context),
+                style: TextStyles.display3.copyWith(
+                  color: colorScheme.textBase,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             hasMore
                 ? Row(
@@ -78,4 +85,11 @@ class SectionHeader extends StatelessWidget {
       startInSearchMode: startInSearchMode,
     );
   }
+}
+
+double _sectionHeaderHeightFor(BuildContext context) {
+  return searchTabSingleLineTextHeight(
+    context,
+    TextStyles.display3,
+  ).clamp(38.0, double.infinity).toDouble();
 }

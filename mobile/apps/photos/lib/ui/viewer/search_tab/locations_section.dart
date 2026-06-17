@@ -117,7 +117,7 @@ class _LocationsSectionState extends State<LocationsSection> {
             ),
             const SizedBox(height: 4),
             SearchTabHorizontalListView(
-              height: LocationRecommendation.height,
+              height: LocationRecommendation.heightFor(context),
               itemCount: _locationsSearchResults.length + 1,
               itemBuilder: (context, index) {
                 if (index == 0) {
@@ -138,12 +138,22 @@ class _LocationsSectionState extends State<LocationsSection> {
 
 class LocationRecommendation extends StatelessWidget {
   static const width = 108.0;
-  static const height = 158.0;
+  static const _height = 158.0;
   static const outerCornerRadius = 20.0;
   static const cornerSmoothing = 1.0;
   static const sideOfThumbnail = 108.0;
   final GenericSearchResult locationSearchResult;
   const LocationRecommendation(this.locationSearchResult, {super.key});
+
+  static double heightFor(BuildContext context) {
+    return (sideOfThumbnail +
+            8 +
+            searchTabSingleLineTextHeight(context, TextStyles.body) +
+            2 +
+            searchTabSingleLineTextHeight(context, TextStyles.mini))
+        .clamp(_height, double.infinity)
+        .toDouble();
+  }
 
   @override
   Widget build(BuildContext context) {
