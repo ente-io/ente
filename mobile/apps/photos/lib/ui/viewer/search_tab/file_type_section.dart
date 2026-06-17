@@ -287,6 +287,10 @@ class _FileExtensionPill extends StatelessWidget {
 class _FileExtensionIcon extends StatelessWidget {
   static const _outlineAsset = "assets/file_extension_outline.svg";
   static const _maxExtensionLength = 5;
+  static const _extensionFontSize = 11.0;
+  static const _outlineHeight = 13.0;
+  static const _outlineTextGap = 1.0;
+  static const _height = _outlineHeight + _outlineTextGap + _extensionFontSize;
 
   final String extension;
   final Color color;
@@ -298,7 +302,7 @@ class _FileExtensionIcon extends StatelessWidget {
     final label = _displayExtension(extension);
     return SizedBox(
       width: 34,
-      height: 23.2041,
+      height: _height,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -307,7 +311,7 @@ class _FileExtensionIcon extends StatelessWidget {
             child: SvgPicture.asset(
               _outlineAsset,
               width: 22,
-              height: 13,
+              height: _outlineHeight,
               colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
             ),
           ),
@@ -315,7 +319,7 @@ class _FileExtensionIcon extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 0,
-            height: 8,
+            height: _extensionFontSize,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
@@ -324,7 +328,7 @@ class _FileExtensionIcon extends StatelessWidget {
                   color: color,
                   fontFamily: TextStyles.fontFamily,
                   package: TextStyles.fontPackage,
-                  fontSize: 7.8,
+                  fontSize: _extensionFontSize,
                   fontWeight: FontWeight.w700,
                   height: 1,
                   letterSpacing: 0,
