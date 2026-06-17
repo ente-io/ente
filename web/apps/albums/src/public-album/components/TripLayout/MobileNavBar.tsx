@@ -130,7 +130,7 @@ const MobileNavContainer = styled(Box)({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "0 16px",
+    padding: "0 16px 0 12px",
     backgroundColor: "transparent",
     zIndex: 2000,
     "&::after": {
@@ -150,7 +150,8 @@ const MobileNavContainer = styled(Box)({
 const LogoContainer = styled(Box)({
     display: "flex",
     alignItems: "center",
-    "& svg": { height: "20px", width: "auto" },
+    transform: "translateY(1px)",
+    "& svg": { height: "17px", width: "auto" },
 });
 
 const ButtonGroup = styled(Box)({
