@@ -1,8 +1,6 @@
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/soft_icon_button.dart";
 
 class SearchableAppBar extends StatefulWidget {
   final Widget title;
@@ -90,7 +88,6 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return SliverAppBar(
       floating: !widget.pinned,
       pinned: widget.pinned,
@@ -122,12 +119,10 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
           : [
               Padding(
                 padding: widget.searchIconPadding,
-                child: SoftIconButton(
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedSearch01,
-                    size: 18,
-                    color: colorScheme.textBase,
-                  ),
+                child: IconButtonComponent(
+                  variant: IconButtonComponentVariant.primary,
+                  shouldSurfaceExecutionStates: false,
+                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedSearch01),
                   onTap: _activateSearch,
                 ),
               ),

@@ -26,6 +26,7 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/empty_state_component.dart";
 import "package:photos/ui/components/popup_menu/ente_popup_menu_button.dart";
 import "package:photos/ui/tabs/albums/albums_manage_sheet.dart";
 import "package:photos/ui/tabs/albums/empty_states/on_ente_empty_state.dart";
@@ -452,18 +453,12 @@ class _AlbumsTabState extends State<AlbumsTab>
   }
 
   Widget _buildGlobalSearchEmptyStateSliver(AppLocalizations strings) {
-    final colors = context.componentColors;
     return SliverFillRemaining(
       hasScrollBody: false,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            strings.noResultsFound,
-            textAlign: TextAlign.center,
-            style: TextStyles.body.copyWith(color: colors.textLight),
-          ),
-        ),
+      child: EmptyStateComponent(
+        assetPath: "assets/empty_state_album_search.png",
+        title: strings.noMatchesFound,
+        textWidth: 240,
       ),
     );
   }
