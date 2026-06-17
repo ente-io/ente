@@ -244,15 +244,9 @@ class _AllLinksPageState extends State<AllLinksPage> {
           if (!hasLinks)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text(
-                    AppLocalizations.of(context).noLinksYet,
-                    style: textTheme.bodyMuted,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              child: EmptyStateComponent(
+                assetPath: "assets/empty_state_links.png",
+                title: AppLocalizations.of(context).activeLinksWillShowUpHere,
               ),
             ),
         ],

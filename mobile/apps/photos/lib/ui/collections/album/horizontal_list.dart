@@ -38,7 +38,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
   static const sectionBottomPadding = 16.0;
   static const titleVerticalPadding = 8.0;
   static const listTopPadding = 8.0;
-  static const gridItemTextHeight = 48.0;
+  static const gridItemTextHeight = 52.0;
 
   @override
   void initState() {
