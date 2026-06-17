@@ -128,7 +128,7 @@ func (c *Controller) SendRecoveryReminder() {
 		return
 	}
 	log.Info(fmt.Sprintf("Found %d recovery rows", len(*rows)))
-	microsecondsInDay := 1000 * 1000 * 24 * 60 * 60
+	microsecondsInDay := int64(1000 * 1000 * 24 * 60) * 60
 	for _, row := range *rows {
 		logger := log.WithFields(log.Fields{
 			"userID":         row.UserID,

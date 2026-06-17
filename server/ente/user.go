@@ -12,7 +12,7 @@ const (
 	SignUpOTTPurpose      = "signup"
 	LoginOTTPurpose       = "login"
 
-	ExpectedKDFStrength = 1073741824 * 4
+	ExpectedKDFStrength int64 = 1073741824 * 4
 )
 
 // User represents a user in the system
@@ -94,7 +94,7 @@ type SetUserAttributesRequest struct {
 }
 
 func (sk *SetUserAttributesRequest) Validate() error {
-	strength := sk.KeyAttributes.MemLimit * sk.KeyAttributes.OpsLimit
+	strength := int64(sk.KeyAttributes.MemLimit) * int64(sk.KeyAttributes.OpsLimit)
 	if strength != ExpectedKDFStrength {
 		return NewBadRequestWithMessage("Unexpected KDF strength")
 	}
@@ -119,7 +119,7 @@ type UpdateKeysRequest struct {
 }
 
 func (u *UpdateKeysRequest) Validate() error {
-	strength := u.MemLimit * u.OpsLimit
+	strength := int64(u.MemLimit) * int64(u.OpsLimit)
 	if strength != ExpectedKDFStrength {
 		return NewBadRequestWithMessage("Unexpected KDF strength")
 	}
