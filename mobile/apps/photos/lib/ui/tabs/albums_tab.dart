@@ -536,7 +536,7 @@ class _AlbumsTabState extends State<AlbumsTab>
               : null,
         ),
         ..._buildCollectionSearchSectionSlivers(
-          title: strings.searchResultShared,
+          title: strings.shared,
           tag: "album_search_shared",
           collections: filteredSharedCollections,
         ),
@@ -940,8 +940,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                               if (!localGalleryMode) ...[
                                                 const SizedBox(width: 8),
                                                 _AlbumsFilterChip(
-                                                  label: strings
-                                                      .searchResultShared,
+                                                  label: strings.shared,
                                                   selected:
                                                       effectiveFilter ==
                                                       _AlbumsFilter.shared,
