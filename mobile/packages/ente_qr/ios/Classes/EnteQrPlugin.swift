@@ -42,11 +42,18 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
     }
   }
 
-  private func detectBarcodes(in cgImage: CGImage) -> [VNBarcodeObservation] {
+  private func detectBarcodes(
+    in cgImage: CGImage,
+    orientation: UIImage.Orientation
+  ) -> [VNBarcodeObservation] {
     let request = VNDetectBarcodesRequest()
     request.symbologies = [.qr]
 
-    let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+    let handler = VNImageRequestHandler(
+      cgImage: cgImage,
+      orientation: CGImagePropertyOrientation(orientation),
+      options: [:]
+    )
     do {
       try handler.perform([request])
     } catch {
@@ -69,7 +76,10 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
         return
       }
 
-      let observations = self.detectBarcodes(in: cgImage)
+      let observations = self.detectBarcodes(
+        in: cgImage,
+        orientation: image.imageOrientation
+      )
 
       if let obs = observations.first,
          let payload = obs.payloadStringValue {
@@ -103,7 +113,10 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
         return
       }
 
-      let observations = self.detectBarcodes(in: cgImage)
+      let observations = self.detectBarcodes(
+        in: cgImage,
+        orientation: image.imageOrientation
+      )
 
       var detections: [[String: Any]] = []
 
@@ -137,6 +150,31 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
           ])
         }
       }
+    }
+  }
+}
+
+private extension CGImagePropertyOrientation {
+  init(_ orientation: UIImage.Orientation) {
+    switch orientation {
+    case .up:
+      self = .up
+    case .upMirrored:
+      self = .upMirrored
+    case .down:
+      self = .down
+    case .downMirrored:
+      self = .downMirrored
+    case .left:
+      self = .left
+    case .leftMirrored:
+      self = .leftMirrored
+    case .right:
+      self = .right
+    case .rightMirrored:
+      self = .rightMirrored
+    @unknown default:
+      self = .up
     }
   }
 }

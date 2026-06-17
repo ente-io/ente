@@ -266,7 +266,7 @@ class ScannerPageState extends State<ScannerPage> {
       );
     } catch (e) {
       if (mounted) {
-        showToast(context, context.l10n.invalidQRCode);
+        showToastAboveBottomControls(context, context.l10n.invalidQRCode);
       }
     }
   }
@@ -282,7 +282,7 @@ class ScannerPageState extends State<ScannerPage> {
       final codes = parseGoogleAuth(qrCode);
       if (codes.isEmpty) {
         if (mounted) {
-          showToast(context, context.l10n.invalidQRCode);
+          showToastAboveBottomControls(context, context.l10n.invalidQRCode);
         }
         return;
       }
@@ -298,7 +298,7 @@ class ScannerPageState extends State<ScannerPage> {
     } catch (e, s) {
       _logger.severe("Error importing Google Authenticator QR", e, s);
       if (mounted) {
-        showToast(context, context.l10n.invalidQRCode);
+        showToastAboveBottomControls(context, context.l10n.invalidQRCode);
       }
     } finally {
       if (shouldResumeCamera && mounted && !_hasCompletedScan) {

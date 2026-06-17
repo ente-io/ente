@@ -150,6 +150,7 @@ Future<GalleryImportResult?> pickCodeFromGallery(
             context,
             l10n.errorInvalidQRCode,
             l10n.errorInvalidQRCodeBody,
+            showContactSupport: false,
           );
           return null;
         }
@@ -159,6 +160,7 @@ Future<GalleryImportResult?> pickCodeFromGallery(
           context,
           l10n.errorNoQRCode,
           qrResult.error ?? l10n.errorNoQRCode,
+          showContactSupport: false,
         );
         return null;
       }

@@ -70,7 +70,7 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
 
     if (!qrCode.startsWith(kGoogleAuthExportPrefix)) {
       if (mounted) {
-        showToast(context, "Invalid QR code");
+        showToastAboveBottomControls(context, context.l10n.invalidQRCode);
       }
       return;
     }
@@ -105,7 +105,7 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
       return;
     }
     Navigator.of(context).pop();
-    showToast(context, "Error $error");
+    showToastAboveBottomControls(context, "${context.l10n.error} $error");
   }
 
   void _cancelScanSubscription() {

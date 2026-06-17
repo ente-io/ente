@@ -24,6 +24,8 @@ private final class EnteQrScannerPreviewView: UIView {
 }
 
 final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataOutputObjectsDelegate {
+  private static let scanPadding: CGFloat = 48
+
   private let containerView: EnteQrScannerPreviewView
   private let channel: FlutterMethodChannel
   private let overlay: EnteQrScannerOverlay
@@ -209,7 +211,11 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
   }
 
   private func scanRect(in bounds: CGRect) -> CGRect {
-    let side = min(overlay.cutOutSize, min(bounds.width, bounds.height))
+    let maxSide = min(bounds.width, bounds.height)
+    let side = min(
+      overlay.cutOutSize + Self.scanPadding * 2,
+      maxSide
+    )
     return CGRect(
       x: bounds.midX - side / 2,
       y: bounds.midY - side / 2,

@@ -52,9 +52,19 @@ Future<String> _decodeQrFromImagePath(String imagePath) async {
 }
 
 Result _decodeImage(img.Image source) {
+  final maxDimension = source.width > source.height
+      ? source.width
+      : source.height;
   final attempts = <img.Image>[
     source,
     img.invert(img.Image.from(source)),
+    if (maxDimension < 600)
+      img.copyResize(
+        source,
+        width: source.width * 2,
+        height: source.height * 2,
+        interpolation: img.Interpolation.linear,
+      ),
     if (source.width > 1200 || source.height > 1200)
       img.copyResize(
         source,
