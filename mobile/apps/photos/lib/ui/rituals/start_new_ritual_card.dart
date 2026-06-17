@@ -1,10 +1,8 @@
 import "dart:math" as math;
 
-import "package:dotted_border/dotted_border.dart";
-import "package:ente_components/ente_components.dart";
+import "package:ente_components/theme/text_styles.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
-import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/pending_translation.dart";
 
@@ -15,236 +13,144 @@ class StartNewRitualCard extends StatelessWidget {
     super.key,
     required this.variant,
     required this.onTap,
-  });
+    double? compactHeight,
+  }) : _compactHeightOverride = compactHeight,
+       assert(
+         variant == StartNewRitualCardVariant.compact || compactHeight == null,
+       );
 
   final StartNewRitualCardVariant variant;
   final VoidCallback onTap;
+  final double? _compactHeightOverride;
 
   static const _cardRadius = 25.0;
-  static const _cardHeight = 100.0;
+  static const _cardHeight = 94.0;
   static const _compactHeight = 94.0;
   static const _compactWidth = 167.5;
-  static const _wideDuckyHeightReduction = 12.0;
-  static const _wideDuckyAspectRatio = 149 / 81;
-  static const _wideDuckyRightOverflow = 4.0;
+  static const _wideHorizontalPadding = 20.0;
+  static const _wideBottomPadding = 14.0;
+  static const _wideIllustrationWidth = 123.0;
+  static const _wideIllustrationHeight = 116.0;
+  static const _wideIllustrationRight = 10.0;
+  static const _wideIllustrationTop = -27.0;
+
+  static double compactHeightFor(BuildContext context) {
+    final titleHeight = _measuredTextHeight(
+      context,
+      text: pendingTranslation("Start new ritual"),
+      style: _compactTitleStyle(Colors.black),
+      maxWidth: _compactWidth - 24,
+    );
+    return math.max(_compactHeight, 16 + 24 + 4 + titleHeight + 16);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-
     if (variant == StartNewRitualCardVariant.compact) {
-      return _CompactStartNewRitualCard(onTap: onTap);
+      return _CompactStartNewRitualCard(
+        onTap: onTap,
+        height: _compactHeightOverride,
+      );
     }
 
-    final componentColors = context.componentColors;
-    const fillColor = Colors.transparent;
-    final dottedBorderColor = componentColors.textLightest;
-    const duckyHeight = _cardHeight - _wideDuckyHeightReduction;
-    const duckyNaturalWidth = duckyHeight * _wideDuckyAspectRatio;
-    const duckyChildWidth = duckyNaturalWidth + _wideDuckyRightOverflow;
+    final colorScheme = getEnteColorScheme(context);
+    final borderRadius = BorderRadius.circular(_cardRadius);
+    final titleText = pendingTranslation("Start new ritual");
+    final subtitleText = pendingTranslation(
+      "Create a ritual, build streaks, and share your progress.",
+    );
 
-    return SizedBox(
-      height: _cardHeight,
-      child: DottedBorder(
-        borderType: BorderType.RRect,
-        radius: const Radius.circular(_cardRadius),
-        dashPattern: const [3.75, 3.75],
-        strokeWidth: 1.5,
-        borderPadding: const EdgeInsets.all(0.75),
-        color: dottedBorderColor,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(_cardRadius),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final layout = _WideRitualCardLayout.forWidth(
+          context,
+          constraints.maxWidth,
+          titleText: titleText,
+          subtitleText: subtitleText,
+          titleStyle: _wideTitleStyle(colorScheme.textBase),
+          subtitleStyle: TextStyles.tiny.copyWith(color: colorScheme.textMuted),
+        );
+
+        return SizedBox(
+          height: layout.cardHeight,
           child: Material(
-            color: fillColor,
+            color: colorScheme.fill,
+            borderRadius: borderRadius,
             child: InkWell(
               onTap: onTap,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  var duckyWidth = 0.0;
-                  final textScaler = MediaQuery.textScalerOf(context);
-                  final textDirection = Directionality.of(context);
-                  const leftPadding = 14.0;
-                  const iconWidth = 24.0;
-                  const iconSpacing = 10.0;
-
-                  bool fits(double candidateDuckyWidth) {
-                    final leftWidth = math.max(
-                      0.0,
-                      constraints.maxWidth - candidateDuckyWidth,
-                    );
-                    final titleMaxWidth =
-                        leftWidth - leftPadding - iconWidth - iconSpacing;
-                    const titleWidthEpsilon = 8.0;
-                    final adjustedTitleMaxWidth =
-                        titleMaxWidth - titleWidthEpsilon;
-                    final subtitleMaxWidth = leftWidth - leftPadding;
-                    if (adjustedTitleMaxWidth <= 0 || subtitleMaxWidth <= 0) {
-                      return false;
-                    }
-
-                    final titlePainter = TextPainter(
-                      text: TextSpan(
-                        text: pendingTranslation("Start new ritual"),
-                        style: textTheme.body,
-                      ),
-                      maxLines: 1,
-                      ellipsis: "…",
-                      textDirection: textDirection,
-                      textScaler: textScaler,
-                      textHeightBehavior: _tightTextHeightBehavior,
-                    )..layout(maxWidth: adjustedTitleMaxWidth);
-                    if (titlePainter.didExceedMaxLines) return false;
-
-                    final subtitlePainter = TextPainter(
-                      text: TextSpan(
-                        text: pendingTranslation(
-                          "Create a ritual, build streaks, and share your progress.",
-                        ),
-                        style: textTheme.miniMuted,
-                      ),
-                      maxLines: 3,
-                      ellipsis: "…",
-                      textDirection: textDirection,
-                      textScaler: textScaler,
-                    )..layout(maxWidth: subtitleMaxWidth);
-                    return !subtitlePainter.didExceedMaxLines;
-                  }
-
-                  final upperBound = math.min(
-                    duckyChildWidth,
-                    constraints.maxWidth,
-                  );
-                  if (fits(upperBound)) {
-                    duckyWidth = upperBound;
-                  } else if (fits(0.0)) {
-                    var low = 0.0;
-                    var high = upperBound;
-                    for (var i = 0; i < 10; i++) {
-                      final mid = (low + high) / 2;
-                      if (fits(mid)) {
-                        low = mid;
-                      } else {
-                        high = mid;
-                      }
-                    }
-                    duckyWidth = low;
-                  }
-
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(14, 11, 0, 11),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF2E1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Center(
-                                      child: Icon(
-                                        EnteIcons.lightningFilled,
-                                        size: 17,
-                                        color: Color(0xFFFFBC03),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      pendingTranslation("Start new ritual"),
-                                      style: textTheme.body,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textHeightBehavior:
-                                          _tightTextHeightBehavior,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                pendingTranslation(
-                                  "Create a ritual, build streaks, and share your progress.",
-                                ),
-                                style: textTheme.miniMuted,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (duckyWidth > 0)
-                        SizedBox(
-                          width: duckyWidth,
-                          height: double.infinity,
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(_cardRadius),
-                              bottomRight: Radius.circular(_cardRadius),
-                            ),
-                            child: Align(
-                              alignment: Alignment.bottomRight,
-                              child: SizedBox(
-                                width: duckyWidth,
-                                height: duckyHeight,
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  alignment: Alignment.bottomRight,
-                                  child: SizedBox(
-                                    width: duckyChildWidth,
-                                    height: duckyHeight,
-                                    child: Transform.translate(
-                                      offset: const Offset(
-                                        _wideDuckyRightOverflow,
-                                        0,
-                                      ),
-                                      child: SvgPicture.asset(
-                                        "assets/rituals/ducky_ritual.svg",
-                                        fit: BoxFit.fitHeight,
-                                        alignment: Alignment.bottomRight,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+              borderRadius: borderRadius,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: _wideHorizontalPadding,
+                    top: _wideHorizontalPadding,
+                    width: layout.textWidth,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(top: 4),
+                              child: Icon(
+                                EnteIcons.lightningFilled,
+                                size: 13,
+                                color: Color(0xFFFFBC03),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                titleText,
+                                style: _wideTitleStyle(colorScheme.textBase),
+                                textHeightBehavior: _tightTextHeightBehavior,
+                              ),
+                            ),
+                          ],
                         ),
-                    ],
-                  );
-                },
+                        const SizedBox(height: 6),
+                        Text(
+                          subtitleText,
+                          style: TextStyles.tiny.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
+                          textHeightBehavior: _tightTextHeightBehavior,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    right: _wideIllustrationRight,
+                    top: layout.illustrationTop,
+                    width: layout.illustrationWidth,
+                    height: layout.illustrationHeight,
+                    child: const _WideRitualIllustration(),
+                  ),
+                ],
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 class _CompactStartNewRitualCard extends StatelessWidget {
-  const _CompactStartNewRitualCard({required this.onTap});
+  const _CompactStartNewRitualCard({required this.onTap, required this.height});
 
   final VoidCallback onTap;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(StartNewRitualCard._cardRadius);
     return SizedBox(
       width: StartNewRitualCard._compactWidth,
-      height: StartNewRitualCard._compactHeight,
+      height: height ?? StartNewRitualCard._compactHeight,
       child: Material(
         color: colorScheme.fill,
         borderRadius: borderRadius,
@@ -254,20 +160,20 @@ class _CompactStartNewRitualCard extends StatelessWidget {
           child: Stack(
             children: [
               const Positioned(
-                left: 22,
-                top: 19,
+                left: 50.5,
+                top: 38,
                 child: Icon(
                   Icons.auto_awesome,
-                  size: 13,
+                  size: 8,
                   color: Color(0xFFFFBC03),
                 ),
               ),
               const Positioned(
-                right: 28,
-                top: 19,
+                left: 103.25,
+                top: 16.93,
                 child: Icon(
                   Icons.auto_awesome,
-                  size: 10,
+                  size: 13,
                   color: Color(0xFFFFD25A),
                 ),
               ),
@@ -293,12 +199,9 @@ class _CompactStartNewRitualCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
                         pendingTranslation("Start new ritual"),
-                        style: textTheme.bodyBold.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        style: _compactTitleStyle(colorScheme.textBase),
                         textAlign: TextAlign.center,
+                        textHeightBehavior: _tightTextHeightBehavior,
                       ),
                     ),
                   ],
@@ -310,6 +213,137 @@ class _CompactStartNewRitualCard extends StatelessWidget {
       ),
     );
   }
+}
+
+TextStyle _wideTitleStyle(Color color) {
+  return const TextStyle(
+    fontFamily: TextStyles.outfitFontFamily,
+    package: TextStyles.fontPackage,
+    fontSize: 16.72,
+    fontWeight: FontWeight.w500,
+    height: 21 / 16.72,
+    letterSpacing: 0,
+  ).copyWith(color: color);
+}
+
+TextStyle _compactTitleStyle(Color color) {
+  return TextStyles.body.copyWith(
+    color: color,
+    fontFamily: TextStyles.outfitFontFamily,
+  );
+}
+
+class _WideRitualCardLayout {
+  const _WideRitualCardLayout({
+    required this.cardHeight,
+    required this.textWidth,
+    required this.illustrationWidth,
+    required this.illustrationHeight,
+    required this.illustrationTop,
+  });
+
+  static const _textIllustrationGap = 12.0;
+  static const _minIllustrationScale = 0.86;
+  static const _narrowWidth = 320.0;
+
+  final double cardHeight;
+  final double textWidth;
+  final double illustrationWidth;
+  final double illustrationHeight;
+  final double illustrationTop;
+
+  factory _WideRitualCardLayout.forWidth(
+    BuildContext context,
+    double width, {
+    required String titleText,
+    required String subtitleText,
+    required TextStyle titleStyle,
+    required TextStyle subtitleStyle,
+  }) {
+    final widthScale = width < _narrowWidth ? width / _narrowWidth : 1.0;
+    final illustrationScale = widthScale
+        .clamp(_minIllustrationScale, 1.0)
+        .toDouble();
+    final illustrationWidth =
+        StartNewRitualCard._wideIllustrationWidth * illustrationScale;
+    final illustrationHeight =
+        StartNewRitualCard._wideIllustrationHeight * illustrationScale;
+    final textWidth = math.max(
+      0.0,
+      width -
+          StartNewRitualCard._wideHorizontalPadding -
+          _textIllustrationGap -
+          StartNewRitualCard._wideIllustrationRight -
+          illustrationWidth,
+    );
+    const titleIconWidth = 13.0;
+    const titleIconGap = 8.0;
+    final titleTextWidth = math.max(
+      0.0,
+      textWidth - titleIconWidth - titleIconGap,
+    );
+    final titleHeight = _measuredTextHeight(
+      context,
+      text: titleText,
+      style: titleStyle,
+      maxWidth: titleTextWidth,
+    );
+    final subtitleHeight = _measuredTextHeight(
+      context,
+      text: subtitleText,
+      style: subtitleStyle,
+      maxWidth: textWidth,
+    );
+    final textHeight = titleHeight + 6 + subtitleHeight;
+    final cardHeight = math.max(
+      StartNewRitualCard._cardHeight,
+      StartNewRitualCard._wideHorizontalPadding +
+          textHeight +
+          StartNewRitualCard._wideBottomPadding,
+    );
+
+    return _WideRitualCardLayout(
+      cardHeight: cardHeight,
+      textWidth: textWidth,
+      illustrationWidth: illustrationWidth,
+      illustrationHeight: illustrationHeight,
+      illustrationTop:
+          StartNewRitualCard._wideIllustrationTop * illustrationScale,
+    );
+  }
+}
+
+class _WideRitualIllustration extends StatelessWidget {
+  const _WideRitualIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      "assets/rituals/search_start_ritual_illustration.png",
+      fit: BoxFit.contain,
+    );
+  }
+}
+
+double _measuredTextHeight(
+  BuildContext context, {
+  required String text,
+  required TextStyle style,
+  required double maxWidth,
+  int? maxLines,
+}) {
+  if (maxWidth <= 0) {
+    return 0;
+  }
+  final textPainter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    maxLines: maxLines,
+    ellipsis: maxLines == null ? null : "…",
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    textHeightBehavior: _tightTextHeightBehavior,
+  )..layout(maxWidth: maxWidth);
+  return textPainter.height;
 }
 
 const _tightTextHeightBehavior = TextHeightBehavior(

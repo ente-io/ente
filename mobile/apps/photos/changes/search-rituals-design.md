@@ -1,0 +1,1 @@
+- Updated the rituals section in Photos search to match the refreshed design.
