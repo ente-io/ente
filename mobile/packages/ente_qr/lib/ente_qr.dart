@@ -1,5 +1,6 @@
 import 'package:ente_qr/ente_qr_method_channel.dart';
 import 'package:ente_qr/ente_qr_platform_interface.dart';
+import 'package:ente_qr/src/dart_zxing_qr_platform.dart';
 import 'package:ente_qr/src/desktop_qr_platform.dart';
 
 export 'ente_qr_platform_interface.dart'
@@ -27,11 +28,23 @@ class EnteQr {
   Future<QrScanResult> scanQrFromImage(
     String imagePath, {
     bool tryOriginalResolution = false,
-  }) {
-    return _scanPlatform.scanQrFromImage(
+  }) async {
+    final platform = _scanPlatform;
+    final result = await platform.scanQrFromImage(
       imagePath,
       tryOriginalResolution: tryOriginalResolution,
     );
+    if (result.success ||
+        !tryOriginalResolution ||
+        platform is! MethodChannelEnteQr) {
+      return result;
+    }
+
+    final fallbackResult = await DartZxingQrPlatform().scanQrFromImage(
+      imagePath,
+      tryOriginalResolution: tryOriginalResolution,
+    );
+    return fallbackResult.success ? fallbackResult : result;
   }
 
   /// Scans all QR codes from an image file at the given path.
