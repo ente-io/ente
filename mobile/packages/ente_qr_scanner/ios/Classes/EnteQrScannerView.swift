@@ -44,10 +44,11 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
       self?.updatePreviewLayout()
     }
     channel.setMethodCallHandler(handle)
-    containerView.addGestureRecognizer(UITapGestureRecognizer(
+    let tapRecognizer = UITapGestureRecognizer(
       target: self,
       action: #selector(handleTapToFocus(_:))
-    ))
+    )
+    containerView.addGestureRecognizer(tapRecognizer)
     requestPermissionAndStart()
   }
 
@@ -294,7 +295,9 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
     guard
       !isDisposed,
       !isPaused,
-      let readableObject = metadataObjects.compactMap({ $0 as? AVMetadataMachineReadableCodeObject }).first,
+      let readableObject = metadataObjects
+        .compactMap({ $0 as? AVMetadataMachineReadableCodeObject })
+        .first,
       supportedMetadataTypes.contains(readableObject.type),
       let payload = readableObject.stringValue,
       !payload.isEmpty
