@@ -109,6 +109,7 @@ export interface CollectionHeaderProps extends Pick<
     onCollectionCast: () => void;
     canSetAlbumCover: boolean;
     onSetAlbumCover: () => void;
+    hasActiveFileSelection: boolean;
     /**
      * A function that can be used to create a UI notification to track the
      * progress of user-initiated download, and to cancel it if needed.
@@ -170,6 +171,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onCollectionCast,
     canSetAlbumCover,
     onSetAlbumCover,
+    hasActiveFileSelection,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
     onMarkTempDeleted,
@@ -762,6 +764,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             <QuickOptions
                 collectionSummary={collectionSummary}
                 isQuickLinkAlbum={isQuickLinkAlbum}
+                hasActiveFileSelection={hasActiveFileSelection}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onMapClick={handleShowMap}
                 onEmptyTrashClick={confirmEmptyTrash}
@@ -830,6 +833,7 @@ interface OptionProps {
 interface QuickOptionsProps {
     collectionSummary: CollectionSummary;
     isQuickLinkAlbum: boolean;
+    hasActiveFileSelection: boolean;
     isDownloadInProgress: () => boolean;
     onMapClick: () => void;
     onEmptyTrashClick: () => void;
@@ -848,13 +852,15 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     onCleanUncategorizedClick,
     collectionSummary,
     isQuickLinkAlbum,
+    hasActiveFileSelection,
     isDownloadInProgress,
 }) => (
     <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
         {showEmptyTrashQuickOption(collectionSummary) && (
             <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
         )}
-        {showDownloadQuickOption(collectionSummary) &&
+        {!hasActiveFileSelection &&
+            showDownloadQuickOption(collectionSummary) &&
             collectionSummary.fileCount > 0 &&
             (isDownloadInProgress() ? (
                 <ActivityIndicator size="20px" sx={{ m: "12px" }} />
