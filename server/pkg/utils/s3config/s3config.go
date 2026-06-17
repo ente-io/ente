@@ -41,7 +41,11 @@ type S3Config struct {
 	// Indicates if local minio buckets are being used. Enables various
 	// debugging workarounds; not tested/intended for production.
 	areLocalBuckets bool
-
+	// Indicates the interval in days at which permanently deleted objects should be 
+	// cleaned up from the data centers. 
+	// Ensure that this is at least as large as the WasabiObjectConditionalHoldDays if 
+	// Wasabi compliance is enabled.
+	objectDeletionIntervalDays int
 	// FileDataConfig is the configuration for various file data.
 	// If for particular object type, the bucket is not specified, it will
 	// default to hotDC as the bucket with no replicas. Initially, this config won't support
@@ -130,6 +134,7 @@ func (config *S3Config) initialize() {
 	usePathStyleURLs := viper.GetBool("s3.use_path_style_urls")
 	areLocalBuckets := viper.GetBool("s3.are_local_buckets")
 	config.areLocalBuckets = areLocalBuckets
+	config.objectDeletionIntervalDays = viper.GetInt("s3.object_deletion_interval_days")
 
 	for _, dc := range dcs {
 		config.buckets[dc] = viper.GetString("s3." + dc + ".bucket")
@@ -166,6 +171,22 @@ func (config *S3Config) initialize() {
 		return
 	}
 
+}
+
+func (config *S3Config) GetObjectDeletionIntervalDays() int {
+	if config.objectDeletionIntervalDays > 0 {
+		if config.isWasabiComplianceEnabled && 
+			config.objectDeletionIntervalDays < WasabiObjectConditionalHoldDays {
+			log.Warnf("Wasabi compliance is enabled, but object deletion interval (%d days) is less than the Wasabi conditional hold period (%d days). This may lead to issues with deleting objects from Wasabi. Consider increasing the object deletion interval to at least %d days.", 
+			config.objectDeletionIntervalDays, 
+			WasabiObjectConditionalHoldDays, 
+			WasabiObjectConditionalHoldDays)
+
+			return WasabiObjectConditionalHoldDays
+		}
+		return config.objectDeletionIntervalDays
+	}
+	return 45 // default
 }
 
 func (config *S3Config) GetBucket(dcOrBucketID string) *string {
