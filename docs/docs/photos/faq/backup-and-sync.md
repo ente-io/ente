@@ -657,16 +657,6 @@ Yes, if the original photo is still available locally on your device or has alre
 
 Photos that exist only in the cloud need an internet connection to load in full quality.
 
-### Does Ente track edits or deletions made in Apple Photos after the initial upload? {#apple-photos-edits-deletions}
-
-No. Ente is an independent backup. After a photo is uploaded:
-
-- Edits made in Apple Photos won't sync to Ente. Ente keeps the original as uploaded.
-- Photos deleted in Apple Photos remain in Ente.
-- Photos deleted in Ente do not affect Apple Photos.
-
-If you're moving to Ente as your primary library, work directly in Ente going forward. For advanced edits, edit in Apple Photos or another editor, export the edited version, and add it to Ente manually.
-
 ### Can I make Ente the default photo app on iOS? {#ente-default-ios}
 
 iOS doesn't let any third-party app replace Apple Photos as the system default. A few practical workarounds:

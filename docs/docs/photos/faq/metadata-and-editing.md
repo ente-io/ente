@@ -341,10 +341,6 @@ When you edit metadata on one device:
 
 We're working on bringing all editing features to all platforms.
 
-### Why is my downloaded photo showing today's date in Apple Photos? {#apple-photos-downloaded-date}
-
-When you download from Ente, the photo's original metadata (including the date) is preserved inside the file. However, the iOS Photos app displays photos based on the file's created date on the device (when it was downloaded), not the metadata inside the file. This is how Apple has chosen to display dates and isn't something Ente can change. You can verify the original date is intact by opening the photo's info panel in Apple Photos.
-
 ### A photo I shared into Ente from WhatsApp shows the wrong date in the timeline. Why? {#whatsapp-wrong-date}
 
 Apps like WhatsApp strip the hidden "date taken" information from photos for privacy. When Ente can't find that information, and can't reliably extract it from the filename either (especially for videos), it falls back to the upload date.
