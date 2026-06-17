@@ -547,7 +547,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     }
   }
 
-  void _onTapDown(details) {
+  void _onTapDown(TapDownDetails details) {
     if (!mounted) return;
     setState(() {
       buttonColor =
@@ -565,7 +565,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     });
   }
 
-  void _onTapUp(details) {
+  void _onTapUp(TapUpDetails details) {
     Future.delayed(const Duration(milliseconds: 84), () {
       if (!mounted) return;
       setState(() {

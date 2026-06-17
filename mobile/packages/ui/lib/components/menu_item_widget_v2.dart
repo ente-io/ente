@@ -269,7 +269,7 @@ class _MenuItemWidgetV2State extends State<MenuItemWidgetV2> {
     }
   }
 
-  void _onTapDown(details) {
+  void _onTapDown(TapDownDetails details) {
     if (executionStateNotifier.value == ExecutionState.inProgress ||
         executionStateNotifier.value == ExecutionState.successful) {
       return;
@@ -291,7 +291,7 @@ class _MenuItemWidgetV2State extends State<MenuItemWidgetV2> {
         widget.onLongPress != null;
   }
 
-  void _onTapUp(details) {
+  void _onTapUp(TapUpDetails details) {
     if (executionStateNotifier.value == ExecutionState.inProgress ||
         executionStateNotifier.value == ExecutionState.successful) {
       return;

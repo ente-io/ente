@@ -118,7 +118,7 @@ class _RequestPasswordVerificationPageState
                         context,
                         title: context.l10n.incorrectPasswordTitle,
                         message: context.l10n.pleaseTryAgain,
-                        assetPath: 'assets/warning-green.png',
+                        assetPath: 'assets/warning-grey.png',
                       );
                     }
                   }

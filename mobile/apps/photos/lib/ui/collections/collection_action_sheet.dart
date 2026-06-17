@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
@@ -13,15 +14,11 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import 'package:photos/ui/collections/album/vertical_list.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/common/progress_dialog.dart";
-import "package:photos/ui/components/base_bottom_sheet.dart";
-import 'package:photos/ui/components/buttons/button_widget_v2.dart';
-import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/separators_util.dart";
@@ -102,19 +99,20 @@ void showCollectionActionSheet(
       ? selectedPeople.length
       : selectedFiles?.files.length ?? 0;
 
-  showBaseBottomSheet<void>(
-    context,
-    title: _actionName(context, actionType, filesCount),
-    isKeyboardAware: false,
-    backgroundColor: getEnteColorScheme(context).backgroundColour,
-    child: SizedBox(
-      height: height,
-      child: CollectionActionSheet(
-        selectedFiles: selectedFiles,
-        sharedFiles: sharedFiles,
-        actionType: actionType,
-        showOptionToCreateNewAlbum: showOptionToCreateNewAlbum,
-        selectedPeople: selectedPeople,
+  showBottomSheetComponent<void>(
+    context: context,
+    builder: (_) => BottomSheetComponent(
+      title: _actionName(context, actionType, filesCount),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      content: SizedBox(
+        height: height,
+        child: CollectionActionSheet(
+          selectedFiles: selectedFiles,
+          sharedFiles: sharedFiles,
+          actionType: actionType,
+          showOptionToCreateNewAlbum: showOptionToCreateNewAlbum,
+          selectedPeople: selectedPeople,
+        ),
       ),
     ),
   );
@@ -179,7 +177,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardUp = bottomInset > 100;
     final double bottomPadding = max(
@@ -197,16 +194,16 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               Expanded(
                 child: Column(
                   children: [
-                    TextInputWidgetV2(
+                    TextInputComponent(
                       hintText: AppLocalizations.of(
                         context,
                       ).searchByAlbumNameHint,
-                      leadingWidget: HugeIcon(
+                      prefix: HugeIcon(
                         icon: HugeIcons.strokeRoundedSearch01,
                         size: 18,
-                        color: colorScheme.textMuted,
+                        color: context.componentColors.textLight,
                       ),
-                      onChange: (value) {
+                      onChanged: (value) {
                         setState(() {
                           _searchQuery = value.trim();
                         });
@@ -218,11 +215,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                   ],
                 ),
               ),
-              SafeArea(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Column(children: [..._actionButtons()]),
-                ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Column(children: [..._actionButtons()]),
               ),
             ],
           ),
@@ -235,12 +230,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final List<Widget> widgets = [];
     if (_enableSelection) {
       widgets.add(
-        ButtonWidgetV2(
+        ButtonComponent(
           key: const ValueKey('add_button'),
-          buttonType: ButtonTypeV2.primary,
-          isInAlert: true,
-          labelText: AppLocalizations.of(context).add,
+          label: AppLocalizations.of(context).add,
           shouldSurfaceExecutionStates: false,
+          dismissModalOnSuccess: true,
           isDisabled: _selectedCollections.isEmpty,
           onTap: () async {
             if (widget.selectedPeople != null) {

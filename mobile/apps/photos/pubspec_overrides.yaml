@@ -44,6 +44,6 @@ dependency_overrides:
   ente_contacts:
     path: ../../packages/contacts
   ente_qr:
-    path: plugins/ente_qr
+    path: ../../packages/ente_qr
   ente_components:
     path: ../../packages/ente_components

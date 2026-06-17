@@ -411,10 +411,10 @@ class CollectionApiClient {
   }
 
   Future<Collection> _fromRemoteCollection(
-    Map<String, dynamic>? collectionData,
+    Map<String, dynamic> collectionData,
   ) async {
     final Collection collection = Collection.fromMap(collectionData);
-    if (collectionData != null && !collection.isDeleted) {
+    if (!collection.isDeleted) {
       final collectionKey = CryptoHelper.instance.getCollectionKey(collection);
       if (collectionData['magicMetadata'] != null) {
         final utfEncodedMmd = await CryptoUtil.decryptData(

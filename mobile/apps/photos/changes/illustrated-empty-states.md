@@ -1,0 +1,1 @@
+- Added empty states for album search, links, and trash.

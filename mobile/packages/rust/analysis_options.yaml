@@ -1,8 +1,6 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  errors:
-    strict_top_level_inference: ignore # deferred: surfaces latent nullable-return mismatches needing per-site fixes
   exclude:
     - lib/src/rust/**
     - cargokit/**

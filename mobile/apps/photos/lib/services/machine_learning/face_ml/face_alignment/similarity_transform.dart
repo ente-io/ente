@@ -21,12 +21,14 @@ class SimilarityTransform {
     <double>[41.5493, 92.3655],
     <double>[70.7299, 92.2041],
   ];
-  static get mobilefacenetIdealNormalized4 => _mobilefacenetIdeal4Landmarks
-      .map((list) => list.map((value) => value / 112.0).toList())
-      .toList();
-  static get mobilefacenetIdealNormalized5 => _mobilefacenetIdeal5Landmarks
-      .map((list) => list.map((value) => value / 112.0).toList())
-      .toList();
+  static List<List<double>> get mobilefacenetIdealNormalized4 =>
+      _mobilefacenetIdeal4Landmarks
+          .map((list) => list.map((value) => value / 112.0).toList())
+          .toList();
+  static List<List<double>> get mobilefacenetIdealNormalized5 =>
+      _mobilefacenetIdeal5Landmarks
+          .map((list) => list.map((value) => value / 112.0).toList())
+          .toList();
 
   SimilarityTransform();
 

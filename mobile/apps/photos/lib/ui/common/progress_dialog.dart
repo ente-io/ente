@@ -197,7 +197,7 @@ class ProgressDialog {
 class _Body extends StatefulWidget {
   final _BodyState _dialog = _BodyState();
 
-  update() {
+  void update() {
     _dialog.update();
   }
 
@@ -209,7 +209,7 @@ class _Body extends StatefulWidget {
 }
 
 class _BodyState extends State<_Body> {
-  update() {
+  void update() {
     setState(() {});
   }
 

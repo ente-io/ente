@@ -27,9 +27,7 @@ class CollectionFileItem {
     };
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
+  static CollectionFileItem fromMap(Map<String, dynamic> map) {
     return CollectionFileItem(
       map['id'],
       map['encryptedKey'],

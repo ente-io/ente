@@ -120,6 +120,7 @@ class _GNavState extends State<GNav> {
                 backgroundColor: t.backgroundColor ?? widget.tabBackgroundColor,
                 duration: widget.duration ?? const Duration(milliseconds: 500),
                 semanticLabel: t.semanticLabel,
+                semanticIdentifier: t.semanticIdentifier,
                 onPressed: () {
                   widget.onTabChange!(widget.tabs!.indexOf(t));
                 },
@@ -158,6 +159,7 @@ class GButton extends StatefulWidget {
   final Border? activeBorder;
   final List<BoxShadow>? shadow;
   final String? semanticLabel;
+  final String? semanticIdentifier;
 
   const GButton({
     super.key,
@@ -187,6 +189,7 @@ class GButton extends StatefulWidget {
     this.activeBorder,
     this.shadow,
     this.semanticLabel,
+    this.semanticIdentifier,
   });
 
   @override
@@ -198,6 +201,7 @@ class _GButtonState extends State<GButton> {
   Widget build(BuildContext context) {
     return Semantics(
       label: widget.semanticLabel ?? widget.text,
+      identifier: widget.semanticIdentifier,
       child: Button(
         borderRadius: widget.borderRadius,
         border: widget.border,

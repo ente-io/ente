@@ -51,7 +51,7 @@ class EmergencyContactService {
         context,
         title: AppLocalizations.of(context).letsTryThatAgain,
         message: AppLocalizations.of(context).enterValidEmail,
-        assetPath: "assets/warning-green.png",
+        assetPath: "assets/warning-grey.png",
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
@@ -59,7 +59,7 @@ class EmergencyContactService {
         context,
         title: AppLocalizations.of(context).oops,
         message: AppLocalizations.of(context).youCannotShareWithYourself,
-        assetPath: "assets/warning-green.png",
+        assetPath: "assets/warning-grey.png",
       );
       return false;
     }

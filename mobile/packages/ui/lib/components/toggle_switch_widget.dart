@@ -4,6 +4,7 @@ import 'package:ente_base/typedefs.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:ente_ui/models/execution_states.dart';
+import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +132,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
     });
   }
 
-  Widget _stateIcon(enteColorScheme) {
+  Widget _stateIcon(EnteColorScheme enteColorScheme) {
     if (executionState == ExecutionState.idle) {
       return const SizedBox(width: 24);
     } else if (executionState == ExecutionState.inProgress) {

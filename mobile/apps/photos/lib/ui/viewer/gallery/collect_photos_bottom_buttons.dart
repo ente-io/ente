@@ -144,7 +144,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
     );
   }
 
-  _selectedFilesListener() {
+  void _selectedFilesListener() {
     _hasSelectedFilesNotifier.value = widget.selectedFiles!.files.isNotEmpty;
   }
 }

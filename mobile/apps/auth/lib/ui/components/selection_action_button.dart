@@ -157,7 +157,7 @@ class __BodyState extends State<_Body> {
     );
   }
 
-  getWidthOfButton() {
+  double getWidthOfButton() {
     final widthOfWidestWord = getWidthOfWidestWord(widget.labelText);
     if (widthOfWidestWord > minWidth) return widthOfWidestWord;
     return minWidth;

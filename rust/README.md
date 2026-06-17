@@ -21,7 +21,6 @@ Other useful commands:
 cargo codegen native  # Regenerate bindings used by native apps
 cargo codegen frb     # Regenerate bindings used by Flutter apps
 
-# Starts Docker + runs the E2E tests (ignored by default)
-./e2e/scripts/run.sh
-cargo test -p ente-e2e -- --ignored --nocapture
+# E2E tests against a local Museum (see e2e/README.md for setup)
+cargo test -p ente-e2e --features museum
 ```

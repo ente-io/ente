@@ -243,7 +243,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     }
   }
 
-  void _onTapDown(details) {
+  void _onTapDown(TapDownDetails details) {
     if (executionStateNotifier.value == ExecutionState.inProgress ||
         executionStateNotifier.value == ExecutionState.successful) {
       return;
@@ -263,7 +263,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     return widget.onDoubleTap != null || widget.onTap != null;
   }
 
-  void _onTapUp(details) {
+  void _onTapUp(TapUpDetails details) {
     if (executionStateNotifier.value == ExecutionState.inProgress ||
         executionStateNotifier.value == ExecutionState.successful) {
       return;

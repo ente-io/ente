@@ -49,7 +49,7 @@ class EnteFile {
   MagicMetadata get magicMetadata =>
       _mmd ?? MagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
 
-  set magicMetadata(val) => _mmd = val;
+  set magicMetadata(MagicMetadata? val) => _mmd = val;
 
   // public magic metadata is shared if during file/album sharing
   String? pubMmdEncodedJson;
@@ -59,7 +59,7 @@ class EnteFile {
   PubMagicMetadata? get pubMagicMetadata =>
       _pubMmd ?? PubMagicMetadata.fromEncodedJson(pubMmdEncodedJson ?? '{}');
 
-  set pubMagicMetadata(val) => _pubMmd = val;
+  set pubMagicMetadata(PubMagicMetadata? val) => _pubMmd = val;
 
   // in Version 1, live photo hash is stored as zip's hash.
   // in V2: LivePhoto hash is stored as imgHash:vidHash

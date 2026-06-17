@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/settings/lock_screen/custom_pin_keypad.dart";
 import "package:photos/utils/lock_screen_settings.dart";
@@ -80,7 +82,11 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
     );
   }
 
-  Widget _getBody(colorTheme, textTheme, {required bool isPortrait}) {
+  Widget _getBody(
+    EnteColorScheme colorTheme,
+    EnteTextTheme textTheme, {
+    required bool isPortrait,
+  }) {
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

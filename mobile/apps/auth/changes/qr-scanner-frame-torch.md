@@ -1,0 +1,1 @@
+- Added a scan frame and torch control to the QR scanner.

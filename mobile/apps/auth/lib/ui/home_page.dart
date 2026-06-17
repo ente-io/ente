@@ -39,6 +39,8 @@ import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/home/widgets/auth_logo_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
+import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
+import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/sort_option_menu.dart';
@@ -1329,7 +1331,26 @@ class _HomePageState extends State<HomePage> {
     _isImportingFromGallery = true;
 
     try {
-      final Code? newCode = await pickCodeFromGallery(context, logger: _logger);
+      final GalleryImportResult? importResult = await pickCodeFromGallery(
+        context,
+        logger: _logger,
+      );
+      if (importResult == null) {
+        return;
+      }
+      final googleAuthCodes = importResult.googleAuthCodes;
+      if (googleAuthCodes != null) {
+        final shouldImport = await confirmGoogleAuthImport(
+          context,
+          googleAuthCodes.length,
+        );
+        if (!shouldImport) {
+          return;
+        }
+        await _completeGoogleAuthImport(googleAuthCodes);
+        return;
+      }
+      final newCode = importResult.code;
       if (newCode == null) {
         return;
       }
@@ -1344,6 +1365,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _completeGoogleAuthImport(List<Code> codes) async {
+    final importedCodeCount = await importGoogleAuthCodes(codes);
+    if (importedCodeCount > 0) {
+      LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
+    }
+    await importSuccessDialog(context, importedCodeCount);
+  }
+
   Future<void> _redirectToScannerPage() async {
     final ScannerPageResult? result = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -1353,13 +1382,22 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (result != null) {
+      final googleAuthCodes = result.googleAuthCodes;
+      if (googleAuthCodes != null) {
+        await _completeGoogleAuthImport(googleAuthCodes);
+        return;
+      }
+      final code = result.code;
+      if (code == null) {
+        return;
+      }
       await CodeStore.instance.addCode(
-        result.code,
+        code,
         shouldSync: result.fromGallery ? false : true,
       );
       // Focus the new code by searching
       if (_shouldFocusAddedCode) {
-        _focusNewCode(result.code);
+        _focusNewCode(code);
       }
       LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     }
@@ -1747,6 +1785,7 @@ class _HomePageState extends State<HomePage> {
       if (_filteredCodes.isEmpty && _searchText.isEmpty && noCodesAnywhere) {
         return HomeEmptyStateWidget(
           onScanTap: _redirectToScannerPage,
+          onImportImageTap: _importFromGalleryNative,
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
@@ -2322,14 +2361,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getFab() {
-    if (PlatformDetector.isDesktop()) {
-      return FloatingActionButton(
-        onPressed: () => _redirectToManualEntryPage(),
-        elevation: 8.0,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add),
-      );
-    }
+    final isDesktop = PlatformDetector.isDesktop();
     return SpeedDial(
       icon: Icons.add,
       activeIcon: Icons.close,
@@ -2344,13 +2376,14 @@ class _HomePageState extends State<HomePage> {
       elevation: 8.0,
       animationCurve: Curves.elasticInOut,
       children: [
-        SpeedDialChild(
-          child: const HugeIcon(icon: HugeIcons.strokeRoundedQrCode),
-          foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
-          backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-          labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
-          onTap: _redirectToScannerPage,
-        ),
+        if (!isDesktop)
+          SpeedDialChild(
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedQrCode),
+            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+            labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
+            onTap: _redirectToScannerPage,
+          ),
         SpeedDialChild(
           child: const Icon(Icons.keyboard_alt_outlined),
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
@@ -2358,7 +2391,7 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
           onTap: _redirectToManualEntryPage,
         ),
-        if (PlatformDetector.isMobile())
+        if (isDesktop || PlatformDetector.isMobile())
           SpeedDialChild(
             child: const HugeIcon(icon: HugeIcons.strokeRoundedAlbum02),
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,

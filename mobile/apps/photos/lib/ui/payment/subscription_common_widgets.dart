@@ -254,7 +254,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
     );
   }
 
-  setIsYearly(bool isYearly) {
+  void setIsYearly(bool isYearly) {
     setState(() {
       _isYearly = isYearly;
     });

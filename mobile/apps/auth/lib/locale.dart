@@ -41,12 +41,15 @@ Locale? autoDetectedLocale;
 // This function takes device locales and supported locales as input
 // and returns the best matching locale.
 // The device locales are sorted by priority, so the first one is the most preferred.
-Locale localResolutionCallBack(onDeviceLocales, supportedLocales) {
+Locale localResolutionCallBack(
+  List<Locale>? onDeviceLocales,
+  Iterable<Locale> supportedLocales,
+) {
   final Set<String> languageSupport = {};
   for (Locale supportedLocale in appSupportedLocales) {
     languageSupport.add(supportedLocale.languageCode);
   }
-  for (Locale locale in onDeviceLocales) {
+  for (Locale locale in onDeviceLocales ?? const []) {
     // check if exact local is supported, if yes, return it
     if (appSupportedLocales.contains(locale)) {
       autoDetectedLocale = locale;

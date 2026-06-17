@@ -27,6 +27,7 @@ Future<ButtonResult?> showErrorDialog(
   String title,
   String? body, {
   bool isDismissable = true,
+  bool showContactSupport = true,
 }) async {
   return showDialogWidget(
     context: context,
@@ -34,15 +35,16 @@ Future<ButtonResult?> showErrorDialog(
     body: body,
     isDismissible: isDismissable,
     buttons: [
-      ButtonWidget(
-        buttonType: ButtonType.primary,
-        labelText: context.l10n.contactSupport,
-        isInAlert: true,
-        buttonAction: ButtonAction.first,
-        onTap: () async {
-          await sendEmail(context, to: "support@ente.com", body: body);
-        },
-      ),
+      if (showContactSupport)
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          labelText: context.l10n.contactSupport,
+          isInAlert: true,
+          buttonAction: ButtonAction.first,
+          onTap: () async {
+            await sendEmail(context, to: "support@ente.com", body: body);
+          },
+        ),
       const ButtonWidget(
         buttonType: ButtonType.secondary,
         labelText: "OK",

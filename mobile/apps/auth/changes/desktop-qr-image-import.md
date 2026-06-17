@@ -1,0 +1,1 @@
+- Added support for importing 2FA codes from QR code images on desktop.

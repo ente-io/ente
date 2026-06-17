@@ -59,7 +59,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
               message: AppLocalizations.of(
                 context,
               ).pleaseCheckYourInternetConnectionAndTryAgain,
-              assetPath: 'assets/warning-green.png',
+              assetPath: 'assets/warning-grey.png',
             );
           } else {
             await showGenericErrorBottomSheet(context: context, error: e);
@@ -72,7 +72,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           context,
           title: AppLocalizations.of(context).recoveryKeyVerified,
           message: AppLocalizations.of(context).recoveryKeySuccessBody,
-          assetPath: 'assets/warning-green.png',
+          assetPath: 'assets/warning-grey.png',
         );
         Navigator.of(context).pop();
       } else {
