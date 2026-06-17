@@ -47,6 +47,7 @@ import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
+import { orientedImageURL } from "ente-gallery/services/image-orientation";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
@@ -111,6 +112,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
+    const editorOrientedImageURLRef = useRef<string | undefined>(undefined);
+    const loadCanvasRequestIDRef = useRef(0);
+    const openRef = useRef(open);
+    openRef.current = open;
 
     const [fileURL, setFileURL] = useState<string | undefined>(undefined);
     // The MIME type of the original file that we are editing.
@@ -159,6 +164,17 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     const [isGrowing, setIsGrowing] = useState(false);
 
     const cropBoxRef = useRef<HTMLDivElement>(null);
+
+    const revokeEditorOrientedImageURL = () => {
+        if (editorOrientedImageURLRef.current) {
+            URL.revokeObjectURL(editorOrientedImageURLRef.current);
+            editorOrientedImageURLRef.current = undefined;
+        }
+    };
+
+    const invalidateLoadCanvasRequests = () => {
+        loadCanvasRequestIDRef.current += 1;
+    };
 
     const getCanvasBoundsOffsets = () => {
         const canvasBounds = {
@@ -361,6 +377,11 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     };
 
     const loadCanvas = async () => {
+        const loadCanvasRequestID = (loadCanvasRequestIDRef.current += 1);
+        const isStaleLoad = () =>
+            loadCanvasRequestID != loadCanvasRequestIDRef.current ||
+            !openRef.current;
+
         try {
             if (
                 !canvasRef.current ||
@@ -384,8 +405,21 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                 if (sourceURLs.type != "image") {
                     throw new Error("Image editor invoked for non-image file");
                 }
-                img.src = sourceURLs.imageURL;
-                setFileURL(sourceURLs.imageURL);
+                if (isStaleLoad()) return;
+                const oriented = await orientedImageURL(
+                    sourceURLs.imageURL,
+                    sourceURLs.originalImageBlob,
+                );
+                if (isStaleLoad()) {
+                    if (oriented.orientedImageURL) {
+                        URL.revokeObjectURL(oriented.orientedImageURL);
+                    }
+                    return;
+                }
+                revokeEditorOrientedImageURL();
+                editorOrientedImageURLRef.current = oriented.orientedImageURL;
+                img.src = oriented.imageURL;
+                setFileURL(oriented.imageURL);
                 setMIMEType(sourceURLs.mimeType);
             } else {
                 img.src = fileURL;
@@ -394,6 +428,10 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             await new Promise((resolve, reject) => {
                 img.onload = () => {
                     try {
+                        if (isStaleLoad()) {
+                            resolve(true);
+                            return;
+                        }
                         const scale = Math.min(
                             parentRef.current!.clientWidth / img.width,
                             parentRef.current!.clientHeight / img.height,
@@ -445,7 +483,19 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
         void loadCanvas();
     }, [open, file]);
 
+    useEffect(() => {
+        if (!open) {
+            invalidateLoadCanvasRequests();
+            revokeEditorOrientedImageURL();
+            setFileURL(undefined);
+        }
+    }, [open]);
+
+    useEffect(() => () => revokeEditorOrientedImageURL(), []);
+
     const handleClose = () => {
+        invalidateLoadCanvasRequests();
+        revokeEditorOrientedImageURL();
         setFileURL(undefined);
         onClose();
     };
@@ -483,6 +533,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                 (c) => c.id == file.collectionID,
             );
             onSaveEditedCopy(await getEditedFile(), collection!, file);
+            invalidateLoadCanvasRequests();
+            revokeEditorOrientedImageURL();
             setFileURL(undefined);
         } catch (e) {
             log.error("Error saving copy to ente", e);

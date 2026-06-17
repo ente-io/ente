@@ -1,4 +1,18 @@
-import type { ExifOrientation } from "ente-gallery/services/exif";
+import log from "ente-base/log";
+import {
+    extractRawExif,
+    parseExif,
+    parseExifOrientation,
+    type ExifOrientation,
+    type RawExifTags,
+} from "ente-gallery/services/exif";
+import type { ParsedMetadata } from "ente-media/file-metadata";
+
+export interface OrientedImageURLResult {
+    imageURL: string;
+    exif?: { tags: RawExifTags; parsed: ParsedMetadata };
+    orientedImageURL?: string;
+}
 
 // For the orientations 5 and above, the height and width of the images are
 // to be swapped for properly rendering them.
@@ -68,3 +82,73 @@ export const drawImageWithExifOrientation = (
     applyExifOrientationTransform(ctx, orientation, width, height);
     ctx.drawImage(image, 0, 0, width, height);
 };
+
+export const orientedImageURL = async (
+    imageURL: string,
+    originalImageBlob: Blob,
+): Promise<OrientedImageURLResult> => {
+    let exif: OrientedImageURLResult["exif"] | undefined;
+    let orientation: ExifOrientation | undefined;
+
+    try {
+        const tags = await extractRawExif(originalImageBlob);
+        const parsed = parseExif(tags);
+        exif = { tags, parsed };
+        orientation = parseExifOrientation(tags);
+    } catch (e) {
+        log.warn("Failed to extract exif for image orientation", e);
+        return { imageURL };
+    }
+
+    if (!orientation || orientation == 1) return { imageURL, exif };
+
+    const correctedImageURL = await canvasOrientedImageURL(
+        imageURL,
+        orientation,
+    );
+    return {
+        imageURL: correctedImageURL,
+        exif,
+        orientedImageURL: correctedImageURL,
+    };
+};
+
+const canvasOrientedImageURL = async (
+    imageURL: string,
+    orientation: ExifOrientation,
+) => {
+    const image = await loadImage(imageURL);
+    const width = image.naturalWidth;
+    const height = image.naturalHeight;
+    const canvasDimensions = dimensionsForExifOrientation(
+        width,
+        height,
+        orientation,
+    );
+
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasDimensions.width;
+    canvas.height = canvasDimensions.height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Failed to get canvas 2D context");
+
+    drawImageWithExifOrientation(ctx, image, orientation, width, height);
+
+    return URL.createObjectURL(await canvasBlob(canvas));
+};
+
+const loadImage = (imageURL: string) =>
+    new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = imageURL;
+    });
+
+const canvasBlob = (canvas: HTMLCanvasElement) =>
+    new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob((blob) =>
+            blob ? resolve(blob) : reject(new Error("toBlob failed")),
+        ),
+    );

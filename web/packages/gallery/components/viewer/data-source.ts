@@ -1,16 +1,8 @@
 import log from "ente-base/log";
 import type { FileInfoExif } from "ente-gallery/components/FileInfo";
 import { downloadManager } from "ente-gallery/services/download";
-import {
-    extractRawExif,
-    parseExif,
-    parseExifOrientation,
-    type ExifOrientation,
-} from "ente-gallery/services/exif";
-import {
-    dimensionsForExifOrientation,
-    drawImageWithExifOrientation,
-} from "ente-gallery/services/image-orientation";
+import { extractRawExif, parseExif } from "ente-gallery/services/exif";
+import { orientedImageURL } from "ente-gallery/services/image-orientation";
 import {
     hlsPlaylistDataForFile,
     type HLSPlaylistDataForFile,
@@ -99,7 +91,7 @@ export type ItemData = PhotoSwipeSlideData & {
      */
     originalImageBlob?: Blob;
     /**
-     * An object URL created by this module for an orientation-corrected image.
+     * An object URL created for an orientation-corrected image.
      *
      * This is separate from {@link imageURL} because object URLs returned by
      * the download manager are owned by the download manager, while this one
@@ -650,83 +642,6 @@ const enqueueUpdates = async (
         markFailed();
     }
 };
-
-interface OrientedImageURLResult {
-    imageURL: string;
-    exif?: FileInfoExif;
-    orientedImageURL?: string;
-}
-
-const orientedImageURL = async (
-    imageURL: string,
-    originalImageBlob: Blob,
-): Promise<OrientedImageURLResult> => {
-    let exif: FileInfoExif | undefined;
-    let orientation: ExifOrientation | undefined;
-
-    try {
-        const file = new File([originalImageBlob], "");
-        const tags = await extractRawExif(file);
-        const parsed = parseExif(tags);
-        exif = { tags, parsed };
-        orientation = parseExifOrientation(tags);
-    } catch (e) {
-        log.warn("Failed to extract exif for image orientation", e);
-        return { imageURL };
-    }
-
-    if (!orientation || orientation == 1) return { imageURL, exif };
-
-    const correctedImageURL = await canvasOrientedImageURL(
-        imageURL,
-        orientation,
-    );
-    return {
-        imageURL: correctedImageURL,
-        exif,
-        orientedImageURL: correctedImageURL,
-    };
-};
-
-const canvasOrientedImageURL = async (
-    imageURL: string,
-    orientation: ExifOrientation,
-) => {
-    const image = await loadImage(imageURL);
-    const width = image.naturalWidth;
-    const height = image.naturalHeight;
-    const canvasDimensions = dimensionsForExifOrientation(
-        width,
-        height,
-        orientation,
-    );
-
-    const canvas = document.createElement("canvas");
-    canvas.width = canvasDimensions.width;
-    canvas.height = canvasDimensions.height;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Failed to get canvas 2D context");
-
-    drawImageWithExifOrientation(ctx, image, orientation, width, height);
-
-    return URL.createObjectURL(await canvasBlob(canvas));
-};
-
-const loadImage = (imageURL: string) =>
-    new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image();
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-        image.src = imageURL;
-    });
-
-const canvasBlob = (canvas: HTMLCanvasElement) =>
-    new Promise<Blob>((resolve, reject) =>
-        canvas.toBlob((blob) =>
-            blob ? resolve(blob) : reject(new Error("toBlob failed")),
-        ),
-    );
 
 /**
  * Take a image URL, determine its dimensions using browser APIs if possible,
