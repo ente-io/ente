@@ -2,6 +2,18 @@ import AVFoundation
 import Flutter
 import UIKit
 
+private struct EnteQrScannerOverlay {
+  let cutOutSize: CGFloat
+
+  static func from(_ args: Any?) -> EnteQrScannerOverlay {
+    guard let map = args as? [String: Any] else {
+      return EnteQrScannerOverlay(cutOutSize: 260)
+    }
+    let cutOutSize = (map["cutOutSize"] as? NSNumber)?.doubleValue ?? 260
+    return EnteQrScannerOverlay(cutOutSize: CGFloat(cutOutSize))
+  }
+}
+
 private final class EnteQrScannerPreviewView: UIView {
   var onLayout: (() -> Void)?
 
@@ -12,8 +24,11 @@ private final class EnteQrScannerPreviewView: UIView {
 }
 
 final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataOutputObjectsDelegate {
+  private static let scanPadding: CGFloat = 48
+
   private let containerView: EnteQrScannerPreviewView
   private let channel: FlutterMethodChannel
+  private let overlay: EnteQrScannerOverlay
   private let session = AVCaptureSession()
   private let sessionQueue = DispatchQueue(label: "io.ente.qr_scanner.session")
   private let metadataQueue = DispatchQueue(label: "io.ente.qr_scanner.metadata")
@@ -32,6 +47,7 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
     args: Any?,
     messenger: FlutterBinaryMessenger
   ) {
+    overlay = EnteQrScannerOverlay.from(args)
     containerView = EnteQrScannerPreviewView(frame: frame)
     channel = FlutterMethodChannel(
       name: "io.ente.qr_scanner/view_\(viewId)",
@@ -182,10 +198,30 @@ final class EnteQrScannerView: NSObject, FlutterPlatformView, AVCaptureMetadataO
     }
 
     previewLayer?.frame = containerView.bounds
-    guard let metadataOutput = metadataOutput else {
+    guard
+      let previewLayer = previewLayer,
+      let metadataOutput = metadataOutput,
+      !containerView.bounds.isEmpty
+    else {
       return
     }
-    metadataOutput.rectOfInterest = CGRect(x: 0, y: 0, width: 1, height: 1)
+    metadataOutput.rectOfInterest = previewLayer.metadataOutputRectConverted(
+      fromLayerRect: scanRect(in: containerView.bounds)
+    )
+  }
+
+  private func scanRect(in bounds: CGRect) -> CGRect {
+    let maxSide = min(bounds.width, bounds.height)
+    let side = min(
+      overlay.cutOutSize + Self.scanPadding * 2,
+      maxSide
+    )
+    return CGRect(
+      x: bounds.midX - side / 2,
+      y: bounds.midY - side / 2,
+      width: side,
+      height: side
+    )
   }
 
   private func pause() {
