@@ -285,6 +285,105 @@ void main() {
   });
 
   testWidgets(
+    "ButtonComponent dismisses modal routes after success when configured",
+    (tester) async {
+      var modalDismissed = false;
+
+      await tester.pumpWidget(
+        _wrapModalTestApp(
+          onModalDismissed: () => modalDismissed = true,
+          child: ButtonComponent(
+            label: "Done",
+            shouldSurfaceExecutionStates: false,
+            dismissModalOnSuccess: true,
+            onTap: () {},
+          ),
+        ),
+      );
+
+      await tester.tap(find.text("Open"));
+      await tester.pumpAndSettle();
+
+      expect(find.text("Done"), findsOneWidget);
+
+      await tester.tap(find.text("Done"));
+      await tester.pumpAndSettle();
+
+      expect(find.text("Open"), findsOneWidget);
+      expect(modalDismissed, isTrue);
+    },
+  );
+
+  testWidgets("ButtonComponent does not dismiss modal routes by default", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrapModalTestApp(
+        child: ButtonComponent(
+          label: "Stay",
+          shouldSurfaceExecutionStates: false,
+          onTap: () {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.text("Open"));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text("Stay"));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Stay"), findsOneWidget);
+  });
+
+  testWidgets(
+    "ButtonComponent does not dismiss normal page routes when configured",
+    (tester) async {
+      await tester.pumpWidget(
+        _wrapRouteTestApp(
+          child: ButtonComponent(
+            label: "Save",
+            shouldSurfaceExecutionStates: false,
+            dismissModalOnSuccess: true,
+            onTap: () {},
+          ),
+        ),
+      );
+
+      await tester.tap(find.text("Open"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Save"));
+      await tester.pumpAndSettle();
+
+      expect(find.text("Save"), findsOneWidget);
+    },
+  );
+
+  testWidgets("ButtonComponent does not dismiss modal routes after errors", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrapModalTestApp(
+        child: ButtonComponent(
+          label: "Fail",
+          shouldSurfaceExecutionStates: false,
+          dismissModalOnSuccess: true,
+          onTap: () async => throw StateError("failed"),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text("Open"));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text("Fail"));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Fail"), findsOneWidget);
+  });
+
+  testWidgets(
     "ButtonComponent remains disabled when onTap is null or disabled",
     (tester) async {
       var tapCount = 0;
@@ -648,6 +747,58 @@ Widget _wrap(
     themeAnimationDuration: Duration.zero,
     theme: ComponentTheme.themeForApp(app, brightness: brightness),
     home: Scaffold(body: Center(child: child)),
+  );
+}
+
+Widget _wrapRouteTestApp({required Widget child}) {
+  return MaterialApp(
+    themeAnimationDuration: Duration.zero,
+    theme: ComponentTheme.themeForApp(ComponentApp.photos),
+    home: Scaffold(
+      body: Center(
+        child: Builder(
+          builder: (context) {
+            return TextButton(
+              onPressed: () async {
+                await Navigator.of(context).push<Object?>(
+                  MaterialPageRoute(
+                    builder: (_) => Scaffold(body: Center(child: child)),
+                  ),
+                );
+              },
+              child: const Text("Open"),
+            );
+          },
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _wrapModalTestApp({
+  required Widget child,
+  VoidCallback? onModalDismissed,
+}) {
+  return MaterialApp(
+    themeAnimationDuration: Duration.zero,
+    theme: ComponentTheme.themeForApp(ComponentApp.photos),
+    home: Scaffold(
+      body: Center(
+        child: Builder(
+          builder: (context) {
+            return TextButton(
+              onPressed: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  builder: (_) => Center(child: child),
+                ).whenComplete(() => onModalDismissed?.call());
+              },
+              child: const Text("Open"),
+            );
+          },
+        ),
+      ),
+    ),
   );
 }
 

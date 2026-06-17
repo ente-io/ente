@@ -1,0 +1,1 @@
+- Fixed the add-to-album sheet layout and shared-album confirmation flow.
