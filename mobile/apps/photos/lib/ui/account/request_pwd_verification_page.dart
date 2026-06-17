@@ -64,65 +64,63 @@ class _RequestPasswordVerificationPageState
           },
         ),
       ),
-      body: _getBody(),
+      body: _getBody(isFormValid),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: ButtonComponent(
           key: const ValueKey("verifyPasswordButton"),
           label: context.l10n.verifyPassword,
           isDisabled: !isFormValid,
-          onTap: isFormValid
-              ? () async {
-                  FocusScope.of(context).unfocus();
-                  final dialog = createProgressDialog(
-                    context,
-                    context.l10n.pleaseWait,
-                  );
-                  await dialog.show();
-                  try {
-                    final attributes = Configuration.instance
-                        .getKeyAttributes()!;
-                    final Uint8List keyEncryptionKey =
-                        await CryptoUtil.deriveKey(
-                          utf8.encode(_passwordController.text),
-                          CryptoUtil.base642bin(attributes.kekSalt),
-                          attributes.memLimit!,
-                          attributes.opsLimit!,
-                        );
-                    CryptoUtil.decryptSync(
-                      CryptoUtil.base642bin(attributes.encryptedKey),
-                      keyEncryptionKey,
-                      CryptoUtil.base642bin(attributes.keyDecryptionNonce),
-                    );
-                    await dialog.show();
-                    // pop
-                    await widget.onPasswordVerified(keyEncryptionKey);
-                    await dialog.hide();
-                    Navigator.of(context).pop(true);
-                  } catch (e, s) {
-                    _logger.severe("Error while verifying password", e, s);
-                    await dialog.hide();
-                    if (widget.onPasswordError != null) {
-                      widget.onPasswordError!();
-                    } else {
-                      // ignore: unawaited_futures
-                      showAlertBottomSheet(
-                        context,
-                        title: context.l10n.incorrectPasswordTitle,
-                        message: context.l10n.pleaseTryAgain,
-                        assetPath: 'assets/warning-grey.png',
-                      );
-                    }
-                  }
-                }
-              : null,
+          onTap: isFormValid ? _verifyPassword : null,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Widget _getBody() {
+  Future<void> _verifyPassword() async {
+    if (_passwordController.text.isEmpty) {
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
+    await dialog.show();
+    try {
+      final attributes = Configuration.instance.getKeyAttributes()!;
+      final Uint8List keyEncryptionKey = await CryptoUtil.deriveKey(
+        utf8.encode(_passwordController.text),
+        CryptoUtil.base642bin(attributes.kekSalt),
+        attributes.memLimit!,
+        attributes.opsLimit!,
+      );
+      CryptoUtil.decryptSync(
+        CryptoUtil.base642bin(attributes.encryptedKey),
+        keyEncryptionKey,
+        CryptoUtil.base642bin(attributes.keyDecryptionNonce),
+      );
+      await dialog.show();
+      // pop
+      await widget.onPasswordVerified(keyEncryptionKey);
+      await dialog.hide();
+      Navigator.of(context).pop(true);
+    } catch (e, s) {
+      _logger.severe("Error while verifying password", e, s);
+      await dialog.hide();
+      if (widget.onPasswordError != null) {
+        widget.onPasswordError!();
+      } else {
+        // ignore: unawaited_futures
+        showAlertBottomSheet(
+          context,
+          title: context.l10n.incorrectPasswordTitle,
+          message: context.l10n.pleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
+        );
+      }
+    }
+  }
+
+  Widget _getBody(bool isFormValid) {
     return Column(
       children: [
         Expanded(
@@ -175,6 +173,7 @@ class _RequestPasswordVerificationPageState
                     keyboardType: TextInputType.visiblePassword,
                     autofillHints: const [AutofillHints.password],
                     shouldUnfocusOnClearOrSubmit: true,
+                    onSubmit: isFormValid ? (_) => _verifyPassword() : null,
                     onChanged: (_) {
                       setState(() {});
                     },
