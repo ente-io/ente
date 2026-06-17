@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:ui" show BlendMode, ImageFilter;
 
 import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
@@ -1104,6 +1105,7 @@ class _AlbumsMoreButtonOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final componentColors = context.componentColors;
+    final maskColor = componentColors.backgroundBase;
 
     return Positioned.fill(
       child: Stack(
@@ -1113,21 +1115,30 @@ class _AlbumsMoreButtonOverlay extends StatelessWidget {
             right: 0,
             bottom: 0,
             child: IgnorePointer(
-              child: Container(
-                width: 96,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerRight,
-                    end: Alignment.centerLeft,
-                    colors: [
-                      componentColors.backgroundBase,
-                      componentColors.backgroundBase.withValues(alpha: 0.92),
-                      componentColors.backgroundBase.withValues(alpha: 0.62),
-                      componentColors.backgroundBase.withValues(alpha: 0.32),
-                      componentColors.backgroundBase.withValues(alpha: 0.12),
-                      componentColors.backgroundBase.withValues(alpha: 0.12),
-                    ],
-                    stops: const [0, 0.34, 0.56, 0.76, 0.92, 1],
+              child: ShaderMask(
+                blendMode: BlendMode.dstIn,
+                shaderCallback: (bounds) => LinearGradient(
+                  begin: Alignment.centerRight,
+                  end: Alignment.centerLeft,
+                  colors: [
+                    maskColor,
+                    maskColor,
+                    maskColor.withValues(alpha: 0),
+                  ],
+                  stops: const [0, 0.48, 1],
+                ).createShader(bounds),
+                child: SizedBox(
+                  width: 72,
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                      child: ColoredBox(
+                        color: componentColors.backgroundBase.withValues(
+                          alpha: 0.66,
+                        ),
+                        child: const SizedBox.expand(),
+                      ),
+                    ),
                   ),
                 ),
               ),
