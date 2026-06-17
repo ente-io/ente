@@ -1,11 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="io.ente.photos">
-    
-    <!-- Adding the following block to prevent the app from having multiple
-    launcher entries. We can remove this along with the `LAUNCHER` category from
-    main/AndroidManifest.xml once
-    https://github.com/flutter/flutter/issues/38965 is fixed. -->
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Strips MainActivity's launcher entry; see independent/AndroidManifest.xml. -->
     <application>
         <activity android:name=".MainActivity">
             <intent-filter>
