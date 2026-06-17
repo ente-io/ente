@@ -215,7 +215,7 @@
         align-items: center;
         justify-content: center;
         margin-top: 20.5px;
-        margin-inline-start: 4px;
+        margin-inline-start: 12px;
         margin-inline-end: 0;
         width: auto;
         min-width: 0;
@@ -245,7 +245,7 @@
     }
 
     .pswp-ente-public-album .pswp__button--ente-logo {
-        margin-inline-start: 2px;
+        margin-inline-start: 10px;
     }
 }
 

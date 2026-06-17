@@ -771,7 +771,7 @@ export default function PublicAlbumPage() {
                                 flex: "0 0 60px",
                                 px: "24px",
                                 "@media (width < 720px)": {
-                                    px: "4px",
+                                    px: "12px",
                                     ...(showMobileMasonryCover
                                         ? { borderBottom: "none" }
                                         : {}),
