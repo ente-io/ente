@@ -68,7 +68,7 @@ dependencies:
   flutter_displaymode: 0.6.0
   flutter_email_sender: 7.0.0
   flutter_launcher_icons: 0.14.4
-  flutter_local_notifications: 18.0.1
+  flutter_local_notifications: 19.3.0
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: 2.4.7
