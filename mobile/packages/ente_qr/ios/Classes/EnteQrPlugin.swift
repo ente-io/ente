@@ -166,13 +166,13 @@ private extension CGImagePropertyOrientation {
     case .downMirrored:
       self = .downMirrored
     case .left:
-      self = .leftMirrored
-    case .leftMirrored:
       self = .left
+    case .leftMirrored:
+      self = .leftMirrored
     case .right:
-      self = .rightMirrored
-    case .rightMirrored:
       self = .right
+    case .rightMirrored:
+      self = .rightMirrored
     @unknown default:
       self = .up
     }
