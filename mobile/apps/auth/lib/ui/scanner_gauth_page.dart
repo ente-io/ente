@@ -18,8 +18,6 @@ class ScannerGoogleAuthPage extends StatefulWidget {
 }
 
 class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
-  static const double _scannerToastBottomMargin = 96;
-
   EnteQrScannerController? controller;
   StreamSubscription<String>? _scanSubscription;
   bool _hasCompletedScan = false;
@@ -72,7 +70,7 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
 
     if (!qrCode.startsWith(kGoogleAuthExportPrefix)) {
       if (mounted) {
-        _showScannerToast("Invalid QR code");
+        showToastAboveBottomControls(context, context.l10n.invalidQRCode);
       }
       return;
     }
@@ -107,11 +105,7 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
       return;
     }
     Navigator.of(context).pop();
-    _showScannerToast("Error $error");
-  }
-
-  void _showScannerToast(String message) {
-    showToast(context, message, mobileBottomMargin: _scannerToastBottomMargin);
+    showToastAboveBottomControls(context, "${context.l10n.error} $error");
   }
 
   void _cancelScanSubscription() {

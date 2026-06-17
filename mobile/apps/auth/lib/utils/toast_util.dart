@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+const double _bottomControlToastMargin = 96;
+
 void showToast(
   BuildContext context,
   String message, {
@@ -101,6 +103,19 @@ void showToast(
       toastDuration: const Duration(seconds: 2),
     );
   }
+}
+
+void showToastAboveBottomControls(
+  BuildContext context,
+  String message, {
+  toastLength = Toast.LENGTH_LONG,
+}) {
+  showToast(
+    context,
+    message,
+    toastLength: toastLength,
+    mobileBottomMargin: _bottomControlToastMargin,
+  );
 }
 
 void showShortToast(BuildContext context, String message) {

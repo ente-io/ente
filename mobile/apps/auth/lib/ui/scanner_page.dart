@@ -39,8 +39,6 @@ class ScannerPage extends StatefulWidget {
 }
 
 class ScannerPageState extends State<ScannerPage> {
-  static const double _scannerToastBottomMargin = 96;
-
   final Logger _logger = Logger('ScannerPage');
   EnteQrScannerController? controller;
   StreamSubscription<String>? _scanSubscription;
@@ -268,7 +266,7 @@ class ScannerPageState extends State<ScannerPage> {
       );
     } catch (e) {
       if (mounted) {
-        _showInvalidQRCodeToast();
+        showToastAboveBottomControls(context, context.l10n.invalidQRCode);
       }
     }
   }
@@ -284,7 +282,7 @@ class ScannerPageState extends State<ScannerPage> {
       final codes = parseGoogleAuth(qrCode);
       if (codes.isEmpty) {
         if (mounted) {
-          _showInvalidQRCodeToast();
+          showToastAboveBottomControls(context, context.l10n.invalidQRCode);
         }
         return;
       }
@@ -300,7 +298,7 @@ class ScannerPageState extends State<ScannerPage> {
     } catch (e, s) {
       _logger.severe("Error importing Google Authenticator QR", e, s);
       if (mounted) {
-        _showInvalidQRCodeToast();
+        showToastAboveBottomControls(context, context.l10n.invalidQRCode);
       }
     } finally {
       if (shouldResumeCamera && mounted && !_hasCompletedScan) {
@@ -308,14 +306,6 @@ class ScannerPageState extends State<ScannerPage> {
       }
       _isHandlingGoogleAuthImport = false;
     }
-  }
-
-  void _showInvalidQRCodeToast() {
-    showToast(
-      context,
-      context.l10n.invalidQRCode,
-      mobileBottomMargin: _scannerToastBottomMargin,
-    );
   }
 
   Future<void> _handleImportFromGallery() async {
