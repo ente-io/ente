@@ -112,6 +112,15 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
+
+    /**
+     * The below refs are for rendering the image file in the proper
+     * EXIF Orientation respected manner.
+     *
+     * editorOrientedImageURLRef: remembers the object URL for orientation correction, for later revocation.
+     * loadCanvasRequestIDRef: gives each async canvas load a generation ID, so older loads can be ignored.
+     * openRef: for letting async callbacks check whether modal is open or not.
+     */
     const editorOrientedImageURLRef = useRef<string | undefined>(undefined);
     const loadCanvasRequestIDRef = useRef(0);
     const openRef = useRef(open);
@@ -165,6 +174,11 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
 
     const cropBoxRef = useRef<HTMLDivElement>(null);
 
+    /**
+     * Since the OrientedImageURL is created in this module,
+     * on close/reset this URL needs to be revoked to and this
+     * function facilitates that using the editorOrientedImageURLRef
+     */
     const revokeEditorOrientedImageURL = () => {
         if (editorOrientedImageURLRef.current) {
             URL.revokeObjectURL(editorOrientedImageURLRef.current);
