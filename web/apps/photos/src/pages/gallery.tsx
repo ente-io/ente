@@ -496,18 +496,45 @@ const Page: React.FC = () => {
         filteredFiles.length > 0 &&
         selectedFilesInView.length === filteredFiles.length;
 
+    const isInArchiveSection =
+        barMode == "albums" &&
+        (activeCollectionID == PseudoCollectionID.archiveItems ||
+            activeCollectionSummary?.attributes.has("archived"));
+
     // TODO: Move into reducer
-    const barCollectionSummaries = useMemo(
-        () =>
-            barMode == "hidden-albums"
-                ? state.hiddenCollectionSummaries
-                : state.normalCollectionSummaries,
-        [
-            barMode,
-            state.hiddenCollectionSummaries,
-            state.normalCollectionSummaries,
-        ],
-    );
+    const barCollectionSummaries = useMemo(() => {
+        if (barMode == "hidden-albums") return state.hiddenCollectionSummaries;
+        if (!isInArchiveSection) return state.normalCollectionSummaries;
+
+        const archiveCollectionSummaries = new Map(
+            [...state.normalCollectionSummaries].filter(
+                ([id, collectionSummary]) =>
+                    id == PseudoCollectionID.archiveItems ||
+                    collectionSummary.attributes.has("archived"),
+            ),
+        );
+        const archiveSummary = archiveCollectionSummaries.get(
+            PseudoCollectionID.archiveItems,
+        );
+        if (archiveSummary) {
+            archiveCollectionSummaries.set(PseudoCollectionID.archiveItems, {
+                ...archiveSummary,
+                coverFile:
+                    archiveSummary.coverFile ?? archiveSummary.latestFile,
+                attributes: new Set(
+                    [...archiveSummary.attributes].filter(
+                        (attribute) => attribute != "hideFromCollectionBar",
+                    ),
+                ),
+            });
+        }
+        return archiveCollectionSummaries;
+    }, [
+        barMode,
+        isInArchiveSection,
+        state.hiddenCollectionSummaries,
+        state.normalCollectionSummaries,
+    ]);
 
     const router = useRouter();
 
@@ -2046,8 +2073,15 @@ const Page: React.FC = () => {
                         onEditLocation={showEditLocation}
                     />
                 ) : barMode == "hidden-albums" ? (
-                    <HiddenSectionNavbarContents
+                    <SectionNavbarContents
+                        title={t("section_hidden")}
                         onBack={() => dispatch({ type: "showAlbums" })}
+                        onUpload={openUploader}
+                    />
+                ) : !isInSearchMode && isInArchiveSection ? (
+                    <SectionNavbarContents
+                        title={t("section_archive")}
+                        onBack={() => dispatch({ type: "showAll" })}
                         onUpload={openUploader}
                     />
                 ) : (
@@ -2081,6 +2115,7 @@ const Page: React.FC = () => {
                     activePerson,
                     setFileListHeader,
                     saveGroups,
+                    canCreateAlbum: !isInArchiveSection,
                     onAddSaveGroup,
                     onMarkTempDeleted: handleMarkTempDeleted,
                     onAddFileToCollection: handleAddSingleFileToCollection,
@@ -2376,14 +2411,17 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     );
 };
 
-interface HiddenSectionNavbarContentsProps {
+interface SectionNavbarContentsProps {
+    title: string;
     onBack: () => void;
     onUpload: () => void;
 }
 
-const HiddenSectionNavbarContents: React.FC<
-    HiddenSectionNavbarContentsProps
-> = ({ onBack, onUpload }) => (
+const SectionNavbarContents: React.FC<SectionNavbarContentsProps> = ({
+    title,
+    onBack,
+    onUpload,
+}) => (
     <Stack
         direction="row"
         sx={(theme) => ({
@@ -2396,7 +2434,7 @@ const HiddenSectionNavbarContents: React.FC<
         <IconButton onClick={onBack}>
             <ArrowBackIcon />
         </IconButton>
-        <Typography sx={{ flex: 1 }}>{t("section_hidden")}</Typography>
+        <Typography sx={{ flex: 1 }}>{title}</Typography>
         <UploadButton onClick={onUpload} />
     </Stack>
 );

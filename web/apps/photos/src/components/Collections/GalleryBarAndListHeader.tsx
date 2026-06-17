@@ -65,6 +65,7 @@ type GalleryBarAndListHeaderProps = Omit<
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
+    canCreateAlbum: boolean;
 } & Pick<
         CollectionHeaderProps,
         | "files"
@@ -120,6 +121,7 @@ export const GalleryBarAndListHeader: React.FC<
     people,
     allPeople,
     saveGroups,
+    canCreateAlbum,
     files,
     mapFileSource,
     activePerson,
@@ -326,6 +328,7 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
+                canCreateAlbum={canCreateAlbum}
                 onRemotePull={onRemotePull}
             />
             <AllPeople
