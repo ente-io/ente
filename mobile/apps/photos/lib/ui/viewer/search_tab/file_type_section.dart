@@ -192,6 +192,7 @@ class _FileTypeRecommendationState extends State<_FileTypeRecommendation> {
 class _FileTypeCard extends StatelessWidget {
   static const width = 108.0;
   static const _height = 56.0;
+  static const _labelHorizontalInset = 13.0;
   static const _labelTop = 31.0;
   static const _labelBottomPadding = 8.0;
 
@@ -219,8 +220,8 @@ class _FileTypeCard extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-              left: 13,
-              right: 38,
+              left: _labelHorizontalInset,
+              right: _labelHorizontalInset,
               top: _labelTop,
               child: Text(
                 tile.label,

@@ -90,15 +90,12 @@ class StartNewRitualCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 4),
-                              child: Icon(
-                                EnteIcons.lightningFilled,
-                                size: 13,
-                                color: Color(0xFFFFBC03),
-                              ),
+                            const Icon(
+                              EnteIcons.lightningFilled,
+                              size: 13,
+                              color: Color(0xFFFFBC03),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
