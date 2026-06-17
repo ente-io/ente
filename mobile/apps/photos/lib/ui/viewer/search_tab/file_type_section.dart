@@ -286,11 +286,11 @@ class _FileExtensionPill extends StatelessWidget {
 
 class _FileExtensionIcon extends StatelessWidget {
   static const _outlineAsset = "assets/file_extension_outline.svg";
-  static const _maxExtensionLength = 5;
+  static const _maxExtensionLength = 4;
   static const _extensionFontSize = 11.0;
+  static const _maxExtensionFontSize = 14.0;
   static const _outlineHeight = 13.0;
   static const _outlineTextGap = 1.0;
-  static const _height = _outlineHeight + _outlineTextGap + _extensionFontSize;
 
   final String extension;
   final Color color;
@@ -300,9 +300,10 @@ class _FileExtensionIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = _displayExtension(extension);
+    final fontSize = _fontSizeFor(context);
     return SizedBox(
       width: 34,
-      height: _height,
+      height: _outlineHeight + _outlineTextGap + fontSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -319,7 +320,7 @@ class _FileExtensionIcon extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 0,
-            height: _extensionFontSize,
+            height: fontSize,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
@@ -328,13 +329,14 @@ class _FileExtensionIcon extends StatelessWidget {
                   color: color,
                   fontFamily: TextStyles.fontFamily,
                   package: TextStyles.fontPackage,
-                  fontSize: _extensionFontSize,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w700,
                   height: 1,
                   letterSpacing: 0,
                 ),
                 maxLines: 1,
                 textAlign: TextAlign.center,
+                textScaler: TextScaler.noScaling,
               ),
             ),
           ),
@@ -349,6 +351,13 @@ class _FileExtensionIcon extends StatelessWidget {
       return normalizedExtension;
     }
     return normalizedExtension.substring(0, _maxExtensionLength);
+  }
+
+  double _fontSizeFor(BuildContext context) {
+    return math.min(
+      MediaQuery.textScalerOf(context).scale(_extensionFontSize),
+      _maxExtensionFontSize,
+    );
   }
 }
 
