@@ -1,8 +1,8 @@
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/collection_share_badge.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -41,8 +41,7 @@ class MemoryLinkAlbumItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -54,9 +53,9 @@ class MemoryLinkAlbumItem extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: _rowHeight),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: colorScheme.fill,
+          color: colors.fillBase,
           border: Border.all(
-            color: isSelected ? colorScheme.strokeDark : colorScheme.fill,
+            color: isSelected ? colors.strokeDark : colors.fillBase,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(_cardRadius)),
         ),
@@ -130,7 +129,9 @@ class MemoryLinkAlbumItem extends StatelessWidget {
                           AppLocalizations.of(
                             context,
                           ).itemCount(count: fileCount ?? 0),
-                          style: textTheme.smallMuted,
+                          style: TextStyles.mini.copyWith(
+                            color: colors.textLight,
+                          ),
                           maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
