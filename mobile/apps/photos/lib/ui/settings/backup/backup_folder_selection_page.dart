@@ -14,8 +14,8 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/collection_share_badge.dart';
 import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
-import 'package:photos/ui/viewer/actions/select_all_status_icon.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -281,7 +281,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         child: EnteLoadingWidget(),
       );
     }
-    _sortFiles();
 
     final screenWidth = MediaQuery.sizeOf(context).width;
     final crossAxisCount = max(screenWidth ~/ _maxThumbnailWidth, 3);
@@ -375,28 +374,16 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           ColoredBox(
                             color: Colors.black.withValues(alpha: 0.4),
                           ),
+                        if (isSelected)
+                          const Positioned(
+                            top: 8,
+                            right: 8,
+                            child: CollectionSelectedBadge(),
+                          ),
                       ],
                     ),
                   ),
                 ),
-                if (isSelected)
-                  Positioned(
-                    top: -6,
-                    right: -6,
-                    child: Container(
-                      padding: const EdgeInsets.all(0.75),
-                      decoration: BoxDecoration(
-                        color: colors.backgroundBase,
-                        shape: BoxShape.circle,
-                      ),
-                      child: SelectAllStatusIcon(
-                        isSelected: true,
-                        size: 18,
-                        selectedFillColor: colors.green,
-                        selectedTickColor: colors.backgroundBase,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -438,23 +425,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       } else {
         _selectedDevicePathIDs.addAll(_allDevicePathIDs);
       }
-      _deviceCollections!.sort((first, second) {
-        return first.name.toLowerCase().compareTo(second.name.toLowerCase());
-      });
-    });
-  }
-
-  void _sortFiles() {
-    _deviceCollections!.sort((first, second) {
-      if (_selectedDevicePathIDs.contains(first.id) &&
-          _selectedDevicePathIDs.contains(second.id)) {
-        return first.name.toLowerCase().compareTo(second.name.toLowerCase());
-      } else if (_selectedDevicePathIDs.contains(first.id)) {
-        return -1;
-      } else if (_selectedDevicePathIDs.contains(second.id)) {
-        return 1;
-      }
-      return first.name.toLowerCase().compareTo(second.name.toLowerCase());
     });
   }
 
