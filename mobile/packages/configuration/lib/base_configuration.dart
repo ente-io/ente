@@ -6,6 +6,7 @@ import 'package:ente_base/models/database.dart';
 import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_base/models/private_key_attributes.dart';
+import 'package:ente_configuration/app_identity.dart';
 import 'package:ente_configuration/constants.dart';
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
@@ -20,7 +21,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 
-class BaseConfiguration {
+export 'package:ente_configuration/app_identity.dart';
+
+abstract class BaseConfiguration {
   static const endpoint = String.fromEnvironment(
     "endpoint",
     defaultValue: kDefaultProductionEndpoint,
@@ -49,6 +52,8 @@ class BaseConfiguration {
   late List<EnteBaseDatabase> _databases;
 
   String? _volatilePassword;
+
+  EnteAppIdentity get appIdentity;
 
   // Descendants can override to append keys that must be cleared.
   List<String> get secureStorageKeys => [];

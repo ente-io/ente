@@ -94,6 +94,14 @@ void main() {
 
 class _TestConfiguration extends BaseConfiguration {
   @override
+  EnteAppIdentity get appIdentity => const EnteAppIdentity(
+    app: 'test',
+    clientPackageName: 'io.ente.test',
+    passkeyRedirectUrl: 'entetest://passkey',
+    referralSourcePrefix: 'test',
+  );
+
+  @override
   String? getEmail() => 'me@test.test';
 
   @override
