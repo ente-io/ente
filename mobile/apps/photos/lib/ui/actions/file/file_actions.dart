@@ -104,7 +104,7 @@ Future<void> showSingleFileDeleteSheet(
                   return deleted.isNotEmpty;
                 },
                 afterPop: (didDelete) {
-                  if (didDelete && !isLocalOnlyContext) {
+                  if (didDelete && isLocalOnlyContext) {
                     onFileRemoved?.call(file);
                   }
                 },
@@ -188,7 +188,7 @@ Future<void> showSingleFileDeleteSheet(
                       onFileRemoved?.call(file);
                     }
                   } else if (deletePreference == .DeleteFromLocalOnly) {
-                    if (didDelete) {
+                    if (didDelete && isLocalOnlyContext) {
                       onFileRemoved?.call(file);
                     }
                   } else if (deletePreference == .DeleteFromBoth) {
