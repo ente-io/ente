@@ -1205,7 +1205,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     UserService.instance.verifyEmail(context, ott);
   }
 
-  showChangeLog(BuildContext context) async {
+  Future<void> showChangeLog(BuildContext context) async {
     if (_isShowingChangeLog || !mounted) {
       return;
     }

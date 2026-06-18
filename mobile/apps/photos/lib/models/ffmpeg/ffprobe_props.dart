@@ -98,7 +98,7 @@ class FFProbeProps {
     return buffer.toString();
   }
 
-  static parseData(Map<dynamic, dynamic>? json) {
+  static FFProbeProps parseData(Map<dynamic, dynamic>? json) {
     final Map<String, dynamic> parsedData = {};
     final FFProbeProps result = FFProbeProps();
 

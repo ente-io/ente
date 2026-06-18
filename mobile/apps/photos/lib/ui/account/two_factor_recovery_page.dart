@@ -130,7 +130,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                     message: AppLocalizations.of(
                       context,
                     ).dropSupportEmail(supportEmail: "support@ente.com"),
-                    assetPath: 'assets/warning-green.png',
+                    assetPath: 'assets/warning-grey.png',
                   );
                 },
               ),

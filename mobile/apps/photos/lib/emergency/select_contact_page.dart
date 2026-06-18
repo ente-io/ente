@@ -233,7 +233,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
         context,
         title: AppLocalizations.of(context).error,
         message: AppLocalizations.of(context).somethingWentWrong,
-        assetPath: "assets/warning-green.png",
+        assetPath: "assets/warning-grey.png",
       );
     }
   }
@@ -257,7 +257,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
       context,
       title: l10n.warning,
       message: message,
-      assetPath: "assets/warning-green.png",
+      assetPath: "assets/warning-grey.png",
       buttons: [
         ButtonWidgetV2(
           buttonType: ButtonTypeV2.critical,
@@ -275,7 +275,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
         context,
         title: AppLocalizations.of(context).invalidEmailAddress,
         message: AppLocalizations.of(context).enterValidEmail,
-        assetPath: "assets/warning-green.png",
+        assetPath: "assets/warning-grey.png",
       );
       return;
     }

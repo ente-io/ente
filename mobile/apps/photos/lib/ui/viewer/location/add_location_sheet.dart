@@ -20,7 +20,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/viewer/location/dynamic_location_gallery_widget.dart';
 import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
-showAddLocationSheet(
+void showAddLocationSheet(
   BuildContext context,
   Location coordinates, {
   String name = '',

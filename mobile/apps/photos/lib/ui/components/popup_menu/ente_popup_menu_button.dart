@@ -1,9 +1,9 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/soft_icon_button.dart";
 
 class EntePopupMenuOption<T> {
   const EntePopupMenuOption({
@@ -53,15 +53,12 @@ class EntePopupMenuButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final child = this.child;
     if (child == null) {
-      return SoftIconButton(
-        icon: HugeIcon(
-          icon: HugeIcons.strokeRoundedMoreVertical,
-          size: 18,
-          color: colorScheme.textBase,
-        ),
+      return IconButtonComponent(
+        variant: IconButtonComponentVariant.primary,
+        shouldSurfaceExecutionStates: false,
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedMoreVertical),
         onTap: () => _showMenu(context),
       );
     }

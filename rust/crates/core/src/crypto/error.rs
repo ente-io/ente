@@ -102,10 +102,6 @@ pub enum CryptoError {
     #[error("Invalid public key")]
     InvalidPublicKey,
 
-    /// Hash computation failed.
-    #[error("Hash computation failed")]
-    HashFailed,
-
     /// JSON serialization or deserialization failed.
     #[error("JSON error: {0}")]
     Json(String),

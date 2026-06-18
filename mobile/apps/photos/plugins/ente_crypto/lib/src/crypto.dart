@@ -642,7 +642,7 @@ class CryptoUtil {
   // Note: workers are turned on during app startup.
   static final Computer _computer = Computer.shared();
 
-  static init() {
+  static void init() {
     Sodium.init();
   }
 

@@ -25,11 +25,11 @@ class SearchSectionCTAIcon extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               DottedBorder(
-                color: colorScheme.strokeFaint,
-                dashPattern: const [3.875, 3.875],
-                borderType: BorderType.Circle,
-                strokeWidth: 1.5,
-                radius: const Radius.circular(33.25),
+                options: CircularDottedBorderOptions(
+                  color: colorScheme.strokeFaint,
+                  dashPattern: const [3.875, 3.875],
+                  strokeWidth: 1.5,
+                ),
                 child: SizedBox(
                   width: 62.5,
                   height: 62.5,
@@ -74,11 +74,11 @@ class SearchSectionEmptyCTAIcon extends StatelessWidget {
         child: Column(
           children: [
             DottedBorder(
-              color: colorScheme.strokeFaint,
-              dashPattern: const [3.875, 3.875],
-              borderType: BorderType.Circle,
-              strokeWidth: 1.5,
-              radius: const Radius.circular(33.25),
+              options: CircularDottedBorderOptions(
+                color: colorScheme.strokeFaint,
+                dashPattern: const [3.875, 3.875],
+                strokeWidth: 1.5,
+              ),
               child: SizedBox(
                 width: 62.5,
                 height: 62.5,

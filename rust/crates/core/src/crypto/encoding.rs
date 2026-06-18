@@ -2,7 +2,9 @@
 
 use base64::{
     Engine,
-    engine::general_purpose::{STANDARD as BASE64, URL_SAFE as BASE64_URL_SAFE},
+    engine::general_purpose::{
+        STANDARD as BASE64, URL_SAFE as BASE64_URL_SAFE, URL_SAFE_NO_PAD as BASE64_URL_SAFE_NO_PAD,
+    },
 };
 
 use crate::crypto::Result;
@@ -39,19 +41,25 @@ pub fn base642bin(input: &str) -> Result<Vec<u8>> {
     decode_b64(input)
 }
 
-/// Encode bytes to a base64 string.
+/// Encode bytes to a URL-safe base64 string.
 ///
-/// Matches libsodium's `bin2base64()` naming.
+/// This uses the URL-safe alphabet (RFC 4648 §5) with padding, matching
+/// libsodium's `sodium_base64_VARIANT_URLSAFE` and Go's `base64.URLEncoding`.
+pub fn encode_b64_url_safe(input: &[u8]) -> String {
+    BASE64_URL_SAFE.encode(input)
+}
+
+/// Encode bytes to an unpadded URL-safe base64 string.
 ///
-/// When `url_safe` is true, this uses the URL-safe alphabet (RFC 4648 §5),
-/// matching libsodium's `sodium_base64_VARIANT_URLSAFE` and Go's
-/// `base64.URLEncoding`.
-pub fn bin2base64(input: &[u8], url_safe: bool) -> String {
-    if url_safe {
-        BASE64_URL_SAFE.encode(input)
-    } else {
-        BASE64.encode(input)
-    }
+/// Like [`encode_b64_url_safe`] but without trailing "=" padding, as required
+/// e.g. when serializing WebAuthn binary values.
+pub fn encode_b64_url_safe_no_padding(input: &[u8]) -> String {
+    BASE64_URL_SAFE_NO_PAD.encode(input)
+}
+
+/// Decode an unpadded URL-safe base64 string to bytes.
+pub fn decode_b64_url_safe_no_padding(input: &str) -> Result<Vec<u8>> {
+    Ok(BASE64_URL_SAFE_NO_PAD.decode(input)?)
 }
 
 /// Convert a UTF-8 string to bytes.
@@ -163,6 +171,15 @@ mod tests {
     fn test_invalid_base64() {
         let result = decode_b64("not valid base64!!!");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_url_safe_variants() {
+        // 0xfb 0xef exercises the -_ alphabet; 2 bytes forces padding
+        let bytes = [0xfbu8, 0xef];
+        assert_eq!(encode_b64_url_safe(&bytes), "--8=");
+        assert_eq!(encode_b64_url_safe_no_padding(&bytes), "--8");
+        assert_eq!(decode_b64_url_safe_no_padding("--8").unwrap(), bytes);
     }
 
     #[test]

@@ -29,7 +29,7 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
       localSettings.getGalleryGroupType() == GroupType.month &&
       localSettings.getPhotoGridSize() == 5;
 
-  _reloadWithLatestSetting() {
+  void _reloadWithLatestSetting() {
     if (!mounted) return;
     setState(() {
       isDayLayout =

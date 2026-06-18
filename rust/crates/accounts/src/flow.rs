@@ -307,8 +307,6 @@ where
 
     /// Login to an existing account.
     pub async fn login(&mut self, params: LoginParams) -> Result<AuthenticatedAccount> {
-        crypto::init()?;
-
         let srp_attrs = self.client.get_srp_attributes(&params.email).await?;
 
         let (auth_response, kek) = if srp_attrs.is_email_mfa_enabled {
@@ -343,8 +341,6 @@ where
         &mut self,
         params: SetupTwoFactorParams,
     ) -> Result<SetupTwoFactorResult> {
-        crypto::init()?;
-
         let key_attributes = if let Some(key_attributes) = params.key_attributes {
             key_attributes
         } else {
@@ -393,8 +389,6 @@ where
         &self,
         params: ChangePasswordParams,
     ) -> Result<ChangePasswordResult> {
-        crypto::init()?;
-
         let (updated_key_attributes_core, _) = auth::generate_key_attributes_for_new_password(
             &params.master_key,
             &to_core_key_attributes(&params.key_attributes),
@@ -543,8 +537,12 @@ where
         let recovery_key = auth::recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex)?;
         let encrypted_secret = crypto::decode_b64(&recovery_response.encrypted_secret)?;
         let nonce = crypto::decode_b64(&recovery_response.secret_decryption_nonce)?;
-        let secret = secretbox::decrypt(&encrypted_secret, &nonce, &recovery_key)
-            .map_err(|_| Error::AuthenticationFailed("Incorrect recovery key".into()))?;
+        let secret = secretbox::decrypt(
+            &encrypted_secret,
+            &crypto::Nonce::try_from_slice(&nonce)?,
+            &crypto::Key::try_from_slice(&recovery_key)?,
+        )
+        .map_err(|_| Error::AuthenticationFailed("Incorrect recovery key".into()))?;
         let request = RemoveTwoFactorRequest {
             session_id: session_id.to_string(),
             secret: String::from_utf8(secret)
@@ -580,11 +578,14 @@ where
         recovery_key_mnemonic_or_hex: &str,
     ) -> Result<()> {
         let recovery_key = auth::recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex)?;
-        let encrypted = secretbox::encrypt_with_key(secret.as_bytes(), &recovery_key)?;
+        let encrypted = secretbox::encrypt(
+            secret.as_bytes(),
+            &crypto::Key::try_from_slice(&recovery_key)?,
+        );
         let request = ConfigurePasskeyRecoveryRequest {
             secret: secret.to_string(),
-            user_secret_cipher: crypto::encode_b64(&encrypted.ciphertext),
-            user_secret_nonce: crypto::encode_b64(&encrypted.nonce),
+            user_secret_cipher: crypto::encode_b64(&encrypted.encrypted_data),
+            user_secret_nonce: crypto::encode_b64(encrypted.nonce.as_bytes()),
         };
         self.client.configure_passkey_recovery(&request).await
     }
@@ -631,8 +632,6 @@ where
         params: CreateAccountParams,
         key_derivation_strength: KeyDerivationStrength,
     ) -> Result<AuthenticatedAccount> {
-        crypto::init()?;
-
         let email = params.email;
         let password = params.password;
 
@@ -1041,12 +1040,15 @@ fn encrypt_two_factor_secret(
     code: &str,
 ) -> Result<EnableTwoFactorRequest> {
     let recovery_key = crypto::decode_hex(recovery_key_hex)?;
-    let encrypted = secretbox::encrypt_with_key(secret_code.as_bytes(), &recovery_key)?;
+    let encrypted = secretbox::encrypt(
+        secret_code.as_bytes(),
+        &crypto::Key::try_from_slice(&recovery_key)?,
+    );
 
     Ok(EnableTwoFactorRequest {
         code: code.to_string(),
-        encrypted_two_factor_secret: crypto::encode_b64(&encrypted.ciphertext),
-        two_factor_secret_decryption_nonce: crypto::encode_b64(&encrypted.nonce),
+        encrypted_two_factor_secret: crypto::encode_b64(&encrypted.encrypted_data),
+        two_factor_secret_decryption_nonce: crypto::encode_b64(encrypted.nonce.as_bytes()),
     })
 }
 
@@ -1223,7 +1225,11 @@ mod tests {
         let key_attributes = to_api_key_attributes(&key_gen.key_attributes);
         let encrypted_token = {
             let public_key = crypto::decode_b64(&key_attributes.public_key).unwrap();
-            let sealed = crypto::sealed::seal(token.as_bytes(), &public_key).unwrap();
+            let sealed = crypto::sealed::seal(
+                token.as_bytes(),
+                &crypto::PublicKey::try_from_slice(&public_key).unwrap(),
+            )
+            .unwrap();
             crypto::encode_b64(&sealed)
         };
 
@@ -1238,8 +1244,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_email_mfa_and_totp_decrypts_account() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let (key_attributes, encrypted_token, recovery_key, _, _) =
             build_login_response(password, "plain-auth-token");
@@ -1328,8 +1332,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_email_mfa_treats_429_as_terminal_error() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1405,8 +1407,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_totp_treats_404_as_expired_session() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1493,8 +1493,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_totp_treats_429_as_terminal_error() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1585,8 +1583,6 @@ mod tests {
 
     #[tokio::test]
     async fn setup_two_factor_encrypts_secret_with_recovery_key() {
-        crypto::init().unwrap();
-
         let password = "pw";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1645,8 +1641,6 @@ mod tests {
 
     #[tokio::test]
     async fn configure_passkey_recovery_accepts_hex_recovery_key() {
-        crypto::init().unwrap();
-
         let key_gen =
             auth::generate_keys_with_strength("pw", auth::KeyDerivationStrength::Interactive)
                 .unwrap();
@@ -1663,8 +1657,12 @@ mod tests {
                 let payload: ConfigurePasskeyRecoveryPayload = parse_request_body(request);
                 let cipher = crypto::decode_b64(&payload.user_secret_cipher).unwrap();
                 let nonce = crypto::decode_b64(&payload.user_secret_nonce).unwrap();
-                let decrypted =
-                    secretbox::decrypt(&cipher, &nonce, &expected_recovery_key).unwrap();
+                let decrypted = secretbox::decrypt(
+                    &cipher,
+                    &crypto::Nonce::try_from_slice(&nonce).unwrap(),
+                    &crypto::Key::try_from_slice(&expected_recovery_key).unwrap(),
+                )
+                .unwrap();
                 assert_eq!(payload.secret, "reset-secret");
                 assert_eq!(String::from_utf8(decrypted).unwrap(), "reset-secret");
                 Vec::new()
@@ -1686,8 +1684,6 @@ mod tests {
 
     #[tokio::test]
     async fn login_with_passkey_treats_404_as_expired_session() {
-        crypto::init().unwrap();
-
         let password = "hunter2";
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
@@ -1779,8 +1775,6 @@ mod tests {
 
     #[tokio::test]
     async fn create_account_uploads_keys_and_completes_srp_setup() {
-        crypto::init().unwrap();
-
         let email = "fresh-user@example.org";
         let encoded_email = urlencoding::encode(email).into_owned();
         let signup_token_bytes = b"signup-session-token";
@@ -2003,8 +1997,6 @@ mod tests {
 
     #[tokio::test]
     async fn change_password_updates_srp_and_keys() {
-        crypto::init().unwrap();
-
         let original = auth::generate_keys_with_strength(
             "old-password",
             auth::KeyDerivationStrength::Interactive,

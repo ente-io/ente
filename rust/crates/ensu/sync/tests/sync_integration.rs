@@ -99,7 +99,7 @@ fn pull_applies_remote_sessions_and_messages() {
     .expect("sync engine");
 
     let master_key = vec![9u8; KEY_BYTES];
-    let chat_key = ente_core::crypto::keys::generate_stream_key();
+    let chat_key = ente_core::crypto::Key::generate().as_bytes().to_vec();
 
     let server = MockServer::start();
     mock_chat_key(&server, &master_key, &chat_key);
@@ -210,7 +210,7 @@ fn push_only_needs_sync_messages() {
         .expect("message sync state");
 
     let master_key = vec![7u8; KEY_BYTES];
-    let chat_key = ente_core::crypto::keys::generate_stream_key();
+    let chat_key = ente_core::crypto::Key::generate().as_bytes().to_vec();
     let server = MockServer::start();
     mock_chat_key(&server, &master_key, &chat_key);
     mock_empty_diff(&server, 10);
@@ -257,7 +257,7 @@ fn tombstone_removes_messages() {
     .expect("sync engine");
 
     let master_key = vec![12u8; KEY_BYTES];
-    let chat_key = ente_core::crypto::keys::generate_stream_key();
+    let chat_key = ente_core::crypto::Key::generate().as_bytes().to_vec();
 
     let server = MockServer::start();
     mock_chat_key(&server, &master_key, &chat_key);

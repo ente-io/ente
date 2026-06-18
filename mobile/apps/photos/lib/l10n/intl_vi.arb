@@ -8,6 +8,7 @@
   "accountSetupIncompleteCreateAccount": "Thiết lập tài khoản chưa hoàn tất. Hãy tạo tài khoản để hoàn tất thiết lập.",
   "email": "Email",
   "cancel": "Hủy",
+  "cast": "Truyền",
   "verify": "Xác minh",
   "invalidEmailAddress": "Địa chỉ email không hợp lệ",
   "validEmailAddress": "Địa chỉ email hợp lệ",

@@ -796,10 +796,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                             layoutBuilder: (currentChild, previousChildren) {
                               return Stack(
                                 fit: StackFit.expand,
-                                children: [
-                                  ...previousChildren,
-                                  if (currentChild != null) currentChild,
-                                ],
+                                children: [...previousChildren, ?currentChild],
                               );
                             },
                             child: MemoriesZoomWidget(

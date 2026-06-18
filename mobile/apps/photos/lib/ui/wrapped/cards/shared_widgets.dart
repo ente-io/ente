@@ -341,10 +341,7 @@ class _GroupSoloMediaCollage extends StatelessWidget {
     final MediaRef? bottomLeft = _at(3);
     final MediaRef? bottomRight = _at(4);
 
-    final List<MediaRef> bottomMedia = <MediaRef>[
-      if (bottomLeft != null) bottomLeft,
-      if (bottomRight != null) bottomRight,
-    ];
+    final List<MediaRef> bottomMedia = <MediaRef>[?bottomLeft, ?bottomRight];
 
     return Column(
       children: [

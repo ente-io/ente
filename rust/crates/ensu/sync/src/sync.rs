@@ -10,7 +10,7 @@ use ensu_db::{
     FsAttachmentStore, Message, Sender, Session, SqliteBackend, SyncEntityState, SyncStateDb,
     SystemClock, UploadState,
 };
-use ente_core::crypto::keys;
+use ente_core::crypto::Key;
 use uuid::Uuid;
 
 use crate::conflict::{
@@ -1665,7 +1665,7 @@ fn get_or_create_chat_key_with_state(
         return Ok((key, ChatKeyStatus::Remote));
     }
 
-    let chat_key = keys::generate_stream_key().into_vec();
+    let chat_key = Key::generate().as_bytes().to_vec();
     let encrypted = encrypt_chat_key(&chat_key, master_key)?;
     let payload = ChatKeyPayload::from_encrypted(&encrypted);
 

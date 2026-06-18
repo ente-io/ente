@@ -287,7 +287,7 @@ class _DownloadsDetailSheetState extends State<_DownloadsDetailSheet> {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: tasks.length,
-                    separatorBuilder: (_, __) =>
+                    separatorBuilder: (_, _) =>
                         Divider(height: 1, color: colorScheme.strokeFaint),
                     itemBuilder: (context, index) {
                       final task = tasks[index];

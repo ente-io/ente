@@ -182,6 +182,7 @@ func main() {
 	legacyKitRepository := &legacykitrepo.Repository{DB: db}
 
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
+	eventRepository := &repo.EventRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
 	objectRepo := &repo.ObjectRepository{DB: db, LatencySensitiveDB: latencySensitiveDB, QueueRepo: queueRepo}
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
@@ -568,6 +569,9 @@ func main() {
 		timeout.WithHandler(healthCheckHandler.PingDBStats),
 		timeout.WithResponse(timeOutResponse),
 	))
+	eventHandler := &api.EventHandler{Repo: eventRepository}
+	publicAPI.POST("/events", eventHandler.Create)
+	privateAPI.POST("/events/user", eventHandler.CreateForUser)
 	fileCopyCtrl := &file_copy.FileCopyController{
 		FileController: fileController,
 		CollectionCtrl: collectionController,
@@ -818,6 +822,8 @@ func main() {
 	}
 
 	publicAPI.POST("/cast/device-info", castHandler.RegisterDevice)
+	privateAPI.GET("/cast/device-info", castHandler.GetAllDevices)
+	privateAPI.DELETE("/cast/device-info/:deviceID", castHandler.DeleteDevice)
 	// Deprecated Nov 2024. Remove in a few months.
 	//
 	// This (and below) are deprecated copy of endpoints with a trailing slash.

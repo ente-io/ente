@@ -40,6 +40,7 @@ class ButtonComponent extends StatefulWidget {
     this.shouldShowSuccessConfirmation = false,
     this.progressStatus,
     this.leading,
+    this.dismissModalOnSuccess = false,
   });
 
   final String label;
@@ -52,6 +53,12 @@ class ButtonComponent extends StatefulWidget {
   final bool shouldShowSuccessConfirmation;
   final ValueListenable<String>? progressStatus;
   final Widget? leading;
+
+  /// Dismisses the current modal route after [onTap] completes without throwing.
+  ///
+  /// This only applies to popup routes such as dialogs and bottom sheets. Normal
+  /// page routes are not dismissed.
+  final bool dismissModalOnSuccess;
 
   @override
   State<ButtonComponent> createState() => _ButtonComponentState();
@@ -438,6 +445,7 @@ class _ButtonComponentState extends State<ButtonComponent>
           _isPressed = false;
         });
         _syncLoadingController();
+        _dismissRouteOnSuccess();
       }
     } catch (_) {
       _loadingTimer?.cancel();
@@ -463,12 +471,31 @@ class _ButtonComponentState extends State<ButtonComponent>
     _successResetTimer?.cancel();
     _successResetTimer = Timer(_successDisplayDuration, () {
       if (!mounted) return;
+      if (_dismissRouteOnSuccess()) {
+        return;
+      }
       setState(() {
         _executionState = ComponentExecutionState.idle;
         _loadingVisible = false;
       });
       _syncLoadingController();
     });
+  }
+
+  bool _dismissRouteOnSuccess() {
+    if (!widget.dismissModalOnSuccess || !mounted) {
+      return false;
+    }
+    final navigator = Navigator.of(context);
+    if (!navigator.canPop()) {
+      return false;
+    }
+    final route = ModalRoute.of(context);
+    if (route is! PopupRoute || !route.isCurrent) {
+      return false;
+    }
+    navigator.pop();
+    return true;
   }
 
   Color _background(BuildContext context) {

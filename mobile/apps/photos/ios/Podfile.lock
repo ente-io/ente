@@ -491,7 +491,7 @@ SPEC CHECKSUMS:
   dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   ente_photos_rust: a9e1166cc460dda69acd56fbed21afe87dfef562
-  ente_qr: d1a6c708e9b2f8166fd20963562a89b122110d25
+  ente_qr: 86beaf5d2644705db9b565b32dd8b82c05fb36af
   ente_rust: d0197ebd5460e8f67576579452b073d698404abe
   ffmpeg_kit_custom: 682b4f2f1ff1f8abae5a92f6c3540f2441d5be99
   ffmpeg_kit_flutter: 915b345acc97d4142e8a9a8549d177ff10f043f5

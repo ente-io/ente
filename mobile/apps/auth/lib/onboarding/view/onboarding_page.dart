@@ -262,7 +262,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (hasOptedBefore || result?.action == ButtonAction.first) {
       await Configuration.instance.optForOfflineMode();
       unawaited(
-        Navigator.of(context).push(
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (BuildContext context) {
               return const HomePage();
@@ -386,7 +386,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _buildDotsIndicator() {
     return DotsIndicator(
       dotsCount: _featureCount,
-      position: _activeDotIndex,
+      position: _activeDotIndex.toDouble(),
       decorator: DotsDecorator(
         activeColor: Colors.white,
         color: Colors.white.withValues(alpha: 0.32),

@@ -189,6 +189,12 @@ Future<void> _warmForegroundDeferredServices() async {
   } catch (e, s) {
     _logger.warning("Deferred MemoryLaneService warm failed", e, s);
   }
+  unawaited(
+    Future.delayed(
+      const Duration(seconds: 5),
+      installSourceService.autoAttributePendingSource,
+    ),
+  );
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {

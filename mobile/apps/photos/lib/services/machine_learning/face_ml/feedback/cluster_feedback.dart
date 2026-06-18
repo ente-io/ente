@@ -60,11 +60,11 @@ class ClusterFeedbackService<T> {
       ClusterFeedbackService._privateConstructor();
 
   static String lastViewedClusterID = '';
-  static setLastViewedClusterID(String clusterID) {
+  static void setLastViewedClusterID(String clusterID) {
     lastViewedClusterID = clusterID;
   }
 
-  static resetLastViewedClusterID() {
+  static void resetLastViewedClusterID() {
     lastViewedClusterID = '';
   }
 

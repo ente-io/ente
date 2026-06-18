@@ -138,7 +138,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
     return ValueListenableBuilder<bool>(
       valueListenable: sharedCollectionNotifier,
-      builder: (context, _, __) => _getBottomBar(),
+      builder: (context, _, _) => _getBottomBar(),
     );
   }
 

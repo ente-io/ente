@@ -118,6 +118,7 @@ func ResetTables(t *testing.T, db *sql.DB) {
 	_, err := db.Exec(`
 		TRUNCATE TABLE
 			notification_history,
+			events,
 			task_lock,
 			storage_bonus,
 			referral_codes,
@@ -131,6 +132,7 @@ func ResetTables(t *testing.T, db *sql.DB) {
 			entity_data,
 			entity_key,
 			authenticator_entity,
+			casting,
 			collections,
 			users
 		RESTART IDENTITY CASCADE`)

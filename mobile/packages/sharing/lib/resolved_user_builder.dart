@@ -24,7 +24,7 @@ class ResolvedUserBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: ContactsDisplayService.instance.changes,
-      builder: (context, __, ___) =>
+      builder: (context, _, _) =>
           builder(context, user.resolvedDisplayName, user.email),
     );
   }

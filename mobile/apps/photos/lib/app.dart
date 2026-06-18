@@ -125,7 +125,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     );
   }
 
-  setLocale(Locale newLocale) {
+  void setLocale(Locale newLocale) {
     setState(() {
       locale = newLocale;
     });

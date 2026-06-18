@@ -149,13 +149,13 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
     final textStyle = getEnteTextTheme(context);
     final String verificationID = _generateVerificationID(publicKey);
     return DottedBorder(
-      color: colorScheme.strokeMuted,
-      //color of dotted/dash line
-      strokeWidth: 1,
-
-      dashPattern: const [12, 6],
-      radius: const Radius.circular(8),
-      //dash patterns, 10 is dash width, 6 is space width
+      options: RectDottedBorderOptions(
+        color: colorScheme.strokeMuted,
+        //color of dotted/dash line
+        strokeWidth: 1,
+        dashPattern: const [12, 6],
+        //dash patterns, 10 is dash width, 6 is space width
+      ),
       child: Column(
         children: [
           GestureDetector(

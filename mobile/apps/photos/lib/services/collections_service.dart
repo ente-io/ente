@@ -1718,8 +1718,8 @@ class CollectionsService {
     final String? albumToken = _cachedPublicAlbumToken[collectionID];
     final String? albumJwtToken = _cachedPublicAlbumJWT[collectionID];
     return {
-      if (albumToken != null) "X-Auth-Access-Token": albumToken,
-      if (albumJwtToken != null) "X-Auth-Access-Token-JWT": albumJwtToken,
+      "X-Auth-Access-Token": ?albumToken,
+      "X-Auth-Access-Token-JWT": ?albumJwtToken,
     };
   }
 
@@ -1733,10 +1733,10 @@ class CollectionsService {
   }
 
   Future<Collection> _fromRemoteCollection(
-    Map<String, dynamic>? collectionData,
+    Map<String, dynamic> collectionData,
   ) async {
     final Collection collection = Collection.fromMap(collectionData);
-    if (collectionData != null && !collection.isDeleted) {
+    if (!collection.isDeleted) {
       final collectionKey = _getAndCacheDecryptedKey(
         collection,
         source: "fetchDecryptMeta",

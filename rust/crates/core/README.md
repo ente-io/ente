@@ -9,6 +9,7 @@ Common Rust code for Ente apps.
 | `auth`   | Authentication helpers (signup/login/recovery, SRP credentials) |
 | `crypto` | Cryptographic utilities (pure Rust, libsodium-wire-compatible)  |
 | `http`   | HTTP client for Ente API                                        |
+| `io`     | I/O adapters (e.g. single-pass MD5 of written data)             |
 | `urls`   | URL construction utilities                                      |
 
 ## Auth
@@ -20,11 +21,12 @@ High-level authentication helpers for Ente clients:
 - Signup key generation
 - Account recovery
 
-📖 **[Full Auth Docs](docs/auth.md)**
-
 ## Crypto
 
-Pure Rust cryptography, byte-compatible with JS/Dart clients.
+Pure Rust cryptography, byte-compatible with JS/Dart clients. Key material is
+typed (`Key`, `Nonce`, `Salt`, `Header`, `PublicKey`, `SecretKey`), so sizes
+are validated once at the boundary where raw bytes enter, and secret types
+zeroize on drop.
 
 | Submodule   | Algorithm                  | Use Case                         |
 | ----------- | -------------------------- | -------------------------------- |
@@ -35,18 +37,13 @@ Pure Rust cryptography, byte-compatible with JS/Dart clients.
 | `argon`     | Argon2id                   | Password-based key derivation    |
 | `kdf`       | BLAKE2b                    | Subkey derivation                |
 | `hash`      | BLAKE2b                    | Cryptographic hashing            |
-| `keys`      | -                          | Key generation                   |
 
 ### Quick Start
 
 ```rust
-use ente_core::crypto;
+use ente_core::crypto::{Key, secretbox};
 
-crypto::init().unwrap();
-
-let key = crypto::keys::generate_key();
-let encrypted = crypto::secretbox::encrypt(b"Hello", &key).unwrap();
-let decrypted = crypto::secretbox::decrypt_box(&encrypted, &key).unwrap();
+let key = Key::generate();
+let encrypted = secretbox::encrypt(b"Hello", &key);
+let decrypted = encrypted.decrypt(&key).unwrap();
 ```
-
-📖 **[Full Crypto Docs](docs/crypto.md)**

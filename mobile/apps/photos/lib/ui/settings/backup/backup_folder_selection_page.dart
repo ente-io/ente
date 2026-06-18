@@ -155,7 +155,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         message: l10n.backupOnlyNewPhotosWarningBody(
           formattedDate: formattedDate,
         ),
-        illustration: Image.asset("assets/warning-green.png"),
+        illustration: Image.asset("assets/warning-grey.png"),
         actions: [
           ButtonComponent(
             label: l10n.updateSettings,

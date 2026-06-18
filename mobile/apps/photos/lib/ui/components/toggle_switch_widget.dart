@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
+import "package:photos/theme/colors.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 
 class ToggleSwitchWidget extends StatefulWidget {
@@ -92,7 +93,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
     );
   }
 
-  Widget _stateIcon(enteColorScheme) {
+  Widget _stateIcon(EnteColorScheme enteColorScheme) {
     if (executionState == ExecutionState.idle) {
       return const SizedBox(width: 24);
     } else if (executionState == ExecutionState.inProgress) {

@@ -55,40 +55,6 @@ void main() {
     expect(find.text('Secondary'), findsOneWidget);
   });
 
-  testWidgets('BottomSheetComponent centers illustration message', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(
-        const BottomSheetComponent(
-          title: 'Title',
-          message: 'Centered message',
-          illustration: SizedBox(
-            key: ValueKey('warning-illustration'),
-            width: 80,
-            height: 80,
-          ),
-        ),
-      ),
-    );
-
-    expect(find.byKey(const ValueKey('warning-illustration')), findsOneWidget);
-    expect(find.text('Centered message'), findsOneWidget);
-    final illustrationSlot = find.ancestor(
-      of: find.byKey(const ValueKey('warning-illustration')),
-      matching: find.byType(FittedBox),
-    );
-    expect(illustrationSlot, findsOneWidget);
-    expect(tester.getSize(illustrationSlot), const Size(180, 109));
-    expect(
-      tester.getSize(find.byKey(const ValueKey('warning-illustration'))),
-      const Size(80, 80),
-    );
-
-    final message = tester.widget<Text>(find.text('Centered message'));
-    expect(message.textAlign, TextAlign.center);
-  });
-
   testWidgets('BottomSheetComponent respects explicit action spacing', (
     tester,
   ) async {

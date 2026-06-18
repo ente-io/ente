@@ -303,7 +303,6 @@ impl From<core_crypto::CryptoError> for ApiError {
             E::StreamTrailingData => "stream_trailing_data",
             E::SealedBoxOpenFailed => "sealed_box_open_failed",
             E::InvalidPublicKey => "invalid_public_key",
-            E::HashFailed => "hash_failed",
             E::Json(_) => "json",
             E::Argon2(_) => "argon2",
             E::Aead => "aead",
@@ -467,23 +466,26 @@ pub struct CryptoBlobDecryptInput {
 
 #[tauri::command]
 pub fn crypto_init() -> Result<(), ApiError> {
-    core_crypto::init().map_err(ApiError::from)
+    // No-op, kept only for frontend compatibility: the pure-Rust crypto
+    // needs no initialization.
+    Ok(())
 }
 
 #[tauri::command]
 pub fn crypto_generate_key() -> String {
-    core_crypto::encode_b64(&core_crypto::keys::generate_key())
+    core_crypto::encode_b64(core_crypto::Key::generate().as_bytes())
 }
 
 #[tauri::command]
 pub fn crypto_encrypt_box(input: CryptoBoxInput) -> Result<EncryptedBox, ApiError> {
     let data = core_crypto::decode_b64(&input.data_b64).map_err(ApiError::from)?;
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
-    let out = core_crypto::secretbox::encrypt_with_key(&data, &key).map_err(ApiError::from)?;
+    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
+    let out = core_crypto::secretbox::encrypt(&data, &key);
 
     Ok(EncryptedBox {
-        encrypted_data: core_crypto::encode_b64(&out.ciphertext),
-        nonce: core_crypto::encode_b64(&out.nonce),
+        encrypted_data: core_crypto::encode_b64(&out.encrypted_data),
+        nonce: core_crypto::encode_b64(out.nonce.as_bytes()),
     })
 }
 
@@ -492,6 +494,8 @@ pub fn crypto_decrypt_box(input: CryptoBoxDecryptInput) -> Result<String, ApiErr
     let ciphertext = core_crypto::decode_b64(&input.encrypted_data_b64).map_err(ApiError::from)?;
     let nonce = core_crypto::decode_b64(&input.nonce_b64).map_err(ApiError::from)?;
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+    let nonce = core_crypto::Nonce::try_from_slice(&nonce).map_err(ApiError::from)?;
+    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
     let plaintext =
         core_crypto::secretbox::decrypt(&ciphertext, &nonce, &key).map_err(ApiError::from)?;
     Ok(core_crypto::encode_b64(&plaintext))
@@ -501,10 +505,11 @@ pub fn crypto_decrypt_box(input: CryptoBoxDecryptInput) -> Result<String, ApiErr
 pub fn crypto_encrypt_blob(input: CryptoBlobInput) -> Result<EncryptedBlob, ApiError> {
     let data = core_crypto::decode_b64(&input.data_b64).map_err(ApiError::from)?;
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
     let out = core_crypto::blob::encrypt(&data, &key).map_err(ApiError::from)?;
     Ok(EncryptedBlob {
         encrypted_data: core_crypto::encode_b64(&out.encrypted_data),
-        decryption_header: core_crypto::encode_b64(&out.decryption_header),
+        decryption_header: core_crypto::encode_b64(out.decryption_header.as_bytes()),
     })
 }
 
@@ -513,6 +518,8 @@ pub fn crypto_decrypt_blob(input: CryptoBlobDecryptInput) -> Result<String, ApiE
     let ciphertext = core_crypto::decode_b64(&input.encrypted_data_b64).map_err(ApiError::from)?;
     let header = core_crypto::decode_b64(&input.header_b64).map_err(ApiError::from)?;
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+    let header = core_crypto::Header::try_from_slice(&header).map_err(ApiError::from)?;
+    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
     let plaintext =
         core_crypto::blob::decrypt(&ciphertext, &header, &key).map_err(ApiError::from)?;
     Ok(core_crypto::encode_b64(&plaintext))
@@ -539,7 +546,7 @@ pub fn auth_decrypt_secrets(input: DecryptSecretsInput) -> Result<DecryptedSecre
     Ok(DecryptedSecrets {
         master_key: core_crypto::encode_b64(&secrets.master_key),
         secret_key: core_crypto::encode_b64(&secrets.secret_key),
-        token: core_crypto::bin2base64(&secrets.token, true),
+        token: core_crypto::encode_b64_url_safe(&secrets.token),
     })
 }
 

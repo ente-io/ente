@@ -157,10 +157,10 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: d90ee57923d1828ac14e492ca49440f65477f4bb1263575900be731a3dac66a9
+      sha256: aff32c08f92787a557dd5c0145ac91536481831a01b4648136373cddb0e64f8c
       url: "https://pub.dev"
     source: hosted
-    version: "5.9.0"
+    version: "5.9.2"
   dio_web_adapter:
     dependency: transitive
     description:
@@ -173,10 +173,10 @@ packages:
     dependency: transitive
     description:
       name: dots_indicator
-      sha256: "2a53e0321a3f0d87e38ef30f6e9ff1deb5d6c0e2c5708e057d26cdaa94a95f10"
+      sha256: c070af5058a084ba7b354df4b4c26c719595d70a3531eea6edd8af8716684ba3
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "4.0.1"
   dotted_border:
     dependency: "direct main"
     description:
@@ -315,14 +315,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.3"
-  fast_base58:
-    dependency: "direct main"
-    description:
-      name: fast_base58
-      sha256: "611f65633b734f27a850b51371b3eba993a5165650e12e8e7b02959f3768ba06"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1"
   ffi:
     dependency: transitive
     description:
@@ -380,10 +372,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: a25a15ebbdfc33ab1cd26c63a6ee519df92338a9c10f122adda92938253bef04
+      sha256: "3105dc8492f6183fb076ccf1f351ac3d60564bff92e20bfc4af9cc1651f4e7e1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "6.0.0"
   flutter_localizations:
     dependency: transitive
     description: flutter
@@ -619,10 +611,10 @@ packages:
     dependency: transitive
     description:
       name: lints
-      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
+      sha256: "12f842a479589fea194fe5c5a3095abc7be0c1f2ddfa9a0e76aed1dbd26a87df"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.1"
+    version: "6.1.0"
   local_auth:
     dependency: transitive
     description:
@@ -648,7 +640,7 @@ packages:
     source: hosted
     version: "2.0.3"
   local_auth_linux:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../local_auth_linux"
       relative: true
@@ -722,10 +714,10 @@ packages:
     dependency: transitive
     description:
       name: native_dio_adapter
-      sha256: "7420bc9517b2abe09810199a19924617b45690a44ecfb0616ac9babc11875c03"
+      sha256: "9bbfa5221fd287eb063962bbe6534290e5f87933e576fac210149fb80253b89a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.0"
+    version: "1.5.1"
   native_toolchain_c:
     dependency: transitive
     description:
@@ -1115,14 +1107,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.1"
-  step_progress_indicator:
-    dependency: transitive
-    description:
-      name: step_progress_indicator
-      sha256: b51bb1fcfc78454359f0658c5a2c21548c3825ebf76e826308e9ca10f383bbb8
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   stream_channel:
     dependency: transitive
     description:

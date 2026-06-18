@@ -132,6 +132,8 @@ class FlagService {
 
   bool get mLHydrationStaleFileRecovery => internalUser;
 
+  bool get enableMultiCast => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();

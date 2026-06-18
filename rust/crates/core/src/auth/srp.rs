@@ -184,12 +184,9 @@ impl Drop for SrpSession {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto;
 
     #[test]
     fn test_srp_session_creation() {
-        crypto::init().unwrap();
-
         let srp_user_id = "test-user-id";
         let srp_salt = [0u8; 16];
         let login_key = [0u8; 16];
@@ -229,8 +226,6 @@ mod tests {
 
     #[test]
     fn test_compute_m1_and_verify_m2_match_expected() {
-        crypto::init().unwrap();
-
         use srp::ServerG4096;
 
         let srp_user_id = "test-user-id";
@@ -308,8 +303,6 @@ mod tests {
 
     #[test]
     fn test_sensitive_buffers_zeroized_after_compute_m1() {
-        crypto::init().unwrap();
-
         use rand_core::RngCore;
         use srp::ServerG4096;
 
@@ -334,8 +327,6 @@ mod tests {
 
     #[test]
     fn test_m1_and_k_zeroized_via_drop_impl() {
-        crypto::init().unwrap();
-
         use rand_core::RngCore;
         use srp::ServerG4096;
         use zeroize::Zeroize;

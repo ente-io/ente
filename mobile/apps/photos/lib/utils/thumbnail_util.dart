@@ -53,7 +53,7 @@ preloadThumbnailWithPendingRequestRef(EnteFile file) async {
     );
   }
   final request = await _getThumbnailFromServerRequest(file);
-  final pendingRequest = request.future.then<void>((_) {}, onError: (_, __) {});
+  final pendingRequest = request.future.then<void>((_) {}, onError: (_, _) {});
   unawaited(pendingRequest);
   return (
     acquiredPendingRequestRef: request.acquiredPendingRequestRef,

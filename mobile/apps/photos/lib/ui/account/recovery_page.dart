@@ -98,7 +98,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   message: AppLocalizations.of(
                     context,
                   ).noRecoveryKeyNoDecryption,
-                  assetPath: 'assets/warning-green.png',
+                  assetPath: 'assets/warning-grey.png',
                 );
               },
             ),
@@ -141,7 +141,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
         context,
         title: AppLocalizations.of(context).incorrectRecoveryKeyTitle,
         message: errMessage,
-        assetPath: 'assets/warning-green.png',
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }

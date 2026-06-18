@@ -34,13 +34,16 @@ extension AppLocalizationsX on BuildContext {
 List<Locale> _onDeviceLocales = [];
 Locale? autoDetectedLocale;
 
-Locale localResolutionCallBack(deviceLocales, supportedLocales) {
-  _onDeviceLocales = deviceLocales;
+Locale localResolutionCallBack(
+  List<Locale>? deviceLocales,
+  Iterable<Locale> supportedLocales,
+) {
+  _onDeviceLocales = deviceLocales ?? [];
   final Set<String> languageSupport = {};
   for (Locale supportedLocale in appSupportedLocales) {
     languageSupport.add(supportedLocale.languageCode);
   }
-  for (Locale locale in deviceLocales) {
+  for (Locale locale in _onDeviceLocales) {
     // check if exact local is supported, if yes, return it
     if (appSupportedLocales.contains(locale)) {
       autoDetectedLocale = locale;

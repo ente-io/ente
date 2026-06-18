@@ -47,7 +47,7 @@ class AppNavigationService {
   }) {
     final pushResult = Completer<T?>();
     final scheduledPush = _lastScheduledPush
-        .catchError((Object _, StackTrace __) {})
+        .catchError((Object _, StackTrace _) {})
         .then((_) async {
           final navigator = await _waitForNavigator();
           if (navigator == null) {
@@ -87,7 +87,7 @@ class AppNavigationService {
             rethrow;
           }
         });
-    _lastScheduledPush = scheduledPush.catchError((Object _, StackTrace __) {});
+    _lastScheduledPush = scheduledPush.catchError((Object _, StackTrace _) {});
     return pushResult.future;
   }
 

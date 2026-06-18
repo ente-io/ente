@@ -18,19 +18,19 @@ use blake2b_simd::Params as Blake2bParams;
 use rand_core::{OsRng, RngCore};
 use salsa20::hsalsa;
 use subtle::ConstantTimeEq;
-use x25519_dalek::{PublicKey, StaticSecret};
+use x25519_dalek::StaticSecret;
 use xsalsa20poly1305::XSalsa20Poly1305;
 use xsalsa20poly1305::aead::generic_array::GenericArray;
 use xsalsa20poly1305::aead::{Aead, KeyInit};
 use zeroize::Zeroize;
 
-use crate::crypto::{CryptoError, Result};
+use crate::crypto::{CryptoError, PublicKey, Result, SecretKey};
 
 /// Size of a public key in bytes.
-pub const PUBLIC_KEY_BYTES: usize = 32;
+pub const PUBLIC_KEY_BYTES: usize = PublicKey::BYTES;
 
 /// Size of a secret key in bytes.
-pub const SECRET_KEY_BYTES: usize = 32;
+pub const SECRET_KEY_BYTES: usize = SecretKey::BYTES;
 
 /// Overhead added by sealing (ephemeral_pk + MAC).
 pub const SEAL_OVERHEAD: usize = 32 + 16;
@@ -85,24 +85,15 @@ fn is_contributory(shared_secret: &[u8; 32]) -> bool {
 ///
 /// # Returns
 /// ephemeral_pk || MAC || ciphertext (libsodium crypto_box_seal format)
-pub fn seal(plaintext: &[u8], recipient_pk: &[u8]) -> Result<Vec<u8>> {
-    if recipient_pk.len() != PUBLIC_KEY_BYTES {
-        return Err(CryptoError::InvalidKeyLength {
-            expected: PUBLIC_KEY_BYTES,
-            actual: recipient_pk.len(),
-        });
-    }
-
-    let recipient_pk_arr: [u8; 32] = recipient_pk
-        .try_into()
-        .map_err(|_| CryptoError::ArrayConversion)?;
-    let recipient_pk_point = PublicKey::from(recipient_pk_arr);
+pub fn seal(plaintext: &[u8], recipient_pk: &PublicKey) -> Result<Vec<u8>> {
+    let recipient_pk_arr: [u8; 32] = *recipient_pk.as_bytes();
+    let recipient_pk_point = x25519_dalek::PublicKey::from(recipient_pk_arr);
 
     // Generate ephemeral keypair
     let mut ephemeral_secret_bytes = [0u8; 32];
     OsRng.fill_bytes(&mut ephemeral_secret_bytes);
     let ephemeral_secret = StaticSecret::from(ephemeral_secret_bytes);
-    let ephemeral_public = PublicKey::from(&ephemeral_secret);
+    let ephemeral_public = x25519_dalek::PublicKey::from(&ephemeral_secret);
 
     // Compute shared secret
     let shared_secret = ephemeral_secret.diffie_hellman(&recipient_pk_point);
@@ -150,25 +141,15 @@ pub fn seal(plaintext: &[u8], recipient_pk: &[u8]) -> Result<Vec<u8>> {
 ///
 /// # Returns
 /// Decrypted plaintext.
-pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Result<Vec<u8>> {
+pub fn open(
+    ciphertext: &[u8],
+    recipient_pk: &PublicKey,
+    recipient_sk: &SecretKey,
+) -> Result<Vec<u8>> {
     if ciphertext.len() < SEAL_OVERHEAD {
         return Err(CryptoError::CiphertextTooShort {
             minimum: SEAL_OVERHEAD,
             actual: ciphertext.len(),
-        });
-    }
-
-    if recipient_pk.len() != PUBLIC_KEY_BYTES {
-        return Err(CryptoError::InvalidKeyLength {
-            expected: PUBLIC_KEY_BYTES,
-            actual: recipient_pk.len(),
-        });
-    }
-
-    if recipient_sk.len() != SECRET_KEY_BYTES {
-        return Err(CryptoError::InvalidKeyLength {
-            expected: SECRET_KEY_BYTES,
-            actual: recipient_sk.len(),
         });
     }
 
@@ -178,15 +159,9 @@ pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Resu
         .map_err(|_| CryptoError::ArrayConversion)?;
     let encrypted = &ciphertext[32..]; // MAC || ciphertext
 
-    let ephemeral_pk = PublicKey::from(ephemeral_pk_bytes);
-    let mut recipient_sk_arr: [u8; 32] = recipient_sk
-        .try_into()
-        .map_err(|_| CryptoError::ArrayConversion)?;
-    let recipient_sk_key = StaticSecret::from(recipient_sk_arr);
-    recipient_sk_arr.zeroize();
-    let recipient_pk_arr: [u8; 32] = recipient_pk
-        .try_into()
-        .map_err(|_| CryptoError::ArrayConversion)?;
+    let ephemeral_pk = x25519_dalek::PublicKey::from(ephemeral_pk_bytes);
+    let recipient_sk_key = StaticSecret::from(*recipient_sk.as_bytes());
+    let recipient_pk_arr: [u8; 32] = *recipient_pk.as_bytes();
 
     // Compute shared secret
     let shared_secret = recipient_sk_key.diffie_hellman(&ephemeral_pk);
@@ -217,11 +192,14 @@ pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::keys;
+    fn generate_keypair() -> (PublicKey, SecretKey) {
+        let sk = SecretKey::generate();
+        (sk.public_key(), sk)
+    }
 
     #[test]
     fn test_seal_open() {
-        let (pk, sk) = keys::generate_keypair();
+        let (pk, sk) = generate_keypair();
         let plaintext = b"Hello, sealed world!";
 
         let sealed = seal(plaintext, &pk).unwrap();
@@ -232,7 +210,7 @@ mod tests {
 
     #[test]
     fn test_seal_overhead() {
-        let (pk, _sk) = keys::generate_keypair();
+        let (pk, _sk) = generate_keypair();
         let plaintext = b"Test";
 
         let sealed = seal(plaintext, &pk).unwrap();
@@ -241,7 +219,7 @@ mod tests {
 
     #[test]
     fn test_seal_non_deterministic() {
-        let (pk, _sk) = keys::generate_keypair();
+        let (pk, _sk) = generate_keypair();
         let plaintext = b"Same message";
 
         let sealed1 = seal(plaintext, &pk).unwrap();
@@ -253,8 +231,8 @@ mod tests {
 
     #[test]
     fn test_wrong_secret_key() {
-        let (pk1, _sk1) = keys::generate_keypair();
-        let (_pk2, sk2) = keys::generate_keypair();
+        let (pk1, _sk1) = generate_keypair();
+        let (_pk2, sk2) = generate_keypair();
         let plaintext = b"Secret";
 
         let sealed = seal(plaintext, &pk1).unwrap();
@@ -265,8 +243,8 @@ mod tests {
 
     #[test]
     fn test_wrong_public_key() {
-        let (pk1, sk1) = keys::generate_keypair();
-        let (pk2, _sk2) = keys::generate_keypair();
+        let (pk1, sk1) = generate_keypair();
+        let (pk2, _sk2) = generate_keypair();
         let plaintext = b"Secret";
 
         let sealed = seal(plaintext, &pk1).unwrap();
@@ -277,7 +255,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_ciphertext() {
-        let (pk, sk) = keys::generate_keypair();
+        let (pk, sk) = generate_keypair();
         let plaintext = b"Original";
 
         let mut sealed = seal(plaintext, &pk).unwrap();
@@ -292,7 +270,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_ephemeral_key() {
-        let (pk, sk) = keys::generate_keypair();
+        let (pk, sk) = generate_keypair();
         let plaintext = b"Original";
 
         let mut sealed = seal(plaintext, &pk).unwrap();
@@ -306,7 +284,7 @@ mod tests {
 
     #[test]
     fn test_corrupted_mac() {
-        let (pk, sk) = keys::generate_keypair();
+        let (pk, sk) = generate_keypair();
         let plaintext = b"Original";
 
         let mut sealed = seal(plaintext, &pk).unwrap();
@@ -319,39 +297,8 @@ mod tests {
     }
 
     #[test]
-    fn test_invalid_public_key_length_seal() {
-        let bad_pk = vec![0u8; 16]; // Wrong size
-        let plaintext = b"Test";
-
-        let result = seal(plaintext, &bad_pk);
-        assert!(matches!(result, Err(CryptoError::InvalidKeyLength { .. })));
-    }
-
-    #[test]
-    fn test_invalid_public_key_length_open() {
-        let (pk, sk) = keys::generate_keypair();
-        let plaintext = b"Test";
-        let sealed = seal(plaintext, &pk).unwrap();
-
-        let bad_pk = vec![0u8; 16];
-        let result = open(&sealed, &bad_pk, &sk);
-        assert!(matches!(result, Err(CryptoError::InvalidKeyLength { .. })));
-    }
-
-    #[test]
-    fn test_invalid_secret_key_length() {
-        let (pk, _sk) = keys::generate_keypair();
-        let plaintext = b"Test";
-        let sealed = seal(plaintext, &pk).unwrap();
-
-        let bad_sk = vec![0u8; 16];
-        let result = open(&sealed, &pk, &bad_sk);
-        assert!(matches!(result, Err(CryptoError::InvalidKeyLength { .. })));
-    }
-
-    #[test]
     fn test_ciphertext_too_short() {
-        let (pk, sk) = keys::generate_keypair();
+        let (pk, sk) = generate_keypair();
         let bad_ciphertext = vec![0u8; 40]; // Less than SEAL_OVERHEAD
 
         let result = open(&bad_ciphertext, &pk, &sk);
@@ -363,7 +310,7 @@ mod tests {
 
     #[test]
     fn test_empty_plaintext() {
-        let (pk, sk) = keys::generate_keypair();
+        let (pk, sk) = generate_keypair();
         let plaintext = b"";
 
         let sealed = seal(plaintext, &pk).unwrap();
@@ -375,7 +322,7 @@ mod tests {
 
     #[test]
     fn test_large_plaintext() {
-        let (pk, sk) = keys::generate_keypair();
+        let (pk, sk) = generate_keypair();
         let plaintext = vec![0x42u8; 1024 * 1024]; // 1 MB
 
         let sealed = seal(&plaintext, &pk).unwrap();
@@ -388,7 +335,7 @@ mod tests {
     fn test_seal_rejects_small_order_point() {
         // The all-zero public key is a small-order point. X25519 DH with it
         // produces an all-zero shared secret, which is_contributory must reject.
-        let zero_pk = [0u8; 32];
+        let zero_pk = PublicKey::from_bytes([0u8; 32]);
         let result = seal(b"test", &zero_pk);
         assert!(
             matches!(result, Err(CryptoError::InvalidPublicKey)),
@@ -399,7 +346,7 @@ mod tests {
 
     #[test]
     fn test_open_rejects_small_order_ephemeral_key() {
-        let (pk, sk) = keys::generate_keypair();
+        let (pk, sk) = generate_keypair();
 
         // Craft a ciphertext with an all-zero ephemeral public key (32 zero
         // bytes) followed by enough garbage to pass the length check.
@@ -420,8 +367,8 @@ mod tests {
 
     #[test]
     fn test_multiple_recipients() {
-        let (pk1, sk1) = keys::generate_keypair();
-        let (pk2, sk2) = keys::generate_keypair();
+        let (pk1, sk1) = generate_keypair();
+        let (pk2, sk2) = generate_keypair();
         let plaintext = b"Broadcast message";
 
         // Seal for different recipients

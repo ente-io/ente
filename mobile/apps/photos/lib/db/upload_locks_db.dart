@@ -473,7 +473,7 @@ class UploadLocksDB {
       _trackUploadTable.columnPartSize: partSize,
       _trackUploadTable.columnLastAttemptedAt:
           DateTime.now().millisecondsSinceEpoch,
-      if (fileMd5 != null) _trackUploadTable.columnFileMd5: fileMd5,
+      _trackUploadTable.columnFileMd5: ?fileMd5,
       if (partMd5s != null)
         _trackUploadTable.columnPartMd5s: jsonEncode(partMd5s),
     });

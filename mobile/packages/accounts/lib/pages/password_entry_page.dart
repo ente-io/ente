@@ -53,6 +53,12 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   bool _passwordsMatch = false;
   bool _isPasswordValid = false;
 
+  bool get _hasValidMatchingPasswords =>
+      _isPasswordValid &&
+      _passwordInInputBox.isNotEmpty &&
+      _passwordInInputConfirmationBox.isNotEmpty &&
+      _passwordInInputBox == _passwordInInputConfirmationBox;
+
   @override
   void initState() {
     super.initState();
@@ -296,9 +302,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                               _isPasswordValid =
                                   _passwordStrength >=
                                   kMildPasswordStrengthThreshold;
-                              _passwordsMatch =
-                                  _passwordInInputBox ==
-                                  _passwordInInputConfirmationBox;
+                              _passwordsMatch = _hasValidMatchingPasswords;
                             });
                           },
                           textInputAction: TextInputAction.next,
@@ -382,11 +386,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           onChanged: (cnfPassword) {
                             setState(() {
                               _passwordInInputConfirmationBox = cnfPassword;
-                              if (_passwordInInputBox != '') {
-                                _passwordsMatch =
-                                    _passwordInInputBox ==
-                                    _passwordInInputConfirmationBox;
-                              }
+                              _passwordsMatch = _hasValidMatchingPasswords;
                             });
                           },
                         ),

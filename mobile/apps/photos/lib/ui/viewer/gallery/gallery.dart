@@ -139,6 +139,9 @@ class Gallery extends StatefulWidget {
 
 class GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
+  static final RegExp _automationIdentifierUnsafeChars = RegExp(
+    r'[^A-Za-z0-9_.-]',
+  );
   late final Debouncer _debouncer;
   late final Debouncer _priorityDebouncer;
   double? groupHeaderExtent;
@@ -166,10 +169,14 @@ class GalleryState extends State<Gallery> {
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
   InheritedSearchFilterData? _inheritedSearchFilterData;
   InheritedGalleryBoundaries? _boundariesProvider;
+  late String _automationScrollIdentifier;
 
   @override
   void initState() {
     super.initState();
+    _automationScrollIdentifier = _buildAutomationScrollIdentifier(
+      widget.tagPrefix,
+    );
     // end the tag with x to avoid `.` in the end if logger name
     _logTag =
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}_x";
@@ -339,6 +346,11 @@ class GalleryState extends State<Gallery> {
   @override
   void didUpdateWidget(covariant Gallery oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.tagPrefix != widget.tagPrefix) {
+      _automationScrollIdentifier = _buildAutomationScrollIdentifier(
+        widget.tagPrefix,
+      );
+    }
     if (oldWidget.groupType != widget.groupType) {
       _setGroupType();
       if (mounted) {
@@ -621,6 +633,14 @@ class GalleryState extends State<Gallery> {
       ? const NeverScrollableScrollPhysics()
       : const ExponentialBouncingScrollPhysics();
 
+  static String _buildAutomationScrollIdentifier(String tagPrefix) {
+    final safeTagPrefix = tagPrefix.replaceAll(
+      _automationIdentifierUnsafeChars,
+      '_',
+    );
+    return "ente.photos.gallery.$safeTagPrefix.scroll";
+  }
+
   @override
   Widget build(BuildContext context) {
     _logger.info("Building Gallery  ${widget.tagPrefix}");
@@ -811,29 +831,33 @@ class GalleryState extends State<Gallery> {
                       ValueListenableBuilder<bool>(
                         valueListenable: _swipeActiveNotifier,
                         builder: (context, isSwipeActive, child) {
-                          return CustomScrollView(
-                            physics: widget.disableScroll || isSwipeActive
-                                ? const NeverScrollableScrollPhysics()
-                                : const ExponentialBouncingScrollPhysics(),
-                            controller: _scrollController,
-                            slivers: [
-                              if (widget.appBar != null)
-                                widget.appBar!.buildSliver(context),
-                              SliverToBoxAdapter(
-                                child: SizeChangedLayoutNotifier(
-                                  child: SizedBox(
-                                    key: _headerKey,
-                                    child:
-                                        widget.header ??
-                                        const SizedBox.shrink(),
+                          return Semantics(
+                            identifier: _automationScrollIdentifier,
+                            container: true,
+                            child: CustomScrollView(
+                              physics: widget.disableScroll || isSwipeActive
+                                  ? const NeverScrollableScrollPhysics()
+                                  : const ExponentialBouncingScrollPhysics(),
+                              controller: _scrollController,
+                              slivers: [
+                                if (widget.appBar != null)
+                                  widget.appBar!.buildSliver(context),
+                                SliverToBoxAdapter(
+                                  child: SizeChangedLayoutNotifier(
+                                    child: SizedBox(
+                                      key: _headerKey,
+                                      child:
+                                          widget.header ??
+                                          const SizedBox.shrink(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SectionedListSliver(
-                                sectionLayouts: groups.groupLayouts,
-                              ),
-                              SliverToBoxAdapter(child: widget.footer),
-                            ],
+                                SectionedListSliver(
+                                  sectionLayouts: groups.groupLayouts,
+                                ),
+                                SliverToBoxAdapter(child: widget.footer),
+                              ],
+                            ),
                           );
                         },
                       ),

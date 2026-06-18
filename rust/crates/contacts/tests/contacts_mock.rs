@@ -1,7 +1,7 @@
 use ente_contacts::client::{ContactsCtx, OpenContactsCtxInput, RootKeySource};
 use ente_contacts::crypto as contacts_crypto;
 use ente_contacts::models::{AttachmentType, ContactData, WrappedRootContactKey};
-use ente_core::crypto::{encode_b64, keys};
+use ente_core::crypto::{Key, encode_b64};
 use md5::Digest;
 use mockito::{Matcher, Server};
 
@@ -37,7 +37,7 @@ fn live_entity_json(
     root_key: &[u8],
     profile_picture_attachment_id: Option<&str>,
 ) -> serde_json::Value {
-    let contact_key = keys::generate_stream_key();
+    let contact_key = Key::generate().as_bytes().to_vec();
     let encrypted_key = contacts_crypto::wrap_contact_key(&contact_key, root_key).unwrap();
     let encrypted_data = contacts_crypto::encrypt_contact_data(data, &contact_key).unwrap();
 
@@ -57,8 +57,8 @@ fn live_entity_json(
 #[tokio::test]
 async fn open_without_cached_wrapped_root_contact_key_is_unresolved() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let root_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let root_key = Key::generate().as_bytes().to_vec();
     let wrapped_root = wrap_root(&root_key, &master_key);
 
     let root_mock = server
@@ -91,8 +91,8 @@ async fn open_without_cached_wrapped_root_contact_key_is_unresolved() {
 #[tokio::test]
 async fn get_contact_fetches_root_key_when_unresolved_context_reads_live_contact() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let server_root_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let server_root_key = Key::generate().as_bytes().to_vec();
     let server_wrapped_root = wrap_root(&server_root_key, &master_key);
     let contact = sample_contact();
 
@@ -149,8 +149,8 @@ async fn get_contact_fetches_root_key_when_unresolved_context_reads_live_contact
 #[tokio::test]
 async fn create_contact_uses_cached_wrapped_root_contact_key_without_fetching_remote_key() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let root_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let root_key = Key::generate().as_bytes().to_vec();
     let wrapped_root = wrap_root(&root_key, &master_key);
     let contact = sample_contact();
     let resolved_email = "b@test.test";
@@ -214,8 +214,8 @@ async fn create_contact_uses_cached_wrapped_root_contact_key_without_fetching_re
 #[tokio::test]
 async fn set_profile_picture_uses_signed_upload_url_and_commit() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let root_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let root_key = Key::generate().as_bytes().to_vec();
     let wrapped_root = wrap_root(&root_key, &master_key);
     let contact = sample_contact();
     let picture_bytes = b"profile-picture-bytes".to_vec();
@@ -324,8 +324,8 @@ async fn set_profile_picture_uses_signed_upload_url_and_commit() {
 #[tokio::test]
 async fn get_profile_picture_uses_signed_download_url() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let root_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let root_key = Key::generate().as_bytes().to_vec();
     let wrapped_root = wrap_root(&root_key, &master_key);
     let contact = sample_contact();
     let picture_bytes = b"profile-picture-bytes".to_vec();
@@ -413,8 +413,8 @@ async fn get_profile_picture_uses_signed_download_url() {
 #[tokio::test]
 async fn delete_profile_picture_fetches_root_key_when_unresolved_context_decodes_live_response() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let root_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let root_key = Key::generate().as_bytes().to_vec();
     let wrapped_root = wrap_root(&root_key, &master_key);
     let contact = sample_contact();
 
@@ -471,8 +471,8 @@ async fn delete_profile_picture_fetches_root_key_when_unresolved_context_decodes
 #[tokio::test]
 async fn get_attachment_uses_generic_signed_download_url() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let root_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let root_key = Key::generate().as_bytes().to_vec();
     let wrapped_root = wrap_root(&root_key, &master_key);
     let payload = b"generic-attachment-bytes".to_vec();
 
@@ -539,8 +539,8 @@ async fn get_attachment_uses_generic_signed_download_url() {
 #[tokio::test]
 async fn deleted_contacts_surface_as_tombstones() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let root_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let root_key = Key::generate().as_bytes().to_vec();
     let wrapped_root = wrap_root(&root_key, &master_key);
 
     let root_mock = server
@@ -605,8 +605,8 @@ async fn deleted_contacts_surface_as_tombstones() {
 #[tokio::test]
 async fn get_diff_uses_cached_wrapped_root_contact_key_for_reads_without_fetching_remote_key() {
     let mut server = Server::new_async().await;
-    let master_key = keys::generate_key().into_vec();
-    let cached_wrapped_root_contact_key = keys::generate_key().into_vec();
+    let master_key = Key::generate().as_bytes().to_vec();
+    let cached_wrapped_root_contact_key = Key::generate().as_bytes().to_vec();
     let cached_wrapped_root = wrap_root(&cached_wrapped_root_contact_key, &master_key);
     let contact = sample_contact();
 

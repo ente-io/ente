@@ -5,13 +5,13 @@
 
 use blake2b_simd::Params as Blake2bParams;
 
-use crate::crypto::{Result, SecretVec};
+use crate::crypto::{Key, Result, SecretVec};
 
 /// Size of KDF context in bytes.
 pub const CONTEXT_BYTES: usize = 8;
 
 /// Size of master key in bytes.
-pub const KEY_BYTES: usize = 32;
+pub const KEY_BYTES: usize = Key::BYTES;
 
 /// Minimum subkey length in bytes.
 pub const SUBKEY_BYTES_MIN: usize = 16;
@@ -26,7 +26,7 @@ pub const LOGIN_SUBKEY_LEN: usize = 32;
 pub const LOGIN_SUBKEY_ID: u64 = 1;
 
 /// Login subkey context (used by derive_login_key).
-pub const LOGIN_SUBKEY_CONTEXT: &[u8] = b"loginctx";
+pub const LOGIN_SUBKEY_CONTEXT: &[u8; CONTEXT_BYTES] = b"loginctx";
 
 /// Derive a subkey from a master key.
 ///
@@ -38,15 +38,15 @@ pub const LOGIN_SUBKEY_CONTEXT: &[u8] = b"loginctx";
 /// * `key` - Master key.
 /// * `subkey_len` - Length of the derived subkey (16-64 bytes).
 /// * `subkey_id` - Subkey identifier (used as salt).
-/// * `context` - Context string (up to 8 bytes, will be truncated/padded).
+/// * `context` - Context for domain separation (exactly 8 bytes).
 ///
 /// # Returns
 /// Derived subkey of the specified length, zeroized on drop.
 pub fn derive_subkey(
-    key: &[u8],
+    key: &Key,
     subkey_len: usize,
     subkey_id: u64,
-    context: &[u8],
+    context: &[u8; CONTEXT_BYTES],
 ) -> Result<SecretVec> {
     if !(SUBKEY_BYTES_MIN..=SUBKEY_BYTES_MAX).contains(&subkey_len) {
         return Err(crate::crypto::CryptoError::InvalidKeyLength {
@@ -55,25 +55,17 @@ pub fn derive_subkey(
         });
     }
 
-    if key.len() != KEY_BYTES {
-        return Err(crate::crypto::CryptoError::InvalidKeyLength {
-            expected: KEY_BYTES,
-            actual: key.len(),
-        });
-    }
-
     // Build salt: subkey_id (8 bytes LE) || zeros (8 bytes)
     let mut salt = [0u8; 16];
     salt[0..8].copy_from_slice(&subkey_id.to_le_bytes());
 
-    // Build personal: context (truncate/pad to 8 bytes) || zeros (8 bytes)
+    // Build personal: context (8 bytes) || zeros (8 bytes)
     let mut personal = [0u8; 16];
-    let ctx_len = context.len().min(CONTEXT_BYTES);
-    personal[0..ctx_len].copy_from_slice(&context[..ctx_len]);
+    personal[0..CONTEXT_BYTES].copy_from_slice(context);
 
     let hash = Blake2bParams::new()
         .hash_length(subkey_len)
-        .key(key)
+        .key(key.as_bytes())
         .salt(&salt)
         .personal(&personal)
         .to_state()
@@ -92,177 +84,87 @@ pub fn derive_subkey(
 ///
 /// # Returns
 /// 16-byte login key, zeroized on drop.
-pub fn derive_login_key(master_key: &[u8]) -> Result<SecretVec> {
-    if master_key.len() != KEY_BYTES {
-        return Err(crate::crypto::CryptoError::InvalidKeyLength {
-            expected: KEY_BYTES,
-            actual: master_key.len(),
-        });
-    }
-
+pub fn derive_login_key(master_key: &Key) -> SecretVec {
     let subkey = derive_subkey(
         master_key,
         LOGIN_SUBKEY_LEN,
         LOGIN_SUBKEY_ID,
         LOGIN_SUBKEY_CONTEXT,
-    )?;
-    Ok(SecretVec::new(subkey[..16].to_vec()))
+    )
+    .expect("login subkey parameters are statically valid");
+    SecretVec::new(subkey[..16].to_vec())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn test_key() -> Key {
+        Key::from_bytes([0x42u8; Key::BYTES])
+    }
+
     #[test]
     fn test_derive_subkey() {
-        let master_key = vec![0x42u8; 32];
-        let subkey = derive_subkey(&master_key, 32, 1, b"test").unwrap();
-
+        let subkey = derive_subkey(&test_key(), 32, 1, b"testctx0").unwrap();
         assert_eq!(subkey.len(), 32);
     }
 
     #[test]
     fn test_derive_subkey_deterministic() {
-        let master_key = vec![0x42u8; 32];
-
-        let subkey1 = derive_subkey(&master_key, 32, 1, b"context").unwrap();
-        let subkey2 = derive_subkey(&master_key, 32, 1, b"context").unwrap();
-
+        let subkey1 = derive_subkey(&test_key(), 32, 1, b"context0").unwrap();
+        let subkey2 = derive_subkey(&test_key(), 32, 1, b"context0").unwrap();
         assert_eq!(subkey1, subkey2);
     }
 
     #[test]
     fn test_different_subkey_ids() {
-        let master_key = vec![0x42u8; 32];
-
-        let subkey1 = derive_subkey(&master_key, 32, 1, b"context").unwrap();
-        let subkey2 = derive_subkey(&master_key, 32, 2, b"context").unwrap();
-
+        let subkey1 = derive_subkey(&test_key(), 32, 1, b"context0").unwrap();
+        let subkey2 = derive_subkey(&test_key(), 32, 2, b"context0").unwrap();
         assert_ne!(subkey1, subkey2);
     }
 
     #[test]
     fn test_different_contexts() {
-        let master_key = vec![0x42u8; 32];
-
-        let subkey1 = derive_subkey(&master_key, 32, 1, b"context1").unwrap();
-        let subkey2 = derive_subkey(&master_key, 32, 1, b"context2").unwrap();
-
+        let subkey1 = derive_subkey(&test_key(), 32, 1, b"context1").unwrap();
+        let subkey2 = derive_subkey(&test_key(), 32, 1, b"context2").unwrap();
         assert_ne!(subkey1, subkey2);
     }
 
     #[test]
     fn test_different_master_keys() {
-        let key1 = vec![0x42u8; 32];
-        let key2 = vec![0x43u8; 32];
-
-        let subkey1 = derive_subkey(&key1, 32, 1, b"context").unwrap();
-        let subkey2 = derive_subkey(&key2, 32, 1, b"context").unwrap();
-
+        let key2 = Key::from_bytes([0x43u8; Key::BYTES]);
+        let subkey1 = derive_subkey(&test_key(), 32, 1, b"context0").unwrap();
+        let subkey2 = derive_subkey(&key2, 32, 1, b"context0").unwrap();
         assert_ne!(subkey1, subkey2);
     }
 
     #[test]
     fn test_different_lengths() {
-        let master_key = vec![0x42u8; 32];
-
-        // Test various subkey lengths
         for &len in &[16, 24, 32, 48, 64] {
-            let subkey = derive_subkey(&master_key, len, 1, b"test").unwrap();
+            let subkey = derive_subkey(&test_key(), len, 1, b"testctx0").unwrap();
             assert_eq!(subkey.len(), len);
         }
     }
 
     #[test]
-    fn test_context_truncation() {
-        let master_key = vec![0x42u8; 32];
-
-        // Context longer than 8 bytes should be truncated
-        let long_context = b"verylongcontext";
-        let subkey1 = derive_subkey(&master_key, 32, 1, long_context).unwrap();
-
-        // First 8 bytes should matter
-        let short_context = b"verylong";
-        let subkey2 = derive_subkey(&master_key, 32, 1, short_context).unwrap();
-
-        assert_eq!(subkey1, subkey2);
-    }
-
-    #[test]
-    fn test_context_padding() {
-        let master_key = vec![0x42u8; 32];
-
-        // Short contexts should be zero-padded
-        let subkey1 = derive_subkey(&master_key, 32, 1, b"abc").unwrap();
-        let subkey2 = derive_subkey(&master_key, 32, 1, b"abc").unwrap();
-
-        assert_eq!(subkey1, subkey2);
-    }
-
-    #[test]
-    fn test_empty_context() {
-        let master_key = vec![0x42u8; 32];
-        let subkey = derive_subkey(&master_key, 32, 1, b"").unwrap();
-
-        assert_eq!(subkey.len(), 32);
-    }
-
-    #[test]
-    fn test_invalid_master_key_length() {
-        let bad_key = vec![0x42u8; 31];
-        let result = derive_subkey(&bad_key, 32, 1, b"context");
-
-        assert!(matches!(
-            result,
-            Err(crate::crypto::CryptoError::InvalidKeyLength {
-                expected: KEY_BYTES,
-                actual: 31
-            })
-        ));
-    }
-
-    #[test]
     fn test_derive_login_key() {
-        let master_key = vec![0x42u8; 32];
-        let login_key = derive_login_key(&master_key).unwrap();
-
+        let login_key = derive_login_key(&test_key());
         assert_eq!(login_key.len(), 16);
-    }
-
-    #[test]
-    fn test_derive_login_key_deterministic() {
-        let master_key = vec![0x42u8; 32];
-
-        let key1 = derive_login_key(&master_key).unwrap();
-        let key2 = derive_login_key(&master_key).unwrap();
-
-        assert_eq!(key1, key2);
+        assert_eq!(login_key, derive_login_key(&test_key()));
     }
 
     #[test]
     fn test_login_key_is_subkey() {
-        let master_key = vec![0x42u8; 32];
-
-        let login_key = derive_login_key(&master_key).unwrap();
-        let subkey = derive_subkey(&master_key, 32, 1, b"loginctx").unwrap();
+        let login_key = derive_login_key(&test_key());
+        let subkey = derive_subkey(&test_key(), 32, 1, b"loginctx").unwrap();
 
         // Login key should be first 16 bytes of subkey
         assert_eq!(login_key.as_ref(), &subkey[..16]);
     }
 
     #[test]
-    fn test_invalid_subkey_length_too_small() {
-        let master_key = vec![0x42u8; 32];
-        let result = derive_subkey(&master_key, 8, 1, b"test");
-
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_invalid_subkey_length_too_large() {
-        let master_key = vec![0x42u8; 32];
-        let result = derive_subkey(&master_key, 128, 1, b"test");
-
-        assert!(result.is_err());
+    fn test_invalid_subkey_lengths() {
+        assert!(derive_subkey(&test_key(), 8, 1, b"testctx0").is_err());
+        assert!(derive_subkey(&test_key(), 128, 1, b"testctx0").is_err());
     }
 }

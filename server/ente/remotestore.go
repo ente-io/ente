@@ -148,6 +148,10 @@ func (k FlagKey) IsValidValue(value string) error {
 
 var domainRegex = regexp.MustCompile(`^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`)
 
+func ValidatePublicCustomDomain(value string) error {
+	return isValidDomainWithoutScheme(value)
+}
+
 const customDomainFamilyPrefix = "_"
 
 // BuildFamilyCustomDomainPointer builds a member-scoped custom domain pointer

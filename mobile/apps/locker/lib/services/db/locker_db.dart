@@ -697,15 +697,11 @@ class LockerDB extends EnteBaseDatabase {
     final shareesData = payload['sharees'] as List<dynamic>? ?? const [];
     final sharees = shareesData
         .map((shareeeMap) => User.fromMap(shareeeMap as Map<String, dynamic>))
-        .where((user) => user != null)
-        .cast<User>()
         .toList();
 
     final publicURLsData = payload['public_urls'] as List<dynamic>? ?? const [];
     final publicURLs = publicURLsData
         .map((urlMap) => PublicURL.fromMap(urlMap as Map<String, dynamic>))
-        .where((url) => url != null)
-        .cast<PublicURL>()
         .toList();
 
     final collection = Collection(

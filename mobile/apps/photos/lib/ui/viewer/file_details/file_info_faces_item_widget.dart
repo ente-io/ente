@@ -233,11 +233,13 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     return GestureDetector(
       onTap: _openAddFilesToPersonPage,
       child: DottedBorder(
-        color: colorScheme.strokeMuted,
-        strokeWidth: strokeWidth,
-        dashPattern: const [4, 4],
-        padding: EdgeInsets.zero,
-        customPath: faceThumbnailSquircleOuterPath,
+        options: CustomPathDottedBorderOptions(
+          customPath: faceThumbnailSquircleOuterPath,
+          color: colorScheme.strokeMuted,
+          strokeWidth: strokeWidth,
+          dashPattern: const [4, 4],
+          padding: EdgeInsets.zero,
+        ),
         child: SizedBox(
           height: innerSize,
           width: innerSize,

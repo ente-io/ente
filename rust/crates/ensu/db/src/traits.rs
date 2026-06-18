@@ -63,7 +63,7 @@ impl FileMetaStore {
     }
 
     fn key_path(&self, key: &str) -> PathBuf {
-        let encoded = ente_core::crypto::bin2base64(key.as_bytes(), true);
+        let encoded = ente_core::crypto::encode_b64_url_safe(key.as_bytes());
         self.root.join(encoded)
     }
 

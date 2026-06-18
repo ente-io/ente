@@ -431,7 +431,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
             context,
             title: context.l10n.cannotUpdateRecoveryTime,
             message: context.l10n.cannotUpdateRecoveryTimeMessage,
-            assetPath: "assets/warning-green.png",
+            assetPath: "assets/warning-grey.png",
           );
         }
       }

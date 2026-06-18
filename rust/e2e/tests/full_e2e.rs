@@ -8,6 +8,7 @@ use ente_contacts::{
 };
 use ente_core::http::Error as CoreHttpError;
 use ente_rs::models::account::App;
+use ente_test_support::{Museum, TestResult};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
@@ -53,62 +54,45 @@ struct CreateLegacyKitRequest {
     encrypted_owner_blob: String,
 }
 
-#[tokio::test]
-#[ignore = "requires local Museum at ENTE_E2E_ENDPOINT or http://localhost:8080"]
-async fn auth_contacts_e2e() {
-    let endpoint = support::endpoint();
-    if !support::assert_stage_enabled_or_skip(STAGE_AUTH_CONTACTS) {
-        return;
-    }
-    if !support::assert_server_or_skip(&endpoint, STAGE_AUTH_CONTACTS).await {
-        return;
-    }
-
-    let suite = support::suite::lock_suite(&endpoint).await;
-    let pair = legacy::open_pair(&endpoint, &suite.legacy_pair).await;
-
-    run_auth_stage(&endpoint, &pair.owner).await;
-    run_contacts_stage(&pair).await;
+#[test]
+fn full_e2e() -> TestResult {
+    Museum::run(|museum| run_stages(museum.endpoint()))
 }
 
-#[tokio::test]
-#[ignore = "requires local Museum at ENTE_E2E_ENDPOINT or http://localhost:8080"]
-async fn legacy_contact_recovery_e2e() {
-    let endpoint = support::endpoint();
-    if !support::assert_stage_enabled_or_skip(STAGE_LEGACY_CONTACT_RECOVERY) {
-        return;
-    }
-    if !support::assert_server_or_skip(&endpoint, STAGE_LEGACY_CONTACT_RECOVERY).await {
-        return;
-    }
+fn run_stages(endpoint: &str) -> TestResult {
+    tokio::runtime::Runtime::new()?.block_on(async {
+        let auth_contacts = support::stage_enabled(STAGE_AUTH_CONTACTS);
+        let legacy_recovery = support::stage_enabled(STAGE_LEGACY_CONTACT_RECOVERY);
 
-    let mut suite = support::suite::lock_suite(&endpoint).await;
-    let mut pair = legacy::open_pair(&endpoint, &suite.legacy_pair).await;
+        let pair_state = if auth_contacts || legacy_recovery {
+            Some(legacy::create_accepted_pair_state(endpoint, 14).await)
+        } else {
+            None
+        };
 
-    ensure_totp_enabled(&endpoint, &pair.owner).await;
-    run_legacy_reject_stage(&pair).await;
-    run_legacy_stop_stage(&pair).await;
-    run_legacy_reinvite_stage(&pair).await;
-    run_legacy_reset_stage(&endpoint, &mut pair).await;
-    legacy::persist_pair_state(&mut suite.legacy_pair, &pair);
-}
+        if auth_contacts {
+            let pair = legacy::open_pair(endpoint, pair_state.as_ref().unwrap()).await;
+            run_auth_stage(endpoint, &pair.owner).await;
+            run_contacts_stage(&pair).await;
+        }
 
-#[tokio::test]
-#[ignore = "requires local Museum at ENTE_E2E_ENDPOINT or http://localhost:8080"]
-async fn legacy_kit_recovery_e2e() {
-    let endpoint = support::endpoint();
-    if !support::assert_stage_enabled_or_skip(STAGE_LEGACY_KIT_RECOVERY) {
-        return;
-    }
-    if !support::assert_server_or_skip(&endpoint, STAGE_LEGACY_KIT_RECOVERY).await {
-        return;
-    }
+        if legacy_recovery {
+            let mut pair = legacy::open_pair(endpoint, pair_state.as_ref().unwrap()).await;
+            ensure_totp_enabled(endpoint, &pair.owner).await;
+            run_legacy_reject_stage(&pair).await;
+            run_legacy_stop_stage(&pair).await;
+            run_legacy_reinvite_stage(&pair).await;
+            run_legacy_reset_stage(endpoint, &mut pair).await;
+        }
 
-    let mut suite = support::suite::lock_suite(&endpoint).await;
-    let mut owner = legacy_kit::open_owner(&endpoint, &suite.legacy_kit_owner).await;
-    ensure_totp_enabled(&endpoint, &owner.owner).await;
-    run_legacy_kit_stage(&endpoint, &mut owner).await;
-    legacy_kit::persist_owner_state(&mut suite.legacy_kit_owner, &owner);
+        if support::stage_enabled(STAGE_LEGACY_KIT_RECOVERY) {
+            let mut owner = legacy_kit::create_owner(endpoint).await;
+            ensure_totp_enabled(endpoint, &owner.owner).await;
+            run_legacy_kit_stage(endpoint, &mut owner).await;
+        }
+
+        Ok(())
+    })
 }
 
 async fn run_auth_stage(endpoint: &str, owner: &auth::TestAccount) {
@@ -485,7 +469,7 @@ async fn run_legacy_kit_stage(endpoint: &str, owner: &mut legacy_kit::LegacyKitO
             kit_id: waiting_kit.kit.id.clone(),
             challenge: invalid_challenge.encrypted_challenge,
             used_part_indexes: None,
-            email: Some("bad-beneficiary@ente-rust-test.org".into()),
+            email: Some("bad-beneficiary@example.org".into()),
         })
         .send()
         .await
@@ -548,7 +532,7 @@ async fn run_legacy_kit_stage(endpoint: &str, owner: &mut legacy_kit::LegacyKitO
         .open_from_encrypted_challenge(
             &downloaded_shares[0..2],
             &first_waiting_challenge.encrypted_challenge,
-            Some("beneficiary@ente-rust-test.org"),
+            Some("beneficiary@example.org"),
         )
         .await
         .expect("legacy kit waiting recovery open failed");
@@ -678,10 +662,7 @@ async fn run_legacy_kit_stage(endpoint: &str, owner: &mut legacy_kit::LegacyKitO
         .await
         .expect("immediate legacy kit create failed");
     let ready_handle = recovery_client
-        .open_from_shares(
-            &immediate_kit.shares[0..2],
-            Some("beneficiary@ente-rust-test.org"),
-        )
+        .open_from_shares(&immediate_kit.shares[0..2], Some("beneficiary@example.org"))
         .await
         .expect("immediate legacy kit recovery open failed");
     assert_eq!(

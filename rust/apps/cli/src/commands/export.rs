@@ -99,8 +99,6 @@ async fn load_album_metadata(
 
 pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> Result<()> {
     // Initialize crypto
-    crypto::init()?;
-
     // Open database
     let config_dir = crate::utils::get_cli_config_dir()?;
     let db_path = config_dir.join("ente.db");
@@ -712,19 +710,25 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
             // Decrypt the file data using streaming XChaCha20-Poly1305
             // Use chunked decryption for large files
-            let decrypted =
-                match crypto::stream::decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
-                    Ok(data) => data,
-                    Err(e) => {
-                        log::error!("Failed to decrypt file {}: {}", file.id, e);
-                        log::debug!(
-                            "File size: {}, header length: {}",
-                            encrypted_data.len(),
-                            file_nonce.len()
-                        );
-                        continue;
-                    }
-                };
+            let decrypt_result = crypto::Header::try_from_slice(&file_nonce).and_then(|header| {
+                crypto::stream::decrypt_file_data(
+                    &encrypted_data,
+                    &header,
+                    &crypto::Key::try_from_slice(&file_key)?,
+                )
+            });
+            let decrypted = match decrypt_result {
+                Ok(data) => data,
+                Err(e) => {
+                    log::error!("Failed to decrypt file {}: {}", file.id, e);
+                    log::debug!(
+                        "File size: {}, header length: {}",
+                        encrypted_data.len(),
+                        file_nonce.len()
+                    );
+                    continue;
+                }
+            };
 
             // Check if this is a live photo that needs extraction
             let is_live_photo = metadata
@@ -959,8 +963,8 @@ fn decrypt_collection_key(
     // Collection keys are encrypted with secret_box (XSalsa20-Poly1305) using master key
     Ok(crypto::secretbox::decrypt(
         &encrypted_bytes,
-        &nonce_bytes,
-        master_key,
+        &crypto::Nonce::try_from_slice(&nonce_bytes)?,
+        &crypto::Key::try_from_slice(master_key)?,
     )?)
 }
 
@@ -978,8 +982,8 @@ fn decrypt_shared_collection_key(
     // which uses the recipient's public key and an ephemeral keypair
     Ok(crypto::sealed::open(
         &encrypted_bytes,
-        public_key,
-        secret_key,
+        &crypto::PublicKey::try_from_slice(public_key)?,
+        &crypto::SecretKey::try_from_slice(secret_key)?,
     )?)
 }
 
@@ -995,7 +999,11 @@ fn decrypt_collection_name(
     let nonce_bytes = BASE64.decode(nonce)?;
 
     // Collection names are encrypted with secret_box using the collection key
-    let decrypted = crypto::secretbox::decrypt(&encrypted_bytes, &nonce_bytes, collection_key)?;
+    let decrypted = crypto::secretbox::decrypt(
+        &encrypted_bytes,
+        &crypto::Nonce::try_from_slice(&nonce_bytes)?,
+        &crypto::Key::try_from_slice(collection_key)?,
+    )?;
 
     // Convert to string
     String::from_utf8(decrypted)
@@ -1012,8 +1020,8 @@ fn decrypt_file_key(encrypted_key: &str, nonce: &str, collection_key: &[u8]) -> 
     // File keys are encrypted with secret_box (XSalsa20-Poly1305) using collection key
     Ok(crypto::secretbox::decrypt(
         &encrypted_bytes,
-        &nonce_bytes,
-        collection_key,
+        &crypto::Nonce::try_from_slice(&nonce_bytes)?,
+        &crypto::Key::try_from_slice(collection_key)?,
     )?)
 }
 
@@ -1063,7 +1071,11 @@ fn decrypt_file_metadata(
     let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
 
     // Decrypt the metadata using streaming XChaCha20-Poly1305
-    let decrypted = crypto::stream::decrypt(&encrypted_bytes, &header_bytes, file_key)?;
+    let decrypted = crypto::blob::decrypt(
+        &encrypted_bytes,
+        &crypto::Header::try_from_slice(&header_bytes)?,
+        &crypto::Key::try_from_slice(file_key)?,
+    )?;
 
     // Parse JSON metadata
     let metadata: FileMetadata = serde_json::from_slice(&decrypted)?;
@@ -1086,7 +1098,11 @@ fn decrypt_magic_metadata(
     let header_bytes = BASE64.decode(&magic_metadata.header)?;
 
     // Decrypt the metadata using streaming XChaCha20-Poly1305
-    let decrypted = crypto::stream::decrypt(&encrypted_bytes, &header_bytes, file_key)?;
+    let decrypted = crypto::blob::decrypt(
+        &encrypted_bytes,
+        &crypto::Header::try_from_slice(&header_bytes)?,
+        &crypto::Key::try_from_slice(file_key)?,
+    )?;
 
     // Parse as generic JSON since magic metadata structure can vary
     let metadata: serde_json::Value = serde_json::from_slice(&decrypted)?;

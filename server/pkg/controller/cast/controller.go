@@ -2,6 +2,7 @@ package cast
 
 import (
 	"context"
+
 	"github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/controller/access"
 	castRepo "github.com/ente-io/museum/pkg/repo/cast"
@@ -9,6 +10,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,6 +30,14 @@ func NewController(castRepo *castRepo.Repository,
 
 func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDeviceRequest) (string, error) {
 	return c.CastRepo.AddCode(ctx, request.PublicKey, network.GetClientIP(ctx))
+}
+
+func (c *Controller) GetAllDevices(ctx *gin.Context, userID int64) ([]cast.CastInfo, error) {
+	return c.CastRepo.GetAllDevices(ctx, userID)
+}
+
+func (c *Controller) DeleteDevice(ctx *gin.Context, userID int64, deviceID uuid.UUID) error {
+	return c.CastRepo.RevokeForGivenUserAndDevice(ctx, userID, deviceID)
 }
 
 func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, error) {
@@ -51,6 +61,13 @@ func (c *Controller) GetEncCastData(ctx context.Context, deviceCode string) (*st
 
 func (c *Controller) InsertCastData(ctx *gin.Context, request *cast.CastRequest) error {
 	userID := auth.GetUserID(ctx.Request.Header)
+	devices, err := c.CastRepo.GetAllDevices(ctx, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get existing devices")
+	}
+	if len(devices) >= 50 {
+		return stacktrace.NewError("device limit reached")
+	}
 	return c.CastRepo.InsertCastData(ctx, userID, request.DeviceCode, request.CollectionID, request.CastToken, request.EncPayload)
 }
 
