@@ -29,7 +29,6 @@
   "deleteReason4": "Моя причина не указана",
   "sendEmail": "Отправить электронное письмо",
   "deleteRequestSLAText": "Ваш запрос будет обработан в течение 72 часов.",
-  "deleteEmailRequest": "Пожалуйста, отправьте письмо на <warning>account-deletion@ente.com</warning> с вашей зарегистрированной электронной почты.",
   "entePhotosPerm": "Ente <i>требуется разрешение для</i> сохранения ваших фото",
   "ok": "Хорошо",
   "createAccount": "Создать аккаунт",

@@ -371,11 +371,7 @@ func (c *BillingController) HandleAccountDeletion(ctx context.Context, userID in
 		billingLogger.Info("user on free plan")
 		return true, nil
 	}
-	// The word "family" here is a misnomer - these are some manually created
-	// accounts for very early adopters, and are unrelated to Family Plans.
-	// Cancelation of these accounts will require manual intervention. Ideally,
-	// we should never be deleting such accounts.
-	if subscription.ProductID == ente.FamilyPlanProductID || subscription.ProductID == "" {
+	if subscription.ProductID == "" {
 		return false, stacktrace.NewError("unexpected product id %s", subscription.ProductID)
 	}
 	isCancelled = subscription.Attributes.IsCancelled

@@ -274,9 +274,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         if (deleteChallengeResponse == null) {
           return;
         }
-        if (deleteChallengeResponse.allowDelete) {
-          await _delete(context, deleteChallengeResponse);
-        }
+        await _delete(context, deleteChallengeResponse);
       },
       isDismissible: false,
     );

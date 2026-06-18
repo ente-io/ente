@@ -150,7 +150,6 @@ class UsersGateway {
   Future<DeleteChallengeResponse> getDeleteChallenge() async {
     final response = await _enteDio.get("/users/delete-challenge");
     return DeleteChallengeResponse(
-      allowDelete: response.data["allowDelete"] as bool,
       encryptedChallenge: response.data["encryptedChallenge"],
     );
   }
