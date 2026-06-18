@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,32 +16,80 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestErrorLogsWarnForNotFoundAPIError(t *testing.T) {
+func TestErrorDoesNotLogExpectedErrors(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	for _, tt := range []struct {
+		name       string
+		err        error
+		wantStatus int
+	}{
+		{
+			name:       "storage limit",
+			err:        ente.ErrStorageLimitExceeded,
+			wantStatus: http.StatusUpgradeRequired,
+		},
+		{
+			name:       "no active subscription",
+			err:        ente.ErrNoActiveSubscription,
+			wantStatus: http.StatusPaymentRequired,
+		},
+		{
+			name:       "not found api error",
+			err:        ente.ErrNotFoundError.NewErr("missing"),
+			wantStatus: http.StatusNotFound,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			recorder, ctx := testContext()
+			hook := testLogHook(t)
+
+			Error(ctx, stacktrace.Propagate(tt.err, ""))
+
+			require.Equal(t, tt.wantStatus, recorder.Code)
+			require.Empty(t, hook.AllEntries())
+		})
+	}
+}
+
+func TestErrorLogsWarnForSQLNoRows(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	recorder, ctx := testContext()
 	hook := testLogHook(t)
 
-	Error(ctx, stacktrace.Propagate(&ente.ErrNotFoundError, ""))
+	Error(ctx, stacktrace.Propagate(sql.ErrNoRows, ""))
 
 	require.Equal(t, http.StatusNotFound, recorder.Code)
-
 	entry := hook.LastEntry()
 	require.NotNil(t, entry)
 	require.Equal(t, log.WarnLevel, entry.Level)
 	require.Equal(t, "Request failed", entry.Message)
 }
 
-func TestExpectedErrorPreservesNotFoundAPIErrorResponseWithoutLog(t *testing.T) {
+func TestErrorLogsUnexpectedErrors(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	recorder, ctx := testContext()
 	hook := testLogHook(t)
 
-	ExpectedError(ctx, stacktrace.Propagate(&ente.ErrNotFoundError, ""))
+	Error(ctx, errors.New("boom"))
+
+	require.Equal(t, http.StatusInternalServerError, recorder.Code)
+	entry := hook.LastEntry()
+	require.NotNil(t, entry)
+	require.Equal(t, log.ErrorLevel, entry.Level)
+	require.Equal(t, "Request failed", entry.Message)
+}
+
+func TestErrorPreservesNotFoundAPIErrorResponse(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	recorder, ctx := testContext()
+
+	Error(ctx, stacktrace.Propagate(&ente.ErrNotFoundError, ""))
 
 	require.Equal(t, http.StatusNotFound, recorder.Code)
-	require.Empty(t, hook.AllEntries())
 
 	var body ente.ApiError
 	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &body))

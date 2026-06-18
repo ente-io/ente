@@ -19,43 +19,19 @@ import (
 // Error parses the error, translates it into an HTTP response and aborts
 // the request
 func Error(c *gin.Context, err error) {
-	errorResponse(c, err, true)
-}
-
-// ExpectedError writes the same HTTP response as Error without logging.
-func ExpectedError(c *gin.Context, err error) {
-	errorResponse(c, err, false)
-}
-
-func errorResponse(c *gin.Context, err error, logFailure bool) {
-	isClientError := false
-	// Tip: To trigger the "unexpected EOF" error, connect with:
-	//
-	//    echo "GET /ping HTTP/1.0\r\nContent-Length: 300\r\n\r\n" | nc localhost 8080
-	if errors.Is(err, ente.ErrStorageLimitExceeded) ||
-		errors.Is(err, ente.ErrNoActiveSubscription) ||
-		errors.Is(err, ente.ErrInvalidPassword) ||
-		errors.Is(err, ente.ErrUserDeleted) ||
-		errors.Is(err, io.ErrUnexpectedEOF) ||
-		errors.Is(err, syscall.EPIPE) ||
-		errors.Is(err, syscall.ECONNRESET) {
-		isClientError = true
-	}
 	unWrappedErr := errors.Unwrap(err)
 	if unWrappedErr == nil {
 		unWrappedErr = err
 	}
 	enteApiErr, isEnteApiErr := unWrappedErr.(*ente.ApiError)
-	if isEnteApiErr && enteApiErr.HttpStatusCode >= 400 && enteApiErr.HttpStatusCode < 500 {
-		isClientError = true
-	}
-	if logFailure {
+
+	if level, shouldLog := requestFailureLogLevel(err, enteApiErr); shouldLog {
 		contextLogger := log.WithError(err).
 			WithFields(log.Fields{
 				"req_id":  requestid.Get(c),
 				"user_id": auth.GetUserID(c.Request.Header),
 			})
-		if isClientError {
+		if level == log.WarnLevel {
 			contextLogger.Warn("Request failed")
 		} else {
 			contextLogger.Error("Request failed")
@@ -68,12 +44,37 @@ func errorResponse(c *gin.Context, err error, logFailure bool) {
 	} else {
 		if _, ok := stacktrace.RootCause(err).(validator.ValidationErrors); ok {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
-		} else if isClientError {
+		} else if isRequestIOError(err) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		} else {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		}
 	}
+}
+
+func requestFailureLogLevel(err error, apiErr *ente.ApiError) (log.Level, bool) {
+	if errors.Is(err, ente.ErrStorageLimitExceeded) ||
+		errors.Is(err, ente.ErrNoActiveSubscription) ||
+		(apiErr != nil && apiErr.Code == ente.NotFoundError) {
+		return log.ErrorLevel, false
+	}
+	if errors.Is(err, ente.ErrInvalidPassword) ||
+		errors.Is(err, ente.ErrUserDeleted) ||
+		errors.Is(err, sql.ErrNoRows) ||
+		isRequestIOError(err) ||
+		(apiErr != nil && apiErr.HttpStatusCode >= 400 && apiErr.HttpStatusCode < 500) {
+		return log.WarnLevel, true
+	}
+	return log.ErrorLevel, true
+}
+
+func isRequestIOError(err error) bool {
+	// Tip: To trigger the "unexpected EOF" error, connect with:
+	//
+	//    echo "GET /ping HTTP/1.0\r\nContent-Length: 300\r\n\r\n" | nc localhost 8080
+	return errors.Is(err, io.ErrUnexpectedEOF) ||
+		errors.Is(err, syscall.EPIPE) ||
+		errors.Is(err, syscall.ECONNRESET)
 }
 
 // If `err` directly maps to an HTTP status code, return the HTTP status code.
