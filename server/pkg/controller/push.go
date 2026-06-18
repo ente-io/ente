@@ -177,8 +177,8 @@ func (c *PushController) sendFCMPushes(pushTokens []ente.PushToken, payload map[
 	log.Info("Sending pushes to " + strconv.Itoa(len(pushTokens)) + " devices")
 	var successCount, failureCount int64
 	var lastErr atomic.Value
-	var staleMu sync.Mutex
-	var staleTokens []string
+	var unregisteredMu sync.Mutex
+	var unregisteredTokens []string
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, fcmSendConcurrency)
 	for _, pushToken := range pushTokens {
@@ -190,10 +190,10 @@ func (c *PushController) sendFCMPushes(pushTokens []ente.PushToken, payload map[
 			if err := c.fcm.send(context.Background(), token, payload); err != nil {
 				atomic.AddInt64(&failureCount, 1)
 				lastErr.Store(err.Error())
-				if errors.Is(err, errStaleToken) {
-					staleMu.Lock()
-					staleTokens = append(staleTokens, token)
-					staleMu.Unlock()
+				if errors.Is(err, errUnregisteredToken) {
+					unregisteredMu.Lock()
+					unregisteredTokens = append(unregisteredTokens, token)
+					unregisteredMu.Unlock()
 				}
 			} else {
 				atomic.AddInt64(&successCount, 1)
@@ -211,19 +211,19 @@ func (c *PushController) sendFCMPushes(pushTokens []ente.PushToken, payload map[
 			", failure count: " + strconv.FormatInt(failureCount, 10))
 	}
 
-	c.pruneStaleTokens(staleTokens)
+	c.pruneTokens(unregisteredTokens)
 	return nil
 }
 
-func (c *PushController) pruneStaleTokens(fcmTokens []string) {
+func (c *PushController) pruneTokens(fcmTokens []string) {
 	if len(fcmTokens) == 0 {
 		return
 	}
 	if err := c.PushRepo.RemoveTokensByFCM(fcmTokens); err != nil {
-		log.Error(fmt.Errorf("error pruning %d stale FCM tokens: %w", len(fcmTokens), err))
+		log.Error(fmt.Errorf("error pruning %d unregistered FCM tokens: %w", len(fcmTokens), err))
 		return
 	}
-	log.Info("Pruned " + strconv.Itoa(len(fcmTokens)) + " stale FCM tokens")
+	log.Info("Pruned " + strconv.Itoa(len(fcmTokens)) + " unregistered FCM tokens")
 }
 
 func (c *fcmClient) send(ctx context.Context, token string, data map[string]string) error {
@@ -259,17 +259,14 @@ func (c *fcmClient) send(ctx context.Context, token string, data map[string]stri
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
 		if fcmErrorCode(b) == "UNREGISTERED" {
-			return fmt.Errorf("%w (status %d)", errStaleToken, resp.StatusCode)
+			return fmt.Errorf("%w (status %d)", errUnregisteredToken, resp.StatusCode)
 		}
 		return fmt.Errorf("status %d: %s", resp.StatusCode, string(b))
 	}
 	return nil
 }
 
-// errStaleToken marks a token FCM rejected as permanently invalid
-// (UNREGISTERED) — the only signal we prune on. Notably not INVALID_ARGUMENT,
-// which a bad message on our side would also raise for every token.
-var errStaleToken = errors.New("fcm: unregistered token")
+var errUnregisteredToken = errors.New("fcm: unregistered token")
 
 func fcmErrorCode(body []byte) string {
 	var e struct {
