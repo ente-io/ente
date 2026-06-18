@@ -56,11 +56,12 @@ class SearchWidgetState extends State<SearchWidget> {
     super.initState();
     focusNode = FocusNode();
     focusNode.addListener(() {
+      if (!mounted) {
+        return;
+      }
       _syncSearchBackNotifier();
       _notifyActiveChanged();
-      if (mounted) {
-        setState(() {});
-      }
+      setState(() {});
     });
     _tabChangedEvent = Bus.instance.on<TabChangedEvent>().listen((event) async {
       if (!mounted) {
@@ -89,6 +90,9 @@ class SearchWidgetState extends State<SearchWidget> {
     _clearAndUnfocusSearchBar = Bus.instance
         .on<ClearAndUnfocusSearchBar>()
         .listen((event) {
+          if (!mounted) {
+            return;
+          }
           textController.clear();
           focusNode.unfocus();
           _syncSearchBackNotifier(false);
