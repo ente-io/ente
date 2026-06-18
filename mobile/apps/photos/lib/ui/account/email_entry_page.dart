@@ -8,7 +8,6 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/account/user_service.dart';
-import "package:photos/services/install_source_service.dart";
 import "package:photos/ui/account/login_page.dart";
 import 'package:photos/ui/common/web_page.dart';
 import "package:photos/ui/settings/developer_settings_tap_area.dart";
