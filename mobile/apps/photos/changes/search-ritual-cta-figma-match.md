@@ -1,0 +1,1 @@
+- Matched the compact search ritual CTA card more closely to the Figma design.

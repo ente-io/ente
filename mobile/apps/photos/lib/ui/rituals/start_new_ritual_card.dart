@@ -159,20 +159,12 @@ class _CompactStartNewRitualCard extends StatelessWidget {
               const Positioned(
                 left: 50.5,
                 top: 38,
-                child: Icon(
-                  Icons.auto_awesome,
-                  size: 8,
-                  color: Color(0xFFFFBC03),
-                ),
+                child: _SparkleIcon(size: 8),
               ),
               const Positioned(
                 left: 103.25,
                 top: 16.93,
-                child: Icon(
-                  Icons.auto_awesome,
-                  size: 13,
-                  color: Color(0xFFFFD25A),
-                ),
+                child: _SparkleIcon(size: 13),
               ),
               Center(
                 child: Column(
@@ -185,11 +177,7 @@ class _CompactStartNewRitualCard extends StatelessWidget {
                         color: colorScheme.greenBase,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.add,
-                        size: 17,
-                        color: Colors.white,
-                      ),
+                      child: const Center(child: _PlusSignIcon()),
                     ),
                     const SizedBox(height: 4),
                     Padding(
@@ -224,10 +212,105 @@ TextStyle _wideTitleStyle(Color color) {
 }
 
 TextStyle _compactTitleStyle(Color color) {
-  return TextStyles.body.copyWith(
+  return TextStyle(
     color: color,
     fontFamily: TextStyles.outfitFontFamily,
+    package: TextStyles.fontPackage,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
   );
+}
+
+class _PlusSignIcon extends StatelessWidget {
+  const _PlusSignIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size.square(9.33333),
+      painter: _PlusSignPainter(),
+    );
+  }
+}
+
+class _PlusSignPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 9.33333;
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2 * scale
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas
+      ..drawLine(
+        Offset(4.66667 * scale, 1 * scale),
+        Offset(4.66667 * scale, 8.33333 * scale),
+        paint,
+      )
+      ..drawLine(
+        Offset(8.33333 * scale, 4.66667 * scale),
+        Offset(1 * scale, 4.66667 * scale),
+        paint,
+      );
+  }
+
+  @override
+  bool shouldRepaint(covariant _PlusSignPainter oldDelegate) => false;
+}
+
+class _SparkleIcon extends StatelessWidget {
+  const _SparkleIcon({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(size: Size.square(size), painter: _SparklePainter());
+  }
+}
+
+class _SparklePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    const bend = 0.2761875;
+    const inverseBend = 1 - bend;
+    final midX = size.width / 2;
+    final midY = size.height / 2;
+    final path = Path()
+      ..moveTo(size.width, midY)
+      ..cubicTo(
+        size.width * inverseBend,
+        midY,
+        midX,
+        size.height * bend,
+        midX,
+        0,
+      )
+      ..cubicTo(midX, size.height * bend, size.width * bend, midY, 0, midY)
+      ..cubicTo(
+        size.width * bend,
+        midY,
+        midX,
+        size.height * inverseBend,
+        midX,
+        size.height,
+      )
+      ..cubicTo(
+        midX,
+        size.height * inverseBend,
+        size.width * inverseBend,
+        midY,
+        size.width,
+        midY,
+      )
+      ..close();
+    canvas.drawPath(path, Paint()..color = const Color(0xFFFFB800));
+  }
+
+  @override
+  bool shouldRepaint(covariant _SparklePainter oldDelegate) => false;
 }
 
 class _WideRitualCardLayout {
