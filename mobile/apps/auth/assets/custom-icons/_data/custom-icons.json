@@ -774,7 +774,6 @@
     {
       "title": "ESL",
       "slug": "esl",
-      "hex": "000000",
       "altNames": [
         "ESL Gaming"
       ]
@@ -1527,7 +1526,7 @@
     },
     {
       "title": "Nintendo",
-      "hex": "E60012",
+      "hex": "000000",
       "altNames": [
         "\u4efb\u5929\u5802",
         "Nintendo Account"
@@ -1791,8 +1790,7 @@
       "slug": "proton_wallet"
     },
     {
-      "title": "Proxmox",
-      "hex": "E57000"
+      "title": "Proxmox"
     },
     {
       "title": "Pufferfish Host",
@@ -2046,8 +2044,7 @@
     },
     {
       "title": "Square Enix",
-      "slug": "square_enix",
-      "hex": "ED1C24"
+      "slug": "square_enix"
     },
     {
       "title": "Standard Notes",
