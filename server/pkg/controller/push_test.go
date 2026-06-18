@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -130,6 +131,44 @@ func TestSendFCMPushesTotalFailureLogsError(t *testing.T) {
 	require.NoError(t, pc.sendFCMPushes(tokens, map[string]string{"action": "sync"}))
 
 	require.True(t, hasLog(hook, log.ErrorLevel, "Failed to send any pushes to 2 devices"))
+}
+
+const fcmUnregisteredBody = `{"error":{"code":404,"status":"NOT_FOUND","message":"Requested entity was not found.","details":[{"@type":"type.googleapis.com/google.firebase.fcm.v1.FcmError","errorCode":"UNREGISTERED"}]}}`
+
+const fcmInvalidArgumentBody = `{"error":{"code":400,"status":"INVALID_ARGUMENT","message":"The registration token is not a valid FCM registration token","details":[{"@type":"type.googleapis.com/google.firebase.fcm.v1.FcmError","errorCode":"INVALID_ARGUMENT"},{"@type":"type.googleapis.com/google.rpc.BadRequest","fieldViolations":[{"field":"message.token","description":"The registration token is not a valid FCM registration token"}]}]}}`
+
+func TestFCMSendClassifiesUnregisteredAsStale(t *testing.T) {
+	c := &fcmClient{
+		projectID: "p",
+		httpClient: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			return jsonResponse(http.StatusNotFound, fcmUnregisteredBody), nil
+		})},
+	}
+	err := c.send(context.Background(), "tok", map[string]string{"action": "sync"})
+	require.Error(t, err)
+	require.True(t, errors.Is(err, errStaleToken))
+}
+
+// A bad message on our side raises INVALID_ARGUMENT for every token; pruning on
+// it would wipe the table on a bad deploy, so it must not be treated as stale.
+func TestFCMSendDoesNotClassifyInvalidArgumentAsStale(t *testing.T) {
+	c := &fcmClient{
+		projectID: "p",
+		httpClient: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			return jsonResponse(http.StatusBadRequest, fcmInvalidArgumentBody), nil
+		})},
+	}
+	err := c.send(context.Background(), "tok", map[string]string{"action": "sync"})
+	require.Error(t, err)
+	require.False(t, errors.Is(err, errStaleToken))
+}
+
+func TestFCMErrorCode(t *testing.T) {
+	require.Equal(t, "UNREGISTERED", fcmErrorCode([]byte(fcmUnregisteredBody)))
+	require.Equal(t, "INVALID_ARGUMENT", fcmErrorCode([]byte(fcmInvalidArgumentBody)))
+	require.Equal(t, "", fcmErrorCode([]byte(`{"error":"bad"}`)))
+	require.Equal(t, "", fcmErrorCode([]byte("not json")))
+	require.Equal(t, "", fcmErrorCode(nil))
 }
 
 func captureLogs(t *testing.T) *logtest.Hook {
