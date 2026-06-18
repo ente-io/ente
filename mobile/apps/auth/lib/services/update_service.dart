@@ -29,7 +29,7 @@ class UpdateService {
   }
 
   Future<bool> shouldUpdate() async {
-    if (!isIndependent()) {
+    if (!supportsInAppUpdates()) {
       return false;
     }
     try {
@@ -43,7 +43,7 @@ class UpdateService {
   }
 
   bool shouldForceUpdate(LatestVersionInfo? info) {
-    if (!isIndependent()) {
+    if (!supportsInAppUpdates()) {
       return false;
     }
     try {
@@ -60,7 +60,7 @@ class UpdateService {
   }
 
   Future<bool> showUpdateNotification() async {
-    if (!isIndependent()) {
+    if (!supportsInAppUpdates()) {
       return false;
     }
     final shouldUpdate = await this.shouldUpdate();
@@ -136,7 +136,7 @@ class UpdateService {
     }
   }
 
-  bool isIndependent() {
+  bool supportsInAppUpdates() {
     return appFlavor == "independent" || PlatformDetector.isDesktop();
   }
 }
