@@ -1,0 +1,1 @@
+- Made the search tab header collapse quickly while searching.

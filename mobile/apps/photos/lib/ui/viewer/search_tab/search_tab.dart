@@ -1,3 +1,5 @@
+import "dart:ui" show lerpDouble;
+
 import "package:ente_components/theme/text_styles.dart";
 import "package:fade_indexed_stack/fade_indexed_stack.dart";
 import "package:flutter/foundation.dart";
@@ -40,6 +42,7 @@ class SearchTab extends StatefulWidget {
 class _SearchTabState extends State<SearchTab> {
   late int index;
   final indexOfStackNotifier = IndexOfStackNotifier();
+  bool _isSearchHeaderCollapsed = SearchWidgetState.query.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -51,6 +54,15 @@ class _SearchTabState extends State<SearchTab> {
   void indexNotifierListener() {
     setState(() {
       index = indexOfStackNotifier.index;
+    });
+  }
+
+  void _setSearchHeaderCollapsed(bool isCollapsed) {
+    if (_isSearchHeaderCollapsed == isCollapsed) {
+      return;
+    }
+    setState(() {
+      _isSearchHeaderCollapsed = isCollapsed;
     });
   }
 
@@ -71,28 +83,12 @@ class _SearchTabState extends State<SearchTab> {
         : colorScheme.backgroundColour;
     return Column(
       children: [
-        ColoredBox(
-          color: headerColor,
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(15, 12, 15, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.of(context).search,
-                    style: TextStyles.display1.copyWith(
-                      color: colorScheme.textBase,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SearchWidget(
-                    shouldConsumeBackNotifier: widget.shouldConsumeBackNotifier,
-                  ),
-                ],
-              ),
-            ),
+        _SearchHeader(
+          backgroundColor: headerColor,
+          isCollapsed: _isSearchHeaderCollapsed,
+          searchField: SearchWidget(
+            shouldConsumeBackNotifier: widget.shouldConsumeBackNotifier,
+            onActiveChanged: _setSearchHeaderCollapsed,
           ),
         ),
         Expanded(
@@ -110,6 +106,89 @@ class _SearchTabState extends State<SearchTab> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SearchHeader extends StatelessWidget {
+  const _SearchHeader({
+    required this.backgroundColor,
+    required this.isCollapsed,
+    required this.searchField,
+  });
+
+  static const _horizontalPadding = 15.0;
+  static const _expandedTopPadding = 12.0;
+  static const _collapsedTopPadding = 8.0;
+  static const _bottomPadding = 8.0;
+  static const _expandedTitleGap = 16.0;
+  static const _transitionDuration = Duration(milliseconds: 150);
+
+  final Color backgroundColor;
+  final bool isCollapsed;
+  final Widget searchField;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final titleStyle = TextStyles.display1.copyWith(
+      color: colorScheme.textBase,
+    );
+    return ColoredBox(
+      color: backgroundColor,
+      child: SafeArea(
+        bottom: false,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: isCollapsed ? 1 : 0),
+          duration: _transitionDuration,
+          curve: Curves.easeOut,
+          child: searchField,
+          builder: (context, progress, child) {
+            final topPadding = lerpDouble(
+              _expandedTopPadding,
+              _collapsedTopPadding,
+              progress,
+            )!;
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                _horizontalPadding,
+                topPadding,
+                _horizontalPadding,
+                _bottomPadding,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SearchHeaderTitle(progress: progress, style: titleStyle),
+                  SizedBox(height: _expandedTitleGap * (1 - progress)),
+                  child!,
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchHeaderTitle extends StatelessWidget {
+  const _SearchHeaderTitle({required this.progress, required this.style});
+
+  final double progress;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: Align(
+        alignment: Alignment.topLeft,
+        heightFactor: (1 - (progress * 1.35)).clamp(0.0, 1.0),
+        child: Opacity(
+          opacity: progress < 0.08 ? 1 : 0,
+          child: Text(AppLocalizations.of(context).search, style: style),
+        ),
+      ),
     );
   }
 }

@@ -16,9 +16,14 @@ import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 import "package:photos/utils/pending_translation.dart";
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({super.key, this.shouldConsumeBackNotifier});
+  const SearchWidget({
+    super.key,
+    this.shouldConsumeBackNotifier,
+    this.onActiveChanged,
+  });
 
   final ValueNotifier<bool>? shouldConsumeBackNotifier;
+  final ValueChanged<bool>? onActiveChanged;
 
   @override
   State<SearchWidget> createState() => SearchWidgetState();
@@ -41,6 +46,7 @@ class SearchWidgetState extends State<SearchWidget> {
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   TextEditingController textController = TextEditingController();
   String? _lastRequestedQuery;
+  bool? _lastReportedActive;
   late final StreamSubscription<ClearAndUnfocusSearchBar>
   _clearAndUnfocusSearchBar;
   late final Logger _logger = Logger("SearchWidgetState");
@@ -51,6 +57,7 @@ class SearchWidgetState extends State<SearchWidget> {
     focusNode = FocusNode();
     focusNode.addListener(() {
       _syncSearchBackNotifier();
+      _notifyActiveChanged();
       if (mounted) {
         setState(() {});
       }
@@ -85,6 +92,7 @@ class SearchWidgetState extends State<SearchWidget> {
           textController.clear();
           focusNode.unfocus();
           _syncSearchBackNotifier(false);
+          _notifyActiveChanged();
         });
   }
 
@@ -127,6 +135,7 @@ class SearchWidgetState extends State<SearchWidget> {
 
   Future<void> textControllerListener() async {
     _syncSearchBackNotifier();
+    _notifyActiveChanged();
     final nextQuery = textController.text.trim();
     if (nextQuery == _lastRequestedQuery) {
       return;
@@ -143,6 +152,15 @@ class SearchWidgetState extends State<SearchWidget> {
         );
       }
     });
+  }
+
+  void _notifyActiveChanged() {
+    final active = focusNode.hasFocus || textController.text.trim().isNotEmpty;
+    if (_lastReportedActive == active) {
+      return;
+    }
+    _lastReportedActive = active;
+    widget.onActiveChanged?.call(active);
   }
 
   @override
