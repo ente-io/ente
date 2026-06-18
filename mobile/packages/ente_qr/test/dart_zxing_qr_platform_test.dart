@@ -41,12 +41,25 @@ void main() {
     expect(result.success, false);
     expect(result.error, isNotEmpty);
   });
+
+  test('scanQrFromImage decodes a low-resolution screenshot', () async {
+    const payload =
+        'otpauth://totp/Example:alice@example.com?secret=JBSWY3DPEHPK3PXP&issuer=Example';
+    final imagePath = '${tempDir.path}/low_resolution_screenshot.png';
+    await File(
+      imagePath,
+    ).writeAsBytes(img.encodePng(_lowResolutionScreenshot(payload)));
+
+    final result = await DartZxingQrPlatform().scanQrFromImage(imagePath);
+
+    expect(result.success, true);
+    expect(result.content, payload);
+  });
 }
 
-img.Image _qrImage(String payload) {
+img.Image _qrImage(String payload, {int pixelsPerModule = 8}) {
   final qrcode = Encoder.encode(payload, ErrorCorrectionLevel.h);
   final matrix = qrcode.matrix!;
-  const pixelsPerModule = 8;
   const quietZoneModules = 4;
   final size = (matrix.width + quietZoneModules * 2) * pixelsPerModule;
   final image = img.Image(width: size, height: size)
@@ -70,4 +83,17 @@ img.Image _qrImage(String payload) {
     }
   }
   return image;
+}
+
+img.Image _lowResolutionScreenshot(String payload) {
+  final screenshot = img.Image(width: 288, height: 272)
+    ..clear(img.ColorRgb8(26, 26, 26));
+  final qr = img.copyResize(
+    _qrImage(payload, pixelsPerModule: 14),
+    width: 200,
+    height: 200,
+    interpolation: img.Interpolation.linear,
+  );
+  img.compositeImage(screenshot, qr, dstX: 44, dstY: 29);
+  return screenshot;
 }

@@ -402,6 +402,11 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
 
+	if isPaidStripeInvoice(invoice) {
+		log.Info("Ignoring stale payment intent failed event for paid invoice:", invoiceID)
+		return ente.StripeEventLog{UserID: userID, StripeSubscription: *stripeSubscription, Event: event}, nil
+	}
+
 	productID := stripeSubscription.Items.Data[0].Price.ID
 	// If the current subscription is not the same as the one in the webhook,
 	// then ignore
@@ -800,6 +805,10 @@ func getSubscriptionPaymentMethodType(stripeSubscription stripe.Subscription) st
 
 func usesAllowIncompleteSubscriptionUpdate(paymentMethodType stripe.PaymentMethodType) bool {
 	return paymentMethodType == stripe.PaymentMethodTypeSepaDebit || paymentMethodType == stripe.PaymentMethodType("upi")
+}
+
+func isPaidStripeInvoice(invoice *stripe.Invoice) bool {
+	return invoice.Paid || invoice.Status == stripe.InvoiceStatusPaid
 }
 
 func getPaymentIntentErrorPaymentMethodType(paymentIntent stripe.PaymentIntent) stripe.PaymentMethodType {

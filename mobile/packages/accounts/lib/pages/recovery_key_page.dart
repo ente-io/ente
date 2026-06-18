@@ -15,6 +15,7 @@ import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:share_plus/share_plus.dart';
 
 class RecoveryKeyPage extends StatefulWidget {
@@ -128,36 +129,54 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         ),
                         child: Builder(
                           builder: (context) {
-                            final content = Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 22,
-                                vertical: 24,
-                              ),
-                              child: Text(
-                                recoveryKey,
-                                textAlign: TextAlign.justify,
-                                style: textTheme.body.copyWith(
-                                  color: Colors.white,
-                                  fontFamily: 'monospace',
-                                  letterSpacing: 0.5,
-                                  height: 1.5,
-                                ),
+                            final text = Text(
+                              recoveryKey,
+                              textAlign: TextAlign.justify,
+                              style: textTheme.body.copyWith(
+                                color: Colors.white,
+                                fontFamily: 'monospace',
+                                letterSpacing: 0.5,
+                                height: 1.5,
                               ),
                             );
 
-                            if (PlatformDetector.isMobile()) {
-                              return GestureDetector(
-                                onTap: () async => await copy(),
-                                child: content,
-                              );
-                            } else {
-                              return SelectableRegion(
-                                focusNode: FocusNode(),
-                                selectionControls:
-                                    PlatformUtil.selectionControls,
-                                child: content,
-                              );
-                            }
+                            final keyContent = PlatformDetector.isMobile()
+                                ? GestureDetector(
+                                    onTap: () async => await copy(),
+                                    child: text,
+                                  )
+                                : SelectableRegion(
+                                    focusNode: FocusNode(),
+                                    selectionControls:
+                                        PlatformUtil.selectionControls,
+                                    child: text,
+                                  );
+
+                            return Stack(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    22,
+                                    24,
+                                    64,
+                                    24,
+                                  ),
+                                  child: keyContent,
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: IconButton(
+                                    onPressed: () async => await copy(),
+                                    icon: const HugeIcon(
+                                      icon: HugeIcons.strokeRoundedCopy01,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
                           },
                         ),
                       ),

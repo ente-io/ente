@@ -182,6 +182,7 @@ func main() {
 	legacyKitRepository := &legacykitrepo.Repository{DB: db}
 
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
+	eventRepository := &repo.EventRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
 	objectRepo := &repo.ObjectRepository{DB: db, LatencySensitiveDB: latencySensitiveDB, QueueRepo: queueRepo}
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
@@ -568,6 +569,9 @@ func main() {
 		timeout.WithHandler(healthCheckHandler.PingDBStats),
 		timeout.WithResponse(timeOutResponse),
 	))
+	eventHandler := &api.EventHandler{Repo: eventRepository}
+	publicAPI.POST("/events", eventHandler.Create)
+	privateAPI.POST("/events/user", eventHandler.CreateForUser)
 	fileCopyCtrl := &file_copy.FileCopyController{
 		FileController: fileController,
 		CollectionCtrl: collectionController,

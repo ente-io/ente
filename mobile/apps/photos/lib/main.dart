@@ -36,7 +36,6 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
-import "package:photos/services/install_source_service.dart";
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
@@ -190,7 +189,12 @@ Future<void> _warmForegroundDeferredServices() async {
   } catch (e, s) {
     _logger.warning("Deferred MemoryLaneService warm failed", e, s);
   }
-  await InstallSourceService.instance.logSource();
+  unawaited(
+    Future.delayed(
+      const Duration(seconds: 5),
+      installSourceService.autoAttributePendingSource,
+    ),
+  );
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {

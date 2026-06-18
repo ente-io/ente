@@ -108,6 +108,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         password,
         Configuration.instance.getKeyAttributes()!,
       );
+      unawaited(installSourceService.autoAttributePendingSource());
       _registerSRPForExistingUsers(kek).ignore();
     } on KeyDerivationError catch (e, s) {
       _logger.severe("Password verification failed", e, s);

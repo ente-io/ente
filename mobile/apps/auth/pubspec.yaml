@@ -19,7 +19,6 @@ dependencies:
   confetti: 0.8.0
   connectivity_plus: 6.1.4
   convert: 3.1.2
-  device_info_plus: 11.5.0
   dio: 5.9.2
   dots_indicator: 4.0.1
   dotted_border: 3.1.0
@@ -47,6 +46,8 @@ dependencies:
     path: ../../packages/ente_pure_utils
   ente_qr:
     path: ../../packages/ente_qr
+  ente_qr_scanner:
+    path: ../../packages/ente_qr_scanner
   ente_strings:
     path: ../../packages/strings
   ente_ui:
@@ -67,7 +68,7 @@ dependencies:
   flutter_displaymode: 0.6.0
   flutter_email_sender: 7.0.0
   flutter_launcher_icons: 0.14.4
-  flutter_local_notifications: 18.0.1
+  flutter_local_notifications: 19.3.0
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: 2.4.7
@@ -109,7 +110,6 @@ dependencies:
   pointycastle: 3.9.1
   privacy_screen: 0.0.8
   protobuf: 4.1.0
-  qr_code_scanner_plus: 2.1.2
   qr_flutter: 4.1.0
   saf_stream: 2.0.0
   saf_util: 2.0.0

@@ -11,6 +11,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
+import "package:photos/ui/components/empty_state_component.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -64,6 +65,10 @@ class TrashPage extends StatelessWidget {
       selectedFiles: _selectedFiles,
       header: _headerWidget(),
       initialFiles: null,
+      emptyState: EmptyStateComponent(
+        assetPath: "assets/empty_state_trash.png",
+        title: AppLocalizations.of(context).deletedItemsStayHereForThirtyDays,
+      ),
     );
 
     return GalleryBoundariesProvider(

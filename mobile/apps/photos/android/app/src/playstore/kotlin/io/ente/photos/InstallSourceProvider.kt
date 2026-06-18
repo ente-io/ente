@@ -20,10 +20,20 @@ class InstallSourceProvider(private val context: Context) {
         }
     }
 
-    fun logInstallSource(result: MethodChannel.Result) {
+    fun autoAttributeSource(isSignUp: Boolean, result: MethodChannel.Result) {
+        store.autoAttributeSource(isSignUp)
+        result.success(null)
+    }
+
+    fun getPendingEvents(result: MethodChannel.Result) {
         getInstallSource { source ->
-            result.success(source?.let { store.logInstallSource(it) })
+            result.success(source?.let { store.pendingEventJsons(it) }.orEmpty())
         }
+    }
+
+    fun markEventSent(event: String?, result: MethodChannel.Result) {
+        store.markEventSent(event.orEmpty())
+        result.success(null)
     }
 
     @Synchronized

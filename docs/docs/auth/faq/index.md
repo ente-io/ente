@@ -147,3 +147,17 @@ Codes that imported successfully continue working normally.
 This means that the parameters that were used to derive your master-key on your original device, are incompatible with your current device (likely because it's less powerful).
 
 If you recover your account using your current device and reset the password, a new key will be generated with different parameters. This new key will be equally strong and compatible with both devices.
+
+### I can't change my app lock PIN. What do I do? {#cant-change-app-lock-pin}
+
+If the option to change the PIN doesn't appear, log out by tapping the back arrow on the app lock screen. Once logged out, the app lock is no longer in effect and you can set it up again from scratch when you sign back in.
+
+### Codes won't sync, password is rejected, or recovery key keeps failing. Where do I start? {#sync-password-recovery-failures}
+
+Most of these failures come from network-level filtering between your device and our servers. Common causes:
+
+- DNS-level blockers like NextDNS, AdGuard, or Pi-hole filtering one of `*.ente.io`, `*.ente.com`, or `*.backblazeb2.com`.
+- A custom Private DNS server on your phone.
+- A VPN routing traffic in a way that interferes with Ente endpoints.
+
+If you use any of these, allowlist Ente's domains or temporarily disable the blocker and try again. After clearing the interference, signing in and syncing should work normally.
