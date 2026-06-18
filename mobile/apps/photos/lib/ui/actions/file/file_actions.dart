@@ -165,8 +165,8 @@ Future<void> showSingleFileDeleteSheet(
               ),
             ),
           if (isBothLocalAndRemote)
-            SizedBox(
-              height: 48,
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
               child: isMoreOptionsShown
                   ? Center(
                       child: LabeledControlComponent(
@@ -291,7 +291,7 @@ class _MoreOptionsButtonState extends State<_MoreOptionsButton> {
             Icon(
               Icons.keyboard_arrow_up,
               color: foreground,
-              size: IconSizes.tiny,
+              size: IconSizes.small,
             ),
           ],
         ),
