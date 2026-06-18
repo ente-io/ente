@@ -28,7 +28,6 @@
   "deleteReason4": "其他原因",
   "sendEmail": "发送电子邮件",
   "deleteRequestSLAText": "您的请求将在 72 小时内处理。",
-  "deleteEmailRequest": "请用您注册的邮箱地址发送邮件到 <warning>account-delettion@ente.com</warning>。",
   "entePhotosPerm": "Ente <i>需要许可</i>才能保存您的照片",
   "ok": "Ok",
   "createAccount": "创建账户",

@@ -317,7 +317,6 @@ class UserService {
       final response = await _enteDio.get("/users/delete-challenge");
       if (response.statusCode == 200) {
         return DeleteChallengeResponse(
-          allowDelete: response.data["allowDelete"] as bool,
           encryptedChallenge: response.data["encryptedChallenge"],
         );
       } else {

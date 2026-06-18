@@ -29,7 +29,6 @@
   "deleteReason4": "Nincs a listán az ok",
   "sendEmail": "Email küldése",
   "deleteRequestSLAText": "A kérése 72 órán belül feldolgozásra kerül.",
-  "deleteEmailRequest": "Kérjük, küldj egy e-mailt a <warning>account-deletion@ente.com\n</warning> címre a regisztrált e-mail-címedről.",
   "entePhotosPerm": "Az Entének <i>engedélyre van szüksége </i>, hogy tárolhassa fotóit",
   "ok": "Rendben",
   "createAccount": "Felhasználó létrehozás",

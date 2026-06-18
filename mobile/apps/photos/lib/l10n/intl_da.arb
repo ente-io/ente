@@ -29,7 +29,6 @@
   "deleteReason4": "Min grund er ikke angivet",
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Din anmodning vil blive behandlet inden for 72 timer.",
-  "deleteEmailRequest": "Send venligst en email til <warning>account-deletion@ente.com</warning> fra din registrerede email adresse.",
   "entePhotosPerm": "Ente <i>har brug for tilladelse til at</i> bevare dine fotos",
   "ok": "Ok",
   "createAccount": "Opret konto",
