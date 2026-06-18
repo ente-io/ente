@@ -9,7 +9,6 @@ class LabeledControlComponent extends StatelessWidget {
     required this.control,
     required this.label,
     this.subtitle,
-    this.expandLabel = true,
     this.foreground,
     this.onTap,
   });
@@ -17,7 +16,6 @@ class LabeledControlComponent extends StatelessWidget {
   final Widget control;
   final String label;
   final String? subtitle;
-  final bool expandLabel;
 
   /// Overrides the label and subtitle color.
   final Color? foreground;
@@ -47,12 +45,12 @@ class LabeledControlComponent extends StatelessWidget {
     );
     final tappableLabel = InkWell(onTap: onTap, child: labelContent);
     return Row(
-      mainAxisSize: expandLabel ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         control,
         const SizedBox(width: Spacing.md),
-        if (expandLabel) Expanded(child: tappableLabel) else tappableLabel,
+        tappableLabel,
       ],
     );
   }

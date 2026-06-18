@@ -14,8 +14,6 @@ import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart'
     show ButtonAction;
-import "package:photos/ui/components/delete_bottom_sheet.dart";
-import "package:photos/ui/components/ghost_button.dart";
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/viewer/file/file_details_widget.dart';
 import "package:photos/utils/delete_file_util.dart";
@@ -33,18 +31,15 @@ Future<void> showSingleFileDeleteSheet(
   final String fileType = file.fileType == FileType.video
       ? l10n.videoSmallCase
       : l10n.photoSmallCase;
-
   final bool isBothLocalAndRemote =
       file.uploadedFileID != null && file.localID != null;
   final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
   final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
-
   if (isLocalGalleryMode) {
     if (file.localID == null) {
       showShortToast(context, l10n.noDeviceThatCanBeDeleted);
       return;
     }
-
     final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
     if (deletedFiles.isNotEmpty &&
         onFileRemoved != null &&
@@ -53,10 +48,8 @@ Future<void> showSingleFileDeleteSheet(
     }
     return;
   }
-
   final String bodyHighlight = l10n.singleFileDeleteHighlight;
   late final String body;
-
   if (isBothLocalAndRemote) {
     body = l10n.singleFileInBothLocalAndRemote(fileType: fileType);
   } else if (isRemoteOnly) {
@@ -67,27 +60,21 @@ Future<void> showSingleFileDeleteSheet(
     throw AssertionError("Unexpected state");
   }
 
-  final deletePreference =
-      localSettings.getDeletePreference() ?? DeletePreference.DeleteFromBoth;
-  final deletePreferenceForFile = _deletePreferenceForFile(
-    deletePreference,
-    isLocalOnly: isLocalOnly,
-    isRemoteOnly: isRemoteOnly,
-  );
-
+  final deletePreference = isLocalOnly
+      ? DeletePreference.DeleteFromLocalOnly
+      : isRemoteOnly
+      ? DeletePreference.DeleteFromRemoteOnly
+      : localSettings.getDeletePreference() ?? DeletePreference.DeleteFromBoth;
   var isMoreOptionsShown = false;
   var isSetAsDefaultSelected = false;
-
   final actionResult = await showBottomSheetComponent<ButtonResult>(
     context: context,
     useRootNavigator: Platform.isIOS,
     builder: (sheetContext) => StatefulBuilder(
       builder: (builderContext, setState) => BottomSheetComponent(
-        header: DeleteBottomSheetHeader(
-          title: l10n.deleteFileQuestion(fileType: fileType),
-          closeTooltip: l10n.close,
-          closeResult: ButtonResult(ButtonAction.fourth),
-        ),
+        title: l10n.deleteFileQuestion(fileType: fileType),
+        illustration: Image.asset("assets/warning-red.png"),
+        closeTooltip: l10n.close,
         content: Text(
           isLocalOnly ? body : "$body\n$bodyHighlight",
           textAlign: TextAlign.center,
@@ -103,79 +90,66 @@ Future<void> showSingleFileDeleteSheet(
             ButtonComponent(
               label: l10n.deleteFromDevice,
               variant: ButtonComponentVariant.secondary,
-              onTap: () => _runSingleFileDeleteAction(
-                sheetContext,
-                ButtonAction.first,
-                () async {
-                  if (isSetAsDefaultSelected) {
-                    await localSettings.setDeletePreference(
-                      .DeleteFromLocalOnly,
-                    );
-                  }
-                  await _deleteFileOnDeviceOnly(
-                    context,
-                    file,
-                    onFileRemoved: onFileRemoved,
-                    isLocalOnly: isLocalOnly,
-                    isLocalOnlyContext: isLocalOnlyContext,
-                  );
-                },
-              ),
+              onTap: () => _runSingleFileDeleteAction(builderContext, () async {
+                if (isSetAsDefaultSelected) {
+                  await localSettings.setDeletePreference(.DeleteFromLocalOnly);
+                }
+                await _deleteFileOnDeviceOnly(
+                  context,
+                  file,
+                  onFileRemoved: onFileRemoved,
+                  isLocalOnly: isLocalOnly,
+                  isLocalOnlyContext: isLocalOnlyContext,
+                );
+              }),
             ),
             ButtonComponent(
               label: l10n.deleteFromEnte,
               variant: ButtonComponentVariant.secondary,
-              onTap: () => _runSingleFileDeleteAction(
-                sheetContext,
-                ButtonAction.first,
-                () async {
-                  if (isSetAsDefaultSelected) {
-                    await localSettings.setDeletePreference(
-                      .DeleteFromRemoteOnly,
-                    );
-                  }
-                  await deleteFilesFromRemoteOnly(context, [file]);
-                  showShortToast(context, l10n.movedToTrash);
-                },
-                afterPop: () => onFileRemoved?.call(file),
-              ),
+              onTap: () => _runSingleFileDeleteAction(builderContext, () async {
+                if (isSetAsDefaultSelected) {
+                  await localSettings.setDeletePreference(
+                    .DeleteFromRemoteOnly,
+                  );
+                }
+                await deleteFilesFromRemoteOnly(builderContext, [file]);
+                showShortToast(builderContext, l10n.movedToTrash);
+              }, afterPop: () => onFileRemoved?.call(file)),
             ),
             ButtonComponent(
               label: l10n.deleteFromBoth,
               variant: ButtonComponentVariant.critical,
               onTap: () => _runSingleFileDeleteAction(
-                sheetContext,
-                ButtonAction.first,
+                builderContext,
                 afterPop: () => onFileRemoved?.call(file),
                 () async {
                   if (isSetAsDefaultSelected) {
                     await localSettings.setDeletePreference(.DeleteFromBoth);
                   }
-                  await deleteFilesFromEverywhere(context, [file]);
-                  showShortToast(context, l10n.movedToTrash);
+                  await deleteFilesFromEverywhere(builderContext, [file]);
+                  showShortToast(builderContext, l10n.movedToTrash);
                 },
               ),
             ),
           ] else
             ButtonComponent(
               key: ValueKey(
-                'singleFileDelete.default.${deletePreferenceForFile.name}',
+                'singleFileDelete.default.${deletePreference.name}',
               ),
-              label: deletePreferenceForFile == .DeleteFromBoth
+              label: deletePreference == .DeleteFromBoth
                   ? l10n.deleteFromBoth
-                  : deletePreferenceForFile == .DeleteFromLocalOnly
+                  : deletePreference == .DeleteFromLocalOnly
                   ? l10n.deleteFromDevice
                   : l10n.deleteFromEnte,
               variant: ButtonComponentVariant.critical,
               onTap: () => _runSingleFileDeleteAction(
                 sheetContext,
-                ButtonAction.first,
                 afterPop: () => onFileRemoved?.call(file),
                 () async {
-                  if (deletePreferenceForFile == .DeleteFromRemoteOnly) {
+                  if (deletePreference == .DeleteFromRemoteOnly) {
                     await deleteFilesFromRemoteOnly(context, [file]);
                     showShortToast(context, l10n.movedToTrash);
-                  } else if (deletePreferenceForFile == .DeleteFromLocalOnly) {
+                  } else if (deletePreference == .DeleteFromLocalOnly) {
                     await _deleteFileOnDeviceOnly(
                       context,
                       file,
@@ -183,7 +157,7 @@ Future<void> showSingleFileDeleteSheet(
                       isLocalOnly: isLocalOnly,
                       isLocalOnlyContext: isLocalOnlyContext,
                     );
-                  } else if (deletePreferenceForFile == .DeleteFromBoth) {
+                  } else if (deletePreference == .DeleteFromBoth) {
                     await deleteFilesFromEverywhere(context, [file]);
                     showShortToast(context, l10n.movedToTrash);
                   }
@@ -196,7 +170,6 @@ Future<void> showSingleFileDeleteSheet(
               child: isMoreOptionsShown
                   ? Center(
                       child: LabeledControlComponent(
-                        expandLabel: false,
                         foreground: context.componentColors.textLight,
                         onTap: () {
                           setState(() {
@@ -214,14 +187,13 @@ Future<void> showSingleFileDeleteSheet(
                         label: l10n.setAsDefault,
                       ),
                     )
-                  : GhostButtonComponent(
+                  : _MoreOptionsButton(
                       label: l10n.moreOptions,
                       onTap: () {
                         setState(() {
                           isMoreOptionsShown = true;
                         });
                       },
-                      trailing: const Icon(Icons.keyboard_arrow_up, size: 16),
                     ),
             ),
         ],
@@ -240,14 +212,13 @@ Future<void> showSingleFileDeleteSheet(
 
 Future<void> _runSingleFileDeleteAction(
   BuildContext context,
-  ButtonAction action,
   Future<void> Function() onDelete, {
   FutureOr<void> Function()? afterPop,
 }) async {
   try {
     await onDelete();
     if (context.mounted) {
-      Navigator.of(context).pop(ButtonResult(action));
+      Navigator.of(context).pop();
       await afterPop?.call();
     }
   } catch (error) {
@@ -279,14 +250,54 @@ Future<void> _deleteFileOnDeviceOnly(
   }
 }
 
-DeletePreference _deletePreferenceForFile(
-  DeletePreference deletePreference, {
-  required bool isLocalOnly,
-  required bool isRemoteOnly,
-}) {
-  if (isLocalOnly) return .DeleteFromLocalOnly;
-  if (isRemoteOnly) return .DeleteFromRemoteOnly;
-  return deletePreference;
+class _MoreOptionsButton extends StatefulWidget {
+  const _MoreOptionsButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  State<_MoreOptionsButton> createState() => _MoreOptionsButtonState();
+}
+
+// TODO: Replace this component once ente_components has a ghost button variant.
+class _MoreOptionsButtonState extends State<_MoreOptionsButton> {
+  var _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final foreground = context.componentColors.textLight;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.98 : 1,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOutCubic,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              widget.label,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: TextStyles.body.copyWith(color: foreground),
+            ),
+            const SizedBox(width: Spacing.xs),
+            Icon(
+              Icons.keyboard_arrow_up,
+              color: foreground,
+              size: IconSizes.tiny,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {

@@ -29,13 +29,10 @@ import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart'
     show ButtonAction;
-import "package:photos/ui/components/delete_bottom_sheet.dart";
-import "package:photos/ui/components/ghost_button.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/utils/device_info.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
-import "package:photos/utils/local_settings.dart";
 
 final _logger = Logger("DeleteFileUtil");
 
@@ -805,10 +802,12 @@ Future<void> showDeleteSheet(
   final Future<void> Function(BuildContext context, List<EnteFile> files)
   deleteFromEverywhereAction =
       deleteFromEverywhereOverride ?? deleteFilesFromEverywhere;
-  final l10n = AppLocalizations.of(context);
 
   if (deletableFiles.isEmpty && filesSplit.ownedByOtherUsers.isNotEmpty) {
-    showShortToast(context, l10n.cannotDeleteSharedFiles);
+    showShortToast(
+      context,
+      AppLocalizations.of(context).cannotDeleteSharedFiles,
+    );
     return;
   }
   if (isLocalGalleryMode) {
@@ -816,7 +815,10 @@ Future<void> showDeleteSheet(
         .where((file) => file.localID != null)
         .toList();
     if (localGalleryDeletableFiles.isEmpty) {
-      showShortToast(context, l10n.noDeviceThatCanBeDeleted);
+      showShortToast(
+        context,
+        AppLocalizations.of(context).noDeviceThatCanBeDeleted,
+      );
       return;
     }
     await deleteOnDeviceOnlyAction(context, localGalleryDeletableFiles);
@@ -829,17 +831,18 @@ Future<void> showDeleteSheet(
   final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
   final bool isLocalOnly = !containsUploadedFile;
   final bool isRemoteOnly = !containsLocalFile;
-  final deleteTitle = l10n.deleteItemCount(count: deletableFiles.length);
   late final String body;
   late final String? bodyHighlight;
   if (isBothLocalAndRemote) {
-    body = l10n.someItemsAreInBothEnteAndYourDevice;
-    bodyHighlight = l10n.theyWillBeDeletedFromAllAlbums;
+    body = AppLocalizations.of(context).someItemsAreInBothEnteAndYourDevice;
+    bodyHighlight = AppLocalizations.of(context).theyWillBeDeletedFromAllAlbums;
   } else if (isRemoteOnly) {
-    body = l10n.selectedItemsWillBeDeletedFromAllAlbumsAndMoved;
+    body = AppLocalizations.of(
+      context,
+    ).selectedItemsWillBeDeletedFromAllAlbumsAndMoved;
     bodyHighlight = null;
   } else if (isLocalOnly) {
-    body = l10n.theseItemsWillBeDeletedFromYourDevice;
+    body = AppLocalizations.of(context).theseItemsWillBeDeletedFromYourDevice;
     bodyHighlight = null;
   } else {
     throw AssertionError("Unexpected state");
@@ -848,7 +851,7 @@ Future<void> showDeleteSheet(
   Future<void> deleteFromEnte() async {
     await deleteFromRemoteOnlyAction(context, deletableFiles).then(
       (value) {
-        showShortToast(context, l10n.movedToTrash);
+        showShortToast(context, AppLocalizations.of(context).movedToTrash);
       },
       onError: (e, s) {
         showGenericErrorDialog(context: context, error: e);
@@ -857,14 +860,10 @@ Future<void> showDeleteSheet(
   }
 
   if (isBothLocalAndRemote) {
-    final deletePreference =
-        localSettings.getDeletePreference() ?? DeletePreference.DeleteFromBoth;
     final actionResult = await _showMixedDeleteTargetSheet(
       context: context,
-      title: deleteTitle,
       body: body,
       bodyHighlight: bodyHighlight!,
-      deletePreference: deletePreference,
       onDelete: (target) async {
         switch (target) {
           case _MixedDeleteTarget.ente:
@@ -890,7 +889,6 @@ Future<void> showDeleteSheet(
 
   final actionResult = await _showSingleDeleteConfirmationSheet(
     context: context,
-    title: deleteTitle,
     body: body,
     action: isRemoteOnly ? ButtonAction.first : ButtonAction.second,
     shouldSurfaceExecutionStates: isRemoteOnly,
@@ -929,10 +927,8 @@ class _MixedDeleteTargetOption {
 
 Future<ButtonResult?> _showMixedDeleteTargetSheet({
   required BuildContext context,
-  required String title,
   required String body,
   required String bodyHighlight,
-  required DeletePreference deletePreference,
   required Future<void> Function(_MixedDeleteTarget target) onDelete,
 }) {
   final l10n = AppLocalizations.of(context);
@@ -940,11 +936,10 @@ Future<ButtonResult?> _showMixedDeleteTargetSheet({
     context: context,
     useRootNavigator: Platform.isIOS,
     builder: (_) => _MixedDeleteTargetSheet(
-      title: title,
+      title: l10n.areYouSure,
       body: body,
       bodyHighlight: bodyHighlight,
       closeTooltip: l10n.close,
-      deletePreference: deletePreference,
       options: [
         _MixedDeleteTargetOption(
           target: _MixedDeleteTarget.ente,
@@ -969,7 +964,6 @@ Future<ButtonResult?> _showMixedDeleteTargetSheet({
 
 Future<ButtonResult?> _showSingleDeleteConfirmationSheet({
   required BuildContext context,
-  required String title,
   required String body,
   required ButtonAction action,
   required bool shouldSurfaceExecutionStates,
@@ -980,21 +974,11 @@ Future<ButtonResult?> _showSingleDeleteConfirmationSheet({
     context: context,
     useRootNavigator: Platform.isIOS,
     builder: (sheetContext) => BottomSheetComponent(
-      header: DeleteBottomSheetHeader(
-        title: title,
-        closeTooltip: l10n.close,
-        closeResult: ButtonResult(ButtonAction.fourth),
-      ),
-      content: Text(
-        body,
-        textAlign: TextAlign.center,
-        style: TextStyles.body.copyWith(
-          color: sheetContext.componentColors.textLight,
-        ),
-      ),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      contentSpacing: Spacing.sm,
-      actionsTopSpacing: Spacing.xxl,
+      title: l10n.areYouSure,
+      message: body,
+      illustration: Image.asset("assets/warning-grey.png"),
+      closeTooltip: l10n.close,
+      closeResult: ButtonResult(ButtonAction.fourth),
       actions: [
         ButtonComponent(
           label: l10n.yesDelete,
@@ -1013,7 +997,6 @@ class _MixedDeleteTargetSheet extends StatelessWidget {
     required this.body,
     required this.bodyHighlight,
     required this.closeTooltip,
-    required this.deletePreference,
     required this.options,
     required this.onDelete,
   });
@@ -1022,147 +1005,30 @@ class _MixedDeleteTargetSheet extends StatelessWidget {
   final String body;
   final String bodyHighlight;
   final String closeTooltip;
-  final DeletePreference deletePreference;
   final List<_MixedDeleteTargetOption> options;
   final Future<void> Function(_MixedDeleteTarget target) onDelete;
 
   @override
   Widget build(BuildContext context) {
-    return _MixedDeleteTargetSheetContent(
-      title: title,
-      body: body,
-      bodyHighlight: bodyHighlight,
-      closeTooltip: closeTooltip,
-      deletePreference: deletePreference,
-      options: options,
-      onDelete: onDelete,
-    );
-  }
-}
-
-class _MixedDeleteTargetSheetContent extends StatefulWidget {
-  const _MixedDeleteTargetSheetContent({
-    required this.title,
-    required this.body,
-    required this.bodyHighlight,
-    required this.closeTooltip,
-    required this.deletePreference,
-    required this.options,
-    required this.onDelete,
-  });
-
-  final String title;
-  final String body;
-  final String bodyHighlight;
-  final String closeTooltip;
-  final DeletePreference deletePreference;
-  final List<_MixedDeleteTargetOption> options;
-  final Future<void> Function(_MixedDeleteTarget target) onDelete;
-
-  @override
-  State<_MixedDeleteTargetSheetContent> createState() =>
-      _MixedDeleteTargetSheetContentState();
-}
-
-class _MixedDeleteTargetSheetContentState
-    extends State<_MixedDeleteTargetSheetContent> {
-  var _isMoreOptionsShown = false;
-  var _isSetAsDefaultSelected = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final defaultTarget = _mixedDeleteTargetForPreference(
-      widget.deletePreference,
-    );
-    final defaultOption = widget.options.firstWhere(
-      (option) => option.target == defaultTarget,
-    );
     return BottomSheetComponent(
-      header: DeleteBottomSheetHeader(
-        title: widget.title,
-        closeTooltip: widget.closeTooltip,
-      ),
-      content: Text(
-        '${widget.body}\n${widget.bodyHighlight}',
-        textAlign: TextAlign.center,
-        style: TextStyles.body.copyWith(
-          color: context.componentColors.textLight,
-        ),
-      ),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      contentSpacing: Spacing.sm,
-      actionsTopSpacing: Spacing.xxl,
+      title: title,
+      message: '$body\n$bodyHighlight',
+      illustration: Image.asset("assets/warning-grey.png"),
+      closeTooltip: closeTooltip,
       actions: [
-        if (_isMoreOptionsShown) ...[
-          for (final option in widget.options)
-            ButtonComponent(
-              key: ValueKey('mixedDeleteTarget.${option.target.name}'),
-              label: option.label,
-              variant: _variantFor(option.target),
-              onTap: () => _runDeleteAction(
-                context,
-                option.action,
-                () => _runMixedDeleteOption(option),
-              ),
-            ),
-        ] else
+        for (final option in options)
           ButtonComponent(
-            key: ValueKey(
-              'mixedDeleteTarget.default.${defaultOption.target.name}',
-            ),
-            label: defaultOption.label,
-            variant: ButtonComponentVariant.critical,
+            key: ValueKey('mixedDeleteTarget.${option.target.name}'),
+            label: option.label,
+            variant: _variantFor(option.target),
             onTap: () => _runDeleteAction(
               context,
-              defaultOption.action,
-              () => widget.onDelete(defaultOption.target),
+              option.action,
+              () => onDelete(option.target),
             ),
           ),
-        SizedBox(
-          height: 48,
-          child: _isMoreOptionsShown
-              ? Center(
-                  child: LabeledControlComponent(
-                    expandLabel: false,
-                    foreground: context.componentColors.textLight,
-                    onTap: () {
-                      setState(() {
-                        _isSetAsDefaultSelected = !_isSetAsDefaultSelected;
-                      });
-                    },
-                    control: CheckboxComponent(
-                      selected: _isSetAsDefaultSelected,
-                      onChanged: (value) {
-                        setState(() {
-                          _isSetAsDefaultSelected = value;
-                        });
-                      },
-                    ),
-                    label: l10n.setAsDefault,
-                  ),
-                )
-              : GhostButtonComponent(
-                  label: l10n.moreOptions,
-                  onTap: () {
-                    setState(() {
-                      _isMoreOptionsShown = true;
-                    });
-                  },
-                  trailing: const Icon(Icons.keyboard_arrow_up, size: 16),
-                ),
-        ),
       ],
     );
-  }
-
-  Future<void> _runMixedDeleteOption(_MixedDeleteTargetOption option) async {
-    if (_isSetAsDefaultSelected) {
-      await localSettings.setDeletePreference(
-        _deletePreferenceForMixedTarget(option.target),
-      );
-    }
-    await widget.onDelete(option.target);
   }
 }
 
@@ -1188,26 +1054,8 @@ Future<void> _runDeleteAction(
 ButtonComponentVariant _variantFor(_MixedDeleteTarget target) {
   return switch (target) {
     _MixedDeleteTarget.ente ||
-    _MixedDeleteTarget.device => ButtonComponentVariant.secondary,
+    _MixedDeleteTarget.device => ButtonComponentVariant.neutral,
     _MixedDeleteTarget.both => ButtonComponentVariant.critical,
-  };
-}
-
-_MixedDeleteTarget _mixedDeleteTargetForPreference(
-  DeletePreference deletePreference,
-) {
-  return switch (deletePreference) {
-    DeletePreference.DeleteFromBoth => _MixedDeleteTarget.both,
-    DeletePreference.DeleteFromLocalOnly => _MixedDeleteTarget.device,
-    DeletePreference.DeleteFromRemoteOnly => _MixedDeleteTarget.ente,
-  };
-}
-
-DeletePreference _deletePreferenceForMixedTarget(_MixedDeleteTarget target) {
-  return switch (target) {
-    _MixedDeleteTarget.both => DeletePreference.DeleteFromBoth,
-    _MixedDeleteTarget.device => DeletePreference.DeleteFromLocalOnly,
-    _MixedDeleteTarget.ente => DeletePreference.DeleteFromRemoteOnly,
   };
 }
 

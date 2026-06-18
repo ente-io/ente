@@ -38,9 +38,23 @@ enum LocalGalleryFlag {
 }
 
 enum DeletePreference {
-  DeleteFromBoth,
-  DeleteFromLocalOnly,
-  DeleteFromRemoteOnly,
+  DeleteFromBoth("delete_from_both"),
+  DeleteFromLocalOnly("delete_from_local_only"),
+  DeleteFromRemoteOnly("delete_from_remote_only");
+
+  const DeletePreference(this._serializedValue);
+
+  final String _serializedValue;
+
+  static DeletePreference? _fromSerializedValue(String? value) {
+    return switch (value) {
+      "delete_from_both" => DeleteFromBoth,
+      "delete_from_local_only" => DeleteFromLocalOnly,
+      "delete_from_remote_only" ||
+      "delete_from_ente_only" => DeleteFromRemoteOnly,
+      _ => null,
+    };
+  }
 }
 
 class LocalSettings {
@@ -620,26 +634,16 @@ class LocalSettings {
     if (!_prefs.containsKey(_kDeletePreference)) {
       return null;
     }
-    final flag = _prefs.getString(_kDeletePreference);
-    if (flag == "delete_from_both") {
-      return DeletePreference.DeleteFromBoth;
-    } else if (flag == "delete_from_local_only") {
-      return DeletePreference.DeleteFromLocalOnly;
-    } else if (flag == "delete_from_ente_only") {
-      return DeletePreference.DeleteFromRemoteOnly;
-    }
-    return null;
+    return DeletePreference._fromSerializedValue(
+      _prefs.getString(_kDeletePreference),
+    );
   }
 
   Future<void> setDeletePreference(DeletePreference? preference) async {
-    if (preference == .DeleteFromBoth) {
-      await _prefs.setString(_kDeletePreference, "delete_from_both");
-    } else if (preference == .DeleteFromLocalOnly) {
-      await _prefs.setString(_kDeletePreference, "delete_from_local_only");
-    } else if (preference == .DeleteFromRemoteOnly) {
-      await _prefs.setString(_kDeletePreference, "delete_from_remote_only");
-    } else {
+    if (preference == null) {
       await _prefs.remove(_kDeletePreference);
+    } else {
+      await _prefs.setString(_kDeletePreference, preference._serializedValue);
     }
   }
 }
