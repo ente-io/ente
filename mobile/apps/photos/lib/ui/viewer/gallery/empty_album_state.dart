@@ -32,7 +32,7 @@ class EmptyAlbumState extends StatelessWidget {
                 style: TextStyles.display2.copyWith(color: colors.textBase),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 140),
+              const SizedBox(height: 200),
             ],
           ),
         ),
