@@ -25,20 +25,11 @@ class EmptyAlbumState extends StatelessWidget {
             children: [
               Image.asset("assets/albums-widget-static.png", height: 160),
               const SizedBox(height: 16),
-              Text.rich(
-                TextSpan(
-                  text: AppLocalizations.of(context).addSomePhotosDesc1,
-                  children: [
-                    TextSpan(
-                      text: AppLocalizations.of(context).addSomePhotosDesc2,
-                      style: TextStyles.body.copyWith(color: colors.primary),
-                    ),
-                    TextSpan(
-                      text: AppLocalizations.of(context).addSomePhotosDesc3,
-                    ),
-                  ],
-                ),
-                style: TextStyles.body.copyWith(color: colors.textLight),
+              Text(
+                AppLocalizations.of(
+                  context,
+                ).startWithAddingPhotosOrFamiliarFaces,
+                style: TextStyles.display2.copyWith(color: colors.textBase),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 140),
