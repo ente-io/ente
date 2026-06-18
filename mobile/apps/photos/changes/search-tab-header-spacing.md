@@ -1,1 +1,0 @@
-- Matched Search tab header spacing with the Albums tab.

@@ -1,1 +1,0 @@
-- Improved Search section layouts for larger text sizes.

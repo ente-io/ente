@@ -1,1 +1,0 @@
-- Removed extra keyboard-driven bottom spacing from Photos search results.

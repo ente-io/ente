@@ -1,1 +1,0 @@
-- Updated the contacts search invite action to use the refreshed icon treatment.

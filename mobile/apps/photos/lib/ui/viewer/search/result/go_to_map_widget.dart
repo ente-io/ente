@@ -20,7 +20,13 @@ class GoToMap extends StatelessWidget {
         if (!mapEnabled) {
           try {
             await setMapEnabled(true);
+            if (!context.mounted) {
+              return;
+            }
           } catch (e) {
+            if (!context.mounted) {
+              return;
+            }
             showShortToast(
               context,
               AppLocalizations.of(context).somethingWentWrong,
