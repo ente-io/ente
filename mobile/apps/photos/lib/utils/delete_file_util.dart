@@ -820,7 +820,23 @@ Future<void> showDeleteSheet(
       );
       return;
     }
-    await deleteOnDeviceOnlyAction(context, localGalleryDeletableFiles);
+    if (true) {
+      await showBottomSheetComponent<ButtonResult>(
+        context: context,
+        useRootNavigator: Platform.isIOS,
+        builder: (_) => _SingleDeleteConfirmationSheet(
+          files: localGalleryDeletableFiles,
+          isRemoteOnly: false,
+          deleteFromRemoteOnlyAction: (context, files) async {
+            throw AssertionError("delete from remote in local gallery mode");
+          },
+          deleteOnDeviceOnlyAction: deleteOnDeviceOnlyAction,
+        ),
+      );
+    } else {
+      await deleteOnDeviceOnlyAction(context, localGalleryDeletableFiles);
+    }
+
     selectedFiles.unSelectAll(localGalleryDeletableFiles.toSet());
     return;
   }
