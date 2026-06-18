@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:math" as math;
 
 import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
@@ -140,6 +139,8 @@ class _PeopleSectionState extends State<PeopleSection> {
 }
 
 class SearchExampleRow extends StatelessWidget {
+  static const _minTileHeight = 158.0;
+
   final SectionType sectionType;
   final List<GenericSearchResult> examples;
 
@@ -147,16 +148,18 @@ class SearchExampleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SearchTabHorizontalListView(
-      height: PersonSearchExample.heightFor(context),
-      itemCount: examples.length,
-      itemBuilder: (context, index) {
-        return PersonSearchExample(
-          searchResult: examples[index],
-          selectedPeople: null,
-        );
-      },
-      separatorBuilder: (context, index) => const SizedBox(width: 10),
+    return SearchTabHorizontalRow(
+      spacing: 10,
+      children: [
+        for (final example in examples)
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: _minTileHeight),
+            child: PersonSearchExample(
+              searchResult: example,
+              selectedPeople: null,
+            ),
+          ),
+      ],
     );
   }
 }
@@ -172,18 +175,6 @@ class PersonSearchExample extends StatelessWidget {
     required this.selectedPeople,
     this.size = 108,
   });
-
-  static double heightFor(BuildContext context, {double size = 108}) {
-    final labelHeight =
-        size +
-        8 +
-        searchTabSingleLineTextHeight(context, TextStyles.body) +
-        2 +
-        searchTabSingleLineTextHeight(context, TextStyles.mini);
-    final clusterLabelHeight =
-        size + 6 + searchTabSingleLineTextHeight(context, TextStyles.body);
-    return math.max(158, math.max(labelHeight, clusterLabelHeight));
-  }
 
   void toggleSelection() {
     selectedPeople?.toggleSelection(

@@ -113,18 +113,13 @@ class _LocationsSectionState extends State<LocationsSection> {
                   (_locationsSearchResults.length >= kSearchSectionLimit - 1),
             ),
             const SizedBox(height: 4),
-            SearchTabHorizontalListView(
-              height: LocationRecommendation.heightFor(context),
-              itemCount: _locationsSearchResults.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return const GoToMapTile();
-                }
-                return LocationRecommendation(
-                  _locationsSearchResults[index - 1],
-                );
-              },
-              separatorBuilder: (context, index) => const SizedBox(width: 10),
+            SearchTabHorizontalRow(
+              spacing: 10,
+              children: [
+                const GoToMapTile(),
+                for (final locationSearchResult in _locationsSearchResults)
+                  LocationRecommendation(locationSearchResult),
+              ],
             ),
           ],
         ),
@@ -135,22 +130,12 @@ class _LocationsSectionState extends State<LocationsSection> {
 
 class LocationRecommendation extends StatelessWidget {
   static const width = 108.0;
-  static const _height = 158.0;
+  static const _minHeight = 158.0;
   static const outerCornerRadius = 20.0;
   static const cornerSmoothing = 1.0;
   static const sideOfThumbnail = 108.0;
   final GenericSearchResult locationSearchResult;
   const LocationRecommendation(this.locationSearchResult, {super.key});
-
-  static double heightFor(BuildContext context) {
-    return (sideOfThumbnail +
-            8 +
-            searchTabSingleLineTextHeight(context, TextStyles.body) +
-            2 +
-            searchTabSingleLineTextHeight(context, TextStyles.mini))
-        .clamp(_height, double.infinity)
-        .toDouble();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,87 +153,91 @@ class LocationRecommendation extends StatelessWidget {
         }
       },
       child: RepaintBoundary(
-        child: SizedBox(
-          width: width,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                children: [
-                  ClipSmoothRect(
-                    radius: SmoothBorderRadius(
-                      cornerRadius: outerCornerRadius,
-                      cornerSmoothing: cornerSmoothing,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: _minHeight),
+          child: SizedBox(
+            width: width,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
+                  children: [
+                    ClipSmoothRect(
+                      radius: SmoothBorderRadius(
+                        cornerRadius: outerCornerRadius,
+                        cornerSmoothing: cornerSmoothing,
+                      ),
+                      child: SizedBox(
+                        width: sideOfThumbnail,
+                        height: sideOfThumbnail,
+                        child: locationSearchResult.previewThumbnail() != null
+                            ? Hero(
+                                tag: heroTag,
+                                child: ThumbnailWidget(
+                                  locationSearchResult.previewThumbnail()!,
+                                  shouldShowSyncStatus: false,
+                                  shouldShowFavoriteIcon: false,
+                                ),
+                              )
+                            : const NoThumbnailWidget(),
+                      ),
                     ),
-                    child: SizedBox(
-                      width: sideOfThumbnail,
-                      height: sideOfThumbnail,
-                      child: locationSearchResult.previewThumbnail() != null
-                          ? Hero(
-                              tag: heroTag,
-                              child: ThumbnailWidget(
-                                locationSearchResult.previewThumbnail()!,
-                                shouldShowSyncStatus: false,
-                                shouldShowFavoriteIcon: false,
-                              ),
-                            )
-                          : const NoThumbnailWidget(),
-                    ),
-                  ),
-                  Positioned(
-                    left: 8,
-                    bottom: 8,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.center,
-                      children: [
-                        ClipOval(
-                          child: Container(
-                            color: const Color.fromRGBO(0, 0, 0, 0.6),
-                            width: 15,
-                            height: 15,
-                          ),
-                        ),
-                        Container(
-                          width: 16,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              width: 0.5,
-                              color: strokeSolidMutedLight,
+                    Positioned(
+                      left: 8,
+                      bottom: 8,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.center,
+                        children: [
+                          ClipOval(
+                            child: Container(
+                              color: const Color.fromRGBO(0, 0, 0, 0.6),
+                              width: 15,
+                              height: 15,
                             ),
                           ),
-                        ),
-                        const Icon(
-                          Icons.location_on_sharp,
-                          color: Colors.white,
-                          size: 11,
-                        ),
-                      ],
+                          Container(
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                width: 0.5,
+                                color: strokeSolidMutedLight,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.location_on_sharp,
+                            color: Colors.white,
+                            size: 11,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                locationSearchResult.name(),
-                style: TextStyles.body.copyWith(color: textTheme.body.color),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                AppLocalizations.of(
-                  context,
-                ).itemCount(count: locationSearchResult.fileCount()),
-                style: TextStyles.mini.copyWith(
-                  color: textTheme.miniMuted.color,
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  locationSearchResult.name(),
+                  style: TextStyles.body.copyWith(color: textTheme.body.color),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  AppLocalizations.of(
+                    context,
+                  ).itemCount(count: locationSearchResult.fileCount()),
+                  style: TextStyles.mini.copyWith(
+                    color: textTheme.miniMuted.color,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -270,6 +259,7 @@ class GoToMapTile extends StatelessWidget {
       child: SizedBox(
         width: LocationRecommendation.width,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipSmoothRect(

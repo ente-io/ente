@@ -70,13 +70,11 @@ class FileTypeSection extends StatelessWidget {
         children: [
           const SectionHeader(SectionType.fileTypesAndExtension, hasMore: true),
           const SizedBox(height: 8),
-          SearchTabHorizontalListView(
-            height: _FileTypeCard.heightFor(context),
-            itemCount: previewTiles.length,
-            itemBuilder: (context, index) {
-              return _FileTypeRecommendation(previewTiles[index]);
-            },
-            separatorBuilder: (context, index) => const SizedBox(width: 10),
+          SearchTabHorizontalRow(
+            spacing: 10,
+            children: [
+              for (final tile in previewTiles) _FileTypeRecommendation(tile),
+            ],
           ),
         ],
       ),
@@ -200,7 +198,7 @@ class _FileTypeCard extends StatelessWidget {
 
   const _FileTypeCard(this.tile);
 
-  static double heightFor(BuildContext context) {
+  static double _heightFor(BuildContext context) {
     return (_labelTop +
             searchTabSingleLineTextHeight(context, _labelStyle(Colors.black)) +
             _labelBottomPadding)
@@ -211,7 +209,7 @@ class _FileTypeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final height = heightFor(context);
+    final height = _heightFor(context);
     return CustomPaint(
       painter: _FileTypeCardBackgroundPainter(colorScheme.fill),
       child: SizedBox(

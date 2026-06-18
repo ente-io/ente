@@ -166,20 +166,16 @@ class _ContactsSectionState extends State<ContactsSection> {
                   (_contactSearchResults.length >= kSearchSectionLimit - 1),
             ),
             const SizedBox(height: 4),
-            SearchTabHorizontalListView(
-              height: ContactRecommendation.heightFor(context),
-              itemCount: _contactSearchResults.length + 1,
-              itemBuilder: (context, index) {
-                if (index == _contactSearchResults.length) {
-                  return const ContactCTA();
-                }
-                final contactSearchResult = _contactSearchResults[index];
-                return ContactRecommendation(
-                  contactSearchResult,
-                  key: ValueKey(contactSearchResult.name()),
-                );
-              },
-              separatorBuilder: (context, index) => const SizedBox(width: 12),
+            SearchTabHorizontalRow(
+              spacing: 12,
+              children: [
+                for (final contactSearchResult in _contactSearchResults)
+                  ContactRecommendation(
+                    contactSearchResult,
+                    key: ValueKey(contactSearchResult.name()),
+                  ),
+                const ContactCTA(),
+              ],
             ),
           ],
         ),
@@ -190,18 +186,10 @@ class _ContactsSectionState extends State<ContactsSection> {
 
 class ContactRecommendation extends StatefulWidget {
   static const _avatarSize = 62.0;
-  static const _height = 92.0;
+  static const _minHeight = 92.0;
 
   final GenericSearchResult contactSearchResult;
   const ContactRecommendation(this.contactSearchResult, {super.key});
-
-  static double heightFor(BuildContext context) {
-    return (_avatarSize +
-            10 +
-            searchTabSingleLineTextHeight(context, TextStyles.mini))
-        .clamp(_height, double.infinity)
-        .toDouble();
-  }
 
   @override
   State<ContactRecommendation> createState() => _ContactRecommendationState();
@@ -226,32 +214,38 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
           routeToPage(context, ContactResultPage(widget.contactSearchResult));
         }
       },
-      child: SizedBox(
-        width: 92,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ClipOval(
-              child: SizedBox(
-                width: ContactRecommendation._avatarSize,
-                height: ContactRecommendation._avatarSize,
-                child: ContactAvatarWidget(
-                  contactUserId: contactUserId,
-                  email: contactEmail,
-                  personId: personId,
-                  size: ContactRecommendation._avatarSize,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: ContactRecommendation._minHeight,
+        ),
+        child: SizedBox(
+          width: 92,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipOval(
+                child: SizedBox(
+                  width: ContactRecommendation._avatarSize,
+                  height: ContactRecommendation._avatarSize,
+                  child: ContactAvatarWidget(
+                    contactUserId: contactUserId,
+                    email: contactEmail,
+                    personId: personId,
+                    size: ContactRecommendation._avatarSize,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              widget.contactSearchResult.name(),
-              style: TextStyles.mini.copyWith(color: colors.textBase),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 10),
+              Text(
+                widget.contactSearchResult.name(),
+                style: TextStyles.mini.copyWith(color: colors.textBase),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -272,6 +266,7 @@ class ContactCTA extends StatelessWidget {
       child: SizedBox(
         width: 62,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
