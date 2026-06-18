@@ -14,6 +14,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart'
     show ButtonAction;
+import "package:photos/ui/components/more_options_button.dart";
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/viewer/file/file_details_widget.dart';
 import "package:photos/utils/delete_file_util.dart";
@@ -222,7 +223,7 @@ Future<void> showSingleFileDeleteSheet(
                         label: l10n.setAsDefault,
                       ),
                     )
-                  : _MoreOptionsButton(
+                  : MoreOptionsButton(
                       label: l10n.moreOptions,
                       onTap: () {
                         setState(() {
@@ -268,56 +269,6 @@ Future<void> _runSingleFileDeleteAction(
 
 Exception _toException(Object error) {
   return error is Exception ? error : Exception(error.toString());
-}
-
-class _MoreOptionsButton extends StatefulWidget {
-  const _MoreOptionsButton({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  State<_MoreOptionsButton> createState() => _MoreOptionsButtonState();
-}
-
-// TODO: Replace this component once ente_components has a ghost button variant.
-class _MoreOptionsButtonState extends State<_MoreOptionsButton> {
-  var _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final foreground = context.componentColors.textLight;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
-      onTap: widget.onTap,
-      child: AnimatedScale(
-        scale: _isPressed ? 0.98 : 1,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOutCubic,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              widget.label,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: TextStyles.body.copyWith(color: foreground),
-            ),
-            const SizedBox(width: Spacing.xs),
-            Icon(
-              Icons.keyboard_arrow_up,
-              color: foreground,
-              size: IconSizes.small,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
