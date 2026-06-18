@@ -19,11 +19,15 @@ import (
 // Error parses the error, translates it into an HTTP response and aborts
 // the request
 func Error(c *gin.Context, err error) {
-	contextLogger := log.WithError(err).
-		WithFields(log.Fields{
-			"req_id":  requestid.Get(c),
-			"user_id": auth.GetUserID(c.Request.Header),
-		})
+	errorResponse(c, err, true)
+}
+
+// ExpectedError writes the same HTTP response as Error without logging.
+func ExpectedError(c *gin.Context, err error) {
+	errorResponse(c, err, false)
+}
+
+func errorResponse(c *gin.Context, err error, logFailure bool) {
 	isClientError := false
 	// Tip: To trigger the "unexpected EOF" error, connect with:
 	//
@@ -45,10 +49,17 @@ func Error(c *gin.Context, err error) {
 	if isEnteApiErr && enteApiErr.HttpStatusCode >= 400 && enteApiErr.HttpStatusCode < 500 {
 		isClientError = true
 	}
-	if isClientError {
-		contextLogger.Warn("Request failed")
-	} else {
-		contextLogger.Error("Request failed")
+	if logFailure {
+		contextLogger := log.WithError(err).
+			WithFields(log.Fields{
+				"req_id":  requestid.Get(c),
+				"user_id": auth.GetUserID(c.Request.Header),
+			})
+		if isClientError {
+			contextLogger.Warn("Request failed")
+		} else {
+			contextLogger.Error("Request failed")
+		}
 	}
 	if isEnteApiErr {
 		c.AbortWithStatusJSON(enteApiErr.HttpStatusCode, enteApiErr)

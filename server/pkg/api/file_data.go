@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
@@ -140,6 +141,10 @@ func (h *FileHandler) GetPreviewURL(c *gin.Context) {
 	actorUser := auth.GetUserID(c.Request.Header)
 	url, err := h.FileDataCtrl.GetPreviewUrl(c, actorUser, request)
 	if err != nil {
+		if errors.Is(err, &ente.ErrNotFoundError) {
+			handler.ExpectedError(c, err)
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
