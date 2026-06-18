@@ -650,6 +650,11 @@
       ]
     },
     {
+      "title": "Deutsche Post",
+      "slug": "deutschepost",
+      "hex": "ffcc00"
+    },
+    {
       "title": "DigiFinex",
       "altNames": [
         "Digi Finex",
