@@ -136,14 +136,8 @@ func testLogHook(t *testing.T) *logtest.Hook {
 	t.Helper()
 	logger := log.StandardLogger()
 	originalHooks := logger.ReplaceHooks(make(log.LevelHooks))
-	originalOut := logger.Out
-	originalFormatter := logger.Formatter
-	originalLevel := logger.Level
 	t.Cleanup(func() {
 		logger.ReplaceHooks(originalHooks)
-		logger.SetOutput(originalOut)
-		logger.SetFormatter(originalFormatter)
-		logger.SetLevel(originalLevel)
 	})
 
 	hook := logtest.NewGlobal()

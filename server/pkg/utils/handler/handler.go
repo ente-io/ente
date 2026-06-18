@@ -25,17 +25,13 @@ func Error(c *gin.Context, err error) {
 	}
 	enteApiErr, isEnteApiErr := unWrappedErr.(*ente.ApiError)
 
-	if level, shouldLog := requestFailureLogLevel(err, enteApiErr); shouldLog {
+	if level := requestFailureLogLevel(err, enteApiErr); level != nil {
 		contextLogger := log.WithError(err).
 			WithFields(log.Fields{
 				"req_id":  requestid.Get(c),
 				"user_id": auth.GetUserID(c.Request.Header),
 			})
-		if level == log.WarnLevel {
-			contextLogger.Warn("Request failed")
-		} else {
-			contextLogger.Error("Request failed")
-		}
+		contextLogger.Log(*level, "Request failed")
 	}
 	if isEnteApiErr {
 		c.AbortWithStatusJSON(enteApiErr.HttpStatusCode, enteApiErr)
@@ -52,11 +48,11 @@ func Error(c *gin.Context, err error) {
 	}
 }
 
-func requestFailureLogLevel(err error, apiErr *ente.ApiError) (log.Level, bool) {
+func requestFailureLogLevel(err error, apiErr *ente.ApiError) *log.Level {
 	if errors.Is(err, ente.ErrStorageLimitExceeded) ||
 		errors.Is(err, ente.ErrNoActiveSubscription) ||
 		(apiErr != nil && apiErr.Code == ente.NotFoundError) {
-		return log.ErrorLevel, false
+		return nil
 	}
 	if errors.Is(err, ente.ErrInvalidPassword) ||
 		errors.Is(err, ente.ErrIncorrectOTT) ||
@@ -66,9 +62,13 @@ func requestFailureLogLevel(err error, apiErr *ente.ApiError) (log.Level, bool) 
 		errors.Is(err, sql.ErrNoRows) ||
 		isRequestIOError(err) ||
 		(apiErr != nil && apiErr.HttpStatusCode >= 400 && apiErr.HttpStatusCode < 500) {
-		return log.WarnLevel, true
+		return logLevel(log.WarnLevel)
 	}
-	return log.ErrorLevel, true
+	return logLevel(log.ErrorLevel)
+}
+
+func logLevel(level log.Level) *log.Level {
+	return &level
 }
 
 func isRequestIOError(err error) bool {
