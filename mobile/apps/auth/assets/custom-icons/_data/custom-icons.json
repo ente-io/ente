@@ -1260,6 +1260,15 @@
       "slug": "linkedin"
     },
     {
+      "title": "Linus Tech Tips",
+      "slug": "linus_tech_tips",
+      "altNames": [
+        "LTT",
+        "Linus Tech Tips Forums",
+        "LTT Forums"
+      ]
+    },
+    {
       "title": "Linux.Do",
       "slug": "linux_do",
       "altNames": [
@@ -2542,18 +2551,18 @@
       "title": "Recruit",
       "slug": "recruit",
       "altNames": [
-      "リクルート",
-      "リクルートID",
-      "recruit id",
-      "recruit holdings",
-      "rgf"
+        "リクルート",
+        "リクルートID",
+        "recruit id",
+        "recruit holdings",
+        "rgf"
       ]
     },
     {
       "title": "Coincheck",
       "slug": "coincheck",
       "altNames": [
-      "コインチェック"
+        "コインチェック"
       ]
     }
   ]
