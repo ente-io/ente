@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/account/user_service.dart';
-import "package:photos/services/install_source_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
@@ -314,8 +314,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   String get _routeSource => widget.referralSource?.trim() ?? '';
 
   Future<void> _updateReferralSourceFieldVisibility() async {
-    final hasInstallSource = await InstallSourceService.instance
-        .hasInstallSource();
+    final hasInstallSource = await installSourceService.hasInstallSource();
     _setHasInstallSource(hasInstallSource);
   }
 
@@ -326,8 +325,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     if (_hasInstallSource) {
       return _routeSource;
     }
-    final hasInstallSource = await InstallSourceService.instance
-        .hasInstallSource();
+    final hasInstallSource = await installSourceService.hasInstallSource();
     _setHasInstallSource(hasInstallSource);
     return hasInstallSource ? _routeSource : _referralSource;
   }

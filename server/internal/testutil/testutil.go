@@ -118,6 +118,7 @@ func ResetTables(t *testing.T, db *sql.DB) {
 	_, err := db.Exec(`
 		TRUNCATE TABLE
 			notification_history,
+			events,
 			task_lock,
 			storage_bonus,
 			referral_codes,

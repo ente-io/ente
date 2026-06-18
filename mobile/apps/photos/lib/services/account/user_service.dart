@@ -378,6 +378,7 @@ class UserService {
             userPassword,
             Configuration.instance.getKeyAttributes()!,
           );
+          unawaited(installSourceService.autoAttributePendingSource());
         } else {
           throw Exception("unexpected response during passkey verification");
         }
@@ -708,6 +709,7 @@ class UserService {
           Configuration.instance.getKeyAttributes()!,
           keyEncryptionKey: keyEncryptionKey,
         );
+        unawaited(installSourceService.autoAttributePendingSource());
         await flagService.tryRefreshFlags();
         Configuration.instance.resetVolatilePassword();
         page = const HomeWidget();
@@ -1206,6 +1208,8 @@ class UserService {
     } else {
       await Configuration.instance.setToken(responseData["token"]);
     }
+    final isSignUp = responseData["encryptedToken"] == null;
+    unawaited(installSourceService.autoAttributeSource(isSignUp: isSignUp));
 
     // Initialize shared feed cutoff at login; feed path keeps the same fallback.
     localSettings.getOrCreateSharedPhotoFeedCutoffTime();
