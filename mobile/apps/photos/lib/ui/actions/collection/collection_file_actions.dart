@@ -100,9 +100,11 @@ extension CollectionFileActions on CollectionActions {
         : null;
     await dialog?.show();
     final int currentUserID = Configuration.instance.getUserID()!;
-    for (int collectionIndex = 0;
-        collectionIndex < collections.length;
-        collectionIndex++) {
+    for (
+      int collectionIndex = 0;
+      collectionIndex < collections.length;
+      collectionIndex++
+    ) {
       final collection = collections[collectionIndex];
       // Pending-upload entries are keyed by generatedID (the primary key) in
       // the files table. Reusing the same generatedID across collections would
