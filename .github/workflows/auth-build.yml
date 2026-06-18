@@ -151,7 +151,7 @@ jobs:
 
             - name: Build PlayStore AAB
               run: |
-                  flutter build appbundle --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --release --flavor playstore --dart-define=app.flavor=playstore --dart-define=cronetHttpNoPlay=true
+                  flutter build appbundle --build-name="${RELEASE_VERSION}" --build-number="${BUILD_NUMBER}" --release --flavor playstore --dart-define=cronetHttpNoPlay=true
               env:
                   SIGNING_KEY_PATH: ${{ runner.temp }}/ente_auth_key.jks
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_AUTH }}

@@ -51,7 +51,7 @@ class AboutSectionWidget extends StatelessWidget {
           url: "https://ente.com/terms",
         ),
         sectionOptionSpacing,
-        UpdateService.instance.isIndependent()
+        UpdateService.instance.supportsInAppUpdates()
             ? Column(
                 children: [
                   MenuItemWidget(
