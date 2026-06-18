@@ -1,10 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/service_locator.dart";
-import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/map/map_screen.dart";
-import 'package:photos/ui/notification/toast.dart';
+import "package:photos/ui/viewer/search/search_map_navigation.dart";
 
 //Used for empty state of location section
 class GoToMap extends StatelessWidget {
@@ -16,33 +13,7 @@ class GoToMap extends StatelessWidget {
         ? "assets/search_map_tile_dark.png"
         : "assets/search_map_tile_light.png";
     return GestureDetector(
-      onTap: () async {
-        if (!mapEnabled) {
-          try {
-            await setMapEnabled(true);
-            if (!context.mounted) {
-              return;
-            }
-          } catch (e) {
-            if (!context.mounted) {
-              return;
-            }
-            showShortToast(
-              context,
-              AppLocalizations.of(context).somethingWentWrong,
-            );
-            return;
-          }
-        }
-        // ignore: unawaited_futures
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => MapScreen(
-              filesFutureFn: SearchService.instance.getAllFilesForSearch,
-            ),
-          ),
-        );
-      },
+      onTap: () => openSearchMap(context),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 14, 8, 0),
         child: Column(

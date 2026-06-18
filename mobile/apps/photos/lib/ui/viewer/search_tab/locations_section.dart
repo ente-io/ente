@@ -10,16 +10,13 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
-import "package:photos/service_locator.dart";
-import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/map/map_screen.dart";
-import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/go_to_map_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
+import "package:photos/ui/viewer/search/search_map_navigation.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
@@ -269,33 +266,7 @@ class GoToMapTile extends StatelessWidget {
         ? "assets/search_map_tile_dark.png"
         : "assets/search_map_tile_light.png";
     return GestureDetector(
-      onTap: () async {
-        if (!mapEnabled) {
-          try {
-            await setMapEnabled(true);
-            if (!context.mounted) {
-              return;
-            }
-          } catch (e) {
-            if (!context.mounted) {
-              return;
-            }
-            showShortToast(
-              context,
-              AppLocalizations.of(context).somethingWentWrong,
-            );
-            return;
-          }
-        }
-        // ignore: unawaited_futures
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => MapScreen(
-              filesFutureFn: SearchService.instance.getAllFilesForSearch,
-            ),
-          ),
-        );
-      },
+      onTap: () => openSearchMap(context),
       child: SizedBox(
         width: LocationRecommendation.width,
         child: Column(
