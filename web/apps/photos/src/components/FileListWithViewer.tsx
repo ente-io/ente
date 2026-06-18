@@ -6,7 +6,6 @@ import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
-import log from "ente-base/log";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import {
     FileViewer,
@@ -476,8 +475,6 @@ const MapIcon = styled("img")<{ $isDarkMode: boolean }>(
  */
 const fileTimelineDateString = (file: EnteFile) => {
     const date = fileCreationPhotoDate(file);
-    if (!Number.isFinite(date.getTime()))
-        log.error(`Invalid file creation date for ${file.id}`);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))
