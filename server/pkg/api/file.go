@@ -54,6 +54,9 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 		file.IsDeleted = false
 		file, err := h.Controller.Create(c, userID, file, c.Request.UserAgent(), enteApp)
 		if err != nil {
+			if handleExpectedUploadLimitError(c, err) {
+				return
+			}
 			handler.Error(c, stacktrace.Propagate(err, ""))
 			return
 		}
@@ -62,6 +65,9 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 	}
 	response, err := h.Controller.Update(c, userID, file, enteApp)
 	if err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -87,6 +93,9 @@ func (h *FileHandler) CreateMetaFile(c *gin.Context) {
 	file.IsDeleted = false
 	resp, err := h.Controller.CreateMetaFile(c, userID, file, c.Request.UserAgent(), enteApp)
 	if err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -129,6 +138,9 @@ func (h *FileHandler) Update(c *gin.Context) {
 	}
 	response, err := h.Controller.Update(c, userID, file, enteApp)
 	if err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -438,6 +450,9 @@ func (h *FileHandler) UpdateThumbnail(c *gin.Context) {
 	}
 	err := h.Controller.UpdateThumbnail(c, request.FileID, request.Thumbnail, enteApp)
 	if err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
