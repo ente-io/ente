@@ -23,6 +23,7 @@ import { readStream } from "ente-gallery/utils/native-stream";
  * existing third party tools for working with the takeout format.
  */
 export interface ParsedMetadataJSON {
+    title?: string;
     creationTime?: number;
     modificationTime?: number;
     location?: Location;
@@ -225,6 +226,8 @@ const parseMetadataJSONText = (text: string) => {
 
     const parsedMetadataJSON: ParsedMetadataJSON = {};
 
+    parsedMetadataJSON.title = parseGTTitle(metadataJSON.title);
+
     parsedMetadataJSON.creationTime =
         parseGTTimestamp(metadataJSON.photoTakenTime) ??
         parseGTTimestamp(metadataJSON.creationTime);
@@ -305,3 +308,13 @@ const parseGTLocation = (o: unknown): Location | undefined => {
  */
 const parseGTNonEmptyString = (o: unknown): string | undefined =>
     o && typeof o == "string" ? o : undefined;
+
+/**
+ * Parse the title from a Google Takeout JSON, trimming whitespace and treating
+ * blank titles as undefined so the upload can fall back to the file name.
+ */
+const parseGTTitle = (o: unknown): string | undefined => {
+    if (!o || typeof o != "string") return undefined;
+    const title = o.trim();
+    return title ? title : undefined;
+};

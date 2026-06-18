@@ -1198,12 +1198,7 @@ const extractLivePhotoMetadata = async (
     const hash = `${imageHash}:${videoHash}`;
 
     return {
-        metadata: {
-            ...imageMetadata,
-            title: uploadItemFileName(livePhotoAssets.image),
-            fileType: FileType.livePhoto,
-            hash,
-        },
+        metadata: { ...imageMetadata, fileType: FileType.livePhoto, hash },
         publicMagicMetadata,
     };
 };
@@ -1290,7 +1285,7 @@ const extractImageOrVideoMetadata = async (
 
     const metadata: FileMetadata = {
         fileType,
-        title: fileName,
+        title: parsedMetadataJSON?.title ?? fileName,
         creationTime: ensureInteger(creationTime),
         modificationTime: ensureInteger(modificationTime),
         hash,
