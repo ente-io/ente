@@ -57,8 +57,7 @@ class Configuration extends BaseConfiguration {
   @override
   // This includes both base keys (key, secretKey) and auth-specific keys.
   List<String> get secureStorageKeys => [
-    BaseConfiguration.keyKey,
-    BaseConfiguration.secretKeyKey,
+    ...BaseConfiguration.accountSecureStorageKeys,
     authSecretKeyKey,
     // Note: offlineAuthSecretKey is intentionally not included here
     // as it persists across logouts for offline mode

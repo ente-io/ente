@@ -102,6 +102,10 @@ class _TestConfiguration extends BaseConfiguration {
   );
 
   @override
+  List<String> get secureStorageKeys =>
+      BaseConfiguration.accountSecureStorageKeys;
+
+  @override
   String? getEmail() => 'me@test.test';
 
   @override

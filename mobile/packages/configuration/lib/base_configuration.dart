@@ -37,6 +37,7 @@ abstract class BaseConfiguration {
   static const userIDKey = "user_id";
   static const endPointKey = "endpoint";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
+  static const accountSecureStorageKeys = [keyKey, secretKeyKey];
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -55,8 +56,7 @@ abstract class BaseConfiguration {
 
   EnteAppIdentity get appIdentity;
 
-  // Descendants can override to append keys that must be cleared.
-  List<String> get secureStorageKeys => [];
+  List<String> get secureStorageKeys;
 
   Future<void> init(List<EnteBaseDatabase> dbs) async {
     _databases = dbs;
