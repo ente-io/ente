@@ -217,6 +217,7 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		return r.limit500ReqPerMin
 	}
 	if reqPath == "/users/ott" ||
+		reqPath == "/events" ||
 		reqPath == "/users/verify-email" ||
 		reqPath == "/users/change-email" ||
 		reqPath == "/paste/create" ||

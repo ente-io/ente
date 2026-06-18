@@ -25,6 +25,7 @@ import "package:photos/services/backup_preference_service.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/services/install_source_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/compute_controller.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
@@ -283,6 +284,14 @@ WrappedCacheService? _wrappedCacheService;
 WrappedCacheService get wrappedCacheService {
   _wrappedCacheService ??= WrappedCacheService.instance;
   return _wrappedCacheService!;
+}
+
+InstallSourceService? _installSourceService;
+InstallSourceService get installSourceService {
+  _installSourceService ??= InstallSourceService(
+    ServiceLocator.instance.enteDio,
+  );
+  return _installSourceService!;
 }
 
 // Gateways

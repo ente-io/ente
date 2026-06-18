@@ -7,11 +7,21 @@ class InstallSourceProvider(context: Context) {
     private val store = InstallSourceEventStore(context)
 
     fun hasInstallSource(result: MethodChannel.Result) {
+        store.saveSource(InstallSource(emptyMap()))
         result.success(false)
     }
 
-    fun logInstallSource(result: MethodChannel.Result) {
-        val source = store.sourceFromState() ?: store.fallbackSource()
-        result.success(store.logInstallSource(source))
+    fun autoAttributeSource(isSignUp: Boolean, result: MethodChannel.Result) {
+        store.saveSource(InstallSource(emptyMap()))
+        store.autoAttributeSource(isSignUp)
+        result.success(null)
+    }
+
+    fun getPendingEvents(result: MethodChannel.Result) {
+        result.success(emptyList<String>())
+    }
+
+    fun markEventSent(event: String?, result: MethodChannel.Result) {
+        result.success(null)
     }
 }
