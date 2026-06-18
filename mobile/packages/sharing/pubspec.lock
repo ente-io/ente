@@ -270,6 +270,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_screen_cover:
+    dependency: "direct overridden"
+    description:
+      path: "../screen_cover"
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_strings:
     dependency: "direct main"
     description:
@@ -878,14 +885,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
-  privacy_screen:
-    dependency: transitive
-    description:
-      name: privacy_screen
-      sha256: "2856e3a3ed082061a5cd2a1518f1ce6367c55916fb75e5db72e5983033a1ca54"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.8"
   pub_semver:
     dependency: transitive
     description:

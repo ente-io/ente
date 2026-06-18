@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: ente_accounts,ente_base,ente_configuration,ente_events,ente_logging,ente_network,ente_strings,ente_ui,ente_utils,ente_crypto_api,ente_pure_utils,local_auth_linux
+# melos_managed_dependency_overrides: ente_accounts,ente_base,ente_configuration,ente_events,ente_logging,ente_network,ente_strings,ente_ui,ente_utils,ente_crypto_api,ente_pure_utils,local_auth_linux,ente_screen_cover
 dependency_overrides:
   ente_accounts:
     path: ../accounts
@@ -16,6 +16,8 @@ dependency_overrides:
     path: ../network
   ente_pure_utils:
     path: ../ente_pure_utils
+  ente_screen_cover:
+    path: ../screen_cover
   ente_strings:
     path: ../strings
   ente_ui:

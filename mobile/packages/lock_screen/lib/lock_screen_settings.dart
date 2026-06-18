@@ -7,10 +7,9 @@ import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
-import "package:flutter/material.dart";
+import "package:ente_screen_cover/ente_screen_cover.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:local_auth/local_auth.dart";
-import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LockScreenSettings {
@@ -99,14 +98,7 @@ class LockScreenSettings {
 
   Future<void> setHideAppContent(bool hideContent) async {
     if (PlatformDetector.isDesktop()) return;
-    !hideContent
-        ? PrivacyScreen.instance.disable()
-        : await PrivacyScreen.instance.enable(
-            iosOptions: const PrivacyIosOptions(enablePrivacy: true),
-            androidOptions: const PrivacyAndroidOptions(enableSecure: true),
-            backgroundColor: const Color(0xff000000),
-            blurEffect: PrivacyBlurEffect.extraLight,
-          );
+    !hideContent ? EnteScreenCover.disable() : await EnteScreenCover.enable();
     await _preferences.setBool(keyHideAppContent, hideContent);
   }
 
