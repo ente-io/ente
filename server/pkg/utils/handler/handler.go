@@ -59,6 +59,9 @@ func requestFailureLogLevel(err error, apiErr *ente.ApiError) (log.Level, bool) 
 		return log.ErrorLevel, false
 	}
 	if errors.Is(err, ente.ErrInvalidPassword) ||
+		errors.Is(err, ente.ErrIncorrectOTT) ||
+		errors.Is(err, ente.ErrIncorrectTOTP) ||
+		errors.Is(err, ente.ErrAuthenticationRequired) ||
 		errors.Is(err, ente.ErrUserDeleted) ||
 		errors.Is(err, sql.ErrNoRows) ||
 		isRequestIOError(err) ||

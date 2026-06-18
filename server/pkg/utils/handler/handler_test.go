@@ -52,19 +52,48 @@ func TestErrorDoesNotLogExpectedErrors(t *testing.T) {
 	}
 }
 
-func TestErrorLogsWarnForSQLNoRows(t *testing.T) {
+func TestErrorLogsWarnForExpectedClientErrors(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	recorder, ctx := testContext()
-	hook := testLogHook(t)
+	for _, tt := range []struct {
+		name       string
+		err        error
+		wantStatus int
+	}{
+		{
+			name:       "sql no rows",
+			err:        sql.ErrNoRows,
+			wantStatus: http.StatusNotFound,
+		},
+		{
+			name:       "incorrect ott",
+			err:        ente.ErrIncorrectOTT,
+			wantStatus: http.StatusUnauthorized,
+		},
+		{
+			name:       "incorrect totp",
+			err:        ente.ErrIncorrectTOTP,
+			wantStatus: http.StatusUnauthorized,
+		},
+		{
+			name:       "authentication required",
+			err:        ente.ErrAuthenticationRequired,
+			wantStatus: http.StatusUnauthorized,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			recorder, ctx := testContext()
+			hook := testLogHook(t)
 
-	Error(ctx, stacktrace.Propagate(sql.ErrNoRows, ""))
+			Error(ctx, stacktrace.Propagate(tt.err, ""))
 
-	require.Equal(t, http.StatusNotFound, recorder.Code)
-	entry := hook.LastEntry()
-	require.NotNil(t, entry)
-	require.Equal(t, log.WarnLevel, entry.Level)
-	require.Equal(t, "Request failed", entry.Message)
+			require.Equal(t, tt.wantStatus, recorder.Code)
+			entry := hook.LastEntry()
+			require.NotNil(t, entry)
+			require.Equal(t, log.WarnLevel, entry.Level)
+			require.Equal(t, "Request failed", entry.Message)
+		})
+	}
 }
 
 func TestErrorLogsUnexpectedErrors(t *testing.T) {

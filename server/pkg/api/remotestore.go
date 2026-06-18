@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
@@ -87,10 +86,6 @@ func (h *RemoteStoreHandler) CheckDomain(c *gin.Context) {
 	}
 	_, err := h.Controller.DomainOwner(c, domain)
 	if err != nil {
-		if errors.Is(err, &ente.ErrNotFoundError) {
-			c.Status(http.StatusNotFound)
-			return
-		}
 		handler.Error(c, stacktrace.Propagate(err, "failed to check custom domain"))
 		return
 	}
