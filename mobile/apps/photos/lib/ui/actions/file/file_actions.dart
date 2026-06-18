@@ -104,7 +104,7 @@ Future<void> showSingleFileDeleteSheet(
                   return deleted.isNotEmpty;
                 },
                 afterPop: (didDelete) {
-                  if (didDelete) {
+                  if (didDelete && !isLocalOnlyContext) {
                     onFileRemoved?.call(file);
                   }
                 },
