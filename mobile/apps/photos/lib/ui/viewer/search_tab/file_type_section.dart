@@ -200,7 +200,7 @@ class _FileTypeCard extends StatelessWidget {
 
   static double _heightFor(BuildContext context) {
     return (_labelTop +
-            searchTabSingleLineTextHeight(context, _labelStyle(Colors.black)) +
+            _singleLineTextHeight(context, _labelStyle(Colors.black)) +
             _labelBottomPadding)
         .clamp(_height, double.infinity)
         .toDouble();
@@ -255,6 +255,15 @@ class _FileTypeCard extends StatelessWidget {
       height: 16.615385 / 12.461538,
     );
   }
+}
+
+double _singleLineTextHeight(BuildContext context, TextStyle style) {
+  final textPainter = TextPainter(
+    text: TextSpan(text: "Ag", style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  return textPainter.height;
 }
 
 class _FileExtensionPill extends StatelessWidget {
