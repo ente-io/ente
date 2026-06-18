@@ -1542,8 +1542,12 @@
     "description": "Search result subtitle label for person results"
   },
   "shared": "Shared",
-  "received": "Received",
-  "@received": {
+  "sharedAlbumsLabel": "Shared",
+  "@sharedAlbumsLabel": {
+    "description": "Albums tab label for albums shared by you"
+  },
+  "receivedAlbumsLabel": "Received",
+  "@receivedAlbumsLabel": {
     "description": "Albums tab filter label for albums received from other people"
   },
   "searchResultUploadedBy": "Uploaded by",

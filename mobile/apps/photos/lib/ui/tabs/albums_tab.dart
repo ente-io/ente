@@ -537,12 +537,12 @@ class _AlbumsTabState extends State<AlbumsTab>
               : null,
         ),
         ..._buildCollectionSearchSectionSlivers(
-          title: strings.shared,
+          title: strings.sharedAlbumsLabel,
           tag: "album_search_shared",
           collections: filteredSharedCollections,
         ),
         ..._buildCollectionSearchSectionSlivers(
-          title: strings.received,
+          title: strings.receivedAlbumsLabel,
           tag: "album_search_received",
           collections: filteredReceivedCollections,
         ),
@@ -941,7 +941,8 @@ class _AlbumsTabState extends State<AlbumsTab>
                                               if (!localGalleryMode) ...[
                                                 const SizedBox(width: 8),
                                                 _AlbumsFilterChip(
-                                                  label: strings.shared,
+                                                  label:
+                                                      strings.sharedAlbumsLabel,
                                                   selected:
                                                       effectiveFilter ==
                                                       _AlbumsFilter.shared,
@@ -951,7 +952,8 @@ class _AlbumsTabState extends State<AlbumsTab>
                                                 ),
                                                 const SizedBox(width: 8),
                                                 _AlbumsFilterChip(
-                                                  label: strings.received,
+                                                  label: strings
+                                                      .receivedAlbumsLabel,
                                                   selected:
                                                       effectiveFilter ==
                                                       _AlbumsFilter.received,
