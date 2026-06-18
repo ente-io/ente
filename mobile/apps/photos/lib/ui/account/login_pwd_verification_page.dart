@@ -82,7 +82,7 @@ class _LoginPasswordVerificationPageState
           key: const ValueKey("verifyPasswordButton"),
           label: AppLocalizations.of(context).logInLabel,
           isDisabled: !_hasPassword,
-          onTap: _hasPassword ? _verifyEnteredPassword : null,
+          onTap: _verifyEnteredPassword,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -123,7 +123,7 @@ class _LoginPasswordVerificationPageState
             autocorrect: false,
             autofocus: true,
             shouldUnfocusOnClearOrSubmit: true,
-            onSubmit: _hasPassword ? (_) => _verifyEnteredPassword() : null,
+            onSubmit: (_) => _verifyEnteredPassword(),
             onChanged: (value) {
               final hasPassword = value.isNotEmpty;
               if (_hasPassword != hasPassword) {
