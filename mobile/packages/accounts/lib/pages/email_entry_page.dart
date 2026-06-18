@@ -47,6 +47,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   bool _password2InFocus = false;
   bool _passwordIsValid = false;
 
+  bool get _hasValidMatchingPasswords =>
+      _passwordIsValid &&
+      (_password?.isNotEmpty ?? false) &&
+      _cnfPassword.isNotEmpty &&
+      _password == _cnfPassword;
+
   @override
   void initState() {
     _email = widget.config.getEmail();
@@ -299,7 +305,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                 _passwordIsValid =
                                     _passwordStrength >=
                                     kMildPasswordStrengthThreshold;
-                                _passwordsMatch = _password == _cnfPassword;
+                                _passwordsMatch = _hasValidMatchingPasswords;
                               });
                             }
                           },
@@ -372,9 +378,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           onChanged: (cnfPassword) {
                             setState(() {
                               _cnfPassword = cnfPassword;
-                              if (_password != null || _password != '') {
-                                _passwordsMatch = _password == _cnfPassword;
-                              }
+                              _passwordsMatch = _hasValidMatchingPasswords;
                             });
                           },
                         ),
