@@ -42,12 +42,15 @@ class SearchTab extends StatefulWidget {
 class _SearchTabState extends State<SearchTab> {
   late int index;
   final indexOfStackNotifier = IndexOfStackNotifier();
-  bool _isSearchHeaderCollapsed = SearchWidgetState.query.trim().isNotEmpty;
+  late final ValueNotifier<bool> _isSearchHeaderCollapsedNotifier;
 
   @override
   void initState() {
     super.initState();
     index = indexOfStackNotifier.index;
+    _isSearchHeaderCollapsedNotifier = ValueNotifier(
+      SearchWidgetState.query.trim().isNotEmpty,
+    );
     indexOfStackNotifier.addListener(indexNotifierListener);
   }
 
@@ -58,17 +61,16 @@ class _SearchTabState extends State<SearchTab> {
   }
 
   void _setSearchHeaderCollapsed(bool isCollapsed) {
-    if (_isSearchHeaderCollapsed == isCollapsed) {
+    if (_isSearchHeaderCollapsedNotifier.value == isCollapsed) {
       return;
     }
-    setState(() {
-      _isSearchHeaderCollapsed = isCollapsed;
-    });
+    _isSearchHeaderCollapsedNotifier.value = isCollapsed;
   }
 
   @override
   void dispose() {
     indexOfStackNotifier.removeListener(indexNotifierListener);
+    _isSearchHeaderCollapsedNotifier.dispose();
     super.dispose();
   }
 
@@ -85,7 +87,7 @@ class _SearchTabState extends State<SearchTab> {
       children: [
         _SearchHeader(
           backgroundColor: headerColor,
-          isCollapsed: _isSearchHeaderCollapsed,
+          isCollapsedListenable: _isSearchHeaderCollapsedNotifier,
           searchField: SearchWidget(
             shouldConsumeBackNotifier: widget.shouldConsumeBackNotifier,
             onActiveChanged: _setSearchHeaderCollapsed,
@@ -113,7 +115,7 @@ class _SearchTabState extends State<SearchTab> {
 class _SearchHeader extends StatelessWidget {
   const _SearchHeader({
     required this.backgroundColor,
-    required this.isCollapsed,
+    required this.isCollapsedListenable,
     required this.searchField,
   });
 
@@ -125,7 +127,7 @@ class _SearchHeader extends StatelessWidget {
   static const _transitionDuration = Duration(milliseconds: 150);
 
   final Color backgroundColor;
-  final bool isCollapsed;
+  final ValueListenable<bool> isCollapsedListenable;
   final Widget searchField;
 
   @override
@@ -138,32 +140,38 @@ class _SearchHeader extends StatelessWidget {
       color: backgroundColor,
       child: SafeArea(
         bottom: false,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(end: isCollapsed ? 1 : 0),
-          duration: _transitionDuration,
-          curve: Curves.easeOut,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: isCollapsedListenable,
           child: searchField,
-          builder: (context, progress, child) {
-            final topPadding = lerpDouble(
-              _expandedTopPadding,
-              _collapsedTopPadding,
-              progress,
-            )!;
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                _horizontalPadding,
-                topPadding,
-                _horizontalPadding,
-                _bottomPadding,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SearchHeaderTitle(progress: progress, style: titleStyle),
-                  SizedBox(height: _expandedTitleGap * (1 - progress)),
-                  child!,
-                ],
-              ),
+          builder: (context, isCollapsed, child) {
+            return TweenAnimationBuilder<double>(
+              tween: Tween(end: isCollapsed ? 1 : 0),
+              duration: _transitionDuration,
+              curve: Curves.easeOut,
+              child: child,
+              builder: (context, progress, child) {
+                final topPadding = lerpDouble(
+                  _expandedTopPadding,
+                  _collapsedTopPadding,
+                  progress,
+                )!;
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    _horizontalPadding,
+                    topPadding,
+                    _horizontalPadding,
+                    _bottomPadding,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SearchHeaderTitle(progress: progress, style: titleStyle),
+                      SizedBox(height: _expandedTitleGap * (1 - progress)),
+                      child!,
+                    ],
+                  ),
+                );
+              },
             );
           },
         ),

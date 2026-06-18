@@ -1,0 +1,1 @@
+- Improved search header animation smoothness when opening the keyboard.
