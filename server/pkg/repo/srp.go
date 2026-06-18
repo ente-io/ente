@@ -8,6 +8,7 @@ import (
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 // AddSRPSession inserts a SRPSession and returns the session id
@@ -219,6 +220,7 @@ func (repo *UserAuthRepository) GetSRPAttributes(userID int64) (*ente.GetSRPAttr
 			if err != nil {
 				return nil, stacktrace.Propagate(err, "")
 			}
+			log.WithField("user_id", userID).Warn("deleted srp auth missing key attributes")
 			return nil, stacktrace.Propagate(&ente.ErrNotFoundError, "key attributes are not present")
 		}
 		return nil, stacktrace.Propagate(err, "failed to read srp attributes")
