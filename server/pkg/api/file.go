@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -142,6 +143,9 @@ func (h *FileHandler) GetUploadURLs(c *gin.Context) {
 	count, _ := strconv.Atoi(c.Query("count"))
 	urls, err := h.Controller.GetUploadURLs(c, userID, count, enteApp, false)
 	if err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -155,6 +159,9 @@ func (h *FileHandler) ValidateUploadEligibility(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 	userID := auth.GetUserID(c.Request.Header)
 	if err := h.Controller.ValidateUploadEligibility(c, userID, enteApp); err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -172,6 +179,9 @@ func (h *FileHandler) GetUploadURLV2(c *gin.Context) {
 	}
 	url, err := h.Controller.GetUploadURLWithMetadata(c, userID, req, enteApp)
 	if err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -186,6 +196,9 @@ func (h *FileHandler) GetMultipartUploadURLs(c *gin.Context) {
 	count, _ := strconv.Atoi(c.Query("count"))
 	urls, err := h.Controller.GetMultipartUploadURLs(c, userID, count, enteApp)
 	if err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -205,10 +218,22 @@ func (h *FileHandler) GetMultipartUploadURLV2(c *gin.Context) {
 	}
 	upload, err := h.Controller.GetMultipartUploadURLWithMetadata(c, userID, req, enteApp)
 	if err != nil {
+		if handleExpectedUploadLimitError(c, err) {
+			return
+		}
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
 	c.JSON(http.StatusOK, upload)
+}
+
+func handleExpectedUploadLimitError(c *gin.Context, err error) bool {
+	if errors.Is(err, ente.ErrStorageLimitExceeded) ||
+		errors.Is(err, ente.ErrNoActiveSubscription) {
+		handler.ExpectedError(c, err)
+		return true
+	}
+	return false
 }
 
 // Get redirects the request to the file location
