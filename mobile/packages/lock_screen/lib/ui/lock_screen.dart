@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:ente_accounts/ente_accounts.dart';
-import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_lock_screen/auth_util.dart';
+import 'package:ente_lock_screen/lock_screen_host.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/local_authentication_unavailable_dialog.dart';
@@ -16,7 +16,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:logging/logging.dart';
 
 class LockScreen extends StatefulWidget {
-  final BaseConfiguration config;
+  final LockScreenHost config;
 
   const LockScreen(this.config, {super.key});
 

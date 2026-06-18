@@ -2,10 +2,10 @@ import "dart:convert";
 import "dart:io";
 import "dart:typed_data";
 
-import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
+import "package:ente_lock_screen/lock_screen_host.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_screen_cover/ente_screen_cover.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
@@ -40,12 +40,12 @@ class LockScreenSettings {
     Duration(minutes: 30),
   ];
 
-  late BaseConfiguration _config;
+  late LockScreenHost _config;
   late SharedPreferences _preferences;
   late FlutterSecureStorage _secureStorage;
 
   Future<void> init(
-    BaseConfiguration config, {
+    LockScreenHost config, {
     bool hasOptedForOfflineMode = false,
   }) async {
     _config = config;
