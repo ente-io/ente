@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/settings/lock_screen_settings.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
@@ -12,7 +13,6 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/settings/lock_screen/custom_pin_keypad.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_confirm_pin.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
-import "package:photos/utils/lock_screen_settings.dart";
 import 'package:pinput/pinput.dart';
 
 class LockScreenPin extends StatefulWidget {

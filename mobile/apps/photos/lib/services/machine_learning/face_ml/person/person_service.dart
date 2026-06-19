@@ -17,8 +17,8 @@ import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/settings/local_settings.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
-import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 typedef ManualPersonAssignmentResult = ({

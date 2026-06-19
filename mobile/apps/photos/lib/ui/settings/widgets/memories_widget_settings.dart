@@ -7,6 +7,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/settings/local_settings.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -15,7 +16,6 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart"
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/utils/local_settings.dart";
 
 class MemoriesWidgetSettings extends StatefulWidget {
   const MemoriesWidgetSettings({super.key});
