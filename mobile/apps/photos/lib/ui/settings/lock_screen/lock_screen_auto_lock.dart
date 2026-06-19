@@ -2,8 +2,8 @@ import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/settings/lock_screen_settings.dart";
 import "package:photos/ui/settings/components/settings_page_scaffold.dart";
-import "package:photos/utils/lock_screen_settings.dart";
 
 class LockScreenAutoLock extends StatefulWidget {
   const LockScreenAutoLock({super.key});

@@ -22,6 +22,7 @@ class LockScreenSettings {
   static const keyHideAppContent = "ls_hide_app_content";
   static const autoLockTime = "ls_auto_lock_time";
   static const keyShowSystemLockScreen = "should_show_lock_screen";
+  static const _keyAppLockEnabled = "ls.app_lock_enabled";
   static final _logger = Logger("LockScreenSettings");
   late FlutterSecureStorage _secureStorage;
   late SharedPreferences _preferences;
@@ -90,6 +91,13 @@ class LockScreenSettings {
 
   Future<void> setInvalidAttemptCount(int count) async {
     await _preferences.setInt(keyInvalidAttempts, count);
+  }
+
+  bool get appLockEnabledCached =>
+      _preferences.getBool(_keyAppLockEnabled) ?? false;
+
+  Future<void> setAppLockEnabledCached(bool value) {
+    return _preferences.setBool(_keyAppLockEnabled, value);
   }
 
   Future<bool> shouldShowLockScreen() async {

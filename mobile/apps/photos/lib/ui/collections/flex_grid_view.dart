@@ -14,6 +14,7 @@ import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/settings/local_settings.dart";
 import "package:photos/ui/collections/album/list_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
 import "package:photos/ui/collections/album/new_row_item.dart";
@@ -22,7 +23,6 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/local_settings.dart";
 
 class CollectionsFlexiGridViewWidget extends StatefulWidget {
   /*

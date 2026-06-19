@@ -11,12 +11,12 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
+import "package:photos/settings/lock_screen_settings.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/lock_screen_settings.dart";
 
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});

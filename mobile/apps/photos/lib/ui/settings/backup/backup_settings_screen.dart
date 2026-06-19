@@ -51,7 +51,7 @@ class BackupSettingsScreen extends StatelessWidget {
           value: () => backupSettings.shouldBackupVideos(),
           onChanged: () async {
             final shouldBackupVideos = !backupSettings.shouldBackupVideos();
-            await backupSettings.setShouldBackupVideos(shouldBackupVideos);
+            await backupSettings.setBackupVideos(shouldBackupVideos);
             if (shouldBackupVideos) {
               SyncService.instance.sync().ignore();
             } else {

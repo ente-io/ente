@@ -10,11 +10,7 @@ class BackupSettings {
   final SharedPreferences _preferences;
 
   bool shouldBackupOverMobileData() {
-    if (_preferences.containsKey(_keyShouldBackupOverMobileData)) {
-      return _preferences.getBool(_keyShouldBackupOverMobileData)!;
-    } else {
-      return false;
-    }
+    return _preferences.getBool(_keyShouldBackupOverMobileData) ?? false;
   }
 
   Future<void> setBackupOverMobileData(bool value) async {
@@ -22,14 +18,10 @@ class BackupSettings {
   }
 
   bool shouldBackupVideos() {
-    if (_preferences.containsKey(_keyShouldBackupVideos)) {
-      return _preferences.getBool(_keyShouldBackupVideos)!;
-    } else {
-      return true;
-    }
+    return _preferences.getBool(_keyShouldBackupVideos) ?? true;
   }
 
-  Future<void> setShouldBackupVideos(bool value) async {
+  Future<void> setBackupVideos(bool value) async {
     await _preferences.setBool(_keyShouldBackupVideos, value);
   }
 }

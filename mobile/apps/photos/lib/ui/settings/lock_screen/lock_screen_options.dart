@@ -5,15 +5,13 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/service_locator.dart";
+import "package:photos/settings/lock_screen_settings.dart";
 import "package:photos/ui/settings/components/settings_item.dart";
 import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_auto_lock.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:photos/ui/tools/app_lock.dart";
-import "package:photos/utils/local_settings.dart";
-import "package:photos/utils/lock_screen_settings.dart";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -25,7 +23,6 @@ class LockScreenOptions extends StatefulWidget {
 enum LockType { device, pin, password }
 
 class _LockScreenOptionsState extends State<LockScreenOptions> {
-  final LocalSettings _localSettings = localSettings;
   final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   late bool appLock;
   late bool hideAppContent;
@@ -36,7 +33,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   void initState() {
     super.initState();
     hideAppContent = _lockscreenSetting.getShouldHideAppContent();
-    appLock = _localSettings.appLockEnabledCached;
+    appLock = _lockscreenSetting.appLockEnabledCached;
     _initializeSettings();
   }
 
@@ -64,7 +61,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       appLock = isAppLockEnabled;
       _isInitialized = true;
     });
-    await _localSettings.setAppLockEnabledCached(isAppLockEnabled);
+    await _lockscreenSetting.setAppLockEnabledCached(isAppLockEnabled);
   }
 
   Future<void> _onToggleSwitch() async {

@@ -20,6 +20,7 @@ import "package:photos/models/selected_people.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/settings/local_settings.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
@@ -35,7 +36,6 @@ import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/ui/viewer/people/pinned_person_badge.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
-import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/people_sort_util.dart";
 
 class PeopleSectionAllPage extends StatefulWidget {

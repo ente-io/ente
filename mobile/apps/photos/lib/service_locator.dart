@@ -2,7 +2,6 @@ import "package:dio/dio.dart";
 import "package:ente_cast/ente_cast.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
-import "package:photos/core/backup_settings.dart";
 import "package:photos/core/network/endpoint_config.dart";
 import "package:photos/gateways/billing/billing_gateway.dart";
 import "package:photos/gateways/collections/collection_files_gateway.dart";
@@ -42,7 +41,8 @@ import "package:photos/services/text_embeddings_cache_service.dart";
 import "package:photos/services/update_service.dart";
 import "package:photos/services/wrapped/wrapped_cache_service.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
-import "package:photos/utils/local_settings.dart";
+import "package:photos/settings/backup_settings.dart";
+import "package:photos/settings/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class ServiceLocator {
@@ -52,6 +52,8 @@ class ServiceLocator {
   late final Dio downloadDio;
   late final PackageInfo packageInfo;
   late final EndpointConfig endpointConfig;
+  late final LocalSettings localSettings;
+  late final BackupSettings backupSettings;
 
   // instance
   ServiceLocator._privateConstructor();
@@ -71,6 +73,8 @@ class ServiceLocator {
     this.downloadDio = downloadDio;
     this.packageInfo = packageInfo;
     endpointConfig = EndpointConfig(prefs);
+    localSettings = LocalSettings(prefs);
+    backupSettings = BackupSettings(prefs);
   }
 }
 
@@ -93,17 +97,9 @@ CastService get castService {
   return _castService!;
 }
 
-LocalSettings? _localSettings;
-LocalSettings get localSettings {
-  _localSettings ??= LocalSettings(ServiceLocator.instance.prefs);
-  return _localSettings!;
-}
+LocalSettings get localSettings => ServiceLocator.instance.localSettings;
 
-BackupSettings? _backupSettings;
-BackupSettings get backupSettings {
-  _backupSettings ??= BackupSettings(ServiceLocator.instance.prefs);
-  return _backupSettings!;
-}
+BackupSettings get backupSettings => ServiceLocator.instance.backupSettings;
 
 /// Whether the app is currently showing the no-account local gallery experience.
 ///

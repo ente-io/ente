@@ -43,9 +43,9 @@ import "package:photos/services/hidden_service.dart";
 import 'package:photos/services/memory_share_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
+import "package:photos/settings/local_settings.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
-import "package:photos/utils/local_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {

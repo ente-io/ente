@@ -5,7 +5,7 @@ import 'package:local_auth_ios/local_auth_ios.dart';
 import 'package:logging/logging.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/local_authentication_service.dart";
-import "package:photos/utils/lock_screen_settings.dart";
+import "package:photos/settings/lock_screen_settings.dart";
 
 Future<bool> requestAuthentication(
   BuildContext context,
