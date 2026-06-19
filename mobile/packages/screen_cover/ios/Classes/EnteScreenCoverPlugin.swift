@@ -32,11 +32,11 @@ public class EnteScreenCoverPlugin: NSObject, FlutterPlugin {
         observing = true
         NotificationCenter.default.addObserver(
             self, selector: #selector(showOverlay),
-            name: UIScene.didEnterBackgroundNotification, object: nil
+            name: UIApplication.willResignActiveNotification, object: nil
         )
         NotificationCenter.default.addObserver(
             self, selector: #selector(hideOverlay),
-            name: UIScene.willEnterForegroundNotification, object: nil
+            name: UIApplication.didBecomeActiveNotification, object: nil
         )
     }
 
