@@ -65,6 +65,7 @@ class _AlbumsTabState extends State<AlbumsTab>
   static const Duration _kContentTransitionDuration = Duration(
     milliseconds: 150,
   );
+  static const double _kContentBottomPadding = 200;
 
   final ValueNotifier<_AlbumsFilter> _filter = ValueNotifier(
     _AlbumsFilter.ente,
@@ -244,13 +245,6 @@ class _AlbumsTabState extends State<AlbumsTab>
 
   bool get _hasSearchQuery => _searchQuery.trim().isNotEmpty;
 
-  double _keyboardAwareBottomPadding(double defaultPadding) {
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    if (keyboardInset <= 0) return defaultPadding;
-    final keyboardPadding = keyboardInset + 50.0;
-    return keyboardPadding > defaultPadding ? keyboardPadding : defaultPadding;
-  }
-
   void _syncSortState() {
     _sortKey.value = localSettings.albumSortKey();
     _sortDirection.value = localSettings.albumSortDirection();
@@ -363,7 +357,6 @@ class _AlbumsTabState extends State<AlbumsTab>
     required bool showCreateAlbum,
     required Widget emptyState,
     Widget? leadingSliver,
-    double? bottomPadding,
   }) {
     if (collections.isEmpty && _searchQuery.trim().isEmpty) {
       return SliverFillRemaining(hasScrollBody: false, child: emptyState);
@@ -381,7 +374,7 @@ class _AlbumsTabState extends State<AlbumsTab>
           shrinkWrap: true,
           shouldShowCreateAlbum: showCreateAlbum && !_hasSearchQuery,
           enableSelectionMode: !_isSearchActive,
-          bottomPadding: bottomPadding ?? 200,
+          bottomPadding: _kContentBottomPadding,
         ),
       ],
     );
@@ -470,7 +463,6 @@ class _AlbumsTabState extends State<AlbumsTab>
   }
 
   Widget _buildGlobalSearchResultsSliver(AppLocalizations strings) {
-    final bottomPadding = _keyboardAwareBottomPadding(200);
     if (_isLocalGalleryMode) {
       return SliverMainAxisGroup(
         slivers: [
@@ -486,7 +478,9 @@ class _AlbumsTabState extends State<AlbumsTab>
             sectionHeader: _buildSearchSectionHeader(strings.onDevice),
             emptyStateSliver: _buildGlobalSearchEmptyStateSliver(strings),
           ),
-          SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: _kContentBottomPadding),
+          ),
         ],
       );
     }
@@ -545,7 +539,9 @@ class _AlbumsTabState extends State<AlbumsTab>
           tag: "album_search_received",
           collections: filteredReceivedCollections,
         ),
-        SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: _kContentBottomPadding),
+        ),
       ],
     );
   }
@@ -577,7 +573,7 @@ class _AlbumsTabState extends State<AlbumsTab>
           albumViewType: _viewType.value,
           sortKey: _sortKey.value,
           sortDirection: _sortDirection.value,
-          bottomPadding: _keyboardAwareBottomPadding(200),
+          bottomPadding: _kContentBottomPadding,
         );
     }
     if (collections == null) {
@@ -592,7 +588,6 @@ class _AlbumsTabState extends State<AlbumsTab>
       collections: collections,
       showCreateAlbum: showCreateAlbum,
       emptyState: emptyState,
-      bottomPadding: _keyboardAwareBottomPadding(200),
       leadingSliver: filter == _AlbumsFilter.ente && !_hasSearchQuery
           ? SliverToBoxAdapter(child: _buildDeleteEmptyAlbumsActionSlot())
           : null,
@@ -1018,6 +1013,8 @@ class _AlbumsTabState extends State<AlbumsTab>
                         child: CustomScrollView(
                           controller: _scrollController,
                           physics: const BouncingScrollPhysics(),
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
                           slivers: [_buildContentSliver(strings)],
                         ),
                       ),

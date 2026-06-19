@@ -428,10 +428,16 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getMagicSectionResults(
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    int? limit,
+  }) async {
     if (hasGrantedMLConsent) {
-      return magicCacheService.getMagicGenericSearchResult(context);
+      final results = await magicCacheService.getMagicGenericSearchResult(
+        context,
+      );
+      return limit == null
+          ? results
+          : results.take(limit).toList(growable: false);
     } else {
       return <GenericSearchResult>[];
     }

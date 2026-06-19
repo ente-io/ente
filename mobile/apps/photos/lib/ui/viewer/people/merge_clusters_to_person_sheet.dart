@@ -267,7 +267,10 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
                 child: Center(child: EnteLoadingWidget()),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           } else if (snapshot.hasError) {
             _logger.severe(
               "Failed to load persons for merge",
@@ -279,7 +282,10 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
                 child: Center(child: Icon(Icons.error_outline_rounded)),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           }
 
           final persons = snapshot.data ?? [];
@@ -294,7 +300,10 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
                 ),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           }
           final screenWidth = MediaQuery.of(context).size.width;
           final estimatedCount = (screenWidth / 100).floor();
@@ -349,7 +358,10 @@ class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
               ),
             ),
           );
-          return CustomScrollView(slivers: slivers);
+          return CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: slivers,
+          );
         },
       ),
     );

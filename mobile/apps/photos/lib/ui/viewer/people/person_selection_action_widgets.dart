@@ -258,7 +258,10 @@ class _LinkContactToPersonSelectionPageState
                 child: Center(child: EnteLoadingWidget()),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           } else if (snapshot.hasError) {
             _logger.severe(
               "Failed to load _personEntities",
@@ -270,7 +273,10 @@ class _LinkContactToPersonSelectionPageState
                 child: Center(child: Icon(Icons.error_outline_rounded)),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             slivers.add(
               SliverFillRemaining(
@@ -281,7 +287,10 @@ class _LinkContactToPersonSelectionPageState
                 ),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           }
 
           final sortedEntries = _sortEntries(snapshot.data!);
@@ -296,7 +305,10 @@ class _LinkContactToPersonSelectionPageState
                 ),
               ),
             );
-            return CustomScrollView(slivers: slivers);
+            return CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: slivers,
+            );
           }
 
           final screenWidth = MediaQuery.of(context).size.width;
@@ -363,7 +375,10 @@ class _LinkContactToPersonSelectionPageState
             ),
           );
 
-          return CustomScrollView(slivers: slivers);
+          return CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: slivers,
+          );
         },
       ),
     );
