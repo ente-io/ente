@@ -69,25 +69,4 @@ class SearchTabPreviewLimits {
     final visibleItems = ((rowWidth + spacing) / (itemWidth + spacing)).floor();
     return math.max(1, visibleItems) + _extraItems;
   }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SearchTabPreviewLimits &&
-        other.faceResults == faceResults &&
-        other.magicResults == magicResults &&
-        other.locationResults == locationResults &&
-        other.contactResults == contactResults &&
-        other.ritualResults == ritualResults;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      faceResults,
-      magicResults,
-      locationResults,
-      contactResults,
-      ritualResults,
-    );
-  }
 }

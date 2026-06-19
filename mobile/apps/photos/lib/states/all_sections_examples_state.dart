@@ -121,15 +121,6 @@ class _AllSectionsExamplesProviderState
     }
   }
 
-  @override
-  void didUpdateWidget(covariant AllSectionsExamplesProvider oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.previewLimits != widget.previewLimits &&
-        _firstLoadInProgressOrComplete) {
-      reloadAllSections();
-    }
-  }
-
   void reloadAllSections() {
     _firstLoadInProgressOrComplete = true;
     _logger.info('queue reload all sections');
