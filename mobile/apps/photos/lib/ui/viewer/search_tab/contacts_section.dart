@@ -143,9 +143,9 @@ class _ContactsSectionState extends State<ContactsSection> {
       final colors = context.componentColors;
       return Padding(
         padding: const EdgeInsets.only(
-          left: searchTabSectionHorizontalPadding + 12,
-          right: searchTabSectionHorizontalPadding + 8,
-          bottom: 24,
+          left: searchTabSectionHorizontalPadding,
+          right: searchTabSectionHorizontalPadding,
+          bottom: 20,
         ),
         child: Row(
           children: [
@@ -157,20 +157,17 @@ class _ContactsSectionState extends State<ContactsSection> {
                     SectionType.contacts.sectionTitle(context),
                     style: TextStyles.h2.copyWith(color: colors.textBase),
                   ),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Text(
-                      SectionType.contacts.getEmptyStateText(context),
-                      style: TextStyles.body.copyWith(color: colors.textLight),
-                    ),
+                  const SizedBox(height: 16),
+                  Text(
+                    SectionType.contacts.getEmptyStateText(context),
+                    style: TextStyles.body.copyWith(color: colors.textLight),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
             const Padding(
-              padding: EdgeInsets.fromLTRB(8, 14, 8, 0),
+              padding: EdgeInsets.symmetric(horizontal: 8),
               child: ContactCTA(),
             ),
           ],

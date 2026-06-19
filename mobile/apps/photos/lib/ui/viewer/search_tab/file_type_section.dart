@@ -14,7 +14,6 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
-import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/pending_translation.dart";
@@ -30,9 +29,9 @@ class FileTypeSection extends StatelessWidget {
       final textTheme = getEnteTextTheme(context);
       return Padding(
         padding: const EdgeInsets.only(
-          left: searchTabSectionHorizontalPadding + 12,
-          right: searchTabSectionHorizontalPadding + 8,
-          bottom: 24,
+          left: searchTabSectionHorizontalPadding,
+          right: searchTabSectionHorizontalPadding,
+          bottom: 20,
         ),
         child: Row(
           children: [
@@ -46,21 +45,16 @@ class FileTypeSection extends StatelessWidget {
                       color: textTheme.largeBold.color,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Text(
-                      SectionType.fileTypesAndExtension.getEmptyStateText(
-                        context,
-                      ),
-                      style: textTheme.smallMuted,
+                  const SizedBox(height: 16),
+                  Text(
+                    SectionType.fileTypesAndExtension.getEmptyStateText(
+                      context,
                     ),
+                    style: textTheme.smallMuted,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            const SearchSectionEmptyCTAIcon(SectionType.fileTypesAndExtension),
           ],
         ),
       );

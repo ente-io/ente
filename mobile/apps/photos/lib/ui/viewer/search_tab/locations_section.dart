@@ -79,9 +79,9 @@ class _LocationsSectionState extends State<LocationsSection> {
       final colors = context.componentColors;
       return Padding(
         padding: const EdgeInsets.only(
-          left: searchTabSectionHorizontalPadding + 12,
-          right: searchTabSectionHorizontalPadding + 8,
-          bottom: 24,
+          left: searchTabSectionHorizontalPadding,
+          right: searchTabSectionHorizontalPadding,
+          bottom: 20,
         ),
         child: Row(
           children: [
@@ -93,13 +93,10 @@ class _LocationsSectionState extends State<LocationsSection> {
                     SectionType.location.sectionTitle(context),
                     style: TextStyles.h2.copyWith(color: colors.textBase),
                   ),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Text(
-                      SectionType.location.getEmptyStateText(context),
-                      style: TextStyles.body.copyWith(color: colors.textLight),
-                    ),
+                  const SizedBox(height: 16),
+                  Text(
+                    SectionType.location.getEmptyStateText(context),
+                    style: TextStyles.body.copyWith(color: colors.textLight),
                   ),
                 ],
               ),

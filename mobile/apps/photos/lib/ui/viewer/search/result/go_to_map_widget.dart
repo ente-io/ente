@@ -15,7 +15,7 @@ class GoToMap extends StatelessWidget {
     return GestureDetector(
       onTap: () => openSearchMap(context),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 14, 8, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,

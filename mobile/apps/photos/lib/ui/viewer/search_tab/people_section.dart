@@ -25,7 +25,6 @@ import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/ui/viewer/people/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
-import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 
@@ -115,34 +114,30 @@ class _PeopleSectionState extends State<PeopleSection> {
             },
             child: Padding(
               padding: const EdgeInsets.only(
-                left: searchTabSectionHorizontalPadding + 16,
-                right: searchTabSectionHorizontalPadding + 8,
+                left: searchTabSectionHorizontalPadding,
+                right: searchTabSectionHorizontalPadding,
+                bottom: 20,
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.sectionType.sectionTitle(context),
-                            style: TextStyles.h2.copyWith(
-                              color: textTheme.largeBold.color,
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.sectionType.sectionTitle(context),
+                          style: TextStyles.h2.copyWith(
+                            color: textTheme.largeBold.color,
                           ),
-                          const SizedBox(height: 24),
-                          Text(
-                            widget.sectionType.getEmptyStateText(context),
-                            style: textTheme.smallMuted,
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.sectionType.getEmptyStateText(context),
+                          style: textTheme.smallMuted,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  SearchSectionEmptyCTAIcon(widget.sectionType),
                 ],
               ),
             ),
