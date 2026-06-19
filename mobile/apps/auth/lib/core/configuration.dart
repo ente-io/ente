@@ -12,6 +12,14 @@ class Configuration extends BaseConfiguration {
   Configuration._privateConstructor();
 
   static final Configuration instance = Configuration._privateConstructor();
+  @override
+  EnteAppIdentity get appIdentity => const EnteAppIdentity(
+    app: "auth",
+    clientPackageName: "io.ente.auth",
+    passkeyRedirectUrl: "enteauth://passkey",
+    referralSourcePrefix: "auth",
+  );
+
   static const authSecretKeyKey = "auth_secret_key";
   static const offlineAuthSecretKey = "offline_auth_secret_key";
   static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
@@ -49,8 +57,7 @@ class Configuration extends BaseConfiguration {
   @override
   // This includes both base keys (key, secretKey) and auth-specific keys.
   List<String> get secureStorageKeys => [
-    BaseConfiguration.keyKey,
-    BaseConfiguration.secretKeyKey,
+    ...BaseConfiguration.accountSecureStorageKeys,
     authSecretKeyKey,
     // Note: offlineAuthSecretKey is intentionally not included here
     // as it persists across logouts for offline mode

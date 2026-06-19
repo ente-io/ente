@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:ente_crypto/ente_crypto.dart";
@@ -20,6 +21,9 @@ class LockScreenSettings {
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
   static const keyHideAppContent = "ls_hide_app_content";
   static const autoLockTime = "ls_auto_lock_time";
+  static const keyShowSystemLockScreen = "should_show_lock_screen";
+  static const _keyAppLockEnabled = "ls.app_lock_enabled";
+  static final _logger = Logger("LockScreenSettings");
   late FlutterSecureStorage _secureStorage;
   late SharedPreferences _preferences;
   static const List<Duration> autoLockDurations = [
@@ -30,22 +34,21 @@ class LockScreenSettings {
     Duration(minutes: 5),
     Duration(minutes: 30),
   ];
-  Future<void> init(SharedPreferences prefs) async {
+  void init(SharedPreferences prefs) {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
+    unawaited(_restorePrivacyScreenPreference());
+  }
 
-    await Future.delayed(const Duration(milliseconds: 500), () {
-      // Note: PrivacyScreen status isn't persisted across app restarts
-      // So we need to re-enable it if the user had it enabled
+  Future<void> _restorePrivacyScreenPreference() async {
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    try {
       if (getShouldHideAppContent()) {
-        setHideAppContent(true).onError((error, stackTrace) {
-          Logger(
-            "LockScreenSettings",
-          ).severe("Error enabling PrivacyScreen", error, stackTrace);
-          return null;
-        });
+        await setHideAppContent(true);
       }
-    });
+    } catch (error, stackTrace) {
+      _logger.severe("Error enabling PrivacyScreen", error, stackTrace);
+    }
   }
 
   Future<void> setHideAppContent(bool hideContent) async {
@@ -88,6 +91,27 @@ class LockScreenSettings {
 
   Future<void> setInvalidAttemptCount(int count) async {
     await _preferences.setInt(keyInvalidAttempts, count);
+  }
+
+  bool get appLockEnabledCached =>
+      _preferences.getBool(_keyAppLockEnabled) ?? false;
+
+  Future<void> setAppLockEnabledCached(bool value) {
+    return _preferences.setBool(_keyAppLockEnabled, value);
+  }
+
+  Future<bool> shouldShowLockScreen() async {
+    return shouldShowSystemLockScreen() ||
+        await isPinSet() ||
+        await isPasswordSet();
+  }
+
+  bool shouldShowSystemLockScreen() {
+    return _preferences.getBool(keyShowSystemLockScreen) ?? false;
+  }
+
+  Future<void> setSystemLockScreen(bool value) {
+    return _preferences.setBool(keyShowSystemLockScreen, value);
   }
 
   static Uint8List _generateSalt() {

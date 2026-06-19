@@ -13,12 +13,12 @@ import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/selected_albums.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/settings/local_settings.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/components/popup_menu/ente_popup_menu_button.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
-import "package:photos/utils/local_settings.dart";
 
 enum UISectionType {
   incomingCollections,

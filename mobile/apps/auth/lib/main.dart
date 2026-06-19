@@ -174,12 +174,7 @@ Future<void> _init(bool bool, {String? via}) async {
   await Configuration.instance.init([AuthenticatorDB.instance]);
   await cleanupPickedImagesOnStartup(logger: _logger);
   await Network.instance.init(Configuration.instance);
-  await UserService.instance.init(
-    Configuration.instance,
-    const HomePage(),
-    clientPackageName: 'io.ente.auth',
-    passkeyRedirectUrl: 'enteauth://passkey',
-  );
+  await UserService.instance.init(Configuration.instance, const HomePage());
   await AuthenticatorService.instance.init();
   await BillingService.instance.init();
   await NotificationService.instance.init();

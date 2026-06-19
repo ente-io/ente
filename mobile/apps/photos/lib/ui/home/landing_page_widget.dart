@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:dots_indicator/dots_indicator.dart';
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -18,7 +19,6 @@ import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
@@ -107,6 +107,9 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final lightComponentTheme = ComponentTheme.lightTheme(
+      app: ComponentApp.photos,
+    );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorScheme.greenBase,
@@ -147,32 +150,35 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
-                    ButtonWidgetV2(
-                      buttonType: ButtonTypeV2.neutral,
-                      labelText: AppLocalizations.of(
-                        context,
-                      ).createAnEnteAccount,
-                      onTap: _navigateToSignUpPage,
-                      shouldSurfaceExecutionStates: false,
-                      shouldStickToLightTheme: true,
-                    ),
-                    if (localSettings.showLocalGalleryModeOption) ...[
-                      const SizedBox(height: 12),
-                      ButtonWidgetV2(
-                        buttonType: ButtonTypeV2.secondary,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).continueWithoutAccount,
-                        onTap: _navigateWithoutAccount,
-                        shouldSurfaceExecutionStates: false,
-                        shouldStickToLightTheme: true,
+                    Theme(
+                      data: lightComponentTheme,
+                      child: Column(
+                        children: [
+                          ButtonComponent(
+                            variant: ButtonComponentVariant.neutral,
+                            label: AppLocalizations.of(
+                              context,
+                            ).createAnEnteAccount,
+                            onTap: _navigateToSignUpPage,
+                            shouldSurfaceExecutionStates: false,
+                          ),
+                          if (localSettings.showLocalGalleryModeOption) ...[
+                            const SizedBox(height: 12),
+                            ButtonComponent(
+                              variant: ButtonComponentVariant.secondary,
+                              label: AppLocalizations.of(
+                                context,
+                              ).continueWithoutAccount,
+                              onTap: _navigateWithoutAccount,
+                              shouldSurfaceExecutionStates: false,
+                            ),
+                          ],
+                        ],
                       ),
-                    ],
+                    ),
                     const SizedBox(height: 12),
                     TextButton(
-                      onPressed: () {
-                        _navigateToSignInPage();
-                      },
+                      onPressed: _navigateToSignInPage,
                       child: Text(
                         AppLocalizations.of(context).loginToExistingAccount,
                         style: textTheme.body.copyWith(
@@ -404,12 +410,8 @@ class FeatureItemWidget extends StatelessWidget {
       color: Colors.white,
     );
 
-    const subTextStyle = TextStyle(
-      fontFamily: "Inter",
-      fontWeight: FontWeight.w500,
-      fontSize: 14,
-      height: 20 / 14,
-      color: Color(0xFFAAFFB8),
+    final subTextStyle = TextStyles.body.copyWith(
+      color: const Color(0xFFAAFFB8),
     );
 
     return Column(

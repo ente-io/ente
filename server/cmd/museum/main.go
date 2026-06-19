@@ -1211,6 +1211,11 @@ func setupAndStartBackgroundJobs(
 		log.Info("Skipping Replication as replication is disabled")
 	}
 
+	if viper.GetBool("jobs.cron.skip") {
+		log.Info("Skipping background cleanup jobs")
+		return
+	}
+
 	fileDataCtrl.StartDataDeletion() // Start data deletion for file data;
 	contactController.StartDataDeletion()
 	objectCleanupController.StartRemovingUnreportedObjects()
@@ -1230,12 +1235,12 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	healthCheckHandler *api.HealthCheckHandler,
 	castDb castRepo.Repository,
 	inactiveUserOrchestrator *user.InactiveUserOrchestrator) {
-	const deletedTokenRetentionDays = 427 // 13-month deletion window (395 days) + 32-day safety buffer
-	shouldSkipCron := viper.GetBool("jobs.cron.skip")
-	if shouldSkipCron {
+	if viper.GetBool("jobs.cron.skip") {
 		log.Info("Skipping cron jobs")
 		return
 	}
+
+	const deletedTokenRetentionDays = 427 // 13-month deletion window (395 days) + 32-day safety buffer
 
 	c := cron.New()
 	schedule(c, "@every 1m", func() {

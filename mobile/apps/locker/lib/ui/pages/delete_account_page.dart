@@ -108,11 +108,7 @@ class DeleteAccountPage extends StatelessWidget {
     if (deleteChallengeResponse == null) {
       return;
     }
-    if (deleteChallengeResponse.allowDelete) {
-      await _confirmAndDelete(context, deleteChallengeResponse);
-    } else {
-      await _requestEmailForDeletion(context);
-    }
+    await _confirmAndDelete(context, deleteChallengeResponse);
   }
 
   Future<void> _confirmAndDelete(
@@ -158,32 +154,6 @@ class DeleteAccountPage extends StatelessWidget {
           text: context.strings.delete,
           backgroundColor: colorScheme.warning700,
           onTap: () => Navigator.of(context).pop(true),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _requestEmailForDeletion(BuildContext context) async {
-    final colorScheme = getEnteColorScheme(context);
-
-    await showAlertBottomSheet(
-      context,
-      title: context.strings.deleteAccount,
-      message:
-          "Please send an email to account-deletion@ente.com from your registered email address.\n\nYour request will be processed within 72 hours.",
-      assetPath: "assets/file_delete_icon.png",
-      buttons: [
-        GradientButton(
-          text: context.strings.sendEmail,
-          backgroundColor: colorScheme.primary700,
-          onTap: () async {
-            Navigator.of(context).pop();
-            await sendEmail(
-              context,
-              to: "account-deletion@ente.com",
-              subject: "[Delete account]",
-            );
-          },
         ),
       ],
     );

@@ -1,0 +1,1 @@
+- Update the Photos login and signup flow components and keyboard handling.

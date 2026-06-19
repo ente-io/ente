@@ -76,7 +76,6 @@ class GalleryAppBarWidget extends StatefulWidget {
     SelectedFiles selectedFiles, {
     DeviceCollection? deviceCollection,
     Collection? collection,
-    bool isFromCollectPhotos = false,
     List<EnteFile>? files,
   }) {
     return GalleryAppBarConfig(
@@ -86,7 +85,6 @@ class GalleryAppBarWidget extends StatefulWidget {
         selectedFiles,
         deviceCollection: deviceCollection,
         collection: collection,
-        isFromCollectPhotos: isFromCollectPhotos,
         files: files,
       ),
       geometryBuilder: _resolveSliverGeometry,
@@ -117,7 +115,6 @@ class GalleryAppBarWidget extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final DeviceCollection? deviceCollection;
   final Collection? collection;
-  final bool isFromCollectPhotos;
   final List<EnteFile>? files;
 
   const GalleryAppBarWidget._(
@@ -126,7 +123,6 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.selectedFiles, {
     this.deviceCollection,
     this.collection,
-    this.isFromCollectPhotos = false,
     this.files,
   });
 
@@ -489,7 +485,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
 
-    if (galleryType.isSharable() && !widget.isFromCollectPhotos) {
+    if (galleryType.isSharable()) {
       actions.add(
         IconButtonComponent(
           tooltip: strings.share,

@@ -29,7 +29,6 @@
   "deleteReason4": "Ma raison n'est pas listée",
   "sendEmail": "Envoyer un e-mail",
   "deleteRequestSLAText": "Votre demande sera traitée sous 72 heures.",
-  "deleteEmailRequest": "Veuillez envoyer un e-mail à <warning>account-deletion@ente.com</warning> à partir de votre adresse e-mail enregistrée.",
   "entePhotosPerm": "Ente <i>a besoin d'une autorisation pour</i> sauvegarder vos photos",
   "ok": "Ok",
   "createAccount": "Créer un compte",

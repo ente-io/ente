@@ -30,7 +30,6 @@
   "deleteReason4": "My reason isn’t listed",
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Your request will be processed within 72 hours.",
-  "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.com</warning> from your registered email address.",
   "entePhotosPerm": "Ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
@@ -1541,9 +1540,14 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Shared",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
+  "shared": "Shared",
+  "sharedAlbumsLabel": "Shared",
+  "@sharedAlbumsLabel": {
+    "description": "Albums tab label for albums shared by you"
+  },
+  "receivedAlbumsLabel": "Received",
+  "@receivedAlbumsLabel": {
+    "description": "Albums tab filter label for albums received from other people"
   },
   "searchResultUploadedBy": "Uploaded by",
   "@searchResultUploadedBy": {
@@ -1724,7 +1728,6 @@
   "nothingSharedWithYouYet": "Nothing shared with you yet",
   "noAlbumsSharedByYouYet": "No albums shared by you yet",
   "sharedWithYou": "Shared with you",
-  "sharedByYou": "Shared by you",
   "inviteYourFriendsToEnte": "Invite your friends to Ente",
   "failedToDownloadVideo": "Failed to download video",
   "hiding": "Hiding...",
@@ -2559,6 +2562,7 @@
   "addSomePhotosDesc1": "Add some photos or pick ",
   "addSomePhotosDesc2": "familiar faces",
   "addSomePhotosDesc3": "\nto begin with",
+  "startWithAddingPhotosOrFamiliarFaces": "Start with adding\nphotos or familiar faces",
   "ignorePerson": "Ignore person",
   "mixedGrouping": "Mixed grouping?",
   "analysis": "Analysis",

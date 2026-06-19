@@ -60,23 +60,14 @@ class UserService {
   late ValueNotifier<String?> emailValueNotifier;
   late BaseConfiguration _config;
   late BaseHomePage _homePage;
-  late String _clientPackageName;
-  late String _passkeyRedirectUrl;
 
   UserService._privateConstructor();
 
   static final UserService instance = UserService._privateConstructor();
 
-  Future<void> init(
-    BaseConfiguration config,
-    BaseHomePage homePage, {
-    required String clientPackageName,
-    required String passkeyRedirectUrl,
-  }) async {
+  Future<void> init(BaseConfiguration config, BaseHomePage homePage) async {
     _config = config;
     _homePage = homePage;
-    _clientPackageName = clientPackageName;
-    _passkeyRedirectUrl = passkeyRedirectUrl;
     emailValueNotifier = ValueNotifier<String?>(config.getEmail());
     _preferences = await SharedPreferences.getInstance();
   }
@@ -326,7 +317,6 @@ class UserService {
       final response = await _enteDio.get("/users/delete-challenge");
       if (response.statusCode == 200) {
         return DeleteChallengeResponse(
-          allowDelete: response.data["allowDelete"] as bool,
           encryptedChallenge: response.data["encryptedChallenge"],
         );
       } else {
@@ -456,7 +446,8 @@ class UserService {
     await dialog.show();
     final verifyData = {"email": _config.getEmail(), "ott": ott};
     if (!_config.isLoggedIn()) {
-      verifyData["source"] = 'auth:${_getRefSource()}';
+      verifyData["source"] =
+          '${_config.appIdentity.referralSourcePrefix}:${_getRefSource()}';
     }
     try {
       final response = await _dio.post(
@@ -480,8 +471,8 @@ class UserService {
             passkeySessionID,
             totp2FASessionID: twoFASessionID,
             accountsUrl: accountsUrl,
-            redirectUrl: _passkeyRedirectUrl,
-            clientPackage: _clientPackageName,
+            redirectUrl: _config.appIdentity.passkeyRedirectUrl,
+            clientPackage: _config.appIdentity.clientPackageName,
           );
         } else if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -796,8 +787,8 @@ class UserService {
           passkeySessionID,
           totp2FASessionID: twoFASessionID,
           accountsUrl: accountsUrl,
-          redirectUrl: _passkeyRedirectUrl,
-          clientPackage: _clientPackageName,
+          redirectUrl: _config.appIdentity.passkeyRedirectUrl,
+          clientPackage: _config.appIdentity.clientPackageName,
         );
       } else if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);

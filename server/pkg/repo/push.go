@@ -53,6 +53,11 @@ func (repo *PushTokenRepository) RemoveTokensOlderThan(creationTime int64) error
 	return stacktrace.Propagate(err, "")
 }
 
+func (repo *PushTokenRepository) RemoveTokensByFCM(fcmTokens []string) error {
+	_, err := repo.DB.Exec(`DELETE FROM push_tokens WHERE fcm_token = ANY($1)`, pq.Array(fcmTokens))
+	return stacktrace.Propagate(err, "")
+}
+
 func (repo *PushTokenRepository) RemoveTokensForUser(userID int64) error {
 	// Does a seq scan but should be fine since this is relatively infrequent
 	// and the size of the push tokens table will be small (as it gets

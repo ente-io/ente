@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/utils/lock_screen_settings.dart";
+import "package:photos/settings/lock_screen_settings.dart";
 
 /// A widget which handles app lifecycle events for showing and hiding a lock screen.
 /// This should wrap around a `MyApp` widget (or equivalent).

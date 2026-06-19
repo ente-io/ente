@@ -5,10 +5,7 @@ import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_strings/ente_strings.dart';
-import 'package:ente_ui/components/base_bottom_sheet.dart';
-import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/dialogs.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
@@ -130,11 +127,7 @@ class DeleteAccountPage extends StatelessWidget {
     if (deleteChallengeResponse == null) {
       return;
     }
-    if (deleteChallengeResponse.allowDelete) {
-      await _confirmAndDelete(context, deleteChallengeResponse);
-    } else {
-      await _requestEmailForDeletion(context);
-    }
+    await _confirmAndDelete(context, deleteChallengeResponse);
   }
 
   Future<void> _confirmAndDelete(
@@ -173,58 +166,5 @@ class DeleteAccountPage extends StatelessWidget {
       showShortToast(context, context.strings.yourAccountHasBeenDeleted);
       Navigator.of(context).popUntil((route) => route.isFirst);
     }
-  }
-
-  Future<void> _requestEmailForDeletion(BuildContext context) async {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    await showBaseBottomSheet(
-      context,
-      title: context.strings.deleteAccount,
-      headerSpacing: 20,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                const TextSpan(text: "Please send an email to "),
-                TextSpan(
-                  text: "account-deletion@ente.com",
-                  style: TextStyle(color: Colors.orange[300]),
-                ),
-                const TextSpan(
-                  text:
-                      " from your registered email address.\n\nYour request will be processed within 72 hours.",
-                ),
-              ],
-              style: textTheme.body.copyWith(
-                color: colorScheme.textBase,
-                height: 1.5,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ButtonWidget(
-              buttonType: ButtonType.critical,
-              labelText: context.strings.sendEmail,
-              onTap: () async {
-                Navigator.of(context).pop();
-                await sendEmail(
-                  context,
-                  to: 'account-deletion@ente.com',
-                  subject: '[Delete account]',
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

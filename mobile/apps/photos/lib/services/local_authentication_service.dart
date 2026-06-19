@@ -2,7 +2,7 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:photos/core/configuration.dart';
+import "package:photos/settings/lock_screen_settings.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
@@ -28,7 +28,7 @@ class LocalAuthenticationService {
       );
       AppLock.of(
         context,
-      )!.setEnabled(await Configuration.instance.shouldShowLockScreen());
+      )!.setEnabled(await LockScreenSettings.instance.shouldShowLockScreen());
       if (!result) {
         showToast(context, infoMessage);
         return false;
@@ -96,14 +96,14 @@ class LocalAuthenticationService {
       if (result) {
         AppLock.of(context)!.setEnabled(shouldEnableLockScreen);
 
-        await Configuration.instance.setSystemLockScreen(
+        await LockScreenSettings.instance.setSystemLockScreen(
           shouldEnableLockScreen,
         );
         return true;
       } else {
         AppLock.of(
           context,
-        )!.setEnabled(await Configuration.instance.shouldShowLockScreen());
+        )!.setEnabled(await LockScreenSettings.instance.shouldShowLockScreen());
       }
     } else {
       unawaited(showErrorDialog(context, errorDialogTitle, errorDialogContent));

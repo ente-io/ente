@@ -234,7 +234,7 @@ class RemoteSyncService {
 
   Future<bool> whiteListVideoForUpload(EnteFile file) async {
     if (file.fileType == FileType.video &&
-        !_config.shouldBackupVideos() &&
+        !backupSettings.shouldBackupVideos() &&
         file.localID != null) {
       final List<String> whitelistedIDs =
           _prefs.getStringList(_ignoreBackUpSettingsForIDs_) ?? <String>[];
@@ -649,7 +649,7 @@ class RemoteSyncService {
       return originalFiles;
     }
     final bool shouldRemoveVideos =
-        !_config.shouldBackupVideos() || bgWithoutResumableUpload;
+        !backupSettings.shouldBackupVideos() || bgWithoutResumableUpload;
     final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
     bool shouldSkipUploadFunc(EnteFile file) {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);

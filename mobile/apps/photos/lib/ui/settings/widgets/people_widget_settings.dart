@@ -8,6 +8,7 @@ import "package:photos/models/selected_people.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
+import "package:photos/settings/local_settings.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -17,7 +18,6 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
-import "package:photos/utils/local_settings.dart";
 
 class PeopleWidgetSettings extends StatefulWidget {
   const PeopleWidgetSettings({super.key});

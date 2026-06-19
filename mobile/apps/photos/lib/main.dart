@@ -52,6 +52,7 @@ import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/services/wake_lock_service.dart";
+import "package:photos/settings/lock_screen_settings.dart";
 import "package:photos/src/rust/frb_generated.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
@@ -59,7 +60,6 @@ import "package:photos/utils/device_info.dart";
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/intent_util.dart";
-import "package:photos/utils/lock_screen_settings.dart";
 import 'package:rive/rive.dart' as rive;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -146,7 +146,7 @@ Future<void> _runInForeground(
         ),
         lockScreen: const LockScreen(),
         enabled:
-            await Configuration.instance.shouldShowLockScreen() ||
+            await LockScreenSettings.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
         locale: locale,
         lightTheme: lightThemeData,
@@ -263,7 +263,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     NotificationService.instance.init(prefs);
 
     _logger.info("(for debugging) Configuration init $tlog");
-    await Configuration.instance.init();
+    await Configuration.instance.init(prefs);
     _logger.info("(for debugging) Configuration done $tlog");
 
     // App LifeCycle
@@ -408,10 +408,10 @@ Future<void> _init(
     );
 
     _logger.info("Lockscreen init $tlog");
-    unawaited(LockScreenSettings.instance.init(preferences));
+    LockScreenSettings.instance.init(preferences);
 
     _logger.info("Configuration init $tlog");
-    await Configuration.instance.init();
+    await Configuration.instance.init(preferences);
     _logger.info("Configuration done $tlog");
 
     await MemoryShareService.instance.init();
