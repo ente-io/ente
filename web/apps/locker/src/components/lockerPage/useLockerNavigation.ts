@@ -14,12 +14,7 @@ const isLockerAppPath = (path: string) => {
 const getCollectionIDFromPath = (path: string) => {
     const searchParams = new URLSearchParams(path.split("?")[1] ?? "");
     const id = searchParams.get("id");
-    if (id === null) {
-        return null;
-    }
-
-    const parsedID = Number.parseInt(id, 10);
-    return Number.isFinite(parsedID) ? parsedID : null;
+    return id ? Number.parseInt(id, 10) || null : null;
 };
 
 interface UseLockerNavigationProps {
@@ -40,10 +35,7 @@ export const useLockerNavigation = ({
         router.pathname === "/collection"
             ? getCollectionIDFromPath(router.asPath)
             : null;
-    const selectedCollectionID =
-        routeCollectionID !== null && Number.isFinite(routeCollectionID)
-            ? routeCollectionID
-            : null;
+    const selectedCollectionID = routeCollectionID;
     const isTrashView = router.pathname === "/trash";
     const isCollectionsView = router.pathname === "/collections";
     const isHomeView =

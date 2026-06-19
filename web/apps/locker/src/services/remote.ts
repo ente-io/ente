@@ -329,14 +329,13 @@ export const createInfoItem = async (
     infoData: Record<string, unknown>,
     masterKey: string,
 ): Promise<void> => {
-    const [collectionID, ...additionalCollectionIDs] =
+    const resolvedCollectionIDs =
         await resolveCollectionIDsWithUncategorizedFallback(
             collectionIDs,
             masterKey,
         );
-    if (collectionID === undefined) {
-        throw new Error("No collection selected");
-    }
+    const collectionID = resolvedCollectionIDs[0]!;
+    const additionalCollectionIDs = resolvedCollectionIDs.slice(1);
     const collectionRecord = getCollectionRecord(collectionID);
     if (!collectionRecord)
         throw new Error(`Collection ${collectionID} not in cache`);

@@ -301,10 +301,8 @@ export const uploadLockerFileWithDeps = async <TCollectionRecord>(
     deps: UploadDeps<TCollectionRecord>,
     onProgress?: (progress: LockerUploadProgress) => void,
 ): Promise<number> => {
-    const [collectionID, ...additionalCollectionIDs] = collectionIDs;
-    if (collectionID === undefined) {
-        throw new Error("No collection selected");
-    }
+    const collectionID = collectionIDs[0]!;
+    const additionalCollectionIDs = collectionIDs.slice(1);
     onProgress?.({ phase: "preparing" });
 
     const plaintextChunkCount = Math.max(

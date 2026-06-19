@@ -20,8 +20,7 @@ const collectionIDFromSinceTimeKey = (key: string) => {
         return undefined;
     }
 
-    const collectionID = Number.parseInt(key.slice(prefix.length), 10);
-    return Number.isFinite(collectionID) ? collectionID : undefined;
+    return Number.parseInt(key.slice(prefix.length), 10) || undefined;
 };
 
 export interface StoredTrashFileRecord extends EncryptedFileRecord {

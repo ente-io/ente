@@ -539,11 +539,9 @@ export const ItemList: React.FC<ItemListProps> = ({
 
     const canEditSelectedCollection =
         selectedCollection !== null &&
-        currentUserID !== undefined &&
         canEditCollection(selectedCollection, currentUserID);
     const canLeaveSelectedCollection =
         selectedCollection !== null &&
-        currentUserID !== undefined &&
         canLeaveCollection(selectedCollection, currentUserID);
     const canShareSelectedCollection =
         selectedCollection !== null &&

@@ -736,9 +736,7 @@ const decryptAllData = async (
                 .filter((item): item is LockerItem => item !== undefined)
                 .map((item) => ({
                     ...item,
-                    collectionIDs:
-                        collectionIDsByFileID.get(item.id) ??
-                        item.collectionIDs,
+                    collectionIDs: collectionIDsByFileID.get(item.id)!,
                 }));
 
             result.push({

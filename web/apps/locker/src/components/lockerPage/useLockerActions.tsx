@@ -282,9 +282,7 @@ const collectionIDsForItemMutation = (
     Array.from(
         new Set(
             selectedCollectionID === null
-                ? item.collectionIDs.length > 0
-                    ? item.collectionIDs
-                    : [item.collectionID]
+                ? item.collectionIDs
                 : [item.collectionID],
         ),
     );
@@ -637,20 +635,6 @@ export const useLockerActions = ({
 
     const handleEditItem = useCallback(
         (item: LockerItem) => {
-            const fullCollectionIDs = Array.from(
-                new Set([
-                    ...item.collectionIDs,
-                    item.collectionID,
-                    ...collections
-                        .filter((collection) =>
-                            collection.items.some(
-                                (candidate) => candidate.id === item.id,
-                            ),
-                        )
-                        .map((collection) => collection.id),
-                ]),
-            );
-
             setEditItem({
                 id: item.id,
                 type: item.type,
@@ -659,10 +643,10 @@ export const useLockerActions = ({
                         ? { name: getItemTitle(item) }
                         : (item.data as unknown as Record<string, unknown>),
                 collectionID: item.collectionID,
-                collectionIDs: fullCollectionIDs,
+                collectionIDs: item.collectionIDs,
             });
         },
-        [collections],
+        [],
     );
 
     const handlePermanentlyDelete = useCallback(
@@ -745,10 +729,8 @@ export const useLockerActions = ({
 
             const normalizedNameToID = new Map(
                 collections
-                    .filter(
-                        (collection) =>
-                            currentUserID !== undefined &&
-                            isCollectionOwner(collection, currentUserID),
+                    .filter((collection) =>
+                        isCollectionOwner(collection, currentUserID),
                     )
                     .map((collection) => [
                         collection.name.trim().toLocaleLowerCase(),

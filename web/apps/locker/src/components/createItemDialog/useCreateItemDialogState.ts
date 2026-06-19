@@ -95,10 +95,7 @@ const initialEditCollectionIDs = (
     if (!editItem) {
         return [];
     }
-    if (editItem.collectionIDs.length > 0) {
-        return editItem.collectionIDs;
-    }
-    return editItem.collectionID ? [editItem.collectionID] : [];
+    return editItem.collectionIDs;
 };
 
 const editFormData = (
@@ -137,10 +134,8 @@ export const useCreateItemDialogState = ({
     const displayCollections = useMemo(() => {
         const ownedVisibleCollections = visibleLockerCollections(
             collections,
-        ).filter(
-            (collection) =>
-                currentUserID !== undefined &&
-                isCollectionOwner(collection, currentUserID),
+        ).filter((collection) =>
+            isCollectionOwner(collection, currentUserID),
         );
 
         if (!isEditMode) {
@@ -202,7 +197,6 @@ export const useCreateItemDialogState = ({
     >({});
 
     const isFileMode = selectedOption === "file";
-    const editCollectionID = editItem?.collectionID ?? null;
     const selectedType =
         selectedOption && selectedOption !== "file"
             ? (selectedOption as LockerItemType)
@@ -212,16 +206,6 @@ export const useCreateItemDialogState = ({
     const displayCollectionsRef = useRef(displayCollections);
 
     displayCollectionsRef.current = displayCollections;
-
-    const normalizeSelectedCollectionIDs = useCallback(
-        (collectionIDs: number[]) =>
-            collectionIDs.filter((collectionID) =>
-                displayCollectionsRef.current.some(
-                    (collection) => collection.id === collectionID,
-                ),
-            ),
-        [],
-    );
 
     const resetUploadState = useCallback(() => {
         const nextState = emptyUploadState();
@@ -241,26 +225,17 @@ export const useCreateItemDialogState = ({
             editItem?.type ?? (initialItems?.length ? "file" : null),
         );
         const defaultCollectionName =
-            defaultCollectionID !== null && defaultCollectionID !== undefined
+            defaultCollectionID != null
                 ? displayCollectionsRef.current.find(
                       (collection) => collection.id === defaultCollectionID,
                   )?.name
                 : undefined;
         setSelectedCollectionIDs(
             isEditMode
-                ? normalizeSelectedCollectionIDs(
-                      editCollectionIDs.length > 0
-                          ? editCollectionIDs
-                          : editCollectionID
-                            ? [editCollectionID]
-                            : [],
-                  )
-                : normalizeSelectedCollectionIDs(
-                      defaultCollectionID !== null &&
-                          defaultCollectionID !== undefined
-                          ? [defaultCollectionID]
-                          : [],
-                  ),
+                ? editCollectionIDs
+                : defaultCollectionID != null
+                  ? [defaultCollectionID]
+                  : [],
         );
         setFormData(editFormData(editItem));
         setShowPassword(false);
@@ -280,59 +255,12 @@ export const useCreateItemDialogState = ({
         setUpgradeCTAType(null);
     }, [
         defaultCollectionID,
-        editCollectionID,
         editCollectionIDs,
         editItem,
         initialItems,
         isEditMode,
-        normalizeSelectedCollectionIDs,
         open,
         resetUploadState,
-    ]);
-
-    useEffect(() => {
-        if (
-            !open ||
-            isEditMode ||
-            selectedCollectionIDs.every((selectedCollectionID) =>
-                displayCollections.some(
-                    (collection) => collection.id === selectedCollectionID,
-                ),
-            )
-        ) {
-            return;
-        }
-
-        setSelectedCollectionIDs((current) =>
-            current.filter((selectedCollectionID) =>
-                displayCollections.some(
-                    (collection) => collection.id === selectedCollectionID,
-                ),
-            ),
-        );
-    }, [displayCollections, isEditMode, open, selectedCollectionIDs]);
-
-    useEffect(() => {
-        if (
-            !open ||
-            isEditMode ||
-            selectedCollectionIDs.length > 0 ||
-            defaultCollectionID === null ||
-            defaultCollectionID === undefined ||
-            !displayCollections.some(
-                (collection) => collection.id === defaultCollectionID,
-            )
-        ) {
-            return;
-        }
-
-        setSelectedCollectionIDs([defaultCollectionID]);
-    }, [
-        defaultCollectionID,
-        displayCollections,
-        isEditMode,
-        open,
-        selectedCollectionIDs.length,
     ]);
 
     const handleClose = useCallback(() => {
