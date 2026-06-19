@@ -194,6 +194,66 @@ class LockScreenSettings {
     return _secureStorage.read(key: password);
   }
 
+  /// Verifies that the hash of [text] matches [storedHash].
+  Future<bool> verify({
+    required String text,
+    required String? storedHash,
+  }) async {
+    if (storedHash == null) return false;
+    final Uint8List? salt = await getSalt();
+    if (salt == null) return false;
+    final hash = base64Encode(
+      CryptoUtil.cryptoPwHash(
+        utf8.encode(text),
+        salt,
+        CryptoUtil.pwhashMemLimitInteractive,
+        CryptoUtil.pwhashOpsLimitSensitive,
+      ),
+    );
+    return hash == storedHash;
+  }
+
+  /// Like [verify], but for secrets created by photos' lock screen.
+  ///
+  /// On a miss it retries with photos' legacy (Interactive ops) parameters and,
+  /// on a hit, upgrades the stored hash to the current parameters under
+  /// [storageKey]. The re-store is best-effort, so a correct secret is never
+  /// rejected.
+  Future<bool> verifyWithLegacyFallback({
+    required String text,
+    required String? storedHash,
+    required String storageKey,
+  }) async {
+    if (await verify(text: text, storedHash: storedHash)) return true;
+    if (storedHash == null) return false;
+    final Uint8List? salt = await getSalt();
+    if (salt == null) return false;
+    final secret = utf8.encode(text);
+
+    final legacy = base64Encode(
+      CryptoUtil.cryptoPwHash(
+        secret,
+        salt,
+        CryptoUtil.pwhashMemLimitInteractive,
+        CryptoUtil.pwhashOpsLimitInteractive,
+      ),
+    );
+    if (legacy != storedHash) return false;
+
+    final upgraded = base64Encode(
+      CryptoUtil.cryptoPwHash(
+        secret,
+        salt,
+        CryptoUtil.pwhashMemLimitInteractive,
+        CryptoUtil.pwhashOpsLimitSensitive,
+      ),
+    );
+    try {
+      await _secureStorage.write(key: storageKey, value: upgraded);
+    } catch (_) {}
+    return true;
+  }
+
   Future<void> removePinAndPassword() async {
     await _secureStorage.delete(key: saltKey);
     await _secureStorage.delete(key: pin);
