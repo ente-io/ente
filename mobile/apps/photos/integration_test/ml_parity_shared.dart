@@ -296,7 +296,7 @@ Future<void> _ensureModelNetworkContext() async {
     NetworkClient.instance.downloadDio,
     packageInfo,
   );
-  await Configuration.instance.init();
+  await Configuration.instance.init(prefs);
   _modelNetworkContextInitialized = true;
 }
 

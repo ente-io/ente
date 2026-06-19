@@ -219,7 +219,7 @@ void main() {
         NetworkClient.instance.downloadDio,
         packageInfo,
       );
-      await Configuration.instance.init();
+      await Configuration.instance.init(prefs);
 
       // Verify configuration
       expect(
