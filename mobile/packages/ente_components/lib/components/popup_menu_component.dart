@@ -1,15 +1,24 @@
-import "dart:async";
+import 'dart:async';
 
-import "package:ente_components/ente_components.dart";
-import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
-import "package:photos/theme/ente_theme.dart";
+import 'package:ente_components/components/buttons/icon_button_component.dart';
+import 'package:ente_components/theme/icon_sizes.dart';
+import 'package:ente_components/theme/radii.dart';
+import 'package:ente_components/theme/spacing.dart';
+import 'package:ente_components/theme/text_styles.dart';
+import 'package:ente_components/theme/theme.dart';
+import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
+/// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=2513-52763&m=dev
+/// Section: Dropdown menu
+/// Specs: 196px menu, 52px rows, 20px radius, optional leading/trailing icons,
+/// optional secondary label, faint dividers, and Inter mini typography.
 class EntePopupMenuOption<T> {
   const EntePopupMenuOption({
     required this.value,
     required this.label,
     this.secondaryLabel,
+    this.secondaryTrailingWidget,
     this.labelColor,
     this.leadingWidget,
     this.isActive = false,
@@ -21,6 +30,7 @@ class EntePopupMenuOption<T> {
   final T value;
   final String label;
   final String? secondaryLabel;
+  final Widget? secondaryTrailingWidget;
   final Color? labelColor;
   final Widget? leadingWidget;
   final bool isActive;
@@ -36,9 +46,9 @@ class EntePopupMenuButton<T> extends StatelessWidget {
     this.child,
     this.menuWidth = 196.0,
     this.itemHeight = 52.0,
-    this.borderRadius = 20.0,
-    this.elevation = 8.0,
-    this.itemHorizontalPadding = 16.0,
+    this.borderRadius = Radii.button,
+    this.elevation = 0.0,
+    this.itemHorizontalPadding = Spacing.lg,
     super.key,
   });
 
@@ -72,7 +82,7 @@ class EntePopupMenuButton<T> extends StatelessWidget {
 
   Future<void> _showMenu(BuildContext context) async {
     final options = await optionsBuilder();
-    if (options.isEmpty) {
+    if (!context.mounted || options.isEmpty) {
       return;
     }
 
@@ -85,7 +95,7 @@ class EntePopupMenuButton<T> extends StatelessWidget {
       elevation: elevation,
       itemHorizontalPadding: itemHorizontalPadding,
     );
-    if (selected == null) return;
+    if (!context.mounted || selected == null) return;
     await onSelected(selected);
   }
 }
@@ -95,16 +105,16 @@ Future<T?> showEntePopupMenu<T>({
   required List<EntePopupMenuOption<T>> options,
   double menuWidth = 196.0,
   double itemHeight = 52.0,
-  double borderRadius = 20.0,
+  double borderRadius = Radii.button,
   double elevation = 0.0,
-  double itemHorizontalPadding = 16.0,
+  double itemHorizontalPadding = Spacing.lg,
 }) {
-  final colorScheme = getEnteColorScheme(context);
+  final colors = context.componentColors;
+  final menuStrokeColor = colors.strokeFaint;
   final button = context.findRenderObject()! as RenderBox;
   final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
   // Anchor the menu to the button's bottom edge so it drops below the button
-  // instead of opening on top of it (showMenu flips it upward if there's no
-  // room below).
+  // instead of opening on top of it when there is enough room below.
   final position = RelativeRect.fromRect(
     Rect.fromPoints(
       button.localToGlobal(
@@ -121,13 +131,16 @@ Future<T?> showEntePopupMenu<T>({
 
   return showMenu<T>(
     context: context,
-    color: colorScheme.fill,
+    color: colors.fillLight,
     elevation: elevation,
+    surfaceTintColor: Colors.transparent,
+    menuPadding: EdgeInsets.zero,
     constraints: BoxConstraints.tightFor(width: menuWidth),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(borderRadius),
-      side: BorderSide(color: colorScheme.strokeFaint),
+      side: BorderSide(color: menuStrokeColor),
     ),
+    clipBehavior: Clip.antiAlias,
     position: position,
     items: List.generate(options.length, (index) {
       final option = options[index];
@@ -136,11 +149,12 @@ Future<T?> showEntePopupMenu<T>({
         padding: EdgeInsets.zero,
         height: itemHeight,
         child: Container(
+          key: ValueKey('ente-popup-menu-item-$index'),
           height: itemHeight,
           padding: EdgeInsets.symmetric(horizontal: itemHorizontalPadding),
           decoration: BoxDecoration(
             border: option.showDivider && index != options.length - 1
-                ? Border(bottom: BorderSide(color: colorScheme.strokeFaint))
+                ? Border(bottom: BorderSide(color: menuStrokeColor))
                 : null,
           ),
           child: _EntePopupMenuRow(option: option),
@@ -157,8 +171,11 @@ class _EntePopupMenuRow<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final titleStyle = textTheme.mini.copyWith(color: option.labelColor);
+    final colors = context.componentColors;
+    final mutedStyle = TextStyles.mini.copyWith(color: colors.textLight);
+    final titleStyle = TextStyles.mini.copyWith(
+      color: option.labelColor ?? colors.textBase,
+    );
     final title = option.secondaryLabel == null
         ? Text(
             option.label,
@@ -177,14 +194,25 @@ class _EntePopupMenuRow<T> extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Text("•", style: textTheme.miniMuted),
+              Text('•', style: mutedStyle),
               const SizedBox(width: 6),
               Flexible(
-                child: Text(
-                  option.secondaryLabel!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.miniMuted,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        option.secondaryLabel!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: mutedStyle,
+                      ),
+                    ),
+                    if (option.secondaryTrailingWidget != null) ...[
+                      const SizedBox(width: Spacing.xs),
+                      option.secondaryTrailingWidget!,
+                    ],
+                  ],
                 ),
               ),
             ],
@@ -194,10 +222,18 @@ class _EntePopupMenuRow<T> extends StatelessWidget {
       children: [
         if (option.leadingWidget != null) ...[
           SizedBox.square(
-            dimension: 20,
-            child: Center(child: option.leadingWidget),
+            dimension: 24,
+            child: Center(
+              child: IconTheme.merge(
+                data: IconThemeData(
+                  color: colors.textLight,
+                  size: IconSizes.small,
+                ),
+                child: option.leadingWidget!,
+              ),
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 6),
         ],
         Expanded(child: title),
         if (option.trailingWidget != null)
@@ -205,7 +241,7 @@ class _EntePopupMenuRow<T> extends StatelessWidget {
         else if (option.activeTrailingWidget != null)
           option.isActive
               ? option.activeTrailingWidget!
-              : const SizedBox(width: 12),
+              : const SizedBox(width: Spacing.md),
       ],
     );
   }

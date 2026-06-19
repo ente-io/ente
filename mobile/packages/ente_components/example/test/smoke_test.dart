@@ -50,7 +50,7 @@ void main() {
     expect(find.byKey(const ValueKey('success')), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 2));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Continue'), findsOneWidget);
   });
