@@ -1,0 +1,1 @@
+- Updated home gallery banners to use the shared Ente component design.
