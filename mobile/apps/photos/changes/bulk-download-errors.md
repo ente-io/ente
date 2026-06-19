@@ -1,0 +1,1 @@
+- Fixed bulk album downloads failing with an error.
