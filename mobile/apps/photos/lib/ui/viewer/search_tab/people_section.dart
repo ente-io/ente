@@ -3,7 +3,6 @@ import "dart:async";
 import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
@@ -33,9 +32,13 @@ import "package:photos/ui/viewer/search_tab/section_header.dart";
 class PeopleSection extends StatefulWidget {
   final SectionType sectionType = SectionType.face;
   final List<GenericSearchResult> examples;
-  final int limit;
+  final int resultLimit;
 
-  const PeopleSection({super.key, required this.examples, this.limit = 7});
+  const PeopleSection({
+    super.key,
+    required this.examples,
+    required this.resultLimit,
+  });
 
   @override
   State<PeopleSection> createState() => _PeopleSectionState();
@@ -57,7 +60,7 @@ class _PeopleSectionState extends State<PeopleSection> {
           _examples =
               await widget.sectionType.getData(
                     context,
-                    limit: kSearchSectionLimit,
+                    limit: widget.resultLimit + 1,
                   )
                   as List<GenericSearchResult>;
           setState(() {});
@@ -83,6 +86,9 @@ class _PeopleSectionState extends State<PeopleSection> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final visibleExamples = _examples
+        .take(widget.resultLimit)
+        .toList(growable: false);
     return _examples.isNotEmpty
         ? GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -92,9 +98,12 @@ class _PeopleSectionState extends State<PeopleSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SectionHeader(widget.sectionType, hasMore: true),
+                SectionHeader(
+                  widget.sectionType,
+                  hasMore: _examples.length > widget.resultLimit,
+                ),
                 const SizedBox(height: 4),
-                SearchExampleRow(_examples, widget.sectionType),
+                SearchExampleRow(visibleExamples, widget.sectionType),
                 const SizedBox(height: 20),
               ],
             ),

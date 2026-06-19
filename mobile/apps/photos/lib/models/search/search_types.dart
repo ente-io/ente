@@ -258,7 +258,10 @@ extension SectionTypeExtensions on SectionType {
               : kMinimumClusterSizeSearchResult,
         );
       case SectionType.magic:
-        return SearchService.instance.getMagicSectionResults(context!);
+        return SearchService.instance.getMagicSectionResults(
+          context!,
+          limit: limit,
+        );
       case SectionType.wrapped:
         return Future.value(const <SearchResult>[]);
       case SectionType.location:

@@ -1,0 +1,1 @@
+- Adjust search tab preview counts to fit the screen width.

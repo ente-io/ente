@@ -26,6 +26,7 @@ import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_preview_limits.dart";
 import "package:photos/ui/wrapped/wrapped_discovery_section.dart";
 
 class SearchTab extends StatefulWidget {
@@ -92,17 +93,25 @@ class _SearchTabState extends State<SearchTab> {
           ),
         ),
         Expanded(
-          child: AllSectionsExamplesProvider(
-            child: FadeIndexedStack(
-              lazy: false,
-              duration: const Duration(milliseconds: 150),
-              index: index,
-              children: const [
-                AllSearchSections(),
-                SearchSuggestionsWidget(),
-                NoResultWidget(),
-              ],
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final previewLimits = SearchTabPreviewLimits.forWidth(
+                constraints.maxWidth,
+              );
+              return AllSectionsExamplesProvider(
+                previewLimits: previewLimits,
+                child: FadeIndexedStack(
+                  lazy: false,
+                  duration: const Duration(milliseconds: 150),
+                  index: index,
+                  children: [
+                    AllSearchSections(previewLimits: previewLimits),
+                    const SearchSuggestionsWidget(),
+                    const NoResultWidget(),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ],
@@ -194,7 +203,9 @@ class _SearchHeaderTitle extends StatelessWidget {
 }
 
 class AllSearchSections extends StatefulWidget {
-  const AllSearchSections({super.key});
+  final SearchTabPreviewLimits previewLimits;
+
+  const AllSearchSections({super.key, required this.previewLimits});
 
   @override
   State<AllSearchSections> createState() => _AllSearchSectionsState();
@@ -248,10 +259,22 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
               resultsBySection[SectionType.face]!.isNotEmpty;
           final sectionWidgets = [
             if (hasGrantedMLConsent)
-              PeopleSection(examples: examplesFor(SectionType.face)),
-            MagicSection(examplesFor(SectionType.magic)),
-            LocationsSection(examplesFor(SectionType.location)),
-            if (!isLocalGalleryMode) const _RitualsDiscoverySection(),
+              PeopleSection(
+                examples: examplesFor(SectionType.face),
+                resultLimit: widget.previewLimits.faceResults,
+              ),
+            MagicSection(
+              examplesFor(SectionType.magic),
+              resultLimit: widget.previewLimits.magicResults,
+            ),
+            LocationsSection(
+              examplesFor(SectionType.location),
+              resultLimit: widget.previewLimits.locationResults,
+            ),
+            if (!isLocalGalleryMode)
+              _RitualsDiscoverySection(
+                resultLimit: widget.previewLimits.ritualResults,
+              ),
             ValueListenableBuilder<WrappedEntryState>(
               valueListenable: wrappedService.stateListenable,
               builder: (BuildContext context, WrappedEntryState state, _) {
@@ -266,7 +289,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 );
               },
             ),
-            const ContactsSectionLoader(),
+            ContactsSectionLoader(
+              resultLimit: widget.previewLimits.contactResults,
+            ),
             FileTypeSection(hasAnySearchableFiles: hasAnySearchableFiles),
           ];
           return ListView.builder(
@@ -334,16 +359,18 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
 }
 
 class _RitualsDiscoverySection extends StatelessWidget {
-  const _RitualsDiscoverySection();
+  final int resultLimit;
+
+  const _RitualsDiscoverySection({required this.resultLimit});
 
   @override
   Widget build(BuildContext context) {
     if (!flagService.ritualsFlag) {
       return const SizedBox.shrink();
     }
-    return const Padding(
-      padding: EdgeInsets.only(bottom: 20),
-      child: RitualsBanner(),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: RitualsBanner(resultLimit: resultLimit),
     );
   }
 }

@@ -4,7 +4,6 @@ import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -21,7 +20,9 @@ import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class ContactsSectionLoader extends StatefulWidget {
-  const ContactsSectionLoader({super.key});
+  final int resultLimit;
+
+  const ContactsSectionLoader({super.key, required this.resultLimit});
 
   @override
   State<ContactsSectionLoader> createState() => _ContactsSectionLoaderState();
@@ -36,17 +37,28 @@ class _ContactsSectionLoaderState extends State<ContactsSectionLoader> {
       return const SizedBox.shrink();
     }
     _contactsFuture ??= SearchService.instance.getAllContactsSearchResults(
-      kSearchSectionLimit,
+      widget.resultLimit + 1,
     );
     return FutureBuilder<List<GenericSearchResult>>(
       future: _contactsFuture!,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return ContactsSection(snapshot.data!);
+          return ContactsSection(
+            snapshot.data!,
+            resultLimit: widget.resultLimit,
+          );
         }
         return const ContactsLoadingSection();
       },
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant ContactsSectionLoader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.resultLimit != widget.resultLimit) {
+      _contactsFuture = null;
+    }
   }
 }
 
@@ -70,7 +82,13 @@ class ContactsLoadingSection extends StatelessWidget {
 
 class ContactsSection extends StatefulWidget {
   final List<GenericSearchResult> contactSearchResults;
-  const ContactsSection(this.contactSearchResults, {super.key});
+  final int resultLimit;
+
+  const ContactsSection(
+    this.contactSearchResults, {
+    super.key,
+    required this.resultLimit,
+  });
 
   @override
   State<ContactsSection> createState() => _ContactsSectionState();
@@ -94,7 +112,7 @@ class _ContactsSectionState extends State<ContactsSection> {
             _contactSearchResults =
                 (await SectionType.contacts.getData(
                       context,
-                      limit: kSearchSectionLimit,
+                      limit: widget.resultLimit + 1,
                     ))
                     as List<GenericSearchResult>;
             setState(() {});
@@ -159,6 +177,9 @@ class _ContactsSectionState extends State<ContactsSection> {
         ),
       );
     } else {
+      final visibleResults = _contactSearchResults
+          .take(widget.resultLimit)
+          .toList(growable: false);
       return Padding(
         padding: const EdgeInsets.only(bottom: 20),
         child: Column(
@@ -166,14 +187,13 @@ class _ContactsSectionState extends State<ContactsSection> {
           children: [
             SectionHeader(
               SectionType.contacts,
-              hasMore:
-                  (_contactSearchResults.length >= kSearchSectionLimit - 1),
+              hasMore: _contactSearchResults.length > widget.resultLimit,
             ),
             const SizedBox(height: 4),
             SearchTabHorizontalRow(
               spacing: 12,
               children: [
-                for (final contactSearchResult in _contactSearchResults)
+                for (final contactSearchResult in visibleResults)
                   ContactRecommendation(
                     contactSearchResult,
                     key: ValueKey(contactSearchResult.name()),

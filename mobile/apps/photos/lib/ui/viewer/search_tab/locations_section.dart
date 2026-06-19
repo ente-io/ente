@@ -4,7 +4,6 @@ import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -23,7 +22,13 @@ import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class LocationsSection extends StatefulWidget {
   final List<GenericSearchResult> locationsSearchResults;
-  const LocationsSection(this.locationsSearchResults, {super.key});
+  final int resultLimit;
+
+  const LocationsSection(
+    this.locationsSearchResults, {
+    super.key,
+    required this.resultLimit,
+  });
 
   @override
   State<LocationsSection> createState() => _LocationsSectionState();
@@ -45,7 +50,7 @@ class _LocationsSectionState extends State<LocationsSection> {
           _locationsSearchResults =
               (await SectionType.location.getData(
                     context,
-                    limit: kSearchSectionLimit,
+                    limit: widget.resultLimit + 1,
                   ))
                   as List<GenericSearchResult>;
           setState(() {});
@@ -106,6 +111,9 @@ class _LocationsSectionState extends State<LocationsSection> {
         ),
       );
     } else {
+      final visibleResults = _locationsSearchResults
+          .take(widget.resultLimit)
+          .toList(growable: false);
       return Padding(
         padding: const EdgeInsets.only(bottom: 20),
         child: Column(
@@ -113,15 +121,14 @@ class _LocationsSectionState extends State<LocationsSection> {
           children: [
             SectionHeader(
               SectionType.location,
-              hasMore:
-                  (_locationsSearchResults.length >= kSearchSectionLimit - 1),
+              hasMore: _locationsSearchResults.length > widget.resultLimit,
             ),
             const SizedBox(height: 4),
             SearchTabHorizontalRow(
               spacing: 10,
               children: [
                 const GoToMapTile(),
-                for (final locationSearchResult in _locationsSearchResults)
+                for (final locationSearchResult in visibleResults)
                   LocationRecommendation(locationSearchResult),
               ],
             ),

@@ -3,7 +3,6 @@ import "dart:async";
 import "package:ente_components/ente_components.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -17,7 +16,13 @@ import "package:photos/ui/viewer/search_tab/section_header.dart";
 
 class MagicSection extends StatefulWidget {
   final List<GenericSearchResult> magicSearchResults;
-  const MagicSection(this.magicSearchResults, {super.key});
+  final int resultLimit;
+
+  const MagicSection(
+    this.magicSearchResults, {
+    super.key,
+    required this.resultLimit,
+  });
 
   @override
   State<MagicSection> createState() => _MagicSectionState();
@@ -39,7 +44,7 @@ class _MagicSectionState extends State<MagicSection> {
           _magicSearchResults =
               (await SectionType.magic.getData(
                     context,
-                    limit: kSearchSectionLimit,
+                    limit: widget.resultLimit + 1,
                   ))
                   as List<GenericSearchResult>;
           setState(() {});
@@ -98,6 +103,9 @@ class _MagicSectionState extends State<MagicSection> {
       // );
       return const SizedBox.shrink();
     } else {
+      final visibleResults = _magicSearchResults
+          .take(widget.resultLimit)
+          .toList(growable: false);
       return Padding(
         padding: const EdgeInsets.only(bottom: 20),
         child: Column(
@@ -105,13 +113,13 @@ class _MagicSectionState extends State<MagicSection> {
           children: [
             SectionHeader(
               SectionType.magic,
-              hasMore: (_magicSearchResults.length >= kSearchSectionLimit - 1),
+              hasMore: _magicSearchResults.length > widget.resultLimit,
             ),
             const SizedBox(height: 4),
             SearchTabHorizontalRow(
               spacing: 10,
               children: [
-                for (final magicSearchResult in _magicSearchResults)
+                for (final magicSearchResult in visibleResults)
                   MagicRecommendation(magicSearchResult),
               ],
             ),

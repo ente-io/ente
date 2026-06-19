@@ -20,11 +20,13 @@ import "package:photos/ui/rituals/start_new_ritual_card.dart";
 import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 
 class RitualsBanner extends StatelessWidget {
-  const RitualsBanner({super.key});
+  const RitualsBanner({super.key, required this.resultLimit});
 
   static const _cardRadius = 25.0;
   static const _minCardHeight = 94.0;
   static const _cardWidth = 167.5;
+
+  final int resultLimit;
 
   @override
   Widget build(BuildContext context) {
@@ -68,13 +70,16 @@ class RitualsBanner extends StatelessWidget {
               Builder(
                 builder: (context) {
                   final cardHeight = _cardHeightFor(context);
+                  final visibleRituals = rituals
+                      .take(resultLimit)
+                      .toList(growable: false);
                   return SearchTabHorizontalScrollView(
                     height: cardHeight,
                     child: Row(
                       children: [
                         for (final (index, item) in _buildRowItems(
                           context,
-                          rituals,
+                          visibleRituals,
                           summary,
                           cardHeight,
                         ).indexed) ...[
