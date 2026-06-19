@@ -43,12 +43,15 @@ class LockScreenSettings {
   late LockScreenHost _config;
   late SharedPreferences _preferences;
   late FlutterSecureStorage _secureStorage;
+  bool _useLegacyHashFallback = false;
 
   Future<void> init(
     LockScreenHost config, {
     bool hasOptedForOfflineMode = false,
+    bool useLegacyHashFallback = false,
   }) async {
     _config = config;
+    _useLegacyHashFallback = useLegacyHashFallback;
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
 
@@ -193,6 +196,8 @@ class LockScreenSettings {
   Future<String?> getPassword() async {
     return _secureStorage.read(key: password);
   }
+
+  bool get useLegacyHashFallback => _useLegacyHashFallback;
 
   /// Verifies that the hash of [text] matches [storedHash].
   Future<bool> verify({

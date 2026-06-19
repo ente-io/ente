@@ -164,10 +164,16 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   }
 
   Future<bool> _confirmPasswordAuth(String inputtedPassword) async {
-    final matched = await _lockscreenSetting.verify(
-      text: inputtedPassword,
-      storedHash: widget.authPass,
-    );
+    final matched = _lockscreenSetting.useLegacyHashFallback
+        ? await _lockscreenSetting.verifyWithLegacyFallback(
+            text: inputtedPassword,
+            storedHash: widget.authPass,
+            storageKey: LockScreenSettings.password,
+          )
+        : await _lockscreenSetting.verify(
+            text: inputtedPassword,
+            storedHash: widget.authPass,
+          );
     if (matched) {
       await _lockscreenSetting.setInvalidAttemptCount(0);
 

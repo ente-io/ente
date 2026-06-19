@@ -63,10 +63,16 @@ class _LockScreenPinState extends State<LockScreenPin> {
   }
 
   Future<bool> confirmPinAuth(String inputtedPin) async {
-    final matched = await _lockscreenSetting.verify(
-      text: inputtedPin,
-      storedHash: widget.authPin,
-    );
+    final matched = _lockscreenSetting.useLegacyHashFallback
+        ? await _lockscreenSetting.verifyWithLegacyFallback(
+            text: inputtedPin,
+            storedHash: widget.authPin,
+            storageKey: LockScreenSettings.pin,
+          )
+        : await _lockscreenSetting.verify(
+            text: inputtedPin,
+            storedHash: widget.authPin,
+          );
     if (matched) {
       invalidAttemptsCount = 0;
       await _lockscreenSetting.setInvalidAttemptCount(0);
