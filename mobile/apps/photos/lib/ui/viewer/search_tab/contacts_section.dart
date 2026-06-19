@@ -52,14 +52,6 @@ class _ContactsSectionLoaderState extends State<ContactsSectionLoader> {
       },
     );
   }
-
-  @override
-  void didUpdateWidget(covariant ContactsSectionLoader oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.resultLimit != widget.resultLimit) {
-      _contactsFuture = null;
-    }
-  }
 }
 
 class ContactsLoadingSection extends StatelessWidget {
