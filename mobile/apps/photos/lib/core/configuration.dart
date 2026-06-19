@@ -6,6 +6,7 @@ import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:ente_contacts/contacts.dart';
 import "package:ente_crypto/ente_crypto.dart";
+import 'package:ente_lock_screen/lock_screen_host.dart';
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -49,7 +50,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
 
-class Configuration {
+class Configuration implements LockScreenHost {
   Configuration._privateConstructor();
 
   static final Configuration instance = Configuration._privateConstructor();
@@ -186,6 +187,7 @@ class Configuration {
     }
   }
 
+  @override
   Future<void> logout({bool autoLogout = false}) async {
     _logger.info("Logging out, autoLogout: $autoLogout");
     if (!autoLogout) {
@@ -516,6 +518,7 @@ class Configuration {
     return _cachedToken;
   }
 
+  @override
   bool isLoggedIn() {
     return getToken() != null;
   }

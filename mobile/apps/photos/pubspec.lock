@@ -587,6 +587,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.3"
+  ente_accounts:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/accounts"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_base:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/base"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_cast:
     dependency: "direct main"
     description:
@@ -601,6 +615,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  ente_configuration:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/configuration"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_contacts:
     dependency: "direct main"
     description:
@@ -615,6 +636,20 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_crypto_api:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_crypto_api"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_events:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/events"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_feature_flag:
     dependency: "direct main"
     description:
@@ -626,6 +661,27 @@ packages:
     dependency: "direct main"
     description:
       path: "../../packages/ente_icons"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_lock_screen:
+    dependency: "direct main"
+    description:
+      path: "../../packages/lock_screen"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_logging:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/logging"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_network:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/network"
       relative: true
     source: path
     version: "1.0.0"
@@ -664,6 +720,34 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_screen_cover:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/screen_cover"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_strings:
+    dependency: "direct main"
+    description:
+      path: "../../packages/strings"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_ui:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/ui"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_utils:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/utils"
+      relative: true
+    source: path
+    version: "1.0.0"
   equatable:
     dependency: "direct main"
     description:
@@ -1586,34 +1670,33 @@ packages:
     dependency: "direct main"
     description:
       name: local_auth
-      sha256: "434d854cf478f17f12ab29a76a02b3067f86a63a6d6c4eb8fbfdcfe4879c1b7b"
+      sha256: ae6f382f638108c6becd134318d7c3f0a93875383a54010f61d7c97ac05d5137
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "3.0.1"
   local_auth_android:
     dependency: "direct main"
     description:
       name: local_auth_android
-      sha256: "63ad7ca6396290626dc0cb34725a939e4cfe965d80d36112f08d49cf13a8136e"
+      sha256: b201c006fa769c23386f89aa6837ec0eb8179fcfb212eadcf87b422b3f9a6a78
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.49"
+    version: "2.0.8"
   local_auth_darwin:
-    dependency: transitive
-    description:
-      name: local_auth_darwin
-      sha256: "699873970067a40ef2f2c09b4c72eb1cfef64224ef041b3df9fdc5c4c1f91f49"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.1"
-  local_auth_ios:
     dependency: "direct main"
     description:
-      name: local_auth_ios
-      sha256: "6dde47dc852bc0c8343cb58e66a46efb16b62eddf389ce103d4dacb0c6c40c71"
+      name: local_auth_darwin
+      sha256: a8c3d4e17454111f7fd31ff72a31222359f6059f7fe956c2dcfe0f88f49826d4
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.7"
+    version: "2.0.3"
+  local_auth_linux:
+    dependency: "direct overridden"
+    description:
+      path: "../../packages/local_auth_linux"
+      relative: true
+    source: path
+    version: "0.1.0"
   local_auth_platform_interface:
     dependency: transitive
     description:
@@ -1626,10 +1709,10 @@ packages:
     dependency: transitive
     description:
       name: local_auth_windows
-      sha256: bc4e66a29b0fdf751aafbec923b5bed7ad6ed3614875d8151afe2578520b2ab5
+      sha256: be12c5b8ba5e64896983123655c5f67d2484ecfcc95e367952ad6e3bff94cb16
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.11"
+    version: "2.0.1"
   log_viewer:
     dependency: "direct main"
     description:
@@ -2350,6 +2433,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  screen_retriever:
+    dependency: transitive
+    description:
+      name: screen_retriever
+      sha256: "42cc3b402a0f67d2455a0d067553d0f13453f6a008d98eababf8b63958d506bd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
+  screen_retriever_linux:
+    dependency: transitive
+    description:
+      name: screen_retriever_linux
+      sha256: "2a476f1a5538065bc5badf376cfdc83d6ecf07d77eb2391b9c2bff5a76970048"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
+  screen_retriever_macos:
+    dependency: transitive
+    description:
+      name: screen_retriever_macos
+      sha256: b5abb900fcb86614ff10b738b34e37b9e1d03b0447280668e2bc8a98bdc7bd59
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
+  screen_retriever_platform_interface:
+    dependency: transitive
+    description:
+      name: screen_retriever_platform_interface
+      sha256: "3af22d926bedf20c2caa308eea376776451a3af125919ce072e56525fded8901"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
+  screen_retriever_windows:
+    dependency: transitive
+    description:
+      name: screen_retriever_windows
+      sha256: c44b38a4c4bab34af259180a70a4eee1e29384e7b82e627c9faa68afcdab2e73
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   scrollable_positioned_list:
     dependency: "direct main"
     description:
@@ -2823,10 +2946,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_ios
-      sha256: "580fe5dfb51671ae38191d316e027f6b76272b026370708c2d898799750a02b0"
+      sha256: d80b3f567a617cb923546034cc94bfe44eb15f989fe670b37f26abdb9d939cb7
       url: "https://pub.dev"
     source: hosted
-    version: "6.4.1"
+    version: "6.3.4"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -3085,6 +3208,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  window_manager:
+    dependency: transitive
+    description:
+      name: window_manager
+      sha256: "7eb6d6c4164ec08e1bf978d6e733f3cebe792e2a23fb07cbca25c2872bfdbdcd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.1"
   wkt_parser:
     dependency: transitive
     description:
