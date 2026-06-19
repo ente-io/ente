@@ -24,6 +24,13 @@ final class DartZxingQrPlatform extends EnteQrPlatform {
   }
 
   @override
+  Future<QrScanResult> scanQrFromCurrentWindow() {
+    return Future.value(
+      QrScanResult.error('Screen QR capture is only supported on macOS'),
+    );
+  }
+
+  @override
   Future<QrScanResults> scanAllQrFromImage(String imagePath) async {
     final result = await scanQrFromImage(imagePath);
     final content = result.content;

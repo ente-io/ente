@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/home/widgets/rounded_action_buttons.dart';
@@ -29,6 +31,12 @@ class HomeEmptyStateWidget extends StatelessWidget {
         ? 'assets/svg/empty-state-bg-dark.svg'
         : 'assets/svg/empty-state-bg-light.svg';
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final showScanner = PlatformDetector.isMobile() || Platform.isMacOS;
+    final showImageImport = !PlatformDetector.isMobile();
+    const importImageLabel = 'Import QR image';
+    final scanLabel = Platform.isMacOS
+        ? 'Scan screen QR'
+        : l10n.importScanQrCode;
     final extraBottomPadding = PlatformDetector.isMobile()
         ? (bottomPadding > 0 ? bottomPadding : 24.0)
         : 24.0;
@@ -96,33 +104,31 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (PlatformDetector.isMobile()) ...[
+                        if (showScanner) ...[
                           RoundedButton(
-                            label: l10n.importScanQrCode,
+                            label: scanLabel,
                             onPressed: onScanTap,
                             width: double.infinity,
                           ),
+                        ],
+                        if (showScanner && showImageImport)
                           const SizedBox(height: 12),
+                        if (showImageImport) ...[
                           RoundedButton(
-                            label: l10n.importEnterSetupKey,
-                            onPressed: onManuallySetupTap,
-                            width: double.infinity,
-                            type: RoundedButtonType.secondary,
-                          ),
-                        ] else ...[
-                          RoundedButton(
-                            label: l10n.importFromGallery,
+                            label: importImageLabel,
                             onPressed: onImportImageTap,
-                            width: double.infinity,
-                          ),
-                          const SizedBox(height: 12),
-                          RoundedButton(
-                            label: l10n.importEnterSetupKey,
-                            onPressed: onManuallySetupTap,
                             width: double.infinity,
                             type: RoundedButtonType.secondary,
                           ),
                         ],
+                        if (showScanner || showImageImport)
+                          const SizedBox(height: 12),
+                        RoundedButton(
+                          label: l10n.importEnterSetupKey,
+                          onPressed: onManuallySetupTap,
+                          width: double.infinity,
+                          type: RoundedButtonType.secondary,
+                        ),
                         const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

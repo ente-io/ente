@@ -17,6 +17,10 @@ class MockEnteQrPlatform
   }) => Future.value(QrScanResult.error('Mock implementation'));
 
   @override
+  Future<QrScanResult> scanQrFromCurrentWindow() =>
+      Future.value(QrScanResult.error('Mock implementation'));
+
+  @override
   Future<QrScanResults> scanAllQrFromImage(String imagePath) =>
       Future.value(QrScanResults.error('Mock implementation'));
 }

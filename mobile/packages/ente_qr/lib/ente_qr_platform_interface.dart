@@ -109,6 +109,13 @@ abstract class EnteQrPlatform extends PlatformInterface {
     throw UnimplementedError('scanQrFromImage() has not been implemented.');
   }
 
+  /// Scans the screen area behind the current app window.
+  Future<QrScanResult> scanQrFromCurrentWindow() {
+    throw UnimplementedError(
+      'scanQrFromCurrentWindow() has not been implemented.',
+    );
+  }
+
   /// Scans all QR codes from an image file at the given path.
   /// Returns a list of detections with content and bounding boxes.
   Future<QrScanResults> scanAllQrFromImage(String imagePath) {

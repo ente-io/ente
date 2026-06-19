@@ -2362,6 +2362,12 @@ class _HomePageState extends State<HomePage> {
 
   Widget _getFab() {
     final isDesktop = PlatformDetector.isDesktop();
+    final importImageLabel = isDesktop
+        ? 'Import QR image'
+        : context.l10n.importFromGallery;
+    final scanLabel = Platform.isMacOS
+        ? 'Scan screen QR'
+        : context.l10n.scanAQrCode;
     return SpeedDial(
       icon: Icons.add,
       activeIcon: Icons.close,
@@ -2376,12 +2382,12 @@ class _HomePageState extends State<HomePage> {
       elevation: 8.0,
       animationCurve: Curves.elasticInOut,
       children: [
-        if (!isDesktop)
+        if (!isDesktop || Platform.isMacOS)
           SpeedDialChild(
             child: const HugeIcon(icon: HugeIcons.strokeRoundedQrCode),
             foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-            labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
+            labelWidget: SpeedDialLabelWidget(scanLabel),
             onTap: _redirectToScannerPage,
           ),
         SpeedDialChild(
@@ -2396,7 +2402,7 @@ class _HomePageState extends State<HomePage> {
             child: const HugeIcon(icon: HugeIcons.strokeRoundedAlbum02),
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
             foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
-            labelWidget: SpeedDialLabelWidget(context.l10n.importFromGallery),
+            labelWidget: SpeedDialLabelWidget(importImageLabel),
             onTap: _importFromGalleryNative,
           ),
       ],

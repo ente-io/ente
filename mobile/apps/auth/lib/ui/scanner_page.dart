@@ -4,15 +4,20 @@ import 'dart:io';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/components/scanner_camera_view.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/gallery_import_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
+import 'package:ente_qr/ente_qr.dart';
 import 'package:ente_qr_scanner/ente_qr_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:window_manager/window_manager.dart';
 
 class ScannerPageResult {
   final Code? code;
@@ -43,10 +48,21 @@ class ScannerPageState extends State<ScannerPage> {
   EnteQrScannerController? controller;
   StreamSubscription<String>? _scanSubscription;
   bool _isImportingFromGallery = false;
+  bool _isCapturingScreen = false;
   bool _hasCompletedScan = false;
   bool _isHandlingGoogleAuthImport = false;
   bool _isTogglingFlash = false;
   bool? _isFlashOn;
+  bool? _previousAlwaysOnTop;
+  double? _previousWindowOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isMacOS) {
+      unawaited(_prepareMacOSScreenCaptureWindow());
+    }
+  }
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -62,6 +78,10 @@ class ScannerPageState extends State<ScannerPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (Platform.isMacOS) {
+      return _macOSScreenCaptureScanner(context);
+    }
+
     final l10n = context.l10n;
     final bool showGalleryImport = PlatformDetector.isMobile();
     final bool showTorch = showGalleryImport && _isFlashOn != null;
@@ -155,6 +175,93 @@ class ScannerPageState extends State<ScannerPage> {
     );
   }
 
+  Widget _macOSScreenCaptureScanner(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final bool isLight = theme.brightness == Brightness.light;
+    final Color frameColor = colorScheme.primary700;
+    final Color frameFill = isLight
+        ? Colors.white.withValues(alpha: 0.16)
+        : Colors.black.withValues(alpha: 0.18);
+    final Color hintColor = isLight
+        ? Colors.black.withValues(alpha: 0.82)
+        : Colors.white.withValues(alpha: 0.9);
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.scan)),
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+          child: Column(
+            children: [
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: frameFill,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: frameColor, width: 3),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.crop_free, size: 42, color: hintColor),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Text(
+                            'Place this window over the QR code',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: hintColor,
+                              height: 1.25,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ButtonWidget(
+                      buttonType: ButtonType.primary,
+                      icon: Icons.qr_code_scanner,
+                      labelText: _isCapturingScreen
+                          ? 'Capturing...'
+                          : 'Capture QR from screen',
+                      onTap: _isCapturingScreen
+                          ? null
+                          : _handleScreenCaptureScan,
+                      isDisabled: _isCapturingScreen,
+                    ),
+                    const SizedBox(height: 12),
+                    ButtonWidget(
+                      buttonType: ButtonType.secondary,
+                      icon: Icons.photo_library_outlined,
+                      labelText: 'Import QR image',
+                      onTap: _isImportingFromGallery
+                          ? null
+                          : _handleImportFromGallery,
+                      isDisabled: _isImportingFromGallery,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _onScannerCreated(EnteQrScannerController controller) {
     this.controller = controller;
     controller.onTorchStatusChanged = _updateFlashStatus;
@@ -165,6 +272,26 @@ class ScannerPageState extends State<ScannerPage> {
 
   void _handleScannerError(String message) {
     _logger.warning('Scanner error: $message');
+  }
+
+  Future<void> _prepareMacOSScreenCaptureWindow() async {
+    try {
+      _previousAlwaysOnTop = await windowManager.isAlwaysOnTop();
+      _previousWindowOpacity = await windowManager.getOpacity();
+      await windowManager.setAlwaysOnTop(true);
+      await windowManager.setOpacity(0.64);
+    } catch (e, s) {
+      _logger.warning('Failed to prepare screen capture window', e, s);
+    }
+  }
+
+  Future<void> _restoreMacOSScreenCaptureWindow() async {
+    try {
+      await windowManager.setOpacity(_previousWindowOpacity ?? 1);
+      await windowManager.setAlwaysOnTop(_previousAlwaysOnTop ?? false);
+    } catch (e, s) {
+      _logger.warning('Failed to restore screen capture window', e, s);
+    }
   }
 
   Widget _scannerActionButton({
@@ -325,27 +452,13 @@ class ScannerPageState extends State<ScannerPage> {
       if (importResult == null) {
         return;
       }
-      final googleAuthCodes = importResult.googleAuthCodes;
-      if (googleAuthCodes != null) {
-        final shouldImport = await confirmGoogleAuthImport(
-          context,
-          googleAuthCodes.length,
-        );
-        if (!shouldImport || !mounted || _hasCompletedScan) {
-          return;
-        }
-        shouldResumeCamera = false;
-        _completeWithResult(ScannerPageResult.googleAuthCodes(googleAuthCodes));
-        return;
-      }
-      final code = importResult.code;
-      if (code == null) {
-        return;
-      }
-      shouldResumeCamera = false;
-      _completeWithResult(
-        ScannerPageResult.single(code: code, fromGallery: true),
+      final didCompleteImport = await _completeImportResult(
+        importResult,
+        fromGallery: true,
       );
+      if (didCompleteImport) {
+        shouldResumeCamera = false;
+      }
     } finally {
       if (shouldResumeCamera && mounted && !_hasCompletedScan) {
         await controller?.resume();
@@ -358,6 +471,90 @@ class ScannerPageState extends State<ScannerPage> {
         _isImportingFromGallery = false;
       }
     }
+  }
+
+  Future<void> _handleScreenCaptureScan() async {
+    if (_isCapturingScreen || _hasCompletedScan) {
+      return;
+    }
+    setState(() {
+      _isCapturingScreen = true;
+    });
+    try {
+      final qrResult = await EnteQr().scanQrFromCurrentWindow();
+      if (!mounted || _hasCompletedScan) {
+        return;
+      }
+
+      final content = qrResult.content;
+      if (!qrResult.success || content == null || content.isEmpty) {
+        _logger.warning('Screen QR scan failed: ${qrResult.error}');
+        await showErrorDialog(
+          context,
+          context.l10n.errorNoQRCode,
+          qrResult.error ?? context.l10n.errorNoQRCode,
+          showContactSupport: false,
+        );
+        return;
+      }
+
+      try {
+        final importResult = parseQrImportPayload(content);
+        await _completeImportResult(importResult, fromGallery: false);
+      } catch (e, s) {
+        _logger.severe('Error adding code from screen QR scan', e, s);
+        await showErrorDialog(
+          context,
+          context.l10n.errorInvalidQRCode,
+          context.l10n.errorInvalidQRCodeBody,
+          showContactSupport: false,
+        );
+      }
+    } catch (e, s) {
+      _logger.severe('Failed to scan QR from screen', e, s);
+      if (mounted && !_hasCompletedScan) {
+        await showErrorDialog(
+          context,
+          context.l10n.errorGenericTitle,
+          context.l10n.errorGenericBody,
+        );
+      }
+    } finally {
+      if (mounted && !_hasCompletedScan) {
+        setState(() {
+          _isCapturingScreen = false;
+        });
+      } else {
+        _isCapturingScreen = false;
+      }
+    }
+  }
+
+  Future<bool> _completeImportResult(
+    GalleryImportResult importResult, {
+    required bool fromGallery,
+  }) async {
+    final googleAuthCodes = importResult.googleAuthCodes;
+    if (googleAuthCodes != null) {
+      final shouldImport = await confirmGoogleAuthImport(
+        context,
+        googleAuthCodes.length,
+      );
+      if (!shouldImport || !mounted || _hasCompletedScan) {
+        return false;
+      }
+      _completeWithResult(ScannerPageResult.googleAuthCodes(googleAuthCodes));
+      return true;
+    }
+
+    final code = importResult.code;
+    if (code == null) {
+      return false;
+    }
+    _completeWithResult(
+      ScannerPageResult.single(code: code, fromGallery: fromGallery),
+    );
+    return true;
   }
 
   void _completeWithResult(ScannerPageResult result) {
@@ -381,6 +578,9 @@ class ScannerPageState extends State<ScannerPage> {
   @override
   void dispose() {
     _cancelScanSubscription();
+    if (Platform.isMacOS) {
+      unawaited(_restoreMacOSScreenCaptureWindow());
+    }
     super.dispose();
   }
 }

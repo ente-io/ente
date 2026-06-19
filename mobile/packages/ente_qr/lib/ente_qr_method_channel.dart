@@ -59,6 +59,40 @@ class MethodChannelEnteQr extends EnteQrPlatform {
   }
 
   @override
+  Future<QrScanResult> scanQrFromCurrentWindow() async {
+    try {
+      final dynamic result = await methodChannel.invokeMethod(
+        'scanQrFromCurrentWindow',
+      );
+
+      if (result == null) {
+        return QrScanResult.error('Failed to scan QR code');
+      }
+
+      final Map<String, dynamic> resultMap = Map<String, dynamic>.from(
+        result as Map,
+      );
+
+      final bool success = resultMap['success'] as bool? ?? false;
+      if (success) {
+        final String? content = resultMap['content'] as String?;
+        if (content != null && content.isNotEmpty) {
+          return QrScanResult.success(content);
+        } else {
+          return QrScanResult.error('No QR code found on screen');
+        }
+      } else {
+        final String? error = resultMap['error'] as String?;
+        return QrScanResult.error(error ?? 'Unknown error occurred');
+      }
+    } on PlatformException catch (e) {
+      return QrScanResult.error('Platform error: ${e.message}');
+    } catch (e) {
+      return QrScanResult.error('Unexpected error: $e');
+    }
+  }
+
+  @override
   Future<QrScanResults> scanAllQrFromImage(String imagePath) async {
     try {
       final dynamic result = await methodChannel.invokeMethod(

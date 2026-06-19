@@ -159,7 +159,7 @@ SPEC CHECKSUMS:
   connectivity_plus: 4adf20a405e25b42b9c9f87feff8f4b6fde18a4e
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
-  ente_qr: 679dcacb6a07788ee2e79d29485b07064cdec78d
+  ente_qr: d20bea75421a9357317ba117771e8aa997a4bbcf
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   file_saver: e35bd97de451dde55ff8c38862ed7ad0f3418d0f
   flutter_local_notifications: 4bf37a31afde695b56091b4ae3e4d9c7a7e6cda0

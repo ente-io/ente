@@ -64,6 +64,11 @@ class EnteQr {
     return _scanPlatform.scanAllQrFromImage(imagePath);
   }
 
+  /// Scans the screen area behind the current app window.
+  Future<QrScanResult> scanQrFromCurrentWindow() {
+    return _scanPlatform.scanQrFromCurrentWindow();
+  }
+
   Future<bool> _shouldRunDartFallback(String imagePath) async {
     try {
       final file = File(imagePath);
