@@ -24,6 +24,7 @@ import "package:photos/models/freeable_space_info.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/media_store_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
@@ -820,7 +821,7 @@ Future<void> showDeleteSheet(
       );
       return;
     }
-    if (true) {
+    if (await MediaStoreService.canManageMedia()) {
       await showBottomSheetComponent<ButtonResult>(
         context: context,
         useRootNavigator: Platform.isIOS,
