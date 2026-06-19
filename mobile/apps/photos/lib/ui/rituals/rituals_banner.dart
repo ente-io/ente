@@ -415,10 +415,7 @@ const _tightTextHeightBehavior = TextHeightBehavior(
 );
 
 TextStyle _ritualSummaryTitleStyle(Color color) {
-  return TextStyles.body.copyWith(
-    color: color,
-    fontFamily: TextStyles.outfitFontFamily,
-  );
+  return TextStyles.bodyBold.copyWith(color: color);
 }
 
 double _singleLineTextHeight(BuildContext context, TextStyle style) {
