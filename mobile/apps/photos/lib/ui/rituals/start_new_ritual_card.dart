@@ -223,18 +223,19 @@ TextStyle _compactTitleStyle(Color color) {
 }
 
 class _PlusSignIcon extends StatelessWidget {
+  static const _painter = _PlusSignPainter();
+
   const _PlusSignIcon();
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size.square(9.33333),
-      painter: _PlusSignPainter(),
-    );
+    return const CustomPaint(size: Size.square(9.33333), painter: _painter);
   }
 }
 
 class _PlusSignPainter extends CustomPainter {
+  const _PlusSignPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final scale = size.width / 9.33333;
@@ -261,17 +262,21 @@ class _PlusSignPainter extends CustomPainter {
 }
 
 class _SparkleIcon extends StatelessWidget {
+  static const _painter = _SparklePainter();
+
   const _SparkleIcon({required this.size});
 
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(size: Size.square(size), painter: _SparklePainter());
+    return CustomPaint(size: Size.square(size), painter: _painter);
   }
 }
 
 class _SparklePainter extends CustomPainter {
+  const _SparklePainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     const bend = 0.2761875;
