@@ -1,5 +1,3 @@
-import "dart:ui" show lerpDouble;
-
 import "package:ente_components/theme/text_styles.dart";
 import "package:fade_indexed_stack/fade_indexed_stack.dart";
 import "package:flutter/foundation.dart";
@@ -120,8 +118,7 @@ class _SearchHeader extends StatelessWidget {
   });
 
   static const _horizontalPadding = 15.0;
-  static const _expandedTopPadding = 12.0;
-  static const _collapsedTopPadding = 8.0;
+  static const _topPadding = 12.0;
   static const _bottomPadding = 8.0;
   static const _expandedTitleGap = 16.0;
   static const _transitionDuration = Duration(milliseconds: 150);
@@ -150,15 +147,10 @@ class _SearchHeader extends StatelessWidget {
               curve: Curves.easeOut,
               child: child,
               builder: (context, progress, child) {
-                final topPadding = lerpDouble(
-                  _expandedTopPadding,
-                  _collapsedTopPadding,
-                  progress,
-                )!;
                 return Padding(
-                  padding: EdgeInsets.fromLTRB(
+                  padding: const EdgeInsets.fromLTRB(
                     _horizontalPadding,
-                    topPadding,
+                    _topPadding,
                     _horizontalPadding,
                     _bottomPadding,
                   ),
