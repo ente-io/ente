@@ -315,7 +315,7 @@ String _sectionTitle(BuildContext context, _SearchResultsSection section) {
     case _SearchResultsSection.people:
       return AppLocalizations.of(context).people;
     case _SearchResultsSection.shared:
-      return AppLocalizations.of(context).searchResultShared;
+      return AppLocalizations.of(context).shared;
     case _SearchResultsSection.albums:
       return AppLocalizations.of(context).albums;
     case _SearchResultsSection.magic:

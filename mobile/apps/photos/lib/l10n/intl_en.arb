@@ -1540,9 +1540,14 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Shared",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
+  "shared": "Shared",
+  "sharedAlbumsLabel": "Shared",
+  "@sharedAlbumsLabel": {
+    "description": "Albums tab label for albums shared by you"
+  },
+  "receivedAlbumsLabel": "Received",
+  "@receivedAlbumsLabel": {
+    "description": "Albums tab filter label for albums received from other people"
   },
   "searchResultUploadedBy": "Uploaded by",
   "@searchResultUploadedBy": {
@@ -1723,7 +1728,6 @@
   "nothingSharedWithYouYet": "Nothing shared with you yet",
   "noAlbumsSharedByYouYet": "No albums shared by you yet",
   "sharedWithYou": "Shared with you",
-  "sharedByYou": "Shared by you",
   "inviteYourFriendsToEnte": "Invite your friends to Ente",
   "failedToDownloadVideo": "Failed to download video",
   "hiding": "Hiding...",
