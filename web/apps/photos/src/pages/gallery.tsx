@@ -1951,9 +1951,10 @@ const Page: React.FC = () => {
         [showAppDownloadFooter],
     );
 
+    const hasActiveFileSelection =
+        selected.count > 0 && selected.collectionID === activeCollectionID;
     const showSelectionBar =
-        selected.count > 0 &&
-        selected.collectionID === activeCollectionID &&
+        hasActiveFileSelection &&
         !suppressContextSelectionBar &&
         !(isContextMenuOpen && selected.count === 1);
 
@@ -2117,6 +2118,7 @@ const Page: React.FC = () => {
                 onChangeMode={handleChangeBarMode}
                 setBlockingLoad={setBlockingLoad}
                 setActiveCollectionID={handleShowCollectionSummaryWithID}
+                hasActiveFileSelection={hasActiveFileSelection}
                 onRemotePull={remotePull}
                 onSelectPerson={handleSelectPerson}
             />
