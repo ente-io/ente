@@ -205,7 +205,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
                 borderRadius: BorderRadius.circular(2.5),
                 child: LinearProgressIndicator(
                   value: showModelDownloadPhase ? 0.0 : progress,
-                  minHeight: 5,
+                  minHeight: 4,
                   backgroundColor: colorScheme.fillFaint,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     colorScheme.greenBase,
