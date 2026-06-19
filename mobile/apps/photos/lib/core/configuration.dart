@@ -56,11 +56,8 @@ class Configuration {
   static final Configuration instance = Configuration._privateConstructor();
 
   static const emailKey = "email";
-  static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
   static const keyKey = "key";
-  static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
-  static const keyShouldBackupVideos = "should_backup_videos";
   static const keyShowSystemLockScreen = "should_show_lock_screen";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const secretKeyKey = "secret_key";
@@ -557,14 +554,6 @@ class Configuration {
     await _preferences.setInt(userIDKey, userID);
   }
 
-  Set<String> getPathsToBackUp() {
-    if (_preferences.containsKey(foldersToBackUpKey)) {
-      return _preferences.getStringList(foldersToBackUpKey)!.toSet();
-    } else {
-      return <String>{};
-    }
-  }
-
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
     await _preferences.setString(keyAttributesKey, attributes.toJson());
   }
@@ -634,38 +623,6 @@ class Configuration {
 
   bool hasConfiguredAccount() {
     return isLoggedIn() && _key != null;
-  }
-
-  bool shouldBackupOverMobileData() {
-    if (_preferences.containsKey(keyShouldBackupOverMobileData)) {
-      return _preferences.getBool(keyShouldBackupOverMobileData)!;
-    } else {
-      return false;
-    }
-  }
-
-  Future<void> setBackupOverMobileData(bool value) async {
-    await _preferences.setBool(keyShouldBackupOverMobileData, value);
-    if (value) {
-      SyncService.instance.sync().ignore();
-    }
-  }
-
-  bool shouldBackupVideos() {
-    if (_preferences.containsKey(keyShouldBackupVideos)) {
-      return _preferences.getBool(keyShouldBackupVideos)!;
-    } else {
-      return true;
-    }
-  }
-
-  Future<void> setShouldBackupVideos(bool value) async {
-    await _preferences.setBool(keyShouldBackupVideos, value);
-    if (value) {
-      SyncService.instance.sync().ignore();
-    } else {
-      SyncService.instance.onVideoBackupPaused();
-    }
   }
 
   Future<bool> shouldShowLockScreen() async {
