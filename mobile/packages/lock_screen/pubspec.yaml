@@ -18,6 +18,8 @@ dependencies:
     path: ../events
   ente_pure_utils:
     path: ../ente_pure_utils
+  ente_screen_cover:
+    path: ../screen_cover
   ente_strings:
     path: ../strings
   ente_ui:
@@ -42,7 +44,6 @@ dependencies:
     path: ../local_auth_linux
   logging: 1.3.0
   pinput: 5.0.2
-  privacy_screen: 0.0.8
   shared_preferences: 2.5.3
 
 dev_dependencies:
