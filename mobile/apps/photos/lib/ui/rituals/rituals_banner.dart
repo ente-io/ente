@@ -40,16 +40,23 @@ class RitualsBanner extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _RitualsHeader(
-              showChevron: rituals.isNotEmpty,
-              onTap: rituals.isNotEmpty
-                  ? () => routeToPage(context, const AllRitualsScreen())
-                  : null,
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: searchTabSectionHorizontalPadding,
+              ),
+              child: _RitualsHeader(
+                showChevron: rituals.isNotEmpty,
+                onTap: rituals.isNotEmpty
+                    ? () => routeToPage(context, const AllRitualsScreen())
+                    : null,
+              ),
             ),
             const SizedBox(height: 4),
             if (rituals.isEmpty)
               Padding(
-                padding: EdgeInsets.zero,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: searchTabSectionHorizontalPadding,
+                ),
                 child: StartNewRitualCard(
                   variant: StartNewRitualCardVariant.wide,
                   onTap: () async {

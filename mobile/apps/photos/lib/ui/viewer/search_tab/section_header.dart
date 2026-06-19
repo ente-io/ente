@@ -6,6 +6,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_section_all_page.dart";
+import "package:photos/ui/viewer/search_tab/search_tab_horizontal_scroll.dart";
 
 class SectionHeader extends StatelessWidget {
   final SectionType sectionType;
@@ -21,54 +22,59 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return GestureDetector(
-      onTap: () {
-        if (hasMore) {
-          routeToPage(context, _sectionAllPage());
-        }
-      },
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 38),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                sectionType.sectionTitle(context),
-                style: TextStyles.display3.copyWith(
-                  color: colorScheme.textBase,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: searchTabSectionHorizontalPadding,
+      ),
+      child: GestureDetector(
+        onTap: () {
+          if (hasMore) {
+            routeToPage(context, _sectionAllPage());
+          }
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 38),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  sectionType.sectionTitle(context),
+                  style: TextStyles.display3.copyWith(
+                    color: colorScheme.textBase,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            hasMore
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (showSearch)
-                        IconButtonWidget(
-                          icon: Icons.search,
-                          iconButtonType: IconButtonType.secondary,
-                          iconColor: colorScheme.blurStrokePressed,
-                          onTap: () {
-                            routeToPage(
-                              context,
-                              _sectionAllPage(startInSearchMode: true),
-                            );
-                          },
+              hasMore
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (showSearch)
+                          IconButtonWidget(
+                            icon: Icons.search,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokePressed,
+                            onTap: () {
+                              routeToPage(
+                                context,
+                                _sectionAllPage(startInSearchMode: true),
+                              );
+                            },
+                          ),
+                        SizedBox(
+                          width: 38,
+                          height: 38,
+                          child: Icon(
+                            Icons.chevron_right_outlined,
+                            color: colorScheme.blurStrokePressed,
+                          ),
                         ),
-                      SizedBox(
-                        width: 38,
-                        height: 38,
-                        child: Icon(
-                          Icons.chevron_right_outlined,
-                          color: colorScheme.blurStrokePressed,
-                        ),
-                      ),
-                    ],
-                  )
-                : const SizedBox.shrink(),
-          ],
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ],
+          ),
         ),
       ),
     );

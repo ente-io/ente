@@ -29,7 +29,11 @@ class FileTypeSection extends StatelessWidget {
     if (!hasAnySearchableFiles) {
       final textTheme = getEnteTextTheme(context);
       return Padding(
-        padding: const EdgeInsets.only(left: 12, right: 8, bottom: 24),
+        padding: const EdgeInsets.only(
+          left: searchTabSectionHorizontalPadding + 12,
+          right: searchTabSectionHorizontalPadding + 8,
+          bottom: 24,
+        ),
         child: Row(
           children: [
             Expanded(

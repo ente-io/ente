@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-const searchTabHorizontalPadding = 15.0;
+const searchTabSectionHorizontalPadding = 15.0;
 
 class SearchTabHorizontalRow extends StatelessWidget {
   const SearchTabHorizontalRow({
@@ -14,18 +14,16 @@ class SearchTabHorizontalRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SearchTabHorizontalViewport(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: searchTabHorizontalPadding,
-        ),
-        physics: const BouncingScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _spacedChildren(),
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: searchTabSectionHorizontalPadding,
+      ),
+      physics: const BouncingScrollPhysics(),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _spacedChildren(),
       ),
     );
   }
@@ -54,35 +52,15 @@ class SearchTabHorizontalScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: height,
-      child: _SearchTabHorizontalViewport(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: searchTabHorizontalPadding,
-          ),
-          physics: const BouncingScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          scrollDirection: Axis.horizontal,
-          child: child,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: searchTabSectionHorizontalPadding,
         ),
+        physics: const BouncingScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        scrollDirection: Axis.horizontal,
+        child: child,
       ),
-    );
-  }
-}
-
-class _SearchTabHorizontalViewport extends StatelessWidget {
-  const _SearchTabHorizontalViewport({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final widthFactor =
-            (constraints.maxWidth + (searchTabHorizontalPadding * 2)) /
-            constraints.maxWidth;
-        return FractionallySizedBox(widthFactor: widthFactor, child: child);
-      },
     );
   }
 }

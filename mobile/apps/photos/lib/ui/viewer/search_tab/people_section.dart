@@ -105,7 +105,10 @@ class _PeopleSectionState extends State<PeopleSection> {
               routeToPage(context, const MachineLearningSettingsPage());
             },
             child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 8),
+              padding: const EdgeInsets.only(
+                left: searchTabSectionHorizontalPadding + 16,
+                right: searchTabSectionHorizontalPadding + 8,
+              ),
               child: Row(
                 children: [
                   Expanded(

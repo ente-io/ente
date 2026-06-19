@@ -258,19 +258,19 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 if (!wrappedService.shouldShowDiscoveryEntry) {
                   return const SizedBox.shrink();
                 }
-                return WrappedDiscoverySection(state: state);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: searchTabSectionHorizontalPadding,
+                  ),
+                  child: WrappedDiscoverySection(state: state),
+                );
               },
             ),
             const ContactsSectionLoader(),
             FileTypeSection(hasAnySearchableFiles: hasAnySearchableFiles),
           ];
           return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(
-                  searchTabHorizontalPadding,
-                  0,
-                  searchTabHorizontalPadding,
-                  bottomPadding,
-                ),
+                padding: const EdgeInsets.only(bottom: bottomPadding),
                 physics: const BouncingScrollPhysics(),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
@@ -283,7 +283,12 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     if (hasSurfacedOfflineFaces) {
                       return const SizedBox.shrink();
                     }
-                    return const MLProgressBanner();
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: searchTabSectionHorizontalPadding,
+                      ),
+                      child: MLProgressBanner(),
+                    );
                   }
                   return sectionWidgets[index - 1];
                 },
