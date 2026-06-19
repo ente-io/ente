@@ -71,7 +71,6 @@ Future<bool?> handleFolderSelectionBackupFlow(
 }
 
 bool _shouldRunFirstImportFlow() =>
-    flagService.enableOnlyBackupFuturePhotos &&
     !LocalSyncService.instance.hasCompletedFirstImport();
 
 Future<bool?> _handleFirstImportFlow(BuildContext context) async {

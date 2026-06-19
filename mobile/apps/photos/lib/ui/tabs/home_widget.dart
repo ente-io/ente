@@ -998,10 +998,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         return const LandingPageWidget();
       }
     }
-    if (flagService.enableOnlyBackupFuturePhotos) {
-      _ensurePersonSync();
-      _ensureCollectionsSync();
-    }
+    _ensurePersonSync();
+    _ensureCollectionsSync();
     if (_shouldShowPermissionWidget()) {
       _ensurePersonSync();
       return const GrantPermissionsWidget();
@@ -1340,26 +1338,18 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowPermissionWidget() {
-    if (flagService.enableOnlyBackupFuturePhotos) {
-      return !permissionService.hasGrantedPermissions() &&
-          !backupPreferenceService.hasSkippedOnboardingPermission;
-    } else {
-      return !permissionService.hasGrantedPermissions();
-    }
+    return !permissionService.hasGrantedPermissions() &&
+        !backupPreferenceService.hasSkippedOnboardingPermission;
   }
 
   bool _shouldShowLoadingWidget() {
     if (isLocalGalleryMode) {
       return false;
     }
-    if (flagService.enableOnlyBackupFuturePhotos) {
-      if (!permissionService.hasGrantedPermissions()) {
-        return false;
-      }
-      return !LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
-    } else {
-      return !LocalSyncService.instance.hasCompletedFirstImport();
+    if (!permissionService.hasGrantedPermissions()) {
+      return false;
     }
+    return !LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
   }
 
   void _ensurePersonSync() {
@@ -1386,6 +1376,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         backupPreferenceService.isOnlyNewBackupEnabled)) {
       return;
     }
+    // When first import is bypassed by skipped onboarding or only-new backup,
+    // trigger collection sync here instead of waiting for the
+    // completedFirstGalleryImport refresh path.
     _collectionsSyncTriggered = true;
     CollectionsService.instance.sync().then((_) {
       if (mounted) {

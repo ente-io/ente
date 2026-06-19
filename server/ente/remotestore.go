@@ -53,7 +53,7 @@ const (
 	UploadV2 int64 = 1 << 0
 	// Comments marks availability of the comments feature.
 	Comments int64 = 1 << 1
-	// BackupOptions gates new backup-related features.
+	// BackupOptions marks availability of backup option features for older clients.
 	BackupOptions int64 = 1 << 2
 	// VideoStreaming gates video streaming feature.
 	VideoStreaming int64 = 1 << 3
