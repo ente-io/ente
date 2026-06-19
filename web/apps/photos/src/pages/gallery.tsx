@@ -501,40 +501,12 @@ const Page: React.FC = () => {
         (activeCollectionID == PseudoCollectionID.archiveItems ||
             activeCollectionSummary?.attributes.has("archived"));
 
-    // TODO: Move into reducer
-    const barCollectionSummaries = useMemo(() => {
-        if (barMode == "hidden-albums") return state.hiddenCollectionSummaries;
-        if (!isInArchiveSection) return state.normalCollectionSummaries;
-
-        const archiveCollectionSummaries = new Map(
-            [...state.normalCollectionSummaries].filter(
-                ([id, collectionSummary]) =>
-                    id == PseudoCollectionID.archiveItems ||
-                    collectionSummary.attributes.has("archived"),
-            ),
-        );
-        const archiveSummary = archiveCollectionSummaries.get(
-            PseudoCollectionID.archiveItems,
-        );
-        if (archiveSummary) {
-            archiveCollectionSummaries.set(PseudoCollectionID.archiveItems, {
-                ...archiveSummary,
-                coverFile:
-                    archiveSummary.coverFile ?? archiveSummary.latestFile,
-                attributes: new Set(
-                    [...archiveSummary.attributes].filter(
-                        (attribute) => attribute != "hideFromCollectionBar",
-                    ),
-                ),
-            });
-        }
-        return archiveCollectionSummaries;
-    }, [
-        barMode,
-        isInArchiveSection,
-        state.hiddenCollectionSummaries,
-        state.normalCollectionSummaries,
-    ]);
+    const barCollectionSummaries =
+        barMode == "hidden-albums"
+            ? state.hiddenCollectionSummaries
+            : isInArchiveSection
+              ? state.archivedCollectionSummaries
+              : state.normalCollectionSummaries;
 
     const router = useRouter();
 
