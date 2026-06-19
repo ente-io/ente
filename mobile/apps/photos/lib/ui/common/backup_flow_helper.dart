@@ -20,7 +20,7 @@ Future<void> handleFullPermissionBackupFlow(BuildContext context) async {
     return;
   }
 
-  await _requestPermissions();
+  await _requestAndStoreGrantedPermissions();
   if (!context.mounted) return;
 
   if (permissionService.hasGrantedFullPermission()) {
@@ -74,15 +74,13 @@ bool _shouldRunFirstImportFlow() =>
     !LocalSyncService.instance.hasCompletedFirstImport();
 
 Future<bool?> _handleFirstImportFlow(BuildContext context) async {
-  final state = await _requestPermissions();
+  final state = await _requestAndStoreGrantedPermissions();
   if (state == null || !context.mounted) return null;
 
   if (!_hasMinimalPermission(state)) {
     await _showPermissionDeniedDialog(context);
     return null;
   }
-
-  await permissionService.onUpdatePermission(state);
 
   // Trigger local sync before showing the loading widget.
   // The skip flag was cleared above, so sync will now proceed with first import.
@@ -99,9 +97,13 @@ Future<bool?> _handleFirstImportFlow(BuildContext context) async {
   );
 }
 
-Future<PermissionState?> _requestPermissions() async {
+Future<PermissionState?> _requestAndStoreGrantedPermissions() async {
   try {
-    return permissionService.requestPhotoMangerPermissions();
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (_hasMinimalPermission(state)) {
+      await permissionService.onUpdatePermission(state);
+    }
+    return state;
   } catch (e, s) {
     _logger.severe("Failed to request permission", e, s);
     return null;
