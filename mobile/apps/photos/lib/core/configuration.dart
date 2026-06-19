@@ -44,7 +44,6 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/services/video_preview_service.dart';
 import 'package:photos/utils/file_uploader.dart';
-import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
@@ -58,7 +57,6 @@ class Configuration {
   static const emailKey = "email";
   static const keyAttributesKey = "key_attributes";
   static const keyKey = "key";
-  static const keyShowSystemLockScreen = "should_show_lock_screen";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
@@ -81,9 +79,9 @@ class Configuration {
   late String _sharedDocumentsMediaDirectory;
   String? _volatilePassword;
 
-  Future<void> init() async {
+  Future<void> init(SharedPreferences preferences) async {
     try {
-      _preferences = await SharedPreferences.getInstance();
+      _preferences = preferences;
       _secureStorage = const FlutterSecureStorage(
         iOptions: IOSOptions(
           accessibility: KeychainAccessibility.first_unlock_this_device,
@@ -623,24 +621,6 @@ class Configuration {
 
   bool hasConfiguredAccount() {
     return isLoggedIn() && _key != null;
-  }
-
-  Future<bool> shouldShowLockScreen() async {
-    final bool isPin = await LockScreenSettings.instance.isPinSet();
-    final bool isPass = await LockScreenSettings.instance.isPasswordSet();
-    return isPin || isPass || shouldShowSystemLockScreen();
-  }
-
-  bool shouldShowSystemLockScreen() {
-    if (_preferences.containsKey(keyShowSystemLockScreen)) {
-      return _preferences.getBool(keyShowSystemLockScreen)!;
-    } else {
-      return false;
-    }
-  }
-
-  Future<void> setSystemLockScreen(bool value) {
-    return _preferences.setBool(keyShowSystemLockScreen, value);
   }
 
   void setVolatilePassword(String volatilePassword) {

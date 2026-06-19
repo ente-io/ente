@@ -4,7 +4,6 @@ import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/ui/settings/components/settings_item.dart";
@@ -26,7 +25,6 @@ class LockScreenOptions extends StatefulWidget {
 enum LockType { device, pin, password }
 
 class _LockScreenOptionsState extends State<LockScreenOptions> {
-  final Configuration _configuration = Configuration.instance;
   final LocalSettings _localSettings = localSettings;
   final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   late bool appLock;
@@ -58,7 +56,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     final bool isAppLockEnabled =
         pinEnabled ||
         passwordEnabled ||
-        _configuration.shouldShowSystemLockScreen();
+        _lockscreenSetting.shouldShowSystemLockScreen();
 
     setState(() {
       hideAppContent = shouldShowAppContent;
@@ -73,7 +71,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     if (appLock) {
       // Turning off app lock
       AppLock.of(context)!.setEnabled(false);
-      await _configuration.setSystemLockScreen(false);
+      await _lockscreenSetting.setSystemLockScreen(false);
       await _lockscreenSetting.removePinAndPassword();
       setState(() {
         appLock = false;
@@ -82,7 +80,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     } else {
       // Turning on app lock - default to device lock
       AppLock.of(context)!.setEnabled(true);
-      await _configuration.setSystemLockScreen(true);
+      await _lockscreenSetting.setSystemLockScreen(true);
       setState(() {
         appLock = true;
         _currentLockType = LockType.device;
@@ -94,7 +92,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _onSelectDeviceLock() async {
     // Remove any existing PIN/password and use device lock
     await _lockscreenSetting.removePinAndPassword();
-    await _configuration.setSystemLockScreen(true);
+    await _lockscreenSetting.setSystemLockScreen(true);
     AppLock.of(context)!.setEnabled(true);
     setState(() {
       _currentLockType = LockType.device;
@@ -105,7 +103,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _onSelectPinLock() async {
     final result = await routeToPage(context, const LockScreenPin());
     if (result == true) {
-      await _configuration.setSystemLockScreen(false);
+      await _lockscreenSetting.setSystemLockScreen(false);
       setState(() {
         _currentLockType = LockType.pin;
       });
@@ -116,7 +114,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _onSelectPasswordLock() async {
     final result = await routeToPage(context, const LockScreenPassword());
     if (result == true) {
-      await _configuration.setSystemLockScreen(false);
+      await _lockscreenSetting.setSystemLockScreen(false);
       setState(() {
         _currentLockType = LockType.password;
       });

@@ -146,7 +146,7 @@ Future<void> _runInForeground(
         ),
         lockScreen: const LockScreen(),
         enabled:
-            await Configuration.instance.shouldShowLockScreen() ||
+            await LockScreenSettings.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
         locale: locale,
         lightTheme: lightThemeData,
@@ -263,7 +263,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     NotificationService.instance.init(prefs);
 
     _logger.info("(for debugging) Configuration init $tlog");
-    await Configuration.instance.init();
+    await Configuration.instance.init(prefs);
     _logger.info("(for debugging) Configuration done $tlog");
 
     // App LifeCycle
@@ -408,10 +408,10 @@ Future<void> _init(
     );
 
     _logger.info("Lockscreen init $tlog");
-    unawaited(LockScreenSettings.instance.init(preferences));
+    LockScreenSettings.instance.init(preferences);
 
     _logger.info("Configuration init $tlog");
-    await Configuration.instance.init();
+    await Configuration.instance.init(preferences);
     _logger.info("Configuration done $tlog");
 
     await MemoryShareService.instance.init();
