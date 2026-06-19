@@ -1148,14 +1148,14 @@ class _FileSelectionActionsWidgetState
       } else {
         final totalFiles = filesToDownload.length;
         int downloadedFiles = 0;
+        final downloadingMessage = l10n.downloading;
 
         final dialog = createProgressDialog(
           context,
-          AppLocalizations.of(context).downloading +
-              " ($downloadedFiles/$totalFiles)",
+          "$downloadingMessage ($downloadedFiles/$totalFiles)",
           isDismissible: true,
         );
-        await dialog.show();
+        final didShowDialog = await dialog.show();
         try {
           final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
           final futures = <Future>[];
@@ -1168,21 +1168,28 @@ class _FileSelectionActionsWidgetState
                       widget.type != GalleryType.sharedPublicCollection,
                 );
                 downloadedFiles++;
-                dialog.update(
-                  message:
-                      AppLocalizations.of(context).downloading +
-                      " ($downloadedFiles/$totalFiles)",
-                );
+                if (didShowDialog) {
+                  dialog.update(
+                    message:
+                        "$downloadingMessage ($downloadedFiles/$totalFiles)",
+                  );
+                }
               }),
             );
           }
           await Future.wait(futures);
           addedToQueueCount = downloadedFiles;
-          await dialog.hide();
-        } catch (e) {
-          _logger.warning("Failed to save files", e);
-          await dialog.hide();
-          await showGenericErrorDialog(context: context, error: e);
+          if (didShowDialog) {
+            await dialog.hide();
+          }
+        } catch (e, s) {
+          _logger.warning("Failed to save files", e, s);
+          if (didShowDialog) {
+            await dialog.hide();
+          }
+          if (mounted) {
+            await showGenericErrorDialog(context: context, error: e);
+          }
           return;
         }
       }
