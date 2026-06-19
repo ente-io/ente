@@ -4,7 +4,6 @@ import React from "react";
 
 interface LockerSidebarCardButtonProps {
     icon?: React.ComponentProps<typeof HugeiconsIcon>["icon"];
-    iconNode?: React.ReactNode;
     label: React.ReactNode;
     onClick: () => void;
     caption?: string;
@@ -15,16 +14,7 @@ interface LockerSidebarCardButtonProps {
 
 export const LockerSidebarCardButton: React.FC<
     LockerSidebarCardButtonProps
-> = ({
-    icon,
-    iconNode,
-    label,
-    onClick,
-    caption,
-    endIcon,
-    selected = false,
-    color,
-}) => (
+> = ({ icon, label, onClick, caption, endIcon, selected = false, color }) => (
     <Box
         component="button"
         type="button"
@@ -77,18 +67,7 @@ export const LockerSidebarCardButton: React.FC<
                 }),
             })}
         >
-            {iconNode ? (
-                <Box
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "inherit",
-                    }}
-                >
-                    {iconNode}
-                </Box>
-            ) : icon ? (
+            {icon ? (
                 <HugeiconsIcon
                     icon={icon}
                     size={24}

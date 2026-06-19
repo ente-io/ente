@@ -633,21 +633,18 @@ export const useLockerActions = ({
         [refreshData, selectedCollectionID, showMiniDialog],
     );
 
-    const handleEditItem = useCallback(
-        (item: LockerItem) => {
-            setEditItem({
-                id: item.id,
-                type: item.type,
-                data:
-                    item.type === "file"
-                        ? { name: getItemTitle(item) }
-                        : (item.data as unknown as Record<string, unknown>),
-                collectionID: item.collectionID,
-                collectionIDs: item.collectionIDs,
-            });
-        },
-        [],
-    );
+    const handleEditItem = useCallback((item: LockerItem) => {
+        setEditItem({
+            id: item.id,
+            type: item.type,
+            data:
+                item.type === "file"
+                    ? { name: getItemTitle(item) }
+                    : (item.data as unknown as Record<string, unknown>),
+            collectionID: item.collectionID,
+            collectionIDs: item.collectionIDs,
+        });
+    }, []);
 
     const handlePermanentlyDelete = useCallback(
         (items: LockerItem[]) => {

@@ -449,12 +449,7 @@ export const LockerCollectionShareDrawer: React.FC<
                 fullWidth
                 maxWidth="xs"
             >
-                <DialogTitle
-                    sx={(theme) => ({
-                        ...theme.applyStyles("light", {}),
-                        color: "#FFFFFF",
-                    })}
-                >
+                <DialogTitle sx={{ color: "#FFFFFF" }}>
                     {t("addEmail")}
                 </DialogTitle>
                 <DialogContent>

@@ -186,12 +186,7 @@ export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
                         }
                         return;
                     }
-                    if (
-                        !isTrashView &&
-                        item.type === "file" &&
-                        masterKey &&
-                        downloadable
-                    ) {
+                    if (!isTrashView && masterKey && downloadable) {
                         void handleDownload();
                         return;
                     }

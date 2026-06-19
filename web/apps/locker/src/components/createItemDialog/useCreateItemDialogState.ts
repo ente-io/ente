@@ -134,9 +134,7 @@ export const useCreateItemDialogState = ({
     const displayCollections = useMemo(() => {
         const ownedVisibleCollections = visibleLockerCollections(
             collections,
-        ).filter((collection) =>
-            isCollectionOwner(collection, currentUserID),
-        );
+        ).filter((collection) => isCollectionOwner(collection, currentUserID));
 
         if (!isEditMode) {
             return ownedVisibleCollections.filter(
@@ -326,12 +324,9 @@ export const useCreateItemDialogState = ({
                 return;
             }
 
-            const defaultCollectionName =
-                selectedCollectionIDs.length > 0
-                    ? displayCollectionsRef.current.find((collection) =>
-                          selectedCollectionIDs.includes(collection.id),
-                      )?.name
-                    : undefined;
+            const defaultCollectionName = displayCollectionsRef.current.find(
+                (collection) => selectedCollectionIDs.includes(collection.id),
+            )?.name;
             const items = files.map((file) => ({
                 file,
                 relativePath: file.webkitRelativePath || file.name,

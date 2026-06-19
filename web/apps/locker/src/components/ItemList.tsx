@@ -351,32 +351,22 @@ export const ItemList: React.FC<ItemListProps> = ({
         homeSelectedCollectionIDs,
         isHomeView,
     ]);
-    const dropdownHomeCollections = useMemo(
-        () => displayCollections,
-        [displayCollections],
-    );
     const visibleItems = useMemo(() => {
         if (isCollectionsView) {
             return [];
         }
         return isHomeView ? homeFilteredItems : sortedItems;
     }, [homeFilteredItems, isCollectionsView, isHomeView, sortedItems]);
-    const visibleSelectableItems = useMemo(() => visibleItems, [visibleItems]);
     const visibleSelectableItemIDs = useMemo(
-        () => visibleSelectableItems.map((item) => item.id),
-        [visibleSelectableItems],
+        () => visibleItems.map((item) => item.id),
+        [visibleItems],
     );
     const selectedVisibleItems = useMemo(() => {
         const selectedIDSet = new Set(selectedItemIDs);
-        return visibleSelectableItems.filter((item) =>
-            selectedIDSet.has(item.id),
-        );
-    }, [selectedItemIDs, visibleSelectableItems]);
+        return visibleItems.filter((item) => selectedIDSet.has(item.id));
+    }, [selectedItemIDs, visibleItems]);
     const selectedDownloadableItems = useMemo(
-        () =>
-            selectedVisibleItems.filter(
-                (item) => item.type === "file" && hasDownloadableObject(item),
-            ),
+        () => selectedVisibleItems.filter(hasDownloadableObject),
         [selectedVisibleItems],
     );
     const selectedOwnedItems = useMemo(
@@ -391,7 +381,7 @@ export const ItemList: React.FC<ItemListProps> = ({
         [selectedItemIDs],
     );
     const canBulkSelectVisibleItems =
-        !isTrashView && !isCollectionsView && visibleSelectableItems.length > 0;
+        !isTrashView && !isCollectionsView && visibleItems.length > 0;
     const skippedSharedSelectionCount =
         selectedVisibleItems.length - selectedOwnedItems.length;
     const skippedDownloadSelectionCount =
@@ -1312,7 +1302,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 createCollectionOpen={createCollectionOpen}
                 creatingCollection={creatingCollection}
                 deleteFileLink={() => void deleteActiveFileLink()}
-                dropdownHomeCollections={dropdownHomeCollections}
+                dropdownHomeCollections={displayCollections}
                 feedbackMessage={feedbackMessage}
                 fileLinkDialogOpen={activeFileLinkItem !== null}
                 homeSelectedCollectionIDs={homeSelectedCollectionIDs}

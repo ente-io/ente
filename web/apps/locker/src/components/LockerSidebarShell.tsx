@@ -115,7 +115,7 @@ const LockerSidebarTitlebar: React.FC<LockerSidebarTitlebarProps> = ({
                 <ArrowBackOutlinedIcon />
             </IconButton>
             <Stack direction="row" sx={{ gap: "4px" }}>
-                {actionButton && actionButton}
+                {actionButton}
                 {!hideRootCloseButton && (
                     <IconButton onClick={onRootClose} color="secondary">
                         <CloseIcon />

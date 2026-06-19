@@ -299,9 +299,6 @@ export const deleteLockerFileShareLink = async (
         lastError = new Error(
             `Failed to delete link ${candidateID}: ${res.status} ${res.statusText}`,
         );
-        if (candidateID !== String(fileID)) {
-            continue;
-        }
     }
 
     throw lastError ?? new Error("Failed to delete file share link");
