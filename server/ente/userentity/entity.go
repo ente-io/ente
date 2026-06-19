@@ -36,6 +36,10 @@ func (et EntityType) GetNewID() (*string, error) {
 	return base.NewID(strings.ToLower(string(et)))
 }
 
+func (et EntityType) CanRestoreDeletedData() bool {
+	return et == SmartAlbum
+}
+
 type EntityKey struct {
 	UserID       int64      `json:"userID" binding:"required"`
 	Type         EntityType `json:"type" binding:"required"`
