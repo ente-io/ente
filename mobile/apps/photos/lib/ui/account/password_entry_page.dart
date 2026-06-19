@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -12,16 +13,10 @@ import "package:photos/gateways/users/models/key_gen_result.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/account/user_service.dart';
-import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/web_page.dart';
 import "package:photos/ui/components/alert_bottom_sheet.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/components/models/text_input_type_v2.dart";
-import "package:photos/ui/components/text_input_widget_v2.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -80,8 +75,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
 
     String title = AppLocalizations.of(context).setPasswordTitle;
     if (widget.mode == PasswordEntryMode.update) {
@@ -96,86 +90,89 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: colorScheme.backgroundColour,
+      backgroundColor: colors.backgroundBase,
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: colorScheme.backgroundColour,
+        backgroundColor: colors.backgroundBase,
         leading: widget.mode == PasswordEntryMode.reset
             ? const SizedBox.shrink()
             : IconButton(
                 icon: const Icon(Icons.arrow_back),
-                color: colorScheme.content,
+                color: colors.iconColor,
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
-        title: Text(title, style: textTheme.largeBold),
+        title: Text(
+          title,
+          style: TextStyles.large.copyWith(color: colors.textBase),
+        ),
         centerTitle: true,
       ),
-      body: _volatilePassword != null
-          ? const SizedBox.shrink()
-          : _getBody(colorScheme, textTheme),
+      body: _volatilePassword != null ? const SizedBox.shrink() : _getBody(),
       floatingActionButton: _volatilePassword != null
           ? null
           : Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ButtonWidgetV2(
-                buttonType: ButtonTypeV2.primary,
-                labelText: title,
+              child: ButtonComponent(
+                label: title,
                 isDisabled: !isFormValid,
-                onTap: isFormValid
-                    ? () async {
-                        if (widget.mode == PasswordEntryMode.set) {
-                          await _showRecoveryCodeDialog(
-                            _passwordController1.text,
-                          );
-                        } else {
-                          _updatePassword();
-                        }
-                        FocusScope.of(context).unfocus();
-                      }
-                    : null,
+                onTap: isFormValid ? _submitPassword : null,
               ),
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+  Future<void> _submitPassword() async {
+    if (!_passwordsMatch || !_isPasswordValid) {
+      return;
+    }
+    if (widget.mode == PasswordEntryMode.set) {
+      await _showRecoveryCodeDialog(_passwordController1.text);
+    } else {
+      _updatePassword();
+    }
+    FocusScope.of(context).unfocus();
+  }
+
+  Widget _getBody() {
+    final colors = context.componentColors;
     final email = Configuration.instance.getEmail();
 
     String? passwordMessage;
-    TextInputMessageType passwordMessageType = TextInputMessageType.guide;
+    TextInputComponentMessageType passwordMessageType =
+        TextInputComponentMessageType.helper;
 
     if (_passwordInInputBox.isNotEmpty && _showPasswordStrength) {
       if (_passwordStrength > kStrongPasswordStrengthThreshold) {
         passwordMessage = AppLocalizations.of(context).strongPassword;
-        passwordMessageType = TextInputMessageType.success;
+        passwordMessageType = TextInputComponentMessageType.success;
       } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
         passwordMessage = AppLocalizations.of(context).moderateStrength;
-        passwordMessageType = TextInputMessageType.alert;
+        passwordMessageType = TextInputComponentMessageType.alert;
       } else {
         passwordMessage = AppLocalizations.of(context).weakStrength;
-        passwordMessageType = TextInputMessageType.alert;
+        passwordMessageType = TextInputComponentMessageType.alert;
       }
     }
 
     String? confirmPasswordMessage;
-    TextInputMessageType confirmPasswordMessageType =
-        TextInputMessageType.guide;
+    TextInputComponentMessageType confirmPasswordMessageType =
+        TextInputComponentMessageType.helper;
 
     if (_passwordInInputConfirmationBox.isNotEmpty &&
         _passwordInInputBox.isNotEmpty &&
         _showConfirmPasswordValidation) {
       if (_passwordsMatch) {
         confirmPasswordMessage = AppLocalizations.of(context).passwordsMatch;
-        confirmPasswordMessageType = TextInputMessageType.success;
+        confirmPasswordMessageType = TextInputComponentMessageType.success;
       } else {
         confirmPasswordMessage = AppLocalizations.of(
           context,
         ).passwordsDontMatch;
-        confirmPasswordMessageType = TextInputMessageType.error;
+        confirmPasswordMessageType = TextInputComponentMessageType.error;
       }
     }
 
@@ -191,16 +188,16 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 widget.mode == PasswordEntryMode.set
                     ? AppLocalizations.of(context).enterPasswordToEncrypt
                     : AppLocalizations.of(context).enterNewPasswordToEncrypt,
-                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+                style: TextStyles.body.copyWith(color: colors.textLight),
               ),
               const SizedBox(height: 8),
               StyledText(
                 text: AppLocalizations.of(context).passwordWarning,
-                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+                style: TextStyles.body.copyWith(color: colors.textLight),
                 tags: {
                   'underline': StyledTextTag(
-                    style: textTheme.body.copyWith(
-                      color: colorScheme.textMuted,
+                    style: TextStyles.body.copyWith(
+                      color: colors.textLight,
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -217,17 +214,17 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   textInputAction: TextInputAction.next,
                 ),
               ),
-              TextInputWidgetV2(
+              TextInputComponent(
                 label: AppLocalizations.of(context).password,
                 hintText: AppLocalizations.of(context).password,
-                textEditingController: _passwordController1,
+                controller: _passwordController1,
                 isPasswordInput: true,
                 isRequired: true,
-                autoCorrect: false,
+                autocorrect: false,
                 autofillHints: const [AutofillHints.newPassword],
                 message: passwordMessage,
                 messageType: passwordMessageType,
-                onChange: (password) {
+                onChanged: (password) {
                   _passwordStrengthTimer?.cancel();
                   setState(() {
                     _passwordInInputBox = password;
@@ -251,18 +248,22 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 },
               ),
               const SizedBox(height: 16),
-              TextInputWidgetV2(
+              TextInputComponent(
                 label: AppLocalizations.of(context).confirmPassword,
                 hintText: AppLocalizations.of(context).confirmPassword,
-                textEditingController: _passwordController2,
+                controller: _passwordController2,
                 isPasswordInput: true,
                 isRequired: true,
-                autoCorrect: false,
+                autocorrect: false,
                 autofillHints: const [],
                 finishAutofillContextOnEditingComplete: true,
+                shouldUnfocusOnClearOrSubmit: true,
+                onSubmit: _passwordsMatch && _isPasswordValid
+                    ? (_) => _submitPassword()
+                    : null,
                 message: confirmPasswordMessage,
                 messageType: confirmPasswordMessageType,
-                onChange: (cnfPassword) {
+                onChanged: (cnfPassword) {
                   _confirmPasswordTimer?.cancel();
                   setState(() {
                     _passwordInInputConfirmationBox = cnfPassword;
@@ -285,10 +286,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
               const SizedBox(height: 16),
               Align(
                 alignment: Alignment.centerRight,
-                child: ButtonWidgetV2(
-                  buttonType: ButtonTypeV2.link,
-                  labelText: AppLocalizations.of(context).howItWorks,
-                  buttonSize: ButtonSizeV2.small,
+                child: ButtonComponent(
+                  variant: ButtonComponentVariant.link,
+                  label: AppLocalizations.of(context).howItWorks,
+                  size: ButtonComponentSize.small,
                   onTap: () async {
                     await Navigator.of(context).push(
                       MaterialPageRoute(

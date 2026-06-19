@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:convert';
 
 import "package:app_links/app_links.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -11,12 +12,8 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import 'package:photos/services/account/user_service.dart';
-import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
 import "package:photos/ui/account/two_factor_authentication_page.dart";
 import "package:photos/ui/components/alert_bottom_sheet.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:url_launcher/url_launcher_string.dart';
@@ -148,33 +145,33 @@ class _PasskeyPageState extends State<PasskeyPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
 
     return Scaffold(
-      backgroundColor: colorScheme.backgroundColour,
+      backgroundColor: colors.backgroundBase,
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: colorScheme.backgroundColour,
+        backgroundColor: colors.backgroundBase,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: colorScheme.content,
+          color: colors.iconColor,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         title: Text(
           AppLocalizations.of(context).passkey,
-          style: textTheme.largeBold,
+          style: TextStyles.large.copyWith(color: colors.textBase),
         ),
         centerTitle: true,
       ),
-      body: _getBody(colorScheme, textTheme),
+      body: _getBody(),
     );
   }
 
-  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+  Widget _getBody() {
+    final colors = context.componentColors;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -183,19 +180,18 @@ class _PasskeyPageState extends State<PasskeyPage> {
             const Spacer(),
             Text(
               context.l10n.waitingForVerification,
-              style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              style: TextStyles.body.copyWith(color: colors.textLight),
               textAlign: TextAlign.center,
             ),
             const Spacer(),
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.primary,
-              labelText: context.l10n.tryAgain,
+            ButtonComponent(
+              label: context.l10n.tryAgain,
               onTap: () => launchPasskey(),
             ),
             const SizedBox(height: 16),
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.secondary,
-              labelText: context.l10n.checkStatus,
+            ButtonComponent(
+              label: context.l10n.checkStatus,
+              variant: ButtonComponentVariant.secondary,
               shouldSurfaceExecutionStates: true,
               onTap: () async {
                 try {
@@ -211,10 +207,10 @@ class _PasskeyPageState extends State<PasskeyPage> {
             ),
             if (widget.totp2FASessionID.isNotEmpty) ...[
               const SizedBox(height: 16),
-              ButtonWidgetV2(
-                buttonType: ButtonTypeV2.link,
-                labelText: context.l10n.loginWithTOTP,
-                buttonSize: ButtonSizeV2.small,
+              ButtonComponent(
+                label: context.l10n.loginWithTOTP,
+                variant: ButtonComponentVariant.link,
+                size: ButtonComponentSize.small,
                 onTap: () async {
                   // ignore: unawaited_futures
                   routeToPage(
@@ -225,10 +221,10 @@ class _PasskeyPageState extends State<PasskeyPage> {
               ),
             ],
             const SizedBox(height: 12),
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.link,
-              labelText: context.l10n.recoverAccount,
-              buttonSize: ButtonSizeV2.small,
+            ButtonComponent(
+              label: context.l10n.recoverAccount,
+              variant: ButtonComponentVariant.link,
+              size: ButtonComponentSize.small,
               onTap: () async {
                 // ignore: unawaited_futures
                 UserService.instance.recoverTwoFactor(

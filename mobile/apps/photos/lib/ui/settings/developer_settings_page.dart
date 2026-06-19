@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:photos/core/event_bus.dart";
@@ -7,8 +8,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/alert_bottom_sheet.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
-import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 
 class DeveloperSettingsPage extends StatefulWidget {
@@ -61,18 +60,17 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              TextInputWidgetV2(
+              TextInputComponent(
                 label: AppLocalizations.of(context).serverEndpoint,
                 hintText: endpoint,
-                textEditingController: _urlController,
-                autoCorrect: false,
-                autoFocus: true,
+                controller: _urlController,
+                autocorrect: false,
+                autofocus: true,
                 keyboardType: TextInputType.url,
               ),
               const SizedBox(height: 20),
-              ButtonWidgetV2(
-                buttonType: ButtonTypeV2.primary,
-                labelText: AppLocalizations.of(context).save,
+              ButtonComponent(
+                label: AppLocalizations.of(context).save,
                 onTap: () async {
                   final url = _urlController.text.trim();
                   _logger.info("Entered endpoint: $url");

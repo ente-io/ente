@@ -1,4 +1,5 @@
 import "package:dio/dio.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -7,13 +8,8 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/gateways/users/models/srp.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/account/user_service.dart";
-import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/button_widget.dart"
     show ButtonAction;
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
-import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/email_util.dart";
 
@@ -57,50 +53,51 @@ class _LoginPasswordVerificationPageState
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: colorScheme.backgroundColour,
+      backgroundColor: colors.backgroundBase,
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: colorScheme.backgroundColour,
+        backgroundColor: colors.backgroundBase,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: colorScheme.content,
+          color: colors.iconColor,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         title: Text(
           AppLocalizations.of(context).logInLabel,
-          style: textTheme.largeBold,
+          style: TextStyles.large.copyWith(color: colors.textBase),
         ),
         centerTitle: true,
       ),
-      body: _getBody(colorScheme, textTheme),
+      body: _getBody(),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ButtonWidgetV2(
+        child: ButtonComponent(
           key: const ValueKey("verifyPasswordButton"),
-          buttonType: ButtonTypeV2.primary,
-          labelText: AppLocalizations.of(context).logInLabel,
+          label: AppLocalizations.of(context).logInLabel,
           isDisabled: !_hasPassword,
-          onTap: _hasPassword
-              ? () async {
-                  FocusScope.of(context).unfocus();
-                  await verifyPassword(context, _passwordController.text);
-                }
-              : null,
+          onTap: _verifyEnteredPassword,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+  Future<void> _verifyEnteredPassword() async {
+    if (!_hasPassword) {
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    await verifyPassword(context, _passwordController.text);
+  }
+
+  Widget _getBody() {
     return AutofillGroup(
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -116,16 +113,18 @@ class _LoginPasswordVerificationPageState
               textInputAction: TextInputAction.next,
             ),
           ),
-          TextInputWidgetV2(
+          TextInputComponent(
             key: const ValueKey("passwordInputField"),
             label: AppLocalizations.of(context).password,
             hintText: AppLocalizations.of(context).enterYourPassword,
-            textEditingController: _passwordController,
+            controller: _passwordController,
             isPasswordInput: true,
             isRequired: true,
-            autoCorrect: false,
-            autoFocus: true,
-            onChange: (value) {
+            autocorrect: false,
+            autofocus: true,
+            shouldUnfocusOnClearOrSubmit: true,
+            onSubmit: (_) => _verifyEnteredPassword(),
+            onChanged: (value) {
               final hasPassword = value.isNotEmpty;
               if (_hasPassword != hasPassword) {
                 setState(() {
@@ -137,10 +136,10 @@ class _LoginPasswordVerificationPageState
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
-            child: ButtonWidgetV2(
-              buttonType: ButtonTypeV2.link,
-              labelText: AppLocalizations.of(context).forgotPassword,
-              buttonSize: ButtonSizeV2.small,
+            child: ButtonComponent(
+              variant: ButtonComponentVariant.link,
+              label: AppLocalizations.of(context).forgotPassword,
+              size: ButtonComponentSize.small,
               onTap: () async {
                 await UserService.instance.sendOtt(
                   context,
