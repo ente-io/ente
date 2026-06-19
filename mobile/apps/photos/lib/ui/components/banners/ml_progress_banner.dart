@@ -163,8 +163,8 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
         },
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.backgroundColour,
-            borderRadius: BorderRadius.circular(14),
+            color: colorScheme.backgroundElevated2,
+            borderRadius: BorderRadius.circular(20),
           ),
           padding: const EdgeInsets.all(16),
           child: Column(
