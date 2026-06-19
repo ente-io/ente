@@ -90,7 +90,7 @@ class _SearchTabState extends State<SearchTab> {
           isCollapsedListenable: _isSearchHeaderCollapsedNotifier,
           searchField: SearchWidget(
             shouldConsumeBackNotifier: widget.shouldConsumeBackNotifier,
-            onActiveChanged: _setSearchHeaderCollapsed,
+            onSearchInputActiveChanged: _setSearchHeaderCollapsed,
           ),
         ),
         Expanded(

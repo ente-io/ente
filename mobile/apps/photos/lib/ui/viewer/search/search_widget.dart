@@ -19,11 +19,11 @@ class SearchWidget extends StatefulWidget {
   const SearchWidget({
     super.key,
     this.shouldConsumeBackNotifier,
-    this.onActiveChanged,
+    this.onSearchInputActiveChanged,
   });
 
   final ValueNotifier<bool>? shouldConsumeBackNotifier;
-  final ValueChanged<bool>? onActiveChanged;
+  final ValueChanged<bool>? onSearchInputActiveChanged;
 
   @override
   State<SearchWidget> createState() => SearchWidgetState();
@@ -46,7 +46,7 @@ class SearchWidgetState extends State<SearchWidget> {
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   TextEditingController textController = TextEditingController();
   String? _lastRequestedQuery;
-  bool? _lastReportedActive;
+  bool? _lastReportedSearchInputActive;
   late final StreamSubscription<ClearAndUnfocusSearchBar>
   _clearAndUnfocusSearchBar;
   late final Logger _logger = Logger("SearchWidgetState");
@@ -60,7 +60,7 @@ class SearchWidgetState extends State<SearchWidget> {
         return;
       }
       _syncSearchBackNotifier();
-      _notifyActiveChanged();
+      _notifySearchInputActiveChanged();
       setState(() {});
     });
     _tabChangedEvent = Bus.instance.on<TabChangedEvent>().listen((event) async {
@@ -96,7 +96,7 @@ class SearchWidgetState extends State<SearchWidget> {
           textController.clear();
           focusNode.unfocus();
           _syncSearchBackNotifier(false);
-          _notifyActiveChanged();
+          _notifySearchInputActiveChanged();
         });
   }
 
@@ -139,7 +139,7 @@ class SearchWidgetState extends State<SearchWidget> {
 
   Future<void> textControllerListener() async {
     _syncSearchBackNotifier();
-    _notifyActiveChanged();
+    _notifySearchInputActiveChanged();
     final nextQuery = textController.text.trim();
     if (nextQuery == _lastRequestedQuery) {
       return;
@@ -158,13 +158,14 @@ class SearchWidgetState extends State<SearchWidget> {
     });
   }
 
-  void _notifyActiveChanged() {
-    final active = focusNode.hasFocus || textController.text.trim().isNotEmpty;
-    if (_lastReportedActive == active) {
+  void _notifySearchInputActiveChanged() {
+    final isSearchInputActive =
+        focusNode.hasFocus || textController.text.trim().isNotEmpty;
+    if (_lastReportedSearchInputActive == isSearchInputActive) {
       return;
     }
-    _lastReportedActive = active;
-    widget.onActiveChanged?.call(active);
+    _lastReportedSearchInputActive = isSearchInputActive;
+    widget.onSearchInputActiveChanged?.call(isSearchInputActive);
   }
 
   @override
