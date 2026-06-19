@@ -70,7 +70,8 @@ if (config.testFlightId) {
 downloadLinks.push(`[GitHub Release](${releaseUrl})`);
 const downloadLine = `-# Download: ${downloadLinks.join(" | ")}`;
 
-const components = [{ type: 10, content: `## ${releaseTitle}` }];
+const heading = releaseTag.endsWith("-rc") ? "##" : "###";
+const components = [{ type: 10, content: `${heading} ${releaseTitle}` }];
 if (releaseBodyDiscord) {
     components.push({ type: 10, content: releaseBodyDiscord });
 }
