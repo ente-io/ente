@@ -22,7 +22,7 @@
         "build:photos": "npm run build:wasm && npm exec --workspace photos -- next build --webpack",
         "build:share": "npm run build:wasm && npm exec --workspace share -- next build --webpack && npm run build:post --workspace share",
         "build:twoof3": "npm exec --workspace twoof3 -- next build --webpack",
-        "build:wasm": "npm run build --workspace ente-wasm -- --no-pack",
+        "build:wasm": "npm run build --workspace ente-wasm -- --no-pack && npm run build --workspace ente-wasm-core -- --no-pack",
         "dev": "npm run dev:photos",
         "dev:accounts": "npm run build:wasm && npm exec --workspace accounts -- next dev --webpack -p 3001",
         "dev:albums": "npm run build:wasm && npm exec --workspace albums -- next dev --webpack -p 3002",
