@@ -1,6 +1,8 @@
 package io.ente.photos
 
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.android.installreferrer.api.InstallReferrerClient
@@ -42,6 +44,13 @@ class InstallSourceProvider(private val context: Context) {
         if (source != null) {
             cachedSource = source
             callback(source)
+            return
+        }
+        if (!isFreshInstall()) {
+            val emptySource = InstallSource(emptyMap())
+            cachedSource = emptySource
+            store.saveSource(emptySource)
+            callback(emptySource)
             return
         }
 
@@ -125,7 +134,26 @@ class InstallSourceProvider(private val context: Context) {
         }
     }
 
+    private fun isFreshInstall(): Boolean {
+        val packageInfo = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageInfo(
+                    context.packageName,
+                    PackageManager.PackageInfoFlags.of(0L),
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(context.packageName, 0)
+            }
+        } catch (_: Exception) {
+            return false
+        }
+        val installUpdateDeltaMs = packageInfo.lastUpdateTime - packageInfo.firstInstallTime
+        return installUpdateDeltaMs in 0L..FRESH_INSTALL_TOLERANCE_MS
+    }
+
     private companion object {
         const val INSTALL_REFERRER_TIMEOUT_MS = 2000L
+        const val FRESH_INSTALL_TOLERANCE_MS = 2 * 60 * 1000L
     }
 }
