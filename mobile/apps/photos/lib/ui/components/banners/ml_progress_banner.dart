@@ -155,7 +155,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(top: 8, bottom: 20),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
