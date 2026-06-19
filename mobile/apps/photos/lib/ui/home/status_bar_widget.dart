@@ -154,7 +154,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
       BannerComponent(
         leadingIcon: HugeIcons.strokeRoundedAiBrain01,
         title: l10n.machineLearning,
-        subtitle: l10n.enableMachineLearningBanner,
+        subtitle: l10n.machineLearningBannerSubtitle,
         state: BannerComponentState.success,
         onTap: () async {
           await routeToPage(
