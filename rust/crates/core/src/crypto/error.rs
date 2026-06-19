@@ -1,8 +1,12 @@
-//! Crypto error types.
+//! The error type shared by the crypto module.
 
 use thiserror::Error;
 
-/// Errors that can occur during cryptographic operations.
+/// An error from a cryptographic operation.
+///
+/// Each variant is returned by the operations documented to produce it.
+/// [`code`](Self::code) maps a variant to a stable string identifier that
+/// bindings forward to non-Rust callers.
 #[derive(Error, Debug)]
 pub enum CryptoError {
     /// Base64 decoding failed.
