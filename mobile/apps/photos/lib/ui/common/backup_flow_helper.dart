@@ -82,6 +82,8 @@ Future<bool?> _handleFirstImportFlow(BuildContext context) async {
     return null;
   }
 
+  await permissionService.onUpdatePermission(state);
+
   // Trigger local sync before showing the loading widget.
   // The skip flag was cleared above, so sync will now proceed with first import.
   // We use LocalSyncService.sync() directly because:
@@ -99,9 +101,7 @@ Future<bool?> _handleFirstImportFlow(BuildContext context) async {
 
 Future<PermissionState?> _requestPermissions() async {
   try {
-    final state = await permissionService.requestPhotoMangerPermissions();
-    await permissionService.onUpdatePermission(state);
-    return state;
+    return permissionService.requestPhotoMangerPermissions();
   } catch (e, s) {
     _logger.severe("Failed to request permission", e, s);
     return null;
