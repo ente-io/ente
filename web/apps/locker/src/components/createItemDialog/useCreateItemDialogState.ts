@@ -230,7 +230,10 @@ export const useCreateItemDialogState = ({
         setSelectedCollectionIDs(
             isEditMode
                 ? editCollectionIDs
-                : defaultCollectionID != null
+                : defaultCollectionID != null &&
+                    displayCollectionsRef.current.some(
+                        (collection) => collection.id === defaultCollectionID,
+                    )
                   ? [defaultCollectionID]
                   : [],
         );
