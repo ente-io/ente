@@ -45,7 +45,7 @@ interface LockerUsageResponse {
     userStorage?: number;
 }
 
-export interface UserDetails extends LockerUploadLimitState {
+interface UserDetails extends LockerUploadLimitState {
     email: string;
 }
 

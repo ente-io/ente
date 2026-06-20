@@ -41,12 +41,11 @@ import React, { useRef } from "react";
 import { Trans } from "react-i18next";
 import {
     type CreateItemDialogEditItem,
-    type CreateOption,
     useCreateItemDialogState,
 } from "./createItemDialog/useCreateItemDialogState";
 
 const CREATABLE_TYPES: {
-    type: CreateOption;
+    type: LockerItemType;
     labelKey: string;
     descriptionKey: string;
     icon: React.ReactNode;

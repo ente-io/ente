@@ -67,7 +67,7 @@ export type LockerNestedSidebarDrawerVisibilityProps = ModalVisibilityProps & {
     onRootClose: () => void;
 };
 
-export const LockerNestedSidebarDrawer: React.FC<
+const LockerNestedSidebarDrawer: React.FC<
     LockerNestedSidebarDrawerVisibilityProps & DrawerProps
 > = ({ onClose, onRootClose, ...rest }) => {
     const handleClose: DrawerProps["onClose"] = (_, reason) => {

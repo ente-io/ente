@@ -149,12 +149,12 @@ interface DecryptAllDataResult {
     totalCollectionCount: number;
 }
 
-export interface LockerTrashData {
+interface LockerTrashData {
     items: LockerItem[];
     lastUpdatedAt: number;
 }
 
-export interface LockerHydratedState {
+interface LockerHydratedState {
     collections: LockerCollection[];
     trashItems: LockerItem[];
     trashLastUpdatedAt: number;
@@ -162,7 +162,7 @@ export interface LockerHydratedState {
     trashSinceTime: number;
 }
 
-export interface LockerPersistedState extends LockerHydratedState {
+interface LockerPersistedState extends LockerHydratedState {
     hasPersistedState: boolean;
 }
 

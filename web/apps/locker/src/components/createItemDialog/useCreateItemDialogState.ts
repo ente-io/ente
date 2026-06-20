@@ -34,7 +34,6 @@ import {
 } from "./fileUploadHelpers";
 import { getRequiredFields } from "./itemFormFieldsUtils";
 
-export type CreateOption = LockerItemType;
 const MAX_PARALLEL_UPLOADS = 4;
 
 export interface CreateItemDialogEditItem {
@@ -72,31 +71,6 @@ interface UseCreateItemDialogStateProps {
     userDetails?: LockerUploadLimitState;
 }
 
-interface UploadState {
-    completedFileKeys: Set<string>;
-    failedFileKeys: Set<string>;
-    uploadingFileKeys: Set<string>;
-    uploadProgressByFileKey: Record<string, LockerUploadProgress | null>;
-    uploadCapByFileKey: Record<string, number>;
-}
-
-const emptyUploadState = (): UploadState => ({
-    completedFileKeys: new Set(),
-    failedFileKeys: new Set(),
-    uploadingFileKeys: new Set(),
-    uploadProgressByFileKey: {},
-    uploadCapByFileKey: {},
-});
-
-const initialEditCollectionIDs = (
-    editItem: CreateItemDialogEditItem | null | undefined,
-) => {
-    if (!editItem) {
-        return [];
-    }
-    return editItem.collectionIDs;
-};
-
 const editFormData = (
     editItem: CreateItemDialogEditItem | null | undefined,
 ): Record<string, string> =>
@@ -127,7 +101,7 @@ export const useCreateItemDialogState = ({
     const isEditMode = !!editItem;
     const currentUserID = savedLocalUser()?.id;
     const editCollectionIDs = useMemo(
-        () => initialEditCollectionIDs(editItem),
+        () => editItem?.collectionIDs ?? [],
         [editItem],
     );
     const displayCollections = useMemo(() => {
@@ -153,7 +127,7 @@ export const useCreateItemDialogState = ({
         return [...ownedVisibleCollections, ...currentEditCollections];
     }, [collections, currentUserID, editCollectionIDs, isEditMode]);
 
-    const [selectedOption, setSelectedOption] = useState<CreateOption | null>(
+    const [selectedOption, setSelectedOption] = useState<LockerItemType | null>(
         editItem?.type ?? (initialItems?.length ? "file" : null),
     );
     const [selectedCollectionIDs, setSelectedCollectionIDs] =
@@ -205,12 +179,11 @@ export const useCreateItemDialogState = ({
     displayCollectionsRef.current = displayCollections;
 
     const resetUploadState = useCallback(() => {
-        const nextState = emptyUploadState();
-        setCompletedFileKeys(nextState.completedFileKeys);
-        setFailedFileKeys(nextState.failedFileKeys);
-        setUploadingFileKeys(nextState.uploadingFileKeys);
-        setUploadProgressByFileKey(nextState.uploadProgressByFileKey);
-        setUploadCapByFileKey(nextState.uploadCapByFileKey);
+        setCompletedFileKeys(new Set());
+        setFailedFileKeys(new Set());
+        setUploadingFileKeys(new Set());
+        setUploadProgressByFileKey({});
+        setUploadCapByFileKey({});
     }, []);
 
     useEffect(() => {
@@ -300,7 +273,7 @@ export const useCreateItemDialogState = ({
     );
 
     const handleSelectOption = useCallback(
-        (option: CreateOption) => {
+        (option: LockerItemType) => {
             setSelectedOption(option);
             setFormData({});
             setSelectedUploadItems([]);

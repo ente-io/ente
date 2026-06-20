@@ -67,7 +67,7 @@ export interface GenericFileData {
 }
 
 /** Union of all item data types. */
-export type LockerItemData =
+type LockerItemData =
     | PersonalNoteData
     | AccountCredentialData
     | PhysicalRecordData
@@ -147,7 +147,7 @@ export const isCollectionOwner = (
     currentUserID: number | undefined,
 ) => currentUserID !== undefined && collection.owner.id === currentUserID;
 
-export const canRestoreToCollection = (
+const canRestoreToCollection = (
     collection: LockerCollection,
     currentUserID: number | undefined,
 ) =>

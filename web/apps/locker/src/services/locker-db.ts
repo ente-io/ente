@@ -42,7 +42,7 @@ interface CachedLockerDB {
     dbPromise: ReturnType<typeof openLockerDB>;
 }
 
-export interface LockerDBSnapshot {
+interface LockerDBSnapshot {
     collections: Map<number, EncryptedCollectionRecord>;
     files: EncryptedFileRecord[];
     trashFiles: StoredTrashFileRecord[];

@@ -206,13 +206,11 @@ export const stringToB64 = (s: string): string => {
     return toB64String(bytes);
 };
 
-export { fromB64String, toB64String };
-
 // ---------------------------------------------------------------------------
 // File encryption helpers (for file upload)
 // ---------------------------------------------------------------------------
 
-export interface StreamEncryptorHandle {
+interface StreamEncryptorHandle {
     key: string;
     decryptionHeader: string;
     encryptChunk: (
@@ -222,7 +220,7 @@ export interface StreamEncryptorHandle {
     free: () => void;
 }
 
-export interface StreamDecryptorHandle {
+interface StreamDecryptorHandle {
     decryptionChunkSize: number;
     decryptChunk: (data: Uint8Array) => Promise<Uint8Array>;
     isFinalized: () => boolean;
@@ -264,7 +262,7 @@ export const createStreamDecryptor = async (
 };
 
 /** Result of encrypting file content using chunked stream encryption. */
-export interface EncryptedFileResult {
+interface EncryptedFileResult {
     /** Encrypted ciphertext as base64. */
     encryptedData: string;
     /** Decryption header as base64. */

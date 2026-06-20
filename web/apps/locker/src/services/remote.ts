@@ -110,7 +110,7 @@ const RemoteFileShareLink = z.object({
     encryptedShareKey: z.string().nullish(),
 });
 
-export interface LockerFileShareLink {
+interface LockerFileShareLink {
     linkID: string;
     url: string;
     fileID?: number;

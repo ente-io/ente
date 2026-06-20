@@ -1,6 +1,5 @@
 export const LOCKER_FILE_LIMIT_FREE = 100;
 export const LOCKER_FILE_LIMIT_PAID = 1000;
-export const LOCKER_STORAGE_LIMIT_FREE_BYTES = 1 * 1024 * 1024 * 1024;
 export const LOCKER_STORAGE_LIMIT_PAID_BYTES = 10 * 1024 * 1024 * 1024;
 export const LOCKER_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024 * 1024;
 
@@ -13,26 +12,12 @@ export interface LockerUploadLimitState {
     lockerFamilyFileCount?: number;
 }
 
-export interface LockerUploadAllowance {
-    maxFileCount: number;
-    currentFileCount: number;
-    remainingFileCount: number;
-    freeStorage: number;
-}
-
-export type LockerUploadPreflightFailureReason =
-    | "fileCountLimit"
-    | "fileTooLarge"
-    | "storageLimit";
-
 export interface LockerUploadPreflightFailure {
-    reason: LockerUploadPreflightFailureReason;
+    reason: "fileCountLimit" | "fileTooLarge" | "storageLimit";
     fileName?: string;
 }
 
-export const lockerUploadAllowance = (
-    userDetails: LockerUploadLimitState,
-): LockerUploadAllowance => {
+export const lockerUploadAllowance = (userDetails: LockerUploadLimitState) => {
     const maxFileCount = Math.max(userDetails.lockerFileLimit, 1);
     const currentFileCount =
         userDetails.isPartOfFamily &&
