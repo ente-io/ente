@@ -121,9 +121,15 @@ fn generate_native_android() -> Result<(), DynError> {
         .ok_or("failed to resolve repo root from rust/apps/codegen")?;
     let core_out_dir =
         repo_root.join("mobile/native/android/apps/ensu/crypto-auth-core/src/main/java");
+    let photos_tv_core_out_dir =
+        repo_root.join("mobile/native/android/apps/photos_tv/app/src/main/java");
+    let photos_tv_core_stale_path = photos_tv_core_out_dir.join("io/ente/photos_tv/crypto/core.kt");
+    let photos_tv_core_config =
+        repo_root.join("mobile/native/android/apps/photos_tv/app/uniffi-core.toml");
     let rust_out_dir = repo_root.join("mobile/native/android/packages/rust/src/main/kotlin");
 
     fs::create_dir_all(&core_out_dir)?;
+    fs::create_dir_all(&photos_tv_core_out_dir)?;
     fs::create_dir_all(&rust_out_dir)?;
 
     let crates = [
@@ -177,6 +183,15 @@ fn generate_native_android() -> Result<(), DynError> {
             &crate_spec.out_dir,
             &crate_spec.uniffi,
         )?;
+        if crate_spec.uniffi.crate_name == "core" {
+            remove_path(&photos_tv_core_stale_path)?;
+            generate_bindings_with_config(
+                TargetLanguage::Kotlin,
+                &photos_tv_core_out_dir,
+                &crate_spec.uniffi,
+                &photos_tv_core_config,
+            )?;
+        }
     }
 
     Ok(())
@@ -318,6 +333,24 @@ fn generate_bindings(
     out_dir: &Path,
     uniffi_crate: &UniffiCrate<'_>,
 ) -> Result<(), DynError> {
+    generate_bindings_impl(language, out_dir, uniffi_crate, None)
+}
+
+fn generate_bindings_with_config(
+    language: TargetLanguage,
+    out_dir: &Path,
+    uniffi_crate: &UniffiCrate<'_>,
+    config: &Path,
+) -> Result<(), DynError> {
+    generate_bindings_impl(language, out_dir, uniffi_crate, Some(config))
+}
+
+fn generate_bindings_impl(
+    language: TargetLanguage,
+    out_dir: &Path,
+    uniffi_crate: &UniffiCrate<'_>,
+    config: Option<&Path>,
+) -> Result<(), DynError> {
     let source = target_dir()?.join("release").join(format!(
         "{}{}{}",
         env::consts::DLL_PREFIX,
@@ -326,6 +359,7 @@ fn generate_bindings(
     ));
     let source = utf8_path(&source)?;
     let out_dir = utf8_path(out_dir)?;
+    let config = config.map(utf8_path).transpose()?;
     let previous_dir = env::current_dir().map_err(|error| {
         format!(
             "failed to capture current directory before generating {} bindings: {error}",
@@ -344,7 +378,7 @@ fn generate_bindings(
         languages: vec![language],
         source,
         out_dir,
-        config_override: None,
+        config_override: config,
         format: false,
         crate_filter: Some(uniffi_crate.crate_name.to_owned()),
         metadata_no_deps: false,
