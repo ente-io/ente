@@ -52,7 +52,6 @@ interface ItemCardProps {
     onRestore?: (item: LockerItem) => void;
     onShareLink?: (item: LockerItem) => void;
     selectionMode?: boolean;
-    selectable?: boolean;
     selected?: boolean;
     onToggleSelection?: (item: LockerItem) => void;
     onLongPressSelect?: (item: LockerItem) => void;
@@ -75,7 +74,6 @@ export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
     onRestore,
     onShareLink,
     selectionMode,
-    selectable,
     selected,
     onToggleSelection,
     onLongPressSelect,
@@ -127,7 +125,6 @@ export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
         (event: React.PointerEvent<HTMLDivElement>) => {
             if (
                 selectionMode ||
-                !selectable ||
                 !onLongPressSelect ||
                 (event.button !== -1 && event.button !== 0)
             ) {
@@ -149,7 +146,7 @@ export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
                 onLongPressSelect(item);
             }, 420);
         },
-        [clearLongPress, item, onLongPressSelect, selectable, selectionMode],
+        [clearLongPress, item, onLongPressSelect, selectionMode],
     );
     const handlePressEnd = useCallback(() => {
         clearLongPress();
@@ -171,7 +168,7 @@ export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
                 onPointerLeave={handlePressEnd}
                 onPointerCancel={handlePressEnd}
                 onContextMenu={(event) => {
-                    if (!selectionMode && selectable && onLongPressSelect) {
+                    if (!selectionMode && onLongPressSelect) {
                         event.preventDefault();
                     }
                 }}
@@ -181,7 +178,7 @@ export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
                         return;
                     }
                     if (selectionMode) {
-                        if (selectable && onToggleSelection) {
+                        if (onToggleSelection) {
                             onToggleSelection(item);
                         }
                         return;
@@ -204,7 +201,6 @@ export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
                     alignItems: "center",
                     backgroundColor: theme.vars.palette.fill.faint,
                     transition: "background-color 0.15s",
-                    opacity: selectionMode && !selectable ? 0.58 : 1,
                     "&:hover": {
                         backgroundColor: theme.vars.palette.fill.faintHover,
                     },
@@ -225,15 +221,13 @@ export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
                             color: selected ? "primary.main" : "text.faint",
                         }}
                     >
-                        {selectable ? (
-                            selected ? (
-                                <CheckCircleRoundedIcon sx={{ fontSize: 22 }} />
-                            ) : (
-                                <RadioButtonUncheckedRoundedIcon
-                                    sx={{ fontSize: 22 }}
-                                />
-                            )
-                        ) : null}
+                        {selected ? (
+                            <CheckCircleRoundedIcon sx={{ fontSize: 22 }} />
+                        ) : (
+                            <RadioButtonUncheckedRoundedIcon
+                                sx={{ fontSize: 22 }}
+                            />
+                        )}
                     </Box>
                 )}
 

@@ -119,14 +119,6 @@ export interface LockerFileShareLink {
     passwordEnabled?: boolean;
 }
 
-export interface LockerFileShareLinkSummary {
-    linkID: string;
-    fileID: number;
-    validTill?: number | null;
-    enableDownload: boolean;
-    passwordEnabled: boolean;
-}
-
 // ---------------------------------------------------------------------------
 // File link helpers
 // ---------------------------------------------------------------------------
@@ -223,19 +215,6 @@ const resolveCollectionIDsWithUncategorizedFallback = async (
     collectionIDs.length > 0
         ? Array.from(new Set(collectionIDs))
         : [(await ensureUncategorizedCollection(masterKey)).id];
-
-/**
- * Fetch Locker file share links for the current user.
- *
- * The backend endpoint is user-wide rather than per-file, so the client
- * filters to the latest non-disabled record per file.
- */
-export const fetchLockerFileShareLinks = (): Promise<
-    Map<number, LockerFileShareLinkSummary>
-> => {
-    // TODO: Re-enable this after GET /files/share-url is deployed on the API.
-    return Promise.resolve(new Map<number, LockerFileShareLinkSummary>());
-};
 
 /**
  * Get or create a public share link for a Locker file.

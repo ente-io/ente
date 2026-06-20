@@ -41,7 +41,6 @@ export interface CreateItemDialogEditItem {
     id: number;
     type: LockerItemType;
     data: Record<string, unknown>;
-    collectionID: number;
     collectionIDs: number[];
 }
 

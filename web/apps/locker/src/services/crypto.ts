@@ -13,7 +13,6 @@ import { ensureArrayBufferBacked } from "ente-base/bytes";
 import type {
     EncryptedBlob,
     EncryptedBox,
-    EncryptedFile,
     KeyPair,
 } from "ente-base/crypto/types";
 import { loadCryptoReadyEnteWasm } from "ente-wasm/load";
@@ -277,31 +276,9 @@ export interface EncryptedFileResult {
 }
 
 /**
- * Encrypt file data using chunked SecretStream (4 MB chunks) via Rust/WASM.
+ * Encrypt data using chunked SecretStream (4 MB chunks) with an existing key,
+ * rather than generating a new one.
  *
- * Generates a new random stream key, encrypts the data in 4 MB chunks, and
- * computes the MD5 hash of the ciphertext.
- *
- * @param dataB64 File content as base64.
- * @returns Encrypted data, header, MD5 hash, and generated key — all base64.
- */
-export const encryptFileStream = async (
-    dataB64: string,
-): Promise<EncryptedFileResult> => {
-    const wasm = await loadCryptoReadyEnteWasm();
-    const result = wasm.crypto_encrypt_stream(dataB64);
-    return {
-        encryptedData: result.encrypted_data,
-        decryptionHeader: result.decryption_header,
-        md5Hash: result.md5_hash,
-        key: result.key,
-    };
-};
-
-/**
- * Encrypt data using chunked SecretStream with an existing key.
- *
- * Same as {@link encryptFileStream} but uses the provided key.
  * Useful for encrypting thumbnails with the same file key.
  */
 export const encryptFileStreamWithKey = async (
@@ -319,25 +296,7 @@ export const encryptFileStreamWithKey = async (
 };
 
 /**
- * Convert a Uint8Array to base64 string.
- */
-export const bytesToB64 = (bytes: Uint8Array): string => toB64String(bytes);
-
-/**
  * Convert a base64 string to Uint8Array.
  */
 export const b64ToBytes = (b64: string): Uint8Array<ArrayBuffer> =>
     fromB64String(b64);
-
-export const decryptStreamBytes = async (
-    file: EncryptedFile,
-    key: Uint8Array | string,
-): Promise<Uint8Array> => {
-    const wasm = await loadCryptoReadyEnteWasm();
-    const plaintextB64 = wasm.crypto_decrypt_stream(
-        toB64String(file.encryptedData),
-        toB64String(file.decryptionHeader),
-        toB64String(key),
-    );
-    return fromB64String(plaintextB64);
-};

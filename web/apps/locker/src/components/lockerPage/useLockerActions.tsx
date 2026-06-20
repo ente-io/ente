@@ -641,7 +641,6 @@ export const useLockerActions = ({
                 item.type === "file"
                     ? { name: getItemTitle(item) }
                     : (item.data as unknown as Record<string, unknown>),
-            collectionID: item.collectionID,
             collectionIDs: item.collectionIDs,
         });
     }, []);

@@ -1506,7 +1506,6 @@ const ItemsSection: React.FC<{
                                 : undefined
                         }
                         selectionMode={selectionMode}
-                        selectable
                         selected={selectedItemIDSet?.has(item.id)}
                         onToggleSelection={onToggleItemSelection}
                         onLongPressSelect={onStartSelection}
@@ -2013,10 +2012,7 @@ const CollectionCard: React.FC<{
                         : "rgba(255, 255, 255, 0.03)",
                 border: 1,
                 borderStyle: "solid",
-                borderColor:
-                    collection.items.length > 0
-                        ? "rgba(255, 255, 255, 0.08)"
-                        : "rgba(255, 255, 255, 0.08)",
+                borderColor: "rgba(255, 255, 255, 0.08)",
                 transition: "background-color 0.15s, border-color 0.15s",
                 "&:hover": {
                     backgroundColor:
