@@ -242,7 +242,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         final ioFile = await getFile(file);
         if (ioFile != null) {
           await MediaExtension().setResult(
-            await copyToTempForSharing(ioFile, file.cacheKey()),
+            await copyToTempForSharing(ioFile),
           );
         }
       } else {
@@ -284,7 +284,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
       final ioFile = await getFile(file);
       if (ioFile != null) {
         await MediaExtension().setResult(
-          await copyToTempForSharing(ioFile, file.cacheKey()),
+          await copyToTempForSharing(ioFile),
         );
       }
     } else {

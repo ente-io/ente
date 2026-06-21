@@ -132,7 +132,7 @@ class _ExternalMediaPickerPageState extends State<ExternalMediaPickerPage> {
       final ioFile = await getFile(file);
       if (ioFile != null) {
         try {
-          uris.add(await copyToTempForSharing(ioFile, file.cacheKey()));
+          uris.add(await copyToTempForSharing(ioFile));
         } catch (_) {
           // copyToTempForSharing already logs the error
         }

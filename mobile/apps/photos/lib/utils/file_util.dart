@@ -20,6 +20,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
+import 'package:uuid/uuid.dart';
 
 final _logger = Logger("FileUtil");
 
@@ -60,13 +61,13 @@ void preloadFile(EnteFile file) {
 /// the original file is on external SD card storage.
 ///
 /// Returns the `file://` URI string of the cached copy.
-Future<String> copyToTempForSharing(File ioFile, String cacheKey) async {
+Future<String> copyToTempForSharing(File ioFile) async {
   final tempDir = Directory(Configuration.instance.getTempDirectory());
   if (!tempDir.existsSync()) {
     tempDir.createSync(recursive: true);
   }
   final cached = File(
-    join(tempDir.path, "${cacheKey}_${basename(ioFile.path)}"),
+    join(tempDir.path, "${const Uuid().v4().toString()}_${basename(ioFile.path)}"),
   );
   try {
     return (await ioFile.copy(cached.path)).uri.toString();
