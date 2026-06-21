@@ -55,6 +55,27 @@ void preloadFile(EnteFile file) {
   getFile(file);
 }
 
+/// Copies [ioFile] to the app's private temp directory so the existing
+/// FileProvider (which has `<files-path>` configured) can serve it even when
+/// the original file is on external SD card storage.
+///
+/// Returns the `file://` URI string of the cached copy.
+Future<String> copyToTempForSharing(File ioFile, String cacheKey) async {
+  final tempDir = Directory(Configuration.instance.getTempDirectory());
+  if (!tempDir.existsSync()) {
+    tempDir.createSync(recursive: true);
+  }
+  final cached = File(
+    join(tempDir.path, "${cacheKey}_${basename(ioFile.path)}"),
+  );
+  try {
+    return (await ioFile.copy(cached.path)).uri.toString();
+  } catch (e, s) {
+    _logger.warning("Failed to copy file to temp for sharing", e, s);
+    rethrow;
+  }
+}
+
 // IMPORTANT: Delete the returned file if `isOrigin` is set to true
 // https://github.com/CaiJingLong/flutter_photo_manager#cache-problem-of-ios
 Future<File?> getFile(
