@@ -415,8 +415,9 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
   }
 
   Future<void> _resetVisibleIgnoredFiles() async {
-    final files = _shouldSplitIgnoredReasons
-        ? await _ignoredFilesForBucket(IgnoredUploadReasonBucket.other)
+    final selectedBucket = _selectedBucket;
+    final files = _shouldSplitIgnoredReasons && selectedBucket != null
+        ? await _ignoredFilesForBucket(selectedBucket)
         : await _ignoredFiles;
     await IgnoredFilesService.instance.removeIgnoredMappings(files);
     await RemoteSyncService.instance.sync(silently: true);
@@ -582,9 +583,9 @@ class SkippedFilesHeaderWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              if (effectiveSelectedBucket == IgnoredUploadReasonBucket.other)
+              if (_canResetIgnoredFiles(effectiveSelectedBucket))
                 const SizedBox(height: 20),
-              if (effectiveSelectedBucket == IgnoredUploadReasonBucket.other)
+              if (_canResetIgnoredFiles(effectiveSelectedBucket))
                 _ResetIgnoredFilesSection(
                   onResetIgnoredFiles: onResetIgnoredFiles,
                 ),
@@ -697,6 +698,11 @@ List<IgnoredUploadReasonBucket> _visibleIgnoredUploadBuckets(
     IgnoredUploadReasonBucket.iCloudUnavailable,
     IgnoredUploadReasonBucket.other,
   ].where(availableBuckets.contains).toList();
+}
+
+bool _canResetIgnoredFiles(IgnoredUploadReasonBucket bucket) {
+  return bucket == IgnoredUploadReasonBucket.deletedFromEnte ||
+      bucket == IgnoredUploadReasonBucket.other;
 }
 
 IgnoredUploadReasonBucket? _ignoredUploadReasonBucketForFile(
