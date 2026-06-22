@@ -7,6 +7,7 @@ enum ButtonTypeV2 {
   primary,
   secondary,
   neutral,
+  muted,
   critical,
   tertiaryCritical,
   link;
@@ -21,6 +22,8 @@ enum ButtonTypeV2 {
         return _secondaryPalette(colorScheme);
       case ButtonTypeV2.neutral:
         return _neutralPalette(colorScheme);
+      case ButtonTypeV2.muted:
+        return _mutedPalette(colorScheme);
       case ButtonTypeV2.tertiaryCritical:
         return _tertiaryCriticalPalette(colorScheme);
       case ButtonTypeV2.link:
@@ -69,6 +72,18 @@ ButtonTheme _neutralPalette(EnteColorScheme c) => ButtonTheme(
   iconColor: c.contentReverse,
   disabledIconColor: c.contentLighter,
   checkmarkColor: c.contentReverse,
+);
+
+ButtonTheme _mutedPalette(EnteColorScheme c) => ButtonTheme(
+  defaultBg: c.fillDarker,
+  hoverBg: c.fillDark,
+  pressedBg: c.fillDarkest,
+  disabledBg: c.fillDark,
+  foreground: c.content,
+  disabledForeground: c.contentLighter,
+  iconColor: c.content,
+  disabledIconColor: c.contentLighter,
+  checkmarkColor: c.content,
 );
 
 ButtonTheme _tertiaryCriticalPalette(EnteColorScheme c) => ButtonTheme(
