@@ -551,9 +551,6 @@ class SkippedFilesHeaderWidget extends StatelessWidget {
           return const SizedBox.shrink();
         }
         final effectiveSelectedBucket = selectedBucket ?? visibleBuckets.first;
-        final canResetIgnoredFiles = _canResetIgnoredFiles(
-          effectiveSelectedBucket,
-        );
         return Padding(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
           child: Column(
@@ -581,11 +578,10 @@ class SkippedFilesHeaderWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              if (canResetIgnoredFiles) const SizedBox(height: 20),
-              if (canResetIgnoredFiles)
-                _ResetIgnoredFilesSection(
-                  onResetIgnoredFiles: onResetIgnoredFiles,
-                ),
+              const SizedBox(height: 20),
+              _ResetIgnoredFilesSection(
+                onResetIgnoredFiles: onResetIgnoredFiles,
+              ),
             ],
           ),
         );
@@ -654,11 +650,6 @@ List<IgnoredUploadReasonBucket> _visibleIgnoredUploadBuckets(
     IgnoredUploadReasonBucket.iCloudUnavailable,
     IgnoredUploadReasonBucket.other,
   ].where(availableBuckets.contains).toList();
-}
-
-bool _canResetIgnoredFiles(IgnoredUploadReasonBucket bucket) {
-  return bucket == IgnoredUploadReasonBucket.deletedFromEnte ||
-      bucket == IgnoredUploadReasonBucket.other;
 }
 
 IgnoredUploadReasonBucket? _ignoredUploadReasonBucketForFile(
