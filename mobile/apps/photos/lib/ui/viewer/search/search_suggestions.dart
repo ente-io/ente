@@ -284,25 +284,20 @@ const List<_SearchResultsSection> _defaultSectionOrder = [
   _SearchResultsSection.files,
 ];
 
-const List<_SearchResultsSection> _fileIntentSectionOrder = [
-  _SearchResultsSection.files,
-  _SearchResultsSection.magic,
-  _SearchResultsSection.people,
-  _SearchResultsSection.locations,
-  _SearchResultsSection.moments,
-  _SearchResultsSection.albums,
-  _SearchResultsSection.shared,
-];
+final List<_SearchResultsSection> _fileIntentSectionOrder =
+    _sectionOrderPromoting(_SearchResultsSection.files);
 
-const List<_SearchResultsSection> _momentIntentSectionOrder = [
-  _SearchResultsSection.moments,
-  _SearchResultsSection.magic,
-  _SearchResultsSection.people,
-  _SearchResultsSection.locations,
-  _SearchResultsSection.albums,
-  _SearchResultsSection.shared,
-  _SearchResultsSection.files,
-];
+final List<_SearchResultsSection> _momentIntentSectionOrder =
+    _sectionOrderPromoting(_SearchResultsSection.moments);
+
+List<_SearchResultsSection> _sectionOrderPromoting(
+  _SearchResultsSection promotedSection,
+) {
+  return List.unmodifiable([
+    promotedSection,
+    ..._defaultSectionOrder.where((section) => section != promotedSection),
+  ]);
+}
 
 const Set<String> _commonFileExtensions = {
   "3fr",
