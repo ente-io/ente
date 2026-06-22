@@ -11,6 +11,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/services/media_store_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart'
     show ButtonAction;
@@ -34,7 +35,7 @@ Future<void> showSingleFileDeleteSheet(
       showShortToast(context, l10n.noDeviceThatCanBeDeleted);
       return;
     }
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid && await MediaStoreService.canManageMedia()) {
       await showBottomSheetComponent<ButtonResult>(
         context: context,
         useRootNavigator: Platform.isIOS,

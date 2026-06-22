@@ -24,6 +24,7 @@ import "package:photos/models/freeable_space_info.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/media_store_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
@@ -62,7 +63,10 @@ Future<void> deleteFilesFromEverywhere(
       hasLocalOnlyFiles = true;
     }
   }
-  if (hasLocalOnlyFiles && Platform.isAndroid && !isLocalGalleryMode) {
+  if (hasLocalOnlyFiles &&
+      Platform.isAndroid &&
+      !isLocalGalleryMode &&
+      await MediaStoreService.canManageMedia()) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
       return;
@@ -227,7 +231,10 @@ Future<List<EnteFile>> deleteFilesOnDeviceOnly(
       localOnlyIDs.add(file.localID);
     }
   }
-  if (hasLocalOnlyFiles && Platform.isAndroid && !isLocalGalleryMode) {
+  if (hasLocalOnlyFiles &&
+      Platform.isAndroid &&
+      !isLocalGalleryMode &&
+      await MediaStoreService.canManageMedia()) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
       return const [];
@@ -819,7 +826,7 @@ Future<void> showDeleteSheet(
       showShortToast(context, l10n.noDeviceThatCanBeDeleted);
       return;
     }
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid && await MediaStoreService.canManageMedia()) {
       final hasVideos = localGalleryDeletableFiles.any(
         (file) => file.fileType == FileType.video,
       );
@@ -1051,7 +1058,7 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
         : localSettings.getDeletePreference() ??
               DeletePreference.DeleteFromBoth;
     // Shared delete runner
-    void onDelete(Future<void> Function() callback) async {
+    Future<void> onDelete(Future<void> Function() callback) async {
       try {
         await callback();
         if (context.mounted) {
@@ -1091,7 +1098,7 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
               if (_isSetAsDefaultSelected) {
                 await localSettings.setDeletePreference(.DeleteFromLocalOnly);
               }
-              onDelete(widget.onDeleteFromLocal);
+              await onDelete(widget.onDeleteFromLocal);
             },
           ),
           ButtonComponent(
@@ -1101,7 +1108,7 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
               if (_isSetAsDefaultSelected) {
                 await localSettings.setDeletePreference(.DeleteFromRemoteOnly);
               }
-              onDelete(widget.onDeleteFromRemote);
+              await onDelete(widget.onDeleteFromRemote);
             },
           ),
           ButtonComponent(
@@ -1111,7 +1118,7 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
               if (_isSetAsDefaultSelected) {
                 await localSettings.setDeletePreference(.DeleteFromBoth);
               }
-              onDelete(widget.onDeleteFromBoth);
+              await onDelete(widget.onDeleteFromBoth);
             },
           ),
         ] else ...[
@@ -1127,11 +1134,11 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
             onTap: () async {
               switch (deletePreference) {
                 case DeletePreference.DeleteFromRemoteOnly:
-                  onDelete(widget.onDeleteFromRemote);
+                  await onDelete(widget.onDeleteFromRemote);
                 case DeletePreference.DeleteFromLocalOnly:
-                  onDelete(widget.onDeleteFromLocal);
+                  await onDelete(widget.onDeleteFromLocal);
                 case DeletePreference.DeleteFromBoth:
-                  onDelete(widget.onDeleteFromBoth);
+                  await onDelete(widget.onDeleteFromBoth);
               }
             },
           ),

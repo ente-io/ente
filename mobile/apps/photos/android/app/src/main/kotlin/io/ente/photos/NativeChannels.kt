@@ -12,6 +12,7 @@ object NativeChannels {
     fun register(context: Context, flutterEngine: FlutterEngine) {
         val messenger = flutterEngine.dartExecutor.binaryMessenger
         InstallSourceChannel(context.applicationContext).register(messenger)
+        MediaStoreChannel(context.applicationContext).register(messenger)
     }
 }
 
@@ -54,8 +55,8 @@ private class MediaStoreChannel(private val context: Context) {
     }
 
     private fun canManageMedia(): Boolean {
-        return MediaStore.canManageMedia(context)
-
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            MediaStore.canManageMedia(context)
     }
 
     private companion object {
