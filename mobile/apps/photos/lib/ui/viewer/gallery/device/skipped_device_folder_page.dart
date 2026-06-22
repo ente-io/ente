@@ -166,6 +166,7 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
     if (!mounted) {
       return;
     }
+    _selectedFiles.clearAll();
     setState(_refreshIgnoredState);
     await _syncSelectedBucket(popIfEmpty: true);
     unawaited(RemoteSyncService.instance.sync(silently: true));
