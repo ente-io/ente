@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
+import "package:photos/data/months.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/device_album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -185,7 +187,10 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
 
   List<Widget> _buildSectionWidgets(BuildContext context) {
     final widgets = <Widget>[];
-    for (final section in _sectionOrder) {
+    for (final section in _sectionOrderForQuery(
+      context,
+      SearchWidgetState.query,
+    )) {
       final results = _sectionedResults[section] ?? [];
       if (results.isEmpty) {
         continue;
@@ -268,15 +273,231 @@ enum _SearchResultsSection {
   moments,
 }
 
-const List<_SearchResultsSection> _sectionOrder = [
-  _SearchResultsSection.files,
+const List<_SearchResultsSection> _defaultSectionOrder = [
+  _SearchResultsSection.magic,
+  _SearchResultsSection.people,
+  _SearchResultsSection.locations,
   _SearchResultsSection.moments,
   _SearchResultsSection.albums,
-  _SearchResultsSection.locations,
-  _SearchResultsSection.people,
   _SearchResultsSection.shared,
-  _SearchResultsSection.magic,
+  _SearchResultsSection.files,
 ];
+
+const List<_SearchResultsSection> _fileIntentSectionOrder = [
+  _SearchResultsSection.files,
+  _SearchResultsSection.magic,
+  _SearchResultsSection.people,
+  _SearchResultsSection.locations,
+  _SearchResultsSection.moments,
+  _SearchResultsSection.albums,
+  _SearchResultsSection.shared,
+];
+
+const List<_SearchResultsSection> _momentIntentSectionOrder = [
+  _SearchResultsSection.moments,
+  _SearchResultsSection.magic,
+  _SearchResultsSection.people,
+  _SearchResultsSection.locations,
+  _SearchResultsSection.albums,
+  _SearchResultsSection.shared,
+  _SearchResultsSection.files,
+];
+
+const Set<String> _commonFileExtensions = {
+  "avi",
+  "gif",
+  "heic",
+  "heif",
+  "jpeg",
+  "jpg",
+  "m4v",
+  "mkv",
+  "mov",
+  "mp4",
+  "png",
+  "raw",
+  "tif",
+  "tiff",
+  "webp",
+};
+
+final _datePhraseTokenSeparator = RegExp(r"[\s,./-]+");
+final _numericDateTokenSeparator = RegExp(r"[\s/.-]+");
+final _explicitNumericDateSeparator = RegExp(r"[/.-]");
+final _ordinalDayPattern = RegExp(r"^(\d{1,2})(st|nd|rd|th)$");
+
+List<_SearchResultsSection> _sectionOrderForQuery(
+  BuildContext context,
+  String query,
+) {
+  final normalizedQuery = query.trim().toLowerCase();
+  if (_looksLikeFileQuery(context, normalizedQuery)) {
+    return _fileIntentSectionOrder;
+  }
+  if (_looksLikeMomentQuery(context, normalizedQuery)) {
+    return _momentIntentSectionOrder;
+  }
+  return _defaultSectionOrder;
+}
+
+bool _looksLikeFileQuery(BuildContext context, String query) {
+  if (query.isEmpty) {
+    return false;
+  }
+  if (query.startsWith(".") ||
+      query.startsWith("img_") ||
+      query.startsWith("pxl_") ||
+      query.startsWith("vid_") ||
+      query.startsWith("dsc")) {
+    return true;
+  }
+
+  if (_commonFileExtensions.contains(query)) {
+    return true;
+  }
+
+  if (query.length < 3) {
+    return false;
+  }
+  return FileType.values.any((fileType) {
+    final typeName = getHumanReadableString(context, fileType).toLowerCase();
+    return typeName.startsWith(query) ||
+        typeName.split(RegExp(r"\s+")).any((part) => part.startsWith(query));
+  });
+}
+
+bool _looksLikeMomentQuery(BuildContext context, String query) {
+  if (query.isEmpty) {
+    return false;
+  }
+  return _isYearQuery(query) ||
+      _isDateLikeQuery(query) ||
+      _isMonthDateQuery(context, query) ||
+      _isMonthQuery(context, query);
+}
+
+bool _isYearQuery(String query) {
+  final yearAsInt = int.tryParse(query);
+  return yearAsInt != null && yearAsInt <= currentYear;
+}
+
+bool _isDateLikeQuery(String query) {
+  final tokens = query
+      .split(_numericDateTokenSeparator)
+      .where((token) => token.isNotEmpty)
+      .toList();
+  if (tokens.length < 2 || tokens.length > 3) {
+    return false;
+  }
+  if (!tokens.every(_isNumericToken)) {
+    return false;
+  }
+  if (tokens.length == 2 &&
+      !_explicitNumericDateSeparator.hasMatch(query) &&
+      !_hasYearToken(tokens)) {
+    return false;
+  }
+  return _isPlausibleNumericDate(tokens);
+}
+
+bool _isMonthDateQuery(BuildContext context, String query) {
+  final tokens = query
+      .split(_datePhraseTokenSeparator)
+      .map(_normalizeDateToken)
+      .where((token) => token.isNotEmpty)
+      .toList();
+  if (tokens.length < 2 || tokens.length > 3) {
+    return false;
+  }
+
+  if (_isMonthToken(context, tokens.first)) {
+    if (tokens.length == 2) {
+      return _isDayToken(tokens[1]) || _isYearToken(tokens[1]);
+    }
+    return _isDayToken(tokens[1]) && _isYearToken(tokens[2]);
+  }
+
+  if (_isDayToken(tokens.first) && _isMonthToken(context, tokens[1])) {
+    if (tokens.length == 2) {
+      return true;
+    }
+    return _isYearToken(tokens[2]);
+  }
+
+  return false;
+}
+
+bool _isMonthQuery(BuildContext context, String query) {
+  if (query.length < 3) {
+    return false;
+  }
+  return getMonthData(
+    context,
+  ).any((monthData) => monthData.name.toLowerCase().startsWith(query));
+}
+
+String _normalizeDateToken(String token) {
+  final normalized = token.toLowerCase().trim();
+  final ordinalMatch = _ordinalDayPattern.firstMatch(normalized);
+  return ordinalMatch?.group(1) ?? normalized;
+}
+
+bool _isMonthToken(BuildContext context, String token) {
+  if (token.length < 3) {
+    return false;
+  }
+  return getMonthData(
+    context,
+  ).any((monthData) => monthData.name.toLowerCase().startsWith(token));
+}
+
+bool _isNumericToken(String token) {
+  return int.tryParse(token) != null;
+}
+
+bool _hasYearToken(List<String> tokens) {
+  return tokens.any(_isYearToken);
+}
+
+bool _isYearToken(String token) {
+  final year = int.tryParse(token);
+  if (year == null) {
+    return false;
+  }
+  return (token.length == 2 || token.length == 4) && year <= currentYear;
+}
+
+bool _isDayToken(String token) {
+  final day = int.tryParse(token);
+  return day != null && day >= 1 && day <= 31;
+}
+
+bool _isMonthNumber(String token) {
+  final month = int.tryParse(token);
+  return month != null && month >= 1 && month <= 12;
+}
+
+bool _isPlausibleNumericDate(List<String> tokens) {
+  if (tokens.length == 2) {
+    if (_isYearToken(tokens[0])) {
+      return _isMonthNumber(tokens[1]);
+    }
+    if (_isYearToken(tokens[1])) {
+      return _isMonthNumber(tokens[0]);
+    }
+    return (_isDayToken(tokens[0]) && _isMonthNumber(tokens[1])) ||
+        (_isMonthNumber(tokens[0]) && _isDayToken(tokens[1]));
+  }
+
+  if (_isYearToken(tokens[0]) && tokens[0].length == 4) {
+    return _isMonthNumber(tokens[1]) && _isDayToken(tokens[2]);
+  }
+  if (_isYearToken(tokens[2])) {
+    return (_isDayToken(tokens[0]) && _isMonthNumber(tokens[1])) ||
+        (_isMonthNumber(tokens[0]) && _isDayToken(tokens[1]));
+  }
+  return false;
+}
 
 _SearchResultsSection _sectionForResult(SearchResult result) {
   switch (result.type()) {
