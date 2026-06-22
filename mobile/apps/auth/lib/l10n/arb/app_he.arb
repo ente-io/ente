@@ -78,7 +78,6 @@
   "passwordForDecryptingExport": "סיסמא כדי לפענח יצוא",
   "passwordEmptyError": "הסיסמה אינה יכולה להיות ריקה",
   "importFromApp": "יבא קודים מ-{appName}",
-  "importGoogleAuthGuide": "יצא את החשבונות שלך מ-Google Authenticator לקוד QR תוך שימוש באפשרות \"Transfer Accounts\". אז, תוך שימוש במכשיר אחר, סרוק את הקוד QR.",
   "importSelectJsonFile": "בחר קובץ JSON",
   "importRaivoGuide": "השתמש באפוציה של \"Export OTPs to Zip archive\" בהגדרות של Raivo.",
   "importAegisGuide": "אנא השתמש באפשרות של \"ייצוא של הכספת\" בתוך ההגדרות של Aegis.",

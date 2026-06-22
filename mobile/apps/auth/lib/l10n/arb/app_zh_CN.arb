@@ -112,7 +112,6 @@
   "passwordEmptyError": "密码不能为空",
   "passwordTooShort": "密码长度必须至少为 8 个字符。",
   "importFromApp": "从 {appName} 导入代码",
-  "importGoogleAuthGuide": "使用“转移账户”选项将您的账户从 Google Authenticator 导出到二维码。然后使用另一台设备扫描二维码。\n\n提示：您可以使用笔记本电脑的摄像头拍摄二维码的照片。",
   "importSelectJsonFile": "选择 JSON 文件",
   "importSelectAppExport": "选择 {appName} 的导出文件",
   "importEnteEncGuide": "选择从 Ente 导出的 JSON 加密文件",
