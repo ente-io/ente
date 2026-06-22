@@ -3,5 +3,5 @@
 /images/*    /images/:splat    200
 /.well-known/*    /.well-known/:splat    200
 /robots.txt    /robots.txt    200
-/:token    /index.html    200
-/:token/    /index.html    200
+/:token    /    200
+/:token/    /    200
