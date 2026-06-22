@@ -220,6 +220,20 @@ class _CatalogHomeState extends State<CatalogHome> {
         previewBuilder: (_) => const _PopupMenuPreview(),
       ),
       CatalogSection(
+        title: 'Banner',
+        icon: HugeIcons.strokeRoundedAlertCircle,
+        components: const [
+          'Failure',
+          'Informative',
+          'Success',
+          'Warning',
+          'Neutral',
+          'Custom leading',
+          'Custom trailing',
+        ],
+        previewBuilder: (_) => const _BannerPreview(),
+      ),
+      CatalogSection(
         title: 'Buttons',
         icon: HugeIcons.strokeRoundedCursorPointer02,
         components: const ['Button', 'Icon button'],
@@ -1118,6 +1132,132 @@ class _TypeSample extends StatelessWidget {
         const SizedBox(height: Spacing.xs),
         Text(detail, style: TextStyles.mini.copyWith(color: colors.textLight)),
       ],
+    );
+  }
+}
+
+const _bannerPreviewSpecs = [
+  _BannerPreviewSpec(
+    state: BannerComponentState.failure,
+    title: 'Failure!',
+    subtitle: 'Some subtext that describes the failure',
+  ),
+  _BannerPreviewSpec(
+    state: BannerComponentState.informative,
+    title: 'Informative!',
+    subtitle: 'Some subtext that describes the info',
+  ),
+  _BannerPreviewSpec(
+    state: BannerComponentState.success,
+    title: 'Success!',
+    subtitle: 'Some subtext that describes the success',
+  ),
+  _BannerPreviewSpec(
+    state: BannerComponentState.warning,
+    title: 'Warning!',
+    subtitle: 'Some subtext that describes the warning',
+  ),
+  _BannerPreviewSpec(
+    state: BannerComponentState.neutral,
+    title: 'Neutral!',
+    subtitle: 'Some subtext that describes the neutral text',
+  ),
+];
+
+class _BannerPreviewSpec {
+  const _BannerPreviewSpec({
+    required this.state,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final BannerComponentState state;
+  final String title;
+  final String subtitle;
+}
+
+class _BannerPreview extends StatelessWidget {
+  const _BannerPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return _CatalogPreviewList(
+      children: [
+        _CatalogPreviewGroup(
+          title: 'States',
+          child: Column(
+            children: [
+              for (
+                var index = 0;
+                index < _bannerPreviewSpecs.length;
+                index++
+              ) ...[
+                _BannerStatePreview(spec: _bannerPreviewSpecs[index]),
+                if (index != _bannerPreviewSpecs.length - 1)
+                  const SizedBox(height: Spacing.md),
+              ],
+            ],
+          ),
+        ),
+        _CatalogPreviewGroup(
+          title: 'Custom leading',
+          child: BannerComponent(
+            title: 'Syncing backup',
+            subtitle: 'Preparing secure upload',
+            state: BannerComponentState.informative,
+            leadingWidget: const _BannerLoadingLeading(),
+            onTap: () {},
+          ),
+        ),
+        _CatalogPreviewGroup(
+          title: 'Custom trailing',
+          child: BannerComponent(
+            title: 'Dismissible info',
+            subtitle: 'Some subtext with a custom trailing icon',
+            state: BannerComponentState.informative,
+            trailingWidget: const _CatalogHugeIcon(
+              HugeIcons.strokeRoundedCancel01,
+              size: IconSizes.small,
+            ),
+            onTap: () {},
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BannerLoadingLeading extends StatelessWidget {
+  const _BannerLoadingLeading();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+
+    return SizedBox(
+      width: IconSizes.small,
+      height: IconSizes.small,
+      child: CircularProgressIndicator(color: colors.blue, strokeWidth: 2),
+    );
+  }
+}
+
+class _BannerStatePreview extends StatelessWidget {
+  const _BannerStatePreview({required this.spec});
+
+  final _BannerPreviewSpec spec;
+
+  @override
+  Widget build(BuildContext context) {
+    return BannerComponent(
+      title: spec.title,
+      subtitle: spec.subtitle,
+      state: spec.state,
+      onTap: () {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${spec.title} tapped')));
+      },
     );
   }
 }

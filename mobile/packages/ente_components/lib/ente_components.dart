@@ -1,5 +1,6 @@
 export 'components/app_bar_component.dart';
 export 'components/avatar_component.dart';
+export 'components/banner_component.dart';
 export 'components/bottom_sheet/bottom_sheet_component.dart';
 export 'components/bottom_sheet/error_bottom_sheet_component.dart';
 export 'components/buttons/button_component.dart';
