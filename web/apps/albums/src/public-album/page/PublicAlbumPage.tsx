@@ -137,6 +137,9 @@ const isDeviceLimitExceededError = async (e: unknown) =>
     isHTTPErrorWithStatus(e, 429) ||
     (await isMuseumHTTPError(e, 403, "LINK_DEVICE_LIMIT_EXCEEDED"));
 
+const accessTokenFromURL = (url: URL) =>
+    url.searchParams.get("t") || url.pathname.split("/").find(Boolean);
+
 export default function PublicAlbumPage() {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = useAlbumsAppContext();
@@ -266,6 +269,7 @@ export default function PublicAlbumPage() {
 
         isRedirectingToAlbumsAppRef.current = true;
 
+        albumsURL.pathname = currentURL.pathname;
         albumsURL.search = currentURL.search;
         albumsURL.hash = currentURL.hash;
 
@@ -282,7 +286,7 @@ export default function PublicAlbumPage() {
             let redirectingToWebsite = false;
             try {
                 const currentURL = new URL(window.location.href);
-                const t = currentURL.searchParams.get("t");
+                const accessToken = accessTokenFromURL(currentURL);
                 const [
                     { extractCollectionKeyFromShareURL },
                     {
@@ -296,19 +300,18 @@ export default function PublicAlbumPage() {
                     loadPublicAlbumsFDB(),
                 ]);
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
-                if (!t && !ck) {
+                if (!accessToken && !ck) {
                     // Only redirect to ente.com if this is not a self-hosted instance.
                     if (!isCustomAPIOrigin) {
                         window.location.href = "https://ente.com";
                         redirectingToWebsite = true;
                     }
                 }
-                if (!t || !ck) {
+                if (!accessToken || !ck) {
                     return;
                 }
                 collectionKey.current = ck;
                 const collection = await savedPublicCollectionByKey(ck);
-                const accessToken = t;
                 const currentAPIOrigin = await apiOrigin();
                 let accessTokenJWT: string | undefined;
                 const linkDeviceToken =
