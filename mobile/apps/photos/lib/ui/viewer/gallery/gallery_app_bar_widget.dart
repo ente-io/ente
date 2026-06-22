@@ -848,7 +848,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _menuOption(
           AlbumPopupAction.disableBackup,
           strings.disableBackup,
-          galleryAppBarMenuIcon(HugeIcons.strokeRoundedCloudUpload, iconColor),
+          galleryAppBarMenuIcon(HugeIcons.strokeRoundedUpload04, iconColor),
         ),
       if (galleryType == GalleryType.sharedPublicCollection &&
           (widget.collection?.isDownloadEnabledForPublicLink() ?? false))
