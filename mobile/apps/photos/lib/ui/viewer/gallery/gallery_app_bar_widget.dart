@@ -73,7 +73,10 @@ class GalleryAppBarWidget extends StatefulWidget {
     GalleryType type,
     String? title,
     SelectedFiles selectedFiles, {
+    String? subtitle,
     DeviceCollection? deviceCollection,
+    bool? isDeviceFolderBackedUp,
+    Future<void> Function()? onDisableDeviceFolderBackup,
     Collection? collection,
     List<EnteFile>? files,
   }) {
@@ -82,15 +85,22 @@ class GalleryAppBarWidget extends StatefulWidget {
         type,
         title,
         selectedFiles,
+        subtitle: subtitle,
         deviceCollection: deviceCollection,
+        isDeviceFolderBackedUp: isDeviceFolderBackedUp,
+        onDisableDeviceFolderBackup: onDisableDeviceFolderBackup,
         collection: collection,
         files: files,
       ),
-      geometryBuilder: _resolveSliverGeometry,
+      geometryBuilder: (context) =>
+          _resolveSliverGeometry(context, subtitle: subtitle),
     );
   }
 
-  static HeaderAppBarGeometry _resolveSliverGeometry(BuildContext context) {
+  static HeaderAppBarGeometry _resolveSliverGeometry(
+    BuildContext context, {
+    String? subtitle,
+  }) {
     final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
       context,
     );
@@ -101,7 +111,7 @@ class GalleryAppBarWidget extends StatefulWidget {
         : 0.0;
     return SliverAppBarComponent.resolveGeometry(
       context,
-      subtitle: null,
+      subtitle: subtitle,
       expandedHeight: _sliverExpandedHeight,
       collapsedHeight: toolbarHeight,
       titleBuilderHeight: null,
@@ -111,8 +121,11 @@ class GalleryAppBarWidget extends StatefulWidget {
 
   final GalleryType type;
   final String? title;
+  final String? subtitle;
   final SelectedFiles selectedFiles;
   final DeviceCollection? deviceCollection;
+  final bool? isDeviceFolderBackedUp;
+  final Future<void> Function()? onDisableDeviceFolderBackup;
   final Collection? collection;
   final List<EnteFile>? files;
 
@@ -120,7 +133,10 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.type,
     this.title,
     this.selectedFiles, {
+    this.subtitle,
     this.deviceCollection,
+    this.isDeviceFolderBackedUp,
+    this.onDisableDeviceFolderBackup,
     this.collection,
     this.files,
   });
@@ -142,6 +158,7 @@ enum AlbumPopupAction {
   sort,
   leave,
   freeUpSpace,
+  disableBackup,
   setCover,
   addPhotos,
   pinAlbum,
@@ -245,6 +262,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (!isHierarchicalSearchable) {
       return _GallerySliverAppBar(
         title: _appBarTitle,
+        subtitle: widget.subtitle,
         actions: _getDefaultActions(context),
       );
     }
@@ -262,6 +280,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       builder: (context, isSearching, child) {
         return _GallerySliverAppBar(
           title: _appBarTitle,
+          subtitle: widget.subtitle,
           actions: isSearching ? const [] : _getDefaultActions(context),
           bottom: child as PreferredSizeWidget,
         );
@@ -557,6 +576,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             setState(() {});
           } else if (value == AlbumPopupAction.freeUpSpace) {
             await _deleteBackedUpFiles(context);
+          } else if (value == AlbumPopupAction.disableBackup) {
+            await widget.onDisableDeviceFolderBackup!.call();
           } else if (value == AlbumPopupAction.setCover) {
             await setCoverPhoto(context);
           } else if (value == AlbumPopupAction.sort) {
@@ -636,6 +657,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         galleryType.canDelete() ||
         galleryType == GalleryType.sharedCollection ||
         (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum) ||
+        _canDisableDeviceFolderBackup ||
         (galleryType == GalleryType.sharedPublicCollection &&
             (widget.collection?.isDownloadEnabledForPublicLink() ?? false));
   }
@@ -818,8 +840,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum)
         _menuOption(
           AlbumPopupAction.freeUpSpace,
-          strings.freeUpDeviceSpace,
+          strings.freeUpSpace,
           galleryAppBarMenuIcon(HugeIcons.strokeRoundedClean, iconColor),
+        ),
+      if (_canDisableDeviceFolderBackup)
+        _menuOption(
+          AlbumPopupAction.disableBackup,
+          strings.disableBackup,
+          galleryAppBarMenuIcon(HugeIcons.strokeRoundedUpload01, iconColor),
         ),
       if (galleryType == GalleryType.sharedPublicCollection &&
           (widget.collection?.isDownloadEnabledForPublicLink() ?? false))
@@ -830,6 +858,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
     ];
   }
+
+  bool get _isDeviceFolderBackedUp =>
+      widget.isDeviceFolderBackedUp ??
+      widget.deviceCollection?.shouldBackup ??
+      false;
+
+  bool get _canDisableDeviceFolderBackup =>
+      galleryType == GalleryType.localFolder &&
+      _isDeviceFolderBackedUp &&
+      widget.onDisableDeviceFolderBackup != null;
 
   EntePopupMenuOption<AlbumPopupAction> _menuOption(
     AlbumPopupAction value,
@@ -1320,11 +1358,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 class _GallerySliverAppBar extends StatelessWidget {
   const _GallerySliverAppBar({
     required this.title,
+    this.subtitle,
     required this.actions,
     this.bottom,
   });
 
   final String title;
+  final String? subtitle;
   final List<Widget> actions;
   final PreferredSizeWidget? bottom;
 
@@ -1332,6 +1372,7 @@ class _GallerySliverAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverAppBarComponent(
       title: title,
+      subtitle: subtitle,
       actions: actions,
       bottom: bottom,
       expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,

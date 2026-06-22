@@ -89,8 +89,6 @@ class FlagService {
 
   bool get useNativeVideoEditor => true;
 
-  bool get resetSplitReason => internalUser;
-
   bool get facesTimeline => true;
   bool get ritualsFlag => true;
 
