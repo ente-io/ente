@@ -374,7 +374,13 @@ final RegExp _cameraFilenamePrefixRegex = RegExp(
   r"^(?:dsc(?:[_\d]|n|f)|\d{8}_)",
 );
 
-final RegExp _whitespaceRegex = RegExp(r"\s+");
+const Set<String> _fileTypeIntentAliases = {"photo", "video"};
+
+const List<FileType> _fileTypesForIntent = [
+  FileType.image,
+  FileType.video,
+  FileType.livePhoto,
+];
 
 List<_SearchResultsSection> _sectionOrderForQuery(
   BuildContext context,
@@ -406,10 +412,16 @@ bool _looksLikeFileQuery(BuildContext context, String query) {
   if (query.length < 3) {
     return false;
   }
-  return FileType.values.any((fileType) {
+  return _isFileTypeQuery(context, query);
+}
+
+bool _isFileTypeQuery(BuildContext context, String query) {
+  if (_fileTypeIntentAliases.contains(query)) {
+    return true;
+  }
+  return _fileTypesForIntent.any((fileType) {
     final typeName = getHumanReadableString(context, fileType).toLowerCase();
-    return typeName.startsWith(query) ||
-        typeName.split(_whitespaceRegex).any((part) => part.startsWith(query));
+    return typeName == query;
   });
 }
 
