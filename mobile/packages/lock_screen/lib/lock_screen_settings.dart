@@ -44,14 +44,17 @@ class LockScreenSettings {
   late SharedPreferences _preferences;
   late FlutterSecureStorage _secureStorage;
   bool _useLegacyHashFallback = false;
+  bool _hideAppContentDefault = false;
 
   Future<void> init(
     LockScreenHost config, {
     bool hasOptedForOfflineMode = false,
     bool useLegacyHashFallback = false,
+    bool hideAppContentDefault = false,
   }) async {
     _config = config;
     _useLegacyHashFallback = useLegacyHashFallback;
+    _hideAppContentDefault = hideAppContentDefault;
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
 
@@ -106,7 +109,7 @@ class LockScreenSettings {
   }
 
   bool getShouldHideAppContent() {
-    return _preferences.getBool(keyHideAppContent) ?? true;
+    return _preferences.getBool(keyHideAppContent) ?? _hideAppContentDefault;
   }
 
   Future<void> setAutoLockTime(Duration duration) async {

@@ -183,6 +183,7 @@ Future<void> _init(bool bool, {String? via}) async {
   await LockScreenSettings.instance.init(
     Configuration.instance,
     hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
+    hideAppContentDefault: true,
   );
   await LocalBackupService.instance.init(
     hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),

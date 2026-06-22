@@ -187,7 +187,10 @@ Future<void> _init(bool bool, {String? via}) async {
 
     await Network.instance.init(Configuration.instance);
     await UserService.instance.init(Configuration.instance, const HomePage());
-    await LockScreenSettings.instance.init(Configuration.instance);
+    await LockScreenSettings.instance.init(
+      Configuration.instance,
+      hideAppContentDefault: true,
+    );
     await CollectionApiClient.instance.init();
     await CollectionService.instance.init(preferences);
     await FavoritesService.instance.init();
