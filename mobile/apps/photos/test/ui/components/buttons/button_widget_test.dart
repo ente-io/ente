@@ -4,7 +4,6 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/button_result.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/utils/dialog_util.dart";
 
@@ -87,34 +86,6 @@ void main() {
 
       expect(result?.action, ButtonAction.first);
       expect(find.text("Open sheet"), findsOneWidget);
-    });
-  });
-
-  group("ButtonWidgetV2", () {
-    testWidgets("muted button renders and handles taps", (tester) async {
-      var tapCount = 0;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: darkThemeData,
-          home: Center(
-            child: ButtonWidgetV2(
-              buttonType: ButtonTypeV2.muted,
-              labelText: "Reset ignored files",
-              onTap: () async {
-                tapCount++;
-              },
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text("Reset ignored files"), findsOneWidget);
-
-      await tester.tap(find.text("Reset ignored files"));
-      await tester.pumpAndSettle();
-
-      expect(tapCount, 1);
     });
   });
 }

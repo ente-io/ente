@@ -188,7 +188,6 @@ class BackupHeaderWidget extends StatefulWidget {
 
 class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   final _logger = Logger("_BackupHeaderWidgetState");
-  late Future<List<EnteFile>> _filesInDeviceCollection;
   late Future<Set<IgnoredUploadReasonBucket>> _ignoredUploadBuckets;
 
   @override
@@ -279,11 +278,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   }
 
   void _refreshIgnoredState() {
-    _filesInDeviceCollection = _filesInDeviceCollectionFor(
-      widget.deviceCollection,
-    );
     _ignoredUploadBuckets = _ignoredUploadReasonBuckets(
-      _filesInDeviceCollection,
+      _filesInDeviceCollectionFor(widget.deviceCollection),
     );
   }
 }
@@ -430,10 +426,7 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
 
   Future<void> _updateBackupStatus(bool shouldBackup) async {
     final updated = await widget.onBackupChanged(shouldBackup);
-    if (!mounted) {
-      return;
-    }
-    if (!updated) {
+    if (!mounted || !updated) {
       return;
     }
     setState(() {
@@ -542,6 +535,9 @@ class SkippedFilesHeaderWidget extends StatelessWidget {
           return const SizedBox.shrink();
         }
         final effectiveSelectedBucket = selectedBucket ?? visibleBuckets.first;
+        final canResetIgnoredFiles = _canResetIgnoredFiles(
+          effectiveSelectedBucket,
+        );
         return Padding(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
           child: Column(
@@ -569,9 +565,8 @@ class SkippedFilesHeaderWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              if (_canResetIgnoredFiles(effectiveSelectedBucket))
-                const SizedBox(height: 20),
-              if (_canResetIgnoredFiles(effectiveSelectedBucket))
+              if (canResetIgnoredFiles) const SizedBox(height: 20),
+              if (canResetIgnoredFiles)
                 _ResetIgnoredFilesSection(
                   onResetIgnoredFiles: onResetIgnoredFiles,
                 ),
