@@ -37,7 +37,11 @@ export const encryptBox = async (
 ): Promise<EncryptedBox> => {
     const wasm = await loadWasmCore();
     const box = wasm.encryptBox(data, key);
-    return { encryptedData: box.encryptedData, nonce: box.nonce };
+    try {
+        return { encryptedData: box.encryptedData, nonce: box.nonce };
+    } finally {
+        box.free();
+    }
 };
 
 /**
