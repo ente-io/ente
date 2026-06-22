@@ -511,7 +511,7 @@
   "deleteFromDevice": "Delete from device",
   "deleteFromBoth": "Delete from both",
   "moreOptions": "More options",
-  "setAsDefault": "Set as default",
+  "setAsMyDefaultChoice": "Set as my default choice",
   "newAlbum": "New album",
   "albums": "Albums",
   "ente": "Ente",

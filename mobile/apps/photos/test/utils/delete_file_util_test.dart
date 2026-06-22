@@ -119,7 +119,14 @@ void main() {
           ButtonComponentVariant.secondary,
           ButtonComponentVariant.critical,
         ]);
-        expect(find.text('Set as default'), findsOneWidget);
+        expect(find.text('Set as my default choice'), findsOneWidget);
+        expect(
+          find.ancestor(
+            of: find.byType(LabeledControlComponent),
+            matching: find.byType(Center),
+          ),
+          findsOneWidget,
+        );
         expect(find.byTooltip('Close'), findsOneWidget);
         expect(find.text('Cancel'), findsNothing);
         _expectVisibleButtonsInOrder(tester, [

@@ -1218,21 +1218,24 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
           ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 48),
             child: _isMoreOptionsShown
-                ? LabeledControlComponent(
-                    control: CheckboxComponent(
-                      selected: _isSetAsDefaultSelected,
-                      onChanged: (value) {
+                ? Center(
+                    child: LabeledControlComponent(
+                      control: CheckboxComponent(
+                        selected: _isSetAsDefaultSelected,
+                        onChanged: (value) {
+                          setState(() {
+                            _isSetAsDefaultSelected = value;
+                          });
+                        },
+                      ),
+                      label: l10n.setAsMyDefaultChoice,
+                      foreground: context.componentColors.textLight,
+                      onTap: () {
                         setState(() {
-                          _isSetAsDefaultSelected = value;
+                          _isSetAsDefaultSelected = !_isSetAsDefaultSelected;
                         });
                       },
                     ),
-                    label: l10n.setAsDefault,
-                    onTap: () {
-                      setState(() {
-                        _isSetAsDefaultSelected = !_isSetAsDefaultSelected;
-                      });
-                    },
                   )
                 : _MoreOptionsButton(
                     onTap: () {
