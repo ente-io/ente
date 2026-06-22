@@ -101,7 +101,9 @@ Future<void> showSingleFileDeleteSheet(
       },
     ),
   );
-
+  if (isLocal) {
+    await showMediaManagementHintSheet(context);
+  }
   if (actionResult?.action != null &&
       actionResult!.action == ButtonAction.error) {
     await showGenericErrorDialog(

@@ -780,6 +780,62 @@ Future<bool> shouldProceedWithDeletion(BuildContext context) async {
   }
 }
 
+Future<void> showMediaManagementHintSheet(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  if (!Platform.isAndroid) {
+    return;
+  }
+  if (!await MediaStoreService.isMediaManagementSupported()) {
+    return;
+  }
+  if (await MediaStoreService.canManageMedia()) {
+    return;
+  }
+  if (localSettings.isMediaManagementHintDismissed) {
+    return;
+  }
+  await localSettings.incrementMediaManagementHintDeleteAttempts();
+  if (!localSettings.hasMediaManagementHintDeleteAttemptsReached()) {
+    return;
+  }
+  final shouldDismissHint = await showBottomSheetComponent<bool>(
+    context: context,
+    useRootNavigator: Platform.isIOS,
+    builder: (sheetContext) => BottomSheetComponent(
+      title: "Tired of confirming every delete?",
+      message:
+          "Turn on media management for Ente in settings, and the prompts stop.",
+      illustration: Image.asset("assets/ducky_smart_feature.png"),
+      closeTooltip: l10n.close,
+      closeResult: true,
+      actions: [
+        ButtonComponent(
+          label: l10n.openSettings,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            await MediaStoreService.openManageMediaSettings();
+            if (sheetContext.mounted) {
+              Navigator.of(sheetContext).pop(false);
+            }
+          },
+        ),
+        ButtonComponent(
+          label: l10n.skip,
+          variant: ButtonComponentVariant.secondary,
+          shouldSurfaceExecutionStates: false,
+          onTap: () {
+            Navigator.of(sheetContext).pop(true);
+          },
+        ),
+      ],
+    ),
+  );
+  if (shouldDismissHint == true) {
+    await localSettings.resetMediaManagementHintDeleteAttempts();
+    await localSettings.setMediaManagementHintDismissed();
+  }
+}
+
 Future<void> showDeleteSheet(
   BuildContext context,
   SelectedFiles selectedFiles,
@@ -826,6 +882,7 @@ Future<void> showDeleteSheet(
       showShortToast(context, l10n.noDeviceThatCanBeDeleted);
       return;
     }
+    ButtonResult? actionResult;
     if (Platform.isAndroid && await MediaStoreService.canManageMedia()) {
       final hasVideos = localGalleryDeletableFiles.any(
         (file) => file.fileType == FileType.video,
@@ -833,7 +890,7 @@ Future<void> showDeleteSheet(
       final hasPhotos = localGalleryDeletableFiles.any(
         (file) => file.fileType != FileType.video,
       );
-      await showBottomSheetComponent<ButtonResult>(
+      actionResult = await showBottomSheetComponent<ButtonResult>(
         context: context,
         useRootNavigator: Platform.isIOS,
         builder: (_) => DeleteConfirmationSheet(
@@ -856,7 +913,15 @@ Future<void> showDeleteSheet(
     } else {
       await deleteOnDeviceOnlyAction(context, localGalleryDeletableFiles);
     }
+    if (actionResult?.action == ButtonAction.error) {
+      await showGenericErrorDialog(
+        context: context,
+        error: actionResult!.exception,
+      );
+      return;
+    }
     selectedFiles.unSelectAll(localGalleryDeletableFiles.toSet());
+    await showMediaManagementHintSheet(context);
     return;
   }
   final hasRemoteFiles = deletableFiles.any((f) => f.isUploaded);
@@ -906,6 +971,9 @@ Future<void> showDeleteSheet(
       },
     ),
   );
+  if (hasLocalFiles) {
+    await showMediaManagementHintSheet(context);
+  }
   if (actionResult?.action != null &&
       actionResult!.action == ButtonAction.error) {
     await showGenericErrorDialog(

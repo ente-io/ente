@@ -108,6 +108,12 @@ class LocalSettings {
   static const _kAppMode = "ls.app_mode";
   static const _kShowLocalGalleryModeOption = "ls.show_offline_mode_option";
   static const _kDeletePreference = "delete_preference";
+  static const _kMediaManagementHintDeleteAttempts =
+      "media_management_hint_delete_attempts";
+  static const _kMediaManagementHintDismissedAt =
+      "media_management_hint_dismissed_at";
+  static const _kMediaManagementHintDismissDuration = Duration(days: 7);
+  static const _kMediaManagementHintDeleteAttemptThreshold = 3;
 
   static const _kWidgetHideTextFlags = "ls.widget_hide_text_flags";
 
@@ -622,6 +628,40 @@ class LocalSettings {
 
   Future<void> setLocalGallerySettingsBannerDismissed(bool value) =>
       _setFlag(LocalGalleryFlag.localGallerySettingsBannerDismissed, value);
+
+  int get _mediaManagementHintDeleteAttempts =>
+      _prefs.getInt(_kMediaManagementHintDeleteAttempts) ?? 0;
+
+  bool hasMediaManagementHintDeleteAttemptsReached() {
+    return _mediaManagementHintDeleteAttempts >=
+        _kMediaManagementHintDeleteAttemptThreshold;
+  }
+
+  bool get isMediaManagementHintDismissed {
+    final dismissedAtMs = _prefs.getInt(_kMediaManagementHintDismissedAt) ?? 0;
+    if (dismissedAtMs == 0) return false;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - dismissedAtMs;
+    return elapsed >= 0 &&
+        elapsed < _kMediaManagementHintDismissDuration.inMilliseconds;
+  }
+
+  Future<void> incrementMediaManagementHintDeleteAttempts() async {
+    await _prefs.setInt(
+      _kMediaManagementHintDeleteAttempts,
+      _mediaManagementHintDeleteAttempts + 1,
+    );
+  }
+
+  Future<void> resetMediaManagementHintDeleteAttempts() async {
+    await _prefs.setInt(_kMediaManagementHintDeleteAttempts, 0);
+  }
+
+  Future<void> setMediaManagementHintDismissed() async {
+    await _prefs.setInt(
+      _kMediaManagementHintDismissedAt,
+      DateTime.now().millisecondsSinceEpoch,
+    );
+  }
 
   DeletePreference? getDeletePreference() {
     if (!_prefs.containsKey(_kDeletePreference)) {
