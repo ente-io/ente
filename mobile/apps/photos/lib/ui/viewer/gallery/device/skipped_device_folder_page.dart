@@ -163,12 +163,12 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
     }
     final files = await _ignoredFilesForBucket(selectedBucket);
     await IgnoredFilesService.instance.removeIgnoredMappings(files);
-    await RemoteSyncService.instance.sync(silently: true);
     if (!mounted) {
       return;
     }
     setState(_refreshIgnoredState);
     await _syncSelectedBucket(popIfEmpty: true);
+    unawaited(RemoteSyncService.instance.sync(silently: true));
   }
 
   Future<void> _updateBackupStatus(bool shouldBackup) async {
