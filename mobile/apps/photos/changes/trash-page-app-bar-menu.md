@@ -1,0 +1,1 @@
+- Move the Trash page delete-all action into the app bar menu.

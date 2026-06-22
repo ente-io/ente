@@ -32,7 +32,6 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/files_service.dart";
 import "package:photos/states/location_screen_state.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
@@ -56,6 +55,7 @@ import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
+import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
@@ -168,6 +168,7 @@ enum AlbumPopupAction {
   downloadAlbum,
   sortByMostRecent,
   sortByMostRelevant,
+  emptyTrash,
   editLocation,
   deleteLocation,
   galleryGuestView,
@@ -626,6 +627,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             await onCleanUncategorizedClick(context);
           } else if (value == AlbumPopupAction.downloadAlbum) {
             await _downloadPublicAlbumToGallery(widget.files!);
+          } else if (value == AlbumPopupAction.emptyTrash) {
+            await emptyTrash(context);
           } else if (value == AlbumPopupAction.editLocation) {
             editLocation();
           } else if (value == AlbumPopupAction.deleteLocation) {
@@ -655,6 +658,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         (!isArchived && galleryType.canHide()) ||
         widget.collection != null ||
         galleryType.canDelete() ||
+        galleryType == GalleryType.trash ||
         galleryType == GalleryType.sharedCollection ||
         (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum) ||
         _canDisableDeviceFolderBackup ||
@@ -670,6 +674,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     required bool isArchived,
     required bool isHidden,
   }) async {
+    final warningColor = context.componentColors.warning;
     final canAutoAdd =
         hasGrantedMLConsent && (widget.collection?.canAutoAdd(userId) ?? false);
     final hasAutoAddPeople = canAutoAdd
@@ -736,8 +741,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _menuOption(
           AlbumPopupAction.deleteLocation,
           strings.deleteLocation,
-          galleryAppBarMenuIcon(HugeIcons.strokeRoundedDelete01, warning500),
-          labelColor: warning500,
+          galleryAppBarMenuIcon(HugeIcons.strokeRoundedDelete01, warningColor),
+          labelColor: warningColor,
         ),
       if (isArchived || (galleryType.canArchive() && !isHidden))
         _menuOption(
@@ -855,6 +860,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           AlbumPopupAction.downloadAlbum,
           strings.download,
           galleryAppBarMenuIcon(HugeIcons.strokeRoundedDownload01, iconColor),
+        ),
+      if (galleryType == GalleryType.trash)
+        _menuOption(
+          AlbumPopupAction.emptyTrash,
+          strings.deleteAll,
+          galleryAppBarMenuIcon(HugeIcons.strokeRoundedDelete01, warningColor),
+          labelColor: warningColor,
         ),
     ];
   }

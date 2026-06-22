@@ -535,9 +535,9 @@ void main() {
     );
     expect(
       tester.getCenter(find.byKey(const ValueKey('header-leading'))).dy,
-      closeTo(73, 1),
+      closeTo(81, 1),
     );
-    expect(tester.getCenter(find.byIcon(Icons.add)).dy, closeTo(73, 1));
+    expect(tester.getCenter(find.byIcon(Icons.add)).dy, closeTo(81, 1));
 
     await tester.tap(find.byKey(const ValueKey('header-leading')));
     await tester.pump();
@@ -775,7 +775,7 @@ void main() {
       expect(title.style?.fontSize, greaterThan(16));
       expect(title.style?.fontFamily, TextStyles.display2.fontFamily);
 
-      scrollController.jumpTo(58);
+      scrollController.jumpTo(74);
       await tester.pump();
 
       final collapsedTitle = tester.widget<Text>(find.text('Menu items'));
@@ -811,7 +811,7 @@ void main() {
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -40));
     await tester.pumpAndSettle();
 
-    expect(scrollController.offset, closeTo(58, 1));
+    expect(scrollController.offset, closeTo(74, 1));
     final collapsedTitle = tester.widget<Text>(find.text('Appearance'));
     expect(collapsedTitle.style?.fontSize, closeTo(20, 0.01));
     expect(collapsedTitle.style?.fontFamily, TextStyles.display3.fontFamily);
@@ -819,7 +819,7 @@ void main() {
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 32));
     await tester.pumpAndSettle();
-    expect(scrollController.offset, closeTo(58, 1));
+    expect(scrollController.offset, closeTo(74, 1));
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
     await tester.pumpAndSettle();
