@@ -20,11 +20,14 @@ CREATE TABLE IF NOT EXISTS public_file_tokens
 );
 
 
-CREATE OR REPLACE TRIGGER  update_public_file_tokens_updated_at
+DROP TRIGGER IF EXISTS update_public_file_tokens_updated_at
+ON public_file_tokens;
+
+CREATE TRIGGER update_public_file_tokens_updated_at
     BEFORE UPDATE
     ON public_file_tokens
     FOR EACH ROW
-EXECUTE PROCEDURE
+EXECUTE FUNCTION
     trigger_updated_at_microseconds_column();
 
 
