@@ -1517,10 +1517,6 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "مشترکہ",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
-  },
   "searchResultUploadedBy": "اپ لوڈ کنندہ",
   "@searchResultUploadedBy": {
     "description": "Search result subtitle label for uploader results"
@@ -1698,7 +1694,6 @@
   "nothingSharedWithYouYet": "ابھی تک آپ کے ساتھ کچھ شیئر نہیں کیا گیا",
   "noAlbumsSharedByYouYet": "ابھی تک آپ کے ذریعہ کوئی البم شیئر نہیں کیا گیا",
   "sharedWithYou": "آپ کے ساتھ شیئر کردہ",
-  "sharedByYou": "آپ کی طرف سے شیئر کردہ",
   "inviteYourFriendsToEnte": "اپنے دوستوں کو Ente پر مدعو کریں",
   "failedToDownloadVideo": "ویڈیو ڈاؤن لوڈ کرنے میں ناکام",
   "hiding": "چھپایا جا رہا ہے...",

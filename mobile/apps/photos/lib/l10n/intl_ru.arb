@@ -1309,10 +1309,6 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Общий",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
-  },
   "searchResultUploadedBy": "Загружено пользователем",
   "@searchResultUploadedBy": {
     "description": "Search result subtitle label for uploader results"
@@ -1483,7 +1479,6 @@
   "nothingSharedWithYouYet": "С вами пока ничем не поделились",
   "noAlbumsSharedByYouYet": "Вы пока не делились альбомами",
   "sharedWithYou": "Поделились с вами",
-  "sharedByYou": "Вы поделились",
   "inviteYourFriendsToEnte": "Пригласите друзей в Ente",
   "failedToDownloadVideo": "Не удалось скачать видео",
   "hiding": "Скрытие...",

@@ -1537,10 +1537,6 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Partagé",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
-  },
   "searchResultUploadedBy": "Déposé par",
   "@searchResultUploadedBy": {
     "description": "Search result subtitle label for uploader results"
@@ -1719,7 +1715,6 @@
   "nothingSharedWithYouYet": "Rien n'a encore été partagé avec vous",
   "noAlbumsSharedByYouYet": "Aucun album que vous avez partagé",
   "sharedWithYou": "Partagé avec vous",
-  "sharedByYou": "Partagé par vous",
   "inviteYourFriendsToEnte": "Invitez vos ami·e·s sur Ente",
   "failedToDownloadVideo": "Échec du téléchargement de la vidéo",
   "hiding": "Masquage en cours...",
