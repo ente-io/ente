@@ -98,7 +98,6 @@
   "passwordForDecryptingExport": "Kodeord til dekryptering af eksport",
   "passwordEmptyError": "Kodeordet kan ikke være tomt",
   "importFromApp": "Importer koder fra {appName}",
-  "importGoogleAuthGuide": "Eksporter dine konti fra Google Authenticator til en QR kode fra \"Transfer Accounts\".\n\nTip: Du kan bruge webkameraet på din bærbare computer til at tage et billede af QR koden.",
   "importSelectJsonFile": "Vælg JSON fil",
   "importSelectAppExport": "Vælg {appName} eksportfil",
   "importEnteEncGuide": "Vælg den krypterede JSON fil eksporteret fra Ente",

@@ -112,7 +112,6 @@
   "passwordEmptyError": "Пароль не може бути порожнім",
   "passwordTooShort": "Пароль має містити принаймні 8 символів.",
   "importFromApp": "Імпортувати коди з {appName}",
-  "importGoogleAuthGuide": "Експортуйте свої облікові записи з Google Authenticator у QR-код за допомогою опції «Перенести облікові записи». Потім за допомогою іншого пристрою зіскануйте QR-код.\n\nПорада: Ви можете сфотографувати QR-код за допомогою вебкамери свого ноутбука.",
   "importSelectJsonFile": "Обрати файл JSON",
   "importSelectAppExport": "Виберіть експортований файл {appName}",
   "importEnteEncGuide": "Виберіть зашифрований файл JSON, експортований з Ente",

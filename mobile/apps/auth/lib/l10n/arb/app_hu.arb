@@ -112,7 +112,9 @@
   "passwordEmptyError": "A jelszó nem lehet üres",
   "passwordTooShort": "A jelszónak legalább 8 karakterből kell állnia.",
   "importFromApp": "Kódok importálása a(z) {appName} alkalmazásból",
-  "importGoogleAuthGuide": "Exportáld fiókjaid a Google Hitelesítőből QR kód segítségével a „Kódok átvitele” lehetőség segítségével. Ezután egy másik eszközzel olvasd be a QR kódot.\n\nTipp: Laptopod webkamerája segítségével lefényképezheted a QR kódot.",
+  "importGoogleAuthGuide": "Exportáld a fiókjaidat a Google Authenticator appból egy QR-kódba a \"Kódok átivtele\" opcióval, majd olvasd le a QR kódot vagy importáld egy képből.",
+  "scannerTorchOn": "Zseblámpa bekapcsolása",
+  "scannerTorchOff": "Zseblámpa kikapcsolása",
   "importSelectJsonFile": "Válassza ki a JSON fájlt",
   "importSelectAppExport": "Válaszd ki az {appName} exportfájlt",
   "importEnteEncGuide": "Válassza ki az Ente-ből exportált titkosított JSON fájlt",
@@ -332,6 +334,16 @@
       }
     }
   },
+  "importGoogleAuthConfirmation": "{codeCount, plural, one{Importálsz 1 kódot a Google Authenticatorból?} other{Importálsz {codeCount} kódot a Google Authenticátorból?}}",
+  "@importGoogleAuthConfirmation": {
+    "placeholders": {
+      "codeCount": {
+        "description": "The number of Google Authenticator codes to import",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "sorry": "Bocsánat",
   "pendingSyncs": "Figyelmeztetés",
   "pendingSyncsWarningBody": "Néhány kódról nem készült biztonsági másolat.\n\nKérjük, győződj meg arról, hogy van biztonsági másolata ezekről a kódokról, mielőtt kijelentkezel.",
@@ -486,6 +498,9 @@
   "somethingWentWrongParsingCode": "Nem tudtunk elemezni {x} kódot.",
   "updateNotAvailable": "Nem érhető el frissítés",
   "viewRawCodes": "Nyers kódok megtekintése",
+  "parsingError": "Feldolgozási hiba",
+  "deleteUnparseableCodeTitle": "Törlöd a feldolgozhatatlan kódokat?",
+  "deleteUnparseableCodeMessage": "Ez véglegesen törli a kódot az Authból. Nem kerül a Kukába.",
   "rawCodes": "Nyers kód",
   "rawCodeData": "Nyers kód adatok",
   "appLock": "Alkalmazás zárolása",

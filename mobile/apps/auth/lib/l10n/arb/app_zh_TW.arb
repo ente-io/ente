@@ -112,7 +112,6 @@
   "passwordEmptyError": "密碼不能留白",
   "passwordTooShort": "密碼長度最少要8個字元。",
   "importFromApp": "從 {appName} 匯入驗證碼",
-  "importGoogleAuthGuide": "從 Google Authenticator 匯出您的帳號至 QR code，使用「轉移帳號」選項。然後使用另一台裝置掃描 QR code。\n\n提示：您可以使用筆電的視訊鏡頭拍攝 QR code的照片。",
   "importSelectJsonFile": "選擇 JSON 檔案",
   "importSelectAppExport": "選擇 {appName} 的匯出檔案",
   "importEnteEncGuide": "選擇從 Ente 匯出的 JSON 加密檔案",

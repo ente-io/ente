@@ -13,7 +13,7 @@
   "signUp": "Registrar",
   "onBoardingGetStarted": "Introdução",
   "setupFirstAccount": "Configure sua primeira\nconta",
-  "allTabEmptyHint": "Não há nada ainda. Clique em + para adicionar um código ou abrir a Lixeira para recuperar algum.",
+  "allTabEmptyHint": "Não há nada aqui. Clique em + para adicionar um código ou abra a Lixeira e recupere um.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
   },
@@ -112,7 +112,9 @@
   "passwordEmptyError": "A senha não pode estar vazia",
   "passwordTooShort": "A senha deve conter pelo menos 8 caracteres.",
   "importFromApp": "Importar códigos do {appName}",
-  "importGoogleAuthGuide": "Exporte suas contas do Google Authenticator para um QR code usando a opção \"Transferir Contas\". Então, usando outro dispositivo, escaneie o código.\n\nDica: Você pode usar a câmera do seu notebook para fotografar o QR code.",
+  "importGoogleAuthGuide": "Exporte suas contas do Google Authenticator para um QR Code usando a opção 'Transferir Contas'. Em seguida, escaneie o QR Code ou importe-o de uma imagem.",
+  "scannerTorchOn": "Ativar lanterna",
+  "scannerTorchOff": "Desativar lanterna",
   "importSelectJsonFile": "Selecionar arquivo JSON",
   "importSelectAppExport": "Selecione o arquivo de exportação do aplicativo {appName}",
   "importEnteEncGuide": "Selecione o arquivo JSON criptografado exportado do Ente",
@@ -123,7 +125,7 @@
   "importLastpassGuide": "Use a opção \"Transferir contas\" nas opções do LastPass Authenticator e pressione \"Exportar contas para arquivo\". Importe o arquivo JSON baixado.",
   "importProtonAuthGuide": "Use a opção \"Exportar\" nas opções do autenticador Proton para exportar seus códigos.\n\nSe sua exportação for protegida por senha, você precisará inserir a senha primeiro para descriptografá-la.",
   "invalidProtonExportTitle": "Exportação do Proton inválida",
-  "invalidProtonExportMessage": "O arquivo selecionado não é uma exportação válida do autenticador Proton.",
+  "invalidProtonExportMessage": "O arquivo selecionado não é uma exportação válida do Proton.",
   "exportCodes": "Exportar códigos",
   "importLabel": "Importar",
   "importInstruction": "Selecione um arquivo que contenha uma lista de códigos no formato a seguir",
@@ -329,6 +331,16 @@
         "description": "The number of codes imported",
         "type": "int",
         "example": "1"
+      }
+    }
+  },
+  "importGoogleAuthConfirmation": "{codeCount, plural, one{Importar 1 código do Google Authenticator?} other{Importar {codeCount} códigos do Google Authenticator?}}",
+  "@importGoogleAuthConfirmation": {
+    "placeholders": {
+      "codeCount": {
+        "description": "The number of Google Authenticator codes to import",
+        "type": "int",
+        "example": "2"
       }
     }
   },
@@ -548,7 +560,7 @@
   "localBackupSettingsTitle": "Backup local",
   "localBackupSidebarTitle": "Backup local",
   "enableAutomaticBackups": "Backups automáticos",
-  "backupDescription": "Isso fará um backup automático de seus dados para um dispositivo. Backups são atualizados assim que forem adicionadas, editadas ou excluídas",
+  "backupDescription": "Isso fará um backup automático de seus dados no dispositivo. Os backups são atualizados assim que entradas são adicionadas, editadas ou excluídas",
   "localBackupDailyManualCopy": "Cria um backup local por dia assim que você abrir o aplicativo. Clique em \"Fazer backup agora\" para salvar manualmente. Backups são retidos até 5 arquivos.",
   "currentLocation": "Local de backup atual:",
   "securityNotice": "Aviso de segurança",

@@ -111,7 +111,6 @@
   "passwordEmptyError": "パスワードは空欄にできません",
   "passwordTooShort": "パスワードは8文字以上でなければなりません。",
   "importFromApp": "{appName} からコードをインポート",
-  "importGoogleAuthGuide": "Google Authenticator の \"アカウントを転送\" オプションを使用してあなたのアカウントを QR コードにエクスポートしてください。その後、他のデバイスで QR コードを読み取ってください。\n\nヒント: ノートパソコンのウェブカメラを使用して QR コードを撮影することができます。",
   "importSelectJsonFile": "JSON ファイルを選択",
   "importSelectAppExport": "{appName} のエクスポートファイルを選択",
   "importEnteEncGuide": "Enteからエクスポートした暗号化されたJSONファイルを選択してください",
