@@ -1169,10 +1169,6 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Paylaşılıb",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
-  },
   "searchResultUploadedBy": "Yüklədi",
   "@searchResultUploadedBy": {
     "description": "Search result subtitle label for uploader results"
@@ -1339,7 +1335,6 @@
   "nothingSharedWithYouYet": "Hələlik sizinlə heç nə paylaşılmayıb",
   "noAlbumsSharedByYouYet": "Hələlik tərəfinizdən heç bir albom paylaşılmayıb",
   "sharedWithYou": "Sizinlə paylaşılanlar",
-  "sharedByYou": "Sizin paylaşdıqlarınız",
   "inviteYourFriendsToEnte": "Dostlarınızı Ente-yə dəvət edin",
   "failedToDownloadVideo": "Videonu yükləmək mümkün olmadı",
   "hiding": "Gizlədilir...",

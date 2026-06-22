@@ -699,7 +699,7 @@
   "addFamilyMember": "Adicionar membro da família",
   "addMember": "Adicionar membro",
   "inviteMembers": "Convidar membros",
-  "enterEmailAddresses": "Insira o endereço de e-mail deles. Eles precisam ter uma conta Ente.",
+  "enterEmailAddresses": "Insira o endereço de e-mail deles. Eles precisam de uma conta Ente.",
   "inviteLimitReached": "Você adicionou 5 convites. Remova um para adicionar outro",
   "emailAddress": "Endereço de e-mail",
   "sendInvites": "Enviar convite",
@@ -815,7 +815,7 @@
       }
     }
   },
-  "yourStorageIsLimitedTo": "Seu armazenamento é limitado para {limit}",
+  "yourStorageIsLimitedTo": "Seu armazenamento é limitado a {limit}",
   "@yourStorageIsLimitedTo": {
     "placeholders": {
       "limit": {
@@ -841,9 +841,9 @@
   "referrals": "Referências",
   "notifications": "Notificações",
   "sharedPhotoNotifications": "Novas fotos e álbuns compartilhados",
-  "sharedPhotoNotificationsExplanation": "Novas fotos e álbuns que você participa ou compartilhado com você",
+  "sharedPhotoNotificationsExplanation": "Novas fotos e álbuns que você faz parte ou compartilhados com você",
   "socialNotifications": "Curtidas e comentários",
-  "socialNotificationsExplanation": "Curtidas nas suas fotos e comentários em álbuns que você participa",
+  "socialNotificationsExplanation": "Curtidas nas fotos e comentários em álbuns que você faz parte",
   "advanced": "Avançado",
   "general": "Geral",
   "security": "Segurança",
@@ -873,8 +873,8 @@
   "reportBug": "Informar erro",
   "suggestFeatures": "Sugerir recurso",
   "support": "Suporte",
-  "helpAndSupport": "Ajuda & Suporte",
-  "browseHelpPages": "Navegar em páginas de ajuda",
+  "helpAndSupport": "Ajuda e suporte",
+  "browseHelpPages": "Explorar páginas de ajuda",
   "searchAndDiscovery": "Busca e descoberta",
   "searchAndDiscoveryDesc": "Rostos, locais, descrições e mais",
   "backupAndSync": "Backup e sincronização",
@@ -883,11 +883,11 @@
   "sharingAndCollaborationDesc": "Álbuns, links e planos familiares",
   "storageAndPlans": "Armazenamento e planos",
   "storageAndPlansDesc": "Planos, finanças e uso de armazenamento",
-  "troubleshooting": "Solução de problemas",
+  "troubleshooting": "Soluções",
   "troubleshootingDesc": "Problemas comuns e suas soluções",
   "viewAllHelpTopics": "Ver todos os tópicos de ajuda",
   "getInTouch": "Entrar em contato",
-  "reportAnIssue": "Denunciar um problema",
+  "reportAnIssue": "Informar erro",
   "askAQuestion": "Perguntar algo",
   "requestAFeature": "Solicitar recurso",
   "subject": "Sujeito",
@@ -1265,6 +1265,7 @@
   "photosAddedByYouWillBeRemovedFromTheAlbum": "Suas fotos adicionadas serão removidas do álbum",
   "youveNoFilesInThisAlbumThatCanBeDeleted": "Você não tem arquivos neste álbum que possam ser excluídos",
   "youDontHaveAnyArchivedItems": "Você não tem nenhum item arquivado.",
+  "deletedItemsStayHereForThirtyDays": "Itens excluídos ficam aqui por 30 dias",
   "ignoredFolderUploadReason": "Alguns arquivos neste álbum são ignorados do envio porque eles foram anteriormente excluídos do Ente.",
   "resetIgnoredFiles": "Redefinir arquivos ignorados",
   "deviceFilesAutoUploading": "Arquivos adicionados ao álbum do dispositivo serão automaticamente enviados para o Ente.",
@@ -1293,6 +1294,7 @@
   "searchByExamples": "• Nomes de álbuns (ex: \"Câmera\")\n• Tipos de arquivos (ex.: \"Vídeos\", \".gif\")\n• Anos e meses (ex.: \"2022\", \"Janeiro\")\n• Temporadas (ex.: \"Natal\")\n• Tags (ex.: \"#divertido\")",
   "youCanTrySearchingForADifferentQuery": "Você pode tentar buscar por outra consulta.",
   "noResultsFound": "Nenhum resultado encontrado",
+  "noMatchesFound": "Nenhum resultado encontrado!",
   "addedBy": "Adicionado por {emailOrName}",
   "loadingExifData": "Carregando dados EXIF...",
   "viewAllExifData": "Ver todos os dados EXIF",
@@ -1538,9 +1540,14 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Compartilhado",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
+  "shared": "Compartilhado",
+  "sharedAlbumsLabel": "Compartilhado",
+  "@sharedAlbumsLabel": {
+    "description": "Albums tab label for albums shared by you"
+  },
+  "receivedAlbumsLabel": "Recebido",
+  "@receivedAlbumsLabel": {
+    "description": "Albums tab filter label for albums received from other people"
   },
   "searchResultUploadedBy": "Enviado por",
   "@searchResultUploadedBy": {
@@ -1698,6 +1705,7 @@
   "enableMaps": "Ativar mapas",
   "links": "Vínculos",
   "noLinksYet": "Sem vínculos",
+  "activeLinksWillShowUpHere": "Links ativos aparecerão aqui",
   "quickLinks": "Links rápidos",
   "selectItemsToAdd": "Selecionar itens para adicionar",
   "addSelected": "Adicionar selecionado",
@@ -1720,7 +1728,6 @@
   "nothingSharedWithYouYet": "Nada compartilhado com você ainda",
   "noAlbumsSharedByYouYet": "Nenhum álbum compartilhado por você ainda",
   "sharedWithYou": "Compartilhado com você",
-  "sharedByYou": "Compartilhado por você",
   "inviteYourFriendsToEnte": "Convide seus amigos ao Ente",
   "failedToDownloadVideo": "Falhou ao baixar vídeo",
   "hiding": "Ocultando...",
@@ -2555,6 +2562,7 @@
   "addSomePhotosDesc1": "Adicione algumas fotos ou selecione ",
   "addSomePhotosDesc2": "rostos familiares",
   "addSomePhotosDesc3": "para iniciar com",
+  "startWithAddingPhotosOrFamiliarFaces": "Comece adicionando\nfotos ou rostos familiares",
   "ignorePerson": "Ignorar pessoa",
   "mixedGrouping": "Agrupamento mesclado?",
   "analysis": "Análise",

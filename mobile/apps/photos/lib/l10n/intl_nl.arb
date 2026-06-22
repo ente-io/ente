@@ -1356,10 +1356,6 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Gedeeld",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
-  },
   "searchResultUploadedBy": "Geüpload door",
   "@searchResultUploadedBy": {
     "description": "Search result subtitle label for uploader results"
@@ -1526,7 +1522,6 @@
   "nothingSharedWithYouYet": "Nog niets met je gedeeld",
   "noAlbumsSharedByYouYet": "Nog geen albums gedeeld door jou",
   "sharedWithYou": "Gedeeld met jou",
-  "sharedByYou": "Gedeeld door jou",
   "inviteYourFriendsToEnte": "Vrienden uitnodigen voor Ente",
   "failedToDownloadVideo": "Downloaden van video mislukt",
   "hiding": "Verbergen...",

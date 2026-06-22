@@ -1417,10 +1417,6 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Sdíleno",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
-  },
   "searchResultUploadedBy": "Nahráno uživatelem",
   "@searchResultUploadedBy": {
     "description": "Search result subtitle label for uploader results"
@@ -1596,7 +1592,6 @@
   "nothingSharedWithYouYet": "Zatím s Vámi nebylo nic sdíleno",
   "noAlbumsSharedByYouYet": "Zatím nemáte žádná sdílená alba",
   "sharedWithYou": "Sdíleno se mnou",
-  "sharedByYou": "Sdíleno mnou",
   "inviteYourFriendsToEnte": "Pozvěte své přátelé do Ente",
   "failedToDownloadVideo": "Stahování videa se nezdařilo",
   "hiding": "Skrývání...",
