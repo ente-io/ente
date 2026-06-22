@@ -25,7 +25,7 @@ const (
 	storageWarningFromName     = "Ente"
 	storageWarningFromEmail    = "support@ente.com"
 
-	storageWarningOverageThreshold             = int64(25 * (1 << 30))
+	storageWarningOverageThreshold             = uint64(25 * (1 << 30))
 	storageWarningPreviousStageFreshnessWindow = 35 * 24 * time.MicroSecondsInOneHour
 	storageWarningOneDayInMicroseconds         = 24 * time.MicroSecondsInOneHour
 	storageWarningBufferedCadenceExtraGrace    = 2 * storageWarningOneDayInMicroseconds

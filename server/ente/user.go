@@ -80,8 +80,8 @@ type KeyAttributes struct {
 	PublicKey                         string `json:"publicKey" binding:"required"`
 	EncryptedSecretKey                string `json:"encryptedSecretKey" binding:"required"`
 	SecretKeyDecryptionNonce          string `json:"secretKeyDecryptionNonce" binding:"required"`
-	MemLimit                          uint64 `json:"memLimit" binding:"required"`
-	OpsLimit                          uint64 `json:"opsLimit" binding:"required"`
+	MemLimit                          int    `json:"memLimit" binding:"required"`
+	OpsLimit                          int    `json:"opsLimit" binding:"required"`
 	MasterKeyEncryptedWithRecoveryKey string `json:"masterKeyEncryptedWithRecoveryKey"`
 	MasterKeyDecryptionNonce          string `json:"masterKeyDecryptionNonce"`
 	RecoveryKeyEncryptedWithMasterKey string `json:"recoveryKeyEncryptedWithMasterKey"`
@@ -114,8 +114,8 @@ type UpdateKeysRequest struct {
 	KEKSalt            string `json:"kekSalt" binding:"required"`
 	EncryptedKey       string `json:"encryptedKey" binding:"required"`
 	KeyDecryptionNonce string `json:"keyDecryptionNonce" binding:"required"`
-	MemLimit           uint64 `json:"memLimit" binding:"required"`
-	OpsLimit           uint64 `json:"opsLimit" binding:"required"`
+	MemLimit           int    `json:"memLimit" binding:"required"`
+	OpsLimit           int    `json:"opsLimit" binding:"required"`
 }
 
 func (u *UpdateKeysRequest) Validate() error {
