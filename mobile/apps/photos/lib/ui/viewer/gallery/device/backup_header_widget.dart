@@ -1,6 +1,10 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/device_collection.dart";
 import "package:photos/models/ignored_upload_reason.dart";
@@ -29,6 +33,7 @@ class BackupHeaderWidget extends StatefulWidget {
 
 class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   final _logger = Logger("_BackupHeaderWidgetState");
+  late final StreamSubscription<LocalPhotosUpdatedEvent> _localPhotosSub;
   Future<Set<IgnoredUploadReasonBucket>> _ignoredUploadBuckets = Future.value(
     const <IgnoredUploadReasonBucket>{},
   );
@@ -36,6 +41,12 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   @override
   void initState() {
     super.initState();
+    _localPhotosSub = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((_) {
+      if (!mounted || !widget.shouldBackup) {
+        return;
+      }
+      setState(_refreshIgnoredState);
+    });
     if (widget.shouldBackup) {
       _refreshIgnoredState();
     }
@@ -127,6 +138,12 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
     _ignoredUploadBuckets = ignoredUploadReasonBuckets(
       filesInDeviceCollectionFor(widget.deviceCollection),
     );
+  }
+
+  @override
+  void dispose() {
+    _localPhotosSub.cancel();
+    super.dispose();
   }
 }
 
