@@ -22,6 +22,7 @@ import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/device_folder_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
+import "package:photos/ui/viewer/search/search_query_utils.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 
 ///Not using StreamBuilder in this widget for rebuilding on every new event as
@@ -429,14 +430,9 @@ bool _looksLikeMomentQuery(BuildContext context, String query) {
   if (query.isEmpty) {
     return false;
   }
-  return _isYearQuery(query) ||
+  return isYearSearchQuery(query) ||
       _isParsedDateQuery(query) ||
       _isLocalizedMonthQuery(context, query);
-}
-
-bool _isYearQuery(String query) {
-  final yearAsInt = int.tryParse(query);
-  return yearAsInt != null && yearAsInt <= currentYear;
 }
 
 bool _isParsedDateQuery(String query) {
