@@ -1081,10 +1081,6 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Compartit",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
-  },
   "searchResultUploadedBy": "Pujat per",
   "@searchResultUploadedBy": {
     "description": "Search result subtitle label for uploader results"
@@ -1251,7 +1247,6 @@
   "nothingSharedWithYouYet": "Encara no s'ha compartit res amb tu",
   "noAlbumsSharedByYouYet": "Encara no has compartit cap àlbum",
   "sharedWithYou": "Compartit amb tu",
-  "sharedByYou": "Compartit per tu",
   "inviteYourFriendsToEnte": "Convida els teus amics a Ente",
   "failedToDownloadVideo": "No s'ha pogut descarregar el vídeo",
   "hiding": "Amagant...",

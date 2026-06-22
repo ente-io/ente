@@ -309,6 +309,7 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
   final _logger = Logger("_SkippedDeviceFolderPageState");
   final _selectedFiles = SelectedFiles();
   final _filterReloadController = StreamController<FilesUpdatedEvent>();
+  late final StreamSubscription<LocalPhotosUpdatedEvent> _localPhotosSub;
   late Future<List<EnteFile>> _filesInDeviceCollection;
   late Future<Set<IgnoredUploadReasonBucket>> _ignoredUploadBuckets;
   late bool _shouldBackup;
@@ -319,6 +320,13 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
     super.initState();
     _shouldBackup = widget.shouldBackup;
     _refreshIgnoredState();
+    _localPhotosSub = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(_refreshIgnoredState);
+      unawaited(_syncSelectedBucket(popIfEmpty: true));
+    });
     unawaited(_syncSelectedBucket(popIfEmpty: false));
   }
 
@@ -332,7 +340,7 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
     if (selectedBucket == null) {
       return FileLoadResult(const [], false);
     }
-    final files = await _filesInDeviceCollection;
+    final files = await _refreshFilesInDeviceCollection();
     final idToReasonMap =
         await IgnoredFilesService.instance.idToIgnoreReasonMap;
     return FileLoadResult(
@@ -364,7 +372,6 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
       key: ValueKey("skipped_device_folder:${widget.deviceCollection.id}"),
       appBar: appBar,
       asyncLoader: _loadFiles,
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [_filterReloadController.stream],
       removalEventTypes: const {
         EventType.deletedFromDevice,
@@ -489,12 +496,16 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
   }
 
   void _refreshIgnoredState() {
-    _filesInDeviceCollection = _filesInDeviceCollectionFor(
-      widget.deviceCollection,
-    );
+    _filesInDeviceCollection = _refreshFilesInDeviceCollection();
     _ignoredUploadBuckets = _ignoredUploadReasonBuckets(
       _filesInDeviceCollection,
     );
+  }
+
+  Future<List<EnteFile>> _refreshFilesInDeviceCollection() {
+    final files = _filesInDeviceCollectionFor(widget.deviceCollection);
+    _filesInDeviceCollection = files;
+    return files;
   }
 
   void _reloadSkippedFiles(String source) {
@@ -508,6 +519,7 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
 
   @override
   void dispose() {
+    _localPhotosSub.cancel();
     _filterReloadController.close();
     super.dispose();
   }

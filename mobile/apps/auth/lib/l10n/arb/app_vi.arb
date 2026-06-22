@@ -112,7 +112,6 @@
   "passwordEmptyError": "Mật khẩu không thể để trống",
   "passwordTooShort": "Mật khẩu tối thiểu 8 ký tự.",
   "importFromApp": "Nhập mã từ {appName}",
-  "importGoogleAuthGuide": "Xuất dữ liệu tài khoản Google Authenticator của bạn thành mã QR bằng tùy chọn \"Chuyển tài khoản\". Sau đó, dùng thiết bị khác quét mã QR.",
   "importSelectJsonFile": "Chọn tệp JSON",
   "importSelectAppExport": "Chọn tệp xuất từ {appName}",
   "importEnteEncGuide": "Chọn tệp JSON Ente đã mã hóa",

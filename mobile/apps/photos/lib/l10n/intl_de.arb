@@ -1265,6 +1265,7 @@
   "photosAddedByYouWillBeRemovedFromTheAlbum": "Von dir hinzugefügte Fotos werden vom Album entfernt",
   "youveNoFilesInThisAlbumThatCanBeDeleted": "Du hast keine Dateien in diesem Album, die gelöscht werden können",
   "youDontHaveAnyArchivedItems": "Du hast keine archivierten Elemente.",
+  "deletedItemsStayHereForThirtyDays": "Gelöschte Elemente bleiben hier für 30 Tage",
   "resetIgnoredFiles": "Ignorierte Dateien zurücksetzen",
   "noHiddenPhotosOrVideos": "Keine versteckten Fotos oder Videos",
   "toHideAPhotoOrVideo": "Foto oder Video verstecken",
@@ -1290,6 +1291,7 @@
   "searchByExamples": "• Albumnamen (z.B. \"Kamera\")\n• Dateitypen (z.B. \"Videos\", \".gif\")\n• Jahre und Monate (z.B. \"2022\", \"Januar\")\n• Feiertage (z.B. \"Weihnachten\")\n• Fotobeschreibungen (z.B. \"#fun\")",
   "youCanTrySearchingForADifferentQuery": "Sie können versuchen, nach einer anderen Abfrage suchen.",
   "noResultsFound": "Keine Ergebnisse gefunden",
+  "noMatchesFound": "Keine Treffer gefunden!",
   "addedBy": "Von {emailOrName} hinzugefügt",
   "loadingExifData": "Lade Exif-Daten...",
   "viewAllExifData": "Alle Exif-Daten anzeigen",
@@ -1535,9 +1537,14 @@
   "@searchResultPerson": {
     "description": "Search result subtitle label for person results"
   },
-  "searchResultShared": "Geteilt",
-  "@searchResultShared": {
-    "description": "Search result subtitle label for shared-with-you results"
+  "shared": "Geteilt",
+  "sharedAlbumsLabel": "Geteilt",
+  "@sharedAlbumsLabel": {
+    "description": "Albums tab label for albums shared by you"
+  },
+  "receivedAlbumsLabel": "Empfangen",
+  "@receivedAlbumsLabel": {
+    "description": "Albums tab filter label for albums received from other people"
   },
   "searchResultUploadedBy": "Hochgeladen von",
   "@searchResultUploadedBy": {
@@ -1695,6 +1702,7 @@
   "enableMaps": "Karten aktivieren",
   "links": "Links",
   "noLinksYet": "Noch keine Links",
+  "activeLinksWillShowUpHere": "Aktive Links werden hier angezeigt",
   "quickLinks": "Quick Links",
   "selectItemsToAdd": "Elemente zum Hinzufügen auswählen",
   "addSelected": "Auswahl hinzufügen",
@@ -1717,7 +1725,6 @@
   "nothingSharedWithYouYet": "Noch nichts mit Dir geteilt",
   "noAlbumsSharedByYouYet": "Noch keine Alben von dir geteilt",
   "sharedWithYou": "Mit dir geteilt",
-  "sharedByYou": "Von dir geteilt",
   "inviteYourFriendsToEnte": "Lade deine Freunde zu Ente ein",
   "failedToDownloadVideo": "Herunterladen des Videos fehlgeschlagen",
   "hiding": "Verstecken...",
@@ -2816,7 +2823,7 @@
   "poolDays": "Tage am Pool",
   "picnicDays": "Picknick-Erinnerungen",
   "campingMoments": "Momente am Lagerfeuer",
-  "babySmiles": "Baby-Lächeln",
+  "babySmiles": "Lächelnde Babys",
   "ritualsTitle": "Rituale",
   "ritualAddTooltip": "Ritual hinzufügen",
   "ritualActivityHeading": "Aktivität",

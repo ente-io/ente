@@ -100,7 +100,6 @@
   "passwordForDecryptingExport": "Kata sandi untuk mendekripsi ekspor",
   "passwordEmptyError": "Kata sandi tidak boleh kosong",
   "importFromApp": "Impor kode dari {appName}",
-  "importGoogleAuthGuide": "Ekspor akun Anda dari Google Authenticator ke kode QR menggunakan opsi \"Transfer Akun\". Kemudian, gunakan perangkat lain untuk memindai kode QR tersebut.\n\nTip: Anda bisa menggunakan webcam laptop Anda untuk memotret kode QR.",
   "importSelectJsonFile": "Pilih berkas JSON",
   "importSelectAppExport": "Pilih berkas eksporan dari {appName}",
   "importEnteEncGuide": "Pilih file enkripsi JSON yang telah diekspor dari Ente",

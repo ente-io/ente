@@ -1,8 +1,12 @@
-//! Crypto error types.
+//! The error type shared by the crypto module.
 
 use thiserror::Error;
 
-/// Errors that can occur during cryptographic operations.
+/// An error from a cryptographic operation.
+///
+/// Each variant is returned by the operations documented to produce it.
+/// [`code`](Self::code) maps a variant to a stable string identifier that
+/// bindings forward to non-Rust callers.
 #[derive(Error, Debug)]
 pub enum CryptoError {
     /// Base64 decoding failed.
@@ -121,6 +125,38 @@ pub enum CryptoError {
     /// IO error.
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+}
+
+impl CryptoError {
+    /// A stable, machine-readable identifier for this error, suitable for
+    /// programmatic matching (e.g. `"invalid_key_length"`).
+    pub fn code(&self) -> &'static str {
+        match self {
+            CryptoError::Base64Decode(_) => "base64_decode",
+            CryptoError::HexDecode(_) => "hex_decode",
+            CryptoError::InvalidKeyLength { .. } => "invalid_key_length",
+            CryptoError::InvalidNonceLength { .. } => "invalid_nonce_length",
+            CryptoError::InvalidSaltLength { .. } => "invalid_salt_length",
+            CryptoError::InvalidHeaderLength { .. } => "invalid_header_length",
+            CryptoError::CiphertextTooShort { .. } => "ciphertext_too_short",
+            CryptoError::InvalidKeyDerivationParams(_) => "invalid_kdf_params",
+            CryptoError::KeyDerivationFailed => "key_derivation_failed",
+            CryptoError::EncryptionFailed => "encryption_failed",
+            CryptoError::DecryptionFailed => "decryption_failed",
+            CryptoError::StreamInitFailed => "stream_init_failed",
+            CryptoError::StreamPushFailed => "stream_push_failed",
+            CryptoError::StreamPullFailed => "stream_pull_failed",
+            CryptoError::StreamTruncated => "stream_truncated",
+            CryptoError::StreamTrailingData => "stream_trailing_data",
+            CryptoError::SealedBoxOpenFailed => "sealed_box_open_failed",
+            CryptoError::InvalidPublicKey => "invalid_public_key",
+            CryptoError::Json(_) => "json",
+            CryptoError::Argon2(_) => "argon2",
+            CryptoError::Aead => "aead",
+            CryptoError::ArrayConversion => "array_conversion",
+            CryptoError::Io(_) => "io",
+        }
+    }
 }
 
 /// Result type for crypto operations.

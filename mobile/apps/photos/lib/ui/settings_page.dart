@@ -122,15 +122,6 @@ class _SettingsBody extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 8),
-              if (flagService.enableMultiCast)
-                _buildMenuItem(
-                  title: AppLocalizations.of(context).cast,
-                  icon: HugeIcons.strokeRoundedTv02,
-                  onTap: () async {
-                    await routeToPage(context, const CastSettingsPage());
-                  },
-                ),
-              if (flagService.enableMultiCast) const SizedBox(height: 8),
             ],
             // Privacy and personalization section
             _buildMenuItem(
@@ -438,6 +429,14 @@ class _SettingsBody extends StatelessWidget {
             await routeToPage(context, const VideoStreamingSettingsPage());
           },
         ),
+        if (flagService.enableMultiCast)
+          _buildMenuItem(
+            title: AppLocalizations.of(context).cast,
+            icon: HugeIcons.strokeRoundedTv02,
+            onTap: () async {
+              await routeToPage(context, const CastSettingsPage());
+            },
+          ),
         _buildMapsMenuItem(context),
       ],
     );

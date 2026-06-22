@@ -100,7 +100,6 @@
   "passwordForDecryptingExport": "گذرواژه برای رمزگشایی ورودی",
   "passwordEmptyError": "گذرواژه نمی‌تواند خالی باشد",
   "importFromApp": "وارد کردن کد ها از {appName}",
-  "importGoogleAuthGuide": "حساب‌های خود را از Google Authenticator با استفاده از گزینه «انتقال حساب‌ها» به یک کد QR صادر کنید. سپس با استفاده از دستگاه دیگری، کد QR را بررسی کنید.\n\nنکته: می‌توانید از دوربین لپ‌تاپ خود برای گرفتن تصویر از کد QR استفاده کنید.",
   "importSelectJsonFile": "انتخاب کنید فایل JSON",
   "importSelectAppExport": "انتخاب فایل وارد کردن {appName}",
   "importEnteEncGuide": "انتخاب فایل JSON رمزگذاری شده از Ente",

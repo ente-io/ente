@@ -141,7 +141,6 @@ BackupPreferenceService? _backupPreferenceService;
 BackupPreferenceService get backupPreferenceService {
   _backupPreferenceService ??= BackupPreferenceService(
     ServiceLocator.instance.prefs,
-    flagService,
   );
   return _backupPreferenceService!;
 }

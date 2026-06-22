@@ -67,6 +67,9 @@ class LocalSyncService {
       _permissionGrantedSubscription = Bus.instance
           .on<PermissionGrantedEvent>()
           .listen((event) async {
+            if (!permissionService.hasGrantedPermissions()) {
+              return;
+            }
             _registerChangeCallback();
             if (isLocalGalleryMode) {
               // Local gallery onboarding grants permission without explicitly
@@ -93,6 +96,7 @@ class LocalSyncService {
         return;
       }
     }
+    _registerChangeCallback();
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
       return _existingSync!.future;

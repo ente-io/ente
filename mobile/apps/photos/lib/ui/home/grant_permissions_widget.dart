@@ -35,7 +35,6 @@ class GrantPermissionsWidget extends StatefulWidget {
 
 class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   final Logger _logger = Logger("_GrantPermissionsWidgetState");
-  final bool _showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
   final Debouncer _onlyNewActionDebouncer = Debouncer(
     const Duration(milliseconds: 500),
     leading: true,
@@ -85,11 +84,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                 padding: const EdgeInsets.only(top: 36, bottom: 20),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _showOnlyNewFeature
-                        ? _buildNewFeatureActionArea(context)
-                        : _buildDefaultActionArea(context),
-                  ],
+                  children: [_buildNewFeatureActionArea(context)],
                 ),
               ),
             ),
@@ -206,11 +201,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Future<void> _onTapSkip() async {
     await backupPreferenceService.setOnboardingPermissionSkipped(true);
-    final state = await permissionService.getPermissionState();
-    if (state == PermissionState.authorized ||
-        state == PermissionState.limited) {
-      await permissionService.onUpdatePermission(state);
-    }
     SyncService.instance.sync().ignore();
     if (mounted) {
       setState(() {});
@@ -291,19 +281,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
             shouldSurfaceExecutionStates: false,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDefaultActionArea(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ButtonWidgetV2(
-        key: const ValueKey("grantPermissionButton"),
-        buttonType: ButtonTypeV2.primary,
-        labelText: AppLocalizations.of(context).continueLabel,
-        onTap: _onTapSelectFolders,
-        shouldSurfaceExecutionStates: false,
       ),
     );
   }

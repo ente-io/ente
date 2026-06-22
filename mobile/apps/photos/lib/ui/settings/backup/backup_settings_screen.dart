@@ -59,10 +59,8 @@ class BackupSettingsScreen extends StatelessWidget {
             }
           },
         ),
-        if (flagService.enableOnlyBackupFuturePhotos) ...[
-          const SizedBox(height: 8),
-          _BackupOnlyNewPhotosToggle(debouncer: _onlyNewToggleDebouncer),
-        ],
+        const SizedBox(height: 8),
+        _BackupOnlyNewPhotosToggle(debouncer: _onlyNewToggleDebouncer),
         if (flagService.enableMobMultiPart) ...[
           const SizedBox(height: 8),
           _toggleItem(
