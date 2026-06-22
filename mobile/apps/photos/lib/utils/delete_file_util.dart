@@ -22,6 +22,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/files_split.dart";
 import "package:photos/models/freeable_space_info.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/models/typedefs.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/media_store_service.dart";
@@ -821,17 +822,20 @@ Future<void> showDeleteSheet(
       );
       return;
     }
-    if (await MediaStoreService.canManageMedia()) {
+    if (Platform.isAndroid && await MediaStoreService.canManageMedia()) {
       await showBottomSheetComponent<ButtonResult>(
         context: context,
         useRootNavigator: Platform.isIOS,
-        builder: (_) => _SingleDeleteConfirmationSheet(
-          files: localGalleryDeletableFiles,
-          isRemoteOnly: false,
-          deleteFromRemoteOnlyAction: (context, files) async {
-            throw AssertionError("delete from remote in local gallery mode");
-          },
-          deleteOnDeviceOnlyAction: deleteOnDeviceOnlyAction,
+        builder: (_) => DeleteConfirmationSheet(
+          fileType: file.fileType,
+          isLocal: true,
+          isRemote: false,
+          onDeleteFromLocal: () async {
+            final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
+            if (deletedFiles.isNotEmpty &&
+                ((isLocal && !isRemote) || isLocalOnlyContext)) {
+              onFileRemoved?.call(file);
+            }
         ),
       );
     } else {
@@ -854,7 +858,7 @@ Future<void> showDeleteSheet(
     final actionResult = await showBottomSheetComponent<ButtonResult>(
       context: context,
       useRootNavigator: Platform.isIOS,
-      builder: (_) => _MixedDeletePreferenceSheet(
+      builder: (_) => DeleteConfirmationSheet(
         files: deletableFiles,
         deleteFromRemoteOnlyAction: deleteFromRemoteOnlyAction,
         deleteOnDeviceOnlyAction: deleteOnDeviceOnlyAction,
@@ -880,7 +884,7 @@ Future<void> showDeleteSheet(
   final actionResult = await showBottomSheetComponent<ButtonResult>(
     context: context,
     useRootNavigator: Platform.isIOS,
-    builder: (_) => _SingleDeleteConfirmationSheet(
+    builder: (_) => SingleDeleteConfirmationSheet(
       files: deletableFiles,
       isRemoteOnly: isRemoteOnly,
       deleteFromRemoteOnlyAction: deleteFromRemoteOnlyAction,
@@ -898,8 +902,9 @@ Future<void> showDeleteSheet(
   }
 }
 
-class _SingleDeleteConfirmationSheet extends StatelessWidget {
-  const _SingleDeleteConfirmationSheet({
+class SingleDeleteConfirmationSheet extends StatelessWidget {
+  const SingleDeleteConfirmationSheet({
+    super.key,
     required this.files,
     required this.isRemoteOnly,
     required this.deleteFromRemoteOnlyAction,
@@ -1165,4 +1170,180 @@ Future<void> _runDeleteAction(
 
 Exception _toException(Object error) {
   return error is Exception ? error : Exception(error.toString());
+}
+
+class DeleteConfirmationSheet extends StatefulWidget {
+  final FileType fileType;
+  final bool isLocal;
+  final bool isRemote;
+  final FutureVoidCallback onDeleteFromLocal;
+  final FutureVoidCallback onDeleteFromRemote;
+  final FutureVoidCallback onDeleteFromBoth;
+
+  const DeleteConfirmationSheet({
+    super.key,
+    required this.fileType,
+    required this.isLocal,
+    required this.isRemote,
+    required this.onDeleteFromLocal,
+    required this.onDeleteFromRemote,
+    required this.onDeleteFromBoth,
+  });
+
+  @override
+  State<StatefulWidget> createState() {
+    return DeleteConfirmationSheetState();
+  }
+}
+
+class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
+  var _isMoreOptionsShown = false;
+  var _isSetAsDefaultSelected = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final deletePreference = (widget.isLocal && !widget.isRemote)
+        ? DeletePreference.DeleteFromLocalOnly
+        : (widget.isRemote && !widget.isLocal)
+        ? DeletePreference.DeleteFromRemoteOnly
+        : localSettings.getDeletePreference() ??
+              DeletePreference.DeleteFromBoth;
+    final String fileType = widget.fileType == FileType.video
+        ? l10n.videoSmallCase
+        : l10n.photoSmallCase;
+    late final String content;
+    if (widget.isLocal && widget.isRemote) {
+      content =
+          l10n.singleFileInBothLocalAndRemote(fileType: fileType) +
+          "\n" +
+          l10n.singleFileDeleteHighlight;
+    } else if (widget.isRemote) {
+      content =
+          l10n.singleFileInRemoteOnly(fileType: fileType) +
+          "\n" +
+          l10n.singleFileDeleteHighlight;
+    } else if (widget.isLocal) {
+      content = l10n.singleFileDeleteFromDevice(fileType: fileType);
+    } else {
+      throw AssertionError("Unexpected state");
+    }
+
+    void onDelete() async {
+      try {
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+      } catch (error) {
+        if (context.mounted) {
+          Navigator.of(
+            context,
+          ).pop(ButtonResult(ButtonAction.error, _toException(error)));
+        }
+        rethrow;
+      }
+    }
+
+    return BottomSheetComponent(
+      title: l10n.deleteFileQuestion(fileType: fileType),
+      illustration: Image.asset("assets/warning-red.png"),
+      closeTooltip: l10n.close,
+      content: Text(
+        content,
+        textAlign: TextAlign.center,
+        style: TextStyles.body.copyWith(
+          color: context.componentColors.textLight,
+        ),
+      ),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      contentSpacing: Spacing.sm,
+      actionsTopSpacing: Spacing.xxl,
+      actions: [
+        if (_isMoreOptionsShown) ...[
+          ButtonComponent(
+            label: l10n.deleteFromDevice,
+            variant: ButtonComponentVariant.secondary,
+            onTap: () async {
+              if (_isSetAsDefaultSelected) {
+                await localSettings.setDeletePreference(.DeleteFromLocalOnly);
+              }
+              await widget.onDeleteFromLocal();
+              onDelete();
+            },
+          ),
+          ButtonComponent(
+            label: l10n.deleteFromEnte,
+            variant: ButtonComponentVariant.secondary,
+            onTap: () async {
+              if (_isSetAsDefaultSelected) {
+                await localSettings.setDeletePreference(.DeleteFromRemoteOnly);
+              }
+              await widget.onDeleteFromRemote();
+              onDelete();
+            },
+          ),
+          ButtonComponent(
+            label: l10n.deleteFromBoth,
+            variant: ButtonComponentVariant.critical,
+            onTap: () async {
+              if (_isSetAsDefaultSelected) {
+                await localSettings.setDeletePreference(.DeleteFromBoth);
+              }
+              await widget.onDeleteFromBoth();
+              onDelete();
+            },
+          ),
+        ] else ...[
+          ButtonComponent(
+            key: const ValueKey('DeleteConfirmationSheet.default'),
+            label: switch (deletePreference) {
+              DeletePreference.DeleteFromRemoteOnly => l10n.deleteFromEnte,
+              DeletePreference.DeleteFromLocalOnly => l10n.deleteFromDevice,
+              DeletePreference.DeleteFromBoth => l10n.deleteFromBoth,
+            },
+            variant: ButtonComponentVariant.critical,
+            onTap: () async {
+              switch (deletePreference) {
+                case DeletePreference.DeleteFromRemoteOnly:
+                  await widget.onDeleteFromRemote();
+                case DeletePreference.DeleteFromLocalOnly:
+                  await widget.onDeleteFromLocal();
+                case DeletePreference.DeleteFromBoth:
+                  await widget.onDeleteFromBoth();
+              }
+              onDelete();
+            },
+          ),
+        ],
+        if (widget.isLocal && widget.isRemote)
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: _isMoreOptionsShown
+                ? LabeledControlComponent(
+                    control: CheckboxComponent(
+                      selected: _isSetAsDefaultSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          _isSetAsDefaultSelected = value;
+                        });
+                      },
+                    ),
+                    label: l10n.setAsDefault,
+                    onTap: () {
+                      setState(() {
+                        _isSetAsDefaultSelected = !_isSetAsDefaultSelected;
+                      });
+                    },
+                  )
+                : MoreOptionsButton(
+                    onTap: () {
+                      setState(() {
+                        _isMoreOptionsShown = true;
+                      });
+                    },
+                  ),
+          ),
+      ],
+    );
+  }
 }

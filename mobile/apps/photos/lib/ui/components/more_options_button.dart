@@ -1,14 +1,10 @@
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
+import "package:photos/generated/intl/app_localizations.dart";
 
 class MoreOptionsButton extends StatefulWidget {
-  const MoreOptionsButton({
-    super.key,
-    required this.label,
-    required this.onTap,
-  });
+  const MoreOptionsButton({super.key, required this.onTap});
 
-  final String label;
   final VoidCallback onTap;
 
   @override
@@ -21,6 +17,7 @@ class _MoreOptionsButtonState extends State<MoreOptionsButton> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final foreground = context.componentColors.textLight;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -37,7 +34,7 @@ class _MoreOptionsButtonState extends State<MoreOptionsButton> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              widget.label,
+              l10n.moreOptions,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
               style: TextStyles.body.copyWith(color: foreground),

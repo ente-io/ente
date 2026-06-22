@@ -30,6 +30,7 @@ private class InstallSourceChannel(context: Context) {
                 call.argument<Boolean>("isSignUp") == true,
                 result,
             )
+
             "getPendingEvents" -> provider.getPendingEvents(result)
             "markEventSent" -> provider.markEventSent(call.argument("event"), result)
             else -> result.notImplemented()
@@ -54,8 +55,8 @@ private class MediaStoreChannel(private val context: Context) {
     }
 
     private fun canManageMedia(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            MediaStore.canManageMedia(context)
+        return MediaStore.canManageMedia(context)
+
     }
 
     private companion object {
