@@ -105,7 +105,7 @@ impl fmt::Debug for DerivedKey {
 /// `params` fall below the accepted minimum or memory is not a multiple of 1024
 /// bytes.
 ///
-/// Wire-compatible with libsodium's `crypto_pwhash` using
+/// Produces the same key as libsodium's `crypto_pwhash` with
 /// `crypto_pwhash_ALG_ARGON2ID13`.
 pub fn derive_key(password: &str, salt: &Salt, params: Params) -> Result<Key> {
     derive_key_impl(password.as_bytes(), salt, params)

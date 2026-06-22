@@ -2,8 +2,8 @@
 //!
 //! A blob is one secretstream message: the data is encrypted and authenticated
 //! in a single shot, without the chunking that [`stream`](super::stream) applies
-//! to large file contents. Use it for the small, bounded values attached to an
-//! Ente object, such as file or collection metadata.
+//! to large file contents. Ente uses it for the small, bounded values attached
+//! to an object, such as file or collection metadata.
 //! ([`secretbox`](super::secretbox) fills the same single-value role for data
 //! not tied to an object.)
 //!
@@ -104,10 +104,21 @@ pub fn decrypt(data: &[u8], header: &Header, key: &Key) -> Result<Vec<u8>> {
     Ok(plaintext)
 }
 
-/// Decrypt a blob that may not carry the secretstream final tag.
+/// Decrypt a blob that might be missing the secretstream final tag.
 ///
-/// Prefer [`decrypt`]. This exists as a migration fallback for older data
-/// written without the final tag; it skips the truncation check.
+/// Same as [`decrypt`], but it doesn't require the final tag, so it can't tell
+/// whether the blob was cut short. The MAC still guarantees that whatever it
+/// returns wasn't tampered with. Use this only to read old data written without
+/// the tag; use [`decrypt`] everywhere else.
+///
+/// Affected blobs: Auth's authenticator entities, pre Nov-2025. Locker also
+/// briefly did this, but only in internal builds pre-launch; no public Locker
+/// release was affected.
+///
+/// # Errors
+///
+/// Same as [`decrypt`], except it never returns
+/// [`StreamTruncated`](CryptoError::StreamTruncated).
 pub fn decrypt_legacy(data: &[u8], header: &Header, key: &Key) -> Result<Vec<u8>> {
     Ok(decrypt_impl(data, header, key)?.0)
 }

@@ -497,10 +497,9 @@ impl<R: Read> StreamingDecryptor<R> {
 /// Encrypt everything from `reader` to `writer`, returning the decryption
 /// header.
 ///
-/// The header is not written to the writer; it travels separately (for
-/// instance, in the file's server-side metadata). The ciphertext is the chunk
-/// stream described at the module level, byte-for-byte the same as a
-/// [`StreamingEncryptor`] produces; predict its size with
+/// The header is not written to the `writer` but is returned; store or send
+/// it separately (for instance, in the file's server-side metadata). Only the
+/// encrypted chunks are written, and you can predict their total length with
 /// [`estimate_encrypted_size`].
 ///
 /// Reuses buffers and encrypts in place, so memory stays bounded to about twice

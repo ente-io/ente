@@ -1,4 +1,4 @@
-//! Cryptographic utilities for Ente.
+//! Cryptographic primitives for Ente.
 //!
 //! This module provides all the cryptographic primitives used by Ente clients.
 //!

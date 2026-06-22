@@ -2,9 +2,9 @@
 //!
 //! SecretBox encrypts and authenticates a single, self-contained value under a
 //! 256-bit key. It suits small, independent pieces of data such as a wrapped
-//! key or a short field. For data attached to an Ente object (file or
-//! collection metadata and the like) prefer [`blob`](super::blob), and for file
-//! contents, which are encrypted in chunks, use [`stream`](super::stream).
+//! key or a short field. Ente uses [`blob`](super::blob) for data attached to
+//! an object (file or collection metadata and the like), and
+//! [`stream`](super::stream) for file contents, which are encrypted in chunks.
 //!
 //! The name comes from libsodium, which exposes this same construction as
 //! `crypto_secretbox`; the implementation here is pure Rust but wire-compatible

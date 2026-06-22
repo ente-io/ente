@@ -8,8 +8,8 @@
 //! Unlike [`argon`](super::argon), the input must already be high-entropy (a
 //! key, not a password): this is fast keyed hashing, not password stretching.
 //!
-//! The construction is libsodium's `crypto_kdf_derive_from_key`; the
-//! implementation here is pure Rust but wire-compatible.
+//! The construction is libsodium's `crypto_kdf_derive_from_key`; this pure-Rust
+//! implementation derives the same subkeys.
 
 use blake2b_simd::Params as Blake2bParams;
 
@@ -56,7 +56,7 @@ pub const LOGIN_SUBKEY_CONTEXT: &[u8; CONTEXT_BYTES] = b"loginctx";
 /// Returns [`InvalidKeyLength`](crate::crypto::CryptoError::InvalidKeyLength) if
 /// `subkey_len` is outside 16 to 64 bytes.
 ///
-/// Wire-compatible with libsodium's `crypto_kdf_derive_from_key`.
+/// Produces the same subkey as libsodium's `crypto_kdf_derive_from_key`.
 pub fn derive_subkey(
     key: &Key,
     subkey_len: usize,

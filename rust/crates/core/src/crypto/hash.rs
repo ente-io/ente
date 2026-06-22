@@ -6,7 +6,7 @@
 //! ([`HashState`]), or straight from a reader ([`hash_reader`]).
 //!
 //! The construction is libsodium's `crypto_generichash`; the implementation
-//! here wraps the pure-Rust `blake2b_simd` crate and is wire-compatible.
+//! here wraps the pure-Rust `blake2b_simd` crate and produces the same digests.
 
 use blake2b_simd::{Params as Blake2bParams, State as Blake2bState};
 use std::io::Read;
@@ -34,15 +34,15 @@ pub const KEY_BYTES_MAX: usize = 64;
 /// Hash `data` with BLAKE2b.
 ///
 /// `out_len` chooses the digest length (16 to 64 bytes), defaulting to 32.
-/// Passing a `key` of 16 to 64 bytes computes a keyed hash, that is a MAC;
-/// `None` or an empty key hashes without one.
+/// Passing a `key` of 16 to 64 bytes computes a keyed hash (a MAC); `None` or
+/// an empty key hashes without one.
 ///
 /// # Errors
 ///
 /// Returns [`InvalidKeyLength`](CryptoError::InvalidKeyLength) if `out_len` is
 /// outside 16 to 64 bytes, or if a non-empty `key` is outside that range.
 ///
-/// Wire-compatible with libsodium's `crypto_generichash`.
+/// Produces the same digest as libsodium's `crypto_generichash`.
 pub fn hash(data: &[u8], out_len: Option<usize>, key: Option<&[u8]>) -> Result<Vec<u8>> {
     let out_len = out_len.unwrap_or(HASH_BYTES);
 
