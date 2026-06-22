@@ -220,7 +220,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
       title: l10n.backup,
       subText: l10n.autoUploadFromThisDeviceFolder,
       titleToSubTextSpacing: 2,
-      leadingIconWidget: _menuIcon(context, HugeIcons.strokeRoundedUpload04),
+      leadingIconWidget: _menuIcon(context, HugeIcons.strokeRoundedUpload01),
       trailingWidget: ToggleSwitchWidget(
         value: () => widget.shouldBackup,
         onChanged: () async {
