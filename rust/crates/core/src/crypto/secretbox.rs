@@ -11,7 +11,7 @@
 //! (recorded per function below).
 //!
 //! Every message takes a 192-bit nonce. The nonce is not secret, but it must
-//! never be reused with the same key (see [`encrypt_with_nonce`]). The
+//! never be reused with the same key. The
 //! [`encrypt`] and [`encrypt_combined`] functions generate a fresh random nonce
 //! for you, which is the safe default.
 //!
@@ -80,22 +80,10 @@ pub fn encrypt(data: &[u8], key: &Key) -> EncryptedBox {
     }
 }
 
-/// Encrypt `data` under `key` with a caller-supplied `nonce`.
-///
-/// Prefer [`encrypt`], which generates the nonce for you. Reach for this only
-/// when the nonce is fixed by something else, for example re-creating a
-/// ciphertext that must match bytes produced earlier.
-///
-/// # Security
-///
-/// The nonce must be unique for every message encrypted under a given key.
-/// Reusing a (key, nonce) pair is catastrophic: it reveals the XOR of the two
-/// plaintexts and makes the Poly1305 tag forgeable, breaking both
-/// confidentiality and authenticity. The nonce itself need not be secret.
-///
-/// Returns `MAC (16 bytes) ‖ ciphertext`, wire-compatible with libsodium's
-/// `crypto_secretbox_easy`.
-pub fn encrypt_with_nonce(data: &[u8], nonce: &Nonce, key: &Key) -> Vec<u8> {
+/// Shared back end for [`encrypt`] and [`encrypt_combined`]: encrypts `data`
+/// under `key` with the given `nonce`, returning `MAC ‖ ciphertext`. Both
+/// callers generate a fresh nonce, so a (key, nonce) pair is never reused.
+fn encrypt_with_nonce(data: &[u8], nonce: &Nonce, key: &Key) -> Vec<u8> {
     let cipher = XSalsa20Poly1305::new(GenericArray::from_slice(key.as_bytes()));
     let nonce_ga = GenericArray::from_slice(nonce.as_bytes());
 
@@ -106,7 +94,7 @@ pub fn encrypt_with_nonce(data: &[u8], nonce: &Nonce, key: &Key) -> Vec<u8> {
         .expect("XSalsa20-Poly1305 encryption cannot fail for in-memory plaintexts")
 }
 
-/// Decrypt a ciphertext produced by [`encrypt`] or [`encrypt_with_nonce`].
+/// Decrypt a ciphertext produced by [`encrypt`].
 ///
 /// Pass the same `nonce` and `key` that encrypted it. `data` is
 /// `MAC (16 bytes) ‖ ciphertext`. The Poly1305 tag is verified before any

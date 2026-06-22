@@ -57,19 +57,6 @@ pub fn secretbox_encrypt(data: &[u8], key: &[u8]) -> Result<EncryptedBox, Crypto
     })
 }
 
-#[wasm_bindgen(js_name = secretboxEncryptWithNonce)]
-pub fn secretbox_encrypt_with_nonce(
-    data: &[u8],
-    nonce: &[u8],
-    key: &[u8],
-) -> Result<Vec<u8>, CryptoError> {
-    Ok(core_crypto::secretbox::encrypt_with_nonce(
-        data,
-        &core_crypto::Nonce::try_from_slice(nonce)?,
-        &core_crypto::Key::try_from_slice(key)?,
-    ))
-}
-
 #[wasm_bindgen(js_name = secretboxDecrypt)]
 pub fn secretbox_decrypt(data: &[u8], nonce: &[u8], key: &[u8]) -> Result<Vec<u8>, CryptoError> {
     Ok(core_crypto::secretbox::decrypt(

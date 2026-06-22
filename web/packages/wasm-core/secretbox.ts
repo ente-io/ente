@@ -12,9 +12,9 @@
  * (recorded per function below).
  *
  * Every message takes a 192-bit nonce. The nonce is not secret, but it must
- * never be reused with the same key (see {@link secretboxEncryptWithNonce}). The
- * {@link secretboxEncrypt} and {@link secretboxEncryptCombined} functions
- * generate a fresh random nonce for you, which is the safe default.
+ * never be reused with the same key. The {@link secretboxEncrypt} and
+ * {@link secretboxEncryptCombined} functions generate a fresh random nonce for
+ * you, which is the safe default.
  *
  * Two payload shapes are offered, differing only in how the nonce travels:
  *
@@ -75,30 +75,6 @@ export const secretboxEncrypt = async (
     } finally {
         box.free();
     }
-};
-
-/**
- * Encrypt `data` under `key` with a caller-supplied `nonce`.
- *
- * Prefer {@link secretboxEncrypt}, which generates the nonce for you. Reach for
- * this only when the nonce is fixed by something else, for example re-creating a
- * ciphertext that must match bytes produced earlier.
- *
- * The nonce must be unique for every message encrypted under a given key.
- * Reusing a (key, nonce) pair is catastrophic: it reveals the XOR of the two
- * plaintexts and makes the Poly1305 tag forgeable, breaking both
- * confidentiality and authenticity. The nonce itself need not be secret.
- *
- * Returns `MAC (16 bytes) ‖ ciphertext`, wire-compatible with libsodium's
- * `crypto_secretbox_easy`.
- */
-export const secretboxEncryptWithNonce = async (
-    data: Uint8Array,
-    nonce: Nonce,
-    key: Key,
-): Promise<Uint8Array> => {
-    const wasm = await loadWasmCore();
-    return wasm.secretboxEncryptWithNonce(data, nonce.bytes, key.bytes);
 };
 
 /**
