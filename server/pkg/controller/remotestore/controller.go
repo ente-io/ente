@@ -129,7 +129,7 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		case ente.IsInternalUser:
 			response.InternalUser = value == "true"
 			if response.InternalUser {
-				response.ServerApiFlag |= ente.Comments
+				response.ServerApiFlag |= ente.CastSessionsV2
 			}
 		case ente.IsBetaUser:
 			response.BetaUser = value == "true"

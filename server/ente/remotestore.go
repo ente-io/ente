@@ -57,6 +57,8 @@ const (
 	BackupOptions int64 = 1 << 2
 	// VideoStreaming gates video streaming feature.
 	VideoStreaming int64 = 1 << 3
+	// CastSessionsV2 gates cast sessions v2 support.
+	CastSessionsV2 int64 = 1 << 4
 )
 
 type FlagKey string
