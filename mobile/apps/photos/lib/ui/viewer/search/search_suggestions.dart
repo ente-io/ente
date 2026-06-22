@@ -16,6 +16,7 @@ import "package:photos/models/search/index_of_indexed_stack.dart";
 import 'package:photos/models/search/search_result.dart';
 import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/date_parse_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/thumbnail_list_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -321,11 +322,6 @@ const Set<String> _commonFileExtensions = {
   "webp",
 };
 
-final _datePhraseTokenSeparator = RegExp(r"[\s,./-]+");
-final _numericDateTokenSeparator = RegExp(r"[\s/.-]+");
-final _explicitNumericDateSeparator = RegExp(r"[/.-]");
-final _ordinalDayPattern = RegExp(r"^(\d{1,2})(st|nd|rd|th)$");
-
 List<_SearchResultsSection> _sectionOrderForQuery(
   BuildContext context,
   String query,
@@ -371,8 +367,7 @@ bool _looksLikeMomentQuery(BuildContext context, String query) {
     return false;
   }
   return _isYearQuery(query) ||
-      _isDateLikeQuery(query) ||
-      _isMonthDateQuery(context, query) ||
+      _isSupportedDateQuery(query) ||
       _isMonthQuery(context, query);
 }
 
@@ -381,50 +376,17 @@ bool _isYearQuery(String query) {
   return yearAsInt != null && yearAsInt <= currentYear;
 }
 
-bool _isDateLikeQuery(String query) {
-  final tokens = query
-      .split(_numericDateTokenSeparator)
-      .where((token) => token.isNotEmpty)
-      .toList();
-  if (tokens.length < 2 || tokens.length > 3) {
+bool _isSupportedDateQuery(String query) {
+  final parsedDate = DateParseService.instance.parse(query);
+  if (parsedDate.isEmpty) {
     return false;
   }
-  if (!tokens.every(_isNumericToken)) {
-    return false;
+  if (parsedDate.day == null &&
+      parsedDate.month == null &&
+      parsedDate.year != null) {
+    return _isYearQuery(query);
   }
-  if (tokens.length == 2 &&
-      !_explicitNumericDateSeparator.hasMatch(query) &&
-      !_hasYearToken(tokens)) {
-    return false;
-  }
-  return _isPlausibleNumericDate(tokens);
-}
-
-bool _isMonthDateQuery(BuildContext context, String query) {
-  final tokens = query
-      .split(_datePhraseTokenSeparator)
-      .map(_normalizeDateToken)
-      .where((token) => token.isNotEmpty)
-      .toList();
-  if (tokens.length < 2 || tokens.length > 3) {
-    return false;
-  }
-
-  if (_isMonthToken(context, tokens.first)) {
-    if (tokens.length == 2) {
-      return _isDayToken(tokens[1]) || _isYearToken(tokens[1]);
-    }
-    return _isDayToken(tokens[1]) && _isYearToken(tokens[2]);
-  }
-
-  if (_isDayToken(tokens.first) && _isMonthToken(context, tokens[1])) {
-    if (tokens.length == 2) {
-      return true;
-    }
-    return _isYearToken(tokens[2]);
-  }
-
-  return false;
+  return true;
 }
 
 bool _isMonthQuery(BuildContext context, String query) {
@@ -434,69 +396,6 @@ bool _isMonthQuery(BuildContext context, String query) {
   return getMonthData(
     context,
   ).any((monthData) => monthData.name.toLowerCase().startsWith(query));
-}
-
-String _normalizeDateToken(String token) {
-  final normalized = token.toLowerCase().trim();
-  final ordinalMatch = _ordinalDayPattern.firstMatch(normalized);
-  return ordinalMatch?.group(1) ?? normalized;
-}
-
-bool _isMonthToken(BuildContext context, String token) {
-  if (token.length < 3) {
-    return false;
-  }
-  return getMonthData(
-    context,
-  ).any((monthData) => monthData.name.toLowerCase().startsWith(token));
-}
-
-bool _isNumericToken(String token) {
-  return int.tryParse(token) != null;
-}
-
-bool _hasYearToken(List<String> tokens) {
-  return tokens.any(_isYearToken);
-}
-
-bool _isYearToken(String token) {
-  final year = int.tryParse(token);
-  if (year == null) {
-    return false;
-  }
-  return (token.length == 2 || token.length == 4) && year <= currentYear;
-}
-
-bool _isDayToken(String token) {
-  final day = int.tryParse(token);
-  return day != null && day >= 1 && day <= 31;
-}
-
-bool _isMonthNumber(String token) {
-  final month = int.tryParse(token);
-  return month != null && month >= 1 && month <= 12;
-}
-
-bool _isPlausibleNumericDate(List<String> tokens) {
-  if (tokens.length == 2) {
-    if (_isYearToken(tokens[0])) {
-      return _isMonthNumber(tokens[1]);
-    }
-    if (_isYearToken(tokens[1])) {
-      return _isMonthNumber(tokens[0]);
-    }
-    return (_isDayToken(tokens[0]) && _isMonthNumber(tokens[1])) ||
-        (_isMonthNumber(tokens[0]) && _isDayToken(tokens[1]));
-  }
-
-  if (_isYearToken(tokens[0]) && tokens[0].length == 4) {
-    return _isMonthNumber(tokens[1]) && _isDayToken(tokens[2]);
-  }
-  if (_isYearToken(tokens[2])) {
-    return (_isDayToken(tokens[0]) && _isMonthNumber(tokens[1])) ||
-        (_isMonthNumber(tokens[0]) && _isDayToken(tokens[1]));
-  }
-  return false;
 }
 
 _SearchResultsSection _sectionForResult(SearchResult result) {
