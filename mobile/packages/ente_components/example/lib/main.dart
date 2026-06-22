@@ -1199,27 +1199,27 @@ class _BannerPreview extends StatelessWidget {
             ],
           ),
         ),
-        const _CatalogPreviewGroup(
+        _CatalogPreviewGroup(
           title: 'Custom leading',
           child: BannerComponent(
             title: 'Syncing backup',
             subtitle: 'Preparing secure upload',
             state: BannerComponentState.informative,
-            leadingWidget: _BannerLoadingLeading(),
-            onTap: _noop,
+            leadingWidget: const _BannerLoadingLeading(),
+            onTap: () {},
           ),
         ),
-        const _CatalogPreviewGroup(
+        _CatalogPreviewGroup(
           title: 'Custom trailing',
           child: BannerComponent(
             title: 'Dismissible info',
             subtitle: 'Some subtext with a custom trailing icon',
             state: BannerComponentState.informative,
-            trailingWidget: _CatalogHugeIcon(
+            trailingWidget: const _CatalogHugeIcon(
               HugeIcons.strokeRoundedCancel01,
               size: IconSizes.small,
             ),
-            onTap: _noop,
+            onTap: () {},
           ),
         ),
       ],
@@ -1241,8 +1241,6 @@ class _BannerLoadingLeading extends StatelessWidget {
     );
   }
 }
-
-void _noop() {}
 
 class _BannerStatePreview extends StatelessWidget {
   const _BannerStatePreview({required this.spec});
