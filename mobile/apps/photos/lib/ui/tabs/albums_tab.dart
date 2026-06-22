@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:ui" show BlendMode, ImageFilter;
 
 import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
@@ -907,7 +906,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                           physics:
                                               const BouncingScrollPhysics(),
                                           padding: const EdgeInsets.only(
-                                            right: 44,
+                                            right: 72,
                                           ),
                                           child: Row(
                                             children: [
@@ -1113,29 +1112,21 @@ class _AlbumsMoreButtonOverlay extends StatelessWidget {
             right: 0,
             bottom: 0,
             child: IgnorePointer(
-              child: ShaderMask(
-                blendMode: BlendMode.dstIn,
-                shaderCallback: (bounds) => LinearGradient(
-                  begin: Alignment.centerRight,
-                  end: Alignment.centerLeft,
-                  colors: [
-                    maskColor,
-                    maskColor,
-                    maskColor.withValues(alpha: 0),
-                  ],
-                  stops: const [0, 0.48, 1],
-                ).createShader(bounds),
-                child: SizedBox(
-                  width: 72,
-                  child: ClipRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                      child: ColoredBox(
-                        color: componentColors.backgroundBase.withValues(
-                          alpha: 0.66,
-                        ),
-                        child: const SizedBox.expand(),
-                      ),
+              child: SizedBox(
+                width: 72,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                      colors: [
+                        maskColor,
+                        maskColor.withValues(alpha: 0.92),
+                        maskColor.withValues(alpha: 0.55),
+                        maskColor.withValues(alpha: 0.12),
+                        maskColor.withValues(alpha: 0),
+                      ],
+                      stops: const [0, 0.3, 0.55, 0.8, 1],
                     ),
                   ),
                 ),
