@@ -12,7 +12,7 @@ const (
 	SignUpOTTPurpose      = "signup"
 	LoginOTTPurpose       = "login"
 
-	ExpectedKDFStrength = uint64(1073741824 * 4)
+	ExpectedKDFStrength = int64(1073741824 * 4)
 )
 
 // User represents a user in the system
