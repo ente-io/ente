@@ -397,8 +397,8 @@ bool _looksLikeMomentQuery(BuildContext context, String query) {
     return false;
   }
   return _isYearQuery(query) ||
-      _isSupportedDateQuery(query) ||
-      _isMonthQuery(context, query);
+      _isParsedDateQuery(query) ||
+      _isLocalizedMonthQuery(context, query);
 }
 
 bool _isYearQuery(String query) {
@@ -406,20 +406,15 @@ bool _isYearQuery(String query) {
   return yearAsInt != null && yearAsInt <= currentYear;
 }
 
-bool _isSupportedDateQuery(String query) {
+bool _isParsedDateQuery(String query) {
   final parsedDate = DateParseService.instance.parse(query);
   if (parsedDate.isEmpty) {
     return false;
   }
-  if (parsedDate.day == null &&
-      parsedDate.month == null &&
-      parsedDate.year != null) {
-    return _isYearQuery(query);
-  }
-  return true;
+  return parsedDate.day != null || parsedDate.month != null;
 }
 
-bool _isMonthQuery(BuildContext context, String query) {
+bool _isLocalizedMonthQuery(BuildContext context, String query) {
   if (query.length < 3) {
     return false;
   }
