@@ -375,7 +375,7 @@ final RegExp _cameraFilenamePrefixRegex = RegExp(
   r"^(?:dsc(?:[_\d]|n|f)|\d{8}_)",
 );
 
-const Set<String> _fileTypeIntentAliases = {"photo", "video"};
+const Set<String> _fileTypeIntentAliases = {"live", "photo", "video"};
 
 const List<FileType> _fileTypesForIntent = [
   FileType.image,
