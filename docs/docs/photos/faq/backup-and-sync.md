@@ -356,9 +356,9 @@ Background sync allows Ente to automatically back up your photos without needing
 
 - Use [watch folders](/photos/faq/backup-and-sync#what-are-watch-folders) to automatically sync specific directories
 
-> [!IMPORTANT]
+> [!NOTE]
 >
-> On iOS, large videos may not upload in background - they'll sync when you open the app.
+> Background sync isn't currently consistent on iOS and on certain Android devices. We're actively working on a fix.
 
 Learn more in the [Background sync feature guide](/photos/features/backup-and-sync/#background-sync).
 
@@ -383,7 +383,7 @@ If photos aren't automatically backing up in the background, try these solutions
 
 > [!NOTE]
 >
-> On iOS, videos may not upload in the background due to size - they'll sync when you next open the app.
+> Background sync isn't currently consistent on iOS and on certain Android devices. We're actively working on a fix.
 
 Learn more in the [Background sync guide](/photos/features/backup-and-sync/#background-sync).
 
