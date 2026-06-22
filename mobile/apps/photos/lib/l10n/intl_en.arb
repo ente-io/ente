@@ -441,16 +441,77 @@
   "uncategorized": "Uncategorized",
   "videoSmallCase": "video",
   "photoSmallCase": "photo",
+  "videosSmallCase": "videos",
+  "photosSmallCase": "photos",
+  "itemsSmallCase": "items",
   "singleFileDeleteHighlight": "It will be deleted from all albums.",
-  "singleFileInBothLocalAndRemote": "This {fileType} is in both Ente and your device.",
-  "singleFileInRemoteOnly": "This {fileType} will be deleted from Ente.",
-  "singleFileDeleteFromDevice": "This {fileType} will be deleted from your device.",
+  "singleFileInBothLocalAndRemote": "This {fileType} is saved on this device and backed up to Ente. It will be removed from all albums.",
+  "singleFileInRemoteOnly": "This {fileType} is backed up to Ente. It will be removed from all albums.",
+  "singleFileDeleteFromDevice": "This {fileType} is saved on this device only.",
+  "deleteFileQuestion": "Delete {fileType}?",
+  "@deleteFileQuestion": {
+    "placeholders": {
+      "fileType": {
+        "type": "String"
+      }
+    }
+  },
+  "deletePhotosQuestion": "{count, plural, one {Delete photo?} other {Delete {count} photos?}}",
+  "@deletePhotosQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteVideosQuestion": "{count, plural, one {Delete video?} other {Delete {count} videos?}}",
+  "@deleteVideosQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteItemsQuestion": "{count, plural, one {Delete item?} other {Delete {count} items?}}",
+  "@deleteItemsQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectedFilesSavedOnDeviceOnly": "These {fileTypes} are saved on this device only.",
+  "@selectedFilesSavedOnDeviceOnly": {
+    "placeholders": {
+      "fileTypes": {
+        "type": "String"
+      }
+    }
+  },
+  "selectedFilesBackedUpToEnte": "These {fileTypes} are backed up to Ente. They will be removed from all albums.",
+  "@selectedFilesBackedUpToEnte": {
+    "placeholders": {
+      "fileTypes": {
+        "type": "String"
+      }
+    }
+  },
+  "someSelectedFilesBackedUpToEnte": "Some {fileTypes} are backed up to Ente. They will be removed from all albums.",
+  "@someSelectedFilesBackedUpToEnte": {
+    "placeholders": {
+      "fileTypes": {
+        "type": "String"
+      }
+    }
+  },
   "deleteFromEnte": "Delete from Ente",
   "yesDelete": "Yes, delete",
   "movedToTrash": "Moved to trash",
   "deleteFromDeviceQuestion": "Delete from device?",
   "deleteFromDevice": "Delete from device",
   "deleteFromBoth": "Delete from both",
+  "moreOptions": "More options",
+  "setAsDefault": "Set as default",
   "newAlbum": "New album",
   "albums": "Albums",
   "ente": "Ente",

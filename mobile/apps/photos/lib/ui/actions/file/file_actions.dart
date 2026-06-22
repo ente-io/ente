@@ -27,105 +27,80 @@ Future<void> showSingleFileDeleteSheet(
   bool isLocalOnlyContext = false,
 }) async {
   final l10n = AppLocalizations.of(context);
-  final String fileType = file.fileType == FileType.video
-      ? l10n.videoSmallCase
-      : l10n.photoSmallCase;
-  final bool isBothLocalAndRemote =
-      file.uploadedFileID != null && file.localID != null;
-  final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
-  final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
+  final bool isLocal = file.localID != null;
+  final bool isRemote = file.uploadedFileID != null;
   if (isLocalGalleryMode) {
-    if (file.localID == null) {
+    if (!isLocal) {
       showShortToast(context, l10n.noDeviceThatCanBeDeleted);
       return;
     }
-    final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
-    if (deletedFiles.isNotEmpty &&
-        onFileRemoved != null &&
-        (isLocalOnly || isLocalOnlyContext)) {
-      onFileRemoved(file);
+    if (Platform.isAndroid) {
+      await showBottomSheetComponent<ButtonResult>(
+        context: context,
+        useRootNavigator: Platform.isIOS,
+        builder: (_) => DeleteConfirmationSheet(
+          count: 1,
+          hasPhotos: file.fileType != FileType.video,
+          hasVideos: file.fileType == FileType.video,
+          isLocal: isLocal,
+          isRemote: false,
+          onDeleteFromLocal: () async {
+            final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
+            if (deletedFiles.isNotEmpty &&
+                ((isLocal && !isRemote) || isLocalOnlyContext)) {
+              onFileRemoved?.call(file);
+            }
+          },
+          onDeleteFromRemote: () async {
+            throw AssertionError("delete from remote in local gallery mode");
+          },
+          onDeleteFromBoth: () async {
+            throw AssertionError("delete from both in local gallery mode");
+          },
+        ),
+      );
+    } else {
+      final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
+      if (deletedFiles.isNotEmpty &&
+          ((isLocal && !isRemote) || isLocalOnlyContext)) {
+        onFileRemoved?.call(file);
+      }
     }
     return;
   }
-  final String bodyHighlight = l10n.singleFileDeleteHighlight;
-  late final String body;
-  if (isBothLocalAndRemote) {
-    body = l10n.singleFileInBothLocalAndRemote(fileType: fileType);
-  } else if (isRemoteOnly) {
-    body = l10n.singleFileInRemoteOnly(fileType: fileType);
-  } else if (isLocalOnly) {
-    body = l10n.singleFileDeleteFromDevice(fileType: fileType);
-  } else {
+  if (!isLocal && !isRemote) {
     throw AssertionError("Unexpected state");
   }
-
   final actionResult = await showBottomSheetComponent<ButtonResult>(
     context: context,
     useRootNavigator: Platform.isIOS,
-    builder: (sheetContext) => BottomSheetComponent(
-      title: l10n.areYouSure,
-      message: isLocalOnly ? body : '$body\n$bodyHighlight',
-      illustration: Image.asset("assets/warning-grey.png"),
-      closeTooltip: l10n.close,
-      closeResult: ButtonResult(ButtonAction.fourth),
-      actions: [
-        if (isBothLocalAndRemote || isRemoteOnly)
-          ButtonComponent(
-            label: isBothLocalAndRemote ? l10n.deleteFromEnte : l10n.yesDelete,
-            variant: isBothLocalAndRemote
-                ? ButtonComponentVariant.neutral
-                : ButtonComponentVariant.critical,
-            onTap: () => _runSingleFileDeleteAction(
-              sheetContext,
-              ButtonAction.first,
-              () async {
-                await deleteFilesFromRemoteOnly(context, [file]);
-                showShortToast(context, l10n.movedToTrash);
-                if (onFileRemoved != null &&
-                    (isRemoteOnly || !isLocalOnlyContext)) {
-                  onFileRemoved(file);
-                }
-              },
-            ),
-          ),
-        if (isBothLocalAndRemote || isLocalOnly)
-          ButtonComponent(
-            label: isBothLocalAndRemote
-                ? l10n.deleteFromDevice
-                : l10n.yesDelete,
-            variant: isBothLocalAndRemote
-                ? ButtonComponentVariant.neutral
-                : ButtonComponentVariant.critical,
-            shouldSurfaceExecutionStates: false,
-            onTap: () => _runSingleFileDeleteAction(
-              sheetContext,
-              ButtonAction.second,
-              () async {
-                final deletedFiles = await deleteFilesOnDeviceOnly(context, [
-                  file,
-                ]);
-                if (deletedFiles.isNotEmpty &&
-                    onFileRemoved != null &&
-                    (isLocalOnly || isLocalOnlyContext)) {
-                  onFileRemoved(file);
-                }
-              },
-            ),
-          ),
-        if (isBothLocalAndRemote)
-          ButtonComponent(
-            label: l10n.deleteFromBoth,
-            variant: ButtonComponentVariant.critical,
-            onTap: () => _runSingleFileDeleteAction(
-              sheetContext,
-              ButtonAction.third,
-              () => deleteFilesFromEverywhere(context, [file]),
-              afterPop: () => onFileRemoved?.call(file),
-            ),
-          ),
-      ],
+    builder: (_) => DeleteConfirmationSheet(
+      isLocal: isLocal,
+      isRemote: isRemote,
+      count: 1,
+      hasPhotos: file.fileType != FileType.video,
+      hasVideos: file.fileType == FileType.video,
+      onDeleteFromLocal: () async {
+        final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
+        if (deletedFiles.isNotEmpty &&
+            ((isLocal && !isRemote) || isLocalOnlyContext)) {
+          onFileRemoved?.call(file);
+        }
+      },
+      onDeleteFromRemote: () async {
+        await deleteFilesFromRemoteOnly(context, [file]);
+        showShortToast(context, l10n.movedToTrash);
+        if (((isRemote && !isLocal) || !isLocalOnlyContext)) {
+          onFileRemoved?.call(file);
+        }
+      },
+      onDeleteFromBoth: () async {
+        await deleteFilesFromEverywhere(context, [file]);
+        onFileRemoved?.call(file);
+      },
     ),
   );
+
   if (actionResult?.action != null &&
       actionResult!.action == ButtonAction.error) {
     await showGenericErrorDialog(
@@ -133,32 +108,6 @@ Future<void> showSingleFileDeleteSheet(
       error: actionResult.exception,
     );
   }
-}
-
-Future<void> _runSingleFileDeleteAction(
-  BuildContext context,
-  ButtonAction action,
-  Future<void> Function() onDelete, {
-  FutureOr<void> Function()? afterPop,
-}) async {
-  try {
-    await onDelete();
-    if (context.mounted) {
-      Navigator.of(context).pop(ButtonResult(action));
-      await afterPop?.call();
-    }
-  } catch (error) {
-    if (context.mounted) {
-      Navigator.of(
-        context,
-      ).pop(ButtonResult(ButtonAction.error, _toException(error)));
-    }
-    rethrow;
-  }
-}
-
-Exception _toException(Object error) {
-  return error is Exception ? error : Exception(error.toString());
 }
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {

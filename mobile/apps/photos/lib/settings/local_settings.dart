@@ -37,6 +37,26 @@ enum LocalGalleryFlag {
   localGallerySettingsBannerDismissed,
 }
 
+enum DeletePreference {
+  DeleteFromBoth("delete_from_both"),
+  DeleteFromLocalOnly("delete_from_local_only"),
+  DeleteFromRemoteOnly("delete_from_remote_only");
+
+  const DeletePreference(this._serializedValue);
+
+  final String _serializedValue;
+
+  static DeletePreference? _fromSerializedValue(String? value) {
+    return switch (value) {
+      "delete_from_both" => DeleteFromBoth,
+      "delete_from_local_only" => DeleteFromLocalOnly,
+      "delete_from_remote_only" ||
+      "delete_from_ente_only" => DeleteFromRemoteOnly,
+      _ => null,
+    };
+  }
+}
+
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kGalleryGroupType = "gallery_group_type";
@@ -87,6 +107,7 @@ class LocalSettings {
       "ml_debug.semantic_search_exact_in_rust";
   static const _kAppMode = "ls.app_mode";
   static const _kShowLocalGalleryModeOption = "ls.show_offline_mode_option";
+  static const _kDeletePreference = "delete_preference";
 
   static const _kWidgetHideTextFlags = "ls.widget_hide_text_flags";
 
@@ -601,4 +622,21 @@ class LocalSettings {
 
   Future<void> setLocalGallerySettingsBannerDismissed(bool value) =>
       _setFlag(LocalGalleryFlag.localGallerySettingsBannerDismissed, value);
+
+  DeletePreference? getDeletePreference() {
+    if (!_prefs.containsKey(_kDeletePreference)) {
+      return null;
+    }
+    return DeletePreference._fromSerializedValue(
+      _prefs.getString(_kDeletePreference),
+    );
+  }
+
+  Future<void> setDeletePreference(DeletePreference? preference) async {
+    if (preference == null) {
+      await _prefs.remove(_kDeletePreference);
+    } else {
+      await _prefs.setString(_kDeletePreference, preference._serializedValue);
+    }
+  }
 }
