@@ -19,3 +19,4 @@ apps/ensu/next/
 
 # Generated wasm build
 packages/wasm/pkg/
+packages/wasm-core/pkg/

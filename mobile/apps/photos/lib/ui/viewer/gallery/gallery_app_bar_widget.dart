@@ -75,6 +75,8 @@ class GalleryAppBarWidget extends StatefulWidget {
     SelectedFiles selectedFiles, {
     String? subtitle,
     DeviceCollection? deviceCollection,
+    bool? isDeviceFolderBackedUp,
+    Future<void> Function()? onDisableDeviceFolderBackup,
     Collection? collection,
     List<EnteFile>? files,
   }) {
@@ -84,7 +86,10 @@ class GalleryAppBarWidget extends StatefulWidget {
         title,
         subtitle,
         selectedFiles,
+        subtitle: subtitle,
         deviceCollection: deviceCollection,
+        isDeviceFolderBackedUp: isDeviceFolderBackedUp,
+        onDisableDeviceFolderBackup: onDisableDeviceFolderBackup,
         collection: collection,
         files: files,
       ),
@@ -120,6 +125,8 @@ class GalleryAppBarWidget extends StatefulWidget {
   final String? subtitle;
   final SelectedFiles selectedFiles;
   final DeviceCollection? deviceCollection;
+  final bool? isDeviceFolderBackedUp;
+  final Future<void> Function()? onDisableDeviceFolderBackup;
   final Collection? collection;
   final List<EnteFile>? files;
 
@@ -128,7 +135,10 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.title,
     this.subtitle,
     this.selectedFiles, {
+    this.subtitle,
     this.deviceCollection,
+    this.isDeviceFolderBackedUp,
+    this.onDisableDeviceFolderBackup,
     this.collection,
     this.files,
   });
@@ -150,6 +160,7 @@ enum AlbumPopupAction {
   sort,
   leave,
   freeUpSpace,
+  disableBackup,
   setCover,
   addPhotos,
   pinAlbum,
@@ -568,6 +579,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             setState(() {});
           } else if (value == AlbumPopupAction.freeUpSpace) {
             await _deleteBackedUpFiles(context);
+          } else if (value == AlbumPopupAction.disableBackup) {
+            await widget.onDisableDeviceFolderBackup!.call();
           } else if (value == AlbumPopupAction.setCover) {
             await setCoverPhoto(context);
           } else if (value == AlbumPopupAction.sort) {
@@ -650,6 +663,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         galleryType == GalleryType.trash ||
         galleryType == GalleryType.sharedCollection ||
         (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum) ||
+        _canDisableDeviceFolderBackup ||
         (galleryType == GalleryType.sharedPublicCollection &&
             (widget.collection?.isDownloadEnabledForPublicLink() ?? false));
   }
@@ -833,8 +847,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum)
         _menuOption(
           AlbumPopupAction.freeUpSpace,
-          strings.freeUpDeviceSpace,
+          strings.freeUpSpace,
           galleryAppBarMenuIcon(HugeIcons.strokeRoundedClean, iconColor),
+        ),
+      if (_canDisableDeviceFolderBackup)
+        _menuOption(
+          AlbumPopupAction.disableBackup,
+          strings.disableBackup,
+          galleryAppBarMenuIcon(HugeIcons.strokeRoundedUpload01, iconColor),
         ),
       if (galleryType == GalleryType.sharedPublicCollection &&
           (widget.collection?.isDownloadEnabledForPublicLink() ?? false))
@@ -852,6 +872,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
     ];
   }
+
+  bool get _isDeviceFolderBackedUp =>
+      widget.isDeviceFolderBackedUp ??
+      widget.deviceCollection?.shouldBackup ??
+      false;
+
+  bool get _canDisableDeviceFolderBackup =>
+      galleryType == GalleryType.localFolder &&
+      _isDeviceFolderBackedUp &&
+      widget.onDisableDeviceFolderBackup != null;
 
   EntePopupMenuOption<AlbumPopupAction> _menuOption(
     AlbumPopupAction value,

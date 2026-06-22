@@ -13,6 +13,7 @@ members = [
     "bindings/uniffi/ensu/sync",
     "bindings/uniffi/ensu/transcription",
     "bindings/wasm/ente-wasm",
+    "bindings/wasm/core",
     "crates/accounts",
     "crates/contacts",
     "crates/core",
@@ -38,3 +39,4 @@ ente-test-support = { path = "crates/test-support" }
 ente_image = { path = "crates/image" }
 ente_photos = { path = "crates/photos" }
 inference_rs = { path = "crates/ensu/inference" }
+wasm-bindgen = "0.2.125"

@@ -1,12 +1,14 @@
-//! Cryptographic utilities for Ente.
+//! Cryptographic primitives for Ente.
 //!
 //! This module provides all the cryptographic primitives used by Ente clients.
 //!
 //! # Implementation
 //!
-//! This crate uses **pure Rust** cryptographic implementations from the RustCrypto project.
-//! All implementations maintain byte-for-byte wire format compatibility with libsodium
-//! for interoperability with existing clients (mobile/web).
+//! Every primitive is implemented in pure Rust, with no libsodium or other C
+//! dependency, drawing on established crates such as those from the RustCrypto
+//! project, `blake2b_simd`, and `crypto_secretstream`. All of them keep
+//! byte-for-byte wire compatibility with libsodium, so keys and ciphertext
+//! interoperate with the existing mobile and web clients.
 //!
 //! # Overview
 //!

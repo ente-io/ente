@@ -22,8 +22,6 @@ import (
 )
 
 const (
-	backupOptionsRolloutPercentage  = 100
-	backupOptionsRolloutNonce       = "backup-options-v1"
 	videoStreamingRolloutPercentage = 75
 	videoStreamingRolloutNonce      = "video-streaming-v1"
 )
@@ -112,7 +110,7 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		// Changing it to false will hide the option and disable multi part upload for everyone
 		// except internal user.rt
 		EnableMobMultiPart: true,
-		ServerApiFlag:      ente.UploadV2 | ente.Comments,
+		ServerApiFlag:      ente.UploadV2 | ente.Comments | ente.BackupOptions,
 		CastUrl:            viper.GetString("apps.cast"),
 		EmbedUrl:           viper.GetString("apps.embed-albums"),
 		CustomDomainCNAME:  viper.GetString("apps.custom-domain.cname"),
@@ -131,7 +129,7 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		case ente.IsInternalUser:
 			response.InternalUser = value == "true"
 			if response.InternalUser {
-				response.ServerApiFlag |= ente.Comments
+				response.ServerApiFlag |= ente.CastSessionsV2
 			}
 		case ente.IsBetaUser:
 			response.BetaUser = value == "true"
@@ -146,11 +144,6 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 				}
 			}
 		}
-	}
-
-	if response.InternalUser ||
-		rollout.IsInPercentageRollout(userID, backupOptionsRolloutNonce, backupOptionsRolloutPercentage) {
-		response.ServerApiFlag |= ente.BackupOptions
 	}
 
 	if response.InternalUser ||

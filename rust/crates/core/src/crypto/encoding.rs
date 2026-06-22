@@ -1,4 +1,9 @@
-//! Base64 and hex encoding helpers.
+//! Base64 and hex encoding and decoding.
+//!
+//! Conversions between bytes and their textual forms: standard and URL-safe
+//! base64, hexadecimal, and base64 to hex. These move key material and
+//! ciphertext across text boundaries such as JSON and URLs; they are plumbing,
+//! not themselves cryptographic.
 
 use base64::{
     Engine,
@@ -9,27 +14,20 @@ use base64::{
 
 use crate::crypto::Result;
 
-/// Decode a base64 string to bytes.
+/// Decode a standard base64 string to bytes, the inverse of [`encode_b64`].
 ///
-/// # Arguments
-/// * `input` - Base64 encoded string.
+/// # Errors
 ///
-/// # Returns
-/// The decoded bytes.
+/// Returns [`Base64Decode`](crate::crypto::CryptoError::Base64Decode) if
+/// `input` is not valid standard base64.
 pub fn decode_b64(input: &str) -> Result<Vec<u8>> {
     Ok(BASE64.decode(input)?)
 }
 
-/// Encode bytes to a base64 string.
+/// Encode bytes to a standard base64 string, the inverse of [`decode_b64`].
 ///
-/// This is standard base64 (RFC 4648 §4), matching libsodium's
+/// Standard base64 (RFC 4648 §4), matching libsodium's
 /// `sodium_base64_VARIANT_ORIGINAL`.
-///
-/// # Arguments
-/// * `input` - Bytes to encode.
-///
-/// # Returns
-/// Base64 encoded string.
 pub fn encode_b64(input: &[u8]) -> String {
     BASE64.encode(input)
 }
@@ -57,63 +55,55 @@ pub fn encode_b64_url_safe_no_padding(input: &[u8]) -> String {
     BASE64_URL_SAFE_NO_PAD.encode(input)
 }
 
-/// Decode an unpadded URL-safe base64 string to bytes.
+/// Decode an unpadded URL-safe base64 string to bytes, the inverse of
+/// [`encode_b64_url_safe_no_padding`].
+///
+/// # Errors
+///
+/// Returns [`Base64Decode`](crate::crypto::CryptoError::Base64Decode) if
+/// `input` is not valid unpadded URL-safe base64.
 pub fn decode_b64_url_safe_no_padding(input: &str) -> Result<Vec<u8>> {
     Ok(BASE64_URL_SAFE_NO_PAD.decode(input)?)
 }
 
-/// Convert a UTF-8 string to bytes.
-///
-/// # Arguments
-/// * `input` - UTF-8 string.
-///
-/// # Returns
-/// UTF-8 bytes.
+/// Return the UTF-8 bytes of `input`.
 pub fn str_to_bin(input: &str) -> Vec<u8> {
     input.as_bytes().to_vec()
 }
 
-/// Decode a hex string to bytes.
+/// Decode a hex string to bytes, the inverse of [`encode_hex`].
 ///
-/// # Arguments
-/// * `input` - Hex encoded string.
+/// # Errors
 ///
-/// # Returns
-/// The decoded bytes.
+/// Returns [`HexDecode`](crate::crypto::CryptoError::HexDecode) if `input` is
+/// not valid hexadecimal.
 pub fn decode_hex(input: &str) -> Result<Vec<u8>> {
     Ok(hex::decode(input)?)
 }
 
-/// Encode bytes to a hex string.
-///
-/// # Arguments
-/// * `input` - Bytes to encode.
-///
-/// # Returns
-/// Hex encoded string (lowercase).
+/// Encode bytes to a lowercase hex string, the inverse of [`decode_hex`].
 pub fn encode_hex(input: &[u8]) -> String {
     hex::encode(input)
 }
 
-/// Convert a base64 string to hex.
+/// Re-encode a standard base64 string as lowercase hex, the inverse of
+/// [`hex_to_b64`].
 ///
-/// # Arguments
-/// * `b64` - Base64 encoded string.
+/// # Errors
 ///
-/// # Returns
-/// Hex encoded string.
+/// Returns [`Base64Decode`](crate::crypto::CryptoError::Base64Decode) if `b64`
+/// is not valid standard base64.
 pub fn b64_to_hex(b64: &str) -> Result<String> {
     let bytes = decode_b64(b64)?;
     Ok(encode_hex(&bytes))
 }
 
-/// Convert a hex string to base64.
+/// Re-encode a hex string as standard base64, the inverse of [`b64_to_hex`].
 ///
-/// # Arguments
-/// * `hex_str` - Hex encoded string.
+/// # Errors
 ///
-/// # Returns
-/// Base64 encoded string.
+/// Returns [`HexDecode`](crate::crypto::CryptoError::HexDecode) if `hex_str` is
+/// not valid hexadecimal.
 pub fn hex_to_b64(hex_str: &str) -> Result<String> {
     let bytes = decode_hex(hex_str)?;
     Ok(encode_b64(&bytes))

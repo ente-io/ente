@@ -1,8 +1,8 @@
 //! Typed key material and related fixed-size values.
 //!
 //! These newtypes carry their size in the type, so length validation happens
-//! once — at the boundary where raw bytes enter ([`Key::try_from_slice`] and
-//! friends) — instead of inside every operation. Secret types zeroize on drop
+//! once, at the boundary where raw bytes enter ([`Key::try_from_slice`] and
+//! friends), rather than inside every operation. Secret types zeroize on drop
 //! and redact their `Debug` output; non-secret types (`Nonce`, `Salt`,
 //! [`Header`]) are plain `Copy` values.
 
