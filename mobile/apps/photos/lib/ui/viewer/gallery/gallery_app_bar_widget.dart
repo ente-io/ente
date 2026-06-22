@@ -32,7 +32,6 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/files_service.dart";
 import "package:photos/states/location_screen_state.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
@@ -56,6 +55,7 @@ import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
+import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
@@ -73,6 +73,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     GalleryType type,
     String? title,
     SelectedFiles selectedFiles, {
+    String? subtitle,
     DeviceCollection? deviceCollection,
     Collection? collection,
     List<EnteFile>? files,
@@ -81,16 +82,21 @@ class GalleryAppBarWidget extends StatefulWidget {
       sliverBuilder: (_) => GalleryAppBarWidget._(
         type,
         title,
+        subtitle,
         selectedFiles,
         deviceCollection: deviceCollection,
         collection: collection,
         files: files,
       ),
-      geometryBuilder: _resolveSliverGeometry,
+      geometryBuilder: (context) =>
+          _resolveSliverGeometry(context, subtitle: subtitle),
     );
   }
 
-  static HeaderAppBarGeometry _resolveSliverGeometry(BuildContext context) {
+  static HeaderAppBarGeometry _resolveSliverGeometry(
+    BuildContext context, {
+    String? subtitle,
+  }) {
     final inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(
       context,
     );
@@ -101,7 +107,7 @@ class GalleryAppBarWidget extends StatefulWidget {
         : 0.0;
     return SliverAppBarComponent.resolveGeometry(
       context,
-      subtitle: null,
+      subtitle: subtitle,
       expandedHeight: _sliverExpandedHeight,
       collapsedHeight: toolbarHeight,
       titleBuilderHeight: null,
@@ -111,6 +117,7 @@ class GalleryAppBarWidget extends StatefulWidget {
 
   final GalleryType type;
   final String? title;
+  final String? subtitle;
   final SelectedFiles selectedFiles;
   final DeviceCollection? deviceCollection;
   final Collection? collection;
@@ -119,6 +126,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   const GalleryAppBarWidget._(
     this.type,
     this.title,
+    this.subtitle,
     this.selectedFiles, {
     this.deviceCollection,
     this.collection,
@@ -151,6 +159,7 @@ enum AlbumPopupAction {
   downloadAlbum,
   sortByMostRecent,
   sortByMostRelevant,
+  emptyTrash,
   editLocation,
   deleteLocation,
   galleryGuestView,
@@ -245,6 +254,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (!isHierarchicalSearchable) {
       return _GallerySliverAppBar(
         title: _appBarTitle,
+        subtitle: widget.subtitle,
         actions: _getDefaultActions(context),
       );
     }
@@ -262,6 +272,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       builder: (context, isSearching, child) {
         return _GallerySliverAppBar(
           title: _appBarTitle,
+          subtitle: widget.subtitle,
           actions: isSearching ? const [] : _getDefaultActions(context),
           bottom: child as PreferredSizeWidget,
         );
@@ -605,6 +616,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             await onCleanUncategorizedClick(context);
           } else if (value == AlbumPopupAction.downloadAlbum) {
             await _downloadPublicAlbumToGallery(widget.files!);
+          } else if (value == AlbumPopupAction.emptyTrash) {
+            await emptyTrash(context);
           } else if (value == AlbumPopupAction.editLocation) {
             editLocation();
           } else if (value == AlbumPopupAction.deleteLocation) {
@@ -634,6 +647,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         (!isArchived && galleryType.canHide()) ||
         widget.collection != null ||
         galleryType.canDelete() ||
+        galleryType == GalleryType.trash ||
         galleryType == GalleryType.sharedCollection ||
         (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum) ||
         (galleryType == GalleryType.sharedPublicCollection &&
@@ -648,6 +662,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     required bool isArchived,
     required bool isHidden,
   }) async {
+    final warningColor = context.componentColors.warning;
     final canAutoAdd =
         hasGrantedMLConsent && (widget.collection?.canAutoAdd(userId) ?? false);
     final hasAutoAddPeople = canAutoAdd
@@ -714,8 +729,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _menuOption(
           AlbumPopupAction.deleteLocation,
           strings.deleteLocation,
-          galleryAppBarMenuIcon(HugeIcons.strokeRoundedDelete01, warning500),
-          labelColor: warning500,
+          galleryAppBarMenuIcon(HugeIcons.strokeRoundedDelete01, warningColor),
+          labelColor: warningColor,
         ),
       if (isArchived || (galleryType.canArchive() && !isHidden))
         _menuOption(
@@ -827,6 +842,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           AlbumPopupAction.downloadAlbum,
           strings.download,
           galleryAppBarMenuIcon(HugeIcons.strokeRoundedDownload01, iconColor),
+        ),
+      if (galleryType == GalleryType.trash)
+        _menuOption(
+          AlbumPopupAction.emptyTrash,
+          strings.deleteAll,
+          galleryAppBarMenuIcon(HugeIcons.strokeRoundedDelete01, warningColor),
+          labelColor: warningColor,
         ),
     ];
   }
@@ -1320,11 +1342,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 class _GallerySliverAppBar extends StatelessWidget {
   const _GallerySliverAppBar({
     required this.title,
+    this.subtitle,
     required this.actions,
     this.bottom,
   });
 
   final String title;
+  final String? subtitle;
   final List<Widget> actions;
   final PreferredSizeWidget? bottom;
 
@@ -1332,6 +1356,7 @@ class _GallerySliverAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverAppBarComponent(
       title: title,
+      subtitle: subtitle,
       actions: actions,
       bottom: bottom,
       expandedHeight: GalleryAppBarWidget._sliverExpandedHeight,
