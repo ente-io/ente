@@ -43,6 +43,9 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   StreamSubscription<List<SearchResult>>? subscription;
   Timer? timer;
   late final VoidCallback _searchResultsStreamNotifierListener;
+  String? _cachedSectionOrderQuery;
+  Locale? _cachedSectionOrderLocale;
+  List<_SearchResultsSection>? _cachedSectionOrder;
 
   ///This is the interval at which the queue is checked for new events and
   ///the search result widgets are generated from the queue.
@@ -188,10 +191,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
 
   List<Widget> _buildSectionWidgets(BuildContext context) {
     final widgets = <Widget>[];
-    for (final section in _sectionOrderForQuery(
-      context,
-      SearchWidgetState.query,
-    )) {
+    for (final section in _sectionOrderForCurrentQuery(context)) {
       final results = _sectionedResults[section] ?? [];
       if (results.isEmpty) {
         continue;
@@ -208,6 +208,25 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       );
     }
     return widgets;
+  }
+
+  List<_SearchResultsSection> _sectionOrderForCurrentQuery(
+    BuildContext context,
+  ) {
+    final query = SearchWidgetState.query;
+    final locale = Localizations.localeOf(context);
+    final cachedSectionOrder = _cachedSectionOrder;
+    if (_cachedSectionOrderQuery == query &&
+        _cachedSectionOrderLocale == locale &&
+        cachedSectionOrder != null) {
+      return cachedSectionOrder;
+    }
+
+    final sectionOrder = _sectionOrderForQuery(context, query);
+    _cachedSectionOrderQuery = query;
+    _cachedSectionOrderLocale = locale;
+    _cachedSectionOrder = sectionOrder;
+    return sectionOrder;
   }
 }
 
@@ -355,6 +374,8 @@ final RegExp _cameraFilenamePrefixRegex = RegExp(
   r"^(?:dsc(?:[_\d]|n|f)|\d{8}_)",
 );
 
+final RegExp _whitespaceRegex = RegExp(r"\s+");
+
 List<_SearchResultsSection> _sectionOrderForQuery(
   BuildContext context,
   String query,
@@ -388,7 +409,7 @@ bool _looksLikeFileQuery(BuildContext context, String query) {
   return FileType.values.any((fileType) {
     final typeName = getHumanReadableString(context, fileType).toLowerCase();
     return typeName.startsWith(query) ||
-        typeName.split(RegExp(r"\s+")).any((part) => part.startsWith(query));
+        typeName.split(_whitespaceRegex).any((part) => part.startsWith(query));
   });
 }
 
