@@ -18,7 +18,7 @@ class InstallSourceProvider(private val context: Context) {
 
     fun hasInstallSource(result: MethodChannel.Result) {
         getInstallSource { source ->
-            result.success(source?.hasReferrer == true)
+            result.success(source?.hasNonOrganicReferrer == true)
         }
     }
 

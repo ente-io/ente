@@ -9,6 +9,11 @@ data class InstallSource(
     val referrerParams: Map<String, String>,
 ) {
     val hasReferrer: Boolean get() = referrerParams.isNotEmpty()
+    val hasNonOrganicReferrer: Boolean
+        get() = hasReferrer && !(
+            referrerParams["utm_source"] == "google-play" &&
+                referrerParams["utm_medium"] == "organic"
+            )
 }
 
 class InstallSourceEventStore(private val context: Context) {
