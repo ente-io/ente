@@ -6,19 +6,15 @@ import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/button_result.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/media_store_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/components/buttons/button_widget.dart'
-    show ButtonAction;
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/viewer/file/file_details_widget.dart';
 import "package:photos/utils/delete_file_util.dart";
-import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/panorama_util.dart";
 
 Future<void> showSingleFileDeleteSheet(
@@ -36,7 +32,7 @@ Future<void> showSingleFileDeleteSheet(
       return;
     }
     if (Platform.isAndroid && await MediaStoreService.canManageMedia()) {
-      await showBottomSheetComponent<ButtonResult>(
+      await showBottomSheetComponent<bool>(
         context: context,
         useRootNavigator: Platform.isIOS,
         builder: (_) => DeleteConfirmationSheet(
@@ -72,7 +68,7 @@ Future<void> showSingleFileDeleteSheet(
   if (!isLocal && !isRemote) {
     throw AssertionError("Unexpected state");
   }
-  final actionResult = await showBottomSheetComponent<ButtonResult>(
+  final didDelete = await showBottomSheetComponent<bool>(
     context: context,
     useRootNavigator: Platform.isIOS,
     builder: (_) => DeleteConfirmationSheet(
@@ -101,15 +97,8 @@ Future<void> showSingleFileDeleteSheet(
       },
     ),
   );
-  if (isLocal) {
+  if (didDelete == true && isLocal) {
     await showMediaManagementHintSheet(context);
-  }
-  if (actionResult?.action != null &&
-      actionResult!.action == ButtonAction.error) {
-    await showGenericErrorDialog(
-      context: context,
-      error: actionResult.exception,
-    );
   }
 }
 

@@ -882,7 +882,7 @@ Future<void> showDeleteSheet(
       showShortToast(context, l10n.noDeviceThatCanBeDeleted);
       return;
     }
-    ButtonResult? actionResult;
+    var didDelete = false;
     if (Platform.isAndroid && await MediaStoreService.canManageMedia()) {
       final hasVideos = localGalleryDeletableFiles.any(
         (file) => file.fileType == FileType.video,
@@ -890,34 +890,38 @@ Future<void> showDeleteSheet(
       final hasPhotos = localGalleryDeletableFiles.any(
         (file) => file.fileType != FileType.video,
       );
-      actionResult = await showBottomSheetComponent<ButtonResult>(
-        context: context,
-        useRootNavigator: Platform.isIOS,
-        builder: (_) => DeleteConfirmationSheet(
-          count: localGalleryDeletableFiles.length,
-          hasPhotos: hasPhotos,
-          hasVideos: hasVideos,
-          isLocal: true,
-          isRemote: false,
-          onDeleteFromLocal: () async {
-            await deleteOnDeviceOnlyAction(context, localGalleryDeletableFiles);
-          },
-          onDeleteFromRemote: () async {
-            throw AssertionError("delete from remote in local gallery mode");
-          },
-          onDeleteFromBoth: () async {
-            throw AssertionError("delete from both in local gallery mode");
-          },
-        ),
-      );
+      didDelete =
+          await showBottomSheetComponent<bool>(
+            context: context,
+            useRootNavigator: Platform.isIOS,
+            builder: (_) => DeleteConfirmationSheet(
+              count: localGalleryDeletableFiles.length,
+              hasPhotos: hasPhotos,
+              hasVideos: hasVideos,
+              isLocal: true,
+              isRemote: false,
+              onDeleteFromLocal: () async {
+                await deleteOnDeviceOnlyAction(
+                  context,
+                  localGalleryDeletableFiles,
+                );
+              },
+              onDeleteFromRemote: () async {
+                throw AssertionError(
+                  "delete from remote in local gallery mode",
+                );
+              },
+              onDeleteFromBoth: () async {
+                throw AssertionError("delete from both in local gallery mode");
+              },
+            ),
+          ) ==
+          true;
     } else {
       await deleteOnDeviceOnlyAction(context, localGalleryDeletableFiles);
+      didDelete = true;
     }
-    if (actionResult?.action == ButtonAction.error) {
-      await showGenericErrorDialog(
-        context: context,
-        error: actionResult!.exception,
-      );
+    if (!didDelete) {
       return;
     }
     selectedFiles.unSelectAll(localGalleryDeletableFiles.toSet());
@@ -951,7 +955,7 @@ Future<void> showDeleteSheet(
     );
   }
 
-  final actionResult = await showBottomSheetComponent<ButtonResult>(
+  final actionResult = await showBottomSheetComponent<bool>(
     context: context,
     useRootNavigator: Platform.isIOS,
     builder: (_) => DeleteConfirmationSheet(
@@ -971,17 +975,11 @@ Future<void> showDeleteSheet(
       },
     ),
   );
-  if (hasLocalFiles) {
-    await showMediaManagementHintSheet(context);
-  }
-  if (actionResult?.action != null &&
-      actionResult!.action == ButtonAction.error) {
-    await showGenericErrorDialog(
-      context: context,
-      error: actionResult.exception,
-    );
-  } else {
+  if (actionResult == true) {
     selectedFiles.clearAll();
+    if (hasLocalFiles) {
+      await showMediaManagementHintSheet(context);
+    }
   }
 }
 
@@ -1130,13 +1128,17 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
       try {
         await callback();
         if (context.mounted) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         }
       } catch (error) {
         if (context.mounted) {
-          Navigator.of(
-            context,
-          ).pop(ButtonResult(ButtonAction.error, _toException(error)));
+          await showGenericErrorDialog(
+            context: context,
+            error: _toException(error),
+          );
+          if (context.mounted) {
+            Navigator.of(context).pop(false);
+          }
         }
         rethrow;
       }
