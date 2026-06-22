@@ -1,0 +1,1 @@
+- See skipped backup files by reason, like Deleted from Ente.
