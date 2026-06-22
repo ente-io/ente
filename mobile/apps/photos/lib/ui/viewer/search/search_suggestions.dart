@@ -322,6 +322,21 @@ const Set<String> _commonFileExtensions = {
   "webp",
 };
 
+const Set<String> _filenamePrefixes = {
+  ".",
+  "img_",
+  "img-",
+  "pxl_",
+  "screenshot_",
+  "screenshot-",
+  "vid_",
+  "vid-",
+};
+
+final RegExp _cameraFilenamePrefixRegex = RegExp(
+  r"^(?:dsc(?:[_\d]|n|f)|\d{8}_)",
+);
+
 List<_SearchResultsSection> _sectionOrderForQuery(
   BuildContext context,
   String query,
@@ -340,11 +355,8 @@ bool _looksLikeFileQuery(BuildContext context, String query) {
   if (query.isEmpty) {
     return false;
   }
-  if (query.startsWith(".") ||
-      query.startsWith("img_") ||
-      query.startsWith("pxl_") ||
-      query.startsWith("vid_") ||
-      query.startsWith("dsc")) {
+  if (_filenamePrefixes.any(query.startsWith) ||
+      _cameraFilenamePrefixRegex.hasMatch(query)) {
     return true;
   }
 
