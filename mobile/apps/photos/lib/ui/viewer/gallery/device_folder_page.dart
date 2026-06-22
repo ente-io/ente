@@ -23,7 +23,6 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -188,19 +187,24 @@ class BackupHeaderWidget extends StatefulWidget {
 
 class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   final _logger = Logger("_BackupHeaderWidgetState");
-  late Future<Set<IgnoredUploadReasonBucket>> _ignoredUploadBuckets;
+  Future<Set<IgnoredUploadReasonBucket>> _ignoredUploadBuckets = Future.value(
+    const <IgnoredUploadReasonBucket>{},
+  );
 
   @override
   void initState() {
     super.initState();
-    _refreshIgnoredState();
+    if (widget.shouldBackup) {
+      _refreshIgnoredState();
+    }
   }
 
   @override
   void didUpdateWidget(covariant BackupHeaderWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.deviceCollection.id != widget.deviceCollection.id ||
-        oldWidget.shouldBackup != widget.shouldBackup) {
+    if (widget.shouldBackup &&
+        (oldWidget.deviceCollection.id != widget.deviceCollection.id ||
+            !oldWidget.shouldBackup)) {
       _refreshIgnoredState();
     }
   }
@@ -374,7 +378,7 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
         availableBuckets: _ignoredUploadBuckets,
         selectedBucket: _selectedBucket,
         onBucketChanged: _onBucketChanged,
-        onResetIgnoredFiles: _resetVisibleIgnoredFiles,
+        onResetIgnoredFiles: _resetFilesInSelectedReason,
       ),
     );
     return GalleryBoundariesProvider(
@@ -409,7 +413,7 @@ class _SkippedDeviceFolderPageState extends State<SkippedDeviceFolderPage> {
     _reloadSkippedFiles("ignoredUploadFilterChanged:${bucket.name}");
   }
 
-  Future<void> _resetVisibleIgnoredFiles() async {
+  Future<void> _resetFilesInSelectedReason() async {
     final selectedBucket = _selectedBucket;
     if (selectedBucket == null) {
       return;
@@ -594,9 +598,9 @@ class _ResetIgnoredFilesSection extends StatelessWidget {
           style: textTheme.smallMuted,
         ),
         const SizedBox(height: 12),
-        ButtonWidgetV2(
-          buttonType: ButtonTypeV2.muted,
-          labelText: AppLocalizations.of(context).resetIgnoredFiles,
+        ButtonComponent(
+          variant: ButtonComponentVariant.secondary,
+          label: AppLocalizations.of(context).resetIgnoredFiles,
           onTap: onResetIgnoredFiles,
         ),
       ],
