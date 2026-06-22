@@ -82,6 +82,8 @@ dependencies:
     path: ../../packages/rust
   ente_strings:
     path: ../../packages/strings
+  ente_ui:
+    path: ../../packages/ui
   equatable: 2.0.7
   event_bus: 2.0.1
   exif_reader: 4.1.0

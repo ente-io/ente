@@ -271,7 +271,7 @@ _windowsLocalAuthenticationExceptionForLocalAuthException(
 Future<bool> requestAuthentication(
   BuildContext context,
   String defaultReason, {
-  required String macOSReason,
+  String? macOSReason,
   bool isOpeningApp = false,
   bool isAuthenticatingForInAppChange = false,
 }) async {
@@ -293,7 +293,9 @@ Future<bool> requestAuthentication(
     await _logLocalAuthState(localAuth);
     final l10n = context.strings;
     final result = await localAuth.authenticate(
-      localizedReason: Platform.isMacOS ? macOSReason : defaultReason,
+      localizedReason: Platform.isMacOS
+          ? (macOSReason ?? defaultReason)
+          : defaultReason,
       authMessages: [
         AndroidAuthMessages(
           cancelButton: l10n.androidCancelButton,

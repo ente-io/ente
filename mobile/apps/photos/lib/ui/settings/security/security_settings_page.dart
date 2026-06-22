@@ -260,7 +260,6 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       final bool result = await requestAuthentication(
         context,
         AppLocalizations.of(context).authToChangeLockscreenSetting,
-        macOSReason: AppLocalizations.of(context).authToChangeLockscreenSetting,
       );
       if (result) {
         await Navigator.of(context).push(

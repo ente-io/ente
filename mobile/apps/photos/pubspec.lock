@@ -735,7 +735,7 @@ packages:
     source: path
     version: "1.0.0"
   ente_ui:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       path: "../../packages/ui"
       relative: true

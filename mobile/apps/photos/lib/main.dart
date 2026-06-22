@@ -12,6 +12,7 @@ import "package:ente_lock_screen/ui/lock_screen.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_rust/ente_rust.dart";
 import "package:ente_strings/l10n/strings_localizations.dart";
+import "package:ente_ui/theme/theme_config.dart" as ente_ui;
 import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import 'package:flutter/foundation.dart';
 import "package:flutter/gestures.dart";
@@ -87,6 +88,7 @@ enum ForegroundStartupMode { normal, picker }
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
+  ente_ui.AppThemeConfig.initialize(ente_ui.EnteApp.photos);
   await initIsIPad();
   if (isIPad) {
     // Workaround for https://github.com/flutter/flutter/issues/177992
@@ -148,7 +150,11 @@ Future<void> _runInForeground(
           savedThemeMode,
           initialMediaExtensionAction: initialMediaExtensionAction,
         ),
-        lockScreen: LockScreen(Configuration.instance),
+        lockScreen: LockScreen(
+          Configuration.instance,
+          authReasonBuilder: (context) =>
+              AppLocalizations.of(context).authToViewYourMemories,
+        ),
         enabled:
             await LockScreenSettings.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),

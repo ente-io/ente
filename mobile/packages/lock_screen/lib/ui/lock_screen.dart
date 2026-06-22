@@ -18,7 +18,11 @@ import 'package:logging/logging.dart';
 class LockScreen extends StatefulWidget {
   final LockScreenHost config;
 
-  const LockScreen(this.config, {super.key});
+  /// Overrides the biometric prompt reason. Resolved at auth time so consumers
+  /// can supply an app-specific localized message; defaults to a shared string.
+  final String Function(BuildContext context)? authReasonBuilder;
+
+  const LockScreen(this.config, {this.authReasonBuilder, super.key});
 
   @override
   State<LockScreen> createState() => _LockScreenState();
@@ -320,7 +324,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
           ? false
           : await requestAuthentication(
               context,
-              context.strings.authToViewSecrets,
+              widget.authReasonBuilder?.call(context) ??
+                  context.strings.authToViewSecrets,
               macOSReason: context.strings.unlock,
               isOpeningApp: true,
             );
