@@ -84,7 +84,6 @@ class GalleryAppBarWidget extends StatefulWidget {
       sliverBuilder: (_) => GalleryAppBarWidget._(
         type,
         title,
-        subtitle,
         selectedFiles,
         subtitle: subtitle,
         deviceCollection: deviceCollection,
@@ -133,7 +132,6 @@ class GalleryAppBarWidget extends StatefulWidget {
   const GalleryAppBarWidget._(
     this.type,
     this.title,
-    this.subtitle,
     this.selectedFiles, {
     this.subtitle,
     this.deviceCollection,
