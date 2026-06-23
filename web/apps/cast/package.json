@@ -5,7 +5,8 @@
     "dependencies": {
         "ente-accounts": "*",
         "ente-base": "*",
-        "ente-media": "*"
+        "ente-media": "*",
+        "node-device-detector": "2.2.5"
     },
     "devDependencies": {
         "@types/chromecast-caf-receiver": "6.0.26",

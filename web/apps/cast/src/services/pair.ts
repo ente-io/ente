@@ -4,7 +4,10 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { wait } from "ente-utils/promise";
 import { nullToUndefined } from "ente-utils/transform";
+import DeviceDetector from "node-device-detector";
 import { z } from "zod";
+
+const deviceDetector = new DeviceDetector({ skipBotDetection: true });
 
 export interface Registration {
     /** A pairing code shown on the screen. A client can use this to connect. */
@@ -89,7 +92,10 @@ export const register = async (): Promise<Registration> => {
     let pairingCode: string | undefined;
     while (true) {
         try {
-            pairingCode = await registerDevice(publicKey);
+            pairingCode = await registerDevice({
+                publicKey,
+                deviceName: deviceNameFromUserAgent(navigator.userAgent),
+            });
         } catch (e) {
             log.error("Failed to register public key with server", e);
         }
@@ -106,16 +112,27 @@ export const register = async (): Promise<Registration> => {
  *
  * @returns A device code that can be used to pair with us.
  */
-const registerDevice = async (publicKey: string) => {
+const registerDevice = async (params: {
+    publicKey: string;
+    deviceName?: string;
+}) => {
     const res = await fetch(await apiURL("/cast/device-info"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({ publicKey }),
+        body: JSON.stringify(params),
     });
     ensureOk(res);
     return z.object({ deviceCode: z.string() }).parse(await res.json())
         .deviceCode;
 };
+
+const deviceNameFromUserAgent = (userAgent: string) => {
+    const { device, os } = deviceDetector.detect(userAgent);
+    return device.model || toTitleCase(device.type) || os.name || undefined;
+};
+
+const toTitleCase = (value: string) =>
+    value ? value[0]!.toUpperCase() + value.slice(1) : "";
 
 /**
  * The structure of the (decrypted) payload that is published (e.g.) by

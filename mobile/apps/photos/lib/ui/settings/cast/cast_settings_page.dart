@@ -6,9 +6,9 @@ import "package:photos/core/network/network.dart";
 import "package:photos/gateways/cast/cast_gateway.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/components/settings_item.dart";
 import "package:photos/ui/settings/components/settings_page_scaffold.dart";
-import "package:photos/utils/dialog_util.dart";
 import 'package:timeago/timeago.dart' as timeago;
 
 class CastSettingsPage extends StatefulWidget {
@@ -31,9 +31,10 @@ class _CastSettingsPageState extends State<CastSettingsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final gw = CastGateway(NetworkClient.instance.enteDio);
+    final textTheme = getEnteTextTheme(context);
 
     return SettingsPageScaffold(
-      title: l10n.cast,
+      title: l10n.castSessions,
       children: [
         FutureBuilder(
           future: _castSessionsFuture,
@@ -44,13 +45,25 @@ class _CastSettingsPageState extends State<CastSettingsPage> {
             if (snapshot.hasError) {
               throw snapshot.error!;
             }
-
             if (!snapshot.hasData || snapshot.data == null) {
               throw Exception(
                 "There is no data returned by getAllCastSessions",
               );
             }
-
+            if (snapshot.data!.isEmpty) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.5 - 200,
+                  ),
+                  Image.asset("assets/empty_casts.png"),
+                  const SizedBox(height: 16),
+                  Text(l10n.noSessionsFound, style: textTheme.h4Bold),
+                ],
+              );
+            }
             return Column(
               children: snapshot.data!
                   .map((session) {
@@ -61,13 +74,14 @@ class _CastSettingsPageState extends State<CastSettingsPage> {
                         session.collectionID.toString();
                     return [
                       SettingsItem(
-                        title: "$title on ${session.deviceIP}",
+                        title:
+                            "$title on ${session.deviceName ?? session.deviceIP}",
                         subtitle: timeago.format(session.lastUsedAt),
-                        icon: HugeIcons.strokeRoundedTv01,
+                        icon: HugeIcons.strokeRoundedTvSmart,
+                        showOnlyLoadingState: true,
                         trailing: IconButtonComponent(
-                          icon: HugeIcon(
+                          icon: const HugeIcon(
                             icon: HugeIcons.strokeRoundedCancel01,
-                            color: context.componentColors.warning,
                             size: IconSizes.small,
                             strokeWidth: 1.6,
                           ),
@@ -91,18 +105,25 @@ class _CastSettingsPageState extends State<CastSettingsPage> {
 
   Future<void> _revokeSession(CastGateway gw, CastInfo session) async {
     final l10n = AppLocalizations.of(context);
-    final result = await showChoiceDialog(
-      context,
-      title: l10n.stopCastingTitle,
-      body: l10n.stopCastingBody,
-      firstButtonLabel: l10n.yes,
-      secondButtonLabel: l10n.no,
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (sheetContext) => BottomSheetComponent(
+        title: l10n.stopCastingTitle,
+        message: l10n.stopCastingBody,
+        illustration: Image.asset("assets/warning-grey.png"),
+        actions: [
+          ButtonComponent(
+            label: l10n.stopCastingTitle,
+            variant: ButtonComponentVariant.critical,
+            onTap: () async {
+              Navigator.of(sheetContext).pop();
+              await gw.revokeSession(session);
+              await _refresh();
+            },
+          ),
+        ],
+      ),
     );
-    if (result?.action != .first) {
-      return;
-    }
-    await gw.revokeSession(session);
-    await _refresh();
   }
 
   Future<List<CastInfo>> _load() {

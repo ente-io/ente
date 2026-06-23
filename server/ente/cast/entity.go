@@ -11,7 +11,8 @@ type CastRequest struct {
 }
 
 type RegisterDeviceRequest struct {
-	PublicKey string `json:"publicKey" binding:"required"`
+	PublicKey  string  `json:"publicKey" binding:"required"`
+	DeviceName *string `json:"deviceName"`
 }
 
 type AuthContext struct {
@@ -24,4 +25,5 @@ type CastInfo struct {
 	CollectionID int64     `json:"collectionID"`
 	DeviceIP     string    `json:"deviceIP"`
 	LastUsedAt   int64     `json:"lastUsedAt"`
+	DeviceName   *string   `json:"deviceName"`
 }
