@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: ente_cast,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,protobuf,video_player_avfoundation,watcher,win32,log_viewer,native_video_editor,ente_qr_ui,ente_icons,ente_rust,ente_pure_utils,backup_exclusion,ente_contacts,ente_qr
+# melos_managed_dependency_overrides: ente_cast,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,protobuf,video_player_avfoundation,watcher,win32,log_viewer,native_video_editor,ente_qr_ui,ente_icons,ente_rust,ente_pure_utils,backup_exclusion,ente_contacts,ente_qr,ente_accounts,ente_base,ente_configuration,ente_crypto_api,ente_events,ente_lock_screen,ente_logging,ente_network,ente_screen_cover,ente_strings,ente_ui,ente_utils,local_auth_linux
 dependency_overrides:
   ente_cast:
     path: plugins/ente_cast
@@ -47,3 +47,29 @@ dependency_overrides:
     path: ../../packages/ente_qr
   ente_components:
     path: ../../packages/ente_components
+  ente_accounts:
+    path: ../../packages/accounts
+  ente_base:
+    path: ../../packages/base
+  ente_configuration:
+    path: ../../packages/configuration
+  ente_crypto_api:
+    path: ../../packages/ente_crypto_api
+  ente_events:
+    path: ../../packages/events
+  ente_lock_screen:
+    path: ../../packages/lock_screen
+  ente_logging:
+    path: ../../packages/logging
+  ente_network:
+    path: ../../packages/network
+  ente_screen_cover:
+    path: ../../packages/screen_cover
+  ente_strings:
+    path: ../../packages/strings
+  ente_ui:
+    path: ../../packages/ui
+  ente_utils:
+    path: ../../packages/utils
+  local_auth_linux:
+    path: ../../packages/local_auth_linux

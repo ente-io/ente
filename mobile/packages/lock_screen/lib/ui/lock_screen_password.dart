@@ -1,6 +1,3 @@
-import "dart:convert";
-
-import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_confirm_password.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
@@ -93,7 +90,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
         ),
         centerTitle: true,
         title: SvgPicture.asset(
-          'assets/svg/app-logo.svg',
+          LockScreenSettings.instance.appLogoAsset,
+          height: LockScreenSettings.instance.appLogoHeight,
           colorFilter: ColorFilter.mode(colorTheme.primary700, BlendMode.srcIn),
         ),
       ),
@@ -167,14 +165,17 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   }
 
   Future<bool> _confirmPasswordAuth(String inputtedPassword) async {
-    final Uint8List? salt = await _lockscreenSetting.getSalt();
-    final hash = CryptoUtil.cryptoPwHash(
-      utf8.encode(inputtedPassword),
-      salt!,
-      CryptoUtil.pwhashMemLimitInteractive,
-      CryptoUtil.pwhashOpsLimitSensitive,
-    );
-    if (widget.authPass == base64Encode(hash)) {
+    final matched = _lockscreenSetting.useLegacyHashFallback
+        ? await _lockscreenSetting.verifyWithLegacyFallback(
+            text: inputtedPassword,
+            storedHash: widget.authPass,
+            storageKey: LockScreenSettings.password,
+          )
+        : await _lockscreenSetting.verify(
+            text: inputtedPassword,
+            storedHash: widget.authPass,
+          );
+    if (matched) {
       await _lockscreenSetting.setInvalidAttemptCount(0);
 
       widget.isAuthenticatingOnAppLaunch ||

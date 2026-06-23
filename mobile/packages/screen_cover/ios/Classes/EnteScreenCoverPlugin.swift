@@ -32,7 +32,7 @@ public class EnteScreenCoverPlugin: NSObject, FlutterPlugin {
         observing = true
         NotificationCenter.default.addObserver(
             self, selector: #selector(showOverlay),
-            name: UIApplication.willResignActiveNotification, object: nil
+            name: UIApplication.didEnterBackgroundNotification, object: nil
         )
         NotificationCenter.default.addObserver(
             self, selector: #selector(hideOverlay),
@@ -49,8 +49,8 @@ public class EnteScreenCoverPlugin: NSObject, FlutterPlugin {
 
     @objc private func showOverlay() {
         guard overlay == nil, let window = keyWindow() else { return }
-        let cover = UIView(frame: window.bounds)
-        cover.backgroundColor = .black
+        let cover = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
+        cover.frame = window.bounds
         cover.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         window.addSubview(cover)
         overlay = cover

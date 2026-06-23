@@ -5,8 +5,14 @@ import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
 import "package:ente_components/ente_components.dart" as components;
 import 'package:ente_crypto/ente_crypto.dart';
+import "package:ente_crypto_api/ente_crypto_api.dart" show registerCryptoApi;
+import "package:ente_lock_screen/lock_screen_settings.dart";
+import "package:ente_lock_screen/ui/app_lock.dart";
+import "package:ente_lock_screen/ui/lock_screen.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_rust/ente_rust.dart";
+import "package:ente_strings/l10n/strings_localizations.dart";
+import "package:ente_ui/theme/theme_config.dart" as ente_ui;
 import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import 'package:flutter/foundation.dart';
 import "package:flutter/gestures.dart";
@@ -29,6 +35,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
@@ -52,14 +59,12 @@ import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/services/wake_lock_service.dart";
-import "package:photos/settings/lock_screen_settings.dart";
 import "package:photos/src/rust/frb_generated.dart";
-import 'package:photos/ui/tools/app_lock.dart';
-import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/intent_util.dart";
+import "package:photos/utils/photos_crypto_api_adapter.dart";
 import 'package:rive/rive.dart' as rive;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -83,6 +88,7 @@ enum ForegroundStartupMode { normal, picker }
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
+  ente_ui.AppThemeConfig.initialize(ente_ui.EnteApp.photos);
   await initIsIPad();
   if (isIPad) {
     // Workaround for https://github.com/flutter/flutter/issues/177992
@@ -144,11 +150,23 @@ Future<void> _runInForeground(
           savedThemeMode,
           initialMediaExtensionAction: initialMediaExtensionAction,
         ),
-        lockScreen: const LockScreen(),
+        lockScreen: LockScreen(
+          Configuration.instance,
+          authReasonBuilder: (context) =>
+              AppLocalizations.of(context).authToViewYourMemories,
+          onLogout: (context) => UserService.instance.logout(context),
+        ),
         enabled:
             await LockScreenSettings.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
+        onUnlock: () => unawaited(localSettings.setOnGuestView(false)),
         locale: locale,
+        supportedLocales: appSupportedLocales,
+        localizationsDelegates: const [
+          StringsLocalizations.delegate,
+          ...AppLocalizations.localizationsDelegates,
+        ],
+        localeListResolutionCallback: localResolutionCallBack,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
         savedThemeMode: _themeMode(savedThemeMode),
@@ -407,12 +425,19 @@ Future<void> _init(
       packageInfo,
     );
 
-    _logger.info("Lockscreen init $tlog");
-    LockScreenSettings.instance.init(preferences);
-
     _logger.info("Configuration init $tlog");
     await Configuration.instance.init(preferences);
     _logger.info("Configuration done $tlog");
+
+    _logger.info("Lockscreen init $tlog");
+    registerCryptoApi(const PhotosCryptoApiAdapter());
+    await LockScreenSettings.instance.init(
+      Configuration.instance,
+      useLegacyHashFallback: true,
+      hasOptedForOfflineMode: isLocalGalleryMode,
+      appLogoAsset: 'assets/ente-branding.svg',
+      appLogoHeight: 18,
+    );
 
     await MemoryShareService.instance.init();
 

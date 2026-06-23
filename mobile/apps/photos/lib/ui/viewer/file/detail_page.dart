@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math";
 
+import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:extended_image/extended_image.dart';
 import "package:flutter/foundation.dart";
@@ -19,7 +20,6 @@ import "package:photos/models/file/trash_file.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/local_authentication_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/notification/toast.dart';

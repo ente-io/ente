@@ -38,6 +38,9 @@ class AppLock extends StatefulWidget {
   final List<LocalizationsDelegate<dynamic>> localizationsDelegates;
   final LocaleListResolutionCallback? localeListResolutionCallback;
 
+  /// Invoked on each successful unlock (launch, resume, or manual).
+  final VoidCallback? onUnlock;
+
   const AppLock({
     super.key,
     required this.builder,
@@ -51,6 +54,7 @@ class AppLock extends StatefulWidget {
     this.backgroundLockLatency = const Duration(seconds: 0),
     this.darkTheme,
     this.lightTheme,
+    this.onUnlock,
   });
 
   static _AppLockState? of(BuildContext context) =>
@@ -164,6 +168,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   /// [lockScreen] in to the rest of your app so you can better guarantee that some
   /// objects, services or databases are already instantiated before using them.
   void didUnlock([Object? args]) {
+    this.widget.onUnlock?.call();
     if (this._didUnlockForAppLaunch) {
       this._didUnlockOnAppPaused();
     } else {

@@ -75,7 +75,8 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
         ),
         centerTitle: true,
         title: SvgPicture.asset(
-          'assets/svg/app-logo.svg',
+          LockScreenSettings.instance.appLogoAsset,
+          height: LockScreenSettings.instance.appLogoHeight,
           colorFilter: ColorFilter.mode(colorTheme.primary700, BlendMode.srcIn),
         ),
       ),

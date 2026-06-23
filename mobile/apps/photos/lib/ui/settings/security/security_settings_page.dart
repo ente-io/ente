@@ -3,6 +3,9 @@ import "dart:typed_data";
 
 import "package:ente_components/ente_components.dart";
 import "package:ente_crypto/ente_crypto.dart";
+import "package:ente_lock_screen/auth_util.dart";
+import "package:ente_lock_screen/local_authentication_service.dart";
+import "package:ente_lock_screen/ui/lock_screen_options.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -18,14 +21,11 @@ import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/passkey_service.dart";
 import "package:photos/services/account/user_service.dart";
-import "package:photos/services/local_authentication_service.dart";
 import "package:photos/ui/account/request_pwd_verification_page.dart";
 import "package:photos/ui/account/sessions_page.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/settings/components/settings_item.dart";
 import "package:photos/ui/settings/components/settings_page_scaffold.dart";
-import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
-import "package:photos/utils/auth_util.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class SecuritySettingsPage extends StatefulWidget {

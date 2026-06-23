@@ -1,7 +1,5 @@
-import "dart:convert";
 import "dart:io";
 
-import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/custom_pin_keypad.dart";
 import "package:ente_lock_screen/ui/lock_screen_confirm_pin.dart";
@@ -65,14 +63,17 @@ class _LockScreenPinState extends State<LockScreenPin> {
   }
 
   Future<bool> confirmPinAuth(String inputtedPin) async {
-    final Uint8List? salt = await _lockscreenSetting.getSalt();
-    final hash = CryptoUtil.cryptoPwHash(
-      utf8.encode(inputtedPin),
-      salt!,
-      CryptoUtil.pwhashMemLimitInteractive,
-      CryptoUtil.pwhashOpsLimitSensitive,
-    );
-    if (widget.authPin == base64Encode(hash)) {
+    final matched = _lockscreenSetting.useLegacyHashFallback
+        ? await _lockscreenSetting.verifyWithLegacyFallback(
+            text: inputtedPin,
+            storedHash: widget.authPin,
+            storageKey: LockScreenSettings.pin,
+          )
+        : await _lockscreenSetting.verify(
+            text: inputtedPin,
+            storedHash: widget.authPin,
+          );
+    if (matched) {
       invalidAttemptsCount = 0;
       await _lockscreenSetting.setInvalidAttemptCount(0);
       widget.isAuthenticatingOnAppLaunch ||
@@ -150,7 +151,8 @@ class _LockScreenPinState extends State<LockScreenPin> {
         ),
         centerTitle: true,
         title: SvgPicture.asset(
-          'assets/svg/app-logo.svg',
+          LockScreenSettings.instance.appLogoAsset,
+          height: LockScreenSettings.instance.appLogoHeight,
           colorFilter: ColorFilter.mode(colorTheme.primary700, BlendMode.srcIn),
         ),
       ),

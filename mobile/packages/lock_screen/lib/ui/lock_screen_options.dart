@@ -67,7 +67,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     if (await LocalAuthenticationService.instance
         .isLocalAuthSupportedOnDevice()) {
       await _lockScreenSettings.removePinAndPassword();
-      await _lockScreenSettings.setSystemLockScreen(!isSystemLockEnabled);
+      await _lockScreenSettings.setSystemLockScreen(true);
     } else {
       final linuxStatus = await LocalAuthenticationService.instance
           .getLinuxLocalAuthSetupStatus();
@@ -94,7 +94,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   }
 
   Future<void> _pinLock() async {
-    final bool result = await Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return const LockScreenPin();
@@ -102,7 +102,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       ),
     );
 
-    if (result) {
+    if (result == true) {
       await _lockScreenSettings.setSystemLockScreen(false);
       await _lockScreenSettings.setAppLockEnabled(true);
       setState(() {
@@ -113,15 +113,16 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   }
 
   Future<void> _passwordLock() async {
-    final bool result = await Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return const LockScreenPassword();
         },
       ),
     );
-    if (result) {
+    if (result == true) {
       await _lockScreenSettings.setSystemLockScreen(false);
+      await _lockScreenSettings.setAppLockEnabled(true);
       setState(() {
         appLock = _lockScreenSettings.getIsAppLockSet();
       });

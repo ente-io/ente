@@ -115,6 +115,10 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs photos set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
@@ -232,6 +236,10 @@ jobs:
 
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
 
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs photos set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"

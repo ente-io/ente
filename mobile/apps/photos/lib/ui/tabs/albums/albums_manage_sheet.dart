@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:collection/collection.dart";
 import "package:ente_components/ente_components.dart";
+import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -9,7 +10,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/hidden_service.dart";
-import "package:photos/services/local_authentication_service.dart";
 import "package:photos/ui/tabs/shared/all_links_page.dart";
 import "package:photos/ui/viewer/gallery/archive_page.dart";
 import "package:photos/ui/viewer/gallery/hidden_page.dart";

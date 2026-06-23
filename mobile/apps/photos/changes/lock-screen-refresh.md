@@ -1,0 +1,1 @@
+- Updated the app lock screen.

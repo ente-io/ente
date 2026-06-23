@@ -18,7 +18,16 @@ import 'package:logging/logging.dart';
 class LockScreen extends StatefulWidget {
   final LockScreenHost config;
 
-  const LockScreen(this.config, {super.key});
+  final String Function(BuildContext context)? authReasonBuilder;
+
+  final Future<void> Function(BuildContext context)? onLogout;
+
+  const LockScreen(
+    this.config, {
+    this.authReasonBuilder,
+    this.onLogout,
+    super.key,
+  });
 
   @override
   State<LockScreen> createState() => _LockScreenState();
@@ -184,7 +193,11 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       firstButtonLabel: context.strings.yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {
-        await UserService.instance.logout(context);
+        if (widget.onLogout != null) {
+          await widget.onLogout!(context);
+        } else {
+          await UserService.instance.logout(context);
+        }
         // To start the app afresh, resetting all state.
         Process.killPid(pid, ProcessSignal.sigkill);
       },
@@ -320,7 +333,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
           ? false
           : await requestAuthentication(
               context,
-              context.strings.authToViewSecrets,
+              widget.authReasonBuilder?.call(context) ??
+                  context.strings.authToViewSecrets,
               macOSReason: context.strings.unlock,
               isOpeningApp: true,
             );
