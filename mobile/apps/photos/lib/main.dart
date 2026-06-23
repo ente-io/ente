@@ -163,7 +163,7 @@ Future<void> _runInForeground(
         locale: locale,
         supportedLocales: appSupportedLocales,
         localizationsDelegates: const [
-          ...StringsLocalizations.localizationsDelegates,
+          StringsLocalizations.delegate,
           ...AppLocalizations.localizationsDelegates,
         ],
         localeListResolutionCallback: localResolutionCallBack,

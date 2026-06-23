@@ -122,6 +122,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     );
     if (result == true) {
       await _lockScreenSettings.setSystemLockScreen(false);
+      await _lockScreenSettings.setAppLockEnabled(true);
       setState(() {
         appLock = _lockScreenSettings.getIsAppLockSet();
       });
