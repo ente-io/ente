@@ -1,0 +1,1 @@
+- Fix the uneven spacing issue in local gallery on the search tab.

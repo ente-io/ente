@@ -199,7 +199,6 @@ class _ContactsSectionState extends State<ContactsSection> {
 
 class ContactRecommendation extends StatefulWidget {
   static const _avatarSize = 62.0;
-  static const _minHeight = 92.0;
 
   final GenericSearchResult contactSearchResult;
   const ContactRecommendation(this.contactSearchResult, {super.key});
@@ -227,38 +226,33 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
           routeToPage(context, ContactResultPage(widget.contactSearchResult));
         }
       },
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: ContactRecommendation._minHeight,
-        ),
-        child: SizedBox(
-          width: 92,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ClipOval(
-                child: SizedBox(
-                  width: ContactRecommendation._avatarSize,
-                  height: ContactRecommendation._avatarSize,
-                  child: ContactAvatarWidget(
-                    contactUserId: contactUserId,
-                    email: contactEmail,
-                    personId: personId,
-                    size: ContactRecommendation._avatarSize,
-                  ),
+      child: SizedBox(
+        width: 92,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ClipOval(
+              child: SizedBox(
+                width: ContactRecommendation._avatarSize,
+                height: ContactRecommendation._avatarSize,
+                child: ContactAvatarWidget(
+                  contactUserId: contactUserId,
+                  email: contactEmail,
+                  personId: personId,
+                  size: ContactRecommendation._avatarSize,
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                widget.contactSearchResult.name(),
-                style: TextStyles.mini.copyWith(color: colors.textBase),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              widget.contactSearchResult.name(),
+              style: TextStyles.mini.copyWith(color: colors.textBase),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
