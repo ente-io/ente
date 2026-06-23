@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: ente_cast,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,protobuf,video_player_avfoundation,watcher,win32,log_viewer,native_video_editor,ente_qr_ui,ente_icons,ente_rust,ente_pure_utils,backup_exclusion,ente_contacts,ente_qr,ente_accounts,ente_base,ente_configuration,ente_crypto_api,ente_events,ente_lock_screen,ente_logging,ente_network,ente_screen_cover,ente_strings,ente_ui,ente_utils,local_auth_linux
+# melos_managed_dependency_overrides: ente_cast,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,video_player_avfoundation,watcher,win32,log_viewer,native_video_editor,ente_qr_ui,ente_icons,ente_rust,ente_pure_utils,backup_exclusion,ente_contacts,ente_qr,ente_accounts,ente_base,ente_configuration,ente_crypto_api,ente_events,ente_lock_screen,ente_logging,ente_network,ente_screen_cover,ente_strings,ente_ui,ente_utils,local_auth_linux
 dependency_overrides:
   ente_cast:
     path: plugins/ente_cast
@@ -19,7 +19,6 @@ dependency_overrides:
     git:
       url: https://github.com/deckerst/aves_panorama_motion_sensors.git
       ref: 4b11d59f4bda152627f701070272f657f8358e67
-  protobuf: 3.1.0
   video_player_avfoundation:
     git:
       url: https://github.com/ente-io/packages.git
