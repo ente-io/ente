@@ -94,13 +94,10 @@ void main() {
         expect(find.byType(BottomSheetComponent), findsOneWidget);
         _expectDeleteWarningIllustration('assets/warning-red.png');
         expect(
-          find.text(
-            'This photo is saved on this device and backed up to Ente. '
-            'It will be removed from all albums.',
-          ),
+          find.text('This item is available on your device and Ente.'),
           findsOneWidget,
         );
-        expect(find.text('Delete photo?'), findsOneWidget);
+        expect(find.text('Delete item?'), findsOneWidget);
         expect(find.byType(RadioComponent), findsNothing);
         expect(find.byType(MenuGroupComponent), findsNothing);
         expect(find.byType(MenuComponent), findsNothing);
@@ -136,6 +133,54 @@ void main() {
         ]);
       },
     );
+
+    testWidgets('plural delete sheet copy matches deletion context', (
+      tester,
+    ) async {
+      final mixedFiles = [
+        _file(generatedID: 17, uploadedID: 27, localID: 'local-17'),
+        _file(generatedID: 18, uploadedID: 28, localID: 'local-18'),
+      ];
+      final mixedSelection = SelectedFiles()..selectAll(mixedFiles.toSet());
+      await _pumpDeleteSheet(
+        tester,
+        selectedFiles: mixedSelection,
+        split: FilesSplit(
+          pendingUploads: const [],
+          ownedByCurrentUser: mixedFiles,
+          ownedByOtherUsers: const [],
+        ),
+      );
+      expect(find.text('Delete 2 items?'), findsOneWidget);
+      expect(
+        find.text('These items are available on device and Ente.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+      final remoteFiles = [
+        _file(generatedID: 19, uploadedID: 29),
+        _file(generatedID: 20, uploadedID: 30),
+      ];
+      final remoteSelection = SelectedFiles()..selectAll(remoteFiles.toSet());
+      await _pumpDeleteSheet(
+        tester,
+        selectedFiles: remoteSelection,
+        split: FilesSplit(
+          pendingUploads: const [],
+          ownedByCurrentUser: remoteFiles,
+          ownedByOtherUsers: const [],
+        ),
+      );
+      expect(find.text('Delete 2 items?'), findsOneWidget);
+      expect(
+        find.text(
+          'These items will be deleted from all albums. '
+          'You can recover them from Trash.',
+        ),
+        findsOneWidget,
+      );
+    });
 
     testWidgets(
       'mixed delete from Ente choice uses the remote delete path and clears selection',
@@ -254,12 +299,13 @@ void main() {
 
       expect(
         find.text(
-          'This photo is backed up to Ente. It will be removed from all albums.',
+          'This item will be deleted from all albums. '
+          'You can recover it from Trash.',
         ),
         findsOneWidget,
       );
       _expectDeleteWarningIllustration('assets/warning-red.png');
-      expect(find.text('Delete photo?'), findsOneWidget);
+      expect(find.text('Delete item?'), findsOneWidget);
       expect(find.text('They will be deleted from all albums.'), findsNothing);
       expect(find.byType(ButtonComponent), findsOneWidget);
       final deleteButton = tester.widget<ButtonComponent>(
@@ -290,11 +336,11 @@ void main() {
       );
 
       expect(
-        find.text('This photo is saved on this device only.'),
+        find.text('Item not backed up. Permanently delete from device?'),
         findsOneWidget,
       );
       _expectDeleteWarningIllustration('assets/warning-red.png');
-      expect(find.text('Delete photo?'), findsOneWidget);
+      expect(find.text('Delete item?'), findsOneWidget);
       expect(find.text('They will be deleted from all albums.'), findsNothing);
       expect(find.byType(ButtonComponent), findsOneWidget);
       final deleteButton = tester.widget<ButtonComponent>(

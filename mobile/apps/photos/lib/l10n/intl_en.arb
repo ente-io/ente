@@ -441,34 +441,15 @@
   "uncategorized": "Uncategorized",
   "videoSmallCase": "video",
   "photoSmallCase": "photo",
-  "videosSmallCase": "videos",
-  "photosSmallCase": "photos",
-  "itemsSmallCase": "items",
   "singleFileDeleteHighlight": "It will be deleted from all albums.",
-  "singleFileInBothLocalAndRemote": "This {fileType} is saved on this device and backed up to Ente. It will be removed from all albums.",
-  "singleFileInRemoteOnly": "This {fileType} is backed up to Ente. It will be removed from all albums.",
-  "singleFileDeleteFromDevice": "This {fileType} is saved on this device only.",
+  "singleFileInBothLocalAndRemote": "This {fileType} is available on your device and Ente.",
+  "singleFileInRemoteOnly": "This {fileType} will be deleted from all albums. You can recover it from Trash.",
+  "singleFileDeleteFromDevice": "{fileType} not backed up. Permanently delete from device?",
   "deleteFileQuestion": "Delete {fileType}?",
   "@deleteFileQuestion": {
     "placeholders": {
       "fileType": {
         "type": "String"
-      }
-    }
-  },
-  "deletePhotosQuestion": "{count, plural, one {Delete photo?} other {Delete {count} photos?}}",
-  "@deletePhotosQuestion": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "deleteVideosQuestion": "{count, plural, one {Delete video?} other {Delete {count} videos?}}",
-  "@deleteVideosQuestion": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
@@ -480,7 +461,7 @@
       }
     }
   },
-  "selectedFilesSavedOnDeviceOnly": "These {fileTypes} are saved on this device only.",
+  "selectedFilesSavedOnDeviceOnly": "{fileTypes} not backed up. Permanently delete from device?",
   "@selectedFilesSavedOnDeviceOnly": {
     "placeholders": {
       "fileTypes": {
@@ -488,7 +469,7 @@
       }
     }
   },
-  "selectedFilesBackedUpToEnte": "These {fileTypes} are backed up to Ente. They will be removed from all albums.",
+  "selectedFilesBackedUpToEnte": "These {fileTypes} will be deleted from all albums. You can recover them from Trash.",
   "@selectedFilesBackedUpToEnte": {
     "placeholders": {
       "fileTypes": {
@@ -496,7 +477,7 @@
       }
     }
   },
-  "someSelectedFilesBackedUpToEnte": "Some {fileTypes} are backed up to Ente. They will be removed from all albums.",
+  "someSelectedFilesBackedUpToEnte": "These {fileTypes} are available on device and Ente.",
   "@someSelectedFilesBackedUpToEnte": {
     "placeholders": {
       "fileTypes": {

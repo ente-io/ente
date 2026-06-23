@@ -1091,39 +1091,24 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    // Dialog copy
-    final title = widget.hasPhotos && widget.hasVideos
-        ? l10n.deleteItemsQuestion(count: widget.count)
-        : widget.hasVideos
-        ? l10n.deleteVideosQuestion(count: widget.count)
-        : l10n.deletePhotosQuestion(count: widget.count);
-    final fileType = widget.hasVideos
-        ? l10n.videoSmallCase
-        : l10n.photoSmallCase;
-    final fileTypes = widget.hasPhotos && widget.hasVideos
-        ? l10n.itemsSmallCase
-        : widget.hasVideos
-        ? l10n.videosSmallCase
-        : l10n.photosSmallCase;
+    final title = l10n.deleteItemsQuestion(count: widget.count);
     final body = widget.count == 1 && widget.isLocal && widget.isRemote
-        ? l10n.singleFileInBothLocalAndRemote(fileType: fileType)
+        ? l10n.singleFileInBothLocalAndRemote(fileType: "item")
         : widget.count == 1 && widget.isRemote
-        ? l10n.singleFileInRemoteOnly(fileType: fileType)
+        ? l10n.singleFileInRemoteOnly(fileType: "item")
         : widget.count == 1 && widget.isLocal
-        ? l10n.singleFileDeleteFromDevice(fileType: fileType)
+        ? l10n.singleFileDeleteFromDevice(fileType: "Item")
         : widget.isLocal && widget.isRemote
-        ? l10n.someSelectedFilesBackedUpToEnte(fileTypes: fileTypes)
+        ? l10n.someSelectedFilesBackedUpToEnte(fileTypes: "items")
         : widget.isRemote
-        ? l10n.selectedFilesBackedUpToEnte(fileTypes: fileTypes)
-        : l10n.selectedFilesSavedOnDeviceOnly(fileTypes: fileTypes);
-    // Default delete target
+        ? l10n.selectedFilesBackedUpToEnte(fileTypes: "items")
+        : l10n.selectedFilesSavedOnDeviceOnly(fileTypes: "Items");
     final deletePreference = (widget.isLocal && !widget.isRemote)
         ? DeletePreference.DeleteFromLocalOnly
         : (widget.isRemote && !widget.isLocal)
         ? DeletePreference.DeleteFromRemoteOnly
         : localSettings.getDeletePreference() ??
               DeletePreference.DeleteFromBoth;
-    // Shared delete runner
     Future<void> onDelete(Future<void> Function() callback) async {
       try {
         await callback();
