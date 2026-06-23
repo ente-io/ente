@@ -442,17 +442,9 @@
   "videoSmallCase": "video",
   "photoSmallCase": "photo",
   "singleFileDeleteHighlight": "It will be deleted from all albums.",
-  "singleFileInBothLocalAndRemote": "This {fileType} is available on your device and Ente.",
-  "singleFileInRemoteOnly": "This {fileType} will be deleted from all albums. You can recover it from Trash.",
-  "singleFileDeleteFromDevice": "{fileType} not backed up. Permanently delete from device?",
-  "deleteFileQuestion": "Delete {fileType}?",
-  "@deleteFileQuestion": {
-    "placeholders": {
-      "fileType": {
-        "type": "String"
-      }
-    }
-  },
+  "singleFileInBothLocalAndRemote": "This item is available on your device and Ente.",
+  "singleFileInRemoteOnly": "This item will be deleted from all albums. You can recover it from Trash.",
+  "singleFileDeleteFromDevice": "Item not backed up. Permanently delete from device?",
   "deleteItemsQuestion": "{count, plural, one {Delete item?} other {Delete {count} items?}}",
   "@deleteItemsQuestion": {
     "placeholders": {
@@ -461,30 +453,9 @@
       }
     }
   },
-  "selectedFilesSavedOnDeviceOnly": "{fileTypes} not backed up. Permanently delete from device?",
-  "@selectedFilesSavedOnDeviceOnly": {
-    "placeholders": {
-      "fileTypes": {
-        "type": "String"
-      }
-    }
-  },
-  "selectedFilesBackedUpToEnte": "These {fileTypes} will be deleted from all albums. You can recover them from Trash.",
-  "@selectedFilesBackedUpToEnte": {
-    "placeholders": {
-      "fileTypes": {
-        "type": "String"
-      }
-    }
-  },
-  "someSelectedFilesBackedUpToEnte": "These {fileTypes} are available on device and Ente.",
-  "@someSelectedFilesBackedUpToEnte": {
-    "placeholders": {
-      "fileTypes": {
-        "type": "String"
-      }
-    }
-  },
+  "selectedFilesSavedOnDeviceOnly": "Items not backed up. Permanently delete from device?",
+  "selectedFilesBackedUpToEnte": "These items will be deleted from all albums. You can recover them from Trash.",
+  "someSelectedFilesBackedUpToEnte": "These items are available on device and Ente.",
   "deleteFromEnte": "Delete from Ente",
   "yesDelete": "Yes, delete",
   "movedToTrash": "Moved to trash",

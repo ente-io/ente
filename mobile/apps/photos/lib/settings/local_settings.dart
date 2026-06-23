@@ -50,8 +50,7 @@ enum DeletePreference {
     return switch (value) {
       "delete_from_both" => DeleteFromBoth,
       "delete_from_local_only" => DeleteFromLocalOnly,
-      "delete_from_remote_only" ||
-      "delete_from_ente_only" => DeleteFromRemoteOnly,
+      "delete_from_remote_only" => DeleteFromRemoteOnly,
       _ => null,
     };
   }
@@ -112,9 +111,6 @@ class LocalSettings {
       "media_management_hint_delete_attempts";
   static const _kMediaManagementHintDismissedAt =
       "media_management_hint_dismissed_at";
-  static const _kMediaManagementHintDismissDuration = Duration(days: 7);
-  static const _kMediaManagementHintDeleteAttemptThreshold = 3;
-
   static const _kWidgetHideTextFlags = "ls.widget_hide_text_flags";
 
   /// Key used by the native (Android/iOS) widget providers to read the
@@ -634,7 +630,7 @@ class LocalSettings {
 
   bool hasMediaManagementHintDeleteAttemptsReached() {
     return _mediaManagementHintDeleteAttempts >=
-        _kMediaManagementHintDeleteAttemptThreshold;
+        mediaManagementHintDeleteAttemptThreshold;
   }
 
   bool get isMediaManagementHintDismissed {
@@ -642,7 +638,7 @@ class LocalSettings {
     if (dismissedAtMs == 0) return false;
     final elapsed = DateTime.now().millisecondsSinceEpoch - dismissedAtMs;
     return elapsed >= 0 &&
-        elapsed < _kMediaManagementHintDismissDuration.inMilliseconds;
+        elapsed < mediaManagementHintDismissDuration.inMilliseconds;
   }
 
   Future<void> incrementMediaManagementHintDeleteAttempts() async {
