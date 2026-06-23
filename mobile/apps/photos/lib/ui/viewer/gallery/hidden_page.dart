@@ -21,10 +21,10 @@ import "package:photos/settings/local_settings.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/empty_state_component.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/cleanup_hidden_files_widget.dart";
 import "package:photos/ui/viewer/gallery/cleanup_hidden_from_device_widget.dart";
-import "package:photos/ui/viewer/gallery/empty_hidden_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
@@ -211,7 +211,10 @@ class _HiddenPageState extends State<HiddenPage> {
       selectedFiles: _selectedFiles,
       initialFiles: null,
       emptyState: _hiddenCollectionsExcludingDefault.isEmpty
-          ? const EmptyHiddenWidget()
+          ? EmptyStateComponent(
+              assetPath: "assets/empty_state_hidden.png",
+              title: AppLocalizations.of(context).hiddenItemsWillShowUpHere,
+            )
           : const SizedBox.shrink(),
       header: Column(
         children: [

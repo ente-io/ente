@@ -77,7 +77,7 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
               iconColor: colors.primary,
               onTap: () async {
                 Navigator.of(sheetContext).pop();
-                unawaited(routeToPage(context, ArchivePage()));
+                unawaited(routeToPage(context, const ArchivePage()));
               },
             ),
             const SizedBox(height: 8),

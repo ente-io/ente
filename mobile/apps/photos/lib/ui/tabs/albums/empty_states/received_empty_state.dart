@@ -1,11 +1,10 @@
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/ui/common/backup_flow_helper.dart";
 import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
 
-class OnEnteEmptyState extends StatelessWidget {
-  const OnEnteEmptyState({super.key});
+class ReceivedEmptyState extends StatelessWidget {
+  const ReceivedEmptyState({super.key});
 
   static const _topPadding = 32.0;
   static const _sectionSpacing = 48.0;
@@ -18,9 +17,9 @@ class OnEnteEmptyState extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     final bottomPadding = 64 + MediaQuery.paddingOf(context).bottom + 32;
     final features = [
-      strings.albumsOnEnteEmptyFeatureAccessAnyDevice,
-      strings.albumsOnEnteEmptyFeatureShareLovedOnes,
-      strings.albumsOnEnteEmptyFeaturePrivacy,
+      strings.albumsReceivedEmptyFeatureSharedByOthers,
+      strings.albumsReceivedEmptyFeatureAcceptInvites,
+      strings.albumsReceivedEmptyFeatureSaveToLibrary,
     ];
 
     return Align(
@@ -30,14 +29,15 @@ class OnEnteEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset("assets/on_ente.png"),
-            const SizedBox(height: _sectionSpacing),
             SizedBox(
               width: _contentWidth,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  Image.asset("assets/shared.png", fit: BoxFit.contain),
+                  const SizedBox(height: _sectionSpacing),
                   Text(
-                    strings.albumsOnEnteEmptyTitle,
+                    strings.albumsReceivedEmptyTitle,
                     textAlign: TextAlign.center,
                     style: TextStyles.display2.copyWith(color: colors.textBase),
                   ),
@@ -57,14 +57,7 @@ class OnEnteEmptyState extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: _sectionSpacing),
-            ButtonComponent(
-              label: strings.albumsOnEnteEmptyCta,
-              shouldSurfaceExecutionStates: false,
-              onTap: () async {
-                await handleFolderSelectionBackupFlow(context);
-              },
-            ),
+            const SizedBox(height: 120),
           ],
         ),
       ),

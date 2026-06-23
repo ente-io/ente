@@ -1,1 +1,1 @@
-- Updated album empty states and add photos flows to use the new UI components.
+- Refreshed album empty states for Archive, Hidden, Uncategorized, and shared/received album views.
