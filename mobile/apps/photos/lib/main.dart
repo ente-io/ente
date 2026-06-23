@@ -435,6 +435,8 @@ Future<void> _init(
       Configuration.instance,
       useLegacyHashFallback: true,
       hasOptedForOfflineMode: isLocalGalleryMode,
+      appLogoAsset: 'assets/ente-branding.svg',
+      appLogoHeight: 18,
     );
 
     await MemoryShareService.instance.init();

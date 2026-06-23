@@ -45,16 +45,22 @@ class LockScreenSettings {
   late FlutterSecureStorage _secureStorage;
   bool _useLegacyHashFallback = false;
   bool _hideAppContentDefault = false;
+  String _appLogoAsset = 'assets/svg/app-logo.svg';
+  double? _appLogoHeight;
 
   Future<void> init(
     LockScreenHost config, {
     bool hasOptedForOfflineMode = false,
     bool useLegacyHashFallback = false,
     bool hideAppContentDefault = false,
+    String appLogoAsset = 'assets/svg/app-logo.svg',
+    double? appLogoHeight,
   }) async {
     _config = config;
     _useLegacyHashFallback = useLegacyHashFallback;
     _hideAppContentDefault = hideAppContentDefault;
+    _appLogoAsset = appLogoAsset;
+    _appLogoHeight = appLogoHeight;
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
 
@@ -201,6 +207,10 @@ class LockScreenSettings {
   }
 
   bool get useLegacyHashFallback => _useLegacyHashFallback;
+
+  String get appLogoAsset => _appLogoAsset;
+
+  double? get appLogoHeight => _appLogoHeight;
 
   /// Verifies that the hash of [text] matches [storedHash].
   Future<bool> verify({
