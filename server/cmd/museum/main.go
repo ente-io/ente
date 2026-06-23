@@ -1285,6 +1285,9 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	schedule(c, "@every 8m", func() {
 		fileController.CleanupDeletedFiles()
 	})
+	schedule(c, "@every 13m", func() {
+		fileController.CleanupOutdatedObjects()
+	})
 	schedule(c, "@every 101s", func() {
 		embeddingCtrl.CleanupDeletedEmbeddings()
 	})

@@ -57,6 +57,8 @@ type FileController struct {
 	DiscordController     *discord.DiscordController
 	HostName              string
 	cleanupCronRunning    bool
+	outdatedCronRunning   bool
+	outdatedQueueDisabled bool
 }
 
 // StorageOverflowAboveSubscriptionLimit is the amount (50 MB) by which user can go beyond their storage limit
