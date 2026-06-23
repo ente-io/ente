@@ -1089,9 +1089,6 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
           color: context.componentColors.textLight,
         ),
       ),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      contentSpacing: Spacing.sm,
-      actionsTopSpacing: Spacing.xxl,
       actions: [
         // Expanded target choices
         AnimatedSize(
