@@ -188,6 +188,18 @@ export const uploadPathPrefix = (pathOrName: string) => {
 
 export type UploadItemAndPath = [UploadItem, string];
 
+export const takeoutAlbumMetadataJSONItemForFolder = (
+    uploadItemAndPaths: UploadItemAndPath[],
+    folderPath: string,
+): UploadItem | undefined => {
+    const albumMetadataJSONPath = folderPath
+        ? `${folderPath}/metadata.json`
+        : "metadata.json";
+    return uploadItemAndPaths.find(
+        ([, path]) => path == albumMetadataJSONPath,
+    )?.[0];
+};
+
 /**
  * Group files that are that have the same parent folder into collections.
  *
