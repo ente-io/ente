@@ -154,6 +154,7 @@ Future<void> _runInForeground(
           Configuration.instance,
           authReasonBuilder: (context) =>
               AppLocalizations.of(context).authToViewYourMemories,
+          onLogout: (context) => UserService.instance.logout(context),
         ),
         enabled:
             await LockScreenSettings.instance.shouldShowLockScreen() ||
@@ -424,16 +425,17 @@ Future<void> _init(
       packageInfo,
     );
 
+    _logger.info("Configuration init $tlog");
+    await Configuration.instance.init(preferences);
+    _logger.info("Configuration done $tlog");
+
     _logger.info("Lockscreen init $tlog");
     registerCryptoApi(const PhotosCryptoApiAdapter());
     await LockScreenSettings.instance.init(
       Configuration.instance,
       useLegacyHashFallback: true,
+      hasOptedForOfflineMode: isLocalGalleryMode,
     );
-
-    _logger.info("Configuration init $tlog");
-    await Configuration.instance.init(preferences);
-    _logger.info("Configuration done $tlog");
 
     await MemoryShareService.instance.init();
 

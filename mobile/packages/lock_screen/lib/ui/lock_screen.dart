@@ -18,11 +18,16 @@ import 'package:logging/logging.dart';
 class LockScreen extends StatefulWidget {
   final LockScreenHost config;
 
-  /// Overrides the biometric prompt reason. Resolved at auth time so consumers
-  /// can supply an app-specific localized message; defaults to a shared string.
   final String Function(BuildContext context)? authReasonBuilder;
 
-  const LockScreen(this.config, {this.authReasonBuilder, super.key});
+  final Future<void> Function(BuildContext context)? onLogout;
+
+  const LockScreen(
+    this.config, {
+    this.authReasonBuilder,
+    this.onLogout,
+    super.key,
+  });
 
   @override
   State<LockScreen> createState() => _LockScreenState();
@@ -188,7 +193,11 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       firstButtonLabel: context.strings.yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {
-        await UserService.instance.logout(context);
+        if (widget.onLogout != null) {
+          await widget.onLogout!(context);
+        } else {
+          await UserService.instance.logout(context);
+        }
         // To start the app afresh, resetting all state.
         Process.killPid(pid, ProcessSignal.sigkill);
       },
