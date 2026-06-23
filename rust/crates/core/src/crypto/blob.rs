@@ -59,7 +59,7 @@ impl EncryptedBlob {
     }
 }
 
-/// Encrypt `data` under `key` as a single secretstream message.
+/// Encrypt `data` with `key` as a single secretstream message.
 ///
 /// A fresh header is generated for every call. The message is tagged final, so
 /// [`decrypt`] can later confirm the ciphertext is complete. Returns the
@@ -135,7 +135,7 @@ fn decrypt_impl(data: &[u8], header: &Header, key: &Key) -> Result<(Vec<u8>, boo
     decryptor.pull(data)
 }
 
-/// Encrypt `data` under `key` into one self-contained buffer.
+/// Encrypt `data` with `key` into one self-contained buffer.
 ///
 /// Like [`encrypt`], but prepends the decryption header to the ciphertext,
 /// returning `header ‖ ciphertext`: everything needed to decrypt except the

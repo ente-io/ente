@@ -1,9 +1,5 @@
 /**
  * @file Typed key material and related fixed-size values.
- *
- * These types carry their size in the type, so length validation happens once,
- * at the boundary where raw bytes enter ({@link Key.fromBytes} and friends),
- * rather than inside every operation.
  */
 
 const sized = (bytes: Uint8Array, length: number, name: string): Uint8Array => {
@@ -15,14 +11,7 @@ const sized = (bytes: Uint8Array, length: number, name: string): Uint8Array => {
     return bytes;
 };
 
-/**
- * A 256-bit symmetric encryption key.
- *
- * One key type serves the secretbox, blob and stream operations: both algorithm
- * families take 256-bit keys, and Ente's data model shares key material across
- * them (e.g. a collection key wraps file keys via secretbox and encrypts
- * collection metadata via blob).
- */
+/** A 256-bit symmetric encryption key. */
 export class Key {
     private constructor(private readonly _bytes: Uint8Array) {}
 
@@ -79,13 +68,7 @@ export class Salt {
     }
 }
 
-/**
- * A 192-bit SecretStream decryption header. Not secret.
- *
- * While the exact contents are an implementation detail of the secretstream
- * construction, it effectively contains the random nonce generated during
- * encryption, and is required for decryption.
- */
+/** A 192-bit SecretStream decryption header. Not secret. */
 export class Header {
     private constructor(private readonly _bytes: Uint8Array) {}
 

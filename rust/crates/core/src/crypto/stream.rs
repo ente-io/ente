@@ -67,7 +67,7 @@ pub struct Encryptor {
 }
 
 impl Encryptor {
-    /// Create an encryptor under `key`, generating a fresh random header.
+    /// Create an encryptor with `key`, generating a fresh random header.
     pub fn new(key: &Key) -> Self {
         let (header, stream) = PushStream::init(OsRng, &upstream_key(key));
         Self {
@@ -248,7 +248,7 @@ pub struct StreamingEncryptor<W: Write> {
 }
 
 impl<W: Write> StreamingEncryptor<W> {
-    /// Create a streaming encryptor under `key`, writing the decryption header
+    /// Create a streaming encryptor with `key`, writing the decryption header
     /// to `writer` before any ciphertext.
     pub fn new(key: &Key, mut writer: W) -> Result<Self> {
         let encryptor = Encryptor::new(key);
@@ -371,7 +371,7 @@ fn ensure_reader_exhausted<R: Read>(reader: &mut R) -> Result<()> {
 }
 
 impl<R: Read> StreamingDecryptor<R> {
-    /// Create a streaming decryptor under `key`, reading the decryption header
+    /// Create a streaming decryptor with `key`, reading the decryption header
     /// from `reader` before any ciphertext.
     pub fn new(key: &Key, mut reader: R) -> Result<Self> {
         let mut header = [0u8; Header::BYTES];
