@@ -894,14 +894,8 @@ Future<void> showDeleteSheet(
   }
 
   Future<void> deleteFromEnte() async {
-    await deleteFromRemoteOnlyAction(context, deletableFiles).then(
-      (value) {
-        showShortToast(context, l10n.movedToTrash);
-      },
-      onError: (e, s) {
-        showGenericErrorDialog(context: context, error: e);
-      },
-    );
+    await deleteFromRemoteOnlyAction(context, deletableFiles);
+    showShortToast(context, l10n.movedToTrash);
   }
 
   final actionResult = await showBottomSheetComponent<bool>(
