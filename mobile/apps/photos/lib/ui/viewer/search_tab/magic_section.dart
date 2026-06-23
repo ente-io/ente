@@ -4,7 +4,6 @@ import "package:ente_components/ente_components.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/events/event.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
@@ -132,7 +131,6 @@ class _MagicSectionState extends State<MagicSection> {
 
 class MagicRecommendation extends StatelessWidget {
   static const _width = 108.0;
-  static const _minHeight = 158.0;
   static const _thumbnailSize = 108.0;
   static const _cornerRadius = 20.0;
   static const _cornerSmoothing = 1.0;
@@ -151,53 +149,39 @@ class MagicRecommendation extends StatelessWidget {
 
         magicSearchResult.onResultTap!(context);
       },
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: _minHeight),
-        child: SizedBox(
-          width: _width,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipSmoothRect(
-                radius: SmoothBorderRadius(
-                  cornerRadius: _cornerRadius,
-                  cornerSmoothing: _cornerSmoothing,
-                ),
-                child: SizedBox(
-                  width: _thumbnailSize,
-                  height: _thumbnailSize,
-                  child: magicSearchResult.previewThumbnail() != null
-                      ? Hero(
-                          tag: heroTag,
-                          child: ThumbnailWidget(
-                            magicSearchResult.previewThumbnail()!,
-                            shouldShowSyncStatus: false,
-                          ),
-                        )
-                      : const NoThumbnailWidget(),
-                ),
+      child: SizedBox(
+        width: _width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipSmoothRect(
+              radius: SmoothBorderRadius(
+                cornerRadius: _cornerRadius,
+                cornerSmoothing: _cornerSmoothing,
               ),
-              const SizedBox(height: 8),
-              Text(
-                magicSearchResult.name(),
-                style: TextStyles.body.copyWith(color: textTheme.body.color),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: SizedBox(
+                width: _thumbnailSize,
+                height: _thumbnailSize,
+                child: magicSearchResult.previewThumbnail() != null
+                    ? Hero(
+                        tag: heroTag,
+                        child: ThumbnailWidget(
+                          magicSearchResult.previewThumbnail()!,
+                          shouldShowSyncStatus: false,
+                        ),
+                      )
+                    : const NoThumbnailWidget(),
               ),
-              const SizedBox(height: 2),
-              Text(
-                AppLocalizations.of(
-                  context,
-                ).itemCount(count: magicSearchResult.fileCount()),
-                style: TextStyles.mini.copyWith(
-                  color: textTheme.miniMuted.color,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              magicSearchResult.name(),
+              style: TextStyles.body.copyWith(color: textTheme.body.color),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
