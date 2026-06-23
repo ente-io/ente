@@ -898,6 +898,7 @@ Future<void> showDeleteSheet(
     showShortToast(context, l10n.movedToTrash);
   }
 
+  var didDeleteLocalFiles = false;
   final actionResult = await showBottomSheetComponent<bool>(
     context: context,
     useRootNavigator: Platform.isIOS,
@@ -907,18 +908,20 @@ Future<void> showDeleteSheet(
       count: deletableFiles.length,
       onDeleteFromLocal: () async {
         await deleteOnDeviceOnlyAction(context, deletableFiles);
+        didDeleteLocalFiles = true;
       },
       onDeleteFromRemote: () async {
         await deleteFromEnte();
       },
       onDeleteFromBoth: () async {
         await deleteFromEverywhereAction(context, deletableFiles);
+        didDeleteLocalFiles = true;
       },
     ),
   );
   if (actionResult == true) {
     selectedFiles.clearAll();
-    if (hasLocalFiles) {
+    if (didDeleteLocalFiles) {
       await showMediaManagementHintSheet(context);
     }
   }
