@@ -189,16 +189,26 @@ export const uploadPathPrefix = (pathOrName: string) => {
 
 export type UploadItemAndPath = [UploadItem, string];
 
+const takeoutAlbumMetadataJSONItemsByFolderPath = (
+    uploadItemAndPaths: UploadItemAndPath[],
+) => {
+    const result = new Map<string, UploadItem>();
+    for (const [uploadItem, path] of uploadItemAndPaths) {
+        if (basename(path) == "metadata.json") {
+            const folderPath = dirname(path);
+            if (!result.has(folderPath)) result.set(folderPath, uploadItem);
+        }
+    }
+    return result;
+};
+
 export const takeoutAlbumMetadataJSONItemForFolder = (
     uploadItemAndPaths: UploadItemAndPath[],
     folderPath: string,
 ): UploadItem | undefined => {
-    const albumMetadataJSONPath = folderPath
-        ? `${folderPath}/metadata.json`
-        : "metadata.json";
-    return uploadItemAndPaths.find(
-        ([, path]) => path == albumMetadataJSONPath,
-    )?.[0];
+    return takeoutAlbumMetadataJSONItemsByFolderPath(uploadItemAndPaths).get(
+        folderPath,
+    );
 };
 
 /**
@@ -234,6 +244,8 @@ export const groupItemsBasedOnParentFolder = async (
 ) => {
     const result = new Map<string, UploadItemAndPath[]>();
     const collectionNameByFolderPath = new Map<string, string>();
+    const albumMetadataJSONItemsByFolderPath =
+        takeoutAlbumMetadataJSONItemsByFolderPath(uploadItemAndPaths);
     for (const [uploadItem, pathOrName] of uploadItemAndPaths) {
         let folderPath = dirname(pathOrName);
         let folderName = basename(folderPath);
@@ -262,10 +274,8 @@ export const groupItemsBasedOnParentFolder = async (
 
         let collectionName = collectionNameByFolderPath.get(folderPath);
         if (collectionName == undefined) {
-            const albumMetadataJSON = takeoutAlbumMetadataJSONItemForFolder(
-                uploadItemAndPaths,
-                folderPath,
-            );
+            const albumMetadataJSON =
+                albumMetadataJSONItemsByFolderPath.get(folderPath);
             const albumName = albumMetadataJSON
                 ? await tryParseTakeoutAlbumNameMetadataJSON(albumMetadataJSON)
                 : undefined;

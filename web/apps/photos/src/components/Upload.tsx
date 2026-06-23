@@ -811,11 +811,10 @@ export const Upload: React.FC<UploadProps> = ({
                 uploadItemsAndPaths.current,
             );
         } else {
-            collectionNameToUploadItems =
-                await groupItemsBasedOnParentFolder(
-                    uploadItemsAndPaths.current,
-                    collectionName,
-                );
+            collectionNameToUploadItems = await groupItemsBasedOnParentFolder(
+                uploadItemsAndPaths.current,
+                collectionName,
+            );
         }
         const collections: Collection[] = [];
         try {
