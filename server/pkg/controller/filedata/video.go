@@ -45,7 +45,7 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 	size, uploadErr := c.uploadObject(obj, objectKey, bucketID)
 	if uploadErr != nil {
 		logger.WithError(uploadErr).Error("upload failed")
-		return nil
+		return stacktrace.Propagate(uploadErr, "failed to upload video preview metadata")
 	}
 	row := filedata.Row{
 		FileID:       req.FileID,
