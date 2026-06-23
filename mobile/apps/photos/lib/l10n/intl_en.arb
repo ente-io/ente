@@ -439,6 +439,7 @@
   "authToViewTrashedFiles": "Please authenticate to view your trashed files",
   "trash": "Trash",
   "uncategorized": "Uncategorized",
+  "uncategorizedItemsWillShowUpHere": "Uncategorized items will show up here",
   "videoSmallCase": "video",
   "photoSmallCase": "photo",
   "singleFileDeleteHighlight": "It will be deleted from all albums.",
