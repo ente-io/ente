@@ -572,8 +572,11 @@ class GalleryState extends State<Gallery> {
         if (!mounted) {
           return result;
         }
+        final inheritedSearchFilterData = _inheritedSearchFilterData;
         final searchFilterDataProvider =
-            _inheritedSearchFilterData?.searchFilterDataProvider;
+            inheritedSearchFilterData?.isHierarchicalSearchable == true
+            ? inheritedSearchFilterData!.searchFilterDataProvider
+            : null;
         if (searchFilterDataProvider != null &&
             !searchFilterDataProvider.isSearchingNotifier.value) {
           unawaited(

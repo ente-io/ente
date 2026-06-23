@@ -1,0 +1,1 @@
+- Fixed extra app bar space in local gallery mode galleries.
