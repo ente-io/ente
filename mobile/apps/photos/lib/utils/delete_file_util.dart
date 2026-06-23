@@ -106,7 +106,6 @@ Future<void> deleteFilesFromEverywhere(
       await FilesDB.instance.deleteMultipleUploadedFiles(fileIDs);
     } catch (e) {
       _logger.severe(e);
-      await showGenericErrorDialog(context: context, error: e);
       rethrow;
     }
     for (final collectionID in updatedCollectionIDs) {
@@ -169,7 +168,6 @@ Future<void> deleteFilesFromRemoteOnly(
     await FilesDB.instance.deleteMultipleUploadedFiles(uploadedFileIDs);
   } catch (e, s) {
     _logger.severe("Failed to delete files from remote", e, s);
-    await showGenericErrorDialog(context: context, error: e);
     rethrow;
   }
   for (final collectionID in updatedCollectionIDs) {
