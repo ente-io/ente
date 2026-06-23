@@ -768,9 +768,8 @@ Future<void> showMediaManagementHintSheet(BuildContext context) async {
     context: context,
     useRootNavigator: Platform.isIOS,
     builder: (sheetContext) => BottomSheetComponent(
-      title: "Tired of confirming every delete?",
-      message:
-          "Turn on media management for Ente in settings, and the prompts stop.",
+      title: l10n.mediaManagementHintTitle,
+      message: l10n.mediaManagementHintMessage,
       illustration: Image.asset("assets/ducky_smart_feature.png"),
       closeTooltip: l10n.close,
       closeResult: true,
@@ -1100,59 +1099,89 @@ class DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
       actionsTopSpacing: Spacing.xxl,
       actions: [
         // Expanded target choices
-        if (_isMoreOptionsShown) ...[
-          ButtonComponent(
-            label: l10n.deleteFromDevice,
-            variant: ButtonComponentVariant.secondary,
-            onTap: () async {
-              if (_isSetAsDefaultSelected) {
-                await localSettings.setDeletePreference(.DeleteFromLocalOnly);
-              }
-              await _onDelete(context, widget.onDeleteFromLocal);
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          alignment: Alignment.bottomCenter,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeOut,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(opacity: animation, child: child);
             },
+            layoutBuilder: (currentChild, previousChildren) {
+              return Stack(
+                alignment: Alignment.bottomCenter,
+                children: [...previousChildren, ?currentChild],
+              );
+            },
+            child: (_isMoreOptionsShown)
+                ? Column(
+                    spacing: Spacing.md,
+                    children: [
+                      ButtonComponent(
+                        label: l10n.deleteFromDevice,
+                        variant: ButtonComponentVariant.secondary,
+                        onTap: () async {
+                          if (_isSetAsDefaultSelected) {
+                            await localSettings.setDeletePreference(
+                              .DeleteFromLocalOnly,
+                            );
+                          }
+                          await _onDelete(context, widget.onDeleteFromLocal);
+                        },
+                      ),
+                      ButtonComponent(
+                        label: l10n.deleteFromEnte,
+                        variant: ButtonComponentVariant.secondary,
+                        onTap: () async {
+                          if (_isSetAsDefaultSelected) {
+                            await localSettings.setDeletePreference(
+                              .DeleteFromRemoteOnly,
+                            );
+                          }
+                          await _onDelete(context, widget.onDeleteFromRemote);
+                        },
+                      ),
+                      ButtonComponent(
+                        label: l10n.deleteFromBoth,
+                        variant: ButtonComponentVariant.critical,
+                        onTap: () async {
+                          if (_isSetAsDefaultSelected) {
+                            await localSettings.setDeletePreference(
+                              .DeleteFromBoth,
+                            );
+                          }
+                          await _onDelete(context, widget.onDeleteFromBoth);
+                        },
+                      ),
+                    ],
+                  )
+                :
+                  // Preferred target shortcut
+                  ButtonComponent(
+                    label: switch (deletePreference) {
+                      DeletePreference.DeleteFromRemoteOnly =>
+                        l10n.deleteFromEnte,
+                      DeletePreference.DeleteFromLocalOnly =>
+                        l10n.deleteFromDevice,
+                      DeletePreference.DeleteFromBoth => l10n.deleteFromBoth,
+                    },
+                    variant: ButtonComponentVariant.critical,
+                    onTap: () async {
+                      switch (deletePreference) {
+                        case DeletePreference.DeleteFromRemoteOnly:
+                          await _onDelete(context, widget.onDeleteFromRemote);
+                        case DeletePreference.DeleteFromLocalOnly:
+                          await _onDelete(context, widget.onDeleteFromLocal);
+                        case DeletePreference.DeleteFromBoth:
+                          await _onDelete(context, widget.onDeleteFromBoth);
+                      }
+                    },
+                  ),
           ),
-          ButtonComponent(
-            label: l10n.deleteFromEnte,
-            variant: ButtonComponentVariant.secondary,
-            onTap: () async {
-              if (_isSetAsDefaultSelected) {
-                await localSettings.setDeletePreference(.DeleteFromRemoteOnly);
-              }
-              await _onDelete(context, widget.onDeleteFromRemote);
-            },
-          ),
-          ButtonComponent(
-            label: l10n.deleteFromBoth,
-            variant: ButtonComponentVariant.critical,
-            onTap: () async {
-              if (_isSetAsDefaultSelected) {
-                await localSettings.setDeletePreference(.DeleteFromBoth);
-              }
-              await _onDelete(context, widget.onDeleteFromBoth);
-            },
-          ),
-        ] else ...[
-          // Preferred target shortcut
-          ButtonComponent(
-            key: const ValueKey('DeleteConfirmationSheet.default'),
-            label: switch (deletePreference) {
-              DeletePreference.DeleteFromRemoteOnly => l10n.deleteFromEnte,
-              DeletePreference.DeleteFromLocalOnly => l10n.deleteFromDevice,
-              DeletePreference.DeleteFromBoth => l10n.deleteFromBoth,
-            },
-            variant: ButtonComponentVariant.critical,
-            onTap: () async {
-              switch (deletePreference) {
-                case DeletePreference.DeleteFromRemoteOnly:
-                  await _onDelete(context, widget.onDeleteFromRemote);
-                case DeletePreference.DeleteFromLocalOnly:
-                  await _onDelete(context, widget.onDeleteFromLocal);
-                case DeletePreference.DeleteFromBoth:
-                  await _onDelete(context, widget.onDeleteFromBoth);
-              }
-            },
-          ),
-        ],
+        ),
         // Preference control
         if (widget.isLocal && widget.isRemote)
           ConstrainedBox(
