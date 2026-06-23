@@ -195,6 +195,20 @@ export const tryParseTakeoutMetadataJSON = async (
     }
 };
 
+/**
+ * Try to parse an album name from an album-level Google Takeout metadata JSON.
+ */
+export const tryParseTakeoutAlbumNameMetadataJSON = async (
+    uploadItem: UploadItem,
+): Promise<string | undefined> => {
+    try {
+        return parseAlbumNameMetadataJSONText(await uploadItemText(uploadItem));
+    } catch (e) {
+        log.error("Failed to parse takeout album metadata JSON", e);
+        return undefined;
+    }
+};
+
 const uploadItemText = async (uploadItem: UploadItem) => {
     if (uploadItem instanceof File) {
         return await uploadItem.text();
@@ -246,6 +260,25 @@ const parseMetadataJSONText = (text: string) => {
     }
 
     return parsedMetadataJSON;
+};
+
+/**
+ *
+ * @param text
+ * @returns metadata.json.title which is the album name
+ *
+ * This function receives the contents of the metadata.json
+ * and check whether it's a valid object and if so then
+ * tries to parse the title and return it.
+ */
+const parseAlbumNameMetadataJSONText = (text: string) => {
+    const metadataJSON_ = JSON.parse(text) as unknown;
+    if (typeof metadataJSON_ != "object") return undefined;
+    if (!metadataJSON_) return undefined;
+    if (Array.isArray(metadataJSON_)) return undefined;
+
+    const metadataJSON = metadataJSON_ as Record<string, unknown>;
+    return parseGTNonEmptyString(metadataJSON.title);
 };
 
 /**
