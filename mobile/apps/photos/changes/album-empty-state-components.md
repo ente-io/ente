@@ -1,1 +1,1 @@
-- Refreshed album empty states for Archive, Hidden, Uncategorized, and shared/received album views with updated illustrations and components.
+- Refreshed album empty states for Archive, Hidden, Uncategorized, and shared/received album views.
