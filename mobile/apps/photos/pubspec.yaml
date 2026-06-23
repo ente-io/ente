@@ -206,6 +206,7 @@ dependencies:
   pinput: 5.0.2
   pointycastle: 3.9.1
   pro_image_editor: 11.23.0
+  protobuf: 4.2.0
   random_access_source: 4.2.1
   receive_sharing_intent: # pub.dev is behind
     git:
@@ -257,7 +258,6 @@ dependency_overrides:
     git:
       url: https://github.com/deckerst/aves_panorama_motion_sensors.git
       ref: 4b11d59f4bda152627f701070272f657f8358e67
-  protobuf: 3.1.0
   # Fixes an iOS AVFoundation crash for videos whose minFrameDuration is zero.
   # https://github.com/flutter/flutter/issues/151031
   video_player_avfoundation:
