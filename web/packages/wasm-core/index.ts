@@ -7,5 +7,6 @@
  * and runs on the calling thread; run heavy operations from a Web Worker to
  * keep the UI responsive.
  */
+export * from "./blob";
 export * from "./secretbox";
 export * from "./types";
