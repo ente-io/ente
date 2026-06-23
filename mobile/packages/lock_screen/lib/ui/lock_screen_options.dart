@@ -67,7 +67,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     if (await LocalAuthenticationService.instance
         .isLocalAuthSupportedOnDevice()) {
       await _lockScreenSettings.removePinAndPassword();
-      await _lockScreenSettings.setSystemLockScreen(!isSystemLockEnabled);
+      await _lockScreenSettings.setSystemLockScreen(true);
     } else {
       final linuxStatus = await LocalAuthenticationService.instance
           .getLinuxLocalAuthSetupStatus();
