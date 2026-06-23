@@ -94,7 +94,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   }
 
   Future<void> _pinLock() async {
-    final bool result = await Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return const LockScreenPin();
@@ -102,7 +102,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       ),
     );
 
-    if (result) {
+    if (result == true) {
       await _lockScreenSettings.setSystemLockScreen(false);
       await _lockScreenSettings.setAppLockEnabled(true);
       setState(() {
@@ -113,14 +113,14 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   }
 
   Future<void> _passwordLock() async {
-    final bool result = await Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return const LockScreenPassword();
         },
       ),
     );
-    if (result) {
+    if (result == true) {
       await _lockScreenSettings.setSystemLockScreen(false);
       setState(() {
         appLock = _lockScreenSettings.getIsAppLockSet();

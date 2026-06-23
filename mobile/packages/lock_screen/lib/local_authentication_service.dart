@@ -112,7 +112,7 @@ class LocalAuthenticationService {
           },
         ),
       );
-      if (result) {
+      if (result == true) {
         return true;
       }
     }
@@ -129,7 +129,7 @@ class LocalAuthenticationService {
           },
         ),
       );
-      if (result) {
+      if (result == true) {
         return true;
       }
     }
