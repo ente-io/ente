@@ -189,6 +189,13 @@ export const uploadPathPrefix = (pathOrName: string) => {
 
 export type UploadItemAndPath = [UploadItem, string];
 
+/**
+ * Build a lookup of album-level Takeout `metadata.json` files by their
+ * containing folder path.
+ *
+ * This only indexes files named exactly `metadata.json`. If multiple entries
+ * exist for the same folder, the first one in the upload list is retained.
+ */
 const takeoutAlbumMetadataJSONItemsByFolderPath = (
     uploadItemAndPaths: UploadItemAndPath[],
 ) => {
@@ -202,6 +209,14 @@ const takeoutAlbumMetadataJSONItemsByFolderPath = (
     return result;
 };
 
+/**
+ * Return the album-level Takeout `metadata.json` upload item for the given
+ * folder path, if one was included in the upload list.
+ *
+ * The `folderPath` must match the metadata file's containing folder exactly.
+ * The returned item is not parsed here; callers parse its `title` when they
+ * need an album-name suggestion.
+ */
 export const takeoutAlbumMetadataJSONItemForFolder = (
     uploadItemAndPaths: UploadItemAndPath[],
     folderPath: string,

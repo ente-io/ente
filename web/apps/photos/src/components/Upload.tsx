@@ -1268,6 +1268,16 @@ const deriveImportSuggestionFromPaths = (
     };
 };
 
+/**
+ *
+ * @param uploadType
+ * @param uploadItemAndPaths
+ * @returns
+ *
+ * rootFolderName: The name of root folder, if there exist a metadata.json in the
+ * same directory which has a valid title we will be using that else will
+ * fallback to the directory foldername.
+ */
 const deriveImportSuggestion = async (
     uploadType: UploadType | undefined,
     uploadItemAndPaths: UploadItemAndPath[],
@@ -1276,10 +1286,12 @@ const deriveImportSuggestion = async (
         uploadType,
         uploadItemAndPaths.map(([, path]) => path),
     );
+
     const albumMetadataJSON = takeoutAlbumMetadataJSONItemForFolder(
         uploadItemAndPaths,
         suggestion.rootFolderPath,
     );
+
     const albumName = albumMetadataJSON
         ? await tryParseTakeoutAlbumNameMetadataJSON(albumMetadataJSON)
         : undefined;

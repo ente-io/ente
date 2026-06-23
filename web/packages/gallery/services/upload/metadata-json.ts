@@ -262,6 +262,15 @@ const parseMetadataJSONText = (text: string) => {
     return parsedMetadataJSON;
 };
 
+/**
+ *
+ * @param text
+ * @returns metadata.json.title which is the album name
+ *
+ * This function receives the contents of the metadata.json
+ * and check whether it's a valid object and if so then
+ * tries to parse the title and return it.
+ */
 const parseAlbumNameMetadataJSONText = (text: string) => {
     const metadataJSON_ = JSON.parse(text) as unknown;
     if (typeof metadataJSON_ != "object") return undefined;
