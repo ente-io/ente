@@ -2295,15 +2295,6 @@ packages:
       url: "https://github.com/ente-io/flutter_pretty_qr_fork"
     source: git
     version: "3.5.0"
-  privacy_screen:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: "2389eaa88f07724a38b9dcab49fef8e96c723921"
-      resolved-ref: "2389eaa88f07724a38b9dcab49fef8e96c723921"
-      url: "https://github.com/ente-io/privacy_screen.git"
-    source: git
-    version: "0.0.6"
   pro_image_editor:
     dependency: "direct main"
     description:
