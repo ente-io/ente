@@ -8,7 +8,6 @@ import "package:photos/events/details_sheet_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
-import 'package:photos/models/file/file_type.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/media_store_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -37,8 +36,6 @@ Future<void> showSingleFileDeleteSheet(
         useRootNavigator: Platform.isIOS,
         builder: (_) => DeleteConfirmationSheet(
           count: 1,
-          hasPhotos: file.fileType != FileType.video,
-          hasVideos: file.fileType == FileType.video,
           isLocal: isLocal,
           isRemote: false,
           onDeleteFromLocal: () async {
@@ -75,8 +72,6 @@ Future<void> showSingleFileDeleteSheet(
       isLocal: isLocal,
       isRemote: isRemote,
       count: 1,
-      hasPhotos: file.fileType != FileType.video,
-      hasVideos: file.fileType == FileType.video,
       onDeleteFromLocal: () async {
         final deletedFiles = await deleteFilesOnDeviceOnly(context, [file]);
         if (deletedFiles.isNotEmpty &&

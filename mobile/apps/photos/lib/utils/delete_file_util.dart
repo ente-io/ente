@@ -62,15 +62,6 @@ Future<void> deleteFilesFromEverywhere(
       hasLocalOnlyFiles = true;
     }
   }
-  if (hasLocalOnlyFiles &&
-      Platform.isAndroid &&
-      !isLocalGalleryMode &&
-      await MediaStoreService.canManageMedia()) {
-    final shouldProceed = await shouldProceedWithDeletion(context);
-    if (!shouldProceed) {
-      return;
-    }
-  }
   Set<String> deletedIDs = <String>{};
   try {
     deletedIDs = (await PhotoManager.editor.deleteWithIds(
@@ -228,15 +219,6 @@ Future<List<EnteFile>> deleteFilesOnDeviceOnly(
     if (file.uploadedFileID == null) {
       hasLocalOnlyFiles = true;
       localOnlyIDs.add(file.localID);
-    }
-  }
-  if (hasLocalOnlyFiles &&
-      Platform.isAndroid &&
-      !isLocalGalleryMode &&
-      await MediaStoreService.canManageMedia()) {
-    final shouldProceed = await shouldProceedWithDeletion(context);
-    if (!shouldProceed) {
-      return const [];
     }
   }
   Set<String> deletedIDs = <String>{};
@@ -761,21 +743,6 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
   } catch (e, s) {
     _logger.severe("Unexpected error while deleting share media files", e, s);
     return Future.value(actuallyDeletedIDs);
-  }
-}
-
-Future<bool> shouldProceedWithDeletion(BuildContext context) async {
-  final actionResult = await showChoiceActionSheet(
-    context,
-    title: AppLocalizations.of(context).permanentlyDeleteFromDevice,
-    body: AppLocalizations.of(context).someOfTheFilesYouAreTryingToDeleteAre,
-    firstButtonLabel: AppLocalizations.of(context).delete,
-    isCritical: true,
-  );
-  if (actionResult?.action == null) {
-    return false;
-  } else {
-    return actionResult!.action == ButtonAction.first;
   }
 }
 
