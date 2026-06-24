@@ -242,7 +242,7 @@ void main() {
 
   testWidgets("LabeledControlComponent wraps long labels", (tester) async {
     const label =
-        "Set this as my default choice for every future delete action unless I come back later and explicitly choose something else";
+        "This is a deliberately long label that should wrap inside the control row";
     await tester.pumpWidget(
       _wrap(
         const SizedBox(

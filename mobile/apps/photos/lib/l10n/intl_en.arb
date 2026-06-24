@@ -485,7 +485,7 @@
   "@moreOptions": {
     "description": "Button label for showing additional delete options."
   },
-  "setAsMyDefaultChoice": "Set this as my default choice for every future delete action unless I come back later and explicitly choose something else",
+  "setAsMyDefaultChoice": "Set as my default choice",
   "@setAsMyDefaultChoice": {
     "description": "Checkbox label for saving the selected delete action as the default choice."
   },
