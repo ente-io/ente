@@ -1,1 +1,0 @@
-- Fixed inconsistent section header typography on the search tab.
