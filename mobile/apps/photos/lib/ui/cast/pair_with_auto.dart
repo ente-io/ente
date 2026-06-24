@@ -71,6 +71,10 @@ class _PairWithAutoSheetState extends State<_PairWithAutoSheet> {
         ? "${l10n.autoCastDialogBody}\n${l10n.autoCastiOSPermission}"
         : l10n.autoCastDialogBody;
     return BottomSheetComponent(
+      isScrollable: true,
+      initialChildSize: 0.35,
+      snapSizes: const [0.35, 1.0],
+      snap: true,
       title: l10n.connectToDevice,
       content: Text(body, style: textStyles.smallMuted),
       actions: [
