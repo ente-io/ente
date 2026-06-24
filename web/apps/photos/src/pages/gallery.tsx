@@ -447,7 +447,9 @@ const Page: React.FC = () => {
 
     const activeCollectionFiles = useMemo(() => {
         if (!activeCollection) return [];
-        if (barMode == "hidden-albums") return filteredFiles;
+        if (barMode == "hidden-albums" || barMode == "archive-albums") {
+            return filteredFiles;
+        }
 
         return filteredFiles.filter(({ id, magicMetadata }) => {
             const visibility = magicMetadata?.data.visibility;
@@ -496,15 +498,12 @@ const Page: React.FC = () => {
         filteredFiles.length > 0 &&
         selectedFilesInView.length === filteredFiles.length;
 
-    const isInArchiveSection =
-        barMode == "albums" &&
-        (activeCollectionID == PseudoCollectionID.archiveItems ||
-            activeCollectionSummary?.attributes.has("archived"));
+    const isInArchiveSection = barMode == "archive-albums";
 
     const barCollectionSummaries =
         barMode == "hidden-albums"
             ? state.hiddenCollectionSummaries
-            : isInArchiveSection
+            : barMode == "archive-albums"
               ? state.archivedCollectionSummaries
               : state.normalCollectionSummaries;
 
@@ -759,7 +758,10 @@ const Page: React.FC = () => {
                 barMode == "people" && activePersonID
                     ? { mode: "people" as const, personID: activePersonID }
                     : {
-                          mode: barMode as "albums" | "hidden-albums",
+                          mode: barMode as
+                              | "albums"
+                              | "hidden-albums"
+                              | "archive-albums",
                           collectionID: activeCollectionID!,
                       },
         };
@@ -786,7 +788,10 @@ const Page: React.FC = () => {
                 barMode == "people" && activePersonID
                     ? { mode: "people" as const, personID: activePersonID }
                     : {
-                          mode: barMode as "albums" | "hidden-albums",
+                          mode: barMode as
+                              | "albums"
+                              | "hidden-albums"
+                              | "archive-albums",
                           collectionID: activeCollectionID!,
                       },
         };
@@ -2054,7 +2059,7 @@ const Page: React.FC = () => {
                 ) : !isInSearchMode && isInArchiveSection ? (
                     <SectionNavbarContents
                         title={t("section_archive")}
-                        onBack={() => dispatch({ type: "showAll" })}
+                        onBack={() => dispatch({ type: "showAlbums" })}
                         onUpload={openUploader}
                     />
                 ) : (

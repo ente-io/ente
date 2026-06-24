@@ -47,7 +47,11 @@ import type { FamilyData, UserDetails } from "../../services/user-details";
  * TODO: Deprecated(?). Use GalleryView instead. Deprecated if it can be used in
  * all cases where the bar mode was in use.
  */
-export type GalleryBarMode = "albums" | "hidden-albums" | "people";
+export type GalleryBarMode =
+    | "albums"
+    | "hidden-albums"
+    | "archive-albums"
+    | "people";
 
 /**
  * Specifies what the gallery is currently displaying.
@@ -57,17 +61,16 @@ export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 export type GalleryView =
     | {
           /**
-           * We're either in the "Albums" or "Hidden albums" section.
+           * We're in the Albums, Hidden albums, or Archive section.
            */
-          type: "albums" | "hidden-albums";
+          type: "albums" | "hidden-albums" | "archive-albums";
           activeCollectionSummaryID: number;
           /**
            * If the active collection ID is for a collection and not a
            * pseudo-collection, this property will be set to the corresponding
            * {@link Collection}.
            *
-           * It is guaranteed that this will be one of the {@link collections}
-           * or {@link hiddenCollections}.
+           * It is guaranteed that this will be one of the {@link collections}.
            */
           activeCollection: Collection | undefined;
           /**
@@ -741,6 +744,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                         hiddenCollectionSummaries,
                         selectedCollectionSummaryID,
                     ));
+            } else if (state.view?.type == "archive-albums") {
+                ({ view, selectedCollectionSummaryID } =
+                    deriveArchiveAlbumsViewAndSelectedID(
+                        collections,
+                        archivedCollectionSummaries,
+                        selectedCollectionSummaryID,
+                    ));
             }
 
             return stateByUpdatingFilteredFiles({
@@ -1106,6 +1116,22 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     activeCollection,
                     activeCollectionSummary:
                         state.hiddenCollectionSummaries.get(
+                            activeCollectionSummaryID,
+                        )!,
+                };
+            } else if (
+                selectedCollectionSummaryID !== undefined &&
+                state.archivedCollectionSummaries.has(
+                    selectedCollectionSummaryID,
+                )
+            ) {
+                const activeCollectionSummaryID = selectedCollectionSummaryID;
+                view = {
+                    type: "archive-albums",
+                    activeCollectionSummaryID,
+                    activeCollection,
+                    activeCollectionSummary:
+                        state.archivedCollectionSummaries.get(
                             activeCollectionSummaryID,
                         )!,
                 };
@@ -1868,9 +1894,15 @@ const deriveAlbumsViewAndSelectedID = (
     selectedCollectionSummaryID: GalleryState["selectedCollectionSummaryID"],
 ) => {
     // Make sure that the last selected ID is still valid by searching for it.
-    const selectedCollectionSummary = selectedCollectionSummaryID
+    const candidateCollectionSummary = selectedCollectionSummaryID
         ? collectionSummaries.get(selectedCollectionSummaryID)
         : undefined;
+    const selectedCollectionSummary =
+        candidateCollectionSummary &&
+        !candidateCollectionSummary.attributes.has("archiveItems") &&
+        !candidateCollectionSummary.attributes.has("archived")
+            ? candidateCollectionSummary
+            : undefined;
 
     const activeCollectionSummaryID =
         selectedCollectionSummary?.id ?? PseudoCollectionID.all;
@@ -1922,6 +1954,41 @@ const deriveHiddenAlbumsViewAndSelectedID = (
         selectedCollectionSummaryID: activeCollectionSummaryID,
         view: {
             type: "hidden-albums" as const,
+            activeCollectionSummaryID,
+            activeCollection,
+            activeCollectionSummary,
+        },
+    };
+};
+
+/**
+ * Sibling of {@link deriveAlbumsViewAndSelectedID} for when we're in the
+ * archive albums section.
+ */
+const deriveArchiveAlbumsViewAndSelectedID = (
+    collections: GalleryState["collections"],
+    archivedCollectionSummaries: GalleryState["archivedCollectionSummaries"],
+    selectedCollectionSummaryID: GalleryState["selectedCollectionSummaryID"],
+) => {
+    // Make sure that the last selected ID is still valid by searching for it.
+    const selectedCollectionSummary = selectedCollectionSummaryID
+        ? archivedCollectionSummaries.get(selectedCollectionSummaryID)
+        : undefined;
+
+    const activeCollectionSummaryID =
+        selectedCollectionSummary?.id ?? PseudoCollectionID.archiveItems;
+    const activeCollectionSummary = archivedCollectionSummaries.get(
+        activeCollectionSummaryID,
+    )!;
+    const activeCollection =
+        selectedCollectionSummary &&
+        activeCollectionSummaryID != PseudoCollectionID.archiveItems
+            ? collections.find(({ id }) => id == activeCollectionSummaryID)
+            : undefined;
+    return {
+        selectedCollectionSummaryID: activeCollectionSummaryID,
+        view: {
+            type: "archive-albums" as const,
             activeCollectionSummaryID,
             activeCollection,
             activeCollectionSummary,
@@ -2098,7 +2165,9 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
         const visibleSearchFiles = suppressSharedFilesSavedByUser(
             searchFiles,
             state.user?.id,
-            state.view?.type == "albums" || state.view?.type == "hidden-albums"
+            state.view?.type == "albums" ||
+                state.view?.type == "hidden-albums" ||
+                state.view?.type == "archive-albums"
                 ? state.view.activeCollection
                 : undefined,
         );
@@ -2111,7 +2180,8 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
         return { ...state, filteredFiles };
     } else if (
         state.view?.type == "albums" ||
-        state.view?.type == "hidden-albums"
+        state.view?.type == "hidden-albums" ||
+        state.view?.type == "archive-albums"
     ) {
         const filteredFiles = deriveAlbumsOrHiddenAlbumsFilteredFiles(
             state.trashItems,
@@ -2141,7 +2211,7 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
 
 /**
  * Compute the sorted list of files to show when we're in the "albums" or
- * "hidden-albums" view and the dependencies change.
+ * "hidden-albums", or "archive-albums" view and the dependencies change.
  */
 const deriveAlbumsOrHiddenAlbumsFilteredFiles = (
     trashItems: GalleryState["trashItems"],
@@ -2152,7 +2222,10 @@ const deriveAlbumsOrHiddenAlbumsFilteredFiles = (
     archivedFileIDs: GalleryState["archivedFileIDs"],
     tempDeletedFileIDs: GalleryState["tempDeletedFileIDs"],
     tempHiddenFileIDs: GalleryState["tempHiddenFileIDs"],
-    view: Extract<GalleryView, { type: "albums" | "hidden-albums" }>,
+    view: Extract<
+        GalleryView,
+        { type: "albums" | "hidden-albums" | "archive-albums" }
+    >,
     currentUserID: number | undefined,
 ) => {
     const activeCollectionSummaryID = view.activeCollectionSummaryID;
