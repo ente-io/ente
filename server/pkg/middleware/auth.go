@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ente-io/museum/ente/jwt"
-	"github.com/ente-io/museum/pkg/utils/network"
+	"github.com/ente/museum/ente/jwt"
+	"github.com/ente/museum/pkg/utils/network"
 
-	"github.com/ente-io/museum/pkg/controller/user"
-	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/auth"
+	"github.com/ente/museum/pkg/controller/user"
+	"github.com/ente/museum/pkg/repo"
+	"github.com/ente/museum/pkg/utils/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
 	"github.com/spf13/viper"

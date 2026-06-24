@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/lib/pq"
 
-	"github.com/ente-io/museum/ente/storagebonus"
 	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente/storagebonus"
 )
 
 // GetStorageBonuses returns the storage surplus for the given userID

@@ -1,4 +1,4 @@
-module github.com/ente-io/museum
+module github.com/ente/museum
 
 go 1.26.0
 

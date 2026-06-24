@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"errors"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/pkg/utils/time"
 )
 
 type ClaimScope string

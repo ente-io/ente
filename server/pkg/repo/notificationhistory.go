@@ -7,7 +7,7 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/pkg/utils/time"
 )
 
 type NotificationHistoryRepository struct {

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/rollout"
+	"github.com/ente/museum/pkg/repo"
+	"github.com/ente/museum/pkg/utils/rollout"
 )
 
 func TestNextInactivityEmailStage(t *testing.T) {

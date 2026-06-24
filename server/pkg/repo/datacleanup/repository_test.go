@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/ente-io/museum/internal/testutil"
+	"github.com/ente/museum/internal/testutil"
 )
 
 func TestDeleteTableDataDeletesContactsAndAttachmentsForUser(t *testing.T) {

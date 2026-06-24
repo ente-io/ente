@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/ente-io/museum/pkg/repo/public"
+	"github.com/ente/museum/pkg/repo/public"
 	"strconv"
 	t "time"
 
@@ -15,9 +15,9 @@ import (
 
 	"github.com/ente-io/stacktrace"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/utils/crypto"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/utils/crypto"
+	"github.com/ente/museum/pkg/utils/time"
 	"github.com/lib/pq"
 )
 

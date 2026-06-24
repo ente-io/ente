@@ -3,8 +3,8 @@ package lock
 import (
 	"fmt"
 
-	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/pkg/repo"
 	log "github.com/sirupsen/logrus"
 )
 

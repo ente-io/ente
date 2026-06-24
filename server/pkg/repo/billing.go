@@ -9,7 +9,7 @@ import (
 
 	"github.com/awa/go-iap/appstore"
 	"github.com/awa/go-iap/playstore"
-	"github.com/ente-io/museum/ente"
+	"github.com/ente/museum/ente"
 	"google.golang.org/api/androidpublisher/v3"
 )
 

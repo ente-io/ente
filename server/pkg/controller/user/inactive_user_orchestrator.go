@@ -9,14 +9,14 @@ import (
 	"sync"
 	stdtime "time"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller/discord"
-	"github.com/ente-io/museum/pkg/controller/lock"
-	"github.com/ente-io/museum/pkg/repo"
-	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
-	emailUtil "github.com/ente-io/museum/pkg/utils/email"
-	"github.com/ente-io/museum/pkg/utils/rollout"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/controller/discord"
+	"github.com/ente/museum/pkg/controller/lock"
+	"github.com/ente/museum/pkg/repo"
+	emergencyRepo "github.com/ente/museum/pkg/repo/emergency"
+	emailUtil "github.com/ente/museum/pkg/utils/email"
+	"github.com/ente/museum/pkg/utils/rollout"
+	"github.com/ente/museum/pkg/utils/time"
 	log "github.com/sirupsen/logrus"
 )
 
