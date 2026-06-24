@@ -29,7 +29,6 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
   static const _duckBottomInset = -2.0;
   static const _closeInset = 8.0;
   static const _ctaIconGap = 4.0;
-  static const _maxTextScaleFactor = 1.0;
   bool _dismissed = false;
 
   @override
@@ -45,161 +44,160 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
     final ctaColor = isDark ? colors.primary : colors.primaryDark;
     final textDirection = Directionality.of(context);
 
-    return MediaQuery.withClampedTextScaling(
-      maxScaleFactor: _maxTextScaleFactor,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final titleWidth = math
-                .min(
-                  _titleMaxWidth,
-                  constraints.maxWidth -
-                      _contentLeftPadding -
-                      _closeTextReservedWidth,
-                )
-                .clamp(120.0, _titleMaxWidth);
-            final bodyTextWidth = math
-                .min(
-                  _bodyTextMaxWidth,
-                  constraints.maxWidth -
-                      _contentLeftPadding -
-                      _duckTextReservedWidth,
-                )
-                .clamp(120.0, _bodyTextMaxWidth);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final titleWidth = math
+              .min(
+                _titleMaxWidth,
+                constraints.maxWidth -
+                    _contentLeftPadding -
+                    _closeTextReservedWidth,
+              )
+              .clamp(120.0, _titleMaxWidth);
+          final bodyTextWidth = math
+              .min(
+                _bodyTextMaxWidth,
+                constraints.maxWidth -
+                    _contentLeftPadding -
+                    _duckTextReservedWidth,
+              )
+              .clamp(120.0, _bodyTextMaxWidth);
 
-            return GestureDetector(
-              onTap: _onGetStarted,
-              child: Container(
-                width: double.infinity,
-                constraints: const BoxConstraints(minHeight: _bannerHeight),
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(_cardRadius),
-                  color: colors.fillLight,
-                  border: Border.all(color: colors.strokeFaint),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: _duckRightInset,
-                      bottom: _duckBottomInset,
-                      child: IgnorePointer(
-                        child: Image.asset(
-                          "assets/ducky_10gb_free.png",
-                          width: _duckWidth,
-                          fit: BoxFit.contain,
-                        ),
+          return GestureDetector(
+            onTap: _onGetStarted,
+            child: Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(minHeight: _bannerHeight),
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(_cardRadius),
+                color: colors.fillLight,
+                border: Border.all(color: colors.strokeFaint),
+              ),
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: _duckRightInset,
+                    bottom: _duckBottomInset,
+                    child: IgnorePointer(
+                      child: Image.asset(
+                        "assets/ducky_10gb_free.png",
+                        width: _duckWidth,
+                        fit: BoxFit.contain,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        _contentLeftPadding,
-                        _contentTopPadding,
-                        16,
-                        _contentBottomPadding,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      _contentLeftPadding,
+                      _contentTopPadding,
+                      16,
+                      _contentBottomPadding,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight:
+                            _bannerHeight -
+                            _contentTopPadding -
+                            _contentBottomPadding,
                       ),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          minHeight:
-                              _bannerHeight -
-                              _contentTopPadding -
-                              _contentBottomPadding,
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: titleWidth),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.offlineHomeSignupBannerTitle,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: titleWidth),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.offlineHomeSignupBannerTitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyles.large.copyWith(
+                                  color: colors.textBase,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: bodyTextWidth,
+                                ),
+                                child: Text(
+                                  l10n.offlineHomeSignupBannerDescription,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyles.large.copyWith(
-                                    color: colors.textBase,
+                                  style: TextStyles.mini.copyWith(
+                                    color: colors.textLight,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: bodyTextWidth,
-                                  ),
-                                  child: Text(
-                                    l10n.offlineHomeSignupBannerDescription,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyles.mini.copyWith(
-                                      color: colors.textLight,
+                              ),
+                              const SizedBox(height: 10),
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: bodyTextWidth,
+                                ),
+                                child: GestureDetector(
+                                  onTap: _onGetStarted,
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 2,
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: bodyTextWidth,
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: _onGetStarted,
-                                    behavior: HitTestBehavior.opaque,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 2,
-                                      ),
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        alignment:
-                                            AlignmentDirectional.centerStart,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              l10n.offlineHomeSignupBannerAction,
-                                              style: TextStyles.bodyBold
-                                                  .copyWith(color: ctaColor),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            l10n.offlineHomeSignupBannerAction,
+                                            style: TextStyles.bodyBold.copyWith(
+                                              color: ctaColor,
                                             ),
-                                            const SizedBox(width: _ctaIconGap),
-                                            Text(
-                                              textDirection == TextDirection.rtl
-                                                  ? "\u2190"
-                                                  : "\u2192",
-                                              style: TextStyles.bodyBold
-                                                  .copyWith(color: ctaColor),
+                                          ),
+                                          const SizedBox(width: _ctaIconGap),
+                                          Text(
+                                            textDirection == TextDirection.rtl
+                                                ? "\u2190"
+                                                : "\u2192",
+                                            style: TextStyles.bodyBold.copyWith(
+                                              color: ctaColor,
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                    Positioned(
-                      top: _closeInset,
-                      right: _closeInset,
-                      child: IconButtonComponent(
-                        tooltip: l10n.close,
-                        variant: IconButtonComponentVariant.circular,
-                        shouldSurfaceExecutionStates: false,
-                        onTap: _onDismiss,
-                        icon: const HugeIcon(
-                          icon: HugeIcons.strokeRoundedCancel01,
-                          size: IconSizes.small,
-                        ),
+                  ),
+                  Positioned(
+                    top: _closeInset,
+                    right: _closeInset,
+                    child: IconButtonComponent(
+                      tooltip: l10n.close,
+                      variant: IconButtonComponentVariant.circular,
+                      shouldSurfaceExecutionStates: false,
+                      onTap: _onDismiss,
+                      icon: const HugeIcon(
+                        icon: HugeIcons.strokeRoundedCancel01,
+                        size: IconSizes.small,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
