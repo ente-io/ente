@@ -207,9 +207,6 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             variant: .critical,
             onTap: () async {
               await _freeStorage(status);
-              if (context.mounted) {
-                await Navigator.maybePop(context);
-              }
             },
           ),
         ],
