@@ -44,6 +44,10 @@ jobs:
 
             - name: Run CLI integration tests
               run: cargo test -p ente-rs --features museum --locked
+              # GITHUB_TOKEN lifts GitHub API rate limit when fetching
+              # postgresql_embedded binaries.
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
 
             - name: Run E2E suite
               run: cargo test -p ente-e2e --features museum --locked
