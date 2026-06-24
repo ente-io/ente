@@ -50,7 +50,7 @@ class LabeledControlComponent extends StatelessWidget {
       children: [
         control,
         const SizedBox(width: Spacing.md),
-        tappableLabel,
+        Flexible(child: tappableLabel),
       ],
     );
   }

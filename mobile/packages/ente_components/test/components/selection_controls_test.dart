@@ -240,6 +240,24 @@ void main() {
     );
   });
 
+  testWidgets("LabeledControlComponent wraps long labels", (tester) async {
+    const label =
+        "Set this as my default choice for every future delete action unless I come back later and explicitly choose something else";
+    await tester.pumpWidget(
+      _wrap(
+        const SizedBox(
+          width: 220,
+          child: LabeledControlComponent(
+            control: CheckboxComponent(selected: true, onChanged: null),
+            label: label,
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text(label), findsOneWidget);
+  });
+
   testWidgets("FilterChipComponent renders selected state with token colors", (
     tester,
   ) async {
