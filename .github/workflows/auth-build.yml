@@ -755,7 +755,7 @@ jobs:
               env:
                   GH_TOKEN: ${{ steps.nightly_token.outputs.token }}
                   RELEASE_TAG: ${{ needs.build-metadata.outputs.release_tag }}
-              run: gh release upload "${RELEASE_TAG}" SHA256SUMS --clobber --repo ente-io/nightly
+              run: gh release upload "${RELEASE_TAG}" SHA256SUMS --clobber --repo ente/nightly
 
             - name: Upload checksum to RC draft
               if: startsWith(github.ref_name, 'release/')

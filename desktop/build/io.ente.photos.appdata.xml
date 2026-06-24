@@ -40,7 +40,7 @@
 
   <releases>
     <release version="1.7" date="2025-01-13">
-      <url type="details">https://github.com/ente-io/photos-desktop/releases</url>
+      <url type="details">https://github.com/ente/photos-desktop/releases</url>
     </release>
   </releases>
 </component>
