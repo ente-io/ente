@@ -97,10 +97,7 @@ class _PeopleSectionState extends State<PeopleSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SectionHeader(
-                  widget.sectionType,
-                  hasMore: _examples.length > widget.resultLimit,
-                ),
+                SectionHeader(widget.sectionType, hasMore: true),
                 const SizedBox(height: 4),
                 SearchExampleRow(visibleExamples, widget.sectionType),
                 const SizedBox(height: 20),
