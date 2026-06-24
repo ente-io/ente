@@ -11,7 +11,7 @@ dependency_overrides:
   ffi: 2.1.0
   flutter_sodium:
     git:
-      url: https://github.com/ente-io/flutter_sodium
+      url: https://github.com/ente/flutter_sodium
       ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   intl: 0.20.2
   js: 0.6.7
@@ -21,7 +21,7 @@ dependency_overrides:
       ref: 4b11d59f4bda152627f701070272f657f8358e67
   video_player_avfoundation:
     git:
-      url: https://github.com/ente-io/packages.git
+      url: https://github.com/ente/packages.git
       path: packages/video_player/video_player_avfoundation
       ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
   watcher: 1.1.2
