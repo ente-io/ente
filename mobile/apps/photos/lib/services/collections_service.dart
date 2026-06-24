@@ -48,6 +48,14 @@ import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
+String? _resolvePublicAlbumAccessToken(Uri uri) {
+  final tokenFromQuery = uri.queryParameters["t"];
+  if (tokenFromQuery != null && tokenFromQuery.isNotEmpty) {
+    return tokenFromQuery;
+  }
+  return uri.pathSegments.firstWhereOrNull((segment) => segment.isNotEmpty);
+}
+
 class CollectionsService {
   static const _collectionSyncTimeKeyPrefix = "collection_sync_time_";
   static const _collectionsSyncTimeKey = "collections_sync_time_x";
@@ -1565,7 +1573,7 @@ class CollectionsService {
     BuildContext context,
     Uri uri,
   ) async {
-    final String? authToken = uri.queryParameters["t"];
+    final String? authToken = _resolvePublicAlbumAccessToken(uri);
     final String albumKey = uri.fragment;
     try {
       final responseData = await collectionShareGateway.getPublicCollectionInfo(
