@@ -665,6 +665,7 @@
   "backup": "Backup",
   "freeUpDeviceSpace": "Free up device space",
   "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have already been backed up.",
+  "freeUpDeviceSpaceConfirmDesc": "{count, plural, one{{count} backed-up file} other{{count} backed-up files}} will be permanently deleted from this device.",
   "freeUpDeviceSpaceDescICloud": "Files in iCloud shared albums cannot be cleared.",
   "@freeUpDeviceSpaceDescICloud": {
     "description": "Here 'cleared' means 'deleted' from the device"
