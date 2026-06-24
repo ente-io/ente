@@ -72,4 +72,4 @@ Release builds use a debug keystore located at `debug.keystore`. For production 
 - `data/` — Repositories, network, storage.
 - `crypto-auth-core/` — Cryptographic primitives (UniFFI-wrapped Rust).
 
-The Rust glue for `db` / `sync` / `inference` lives outside this app, at [`mobile/native/android/packages/rust/`](../../packages/rust/).
+The Rust glue for `db` / `inference` lives outside this app, at [`mobile/native/android/packages/rust/`](../../packages/rust/).

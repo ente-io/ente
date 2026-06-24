@@ -64,7 +64,6 @@ import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.EnsuDefaults
-import io.ente.ensu.domain.model.LogEntry
 import io.ente.ensu.domain.model.MaxImageAttachmentsPerMessage
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
@@ -86,7 +85,6 @@ import java.util.UUID
 fun HomeView(
     appState: AppState,
     store: AppStore,
-    logs: List<LogEntry>,
     logRepository: FileLogRepository,
     authService: EnsuAuthService,
     currentEndpointFlow: Flow<String>,
