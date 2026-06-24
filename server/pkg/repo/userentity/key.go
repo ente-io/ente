@@ -3,9 +3,9 @@ package userentity
 import (
 	"context"
 
-	"github.com/ente-io/museum/ente"
-	model "github.com/ente-io/museum/ente/userentity"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente"
+	model "github.com/ente/museum/ente/userentity"
+	"github.com/ente/stacktrace"
 )
 
 func (r *Repository) CreateKey(ctx context.Context, userID int64, entry model.EntityKeyRequest) error {

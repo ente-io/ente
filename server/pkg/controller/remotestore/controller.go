@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ente-io/museum/pkg/controller"
-	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/rollout"
+	"github.com/ente/museum/pkg/controller"
+	"github.com/ente/museum/pkg/repo"
+	"github.com/ente/museum/pkg/utils/rollout"
 	"github.com/spf13/viper"
 	"golang.org/x/net/idna"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/repo/remotestore"
-	"github.com/ente-io/museum/pkg/utils/auth"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/repo/remotestore"
+	"github.com/ente/museum/pkg/utils/auth"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )

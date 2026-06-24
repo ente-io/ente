@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ente-io/museum/ente/cast"
+	"github.com/ente/museum/ente/cast"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente"
+	"github.com/ente/stacktrace"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"

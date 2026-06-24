@@ -329,7 +329,7 @@ DEPENDENCIES:
   - workmanager_apple (from `.symlinks/plugins/workmanager_apple/ios`)
 
 SPEC REPOS:
-  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git:
+  https://github.com/ente/ffmpeg-kit-custom-repo-ios.git:
     - ffmpeg_kit_custom
   trunk:
     - Firebase
@@ -566,6 +566,6 @@ SPEC CHECKSUMS:
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
   workmanager_apple: 904529ae31e97fc5be632cf628507652294a0778
 
-PODFILE CHECKSUM: a0ca58908e52cf6c3fe2f16f5b193ce82a62fa3b
+PODFILE CHECKSUM: 8fc1fde26dfa3b23d869bfb05f0291fe4d453b91
 
 COCOAPODS: 1.16.2

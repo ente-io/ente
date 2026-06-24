@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/ente-io/cli/utils/constants"
+	"github.com/ente/cli/utils/constants"
 	"log"
 	"os"
 

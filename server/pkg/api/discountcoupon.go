@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/ente-io/museum/pkg/controller/discountcoupon"
-	"github.com/ente-io/museum/pkg/utils/handler"
+	"github.com/ente/museum/pkg/controller/discountcoupon"
+	"github.com/ente/museum/pkg/utils/handler"
 	"github.com/gin-gonic/gin"
 )
 

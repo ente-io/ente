@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ente-io/museum/pkg/repo/passkey"
-	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
-	emailUtil "github.com/ente-io/museum/pkg/utils/email"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/pkg/repo/passkey"
+	storageBonusRepo "github.com/ente/museum/pkg/repo/storagebonus"
+	emailUtil "github.com/ente/museum/pkg/utils/email"
+	"github.com/ente/stacktrace"
 	"github.com/lib/pq"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/utils/crypto"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/utils/crypto"
+	"github.com/ente/museum/pkg/utils/time"
 )
 
 const (

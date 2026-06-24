@@ -2,8 +2,8 @@ package userentity
 
 import (
 	"fmt"
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/ente/base"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/ente/base"
 	"strings"
 )
 

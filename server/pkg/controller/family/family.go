@@ -5,16 +5,16 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ente-io/museum/pkg/controller/usercache"
-	remoteStoreRepo "github.com/ente-io/museum/pkg/repo/remotestore"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/pkg/controller/usercache"
+	remoteStoreRepo "github.com/ente/museum/pkg/repo/remotestore"
+	"github.com/ente/museum/pkg/utils/time"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller"
-	"github.com/ente-io/museum/pkg/repo"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/controller"
+	"github.com/ente/museum/pkg/repo"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 )
 
 const (

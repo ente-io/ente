@@ -98,7 +98,7 @@ dependencies:
   modal_bottom_sheet: 3.0.0
   move_to_background: # no updates in git, replace package
     git:
-      url: https://github.com/ente-io/move_to_background.git
+      url: https://github.com/ente/move_to_background.git
       ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
   native_dio_adapter: 1.5.1
   otp: 3.2.0

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ente-io/museum/internal/testutil"
+	"github.com/ente/museum/internal/testutil"
 )
 
 func TestOutdatedObjectQueueUsesNoDelayAndBatchLimit(t *testing.T) {

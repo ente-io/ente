@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/file"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/pkg/repo"
+	"github.com/ente/museum/pkg/utils/file"
+	"github.com/ente/museum/pkg/utils/time"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ente-io/museum/ente"
-	entity "github.com/ente-io/museum/ente/data_cleanup"
-	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/repo/datacleanup"
-	"github.com/ente-io/museum/pkg/utils/time"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente"
+	entity "github.com/ente/museum/ente/data_cleanup"
+	"github.com/ente/museum/pkg/repo"
+	"github.com/ente/museum/pkg/repo/datacleanup"
+	"github.com/ente/museum/pkg/utils/time"
+	"github.com/ente/stacktrace"
 	log "github.com/sirupsen/logrus"
 )
 

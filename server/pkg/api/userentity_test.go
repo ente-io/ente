@@ -10,11 +10,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ente-io/museum/ente"
-	model "github.com/ente-io/museum/ente/userentity"
-	"github.com/ente-io/museum/internal/testutil"
-	userentitycontroller "github.com/ente-io/museum/pkg/controller/userentity"
-	userentityrepo "github.com/ente-io/museum/pkg/repo/userentity"
+	"github.com/ente/museum/ente"
+	model "github.com/ente/museum/ente/userentity"
+	"github.com/ente/museum/internal/testutil"
+	userentitycontroller "github.com/ente/museum/pkg/controller/userentity"
+	userentityrepo "github.com/ente/museum/pkg/repo/userentity"
 	"github.com/gin-gonic/gin"
 )
 

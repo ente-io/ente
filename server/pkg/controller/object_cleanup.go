@@ -7,15 +7,15 @@ import (
 	stime "time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/ente-io/museum/pkg/external/wasabi"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/pkg/external/wasabi"
+	"github.com/ente/stacktrace"
 	"github.com/spf13/viper"
 
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/s3config"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/repo"
+	"github.com/ente/museum/pkg/utils/s3config"
+	"github.com/ente/museum/pkg/utils/time"
 	log "github.com/sirupsen/logrus"
 )
 

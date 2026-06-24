@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/ente-io/museum/ente"
+	"github.com/ente/museum/ente"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
