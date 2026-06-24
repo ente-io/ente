@@ -42,8 +42,14 @@ jobs:
                   shared-key: rust-cli
                   save-if: false
 
+            # GITHUB_TOKEN lifts postgresql_embedded's GitHub API rate limit
+            # for fetching Postgres binaries (60/hr unauthenticated -> 1000/hr).
             - name: Run CLI integration tests
               run: cargo test -p ente-rs --features museum --locked
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Run E2E suite
               run: cargo test -p ente-e2e --features museum --locked
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
