@@ -36,7 +36,7 @@ class AboutSectionWidget extends StatelessWidget {
           trailingIconIsMuted: true,
           onTap: () async {
             await PlatformUtil.openUrlInBrowser(
-              "https://github.com/ente-io/ente",
+              "https://github.com/ente/ente",
             );
           },
         ),

@@ -9,7 +9,7 @@ const mnemonicKeyWordCount = 24;
 
 const kDefaultProductionEndpoint = 'https://api.ente.com';
 const String githubDiscussionsUrl =
-    "https://github.com/ente-io/ente/discussions";
+    "https://github.com/ente/ente/discussions";
 
 const supportEmail = 'support@ente.com';
 

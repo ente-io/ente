@@ -112,7 +112,7 @@ However, if you are using Ente for long-term needs and you have not installed En
 
 ```sh
 # If you have not cloned already
-git clone https://github.com/ente-io/ente
+git clone https://github.com/ente/ente
 
 # Generate the values
 cd ente/server

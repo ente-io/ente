@@ -11,7 +11,7 @@ To know more about Ente, see [our main README](../README.md) or visit [ente.com]
 Clone this repository
 
 ```sh
-git clone https://github.com/ente-io/ente
+git clone https://github.com/ente/ente
 cd ente
 ```
 

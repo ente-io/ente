@@ -8,7 +8,7 @@ Ente's 2FA app. An end-to-end encrypted, cross platform and free app for storing
 
 ### Android
 
-This repository's [GitHub releases](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v4) contains APKs, built straight from source. These builds keep themselves updated, without relying on third party stores.
+This repository's [GitHub releases](https://github.com/ente/ente/releases?q=tag%3Aauth-v4) contains APKs, built straight from source. These builds keep themselves updated, without relying on third party stores.
 
 You can alternatively install the build from PlayStore or F-Droid.
 
@@ -27,7 +27,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ### Desktop
 
-You can [**download**](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v4) a native desktop app from this repository's GitHub releases. The desktop app works on Windows, Linux and macOS.
+You can [**download**](https://github.com/ente/ente/releases?q=tag%3Aauth-v4) a native desktop app from this repository's GitHub releases. The desktop app works on Windows, Linux and macOS.
 
 ### Web
 
@@ -66,7 +66,7 @@ The architecture that powers end-to-end encrypted storage and sync of your token
 
 If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-authenticator-app) to get started. Thank you for your support.
 
-If your language is not listed for translation, please [create a GitHub issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A) to have it added.
+If your language is not listed for translation, please [create a GitHub issue](https://github.com/ente/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A) to have it added.
 
 ## 🧑‍🎨 Icons
 

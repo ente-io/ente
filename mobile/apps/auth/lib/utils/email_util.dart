@@ -112,7 +112,7 @@ Future<void> sendLogs(
 Future<void> openSupportPage(String? subject, String? body) async {
   final baseSupportUri = Uri.https(
     "github.com",
-    "/ente-io/ente/discussions/new",
+    "/ente/ente/discussions/new",
     {"category": "q-a"},
   );
   final queryParameters = Map<String, String>.from(

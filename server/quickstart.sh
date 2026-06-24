@@ -2,8 +2,8 @@
 #
 # Ente self-host quickstart helper script.
 #
-# Usage: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
-# Docs: https://github.com/ente-io/ente/blob/main/server/docs/quickstart.md
+# Usage: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente/ente/main/server/quickstart.sh)"
+# Docs: https://github.com/ente/ente/blob/main/server/docs/quickstart.md
 
 set -e
 

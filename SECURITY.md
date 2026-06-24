@@ -1,6 +1,6 @@
 # Security Policy
 
-Ente believes that working with security researchers across the globe is crucial to keeping our users safe. If you believe you've found a security issue in our product or service, we encourage you to notify us by email at security@ente.com or by [filling out this form](https://github.com/ente-io/ente/security/advisories/new). We welcome working with you to resolve the issue promptly. Thanks in advance!
+Ente believes that working with security researchers across the globe is crucial to keeping our users safe. If you believe you've found a security issue in our product or service, we encourage you to notify us by email at security@ente.com or by [filling out this form](https://github.com/ente/ente/security/advisories/new). We welcome working with you to resolve the issue promptly. Thanks in advance!
 
 ## Disclosure Policy
 

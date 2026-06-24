@@ -224,7 +224,7 @@ class Code {
       if (uri.queryParameters.containsKey("issuer")) {
         String issuerName = uri.queryParameters['issuer']!;
         // Handle issuer name with period
-        // See https://github.com/ente-io/ente/pull/77
+        // See https://github.com/ente/ente/pull/77
         if (issuerName.contains("period=")) {
           return issuerName.substring(0, issuerName.indexOf("period="));
         }

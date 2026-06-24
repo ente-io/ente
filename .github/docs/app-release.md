@@ -34,8 +34,8 @@ gh workflow run app-release.yml \
 This:
 
 1. Creates a release branch `release/ensu-v0.1.16` with the version set to `0.1.16`
-2. Pushes the branch, which triggers `ensu-build.yml`, which creates the draft `ensu-v0.1.16-rc` GitHub release in `ente-io/ente` (and a pre-release in `ente-io/nightly`).
-3. Removes the `ensu-v0.1.16-beta` pre-release from `ente-io/nightly` and the beta tag from `ente-io/ente`.
+2. Pushes the branch, which triggers `ensu-build.yml`, which creates the draft `ensu-v0.1.16-rc` GitHub release in `ente/ente` (and a pre-release in `ente-io/nightly`).
+3. Removes the `ensu-v0.1.16-beta` pre-release from `ente-io/nightly` and the beta tag from `ente/ente`.
 
 > [!TIP]
 >
@@ -57,7 +57,7 @@ git push
 
 > [!IMPORTANT]
 >
-> Edit the release notes for the `ensu-v0.1.16-rc` draft release in `ente-io/ente` into the final user-facing changelog before promoting.
+> Edit the release notes for the `ensu-v0.1.16-rc` draft release in `ente/ente` into the final user-facing changelog before promoting.
 
 ```sh
 gh workflow run app-release.yml \

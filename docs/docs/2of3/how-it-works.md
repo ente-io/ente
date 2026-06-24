@@ -88,7 +88,7 @@ This file is the answer to the question "what happens if 2of3.ente.com is gone i
 >
 > Treat the offline recovery file like a backup. Store at least one copy somewhere durable: on a USB stick, in a backup, or printed alongside the cards if you are storing things in a safe. The cards are the secret; the recovery file is the tool that opens them.
 
-The file is also a verification target: because the file is self-contained plain JavaScript, you can read it, run it through static analysis, or compare it against the [open source repository](https://github.com/ente-io/ente) to convince yourself that it does what it claims. There is no remote service to trust.
+The file is also a verification target: because the file is self-contained plain JavaScript, you can read it, run it through static analysis, or compare it against the [open source repository](https://github.com/ente/ente) to convince yourself that it does what it claims. There is no remote service to trust.
 
 ## QR decoder
 
@@ -106,4 +106,4 @@ If none of the attempts succeed, the recovery flow shows "Could not read that QR
 
 - [Getting started](/2of3/getting-started): splitting, storing, and recovering, with the actual UI steps.
 - [FAQ](/2of3/faq): answers to common questions about safety, storage, and edge cases.
-- [Source code on GitHub](https://github.com/ente-io/ente): the full 2of3 source, including the Shamir implementation and the offline recovery file generator.
+- [Source code on GitHub](https://github.com/ente/ente): the full 2of3 source, including the Shamir implementation and the offline recovery file generator.

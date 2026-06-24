@@ -122,7 +122,7 @@ Learn more in [How it works](/ensu/how-it-works).
 
 ### Open source
 
-The entire Ensu codebase is in [Ente's open source monorepo on GitHub](https://github.com/ente-io/ente), including the Rust inference core, the platform UIs, and the web app. You can read it, build it, audit it, and contribute to it.
+The entire Ensu codebase is in [Ente's open source monorepo on GitHub](https://github.com/ente/ente), including the Rust inference core, the platform UIs, and the web app. You can read it, build it, audit it, and contribute to it.
 
 ### Sync and backup (planned)
 
