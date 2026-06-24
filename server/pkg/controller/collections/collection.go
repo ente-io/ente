@@ -14,10 +14,10 @@ import (
 	"github.com/ente/museum/pkg/utils/auth"
 	"github.com/gin-gonic/gin"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/pkg/repo"
 	"github.com/ente/museum/pkg/utils/time"
+	"github.com/ente/stacktrace"
 	log "github.com/sirupsen/logrus"
 )
 

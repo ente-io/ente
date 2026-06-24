@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	entity "github.com/ente/museum/ente/cast"
 	"github.com/ente/museum/pkg/controller"
@@ -13,6 +12,7 @@ import (
 	"github.com/ente/museum/pkg/controller/collections"
 	"github.com/ente/museum/pkg/utils/auth"
 	"github.com/ente/museum/pkg/utils/handler"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	socialentity "github.com/ente/museum/ente/social"
+	"github.com/ente/stacktrace"
 	"github.com/lib/pq"
 )
 

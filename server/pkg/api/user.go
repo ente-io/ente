@@ -10,13 +10,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/ente/jwt"
 	"github.com/ente/museum/pkg/controller/user"
 	"github.com/ente/museum/pkg/utils/auth"
 	emailUtil "github.com/ente/museum/pkg/utils/email"
 	"github.com/ente/museum/pkg/utils/handler"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

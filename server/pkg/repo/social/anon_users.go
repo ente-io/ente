@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/ente-io/stacktrace"
 	socialentity "github.com/ente/museum/ente/social"
+	"github.com/ente/stacktrace"
 	"github.com/lib/pq"
 )
 

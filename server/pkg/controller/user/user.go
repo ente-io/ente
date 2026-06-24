@@ -17,7 +17,6 @@ import (
 	"github.com/ente/museum/pkg/controller/discord"
 	"github.com/ente/museum/pkg/controller/usercache"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/pkg/controller"
 	"github.com/ente/museum/pkg/controller/family"
@@ -29,6 +28,7 @@ import (
 	"github.com/ente/museum/pkg/utils/billing"
 	"github.com/ente/museum/pkg/utils/crypto"
 	"github.com/ente/museum/pkg/utils/email"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"

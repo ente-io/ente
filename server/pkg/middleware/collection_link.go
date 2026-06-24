@@ -23,7 +23,6 @@ import (
 	"github.com/ente/museum/pkg/repo/public"
 	socialrepo "github.com/ente/museum/pkg/repo/social"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/pkg/controller"
 	"github.com/ente/museum/pkg/controller/discord"
@@ -31,6 +30,7 @@ import (
 	"github.com/ente/museum/pkg/utils/auth"
 	"github.com/ente/museum/pkg/utils/network"
 	"github.com/ente/museum/pkg/utils/time"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"

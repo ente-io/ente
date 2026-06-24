@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente/museum/pkg/repo/storagebonus"
 	emailUtil "github.com/ente/museum/pkg/utils/email"
+	"github.com/ente/stacktrace"
 	"github.com/lib/pq"
 
 	"github.com/ente/museum/ente"

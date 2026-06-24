@@ -11,7 +11,6 @@ import (
 
 	"github.com/ente/museum/pkg/controller/usercache"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	storageBonusEntity "github.com/ente/museum/ente/storagebonus"
 	"github.com/ente/museum/pkg/controller/discord"
@@ -21,6 +20,7 @@ import (
 	"github.com/ente/museum/pkg/utils/config"
 	emailUtil "github.com/ente/museum/pkg/utils/email"
 	"github.com/ente/museum/pkg/utils/time"
+	"github.com/ente/stacktrace"
 	log "github.com/sirupsen/logrus"
 )
 

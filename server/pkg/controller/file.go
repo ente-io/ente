@@ -19,11 +19,11 @@ import (
 	"github.com/ente/museum/pkg/controller/discord"
 	"github.com/ente/museum/pkg/utils/network"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/pkg/controller/email"
 	"github.com/ente/museum/pkg/controller/lock"
 	"github.com/ente/museum/pkg/utils/auth"
 	"github.com/ente/museum/pkg/utils/file"
+	"github.com/ente/stacktrace"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

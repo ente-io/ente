@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/ente/details"
 	bonus "github.com/ente/museum/ente/storagebonus"
@@ -10,6 +9,7 @@ import (
 	"github.com/ente/museum/pkg/utils/billing"
 	"github.com/ente/museum/pkg/utils/recover"
 	"github.com/ente/museum/pkg/utils/time"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/sync/errgroup"
 )

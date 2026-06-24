@@ -11,8 +11,8 @@ import (
 
 	"github.com/ente/museum/pkg/utils/network"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/pkg/utils/auth"
+	"github.com/ente/stacktrace"
 	"github.com/gin-contrib/requestid"
 
 	timeUtil "github.com/ente/museum/pkg/utils/time"

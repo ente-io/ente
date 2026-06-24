@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 
 	"github.com/awa/go-iap/appstore"
 	"github.com/awa/go-iap/playstore"

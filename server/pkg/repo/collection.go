@@ -13,7 +13,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/pkg/utils/crypto"

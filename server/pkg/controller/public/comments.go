@@ -6,7 +6,6 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	socialentity "github.com/ente/museum/ente/social"
 	socialcontroller "github.com/ente/museum/pkg/controller/social"
@@ -14,6 +13,7 @@ import (
 	socialrepo "github.com/ente/museum/pkg/repo/social"
 	"github.com/ente/museum/pkg/utils/auth"
 	emailUtil "github.com/ente/museum/pkg/utils/email"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 

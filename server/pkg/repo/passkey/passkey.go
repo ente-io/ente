@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ente-io/stacktrace"
 	emailUtil "github.com/ente/museum/pkg/utils/email"
 	ente_time "github.com/ente/museum/pkg/utils/time"
+	"github.com/ente/stacktrace"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"

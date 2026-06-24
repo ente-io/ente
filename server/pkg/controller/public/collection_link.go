@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/pkg/controller"
 	emailCtrl "github.com/ente/museum/pkg/controller/email"
@@ -14,6 +13,7 @@ import (
 	"github.com/ente/museum/pkg/repo/public"
 	"github.com/ente/museum/pkg/utils/auth"
 	"github.com/ente/museum/pkg/utils/time"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/lithammer/shortuuid/v3"
 	"github.com/sirupsen/logrus"

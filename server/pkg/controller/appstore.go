@@ -15,7 +15,7 @@ import (
 	"github.com/ente/museum/pkg/utils/email"
 	"github.com/prometheus/common/log"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

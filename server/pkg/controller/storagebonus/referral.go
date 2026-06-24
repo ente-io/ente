@@ -12,10 +12,10 @@ import (
 	"github.com/ente/museum/pkg/controller/email"
 	"github.com/ente/museum/pkg/controller/lock"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/pkg/repo"
 	"github.com/ente/museum/pkg/repo/storagebonus"
 	"github.com/ente/museum/pkg/utils/auth"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 

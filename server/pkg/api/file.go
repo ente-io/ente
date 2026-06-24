@@ -11,7 +11,7 @@ import (
 	"github.com/ente/museum/pkg/controller/filedata"
 	"github.com/ente/museum/pkg/controller/public"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 	"github.com/gin-contrib/requestid"
 	log "github.com/sirupsen/logrus"
 

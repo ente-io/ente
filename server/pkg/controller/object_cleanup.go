@@ -7,8 +7,8 @@ import (
 	stime "time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/pkg/external/wasabi"
+	"github.com/ente/stacktrace"
 	"github.com/spf13/viper"
 
 	"github.com/aws/aws-sdk-go/service/s3"

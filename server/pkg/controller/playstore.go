@@ -8,7 +8,7 @@ import (
 	"github.com/ente/museum/pkg/controller/commonbilling"
 	"github.com/ente/museum/pkg/repo/storagebonus"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 
 	log "github.com/sirupsen/logrus"
 

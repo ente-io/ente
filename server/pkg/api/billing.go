@@ -12,7 +12,7 @@ import (
 	"github.com/ente/museum/pkg/utils/network"
 	"github.com/gin-contrib/requestid"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/awa/go-iap/appstore"

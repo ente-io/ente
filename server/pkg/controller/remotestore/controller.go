@@ -13,10 +13,10 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/net/idna"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/pkg/repo/remotestore"
 	"github.com/ente/museum/pkg/utils/auth"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )

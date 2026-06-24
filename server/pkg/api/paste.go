@@ -3,10 +3,10 @@ package api
 import (
 	"net/http"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/ente"
 	public "github.com/ente/museum/pkg/controller/public"
 	"github.com/ente/museum/pkg/utils/handler"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 

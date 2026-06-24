@@ -14,7 +14,7 @@ import (
 	"github.com/ente/museum/pkg/repo"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 )
 
 const (

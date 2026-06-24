@@ -28,8 +28,8 @@ import (
 	"github.com/gin-contrib/requestid"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ente-io/stacktrace"
 	"github.com/ente/museum/pkg/utils/crypto"
+	"github.com/ente/stacktrace"
 
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/pkg/repo"

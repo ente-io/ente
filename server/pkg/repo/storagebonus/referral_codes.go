@@ -7,8 +7,8 @@ import (
 	"github.com/ente/museum/ente"
 	"net/http"
 
-	"github.com/ente-io/stacktrace"
 	entity "github.com/ente/museum/ente/storagebonus"
+	"github.com/ente/stacktrace"
 )
 
 const (
