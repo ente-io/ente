@@ -1123,7 +1123,10 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 selectedCollectionSummaryID !== undefined &&
                 state.archivedCollectionSummaries.has(
                     selectedCollectionSummaryID,
-                )
+                ) &&
+                (state.view?.type == "archive-albums" ||
+                    selectedCollectionSummaryID ==
+                        PseudoCollectionID.archiveItems)
             ) {
                 const activeCollectionSummaryID = selectedCollectionSummaryID;
                 view = {
