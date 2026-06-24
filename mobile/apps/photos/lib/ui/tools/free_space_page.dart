@@ -200,6 +200,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
         message: l10n.freeUpDeviceSpaceConfirmDesc(
           count: status.localIDs.length,
         ),
+        illustration: Image.asset("assets/warning-red.png"),
         actions: [
           ButtonComponent(
             label: l10n.yesDelete,
