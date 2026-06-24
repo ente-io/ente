@@ -29,6 +29,6 @@ jobs:
                   docker buildx build --push \
                       --file web/Dockerfile \
                       --platform linux/amd64,linux/arm64 \
-                      --tag ghcr.io/ente-io/web:${GITHUB_SHA} \
-                      --tag ghcr.io/ente-io/web:latest \
+                      --tag ghcr.io/ente/web:${GITHUB_SHA} \
+                      --tag ghcr.io/ente/web:latest \
                       .

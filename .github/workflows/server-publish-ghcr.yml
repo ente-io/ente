@@ -38,6 +38,6 @@ jobs:
                       --file server/Dockerfile \
                       --platform linux/amd64,linux/arm64 \
                       --build-arg GIT_COMMIT="${museum_commit}" \
-                      --tag ghcr.io/ente-io/server:${museum_commit} \
-                      --tag ghcr.io/ente-io/server:latest \
+                      --tag ghcr.io/ente/server:${museum_commit} \
+                      --tag ghcr.io/ente/server:latest \
                       server
