@@ -206,6 +206,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             label: l10n.yesDelete,
             variant: .critical,
             onTap: () async {
+              Navigator.of(context).pop();
               await _freeStorage(status);
             },
           ),
