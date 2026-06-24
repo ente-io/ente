@@ -20,7 +20,7 @@ for tool in cargo rustup cmake; do
     command -v "$tool" >/dev/null || { echo "error: $tool not on PATH" >&2; exit 1; }
 done
 
-for name in core db sync inference transcription; do
+for name in core db inference transcription; do
     for ext in .swift FFI.h FFI.modulemap; do
         [[ -f "$GENERATED_DIR/$name$ext" ]] || {
             echo "error: missing $GENERATED_DIR/$name$ext" >&2
@@ -122,6 +122,5 @@ build_crate() {
 
 build_crate core      "$REPO_ROOT/rust/bindings/uniffi/core"           libcore.a
 build_crate db        "$REPO_ROOT/rust/bindings/uniffi/ensu/db"        libdb.a
-build_crate sync      "$REPO_ROOT/rust/bindings/uniffi/ensu/sync"      libsync.a
 build_crate inference "$REPO_ROOT/rust/bindings/uniffi/ensu/inference" libinference.a
 build_crate transcription "$REPO_ROOT/rust/bindings/uniffi/ensu/transcription" libtranscription.a

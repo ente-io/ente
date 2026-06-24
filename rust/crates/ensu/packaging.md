@@ -16,7 +16,6 @@ Core rust crate is in `rust/crates/core`.
 Ensu specific Rust crates are in `rust/crates/ensu`
 
 - Local chat database: `rust/crates/ensu/db`
-- Sync engine: `rust/crates/ensu/sync`
 - Inference runtime: `rust/crates/ensu/inference`
 
 ## Adapter/Binding layers

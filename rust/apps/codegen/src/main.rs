@@ -86,10 +86,6 @@ fn generate_native_ios() -> Result<(), DynError> {
             crate_dir: rust_root.join("bindings/uniffi/ensu/db"),
         },
         UniffiCrate {
-            crate_name: "sync",
-            crate_dir: rust_root.join("bindings/uniffi/ensu/sync"),
-        },
-        UniffiCrate {
             crate_name: "inference",
             crate_dir: rust_root.join("bindings/uniffi/ensu/inference"),
         },
@@ -109,7 +105,6 @@ fn generate_native_ios() -> Result<(), DynError> {
     }
 
     sanitize_generated_swift_bindings(&generated_dir.join("db.swift"), "db")?;
-    sanitize_generated_swift_bindings(&generated_dir.join("sync.swift"), "sync")?;
 
     Ok(())
 }
@@ -142,14 +137,6 @@ fn generate_native_android() -> Result<(), DynError> {
             },
             out_dir: rust_out_dir.clone(),
             stale_path: rust_out_dir.join("io/ente/labs/ensu_db/db.kt"),
-        },
-        AndroidCrate {
-            uniffi: UniffiCrate {
-                crate_name: "sync",
-                crate_dir: rust_root.join("bindings/uniffi/ensu/sync"),
-            },
-            out_dir: rust_out_dir.clone(),
-            stale_path: rust_out_dir.join("io/ente/labs/ensu_sync/sync.kt"),
         },
         AndroidCrate {
             uniffi: UniffiCrate {

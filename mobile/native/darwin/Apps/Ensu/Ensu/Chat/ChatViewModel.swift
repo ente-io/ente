@@ -3,48 +3,6 @@ import SwiftUI
 #if canImport(EnteCore)
 import EnteCore
 #else
-struct SyncAuth {
-    let baseUrl: String
-    let authToken: String
-    let masterKey: Data
-    let userAgent: String
-    let clientPackage: String
-    let clientVersion: String?
-}
-
-enum SyncError: Error {
-    case Message(String)
-    case SyncInProgress
-}
-
-struct MigrationConfig {
-    let batchSize: Int64
-    let priority: MigrationPriority
-}
-
-enum MigrationPriority {
-    case recentFirst
-    case oldestFirst
-}
-
-enum MigrationState {
-    case notNeeded
-    case inProgress
-    case complete
-    case failed
-}
-
-struct MigrationProgress {
-    let state: MigrationState
-    let processed: Int64
-    let remaining: Int64
-    let total: Int64
-}
-
-protocol MigrationProgressCallback {
-    func onProgress(progress: MigrationProgress)
-}
-
 final class CredentialStore {
     static let shared = CredentialStore()
     var hasConfiguredAccount: Bool { false }
@@ -53,19 +11,6 @@ final class CredentialStore {
 
     func getOrCreateChatDbKey() -> Data {
         Data()
-    }
-}
-
-struct EntePlatform {
-    static let current = EntePlatform()
-    var userAgent: String { "ensu" }
-}
-
-enum EnteApp {
-    case ensu
-
-    var packageIdentifier: String {
-        "ensu"
     }
 }
 
@@ -98,20 +43,6 @@ final class EnsuLogging {
     func listLogFiles() -> [URL] { [] }
     func readLogText(fileURL: URL) -> String { "" }
     func createLogsArchive() throws -> URL { URL(fileURLWithPath: "") }
-}
-
-struct NetworkConfiguration {
-    let apiEndpoint: URL
-
-    static var `default`: NetworkConfiguration {
-        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.com")!)
-    }
-}
-
-enum EnsuDeveloperSettings {
-    static var networkConfiguration: NetworkConfiguration {
-        .default
-    }
 }
 
 struct InferenceModelTarget: Equatable {
@@ -305,90 +236,11 @@ final class EnsuDb {
         _ = (uuid, title)
     }
 }
-
-final class EnsuSync {
-    static func open(
-        mainDbPath: String,
-        attachmentsDbPath: String,
-        dbKey: Data,
-        attachmentsDir: String,
-        metaDir: String,
-        plaintextDir: String
-    ) throws -> EnsuSync {
-        _ = (mainDbPath, attachmentsDbPath, dbKey, attachmentsDir, metaDir, plaintextDir)
-        return EnsuSync()
-    }
-
-    func sync(auth: SyncAuth) throws -> Bool {
-        _ = auth
-        return true
-    }
-
-    func checkMigrationStatusLocal() -> MigrationState? {
-        nil
-    }
-
-    func checkMigrationStatus(auth: SyncAuth) throws -> MigrationState {
-        _ = auth
-        return .inProgress
-    }
-
-    func syncWithProgress(
-        auth: SyncAuth,
-        config: MigrationConfig,
-        callback: MigrationProgressCallback
-    ) throws -> Bool {
-        _ = (auth, config, callback)
-        return true
-    }
-
-    func resetSyncState() throws {
-    }
-
-    func seedFromOffline(offlineDbPath: String, offlineDbKey: Data) throws {
-        _ = (offlineDbPath, offlineDbKey)
-    }
-
-    func downloadAttachment(attachmentId: String, sessionUuid: String, auth: SyncAuth) throws -> Bool {
-        _ = (attachmentId, sessionUuid, auth)
-        return true
-    }
-}
-
-func fetchChatKey(auth: SyncAuth, syncDbPath: String) throws -> Data {
-    _ = (auth, syncDbPath)
-    return Data()
-}
 #endif
 
 #if canImport(EnteCore)
 
 typealias LlmChatSession = Session
-
-enum SyncState: Equatable {
-    case idle
-    case syncing
-    case migrating(processed: Int64, total: Int64)
-    case error(String)
-}
-
-final class MigrationProgressHandler: MigrationProgressCallback {
-    private let handler: @Sendable (MigrationProgress) -> Void
-
-    init(_ handler: @escaping @Sendable (MigrationProgress) -> Void) {
-        self.handler = handler
-    }
-
-    func onProgress(progress: MigrationProgress) {
-        handler(progress)
-    }
-}
-
-private struct OnlineStorePreparation {
-    let chatKey: Data
-    let chatDb: EnsuDb
-    let syncEngine: EnsuSync
-}
 
 @MainActor
 final class ChatViewModel: ObservableObject {
@@ -462,9 +314,6 @@ final class ChatViewModel: ObservableObject {
     @Published var showUnsupportedDeviceDialog: Bool = false
     @Published var attachmentDownloads: [AttachmentDownloadItem] = []
     @Published var currentSessionMissingAttachments: [AttachmentDownloadItem] = []
-    @Published var syncState: SyncState = .idle
-    @Published var syncErrorMessage: String?
-    @Published var syncSuccessMessage: String?
     @Published var generationErrorMessage: String?
     @Published var voiceInputState: VoiceInputState = .initial
     @Published var draftCursorMoveToken = UUID()
@@ -473,25 +322,11 @@ final class ChatViewModel: ObservableObject {
     private let deviceCapabilityProvider = ProcessInfoChatDeviceCapabilityProvider()
     private let voiceTranscriber: VoiceTranscriptionService
     private var chatDb: EnsuDb
-    private var syncEngine: EnsuSync
     private let attachmentsDir: URL
-    private let offlineDbPath: String
-    private let onlineDbPath: String
-    private let syncDbPath: String
-    private let syncMetaDir: URL
-    private let encryptedAttachmentsDir: URL
-    private let offlineDbKey: Data
-    private var onlineDbKey: Data?
-    private var isOnlineMode = false
+    private let chatDbPath: String
+    private let attachmentsDbPath: String
+    private let chatDbKey: Data
     private let modelSettings = ModelSettingsStore.shared
-
-    private var activeDbPath: String {
-        isOnlineMode ? onlineDbPath : offlineDbPath
-    }
-
-    private var activeDbKey: Data? {
-        isOnlineMode ? onlineDbKey : offlineDbKey
-    }
 
     private var messageStore: [UUID: [MessageNode]] = [:]
     private var branchSelections: [UUID: [String: UUID]] = [:]
@@ -510,9 +345,6 @@ final class ChatViewModel: ObservableObject {
     private var stopRequested = false
     private var activeGenerationId: UUID?
     private var activeGenerationSessionId: UUID?
-    private var pendingSyncRequested = false
-    private var pendingSyncShowErrors = false
-    private var pendingSyncShowSuccess = false
     private var modelDownloadLoggedStart = false
     private let downloadProgressTracker = DownloadProgressTracker()
     private var pendingOverflow: PendingOverflow?
@@ -541,35 +373,15 @@ final class ChatViewModel: ObservableObject {
         let attachmentsDir = dbDir.appendingPathComponent("chat_attachments", isDirectory: true)
         try? FileManager.default.createDirectory(at: attachmentsDir, withIntermediateDirectories: true, attributes: nil)
 
-        let offlineKey = CredentialStore.shared.getOrCreateChatDbKey()
-        let offlineDbPath = dbDir.appendingPathComponent("llmchat.db").path
-        let onlineDbPath = dbDir.appendingPathComponent("llmchat_online.db").path
-        let syncDbPath = dbDir.appendingPathComponent("llmchat_sync.db").path
+        let chatDbKey = CredentialStore.shared.getOrCreateChatDbKey()
+        let chatDbPath = dbDir.appendingPathComponent("llmchat.db").path
+        let attachmentsDbPath = dbDir.appendingPathComponent("llmchat_sync.db").path
 
         let chatDb: EnsuDb
         do {
-            chatDb = try EnsuDb.open(mainDbPath: offlineDbPath, attachmentsDbPath: syncDbPath, key: offlineKey)
+            chatDb = try EnsuDb.open(mainDbPath: chatDbPath, attachmentsDbPath: attachmentsDbPath, key: chatDbKey)
         } catch {
             fatalError("Failed to open chat DB: \(error)")
-        }
-
-        let syncMetaDir = dbDir.appendingPathComponent("sync_meta", isDirectory: true)
-        try? FileManager.default.createDirectory(at: syncMetaDir, withIntermediateDirectories: true, attributes: nil)
-        let encryptedAttachmentsDir = dbDir.appendingPathComponent("chat_attachments_encrypted", isDirectory: true)
-        try? FileManager.default.createDirectory(at: encryptedAttachmentsDir, withIntermediateDirectories: true, attributes: nil)
-
-        let syncEngine: EnsuSync
-        do {
-            syncEngine = try EnsuSync.open(
-                mainDbPath: offlineDbPath,
-                attachmentsDbPath: syncDbPath,
-                dbKey: offlineKey,
-                attachmentsDir: encryptedAttachmentsDir.path,
-                metaDir: syncMetaDir.path,
-                plaintextDir: attachmentsDir.path
-            )
-        } catch {
-            fatalError("Failed to open chat sync: \(error)")
         }
 
         // Load sessions/messages.
@@ -580,14 +392,10 @@ final class ChatViewModel: ObservableObject {
         self.provider = provider
         self.voiceTranscriber = voiceTranscriber
         self.chatDb = chatDb
-        self.syncEngine = syncEngine
         self.attachmentsDir = attachmentsDir
-        self.offlineDbPath = offlineDbPath
-        self.onlineDbPath = onlineDbPath
-        self.syncDbPath = syncDbPath
-        self.syncMetaDir = syncMetaDir
-        self.encryptedAttachmentsDir = encryptedAttachmentsDir
-        self.offlineDbKey = offlineKey
+        self.chatDbPath = chatDbPath
+        self.attachmentsDbPath = attachmentsDbPath
+        self.chatDbKey = chatDbKey
         self.sessionSummaries = summaries
 
         self.sessions = sessions
@@ -645,29 +453,14 @@ final class ChatViewModel: ObservableObject {
         "This device doesn't have enough memory to run Ensu's AI model. " +
         "You can view existing chats, but can't send new messages."
 
-    private func reopenSyncStoresIfNeeded(force: Bool = false) {
-        let hasSyncDb = FileManager.default.fileExists(atPath: syncDbPath)
-        let hasActiveDb = FileManager.default.fileExists(atPath: activeDbPath)
-        if !force && hasSyncDb && hasActiveDb {
-            return
-        }
-
-        guard let key = activeDbKey else {
-            logger.error("Missing active DB key")
+    private func reopenChatStoreIfNeeded(force: Bool = false) {
+        let hasAttachmentsDb = FileManager.default.fileExists(atPath: attachmentsDbPath)
+        let hasChatDb = FileManager.default.fileExists(atPath: chatDbPath)
+        if !force && hasAttachmentsDb && hasChatDb {
             return
         }
 
         do {
-            try? FileManager.default.createDirectory(
-                at: syncMetaDir,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
-            try? FileManager.default.createDirectory(
-                at: encryptedAttachmentsDir,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
             try? FileManager.default.createDirectory(
                 at: attachmentsDir,
                 withIntermediateDirectories: true,
@@ -675,94 +468,13 @@ final class ChatViewModel: ObservableObject {
             )
 
             chatDb = try EnsuDb.open(
-                mainDbPath: activeDbPath,
-                attachmentsDbPath: syncDbPath,
-                key: key
-            )
-            syncEngine = try EnsuSync.open(
-                mainDbPath: activeDbPath,
-                attachmentsDbPath: syncDbPath,
-                dbKey: key,
-                attachmentsDir: encryptedAttachmentsDir.path,
-                metaDir: syncMetaDir.path,
-                plaintextDir: attachmentsDir.path
+                mainDbPath: chatDbPath,
+                attachmentsDbPath: attachmentsDbPath,
+                key: chatDbKey
             )
         } catch {
-            logger.error("Failed to reopen sync stores: \(error)")
+            logger.error("Failed to reopen chat store: \(error)")
         }
-    }
-
-    private func prepareOnlineStores(auth: SyncAuth) async throws {
-        let syncDbPath = syncDbPath
-        let onlineDbPath = onlineDbPath
-        let offlineDbPath = offlineDbPath
-        let offlineDbKey = offlineDbKey
-        let syncMetaDir = syncMetaDir
-        let encryptedAttachmentsDir = encryptedAttachmentsDir
-        let attachmentsDir = attachmentsDir
-        let existingSyncEngine = syncEngine
-
-        let preparation = try await Task.detached {
-            if FileManager.default.fileExists(atPath: syncDbPath) {
-                try? existingSyncEngine.resetSyncState()
-            }
-            try? FileManager.default.removeItem(atPath: onlineDbPath)
-            ChatDataCleaner.deleteSyncState()
-            try? FileManager.default.createDirectory(
-                at: syncMetaDir,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
-            try? FileManager.default.createDirectory(
-                at: encryptedAttachmentsDir,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
-            try? FileManager.default.createDirectory(
-                at: attachmentsDir,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
-
-            let chatKey = try fetchChatKey(auth: auth, syncDbPath: syncDbPath)
-
-            let chatDb = try EnsuDb.open(
-                mainDbPath: onlineDbPath,
-                attachmentsDbPath: syncDbPath,
-                key: chatKey
-            )
-            let newSyncEngine = try EnsuSync.open(
-                mainDbPath: onlineDbPath,
-                attachmentsDbPath: syncDbPath,
-                dbKey: chatKey,
-                attachmentsDir: encryptedAttachmentsDir.path,
-                metaDir: syncMetaDir.path,
-                plaintextDir: attachmentsDir.path
-            )
-            try newSyncEngine.seedFromOffline(offlineDbPath: offlineDbPath, offlineDbKey: offlineDbKey)
-            return OnlineStorePreparation(chatKey: chatKey, chatDb: chatDb, syncEngine: newSyncEngine)
-        }.value
-
-        onlineDbKey = preparation.chatKey
-        isOnlineMode = true
-        chatDb = preparation.chatDb
-        syncEngine = preparation.syncEngine
-    }
-
-    func handleLogout() {
-        if FileManager.default.fileExists(atPath: syncDbPath) {
-            do {
-                try syncEngine.resetSyncState()
-            } catch {
-                logger.warning("Failed to reset sync state: \(error)")
-            }
-        }
-        ChatDataCleaner.deleteSyncState()
-        try? FileManager.default.removeItem(atPath: onlineDbPath)
-        onlineDbKey = nil
-        isOnlineMode = false
-        reopenSyncStoresIfNeeded(force: true)
-        reloadFromDb()
     }
 
     var currentSession: ChatSession? {
@@ -863,7 +575,6 @@ final class ChatViewModel: ObservableObject {
         }
         logger.info("Session deleted", details: "id=\(session.id.uuidString)")
         try? chatDb.deleteSession(uuid: session.id.uuidString)
-        deleteOfflineSessionIfNeeded(session.id)
         sessionSummaries.removeValue(forKey: sessionSummaryKey(session.id))
         persistSessionSummaries()
 
@@ -882,159 +593,6 @@ final class ChatViewModel: ObservableObject {
                 refreshAttachmentDownloadState()
             }
         }
-        syncNow()
-    }
-
-    private func deleteOfflineSessionIfNeeded(_ sessionId: UUID) {
-        guard isOnlineMode else { return }
-        do {
-            let offlineDb = try EnsuDb.open(
-                mainDbPath: offlineDbPath,
-                attachmentsDbPath: syncDbPath,
-                key: offlineDbKey
-            )
-            try offlineDb.deleteSession(uuid: sessionId.uuidString)
-        } catch {
-            logger.warning("Failed to delete offline session", details: "id=\(sessionId.uuidString) error=\(error)")
-        }
-    }
-
-    func syncNow(showErrors: Bool = true, showSuccess: Bool = false) {
-        if isGenerating {
-            pendingSyncRequested = true
-            pendingSyncShowErrors = pendingSyncShowErrors || showErrors
-            pendingSyncShowSuccess = pendingSyncShowSuccess || showSuccess
-            return
-        }
-
-        let shouldSync = pendingSyncRequested || showErrors || showSuccess
-        let shouldShowErrors = pendingSyncShowErrors || showErrors
-        let shouldShowSuccess = pendingSyncShowSuccess || showSuccess
-        pendingSyncRequested = false
-        pendingSyncShowErrors = false
-        pendingSyncShowSuccess = false
-        guard shouldSync else { return }
-        performSync(showErrors: shouldShowErrors, showSuccess: shouldShowSuccess)
-    }
-
-    func syncAfterLogin() {
-        guard let auth = buildSyncAuth() else {
-            syncState = .error("Sign in to sync")
-            return
-        }
-
-        Task.detached { [weak self] in
-            guard let self else { return }
-            do {
-                try await self.prepareOnlineStores(auth: auth)
-            } catch {
-                await MainActor.run {
-                    self.syncState = .error("Failed to prepare online chats")
-                }
-                return
-            }
-
-            await MainActor.run {
-                self.reloadFromDb()
-            }
-
-            let syncEngine = await self.syncEngine
-            if let localStatus = syncEngine.checkMigrationStatusLocal() {
-                await self.handleMigrationStatus(localStatus, auth: auth)
-                return
-            }
-
-            do {
-                let status = try syncEngine.checkMigrationStatus(auth: auth)
-                await self.handleMigrationStatus(status, auth: auth)
-            } catch {
-                await MainActor.run {
-                    self.syncState = .error("Offline")
-                }
-            }
-        }
-    }
-
-    private func handleMigrationStatus(_ status: MigrationState, auth: SyncAuth) async {
-        switch status {
-        case .inProgress:
-            await performBatchedSync(auth: auth)
-        case .notNeeded, .complete:
-            performSyncWithAuth(auth: auth, showErrors: false, showSuccess: false)
-        case .failed:
-            await MainActor.run {
-                self.syncState = .error("Migration failed")
-            }
-        }
-    }
-
-    private func performSync(showErrors: Bool, showSuccess: Bool) {
-        reopenSyncStoresIfNeeded()
-        guard let auth = buildSyncAuth() else {
-            if showErrors {
-                syncErrorMessage = "Sync failed: Sign in to sync"
-            }
-            return
-        }
-        performSyncWithAuth(auth: auth, showErrors: showErrors, showSuccess: showSuccess)
-    }
-
-    private func performSyncWithAuth(auth: SyncAuth, showErrors: Bool, showSuccess: Bool) {
-        let log = logger
-        syncState = .syncing
-        log.info("Sync started")
-
-        let syncEngine = self.syncEngine
-        Task.detached { [weak self, log] in
-            guard let self else { return }
-            do {
-                _ = try syncEngine.sync(auth: auth)
-                log.info("Sync success")
-                await MainActor.run {
-                    self.syncState = .idle
-                    self.reloadFromDb()
-                    if showSuccess {
-                        self.syncSuccessMessage = "Sync complete"
-                    }
-                }
-            } catch {
-                let message = syncErrorMessage(from: error)
-                let needsReset = ChatRecovery.shouldResetFromMessage(message)
-                let userMessage = needsReset
-                    ? "\(message). Reset chat data to recover."
-                    : message
-                log.error("Sync failed", error, details: message)
-                await MainActor.run {
-                    self.syncState = .error(userMessage)
-                    if showErrors {
-                        self.syncErrorMessage = self.formatSyncErrorMessage(userMessage)
-                    }
-                }
-            }
-        }
-    }
-
-    private func performBatchedSync(auth: SyncAuth) async {
-        let config = MigrationConfig(batchSize: 25, priority: .recentFirst)
-        syncState = .migrating(processed: 0, total: 0)
-
-        let syncEngine = syncEngine
-        do {
-            let handler = MigrationProgressHandler { [weak self] progress in
-                Task { @MainActor in
-                    self?.syncState = .migrating(processed: progress.processed, total: progress.total)
-                }
-            }
-            try await Task.detached {
-                _ = try syncEngine.syncWithProgress(auth: auth, config: config, callback: handler)
-            }.value
-            syncState = .idle
-            reloadFromDb()
-        } catch {
-            let message = syncErrorMessage(from: error)
-            syncState = .error(message)
-            syncErrorMessage = formatSyncErrorMessage(message)
-        }
     }
 
     func deleteAllData() async {
@@ -1047,7 +605,6 @@ final class ChatViewModel: ObservableObject {
         childrenByParentCache.removeAll()
         attachmentDownloads = []
         currentSessionMissingAttachments = []
-        syncState = .idle
         refreshAttachmentDownloadState()
     }
 
@@ -1342,7 +899,6 @@ final class ChatViewModel: ObservableObject {
         updateSessionPreview(sessionId: sessionId, preview: trimmed, date: timestamp)
         rebuildMessages(for: sessionId)
         startGeneration(for: userNode)
-        syncNow(showErrors: false)
     }
 
     func stopGenerating() {
@@ -1621,7 +1177,6 @@ final class ChatViewModel: ObservableObject {
             }
             self.provider.resetContext()
             self.startGeneration(for: userNode)
-            self.syncNow(showErrors: false)
         }
     }
 
@@ -1699,7 +1254,6 @@ final class ChatViewModel: ObservableObject {
                         activeGenerationId = nil
                         activeGenerationSessionId = nil
                     }
-                    syncNow(showErrors: false)
                     return
                 }
                 if self.activeGenerationId == generationId {
@@ -1716,7 +1270,6 @@ final class ChatViewModel: ObservableObject {
                     activeGenerationId = nil
                     activeGenerationSessionId = nil
                 }
-                syncNow(showErrors: false)
                 return
             }
 
@@ -1745,7 +1298,6 @@ final class ChatViewModel: ObservableObject {
                     maxOutput: generationLimits.maxOutput
                 )
                 rebuildMessages(for: userNode.sessionId)
-                syncNow(showErrors: false)
                 return
             }
 
@@ -1919,7 +1471,6 @@ final class ChatViewModel: ObservableObject {
         if currentSessionId == parent.sessionId {
             rebuildMessages(for: parent.sessionId)
         }
-        syncNow(showErrors: false)
         scheduleSessionSummary(for: parent.sessionId)
     }
 
@@ -2030,49 +1581,6 @@ final class ChatViewModel: ObservableObject {
         return (progress, isDownloaded)
     }
 
-    private func buildSyncAuth() -> SyncAuth? {
-        guard CredentialStore.shared.hasConfiguredAccount,
-              let token = CredentialStore.shared.token,
-              let masterKey = CredentialStore.shared.masterKey else {
-            return nil
-        }
-
-        let baseUrl = EnsuDeveloperSettings.networkConfiguration.apiEndpoint.absoluteString
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-        return SyncAuth(
-            baseUrl: baseUrl,
-            authToken: token,
-            masterKey: masterKey,
-            userAgent: EntePlatform.current.userAgent,
-            clientPackage: EnteApp.ensu.packageIdentifier,
-            clientVersion: version
-        )
-    }
-
-    private nonisolated func syncErrorMessage(from error: Error) -> String {
-        if let syncError = error as? SyncError {
-            switch syncError {
-            case let .Message(message):
-                return message
-            case .SyncInProgress:
-                return "Sync already in progress"
-            }
-        }
-        let description = error.localizedDescription
-        if description.isEmpty {
-            return String(describing: error)
-        }
-        return description
-    }
-
-    private func formatSyncErrorMessage(_ message: String) -> String {
-        let normalized = message.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        if normalized.contains("sync already in progress") {
-            return message
-        }
-        return "Sync failed: \(message)"
-    }
-
     private func queueMissingAttachments(for sessionId: UUID, missing: [AttachmentDownloadItem]? = nil) {
         Task { @MainActor in
             let resolvedMissing: [AttachmentDownloadItem]
@@ -2160,11 +1668,8 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func startNextAttachmentDownloads() {
-        reopenSyncStoresIfNeeded()
         guard attachmentDownloadTasks.count < maxAttachmentDownloads else { return }
-        guard let auth = buildSyncAuth() else { return }
 
-        let syncEngine = self.syncEngine
         while attachmentDownloadTasks.count < maxAttachmentDownloads, !attachmentDownloadQueue.isEmpty {
             let id = attachmentDownloadQueue.removeFirst()
             guard let index = attachmentDownloads.firstIndex(where: { $0.id == id }) else { continue }
@@ -2172,29 +1677,10 @@ final class ChatViewModel: ObservableObject {
                 attachmentDownloads[index].status == AttachmentDownloadItem.Status.completed {
                 continue
             }
-            let sessionId = attachmentDownloads[index].sessionId
-            attachmentDownloads[index].status = AttachmentDownloadItem.Status.downloading
-
-            let task = Task.detached { [weak self] in
-                guard let self else { return }
-                do {
-                    _ = try syncEngine.downloadAttachment(
-                        attachmentId: id,
-                        sessionUuid: sessionId.uuidString,
-                        auth: auth
-                    )
-                    await MainActor.run {
-                        self.updateAttachmentDownloadStatus(id: id, status: AttachmentDownloadItem.Status.completed, errorMessage: nil)
-                    }
-                } catch {
-                    let message = self.syncErrorMessage(from: error)
-                    await MainActor.run {
-                        self.updateAttachmentDownloadStatus(id: id, status: AttachmentDownloadItem.Status.failed, errorMessage: message)
-                    }
-                }
-            }
-            attachmentDownloadTasks[id] = task
+            attachmentDownloads[index].status = AttachmentDownloadItem.Status.failed
+            attachmentDownloads[index].errorMessage = "Attachment is not available on this device."
         }
+        refreshAttachmentDownloadState()
     }
 
     private func updateAttachmentDownloadStatus(
@@ -2284,7 +1770,7 @@ final class ChatViewModel: ObservableObject {
 
     private func reloadFromDb() {
         reloadTask?.cancel()
-        reopenSyncStoresIfNeeded()
+        reopenChatStoreIfNeeded()
         let chatDb = chatDb
         let summaries = sessionSummaries
         let selected = currentSessionId
@@ -2341,7 +1827,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func loadMessagesFromDb(for sessionId: UUID) {
-        reopenSyncStoresIfNeeded()
+        reopenChatStoreIfNeeded()
         if messageStore[sessionId] == nil {
             messageStore[sessionId] = []
             branchSelections[sessionId] = [:]

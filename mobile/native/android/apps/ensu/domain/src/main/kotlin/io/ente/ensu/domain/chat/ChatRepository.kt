@@ -22,7 +22,5 @@ interface ChatRepository {
 
     fun updateMessageText(messageId: String, text: String)
     fun updateSessionTitle(sessionId: String, title: String)
-    fun enterOnlineMode(chatKey: ByteArray)
-    fun exitOnlineMode()
     fun deleteAllData()
 }

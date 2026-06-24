@@ -64,7 +64,6 @@ import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.EnsuDefaults
-import io.ente.ensu.domain.model.LogEntry
 import io.ente.ensu.domain.model.MaxImageAttachmentsPerMessage
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
@@ -86,7 +85,6 @@ import java.util.UUID
 fun HomeView(
     appState: AppState,
     store: AppStore,
-    logs: List<LogEntry>,
     logRepository: FileLogRepository,
     authService: EnsuAuthService,
     currentEndpointFlow: Flow<String>,
@@ -254,16 +252,6 @@ fun HomeView(
                 onDeleteSession = { session ->
                     deleteSessionTarget = session
                 },
-                onSync = {
-                    store.syncNow(
-                        onSuccess = {
-                            Toast.makeText(context, "Sync complete", Toast.LENGTH_SHORT).show()
-                        },
-                        onError = { message ->
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        }
-                    )
-                },
                 onOpenSettings = {
                     navController.navigate(HomeRoute.Settings) {
                         launchSingleTop = true
@@ -367,7 +355,7 @@ fun HomeView(
     if (deleteSessionTarget != null) {
         NativeChoiceDialog(
             title = "Delete Chat",
-            body = "This will delete the chat and sync the change.",
+            body = "This will delete the chat from this device.",
             firstButtonLabel = "Delete",
             secondButtonLabel = "Cancel",
             onFirst = {
@@ -430,7 +418,7 @@ fun HomeView(
     if (isShowingSignOutDialog) {
         NativeChoiceDialog(
             title = "Sign Out",
-            body = "Signing out will remove your online chats from this device. Offline chats stay available.",
+            body = "Signing out will remove your account from this device. Local chats stay available.",
             firstButtonLabel = "Sign Out",
             secondButtonLabel = "Cancel",
             onFirst = {

@@ -10,7 +10,6 @@ import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.domain.model.EnsuDefaults
-import io.ente.ensu.domain.model.LogEntry
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.Flow
 fun RootView(
     appState: AppState,
     store: AppStore,
-    logs: List<LogEntry>,
     logRepository: FileLogRepository,
     authService: EnsuAuthService,
     currentEndpointFlow: Flow<String>,
@@ -35,7 +33,6 @@ fun RootView(
         HomeView(
             appState = appState,
             store = store,
-            logs = logs,
             logRepository = logRepository,
             authService = authService,
             currentEndpointFlow = currentEndpointFlow,
