@@ -1777,7 +1777,7 @@ const Help: React.FC<HelpProps> = ({
     const handleBlog = useCallback(() => openURL("https://ente.com/blog/"), []);
 
     const handleRequestFeature = useCallback(
-        () => openURL("https://github.com/ente-io/ente/discussions"),
+        () => openURL("https://github.com/ente/ente/discussions"),
         [],
     );
 

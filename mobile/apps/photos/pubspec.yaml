@@ -291,7 +291,7 @@ dev_dependencies:
 # (ADAPTIVE ICONS or NON ADAPTIVE ICONS) within the `flutter_icons` section. You
 # may have to update the `icon_X.xml` generated within `res/minimap-*` folder.
 # Sample commit for adding an icon:
-# https://github.com/ente-io/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
+# https://github.com/ente/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
 
 # flutter_icons:
 # ADAPTIVE ICONS

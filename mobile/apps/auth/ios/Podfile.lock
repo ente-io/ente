@@ -226,7 +226,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   app_links: 3dbc685f76b1693c66a6d9dd1e9ab6f73d97dc0a
-  backup_exclusion: a855876cbfac88c9d23f25b91263acd582ce4a05
+  backup_exclusion: 7aa8535339e746fb217cfdfe8fb8f8a718e4cb0b
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
@@ -247,7 +247,7 @@ SPEC CHECKSUMS:
   local_auth_darwin: c3ee6cce0a8d56be34c8ccb66ba31f7f180aaebb
   move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  scoped_dir_access: 4a89af7a2435a101b0cff856d6b6e7021df676de
+  scoped_dir_access: 3906ef4dd37b506647f3adbe7bb172d5d8d5d655
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684

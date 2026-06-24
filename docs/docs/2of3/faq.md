@@ -129,7 +129,7 @@ You need any two of the three before the secret can be reconstructed.
 
 Recovery still works. When you click **Download all cards**, 2of3 also downloads a file called `2of3-recovery.html`, a fully offline copy of the recovery flow. Open that file in any browser, drop in any two cards, and recover.
 
-2of3 is also [open source](https://github.com/ente-io/ente), and the [share format](/2of3/how-it-works#share-format) is documented, so even if both Ente and the offline file were gone, someone with the cards could write their own recovery tool from the format description.
+2of3 is also [open source](https://github.com/ente/ente), and the [share format](/2of3/how-it-works#share-format) is documented, so even if both Ente and the offline file were gone, someone with the cards could write their own recovery tool from the format description.
 
 ### What information does Ente collect when I use 2of3? {#2of3-collected-info}
 
@@ -137,7 +137,7 @@ Nothing about your secret or your cards. 2of3 has no account, no sign-in, and no
 
 ### Is 2of3 open source? {#2of3-open-source}
 
-Yes. 2of3 is part of [Ente's open source repository](https://github.com/ente-io/ente). The Shamir implementation, the share format, the QR encoder, and the offline recovery file generator are all there to read.
+Yes. 2of3 is part of [Ente's open source repository](https://github.com/ente/ente). The Shamir implementation, the share format, the QR encoder, and the offline recovery file generator are all there to read.
 
 ## How it works
 

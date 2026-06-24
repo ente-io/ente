@@ -652,6 +652,6 @@ Open `Settings > Support > Help` to download logs, then email the downloaded log
 1. **Check the FAQ sections** for answers to common questions
 2. **Join our [Discord community](https://ente.com/discord)** for community support
 3. **Email us at [support@ente.com](mailto:support@ente.com)** with details about your issue
-4. **Report bugs on [GitHub](https://github.com/ente-io/ente/issues)** if you've found a technical issue
+4. **Report bugs on [GitHub](https://github.com/ente/ente/issues)** if you've found a technical issue
 
 For security vulnerabilities, please email [security@ente.com](mailto:security@ente.com) directly.

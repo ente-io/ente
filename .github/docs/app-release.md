@@ -8,13 +8,13 @@ Photos, Auth, Locker, Ensu, and Photos desktop use the same release process, as 
 
 ## App specifics
 
-- Photos desktop follows the same flow, but its stable releases live in [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop). See [desktop/docs/release.md](../../desktop/docs/release.md) for more details.
+- Photos desktop follows the same flow, but its stable releases live in [ente/photos-desktop](https://github.com/ente/photos-desktop). See [desktop/docs/release.md](../../desktop/docs/release.md) for more details.
 
 ## Normal development
 
 Nightly builds of `main` are automatically created every weekday morning (IST), and can also be created by running `ensu-build.yml` manually.
 
-The nightly builds are published to the `ensu-v0.1.16-beta` pre-release in [ente-io/nightly](https://github.com/ente-io/nightly); each nightly keeps updating the same pre-release.
+The nightly builds are published to the `ensu-v0.1.16-beta` pre-release in [ente/nightly](https://github.com/ente/nightly); each nightly keeps updating the same pre-release.
 
 > [!NOTE]
 >
@@ -34,8 +34,8 @@ gh workflow run app-release.yml \
 This:
 
 1. Creates a release branch `release/ensu-v0.1.16` with the version set to `0.1.16`
-2. Pushes the branch, which triggers `ensu-build.yml`, which creates the draft `ensu-v0.1.16-rc` GitHub release in `ente-io/ente` (and a pre-release in `ente-io/nightly`).
-3. Removes the `ensu-v0.1.16-beta` pre-release from `ente-io/nightly` and the beta tag from `ente-io/ente`.
+2. Pushes the branch, which triggers `ensu-build.yml`, which creates the draft `ensu-v0.1.16-rc` GitHub release in `ente/ente` (and a pre-release in `ente/nightly`).
+3. Removes the `ensu-v0.1.16-beta` pre-release from `ente/nightly` and the beta tag from `ente/ente`.
 
 > [!TIP]
 >
@@ -57,7 +57,7 @@ git push
 
 > [!IMPORTANT]
 >
-> Edit the release notes for the `ensu-v0.1.16-rc` draft release in `ente-io/ente` into the final user-facing changelog before promoting.
+> Edit the release notes for the `ensu-v0.1.16-rc` draft release in `ente/ente` into the final user-facing changelog before promoting.
 
 ```sh
 gh workflow run app-release.yml \
@@ -66,7 +66,7 @@ gh workflow run app-release.yml \
   -f version=0.1.16
 ```
 
-This does not create another build. It tags the last RC commit as `ensu-v0.1.16`, publishes it (renaming `ensu-v0.1.16-rc` to `ensu-v0.1.16`), removes the RC tag, deletes the `ensu-v0.1.16-rc` pre-release from `ente-io/nightly`, and deletes the release branch.
+This does not create another build. It tags the last RC commit as `ensu-v0.1.16`, publishes it (renaming `ensu-v0.1.16-rc` to `ensu-v0.1.16`), removes the RC tag, deletes the `ensu-v0.1.16-rc` pre-release from `ente/nightly`, and deletes the release branch.
 
 It also opens a PR for updating the changelog in the docs.
 
@@ -82,4 +82,4 @@ It also opens a PR for updating the changelog in the docs.
 >
 > If a build has already reached Play Store or TestFlight, trigger a new workflow run instead of re-running failed jobs so that it gets a new build number.
 
-`app-release.yml` changes release state. If it fails, inspect the failed step before re-running. After it has pushed a branch, created a tag, or moved a draft release, either finish the remaining step manually or undo the partial state first. Cleanup is intentionally late: `action=start` pushes the release branch before deleting the beta pre-release from `ente-io/nightly`, and `action=promote` deletes the release branch last.
+`app-release.yml` changes release state. If it fails, inspect the failed step before re-running. After it has pushed a branch, created a tag, or moved a draft release, either finish the remaining step manually or undo the partial state first. Cleanup is intentionally late: `action=start` pushes the release branch before deleting the beta pre-release from `ente/nightly`, and `action=promote` deletes the release branch last.

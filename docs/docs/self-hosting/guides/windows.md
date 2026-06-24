@@ -23,7 +23,7 @@ You will need Docker Desktop or Docker Engine. Follow the installation instructi
 
 ## Architecture
 
-To troubleshoot, you'll need an understanding of the components at play. Start by memorizing the diagram here (there will be a quiz): https://github.com/ente-io/ente/tree/main/server/README.md
+To troubleshoot, you'll need an understanding of the components at play. Start by memorizing the diagram here (there will be a quiz): https://github.com/ente/ente/tree/main/server/README.md
 
 We have four primary components:
 

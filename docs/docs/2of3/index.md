@@ -86,7 +86,7 @@ Because the recovery flow is also bundled into an offline HTML file you can down
 
 ## Source code
 
-2of3 is part of [Ente's open source repository](https://github.com/ente-io/ente). The Shamir implementation and the offline recovery file are short and inspectable. The data format on each card is documented in [How it works](/2of3/how-it-works#share-format) so that, in principle, anyone with the cards and a few hours could write their own recovery tool.
+2of3 is part of [Ente's open source repository](https://github.com/ente/ente). The Shamir implementation and the offline recovery file are short and inspectable. The data format on each card is documented in [How it works](/2of3/how-it-works#share-format) so that, in principle, anyone with the cards and a few hours could write their own recovery tool.
 
 ## Get started
 

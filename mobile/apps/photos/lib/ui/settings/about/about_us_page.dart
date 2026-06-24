@@ -25,7 +25,7 @@ class AboutUsPage extends StatelessWidget {
           icon: HugeIcons.strokeRoundedGithub,
           showOnlyLoadingState: true,
           onTap: () async {
-            await launchUrl(Uri.parse("https://github.com/ente-io/ente"));
+            await launchUrl(Uri.parse("https://github.com/ente/ente"));
           },
         ),
         const SizedBox(height: 8),

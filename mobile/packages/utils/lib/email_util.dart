@@ -163,7 +163,7 @@ Future<void> shareLogs(
 }
 
 Future<void> openSupportPage(String? subject, String? body) async {
-  const url = "https://github.com/ente-io/ente/discussions/new?category=q-a";
+  const url = "https://github.com/ente/ente/discussions/new?category=q-a";
   if (subject != null && body != null) {
     await launchUrl(Uri.parse("$url&title=$subject&body=$body"));
   } else {

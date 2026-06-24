@@ -1,7 +1,7 @@
 name: backup_exclusion
 description: iOS backup exclusion utilities for Ente Flutter apps
 version: 1.0.0
-homepage: https://github.com/ente-io/ente
+homepage: https://github.com/ente/ente
 publish_to: none
 
 environment:

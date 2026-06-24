@@ -31,7 +31,7 @@ if (!config || !releaseTag) {
     throw new Error(`Usage: node .github/scripts/release-notify.mjs ${Object.keys(apps).join("|")} <release-tag>`);
 }
 
-const releaseUrl = `https://github.com/ente-io/nightly/releases/tag/${releaseTag}`;
+const releaseUrl = `https://github.com/ente/nightly/releases/tag/${releaseTag}`;
 
 const env = (name) => {
     const value = process.env[name];
