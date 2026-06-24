@@ -126,8 +126,6 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                                 ),
                                 child: Text(
                                   l10n.offlineHomeSignupBannerDescription,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyles.mini.copyWith(
                                     color: colors.textLight,
                                   ),
