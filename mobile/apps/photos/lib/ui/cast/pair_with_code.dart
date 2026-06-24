@@ -6,6 +6,7 @@ import "package:photos/gateways/cast/cast_gateway.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:uuid/uuid.dart";
@@ -62,9 +63,13 @@ class _PairWithCodeSheetState extends State<_PairWithCodeSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final logger = Logger("PairWithCodeSheet");
+    final textStyles = getEnteTextTheme(context);
     return BottomSheetComponent(
       title: l10n.castAlbum,
-      content: Text(l10n.castInstruction(castUrl: flagService.castUrl)),
+      content: Text(
+        l10n.castInstruction(castUrl: flagService.castUrl),
+        style: textStyles.smallMuted,
+      ),
       actions: [
         TextInputComponent(
           controller: _controller,

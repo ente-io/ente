@@ -19,7 +19,6 @@ class AutoCastDialog extends StatefulWidget {
 }
 
 class _AutoCastDialogState extends State<AutoCastDialog> {
-  final bool doesUserExist = true;
   final Set<Object> _isDeviceTapInProgress = {};
 
   @override

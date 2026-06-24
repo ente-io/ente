@@ -1,61 +1,214 @@
+import "dart:async";
+import "dart:io";
+
+import "package:ente_cast/ente_cast.dart";
 import "package:ente_components/ente_components.dart";
-import "package:flutter/widgets.dart";
+import "package:flutter/material.dart";
+import "package:logging/logging.dart";
+import "package:photos/core/network/network.dart";
+import "package:photos/gateways/cast/cast_gateway.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/notification/toast.dart";
+import "package:photos/utils/dialog_util.dart";
+import "package:uuid/uuid.dart";
 
-Future<void> _pairWithAuto() async {}
-
-Future<void> showPairWithAutoSheet(BuildContext context) async {}
-
-class PairWithAutoSheet extends StatefulWidget {
-  const PairWithAutoSheet({super.key});
-
-  @override
-  State<PairWithAutoSheet> createState() => _PairWithAutoSheetState();
+class _DeviceNotFoundException implements Exception {
+  const _DeviceNotFoundException();
 }
 
-class _PairWithAutoSheetState extends State<PairWithAutoSheet> {
+Future<void> _pairWithAuto(
+  BuildContext context,
+  Collection collection,
+  String code,
+) async {
+  final gw = CastGateway(NetworkClient.instance.enteDio);
+  final publicKey = await gw.getPublicKey(code);
+  if (publicKey == null) {
+    throw const _DeviceNotFoundException();
+  }
+  final castToken = const Uuid().v4();
+  final castData = collectionsService.getCastData(
+    castToken,
+    collection,
+    publicKey,
+  );
+  await gw.publishCastPayload(code, castData, collection.id, castToken);
+}
+
+/// Shows the auto-pairing sheet for Cast devices.
+Future<void> showPairWithAutoSheet(
+  BuildContext context,
+  Collection collection,
+) async {
+  await showBottomSheetComponent<void>(
+    context: context,
+    builder: (_) => _PairWithAutoSheet(collection: collection),
+  );
+}
+
+class _PairWithAutoSheet extends StatefulWidget {
+  final Collection collection;
+
+  const _PairWithAutoSheet({required this.collection});
+
+  @override
+  State<_PairWithAutoSheet> createState() => _PairWithAutoSheetState();
+}
+
+class _PairWithAutoSheetState extends State<_PairWithAutoSheet> {
+  final _devicesInProgress = <Object>{};
+  final _logger = Logger("PairWithAutoSheet");
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
+    final textStyles = getEnteTextTheme(context);
+    final body = Platform.isIOS
+        ? "${l10n.autoCastDialogBody}\n${l10n.autoCastiOSPermission}"
+        : l10n.autoCastDialogBody;
     return BottomSheetComponent(
       title: l10n.connectToDevice,
-      content: Text(
-        l10n.autoCastDialogBody + "\n" + l10n.autoCastiOSPermission,
-      ),
+      content: Text(body, style: textStyles.smallMuted),
       actions: [
-        FutureBuilder(
+        FutureBuilder<List<(String, Object)>>(
           future: castService.searchDevices(),
           builder: (_, snapshot) {
             if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error.toString()}'));
+              return Center(child: Text("Error: ${snapshot.error}"));
             }
             if (!snapshot.hasData) {
               return const EnteLoadingWidget();
             }
             if (snapshot.data!.isEmpty) {
-              return Center(child: Text(l10n.noDeviceFound));
+              final colors = context.componentColors;
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.xl,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.fillDark,
+                  borderRadius: Radii.buttonBorder,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/warning-yellow.png",
+                      width: IconSizes.small,
+                      height: IconSizes.small,
+                    ),
+                    const SizedBox(width: Spacing.sm),
+                    Flexible(
+                      child: Text(
+                        l10n.noDeviceFound,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyles.bodyBold.copyWith(
+                          color: colors.textLightest,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: snapshot.data!.map((result) {
                 final device = result.$2;
                 final name = result.$1;
-                return ButtonComponent(label: name, onTap: () async {});
-              }),
+                return ButtonComponent(
+                  label: name,
+                  variant: .secondary,
+                  isDisabled: _devicesInProgress.contains(device),
+                  onTap: () async => _connectToDevice(context, device),
+                );
+              }).toList(),
             );
-          },
-        ),
-        ButtonComponent(
-          label: l10n.pair,
-          variant: ButtonComponentVariant.primary,
-          onTap: () async {
-            await _pairWithAuto();
           },
         ),
       ],
     );
+  }
+
+  Future<void> _connectToDevice(BuildContext context, Object device) async {
+    if (_devicesInProgress.contains(device)) {
+      return;
+    }
+    setState(() => _devicesInProgress.add(device));
+    final pairing = Completer<void>();
+    try {
+      await castService.connectDevice(
+        context,
+        device,
+        collectionID: widget.collection.id,
+        onMessage: (message) async {
+          if (pairing.isCompleted) {
+            return;
+          }
+          final code = message[CastMessageType.pairCode]?["code"];
+          if (code is! String) {
+            return;
+          }
+          await _handlePairCode(context, device, code);
+          pairing.complete();
+        },
+      );
+      await pairing.future;
+    } catch (e, s) {
+      await _handleError(context, device, e, s);
+    }
+  }
+
+  Future<void> _handlePairCode(
+    BuildContext context,
+    Object device,
+    String code,
+  ) async {
+    try {
+      await _pairWithAuto(context, widget.collection, code);
+      if (mounted) {
+        await Navigator.maybePop(context);
+      }
+    } catch (e, s) {
+      await _handleError(context, device, e, s);
+    } finally {
+      if (mounted) {
+        setState(() => _devicesInProgress.remove(device));
+      }
+    }
+  }
+
+  Future<void> _handleError(
+    BuildContext context,
+    Object device,
+    Object error,
+    StackTrace stackTrace,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    _logger.severe("Failed to pair automatically", error, stackTrace);
+    if (mounted) {
+      setState(() => _devicesInProgress.remove(device));
+    }
+    if (error is CastIPMismatchException) {
+      await showErrorDialog(
+        context,
+        l10n.castIPMismatchTitle,
+        l10n.castIPMismatchBody,
+      );
+      return;
+    }
+    if (error is _DeviceNotFoundException) {
+      showToast(context, l10n.deviceNotFound);
+      return;
+    }
+    await showGenericErrorDialog(context: context, error: error);
   }
 }

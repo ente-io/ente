@@ -1794,7 +1794,7 @@
   "playOnTv": "Play album on TV",
   "pair": "Pair",
   "deviceNotFound": "Device not found",
-  "castInstruction": "Visit {castUrl} on the device you want to pair.\n\nEnter the code below to play the album on your TV.",
+  "castInstruction": "Visit {castUrl} on the device you want to pair.",
   "@castInstruction": {
     "description": "Instructions shown when pairing a device to play an album on TV.",
     "placeholders": {
