@@ -12,47 +12,35 @@
 //!
 //! # Overview
 //!
-//! ## Key Generation
-//! - [`Key::generate`] - Generate a 256-bit symmetric key
-//! - [`SecretKey::generate`] - Generate an X25519 secret key (public key via
-//!   [`SecretKey::public_key`])
-//! - [`Salt::generate`] - Generate a salt for key derivation
+//! Authenticated encryption:
+//! - [`secretbox`] - a single small, independent value
+//! - [`blob`] - a single value attached to an Ente object, such as metadata
+//! - [`stream`] - file contents of any size, encrypted in chunks
 //!
-//! ## Key Derivation
-//! - [`argon::derive_key`] - Derive a key from password using Argon2id
-//! - [`argon::derive_sensitive_key`] - Derive with secure parameters
-//! - [`kdf::derive_subkey`] - Derive a subkey from a master key
-//! - [`kdf::derive_login_key`] - Derive login key for SRP authentication
+//! Public-key:
+//! - [`sealed`] - anonymous encryption to a recipient's public key
 //!
-//! ## Symmetric Encryption
-//! - [`secretbox`] - SecretBox (XSalsa20-Poly1305) for independent data
-//! - [`blob`] - SecretStream without chunking for metadata
-//! - [`stream`] - Chunked SecretStream for large files
-//!
-//! ## Asymmetric Encryption
-//! - [`sealed`] - Sealed box for anonymous public-key encryption
-//!
-//! ## Hashing
+//! Key derivation and hashing:
+//! - [`argon`] - derive a key from a password (Argon2id)
+//! - [`kdf`] - derive subkeys from a high-entropy key (BLAKE2b)
 //! - [`hash`] - BLAKE2b hashing
+//!
+//! Base64 and hex helpers ([`encode_b64`], [`encode_hex`], and friends) are
+//! available directly on this module. Key material is typed ([`Key`],
+//! [`Nonce`], [`Salt`], [`Header`], [`PublicKey`], [`SecretKey`]), with lengths
+//! validated at construction, and secrets are held in zeroizing [`SecretVec`] /
+//! [`SecretString`].
 //!
 //! # Example
 //!
 //! ```rust
-//! use ente_core::crypto;
+//! use ente_core::crypto::{Key, secretbox};
 //!
-//! // Generate a key and encrypt some data
-//! let key = crypto::Key::generate();
-//! let plaintext = b"Hello, World!";
+//! let key = Key::generate();
+//! let encrypted = secretbox::encrypt(b"a secret", &key);
 //!
-//! // SecretBox encryption (for independent data)
-//! let encrypted = crypto::secretbox::encrypt(plaintext, &key);
 //! let decrypted = encrypted.decrypt(&key).unwrap();
-//! assert_eq!(decrypted, plaintext);
-//!
-//! // Blob encryption (for metadata)
-//! let encrypted = crypto::blob::encrypt(plaintext, &key).unwrap();
-//! let decrypted = encrypted.decrypt(&key).unwrap();
-//! assert_eq!(decrypted, plaintext);
+//! assert_eq!(decrypted, b"a secret");
 //! ```
 
 mod encoding;

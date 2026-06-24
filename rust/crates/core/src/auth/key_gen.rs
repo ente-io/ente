@@ -1,6 +1,6 @@
 //! Key generation for new account sign-up.
 
-use crate::crypto::{self, Key, Nonce, SecretString, SecretVec, argon, kdf, secretbox};
+use crate::crypto::{self, Key, SecretString, SecretVec, argon, kdf, secretbox};
 
 use super::{KeyAttributes, KeyGenResult, PrivateKeyAttributes, Result};
 
@@ -17,11 +17,10 @@ pub enum KeyDerivationStrength {
 /// Encrypt data and return (encrypted_data, nonce) as base64 strings.
 /// The encrypted_data is MAC || ciphertext format (compatible with Dart).
 fn encrypt_to_b64(plaintext: &[u8], key: &Key) -> Result<(String, String)> {
-    let nonce = Nonce::generate();
-    let encrypted = secretbox::encrypt_with_nonce(plaintext, &nonce, key);
+    let encrypted = secretbox::encrypt(plaintext, key);
     Ok((
-        crypto::encode_b64(&encrypted),
-        crypto::encode_b64(nonce.as_bytes()),
+        crypto::encode_b64(&encrypted.encrypted_data),
+        crypto::encode_b64(encrypted.nonce.as_bytes()),
     ))
 }
 
@@ -176,6 +175,7 @@ pub fn create_new_recovery_key(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::crypto::Nonce;
 
     // Typed-decrypt helper for byte-slice test material.
     fn decrypt_raw(data: &[u8], nonce: &[u8], key: &[u8]) -> Vec<u8> {

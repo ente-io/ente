@@ -1,6 +1,6 @@
 //! Authenticated encryption with XSalsa20-Poly1305.
 //!
-//! SecretBox encrypts and authenticates a single, self-contained value under a
+//! SecretBox encrypts and authenticates a single, self-contained value with a
 //! 256-bit key. It suits small, independent pieces of data such as a wrapped
 //! key or a short field. Ente uses [`blob`](super::blob) for data attached to
 //! an object (file or collection metadata and the like), and
@@ -10,10 +10,8 @@
 //! `crypto_secretbox`; the implementation here is pure Rust but wire-compatible
 //! (recorded per function below).
 //!
-//! Every message takes a 192-bit nonce. The nonce is not secret, but it must
-//! never be reused with the same key (see [`encrypt_with_nonce`]). The
-//! [`encrypt`] and [`encrypt_combined`] functions generate a fresh random nonce
-//! for you, which is the safe default.
+//! Every message uses a 192-bit nonce, generated fresh on each call. It is not
+//! secret, but it is needed to decrypt.
 //!
 //! Two payload shapes are offered, differing only in how the nonce travels:
 //!
@@ -60,15 +58,11 @@ impl EncryptedBox {
     }
 }
 
-/// Encrypt `data` under `key`, generating a fresh random nonce.
+/// Encrypt `data` with `key` and a freshly generated random nonce.
 ///
-/// This is the default choice for secretbox encryption: a new nonce is
-/// generated on every call, so a (key, nonce) pair cannot be reused by mistake.
-/// The plaintext is not padded, so the ciphertext length reveals the exact
-/// plaintext length.
-///
-/// Returns the ciphertext and the generated nonce; decrypt with [`decrypt`] or
-/// [`EncryptedBox::decrypt`].
+/// Returns the ciphertext and the nonce; decrypt with [`decrypt`] or
+/// [`EncryptedBox::decrypt`]. The plaintext is not padded, so the ciphertext
+/// length reveals the exact plaintext length.
 ///
 /// Wire-compatible with libsodium's `crypto_secretbox_easy`.
 pub fn encrypt(data: &[u8], key: &Key) -> EncryptedBox {
@@ -80,22 +74,10 @@ pub fn encrypt(data: &[u8], key: &Key) -> EncryptedBox {
     }
 }
 
-/// Encrypt `data` under `key` with a caller-supplied `nonce`.
-///
-/// Prefer [`encrypt`], which generates the nonce for you. Reach for this only
-/// when the nonce is fixed by something else, for example re-creating a
-/// ciphertext that must match bytes produced earlier.
-///
-/// # Security
-///
-/// The nonce must be unique for every message encrypted under a given key.
-/// Reusing a (key, nonce) pair is catastrophic: it reveals the XOR of the two
-/// plaintexts and makes the Poly1305 tag forgeable, breaking both
-/// confidentiality and authenticity. The nonce itself need not be secret.
-///
-/// Returns `MAC (16 bytes) ‖ ciphertext`, wire-compatible with libsodium's
-/// `crypto_secretbox_easy`.
-pub fn encrypt_with_nonce(data: &[u8], nonce: &Nonce, key: &Key) -> Vec<u8> {
+/// Shared back end for [`encrypt`] and [`encrypt_combined`]: encrypts `data`
+/// with `key` and the given `nonce`, returning `MAC ‖ ciphertext`. Both
+/// callers generate a fresh nonce, so a (key, nonce) pair is never reused.
+fn encrypt_with_nonce(data: &[u8], nonce: &Nonce, key: &Key) -> Vec<u8> {
     let cipher = XSalsa20Poly1305::new(GenericArray::from_slice(key.as_bytes()));
     let nonce_ga = GenericArray::from_slice(nonce.as_bytes());
 
@@ -106,7 +88,7 @@ pub fn encrypt_with_nonce(data: &[u8], nonce: &Nonce, key: &Key) -> Vec<u8> {
         .expect("XSalsa20-Poly1305 encryption cannot fail for in-memory plaintexts")
 }
 
-/// Decrypt a ciphertext produced by [`encrypt`] or [`encrypt_with_nonce`].
+/// Decrypt a ciphertext produced by [`encrypt`].
 ///
 /// Pass the same `nonce` and `key` that encrypted it. `data` is
 /// `MAC (16 bytes) ‖ ciphertext`. The Poly1305 tag is verified before any
@@ -137,9 +119,9 @@ pub fn decrypt(data: &[u8], nonce: &Nonce, key: &Key) -> Result<Vec<u8>> {
         .map_err(|_| CryptoError::DecryptionFailed)
 }
 
-/// Encrypt `data` under `key` into one self-contained buffer.
+/// Encrypt `data` with `key` into one self-contained buffer.
 ///
-/// Like [`encrypt`], but prepends a fresh random nonce to the ciphertext,
+/// Like [`encrypt`], but prepends a random nonce to the ciphertext,
 /// returning `nonce (24 bytes) ‖ MAC (16 bytes) ‖ ciphertext`: everything
 /// needed to decrypt except the key. Prefer this when a single opaque blob is
 /// easier to store or pass around than a separate ciphertext and nonce. Decrypt
