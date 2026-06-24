@@ -59,7 +59,7 @@ These are the primary public facing apps. There are other parts of the code whic
 - `apps/cast`: Browser and Chromecast casting support.
 - `apps/payments`: Handle subscription payments.
 
-> Apart from these, we also have the manage family portal whose code is currently in a separate repository (https://github.com/ente-io/families) and still needs to be brought here.
+> Apart from these, we also have the manage family portal whose code is currently in a separate repository (https://github.com/ente/families) and still needs to be brought here.
 
 The apps take use various `packages/` to share code amongst themselves.
 

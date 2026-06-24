@@ -316,7 +316,7 @@ Future<bool> sendComposedEmail(
 
     if (Platform.isAndroid) {
       // Special handling due to issue in proton mail android client
-      // https://github.com/ente-io/photos-app/pull/253
+      // https://github.com/ente/photos-app/pull/253
       final params = _buildMailtoUri(to, subject: subject, body: body);
       if (!await canLaunchUrl(params)) {
         return false;
