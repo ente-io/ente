@@ -1,6 +1,8 @@
 import "package:ente_components/ente_components.dart";
 import "package:flutter/widgets.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:photos/core/network/network.dart";
+import "package:photos/gateways/cast/cast_gateway.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/service_locator.dart";
@@ -13,9 +15,15 @@ Future<void> showCastSheet(BuildContext context, Collection collection) async {
   final l10n = AppLocalizations.of(context);
   final textStyle = getEnteTextTheme(context);
   await castService.closeActiveCasts();
+  final gw = CastGateway(NetworkClient.instance.enteDio);
+  final sessions = await gw.getAllCastSessions();
   return showBottomSheetComponent(
     context: context,
     builder: (_) => BottomSheetComponent(
+      isScrollable: sessions.isNotEmpty,
+      initialChildSize: 0.6,
+      snapSizes: const [0.6, 1.0],
+      snap: true,
       title: l10n.castAlbum,
       actions: [
         Text(l10n.pairWithAutoDesc, style: textStyle.smallMuted),
@@ -40,7 +48,11 @@ Future<void> showCastSheet(BuildContext context, Collection collection) async {
             await showPairWithCodeSheet(context, collection);
           },
         ),
-        const CastSessionsList(showTitle: true, fallback: SizedBox.shrink()),
+        CastSessionsList(
+          showTitle: true,
+          fallback: const SizedBox.shrink(),
+          initialSessions: sessions,
+        ),
       ],
     ),
   );

@@ -6,6 +6,7 @@ import "package:photos/gateways/cast/cast_gateway.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/settings/components/settings_item.dart";
 import "package:photos/ui/settings/components/settings_page_scaffold.dart";
 import 'package:timeago/timeago.dart' as timeago;
@@ -44,6 +45,7 @@ class CastSessionsList extends StatefulWidget {
   const CastSessionsList({
     required this.showTitle,
     required this.fallback,
+    this.initialSessions,
     super.key,
   });
 
@@ -52,6 +54,8 @@ class CastSessionsList extends StatefulWidget {
 
   /// Widget shown when there are no cast sessions.
   final Widget fallback;
+
+  final List<CastInfo>? initialSessions;
 
   @override
   State<CastSessionsList> createState() => _CastSessionsListState();
@@ -63,20 +67,21 @@ class _CastSessionsListState extends State<CastSessionsList> {
   @override
   void initState() {
     super.initState();
-    _sessionsFuture = CastGateway(
-      NetworkClient.instance.enteDio,
-    ).getAllCastSessions();
+    final gw = CastGateway(NetworkClient.instance.enteDio);
+    _sessionsFuture = widget.initialSessions == null
+        ? gw.getAllCastSessions()
+        : Future.value(widget.initialSessions!);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final textTheme = getEnteTextTheme(context);
+    final colors = context.componentColors;
     return FutureBuilder(
       future: _sessionsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: EnteLoadingWidget());
         }
         if (snapshot.hasError) {
           throw snapshot.error!;
@@ -88,17 +93,22 @@ class _CastSessionsListState extends State<CastSessionsList> {
           return widget.fallback;
         }
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.showTitle) ...[
-              Text(l10n.activeSessions, style: textTheme.h4Bold),
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.xxl),
+              Text(
+                l10n.activeSessions,
+                style: TextStyles.h2.copyWith(color: colors.textBase),
+              ),
+              const SizedBox(height: Spacing.lg),
             ],
             for (final session in snapshot.data!) ...[
               _CastSessionItem(
                 session: session,
                 onRevokeSession: _revokeSession,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.sm),
             ],
           ],
         );
@@ -158,7 +168,9 @@ class _CastSessionItem extends StatelessWidget {
       title: "$title on ${session.deviceName ?? session.deviceIP}",
       subtitle: timeago.format(session.lastUsedAt),
       icon: HugeIcons.strokeRoundedTvSmart,
+      showChevron: false,
       showOnlyLoadingState: true,
+      shouldSurfaceExecutionStates: false,
       trailing: IconButtonComponent(
         icon: const HugeIcon(
           icon: HugeIcons.strokeRoundedCancel01,
@@ -168,6 +180,7 @@ class _CastSessionItem extends StatelessWidget {
         onTap: () async {
           await onRevokeSession(session);
         },
+        shouldSurfaceExecutionStates: false,
         shouldShowSuccessConfirmation: false,
       ),
     );

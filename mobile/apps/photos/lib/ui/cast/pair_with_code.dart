@@ -84,12 +84,17 @@ class _PairWithCodeSheetState extends State<_PairWithCodeSheet> {
           variant: .primary,
           onTap: () async {
             try {
-              if (!await _pairWithCode(
+              final paired = await _pairWithCode(
                 context,
                 widget.collection,
                 _controller.text,
-              )) {
+              );
+              if (!paired) {
                 showToast(context, l10n.deviceNotFound);
+                return;
+              }
+              if (mounted) {
+                await Navigator.maybePop(context);
               }
             } catch (e, s) {
               if (e is CastIPMismatchException) {
