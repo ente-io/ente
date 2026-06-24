@@ -32,7 +32,7 @@ export type FileContextAction =
  * Context needed to determine which file actions should be available.
  */
 export interface FileActionContext {
-    /** The current bar mode (albums, hidden-albums, people). */
+    /** The current bar mode (albums, hidden-albums, archive-albums, people). */
     barMode?: GalleryBarMode;
     /** Whether we're in search mode. */
     isInSearchMode: boolean;
