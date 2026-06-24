@@ -4,4 +4,3 @@
 /.well-known/*    /.well-known/:splat    200
 /robots.txt    /robots.txt    200
 /:token    /    200
-/:token/    /    200
