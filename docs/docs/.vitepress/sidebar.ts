@@ -746,6 +746,10 @@ export const sidebar = [
                         link: "/self-hosting/troubleshooting/docker",
                     },
                     {
+                        text: "Updated images",
+                        link: "/self-hosting/troubleshooting/ghcr",
+                    },
+                    {
                         text: "Uploads",
                         link: "/self-hosting/troubleshooting/uploads",
                     },

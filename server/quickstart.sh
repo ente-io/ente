@@ -70,7 +70,7 @@ sleep 1
 cat <<EOF >compose.yaml
 services:
   museum:
-    image: ghcr.io/ente-io/server
+    image: ghcr.io/ente/server
     ports:
       - 8080:8080 # API
     depends_on:
@@ -94,7 +94,7 @@ services:
     command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
 
   web:
-    image: ghcr.io/ente-io/web
+    image: ghcr.io/ente/web
     # Uncomment what you need to tweak.
     ports:
       - 3000:3000 # Photos web app

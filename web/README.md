@@ -67,7 +67,7 @@ You might also find this [overview of dependencies](docs/dependencies.md) useful
 
 ## Docker images
 
-A Docker image containing the self-hosting web apps is available from `ghcr.io/ente-io/web`. See [docs/docker.md](docs/docker.md) for more details.
+A Docker image containing the self-hosting web apps is available from `ghcr.io/ente/web`. See [docs/docker.md](docs/docker.md) for more details.
 
 ## Attributions
 
