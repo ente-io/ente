@@ -4,6 +4,7 @@ import "dart:io";
 import "package:ente_cast/ente_cast.dart";
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/gateways/cast/cast_gateway.dart";
@@ -128,10 +129,10 @@ class _PairWithAutoSheetState extends State<_PairWithAutoSheet> {
               children: snapshot.data!.map((result) {
                 final device = result.$2;
                 final name = result.$1;
-                return ButtonComponent(
-                  label: name,
-                  variant: .secondary,
+                return MenuComponent(
+                  title: name,
                   isDisabled: _devicesInProgress.contains(device),
+                  leading: const HugeIcon(icon: HugeIcons.strokeRoundedTvSmart),
                   onTap: () async => _connectToDevice(context, device),
                 );
               }).toList(),
