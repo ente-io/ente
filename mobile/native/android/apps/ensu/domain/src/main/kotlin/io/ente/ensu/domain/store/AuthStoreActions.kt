@@ -9,8 +9,7 @@ import kotlinx.coroutines.flow.update
 
 internal class AuthStoreActions(
     private val state: MutableStateFlow<AppState>,
-    private val logRepository: LogRepository,
-    private val onSync: () -> Unit
+    private val logRepository: LogRepository
 ) {
     fun signIn(email: String) {
         state.update { appState ->
@@ -18,7 +17,6 @@ internal class AuthStoreActions(
         }
         // Do not log PII like user email.
         logRepository.log(LogLevel.Info, "Signed in", tag = "Auth")
-        onSync()
     }
 
     fun signOut() {

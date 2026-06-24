@@ -253,7 +253,6 @@ final class EnsuAuthService {
 
         if !CredentialStore.shared.isSameUser(userId) {
             CredentialStore.shared.clear()
-            ChatDataCleaner.deleteSyncState()
         }
 
         try CredentialStore.shared.save(

@@ -110,9 +110,9 @@ export interface ChatDialogsProps {
     systemPrompt: string;
     handleSaveSystemPrompt: (promptText: string) => void;
     handleUseDefaultSystemPrompt: () => void;
-    syncNotificationOpen: boolean;
-    setSyncNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    syncNotification?: NotificationAttributes;
+    chatNotificationOpen: boolean;
+    setChatNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    chatNotification?: NotificationAttributes;
     modelGateStatus: ModelGateStatus;
     imagePreview: { url: string; name: string } | null;
     closeImagePreview: () => void;
@@ -167,9 +167,9 @@ export const ChatDialogs = memo(
         systemPrompt,
         handleSaveSystemPrompt,
         handleUseDefaultSystemPrompt,
-        syncNotificationOpen,
-        setSyncNotificationOpen,
-        syncNotification,
+        chatNotificationOpen,
+        setChatNotificationOpen,
+        chatNotification,
         modelGateStatus,
         imagePreview,
         closeImagePreview,
@@ -1090,9 +1090,9 @@ export const ChatDialogs = memo(
                 </Dialog>
 
                 <Notification
-                    open={syncNotificationOpen}
-                    onClose={() => setSyncNotificationOpen(false)}
-                    attributes={syncNotification}
+                    open={chatNotificationOpen}
+                    onClose={() => setChatNotificationOpen(false)}
+                    attributes={chatNotification}
                     horizontal={isSmall ? "left" : "right"}
                     vertical="bottom"
                     sx={{

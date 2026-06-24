@@ -43,7 +43,6 @@ internal class ChatStoreActions(
     private val logRepository: LogRepository,
     private val messageStore: MutableMap<String, MutableList<ChatMessage>>,
     private val attachmentActions: AttachmentStoreActions,
-    private val syncActions: SyncStoreActions,
     private val modelSettingsActions: ModelSettingsActions,
     private val ensuDefaults: EnsuDefaults
 ) {
@@ -216,7 +215,6 @@ internal class ChatStoreActions(
         trimSessionCaches(sessions.map { it.id }.toSet())
 
         scope?.launch { sessionPreferences.setSelectedSessionId(newCurrent) }
-        syncActions.syncNow()
         logRepository.log(LogLevel.Info, "Session deleted", tag = "Chat")
     }
 
@@ -309,7 +307,6 @@ internal class ChatStoreActions(
         }
         llmProvider.resetContext()
         startGeneration(sessionId, parent)
-        syncActions.requestSync()
     }
 
     fun sendMessage() {
@@ -359,7 +356,6 @@ internal class ChatStoreActions(
         updateCurrentSessionPreview(sessionId, text, timestamp)
         rebuildChatState(sessionId)
         startGeneration(sessionId, userMessage)
-        syncActions.requestSync()
         logRepository.log(
             LogLevel.Info,
             "Message sent",
@@ -531,7 +527,6 @@ internal class ChatStoreActions(
                         throwable = err
                     )
                 }
-                syncActions.syncAfterGeneration()
                 return@launch
             }
 
@@ -712,7 +707,6 @@ internal class ChatStoreActions(
                     )
                 )
             }
-            syncActions.syncAfterGeneration()
         }
         scheduleSessionSummary(sessionId)
     }

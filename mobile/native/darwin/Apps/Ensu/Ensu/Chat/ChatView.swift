@@ -20,8 +20,6 @@ struct ChatView: View {
 
     private var toastTrigger: ToastTrigger {
         ToastTrigger(
-            syncError: viewModel.syncErrorMessage,
-            syncSuccess: viewModel.syncSuccessMessage,
             generationError: viewModel.generationErrorMessage
         )
     }
@@ -444,9 +442,6 @@ struct ChatView: View {
             onDeleteSession: { session in
                 viewState.deleteSession = session
             },
-            onSync: {
-                viewModel.syncNow(showErrors: true, showSuccess: true)
-            },
             onOpenSettings: {
                 viewState.isDrawerOpen = false
                 viewState.showSettings = true
@@ -464,16 +459,6 @@ struct ChatView: View {
     }
 
     private func handleToastTrigger(_ trigger: ToastTrigger) {
-        if let message = trigger.syncError {
-            showToast(message, duration: 2)
-            viewModel.syncErrorMessage = nil
-            return
-        }
-        if let message = trigger.syncSuccess {
-            showToast(message, duration: 2)
-            viewModel.syncSuccessMessage = nil
-            return
-        }
         if let message = trigger.generationError {
             showToast(message, duration: 2)
             viewModel.generationErrorMessage = nil
@@ -538,8 +523,6 @@ private final class ChatViewState: ObservableObject {
 }
 
 private struct ToastTrigger: Equatable {
-    let syncError: String?
-    let syncSuccess: String?
     let generationError: String?
 }
 

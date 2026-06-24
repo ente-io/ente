@@ -1,7 +1,6 @@
 package io.ente.ensu.domain.store
 
 import io.ente.ensu.domain.chat.ChatRepository
-import io.ente.ensu.domain.chat.ChatSyncRepository
 import io.ente.ensu.domain.device.ChatDeviceCapability
 import io.ente.ensu.domain.device.DeviceCapabilityProvider
 import io.ente.ensu.domain.device.UnknownDeviceCapabilityProvider
@@ -25,7 +24,6 @@ import kotlinx.coroutines.launch
 class AppStore(
     private val sessionPreferences: SessionPreferences,
     private val chatRepository: ChatRepository,
-    private val chatSyncRepository: ChatSyncRepository? = null,
     private val llmProvider: LlmProvider,
     private val deviceCapabilityProvider: DeviceCapabilityProvider = UnknownDeviceCapabilityProvider,
     val ensuDefaults: EnsuDefaults,
@@ -36,10 +34,9 @@ class AppStore(
     val state: StateFlow<AppState> = _state.asStateFlow()
 
     private val messageStore = mutableMapOf<String, MutableList<ChatMessage>>()
-    private val attachmentActions = AttachmentStoreActions(_state, chatSyncRepository, messageStore)
+    private val attachmentActions = AttachmentStoreActions(_state, messageStore)
     private val modelSettingsActions =
         ModelSettingsActions(_state, sessionPreferences, llmProvider, logRepository, ensuDefaults)
-    private val syncActions = SyncStoreActions(_state, chatSyncRepository, logRepository)
     private val chatActions = ChatStoreActions(
         state = _state,
         sessionPreferences = sessionPreferences,
@@ -49,22 +46,14 @@ class AppStore(
         logRepository = logRepository,
         messageStore = messageStore,
         attachmentActions = attachmentActions,
-        syncActions = syncActions,
         modelSettingsActions = modelSettingsActions,
         ensuDefaults = ensuDefaults
     )
-    private val authActions = AuthStoreActions(_state, logRepository) {
-        syncActions.syncAfterLogin()
-    }
-
-    init {
-        syncActions.setReloadSessions { chatActions.loadSessionsFromDb() }
-    }
+    private val authActions = AuthStoreActions(_state, logRepository)
 
     fun bootstrap(scope: CoroutineScope) {
         chatActions.setScope(scope)
         attachmentActions.setScope(scope)
-        syncActions.setScope(scope)
         modelSettingsActions.setScope(scope)
         refreshDeviceCapability(scope)
         chatActions.bootstrap(scope)
@@ -198,11 +187,6 @@ class AppStore(
         authActions.signOut()
         chatActions.handleLogout()
     }
-
-    fun syncNow(
-        onSuccess: (() -> Unit)? = null,
-        onError: ((String) -> Unit)? = null
-    ) = syncActions.syncNow(onSuccess, onError)
 
     fun cancelAttachmentDownload(attachmentId: String) =
         attachmentActions.cancelAttachmentDownload(attachmentId)

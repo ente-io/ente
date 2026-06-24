@@ -35,11 +35,6 @@ import {
     type ChatSession,
 } from "@/services/chat/store";
 import {
-    ChatSyncLimitError,
-    downloadAttachment,
-    syncChat,
-} from "@/services/chat/sync";
-import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
     SIGN_IN_ENABLED,
 } from "@/services/featureFlags";
@@ -635,10 +630,10 @@ const Page: React.FC = () => {
     const [pendingImages, setPendingImages] = useState<ImageAttachment[]>([]);
     const [attachmentAnchor, setAttachmentAnchor] =
         useState<HTMLElement | null>(null);
-    const [syncNotification, setSyncNotification] = useState<
+    const [chatNotification, setChatNotification] = useState<
         NotificationAttributes | undefined
     >(undefined);
-    const [syncNotificationOpen, setSyncNotificationOpen] = useState(false);
+    const [chatNotificationOpen, setChatNotificationOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isStreamingOutro, setIsStreamingOutro] = useState(false);
     const [loadingPhrase, setLoadingPhrase] = useState<string | null>(null);
@@ -824,7 +819,7 @@ const Page: React.FC = () => {
             } catch (error) {
                 log.error("Failed to load remote chat key", error);
                 showMiniDialog({
-                    title: "Sync unavailable",
+                    title: "Chat key unavailable",
                     message:
                         "We could not load your chat encryption key. Please try again.",
                 });
@@ -1411,123 +1406,38 @@ const Page: React.FC = () => {
             attributes: NotificationAttributes & { autoHideDuration?: number },
         ) => {
             const { autoHideDuration, ...rest } = attributes;
-            setSyncNotification(rest);
-            setSyncNotificationOpen(true);
+            setChatNotification(rest);
+            setChatNotificationOpen(true);
             if (toastTimeoutRef.current) {
                 window.clearTimeout(toastTimeoutRef.current);
                 toastTimeoutRef.current = null;
             }
             if (autoHideDuration && typeof window !== "undefined") {
                 toastTimeoutRef.current = window.setTimeout(() => {
-                    setSyncNotificationOpen(false);
+                    setChatNotificationOpen(false);
                 }, autoHideDuration);
             }
         },
-        [setSyncNotification, setSyncNotificationOpen],
+        [setChatNotification, setChatNotificationOpen],
     );
-
-    const syncNow = useCallback(
-        async ({
-            showToast: shouldShowToast = false,
-        }: { showToast?: boolean } = {}) => {
-            if (!chatKey) return;
-            let activeChatKey = chatKey;
-            let remoteKey = cachedChatKey();
-            let canSync =
-                isLoggedIn && !!remoteKey && remoteKey === activeChatKey;
-
-            if (!canSync && isLoggedIn) {
-                await refreshAuthState();
-                remoteKey = cachedChatKey();
-                if (remoteKey) {
-                    activeChatKey = remoteKey;
-                    if (remoteKey !== chatKey) {
-                        setChatKey(remoteKey);
-                    }
-                    canSync = true;
-                }
-            }
-
-            if (canSync) {
-                try {
-                    await syncChat(activeChatKey);
-                    if (shouldShowToast) {
-                        showToast({
-                            title: "Sync complete",
-                            caption: "Your chats are up to date.",
-                            color: "accent",
-                            autoHideDuration: 3000,
-                        });
-                    }
-                } catch (error) {
-                    log.error("Chat sync failed", error);
-                    if (shouldShowToast) {
-                        showToast({
-                            title: "Sync failed",
-                            caption:
-                                error instanceof ChatSyncLimitError
-                                    ? error.message
-                                    : "We could not sync right now.",
-                            color: "critical",
-                            autoHideDuration: 4000,
-                        });
-                    }
-                    if (error instanceof ChatSyncLimitError) {
-                        showMiniDialog({
-                            title: "Sync limit reached",
-                            message: error.message,
-                        });
-                    }
-                }
-            } else if (shouldShowToast) {
-                showToast({
-                    title: "Sync unavailable",
-                    caption: "Encryption is still initializing.",
-                    color: "critical",
-                    autoHideDuration: 3000,
-                });
-            }
-
-            await refreshSessions();
-            await refreshMessages();
-        },
-        [
-            chatKey,
-            isLoggedIn,
-            refreshAuthState,
-            refreshMessages,
-            refreshSessions,
-            showMiniDialog,
-            showToast,
-        ],
-    );
-
-    useEffect(() => {
-        if (typeof window === "undefined") return;
-        if (!chatKey || !isLoggedIn) return;
-        const intervalId = window.setInterval(() => {
-            void syncNow();
-        }, 60_000);
-        return () => {
-            window.clearInterval(intervalId);
-        };
-    }, [chatKey, isLoggedIn, syncNow]);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
 
         const handleFocus = () => {
             void refreshAuthState();
-            if (chatKey && isLoggedIn) {
-                void syncNow();
+            if (chatKey) {
+                void refreshSessions();
+                void refreshMessages();
             }
         };
 
         const handleVisibility = () => {
             if (!document.hidden) {
                 void refreshAuthState();
-                if (chatKey && isLoggedIn) {
-                    void syncNow();
+                if (chatKey) {
+                    void refreshSessions();
+                    void refreshMessages();
                 }
             }
         };
@@ -1539,7 +1449,7 @@ const Page: React.FC = () => {
             window.removeEventListener("focus", handleFocus);
             document.removeEventListener("visibilitychange", handleVisibility);
         };
-    }, [chatKey, isLoggedIn, refreshAuthState, syncNow]);
+    }, [chatKey, refreshAuthState, refreshMessages, refreshSessions]);
 
     const deleteSessionTarget = useMemo(
         () =>
@@ -1561,12 +1471,8 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (!chatKey || !isChatStoreBridgeReady) return;
-        if (isLoggedIn) {
-            void syncNow();
-            return;
-        }
         void refreshSessions();
-    }, [chatKey, isChatStoreBridgeReady, isLoggedIn, refreshSessions, syncNow]);
+    }, [chatKey, isChatStoreBridgeReady, refreshSessions]);
 
     useEffect(() => {
         currentSessionIdRef.current = currentSessionId;
@@ -1640,7 +1546,6 @@ const Page: React.FC = () => {
 
             const task = (async () => {
                 try {
-                    await downloadAttachment(attachment.id);
                     const bytes = await readDecryptedAttachmentBytes(
                         attachment.id,
                         chatKey,
@@ -2539,7 +2444,6 @@ const Page: React.FC = () => {
 
             await deleteSession(sessionId, chatKey);
             removeSessionFromState(sessionId);
-            void syncChat(chatKey);
         },
         [chatKey, removeSessionFromState],
     );
@@ -2587,7 +2491,6 @@ const Page: React.FC = () => {
             try {
                 const images = await Promise.all(
                     imageAttachments.map(async (attachment) => {
-                        await downloadAttachment(attachment.id);
                         const bytes = await readDecryptedAttachmentBytes(
                             attachment.id,
                             chatKey,
@@ -2662,7 +2565,6 @@ const Page: React.FC = () => {
             if (!chatKey) return;
 
             try {
-                await downloadAttachment(attachment.id);
                 const bytes = await readDecryptedAttachmentBytes(
                     attachment.id,
                     chatKey,
@@ -2809,7 +2711,6 @@ const Page: React.FC = () => {
                     );
                     appendMessageToState(assistantMessage);
                     updateSessionAfterMessage(assistantMessage);
-                    void syncChat(chatKey);
                     void maybeGenerateSessionTitle({
                         sessionUuid: activeSessionId,
                         assistantMessageUuid: assistantMessage.messageUuid,
@@ -3090,7 +2991,6 @@ const Page: React.FC = () => {
                 appendMessageToState(assistantMessage);
                 updateSessionAfterMessage(assistantMessage);
 
-                void syncChat(chatKey);
                 void maybeGenerateSessionTitle({
                     sessionUuid: activeSessionId,
                     assistantMessageUuid: assistantMessage.messageUuid,
@@ -4089,8 +3989,6 @@ const Page: React.FC = () => {
                 setPendingDocuments([]);
                 setPendingImages([]);
 
-                void syncChat(chatKey);
-
                 await startGeneration({
                     promptText,
                     parentMessageUuid: newUserMessage.messageUuid,
@@ -4124,8 +4022,6 @@ const Page: React.FC = () => {
             updateSessionAfterMessage(userMessage);
             setPendingDocuments([]);
             setPendingImages([]);
-
-            void syncChat(chatKey);
 
             await startGeneration({
                 promptText,
@@ -4524,9 +4420,9 @@ const Page: React.FC = () => {
                 systemPrompt={systemPrompt}
                 handleSaveSystemPrompt={handleSaveSystemPrompt}
                 handleUseDefaultSystemPrompt={handleUseDefaultSystemPrompt}
-                syncNotificationOpen={syncNotificationOpen}
-                setSyncNotificationOpen={setSyncNotificationOpen}
-                syncNotification={syncNotification}
+                chatNotificationOpen={chatNotificationOpen}
+                setChatNotificationOpen={setChatNotificationOpen}
+                chatNotification={chatNotification}
                 modelGateStatus={modelGateStatus}
                 imagePreview={imagePreview}
                 closeImagePreview={closeImagePreview}

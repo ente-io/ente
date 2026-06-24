@@ -8,7 +8,6 @@ struct SessionDrawerView: View {
     let email: String?
     let onSelectSession: (ChatSession) -> Void
     let onDeleteSession: (ChatSession) -> Void
-    let onSync: () -> Void
     let onOpenSettings: () -> Void
 
     @State private var searchQuery: String = ""
@@ -47,20 +46,6 @@ struct SessionDrawerView: View {
 
     private var drawerHeader: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if isLoggedIn {
-                HStack {
-                    Spacer()
-
-                    drawerPrimaryTile(
-                        icon: "ArrowReloadHorizontalIcon",
-                        title: "Sync",
-                        action: onSync,
-                        expands: false
-                    )
-                }
-                .padding(.bottom, EnsuSpacing.sm)
-            }
-
             headerControls
         }
         .padding(.horizontal, EnsuSpacing.lg)

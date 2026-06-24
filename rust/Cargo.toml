@@ -10,7 +10,6 @@ members = [
     "bindings/uniffi/core",
     "bindings/uniffi/ensu/db",
     "bindings/uniffi/ensu/inference",
-    "bindings/uniffi/ensu/sync",
     "bindings/uniffi/ensu/transcription",
     "bindings/wasm/ente-wasm",
     "bindings/wasm/core",
@@ -19,7 +18,6 @@ members = [
     "crates/core",
     "crates/ensu/db",
     "crates/ensu/inference",
-    "crates/ensu/sync",
     "crates/ensu/transcription",
     "crates/image",
     "crates/photos",
@@ -29,7 +27,6 @@ members = [
 
 [workspace.dependencies]
 ensu-db = { path = "crates/ensu/db" }
-ensu-sync = { path = "crates/ensu/sync" }
 ensu-transcription = { path = "crates/ensu/transcription" }
 ente-accounts = { path = "crates/accounts" }
 ente-contacts = { path = "crates/contacts" }

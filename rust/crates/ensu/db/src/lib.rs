@@ -12,8 +12,6 @@ pub mod image;
 pub mod migrations;
 pub mod models;
 pub mod schema;
-pub mod sync_state_db;
-pub mod sync_state_schema;
 pub mod traits;
 
 pub use crate::attachments_db::{AttachmentUploadRow, AttachmentsDb, UploadState};
@@ -28,7 +26,6 @@ pub use crate::models::{
     Attachment, AttachmentKind, AttachmentMeta, EntityType, Message, Sender, Session,
     SessionWithPreview,
 };
-pub use crate::sync_state_db::{SyncEntityState, SyncStateDb};
 pub use crate::traits::{
     AttachmentStore, Clock, FileMetaStore, FsAttachmentStore, MetaStore, RandomUuidGen,
     SystemClock, UuidGen,

@@ -14,8 +14,6 @@ import io.ente.ensu.data.network.AuthorizationResponse
 import io.ente.ensu.data.network.NetworkConfiguration
 import io.ente.ensu.data.network.NetworkFactory
 import io.ente.ensu.data.storage.CredentialStore
-import io.ente.ensu.domain.chat.ChatRepository
-import io.ente.ensu.domain.chat.ChatSyncRepository
 import io.ente.ensu.domain.logging.LogRepository
 import io.ente.ensu.domain.model.LogLevel
 import kotlinx.coroutines.Dispatchers
@@ -32,8 +30,6 @@ class EnsuAuthService(
     private val context: Context,
     private val endpointPreferences: EndpointPreferencesDataStore,
     private val credentialStore: CredentialStore,
-    private val chatRepository: ChatRepository,
-    private val chatSyncRepository: ChatSyncRepository,
     private val logRepository: LogRepository
 ) {
     private val authTokenProvider = EnsuAuthTokenProvider(credentialStore)
@@ -244,8 +240,6 @@ class EnsuAuthService(
 
     suspend fun clearCredentials() {
         credentialStore.clear()
-        chatRepository.exitOnlineMode()
-        chatSyncRepository.resetSyncState()
     }
 
     private suspend fun pingEndpoint(endpoint: HttpUrl) {
@@ -271,24 +265,7 @@ class EnsuAuthService(
         val tokenBytes = secrets.token.toUByteArray().toByteArray()
         val token = Base64.encodeToString(tokenBytes, Base64.NO_WRAP or Base64.URL_SAFE)
 
-        if (!credentialStore.isSameUser(userId)) {
-            chatSyncRepository.resetSyncState()
-        }
-
         credentialStore.save(email, userId, masterKey, secretKey, token)
-
-        runCatching {
-            val chatKey = chatSyncRepository.prepareOnlineDb()
-            chatRepository.enterOnlineMode(chatKey)
-        }.onFailure { error ->
-            logRepository.log(
-                LogLevel.Warning,
-                "Failed to prepare online chat",
-                details = error.message,
-                tag = "Auth",
-                throwable = error
-            )
-        }
 
         // Best-effort zeroing of sensitive material after persisting.
         masterKey.fill(0)

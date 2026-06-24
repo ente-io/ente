@@ -17,7 +17,6 @@ import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.data.storage.CredentialStore
 import io.ente.ensu.data.llm.InferenceRsProvider
 import io.ente.ensu.data.chat.RustChatRepository
-import io.ente.ensu.data.chat.RustChatSyncRepository
 import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.store.AppStore
 import kotlinx.coroutines.flow.collectLatest
@@ -42,11 +41,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         deviceCapabilityProvider = deviceCapabilityProvider
     )
     private val chatRepository = RustChatRepository(application, credentialStore)
-    private val chatSyncRepository = RustChatSyncRepository(
-        context = application,
-        credentialStore = credentialStore,
-        endpointPreferences = endpointPreferences
-    )
     val ensuDefaults = runCatching { EnsuRustDefaults.load() }
         .onFailure { error ->
             logRepository.log(
@@ -62,7 +56,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val store = AppStore(
         sessionPreferences = sessionPreferences,
         chatRepository = chatRepository,
-        chatSyncRepository = chatSyncRepository,
         llmProvider = llmProvider,
         deviceCapabilityProvider = deviceCapabilityProvider,
         ensuDefaults = ensuDefaults,
@@ -72,8 +65,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         context = application,
         endpointPreferences = endpointPreferences,
         credentialStore = credentialStore,
-        chatRepository = chatRepository,
-        chatSyncRepository = chatSyncRepository,
         logRepository = logRepository
     )
 
