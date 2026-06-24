@@ -147,7 +147,7 @@ class _ContactsSectionState extends State<ContactsSection> {
                 children: [
                   Text(
                     SectionType.contacts.sectionTitle(context),
-                    style: TextStyles.h2.copyWith(color: colors.textBase),
+                    style: TextStyles.display3.copyWith(color: colors.textBase),
                   ),
                   const SizedBox(height: 16),
                   Text(
