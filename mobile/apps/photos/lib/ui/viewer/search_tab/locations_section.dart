@@ -91,7 +91,7 @@ class _LocationsSectionState extends State<LocationsSection> {
                 children: [
                   Text(
                     SectionType.location.sectionTitle(context),
-                    style: TextStyles.h2.copyWith(color: colors.textBase),
+                    style: TextStyles.display3.copyWith(color: colors.textBase),
                   ),
                   const SizedBox(height: 16),
                   Text(

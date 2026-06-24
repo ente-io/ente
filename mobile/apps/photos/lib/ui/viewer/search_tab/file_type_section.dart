@@ -41,7 +41,7 @@ class FileTypeSection extends StatelessWidget {
                 children: [
                   Text(
                     SectionType.fileTypesAndExtension.sectionTitle(context),
-                    style: TextStyles.h2.copyWith(
+                    style: TextStyles.display3.copyWith(
                       color: textTheme.largeBold.color,
                     ),
                   ),

@@ -126,7 +126,7 @@ class _PeopleSectionState extends State<PeopleSection> {
                       children: [
                         Text(
                           widget.sectionType.sectionTitle(context),
-                          style: TextStyles.h2.copyWith(
+                          style: TextStyles.display3.copyWith(
                             color: textTheme.largeBold.color,
                           ),
                         ),
