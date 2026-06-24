@@ -277,7 +277,6 @@ fn build_host_library(crate_dir: &Path) -> Result<(), DynError> {
         Command::new("cargo")
             .arg("build")
             .arg("--locked")
-            .arg("--release")
             .arg("--target-dir")
             .arg(target_dir)
             .current_dir(crate_dir),
@@ -318,7 +317,7 @@ fn generate_bindings(
     out_dir: &Path,
     uniffi_crate: &UniffiCrate<'_>,
 ) -> Result<(), DynError> {
-    let source = target_dir()?.join("release").join(format!(
+    let source = target_dir()?.join("debug").join(format!(
         "{}{}{}",
         env::consts::DLL_PREFIX,
         uniffi_crate.crate_name,
