@@ -2,7 +2,7 @@
  * Lazy loader for the `ente-wasm` package or Tauri-native bindings.
  *
  * We keep this behind a dynamic import so that the WASM bundle is only loaded
- * when needed (login/crypto flows), while Tauri uses native Rust bindings.
+ * when local crypto is needed, while Tauri uses native Rust bindings.
  */
 
 import { isTauriRuntime } from "@/services/tauri-runtime";
@@ -18,28 +18,6 @@ export interface EncryptedBox {
 export interface EncryptedBlob {
     encrypted_data: string;
     decryption_header: string;
-}
-
-export interface SrpCredentials {
-    kek: string;
-    login_key: string;
-}
-
-export interface DecryptedSecrets {
-    master_key: string;
-    secret_key: string;
-    token: string;
-}
-
-export interface DecryptedKeys {
-    master_key: string;
-    secret_key: string;
-}
-
-export interface SrpSessionAdapter {
-    public_a(): Promise<string>;
-    compute_m1(srpB64: string): Promise<string>;
-    verify_m2(srpM2B64: string): Promise<void>;
 }
 
 export interface EnteCryptoAdapter {
@@ -60,58 +38,9 @@ export interface EnteCryptoAdapter {
         headerB64: string,
         keyB64: string,
     ): Promise<string>;
-
-    auth_derive_srp_credentials(
-        password: string,
-        srpAttributes: Record<string, unknown>,
-    ): Promise<SrpCredentials>;
-    auth_decrypt_secrets(
-        kekB64: string,
-        keyAttributes: Record<string, unknown>,
-        encryptedTokenB64: string,
-    ): Promise<DecryptedSecrets>;
-    auth_decrypt_keys_only(
-        kekB64: string,
-        keyAttributes: Record<string, unknown>,
-    ): Promise<DecryptedKeys>;
-
-    SrpSession: new (
-        srpUserID: string,
-        srpSaltB64: string,
-        loginKeyB64: string,
-    ) => SrpSessionAdapter;
 }
 
 const createWasmAdapter = (wasm: EnteWasmModule): EnteCryptoAdapter => {
-    class WasmSrpSession implements SrpSessionAdapter {
-        private inner: InstanceType<typeof wasm.SrpSession>;
-
-        constructor(
-            srpUserID: string,
-            srpSaltB64: string,
-            loginKeyB64: string,
-        ) {
-            this.inner = new wasm.SrpSession(
-                srpUserID,
-                srpSaltB64,
-                loginKeyB64,
-            );
-        }
-
-        public_a() {
-            return Promise.resolve(this.inner.public_a());
-        }
-
-        compute_m1(srpB64: string) {
-            return Promise.resolve(this.inner.compute_m1(srpB64));
-        }
-
-        verify_m2(srpM2B64: string) {
-            this.inner.verify_m2(srpM2B64);
-            return Promise.resolve();
-        }
-    }
-
     return {
         crypto_init: () => {
             wasm.crypto_init();
@@ -130,23 +59,6 @@ const createWasmAdapter = (wasm: EnteWasmModule): EnteCryptoAdapter => {
             Promise.resolve(
                 wasm.crypto_decrypt_blob(encryptedDataB64, headerB64, keyB64),
             ),
-
-        auth_derive_srp_credentials: (password, srpAttributes) =>
-            Promise.resolve(
-                wasm.auth_derive_srp_credentials(password, srpAttributes),
-            ),
-        auth_decrypt_secrets: (kekB64, keyAttributes, encryptedTokenB64) =>
-            Promise.resolve(
-                wasm.auth_decrypt_secrets(
-                    kekB64,
-                    keyAttributes,
-                    encryptedTokenB64,
-                ),
-            ),
-        auth_decrypt_keys_only: (kekB64, keyAttributes) =>
-            Promise.resolve(wasm.auth_decrypt_keys_only(kekB64, keyAttributes)),
-
-        SrpSession: WasmSrpSession,
     };
 };
 
@@ -225,38 +137,6 @@ const createTauriAdapter = async (): Promise<EnteCryptoAdapter> => {
         }
     };
 
-    class TauriSrpSession implements SrpSessionAdapter {
-        private sessionIdPromise: Promise<string>;
-
-        constructor(
-            srpUserID: string,
-            srpSaltB64: string,
-            loginKeyB64: string,
-        ) {
-            this.sessionIdPromise = invokeOrThrow<string>("srp_session_new", {
-                input: { srpUserId: srpUserID, srpSaltB64, loginKeyB64 },
-            });
-        }
-
-        async public_a() {
-            return invokeOrThrow<string>("srp_session_public_a", {
-                input: { sessionId: await this.sessionIdPromise },
-            });
-        }
-
-        async compute_m1(srpB64: string) {
-            return invokeOrThrow<string>("srp_session_compute_m1", {
-                input: { sessionId: await this.sessionIdPromise, srpB64 },
-            });
-        }
-
-        async verify_m2(srpM2B64: string) {
-            await invokeOrThrow("srp_session_verify_m2", {
-                input: { sessionId: await this.sessionIdPromise, srpM2B64 },
-            });
-        }
-    }
-
     return {
         crypto_init: async () => {
             await invokeOrThrow("crypto_init");
@@ -278,21 +158,6 @@ const createTauriAdapter = async (): Promise<EnteCryptoAdapter> => {
             invokeOrThrow<string>("crypto_decrypt_blob", {
                 input: { encryptedDataB64, headerB64, keyB64 },
             }),
-
-        auth_derive_srp_credentials: (password, srpAttributes) =>
-            invokeOrThrow<SrpCredentials>("auth_derive_srp_credentials", {
-                input: { password, srpAttrs: srpAttributes },
-            }),
-        auth_decrypt_secrets: (kekB64, keyAttributes, encryptedTokenB64) =>
-            invokeOrThrow<DecryptedSecrets>("auth_decrypt_secrets", {
-                input: { kekB64, keyAttrs: keyAttributes, encryptedTokenB64 },
-            }),
-        auth_decrypt_keys_only: (kekB64, keyAttributes) =>
-            invokeOrThrow<DecryptedKeys>("auth_decrypt_keys_only", {
-                input: { kekB64, keyAttrs: keyAttributes },
-            }),
-
-        SrpSession: TauriSrpSession,
     };
 };
 

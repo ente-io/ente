@@ -26,4 +26,4 @@ After updating Flutter dependencies, run `pod install` from `ios/` on macOS and 
 
 If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-locker) to get started. Thank you for your support.
 
-If your language is not listed for translation, please [create a GitHub issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A) to have it added.
+If your language is not listed for translation, please [create a GitHub issue](https://github.com/ente/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A) to have it added.

@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::Result;
 use crate::attachments_db::{AttachmentUploadRow, AttachmentsDb, UploadState};
 use crate::db::ChatDb;
-use crate::models::{Attachment, AttachmentMeta, EntityType, Message, Session, SessionWithPreview};
+use crate::models::{Attachment, AttachmentMeta, Message, Session, SessionWithPreview};
 use crate::traits::{Clock, UuidGen};
 
 /// High-level DB that ties together the main chat DB and the attachments upload-state DB.
@@ -228,10 +228,6 @@ impl<B: crate::Backend> EnsuDb<B> {
             .set_attachment_upload_state(attachment_id, state)
     }
 
-    pub fn mark_attachment_uploaded(&self, attachment_id: &str) -> Result<()> {
-        self.attachments.mark_attachment_uploaded(attachment_id)
-    }
-
     pub fn get_pending_uploads_for_session(
         &self,
         session_uuid: Uuid,
@@ -262,94 +258,8 @@ impl<B: crate::Backend> EnsuDb<B> {
             .delete_attachment_tracking_for_session(session_uuid)
     }
 
-    // Sync helpers
-    pub fn mark_session_synced(&self, uuid: Uuid, remote_id: &str) -> Result<()> {
-        self.chat.mark_session_synced(uuid, remote_id)
-    }
-
-    pub fn get_session_remote_id(&self, uuid: Uuid) -> Result<Option<String>> {
-        self.chat.get_session_remote_id(uuid)
-    }
-
-    pub fn set_session_remote_id(&self, uuid: Uuid, remote_id: &str) -> Result<()> {
-        self.chat.set_session_remote_id(uuid, remote_id)
-    }
-
-    pub fn get_session_uuid_by_remote_id(&self, remote_id: &str) -> Result<Option<Uuid>> {
-        self.chat.get_session_uuid_by_remote_id(remote_id)
-    }
-
-    pub fn mark_message_synced(&self, uuid: Uuid) -> Result<()> {
-        self.chat.mark_message_synced(uuid)
-    }
-
     pub fn set_message_remote_id(&self, uuid: Uuid, remote_id: &str) -> Result<()> {
         self.chat.set_message_remote_id(uuid, remote_id)
-    }
-
-    pub fn get_message_remote_id(&self, uuid: Uuid) -> Result<Option<String>> {
-        self.chat.get_message_remote_id(uuid)
-    }
-
-    pub fn get_message_uuid_by_remote_id(&self, remote_id: &str) -> Result<Option<Uuid>> {
-        self.chat.get_message_uuid_by_remote_id(remote_id)
-    }
-
-    pub fn get_sessions_needing_sync(&self) -> Result<Vec<Session>> {
-        self.chat.get_sessions_needing_sync()
-    }
-
-    pub fn count_needing_sync(&self) -> Result<i64> {
-        self.chat.count_needing_sync()
-    }
-
-    pub fn get_sessions_needing_sync_batch(
-        &self,
-        limit: i64,
-        order_desc: bool,
-    ) -> Result<Vec<Session>> {
-        self.chat.get_sessions_needing_sync_batch(limit, order_desc)
-    }
-
-    pub fn set_session_server_updated_at(&self, uuid: Uuid, updated_at: i64) -> Result<()> {
-        self.chat.set_session_server_updated_at(uuid, updated_at)
-    }
-
-    pub fn set_message_server_updated_at(&self, uuid: Uuid, updated_at: i64) -> Result<()> {
-        self.chat.set_message_server_updated_at(uuid, updated_at)
-    }
-
-    pub fn get_pending_deletions(&self) -> Result<Vec<(EntityType, Uuid)>> {
-        self.chat.get_pending_deletions()
-    }
-
-    pub fn get_deleted_sessions(&self) -> Result<Vec<(Uuid, i64)>> {
-        self.chat.get_deleted_sessions()
-    }
-
-    pub fn get_deleted_messages(&self) -> Result<Vec<(Uuid, i64)>> {
-        self.chat.get_deleted_messages()
-    }
-
-    pub fn hard_delete(&self, entity_type: EntityType, uuid: Uuid) -> Result<()> {
-        self.chat.hard_delete(entity_type, uuid)
-    }
-
-    // Sync apply helpers
-    pub fn upsert_session_from_remote(
-        &self,
-        session_uuid: Uuid,
-        remote_id: &str,
-        title: &str,
-        created_at: i64,
-        updated_at: i64,
-    ) -> Result<Session> {
-        self.chat
-            .upsert_session_from_remote(session_uuid, remote_id, title, created_at, updated_at)
-    }
-
-    pub fn apply_session_tombstone(&self, session_uuid: Uuid, deleted_at: i64) -> Result<()> {
-        self.chat.apply_session_tombstone(session_uuid, deleted_at)
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -414,24 +324,6 @@ impl<B: crate::Backend> EnsuDb<B> {
 
     pub fn get_attachment_upload_state(&self, attachment_id: &str) -> Result<Option<UploadState>> {
         self.attachments.get_upload_state(attachment_id)
-    }
-
-    pub fn mark_all_needs_sync(&self) -> Result<()> {
-        self.chat.mark_all_needs_sync()
-    }
-
-    pub fn clear_all_server_timestamps(&self) -> Result<()> {
-        self.chat.clear_all_server_timestamps()
-    }
-
-    pub fn reset_sync_state(&self) -> Result<()> {
-        self.chat.reset_sync_state()?;
-        self.attachments.reset_all_upload_state()?;
-        Ok(())
-    }
-
-    pub fn reset_attachment_sync_state(&self) -> Result<()> {
-        self.attachments.reset_all_upload_state()
     }
 }
 

@@ -3,11 +3,11 @@ package api
 import (
 	"net/http"
 
-	"github.com/ente-io/museum/ente"
-	model "github.com/ente-io/museum/ente/userentity"
-	userentity "github.com/ente-io/museum/pkg/controller/userentity"
-	"github.com/ente-io/museum/pkg/utils/handler"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente"
+	model "github.com/ente/museum/ente/userentity"
+	userentity "github.com/ente/museum/pkg/controller/userentity"
+	"github.com/ente/museum/pkg/utils/handler"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 

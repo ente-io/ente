@@ -1,6 +1,5 @@
 package io.ente.ensu.domain.store
 
-import io.ente.ensu.domain.chat.ChatSyncRepository
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentDownloadItem
 import io.ente.ensu.domain.model.AttachmentDownloadStatus
@@ -21,7 +20,6 @@ import java.util.concurrent.ConcurrentLinkedDeque
 
 internal class AttachmentStoreActions(
     private val state: MutableStateFlow<AppState>,
-    private val chatSyncRepository: ChatSyncRepository?,
     private val messageStore: MutableMap<String, MutableList<ChatMessage>>
 ) {
     private val attachmentDownloads = ConcurrentHashMap<String, AttachmentDownloadItem>()
@@ -183,19 +181,10 @@ internal class AttachmentStoreActions(
             updateAttachmentDownloadState()
 
             val job = scope.launch(Dispatchers.IO) {
-                val result = runCatching {
-                    chatSyncRepository?.downloadAttachment(id, item.sessionId)
-                        ?: throw IllegalStateException("Sync unavailable")
-                }
-                val status = if (result.isSuccess) {
-                    AttachmentDownloadStatus.Completed
-                } else {
-                    AttachmentDownloadStatus.Failed
-                }
                 withContext(Dispatchers.Main) {
                     attachmentDownloads[id]?.let { current ->
                         if (current.status != AttachmentDownloadStatus.Canceled) {
-                            attachmentDownloads[id] = current.copy(status = status)
+                            attachmentDownloads[id] = current.copy(status = AttachmentDownloadStatus.Failed)
                         }
                     }
                     attachmentDownloadActive.remove(id)

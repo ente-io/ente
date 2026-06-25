@@ -81,7 +81,7 @@ If you only have a PIN and forgot it, you may need to reinstall the app and log 
 
 ### How do I report a bug? {#locker-report-bug}
 
-Report bugs on GitHub: [github.com/ente-io/ente/issues](https://github.com/ente-io/ente/issues)
+Report bugs on GitHub: [github.com/ente/ente/issues](https://github.com/ente/ente/issues)
 
 Include:
 

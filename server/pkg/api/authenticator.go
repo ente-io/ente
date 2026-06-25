@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ente-io/museum/ente"
-	model "github.com/ente-io/museum/ente/authenticator"
-	authenticaor "github.com/ente-io/museum/pkg/controller/authenticator"
-	"github.com/ente-io/museum/pkg/utils/handler"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente"
+	model "github.com/ente/museum/ente/authenticator"
+	authenticaor "github.com/ente/museum/pkg/controller/authenticator"
+	"github.com/ente/museum/pkg/utils/handler"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

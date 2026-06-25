@@ -7,33 +7,33 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ente-io/museum/pkg/controller/emergency"
-	"github.com/ente-io/museum/pkg/controller/remotestore"
-	"github.com/ente-io/museum/pkg/repo/authenticator"
+	"github.com/ente/museum/pkg/controller/emergency"
+	"github.com/ente/museum/pkg/controller/remotestore"
+	"github.com/ente/museum/pkg/repo/authenticator"
 
-	"github.com/ente-io/museum/pkg/controller/family"
+	"github.com/ente/museum/pkg/controller/family"
 
-	bonusEntity "github.com/ente-io/museum/ente/storagebonus"
-	"github.com/ente-io/museum/pkg/repo/storagebonus"
+	bonusEntity "github.com/ente/museum/ente/storagebonus"
+	"github.com/ente/museum/pkg/repo/storagebonus"
 
 	gTime "time"
 
-	"github.com/ente-io/museum/pkg/controller"
-	"github.com/ente-io/museum/pkg/controller/discord"
-	storagebonusCtrl "github.com/ente-io/museum/pkg/controller/storagebonus"
-	"github.com/ente-io/museum/pkg/controller/user"
-	"github.com/ente-io/museum/pkg/utils/auth"
-	emailUtil "github.com/ente-io/museum/pkg/utils/email"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/pkg/controller"
+	"github.com/ente/museum/pkg/controller/discord"
+	storagebonusCtrl "github.com/ente/museum/pkg/controller/storagebonus"
+	"github.com/ente/museum/pkg/controller/user"
+	"github.com/ente/museum/pkg/utils/auth"
+	emailUtil "github.com/ente/museum/pkg/utils/email"
+	"github.com/ente/museum/pkg/utils/time"
 	"github.com/gin-contrib/requestid"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ente-io/museum/pkg/utils/crypto"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/pkg/utils/crypto"
+	"github.com/ente/stacktrace"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/handler"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/repo"
+	"github.com/ente/museum/pkg/utils/handler"
 	"github.com/gin-gonic/gin"
 )
 

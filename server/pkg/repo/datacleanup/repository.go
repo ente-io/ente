@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	entity "github.com/ente-io/museum/ente/data_cleanup"
-	"github.com/ente-io/museum/pkg/utils/time"
-	"github.com/ente-io/stacktrace"
+	entity "github.com/ente/museum/ente/data_cleanup"
+	"github.com/ente/museum/pkg/utils/time"
+	"github.com/ente/stacktrace"
 )
 
 // Repository wraps out interaction related to data_cleanup database table

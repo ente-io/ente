@@ -101,7 +101,7 @@ export const PasteFrame = ({ children, footer }: PasteFrameProps) => {
                     <Stack direction="row" spacing={0.85} alignItems="center">
                         <IconButton
                             component="a"
-                            href="https://github.com/ente-io/ente"
+                            href="https://github.com/ente/ente"
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="View source on GitHub"

@@ -444,7 +444,7 @@
   "singleFileDeleteHighlight": "Es wird aus allen Alben gelöscht.",
   "singleFileInBothLocalAndRemote": "Diese Datei ist sowohl in Ente als auch auf deinem Gerät.",
   "singleFileInRemoteOnly": "Diese Datei wird von Ente gelöscht.",
-  "singleFileDeleteFromDevice": "Dieses {fileType} wird von deinem Gerät gelöscht.",
+  "singleFileDeleteFromDevice": "Dieses wird von deinem Gerät gelöscht.",
   "deleteFromEnte": "Von Ente löschen",
   "yesDelete": "Ja, löschen",
   "movedToTrash": "In den Papierkorb verschoben",

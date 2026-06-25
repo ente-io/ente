@@ -46,23 +46,19 @@ import io.ente.ensu.designsystem.HugeIcons
 @Composable
 fun SettingsScreen(
     buildVersion: String,
-    isLoggedIn: Boolean,
-    userEmail: String?,
     isAdvancedUnlocked: Boolean,
     onOpenLogs: () -> Unit,
     onOpenModelSettings: () -> Unit,
     onOpenSystemPromptSettings: () -> Unit,
     onUnlockAdvanced: () -> Unit,
-    onSignOut: () -> Unit,
-    onSignIn: () -> Unit,
-    onDeleteAccount: () -> Unit
+    onSignIn: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     var buildVersionTapCount by remember { mutableStateOf(0) }
     var lastBuildVersionTapAt by remember { mutableStateOf<Long?>(null) }
     val context = LocalContext.current
 
-    val allItems = remember(context, onOpenLogs, onSignOut, onSignIn, onDeleteAccount, isLoggedIn) {
+    val allItems = remember(context, onOpenLogs, onSignIn) {
         buildList {
             add(
                 SettingsItem(
@@ -80,32 +76,13 @@ fun SettingsScreen(
                 )
             )
 
-            if (isLoggedIn) {
-                add(
-                    SettingsItem(
-                        title = "Delete Account",
-                        iconRes = HugeIcons.Delete01Icon,
-                        onClick = onDeleteAccount,
-                        isDestructive = true
-                    )
+            add(
+                SettingsItem(
+                    title = "Sign In to Backup",
+                    iconRes = HugeIcons.Upload01Icon,
+                    onClick = onSignIn
                 )
-                add(
-                    SettingsItem(
-                        title = "Sign Out",
-                        iconRes = HugeIcons.Cancel01Icon,
-                        onClick = onSignOut,
-                        isDestructive = true
-                    )
-                )
-            } else {
-                add(
-                    SettingsItem(
-                        title = "Sign In to Backup",
-                        iconRes = HugeIcons.Upload01Icon,
-                        onClick = onSignIn
-                    )
-                )
-            }
+            )
 
             add(
                 SettingsItem(
@@ -165,28 +142,6 @@ fun SettingsScreen(
         )
 
         Spacer(modifier = Modifier.size(EnsuSpacing.lg.dp))
-
-        if (isLoggedIn && !userEmail.isNullOrBlank()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(EnsuCornerRadius.card.dp))
-                    .background(EnsuColor.fillFaint())
-                    .padding(EnsuSpacing.lg.dp)
-            ) {
-                Text(
-                    text = "Signed in as",
-                    style = EnsuTypography.small,
-                    color = EnsuColor.textMuted()
-                )
-                Text(
-                    text = userEmail,
-                    style = EnsuTypography.body,
-                    color = EnsuColor.textPrimary()
-                )
-            }
-            Spacer(modifier = Modifier.size(EnsuSpacing.md.dp))
-        }
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
             items(filteredItems, key = { it.title }) { item ->

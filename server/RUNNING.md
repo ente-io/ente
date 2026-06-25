@@ -15,7 +15,7 @@ This document describes these different approaches (you can choose any one), and
 ## Run using pre-built Docker images
 
 ```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente/ente/main/server/quickstart.sh)"
 ```
 
 For more details, see [docs/quickstart.md](docs/quickstart.md).

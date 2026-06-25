@@ -1,1 +1,0 @@
-- Search tab redesign.

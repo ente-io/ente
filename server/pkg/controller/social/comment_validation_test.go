@@ -3,7 +3,7 @@ package social
 import (
 	"testing"
 
-	socialentity "github.com/ente-io/museum/ente/social"
+	socialentity "github.com/ente/museum/ente/social"
 	"github.com/stretchr/testify/require"
 )
 

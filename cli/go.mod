@@ -1,4 +1,4 @@
-module github.com/ente-io/cli
+module github.com/ente/cli
 
 go 1.26
 

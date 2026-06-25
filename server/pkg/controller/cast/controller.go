@@ -3,12 +3,12 @@ package cast
 import (
 	"context"
 
-	"github.com/ente-io/museum/ente/cast"
-	"github.com/ente-io/museum/pkg/controller/access"
-	castRepo "github.com/ente-io/museum/pkg/repo/cast"
-	"github.com/ente-io/museum/pkg/utils/auth"
-	"github.com/ente-io/museum/pkg/utils/network"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente/cast"
+	"github.com/ente/museum/pkg/controller/access"
+	castRepo "github.com/ente/museum/pkg/repo/cast"
+	"github.com/ente/museum/pkg/utils/auth"
+	"github.com/ente/museum/pkg/utils/network"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"

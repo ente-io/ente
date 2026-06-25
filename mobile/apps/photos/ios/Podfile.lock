@@ -329,7 +329,7 @@ DEPENDENCIES:
   - workmanager_apple (from `.symlinks/plugins/workmanager_apple/ios`)
 
 SPEC REPOS:
-  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git:
+  https://github.com/ente/ffmpeg-kit-custom-repo-ios.git:
     - ffmpeg_kit_custom
   trunk:
     - Firebase
@@ -484,7 +484,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   app_links: 3dbc685f76b1693c66a6d9dd1e9ab6f73d97dc0a
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
-  backup_exclusion: a855876cbfac88c9d23f25b91263acd582ce4a05
+  backup_exclusion: 7aa8535339e746fb217cfdfe8fb8f8a718e4cb0b
   battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
   camera_avfoundation: 5675ca25298b6f81fa0a325188e7df62cc217741
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
@@ -534,7 +534,7 @@ SPEC CHECKSUMS:
   motionphoto: 23e2aeb5c6380112f69468d71f970fa7438e5ed1
   move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  native_video_editor: 7f6e3d37acdae585f6c273b1e2be6ca6d6bb461e
+  native_video_editor: 5af94a14017a00dcb0a0055abb869fce79e5493e
   native_video_player: 6809dec117e8997161dbfb42a6f90d6df71a504d
   onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
   onnxruntime-c: a909204639a1f035f575127ac406f781ac797c9c
@@ -566,6 +566,6 @@ SPEC CHECKSUMS:
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
   workmanager_apple: 904529ae31e97fc5be632cf628507652294a0778
 
-PODFILE CHECKSUM: a0ca58908e52cf6c3fe2f16f5b193ce82a62fa3b
+PODFILE CHECKSUM: 8fc1fde26dfa3b23d869bfb05f0291fe4d453b91
 
 COCOAPODS: 1.16.2

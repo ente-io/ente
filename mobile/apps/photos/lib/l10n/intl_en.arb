@@ -443,15 +443,53 @@
   "videoSmallCase": "video",
   "photoSmallCase": "photo",
   "singleFileDeleteHighlight": "It will be deleted from all albums.",
-  "singleFileInBothLocalAndRemote": "This {fileType} is in both Ente and your device.",
-  "singleFileInRemoteOnly": "This {fileType} will be deleted from Ente.",
-  "singleFileDeleteFromDevice": "This {fileType} will be deleted from your device.",
+  "singleFileInBothLocalAndRemote": "This item is available on your device and Ente.",
+  "@singleFileInBothLocalAndRemote": {
+    "description": "Delete confirmation message for a single item that exists both on the device and in Ente."
+  },
+  "singleFileInRemoteOnly": "This item will be deleted from all albums. You can recover it from Trash.",
+  "@singleFileInRemoteOnly": {
+    "description": "Delete confirmation message for a single item that exists only in Ente."
+  },
+  "singleFileDeleteFromDevice": "Item not backed up. Permanently delete from device?",
+  "@singleFileDeleteFromDevice": {
+    "description": "Delete confirmation message for a single item that exists only on the device."
+  },
+  "deleteItemsQuestion": "{count, plural, one {Delete item?} other {Delete {count} items?}}",
+  "@deleteItemsQuestion": {
+    "description": "Delete confirmation title for one or more selected items.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectedFilesSavedOnDeviceOnly": "Items not backed up. Permanently delete from device?",
+  "@selectedFilesSavedOnDeviceOnly": {
+    "description": "Delete confirmation message for selected items that exist only on the device."
+  },
+  "selectedFilesBackedUpToEnte": "These items will be deleted from all albums. You can recover them from Trash.",
+  "@selectedFilesBackedUpToEnte": {
+    "description": "Delete confirmation message for selected items that are backed up to Ente."
+  },
+  "someSelectedFilesBackedUpToEnte": "These items are available on device and Ente.",
+  "@someSelectedFilesBackedUpToEnte": {
+    "description": "Delete confirmation message for selected items that exist both on the device and in Ente."
+  },
   "deleteFromEnte": "Delete from Ente",
   "yesDelete": "Yes, delete",
   "movedToTrash": "Moved to trash",
   "deleteFromDeviceQuestion": "Delete from device?",
   "deleteFromDevice": "Delete from device",
   "deleteFromBoth": "Delete from both",
+  "moreOptions": "More options",
+  "@moreOptions": {
+    "description": "Button label for showing additional delete options."
+  },
+  "setAsMyDefaultChoice": "Set as my default choice",
+  "@setAsMyDefaultChoice": {
+    "description": "Checkbox label for saving the selected delete action as the default choice."
+  },
   "newAlbum": "New album",
   "albums": "Albums",
   "ente": "Ente",
@@ -628,6 +666,7 @@
   "backup": "Backup",
   "freeUpDeviceSpace": "Free up device space",
   "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have already been backed up.",
+  "freeUpDeviceSpaceConfirmDesc": "{count, plural, one{{count} backed-up file} other{{count} backed-up files}} will be permanently deleted from this device.",
   "freeUpDeviceSpaceDescICloud": "Files in iCloud shared albums cannot be cleared.",
   "@freeUpDeviceSpaceDescICloud": {
     "description": "Here 'cleared' means 'deleted' from the device"
@@ -636,6 +675,14 @@
   "noDeviceThatCanBeDeleted": "You've no files on this device that can be deleted",
   "removeDuplicates": "Remove duplicates",
   "removeDuplicatesDesc": "Review and remove files that are exact duplicates.",
+  "mediaManagementHintTitle": "Tired of confirming every delete?",
+  "@mediaManagementHintTitle": {
+    "description": "Title of a sheet prompting Android users to enable media management permission."
+  },
+  "mediaManagementHintMessage": "Turn on media management for Ente in settings, and the prompts stop.",
+  "@mediaManagementHintMessage": {
+    "description": "Message explaining that enabling Android media management permission avoids repeated delete confirmations."
+  },
   "viewLargeFiles": "Large files",
   "viewLargeFilesDesc": "View files that are consuming the most amount of storage.",
   "deleteSuggestions": "Delete suggestions",

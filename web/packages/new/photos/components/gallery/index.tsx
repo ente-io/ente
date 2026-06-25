@@ -59,7 +59,10 @@ export interface RemotePullOpts {
  * and starts a new selection.
  * */
 export type SelectionContext =
-    | { mode: "albums" | "hidden-albums"; collectionID: number }
+    | {
+          mode: "albums" | "hidden-albums" | "archive-albums";
+          collectionID: number;
+      }
     | { mode: "people"; personID: string };
 
 interface SearchResultsHeaderProps {

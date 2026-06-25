@@ -55,11 +55,8 @@ import kotlin.math.absoluteValue
 fun SessionDrawer(
     sessions: List<ChatSession>,
     selectedSessionId: String?,
-    isLoggedIn: Boolean,
-    userEmail: String?,
     onSelectSession: (ChatSession) -> Unit,
     onDeleteSession: (ChatSession) -> Unit,
-    onSync: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -86,10 +83,8 @@ fun SessionDrawer(
                 .windowInsetsPadding(WindowInsets.systemBars)
         ) {
             DrawerHeader(
-                isLoggedIn = isLoggedIn,
                 searchQuery = searchQuery,
-                onSearchChange = { searchQuery = it },
-                onSync = onSync
+                onSearchChange = { searchQuery = it }
             )
 
             HorizontalDivider(color = EnsuColor.border())
@@ -105,8 +100,6 @@ fun SessionDrawer(
             HorizontalDivider(color = EnsuColor.border())
 
             DrawerFooter(
-                isLoggedIn = isLoggedIn,
-                userEmail = userEmail,
                 onOpenSettings = onOpenSettings
             )
         }
@@ -115,10 +108,8 @@ fun SessionDrawer(
 
 @Composable
 private fun DrawerHeader(
-    isLoggedIn: Boolean,
     searchQuery: String,
-    onSearchChange: (String) -> Unit,
-    onSync: () -> Unit
+    onSearchChange: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -126,24 +117,6 @@ private fun DrawerHeader(
             .background(EnsuColor.backgroundBase())
             .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp)
     ) {
-        if (isLoggedIn) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-
-                DrawerPrimaryTile(
-                    iconRes = HugeIcons.ArrowReloadHorizontalIcon,
-                    label = "Sync",
-                    onClick = onSync,
-                    isEnabled = true
-                )
-            }
-
-            Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-        }
-
         DrawerSearchControls(
             query = searchQuery,
             onQueryChange = onSearchChange,
@@ -152,37 +125,6 @@ private fun DrawerHeader(
         )
     }
 }
-
-@Composable
-private fun DrawerPrimaryTile(
-    iconRes: Int,
-    label: String,
-    onClick: () -> Unit,
-    isEnabled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val tint = if (isEnabled) EnsuColor.textPrimary() else EnsuColor.textMuted()
-
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(EnsuCornerRadius.card.dp))
-            .background(EnsuColor.fillFaint())
-            .clickable(enabled = isEnabled, onClick = onClick)
-            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = label,
-            modifier = Modifier.size(18.dp),
-            tint = tint
-        )
-        Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
-        Text(text = label, style = EnsuTypography.body, color = tint)
-    }
-}
-
 
 @Composable
 private fun DrawerSearchControls(
@@ -378,54 +320,28 @@ private fun SessionTile(
 
 @Composable
 private fun DrawerFooter(
-    isLoggedIn: Boolean,
-    userEmail: String?,
     onOpenSettings: () -> Unit
 ) {
-    if (isLoggedIn) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onOpenSettings)
-                .padding(EnsuSpacing.lg.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
-        ) {
-            Text(
-                text = userEmail.orEmpty(),
-                style = EnsuTypography.body,
-                color = EnsuColor.textPrimary(),
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                painter = painterResource(HugeIcons.ArrowRight01Icon),
-                contentDescription = "Settings",
-                modifier = Modifier.size(18.dp),
-                tint = EnsuColor.textMuted()
-            )
-        }
-    } else {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onOpenSettings)
-                .padding(EnsuSpacing.lg.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
-        ) {
-            Text(
-                text = "Settings",
-                style = EnsuTypography.body,
-                color = EnsuColor.textPrimary(),
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                painter = painterResource(HugeIcons.ArrowRight01Icon),
-                contentDescription = "Settings",
-                modifier = Modifier.size(18.dp),
-                tint = EnsuColor.textMuted()
-            )
-        }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpenSettings)
+            .padding(EnsuSpacing.lg.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
+    ) {
+        Text(
+            text = "Settings",
+            style = EnsuTypography.body,
+            color = EnsuColor.textPrimary(),
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            painter = painterResource(HugeIcons.ArrowRight01Icon),
+            contentDescription = "Settings",
+            modifier = Modifier.size(18.dp),
+            tint = EnsuColor.textMuted()
+        )
     }
 }
 

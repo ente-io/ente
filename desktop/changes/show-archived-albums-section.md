@@ -1,0 +1,1 @@
+- Update the Archive section to show only archived albums on the top bar.

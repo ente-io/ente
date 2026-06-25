@@ -8,10 +8,10 @@ import (
 	"slices"
 	"time"
 
-	"github.com/ente-io/museum/ente"
-	contactmodel "github.com/ente-io/museum/ente/contact"
-	"github.com/ente-io/museum/pkg/utils/crypto"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente"
+	contactmodel "github.com/ente/museum/ente/contact"
+	"github.com/ente/museum/pkg/utils/crypto"
+	"github.com/ente/stacktrace"
 	"github.com/lib/pq"
 )
 

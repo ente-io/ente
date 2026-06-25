@@ -15,7 +15,6 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
         .manage(commands::LlmModelDownloadState::default())
         .manage(commands::ChatDbState::default())
@@ -43,13 +42,6 @@ fn main() {
             commands::secure_storage_get,
             commands::secure_storage_set,
             commands::secure_storage_delete,
-            commands::auth_derive_srp_credentials,
-            commands::auth_decrypt_secrets,
-            commands::auth_decrypt_keys_only,
-            commands::srp_session_new,
-            commands::srp_session_public_a,
-            commands::srp_session_compute_m1,
-            commands::srp_session_verify_m2,
             commands::chat_db_list_sessions,
             commands::chat_db_list_sessions_with_preview,
             commands::chat_db_get_session,
@@ -58,23 +50,14 @@ fn main() {
             commands::chat_db_update_session_title,
             commands::chat_db_delete_session,
             commands::chat_db_get_messages,
-            commands::chat_db_get_messages_for_sync,
             commands::chat_db_insert_message,
             commands::chat_db_update_message_text,
-            commands::chat_db_list_sessions_for_sync,
             commands::chat_db_upsert_session,
             commands::chat_db_insert_message_with_uuid,
-            commands::chat_db_mark_session_synced,
-            commands::chat_db_mark_session_deleted,
-            commands::chat_db_mark_message_deleted,
-            commands::chat_db_mark_attachment_uploaded,
             commands::chat_db_compress_attachment_image,
             commands::chat_db_compress_attachment_image_file,
-            commands::chat_db_get_pending_deletions,
-            commands::chat_db_hard_delete,
             commands::chat_db_reset,
             commands::chat_db_migrate_legacy,
-            commands::chat_sync,
             commands::llm_init_backend,
             commands::llm_load_model,
             commands::llm_create_context,

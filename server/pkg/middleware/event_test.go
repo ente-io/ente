@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	util "github.com/ente-io/museum/pkg/utils"
+	util "github.com/ente/museum/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 

@@ -45,6 +45,26 @@ private struct PrimaryButtonStyle: ButtonStyle {
     }
 }
 
+struct StyledTextField: View {
+    let hint: String
+    @Binding var text: String
+    var keyboardType: PlatformKeyboardType = .default
+
+    var body: some View {
+        TextField(hint, text: $text)
+            .font(EnsuTypography.body)
+            .foregroundStyle(EnsuColor.textPrimary)
+            .platformTextFieldStyle()
+            .platformTextInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .platformKeyboardType(keyboardType)
+            .padding(.horizontal, EnsuSpacing.inputHorizontal)
+            .padding(.vertical, EnsuSpacing.inputVertical)
+            .background(EnsuColor.fillFaint)
+            .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
+    }
+}
+
 struct TextLink: View {
     let text: String
     let action: () -> Void

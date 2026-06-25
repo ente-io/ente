@@ -1,0 +1,1 @@
+- Improved the delete confirmation flow by replacing multiple prompts with a single confirmation that remembers the last selected option.

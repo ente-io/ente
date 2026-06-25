@@ -447,7 +447,9 @@ const Page: React.FC = () => {
 
     const activeCollectionFiles = useMemo(() => {
         if (!activeCollection) return [];
-        if (barMode == "hidden-albums") return filteredFiles;
+        if (barMode == "hidden-albums" || barMode == "archive-albums") {
+            return filteredFiles;
+        }
 
         return filteredFiles.filter(({ id, magicMetadata }) => {
             const visibility = magicMetadata?.data.visibility;
@@ -496,18 +498,14 @@ const Page: React.FC = () => {
         filteredFiles.length > 0 &&
         selectedFilesInView.length === filteredFiles.length;
 
-    // TODO: Move into reducer
-    const barCollectionSummaries = useMemo(
-        () =>
-            barMode == "hidden-albums"
-                ? state.hiddenCollectionSummaries
-                : state.normalCollectionSummaries,
-        [
-            barMode,
-            state.hiddenCollectionSummaries,
-            state.normalCollectionSummaries,
-        ],
-    );
+    const isInArchiveSection = barMode == "archive-albums";
+
+    const barCollectionSummaries =
+        barMode == "hidden-albums"
+            ? state.hiddenCollectionSummaries
+            : barMode == "archive-albums"
+              ? state.archivedCollectionSummaries
+              : state.normalCollectionSummaries;
 
     const router = useRouter();
 
@@ -760,7 +758,10 @@ const Page: React.FC = () => {
                 barMode == "people" && activePersonID
                     ? { mode: "people" as const, personID: activePersonID }
                     : {
-                          mode: barMode as "albums" | "hidden-albums",
+                          mode: barMode as
+                              | "albums"
+                              | "hidden-albums"
+                              | "archive-albums",
                           collectionID: activeCollectionID!,
                       },
         };
@@ -787,7 +788,10 @@ const Page: React.FC = () => {
                 barMode == "people" && activePersonID
                     ? { mode: "people" as const, personID: activePersonID }
                     : {
-                          mode: barMode as "albums" | "hidden-albums",
+                          mode: barMode as
+                              | "albums"
+                              | "hidden-albums"
+                              | "archive-albums",
                           collectionID: activeCollectionID!,
                       },
         };
@@ -2047,7 +2051,14 @@ const Page: React.FC = () => {
                         onEditLocation={showEditLocation}
                     />
                 ) : barMode == "hidden-albums" ? (
-                    <HiddenSectionNavbarContents
+                    <SectionNavbarContents
+                        title={t("section_hidden")}
+                        onBack={() => dispatch({ type: "showAlbums" })}
+                        onUpload={openUploader}
+                    />
+                ) : !isInSearchMode && isInArchiveSection ? (
+                    <SectionNavbarContents
+                        title={t("section_archive")}
                         onBack={() => dispatch({ type: "showAlbums" })}
                         onUpload={openUploader}
                     />
@@ -2082,6 +2093,7 @@ const Page: React.FC = () => {
                     activePerson,
                     setFileListHeader,
                     saveGroups,
+                    canCreateAlbum: !isInArchiveSection,
                     onAddSaveGroup,
                     onMarkTempDeleted: handleMarkTempDeleted,
                     onAddFileToCollection: handleAddSingleFileToCollection,
@@ -2378,14 +2390,17 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     );
 };
 
-interface HiddenSectionNavbarContentsProps {
+interface SectionNavbarContentsProps {
+    title: string;
     onBack: () => void;
     onUpload: () => void;
 }
 
-const HiddenSectionNavbarContents: React.FC<
-    HiddenSectionNavbarContentsProps
-> = ({ onBack, onUpload }) => (
+const SectionNavbarContents: React.FC<SectionNavbarContentsProps> = ({
+    title,
+    onBack,
+    onUpload,
+}) => (
     <Stack
         direction="row"
         sx={(theme) => ({
@@ -2398,7 +2413,7 @@ const HiddenSectionNavbarContents: React.FC<
         <IconButton onClick={onBack}>
             <ArrowBackIcon />
         </IconButton>
-        <Typography sx={{ flex: 1 }}>{t("section_hidden")}</Typography>
+        <Typography sx={{ flex: 1 }}>{title}</Typography>
         <UploadButton onClick={onUpload} />
     </Stack>
 );

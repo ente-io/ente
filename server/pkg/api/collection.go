@@ -1,17 +1,17 @@
 package api
 
 import (
-	"github.com/ente-io/museum/pkg/controller/collections"
+	"github.com/ente/museum/pkg/controller/collections"
 	"net/http"
 	"strconv"
 
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/stacktrace"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/utils/auth"
-	"github.com/ente-io/museum/pkg/utils/handler"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/utils/auth"
+	"github.com/ente/museum/pkg/utils/handler"
+	"github.com/ente/museum/pkg/utils/time"
 	"github.com/gin-gonic/gin"
 )
 

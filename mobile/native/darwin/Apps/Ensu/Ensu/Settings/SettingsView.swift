@@ -3,17 +3,12 @@ import SwiftUI
 import Foundation
 
 struct SettingsView: View {
-    let isLoggedIn: Bool
-    let email: String?
-    let showsSignInOption: Bool
-    let onSignOut: () -> Void
     let onSignIn: () -> Void
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
     @State private var query: String = ""
-    @State private var showSignOutConfirm = false
     @State private var buildVersionTapCount = 0
     @State private var lastBuildVersionTapAt: Date?
     @State private var isAdvancedUnlocked = EnsuAdvancedSettings.isUnlocked
@@ -24,10 +19,6 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: EnsuSpacing.lg) {
-                    if let email, isLoggedIn, trimmedQuery.isEmpty {
-                        signedInCard(email: email)
-                    }
-
                     if let aboutItem = filteredAboutItem {
                         Button(action: aboutItem.action) {
                             settingsCard(title: aboutItem.title, iconName: aboutItem.iconName, showsChevron: true)
@@ -39,13 +30,6 @@ struct SettingsView: View {
                         NavigationLink {
                             item.destination
                         } label: {
-                            settingsCard(title: item.title, iconName: item.iconName, showsChevron: true)
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    ForEach(filteredAccountItems) { item in
-                        Button(action: item.action) {
                             settingsCard(title: item.title, iconName: item.iconName, showsChevron: true)
                         }
                         .buttonStyle(.plain)
@@ -81,15 +65,6 @@ struct SettingsView: View {
                         }
                     }
 
-                    if let endpointInfoText {
-                        Text(endpointInfoText)
-                            .font(EnsuTypography.small)
-                            .foregroundStyle(EnsuColor.textMuted)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 8)
-                    }
-
                     Button(action: handleBuildVersionTap) {
                         Text(buildVersionText)
                             .font(EnsuTypography.small)
@@ -118,14 +93,6 @@ struct SettingsView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Close") { dismiss() }
                 }
-            }
-            .alert("Sign out of Ensu?", isPresented: $showSignOutConfirm) {
-                Button("Sign Out", role: .destructive) {
-                    onSignOut()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Signing out will remove your online chats from this device. Offline chats stay available.")
             }
             .overlay(alignment: .bottom) {
                 if let toastMessage {
@@ -177,30 +144,6 @@ struct SettingsView: View {
         ]
     }
 
-    private var accountItems: [SettingsActionItem] {
-        guard isLoggedIn else { return [] }
-        return [
-            SettingsActionItem(
-                title: "Delete Account",
-                iconName: "Delete01Icon",
-                action: { openDeleteAccountEmail() }
-            ),
-            SettingsActionItem(
-                title: "Sign Out",
-                iconName: "Cancel01Icon",
-                action: { showSignOutConfirm = true }
-            )
-        ]
-    }
-
-    private var filteredAccountItems: [SettingsActionItem] {
-        guard !trimmedQuery.isEmpty else { return accountItems }
-        let q = trimmedQuery.lowercased()
-        return accountItems.filter { item in
-            item.title.lowercased().contains(q)
-        }
-    }
-
     private var filteredAboutItem: SettingsActionItem? {
         guard !trimmedQuery.isEmpty else { return aboutItem }
         let q = trimmedQuery.lowercased()
@@ -216,8 +159,6 @@ struct SettingsView: View {
     }
 
     private var shouldShowSignInRow: Bool {
-        guard showsSignInOption else { return false }
-        guard !isLoggedIn else { return false }
         guard !trimmedQuery.isEmpty else { return true }
         let q = trimmedQuery.lowercased()
         return signInTitle.lowercased().contains(q)
@@ -254,18 +195,6 @@ struct SettingsView: View {
         isAdvancedUnlocked && !filteredAdvancedItems.isEmpty
     }
 
-    private var endpointInfoText: String? {
-        guard trimmedQuery.isEmpty else { return nil }
-
-        let defaultEndpoint = "https://api.ente.com"
-        let endpoint = EnsuDeveloperSettings.currentEndpointString
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-
-        guard !endpoint.isEmpty, endpoint != defaultEndpoint else { return nil }
-        return "Endpoint: \(endpoint)"
-    }
-
     private var trimmedQuery: String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -275,13 +204,6 @@ struct SettingsView: View {
         let version = info?["CFBundleShortVersionString"] as? String ?? "unknown"
         let build = info?["CFBundleVersion"] as? String ?? "unknown"
         return "Build \(version) (\(build))"
-    }
-
-    private func openDeleteAccountEmail() {
-        let subject = "Request Deletion for Ente Account"
-        let encoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? subject
-        guard let url = URL(string: "mailto:support@ente.com?subject=\(encoded)") else { return }
-        openURL(url)
     }
 
     private func handleBuildVersionTap() {
@@ -305,22 +227,6 @@ struct SettingsView: View {
     private func openExternalLink(_ urlString: String) {
         guard let url = URL(string: urlString) else { return }
         openURL(url)
-    }
-
-    private func signedInCard(email: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Signed in as")
-                .font(EnsuTypography.small)
-                .foregroundStyle(EnsuColor.textMuted)
-            Text(email)
-                .font(EnsuTypography.body)
-                .foregroundStyle(EnsuColor.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(EnsuSpacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(EnsuColor.fillFaint)
-        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
     }
 
     private func settingsCard(title: String, iconName: String, showsChevron: Bool) -> some View {
@@ -529,10 +435,6 @@ private struct SettingsActionItem: Identifiable {
 import SwiftUI
 
 struct SettingsView: View {
-    let isLoggedIn: Bool
-    let email: String?
-    let showsSignInOption: Bool
-    let onSignOut: () -> Void
     let onSignIn: () -> Void
 
     var body: some View {

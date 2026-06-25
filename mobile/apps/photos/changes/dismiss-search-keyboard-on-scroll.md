@@ -1,1 +1,0 @@
-- Dismiss the keyboard when scrolling search screens.

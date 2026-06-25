@@ -4,11 +4,8 @@ import SwiftUI
 struct SessionDrawerView: View {
     let sessions: [ChatSession]
     let currentSessionId: UUID?
-    let isLoggedIn: Bool
-    let email: String?
     let onSelectSession: (ChatSession) -> Void
     let onDeleteSession: (ChatSession) -> Void
-    let onSync: () -> Void
     let onOpenSettings: () -> Void
 
     @State private var searchQuery: String = ""
@@ -47,20 +44,6 @@ struct SessionDrawerView: View {
 
     private var drawerHeader: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if isLoggedIn {
-                HStack {
-                    Spacer()
-
-                    drawerPrimaryTile(
-                        icon: "ArrowReloadHorizontalIcon",
-                        title: "Sync",
-                        action: onSync,
-                        expands: false
-                    )
-                }
-                .padding(.bottom, EnsuSpacing.sm)
-            }
-
             headerControls
         }
         .padding(.horizontal, EnsuSpacing.lg)
@@ -149,25 +132,14 @@ struct SessionDrawerView: View {
 
     private var footer: some View {
         HStack {
-            if isLoggedIn {
-                Button {
-                    hapticTap()
-                    onOpenSettings()
-                } label: {
-                    footerButtonLabel(title: email ?? "")
-                }
-                .buttonStyle(.plain)
-                .contentShape(Rectangle())
-            } else {
-                Button {
-                    hapticTap()
-                    onOpenSettings()
-                } label: {
-                    footerButtonLabel(title: "Settings")
-                }
-                .buttonStyle(.plain)
-                .contentShape(Rectangle())
+            Button {
+                hapticTap()
+                onOpenSettings()
+            } label: {
+                footerButtonLabel(title: "Settings")
             }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
             Spacer(minLength: 0)
         }
         .padding(EnsuSpacing.lg)

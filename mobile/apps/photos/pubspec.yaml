@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.3.57+2158
+version: 1.3.58+2158
 publish_to: none
 
 environment:
@@ -29,7 +29,7 @@ dependencies:
     path: ../../packages/backup_exclusion
   battery_info: # replace with battery_plus
     git:
-      url: https://github.com/ente-io/battery_info
+      url: https://github.com/ente/battery_info
       ref: 95c7a9f0400b968b3bfdc98c8c10a07fb4a62ea2
   bip39: 1.0.6
   cached_network_image: 3.4.1
@@ -38,7 +38,7 @@ dependencies:
   collection: 1.19.1 #dart
   computer: # logged task name in verbose in fork
     git:
-      url: https://github.com/ente-io/computer.git
+      url: https://github.com/ente/computer.git
       ref: 82e365fed8a1a76f6eea0220de98389eed7b0445
   connectivity_plus: 6.1.4
   convert: 3.1.2
@@ -94,7 +94,7 @@ dependencies:
   fast_base58: 0.2.1
   ffmpeg_kit_flutter:
     git:
-      url: https://github.com/ente-io/ffmpeg-kit
+      url: https://github.com/ente/ffmpeg-kit
       path: flutter/flutter
       ref: 15afc08775a75fe9c12de3366fa99e39bf171ccc
   figma_squircle: 0.6.3
@@ -126,7 +126,7 @@ dependencies:
   flutter_secure_storage: 9.0.0
   flutter_sodium:
     git:
-      url: https://github.com/ente-io/flutter_sodium
+      url: https://github.com/ente/flutter_sodium
       ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   flutter_spinkit: 5.2.1
   flutter_staggered_grid_view: 0.7.0
@@ -155,7 +155,7 @@ dependencies:
   maps_launcher: 3.0.0+1
   media_extension:
     git:
-      url: https://github.com/ente-io/media_extension.git
+      url: https://github.com/ente/media_extension.git
       ref: 7dfca297926ad113780e8151d58262bf5f8c8e9c
   media_kit: 1.2.2
   media_kit_libs_video: 1.0.7
@@ -164,16 +164,16 @@ dependencies:
   ml_linalg: 13.12.6
   mobile_ocr:
     git:
-      url: https://github.com/ente-io/mobile_ocr
+      url: https://github.com/ente/mobile_ocr
       ref: bd1cce917e914690c00cc138b000b728742dde2b
   modal_bottom_sheet: 3.0.0
   motionphoto:
     git:
-      url: https://github.com/ente-io/motionphoto.git
+      url: https://github.com/ente/motionphoto.git
       ref: 64e47a446bf3b64f012f2076481cebea51ca27cf
   move_to_background: # no updates in git, replace package
     git:
-      url: https://github.com/ente-io/move_to_background.git
+      url: https://github.com/ente/move_to_background.git
       ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
   nanoid: 1.0.0
   native_dio_adapter: 1.5.1
@@ -184,16 +184,16 @@ dependencies:
     path: plugins/onnx_dart
   onnxruntime:
     git:
-      url: https://github.com/ente-io/onnxruntime.git
+      url: https://github.com/ente/onnxruntime.git
       ref: 212b2cab85647c6d2ffee213dc3b875ef2bf6504
   open_mail_app: # replace plugin, git is archived
     git:
-      url: https://github.com/ente-io/open-mail-app-flutter.git
+      url: https://github.com/ente/open-mail-app-flutter.git
       ref: 13c0244db82b386ad1a53b2451bdfda8d2687cb6
   package_info_plus: 8.3.1
   panorama:
     git:
-      url: https://github.com/ente-io/panorama_blur.git
+      url: https://github.com/ente/panorama_blur.git
       ref: d7bf958d045ce5c06080aaa39074546f46f064d1
   password_strength: 0.2.0
   path: 1.9.1 #dart
@@ -234,7 +234,7 @@ dependencies:
   uuid: 4.5.2
   video_editor: # edge cases handled in fork
     git:
-      url: https://github.com/ente-io/video_editor_fork.git
+      url: https://github.com/ente/video_editor_fork.git
       ref: 1eeb18e2b1ce36bd8ca70178c0d4b485e9982257
   video_player: 2.10.0
   video_thumbnail: 0.5.6
@@ -250,7 +250,7 @@ dependency_overrides:
   ffi: 2.1.0
   flutter_sodium: # update source if there is any update
     git:
-      url: https://github.com/ente-io/flutter_sodium
+      url: https://github.com/ente/flutter_sodium
       ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   intl: 0.20.2
   js: 0.6.7
@@ -262,7 +262,7 @@ dependency_overrides:
   # https://github.com/flutter/flutter/issues/151031
   video_player_avfoundation:
     git:
-      url: https://github.com/ente-io/packages.git
+      url: https://github.com/ente/packages.git
       path: packages/video_player/video_player_avfoundation
       ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
   watcher: 1.1.2
@@ -291,7 +291,7 @@ dev_dependencies:
 # (ADAPTIVE ICONS or NON ADAPTIVE ICONS) within the `flutter_icons` section. You
 # may have to update the `icon_X.xml` generated within `res/minimap-*` folder.
 # Sample commit for adding an icon:
-# https://github.com/ente-io/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
+# https://github.com/ente/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
 
 # flutter_icons:
 # ADAPTIVE ICONS

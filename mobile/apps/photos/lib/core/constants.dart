@@ -10,8 +10,7 @@ const String sentryDSN =
 const String sentryDebugDSN =
     "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.io/3";
 const String sentryTunnel = "https://sentry-reporter.ente.com";
-const String githubDiscussionsUrl =
-    "https://github.com/ente-io/ente/discussions";
+const String githubDiscussionsUrl = "https://github.com/ente/ente/discussions";
 const int microSecondsInDay = 86400000000;
 const int android11SDKINT = 30;
 const int jan011981Time = 347155200000000;
@@ -29,6 +28,8 @@ const String sharedMediaIdentifier = 'ente-shared-media://';
 
 const galleryThumbnailDiskLoadDeferDuration = Duration(milliseconds: 80);
 const galleryThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
+const mediaManagementHintDismissDuration = Duration(days: 7);
+const mediaManagementHintDeleteAttemptThreshold = 3;
 
 // 256 bit key maps to 24 words
 // https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Generating_the_mnemonic

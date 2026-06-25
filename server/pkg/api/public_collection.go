@@ -5,18 +5,18 @@ import (
 	"net/http"
 	"strconv"
 
-	fileData "github.com/ente-io/museum/ente/filedata"
-	"github.com/ente-io/museum/pkg/controller/collections"
-	"github.com/ente-io/museum/pkg/controller/filedata"
-	"github.com/ente-io/museum/pkg/controller/public"
+	fileData "github.com/ente/museum/ente/filedata"
+	"github.com/ente/museum/pkg/controller/collections"
+	"github.com/ente/museum/pkg/controller/filedata"
+	"github.com/ente/museum/pkg/controller/public"
 
-	"github.com/ente-io/museum/pkg/controller/storagebonus"
+	"github.com/ente/museum/pkg/controller/storagebonus"
 
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller"
-	"github.com/ente-io/museum/pkg/utils/auth"
-	"github.com/ente-io/museum/pkg/utils/handler"
-	"github.com/ente-io/stacktrace"
+	"github.com/ente/museum/ente"
+	"github.com/ente/museum/pkg/controller"
+	"github.com/ente/museum/pkg/utils/auth"
+	"github.com/ente/museum/pkg/utils/handler"
+	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 

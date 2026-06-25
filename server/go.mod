@@ -1,4 +1,4 @@
-module github.com/ente-io/museum
+module github.com/ente/museum
 
 go 1.26.0
 
@@ -11,8 +11,8 @@ require (
 	github.com/aws/aws-sdk-go v1.34.13
 	github.com/bwmarrin/discordgo v0.25.0
 	github.com/dlmiddlecote/sqlstats v1.0.2
-	github.com/ente-io/go-srp v0.0.0-20250116115009-d52061067e78
-	github.com/ente-io/stacktrace v0.0.0-20210619050357-0af9fad4639c
+	github.com/ente/go-srp v0.0.0-20260624111502-867e68cac3e3
+	github.com/ente/stacktrace v0.0.0-20260624111210-7ca70efec226
 	github.com/gin-contrib/gzip v0.0.5
 	github.com/gin-contrib/requestid v0.0.2-0.20210619060739-3f23d9a07dc5
 	github.com/gin-contrib/timeout v0.0.3
