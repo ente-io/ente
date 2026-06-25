@@ -16,40 +16,40 @@
 			containerPortal = DA72BC592E5F87A000D128FF /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = DA72BC602E5F87A000D128FF;
-			remoteInfo = tv;
+			remoteInfo = Cast;
 		};
 		DA72BC7E2E5F87A100D128FF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DA72BC592E5F87A000D128FF /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = DA72BC602E5F87A000D128FF;
-			remoteInfo = tv;
+			remoteInfo = Cast;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		DA72BC612E5F87A000D128FF /* cast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cast.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA72BC732E5F87A100D128FF /* castTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = castTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA72BC7D2E5F87A100D128FF /* castUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = castUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA72BC612E5F87A000D128FF /* Cast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cast.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA72BC732E5F87A100D128FF /* CastTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA72BC7D2E5F87A100D128FF /* CastUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CastUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		DA01087C2E682336006E79AE /* Exceptions for "cast" folder in "cast" target */ = {
+		DA01087C2E682336006E79AE /* Exceptions for "Cast" folder in "Cast" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = DA72BC602E5F87A000D128FF /* cast */;
+			target = DA72BC602E5F87A000D128FF /* Cast */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DA72BC632E5F87A000D128FF /* cast */ = {
+		DA72BC632E5F87A000D128FF /* Cast */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				DA01087C2E682336006E79AE /* Exceptions for "cast" folder in "cast" target */,
+				DA01087C2E682336006E79AE /* Exceptions for "Cast" folder in "Cast" target */,
 			);
-			path = cast;
+			path = Cast;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -83,7 +83,7 @@
 		DA72BC582E5F87A000D128FF = {
 			isa = PBXGroup;
 			children = (
-				DA72BC632E5F87A000D128FF /* cast */,
+				DA72BC632E5F87A000D128FF /* Cast */,
 				DACC3DC72E618D6A00DAF993 /* Frameworks */,
 				DA72BC622E5F87A000D128FF /* Products */,
 			);
@@ -92,9 +92,9 @@
 		DA72BC622E5F87A000D128FF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DA72BC612E5F87A000D128FF /* cast.app */,
-				DA72BC732E5F87A100D128FF /* castTests.xctest */,
-				DA72BC7D2E5F87A100D128FF /* castUITests.xctest */,
+				DA72BC612E5F87A000D128FF /* Cast.app */,
+				DA72BC732E5F87A100D128FF /* CastTests.xctest */,
+				DA72BC7D2E5F87A100D128FF /* CastUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -109,9 +109,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		DA72BC602E5F87A000D128FF /* cast */ = {
+		DA72BC602E5F87A000D128FF /* Cast */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "cast" */;
+			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "Cast" */;
 			buildPhases = (
 				DAEC00012F40000000CABA11 /* Build Rust (ente-crypto) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
@@ -123,19 +123,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				DA72BC632E5F87A000D128FF /* cast */,
+				DA72BC632E5F87A000D128FF /* Cast */,
 			);
-			name = cast;
+			name = Cast;
 			packageProductDependencies = (
 				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 			);
-			productName = tv;
-			productReference = DA72BC612E5F87A000D128FF /* cast.app */;
+			productName = Cast;
+			productReference = DA72BC612E5F87A000D128FF /* Cast.app */;
 			productType = "com.apple.product-type.application";
 		};
-		DA72BC722E5F87A100D128FF /* castTests */ = {
+		DA72BC722E5F87A100D128FF /* CastTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DA72BC8A2E5F87A100D128FF /* Build configuration list for PBXNativeTarget "castTests" */;
+			buildConfigurationList = DA72BC8A2E5F87A100D128FF /* Build configuration list for PBXNativeTarget "CastTests" */;
 			buildPhases = (
 				DA72BC6F2E5F87A100D128FF /* Sources */,
 				DA72BC702E5F87A100D128FF /* Frameworks */,
@@ -146,16 +146,16 @@
 			dependencies = (
 				DA72BC752E5F87A100D128FF /* PBXTargetDependency */,
 			);
-			name = castTests;
+			name = CastTests;
 			packageProductDependencies = (
 			);
-			productName = tvTests;
-			productReference = DA72BC732E5F87A100D128FF /* castTests.xctest */;
+			productName = CastTests;
+			productReference = DA72BC732E5F87A100D128FF /* CastTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		DA72BC7C2E5F87A100D128FF /* castUITests */ = {
+		DA72BC7C2E5F87A100D128FF /* CastUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DA72BC8D2E5F87A100D128FF /* Build configuration list for PBXNativeTarget "castUITests" */;
+			buildConfigurationList = DA72BC8D2E5F87A100D128FF /* Build configuration list for PBXNativeTarget "CastUITests" */;
 			buildPhases = (
 				DA72BC792E5F87A100D128FF /* Sources */,
 				DA72BC7A2E5F87A100D128FF /* Frameworks */,
@@ -166,11 +166,11 @@
 			dependencies = (
 				DA72BC7F2E5F87A100D128FF /* PBXTargetDependency */,
 			);
-			name = castUITests;
+			name = CastUITests;
 			packageProductDependencies = (
 			);
-			productName = tvUITests;
-			productReference = DA72BC7D2E5F87A100D128FF /* castUITests.xctest */;
+			productName = CastUITests;
+			productReference = DA72BC7D2E5F87A100D128FF /* CastUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -196,7 +196,7 @@
 					};
 				};
 			};
-			buildConfigurationList = DA72BC5C2E5F87A000D128FF /* Build configuration list for PBXProject "tv" */;
+			buildConfigurationList = DA72BC5C2E5F87A000D128FF /* Build configuration list for PBXProject "Cast" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -213,9 +213,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				DA72BC602E5F87A000D128FF /* cast */,
-				DA72BC722E5F87A100D128FF /* castTests */,
-				DA72BC7C2E5F87A100D128FF /* castUITests */,
+				DA72BC602E5F87A000D128FF /* Cast */,
+				DA72BC722E5F87A100D128FF /* CastTests */,
+				DA72BC7C2E5F87A100D128FF /* CastUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -289,12 +289,12 @@
 /* Begin PBXTargetDependency section */
 		DA72BC752E5F87A100D128FF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DA72BC602E5F87A000D128FF /* cast */;
+			target = DA72BC602E5F87A000D128FF /* Cast */;
 			targetProxy = DA72BC742E5F87A100D128FF /* PBXContainerItemProxy */;
 		};
 		DA72BC7F2E5F87A100D128FF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DA72BC602E5F87A000D128FF /* cast */;
+			target = DA72BC602E5F87A000D128FF /* Cast */;
 			targetProxy = DA72BC7E2E5F87A100D128FF /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -435,7 +435,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = cast/Info.plist;
+				INFOPLIST_FILE = Cast/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Ente Cast";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -472,7 +472,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = cast/Info.plist;
+				INFOPLIST_FILE = Cast/Info.plist;
 				"INFOPLIST_FILE[sdk=appletvos*]" = "";
 				INFOPLIST_KEY_CFBundleDisplayName = "Ente Cast";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
@@ -512,7 +512,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tv.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tv";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cast.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cast";
 				TVOS_DEPLOYMENT_TARGET = 18.4;
 			};
 			name = Debug;
@@ -526,12 +526,12 @@
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tvTests;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tv.castTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tv.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tv";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cast.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cast";
 				TVOS_DEPLOYMENT_TARGET = 18.4;
 			};
 			name = Release;
@@ -549,7 +549,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TEST_TARGET_NAME = tv;
+				TEST_TARGET_NAME = Cast;
 			};
 			name = Debug;
 		};
@@ -561,19 +561,19 @@
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tvUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tv.castUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TEST_TARGET_NAME = tv;
+				TEST_TARGET_NAME = Cast;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		DA72BC5C2E5F87A000D128FF /* Build configuration list for PBXProject "tv" */ = {
+		DA72BC5C2E5F87A000D128FF /* Build configuration list for PBXProject "Cast" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DA72BC852E5F87A100D128FF /* Debug */,
@@ -582,7 +582,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "cast" */ = {
+		DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "Cast" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DA72BC882E5F87A100D128FF /* Debug */,
@@ -591,7 +591,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DA72BC8A2E5F87A100D128FF /* Build configuration list for PBXNativeTarget "castTests" */ = {
+		DA72BC8A2E5F87A100D128FF /* Build configuration list for PBXNativeTarget "CastTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DA72BC8B2E5F87A100D128FF /* Debug */,
@@ -600,7 +600,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DA72BC8D2E5F87A100D128FF /* Build configuration list for PBXNativeTarget "castUITests" */ = {
+		DA72BC8D2E5F87A100D128FF /* Build configuration list for PBXNativeTarget "CastUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DA72BC8E2E5F87A100D128FF /* Debug */,

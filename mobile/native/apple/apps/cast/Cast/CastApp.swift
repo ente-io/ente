@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct tvApp: App {
+struct CastApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

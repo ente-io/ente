@@ -12,8 +12,8 @@ const files = {
     cargoToml: path.join(root, "rust/apps/ensu/src-tauri/Cargo.toml"),
     cargoLock: path.join(root, "rust/Cargo.lock"),
     android: path.join(root, "mobile/native/android/apps/ensu/app-ui/build.gradle.kts"),
-    xcode: path.join(root, "mobile/native/darwin/Apps/Ensu/Ensu.xcodeproj/project.pbxproj"),
-    plist: path.join(root, "mobile/native/darwin/Apps/Ensu/Ensu/Info.plist"),
+    xcode: path.join(root, "mobile/native/apple/apps/ensu/Ensu.xcodeproj/project.pbxproj"),
+    plist: path.join(root, "mobile/native/apple/apps/ensu/Ensu/Info.plist"),
 };
 
 function read(file) {

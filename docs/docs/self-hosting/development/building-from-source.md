@@ -314,7 +314,7 @@ cd mobile/native/android/apps/ensu
 adb shell am start -n io.ente.ensu.debug/io.ente.ensu.MainActivity
 ```
 
-Or, if you have Android Studio, you can just open `mobile/native/android/apps/ensu` and run. Same goes for opening `mobile/native/darwin/Apps/Ensu` in Xcode and running.
+Or, if you have Android Studio, you can just open `mobile/native/android/apps/ensu` and run. Same goes for opening `mobile/native/apple/apps/ensu` in Xcode and running.
 
 ## That's all folks.
 

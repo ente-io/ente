@@ -391,7 +391,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: mobile/native/darwin/Apps/Ensu
+                working-directory: mobile/native/apple/apps/ensu
 
         steps:
             - name: Checkout
