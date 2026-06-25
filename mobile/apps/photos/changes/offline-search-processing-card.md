@@ -1,1 +1,0 @@
-- Improve the offline search processing card contrast.
