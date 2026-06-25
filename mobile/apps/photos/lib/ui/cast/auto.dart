@@ -23,27 +23,19 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textStyle = getEnteTextTheme(context);
     final AlertDialog alert = AlertDialog(
-      title: Text(
-        AppLocalizations.of(context).connectToDevice,
-        style: textStyle.largeBold,
-      ),
+      title: Text(l10n.connectToDevice, style: textStyle.largeBold),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            AppLocalizations.of(context).autoCastDialogBody,
-            style: textStyle.bodyMuted,
-          ),
+          Text(l10n.autoCastDialogBody, style: textStyle.bodyMuted),
           if (Platform.isIOS)
-            Text(
-              AppLocalizations.of(context).autoCastiOSPermission,
-              style: textStyle.bodyMuted,
-            ),
+            Text(l10n.autoCastiOSPermission, style: textStyle.bodyMuted),
           const SizedBox(height: 16),
-          FutureBuilder<List<(String, Object)>>(
+          FutureBuilder(
             future: castService.searchDevices(),
             builder: (_, snapshot) {
               if (snapshot.hasError) {
@@ -55,9 +47,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
               }
 
               if (snapshot.data!.isEmpty) {
-                return Center(
-                  child: Text(AppLocalizations.of(context).noDeviceFound),
-                );
+                return Center(child: Text(l10n.noDeviceFound));
               }
 
               return Column(
