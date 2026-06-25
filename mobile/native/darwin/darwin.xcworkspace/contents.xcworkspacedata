@@ -117,9 +117,6 @@
    <Group
       location = "group:Packages"
       name = "Packages">
-      <FileRef
-         location = "group:EnteNetwork">
-      </FileRef>
       <Group
          location = "group:EnteConfiguration"
          name = "EnteConfiguration">
@@ -128,8 +125,5 @@
          location = "group:EnteLogging"
          name = "EnteLogging">
       </Group>
-      <FileRef
-         location = "group:EnteCore">
-      </FileRef>
    </Group>
 </Workspace>

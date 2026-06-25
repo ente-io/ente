@@ -1,7 +1,5 @@
 import Foundation
 import SwiftUI
-import EnteCore
-
 
 typealias LlmChatSession = Session
 
