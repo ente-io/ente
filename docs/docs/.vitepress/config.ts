@@ -142,8 +142,7 @@ export default defineConfig({
         logo: "/logo.png",
         externalLinkIcon: true,
         editLink: {
-            pattern:
-                "https://github.com/ente/ente/edit/main/docs/docs/:path",
+            pattern: "https://github.com/ente/ente/edit/main/docs/docs/:path",
         },
         search: {
             provider: "local",

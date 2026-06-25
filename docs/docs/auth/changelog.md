@@ -14,15 +14,12 @@ A short summary list of changes to the Ente Auth mobile and desktop apps. For a 
 - Fixed many custom icons that were invisible, low-contrast, mis-colored, or flickering in light or dark mode.
 - Fixed some icons not appearing in the icon picker because their filenames weren't resolved correctly.
 - Added custom icons for several more services.
-- Your selected theme on Desktop is now kept after unlocking, and the lock screen no longer shows the old theme after you
-change it in-app.
-- Tag strips that overflow can now be scrolled with the mouse wheel or by dragging, and tag chips are reachable
-with Tab and selectable with Enter or Space.
+- Your selected theme on Desktop is now kept after unlocking, and the lock screen no longer shows the old theme after you change it in-app.
+- Tag strips that overflow can now be scrolled with the mouse wheel or by dragging, and tag chips are reachable with Tab and selectable with Enter or Space.
 - Better support for linux system authentication.
 - Fixed AppImage startup failures on some Linux systems by preferring host libraries before bundled fallbacks.
 - Fixed missing tray icons in sandboxed Linux builds.
-- Fixed Windows tray close, exit, and menu actions, removed stale/duplicate tray icons, and improved tray icon
-contrast in the overflow.
+- Fixed Windows tray close, exit, and menu actions, removed stale/duplicate tray icons, and improved tray icon contrast in the overflow.
 - Worked around the keyboard not reliably opening for search and app-lock password fields on app start
 - Moved Auth services to ente.com domains.
 - Updated Estonian, Hungarian, Lithuanian, Portuguese, and Russian translations.
