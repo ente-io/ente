@@ -377,7 +377,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       );
       Configuration.instance.resetVolatilePassword();
       await dialog.hide();
-      onDone() async {
+      Future<void> onDone() async {
         final dialog = createProgressDialog(
           context,
           AppLocalizations.of(context).pleaseWait,
@@ -387,9 +387,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
           Configuration.instance.resetVolatilePassword();
-          Bus.instance.fire(AccountConfiguredEvent());
-          // ignore: unawaited_futures
-          Navigator.of(context).pushAndRemoveUntil(
+          await Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {
                 return getSubscriptionPage(isOnBoarding: true);
@@ -397,6 +395,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             ),
             (route) => route.isFirst,
           );
+          Bus.instance.fire(AccountConfiguredEvent());
         } catch (e, s) {
           _logger.severe("Failed to configure account", e, s);
           await dialog.hide();
