@@ -367,7 +367,7 @@ class DownloadManager {
         } catch (e) {
             // If the stream came from a cached object URL then retry once
             // to rule out issues with the cache.
-            if (cachedURL && this.fileURLPromises.get(file.id) == cachedURL) {
+            if (cachedURL) {
                 this.fileURLPromises.delete(file.id);
                 return _fileBlob();
             } else {
