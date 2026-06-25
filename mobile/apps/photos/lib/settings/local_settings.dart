@@ -87,6 +87,8 @@ class LocalSettings {
       "ml_debug.semantic_search_exact_in_rust";
   static const _kAppMode = "ls.app_mode";
   static const _kShowLocalGalleryModeOption = "ls.show_offline_mode_option";
+  static const _kIsFromLocalGalleryToEnte =
+      "ls.pending_backup_selection_from_local_import";
 
   static const _kWidgetHideTextFlags = "ls.widget_hide_text_flags";
 
@@ -112,6 +114,17 @@ class LocalSettings {
   /// false on the next app launch. Used to defer the get-started banner to
   /// the second app open (after onboarding).
   bool localGalleryModeEnabledThisSession = false;
+
+  /// Set after the first local-gallery import completes before an account is
+  /// configured. When the user later signs in or signs up, the online flow
+  /// replays first-import completion once so backup-folder selection can run
+  /// against the imported local rows, then clears this marker.
+  bool get isFromLocalGalleryToEnte =>
+      _prefs.getBool(_kIsFromLocalGalleryToEnte) ?? false;
+
+  Future<void> setIsFromLocalGalleryToEnte(bool value) async {
+    await _prefs.setBool(_kIsFromLocalGalleryToEnte, value);
+  }
 
   LocalSettings(this._prefs);
 

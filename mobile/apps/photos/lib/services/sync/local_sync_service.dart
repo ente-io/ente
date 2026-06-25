@@ -144,8 +144,16 @@ class LocalSyncService {
           toTime: syncStartTime,
         );
       }
-      if (!hasCompletedFirstImport()) {
+      final hasCompletedInitialImport = hasCompletedFirstImport();
+      final shouldCompleteLocalGalleryHandoff =
+          !isLocalGalleryMode && localSettings.isFromLocalGalleryToEnte;
+      if (!hasCompletedInitialImport || shouldCompleteLocalGalleryHandoff) {
         await _prefs.setBool(kHasCompletedFirstImportKey, true);
+        if (isLocalGalleryMode) {
+          await localSettings.setIsFromLocalGalleryToEnte(true);
+        } else if (shouldCompleteLocalGalleryHandoff) {
+          await localSettings.setIsFromLocalGalleryToEnte(false);
+        }
         if (backupPreferenceService.hasSkippedOnboardingPermission) {
           await backupPreferenceService.setOnboardingPermissionSkipped(false);
         }
@@ -317,6 +325,11 @@ class LocalSyncService {
   /// bypass it (e.g., onboarding skipped or only-new backup). Falls back to the
   /// stored completion value otherwise.
   bool hasCompletedFirstImportOrBypassed() {
+    if (!isLocalGalleryMode &&
+        Configuration.instance.hasConfiguredAccount() &&
+        localSettings.isFromLocalGalleryToEnte) {
+      return false;
+    }
     if (hasCompletedFirstImport()) {
       return true;
     }
