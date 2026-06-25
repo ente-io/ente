@@ -1534,61 +1534,64 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
 
-    const shouldIgnoreKeyboardEvent = useCallback((event: KeyboardEvent) => {
-        // Allow the file info drawer itself to pass through the slide shortcut.
-        const shouldAllowFileInfoArrowNavigation =
-            openFileInfo &&
-            !fileInfoNavigationLocked &&
-            !event.shiftKey &&
-            !event.metaKey &&
-            !event.ctrlKey &&
-            event.altKey &&
-            (event.key == "ArrowLeft" || event.key == "ArrowRight");
+    const shouldIgnoreKeyboardEvent = useCallback(
+        (event: KeyboardEvent) => {
+            // Allow the file info drawer itself to pass through the slide shortcut.
+            const shouldAllowFileInfoArrowNavigation =
+                openFileInfo &&
+                !fileInfoNavigationLocked &&
+                !event.shiftKey &&
+                !event.metaKey &&
+                !event.ctrlKey &&
+                event.altKey &&
+                (event.key == "ArrowLeft" || event.key == "ArrowRight");
 
-        // Don't handle keydowns if any of the viewer's own modals are open.
-        if (
-            (openFileInfo && !shouldAllowFileInfoArrowNavigation) ||
-            openComments ||
-            openLikes ||
-            openLikeAlbumSelector ||
-            !!moreMenuAnchorEl ||
-            openImageEditor ||
-            openConfirmDelete ||
-            openShortcuts
-        ) {
-            return true;
-        }
-
-        // Also ignore keydowns if keyboard focus is inside an editable field
-        // (e.g., when the CollectionSelector dialog's search TextField is focused)
-        const activeElement = document.activeElement as HTMLElement | null;
-        if (activeElement) {
-            const tagName = activeElement.tagName;
-            const role = activeElement.getAttribute("role");
+            // Don't handle keydowns if any of the viewer's own modals are open.
             if (
-                tagName === "INPUT" ||
-                tagName === "TEXTAREA" ||
-                tagName === "SELECT" ||
-                activeElement.isContentEditable ||
-                role === "textbox" ||
-                role === "combobox"
+                (openFileInfo && !shouldAllowFileInfoArrowNavigation) ||
+                openComments ||
+                openLikes ||
+                openLikeAlbumSelector ||
+                !!moreMenuAnchorEl ||
+                openImageEditor ||
+                openConfirmDelete ||
+                openShortcuts
             ) {
                 return true;
             }
-        }
 
-        return false;
-    }, [
-        openFileInfo,
-        fileInfoNavigationLocked,
-        openComments,
-        openLikes,
-        openLikeAlbumSelector,
-        moreMenuAnchorEl,
-        openImageEditor,
-        openConfirmDelete,
-        openShortcuts,
-    ]);
+            // Also ignore keydowns if keyboard focus is inside an editable field
+            // (e.g., when the CollectionSelector dialog's search TextField is focused)
+            const activeElement = document.activeElement as HTMLElement | null;
+            if (activeElement) {
+                const tagName = activeElement.tagName;
+                const role = activeElement.getAttribute("role");
+                if (
+                    tagName === "INPUT" ||
+                    tagName === "TEXTAREA" ||
+                    tagName === "SELECT" ||
+                    activeElement.isContentEditable ||
+                    role === "textbox" ||
+                    role === "combobox"
+                ) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+        [
+            openFileInfo,
+            fileInfoNavigationLocked,
+            openComments,
+            openLikes,
+            openLikeAlbumSelector,
+            moreMenuAnchorEl,
+            openImageEditor,
+            openConfirmDelete,
+            openShortcuts,
+        ],
+    );
 
     const canCopyImage = useCallback(
         () =>
