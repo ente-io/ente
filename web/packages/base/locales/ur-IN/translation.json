@@ -362,6 +362,7 @@
     "details": "تفصیلات",
     "view_exif": "تمام Exif ڈیٹا دیکھیں",
     "no_exif": "کوئی Exif ڈیٹا نہیں",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "دو عنصری",
     "two_factor_authentication": "دو عنصری تصدیق",

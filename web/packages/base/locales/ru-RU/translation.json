@@ -362,6 +362,7 @@
     "details": "Подробности",
     "view_exif": "Просмотр всех данных Exif",
     "no_exif": "Нет данных Exif",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Двухфакторная аутентификация",
     "two_factor_authentication": "Двухфакторная аутентификация",

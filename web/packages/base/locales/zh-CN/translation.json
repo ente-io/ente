@@ -362,6 +362,7 @@
     "details": "详情",
     "view_exif": "查看所有 Exif 数据",
     "no_exif": "无 Exif 数据",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "双重认证",
     "two_factor_authentication": "双重认证",

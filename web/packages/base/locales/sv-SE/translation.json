@@ -362,6 +362,7 @@
     "details": "",
     "view_exif": "Visa all Exif-data",
     "no_exif": "Ingen Exif-data",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Tvåfaktorsautentisering",
     "two_factor_authentication": "Tvåfaktorsautentisering",

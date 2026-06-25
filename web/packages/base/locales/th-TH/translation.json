@@ -362,6 +362,7 @@
     "details": "รายละเอียด",
     "view_exif": "ดูข้อมูล Exit ทั้งหมด",
     "no_exif": "ไม่มีข้อมูล EXIF",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "",
     "two_factor_authentication": "",
