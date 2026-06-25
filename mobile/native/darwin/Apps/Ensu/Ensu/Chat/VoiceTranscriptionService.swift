@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import Foundation
 #if os(iOS)
 import AVFoundation
@@ -474,5 +473,4 @@ private final class TranscriptionProgressCallback: TranscriptionModelEventCallba
         handler(event)
     }
 }
-#endif
 #endif

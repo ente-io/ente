@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
@@ -522,15 +521,6 @@ private extension UIView {
             inputs.append(contentsOf: subview.cursorEndTextInputs())
         }
         return inputs
-    }
-}
-#endif
-#else
-import SwiftUI
-
-struct MessageInputView: View {
-    var body: some View {
-        Text("Input unavailable")
     }
 }
 #endif

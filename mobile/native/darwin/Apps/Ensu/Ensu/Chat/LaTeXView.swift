@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 import SwiftMath
 
@@ -222,5 +221,4 @@ private final class MathLabelContainerView: NSView {
         invalidateIntrinsicContentSize()
     }
 }
-#endif
 #endif

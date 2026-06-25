@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import Foundation
 
 struct WhatsNewEntry: Equatable {
@@ -23,4 +22,3 @@ enum WhatsNewContent {
         )
     ]
 }
-#endif

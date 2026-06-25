@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 
 struct ModelSettingsView: View {
@@ -460,13 +459,3 @@ private struct ModelChoice: Identifiable {
         self.isCustom = isCustom
     }
 }
-
-#else
-import SwiftUI
-
-struct ModelSettingsView: View {
-    var body: some View {
-        Text("Model settings unavailable")
-    }
-}
-#endif

@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 
 struct DownloadOnboardingView: View {
@@ -388,4 +387,3 @@ struct ModelProgressIndicator: View {
         }
     }
 }
-#endif

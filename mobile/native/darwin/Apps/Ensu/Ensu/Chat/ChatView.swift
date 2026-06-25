@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 
 struct ChatView: View {
@@ -511,13 +510,3 @@ private struct ToastMessage: Identifiable {
     let id = UUID()
     let text: String
 }
-
-#else
-import SwiftUI
-
-struct ChatView: View {
-    var body: some View {
-        Text("Chat unavailable")
-    }
-}
-#endif

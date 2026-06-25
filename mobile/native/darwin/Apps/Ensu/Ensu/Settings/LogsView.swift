@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 
 struct LogsView: View {
@@ -433,16 +432,6 @@ private final class MacShareSheet: NSObject {
               let contentView = keyWindow.contentView else { return }
         let picker = NSSharingServicePicker(items: items)
         picker.show(relativeTo: .zero, of: contentView, preferredEdge: .minY)
-    }
-}
-#endif
-
-#else
-import SwiftUI
-
-struct LogsView: View {
-    var body: some View {
-        Text("Logs unavailable")
     }
 }
 #endif

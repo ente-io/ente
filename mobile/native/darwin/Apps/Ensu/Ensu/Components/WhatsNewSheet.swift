@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 
 struct WhatsNewSheet: View {
@@ -45,4 +44,3 @@ private struct WhatsNewEntryView: View {
         }
     }
 }
-#endif
