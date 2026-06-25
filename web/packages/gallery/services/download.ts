@@ -402,9 +402,24 @@ class DownloadManager {
      * it into a {@link Blob}.
      */
     async fileBlob(file: EnteFile, opts?: FileDownloadOpts) {
-        return this.fileStream(file, opts).then((stream) =>
-            this.blobWithInferredType(file, stream),
-        );
+        const _fileBlob = () =>
+            this.fileStream(file, opts).then((stream) =>
+                this.blobWithInferredType(file, stream),
+            );
+
+        const cachedURL = this.fileURLPromises.get(file.id);
+        try {
+            return await _fileBlob();
+        } catch (e) {
+            // If the stream came from a cached object URL then retry once
+            // to rule out issues with the cache.
+            if (cachedURL) {
+                this.fileURLPromises.delete(file.id);
+                return _fileBlob();
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
