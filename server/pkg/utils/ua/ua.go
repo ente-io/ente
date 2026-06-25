@@ -3,13 +3,13 @@ package ua
 import (
 	"errors"
 
-	. "github.com/slipros/devicedetector"
+	"github.com/slipros/devicedetector"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
 func GetDeviceType(ua string) (string, error) {
-	dd, dderr := NewDeviceDetector()
+	dd, dderr := devicedetector.NewDeviceDetector()
 	if dderr != nil {
 		return "", dderr
 	}
