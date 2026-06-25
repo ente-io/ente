@@ -25,10 +25,11 @@ import 'package:photos/ui/payment/subscription.dart';
 import "package:photos/ui/settings/developer_settings_tap_area.dart";
 import "package:photos/ui/settings/developer_settings_widget.dart";
 import "package:photos/ui/settings/language_picker.dart";
-import 'package:photos/ui/tabs/home_widget.dart';
 
 class LandingPageWidget extends StatefulWidget {
-  const LandingPageWidget({super.key});
+  const LandingPageWidget({required this.onStartWithoutAccount, super.key});
+
+  final VoidCallback onStartWithoutAccount;
 
   @override
   State<LandingPageWidget> createState() => _LandingPageWidgetState();
@@ -298,12 +299,8 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     );
   }
 
-  Future<void> _navigateWithoutAccount() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const HomeWidget(startWithoutAccount: true),
-      ),
-    );
+  void _navigateWithoutAccount() {
+    widget.onStartWithoutAccount();
   }
 
   Future<void> _navigateToSignUpPage() async {
