@@ -242,7 +242,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                         _isYearly
                             ? AppLocalizations.of(context).yearly
                             : AppLocalizations.of(context).monthly,
-                        style: textTheme.bodyMuted,
+                        style: textTheme.body,
                       ),
                     ),
                   ),
