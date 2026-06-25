@@ -1,0 +1,1 @@
+- Keep the info panel open when using arrow keys while viewing files.
