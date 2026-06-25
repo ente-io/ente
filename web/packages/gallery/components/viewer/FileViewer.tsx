@@ -456,8 +456,23 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [activeFileExif, setActiveFileExif] = useState<
         FileInfoExif | undefined
     >(undefined);
+    const activeFileExifFileIDRef = useRef<number | undefined>(undefined);
+
+    const refreshActiveFileExif = useCallback((file: EnteFile) => {
+        const fileID = file.id;
+        activeFileExifFileIDRef.current = fileID;
+        setActiveFileExif(
+            fileInfoExifForFile(file, (exif) => {
+                if (activeFileExifFileIDRef.current == fileID) {
+                    setActiveFileExif(exif);
+                }
+            }),
+        );
+    }, []);
 
     const [openFileInfo, setOpenFileInfo] = useState(false);
+    const [fileInfoNavigationLocked, setFileInfoNavigationLocked] =
+        useState(false);
     const [openComments, setOpenComments] = useState(false);
     const [openLikes, setOpenLikes] = useState(false);
     const [openLikeAlbumSelector, setOpenLikeAlbumSelector] = useState(false);
@@ -598,6 +613,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             return false;
         });
         setOpenFileInfo(false);
+        setFileInfoNavigationLocked(false);
         setOpenComments(false);
         setOpenLikes(false);
         setOpenLikeAlbumSelector(false);
@@ -617,17 +633,22 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
-            setActiveFileExif(
-                fileInfoExifForFile(annotatedFile.file, (exif) =>
-                    setActiveFileExif(exif),
-                ),
-            );
+            refreshActiveFileExif(annotatedFile.file);
             setOpenFileInfo(true);
         },
-        [],
+        [refreshActiveFileExif],
     );
 
-    const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
+    useEffect(() => {
+        if (openFileInfo && activeAnnotatedFile) {
+            refreshActiveFileExif(activeAnnotatedFile.file);
+        }
+    }, [activeAnnotatedFile, openFileInfo, refreshActiveFileExif]);
+
+    const handleFileInfoClose = useCallback(() => {
+        setOpenFileInfo(false);
+        setFileInfoNavigationLocked(false);
+    }, []);
 
     const handleViewComments = useCallback(() => setOpenComments(true), []);
 
@@ -1513,10 +1534,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
 
-    const shouldIgnoreKeyboardEvent = useCallback(() => {
+    const shouldIgnoreKeyboardEvent = useCallback((event: KeyboardEvent) => {
+        // Allow the file info drawer itself to pass through plain slide arrows.
+        const shouldAllowFileInfoArrowNavigation =
+            openFileInfo &&
+            !fileInfoNavigationLocked &&
+            !event.shiftKey &&
+            !event.metaKey &&
+            !event.ctrlKey &&
+            !event.altKey &&
+            (event.key == "ArrowLeft" || event.key == "ArrowRight");
+
         // Don't handle keydowns if any of the viewer's own modals are open.
         if (
-            openFileInfo ||
+            (openFileInfo && !shouldAllowFileInfoArrowNavigation) ||
             openComments ||
             openLikes ||
             openLikeAlbumSelector ||
@@ -1549,6 +1580,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         return false;
     }, [
         openFileInfo,
+        fileInfoNavigationLocked,
         openComments,
         openLikes,
         openLikeAlbumSelector,
@@ -2113,6 +2145,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
+                onNavigationLockChange={setFileInfoNavigationLocked}
                 {...{ collectionNameByID }}
             />
             <CommentsSidebar
