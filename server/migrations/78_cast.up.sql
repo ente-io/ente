@@ -6,7 +6,6 @@ CREATE  TABLE IF NOT EXISTS casting
     public_key VARCHAR(512) NOT NULL,
     collection_id BIGINT,
     cast_user BIGINT,
-    device_name VARCHAR(512) DEFAULT NULL,
     encrypted_payload text,
     token VARCHAR(512),
     is_deleted BOOLEAN DEFAULT FALSE,
