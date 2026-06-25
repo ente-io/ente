@@ -9,7 +9,7 @@ use std::time::{Duration, Instant};
 
 use ensu_db::backend::sqlite::SqliteBackend;
 use ensu_db::{EnsuDb, Error as DbError};
-use ente_core::{auth as core_auth, crypto as core_crypto};
+use ente_core::crypto as core_crypto;
 use inference_rs as llm;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
@@ -17,11 +17,6 @@ use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
 use uuid::Uuid;
 
 use crate::logging;
-
-#[derive(Default)]
-pub struct SrpState {
-    sessions: Mutex<HashMap<String, core_auth::SrpSession>>,
-}
 
 #[derive(Default)]
 pub struct LlmState {
@@ -256,26 +251,6 @@ fn total_memory_bytes() -> Option<u64> {
     None
 }
 
-impl From<core_auth::AuthError> for ApiError {
-    fn from(e: core_auth::AuthError) -> Self {
-        use core_auth::AuthError as E;
-
-        let code = match &e {
-            E::IncorrectPassword => "incorrect_password",
-            E::IncorrectRecoveryKey => "incorrect_recovery_key",
-            E::InvalidKeyAttributes => "invalid_key_attributes",
-            E::InsufficientMemory => "insufficient_memory",
-            E::MissingField(_) => "missing_field",
-            E::Crypto(_) => "crypto",
-            E::Decode(_) => "decode",
-            E::InvalidKey(_) => "invalid_key",
-            E::Srp(_) => "srp",
-        };
-
-        ApiError::new(code, e.to_string())
-    }
-}
-
 impl From<core_crypto::CryptoError> for ApiError {
     fn from(e: core_crypto::CryptoError) -> Self {
         use core_crypto::CryptoError as E;
@@ -338,25 +313,6 @@ impl From<DbError> for ApiError {
 }
 
 #[derive(Serialize)]
-pub struct SrpCredentials {
-    kek: String,
-    login_key: String,
-}
-
-#[derive(Serialize)]
-pub struct DecryptedSecrets {
-    master_key: String,
-    secret_key: String,
-    token: String,
-}
-
-#[derive(Serialize)]
-pub struct DecryptedKeys {
-    master_key: String,
-    secret_key: String,
-}
-
-#[derive(Serialize)]
 pub struct EncryptedBox {
     encrypted_data: String,
     nonce: String,
@@ -366,56 +322,6 @@ pub struct EncryptedBox {
 pub struct EncryptedBlob {
     encrypted_data: String,
     decryption_header: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SrpSessionNewInput {
-    srp_user_id: String,
-    srp_salt_b64: String,
-    login_key_b64: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SrpSessionComputeInput {
-    session_id: String,
-    srp_b64: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SrpSessionVerifyInput {
-    session_id: String,
-    srp_m2_b64: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SrpSessionLookupInput {
-    session_id: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DeriveSrpCredentialsInput {
-    password: String,
-    srp_attrs: core_auth::SrpAttributes,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DecryptSecretsInput {
-    kek_b64: String,
-    key_attrs: core_auth::KeyAttributes,
-    encrypted_token_b64: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DecryptKeysInput {
-    kek_b64: String,
-    key_attrs: core_auth::KeyAttributes,
 }
 
 #[derive(Deserialize)]
@@ -507,123 +413,6 @@ pub fn crypto_decrypt_blob(input: CryptoBlobDecryptInput) -> Result<String, ApiE
     let plaintext =
         core_crypto::blob::decrypt(&ciphertext, &header, &key).map_err(ApiError::from)?;
     Ok(core_crypto::encode_b64(&plaintext))
-}
-
-#[tauri::command]
-pub fn auth_derive_srp_credentials(
-    input: DeriveSrpCredentialsInput,
-) -> Result<SrpCredentials, ApiError> {
-    let creds = core_auth::derive_srp_credentials(&input.password, &input.srp_attrs)?;
-    Ok(SrpCredentials {
-        kek: core_crypto::encode_b64(&creds.kek),
-        login_key: core_crypto::encode_b64(&creds.login_key),
-    })
-}
-
-#[tauri::command]
-pub fn auth_decrypt_secrets(input: DecryptSecretsInput) -> Result<DecryptedSecrets, ApiError> {
-    let kek = core_crypto::decode_b64(&input.kek_b64)
-        .map_err(|e| ApiError::new("decode", format!("kek: {}", e)))?;
-
-    let secrets = core_auth::decrypt_secrets(&kek, &input.key_attrs, &input.encrypted_token_b64)?;
-
-    Ok(DecryptedSecrets {
-        master_key: core_crypto::encode_b64(&secrets.master_key),
-        secret_key: core_crypto::encode_b64(&secrets.secret_key),
-        token: core_crypto::encode_b64_url_safe(&secrets.token),
-    })
-}
-
-#[tauri::command]
-pub fn auth_decrypt_keys_only(input: DecryptKeysInput) -> Result<DecryptedKeys, ApiError> {
-    let kek = core_crypto::decode_b64(&input.kek_b64)
-        .map_err(|e| ApiError::new("decode", format!("kek: {}", e)))?;
-
-    let (master_key, secret_key) = core_auth::decrypt_keys_only(&kek, &input.key_attrs)?;
-
-    Ok(DecryptedKeys {
-        master_key: core_crypto::encode_b64(&master_key),
-        secret_key: core_crypto::encode_b64(&secret_key),
-    })
-}
-
-#[tauri::command]
-pub fn srp_session_new(
-    state: State<SrpState>,
-    input: SrpSessionNewInput,
-) -> Result<String, ApiError> {
-    let srp_salt = core_crypto::decode_b64(&input.srp_salt_b64)
-        .map_err(|e| ApiError::new("decode", format!("srp_salt: {}", e)))?;
-    let login_key = core_crypto::decode_b64(&input.login_key_b64)
-        .map_err(|e| ApiError::new("decode", format!("login_key: {}", e)))?;
-
-    let session = core_auth::SrpSession::new(&input.srp_user_id, &srp_salt, &login_key)?;
-
-    let session_id = Uuid::new_v4().to_string();
-    let mut sessions = state
-        .sessions
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock SRP session store"))?;
-    sessions.insert(session_id.clone(), session);
-
-    Ok(session_id)
-}
-
-#[tauri::command]
-pub fn srp_session_public_a(
-    state: State<SrpState>,
-    input: SrpSessionLookupInput,
-) -> Result<String, ApiError> {
-    let sessions = state
-        .sessions
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock SRP session store"))?;
-    let session = sessions
-        .get(&input.session_id)
-        .ok_or_else(|| ApiError::new("srp_session_not_found", "SRP session not found"))?;
-
-    Ok(core_crypto::encode_b64(&session.public_a()))
-}
-
-#[tauri::command]
-pub fn srp_session_compute_m1(
-    state: State<SrpState>,
-    input: SrpSessionComputeInput,
-) -> Result<String, ApiError> {
-    let srp_b = core_crypto::decode_b64(&input.srp_b64)
-        .map_err(|e| ApiError::new("decode", format!("srpB: {}", e)))?;
-
-    let mut sessions = state
-        .sessions
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock SRP session store"))?;
-    let session = sessions
-        .get_mut(&input.session_id)
-        .ok_or_else(|| ApiError::new("srp_session_not_found", "SRP session not found"))?;
-
-    let m1 = session.compute_m1(&srp_b)?;
-    Ok(core_crypto::encode_b64(&m1))
-}
-
-#[tauri::command]
-pub fn srp_session_verify_m2(
-    state: State<SrpState>,
-    input: SrpSessionVerifyInput,
-) -> Result<(), ApiError> {
-    let srp_m2 = core_crypto::decode_b64(&input.srp_m2_b64)
-        .map_err(|e| ApiError::new("decode", format!("srpM2: {}", e)))?;
-
-    let mut sessions = state
-        .sessions
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock SRP session store"))?;
-    let session = sessions
-        .get(&input.session_id)
-        .ok_or_else(|| ApiError::new("srp_session_not_found", "SRP session not found"))?;
-
-    session.verify_m2(&srp_m2)?;
-    sessions.remove(&input.session_id);
-    Ok(())
 }
 
 #[derive(Serialize)]

@@ -389,37 +389,6 @@ internal class ChatStoreActions(
         resetGenerationState()
     }
 
-    fun handleLogout() {
-        resetGenerationState()
-        pendingOverflow = null
-        overflowBypassMessageId = null
-        streamingParentId = null
-        messageStore.clear()
-        branchSelections.clear()
-        sessionAccessTimes.clear()
-
-        state.update { appState ->
-            appState.copy(
-                chat = appState.chat.copy(
-                    sessions = emptyList(),
-                    currentSessionId = null,
-                    messages = emptyList(),
-                    branchSelections = emptyMap(),
-                    messageText = "",
-                    attachments = emptyList(),
-                    editingMessageId = null,
-                    isProcessingAttachments = false,
-                    attachmentDownloads = emptyList(),
-                    attachmentDownloadProgress = null,
-                    isAttachmentDownloadBlocked = false
-                )
-            )
-        }
-
-        attachmentActions.refreshAttachmentDownloadState()
-        loadSessionsFromDb()
-    }
-
     fun loadSessionsFromDb() {
         val scope = scope ?: return
         scope.launch(Dispatchers.IO) {

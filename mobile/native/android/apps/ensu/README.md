@@ -29,8 +29,6 @@ That's it. Apart from the `cargo codegen`, this is a normal Android project. Gra
 > (cd "$(git rev-parse --show-toplevel)/rust" && cargo codegen native)
 > ```
 
-A custom endpoint can be baked into the build via `./gradlew :app-ui:installDebug -PENTE_API_ENDPOINT=http://localhost:8080`, or by exporting `ENTE_API_ENDPOINT` before running Gradle.
-
 ## Terminal builds
 
 > [!NOTE]
@@ -69,7 +67,6 @@ Release builds use a debug keystore located at `debug.keystore`. For production 
 
 - `app-ui/` — Compose UI and app entry point.
 - `domain/` — Business logic and state (pure Kotlin).
-- `data/` — Repositories, network, storage.
-- `crypto-auth-core/` — Cryptographic primitives (UniFFI-wrapped Rust).
+- `data/` — Repositories and storage.
 
 The Rust glue for `db` / `inference` lives outside this app, at [`mobile/native/android/packages/rust/`](../../packages/rust/).

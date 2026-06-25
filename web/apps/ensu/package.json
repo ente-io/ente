@@ -16,7 +16,6 @@
         "@tauri-apps/plugin-process": "2.3.1",
         "@tauri-apps/plugin-updater": "2.10.1",
         "@wllama/wllama": "2.4.0",
-        "ente-accounts": "*",
         "ente-base": "*",
         "ente-new": "*",
         "ente-wasm": "*",

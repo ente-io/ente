@@ -78,10 +78,6 @@ fn generate_native_ios() -> Result<(), DynError> {
 
     let crates = [
         UniffiCrate {
-            crate_name: "core",
-            crate_dir: rust_root.join("bindings/uniffi/core"),
-        },
-        UniffiCrate {
             crate_name: "db",
             crate_dir: rust_root.join("bindings/uniffi/ensu/db"),
         },
@@ -114,22 +110,11 @@ fn generate_native_android() -> Result<(), DynError> {
     let repo_root = rust_root
         .parent()
         .ok_or("failed to resolve repo root from rust/apps/codegen")?;
-    let core_out_dir =
-        repo_root.join("mobile/native/android/apps/ensu/crypto-auth-core/src/main/java");
     let rust_out_dir = repo_root.join("mobile/native/android/packages/rust/src/main/kotlin");
 
-    fs::create_dir_all(&core_out_dir)?;
     fs::create_dir_all(&rust_out_dir)?;
 
     let crates = [
-        AndroidCrate {
-            uniffi: UniffiCrate {
-                crate_name: "core",
-                crate_dir: rust_root.join("bindings/uniffi/core"),
-            },
-            out_dir: core_out_dir.clone(),
-            stale_path: core_out_dir.join("io/ente/ensu/crypto/core.kt"),
-        },
         AndroidCrate {
             uniffi: UniffiCrate {
                 crate_name: "db",

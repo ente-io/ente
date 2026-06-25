@@ -11,8 +11,6 @@ fun EnsuApp(appViewModel: AppViewModel) {
         appState = appState,
         store = appViewModel.store,
         logRepository = appViewModel.logRepository,
-        authService = appViewModel.authService,
-        currentEndpointFlow = appViewModel.currentEndpointFlow,
         advancedSettingsDataStore = appViewModel.advancedSettingsDataStore,
         appVersion = appViewModel.appVersion,
         ensuDefaults = appViewModel.ensuDefaults

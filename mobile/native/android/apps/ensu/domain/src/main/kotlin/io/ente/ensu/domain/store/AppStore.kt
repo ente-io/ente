@@ -49,8 +49,6 @@ class AppStore(
         modelSettingsActions = modelSettingsActions,
         ensuDefaults = ensuDefaults
     )
-    private val authActions = AuthStoreActions(_state, logRepository)
-
     fun bootstrap(scope: CoroutineScope) {
         chatActions.setScope(scope)
         attachmentActions.setScope(scope)
@@ -179,13 +177,6 @@ class AppStore(
     ) {
         _state.value = _state.value.copy(developerSettings = developerSettings)
         modelSettingsActions.hydratePersistedModelSettings(modelSettings)
-    }
-
-    fun signIn(email: String) = authActions.signIn(email)
-
-    fun signOut() {
-        authActions.signOut()
-        chatActions.handleLogout()
     }
 
     fun cancelAttachmentDownload(attachmentId: String) =

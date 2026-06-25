@@ -11,9 +11,7 @@ import {
     type BranchSwitcher,
 } from "@/services/chat/branching";
 import {
-    cachedChatKey,
     cachedLocalChatKey,
-    getOrCreateChatKey,
     getOrCreateLocalChatKey,
     initChatKeyStore,
 } from "@/services/chat/chatKey";
@@ -34,10 +32,7 @@ import {
     type ChatMessage,
     type ChatSession,
 } from "@/services/chat/store";
-import {
-    DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
-    SIGN_IN_ENABLED,
-} from "@/services/featureFlags";
+import { DESKTOP_IMAGE_ATTACHMENTS_ENABLED } from "@/services/featureFlags";
 import {
     DEFAULT_MODEL,
     FALLBACK_DESKTOP_MODEL_PRESETS,
@@ -52,17 +47,11 @@ import type {
     ModelInfo,
     ModelSettings,
 } from "@/services/llm/types";
-import {
-    clearMasterKeyFromEverywhere,
-    masterKeyFromSession,
-    updateSessionFromTauriSecureStorageIfNeeded,
-} from "@/services/session";
 import { isTauriRuntime as detectTauriAppRuntime } from "@/services/tauri-runtime";
 import { Menu01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
-    Button,
     Drawer,
     IconButton,
     Stack,
@@ -70,15 +59,12 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
-import { savedLocalUser } from "ente-accounts/services/accounts-db";
-import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
 import { buildEnvEnsuDesktopVersion } from "ente-base/env";
 import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
-import { savedAuthToken } from "ente-base/token";
 import { saveStringAsFile } from "ente-base/utils/web";
 import { type NotificationAttributes } from "ente-new/photos/components/Notification";
 import { useRouter } from "next/router";
@@ -423,12 +409,11 @@ const detectTauriRuntime = () => detectTauriAppRuntime();
 
 const Page: React.FC = () => {
     const router = useRouter();
-    const { logout, showMiniDialog } = useBaseContext();
+    const { showMiniDialog } = useBaseContext();
     const theme = useTheme();
     const isSmall = useMediaQuery(theme.breakpoints.down("md"));
     const assetBasePath = router.basePath ?? "";
     const logoSrc = `${assetBasePath}/images/ensu-logo.svg`;
-    const comingSoonDuckySrc = `${assetBasePath}/images/ensu-ducky.png`;
     const [isDarkMode, setIsDarkMode] = useState(theme.palette.mode === "dark");
 
     useEffect(() => {
@@ -578,7 +563,6 @@ const Page: React.FC = () => {
 
     const [loading, setLoading] = useState(true);
     const [firstPaintDone, setFirstPaintDone] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [chatKey, setChatKey] = useState<string | undefined>();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
@@ -710,8 +694,7 @@ const Page: React.FC = () => {
         promise: Promise<void> | null;
     }>({ sessionId: undefined, promise: null });
 
-    const authRefreshCancelledRef = useRef(false);
-    const authRetryCancelledRef = useRef(false);
+    const chatKeyInitCancelledRef = useRef(false);
 
     const scheduleIdleTask = useCallback(
         (callback: () => void, timeout = 1200) => {
@@ -772,68 +755,12 @@ const Page: React.FC = () => {
         [router],
     );
 
-    const refreshAuthState = useCallback(async () => {
+    const refreshLocalChatKey = useCallback(async () => {
         await initChatKeyStore();
-        await updateSessionFromTauriSecureStorageIfNeeded();
-        const token = await savedAuthToken();
-        const hasToken = !!token;
-
-        log.info("Refreshing auth state", { hasToken });
-
-        if (hasToken) {
-            const cachedRemote = cachedChatKey();
-            if (cachedRemote) {
-                log.info("Using cached remote chat key");
-                setChatKey(cachedRemote);
-                setIsLoggedIn(true);
-                return;
-            }
-
-            let masterKey: string | undefined;
-
-            try {
-                masterKey = await masterKeyFromSession();
-            } catch (error) {
-                log.error("Failed to read master key from session", error);
-                await clearMasterKeyFromEverywhere();
-            }
-
-            if (!masterKey) {
-                log.warn(
-                    "No master key found in session storage; redirecting to credentials",
-                );
-                setChatKey(undefined);
-                setIsLoggedIn(false);
-                if (router.pathname !== "/credentials") {
-                    void router.replace("/credentials");
-                }
-                return;
-            }
-
-            try {
-                log.info("Found master key in session, deriving chat key");
-                const remoteKey = await getOrCreateChatKey(masterKey);
-                setChatKey(remoteKey);
-                setIsLoggedIn(true);
-                return;
-            } catch (error) {
-                log.error("Failed to load remote chat key", error);
-                showMiniDialog({
-                    title: "Chat key unavailable",
-                    message:
-                        "We could not load your chat encryption key. Please try again.",
-                });
-                setChatKey(undefined);
-                setIsLoggedIn(true);
-                return;
-            }
-        }
-
-        setIsLoggedIn(false);
 
         const cachedLocal = cachedLocalChatKey();
         if (cachedLocal) {
-            log.info("Falling back to cached local chat key");
+            log.info("Using cached local chat key");
             setChatKey(cachedLocal);
             return;
         }
@@ -849,24 +776,24 @@ const Page: React.FC = () => {
                     "We could not initialize encryption. Please refresh the page.",
             });
         }
-    }, [router, showMiniDialog]);
+    }, [showMiniDialog]);
 
     useEffect(() => {
-        authRefreshCancelledRef.current = false;
+        chatKeyInitCancelledRef.current = false;
 
         void (async () => {
             try {
-                await refreshAuthState();
+                await refreshLocalChatKey();
             } catch (error) {
-                log.error("Failed to refresh auth state", error);
+                log.error("Failed to initialize local chat key", error);
             }
-            if (!authRefreshCancelledRef.current) setLoading(false);
+            if (!chatKeyInitCancelledRef.current) setLoading(false);
         })();
 
         return () => {
-            authRefreshCancelledRef.current = true;
+            chatKeyInitCancelledRef.current = true;
         };
-    }, [refreshAuthState]);
+    }, [refreshLocalChatKey]);
 
     useEffect(() => {
         routeInitializedRef.current = false;
@@ -901,55 +828,6 @@ const Page: React.FC = () => {
     useEffect(() => {
         isDraftSessionRef.current = isDraftSession;
     }, [isDraftSession]);
-
-    useEffect(() => {
-        if (typeof window === "undefined") return;
-
-        authRetryCancelledRef.current = false;
-        let attempts = 0;
-        let timeoutId: number | undefined;
-
-        const retry = async () => {
-            if (authRetryCancelledRef.current) return;
-            const token = await savedAuthToken();
-            let masterKey: string | undefined;
-
-            try {
-                masterKey = await masterKeyFromSession();
-            } catch (error) {
-                log.error("Failed to read master key from session", error);
-                await clearMasterKeyFromEverywhere();
-            }
-
-            const remoteKey = cachedChatKey();
-
-            // If we are logged in, we want to wait for either the master key to
-            // appear in session storage, or for a previously cached remote key
-            // to be available.
-            if (token && (masterKey || remoteKey)) {
-                await refreshAuthState();
-                return;
-            }
-
-            // If we're not logged in, we just retry a few times to see if a
-            // login token appears (e.g. from a recent redirect).
-            if (!token && attempts >= 5) {
-                return;
-            }
-
-            attempts += 1;
-            if (attempts < 15) {
-                timeoutId = window.setTimeout(retry, 600);
-            }
-        };
-
-        timeoutId = window.setTimeout(retry, 600);
-
-        return () => {
-            authRetryCancelledRef.current = true;
-            if (timeoutId) window.clearTimeout(timeoutId);
-        };
-    }, [refreshAuthState]);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -1425,7 +1303,7 @@ const Page: React.FC = () => {
         if (typeof window === "undefined") return;
 
         const handleFocus = () => {
-            void refreshAuthState();
+            void refreshLocalChatKey();
             if (chatKey) {
                 void refreshSessions();
                 void refreshMessages();
@@ -1434,7 +1312,7 @@ const Page: React.FC = () => {
 
         const handleVisibility = () => {
             if (!document.hidden) {
-                void refreshAuthState();
+                void refreshLocalChatKey();
                 if (chatKey) {
                     void refreshSessions();
                     void refreshMessages();
@@ -1449,7 +1327,7 @@ const Page: React.FC = () => {
             window.removeEventListener("focus", handleFocus);
             document.removeEventListener("visibilitychange", handleVisibility);
         };
-    }, [chatKey, refreshAuthState, refreshMessages, refreshSessions]);
+    }, [chatKey, refreshLocalChatKey, refreshMessages, refreshSessions]);
 
     const deleteSessionTarget = useMemo(
         () =>
@@ -3774,65 +3652,6 @@ const Page: React.FC = () => {
         setPendingImages((prev) => prev.filter((img) => img.id !== id));
     }, []);
 
-    const handleLogout = useCallback(
-        () =>
-            showMiniDialog({
-                title: "Sign out",
-                message: "Are you sure you want to sign out?",
-                continue: {
-                    text: "Sign out",
-                    color: "critical",
-                    action: logout,
-                },
-                buttonDirection: "row",
-            }),
-        [logout, showMiniDialog],
-    );
-
-    const openLoginFromChat = useCallback(() => {
-        if (!SIGN_IN_ENABLED) {
-            showMiniDialog({
-                title: "Coming Soon",
-                message: (
-                    <Stack
-                        sx={{
-                            gap: 1.25,
-                            alignItems: "center",
-                            textAlign: "center",
-                        }}
-                    >
-                        <Box
-                            component="img"
-                            src={comingSoonDuckySrc}
-                            alt="Ensu ducky"
-                            sx={{ width: 92, height: 92, objectFit: "contain" }}
-                        />
-                        <Box component="span" sx={{ px: 3 }}>
-                            Sign in and cloud backup will be available in a
-                            future update.
-                        </Box>
-                    </Stack>
-                ),
-                cancel: "Got it",
-            });
-            return;
-        }
-        void router.push("/login");
-    }, [comingSoonDuckySrc, router, showMiniDialog]);
-
-    const openPasskeysFromChat = useCallback(async () => {
-        try {
-            await openAccountsManagePasskeysPage();
-        } catch (e) {
-            log.error("Failed to open passkeys page", e);
-            showMiniDialog({
-                title: "Passkeys unavailable",
-                message:
-                    "We could not open the passkeys page. Please try again.",
-            });
-        }
-    }, [showMiniDialog]);
-
     const handleSend = useCallback(async () => {
         const trimmed = input.trim();
         const hasDocuments = pendingDocuments.length > 0;
@@ -4092,7 +3911,6 @@ const Page: React.FC = () => {
             currentSessionId={currentSessionId}
             handleSelectSession={handleSelectSession}
             requestDeleteSession={requestDeleteSession}
-            isLoggedIn={isLoggedIn}
             openSettingsModal={openSettingsModal}
         />
     );
@@ -4231,22 +4049,6 @@ const Page: React.FC = () => {
                                 </Box>
                             </Stack>
                         </Stack>
-                        {!isLoggedIn && (
-                            <Button
-                                onClick={openLoginFromChat}
-                                color="inherit"
-                                variant="text"
-                                sx={{
-                                    textTransform: "none",
-                                    fontWeight: 600,
-                                    fontSize: "13px",
-                                    color: "text.base",
-                                    py: 0.75,
-                                }}
-                            >
-                                Sign In
-                            </Button>
-                        )}
                     </NavbarBase>
 
                     <ChatMessageList
@@ -4381,13 +4183,8 @@ const Page: React.FC = () => {
                 settingsItemSx={settingsItemSx}
                 smallIconProps={smallIconProps}
                 compactIconProps={compactIconProps}
-                isLoggedIn={isLoggedIn}
-                signedInEmail={savedLocalUser()?.email ?? ""}
                 saveLogs={saveLogs}
                 handleCheckForUpdates={handleCheckForUpdates}
-                handleLogout={handleLogout}
-                openLoginFromChat={openLoginFromChat}
-                openPasskeysFromChat={openPasskeysFromChat}
                 advancedUnlocked={advancedUnlocked}
                 buildVersion={buildVersion}
                 handleBuildVersionTap={handleBuildVersionTap}
