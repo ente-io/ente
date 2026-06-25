@@ -27,8 +27,6 @@ That's it. Apart from the `cargo codegen`, this is a normal iOS project. Xcode c
 > (cd "$(git rev-parse --show-toplevel)/rust" && cargo codegen native)
 > ```
 
-A custom endpoint can be baked into the build via `xcodebuild ENTE_API_ENDPOINT=http://localhost:8080 ...` or by editing the user-defined `ENTE_API_ENDPOINT` build setting in the `Ensu` target.
-
 ## Terminal builds
 
 > [!NOTE]

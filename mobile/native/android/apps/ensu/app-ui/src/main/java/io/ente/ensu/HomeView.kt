@@ -1,4 +1,7 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, androidx.compose.animation.ExperimentalAnimationApi::class)
+@file:OptIn(
+    androidx.compose.animation.ExperimentalAnimationApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class
+)
 
 package io.ente.ensu
 
@@ -13,12 +16,6 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,12 +47,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import io.ente.ensu.auth.AuthFlowScreen
 import io.ente.ensu.chat.SessionDrawer
 import io.ente.ensu.components.ImageAttachmentPreviewDialog
 import io.ente.ensu.components.NativeChoiceDialog
 import io.ente.ensu.data.AdvancedSettingsDataStore
-import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.data.storage.FilePathManager
 import io.ente.ensu.designsystem.EnsuColor
@@ -67,14 +62,12 @@ import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.MaxImageAttachmentsPerMessage
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
-import io.ente.ensu.utils.EnsuFeatureFlags
 import io.ente.ensu.whatsnew.PendingWhatsNew
 import io.ente.ensu.whatsnew.WhatsNewDialog
 import io.ente.ensu.whatsnew.WhatsNewService
 import io.ente.labs.ensu_db.compressAttachmentImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -86,8 +79,6 @@ fun HomeView(
     appState: AppState,
     store: AppStore,
     logRepository: FileLogRepository,
-    authService: EnsuAuthService,
-    currentEndpointFlow: Flow<String>,
     advancedSettingsDataStore: AdvancedSettingsDataStore,
     appVersion: String,
     ensuDefaults: EnsuDefaults
@@ -101,8 +92,6 @@ fun HomeView(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: HomeRoute.Chat
     val isChatRoute = currentRoute == HomeRoute.Chat
-    var isShowingAuth by remember { mutableStateOf(false) }
-    var isShowingSignOutDialog by remember { mutableStateOf(false) }
     var showAttachmentDownloads by remember { mutableStateOf(false) }
     var deleteSessionTarget by remember { mutableStateOf<io.ente.ensu.domain.model.ChatSession?>(null) }
     var showLogShareDialog by remember { mutableStateOf(false) }
@@ -111,13 +100,7 @@ fun HomeView(
     val whatsNewService = remember(context) { WhatsNewService(context.applicationContext) }
     var pendingWhatsNew by remember { mutableStateOf<PendingWhatsNew?>(null) }
 
-    val handleSignInRequest: () -> Unit = handle@{
-        if (!EnsuFeatureFlags.enableSignIn) {
-            showSignInComingSoon = true
-            return@handle
-        }
-        isShowingAuth = true
-    }
+    val handleSignInRequest: () -> Unit = { showSignInComingSoon = true }
 
     val imagePicker = rememberAttachmentPicker(
         contract = ActivityResultContracts.GetContent(),
@@ -192,10 +175,6 @@ fun HomeView(
         scope.launch { drawerState.close() }
     }
 
-    BackHandler(enabled = isShowingAuth) {
-        isShowingAuth = false
-    }
-
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -241,8 +220,6 @@ fun HomeView(
             SessionDrawer(
                 sessions = appState.chat.sessions,
                 selectedSessionId = appState.chat.currentSessionId,
-                isLoggedIn = appState.auth.isLoggedIn,
-                userEmail = appState.auth.email,
                 onSelectSession = { session ->
                     // Same reason as above: just swap the session in-place.
                     store.selectSession(session.id)
@@ -267,8 +244,6 @@ fun HomeView(
             appState = appState,
             store = store,
             logRepository = logRepository,
-            authService = authService,
-            currentEndpointFlow = currentEndpointFlow,
             advancedSettingsDataStore = advancedSettingsDataStore,
             appVersion = appVersion,
             ensuDefaults = ensuDefaults,
@@ -277,7 +252,6 @@ fun HomeView(
             currentRoute = currentRoute,
             currentSession = currentSession,
             onSignIn = handleSignInRequest,
-            onSignOut = { isShowingSignOutDialog = true },
             onOpenDrawer = openDrawer,
             onNewChat = {
                 store.startNewSessionDraft()
@@ -292,8 +266,7 @@ fun HomeView(
                 } else {
                     openAttachment(context, attachment)
                 }
-            },
-            onDeleteAccount = { openDeleteAccountEmail(context) }
+            }
         )
     }
 
@@ -302,27 +275,6 @@ fun HomeView(
             path = attachment.localPath,
             contentDescription = attachment.name,
             onDismiss = { imagePreviewAttachment = null }
-        )
-    }
-
-    AnimatedVisibility(
-        visible = isShowingAuth,
-        enter = slideInHorizontally(
-            initialOffsetX = { fullWidth -> fullWidth },
-            animationSpec = tween(220)
-        ) + fadeIn(animationSpec = tween(90)),
-        exit = slideOutHorizontally(
-            targetOffsetX = { fullWidth -> fullWidth },
-            animationSpec = tween(220)
-        ) + fadeOut(animationSpec = tween(90))
-    ) {
-        AuthFlowScreen(
-            authService = authService,
-            onLoggedIn = { email ->
-                store.signIn(email)
-                isShowingAuth = false
-            },
-            onDismiss = { isShowingAuth = false }
         )
     }
 
@@ -413,24 +365,6 @@ fun HomeView(
                 Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
             }
         }
-    }
-
-    if (isShowingSignOutDialog) {
-        NativeChoiceDialog(
-            title = "Sign Out",
-            body = "Signing out will remove your account from this device. Local chats stay available.",
-            firstButtonLabel = "Sign Out",
-            secondButtonLabel = "Cancel",
-            onFirst = {
-                scope.launch {
-                    authService.clearCredentials()
-                    store.signOut()
-                    isShowingSignOutDialog = false
-                }
-            },
-            onSecond = { isShowingSignOutDialog = false },
-            onDismiss = { isShowingSignOutDialog = false }
-        )
     }
 }
 
@@ -565,18 +499,6 @@ private fun openAttachment(context: Context, attachment: Attachment) {
         context.startActivity(chooser)
     } else {
         Toast.makeText(context, "No app available to open this file", Toast.LENGTH_SHORT).show()
-    }
-}
-
-private fun openDeleteAccountEmail(context: Context) {
-    val subject = Uri.encode("Request Deletion for Ente Account")
-    val uri = Uri.parse("mailto:support@ente.com?subject=$subject")
-    val intent = Intent(Intent.ACTION_SENDTO, uri)
-    val resolved = intent.resolveActivity(context.packageManager)
-    if (resolved != null) {
-        context.startActivity(intent)
-    } else {
-        Toast.makeText(context, "No email app available", Toast.LENGTH_SHORT).show()
     }
 }
 

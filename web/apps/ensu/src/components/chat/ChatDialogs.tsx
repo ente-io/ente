@@ -5,7 +5,6 @@ import {
     Cancel01Icon,
     File01Icon,
     InformationCircleIcon,
-    Key01Icon,
     Settings01Icon,
     SlidersHorizontalIcon,
     Upload01Icon,
@@ -71,13 +70,8 @@ export interface ChatDialogsProps {
     settingsItemSx: SxEntry;
     smallIconProps: IconProps;
     compactIconProps: IconProps;
-    isLoggedIn: boolean;
-    signedInEmail?: string | null;
     saveLogs: () => void | Promise<void>;
     handleCheckForUpdates: () => void | Promise<void>;
-    handleLogout: () => void;
-    openLoginFromChat: () => void;
-    openPasskeysFromChat: () => void;
     advancedUnlocked: boolean;
     buildVersion?: string;
     handleBuildVersionTap: () => void;
@@ -128,13 +122,8 @@ export const ChatDialogs = memo(
         settingsItemSx,
         smallIconProps,
         compactIconProps,
-        isLoggedIn,
-        signedInEmail,
         saveLogs,
         handleCheckForUpdates,
-        handleLogout,
-        openLoginFromChat,
-        openPasskeysFromChat,
         advancedUnlocked,
         buildVersion,
         handleBuildVersionTap,
@@ -216,6 +205,8 @@ export const ChatDialogs = memo(
         const [showAdvancedLimits, setShowAdvancedLimits] =
             React.useState(false);
         const [selectedModelId, setSelectedModelId] = React.useState("default");
+        const [showBackupComingSoon, setShowBackupComingSoon] =
+            React.useState(false);
 
         // --- System prompt draft state ---
         const [draftSystemPrompt, setDraftSystemPrompt] = React.useState("");
@@ -481,29 +472,6 @@ export const ChatDialogs = memo(
                     </DialogTitle>
                     <DialogContent sx={{ flex: 1, overflowY: "auto" }}>
                         <Stack sx={{ gap: 2 }}>
-                            {isLoggedIn && (
-                                <Box
-                                    sx={{
-                                        px: 2,
-                                        py: 1.5,
-                                        borderRadius: 2,
-                                        border: "1px solid",
-                                        borderColor: "divider",
-                                        bgcolor: "background.default",
-                                    }}
-                                >
-                                    <Typography
-                                        variant="mini"
-                                        sx={{ color: "text.muted" }}
-                                    >
-                                        Signed in as
-                                    </Typography>
-                                    <Typography variant="small">
-                                        {signedInEmail ?? ""}
-                                    </Typography>
-                                </Box>
-                            )}
-
                             <Stack sx={{ gap: 1 }}>
                                 <ListItemButton
                                     onClick={() => {
@@ -578,83 +546,28 @@ export const ChatDialogs = memo(
                                     />
                                 </ListItemButton>
 
-                                {isLoggedIn && (
-                                    <ListItemButton
-                                        onClick={() => {
-                                            closeSettingsModal();
-                                            openPasskeysFromChat();
-                                        }}
-                                        sx={settingsItemSx}
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        setShowBackupComingSoon(true);
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={Upload01Icon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
                                     >
-                                        <HugeiconsIcon
-                                            icon={Key01Icon}
-                                            {...compactIconProps}
-                                        />
-                                        <Typography
-                                            variant="small"
-                                            sx={{ flex: 1 }}
-                                        >
-                                            Passkeys
-                                        </Typography>
-                                        <HugeiconsIcon
-                                            icon={ArrowRight01Icon}
-                                            {...smallIconProps}
-                                        />
-                                    </ListItemButton>
-                                )}
-
-                                {!isLoggedIn && (
-                                    <ListItemButton
-                                        onClick={() => {
-                                            closeSettingsModal();
-                                            openLoginFromChat();
-                                        }}
-                                        sx={settingsItemSx}
-                                    >
-                                        <HugeiconsIcon
-                                            icon={Upload01Icon}
-                                            {...compactIconProps}
-                                        />
-                                        <Typography
-                                            variant="small"
-                                            sx={{ flex: 1 }}
-                                        >
-                                            Sign In to Backup
-                                        </Typography>
-                                        <HugeiconsIcon
-                                            icon={ArrowRight01Icon}
-                                            {...smallIconProps}
-                                        />
-                                    </ListItemButton>
-                                )}
-
-                                {isLoggedIn && (
-                                    <ListItemButton
-                                        onClick={() => {
-                                            closeSettingsModal();
-                                            handleLogout();
-                                        }}
-                                        sx={[
-                                            settingsItemSx,
-                                            { color: "critical.main" },
-                                        ]}
-                                    >
-                                        <HugeiconsIcon
-                                            icon={Cancel01Icon}
-                                            {...compactIconProps}
-                                        />
-                                        <Typography
-                                            variant="small"
-                                            sx={{ flex: 1, fontWeight: 600 }}
-                                        >
-                                            Sign Out
-                                        </Typography>
-                                        <HugeiconsIcon
-                                            icon={ArrowRight01Icon}
-                                            {...smallIconProps}
-                                        />
-                                    </ListItemButton>
-                                )}
+                                        Sign In to Backup
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
 
                                 <ListItemButton
                                     onClick={() => {
@@ -786,6 +699,32 @@ export const ChatDialogs = memo(
                             )}
                         </Stack>
                     </DialogContent>
+                </Dialog>
+
+                <Dialog
+                    open={showBackupComingSoon}
+                    onClose={() => setShowBackupComingSoon(false)}
+                    fullScreen={isSmall}
+                    maxWidth="xs"
+                    fullWidth
+                    slotProps={{ paper: { sx: dialogPaperSx } }}
+                >
+                    <DialogTitle sx={dialogTitleSx}>Coming soon</DialogTitle>
+                    <DialogContent>
+                        <Typography variant="body" sx={{ color: "text.muted" }}>
+                            Sign in and cloud backup will be available in a
+                            future update.
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions sx={{ px: 3, pb: 3 }}>
+                        <Button
+                            variant="contained"
+                            color="accent"
+                            onClick={() => setShowBackupComingSoon(false)}
+                        >
+                            Got it
+                        </Button>
+                    </DialogActions>
                 </Dialog>
 
                 <Dialog

@@ -10,17 +10,6 @@ configurations.configureEach {
     exclude(group = "com.google.guava", module = "listenablefuture")
 }
 
-val apiEndpointOverride = (System.getenv("ENTE_API_ENDPOINT")
-    ?: project.findProperty("ENTE_API_ENDPOINT") as? String)
-    ?.trim()
-    .orEmpty()
-
-if (apiEndpointOverride.isNotBlank()) {
-    println("ENTE_API_ENDPOINT set for build: $apiEndpointOverride")
-} else {
-    println("ENTE_API_ENDPOINT not set; BuildConfig.API_ENDPOINT will be empty")
-}
-
 val keystorePropsFile = rootProject.file("key.properties")
 val keystoreProps = Properties()
 val hasReleaseKeystore = keystorePropsFile.exists()
@@ -88,7 +77,6 @@ android {
         targetSdk = 35
         versionCode = (project.findProperty("versionCode") as? String)?.toInt() ?: 33
         versionName = "0.1.18"
-        buildConfigField("String", "API_ENDPOINT", "\"$apiEndpointOverride\"")
     }
 
     buildTypes {
@@ -109,7 +97,6 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 
     composeOptions {
@@ -162,7 +149,6 @@ dependencies {
     implementation("com.google.accompanist:accompanist-navigation-animation:0.34.0")
     implementation(project(":domain"))
     implementation(project(":data"))
-    implementation(project(":crypto-auth-core"))
     implementation(project(":rust"))
 
     implementation("com.github.gregcockroft:AndroidMath:v1.1.0") {

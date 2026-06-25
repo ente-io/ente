@@ -55,8 +55,6 @@ import kotlin.math.absoluteValue
 fun SessionDrawer(
     sessions: List<ChatSession>,
     selectedSessionId: String?,
-    isLoggedIn: Boolean,
-    userEmail: String?,
     onSelectSession: (ChatSession) -> Unit,
     onDeleteSession: (ChatSession) -> Unit,
     onOpenSettings: () -> Unit
@@ -102,8 +100,6 @@ fun SessionDrawer(
             HorizontalDivider(color = EnsuColor.border())
 
             DrawerFooter(
-                isLoggedIn = isLoggedIn,
-                userEmail = userEmail,
                 onOpenSettings = onOpenSettings
             )
         }
@@ -324,54 +320,28 @@ private fun SessionTile(
 
 @Composable
 private fun DrawerFooter(
-    isLoggedIn: Boolean,
-    userEmail: String?,
     onOpenSettings: () -> Unit
 ) {
-    if (isLoggedIn) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onOpenSettings)
-                .padding(EnsuSpacing.lg.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
-        ) {
-            Text(
-                text = userEmail.orEmpty(),
-                style = EnsuTypography.body,
-                color = EnsuColor.textPrimary(),
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                painter = painterResource(HugeIcons.ArrowRight01Icon),
-                contentDescription = "Settings",
-                modifier = Modifier.size(18.dp),
-                tint = EnsuColor.textMuted()
-            )
-        }
-    } else {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onOpenSettings)
-                .padding(EnsuSpacing.lg.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
-        ) {
-            Text(
-                text = "Settings",
-                style = EnsuTypography.body,
-                color = EnsuColor.textPrimary(),
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                painter = painterResource(HugeIcons.ArrowRight01Icon),
-                contentDescription = "Settings",
-                modifier = Modifier.size(18.dp),
-                tint = EnsuColor.textMuted()
-            )
-        }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpenSettings)
+            .padding(EnsuSpacing.lg.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
+    ) {
+        Text(
+            text = "Settings",
+            style = EnsuTypography.body,
+            color = EnsuColor.textPrimary(),
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            painter = painterResource(HugeIcons.ArrowRight01Icon),
+            contentDescription = "Settings",
+            modifier = Modifier.size(18.dp),
+            tint = EnsuColor.textMuted()
+        )
     }
 }
 

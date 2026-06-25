@@ -5,9 +5,6 @@ import EnteCore
 #else
 final class CredentialStore {
     static let shared = CredentialStore()
-    var hasConfiguredAccount: Bool { false }
-    var token: String? { nil }
-    var masterKey: Data? { nil }
 
     func getOrCreateChatDbKey() -> Data {
         Data()

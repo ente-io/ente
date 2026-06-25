@@ -3,9 +3,7 @@ import SwiftUI
 
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
-    @Binding var isShowingAuth: Bool
 
-    @EnvironmentObject private var appState: EnsuAppState
     @Environment(\.scenePhase) private var scenePhase
     @ObservedObject private var modelSettings = ModelSettingsStore.shared
 
@@ -151,16 +149,7 @@ struct ChatView: View {
         }
         .sheet(isPresented: $viewState.showSettings) {
             SettingsView(
-                isLoggedIn: appState.isLoggedIn,
-                email: CredentialStore.shared.email,
-                showsSignInOption: EnsuFeatureFlags.enableSignIn,
-                onSignOut: {
-                    appState.logout()
-                    viewState.showSettings = false
-                    viewState.isDrawerOpen = false
-                },
                 onSignIn: {
-                    guard EnsuFeatureFlags.enableSignIn else { return }
                     viewState.pendingSignInRequest = true
                     viewState.showSettings = false
                 }
@@ -172,7 +161,6 @@ struct ChatView: View {
                 isInputFocused = false
             } else if viewState.pendingSignInRequest {
                 viewState.pendingSignInRequest = false
-                guard EnsuFeatureFlags.enableSignIn else { return }
                 handleSignInRequest()
             }
         }
@@ -256,13 +244,12 @@ struct ChatView: View {
             ChatAppBar(
                 sessionTitle: viewModel.currentSessionId.map { viewModel.sessionTitle(for: $0) } ?? "New chat",
                 showBrand: viewModel.messages.isEmpty,
-                showSignIn: EnsuFeatureFlags.enableSignIn && !appState.isLoggedIn,
+                showSignIn: false,
                 showsMenuButton: showsMenuButton,
                 attachmentDownloadSummary: viewModel.attachmentDownloadSummary,
                 modelDownloadState: viewModel.downloadToast,
                 onMenu: { viewState.isDrawerOpen.toggle() },
                 onSignIn: {
-                    guard EnsuFeatureFlags.enableSignIn else { return }
                     handleSignInRequest()
                 },
                 onNewChat: {
@@ -433,8 +420,6 @@ struct ChatView: View {
         let drawer = SessionDrawerView(
             sessions: viewModel.sessions,
             currentSessionId: viewModel.currentSessionId,
-            isLoggedIn: appState.isLoggedIn,
-            email: CredentialStore.shared.email,
             onSelectSession: { session in
                 viewModel.selectSession(session)
                 viewState.isDrawerOpen = false
@@ -491,11 +476,7 @@ struct ChatView: View {
     }
 
     private func handleSignInRequest() {
-        if EnsuFeatureFlags.enableSignIn {
-            isShowingAuth = true
-        } else {
-            viewState.showSignInComingSoon = true
-        }
+        viewState.showSignInComingSoon = true
     }
 
     private func markWhatsNewSeen() {

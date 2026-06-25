@@ -1,22 +1,20 @@
 package io.ente.ensu
 
 import android.app.Application
-import android.os.Build
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Environment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.data.AdvancedSettingsSnapshot
 import io.ente.ensu.data.AndroidDeviceCapabilityProvider
-import io.ente.ensu.data.EndpointPreferencesDataStore
 import io.ente.ensu.data.SessionPreferencesDataStore
-import io.ente.ensu.data.auth.EnsuAuthService
+import io.ente.ensu.data.chat.RustChatRepository
 import io.ente.ensu.data.llm.EnsuRustDefaults
+import io.ente.ensu.data.llm.InferenceRsProvider
 import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.data.storage.CredentialStore
-import io.ente.ensu.data.llm.InferenceRsProvider
-import io.ente.ensu.data.chat.RustChatRepository
 import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.store.AppStore
 import kotlinx.coroutines.flow.collectLatest
@@ -27,7 +25,6 @@ import java.io.File
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val sessionPreferences = SessionPreferencesDataStore(application)
-    private val endpointPreferences = EndpointPreferencesDataStore(application)
     val advancedSettingsDataStore = AdvancedSettingsDataStore(application)
     private val credentialStore = CredentialStore(application)
     val appVersion = runCatching { getAppVersion(application) }.getOrDefault("unknown")
@@ -61,41 +58,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         ensuDefaults = ensuDefaults,
         logRepository = logRepository
     )
-    val authService = EnsuAuthService(
-        context = application,
-        endpointPreferences = endpointPreferences,
-        credentialStore = credentialStore,
-        logRepository = logRepository
-    )
-
-    val currentEndpointFlow = authService.currentEndpointFlow
-
     init {
         val launchMessage = "App launched app=$appVersion device=${Build.MANUFACTURER} ${Build.MODEL} os=${Build.VERSION.RELEASE} (sdk=${Build.VERSION.SDK_INT})"
         logRepository.log(LogLevel.Info, launchMessage, tag = "App")
-
-        viewModelScope.launch {
-            val endpoint = endpointPreferences.endpointFlow.first()
-            val buildEndpoint = BuildConfig.API_ENDPOINT.trim()
-            if (endpoint.isNullOrBlank()) {
-                val fallback = "https://api.ente.com"
-                val resolved = if (buildEndpoint.isNotBlank()) buildEndpoint else fallback
-                endpointPreferences.setEndpoint(resolved)
-            } else if (buildEndpoint.isNotBlank() && buildEndpoint != endpoint) {
-                logRepository.log(
-                    LogLevel.Info,
-                    "Build endpoint ignored",
-                    details = "stored=$endpoint build=$buildEndpoint",
-                    tag = "App"
-                )
-            }
-        }
-
-        viewModelScope.launch {
-            authService.storedEndpointFlow.collectLatest { endpoint ->
-                authService.updateEndpoint(endpoint)
-            }
-        }
 
         viewModelScope.launch {
             val initialSettings = runCatching {
@@ -107,11 +72,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             )
             store.hydrateModelDownloadRequested(sessionPreferences.modelDownloadRequested.first())
             store.bootstrap(viewModelScope)
-
-            val email = credentialStore.getEmail()
-            if (credentialStore.isLoggedIn() && !email.isNullOrBlank()) {
-                store.signIn(email)
-            }
 
             advancedSettingsDataStore.settingsFlow.drop(1).collectLatest { settings ->
                 store.applyPersistedSettings(

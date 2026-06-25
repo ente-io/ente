@@ -7,7 +7,6 @@ members = [
     "bindings/ffi/crypto",
     "bindings/frb/ente-rust",
     "bindings/frb/photos",
-    "bindings/uniffi/core",
     "bindings/uniffi/ensu/db",
     "bindings/uniffi/ensu/inference",
     "bindings/uniffi/ensu/transcription",

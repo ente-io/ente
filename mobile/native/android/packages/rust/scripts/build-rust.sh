@@ -11,7 +11,6 @@ TOOLCHAIN=""
 OUT_DIR=""
 
 CRATES=(
-    bindings/uniffi/core
     bindings/uniffi/ensu/db
     bindings/uniffi/ensu/inference
     bindings/uniffi/ensu/transcription

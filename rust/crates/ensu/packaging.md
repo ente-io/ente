@@ -24,7 +24,6 @@ Web app depends on shared WASM bindings at `web/packages/wasm`.
 
 Android and Apple native apps use UniFFI + adapters.
 
-- Core UniFFI bindings: `rust/bindings/uniffi/core`
 - Ensu UniFFI bindings: `rust/bindings/uniffi/ensu`
 
 ## Native packaging layers
