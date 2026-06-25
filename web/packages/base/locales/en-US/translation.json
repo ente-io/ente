@@ -362,6 +362,7 @@
     "details": "Details",
     "view_exif": "View all Exif data",
     "no_exif": "No Exif data",
+    "file_info_arrow_navigation_hint": "Use Alt/Option + left or right arrow to move between photos without closing this panel.",
     "exif": "Exif",
     "two_factor": "Two-factor",
     "two_factor_authentication": "Two-factor authentication",

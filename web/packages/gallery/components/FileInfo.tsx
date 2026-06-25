@@ -183,6 +183,11 @@ export type FileInfoProps = ModalVisibilityProps & {
      * Called when the user selects a person in the file info panel.
      */
     onSelectPerson?: (personID: string) => void;
+    /**
+     * Called when an edit surface owned by the file info panel is opened or
+     * closed, so the viewer can avoid navigating to another file underneath it.
+     */
+    onNavigationLockChange?: (locked: boolean) => void;
 };
 
 export const FileInfo: React.FC<FileInfoProps> = ({
@@ -199,6 +204,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     onUpdateCaption,
     onSelectCollection,
     onSelectPerson,
+    onNavigationLockChange,
 }) => {
     const { mapEnabled } = useSettingsSnapshot();
     const peopleState = usePeopleStateSnapshot();
@@ -212,6 +218,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         useModalVisibility();
     const { show: showEditLocation, props: editLocationVisibilityProps } =
         useModalVisibility();
+
+    const [captionNavigationLocked, setCaptionNavigationLocked] =
+        useState(false);
+    const [dateTimeNavigationLocked, setDateTimeNavigationLocked] =
+        useState(false);
+    const [renameNavigationLocked, setRenameNavigationLocked] = useState(false);
 
     const assignablePeople = useMemo(
         () =>
@@ -263,6 +275,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         // rerun whenever reopened (even if for the same file).
         if (!open) return undefined;
 
+        setAnnotatedFaces([]);
+
         let didCancel = false;
 
         void getAnnotatedFacesForFile(file).then(
@@ -303,6 +317,19 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const uploaderName = file.pubMagicMetadata?.data.uploaderName;
 
+    const navigationLocked =
+        open &&
+        (rawExifVisibilityProps.open ||
+            assignPersonVisibilityProps.open ||
+            editLocationVisibilityProps.open ||
+            captionNavigationLocked ||
+            dateTimeNavigationLocked ||
+            renameNavigationLocked);
+
+    useEffect(() => {
+        onNavigationLockChange?.(navigationLocked);
+    }, [onNavigationLockChange, navigationLocked]);
+
     return (
         <FileInfoSidebar {...{ open, onClose }}>
             <SidebarDrawerTitlebar
@@ -318,15 +345,24 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         onFileMetadataUpdate,
                         onUpdateCaption,
                         onClose,
+                        onNavigationLockChange: setCaptionNavigationLocked,
                     }}
                 />
-                <CreationTime {...{ file, allowEdits, onFileMetadataUpdate }} />
+                <CreationTime
+                    {...{
+                        file,
+                        allowEdits,
+                        onFileMetadataUpdate,
+                        onNavigationLockChange: setDateTimeNavigationLocked,
+                    }}
+                />
                 <FileName
                     {...{
                         file,
                         annotatedExif,
                         allowEdits,
                         onFileMetadataUpdate,
+                        onNavigationLockChange: setRenameNavigationLocked,
                     }}
                 />
 
@@ -457,6 +493,20 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         {t("added_by_name", { name: uploaderName })}
                     </Typography>
                 )}
+                <Typography
+                    variant="small"
+                    sx={{
+                        display: { xs: "none", sm: "block" },
+                        px: 2,
+                        color: "text.muted",
+                        opacity: 0.3,
+                        maxWidth: "300px",
+                        fontSize: "12px",
+                        lineHeight: "15px",
+                    }}
+                >
+                    {t("file_info_arrow_navigation_hint")}
+                </Typography>
             </Stack>
             <RawExif
                 {...rawExifVisibilityProps}
@@ -655,6 +705,7 @@ type CaptionProps = Pick<
     | "onFileMetadataUpdate"
     | "onUpdateCaption"
     | "onClose"
+    | "onNavigationLockChange"
 >;
 
 const Caption: React.FC<CaptionProps> = ({
@@ -663,6 +714,7 @@ const Caption: React.FC<CaptionProps> = ({
     onFileMetadataUpdate,
     onUpdateCaption,
     onClose,
+    onNavigationLockChange,
 }) => {
     const [isSaving, setIsSaving] = useState(false);
 
@@ -670,6 +722,7 @@ const Caption: React.FC<CaptionProps> = ({
 
     const formik = useFormik<{ caption: string }>({
         initialValues: { caption },
+        enableReinitialize: true,
         validate: ({ caption }) =>
             caption.length > 5000
                 ? { caption: t("caption_character_limit") }
@@ -692,6 +745,10 @@ const Caption: React.FC<CaptionProps> = ({
     });
 
     const { values, errors, handleChange, handleSubmit, resetForm } = formik;
+
+    useEffect(() => {
+        onNavigationLockChange?.(values.caption != caption || isSaving);
+    }, [onNavigationLockChange, values.caption, caption, isSaving]);
 
     if (!caption.length && !allowEdits) {
         // Visually take up some space, otherwise the info panel for the shared
@@ -746,13 +803,14 @@ const CaptionForm = styled("form")(({ theme }) => ({
 
 type CreationTimeProps = Pick<
     FileInfoProps,
-    "allowEdits" | "onFileMetadataUpdate"
+    "allowEdits" | "onFileMetadataUpdate" | "onNavigationLockChange"
 > & { file: EnteFile };
 
 const CreationTime: React.FC<CreationTimeProps> = ({
     file,
     allowEdits,
     onFileMetadataUpdate,
+    onNavigationLockChange,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -760,6 +818,10 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     const [isSaving, setIsSaving] = useState(false);
 
     const originalDate = fileCreationPhotoDate(file);
+
+    useEffect(() => {
+        onNavigationLockChange?.(isEditing || isSaving);
+    }, [onNavigationLockChange, isEditing, isSaving]);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         setIsEditing(false);
@@ -819,7 +881,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
 
 type FileNameProps = Pick<
     FileInfoProps,
-    "allowEdits" | "onFileMetadataUpdate"
+    "allowEdits" | "onFileMetadataUpdate" | "onNavigationLockChange"
 > & { file: EnteFile; annotatedExif: AnnotatedExif | undefined };
 
 const FileName: React.FC<FileNameProps> = ({
@@ -827,9 +889,14 @@ const FileName: React.FC<FileNameProps> = ({
     annotatedExif,
     allowEdits,
     onFileMetadataUpdate,
+    onNavigationLockChange,
 }) => {
     const { show: showRename, props: renameVisibilityProps } =
         useModalVisibility();
+
+    useEffect(() => {
+        onNavigationLockChange?.(renameVisibilityProps.open);
+    }, [onNavigationLockChange, renameVisibilityProps.open]);
 
     const fileName = fileFileName(file);
 
