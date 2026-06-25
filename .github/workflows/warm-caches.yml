@@ -169,7 +169,7 @@ jobs:
 
             # Compile the app and tests without running them.
             - name: Build Ensu
-              working-directory: mobile/native/darwin/Apps/Ensu
+              working-directory: mobile/native/apple/apps/ensu
               run: xcodebuild build-for-testing -scheme Ensu -destination 'platform=iOS Simulator,name=iPhone 17'
 
     go-server:

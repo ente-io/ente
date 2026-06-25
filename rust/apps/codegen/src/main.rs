@@ -72,7 +72,7 @@ fn generate_native_ios() -> Result<(), DynError> {
     let repo_root = rust_root
         .parent()
         .ok_or("failed to resolve repo root from rust/apps/codegen")?;
-    let generated_dir = repo_root.join("mobile/native/darwin/Apps/Ensu/Ensu/Generated");
+    let generated_dir = repo_root.join("mobile/native/apple/apps/ensu/Ensu/Generated");
 
     fs::create_dir_all(&generated_dir)?;
 

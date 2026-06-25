@@ -6,7 +6,7 @@ Source code for the Ente Cast tvOS app.
 
 1. Install [Xcode](https://developer.apple.com/xcode/) and [Rust](https://www.rust-lang.org/tools/install). In Xcode install the tvOS platform.
 
-2. Open `tv.xcodeproj` in Xcode and run the `cast` scheme.
+2. Open `Cast.xcodeproj` in Xcode and run the `Cast` scheme.
 
 > [!NOTE]
 >
