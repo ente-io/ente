@@ -29,21 +29,15 @@ enum ChatDeviceCapability: Equatable {
     }
 }
 
-protocol ChatDeviceCapabilityProviding {
-    func chatCapability() -> ChatDeviceCapability
-}
-
-struct ProcessInfoChatDeviceCapabilityProvider: ChatDeviceCapabilityProviding {
-    func chatCapability() -> ChatDeviceCapability {
-        let totalMemoryBytes = ProcessInfo.processInfo.physicalMemory
-        if totalMemoryBytes < chatMinimumRAMBytes {
-            return .unsupportedLowMemory(
-                totalMemoryBytes: totalMemoryBytes,
-                requiredMemoryBytes: chatMinimumRAMBytes
-            )
-        }
-        return .supported(totalMemoryBytes: totalMemoryBytes)
+func currentChatDeviceCapability() -> ChatDeviceCapability {
+    let totalMemoryBytes = ProcessInfo.processInfo.physicalMemory
+    if totalMemoryBytes < chatMinimumRAMBytes {
+        return .unsupportedLowMemory(
+            totalMemoryBytes: totalMemoryBytes,
+            requiredMemoryBytes: chatMinimumRAMBytes
+        )
     }
+    return .supported(totalMemoryBytes: totalMemoryBytes)
 }
 
 struct UnsupportedDeviceMemoryError: LocalizedError {

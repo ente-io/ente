@@ -89,7 +89,6 @@ final class InferenceRsProvider {
     }
 
     private let modelDir: URL
-    private let deviceCapabilityProvider: ChatDeviceCapabilityProviding
     private let downloadManager = ModelDownloadManager.shared
     private var modelHandle: ModelHandle?
     private var contextHandle: ContextHandle?
@@ -102,12 +101,8 @@ final class InferenceRsProvider {
     private var rustDownloadCancelled = false
     private let logger = EnsuLogging.shared.logger("InferenceRsProvider")
 
-    init(
-        modelDir: URL,
-        deviceCapabilityProvider: ChatDeviceCapabilityProviding = ProcessInfoChatDeviceCapabilityProvider()
-    ) {
+    init(modelDir: URL) {
         self.modelDir = modelDir
-        self.deviceCapabilityProvider = deviceCapabilityProvider
         try? FileManager.default.createDirectory(at: modelDir, withIntermediateDirectories: true, attributes: nil)
     }
 
@@ -125,7 +120,7 @@ final class InferenceRsProvider {
         onProgress: @escaping (InferenceDownloadProgress) -> Void,
         allowRecovery: Bool
     ) async throws {
-        let capability = deviceCapabilityProvider.chatCapability()
+        let capability = currentChatDeviceCapability()
         if !capability.isChatSupported {
             throw UnsupportedDeviceMemoryError(capability: capability)
         }
@@ -206,7 +201,7 @@ final class InferenceRsProvider {
         maxTokens: Int?,
         onToken: @escaping (String) -> Void
     ) async throws -> InferenceGenerationSummary {
-        let capability = deviceCapabilityProvider.chatCapability()
+        let capability = currentChatDeviceCapability()
         if !capability.isChatSupported {
             throw UnsupportedDeviceMemoryError(capability: capability)
         }

@@ -316,7 +316,6 @@ final class ChatViewModel: ObservableObject {
     @Published var draftCursorMoveToken = UUID()
 
     private let provider: InferenceRsProvider
-    private let deviceCapabilityProvider = ProcessInfoChatDeviceCapabilityProvider()
     private let voiceTranscriber: VoiceTranscriptionService
     private var chatDb: EnsuDb
     private let attachmentsDir: URL
@@ -423,7 +422,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func refreshDeviceCapability() {
-        let capability = deviceCapabilityProvider.chatCapability()
+        let capability = currentChatDeviceCapability()
         deviceCapability = capability
         logger.info("Chat device capability evaluated", details: "\(capability)")
         guard !capability.isChatSupported else { return }
