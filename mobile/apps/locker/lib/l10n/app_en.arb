@@ -842,6 +842,8 @@
   },
   "locker": "Locker",
   "loginToEnteAccount": "Log in to your Ente account",
+  "createAnEnteAccount": "Create an Ente account",
+  "loginToExistingAccount": "Login to existing account",
   "unlockLockerNewUserTitle": "Join Ente to use Locker",
   "unlockLockerNewUserBody": "Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.",
   "checkoutEntePhotos": "Checkout Ente Photos",
