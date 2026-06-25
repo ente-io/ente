@@ -275,6 +275,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         // rerun whenever reopened (even if for the same file).
         if (!open) return undefined;
 
+        setAnnotatedFaces([]);
+
         let didCancel = false;
 
         void getAnnotatedFacesForFile(file).then(
