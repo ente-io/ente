@@ -89,9 +89,7 @@ export const register = async (): Promise<Registration> => {
     let pairingCode: string | undefined;
     while (true) {
         try {
-            pairingCode = await registerDevice({
-                publicKey,
-            });
+            pairingCode = await registerDevice(publicKey);
         } catch (e) {
             log.error("Failed to register public key with server", e);
         }
@@ -108,13 +106,11 @@ export const register = async (): Promise<Registration> => {
  *
  * @returns A device code that can be used to pair with us.
  */
-const registerDevice = async (params: {
-    publicKey: string;
-}) => {
+const registerDevice = async (publicKey: string) => {
     const res = await fetch(await apiURL("/cast/device-info"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify(params),
+        body: JSON.stringify({ publicKey }),
     });
     ensureOk(res);
     return z.object({ deviceCode: z.string() }).parse(await res.json())
