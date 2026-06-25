@@ -164,7 +164,7 @@ struct MessageInputView: View {
                         )
                         #endif
 
-                    if EnsuFeatureFlags.enableImageUploads && editingMessage == nil {
+                    if editingMessage == nil {
                         let canUseAttachment = !isGenerating &&
                             !isDownloading &&
                             !isAttachmentDownloadBlocked &&
