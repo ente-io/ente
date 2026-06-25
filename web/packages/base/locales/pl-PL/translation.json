@@ -362,6 +362,7 @@
     "details": "Szczegóły",
     "view_exif": "Wyświetl wszystkie dane Exif",
     "no_exif": "Brak danych Exif",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Uwierzytelnianie dwustopniowe",
     "two_factor_authentication": "Uwierzytelnianie dwustopniowe",

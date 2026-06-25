@@ -362,6 +362,7 @@
     "details": "Chi tiết",
     "view_exif": "Xem thông số Exif",
     "no_exif": "Không có Exif",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Xác thực 2 bước",
     "two_factor_authentication": "Xác thực 2 bước",

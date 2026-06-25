@@ -362,6 +362,7 @@
     "details": "Details",
     "view_exif": "Bekijk alle Exif gegevens",
     "no_exif": "Geen Exif gegevens",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Tweestaps",
     "two_factor_authentication": "Tweestapsverificatie",
