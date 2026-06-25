@@ -308,6 +308,28 @@ You can help improve face grouping by reviewing and confirming suggestions:
 
 This helps the app learn and improve grouping accuracy for the specific person over time.
 
+### Will indexing on desktop download a fresh copy of my library even if I'm using watched folders? {#indexing-watched-folders}
+
+The desktop app may still download or cache items from your Ente account during ML indexing, depending on what's available locally. Expect some temporary local storage and network use during the initial indexing run.
+
+### Once indexing is done, will my phone storage be affected? {#indexing-phone-storage}
+
+No. ML results sync to your account and are available on your phone without re-running the work. Your phone may still cache thumbnails and any files you open, but it does not duplicate the full desktop processing cache.
+
+### Can I reset the machine learning database and re-run face detection from scratch? {#reset-ml-database}
+
+Not currently. There is no built-in option to reset the ML database and detected faces.
+
+### Does Ente adapt as I name people and clean up duplicate face clusters? {#ml-adapts-to-corrections}
+
+Yes. Naming a person triggers automatic merging of the closest matching clusters. Beyond that, Ente surfaces less-confident matches as suggestions for you to accept or reject, and rejected clusters won't be suggested again. All corrections sync across devices.
+
+The fastest way through a large cluster list is to name the people who appear most often in your library first, then accept or reject the follow-up suggestions.
+
+### What happens if I enable Machine Learning but turn off local indexing? {#ml-without-local-indexing}
+
+Local indexing lets your device do the ML work itself — downloading photos, running the models, and building the indexes locally. If you turn it off, the device skips that work and pulls in indexes already built by another of your devices (such as desktop). This is useful for phones with limited RAM.
+
 ## Magic Search
 
 ### What is magic search? {#what-is-magic-search}
