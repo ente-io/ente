@@ -17,7 +17,7 @@ type Repository struct {
 	DB *sql.DB
 }
 
-func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string, deviceName *string) (string, error) {
+func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string, deviceName string) (string, error) {
 	codeValue, err := random.GenerateAlphaNumString(6)
 	if err != nil {
 		return "", err

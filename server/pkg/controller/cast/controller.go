@@ -8,6 +8,7 @@ import (
 	castRepo "github.com/ente/museum/pkg/repo/cast"
 	"github.com/ente/museum/pkg/utils/auth"
 	"github.com/ente/museum/pkg/utils/network"
+	"github.com/ente/museum/pkg/utils/ua"
 	"github.com/ente/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -29,7 +30,12 @@ func NewController(castRepo *castRepo.Repository,
 }
 
 func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDeviceRequest) (string, error) {
-	return c.CastRepo.AddCode(ctx, request.PublicKey, network.GetClientIP(ctx), request.DeviceName)
+	ipAddress := network.GetClientIP(ctx)
+	deviceName, err := ua.GetDeviceType(ctx.GetHeader("User-Agent"))
+	if err != nil {
+		deviceName = ipAddress
+	}
+	return c.CastRepo.AddCode(ctx, request.PublicKey, ipAddress, deviceName)
 }
 
 func (c *Controller) GetAllDevices(ctx *gin.Context, userID int64) ([]cast.CastInfo, error) {

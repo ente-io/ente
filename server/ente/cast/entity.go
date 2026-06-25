@@ -11,8 +11,7 @@ type CastRequest struct {
 }
 
 type RegisterDeviceRequest struct {
-	PublicKey  string  `json:"publicKey" binding:"required"`
-	DeviceName *string `json:"deviceName"`
+	PublicKey string `json:"publicKey" binding:"required"`
 }
 
 type AuthContext struct {
