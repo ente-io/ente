@@ -521,6 +521,28 @@ By default, shared items can appear in your home gallery.
 
 To hide them, open `Settings > Appearance > Gallery` and enable **Hide shared items from home gallery**.
 
+### What happens to a shared album's photos if it is deleted or I leave it? {#shared-album-deletion-fate}
+
+Anything **you** uploaded to a shared album always stays in your own library, no matter what happens to the album.
+
+For photos uploaded by **others**, you lose access if the album is deleted or you are removed. There is no automatic saving and no advance warning when this happens. The owner who deletes the album sees a dialog warning that the album will be deleted for everyone and that they will lose access to photos uploaded by others.
+
+To keep others' photos before this can happen, save them into one of your own albums first:
+
+1. Open the shared album.
+2. Long-press to select photos, then choose **Select all**.
+3. Tap **Add to album** and pick one of your own albums.
+
+This creates copies you fully own, which count towards your storage. See [Can I add photos from a shared album to my own albums?](#add-shared-photos).
+
+### Does Ente remove duplicates in shared albums? {#shared-album-duplicates}
+
+No. Ente's [remove duplicates](/photos/features/albums-and-organization/storage-optimization#remove-exact-duplicates) and [remove similar images](/photos/features/albums-and-organization/storage-optimization#remove-similar-images) tools only work on albums you own, not on shared or collaborative albums. The same applies across two separate accounts: there is no way to deduplicate between them.
+
+Because of this, a shared album can show the same photo or video twice when more than one person adds it, or when you add something a collaborator already added. The album does not warn participants that an item is already present.
+
+Sharing without duplicates is on our roadmap, but we cannot share a timeline.
+
 ### Can I remove myself from a shared album? {#leave-shared-album}
 
 Yes, if someone has shared an album with you, you can leave it at any time:

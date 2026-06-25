@@ -168,6 +168,38 @@ Try these steps first:
 
 If the People section is still empty, please [send logs](/photos/faq/troubleshooting#sharing-logs) from your desktop app so we can investigate further.
 
+### I named and merged people on one device, but my other device still shows them unsorted. How do I fix it? {#people-organization-not-syncing}
+
+Person names, merges, and other face organization sync across your devices as end-to-end encrypted machine learning data, the same way your photos do. If one device still shows the old, unsorted state, it usually has a stale local copy.
+
+Log out of that device and log back in, then give it a few minutes to pull the latest face data. Your organization appears once the sync completes.
+
+Make sure machine learning is enabled and indexing has finished on the device you are syncing to.
+
+### Why do some people show a letter instead of a face thumbnail? {#people-letter-placeholders}
+
+The letter placeholders are a fallback Ente shows when it cannot yet load the actual face thumbnail for someone. This usually happens after you add new photos, while the app is still generating thumbnails and downloading the originals it needs.
+
+1. Force-quit and reopen Ente.
+2. Open the People section and leave it in the foreground for a few minutes, with your device on WiFi.
+3. If the placeholders remain after 10 to 15 minutes, force-quit and reopen once more.
+
+The faces reappear gradually as the app catches up.
+
+### Can I use face recognition without backing up my photos? {#face-recognition-without-backup}
+
+Yes, but how it works depends on whether you are signed in.
+
+**Signed in to an account:**
+
+Machine learning runs only on photos that are backed up to Ente. Photos that stay on your device and are never backed up are not indexed, so they will not produce people or magic search results.
+
+**Without an account:**
+
+Open Ente and select **Continue without account**. Face recognition and magic search then run entirely on the photos on your device, with nothing uploaded. Enable it from `Settings > Machine learning`.
+
+If you are signed in but see no people and the learning rate shows N/A, either back up the photos you want indexed, or log out and use **Continue without account** to index your local photos. Learn more in the [Gallery mode FAQ](/photos/faq/gallery-mode#offline-face-recognition).
+
 ### How do I enable face recognition? {#enable-face-recognition}
 
 Face recognition requires enabling **Machine Learning** first:

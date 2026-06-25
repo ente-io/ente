@@ -79,6 +79,35 @@ The initial backup can take time depending on:
 - Desktop uploads are generally faster than mobile
 - Consider doing initial upload from desktop if you have a large library
 
+### Why does the app keep closing during my first large backup on iPhone? {#ios-backup-app-closing}
+
+During a large initial backup, iOS can suspend or close Ente when the phone gets hot, even with **Disable auto lock** turned on. That setting only keeps the screen awake. It cannot stop iOS from suspending an app under thermal pressure, background limits, or system resource management. Uploads pause whenever the app is moved out of the foreground.
+
+To get through the first backup:
+
+- Remove any case and use wired charging to keep the phone cool.
+- Stay on stable WiFi and avoid using other heavy apps.
+- Keep Ente open in the foreground.
+- If **Optimize iPhone Storage** is enabled, originals may need to download from iCloud first, which can slow or stall uploads.
+
+Once the initial backup completes, background sync handles new photos without keeping the app open.
+
+### On iOS, which album should I back up to capture all my photos? {#ios-backup-recents}
+
+Back up **Recents**. On iOS, Recents is the smart album that contains every photo and video in your library, sorted by date added, regardless of where it came from (camera, screenshots, WhatsApp, AirDrop, browser downloads, and so on). It is the closest equivalent to the single camera roll on Android.
+
+iOS automatically sorts media into albums like Portraits and Live Photos, and you cannot turn this off. Since those photos are already included in Recents, you can enable backup for Recents and disable backup for the others without missing anything.
+
+Open `Settings > Backup > Backed up folders` to choose which albums Ente backs up.
+
+### Why is Ente using device storage even though I removed the backed-up files? {#pending-sync-storage}
+
+This space is Ente's working cache, including the "pending sync" data the app prepares while uploading. It is not a second copy of your library, and it is separate from the original files you have already cleared from your device.
+
+Ente clears upload-related temporary files every 6 hours. To reclaim the space sooner, open `Settings > Backup > Free up space > Manage device cache` and tap **Clear cache**, then force-quit and reopen the app. See [How can I clear the cache from the Ente app?](/photos/faq/troubleshooting#clear-cache).
+
+If the cache stays large after clearing it and your remaining uploads are small, send debug logs to [support@ente.com](mailto:support@ente.com) so we can check which files are stuck. See [How do I share debug logs?](/photos/faq/troubleshooting#sharing-logs).
+
 ### What happens if my backup is interrupted? {#backup-interrupted}
 
 If your backup is interrupted (due to network issues, closing the app, or other reasons), Ente will automatically resume from where it left off the next time you have connectivity. You don't need to restart the entire backup process.
@@ -638,6 +667,18 @@ Common reasons and solutions:
 6. **File too large**: Maximum file size is 10 GB
 
 For detailed troubleshooting, see [Troubleshooting](/photos/faq/troubleshooting).
+
+### What is "Faster uploads"? {#what-is-faster-uploads}
+
+Faster uploads routes your uploads through Cloudflare's network (`uploader.ente.com`) instead of sending them straight to Ente's storage backend. Your files are still end-to-end encrypted; only the network path changes. They reach the nearest Cloudflare edge node first, and Cloudflare's backbone handles the final leg to storage.
+
+For most users, especially those far from Ente's storage origin, this is noticeably faster because the public-internet portion of the trip is shorter.
+
+A few details:
+
+- It is available only on the production app, not on self-hosted instances.
+- It is enabled by default. You can toggle it in `Settings > Preferences > Advanced` on desktop and web.
+- If uploads are slow or failing, turning it off is a useful troubleshooting step, since Cloudflare routing can occasionally slow things down in certain regions. See [Why are uploads failing on desktop or web?](/photos/faq/troubleshooting#faster-uploads).
 
 ### Can I use the desktop app and mobile app at the same time? {#use-multiple-devices}
 

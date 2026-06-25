@@ -23,6 +23,26 @@ description: Frequently asked questions about Ente Auth
 4. Enter the account name, issuer, and secret (setup key).
 5. Save and verify the generated code.
 
+### Why does Ente Auth say "No QR code found in image"? {#no-qr-code-found}
+
+If the QR code is sharp and high-resolution but still will not scan, the service is most likely using a QR format that Ente Auth does not recognize. Some sites embed proprietary or non-standard data instead of the standard `otpauth://` URI.
+
+The simplest fix is to add the code by hand. Tap the + button, choose **Enter details manually**, and enter the account name, issuer, and secret (setup key) shown by the service.
+
+If you are not sure which website it is from, write to [support@ente.com](mailto:support@ente.com) and we can check for any known issue with that service.
+
+### How do I move my codes to a different Ente account? {#move-codes-to-new-account}
+
+You can move your codes to another account, for example to keep your authenticator separate from the Ente account whose own 2FA you store in it (see [Enteception](/auth/faq/enteception/)).
+
+1. Create the new Ente account with a different email address.
+2. In the old account, open `Settings > Data > Export codes` and choose the **Encrypted** export.
+3. In the new account, open `Settings > Data > Import codes`, choose **Ente Encrypted export**, and select the exported file.
+4. Confirm that all codes imported correctly and generate the same values.
+5. Once verified, log out of the old account.
+
+You do not need to delete the old account. Deleting it would also delete the Ente Photos and Ente Locker data on that same account, since all three share one login. Note down the password and 24-word recovery key for the new account, and store them somewhere safe and separate. Learn more in the [export](/auth/migration/export) and [import](/auth/migration/import) guides.
+
 ### How secure is Ente Auth?
 
 All codes you backup via Ente is stored with end-to-end encryption. This means only you can access your codes. Our apps are open source and our cryptography has been externally audited.

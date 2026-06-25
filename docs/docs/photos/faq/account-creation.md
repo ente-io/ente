@@ -213,6 +213,14 @@ If you lose access to your passkey (for example, if you misplace a hardware secu
 
 If you've lost both your passkey and recovery key, contact [support@ente.com](mailto:support@ente.com) for assistance.
 
+### Why doesn't my passkey appear on my other device? {#passkey-not-on-other-device}
+
+Passkeys sync through whichever password manager or keychain you saved them to, not through Ente. For a passkey created on your iPhone to appear on your iPad, both devices need to be signed in to the same Apple ID with iCloud Keychain enabled (device `Settings > [your name] > iCloud > Passwords`). If you saved the passkey to a third-party password manager instead, that same manager must be signed in on the other device.
+
+To add a separate passkey on another device, you must be signed in to Ente there first. If you cannot sign in because passkey verification is your second factor, select **Recover two-factor** on the verification screen and enter your recovery key. Then open [accounts.ente.com](https://accounts.ente.com), open Passkeys, and add a new one.
+
+Cross-device sign-in using the browser's QR code flow depends on Bluetooth, proximity, and both devices being nearby, and it is known to time out. Adding a device-local passkey is more reliable. Learn more in the [Passkeys guide](/photos/features/account/passkeys).
+
 ### I'm not receiving the verification code email {#verification-code}
 
 If you're not receiving verification codes:

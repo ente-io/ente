@@ -291,6 +291,18 @@ Ente will automatically skip files that have already been uploaded, so you can d
 
 If the browser settings cannot be changed, we recommend uploading files through the desktop app.
 
+### Why does machine learning show "Indexing: Error"? {#ml-indexing-error-general}
+
+When indexing fails, the most common cause is that Ente could not download its machine learning models, or could not reach the photos it needs to index. A firewall, antivirus, VPN, or network-level blocker sitting between the app and our servers can interrupt these downloads.
+
+Try the following:
+
+1. Allowlist Ente in your firewall and antivirus, and temporarily disable any VPN or DNS blocker.
+2. Confirm your network does not block `*.ente.io`, `*.ente.com`, or `*.backblazeb2.com`.
+3. Fully quit and reopen the app, then re-enable ML so the model download retries.
+
+On Windows specifically, indexing errors are often caused by an old VC++ runtime or a roaming profile. See [Why is ML stuck on Windows?](#windows-ml-stuck) and [Why does desktop ML show "Indexing: Error" on Windows?](#windows-ml-indexing-error-13).
+
 ### Why does desktop ML show "Indexing: Error" on Windows? {#windows-ml-indexing-error-13}
 
 If the desktop app shows `Indexing: Error` in `Settings > Preferences > Machine learning`, this is usually caused by Windows roaming profiles preventing access to the ML model files in `%APPDATA%\ente\models\`.
@@ -524,6 +536,17 @@ Mobile browsers on photos.ente.com are not supported. Use native apps for the be
 If photos appear in the mobile or desktop app but not on photos.ente.com, try logging out and logging back in on the browser. This clears any stale session data and refreshes your library view.
 
 You can also try opening photos.ente.com in an incognito or private window to rule out browser caching issues.
+
+### Why don't some photos show in my home gallery? {#home-gallery-missing-photos}
+
+The home gallery does not show everything by design. Photos are excluded from it if they are:
+
+- Archived, or in an archived album.
+- Hidden, or in a hidden album.
+
+Check whether the missing photos fall into one of these categories by opening the **Archive** or **Hidden** section. Shared items can also be hidden from the home gallery if you enabled that option in `Settings > Appearance > Gallery`.
+
+If the home gallery is empty or new photos are missing on iOS, also confirm Ente has full photo access. With "Selected Photos" or "Limited Access", Ente only sees the few photos you picked. Open device `Settings > Ente > Photos` and select **Full Access**, then force-quit and reopen the app.
 
 ### How do I identify which files failed to upload? {#identify-failed-uploads}
 
