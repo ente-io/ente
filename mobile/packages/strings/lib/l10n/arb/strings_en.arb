@@ -515,7 +515,7 @@
   "@recoveryKeyOnForgotPassword": {
     "description": "Recovery key importance explanation"
   },
-  "recoveryKeySaveDescription": "We don't store this key, please save this 24 word key in a safe place.",
+  "recoveryKeySaveDescription": "Please save this key in a safe place.",
   "@recoveryKeySaveDescription": {
     "description": "Recovery key save description"
   },

@@ -208,6 +208,8 @@ class HomePage extends UploaderPage {
 
 class _HomePageState extends UploaderPageState<HomePage>
     with TickerProviderStateMixin, SearchMixin {
+  static const double _drawerOpenDragThreshold = 45;
+
   late final _settingsPage = DrawerPage(
     emailNotifier: UserService.instance.emailValueNotifier,
     scaffoldKey: scaffoldKey,
@@ -216,6 +218,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   final _searchFocusNode = FocusNode();
   final _selectedFiles = SelectedFiles();
   final _scrollController = ScrollController();
+  final _drawerPageController = PageController();
   bool _isLoading = true;
   bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
@@ -282,6 +285,8 @@ class _HomePageState extends UploaderPageState<HomePage>
   void initState() {
     super.initState();
 
+    _drawerPageController.addListener(_handleDrawerPageOverscroll);
+
     _loadCollections();
 
     // Initialize sharing functionality to handle shared files
@@ -324,6 +329,8 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   @override
   void dispose() {
+    _drawerPageController.removeListener(_handleDrawerPageOverscroll);
+    _drawerPageController.dispose();
     _searchFocusNode.dispose();
     _scrollController.dispose();
     _displayedFilesNotifier.dispose();
@@ -652,7 +659,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                   backgroundColor: componentColors.backgroundBase,
                   child: _settingsPage,
                 ),
-                drawerEnableOpenDragGesture: true,
+                drawerEnableOpenDragGesture: false,
                 onDrawerChanged: (isOpened) {
                   _isSettingsOpen = isOpened;
                   if (isOpened) {
@@ -671,7 +678,13 @@ class _HomePageState extends UploaderPageState<HomePage>
                 ),
                 body: Stack(
                   children: [
-                    _buildBody(),
+                    PageView(
+                      controller: _drawerPageController,
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      children: [_buildBody()],
+                    ),
                     ValueListenableBuilder<List<EnteFile>>(
                       valueListenable: _displayedFilesNotifier,
                       builder: (context, displayedFiles, _) {
@@ -792,6 +805,15 @@ class _HomePageState extends UploaderPageState<HomePage>
               );
       },
     );
+  }
+
+  void _handleDrawerPageOverscroll() {
+    if (_isSettingsOpen) {
+      return;
+    }
+    if (_drawerPageController.offset < -_drawerOpenDragThreshold) {
+      scaffoldKey.currentState?.openDrawer();
+    }
   }
 
   void _openSavePage() {
