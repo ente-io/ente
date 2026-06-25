@@ -978,19 +978,24 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
             );
           } catch (e, s) {
             _logger.severe("Failed to delete files", e, s);
-            if (flagService.internalUser) {
-              await showGenericErrorDialog(context: context, error: e);
-            }
+            await showGenericErrorDialog(context: context, error: e);
           }
         },
       );
     } else {
-      await _deleteFilesLogic(
-        filesToDelete,
-        true,
-        showUIFeedback: showUIFeedback,
-        maintainScrollAnchor: maintainScrollAnchor,
-      );
+      try {
+        await _deleteFilesLogic(
+          filesToDelete,
+          true,
+          showUIFeedback: showUIFeedback,
+          maintainScrollAnchor: maintainScrollAnchor,
+        );
+      } catch (e, s) {
+        _logger.severe("Failed to delete files", e, s);
+        if (mounted) {
+          await showGenericErrorDialog(context: context, error: e);
+        }
+      }
     }
   }
 

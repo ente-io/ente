@@ -316,7 +316,7 @@
   "videoSmallCase": "וידאו",
   "photoSmallCase": "תמונה",
   "singleFileDeleteHighlight": "זה יימחק מכל האלבומים.",
-  "singleFileDeleteFromDevice": "{fileType} יימחק מהמכשיר שלך.",
+  "singleFileDeleteFromDevice": "יימחק מהמכשיר שלך.",
   "yesDelete": "כן, מחק",
   "movedToTrash": "הועבר לאשפה",
   "deleteFromDevice": "מחק מהמכשיר",
