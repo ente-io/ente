@@ -1535,14 +1535,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
 
     const shouldIgnoreKeyboardEvent = useCallback((event: KeyboardEvent) => {
-        // Allow the file info drawer itself to pass through plain slide arrows.
+        // Allow the file info drawer itself to pass through the slide shortcut.
         const shouldAllowFileInfoArrowNavigation =
             openFileInfo &&
             !fileInfoNavigationLocked &&
             !event.shiftKey &&
             !event.metaKey &&
             !event.ctrlKey &&
-            !event.altKey &&
+            event.altKey &&
             (event.key == "ArrowLeft" || event.key == "ArrowRight");
 
         // Don't handle keydowns if any of the viewer's own modals are open.

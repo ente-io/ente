@@ -1,1 +1,1 @@
-- Keep the info panel open when using arrow keys while viewing files.
+- Keep the info panel open when using Alt/Option + arrow keys while viewing files.
