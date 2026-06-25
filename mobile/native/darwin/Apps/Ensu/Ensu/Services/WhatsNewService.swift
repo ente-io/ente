@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import Foundation
 
 struct PendingWhatsNew: Identifiable {
@@ -44,4 +43,3 @@ final class WhatsNewService {
         defaults.set(WhatsNewContent.version, forKey: seenVersionKey)
     }
 }
-#endif

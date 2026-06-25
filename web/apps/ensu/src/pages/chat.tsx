@@ -32,7 +32,6 @@ import {
     type ChatMessage,
     type ChatSession,
 } from "@/services/chat/store";
-import { DESKTOP_IMAGE_ATTACHMENTS_ENABLED } from "@/services/featureFlags";
 import {
     DEFAULT_MODEL,
     FALLBACK_DESKTOP_MODEL_PRESETS,
@@ -1638,9 +1637,7 @@ const Page: React.FC = () => {
     const drawerWidth = isSmall ? 300 : drawerCollapsed ? 0 : 320;
     const desktopBreakpoint = theme.breakpoints.values.lg ?? 1200;
     const isDesktopOverlay = !isSmall && chatViewportWidth >= desktopBreakpoint;
-    const showAttachmentPicker = isTauriRuntime;
-    const showImageAttachment =
-        showAttachmentPicker && DESKTOP_IMAGE_ATTACHMENTS_ENABLED;
+    const showImageAttachment = isTauriRuntime;
     const showDownloadProgress =
         !!downloadStatus?.status && downloadStatus.status !== "Ready";
     const showModelGate =
@@ -4109,7 +4106,7 @@ const Page: React.FC = () => {
                         isGenerating={isGenerating}
                         handleSend={handleSend}
                         handleStopGeneration={handleStopGeneration}
-                        showAttachmentPicker={showAttachmentPicker}
+                        showAttachmentPicker={isTauriRuntime}
                         openAttachmentMenu={openAttachmentMenu}
                         attachmentAnchor={attachmentAnchor}
                         closeAttachmentMenu={closeAttachmentMenu}

@@ -59,7 +59,6 @@ import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.MaxImageAttachmentsPerMessage
 import io.ente.ensu.domain.util.formattedFileSize
-import io.ente.ensu.utils.EnsuFeatureFlags
 import io.ente.ensu.utils.rememberEnsuHaptics
 import kotlinx.coroutines.delay
 
@@ -73,7 +72,6 @@ internal fun MessageInput(
     isProcessingAttachments: Boolean,
     isGenerating: Boolean,
     isDownloading: Boolean,
-    downloadPercent: Int?,
     isAttachmentDownloadBlocked: Boolean,
     attachmentDownloadPercent: Int?,
     onMessageChange: (String) -> Unit,
@@ -268,7 +266,7 @@ internal fun MessageInput(
 
                 Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
 
-                if (EnsuFeatureFlags.enableImageUploads && editingMessage == null) {
+                if (editingMessage == null) {
                     val canAddImageAttachment = !isGenerating &&
                         !isDownloading &&
                         !isAttachmentDownloadBlocked &&

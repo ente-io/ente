@@ -1,1 +1,0 @@
-export const DESKTOP_IMAGE_ATTACHMENTS_ENABLED = true;

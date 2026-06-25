@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 
 struct SessionDrawerView: View {
@@ -228,13 +227,3 @@ private struct SessionSection: Identifiable {
     let title: String
     let sessions: [ChatSession]
 }
-
-#else
-import SwiftUI
-
-struct SessionDrawerView: View {
-    var body: some View {
-        Text("Sessions unavailable")
-    }
-}
-#endif

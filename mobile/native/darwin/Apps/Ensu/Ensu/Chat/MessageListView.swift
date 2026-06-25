@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 
 struct MessageListView: View {
@@ -407,13 +406,3 @@ private struct StreamingDotsView: View {
         }
     }
 }
-
-#else
-import SwiftUI
-
-struct MessageListView: View {
-    var body: some View {
-        Text("Messages unavailable")
-    }
-}
-#endif

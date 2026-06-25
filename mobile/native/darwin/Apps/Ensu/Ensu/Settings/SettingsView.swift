@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 import Foundation
 
@@ -431,14 +430,3 @@ private struct SettingsActionItem: Identifiable {
     let iconName: String
     let action: () -> Void
 }
-#else
-import SwiftUI
-
-struct SettingsView: View {
-    let onSignIn: () -> Void
-
-    var body: some View {
-        Text("Settings unavailable")
-    }
-}
-#endif

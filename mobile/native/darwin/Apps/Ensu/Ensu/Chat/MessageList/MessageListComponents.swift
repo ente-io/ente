@@ -1,4 +1,3 @@
-#if canImport(EnteCore)
 import SwiftUI
 import Markdown
 #if os(macOS)
@@ -1394,4 +1393,3 @@ struct ScrollChange: Equatable {
     var isGenerating: Bool = false
     var isAtBottom: Bool = true
 }
-#endif
