@@ -1,6 +1,8 @@
 import "package:ente_components/ente_components.dart";
+import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/gateways/cast/cast_gateway.dart";
 import "package:photos/generated/l10n.dart";
@@ -77,6 +79,7 @@ class _CastSessionsListState extends State<CastSessionsList> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.componentColors;
+    final logger = Logger("CastSessionsList");
     return FutureBuilder(
       future: _sessionsFuture,
       builder: (context, snapshot) {
@@ -87,7 +90,9 @@ class _CastSessionsListState extends State<CastSessionsList> {
           throw snapshot.error!;
         }
         if (!snapshot.hasData || snapshot.data == null) {
-          throw Exception("There is no data returned by getAllCastSessions");
+          logger.severe("No data returned by get all cast sessions.");
+          showGenericErrorDialog(context: context, error: null);
+          return const Column(children: []);
         }
         if (snapshot.data!.isEmpty) {
           return widget.fallback;
@@ -106,7 +111,7 @@ class _CastSessionsListState extends State<CastSessionsList> {
             for (final session in snapshot.data!) ...[
               _CastSessionItem(
                 session: session,
-                onRevokeSession: _revokeSession,
+                onRevokeSession: (session) => _revokeSession(session, logger),
               ),
               const SizedBox(height: Spacing.sm),
             ],
@@ -116,7 +121,7 @@ class _CastSessionsListState extends State<CastSessionsList> {
     );
   }
 
-  Future<void> _revokeSession(CastInfo session) async {
+  Future<void> _revokeSession(CastInfo session, Logger logger) async {
     final l10n = AppLocalizations.of(context);
     final gw = CastGateway(NetworkClient.instance.enteDio);
     await showBottomSheetComponent<void>(
@@ -131,7 +136,13 @@ class _CastSessionsListState extends State<CastSessionsList> {
             variant: ButtonComponentVariant.critical,
             onTap: () async {
               Navigator.of(sheetContext).pop();
-              await gw.revokeSession(session);
+              try {
+                await gw.revokeSession(session);
+              } catch (e, s) {
+                logger.severe('Failed to revoke cast session: ', e, s);
+                await showGenericErrorDialog(context: context, error: e);
+                return;
+              }
               _refresh();
             },
           ),
@@ -141,10 +152,9 @@ class _CastSessionsListState extends State<CastSessionsList> {
   }
 
   void _refresh() {
+    final gw = CastGateway(NetworkClient.instance.enteDio);
     setState(() {
-      _sessionsFuture = CastGateway(
-        NetworkClient.instance.enteDio,
-      ).getAllCastSessions();
+      _sessionsFuture = gw.getAllCastSessions();
     });
   }
 }
