@@ -16,7 +16,6 @@ import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/models/collection.dart';
-import "package:locker/services/collections/models/collection_items.dart";
 import "package:locker/services/collections/models/files_split.dart";
 import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
@@ -239,27 +238,6 @@ class CollectionService {
       }
     }
     return null;
-  }
-
-  Future<SharedCollections> getSharedCollections() async {
-    final List<Collection> outgoing = [];
-    final List<Collection> incoming = [];
-    final List<Collection> quickLinks = [];
-
-    final List<Collection> collections = await getCollections();
-
-    for (final c in collections) {
-      if (c.owner.id == Configuration.instance.getUserID()) {
-        if (c.hasSharees || c.hasLink && !c.isQuickLinkCollection()) {
-          outgoing.add(c);
-        } else if (c.isQuickLinkCollection()) {
-          quickLinks.add(c);
-        }
-      } else {
-        incoming.add(c);
-      }
-    }
-    return SharedCollections(outgoing, incoming, quickLinks);
   }
 
   Future<List<Collection>> getCollectionsForFile(EnteFile file) async {

@@ -9,10 +9,19 @@ import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
-import 'package:locker/ui/components/file_upload_sheet.dart';
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import 'package:path/path.dart' as path;
+
+class FileUploadScreenResult {
+  final String note;
+  final List<Collection> selectedCollections;
+
+  FileUploadScreenResult({
+    required this.note,
+    required this.selectedCollections,
+  });
+}
 
 class FileUploadScreen extends StatefulWidget {
   final List<File> files;
@@ -193,7 +202,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                                   (c) => _selectedCollectionIds.contains(c.id),
                                 )
                                 .toList();
-                            final result = FileUploadSheetResult(
+                            final result = FileUploadScreenResult(
                               note: '',
                               selectedCollections: selectedCollections,
                             );
