@@ -85,8 +85,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
       _sortedCollections = List.from(regularCollections);
       _uncategorizedCollection = uncategorized;
-      _uncategorizedFileCount =
-          uncategorized != null
+      _uncategorizedFileCount = uncategorized != null
           ? (await CollectionService.instance.getFilesInCollection(
               uncategorized,
             )).length
@@ -339,5 +338,4 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       ),
     );
   }
-
 }
