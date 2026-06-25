@@ -286,9 +286,13 @@ flutter run --flavor independent --dart-define 'endpoint=http://localhost:8080'
 
 ### Auth and Locker
 
-The Auth and Locker follow the same pattern. For example, for running the Ente Auth app in the iOS simulator:
+The [Auth](https://github.com/ente/ente/tree/main/mobile/apps/auth#readme) and [Locker](https://github.com/ente/ente/tree/main/mobile/apps/locker#readme) follow the same pattern, though they might have some oddities that you'll find documented in the linked READMEs.
+
+For example, for running the Ente Auth app in the iOS simulator, we need to also update the submodules to pull in icons.
 
 ```sh
+git submodule update --init --recursive
+
 cd mobile/apps/auth
 flutter run --dart-define 'endpoint=http://localhost:8080'
 ```
