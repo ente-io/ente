@@ -25,7 +25,6 @@ import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
-import "package:photos/ui/tabs/home_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -644,16 +643,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
 
     if (selectedPlanProductID == freeProductID) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
       Bus.instance.fire(SubscriptionPurchasedEvent());
-      // ignore: unawaited_futures
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return const HomeWidget();
-          },
-        ),
-        (route) => false,
-      );
       unawaited(
         _billingService.verifySubscription(
           freeProductID,

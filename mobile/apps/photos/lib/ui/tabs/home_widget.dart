@@ -92,9 +92,7 @@ import "package:photos/utils/intent_util.dart";
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 class HomeWidget extends StatefulWidget {
-  const HomeWidget({super.key, this.startWithoutAccount = false});
-
-  final bool startWithoutAccount;
+  const HomeWidget({super.key});
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -124,6 +122,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _personSyncTriggered = false;
   bool _collectionsSyncTriggered = false;
   bool _isShowingChangeLog = false;
+  bool _startWithoutAccount = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _isAlbumsSearchActiveNotifier = ValueNotifier<bool>(
     false,
@@ -153,6 +152,12 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<AppModeChangedEvent> _appModeChangedEventSubscription;
 
   final DiffFetcher _diffFetcher = DiffFetcher();
+
+  void _startWithoutAccountFlow() {
+    setState(() {
+      _startWithoutAccount = true;
+    });
+  }
 
   @override
   void initState() {
@@ -205,6 +210,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _accountConfiguredEvent = Bus.instance.on<AccountConfiguredEvent>().listen((
       event,
     ) {
+      _startWithoutAccount = false;
       setState(() {});
       // fetch user flags on login
       if (!isLocalGalleryMode) {
@@ -220,6 +226,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _logger.info('logged out, selectTab index to 0');
       _selectedTabIndex = 0;
       _selectedTabIndexNotifier.value = 0;
+      _startWithoutAccount = false;
       if (mounted) {
         setState(() {});
       }
@@ -822,11 +829,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
           final isStartWithoutAccountFlow =
-              widget.startWithoutAccount &&
+              _startWithoutAccount &&
               !Configuration.instance.hasConfiguredAccount() &&
               !localSettings.isAppModeSet;
           if (isStartWithoutAccountFlow) {
-            Navigator.pop(context);
+            setState(() {
+              _startWithoutAccount = false;
+            });
             return;
           }
           if (_selectedTabIndex == 0) {
@@ -949,7 +958,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                           final isOnLandingPage =
                               !Configuration.instance.hasConfiguredAccount() &&
                               !isLocalGalleryMode &&
-                              !widget.startWithoutAccount;
+                              !_startWithoutAccount;
                           final isOnOnlineGrantPermissionScreen =
                               Configuration.instance.hasConfiguredAccount() &&
                               !isLocalGalleryMode &&
@@ -979,14 +988,14 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen();
       final shouldBootstrapLocalGalleryEntryFlow =
-          widget.startWithoutAccount && !localGalleryMode;
+          _startWithoutAccount && !localGalleryMode;
       final hasPersistedLocalGalleryMode =
           localSettings.isAppModeSet && localGalleryMode;
       final canResumePersistedLocalGalleryMode =
           hasPersistedLocalGalleryMode &&
           permissionService.hasGrantedPermissions();
       final shouldUseLocalGalleryEntryFlow =
-          widget.startWithoutAccount || canResumePersistedLocalGalleryMode;
+          _startWithoutAccount || canResumePersistedLocalGalleryMode;
 
       if (shouldBootstrapLocalGalleryEntryFlow) {
         return const GrantPermissionsWidget(startWithoutAccount: true);
@@ -995,7 +1004,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         return const GrantPermissionsWidget(startWithoutAccount: true);
       }
       if (!shouldUseLocalGalleryEntryFlow) {
-        return const LandingPageWidget();
+        return LandingPageWidget(
+          onStartWithoutAccount: _startWithoutAccountFlow,
+        );
       }
     }
     _ensurePersonSync();
@@ -1349,7 +1360,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!permissionService.hasGrantedPermissions()) {
       return false;
     }
-    return !LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
+    final isFirstImportCompletedOrBypassed = LocalSyncService.instance
+        .hasCompletedFirstImportOrBypassed();
+    return !isFirstImportCompletedOrBypassed;
   }
 
   void _ensurePersonSync() {
