@@ -4,7 +4,7 @@ edition = "2024"
 
 [dependencies]
 ente-core.workspace = true
-ente_image.workspace = true
+ente-image.workspace = true
 rusqlite = { version = "0.38", features = ["bundled"], optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
