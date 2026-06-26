@@ -13,6 +13,9 @@ import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import KeyboardOptionKeyIcon from "@mui/icons-material/KeyboardOptionKey";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
 import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
@@ -331,7 +334,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     }, [onNavigationLockChange, navigationLocked]);
 
     return (
-        <FileInfoSidebar {...{ open, onClose }}>
+        <BottomAlignedFileInfoSidebar {...{ open, onClose }}>
             <SidebarDrawerTitlebar
                 onClose={onClose}
                 onRootClose={onClose}
@@ -493,21 +496,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         {t("added_by_name", { name: uploaderName })}
                     </Typography>
                 )}
-                <Typography
-                    variant="small"
-                    sx={{
-                        display: { xs: "none", sm: "block" },
-                        px: 2,
-                        color: "text.muted",
-                        opacity: 0.3,
-                        maxWidth: "300px",
-                        fontSize: "12px",
-                        lineHeight: "15px",
-                    }}
-                >
-                    {t("file_info_arrow_navigation_hint")}
-                </Typography>
             </Stack>
+            <FileInfoNavigationHint />
             <RawExif
                 {...rawExifVisibilityProps}
                 onInfoClose={onClose}
@@ -531,9 +521,75 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     onConfirm={handleEditLocationConfirm}
                 />
             )}
-        </FileInfoSidebar>
+        </BottomAlignedFileInfoSidebar>
     );
 };
+
+const FileInfoNavigationHint: React.FC = () => (
+    <Stack
+        direction="row"
+        sx={{
+            display: { xs: "none", sm: "flex" },
+            alignItems: "center",
+            gap: 0.5,
+            mt: "auto",
+            pb: 3,
+            px: 2,
+            color: "text.muted",
+            opacity: 0.24,
+        }}
+    >
+        <Typography component="span" variant="tiny">
+            Use
+        </Typography>
+        <NavigationHintKey>
+            <KeyboardOptionKeyIcon sx={{ fontSize: 12 }} />
+            <Typography
+                component="span"
+                variant="tiny"
+                sx={{ fontWeight: "medium" }}
+            >
+                Alt / Option
+            </Typography>
+        </NavigationHintKey>
+        <NavigationHintSeparator>+</NavigationHintSeparator>
+        <NavigationHintKey>
+            <KeyboardArrowLeftIcon sx={{ fontSize: 14 }} />
+        </NavigationHintKey>
+        <NavigationHintSeparator>/</NavigationHintSeparator>
+        <NavigationHintKey>
+            <KeyboardArrowRightIcon sx={{ fontSize: 14 }} />
+        </NavigationHintKey>
+        <Typography component="span" variant="tiny" sx={{ ml: 0.5 }}>
+            {t("file_info_arrow_navigation_hint")}
+        </Typography>
+    </Stack>
+);
+
+const NavigationHintKey = styled("span")(
+    ({ theme }) => `
+    min-height: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 5px;
+    border: 1px solid ${theme.vars.palette.stroke.faint};
+    border-radius: 4px;
+    color: ${theme.vars.palette.text.muted};
+`,
+);
+
+const NavigationHintSeparator: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => (
+    <Typography
+        component="span"
+        variant="tiny"
+        sx={{ color: "text.faint", lineHeight: 1 }}
+    >
+        {children}
+    </Typography>
+);
 
 /**
  * Some immediate fields of interest, in the form that we want to display on the
@@ -612,6 +668,15 @@ const FileInfoSidebar = styled(
         },
     }),
 }));
+
+const BottomAlignedFileInfoSidebar = styled(FileInfoSidebar)({
+    ".MuiDrawer-paper": { display: "flex", flexDirection: "column" },
+    ".MuiDrawer-paper > .MuiBox-root": {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+    },
+});
 
 interface InfoItemProps {
     /**
