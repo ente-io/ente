@@ -184,10 +184,12 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
         );
       },
       child: _displayedFiles.isEmpty
-          ? EmptyStateWidget(
+          ? Center(
               key: const ValueKey('empty_state'),
-              assetPath: "assets/empty_state.png",
-              subtitle: context.l10n.noItemsMatchSelectedFilters,
+              child: EmptyStateWidget(
+                assetPath: "assets/empty_state.png",
+                subtitle: context.l10n.noItemsMatchSelectedFilters,
+              ),
             )
           : ItemListView(
               key: const ValueKey('items_list'),
