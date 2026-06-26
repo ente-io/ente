@@ -39,7 +39,7 @@ const DefaultCopyBatchSize = 100
 func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var file ente.File
-	if err := c.ShouldBindJSON(&file); err != nil {
+	if err := handler.BindJSON(c, &file); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -71,7 +71,7 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 func (h *FileHandler) CreateMetaFile(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var file ente.MetaFile
-	if err := c.ShouldBindJSON(&file); err != nil {
+	if err := handler.BindJSON(c, &file); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -95,7 +95,7 @@ func (h *FileHandler) CreateMetaFile(c *gin.Context) {
 // CopyFiles copies files that are owned by another user
 func (h *FileHandler) CopyFiles(c *gin.Context) {
 	var req ente.CopyFileSyncRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := handler.BindJSON(c, &req); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -117,7 +117,7 @@ func (h *FileHandler) Update(c *gin.Context) {
 
 	userID := auth.GetUserID(c.Request.Header)
 	var file ente.File
-	if err := c.ShouldBindJSON(&file); err != nil {
+	if err := handler.BindJSON(c, &file); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -166,7 +166,7 @@ func (h *FileHandler) GetUploadURLV2(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 	userID := auth.GetUserID(c.Request.Header)
 	var req ente.UploadURLRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := handler.BindJSON(c, &req); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -199,7 +199,7 @@ func (h *FileHandler) GetMultipartUploadURLV2(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 	userID := auth.GetUserID(c.Request.Header)
 	var req ente.MultipartUploadURLRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := handler.BindJSON(c, &req); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -238,7 +238,7 @@ func (h *FileHandler) GetThumbnail(c *gin.Context) {
 // Trash moves the given files to the trash bin
 func (h *FileHandler) Trash(c *gin.Context) {
 	var request ente.TrashRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to bind"))
 		return
 	}
@@ -259,7 +259,7 @@ func (h *FileHandler) Trash(c *gin.Context) {
 // GetSize returns the size of files indicated by fileIDs
 func (h *FileHandler) GetSize(c *gin.Context) {
 	var request ente.FileIDsRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -287,7 +287,7 @@ func (h *FileHandler) GetSize(c *gin.Context) {
 // GetInfo returns the FileInfo of files indicated by fileIDs
 func (h *FileHandler) GetInfo(c *gin.Context) {
 	var request ente.FileIDsRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to bind request"))
 		return
 	}
@@ -371,7 +371,7 @@ func (h *FileHandler) GetLargeThumbnailFiles(c *gin.Context) {
 // UpdateMagicMetadata updates magic metadata for a list of files.
 func (h *FileHandler) UpdateMagicMetadata(c *gin.Context) {
 	var request ente.UpdateMultipleMagicMetadataRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -390,7 +390,7 @@ func (h *FileHandler) UpdateMagicMetadata(c *gin.Context) {
 // UpdatePublicMagicMetadata updates public magic metadata for a list of files.
 func (h *FileHandler) UpdatePublicMagicMetadata(c *gin.Context) {
 	var request ente.UpdateMultipleMagicMetadataRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -407,7 +407,7 @@ func (h *FileHandler) UpdateThumbnail(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 
 	var request ente.UpdateThumbnailRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}

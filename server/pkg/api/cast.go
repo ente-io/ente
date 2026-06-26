@@ -26,7 +26,7 @@ type CastHandler struct {
 
 func (h *CastHandler) RegisterDevice(c *gin.Context) {
 	var request entity.RegisterDeviceRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to bind"))
 		return
 	}
@@ -84,7 +84,7 @@ func (h *CastHandler) DeleteDevice(c *gin.Context) {
 
 func (h *CastHandler) InsertCastData(c *gin.Context) {
 	var request entity.CastRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to bind"))
 		return
 	}

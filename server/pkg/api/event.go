@@ -65,8 +65,8 @@ func (h *EventHandler) CreateForUser(c *gin.Context) {
 
 func bindEventRequest(c *gin.Context) (ente.EventRequest, bool) {
 	var request ente.EventRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "request binding failed"))
 		return request, false
 	}
 	if _, err := uuid.Parse(request.ID); err != nil {

@@ -147,7 +147,7 @@ func (h *PublicCollectionHandler) GetUploadUrls(c *gin.Context) {
 func (h *PublicCollectionHandler) GetUploadURLV2(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 	var req ente.UploadURLRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := handler.BindJSON(c, &req); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -189,7 +189,7 @@ func (h *PublicCollectionHandler) GetMultipartUploadURLs(c *gin.Context) {
 func (h *PublicCollectionHandler) GetMultipartUploadURLV2(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 	var req ente.MultipartUploadURLRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := handler.BindJSON(c, &req); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -209,7 +209,7 @@ func (h *PublicCollectionHandler) GetMultipartUploadURLV2(c *gin.Context) {
 // CreateFile create a new file inside the collection corresponding to the public accessToken
 func (h *PublicCollectionHandler) CreateFile(c *gin.Context) {
 	var file ente.File
-	if err := c.ShouldBindJSON(&file); err != nil {
+	if err := handler.BindJSON(c, &file); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -232,7 +232,7 @@ func (h *PublicCollectionHandler) CreateFile(c *gin.Context) {
 // VerifyPassword verifies the password for given public access token and return signed jwt token if it's valid
 func (h *PublicCollectionHandler) VerifyPassword(c *gin.Context) {
 	var req ente.VerifyPasswordRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := handler.BindJSON(c, &req); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}

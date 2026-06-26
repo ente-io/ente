@@ -21,9 +21,8 @@ type AuthenticatorHandler struct {
 // CreateKey...
 func (h *AuthenticatorHandler) CreateKey(c *gin.Context) {
 	var request model.CreateKeyRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 	err := h.Controller.CreateKey(c, request)
@@ -47,9 +46,8 @@ func (h *AuthenticatorHandler) GetKey(c *gin.Context) {
 // CreateEntity...
 func (h *AuthenticatorHandler) CreateEntity(c *gin.Context) {
 	var request model.CreateEntityRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 	resp, err := h.Controller.CreateEntity(c, request)
@@ -63,9 +61,8 @@ func (h *AuthenticatorHandler) CreateEntity(c *gin.Context) {
 // UpdateEntity...
 func (h *AuthenticatorHandler) UpdateEntity(c *gin.Context) {
 	var request model.UpdateEntityRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 	err := h.Controller.UpdateEntity(c, request)
