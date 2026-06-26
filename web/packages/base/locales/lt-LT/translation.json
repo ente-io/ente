@@ -362,6 +362,7 @@
     "details": "Išsami informacija",
     "view_exif": "Peržiūrėti visus Exif duomenis",
     "no_exif": "Nėra Exif duomenų",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Dvigubas tapatybės nustatymas",
     "two_factor_authentication": "Dvigubas tapatybės nustatymas",

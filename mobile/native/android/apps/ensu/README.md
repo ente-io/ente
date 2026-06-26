@@ -42,7 +42,7 @@ Build and install a debug APK on a connected device or emulator:
 ```sh
 cd mobile/native/android/apps/ensu
 ./gradlew :app-ui:installDebug
-adb shell am start -n io.ente.ensu/.MainActivity
+adb shell am start -n io.ente.ensu.debug/io.ente.ensu.MainActivity
 ```
 
 Release APK:

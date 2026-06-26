@@ -2270,7 +2270,7 @@ name = "ensu-db"
 version = "0.0.0"
 dependencies = [
  "ente-core",
- "ente_image",
+ "ente-image",
  "rusqlite",
  "serde",
  "serde_json",
@@ -2399,6 +2399,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-image"
+version = "0.0.0"
+dependencies = [
+ "fast_image_resize",
+ "heic_decoder",
+ "image",
+ "kamadak-exif",
+ "thiserror 2.0.18",
+ "tiff 0.10.3",
+]
+
+[[package]]
+name = "ente-photos"
+version = "0.0.0"
+dependencies = [
+ "ente-image",
+ "fast_image_resize",
+ "half",
+ "html-escape",
+ "image",
+ "imageproc",
+ "nalgebra 0.33.3",
+ "once_cell",
+ "ort 2.0.0-rc.4",
+ "plsfix",
+ "quick-xml 0.37.5",
+ "regex",
+ "tempfile",
+ "thiserror 2.0.18",
+ "usearch",
+]
+
+[[package]]
 name = "ente-rs"
 version = "0.0.1"
 dependencies = [
@@ -2469,44 +2502,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "ente_image"
-version = "0.0.0"
-dependencies = [
- "fast_image_resize",
- "heic_decoder",
- "image",
- "kamadak-exif",
- "thiserror 2.0.18",
- "tiff 0.10.3",
-]
-
-[[package]]
-name = "ente_photos"
-version = "0.0.0"
-dependencies = [
- "ente_image",
- "fast_image_resize",
- "half",
- "html-escape",
- "image",
- "imageproc",
- "nalgebra 0.33.3",
- "once_cell",
- "ort 2.0.0-rc.4",
- "plsfix",
- "quick-xml 0.37.5",
- "regex",
- "tempfile",
- "thiserror 2.0.18",
- "usearch",
-]
-
-[[package]]
 name = "ente_photos_rust"
 version = "0.0.0"
 dependencies = [
- "ente_image",
- "ente_photos",
+ "ente-image",
+ "ente-photos",
  "flutter_rust_bridge",
 ]
 
@@ -4479,7 +4479,6 @@ name = "inference"
 version = "0.0.0"
 dependencies = [
  "inference_rs",
- "serde",
  "thiserror 1.0.69",
  "uniffi",
 ]

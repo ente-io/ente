@@ -362,6 +362,7 @@
     "details": "Podrobnosti",
     "view_exif": "Zobrazit všechna Exif data",
     "no_exif": "Žádná Exif data",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Dvoufázové ověření",
     "two_factor_authentication": "Dvoufázové ověření",

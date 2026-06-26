@@ -263,7 +263,6 @@ fun ChatView(
                     isProcessingAttachments = chatState.isProcessingAttachments,
                     isGenerating = chatState.isGenerating,
                     isDownloading = chatState.isDownloading,
-                    downloadPercent = chatState.downloadPercent,
                     isAttachmentDownloadBlocked = chatState.isAttachmentDownloadBlocked,
                     attachmentDownloadPercent = chatState.attachmentDownloadProgress,
                     onMessageChange = onMessageChange,

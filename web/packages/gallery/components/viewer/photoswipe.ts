@@ -97,10 +97,10 @@ export interface FileViewerPhotoSwipeDelegate {
      * Called when there is a keydown event, and our PhotoSwipe instance wants
      * to know if it should ignore it or handle it.
      *
-     * The delegate should return true when, e.g., the file info dialog is
-     * being displayed.
+     * The delegate should return true when it wants the keyboard event ignored,
+     * e.g. for most keys while a viewer dialog is being displayed.
      */
-    shouldIgnoreKeyboardEvent: () => boolean;
+    shouldIgnoreKeyboardEvent: (event: KeyboardEvent) => boolean;
     /**
      * Called when the user triggers a potential action using a keyboard
      * shortcut.
@@ -1819,13 +1819,13 @@ export class FileViewerPhotoSwipe {
         const handleHelp = () => delegate.performKeyAction("help");
 
         pswp.on("keydown", (pswpEvent) => {
+            const e: KeyboardEvent = pswpEvent.originalEvent;
+
             // Ignore keyboard events when one of our sub-dialogs are open.
-            if (delegate.shouldIgnoreKeyboardEvent()) {
+            if (delegate.shouldIgnoreKeyboardEvent(e)) {
                 pswpEvent.preventDefault();
                 return;
             }
-
-            const e: KeyboardEvent = pswpEvent.originalEvent;
 
             const key = e.key;
             // Even though we ignore shift, Caps lock might still be on.

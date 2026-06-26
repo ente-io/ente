@@ -10,11 +10,6 @@ import { loadEnteWasm } from "ente-wasm/load";
 
 export type EnteWasmModule = typeof import("ente-wasm");
 
-export interface EncryptedBox {
-    encrypted_data: string;
-    nonce: string;
-}
-
 export interface EncryptedBlob {
     encrypted_data: string;
     decryption_header: string;
@@ -23,12 +18,6 @@ export interface EncryptedBlob {
 export interface EnteCryptoAdapter {
     crypto_init(): Promise<void>;
     crypto_generate_key(): Promise<string>;
-    crypto_encrypt_box(dataB64: string, keyB64: string): Promise<EncryptedBox>;
-    crypto_decrypt_box(
-        encryptedDataB64: string,
-        nonceB64: string,
-        keyB64: string,
-    ): Promise<string>;
     crypto_encrypt_blob(
         dataB64: string,
         keyB64: string,
@@ -47,12 +36,6 @@ const createWasmAdapter = (wasm: EnteWasmModule): EnteCryptoAdapter => {
             return Promise.resolve();
         },
         crypto_generate_key: () => Promise.resolve(wasm.crypto_generate_key()),
-        crypto_encrypt_box: (dataB64, keyB64) =>
-            Promise.resolve(wasm.crypto_encrypt_box(dataB64, keyB64)),
-        crypto_decrypt_box: (encryptedDataB64, nonceB64, keyB64) =>
-            Promise.resolve(
-                wasm.crypto_decrypt_box(encryptedDataB64, nonceB64, keyB64),
-            ),
         crypto_encrypt_blob: (dataB64, keyB64) =>
             Promise.resolve(wasm.crypto_encrypt_blob(dataB64, keyB64)),
         crypto_decrypt_blob: (encryptedDataB64, headerB64, keyB64) =>
@@ -142,14 +125,6 @@ const createTauriAdapter = async (): Promise<EnteCryptoAdapter> => {
             await invokeOrThrow("crypto_init");
         },
         crypto_generate_key: () => invokeOrThrow<string>("crypto_generate_key"),
-        crypto_encrypt_box: (dataB64, keyB64) =>
-            invokeOrThrow<EncryptedBox>("crypto_encrypt_box", {
-                input: { dataB64, keyB64 },
-            }),
-        crypto_decrypt_box: (encryptedDataB64, nonceB64, keyB64) =>
-            invokeOrThrow<string>("crypto_decrypt_box", {
-                input: { encryptedDataB64, nonceB64, keyB64 },
-            }),
         crypto_encrypt_blob: (dataB64, keyB64) =>
             invokeOrThrow<EncryptedBlob>("crypto_encrypt_blob", {
                 input: { dataB64, keyB64 },

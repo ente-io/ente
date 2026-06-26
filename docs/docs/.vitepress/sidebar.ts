@@ -702,6 +702,10 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     {
+                        text: "Building from source",
+                        link: "/self-hosting/development/building-from-source",
+                    },
+                    {
                         text: "Building mobile apps",
                         link: "/self-hosting/development/mobile-build",
                     },

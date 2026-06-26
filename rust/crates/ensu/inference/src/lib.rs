@@ -1,5 +1,4 @@
 mod api;
-mod capi;
 mod defaults;
 mod model_download;
 
