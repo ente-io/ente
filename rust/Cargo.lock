@@ -4479,7 +4479,6 @@ name = "inference"
 version = "0.0.0"
 dependencies = [
  "inference_rs",
- "serde",
  "thiserror 1.0.69",
  "uniffi",
 ]

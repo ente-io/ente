@@ -1,5 +1,4 @@
 use inference_rs as core;
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use thiserror::Error;
 
@@ -15,7 +14,7 @@ impl From<String> for InferenceError {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct ModelLoadParams {
     pub model_path: String,
     pub n_gpu_layers: Option<i32>,
@@ -23,14 +22,14 @@ pub struct ModelLoadParams {
     pub use_mlock: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct ContextParams {
     pub context_size: Option<i32>,
     pub n_threads: Option<i32>,
     pub n_batch: Option<i32>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct EnsuModelPreset {
     pub id: String,
     pub title: String,
@@ -38,7 +37,7 @@ pub struct EnsuModelPreset {
     pub mmproj_url: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct EnsuDefaults {
     pub mobile_system_prompt_body: String,
     pub desktop_system_prompt_body: String,
@@ -50,13 +49,13 @@ pub struct EnsuDefaults {
     pub desktop_model_presets: Vec<EnsuModelPreset>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct ChatMessage {
     pub role: String,
     pub content: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct GenerateChatRequest {
     pub messages: Vec<ChatMessage>,
     pub template_override: Option<String>,
@@ -76,7 +75,7 @@ pub struct GenerateChatRequest {
     pub grammar: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct GenerateSummary {
     pub job_id: i64,
     pub prompt_tokens: Option<i32>,
@@ -84,14 +83,14 @@ pub struct GenerateSummary {
     pub total_time_ms: Option<i64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct LlmModelDownloadTarget {
     pub label: String,
     pub url: String,
     pub destination_path: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct LlmModelDownloadProgress {
     pub label: String,
     pub downloaded_bytes: i64,
@@ -109,7 +108,7 @@ pub struct LlmModelDownloadProgress {
     pub complete: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Enum)]
+#[derive(Debug, Clone, uniffi::Enum)]
 pub enum GenerateEvent {
     Text {
         job_id: i64,
