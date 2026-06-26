@@ -13,6 +13,9 @@ import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import KeyboardOptionKeyIcon from "@mui/icons-material/KeyboardOptionKey";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
 import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
@@ -89,6 +92,7 @@ import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Trans } from "react-i18next";
 
 // Re-uses images from ~leaflet package.
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
@@ -331,7 +335,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     }, [onNavigationLockChange, navigationLocked]);
 
     return (
-        <FileInfoSidebar {...{ open, onClose }}>
+        <BottomAlignedFileInfoSidebar {...{ open, onClose }}>
             <SidebarDrawerTitlebar
                 onClose={onClose}
                 onRootClose={onClose}
@@ -493,21 +497,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         {t("added_by_name", { name: uploaderName })}
                     </Typography>
                 )}
-                <Typography
-                    variant="small"
-                    sx={{
-                        display: { xs: "none", sm: "block" },
-                        px: 2,
-                        color: "text.muted",
-                        opacity: 0.3,
-                        maxWidth: "300px",
-                        fontSize: "12px",
-                        lineHeight: "15px",
-                    }}
-                >
-                    {t("file_info_arrow_navigation_hint")}
-                </Typography>
             </Stack>
+            <FileInfoNavigationHint />
             <RawExif
                 {...rawExifVisibilityProps}
                 onInfoClose={onClose}
@@ -531,9 +522,100 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     onConfirm={handleEditLocationConfirm}
                 />
             )}
-        </FileInfoSidebar>
+        </BottomAlignedFileInfoSidebar>
     );
 };
+
+const navigationShortcut = "Alt / Option";
+
+const FileInfoNavigationHint: React.FC = () => (
+    <Typography
+        component="div"
+        variant="tiny"
+        sx={{
+            display: { xs: "none", sm: "block" },
+            mt: "auto",
+            pb: 3,
+            px: 2,
+            color: "text.muted",
+            opacity: 0.24,
+        }}
+    >
+        <Trans
+            i18nKey="use_shortcut_to_navigate"
+            components={{
+                shortcut: <ShortcutHint shortcut={navigationShortcut} />,
+            }}
+        />
+    </Typography>
+);
+
+interface ShortcutHintProps {
+    shortcut: string;
+}
+
+function ShortcutHint({ shortcut }: ShortcutHintProps) {
+    return (
+        <InlineShortcut>
+            <NavigationHintKey>
+                <KeyboardOptionKeyIcon sx={{ fontSize: 12 }} />
+                <Typography
+                    component="span"
+                    variant="tiny"
+                    sx={{ fontWeight: "medium" }}
+                >
+                    {shortcut}
+                </Typography>
+            </NavigationHintKey>
+            <NavigationHintSeparator>+</NavigationHintSeparator>
+            <NavigationHintKey>
+                <KeyboardArrowLeftIcon
+                    titleAccess={t("previous")}
+                    sx={{ fontSize: 14 }}
+                />
+            </NavigationHintKey>
+            <NavigationHintSeparator>/</NavigationHintSeparator>
+            <NavigationHintKey>
+                <KeyboardArrowRightIcon
+                    titleAccess={t("next")}
+                    sx={{ fontSize: 14 }}
+                />
+            </NavigationHintKey>
+        </InlineShortcut>
+    );
+}
+
+const InlineShortcut = styled("span")({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 4,
+    verticalAlign: "middle",
+});
+
+const NavigationHintKey = styled("span")(
+    ({ theme }) => `
+    min-height: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 5px;
+    border: 1px solid ${theme.vars.palette.stroke.faint};
+    border-radius: 4px;
+    color: ${theme.vars.palette.text.muted};
+`,
+);
+
+const NavigationHintSeparator: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => (
+    <Typography
+        component="span"
+        variant="tiny"
+        sx={{ color: "text.faint", lineHeight: 1 }}
+    >
+        {children}
+    </Typography>
+);
 
 /**
  * Some immediate fields of interest, in the form that we want to display on the
@@ -612,6 +694,15 @@ const FileInfoSidebar = styled(
         },
     }),
 }));
+
+const BottomAlignedFileInfoSidebar = styled(FileInfoSidebar)({
+    ".MuiDrawer-paper": { display: "flex", flexDirection: "column" },
+    ".MuiDrawer-paper > .MuiBox-root": {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+    },
+});
 
 interface InfoItemProps {
     /**
