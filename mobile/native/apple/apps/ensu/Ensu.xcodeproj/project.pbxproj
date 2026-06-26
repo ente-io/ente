@@ -216,18 +216,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		CC142736A470612F436ECF8E /* Build Rust (db/inference/transcription) */ = {
+		CC142736A470612F436ECF8E /* Build Rust (ensu) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (db/inference/transcription)";
+			name = "Build Rust (ensu)";
 			outputPaths = (
-				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libtranscription.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libensu.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -277,7 +275,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 0.1.18;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/transcriptionFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/ensuFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -303,7 +301,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 0.1.18;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/transcriptionFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/ensuFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -477,11 +475,9 @@
 					Metal,
 					"-framework",
 					MetalKit,
-					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libtranscription.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libensu.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/transcriptionFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/ensuFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -532,11 +528,9 @@
 					Metal,
 					"-framework",
 					MetalKit,
-					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libtranscription.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libensu.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/transcriptionFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/ensuFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(APP_STORE_PROFILE_SPECIFIER)";

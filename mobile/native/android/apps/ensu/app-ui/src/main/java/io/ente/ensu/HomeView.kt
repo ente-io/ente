@@ -65,7 +65,7 @@ import io.ente.ensu.domain.store.AppStore
 import io.ente.ensu.whatsnew.PendingWhatsNew
 import io.ente.ensu.whatsnew.WhatsNewDialog
 import io.ente.ensu.whatsnew.WhatsNewService
-import io.ente.labs.ensu_db.compressAttachmentImage
+import io.ente.ensu.bindings.compressAttachmentImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

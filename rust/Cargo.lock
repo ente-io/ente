@@ -1797,16 +1797,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "db"
-version = "0.0.0"
-dependencies = [
- "ente-ensu",
- "thiserror 2.0.18",
- "uniffi",
- "uuid",
-]
-
-[[package]]
 name = "dbus"
 version = "0.9.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2393,6 +2383,16 @@ dependencies = [
  "transcribe-rs",
  "uuid",
  "zeroize",
+]
+
+[[package]]
+name = "ente-ensu-uniffi"
+version = "0.0.0"
+dependencies = [
+ "ente-ensu",
+ "thiserror 2.0.18",
+ "uniffi",
+ "uuid",
 ]
 
 [[package]]
@@ -4469,15 +4469,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a588916bfdfd92e71cacef98a63d9b1f0d74d6599980d11894290e7ddefffcf7"
 dependencies = [
  "cfb",
-]
-
-[[package]]
-name = "inference"
-version = "0.0.0"
-dependencies = [
- "ente-ensu",
- "thiserror 1.0.69",
- "uniffi",
 ]
 
 [[package]]
@@ -9261,15 +9252,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.18",
-]
-
-[[package]]
-name = "transcription"
-version = "0.0.0"
-dependencies = [
- "ente-ensu",
- "thiserror 2.0.18",
- "uniffi",
 ]
 
 [[package]]
