@@ -282,7 +282,7 @@ From README.md:
 
 ## Common Gotchas
 
-1. **Multiple Flutter apps in monorepo:** Always use `melos bootstrap` instead of `flutter pub get` to properly link local packages
+1. **Pub workspace:** `mobile/` is a Dart pub workspace — running `flutter pub get` anywhere inside it resolves and links all local packages (`melos bootstrap` does the same, delegating to it)
 2. **Window management:** Desktop window initialization must happen before `runApp()` in `main.dart`
 3. **Trailing commas:** The linter is strict about this - always add them to avoid CI failures
 4. **Package imports:** Never use relative imports for files in other packages; always use `package:` syntax

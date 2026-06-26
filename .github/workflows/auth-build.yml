@@ -116,15 +116,10 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
-            - name: Resolve dependencies with lockfile enforcement
-              run: flutter pub get --enforce-lockfile
+            - run: flutter pub get --enforce-lockfile
 
             - name: Prepare whatsnew
               run: |
@@ -241,15 +236,10 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
-            - name: Resolve dependencies with lockfile enforcement
-              run: flutter pub get --enforce-lockfile
+            - run: flutter pub get --enforce-lockfile
 
             - name: Create artifacts directory
               run: mkdir artifacts
@@ -357,16 +347,11 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
               shell: bash
               run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
-            - name: Resolve dependencies with lockfile enforcement
-              run: flutter pub get --enforce-lockfile
+            - run: flutter pub get --enforce-lockfile
 
             - name: Create artifacts directory
               run: mkdir artifacts
@@ -521,15 +506,10 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
-            - name: Resolve dependencies with lockfile enforcement
-              run: flutter pub get --enforce-lockfile
+            - run: flutter pub get --enforce-lockfile
 
             - name: Install code signing dependencies
               run: pip3 install codemagic-cli-tools --break-system-packages
@@ -657,15 +637,10 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
-            - name: Resolve dependencies with lockfile enforcement
-              run: flutter pub get --enforce-lockfile
+            - run: flutter pub get --enforce-lockfile
 
             - name: Install iOS pods
               run: pod install --deployment

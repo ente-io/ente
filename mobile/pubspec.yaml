@@ -18,6 +18,7 @@ workspace:
   - packages/configuration
   - packages/contacts
   - packages/ente_components
+  - packages/ente_components/example
   - packages/ente_crypto_api
   - packages/ente_crypto_dart_adapter
   - packages/ente_icons

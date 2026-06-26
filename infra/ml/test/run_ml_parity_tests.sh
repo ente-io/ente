@@ -1518,12 +1518,13 @@ run_mobile_runner() {
     esac
   fi
 
-  local package_config_path="$mobile_dir/.dart_tool/package_config.json"
+  local workspace_dir="$ROOT_DIR/mobile"
+  local package_config_path="$workspace_dir/.dart_tool/package_config.json"
   local needs_pub_get=false
   if [[ ! -f "$package_config_path" ]]; then
     needs_pub_get=true
   else
-    for dependency_file in "$mobile_dir/pubspec.yaml" "$mobile_dir/pubspec.lock" "$mobile_dir/pubspec_overrides.yaml"; do
+    for dependency_file in "$mobile_dir/pubspec.yaml" "$workspace_dir/pubspec.yaml" "$workspace_dir/pubspec.lock"; do
       if [[ -f "$dependency_file" && "$dependency_file" -nt "$package_config_path" ]]; then
         needs_pub_get=true
         break

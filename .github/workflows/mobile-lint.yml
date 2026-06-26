@@ -1,4 +1,4 @@
-name: "Lint (Mobile)"
+name: "Lint and test (Mobile)"
 
 on:
     pull_request:
@@ -82,39 +82,21 @@ jobs:
             - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
               working-directory: rust
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
+            - run: flutter pub get --enforce-lockfile
+              working-directory: mobile
 
-            - name: Lint packages
+            - name: Lint and test
+              working-directory: mobile
               run: |
-                  for pubspec in mobile/packages/*/pubspec.yaml; do
-                      package_dir=${pubspec%/pubspec.yaml}
-                      package=${package_dir##*/}
-                      echo "Linting $package"
+                  members=$(dart pub workspace list --json | jq -r '.packages[] | select(.name != "ente_workspace") | .path')
+                  for member in $members; do
+                      echo "Checking ${member#"$PWD/"}"
                       (
-                          cd "$package_dir"
-                          flutter pub get --enforce-lockfile
+                          cd "$member"
                           dart format --output=none --set-exit-if-changed .
                           flutter analyze
                           if [[ -d test ]]; then
                               flutter test
                           fi
-                      )
-                  done
-
-            - name: Lint apps
-              run: |
-                  for app in photos auth locker; do
-                      echo "Linting $app"
-                      (
-                          cd "mobile/apps/$app"
-                          flutter pub get --enforce-lockfile
-                          if [[ "$app" != "photos" ]]; then
-                              flutter gen-l10n
-                          fi
-                          dart format --output=none --set-exit-if-changed .
-                          flutter analyze
-                          flutter test
                       )
                   done
