@@ -68,14 +68,7 @@ class _FileEditSheetState extends State<FileEditSheet> {
       setState(() {
         _selectedCollectionIds
           ..clear()
-          ..addAll(
-            existingCollections
-                .where(
-                  (collection) =>
-                      collection.type != CollectionType.uncategorized,
-                )
-                .map((collection) => collection.id),
-          );
+          ..addAll(existingCollections.map((collection) => collection.id));
       });
     } catch (_) {
       // Ignore failures; selections will remain empty.
@@ -109,11 +102,7 @@ class _FileEditSheetState extends State<FileEditSheet> {
   }
 
   List<Collection> _filterCollections(List<Collection> source) {
-    final filtered = uniqueCollectionsById(source)
-      ..removeWhere(
-        (collection) => collection.type == CollectionType.uncategorized,
-      );
-    return filtered;
+    return uniqueCollectionsById(source);
   }
 
   Future<void> _onSave() async {

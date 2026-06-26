@@ -126,16 +126,15 @@ class _ItemListViewState extends State<ItemListView> {
 
   Widget _buildItem(int index) {
     final item = _sortedItems[index];
-    final isLastItem = index == _sortedItems.length - 1;
 
     if (item.isCollection) {
-      return _buildCollectionItem(item.collection!, isLastItem);
+      return _buildCollectionItem(item.collection!);
     } else {
-      return _buildFileItem(item.file!, isLastItem);
+      return _buildFileItem(item.file!);
     }
   }
 
-  Widget _buildCollectionItem(Collection collection, bool isLastItem) {
+  Widget _buildCollectionItem(Collection collection) {
     final hasSelection = widget.selectedCollections != null;
 
     if (hasSelection) {
@@ -145,7 +144,6 @@ class _ItemListViewState extends State<ItemListView> {
           final isAnySelected = widget.selectedCollections!.hasSelections;
           return _createCollectionWidget(
             collection: collection,
-            isLastItem: isLastItem,
             onTap: (c) => isAnySelected
                 ? _toggleCollectionSelection(c)
                 : _navigateToCollectionPage(c),
@@ -157,13 +155,10 @@ class _ItemListViewState extends State<ItemListView> {
       );
     }
 
-    return _createCollectionWidget(
-      collection: collection,
-      isLastItem: isLastItem,
-    );
+    return _createCollectionWidget(collection: collection);
   }
 
-  Widget _buildFileItem(EnteFile file, bool isLastItem) {
+  Widget _buildFileItem(EnteFile file) {
     final hasSelection = widget.selectedFiles != null;
 
     if (hasSelection) {
@@ -173,7 +168,6 @@ class _ItemListViewState extends State<ItemListView> {
           final isAnySelected = widget.selectedFiles!.hasSelections;
           return _createFileWidget(
             file: file,
-            isLastItem: isLastItem,
             onTap: isAnySelected ? (f) => _toggleFileSelection(f) : null,
             onLongPress: isAnySelected ? null : (f) => _toggleFileSelection(f),
           );
@@ -181,18 +175,16 @@ class _ItemListViewState extends State<ItemListView> {
       );
     }
 
-    return _createFileWidget(file: file, isLastItem: isLastItem);
+    return _createFileWidget(file: file);
   }
 
   Widget _createCollectionWidget({
     required Collection collection,
-    required bool isLastItem,
     Function(Collection)? onTap,
     Function(Collection)? onLongPress,
   }) {
     return CollectionListWidget(
       collection: collection,
-      isLastItem: isLastItem,
       selectedCollections: widget.selectedCollections,
       onTapCallback: onTap,
       onLongPressCallback: onLongPress,
@@ -201,13 +193,11 @@ class _ItemListViewState extends State<ItemListView> {
 
   Widget _createFileWidget({
     required EnteFile file,
-    required bool isLastItem,
     Function(EnteFile)? onTap,
     Function(EnteFile)? onLongPress,
   }) {
     return FileListWidget(
       file: file,
-      isLastItem: isLastItem,
       selectedFiles: widget.selectedFiles,
       onTapCallback: onTap,
       onLongPressCallback: onLongPress,

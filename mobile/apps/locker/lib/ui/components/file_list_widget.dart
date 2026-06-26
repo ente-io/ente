@@ -17,7 +17,6 @@ import "package:locker/utils/info_item_utils.dart";
 
 class FileListWidget extends StatelessWidget {
   final EnteFile file;
-  final bool isLastItem;
   final SelectedFiles? selectedFiles;
   final void Function(EnteFile)? onTapCallback;
   final void Function(EnteFile)? onLongPressCallback;
@@ -25,7 +24,6 @@ class FileListWidget extends StatelessWidget {
   const FileListWidget({
     super.key,
     required this.file,
-    this.isLastItem = false,
     this.selectedFiles,
     this.onTapCallback,
     this.onLongPressCallback,

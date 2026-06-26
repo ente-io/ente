@@ -49,7 +49,7 @@ class FileActions {
     _logger.info('Opening edit dialog for file ${file.uploadedFileID}');
 
     final editableCollections = await CollectionService.instance
-        .getCollectionsForUI();
+        .getCollectionsForUI(includeUncategorized: true);
 
     final currentCollections = await CollectionService.instance
         .getCollectionsForFile(file);
