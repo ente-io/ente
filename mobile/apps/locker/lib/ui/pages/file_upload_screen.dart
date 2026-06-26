@@ -194,20 +194,16 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                 child: SizedBox(
                   width: double.infinity,
                   child: GradientButton(
-                    onTap: _selectedCollectionIds.isEmpty
-                        ? null
-                        : () async {
-                            final selectedCollections = _availableCollections
-                                .where(
-                                  (c) => _selectedCollectionIds.contains(c.id),
-                                )
-                                .toList();
-                            final result = FileUploadScreenResult(
-                              note: '',
-                              selectedCollections: selectedCollections,
-                            );
-                            Navigator.of(context).pop(result);
-                          },
+                    onTap: () async {
+                      final selectedCollections = _availableCollections
+                          .where((c) => _selectedCollectionIds.contains(c.id))
+                          .toList();
+                      final result = FileUploadScreenResult(
+                        note: '',
+                        selectedCollections: selectedCollections,
+                      );
+                      Navigator.of(context).pop(result);
+                    },
                     text: context.l10n.save,
                   ),
                 ),
