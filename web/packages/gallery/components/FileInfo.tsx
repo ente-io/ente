@@ -554,11 +554,17 @@ const FileInfoNavigationHint: React.FC = () => (
         </NavigationHintKey>
         <NavigationHintSeparator>+</NavigationHintSeparator>
         <NavigationHintKey>
-            <KeyboardArrowLeftIcon sx={{ fontSize: 14 }} />
+            <KeyboardArrowLeftIcon
+                titleAccess={t("file_info_arrow_navigation_hint_left_arrow")}
+                sx={{ fontSize: 14 }}
+            />
         </NavigationHintKey>
         <NavigationHintSeparator>/</NavigationHintSeparator>
         <NavigationHintKey>
-            <KeyboardArrowRightIcon sx={{ fontSize: 14 }} />
+            <KeyboardArrowRightIcon
+                titleAccess={t("file_info_arrow_navigation_hint_right_arrow")}
+                sx={{ fontSize: 14 }}
+            />
         </NavigationHintKey>
         <Typography component="span" variant="tiny" sx={{ ml: 0.5 }}>
             {t("file_info_arrow_navigation_hint")}
