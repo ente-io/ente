@@ -39,6 +39,7 @@ class AlbumSelectionActionWidget extends StatefulWidget {
 class _AlbumSelectionActionWidgetState
     extends State<AlbumSelectionActionWidget> {
   final _logger = Logger("AlbumSelectionActionWidgetState");
+  final _scrollController = ScrollController();
   late CollectionActions collectionActions;
   bool hasFavorites = false;
 
@@ -52,6 +53,7 @@ class _AlbumSelectionActionWidgetState
   @override
   void dispose() {
     widget.selectedAlbums.removeListener(_selectionChangedListener);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -204,17 +206,16 @@ class _AlbumSelectionActionWidgetState
       );
     }
 
-    final scrollController = ScrollController();
-
     return MediaQuery(
       data: MediaQuery.of(context).removePadding(removeBottom: true),
       child: SafeArea(
         child: Scrollbar(
           radius: const Radius.circular(1),
           thickness: 2,
-          controller: scrollController,
+          controller: _scrollController,
           thumbVisibility: true,
           child: SingleChildScrollView(
+            controller: _scrollController,
             physics: const BouncingScrollPhysics(
               decelerationRate: ScrollDecelerationRate.fast,
             ),
