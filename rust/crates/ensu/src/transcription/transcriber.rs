@@ -4,10 +4,10 @@ use std::sync::{Mutex, OnceLock};
 use transcribe_rs::onnx::Quantization;
 use transcribe_rs::onnx::parakeet::{ParakeetModel, ParakeetParams, TimestampGranularity};
 
-use crate::audio::extract_speech_from_pcm16;
-use crate::model::{model_path, vad_model_path};
-use crate::text::filter_transcription_output;
-use crate::{Result, error};
+use crate::transcription::audio::extract_speech_from_pcm16;
+use crate::transcription::model::{model_path, vad_model_path};
+use crate::transcription::text::filter_transcription_output;
+use crate::transcription::{Result, error};
 
 static MANAGER: OnceLock<Mutex<TranscriptionManager>> = OnceLock::new();
 

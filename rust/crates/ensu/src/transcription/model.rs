@@ -10,7 +10,7 @@ use reqwest::blocking::Client;
 use reqwest::header::RANGE;
 use tar::Archive;
 
-use crate::{Result, error};
+use crate::transcription::{Result, error};
 
 const MODEL_URL: &str = "https://models.ente.io/parakeet-v3-int8.tar.gz";
 const MODEL_DIR_NAME: &str = "parakeet-tdt-0.6b-v3-int8";

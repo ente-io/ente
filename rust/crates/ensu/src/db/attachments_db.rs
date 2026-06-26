@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use uuid::Uuid;
 
-use crate::Result;
-use crate::backend::{Backend, RowExt, Value};
-use crate::traits::{Clock, SystemClock};
+use crate::db::Result;
+use crate::db::backend::{Backend, RowExt, Value};
+use crate::db::traits::{Clock, SystemClock};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UploadState {
@@ -26,7 +26,7 @@ impl UploadState {
 }
 
 impl std::str::FromStr for UploadState {
-    type Err = crate::Error;
+    type Err = crate::db::Error;
 
     fn from_str(value: &str) -> std::result::Result<Self, Self::Err> {
         match value {
@@ -34,7 +34,7 @@ impl std::str::FromStr for UploadState {
             "uploading" => Ok(UploadState::Uploading),
             "uploaded" => Ok(UploadState::Uploaded),
             "failed" => Ok(UploadState::Failed),
-            _ => Err(crate::Error::Row(format!(
+            _ => Err(crate::db::Error::Row(format!(
                 "invalid upload_state value {value}"
             ))),
         }
@@ -60,7 +60,7 @@ pub struct AttachmentsDb<B: Backend> {
 
 impl<B: Backend> AttachmentsDb<B> {
     pub fn new(backend: B, clock: Arc<dyn Clock>) -> Result<Self> {
-        crate::attachments_migrations::migrate(&backend)?;
+        crate::db::attachments_migrations::migrate(&backend)?;
         Ok(Self { backend, clock })
     }
 
@@ -283,7 +283,7 @@ impl<B: Backend> AttachmentsDb<B> {
         Ok(())
     }
 
-    fn row_from_row(row: &crate::backend::Row) -> Result<AttachmentUploadRow> {
+    fn row_from_row(row: &crate::db::backend::Row) -> Result<AttachmentUploadRow> {
         let attachment_id = row.get_string(0)?;
         let session_uuid = Uuid::parse_str(&row.get_string(1)?)?;
         let message_uuid = Uuid::parse_str(&row.get_string(2)?)?;
@@ -306,19 +306,19 @@ impl<B: Backend> AttachmentsDb<B> {
 }
 
 #[cfg(feature = "sqlite")]
-impl AttachmentsDb<crate::backend::sqlite::SqliteBackend> {
+impl AttachmentsDb<crate::db::backend::sqlite::SqliteBackend> {
     pub fn open_sqlite(path: impl AsRef<std::path::Path>, clock: Arc<dyn Clock>) -> Result<Self> {
-        let backend = crate::backend::sqlite::SqliteBackend::open(path)?;
+        let backend = crate::db::backend::sqlite::SqliteBackend::open(path)?;
         Self::new(backend, clock)
     }
 
     pub fn open_sqlite_with_defaults(path: impl AsRef<std::path::Path>) -> Result<Self> {
-        let backend = crate::backend::sqlite::SqliteBackend::open(path)?;
+        let backend = crate::db::backend::sqlite::SqliteBackend::open(path)?;
         Self::new_with_defaults(backend)
     }
 
     pub fn open_in_memory(clock: Arc<dyn Clock>) -> Result<Self> {
-        let backend = crate::backend::sqlite::SqliteBackend::open_in_memory()?;
+        let backend = crate::db::backend::sqlite::SqliteBackend::open_in_memory()?;
         Self::new(backend, clock)
     }
 }
@@ -328,7 +328,7 @@ mod tests {
     use std::sync::atomic::{AtomicI64, Ordering};
 
     use super::*;
-    use crate::backend::sqlite::SqliteBackend;
+    use crate::db::backend::sqlite::SqliteBackend;
 
     #[derive(Debug)]
     struct StepClock {

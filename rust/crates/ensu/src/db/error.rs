@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::models::EntityType;
+use crate::db::models::EntityType;
 
 pub type Result<T> = std::result::Result<T, Error>;
 

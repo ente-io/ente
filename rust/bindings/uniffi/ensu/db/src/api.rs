@@ -1,4 +1,4 @@
-use ensu_db as core;
+use ente_ensu::db as core;
 use thiserror::Error;
 use uuid::Uuid;
 

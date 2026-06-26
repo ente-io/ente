@@ -1,6 +1,6 @@
 use ente_core::crypto::{self, Header, Key, blob};
 
-use crate::{Error, Result};
+use crate::db::{Error, Result};
 
 pub const HEADER_BYTES: usize = blob::HEADER_BYTES;
 pub const KEY_BYTES: usize = blob::KEY_BYTES;

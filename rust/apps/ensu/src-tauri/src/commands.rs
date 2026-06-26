@@ -7,10 +7,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use ensu_db::backend::sqlite::SqliteBackend;
-use ensu_db::{EnsuDb, Error as DbError};
+use ente_ensu::db::backend::sqlite::SqliteBackend;
+use ente_ensu::db::{self as ensu_db, EnsuDb, Error as DbError};
+use ente_ensu::inference as llm;
 use ente_core::crypto as core_crypto;
-use inference_rs as llm;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
 use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};

@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use ensu_transcription as core;
+use ente_ensu::transcription as core;
 
 #[derive(Debug, Error, uniffi::Error)]
 pub enum TranscriptionError {

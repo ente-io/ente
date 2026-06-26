@@ -6,7 +6,7 @@ edition = "2024"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-ensu-db.workspace = true
+ente-ensu.workspace = true
 thiserror = "2"
 uniffi = { version = "0.31.0" }
 uuid = { version = "1" }

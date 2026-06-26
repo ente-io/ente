@@ -6,7 +6,7 @@ use std::{
 
 use uuid::Uuid;
 
-use crate::Result;
+use crate::db::Result;
 
 pub trait MetaStore: Send + Sync {
     fn get(&self, key: &str) -> Result<Option<Vec<u8>>>;

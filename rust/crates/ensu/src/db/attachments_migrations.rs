@@ -1,6 +1,6 @@
-use crate::attachments_schema;
-use crate::backend::RowExt;
-use crate::{Backend, Error, Result};
+use crate::db::attachments_schema;
+use crate::db::backend::RowExt;
+use crate::db::{Backend, Error, Result};
 
 pub const LATEST_VERSION: i64 = 2;
 
@@ -34,8 +34,8 @@ fn user_version<B: Backend>(backend: &B) -> Result<i64> {
 #[cfg(all(test, feature = "sqlite"))]
 mod tests {
     use super::*;
-    use crate::backend::sqlite::SqliteBackend;
-    use crate::backend::{BackendTx, RowExt, Value};
+    use crate::db::backend::sqlite::SqliteBackend;
+    use crate::db::backend::{BackendTx, RowExt, Value};
 
     #[test]
     fn creates_schema_and_indexes() {

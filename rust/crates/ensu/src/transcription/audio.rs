@@ -4,7 +4,7 @@ use std::time::Duration;
 use rubato::{FftFixedIn, Resampler};
 use transcribe_rs::vad::{SileroVad, SmoothedVad, Vad};
 
-use crate::{Result, error};
+use crate::transcription::{Result, error};
 
 const TARGET_SAMPLE_RATE: usize = 16_000;
 const RESAMPLER_CHUNK_SIZE: usize = 1024;

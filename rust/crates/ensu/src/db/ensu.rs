@@ -2,19 +2,19 @@ use std::sync::Arc;
 
 use uuid::Uuid;
 
-use crate::Result;
-use crate::attachments_db::{AttachmentUploadRow, AttachmentsDb, UploadState};
-use crate::db::ChatDb;
-use crate::models::{Attachment, AttachmentMeta, Message, Session, SessionWithPreview};
-use crate::traits::{Clock, UuidGen};
+use crate::db::Result;
+use crate::db::attachments_db::{AttachmentUploadRow, AttachmentsDb, UploadState};
+use crate::db::db::ChatDb;
+use crate::db::models::{Attachment, AttachmentMeta, Message, Session, SessionWithPreview};
+use crate::db::traits::{Clock, UuidGen};
 
 /// High-level DB that ties together the main chat DB and the attachments upload-state DB.
-pub struct EnsuDb<B: crate::Backend> {
+pub struct EnsuDb<B: crate::db::Backend> {
     pub chat: ChatDb<B>,
     pub attachments: AttachmentsDb<B>,
 }
 
-impl<B: crate::Backend> EnsuDb<B> {
+impl<B: crate::db::Backend> EnsuDb<B> {
     pub fn new(chat: ChatDb<B>, attachments: AttachmentsDb<B>) -> Self {
         Self { chat, attachments }
     }
@@ -328,7 +328,7 @@ impl<B: crate::Backend> EnsuDb<B> {
 }
 
 #[cfg(feature = "sqlite")]
-impl EnsuDb<crate::backend::sqlite::SqliteBackend> {
+impl EnsuDb<crate::db::backend::sqlite::SqliteBackend> {
     pub fn open_sqlite(
         main_path: impl AsRef<std::path::Path>,
         attachments_path: impl AsRef<std::path::Path>,

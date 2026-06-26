@@ -1,6 +1,6 @@
 use ente_image::image_compression::compress_image_bytes_to_jpeg;
 
-use crate::Result;
+use crate::db::Result;
 
 pub const ATTACHMENT_IMAGE_MAX_LONG_EDGE: u32 = 512;
 pub const ATTACHMENT_IMAGE_JPEG_QUALITY: u8 = 85;

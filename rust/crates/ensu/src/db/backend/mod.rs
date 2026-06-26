@@ -1,4 +1,4 @@
-use crate::{Error, Result};
+use crate::db::{Error, Result};
 
 #[cfg(feature = "sqlite")]
 pub mod sqlite;

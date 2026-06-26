@@ -3,14 +3,14 @@ use std::sync::Arc;
 use uuid::Uuid;
 use zeroize::Zeroizing;
 
-use crate::backend::{Backend, BackendTx, RowExt, Value};
-use crate::crypto;
-use crate::migrations;
-use crate::models::{
+use crate::db::backend::{Backend, BackendTx, RowExt, Value};
+use crate::db::crypto;
+use crate::db::migrations;
+use crate::db::models::{
     AttachmentMeta, EntityType, Message, Sender, Session, SessionWithPreview, StoredAttachment,
 };
-use crate::traits::{Clock, RandomUuidGen, SystemClock, UuidGen};
-use crate::{Error, Result};
+use crate::db::traits::{Clock, RandomUuidGen, SystemClock, UuidGen};
+use crate::db::{Error, Result};
 
 const SESSION_NEEDS_SYNC_PREDICATE: &str = "deleted_at IS NULL \
   AND (needs_sync = 1 OR EXISTS (\
@@ -822,7 +822,7 @@ impl<B: Backend> ChatDb<B> {
         Ok(())
     }
 
-    fn session_from_row(&self, row: &crate::backend::Row) -> Result<Session> {
+    fn session_from_row(&self, row: &crate::db::backend::Row) -> Result<Session> {
         let uuid = Uuid::parse_str(&row.get_string(0)?)?;
         let title_blob = row.get_blob(1)?;
         let title = crypto::decrypt_string(&title_blob, &self.key)?;
@@ -844,7 +844,7 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
-    fn message_from_row(&self, row: &crate::backend::Row) -> Result<Message> {
+    fn message_from_row(&self, row: &crate::db::backend::Row) -> Result<Message> {
         let uuid = Uuid::parse_str(&row.get_string(0)?)?;
         let session_uuid = Uuid::parse_str(&row.get_string(1)?)?;
         let parent_message_uuid = row
@@ -937,14 +937,14 @@ impl<B: Backend> ChatDb<B> {
 }
 
 #[cfg(feature = "sqlite")]
-impl ChatDb<crate::backend::sqlite::SqliteBackend> {
+impl ChatDb<crate::db::backend::sqlite::SqliteBackend> {
     pub fn open_sqlite(
         path: impl AsRef<std::path::Path>,
         key: Vec<u8>,
         clock: Arc<dyn Clock>,
         uuid_gen: Arc<dyn UuidGen>,
     ) -> Result<Self> {
-        let backend = crate::backend::sqlite::SqliteBackend::open(path)?;
+        let backend = crate::db::backend::sqlite::SqliteBackend::open(path)?;
         Self::new(backend, key, clock, uuid_gen)
     }
 
@@ -952,12 +952,12 @@ impl ChatDb<crate::backend::sqlite::SqliteBackend> {
         path: impl AsRef<std::path::Path>,
         key: Vec<u8>,
     ) -> Result<Self> {
-        let backend = crate::backend::sqlite::SqliteBackend::open(path)?;
+        let backend = crate::db::backend::sqlite::SqliteBackend::open(path)?;
         Self::new_with_defaults(backend, key)
     }
 
     pub fn open_in_memory(key: Vec<u8>) -> Result<Self> {
-        let backend = crate::backend::sqlite::SqliteBackend::open_in_memory()?;
+        let backend = crate::db::backend::sqlite::SqliteBackend::open_in_memory()?;
         Self::new_with_defaults(backend, key)
     }
 }
@@ -1006,10 +1006,10 @@ mod tests {
     use uuid::Uuid;
 
     use super::*;
-    use crate::backend::sqlite::SqliteBackend;
-    use crate::backend::{BackendTx, RowExt, Value};
-    use crate::crypto::KEY_BYTES;
-    use crate::models::{AttachmentKind, AttachmentMeta};
+    use crate::db::backend::sqlite::SqliteBackend;
+    use crate::db::backend::{BackendTx, RowExt, Value};
+    use crate::db::crypto::KEY_BYTES;
+    use crate::db::models::{AttachmentKind, AttachmentMeta};
 
     #[derive(Debug)]
     struct StepClock {

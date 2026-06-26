@@ -1800,7 +1800,7 @@ dependencies = [
 name = "db"
 version = "0.0.0"
 dependencies = [
- "ensu-db",
+ "ente-ensu",
  "thiserror 2.0.18",
  "uniffi",
  "uuid",
@@ -2266,26 +2266,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "66b7e2430c6dff6a955451e2cfc438f09cea1965a9d6f87f7e3b90decc014099"
 
 [[package]]
-name = "ensu-db"
-version = "0.0.0"
-dependencies = [
- "ente-core",
- "ente-image",
- "rusqlite",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "uuid",
- "zeroize",
-]
-
-[[package]]
 name = "ensu-desktop"
 version = "0.1.18-beta"
 dependencies = [
- "ensu-db",
  "ente-core",
- "inference_rs",
+ "ente-ensu",
  "keyring",
  "libc",
  "serde",
@@ -2299,20 +2284,6 @@ dependencies = [
  "tauri-plugin-updater",
  "uuid",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "ensu-transcription"
-version = "0.0.0"
-dependencies = [
- "flate2",
- "ort 2.0.0-rc.12",
- "regex",
- "reqwest 0.12.28",
- "rubato",
- "tar",
- "thiserror 2.0.18",
- "transcribe-rs",
 ]
 
 [[package]]
@@ -2394,6 +2365,32 @@ dependencies = [
  "serde_json",
  "sha1 0.11.0",
  "tokio",
+ "uuid",
+ "zeroize",
+]
+
+[[package]]
+name = "ente-ensu"
+version = "0.0.0"
+dependencies = [
+ "ente-core",
+ "ente-image",
+ "flate2",
+ "futures-util",
+ "llama-cpp-2",
+ "ort 2.0.0-rc.12",
+ "parking_lot",
+ "regex",
+ "reqwest 0.12.28",
+ "rubato",
+ "rusqlite",
+ "self_cell",
+ "serde",
+ "serde_json",
+ "tar",
+ "thiserror 2.0.18",
+ "tokio",
+ "transcribe-rs",
  "uuid",
  "zeroize",
 ]
@@ -4478,23 +4475,9 @@ dependencies = [
 name = "inference"
 version = "0.0.0"
 dependencies = [
- "inference_rs",
+ "ente-ensu",
  "thiserror 1.0.69",
  "uniffi",
-]
-
-[[package]]
-name = "inference_rs"
-version = "0.0.0"
-dependencies = [
- "futures-util",
- "llama-cpp-2",
- "parking_lot",
- "reqwest 0.12.28",
- "self_cell",
- "serde",
- "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -9284,7 +9267,7 @@ dependencies = [
 name = "transcription"
 version = "0.0.0"
 dependencies = [
- "ensu-transcription",
+ "ente-ensu",
  "thiserror 2.0.18",
  "uniffi",
 ]

@@ -6,6 +6,6 @@ edition = "2024"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-inference_rs.workspace = true
+ente-ensu.workspace = true
 thiserror = "1"
 uniffi = { version = "0.31.0" }

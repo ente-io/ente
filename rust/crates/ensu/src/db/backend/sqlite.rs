@@ -4,7 +4,7 @@ use std::sync::{Mutex, MutexGuard};
 use rusqlite::types::Value as SqlValue;
 use rusqlite::{Connection, params_from_iter};
 
-use crate::{Backend, BackendTx, Error, Result, Row, Value};
+use crate::db::{Backend, BackendTx, Error, Result, Row, Value};
 
 pub struct SqliteBackend {
     conn: Mutex<Connection>,

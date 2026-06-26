@@ -1,4 +1,4 @@
-use inference_rs as core;
+use ente_ensu::inference as core;
 use std::sync::Arc;
 use thiserror::Error;
 

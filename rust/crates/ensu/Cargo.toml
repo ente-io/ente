@@ -1,15 +1,26 @@
 [package]
-name = "inference_rs"
+name = "ente-ensu"
 edition = "2024"
 
 [dependencies]
+ente-core.workspace = true
+ente-image.workspace = true
+flate2 = "1"
 futures-util = "0.3"
 parking_lot = "0.12"
-reqwest = { version = "0.12", default-features = false, features = ["http2", "charset", "system-proxy", "rustls-tls-webpki-roots"] }
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "http2", "charset", "system-proxy", "rustls-tls-webpki-roots"] }
+rubato = "0.16"
+rusqlite = { version = "0.38", features = ["bundled"], optional = true }
 self_cell = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tar = "0.4"
+thiserror = "2"
 tokio = { version = "1", features = ["rt", "time"] }
+transcribe-rs = { version = "0.3.11", default-features = false, features = ["onnx", "vad-silero"] }
+uuid = { version = "1", features = ["v4", "rng-getrandom"] }
+zeroize = { version = "1.8", features = ["derive"] }
 
 # llama-cpp-2's default features are "openmp" and "android-shared-stdcxx".
 #
@@ -30,3 +41,10 @@ llama-cpp-2 = { version = "=0.1.144", default-features = false, features = ["mtm
 
 [target.'cfg(not(target_os = "macos"))'.dependencies]
 llama-cpp-2 = { version = "=0.1.144", features = ["mtmd"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+ort = { version = "=2.0.0-rc.12", default-features = false, features = ["load-dynamic"] }
+
+[features]
+default = ["sqlite"]
+sqlite = ["dep:rusqlite"]

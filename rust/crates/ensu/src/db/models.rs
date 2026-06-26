@@ -104,13 +104,13 @@ impl Sender {
 }
 
 impl std::str::FromStr for Sender {
-    type Err = crate::Error;
+    type Err = crate::db::Error;
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
             "self" => Ok(Sender::SelfUser),
             "other" => Ok(Sender::Other),
-            _ => Err(crate::Error::InvalidSender(value.to_string())),
+            _ => Err(crate::db::Error::InvalidSender(value.to_string())),
         }
     }
 }
