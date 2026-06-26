@@ -35,8 +35,6 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             commands::crypto_init,
             commands::crypto_generate_key,
-            commands::crypto_encrypt_box,
-            commands::crypto_decrypt_box,
             commands::crypto_encrypt_blob,
             commands::crypto_decrypt_blob,
             commands::secure_storage_get,

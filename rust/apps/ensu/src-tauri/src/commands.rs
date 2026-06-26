@@ -313,30 +313,9 @@ impl From<DbError> for ApiError {
 }
 
 #[derive(Serialize)]
-pub struct EncryptedBox {
-    encrypted_data: String,
-    nonce: String,
-}
-
-#[derive(Serialize)]
 pub struct EncryptedBlob {
     encrypted_data: String,
     decryption_header: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CryptoBoxInput {
-    data_b64: String,
-    key_b64: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CryptoBoxDecryptInput {
-    encrypted_data_b64: String,
-    nonce_b64: String,
-    key_b64: String,
 }
 
 #[derive(Deserialize)]
@@ -364,31 +343,6 @@ pub fn crypto_init() -> Result<(), ApiError> {
 #[tauri::command]
 pub fn crypto_generate_key() -> String {
     core_crypto::encode_b64(core_crypto::Key::generate().as_bytes())
-}
-
-#[tauri::command]
-pub fn crypto_encrypt_box(input: CryptoBoxInput) -> Result<EncryptedBox, ApiError> {
-    let data = core_crypto::decode_b64(&input.data_b64).map_err(ApiError::from)?;
-    let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
-    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
-    let out = core_crypto::secretbox::encrypt(&data, &key);
-
-    Ok(EncryptedBox {
-        encrypted_data: core_crypto::encode_b64(&out.encrypted_data),
-        nonce: core_crypto::encode_b64(out.nonce.as_bytes()),
-    })
-}
-
-#[tauri::command]
-pub fn crypto_decrypt_box(input: CryptoBoxDecryptInput) -> Result<String, ApiError> {
-    let ciphertext = core_crypto::decode_b64(&input.encrypted_data_b64).map_err(ApiError::from)?;
-    let nonce = core_crypto::decode_b64(&input.nonce_b64).map_err(ApiError::from)?;
-    let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
-    let nonce = core_crypto::Nonce::try_from_slice(&nonce).map_err(ApiError::from)?;
-    let key = core_crypto::Key::try_from_slice(&key).map_err(ApiError::from)?;
-    let plaintext =
-        core_crypto::secretbox::decrypt(&ciphertext, &nonce, &key).map_err(ApiError::from)?;
-    Ok(core_crypto::encode_b64(&plaintext))
 }
 
 #[tauri::command]
