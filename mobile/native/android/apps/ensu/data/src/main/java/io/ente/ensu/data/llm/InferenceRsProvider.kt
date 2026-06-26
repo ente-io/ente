@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import io.ente.ensu.domain.device.DeviceCapabilityProvider
-import io.ente.ensu.domain.device.UnknownDeviceCapabilityProvider
 import io.ente.ensu.domain.device.requireChatSupported
 import io.ente.ensu.domain.llm.DownloadProgress
 import io.ente.ensu.domain.llm.GenerationSummary
@@ -55,8 +54,8 @@ import kotlin.math.max
 class InferenceRsProvider(
     context: Context,
     private val modelDir: File,
+    private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val legacyModelDir: File? = null,
-    private val deviceCapabilityProvider: DeviceCapabilityProvider = UnknownDeviceCapabilityProvider,
     private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
 ) : LlmProvider {
     private data class LoadedModelKey(

@@ -64,24 +64,6 @@ struct StyledTextField: View {
     }
 }
 
-struct TextLink: View {
-    let text: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: {
-            hapticTap()
-            action()
-        }) {
-            Text(text)
-                .font(EnsuFont.ui(size: 14, weight: .semibold))
-                .underline()
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(EnsuColor.action)
-    }
-}
-
 struct ActionButton: View {
     let icon: String
     var isSystemSymbol: Bool = false

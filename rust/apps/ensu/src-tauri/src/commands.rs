@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -1431,25 +1431,6 @@ pub async fn fs_read_head(path: String, length: usize) -> Result<Vec<u8>, ApiErr
     .map_err(|_| fs_thread_error())?
 }
 
-#[tauri::command]
-pub async fn fs_append_bytes(path: String, bytes: Vec<u8>) -> Result<(), ApiError> {
-    async_runtime::spawn_blocking(move || {
-        if bytes.is_empty() {
-            return Ok(());
-        }
-        let mut file = fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&path)
-            .map_err(|err| ApiError::new("io", err.to_string()))?;
-        file.write_all(&bytes)
-            .map_err(|err| ApiError::new("io", err.to_string()))?;
-        Ok(())
-    })
-    .await
-    .map_err(|_| fs_thread_error())?
-}
-
 fn normalize_sender(sender: &str) -> Result<&'static str, ApiError> {
     match sender {
         "self" => Ok("self"),
@@ -1463,16 +1444,6 @@ fn normalize_sender(sender: &str) -> Result<&'static str, ApiError> {
 
 fn parse_uuid(value: &str) -> Result<Uuid, ApiError> {
     Uuid::parse_str(value).map_err(|err| ApiError::new("uuid", err.to_string()))
-}
-
-#[tauri::command]
-pub async fn chat_db_compress_attachment_image(data: Vec<u8>) -> Result<Vec<u8>, ApiError> {
-    async_runtime::spawn_blocking(move || {
-        ensu_db::compress_attachment_image(&data)
-            .map_err(|err| ApiError::new("image", err.to_string()))
-    })
-    .await
-    .map_err(|_| image_thread_error())?
 }
 
 #[tauri::command]

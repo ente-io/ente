@@ -3,10 +3,8 @@ package io.ente.ensu.domain.store
 import io.ente.ensu.domain.chat.ChatRepository
 import io.ente.ensu.domain.device.ChatDeviceCapability
 import io.ente.ensu.domain.device.DeviceCapabilityProvider
-import io.ente.ensu.domain.device.UnknownDeviceCapabilityProvider
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.logging.LogRepository
-import io.ente.ensu.domain.logging.NoOpLogRepository
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.EnsuDefaults
@@ -25,10 +23,10 @@ class AppStore(
     private val sessionPreferences: SessionPreferences,
     private val chatRepository: ChatRepository,
     private val llmProvider: LlmProvider,
-    private val deviceCapabilityProvider: DeviceCapabilityProvider = UnknownDeviceCapabilityProvider,
+    private val deviceCapabilityProvider: DeviceCapabilityProvider,
     val ensuDefaults: EnsuDefaults,
-    private val clock: () -> Long = { System.currentTimeMillis() },
-    private val logRepository: LogRepository = NoOpLogRepository
+    private val logRepository: LogRepository,
+    private val clock: () -> Long = { System.currentTimeMillis() }
 ) {
     private val _state = MutableStateFlow(AppState())
     val state: StateFlow<AppState> = _state.asStateFlow()

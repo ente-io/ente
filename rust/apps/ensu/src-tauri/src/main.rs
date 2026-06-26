@@ -52,7 +52,6 @@ fn main() {
             commands::chat_db_update_message_text,
             commands::chat_db_upsert_session,
             commands::chat_db_insert_message_with_uuid,
-            commands::chat_db_compress_attachment_image,
             commands::chat_db_compress_attachment_image_file,
             commands::chat_db_reset,
             commands::chat_db_migrate_legacy,
@@ -70,7 +69,6 @@ fn main() {
             commands::llm_cancel_model_download,
             commands::fs_file_size,
             commands::fs_read_head,
-            commands::fs_append_bytes,
         ])
         .build(tauri::generate_context!())
         .unwrap_or_else(|err| {
