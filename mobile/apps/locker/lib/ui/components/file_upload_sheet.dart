@@ -5,7 +5,6 @@ import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/text_input_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
-import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -80,11 +79,6 @@ class _FileUploadSheetState extends State<FileUploadSheet> {
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
 
-    if (selectedCollections.isEmpty) {
-      showToast(context, context.l10n.pleaseSelectAtLeastOneCollection);
-      return;
-    }
-
     final result = FileUploadSheetResult(
       note: _noteController.text.trim(),
       selectedCollections: selectedCollections,
@@ -151,7 +145,6 @@ class _FileUploadSheetState extends State<FileUploadSheet> {
             buttonType: ButtonType.primary,
             labelText: context.l10n.upload,
             onTap: _onSave,
-            isDisabled: _selectedCollectionIds.isEmpty,
           ),
         ),
       ],
