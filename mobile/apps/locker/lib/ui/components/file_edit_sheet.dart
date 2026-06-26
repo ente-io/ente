@@ -42,6 +42,10 @@ class _FileEditSheetState extends State<FileEditSheet> {
   final TextEditingController _captionController = TextEditingController();
   final Set<int> _selectedCollectionIds = <int>{};
   List<Collection> _availableCollections = [];
+  bool _hasLoadedCollectionSelection = false;
+
+  bool get _canSave =>
+      _hasLoadedCollectionSelection && _selectedCollectionIds.isNotEmpty;
 
   @override
   void initState() {
@@ -68,17 +72,16 @@ class _FileEditSheetState extends State<FileEditSheet> {
       setState(() {
         _selectedCollectionIds
           ..clear()
-          ..addAll(
-            existingCollections
-                .where(
-                  (collection) =>
-                      collection.type != CollectionType.uncategorized,
-                )
-                .map((collection) => collection.id),
-          );
+          ..addAll(existingCollections.map((collection) => collection.id));
+        _hasLoadedCollectionSelection = true;
       });
     } catch (_) {
       // Ignore failures; selections will remain empty.
+      if (mounted) {
+        setState(() {
+          _hasLoadedCollectionSelection = true;
+        });
+      }
     }
   }
 
@@ -109,11 +112,7 @@ class _FileEditSheetState extends State<FileEditSheet> {
   }
 
   List<Collection> _filterCollections(List<Collection> source) {
-    final filtered = uniqueCollectionsById(source)
-      ..removeWhere(
-        (collection) => collection.type == CollectionType.uncategorized,
-      );
-    return filtered;
+    return uniqueCollectionsById(source);
   }
 
   Future<void> _onSave() async {
@@ -155,9 +154,7 @@ class _FileEditSheetState extends State<FileEditSheet> {
         SizedBox(
           width: double.infinity,
           child: GradientButton(
-            onTap: () async {
-              await _onSave();
-            },
+            onTap: _canSave ? _onSave : null,
             text: context.l10n.save,
           ),
         ),

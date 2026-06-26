@@ -14,7 +14,6 @@ import "package:locker/ui/sharing/album_share_info_widget.dart";
 
 class CollectionListWidget extends StatelessWidget {
   final Collection collection;
-  final bool isLastItem;
   final SelectedCollections? selectedCollections;
   final void Function(Collection)? onTapCallback;
   final void Function(Collection)? onLongPressCallback;
@@ -22,7 +21,6 @@ class CollectionListWidget extends StatelessWidget {
   const CollectionListWidget({
     super.key,
     required this.collection,
-    this.isLastItem = false,
     this.selectedCollections,
     this.onTapCallback,
     this.onLongPressCallback,

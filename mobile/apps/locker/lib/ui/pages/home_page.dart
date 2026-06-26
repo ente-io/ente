@@ -230,6 +230,8 @@ class _HomePageState extends UploaderPageState<HomePage>
   );
 
   String? _error;
+  // Accumulated rightward drag distance for the open-drawer swipe.
+  double _drawerDragDx = 0;
   final _logger = Logger('HomePage');
   StreamSubscription? _mediaStreamSubscription;
   StreamSubscription<Uri>? _deepLinkSubscription;
@@ -267,11 +269,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         _filteredFiles = _recentFiles;
       });
     }
-  }
-
-  List<Collection> get _displayedCollections {
-    final collections = isSearchActive ? _filteredCollections : _collections;
-    return _filterOutUncategorized(collections);
   }
 
   List<Collection> _filterOutUncategorized(List<Collection> collections) {
@@ -652,7 +649,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                   backgroundColor: componentColors.backgroundBase,
                   child: _settingsPage,
                 ),
-                drawerEnableOpenDragGesture: true,
+                drawerEnableOpenDragGesture: false,
                 onDrawerChanged: (isOpened) {
                   _isSettingsOpen = isOpened;
                   if (isOpened) {
@@ -671,7 +668,19 @@ class _HomePageState extends UploaderPageState<HomePage>
                 ),
                 body: Stack(
                   children: [
-                    _buildBody(),
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onHorizontalDragStart: (_) => _drawerDragDx = 0,
+                      onHorizontalDragUpdate: (details) =>
+                          _drawerDragDx += details.delta.dx,
+                      onHorizontalDragEnd: (details) {
+                        final velocity = details.primaryVelocity ?? 0;
+                        if (_drawerDragDx > 60 || velocity > 150) {
+                          scaffoldKey.currentState?.openDrawer();
+                        }
+                      },
+                      child: _buildBody(),
+                    ),
                     ValueListenableBuilder<List<EnteFile>>(
                       valueListenable: _displayedFilesNotifier,
                       builder: (context, displayedFiles, _) {
@@ -749,15 +758,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         ),
       );
     }
-    if (_displayedCollections.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(isLoading: _isSyncing),
-        ),
-      );
-    }
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
@@ -782,7 +782,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     RecentsSectionWidget(
-                      collections: _filterOutUncategorized(_collections),
+                      collections: _collections,
                       recentFiles: _recentFiles,
                       selectedFiles: _selectedFiles,
                       displayedFilesNotifier: _displayedFilesNotifier,
