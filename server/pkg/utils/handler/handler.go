@@ -2,6 +2,7 @@ package handler
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -60,6 +61,7 @@ func requestFailureLogLevel(err error, apiErr *ente.ApiError) *log.Level {
 		errors.Is(err, ente.ErrAuthenticationRequired) ||
 		errors.Is(err, ente.ErrUserDeleted) ||
 		errors.Is(err, sql.ErrNoRows) ||
+		isJSONDecodeError(err) ||
 		isRequestIOError(err) ||
 		(apiErr != nil && apiErr.HttpStatusCode >= 400 && apiErr.HttpStatusCode < 500) {
 		return logLevel(log.WarnLevel)
@@ -89,7 +91,8 @@ func httpStatusCode(err error) int {
 		return http.StatusNotFound
 	case errors.Is(err, ente.ErrBadRequest) ||
 		errors.Is(err, ente.ErrCannotDowngrade) ||
-		errors.Is(err, ente.ErrCannotSwitchPaymentProvider):
+		errors.Is(err, ente.ErrCannotSwitchPaymentProvider) ||
+		isJSONDecodeError(err):
 		return http.StatusBadRequest
 	case errors.Is(err, ente.ErrTooManyBadRequest):
 		return http.StatusTooManyRequests
@@ -124,4 +127,10 @@ func httpStatusCode(err error) int {
 	default:
 		return 0
 	}
+}
+
+func isJSONDecodeError(err error) bool {
+	var syntaxErr *json.SyntaxError
+	var unmarshalTypeErr *json.UnmarshalTypeError
+	return errors.As(err, &syntaxErr) || errors.As(err, &unmarshalTypeErr)
 }

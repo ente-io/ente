@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/ente/museum/ente"
@@ -94,6 +95,28 @@ func TestErrorLogsWarnForExpectedClientErrors(t *testing.T) {
 			require.Equal(t, "Request failed", entry.Message)
 		})
 	}
+}
+
+func TestErrorLogsWarnForInvalidJSON(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	recorder, ctx := testContext()
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/users/ott", strings.NewReader(`{"email":"a" "purpose":"login"}`))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+
+	var payload map[string]string
+	err := ctx.ShouldBindJSON(&payload)
+	require.Error(t, err)
+
+	hook := testLogHook(t)
+
+	Error(ctx, stacktrace.Propagate(err, ""))
+
+	require.Equal(t, http.StatusBadRequest, recorder.Code)
+	entry := hook.LastEntry()
+	require.NotNil(t, entry)
+	require.Equal(t, log.WarnLevel, entry.Level)
+	require.Equal(t, "Request failed", entry.Message)
 }
 
 func TestErrorLogsUnexpectedErrors(t *testing.T) {
