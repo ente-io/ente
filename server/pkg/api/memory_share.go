@@ -20,8 +20,8 @@ type MemoryShareHandler struct {
 // Create creates a new memory share
 func (h *MemoryShareHandler) Create(c *gin.Context) {
 	var req ente.CreateMemoryShareRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "invalid request body"))
+	if err := handler.BindJSON(c, &req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "invalid request body"))
 		return
 	}
 

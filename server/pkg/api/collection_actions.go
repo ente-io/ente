@@ -65,7 +65,7 @@ type rejectDeleteSuggestionsRequest struct {
 func (h *CollectionActionsHandler) RejectDeleteSuggestions(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var req rejectDeleteSuggestionsRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := handler.BindJSON(c, &req); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "invalid payload"))
 		return
 	}

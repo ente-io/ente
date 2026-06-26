@@ -30,7 +30,7 @@ type UserHandler struct {
 // SendOTT generates and sends an OTT to the provided email address
 func (h *UserHandler) SendOTT(c *gin.Context) {
 	var request ente.SendOTTRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -89,7 +89,7 @@ func (h *UserHandler) GetLockerUsage(c *gin.Context) {
 func (h *UserHandler) SetAttributes(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var request ente.SetUserAttributesRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -108,7 +108,7 @@ func (h *UserHandler) SetAttributes(c *gin.Context) {
 func (h *UserHandler) UpdateEmailMFA(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var request ente.UpdateEmailMFA
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -124,7 +124,7 @@ func (h *UserHandler) UpdateEmailMFA(c *gin.Context) {
 func (h *UserHandler) SetRecoveryKey(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var request ente.SetRecoveryKeyRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -173,7 +173,7 @@ func (h *UserHandler) GetSessionValidityV2(c *gin.Context) {
 // provided email address and if yes returns the users credentials
 func (h *UserHandler) VerifyEmail(c *gin.Context) {
 	var request ente.EmailVerificationRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -189,7 +189,7 @@ func (h *UserHandler) VerifyEmail(c *gin.Context) {
 // provided email address and if yes updates the user's existing email address
 func (h *UserHandler) ChangeEmail(c *gin.Context) {
 	var request ente.EmailVerificationRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -225,7 +225,7 @@ func (h *UserHandler) GetTwoFactorRecoveryStatus(c *gin.Context) {
 // have access to passkey, the user can bypass the passkey by providing the recovery key
 func (h *UserHandler) ConfigurePasskeyRecovery(c *gin.Context) {
 	var request ente.SetPasskeyRecoveryRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -252,7 +252,7 @@ func (h *UserHandler) SetupTwoFactor(c *gin.Context) {
 func (h *UserHandler) EnableTwoFactor(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var request ente.TwoFactorEnableRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -267,8 +267,8 @@ func (h *UserHandler) EnableTwoFactor(c *gin.Context) {
 // VerifyTwoFactor handles the two factor validation request
 func (h *UserHandler) VerifyTwoFactor(c *gin.Context) {
 	var request ente.TwoFactorVerificationRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Failed to bind request: %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Failed to bind request"))
 		return
 	}
 	response, err := h.UserController.VerifyTwoFactor(c, request.SessionID, request.Code)
@@ -282,8 +282,8 @@ func (h *UserHandler) VerifyTwoFactor(c *gin.Context) {
 // BeginPasskeyRegistrationCeremony handles the request to begin the passkey registration ceremony
 func (h *UserHandler) BeginPasskeyAuthenticationCeremony(c *gin.Context) {
 	var request ente.PasskeyTwoFactorBeginAuthenticationCeremonyRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Failed to bind request: %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Failed to bind request"))
 		return
 	}
 
@@ -424,7 +424,7 @@ func (h *UserHandler) RecoverTwoFactor(c *gin.Context) {
 // by authenticating him using his twoFactorsessionToken and twoFactor secret
 func (h *UserHandler) RemoveTwoFactor(c *gin.Context) {
 	var request ente.TwoFactorRemovalRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -444,7 +444,7 @@ func (h *UserHandler) RemoveTwoFactor(c *gin.Context) {
 
 func (h *UserHandler) ReportEvent(c *gin.Context) {
 	var request ente.EventReportRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -533,7 +533,7 @@ func (h *UserHandler) GetDeleteChallenge(c *gin.Context) {
 // DeleteUser api for deleting a user
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	var request ente.DeleteAccountRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
 		return
 	}
@@ -597,9 +597,8 @@ func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 // SetupSRP sets the SRP attributes for a user
 func (h *UserHandler) SetupSRP(c *gin.Context) {
 	var request ente.SetupSRPRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 	userID := auth.GetUserID(c.Request.Header)
@@ -614,9 +613,8 @@ func (h *UserHandler) SetupSRP(c *gin.Context) {
 // CompleteSRPSetup completes the SRP setup for a user
 func (h *UserHandler) CompleteSRPSetup(c *gin.Context) {
 	var request ente.CompleteSRPSetupRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 	resp, err := h.UserController.CompleteSRPSetup(c, request)
@@ -630,9 +628,8 @@ func (h *UserHandler) CompleteSRPSetup(c *gin.Context) {
 // UpdateSrpAndKeyAttributes updates the SRP setup for a user and key attributes
 func (h *UserHandler) UpdateSrpAndKeyAttributes(c *gin.Context) {
 	var request ente.UpdateSRPAndKeysRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 	userID := auth.GetUserID(c.Request.Header)
@@ -652,9 +649,8 @@ func (h *UserHandler) UpdateSrpAndKeyAttributes(c *gin.Context) {
 // CreateSRPSession set the SRP A value on the server and returns the SRP B value to the client
 func (h *UserHandler) CreateSRPSession(c *gin.Context) {
 	var request ente.CreateSRPSessionRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 	resp, err := h.UserController.CreateSrpSession(c, request)
@@ -668,9 +664,8 @@ func (h *UserHandler) CreateSRPSession(c *gin.Context) {
 // VerifySRPSession checks the M1 value to determine if user actually knows the password
 func (h *UserHandler) VerifySRPSession(c *gin.Context) {
 	var request ente.VerifySRPSessionRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 	response, err := h.UserController.VerifySRPSession(c, request)

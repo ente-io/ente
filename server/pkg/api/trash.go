@@ -56,7 +56,7 @@ func (t *TrashHandler) GetDiffV2(c *gin.Context) {
 func (t *TrashHandler) Delete(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var request ente.DeleteTrashFilesRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -74,7 +74,7 @@ func (t *TrashHandler) Empty(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	enteApp := auth.GetApp(c)
 	var request ente.EmptyTrashRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}

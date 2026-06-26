@@ -30,7 +30,7 @@ type reactionPayload struct {
 
 func (h *ReactionsHandler) Upsert(c *gin.Context) {
 	var payload reactionPayload
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	if err := handler.BindJSON(c, &payload); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}

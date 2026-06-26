@@ -18,9 +18,8 @@ type RemoteStoreHandler struct {
 // InsertOrUpdate handler for inserting or updating key
 func (h *RemoteStoreHandler) InsertOrUpdate(c *gin.Context) {
 	var request ente.UpdateKeyValueRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, "Request binding failed %s", err))
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Request binding failed"))
 		return
 	}
 

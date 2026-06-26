@@ -35,7 +35,7 @@ type updateCommentPayload struct {
 
 func (h *CommentsHandler) Create(c *gin.Context) {
 	var payload createCommentPayload
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	if err := handler.BindJSON(c, &payload); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
@@ -115,7 +115,7 @@ func (h *CommentsHandler) Update(c *gin.Context) {
 		return
 	}
 	var payload updateCommentPayload
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	if err := handler.BindJSON(c, &payload); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
