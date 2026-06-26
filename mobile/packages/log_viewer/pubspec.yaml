@@ -1,6 +1,5 @@
 name: log_viewer
 description: In-app log viewer with filtering capabilities for Ente apps
-version: 1.0.0
 
 resolution: workspace
 environment:

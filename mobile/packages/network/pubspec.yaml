@@ -1,7 +1,5 @@
 name: ente_network
 description: A Flutter package for network management and HTTP client configuration
-version: 1.0.0
-publish_to: none
 
 resolution: workspace
 environment:

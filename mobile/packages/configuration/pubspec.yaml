@@ -1,7 +1,5 @@
 name: ente_configuration
 description: A Flutter package for shared configuration across ente apps
-version: 1.0.0
-publish_to: none
 
 resolution: workspace
 environment:

@@ -1,7 +1,5 @@
 name: ente_components
 description: Production-ready Flutter design-system components for mobile apps.
-version: 0.1.0
-publish_to: none
 
 resolution: workspace
 environment:

@@ -1,6 +1,4 @@
 name: ente_feature_flag
-version: 0.0.1
-publish_to: none
 
 resolution: workspace
 environment:

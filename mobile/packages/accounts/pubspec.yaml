@@ -1,6 +1,5 @@
 name: ente_accounts
 description: A Flutter package containing account-related models, pages, and services for Ente apps
-version: 1.0.0
 
 resolution: workspace
 environment:
@@ -58,4 +57,3 @@ dev_dependencies:
 flutter:
 
 # This package is not meant to be published
-publish_to: none

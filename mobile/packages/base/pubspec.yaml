@@ -1,6 +1,5 @@
 name: ente_base
 description: A base Flutter package containing shared models and types for ente apps
-version: 1.0.0
 
 resolution: workspace
 environment:

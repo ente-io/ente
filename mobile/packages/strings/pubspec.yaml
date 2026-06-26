@@ -1,6 +1,5 @@
 name: ente_strings
 description: A Flutter package containing shared localization strings for ente apps
-version: 1.0.0
 
 resolution: workspace
 environment:

@@ -1,7 +1,5 @@
 name: ente_contacts
 description: Shared contacts client, cache, and Rust orchestration for Ente apps
-version: 1.0.0
-publish_to: none
 
 resolution: workspace
 environment:

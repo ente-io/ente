@@ -1,6 +1,5 @@
 name: ente_components_catalog
 description: Visual catalog for the mobile component package.
-publish_to: none
 
 resolution: workspace
 environment:

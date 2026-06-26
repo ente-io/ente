@@ -1,6 +1,5 @@
 name: ente_logging
 description: A Flutter package for logging functionality across ente apps
-version: 1.0.0
 
 resolution: workspace
 environment:

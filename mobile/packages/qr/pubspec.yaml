@@ -1,7 +1,5 @@
 name: ente_qr_ui
 description: Shared QR code utilities for Ente mobile apps
-version: 0.0.1
-publish_to: none
 
 resolution: workspace
 environment:

@@ -1,7 +1,5 @@
 name: ente_utils
 description: A Flutter package containing shared utility functions for Ente apps
-version: 1.0.0
-publish_to: none
 
 resolution: workspace
 environment:

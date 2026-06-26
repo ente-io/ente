@@ -1,7 +1,5 @@
 name: ente_qr
 description: "A QR code reader plugin for Ente."
-version: 0.0.1
-homepage: https://ente.com
 
 resolution: workspace
 environment:

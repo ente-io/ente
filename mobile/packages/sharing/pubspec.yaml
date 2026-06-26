@@ -1,7 +1,5 @@
 name: ente_sharing
 description: Common sharing functionality for ente apps
-version: 1.0.0
-publish_to: none
 
 resolution: workspace
 environment:
