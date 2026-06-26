@@ -1,0 +1,1 @@
+- Updated the Local Gallery backup banner UI and show it only from the second launch.
