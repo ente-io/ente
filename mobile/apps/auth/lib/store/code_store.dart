@@ -215,7 +215,8 @@ class CodeStore {
           (oc) =>
               oc.issuer == eachCode.issuer &&
               oc.account == eachCode.account &&
-              oc.secret == eachCode.secret,
+            oc.secret == eachCode.secret &&
+            oc.pin == eachCode.pin,
         );
         int? generatedID = eachCode.generatedID!;
         logger.info(
