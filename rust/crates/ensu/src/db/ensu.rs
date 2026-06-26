@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::db::Result;
 use crate::db::attachments_db::{AttachmentUploadRow, AttachmentsDb, UploadState};
-use crate::db::db::ChatDb;
+use crate::db::chat_db::ChatDb;
 use crate::db::models::{Attachment, AttachmentMeta, Message, Session, SessionWithPreview};
 #[cfg(feature = "sqlite")]
 use crate::db::traits::{Clock, UuidGen};
