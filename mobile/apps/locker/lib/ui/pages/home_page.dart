@@ -230,6 +230,8 @@ class _HomePageState extends UploaderPageState<HomePage>
   );
 
   String? _error;
+  // Accumulated rightward drag distance for the open-drawer swipe.
+  double _drawerDragDx = 0;
   final _logger = Logger('HomePage');
   StreamSubscription? _mediaStreamSubscription;
   StreamSubscription<Uri>? _deepLinkSubscription;
@@ -647,8 +649,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                   backgroundColor: componentColors.backgroundBase,
                   child: _settingsPage,
                 ),
-                drawerEnableOpenDragGesture: true,
-                drawerEdgeDragWidth: 45,
+                drawerEnableOpenDragGesture: false,
                 onDrawerChanged: (isOpened) {
                   _isSettingsOpen = isOpened;
                   if (isOpened) {
@@ -667,7 +668,19 @@ class _HomePageState extends UploaderPageState<HomePage>
                 ),
                 body: Stack(
                   children: [
-                    _buildBody(),
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onHorizontalDragStart: (_) => _drawerDragDx = 0,
+                      onHorizontalDragUpdate: (details) =>
+                          _drawerDragDx += details.delta.dx,
+                      onHorizontalDragEnd: (details) {
+                        final velocity = details.primaryVelocity ?? 0;
+                        if (_drawerDragDx > 60 || velocity > 150) {
+                          scaffoldKey.currentState?.openDrawer();
+                        }
+                      },
+                      child: _buildBody(),
+                    ),
                     ValueListenableBuilder<List<EnteFile>>(
                       valueListenable: _displayedFilesNotifier,
                       builder: (context, displayedFiles, _) {
