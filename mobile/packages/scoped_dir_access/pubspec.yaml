@@ -3,6 +3,7 @@ description: Cross-platform directory access with security-scoped persistent acc
 version: 1.0.0
 homepage: https://github.com/ente/ente
 
+resolution: workspace
 environment:
   sdk: ">=3.10.0 <4.0.0"
   flutter: ">=2.5.0"

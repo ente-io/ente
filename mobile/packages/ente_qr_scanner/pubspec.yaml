@@ -4,6 +4,7 @@ version: 0.0.1
 homepage: https://ente.com
 publish_to: none
 
+resolution: workspace
 environment:
   sdk: ">=3.10.0 <4.0.0"
   flutter: ">=3.22.0"
