@@ -348,7 +348,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         allowEdits,
                         onFileMetadataUpdate,
                         onUpdateCaption,
-                        onClose,
                         onNavigationLockChange: setCaptionNavigationLocked,
                     }}
                 />
@@ -795,7 +794,6 @@ type CaptionProps = Pick<
     | "allowEdits"
     | "onFileMetadataUpdate"
     | "onUpdateCaption"
-    | "onClose"
     | "onNavigationLockChange"
 >;
 
@@ -804,7 +802,6 @@ const Caption: React.FC<CaptionProps> = ({
     allowEdits,
     onFileMetadataUpdate,
     onUpdateCaption,
-    onClose,
     onNavigationLockChange,
 }) => {
     const [isSaving, setIsSaving] = useState(false);
@@ -826,7 +823,6 @@ const Caption: React.FC<CaptionProps> = ({
                 await onFileMetadataUpdate?.();
                 onUpdateCaption(file.id, newCaption);
                 setIsSaving(false);
-                onClose();
             } catch (e) {
                 log.error("Failed to update caption", e);
                 setIsSaving(false);
@@ -1260,6 +1256,7 @@ const RawExif: React.FC<RawExifProps> = ({
                 onRootClose={handleRootClose}
                 title={t("exif")}
                 caption={fileName}
+                showRootCloseButton={false}
                 actionButton={
                     <CopyButton size="small" text={JSON.stringify(tags)} />
                 }
