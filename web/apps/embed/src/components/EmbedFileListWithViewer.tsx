@@ -60,7 +60,9 @@ export const EmbedFileListWithViewer: React.FC<
 
     const header = useMemo(
         () => (
-            <GalleryItemsHeaderAdapter>
+            <GalleryItemsHeaderAdapter
+                sx={{ boxSizing: "border-box", p: "12px", pb: "4px", mb: 0 }}
+            >
                 <SpacedRow>
                     <GalleryItemsSummary
                         name={publicCollection.name}
