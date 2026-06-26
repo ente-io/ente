@@ -115,15 +115,10 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs photos set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
-            - name: Resolve dependencies with lockfile enforcement
-              run: flutter pub get --enforce-lockfile
+            - run: flutter pub get --enforce-lockfile
 
             - run: cargo codegen frb
               working-directory: rust
@@ -237,15 +232,10 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
-            - name: Generate strings localizations
-              run: flutter gen-l10n
-              working-directory: mobile/packages/strings
-
             - name: Set build version
               run: node ../../../.github/scripts/flutter-version.mjs photos set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
-            - name: Resolve dependencies with lockfile enforcement
-              run: flutter pub get --enforce-lockfile
+            - run: flutter pub get --enforce-lockfile
 
             - name: Set up Rive iOS binaries
               run: dart run rive_native:setup --clean --platform ios

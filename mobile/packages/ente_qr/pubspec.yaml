@@ -1,8 +1,7 @@
 name: ente_qr
-description: "A QR code reader plugin for Ente."
-version: 0.0.1
-homepage: https://ente.com
+description: A QR code reader plugin for Ente.
 
+resolution: workspace
 environment:
   sdk: ">=3.10.0 <4.0.0"
   flutter: '>=3.3.0'

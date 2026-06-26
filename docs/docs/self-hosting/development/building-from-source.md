@@ -223,16 +223,14 @@ cargo codegen frb
 Fetch the dependencies:
 
 ```sh
-cd mobile/packages/strings
-flutter pub get --enforce-lockfile
-
-cd mobile/apps/photos
+cd mobile
 flutter pub get --enforce-lockfile
 ```
 
 That's about it. Now we can run the Photos iOS app in the iOS Simulator, asking it to connect to our local museum:
 
 ```sh
+cd mobile/apps/photos
 flutter run --dart-define 'endpoint=http://localhost:8080'
 ```
 

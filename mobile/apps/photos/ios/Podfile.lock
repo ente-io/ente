@@ -186,10 +186,7 @@ PODS:
   - OrderedSet (6.0.3)
   - package_info_plus (0.4.5):
     - Flutter
-  - path_provider_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
-  - permission_handler_apple (9.3.0):
+  - permission_handler_apple (9.4.8):
     - Flutter
   - photo_manager (3.7.1):
     - Flutter
@@ -309,7 +306,6 @@ DEPENDENCIES:
   - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
   - open_mail_app (from `.symlinks/plugins/open_mail_app/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
@@ -444,8 +440,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/open_mail_app/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
-  path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   photo_manager:
@@ -542,8 +536,7 @@ SPEC CHECKSUMS:
   open_mail_app: 7314a609e88eed22d53671279e189af7a0ab0f11
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  permission_handler_apple: 92d754bbaa7361d436db2d6c3c1c2a0fdcec462e
   photo_manager: 1d80ae07a89a67dfbcae95953a1e5a24af7c3e62
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
@@ -560,7 +553,7 @@ SPEC CHECKSUMS:
   system_info_plus: 555ce7047fbbf29154726db942ae785c29211740
   thermal: d4c48be750d1ddbab36b0e2dcb2471531bc8df41
   ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
-  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
+  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
   video_player_avfoundation: 33f12ee023e354af9d062d2c366503424a914d10
   video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
