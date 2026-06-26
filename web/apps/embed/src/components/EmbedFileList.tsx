@@ -1,5 +1,6 @@
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, styled } from "@mui/material";
+import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
@@ -9,7 +10,7 @@ import {
     StaticThumbnail,
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import {
     FixedSizeList,
     areEqual,
@@ -149,34 +150,25 @@ const EmbedFileTile: React.FC<EmbedFileTileProps> = memo(
             [file.metadata.fileType],
         );
 
-        const loadThumbnail = useCallback(async () => {
-            try {
-                setIsLoading(true);
-                const thumbnailData = await downloadManager.thumbnailData(file);
-                if (thumbnailData) {
-                    const blob = new Blob([thumbnailData]);
-                    const url = URL.createObjectURL(blob);
-                    setThumbnailSrc(url);
-                }
-            } catch (error) {
-                console.error("Failed to load thumbnail:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }, [file]);
+        useEffect(() => {
+            let didCancel = false;
 
-        React.useEffect(() => {
-            void loadThumbnail();
-        }, [loadThumbnail]);
+            setIsLoading(true);
+            setThumbnailSrc(undefined);
+            void downloadManager
+                .renderableThumbnailURL(file)
+                .then((url) => !didCancel && setThumbnailSrc(url))
+                .catch((e: unknown) => {
+                    log.warn("Failed to fetch embed thumbnail", e);
+                })
+                .finally(() => {
+                    if (!didCancel) setIsLoading(false);
+                });
 
-        // Separate cleanup effect that only runs on unmount
-        React.useEffect(() => {
             return () => {
-                if (thumbnailSrc) {
-                    URL.revokeObjectURL(thumbnailSrc);
-                }
+                didCancel = true;
             };
-        }, [thumbnailSrc]);
+        }, [file]);
 
         const content = useMemo(() => {
             if (isLoading) {
