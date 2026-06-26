@@ -93,6 +93,10 @@ func hardcodedOTTForEmail(hardCodedOTT HardCodedOTT, email string) string {
 
 // SendEmailOTT generates and sends an OTT to the provided email address
 func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpose string, mobile bool) error {
+	if c.OTTSendLimiter.IsGloballyBlocked() {
+		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many OTT requests")
+	}
+
 	shouldSend, err := c.validateSendOTT(context, email, purpose)
 	if err != nil {
 		return err
@@ -100,6 +104,32 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 	if !shouldSend {
 		return nil
 	}
+	emailHash, err := crypto.GetHash(email, c.HashingKey)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	// check if user has already requested for more than 10 codes in last 10mins
+	app := auth.GetApp(context)
+	otts, err := c.UserAuthRepo.GetValidOTTs(emailHash, app)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if len(otts) >= OTTActiveCodeLimit {
+		alertMsg := fmt.Sprintf("Too many OTT requests for %s in %d minutes",
+			emailUtil.GetMaskedEmailWithHint(email),
+			OTTValidityDurationInMicroSeconds/(60*1000000))
+		go c.DiscordController.NotifyPotentialAbuse(alertMsg)
+		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many OTT requests")
+	}
+
+	decision := c.OTTSendLimiter.Allow(network.GetClientIP(context))
+	if decision.alert != "" {
+		go c.DiscordController.NotifyPotentialAbuse(decision.alert)
+	}
+	if !decision.allowed {
+		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many OTT requests")
+	}
+
 	ott, err := random.GenerateSixDigitOtp()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -113,20 +143,6 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 			hasHardcodedOTT = true
 			ott = hardCodedOTT
 		}
-	}
-	emailHash, err := crypto.GetHash(email, c.HashingKey)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	// check if user has already requested for more than 10 codes in last 10mins
-	app := auth.GetApp(context)
-	otts, _ := c.UserAuthRepo.GetValidOTTs(emailHash, app)
-	if len(otts) >= OTTActiveCodeLimit {
-		alertMsg := fmt.Sprintf("Too many OTT requests for %s in %d minutes",
-			emailUtil.GetMaskedEmailWithHint(email),
-			OTTValidityDurationInMicroSeconds/(60*1000000))
-		go c.DiscordController.NotifyPotentialAbuse(alertMsg)
-		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many OTT requests")
 	}
 
 	err = c.UserAuthRepo.AddOTT(emailHash, app, ott, time.Microseconds()+OTTValidityDurationInMicroSeconds)

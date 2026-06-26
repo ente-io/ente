@@ -64,6 +64,7 @@ type UserController struct {
 	UserCacheController     *usercache.Controller
 	SRPLimiter              *limiter.Limiter
 	OTTLimiter              *limiter.Limiter
+	OTTSendLimiter          *OTTSendLimiter
 }
 
 const (
@@ -135,6 +136,7 @@ func NewUserController(
 ) *UserController {
 	srpLimiter := util.NewRateLimiter("100-H")
 	ottLimiter := util.NewRateLimiter("100-H")
+	ottSendLimiter := NewOTTSendLimiter()
 	return &UserController{
 		UserRepo:                userRepo,
 		UsageRepo:               usageRepo,
@@ -164,6 +166,7 @@ func NewUserController(
 		UserCacheController:     userCacheController,
 		SRPLimiter:              srpLimiter,
 		OTTLimiter:              ottLimiter,
+		OTTSendLimiter:          ottSendLimiter,
 	}
 }
 
