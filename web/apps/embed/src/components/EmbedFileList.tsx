@@ -10,6 +10,11 @@ import {
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import React, { memo, useCallback, useMemo, useState } from "react";
+import {
+    FixedSizeList,
+    areEqual,
+    type ListChildComponentProps,
+} from "react-window";
 
 export interface EmbedFileListAnnotatedFile {
     file: EnteFile;
@@ -21,8 +26,6 @@ export interface EmbedFileListProps {
     height: number;
     annotatedFiles: EmbedFileListAnnotatedFile[];
     onItemClick: (index: number) => void;
-    header?: React.ReactNode;
-    footer?: React.ReactNode;
 }
 
 const THUMBNAIL_SIZE = 200;
@@ -30,35 +33,105 @@ const THUMBNAIL_GAP = 4;
 const CONTAINER_PADDING = 4;
 
 export const EmbedFileList: React.FC<EmbedFileListProps> = memo(
-    ({ width, height, annotatedFiles, onItemClick, header, footer }) => {
-        const availableWidth = width - 2 * CONTAINER_PADDING;
-        const columns = Math.max(
-            1,
-            Math.floor(availableWidth / (THUMBNAIL_SIZE + THUMBNAIL_GAP)),
-        );
-        const actualThumbnailSize =
-            (availableWidth - (columns - 1) * THUMBNAIL_GAP) / columns;
+    ({ width, height, annotatedFiles, onItemClick }) => {
+        const gridWidth = width - 2 * CONTAINER_PADDING;
+        const gridHeight = height - 2 * CONTAINER_PADDING;
 
         return (
             <Container style={{ width, height }}>
-                {header}
-                <Grid columns={columns} gap={THUMBNAIL_GAP}>
-                    {annotatedFiles.map((annotatedFile, index) => (
-                        <EmbedFileTile
-                            key={`${annotatedFile.file.id}-${index}`}
-                            file={annotatedFile.file}
-                            size={actualThumbnailSize}
-                            onClick={() => onItemClick(index)}
-                        />
-                    ))}
-                </Grid>
-                {footer}
+                <EmbedVirtualGrid
+                    height={gridHeight}
+                    width={gridWidth}
+                    annotatedFiles={annotatedFiles}
+                    onItemClick={onItemClick}
+                />
             </Container>
         );
     },
 );
 
 EmbedFileList.displayName = "EmbedFileList";
+
+interface EmbedVirtualGridProps {
+    width: number;
+    height: number;
+    annotatedFiles: EmbedFileListAnnotatedFile[];
+    onItemClick: (index: number) => void;
+}
+
+const EmbedVirtualGrid: React.FC<EmbedVirtualGridProps> = memo(
+    ({ width, height, annotatedFiles, onItemClick }) => {
+        const columnCount = Math.max(
+            1,
+            Math.floor(
+                (width + THUMBNAIL_GAP) / (THUMBNAIL_SIZE + THUMBNAIL_GAP),
+            ),
+        );
+        const size = (width - (columnCount - 1) * THUMBNAIL_GAP) / columnCount;
+        const rowCount = Math.ceil(annotatedFiles.length / columnCount);
+        const itemData = useMemo(
+            () => ({ annotatedFiles, columnCount, onItemClick, size }),
+            [annotatedFiles, columnCount, onItemClick, size],
+        );
+
+        return (
+            <FixedSizeList
+                height={height}
+                itemData={itemData}
+                itemCount={rowCount}
+                itemSize={size + THUMBNAIL_GAP}
+                overscanCount={2}
+                width={width}
+            >
+                {EmbedFileRow}
+            </FixedSizeList>
+        );
+    },
+);
+
+EmbedVirtualGrid.displayName = "EmbedVirtualGrid";
+
+interface EmbedFileCellData {
+    annotatedFiles: EmbedFileListAnnotatedFile[];
+    columnCount: number;
+    onItemClick: (index: number) => void;
+    size: number;
+}
+
+const EmbedFileRow = memo(
+    ({
+        index: rowIndex,
+        style,
+        data,
+    }: ListChildComponentProps<EmbedFileCellData>) => {
+        const startIndex = rowIndex * data.columnCount;
+        const rowFiles = data.annotatedFiles.slice(
+            startIndex,
+            startIndex + data.columnCount,
+        );
+
+        return (
+            <div style={style}>
+                <GridRow columns={data.columnCount} gap={THUMBNAIL_GAP}>
+                    {rowFiles.map((annotatedFile, columnIndex) => {
+                        const fileIndex = startIndex + columnIndex;
+                        return (
+                            <EmbedFileTile
+                                key={annotatedFile.file.id}
+                                file={annotatedFile.file}
+                                size={data.size}
+                                onClick={() => data.onItemClick(fileIndex)}
+                            />
+                        );
+                    })}
+                </GridRow>
+            </div>
+        );
+    },
+    areEqual,
+);
+
+EmbedFileRow.displayName = "EmbedFileRow";
 
 interface EmbedFileTileProps {
     file: EnteFile;
@@ -145,16 +218,16 @@ const EmbedFileTile: React.FC<EmbedFileTileProps> = memo(
 EmbedFileTile.displayName = "EmbedFileTile";
 
 const Container = styled("div")({
-    overflow: "auto",
+    boxSizing: "border-box",
+    overflow: "hidden",
     padding: `${CONTAINER_PADDING}px`,
 });
 
-const Grid = styled("div")<{ columns: number; gap: number }>(
+const GridRow = styled("div")<{ columns: number; gap: number }>(
     ({ columns, gap }) => ({
         display: "grid",
-        gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gridAutoRows: "min-content",
         gap: `${gap}px`,
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
     }),
 );
 
