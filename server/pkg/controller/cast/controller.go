@@ -31,7 +31,7 @@ func NewController(castRepo *castRepo.Repository,
 
 func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDeviceRequest) (string, error) {
 	ipAddress := network.GetClientIP(ctx)
-	deviceName, err := ua.GetDeviceType(ctx.GetHeader("User-Agent"))
+	deviceName, err := ua.GetDeviceType(ctx.GetHeader("User-Agent")[:5000])
 	if err != nil {
 		deviceName = ipAddress
 	}
