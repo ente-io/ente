@@ -269,11 +269,6 @@ class _HomePageState extends UploaderPageState<HomePage>
     }
   }
 
-  List<Collection> get _displayedCollections {
-    final collections = isSearchActive ? _filteredCollections : _collections;
-    return _filterOutUncategorized(collections);
-  }
-
   List<Collection> _filterOutUncategorized(List<Collection> collections) {
     return CollectionSortUtil.filterAndSortCollections(collections);
   }
@@ -653,6 +648,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                   child: _settingsPage,
                 ),
                 drawerEnableOpenDragGesture: true,
+                drawerEdgeDragWidth: 45,
                 onDrawerChanged: (isOpened) {
                   _isSettingsOpen = isOpened;
                   if (isOpened) {
@@ -749,15 +745,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         ),
       );
     }
-    if (_displayedCollections.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(isLoading: _isSyncing),
-        ),
-      );
-    }
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
@@ -782,7 +769,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     RecentsSectionWidget(
-                      collections: _filterOutUncategorized(_collections),
+                      collections: _collections,
                       recentFiles: _recentFiles,
                       selectedFiles: _selectedFiles,
                       displayedFilesNotifier: _displayedFilesNotifier,
