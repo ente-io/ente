@@ -423,6 +423,18 @@ Open device `Settings > Apps > Ente > Storage` and tap "Clear cache" (NOT "Clear
 >
 > This is a known issue being investigated by our team. If none of these solutions work, please contact [support@ente.com](mailto:support@ente.com) with your device model and Android version.
 
+### Why does Android ask me to confirm every photo when I delete from Ente? {#android-media-management-delete}
+
+When Ente deletes a photo or video that also exists in your device gallery, Android shows a system confirmation dialog for each item. This is an Android security measure for third-party apps. It is especially noticeable when using **Free up space**, where you may have to confirm a large number of files one by one.
+
+To stop these repeated prompts, grant Ente the **media management** special access:
+
+**On Android:**
+
+Open device `Settings > Apps > Special app access > Media management apps > Ente Photos` and enable "Allow app to manage media".
+
+Once granted, Ente can delete media that it manages without asking for confirmation each time.
+
 ### Why is the Linux desktop app still showing the old icon after updating? {#linux-icon-update}
 
 You might need to update the icon cache of your Linux desktop environment.

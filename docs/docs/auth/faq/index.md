@@ -23,6 +23,19 @@ description: Frequently asked questions about Ente Auth
 4. Enter the account name, issuer, and secret (setup key).
 5. Save and verify the generated code.
 
+### Why does Ente Auth say "No QR code found in image"? {#qr-code-not-scanning}
+
+If the QR code is sharp and high-resolution but Ente Auth still won't scan it, the most likely cause is that the service is using a QR format Ente Auth doesn't recognise. Some sites embed proprietary or non-standard data instead of the standard `otpauth://` URI that authenticator apps expect.
+
+The easiest workaround is to add the code manually:
+
+1. Open Ente Auth.
+2. Tap the + button.
+3. Choose "Enter details manually".
+4. Enter the account name, issuer, and secret (setup key) shown by the service alongside the QR code.
+
+If the service only offers a QR code and no setup key, check its security settings for an option to "show setup key" or "can't scan?".
+
 ### How secure is Ente Auth?
 
 All codes you backup via Ente is stored with end-to-end encryption. This means only you can access your codes. Our apps are open source and our cryptography has been externally audited.
@@ -147,6 +160,18 @@ Codes that imported successfully continue working normally.
 This means that the parameters that were used to derive your master-key on your original device, are incompatible with your current device (likely because it's less powerful).
 
 If you recover your account using your current device and reset the password, a new key will be generated with different parameters. This new key will be equally strong and compatible with both devices.
+
+### Why do I get verification errors when signing in on a new device, but it works hours later? {#login-fails-low-ram}
+
+When you sign in to Ente Auth, the app performs a deliberately heavy cryptographic step that needs around 1 GB of free RAM on the device. This is part of how we keep your password secure. If a lot of other apps are running in the background, there often isn't enough free memory available and the sign-in fails. After a few hours, the operating system clears out enough background apps to free up that memory, which is why it eventually works.
+
+This is more likely on phones and tablets with 2-3 GB of RAM (older models such as iPhone 7, 8, SE, or older iPads).
+
+Try the following:
+
+1. Restart your device, then open Ente Auth immediately before other apps load.
+2. Close other apps (swipe them away in the app switcher) and try again.
+3. In the meantime, access your codes at [auth.ente.com](https://auth.ente.com) in a browser on another device.
 
 ### I can't change my app lock PIN. What do I do? {#cant-change-app-lock-pin}
 
