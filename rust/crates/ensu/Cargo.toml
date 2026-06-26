@@ -1,0 +1,59 @@
+[package]
+name = "ente-ensu"
+edition = "2024"
+
+[dependencies]
+ente-core.workspace = true
+ente-image.workspace = true
+flate2 = { version = "1", optional = true }
+futures-util = "0.3"
+parking_lot = "0.12"
+regex = { version = "1", optional = true }
+reqwest = { version = "0.12", default-features = false, features = ["http2", "charset", "system-proxy", "rustls-tls-webpki-roots"] }
+rubato = { version = "0.16", optional = true }
+rusqlite = { version = "0.38", features = ["bundled"], optional = true }
+self_cell = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tar = { version = "0.4", optional = true }
+thiserror = "2"
+tokio = { version = "1", features = ["rt", "time"] }
+transcribe-rs = { version = "0.3.11", default-features = false, features = ["onnx", "vad-silero"], optional = true }
+uuid = { version = "1", features = ["v4", "rng-getrandom"] }
+zeroize = { version = "1.8", features = ["derive"] }
+
+# llama-cpp-2's default features are "openmp" and "android-shared-stdcxx".
+#
+# - "openmp" enables OpenMP CPU parallelism. It requires libomp, which usually
+#   ships with Linux/Windows toolchains but not Apple's clang. Without it,
+#   llama.cpp falls back to its built-in thread pool.
+#
+# - "android-shared-stdcxx" is a no-op everywhere except Android (where it
+#   enables the NDK's shared C++ runtime).
+#
+# On Apple platforms, Accelerate is auto-linked by llama-cpp-sys-2 for CPU
+# SIMD helpers. llama-cpp-2 additionally enables the "metal" feature on arm64,
+# which causes Metal to be used for GPU inference.
+#
+# "mtmd" is used on all platforms for enabling multimodal support.
+[target.'cfg(target_os = "macos")'.dependencies]
+llama-cpp-2 = { version = "=0.1.144", default-features = false, features = ["mtmd"] }
+
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+llama-cpp-2 = { version = "=0.1.144", features = ["mtmd"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+ort = { version = "=2.0.0-rc.12", default-features = false, features = ["load-dynamic"], optional = true }
+
+[features]
+default = ["sqlite"]
+sqlite = ["dep:rusqlite"]
+transcription = [
+    "dep:flate2",
+    "dep:ort",
+    "dep:regex",
+    "reqwest/blocking",
+    "dep:rubato",
+    "dep:tar",
+    "dep:transcribe-rs",
+]

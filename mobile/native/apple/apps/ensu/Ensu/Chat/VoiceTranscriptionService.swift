@@ -170,8 +170,6 @@ final class VoiceTranscriptionService {
 
         transcriptionTask = Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                uniffiEnsureTranscriptionInitialized()
-
                 if !isTranscriptionModelDownloaded(modelsDir: modelsDirPath) {
                     await MainActor.run { [weak self] in
                         guard self?.isDownloadActive(taskId: taskId, downloadId: downloadId) == true else { return }
@@ -259,8 +257,6 @@ final class VoiceTranscriptionService {
 
         transcriptionTask = Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                uniffiEnsureTranscriptionInitialized()
-
                 if !isTranscriptionModelDownloaded(modelsDir: modelsDirPath) {
                     await MainActor.run { [weak self] in
                         guard self?.isDownloadActive(taskId: taskId, downloadId: downloadId) == true else { return }
@@ -304,7 +300,6 @@ final class VoiceTranscriptionService {
         preloadTask?.cancel()
         preloadTask = Task.detached(priority: .utility) {
             do {
-                uniffiEnsureTranscriptionInitialized()
                 try loadTranscriptionModel(modelsDir: modelsDirPath)
             } catch is CancellationError {
                 return

@@ -7,17 +7,13 @@ members = [
     "bindings/ffi/crypto",
     "bindings/frb/ente-rust",
     "bindings/frb/photos",
-    "bindings/uniffi/ensu/db",
-    "bindings/uniffi/ensu/inference",
-    "bindings/uniffi/ensu/transcription",
+    "bindings/uniffi/ensu",
     "bindings/wasm/ente-wasm",
     "bindings/wasm/core",
     "crates/accounts",
     "crates/contacts",
     "crates/core",
-    "crates/ensu/db",
-    "crates/ensu/inference",
-    "crates/ensu/transcription",
+    "crates/ensu",
     "crates/image",
     "crates/photos",
     "crates/test-support",
@@ -25,8 +21,7 @@ members = [
 ]
 
 [workspace.dependencies]
-ensu-db = { path = "crates/ensu/db" }
-ensu-transcription = { path = "crates/ensu/transcription" }
+ente-ensu = { path = "crates/ensu" }
 ente-accounts = { path = "crates/accounts" }
 ente-contacts = { path = "crates/contacts" }
 ente-core = { path = "crates/core" }
@@ -34,5 +29,4 @@ ente-image = { path = "crates/image" }
 ente-photos = { path = "crates/photos" }
 ente-rs = { path = "apps/cli" }
 ente-test-support = { path = "crates/test-support" }
-inference_rs = { path = "crates/ensu/inference" }
 wasm-bindgen = "0.2.125"

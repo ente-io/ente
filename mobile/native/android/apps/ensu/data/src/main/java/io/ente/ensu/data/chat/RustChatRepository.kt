@@ -10,10 +10,11 @@ import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
 import io.ente.ensu.domain.model.MessageAuthor
 import io.ente.ensu.domain.model.sessionTitleFromText
-import io.ente.labs.ensu_db.AttachmentKind
-import io.ente.labs.ensu_db.AttachmentMeta
-import io.ente.labs.ensu_db.DbException
-import io.ente.labs.ensu_db.EnsuDb
+import io.ente.ensu.bindings.AttachmentKind
+import io.ente.ensu.bindings.AttachmentMeta
+import io.ente.ensu.bindings.Sender
+import io.ente.ensu.bindings.EnsuDb
+import io.ente.ensu.bindings.DbException
 import java.io.File
 
 class RustChatRepository(
@@ -66,8 +67,8 @@ class RustChatRepository(
                 sessionId = message.sessionUuid,
                 parentId = message.parentMessageUuid,
                 author = when (message.sender) {
-                    io.ente.labs.ensu_db.Sender.SELF_USER -> MessageAuthor.User
-                    io.ente.labs.ensu_db.Sender.OTHER -> MessageAuthor.Assistant
+                    Sender.SELF_USER -> MessageAuthor.User
+                    Sender.OTHER -> MessageAuthor.Assistant
                 },
                 text = message.text,
                 timestampMillis = message.createdAtUs / 1000,
@@ -109,7 +110,11 @@ class RustChatRepository(
 
         val message = db.insertMessage(
             sessionUuid = sessionId,
-            sender = if (author == MessageAuthor.User) io.ente.labs.ensu_db.Sender.SELF_USER else io.ente.labs.ensu_db.Sender.OTHER,
+            sender = if (author == MessageAuthor.User) {
+                Sender.SELF_USER
+            } else {
+                Sender.OTHER
+            },
             text = text,
             parentMessageUuid = parentId,
             attachments = meta

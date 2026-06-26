@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script is invoked from Gradle's `buildRustJni` task.
-# It builds the JNI libraries used by Ensu's generated UniFFI bindings.
+# It builds the JNI library used by Ensu's generated UniFFI bindings.
 
 set -euo pipefail
 
@@ -9,12 +9,6 @@ REPO_ROOT=$(cd "$(dirname "$0")/../../../../../.." && pwd)
 TARGET_DIR="$REPO_ROOT/rust/target"
 TOOLCHAIN=""
 OUT_DIR=""
-
-CRATES=(
-    bindings/uniffi/ensu/db
-    bindings/uniffi/ensu/inference
-    bindings/uniffi/ensu/transcription
-)
 
 ABIS=()
 while [[ $# -gt 0 ]]; do
@@ -74,11 +68,8 @@ build_abi() {
     local out=$OUT_DIR/$abi
     mkdir -p "$out"
     echo "==> $abi"
-    for crate in "${CRATES[@]}"; do
-        (cd "$REPO_ROOT/rust/$crate" && CARGO_TARGET_DIR="$TARGET_DIR" cargo build --release --target "$target")
-        local name=${crate##*/}
-        cp "$TARGET_DIR/$target/release/lib${name}.so" "$out/"
-    done
+    (cd "$REPO_ROOT/rust/bindings/uniffi/ensu" && CARGO_TARGET_DIR="$TARGET_DIR" cargo build --release --target "$target")
+    cp "$TARGET_DIR/$target/release/libensu.so" "$out/"
     cp "$TOOLCHAIN/sysroot/usr/lib/$libcxx_dir/libc++_shared.so" "$out/"
 }
 

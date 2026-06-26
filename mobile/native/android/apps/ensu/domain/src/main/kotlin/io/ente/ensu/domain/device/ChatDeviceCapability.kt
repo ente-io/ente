@@ -26,10 +26,6 @@ interface DeviceCapabilityProvider {
     fun chatCapability(): ChatDeviceCapability
 }
 
-object UnknownDeviceCapabilityProvider : DeviceCapabilityProvider {
-    override fun chatCapability(): ChatDeviceCapability = ChatDeviceCapability.Unknown
-}
-
 class UnsupportedDeviceMemoryException(
     val capability: ChatDeviceCapability.UnsupportedLowMemory
 ) : IllegalStateException("Device does not have enough RAM for local chat")

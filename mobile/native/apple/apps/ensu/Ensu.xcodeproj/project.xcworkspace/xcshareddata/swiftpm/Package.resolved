@@ -2,15 +2,6 @@
   "originHash" : "df4c339047e0bba04154f554ebecda553116891c5ddcb81d37ef7d8676e1f66d",
   "pins" : [
     {
-      "identity" : "rive-ios",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/rive-app/rive-ios.git",
-      "state" : {
-        "revision" : "388cebf85b8fc2258b93f86dd3e26a30fb070fd0",
-        "version" : "6.15.1"
-      }
-    },
-    {
       "identity" : "swift-cmark",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-cmark.git",

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script is invoked from Xcode's "Run Script" build phase.
-# It builds the Rust static libraries used by Ensu's generated UniFFI bindings.
+# It builds the Rust static library used by Ensu's generated UniFFI bindings.
 
 set -euo pipefail
 
@@ -20,15 +20,13 @@ for tool in cargo rustup cmake; do
     command -v "$tool" >/dev/null || { echo "error: $tool not on PATH" >&2; exit 1; }
 done
 
-for name in db inference transcription; do
-    for ext in .swift FFI.h FFI.modulemap; do
-        [[ -f "$GENERATED_DIR/$name$ext" ]] || {
-            echo "error: missing $GENERATED_DIR/$name$ext" >&2
-            echo "  run: (cd $REPO_ROOT/rust && cargo codegen native)" >&2
-            exit 1
-        }
-    done
-done
+if [[ ! -f "$GENERATED_DIR/ensu.swift" \
+   || ! -f "$GENERATED_DIR/ensuFFI.h" \
+   || ! -f "$GENERATED_DIR/ensuFFI.modulemap" ]]; then
+    echo "error: missing generated Ensu UniFFI bindings in $GENERATED_DIR" >&2
+    echo "  run: (cd $REPO_ROOT/rust && cargo codegen native)" >&2
+    exit 1
+fi
 
 # Host build scripts compile against macOS; each target uses its own SDK below.
 SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
@@ -104,6 +102,4 @@ build_crate() {
     echo "    -> $out"
 }
 
-build_crate db        "$REPO_ROOT/rust/bindings/uniffi/ensu/db"        libdb.a
-build_crate inference "$REPO_ROOT/rust/bindings/uniffi/ensu/inference" libinference.a
-build_crate transcription "$REPO_ROOT/rust/bindings/uniffi/ensu/transcription" libtranscription.a
+build_crate ensu "$REPO_ROOT/rust/bindings/uniffi/ensu" libensu.a

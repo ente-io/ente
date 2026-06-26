@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import io.ente.ensu.domain.device.DeviceCapabilityProvider
-import io.ente.ensu.domain.device.UnknownDeviceCapabilityProvider
 import io.ente.ensu.domain.device.requireChatSupported
 import io.ente.ensu.domain.llm.DownloadProgress
 import io.ente.ensu.domain.llm.GenerationSummary
@@ -14,27 +13,28 @@ import io.ente.ensu.domain.llm.LlmMessage
 import io.ente.ensu.domain.llm.LlmModelTarget
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.util.formatBytes
-import io.ente.labs.inference_rs.ContextHandle
-import io.ente.labs.inference_rs.ContextParams
-import io.ente.labs.inference_rs.GenerateChatRequest
-import io.ente.labs.inference_rs.GenerateEvent
-import io.ente.labs.inference_rs.GenerateEventCallback
-import io.ente.labs.inference_rs.GenerateSummary as NativeSummary
-import io.ente.labs.inference_rs.LlmModelDownloadCallback
-import io.ente.labs.inference_rs.LlmModelDownloadProgress
-import io.ente.labs.inference_rs.LlmModelDownloadTarget
-import io.ente.labs.inference_rs.ModelHandle
-import io.ente.labs.inference_rs.ModelLoadParams
-import io.ente.labs.inference_rs.initBackend
-import io.ente.labs.inference_rs.loadModel
-import io.ente.labs.inference_rs.createContext
-import io.ente.labs.inference_rs.generateChatStream
-import io.ente.labs.inference_rs.prewarmMultimodalContext
-import io.ente.labs.inference_rs.cancel
-import io.ente.labs.inference_rs.downloadLlmModelFiles
-import io.ente.labs.inference_rs.uniffiEnsureInitialized
-import io.ente.labs.inference_rs.InferenceException
-import io.ente.labs.ensu_transcription.unloadTranscriptionModel
+import io.ente.ensu.bindings.ContextHandle
+import io.ente.ensu.bindings.ContextParams
+import io.ente.ensu.bindings.InferenceException
+import io.ente.ensu.bindings.GenerateChatRequest
+import io.ente.ensu.bindings.GenerateEvent
+import io.ente.ensu.bindings.GenerateEventCallback
+import io.ente.ensu.bindings.LlmModelDownloadCallback
+import io.ente.ensu.bindings.LlmModelDownloadProgress
+import io.ente.ensu.bindings.LlmModelDownloadTarget
+import io.ente.ensu.bindings.ModelHandle
+import io.ente.ensu.bindings.ModelLoadParams
+import io.ente.ensu.bindings.cancel
+import io.ente.ensu.bindings.createContext
+import io.ente.ensu.bindings.downloadLlmModelFiles
+import io.ente.ensu.bindings.generateChatStream
+import io.ente.ensu.bindings.initBackend
+import io.ente.ensu.bindings.loadModel
+import io.ente.ensu.bindings.prewarmMultimodalContext
+import io.ente.ensu.bindings.uniffiEnsureInitialized
+import io.ente.ensu.bindings.unloadTranscriptionModel
+import io.ente.ensu.bindings.ChatMessage as NativeChatMessage
+import io.ente.ensu.bindings.GenerateSummary as NativeSummary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -55,8 +55,8 @@ import kotlin.math.max
 class InferenceRsProvider(
     context: Context,
     private val modelDir: File,
+    private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val legacyModelDir: File? = null,
-    private val deviceCapabilityProvider: DeviceCapabilityProvider = UnknownDeviceCapabilityProvider,
     private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
 ) : LlmProvider {
     private data class LoadedModelKey(
@@ -137,7 +137,7 @@ class InferenceRsProvider(
 
         val request = GenerateChatRequest(
             messages = messages.map { msg ->
-                io.ente.labs.inference_rs.ChatMessage(msg.roleString(), msg.text)
+                NativeChatMessage(msg.roleString(), msg.text)
             },
             templateOverride = null,
             addAssistant = true,

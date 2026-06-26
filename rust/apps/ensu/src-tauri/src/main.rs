@@ -15,9 +15,9 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .manage(commands::LlmState::default())
-        .manage(commands::LlmModelDownloadState::default())
-        .manage(commands::ChatDbState::default())
+        .manage(commands::inference::LlmState::default())
+        .manage(commands::inference::LlmModelDownloadState::default())
+        .manage(commands::chat_db::ChatDbState::default())
         .setup(|app| {
             logging::init_logging(app.handle());
             logging::log("App", "setup started");
@@ -33,44 +33,42 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            commands::crypto_init,
-            commands::crypto_generate_key,
-            commands::crypto_encrypt_blob,
-            commands::crypto_decrypt_blob,
-            commands::secure_storage_get,
-            commands::secure_storage_set,
-            commands::secure_storage_delete,
-            commands::chat_db_list_sessions,
-            commands::chat_db_list_sessions_with_preview,
-            commands::chat_db_get_session,
-            commands::chat_db_get_message,
-            commands::chat_db_create_session,
-            commands::chat_db_update_session_title,
-            commands::chat_db_delete_session,
-            commands::chat_db_get_messages,
-            commands::chat_db_insert_message,
-            commands::chat_db_update_message_text,
-            commands::chat_db_upsert_session,
-            commands::chat_db_insert_message_with_uuid,
-            commands::chat_db_compress_attachment_image,
-            commands::chat_db_compress_attachment_image_file,
-            commands::chat_db_reset,
-            commands::chat_db_migrate_legacy,
-            commands::llm_init_backend,
-            commands::llm_load_model,
-            commands::llm_create_context,
-            commands::llm_free_context,
-            commands::llm_free_model,
-            commands::llm_prewarm_multimodal_context,
-            commands::llm_generate_chat_stream,
-            commands::llm_cancel,
-            commands::system_info,
-            commands::get_ensu_defaults,
-            commands::llm_download_model_files,
-            commands::llm_cancel_model_download,
-            commands::fs_file_size,
-            commands::fs_read_head,
-            commands::fs_append_bytes,
+            commands::crypto::crypto_init,
+            commands::crypto::crypto_generate_key,
+            commands::crypto::crypto_encrypt_blob,
+            commands::crypto::crypto_decrypt_blob,
+            commands::secure_storage::secure_storage_get,
+            commands::secure_storage::secure_storage_set,
+            commands::secure_storage::secure_storage_delete,
+            commands::chat_db::chat_db_list_sessions,
+            commands::chat_db::chat_db_list_sessions_with_preview,
+            commands::chat_db::chat_db_get_session,
+            commands::chat_db::chat_db_get_message,
+            commands::chat_db::chat_db_create_session,
+            commands::chat_db::chat_db_update_session_title,
+            commands::chat_db::chat_db_delete_session,
+            commands::chat_db::chat_db_get_messages,
+            commands::chat_db::chat_db_insert_message,
+            commands::chat_db::chat_db_update_message_text,
+            commands::chat_db::chat_db_upsert_session,
+            commands::chat_db::chat_db_insert_message_with_uuid,
+            commands::chat_db::chat_db_compress_attachment_image_file,
+            commands::chat_db::chat_db_reset,
+            commands::chat_db::chat_db_migrate_legacy,
+            commands::inference::llm_init_backend,
+            commands::inference::llm_load_model,
+            commands::inference::llm_create_context,
+            commands::inference::llm_free_context,
+            commands::inference::llm_free_model,
+            commands::inference::llm_prewarm_multimodal_context,
+            commands::inference::llm_generate_chat_stream,
+            commands::inference::llm_cancel,
+            commands::system::system_info,
+            commands::inference::get_ensu_defaults,
+            commands::inference::llm_download_model_files,
+            commands::inference::llm_cancel_model_download,
+            commands::fs::fs_file_size,
+            commands::fs::fs_read_head,
         ])
         .build(tauri::generate_context!())
         .unwrap_or_else(|err| {
