@@ -135,8 +135,11 @@ class RustChatRepository(
     }
 
     override fun deleteAllData() {
+        // Full reset removes current storage plus legacy sync leftovers.
         dbFile.delete()
         attachmentsDbFile.delete()
+        filePaths.legacyOnlineDbFile.delete()
+        filePaths.legacySyncDir.deleteRecursively()
         filePaths.attachmentsDir.deleteRecursively()
 
         filePaths.attachmentsDir.mkdirs()

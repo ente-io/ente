@@ -7,6 +7,5 @@ crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
 inference_rs.workspace = true
-serde = { version = "1", features = ["derive"] }
 thiserror = "1"
 uniffi = { version = "0.31.0" }
