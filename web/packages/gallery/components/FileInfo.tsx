@@ -92,6 +92,7 @@ import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Trans } from "react-i18next";
 
 // Re-uses images from ~leaflet package.
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
@@ -525,13 +526,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     );
 };
 
+const navigationShortcut = "Alt / Option";
+
 const FileInfoNavigationHint: React.FC = () => (
-    <Stack
-        direction="row"
+    <Typography
+        component="div"
+        variant="tiny"
         sx={{
-            display: { xs: "none", sm: "flex" },
-            alignItems: "center",
-            gap: 0.5,
+            display: { xs: "none", sm: "block" },
             mt: "auto",
             pb: 3,
             px: 2,
@@ -539,38 +541,56 @@ const FileInfoNavigationHint: React.FC = () => (
             opacity: 0.24,
         }}
     >
-        <Typography component="span" variant="tiny">
-            {t("file_info_arrow_navigation_hint_use")}
-        </Typography>
-        <NavigationHintKey>
-            <KeyboardOptionKeyIcon sx={{ fontSize: 12 }} />
-            <Typography
-                component="span"
-                variant="tiny"
-                sx={{ fontWeight: "medium" }}
-            >
-                Alt / Option
-            </Typography>
-        </NavigationHintKey>
-        <NavigationHintSeparator>+</NavigationHintSeparator>
-        <NavigationHintKey>
-            <KeyboardArrowLeftIcon
-                titleAccess={t("file_info_arrow_navigation_hint_left_arrow")}
-                sx={{ fontSize: 14 }}
-            />
-        </NavigationHintKey>
-        <NavigationHintSeparator>/</NavigationHintSeparator>
-        <NavigationHintKey>
-            <KeyboardArrowRightIcon
-                titleAccess={t("file_info_arrow_navigation_hint_right_arrow")}
-                sx={{ fontSize: 14 }}
-            />
-        </NavigationHintKey>
-        <Typography component="span" variant="tiny" sx={{ ml: 0.5 }}>
-            {t("file_info_arrow_navigation_hint")}
-        </Typography>
-    </Stack>
+        <Trans
+            i18nKey="use_shortcut_to_navigate"
+            components={{
+                shortcut: <ShortcutHint shortcut={navigationShortcut} />,
+            }}
+        />
+    </Typography>
 );
+
+interface ShortcutHintProps {
+    shortcut: string;
+}
+
+function ShortcutHint({ shortcut }: ShortcutHintProps) {
+    return (
+        <InlineShortcut>
+            <NavigationHintKey>
+                <KeyboardOptionKeyIcon sx={{ fontSize: 12 }} />
+                <Typography
+                    component="span"
+                    variant="tiny"
+                    sx={{ fontWeight: "medium" }}
+                >
+                    {shortcut}
+                </Typography>
+            </NavigationHintKey>
+            <NavigationHintSeparator>+</NavigationHintSeparator>
+            <NavigationHintKey>
+                <KeyboardArrowLeftIcon
+                    titleAccess={t("previous")}
+                    sx={{ fontSize: 14 }}
+                />
+            </NavigationHintKey>
+            <NavigationHintSeparator>/</NavigationHintSeparator>
+            <NavigationHintKey>
+                <KeyboardArrowRightIcon
+                    titleAccess={t("next")}
+                    sx={{ fontSize: 14 }}
+                />
+            </NavigationHintKey>
+        </InlineShortcut>
+    );
+}
+
+const InlineShortcut = styled("span")({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 4,
+    verticalAlign: "middle",
+});
 
 const NavigationHintKey = styled("span")(
     ({ theme }) => `
