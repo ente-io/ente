@@ -30,9 +30,9 @@ ensu-transcription = { path = "crates/ensu/transcription" }
 ente-accounts = { path = "crates/accounts" }
 ente-contacts = { path = "crates/contacts" }
 ente-core = { path = "crates/core" }
+ente-image = { path = "crates/image" }
+ente-photos = { path = "crates/photos" }
 ente-rs = { path = "apps/cli" }
 ente-test-support = { path = "crates/test-support" }
-ente_image = { path = "crates/image" }
-ente_photos = { path = "crates/photos" }
 inference_rs = { path = "crates/ensu/inference" }
 wasm-bindgen = "0.2.125"
