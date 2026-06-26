@@ -31,16 +31,6 @@ pub struct ContextParams {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
-pub struct ModelInfo {
-    pub bos_token_id: Option<i32>,
-    pub eos_token_id: Option<i32>,
-    pub bos_token: Option<String>,
-    pub eos_token: Option<String>,
-    pub chat_template: Option<String>,
-    pub metadata_json: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
 pub struct EnsuModelPreset {
     pub id: String,
     pub title: String,
@@ -64,21 +54,6 @@ pub struct EnsuDefaults {
 pub struct ChatMessage {
     pub role: String,
     pub content: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
-pub struct GenerateRequest {
-    pub prompt: String,
-    pub max_tokens: Option<i32>,
-    pub temperature: Option<f32>,
-    pub top_p: Option<f32>,
-    pub top_k: Option<i32>,
-    pub repeat_penalty: Option<f32>,
-    pub frequency_penalty: Option<f32>,
-    pub presence_penalty: Option<f32>,
-    pub seed: Option<i64>,
-    pub stop_sequences: Option<Vec<String>>,
-    pub grammar: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
@@ -192,19 +167,6 @@ impl From<ContextParams> for core::ContextParams {
     }
 }
 
-impl From<core::ModelInfo> for ModelInfo {
-    fn from(value: core::ModelInfo) -> Self {
-        Self {
-            bos_token_id: value.bos_token_id,
-            eos_token_id: value.eos_token_id,
-            bos_token: value.bos_token,
-            eos_token: value.eos_token,
-            chat_template: value.chat_template,
-            metadata_json: value.metadata_json,
-        }
-    }
-}
-
 impl From<core::EnsuModelPreset> for EnsuModelPreset {
     fn from(value: core::EnsuModelPreset) -> Self {
         Self {
@@ -244,24 +206,6 @@ impl From<ChatMessage> for core::ChatMessage {
         Self {
             role: value.role,
             content: value.content,
-        }
-    }
-}
-
-impl From<GenerateRequest> for core::GenerateRequest {
-    fn from(value: GenerateRequest) -> Self {
-        Self {
-            prompt: value.prompt,
-            max_tokens: value.max_tokens,
-            temperature: value.temperature,
-            top_p: value.top_p,
-            top_k: value.top_k,
-            repeat_penalty: value.repeat_penalty,
-            frequency_penalty: value.frequency_penalty,
-            presence_penalty: value.presence_penalty,
-            seed: value.seed,
-            stop_sequences: value.stop_sequences,
-            grammar: value.grammar,
         }
     }
 }
@@ -391,28 +335,6 @@ pub fn create_context(
 }
 
 #[uniffi::export]
-pub fn tokenize(
-    model: Arc<ModelHandle>,
-    text: String,
-    add_bos: bool,
-    special: bool,
-) -> Result<Vec<i32>, InferenceError> {
-    core::tokenize(model.handle.as_ref(), text, add_bos, special).map_err(InferenceError::from)
-}
-
-#[uniffi::export]
-pub fn detokenize(model: Arc<ModelHandle>, tokens: Vec<i32>) -> Result<String, InferenceError> {
-    core::detokenize(model.handle.as_ref(), tokens).map_err(InferenceError::from)
-}
-
-#[uniffi::export]
-pub fn get_model_info(model: Arc<ModelHandle>) -> Result<ModelInfo, InferenceError> {
-    core::get_model_info(model.handle.as_ref())
-        .map(Into::into)
-        .map_err(InferenceError::from)
-}
-
-#[uniffi::export]
 pub fn get_ensu_defaults() -> EnsuDefaults {
     core::ensu_defaults().into()
 }
@@ -435,23 +357,6 @@ pub fn download_llm_model_files(
 }
 
 #[uniffi::export]
-pub fn apply_chat_template(
-    model: Arc<ModelHandle>,
-    messages: Vec<ChatMessage>,
-    template_override: Option<String>,
-    add_assistant: bool,
-) -> Result<String, InferenceError> {
-    let messages = messages.into_iter().map(Into::into).collect();
-    core::apply_chat_template(
-        model.handle.as_ref(),
-        messages,
-        template_override,
-        add_assistant,
-    )
-    .map_err(InferenceError::from)
-}
-
-#[uniffi::export]
 pub fn prewarm_multimodal_context(
     context: Arc<ContextHandle>,
     mmproj_path: String,
@@ -469,18 +374,6 @@ pub fn generate_chat_stream(
 ) -> Result<GenerateSummary, InferenceError> {
     let mut sink = CallbackSink { callback };
     core::generate_chat_stream(context.handle.as_ref(), request.into(), &mut sink)
-        .map(Into::into)
-        .map_err(InferenceError::from)
-}
-
-#[uniffi::export]
-pub fn generate_stream(
-    context: Arc<ContextHandle>,
-    request: GenerateRequest,
-    callback: Box<dyn GenerateEventCallback>,
-) -> Result<GenerateSummary, InferenceError> {
-    let mut sink = CallbackSink { callback };
-    core::generate_stream(context.handle.as_ref(), request.into(), &mut sink)
         .map(Into::into)
         .map_err(InferenceError::from)
 }

@@ -456,34 +456,20 @@ pub struct ContextParams {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ModelInfo {
-    pub bos_token_id: Option<i32>,
-    pub eos_token_id: Option<i32>,
-    pub bos_token: Option<String>,
-    pub eos_token: Option<String>,
-    pub chat_template: Option<String>,
-    pub metadata_json: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatMessage {
     pub role: String,
     pub content: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GenerateRequest {
-    pub prompt: String,
-    pub max_tokens: Option<i32>,
-    pub temperature: Option<f32>,
-    pub top_p: Option<f32>,
-    pub top_k: Option<i32>,
-    pub repeat_penalty: Option<f32>,
-    pub frequency_penalty: Option<f32>,
-    pub presence_penalty: Option<f32>,
-    pub seed: Option<i64>,
-    pub stop_sequences: Option<Vec<String>>,
-    pub grammar: Option<String>,
+struct GenerateRequest {
+    temperature: Option<f32>,
+    top_p: Option<f32>,
+    top_k: Option<i32>,
+    repeat_penalty: Option<f32>,
+    frequency_penalty: Option<f32>,
+    presence_penalty: Option<f32>,
+    seed: Option<i64>,
+    grammar: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -720,90 +706,6 @@ pub fn create_context(
     Ok(Arc::new(context))
 }
 
-pub fn tokenize(
-    model: &ModelHandle,
-    text: String,
-    add_bos: bool,
-    special: bool,
-) -> Result<Vec<i32>, String> {
-    let add_bos = if add_bos {
-        AddBos::Always
-    } else {
-        AddBos::Never
-    };
-    let _ = special;
-
-    let tokens = model
-        .model()
-        .str_to_token(&text, add_bos)
-        .map_err(|err| format_error("Tokenize failed", err))?;
-
-    Ok(tokens.into_iter().map(|token| token.0).collect())
-}
-
-pub fn detokenize(model: &ModelHandle, tokens: Vec<i32>) -> Result<String, String> {
-    let tokens = tokens.into_iter().map(LlamaToken::new).collect::<Vec<_>>();
-    let mut bytes = Vec::with_capacity(tokens.len() * 4);
-    for token in tokens {
-        bytes.extend_from_slice(
-            &token_piece_bytes(model.model(), token)
-                .map_err(|err| format_error("Detokenize failed", err))?,
-        );
-    }
-    String::from_utf8(bytes).map_err(|err| format_error("Detokenize failed", err))
-}
-
-pub fn get_model_info(model: &ModelHandle) -> Result<ModelInfo, String> {
-    let model_ref = model.model();
-    let bos_token = model_ref.token_bos();
-    let eos_token = model_ref.token_eos();
-
-    let bos_token_str = token_piece_string(model_ref, bos_token).filter(|value| !value.is_empty());
-    let eos_token_str = token_piece_string(model_ref, eos_token).filter(|value| !value.is_empty());
-
-    let chat_template = model_ref
-        .chat_template(None)
-        .ok()
-        .and_then(|tmpl| tmpl.to_string().ok());
-
-    let meta_count = model_ref.meta_count();
-    let mut metadata_json = None;
-
-    if meta_count > 0 {
-        let mut map = serde_json::Map::new();
-        for index in 0..meta_count {
-            let key = model_ref
-                .meta_key_by_index(index)
-                .map_err(|err| format_error("Failed to read metadata key", err))?;
-            let value = model_ref
-                .meta_val_str_by_index(index)
-                .map_err(|err| format_error("Failed to read metadata value", err))?;
-            map.insert(key, serde_json::Value::String(value));
-        }
-        if !map.is_empty() {
-            metadata_json = Some(serde_json::Value::Object(map).to_string());
-        }
-    }
-
-    Ok(ModelInfo {
-        bos_token_id: Some(bos_token.0),
-        eos_token_id: Some(eos_token.0),
-        bos_token: bos_token_str,
-        eos_token: eos_token_str,
-        chat_template,
-        metadata_json,
-    })
-}
-
-pub fn apply_chat_template(
-    model: &ModelHandle,
-    messages: Vec<ChatMessage>,
-    template_override: Option<String>,
-    add_assistant: bool,
-) -> Result<String, String> {
-    build_chat_prompt(model.model(), messages, template_override, add_assistant)
-}
-
 pub fn prewarm_multimodal_context(
     context: &ContextHandle,
     mmproj_path: String,
@@ -899,8 +801,6 @@ pub fn generate_chat_stream(
             let prompt = build_chat_prompt(ctx.model, messages, template_override, add_assistant)?;
 
             let sampler_request = GenerateRequest {
-                prompt: prompt.clone(),
-                max_tokens: None,
                 temperature,
                 top_p,
                 top_k,
@@ -908,7 +808,6 @@ pub fn generate_chat_stream(
                 frequency_penalty,
                 presence_penalty,
                 seed,
-                stop_sequences: Some(stop_sequences.clone()),
                 grammar: grammar.clone(),
             };
 
@@ -1066,128 +965,6 @@ pub fn generate_chat_stream(
                 &mut generated_tokens_count,
                 n_past,
                 -1,
-            )?;
-
-            Ok(())
-        })
-    })) {
-        Ok(inner) => inner,
-        Err(_) => Err("Generation panicked".to_string()),
-    };
-
-    if let Err(err) = result {
-        error_message = Some(err);
-    }
-
-    let summary = GenerateSummary {
-        job_id,
-        prompt_tokens: Some(prompt_tokens_count),
-        generated_tokens: Some(generated_tokens_count),
-        total_time_ms: Some(start.elapsed().as_millis() as i64),
-    };
-
-    if let Some(message) = error_message {
-        sink.add(GenerateEvent::Error { job_id, message });
-    }
-
-    sink.add(GenerateEvent::Done {
-        summary: summary.clone(),
-    });
-
-    Ok(summary)
-}
-
-pub fn generate_stream(
-    context: &ContextHandle,
-    request: GenerateRequest,
-    sink: &mut dyn EventSink,
-) -> Result<GenerateSummary, String> {
-    let (job_id, cancel_flag) = register_job();
-    let _job_guard = JobGuard(job_id);
-    let start = Instant::now();
-
-    sink.add(GenerateEvent::Text {
-        job_id,
-        text: String::new(),
-        token_id: None,
-    });
-
-    let max_tokens = request.max_tokens.unwrap_or(DEFAULT_GENERATION_MAX_TOKENS);
-    let max_tokens = usize::try_from(max_tokens.max(0)).unwrap_or(0);
-    let stop_sequences = request.stop_sequences.clone().unwrap_or_default();
-
-    let mut prompt_tokens_count: i32 = 0;
-    let mut generated_tokens_count: i32 = 0;
-    let mut error_message: Option<String> = None;
-
-    let result = match catch_unwind(AssertUnwindSafe(|| {
-        context.with_context_mut(|ctx| -> Result<(), String> {
-            let add_bos = should_add_bos(ctx.model, &request.prompt);
-            let prompt_tokens = ctx
-                .model
-                .str_to_token(&request.prompt, add_bos)
-                .map_err(|err| format_error("Tokenize failed", err))?;
-
-            if prompt_tokens.is_empty() {
-                return Err("Prompt produced no tokens".to_string());
-            }
-
-            prompt_tokens_count =
-                i32::try_from(prompt_tokens.len()).map_err(|_| "Prompt is too long".to_string())?;
-
-            let n_ctx = ctx.n_ctx();
-            if prompt_tokens.len() as u32 > n_ctx {
-                return Err(format!(
-                    "Prompt length {} exceeds context size {}",
-                    prompt_tokens.len(),
-                    n_ctx
-                ));
-            }
-
-            let n_batch = ctx.n_batch() as usize;
-            if n_batch == 0 {
-                return Err("Context batch size is 0".to_string());
-            }
-
-            ctx.clear_kv_cache();
-
-            let mut token_offset = 0usize;
-            let mut logits_index: i32 = 0;
-            while token_offset < prompt_tokens.len() {
-                check_cancelled(&cancel_flag)?;
-                let end = (token_offset + n_batch).min(prompt_tokens.len());
-                let chunk = &prompt_tokens[token_offset..end];
-                let mut batch = LlamaBatch::new(chunk.len(), 1);
-                for (idx, token) in chunk.iter().enumerate() {
-                    let pos = (token_offset + idx) as i32;
-                    let logits = token_offset + idx + 1 == prompt_tokens.len();
-                    batch
-                        .add(*token, pos, &[0], logits)
-                        .map_err(|err| format_error("Failed to add prompt token", err))?;
-                }
-                ctx.decode(&mut batch)
-                    .map_err(|err| format_error("Prompt decode failed", err))?;
-                if end == prompt_tokens.len() {
-                    logits_index = (chunk.len() - 1) as i32;
-                }
-                token_offset = end;
-            }
-
-            let mut sampler = build_sampler(ctx.model, &request)?;
-            sampler.accept_many(prompt_tokens.iter());
-
-            let pos = prompt_tokens.len() as i32;
-            run_generation_loop(
-                ctx,
-                &mut sampler,
-                &cancel_flag,
-                sink,
-                job_id,
-                max_tokens,
-                &stop_sequences,
-                &mut generated_tokens_count,
-                pos,
-                logits_index,
             )?;
 
             Ok(())
