@@ -1,1 +1,0 @@
-- Navgiate files keeping the File Info opened using Alt/Option + Arrow Keys
