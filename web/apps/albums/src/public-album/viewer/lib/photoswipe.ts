@@ -2193,6 +2193,7 @@ const hlsVideoControlsHTML = () => `
   <media-control-bar>
     <media-play-button notooltip></media-play-button>
     <media-mute-button notooltip></media-mute-button>
+    <media-volume-range></media-volume-range>
     <media-time-display showduration notoggle></media-time-display>
     <media-text-display></media-text-display>
     <media-settings-menu-button id="ente-settings-menu-btn" invoketarget="ente-settings-menu" notooltip>

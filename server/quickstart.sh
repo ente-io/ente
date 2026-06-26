@@ -232,7 +232,7 @@ sleep 1
 printf " \033[1;32mE\033[0m   Do you want to start Ente? (y/n) [n]: "
 read -r choice
 
-if [[ "$choice" =~ ^[Yy]$ ]]; then
+if [ "$choice" = "y" ] || [ "$choice" = "Y" ]; then
     printf "\nStarting docker compose\n"
     printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
     printf "(Verification code will be in the logs here)\n\n"

@@ -66,4 +66,7 @@ Future<void> _logout(BuildContext context, AppLocalizations l10n) async {
   await dialog.show();
   await Configuration.instance.logout();
   await dialog.hide();
+  if (context.mounted) {
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+  }
 }
