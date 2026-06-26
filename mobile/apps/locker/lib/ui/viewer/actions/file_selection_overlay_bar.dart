@@ -620,8 +620,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       'Opening add-to dialog for ${ownedFiles.length} file(s); fetching collections.',
     );
 
-    final allCollections = await CollectionService.instance
-        .getCollectionsForUI();
+    final allCollections = await CollectionService.instance.getCollectionsForUI(
+      includeUncategorized: true,
+    );
     final dedupedCollections = uniqueCollectionsById(allCollections);
     _logger.info(
       'Presenting ${dedupedCollections.length} unique collection option(s) '
@@ -827,8 +828,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _restoreFiles(BuildContext context, List<EnteFile> files) async {
     _logger.info('Opening restore dialog for ${files.length} file(s)');
 
-    final allCollections = await CollectionService.instance
-        .getCollectionsForUI();
+    final allCollections = await CollectionService.instance.getCollectionsForUI(
+      includeUncategorized: true,
+    );
     final dedupedCollections = uniqueCollectionsById(allCollections);
 
     final result = await showAddToCollectionSheet(
