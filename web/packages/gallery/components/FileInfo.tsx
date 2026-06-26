@@ -540,7 +540,7 @@ const FileInfoNavigationHint: React.FC = () => (
         }}
     >
         <Typography component="span" variant="tiny">
-            Use
+            {t("file_info_arrow_navigation_hint_use")}
         </Typography>
         <NavigationHintKey>
             <KeyboardOptionKeyIcon sx={{ fontSize: 12 }} />
