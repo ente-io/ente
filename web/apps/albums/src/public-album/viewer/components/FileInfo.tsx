@@ -370,6 +370,7 @@ const RawExif: React.FC<RawExifProps> = ({
                 onRootClose={handleRootClose}
                 title={t("exif")}
                 caption={fileName}
+                showRootCloseButton={false}
                 actionButton={
                     <CopyButton size="small" text={JSON.stringify(tags)} />
                 }
