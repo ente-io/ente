@@ -368,8 +368,10 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       );
     }
 
-    // Keep Uncategorized here so assigning a regular collection removes the
-    // file from Uncategorized.
+    // Only favorites is special-cased; Uncategorized is treated as a normal
+    // collection. A file can belong to multiple collections (incl.
+    // Uncategorized), so it is only removed from Uncategorized when the user
+    // explicitly deselects it.
     final regularCurrentIds = currentCollectionIds
         .where((id) => id != favoriteCollection.id)
         .toSet();
