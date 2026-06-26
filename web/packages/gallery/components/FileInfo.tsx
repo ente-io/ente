@@ -13,9 +13,6 @@ import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import KeyboardOptionKeyIcon from "@mui/icons-material/KeyboardOptionKey";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
 import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
@@ -526,12 +523,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 };
 
 const FileInfoNavigationHint: React.FC = () => (
-    <Stack
-        direction="row"
+    <Typography
+        variant="tiny"
         sx={{
-            display: { xs: "none", sm: "flex" },
-            alignItems: "center",
-            gap: 0.5,
+            display: { xs: "none", sm: "block" },
             mt: "auto",
             pb: 3,
             px: 2,
@@ -539,61 +534,7 @@ const FileInfoNavigationHint: React.FC = () => (
             opacity: 0.24,
         }}
     >
-        <Typography component="span" variant="tiny">
-            {t("file_info_arrow_navigation_hint_use")}
-        </Typography>
-        <NavigationHintKey>
-            <KeyboardOptionKeyIcon sx={{ fontSize: 12 }} />
-            <Typography
-                component="span"
-                variant="tiny"
-                sx={{ fontWeight: "medium" }}
-            >
-                Alt / Option
-            </Typography>
-        </NavigationHintKey>
-        <NavigationHintSeparator>+</NavigationHintSeparator>
-        <NavigationHintKey>
-            <KeyboardArrowLeftIcon
-                titleAccess={t("file_info_arrow_navigation_hint_left_arrow")}
-                sx={{ fontSize: 14 }}
-            />
-        </NavigationHintKey>
-        <NavigationHintSeparator>/</NavigationHintSeparator>
-        <NavigationHintKey>
-            <KeyboardArrowRightIcon
-                titleAccess={t("file_info_arrow_navigation_hint_right_arrow")}
-                sx={{ fontSize: 14 }}
-            />
-        </NavigationHintKey>
-        <Typography component="span" variant="tiny" sx={{ ml: 0.5 }}>
-            {t("file_info_arrow_navigation_hint")}
-        </Typography>
-    </Stack>
-);
-
-const NavigationHintKey = styled("span")(
-    ({ theme }) => `
-    min-height: 20px;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    padding: 2px 5px;
-    border: 1px solid ${theme.vars.palette.stroke.faint};
-    border-radius: 4px;
-    color: ${theme.vars.palette.text.muted};
-`,
-);
-
-const NavigationHintSeparator: React.FC<React.PropsWithChildren> = ({
-    children,
-}) => (
-    <Typography
-        component="span"
-        variant="tiny"
-        sx={{ color: "text.faint", lineHeight: 1 }}
-    >
-        {children}
+        {t("file_info_arrow_navigation_hint")}
     </Typography>
 );
 
