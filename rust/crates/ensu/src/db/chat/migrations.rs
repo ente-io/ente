@@ -1,6 +1,7 @@
 use crate::db::backend::RowExt;
-use crate::db::schema;
 use crate::db::{Backend, Error, Result};
+
+use super::schema;
 
 pub const LATEST_VERSION: i64 = 4;
 

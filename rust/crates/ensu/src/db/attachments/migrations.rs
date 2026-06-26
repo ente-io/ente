@@ -1,6 +1,7 @@
-use crate::db::attachments_schema;
 use crate::db::backend::RowExt;
 use crate::db::{Backend, Error, Result};
+
+use super::schema;
 
 pub const LATEST_VERSION: i64 = 2;
 
@@ -8,7 +9,7 @@ pub fn migrate<B: Backend>(backend: &B) -> Result<()> {
     let version = user_version(backend)?;
     match version {
         0 => {
-            backend.execute_batch(attachments_schema::CREATE_ALL)?;
+            backend.execute_batch(schema::CREATE_ALL)?;
             backend.execute("PRAGMA user_version = 2;", &[])?;
             Ok(())
         }

@@ -3,6 +3,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+use ente_ensu::config;
 use ente_ensu::inference;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
@@ -73,8 +74,8 @@ pub struct TauriLlmModelDownloadProgress {
     file_total_bytes: Option<u64>,
 }
 
-impl From<inference::EnsuModelPreset> for TauriEnsuModelPreset {
-    fn from(p: inference::EnsuModelPreset) -> Self {
+impl From<config::ModelPreset> for TauriEnsuModelPreset {
+    fn from(p: config::ModelPreset) -> Self {
         Self {
             id: p.id,
             title: p.title,
@@ -84,8 +85,8 @@ impl From<inference::EnsuModelPreset> for TauriEnsuModelPreset {
     }
 }
 
-impl From<inference::EnsuDefaults> for TauriEnsuDefaults {
-    fn from(d: inference::EnsuDefaults) -> Self {
+impl From<config::Defaults> for TauriEnsuDefaults {
+    fn from(d: config::Defaults) -> Self {
         Self {
             mobile_system_prompt_body: d.mobile_system_prompt_body,
             desktop_system_prompt_body: d.desktop_system_prompt_body,
@@ -269,7 +270,7 @@ impl inference::EventSink for LlmEventSink {
 
 #[tauri::command]
 pub fn get_ensu_defaults() -> TauriEnsuDefaults {
-    inference::ensu_defaults().into()
+    config::defaults().into()
 }
 
 #[tauri::command]

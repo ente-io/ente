@@ -1,3 +1,6 @@
+pub mod migrations;
+pub mod schema;
+
 use std::sync::Arc;
 
 use uuid::Uuid;
@@ -5,7 +8,6 @@ use zeroize::Zeroizing;
 
 use crate::db::backend::{Backend, BackendTx, RowExt, Value};
 use crate::db::crypto;
-use crate::db::migrations;
 use crate::db::models::{
     AttachmentMeta, EntityType, Message, Sender, Session, SessionWithPreview, StoredAttachment,
 };

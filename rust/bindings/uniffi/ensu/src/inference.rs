@@ -1,3 +1,4 @@
+use ente_ensu::config;
 use ente_ensu::inference as core;
 use std::sync::Arc;
 use thiserror::Error;
@@ -166,8 +167,8 @@ impl From<ContextParams> for core::ContextParams {
     }
 }
 
-impl From<core::EnsuModelPreset> for EnsuModelPreset {
-    fn from(value: core::EnsuModelPreset) -> Self {
+impl From<config::ModelPreset> for EnsuModelPreset {
+    fn from(value: config::ModelPreset) -> Self {
         Self {
             id: value.id,
             title: value.title,
@@ -177,8 +178,8 @@ impl From<core::EnsuModelPreset> for EnsuModelPreset {
     }
 }
 
-impl From<core::EnsuDefaults> for EnsuDefaults {
-    fn from(value: core::EnsuDefaults) -> Self {
+impl From<config::Defaults> for EnsuDefaults {
+    fn from(value: config::Defaults) -> Self {
         Self {
             mobile_system_prompt_body: value.mobile_system_prompt_body,
             desktop_system_prompt_body: value.desktop_system_prompt_body,
@@ -335,7 +336,7 @@ pub fn create_context(
 
 #[uniffi::export]
 pub fn get_ensu_defaults() -> EnsuDefaults {
-    core::ensu_defaults().into()
+    config::defaults().into()
 }
 
 #[uniffi::export]

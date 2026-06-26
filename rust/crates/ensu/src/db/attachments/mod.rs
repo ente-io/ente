@@ -1,3 +1,6 @@
+pub mod migrations;
+pub mod schema;
+
 use std::sync::Arc;
 
 use uuid::Uuid;
@@ -60,7 +63,7 @@ pub struct AttachmentsDb<B: Backend> {
 
 impl<B: Backend> AttachmentsDb<B> {
     pub fn new(backend: B, clock: Arc<dyn Clock>) -> Result<Self> {
-        crate::db::attachments_migrations::migrate(&backend)?;
+        migrations::migrate(&backend)?;
         Ok(Self { backend, clock })
     }
 

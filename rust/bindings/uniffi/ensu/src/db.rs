@@ -108,7 +108,7 @@ pub struct Message {
 
 #[derive(uniffi::Object)]
 pub struct EnsuDb {
-    inner: core::EnsuDb<core::SqliteBackend>,
+    inner: core::Db<core::SqliteBackend>,
 }
 
 fn to_session(session: core::Session) -> Session {
@@ -152,8 +152,7 @@ impl EnsuDb {
         attachments_db_path: String,
         key: Vec<u8>,
     ) -> Result<Self, DbError> {
-        let inner =
-            core::EnsuDb::open_sqlite_with_defaults(main_db_path, attachments_db_path, key)?;
+        let inner = core::Db::open_sqlite_with_defaults(main_db_path, attachments_db_path, key)?;
         Ok(Self { inner })
     }
 

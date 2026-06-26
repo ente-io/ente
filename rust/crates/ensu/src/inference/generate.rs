@@ -1,55 +1,29 @@
 use llama_cpp_2::TokenToStringError;
 use llama_cpp_2::context::LlamaContext;
-use llama_cpp_2::context::params::LlamaContextParams;
-use llama_cpp_2::llama_backend::LlamaBackend;
 use llama_cpp_2::llama_batch::LlamaBatch;
 use llama_cpp_2::model::{AddBos, LlamaChatMessage, LlamaChatTemplate, LlamaModel};
-use llama_cpp_2::mtmd::{
-    MtmdBitmap, MtmdContext, MtmdContextParams, MtmdInputText, mtmd_default_marker,
-};
+use llama_cpp_2::mtmd::{MtmdBitmap, MtmdInputText, mtmd_default_marker};
 use llama_cpp_2::openai::OpenAIChatTemplateParams;
 use llama_cpp_2::sampling::LlamaSampler;
 use llama_cpp_2::token::LlamaToken;
 use parking_lot::Mutex;
-use self_cell::self_cell;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::ffi::CString;
-use std::num::NonZeroU32;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, AtomicI64, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::time::Instant;
 
-pub type JobId = i64;
+use super::context::ContextHandle;
+use super::event::{EventSink, GenerateEvent, GenerateSummary, JobId};
+use super::format_error;
 
-pub trait EventSink {
-    fn add(&mut self, event: GenerateEvent);
-}
-
-impl<F> EventSink for F
-where
-    F: FnMut(GenerateEvent),
-{
-    fn add(&mut self, event: GenerateEvent) {
-        (self)(event);
-    }
-}
-
-static BACKEND: OnceLock<Result<LlamaBackend, String>> = OnceLock::new();
 static JOB_COUNTER: AtomicI64 = AtomicI64::new(1);
 static CANCEL_FLAGS: OnceLock<Mutex<HashMap<JobId, Arc<AtomicBool>>>> = OnceLock::new();
 
 const CANCEL_MESSAGE: &str = "Generation cancelled";
 const DEFAULT_GENERATION_MAX_TOKENS: i32 = 8_192;
-
-fn backend() -> Result<&'static LlamaBackend, String> {
-    match BACKEND.get_or_init(|| LlamaBackend::init().map_err(|err| err.to_string())) {
-        Ok(backend) => Ok(backend),
-        Err(err) => Err(format!("Failed to initialize backend: {err}")),
-    }
-}
 
 fn cancel_flags() -> &'static Mutex<HashMap<JobId, Arc<AtomicBool>>> {
     CANCEL_FLAGS.get_or_init(|| Mutex::new(HashMap::new()))
@@ -84,8 +58,41 @@ impl Drop for JobGuard {
     }
 }
 
-fn format_error(context: &str, err: impl std::fmt::Display) -> String {
-    format!("{context}: {err}")
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChatMessage {
+    pub role: String,
+    pub content: String,
+}
+
+struct GenerateRequest {
+    temperature: Option<f32>,
+    top_p: Option<f32>,
+    top_k: Option<i32>,
+    repeat_penalty: Option<f32>,
+    frequency_penalty: Option<f32>,
+    presence_penalty: Option<f32>,
+    seed: Option<i64>,
+    grammar: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GenerateChatRequest {
+    pub messages: Vec<ChatMessage>,
+    pub template_override: Option<String>,
+    pub add_assistant: Option<bool>,
+    pub image_paths: Option<Vec<String>>,
+    pub mmproj_path: Option<String>,
+    pub media_marker: Option<String>,
+    pub max_tokens: Option<i32>,
+    pub temperature: Option<f32>,
+    pub top_p: Option<f32>,
+    pub top_k: Option<i32>,
+    pub repeat_penalty: Option<f32>,
+    pub frequency_penalty: Option<f32>,
+    pub presence_penalty: Option<f32>,
+    pub seed: Option<i64>,
+    pub stop_sequences: Option<Vec<String>>,
+    pub grammar: Option<String>,
 }
 
 fn token_piece_bytes(model: &LlamaModel, token: LlamaToken) -> Result<Vec<u8>, TokenToStringError> {
@@ -438,285 +445,6 @@ fn build_sampler(model: &LlamaModel, request: &GenerateRequest) -> Result<LlamaS
     }
 
     Ok(LlamaSampler::chain_simple(samplers))
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ModelLoadParams {
-    pub model_path: String,
-    pub n_gpu_layers: Option<i32>,
-    pub use_mmap: Option<bool>,
-    pub use_mlock: Option<bool>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ContextParams {
-    pub context_size: Option<i32>,
-    pub n_threads: Option<i32>,
-    pub n_batch: Option<i32>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ChatMessage {
-    pub role: String,
-    pub content: String,
-}
-
-struct GenerateRequest {
-    temperature: Option<f32>,
-    top_p: Option<f32>,
-    top_k: Option<i32>,
-    repeat_penalty: Option<f32>,
-    frequency_penalty: Option<f32>,
-    presence_penalty: Option<f32>,
-    seed: Option<i64>,
-    grammar: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GenerateChatRequest {
-    pub messages: Vec<ChatMessage>,
-    pub template_override: Option<String>,
-    pub add_assistant: Option<bool>,
-    pub image_paths: Option<Vec<String>>,
-    pub mmproj_path: Option<String>,
-    pub media_marker: Option<String>,
-    pub max_tokens: Option<i32>,
-    pub temperature: Option<f32>,
-    pub top_p: Option<f32>,
-    pub top_k: Option<i32>,
-    pub repeat_penalty: Option<f32>,
-    pub frequency_penalty: Option<f32>,
-    pub presence_penalty: Option<f32>,
-    pub seed: Option<i64>,
-    pub stop_sequences: Option<Vec<String>>,
-    pub grammar: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GenerateSummary {
-    pub job_id: JobId,
-    pub prompt_tokens: Option<i32>,
-    pub generated_tokens: Option<i32>,
-    pub total_time_ms: Option<i64>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum GenerateEvent {
-    Text {
-        job_id: JobId,
-        text: String,
-        token_id: Option<i32>,
-    },
-    Done {
-        summary: GenerateSummary,
-    },
-    Error {
-        job_id: JobId,
-        message: String,
-    },
-}
-
-pub struct ModelHandle {
-    model: LlamaModel,
-}
-
-pub type ModelHandleRef = Arc<ModelHandle>;
-
-impl ModelHandle {
-    fn model(&self) -> &LlamaModel {
-        &self.model
-    }
-}
-
-self_cell!(
-    struct ContextHandleCell {
-        owner: ModelHandleRef,
-
-        #[covariant]
-        dependent: LlamaContext,
-    }
-);
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct MtmdCacheKey {
-    mmproj_path: String,
-    media_marker: String,
-    use_gpu: bool,
-    print_timings: bool,
-    n_threads: i32,
-}
-
-struct CachedMtmdContext {
-    key: MtmdCacheKey,
-    context: Arc<MtmdContext>,
-}
-
-pub struct ContextHandle {
-    cell: Mutex<ContextHandleCell>,
-    mtmd_context: Mutex<Option<CachedMtmdContext>>,
-}
-
-pub type ContextHandleRef = Arc<ContextHandle>;
-
-unsafe impl Send for ContextHandle {}
-unsafe impl Sync for ContextHandle {}
-
-impl ContextHandle {
-    fn try_new(
-        owner: ModelHandleRef,
-        builder: impl for<'a> FnOnce(&'a ModelHandleRef) -> Result<LlamaContext<'a>, String>,
-    ) -> Result<Self, String> {
-        ContextHandleCell::try_new(owner, builder).map(|cell| ContextHandle {
-            cell: Mutex::new(cell),
-            mtmd_context: Mutex::new(None),
-        })
-    }
-
-    fn with_context_mut<R>(
-        &self,
-        func: impl for<'a, 'b> FnOnce(&'b mut LlamaContext<'a>) -> R,
-    ) -> R {
-        let mut guard = self.cell.lock();
-        guard.with_dependent_mut(|_owner, context| func(context))
-    }
-
-    fn cached_mtmd_context(
-        &self,
-        model: &LlamaModel,
-        mmproj_path: &str,
-        marker: &str,
-    ) -> Result<Arc<MtmdContext>, String> {
-        if !Path::new(mmproj_path).exists() {
-            return Err(format!("mmproj file not found at {mmproj_path}"));
-        }
-
-        let (key, params) = mtmd_cache_key_and_params(mmproj_path, marker)?;
-        let mut guard = self.mtmd_context.lock();
-
-        if let Some(cached) = guard.as_ref()
-            && cached.key == key
-        {
-            return Ok(cached.context.clone());
-        }
-
-        let mtmd_ctx = Arc::new(
-            MtmdContext::init_from_file(mmproj_path, model, &params)
-                .map_err(|err| format_error("Failed to initialize mmproj", err))?,
-        );
-
-        if !mtmd_ctx.support_vision() {
-            return Err("Model does not support vision input".to_string());
-        }
-
-        *guard = Some(CachedMtmdContext {
-            key,
-            context: mtmd_ctx.clone(),
-        });
-        Ok(mtmd_ctx)
-    }
-}
-
-fn mtmd_cache_key_and_params(
-    mmproj_path: &str,
-    marker: &str,
-) -> Result<(MtmdCacheKey, MtmdContextParams), String> {
-    let media_marker = CString::new(marker.to_string())
-        .map_err(|err| format_error("Invalid media marker", err))?;
-    let params = MtmdContextParams {
-        use_gpu: false,
-        print_timings: false,
-        media_marker,
-        ..Default::default()
-    };
-    let marker = params
-        .media_marker
-        .to_str()
-        .map_err(|err| format_error("Invalid media marker", err))?
-        .to_string();
-    let key = MtmdCacheKey {
-        mmproj_path: mmproj_path.to_string(),
-        media_marker: marker,
-        use_gpu: params.use_gpu,
-        print_timings: params.print_timings,
-        n_threads: params.n_threads,
-    };
-    Ok((key, params))
-}
-
-pub fn init_backend() -> Result<(), String> {
-    backend().map(|_| ())
-}
-
-pub fn load_model(params: ModelLoadParams) -> Result<ModelHandleRef, String> {
-    let backend = backend()?;
-    let mut model_params = llama_cpp_2::model::params::LlamaModelParams::default();
-
-    if let Some(n_gpu_layers) = params.n_gpu_layers {
-        let layers =
-            u32::try_from(n_gpu_layers).map_err(|_| "n_gpu_layers must be >= 0".to_string())?;
-        model_params = model_params.with_n_gpu_layers(layers);
-    }
-
-    if let Some(use_mlock) = params.use_mlock {
-        model_params = model_params.with_use_mlock(use_mlock);
-    }
-
-    let model = LlamaModel::load_from_file(backend, Path::new(&params.model_path), &model_params)
-        .map_err(|err| format_error("Failed to load model", err))?;
-
-    Ok(Arc::new(ModelHandle { model }))
-}
-
-pub fn create_context(
-    model: ModelHandleRef,
-    params: ContextParams,
-) -> Result<ContextHandleRef, String> {
-    let mut context_params = LlamaContextParams::default();
-
-    if let Some(context_size) = params.context_size {
-        let context_size =
-            u32::try_from(context_size).map_err(|_| "context_size must be > 0".to_string())?;
-        let context_size =
-            NonZeroU32::new(context_size).ok_or_else(|| "context_size must be > 0".to_string())?;
-        context_params = context_params.with_n_ctx(Some(context_size));
-    }
-
-    if let Some(n_threads) = params.n_threads {
-        if n_threads <= 0 {
-            return Err("n_threads must be > 0".to_string());
-        }
-        context_params = context_params
-            .with_n_threads(n_threads)
-            .with_n_threads_batch(n_threads);
-    }
-
-    if let Some(n_batch) = params.n_batch {
-        let n_batch = u32::try_from(n_batch).map_err(|_| "n_batch must be > 0".to_string())?;
-        context_params = context_params.with_n_batch(n_batch);
-    }
-
-    let context = ContextHandle::try_new(model, |model| {
-        let backend = backend()?;
-        model
-            .model()
-            .new_context(backend, context_params)
-            .map_err(|err| format_error("Failed to create context", err))
-    })?;
-
-    Ok(Arc::new(context))
-}
-
-pub fn prewarm_multimodal_context(
-    context: &ContextHandle,
-    mmproj_path: String,
-    media_marker: Option<String>,
-) -> Result<(), String> {
-    let marker = media_marker.unwrap_or_else(|| mtmd_default_marker().to_string());
-    context.with_context_mut(|ctx| {
-        context
-            .cached_mtmd_context(ctx.model, &mmproj_path, &marker)
-            .map(|_| ())
-    })
 }
 
 pub fn generate_chat_stream(

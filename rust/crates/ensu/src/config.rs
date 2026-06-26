@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EnsuModelPreset {
+pub struct ModelPreset {
     pub id: String,
     pub title: String,
     pub url: String,
@@ -9,15 +9,15 @@ pub struct EnsuModelPreset {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EnsuDefaults {
+pub struct Defaults {
     pub mobile_system_prompt_body: String,
     pub desktop_system_prompt_body: String,
     pub system_prompt_date_placeholder: String,
     pub session_summary_system_prompt: String,
-    pub mobile_default_model: EnsuModelPreset,
-    pub mobile_model_presets: Vec<EnsuModelPreset>,
-    pub desktop_default_model: EnsuModelPreset,
-    pub desktop_model_presets: Vec<EnsuModelPreset>,
+    pub mobile_default_model: ModelPreset,
+    pub mobile_model_presets: Vec<ModelPreset>,
+    pub desktop_default_model: ModelPreset,
+    pub desktop_model_presets: Vec<ModelPreset>,
 }
 
 const SYSTEM_PROMPT_DATE_PLACEHOLDER: &str = "$date";
@@ -25,8 +25,8 @@ const MOBILE_SYSTEM_PROMPT_BODY: &str = "You are Ensu, an AI assistant built by 
 const DESKTOP_SYSTEM_PROMPT_BODY: &str = MOBILE_SYSTEM_PROMPT_BODY;
 const SESSION_SUMMARY_SYSTEM_PROMPT: &str = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title.";
 
-fn lfm_vl_1_6b() -> EnsuModelPreset {
-    EnsuModelPreset {
+fn lfm_vl_1_6b() -> ModelPreset {
+    ModelPreset {
         id: "lfm-vl-1.6b".to_string(),
         title: "LFM 2.5 VL 1.6B (Q4_0)".to_string(),
         url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true".to_string(),
@@ -37,8 +37,8 @@ fn lfm_vl_1_6b() -> EnsuModelPreset {
     }
 }
 
-fn lfm_1_2b() -> EnsuModelPreset {
-    EnsuModelPreset {
+fn lfm_1_2b() -> ModelPreset {
+    ModelPreset {
         id: "lfm-1.2b".to_string(),
         title: "LFM 2.5 1.2B Instruct (Q4_0)".to_string(),
         url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf?download=true".to_string(),
@@ -46,8 +46,8 @@ fn lfm_1_2b() -> EnsuModelPreset {
     }
 }
 
-fn qwen_0_8b() -> EnsuModelPreset {
-    EnsuModelPreset {
+fn qwen_0_8b() -> ModelPreset {
+    ModelPreset {
         id: "qwen-0.8b".to_string(),
         title: "Qwen 3.5 0.8B (Q4_K_M)".to_string(),
         url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true".to_string(),
@@ -58,8 +58,8 @@ fn qwen_0_8b() -> EnsuModelPreset {
     }
 }
 
-fn qwen_2b_q8() -> EnsuModelPreset {
-    EnsuModelPreset {
+fn qwen_2b_q8() -> ModelPreset {
+    ModelPreset {
         id: "qwen-2b-q8".to_string(),
         title: "Qwen 3.5 2B (Q8_0)".to_string(),
         url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true".to_string(),
@@ -70,8 +70,8 @@ fn qwen_2b_q8() -> EnsuModelPreset {
     }
 }
 
-fn qwen_4b_q4km() -> EnsuModelPreset {
-    EnsuModelPreset {
+fn qwen_4b_q4km() -> ModelPreset {
+    ModelPreset {
         id: "qwen-4b-q4km".to_string(),
         title: "Qwen 3.5 4B (Q4_K_M)".to_string(),
         url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true".to_string(),
@@ -82,8 +82,8 @@ fn qwen_4b_q4km() -> EnsuModelPreset {
     }
 }
 
-fn gemma_4_e4b_q4km() -> EnsuModelPreset {
-    EnsuModelPreset {
+fn gemma_4_e4b_q4km() -> ModelPreset {
+    ModelPreset {
         id: "gemma-4-e4b-q4km".to_string(),
         title: "Gemma 4 E4B (Q4_K_M)".to_string(),
         url: "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf?download=true".to_string(),
@@ -94,8 +94,8 @@ fn gemma_4_e4b_q4km() -> EnsuModelPreset {
     }
 }
 
-fn gemma_4_e2b_q4km() -> EnsuModelPreset {
-    EnsuModelPreset {
+fn gemma_4_e2b_q4km() -> ModelPreset {
+    ModelPreset {
         id: "gemma-4-e2b-q4km".to_string(),
         title: "Gemma 4 E2B (Q4_K_M)".to_string(),
         url: "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_K_M.gguf?download=true".to_string(),
@@ -106,11 +106,11 @@ fn gemma_4_e2b_q4km() -> EnsuModelPreset {
     }
 }
 
-pub fn ensu_defaults() -> EnsuDefaults {
+pub fn defaults() -> Defaults {
     let mobile_default_model = lfm_vl_1_6b();
     let desktop_default_model = gemma_4_e4b_q4km();
 
-    EnsuDefaults {
+    Defaults {
         mobile_system_prompt_body: MOBILE_SYSTEM_PROMPT_BODY.to_string(),
         desktop_system_prompt_body: DESKTOP_SYSTEM_PROMPT_BODY.to_string(),
         system_prompt_date_placeholder: SYSTEM_PROMPT_DATE_PLACEHOLDER.to_string(),
