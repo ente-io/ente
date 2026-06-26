@@ -1,5 +1,4 @@
 name: ente_pure_utils
-description: The depencies should be maintained by pub.dev/flutter.dev
 
 resolution: workspace
 environment:

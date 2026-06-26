@@ -1,5 +1,5 @@
 name: ente_qr
-description: "A QR code reader plugin for Ente."
+description: A QR code reader plugin for Ente.
 
 resolution: workspace
 environment:

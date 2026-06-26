@@ -1,5 +1,4 @@
 name: onnx_dart
-description: "A new Flutter plugin project."
 
 resolution: workspace
 environment:
