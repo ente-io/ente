@@ -92,7 +92,7 @@ fn generate_native_android() -> Result<(), DynError> {
     let repo_root = rust_root
         .parent()
         .ok_or("failed to resolve repo root from rust/apps/codegen")?;
-    let rust_out_dir = repo_root.join("mobile/native/android/packages/rust/src/main/kotlin");
+    let rust_out_dir = repo_root.join("mobile/native/android/apps/ensu/rust/src/main/kotlin");
 
     fs::create_dir_all(&rust_out_dir)?;
 

@@ -51,7 +51,7 @@ fun registerBuildRustJni(
 ) = tasks.register(taskName) {
     val abis = resolveAbis()
 
-    inputs.files(fileTree(file("../../../../../rust")) { exclude("**/target/**") })
+    inputs.files(fileTree(file("../../../../../../rust")) { exclude("**/target/**") })
     inputs.file(file("scripts/build-rust.sh"))
     inputs.property("abis", abis)
     inputs.property("ndk", providers.provider { android.ndkVersion })

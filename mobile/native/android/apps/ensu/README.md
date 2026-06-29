@@ -62,11 +62,3 @@ Release AAB (Play Store bundle):
 Output: `app/build/outputs/bundle/release/app-release.aab`.
 
 Release builds use a debug keystore located at `debug.keystore`. For production releases, configure your own signing keys in `app/build.gradle.kts`.
-
-## Modules
-
-- `app/` — Compose UI and app entry point.
-- `domain/` — Business logic and state (pure Kotlin).
-- `data/` — Repositories and storage.
-
-The Rust glue for `db` / `inference` lives outside this app, at [`mobile/native/android/packages/rust/`](../../packages/rust/).
