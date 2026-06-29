@@ -1,22 +1,22 @@
 use ente_ensu::config;
-use ente_ensu::inference as core;
+use ente_ensu::llm as core;
 use std::sync::Arc;
 use thiserror::Error;
 
 #[derive(Debug, Error, uniffi::Error)]
-pub enum InferenceError {
+pub enum LlmError {
     #[error("{0}")]
     Message(String),
 }
 
-impl From<String> for InferenceError {
+impl From<String> for LlmError {
     fn from(value: String) -> Self {
         Self::Message(value)
     }
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct ModelLoadParams {
+pub struct LlmModelLoadParams {
     pub model_path: String,
     pub n_gpu_layers: Option<i32>,
     pub use_mmap: Option<bool>,
@@ -24,14 +24,14 @@ pub struct ModelLoadParams {
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct ContextParams {
+pub struct LlmContextParams {
     pub context_size: Option<i32>,
     pub n_threads: Option<i32>,
     pub n_batch: Option<i32>,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct EnsuModelPreset {
+pub struct LlmModelPreset {
     pub id: String,
     pub title: String,
     pub url: String,
@@ -44,21 +44,21 @@ pub struct EnsuDefaults {
     pub desktop_system_prompt_body: String,
     pub system_prompt_date_placeholder: String,
     pub session_summary_system_prompt: String,
-    pub mobile_default_model: EnsuModelPreset,
-    pub mobile_model_presets: Vec<EnsuModelPreset>,
-    pub desktop_default_model: EnsuModelPreset,
-    pub desktop_model_presets: Vec<EnsuModelPreset>,
+    pub mobile_default_model: LlmModelPreset,
+    pub mobile_model_presets: Vec<LlmModelPreset>,
+    pub desktop_default_model: LlmModelPreset,
+    pub desktop_model_presets: Vec<LlmModelPreset>,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct ChatMessage {
+pub struct LlmChatMessage {
     pub role: String,
     pub content: String,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct GenerateChatRequest {
-    pub messages: Vec<ChatMessage>,
+pub struct LlmGenerateChatRequest {
+    pub messages: Vec<LlmChatMessage>,
     pub template_override: Option<String>,
     pub add_assistant: Option<bool>,
     pub image_paths: Option<Vec<String>>,
@@ -77,7 +77,7 @@ pub struct GenerateChatRequest {
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct GenerateSummary {
+pub struct LlmGenerateSummary {
     pub job_id: i64,
     pub prompt_tokens: Option<i32>,
     pub generated_tokens: Option<i32>,
@@ -110,14 +110,14 @@ pub struct LlmModelDownloadProgress {
 }
 
 #[derive(Debug, Clone, uniffi::Enum)]
-pub enum GenerateEvent {
+pub enum LlmGenerateEvent {
     Text {
         job_id: i64,
         text: String,
         token_id: Option<i32>,
     },
     Done {
-        summary: GenerateSummary,
+        summary: LlmGenerateSummary,
     },
     Error {
         job_id: i64,
@@ -126,18 +126,18 @@ pub enum GenerateEvent {
 }
 
 #[derive(uniffi::Object)]
-pub struct ModelHandle {
+pub struct LlmModelHandle {
     handle: core::ModelHandleRef,
 }
 
 #[derive(uniffi::Object)]
-pub struct ContextHandle {
+pub struct LlmContextHandle {
     handle: core::ContextHandleRef,
 }
 
 #[uniffi::export(callback_interface)]
-pub trait GenerateEventCallback: Send + Sync {
-    fn on_event(&self, event: GenerateEvent);
+pub trait LlmGenerateEventCallback: Send + Sync {
+    fn on_event(&self, event: LlmGenerateEvent);
 }
 
 #[uniffi::export(callback_interface)]
@@ -146,8 +146,8 @@ pub trait LlmModelDownloadCallback: Send + Sync {
     fn is_cancelled(&self) -> bool;
 }
 
-impl From<ModelLoadParams> for core::ModelLoadParams {
-    fn from(value: ModelLoadParams) -> Self {
+impl From<LlmModelLoadParams> for core::ModelLoadParams {
+    fn from(value: LlmModelLoadParams) -> Self {
         Self {
             model_path: value.model_path,
             n_gpu_layers: value.n_gpu_layers,
@@ -157,8 +157,8 @@ impl From<ModelLoadParams> for core::ModelLoadParams {
     }
 }
 
-impl From<ContextParams> for core::ContextParams {
-    fn from(value: ContextParams) -> Self {
+impl From<LlmContextParams> for core::ContextParams {
+    fn from(value: LlmContextParams) -> Self {
         Self {
             context_size: value.context_size,
             n_threads: value.n_threads,
@@ -167,7 +167,7 @@ impl From<ContextParams> for core::ContextParams {
     }
 }
 
-impl From<config::ModelPreset> for EnsuModelPreset {
+impl From<config::ModelPreset> for LlmModelPreset {
     fn from(value: config::ModelPreset) -> Self {
         Self {
             id: value.id,
@@ -201,8 +201,8 @@ impl From<config::Defaults> for EnsuDefaults {
     }
 }
 
-impl From<ChatMessage> for core::ChatMessage {
-    fn from(value: ChatMessage) -> Self {
+impl From<LlmChatMessage> for core::ChatMessage {
+    fn from(value: LlmChatMessage) -> Self {
         Self {
             role: value.role,
             content: value.content,
@@ -210,8 +210,8 @@ impl From<ChatMessage> for core::ChatMessage {
     }
 }
 
-impl From<GenerateChatRequest> for core::GenerateChatRequest {
-    fn from(value: GenerateChatRequest) -> Self {
+impl From<LlmGenerateChatRequest> for core::GenerateChatRequest {
+    fn from(value: LlmGenerateChatRequest) -> Self {
         Self {
             messages: value.messages.into_iter().map(Into::into).collect(),
             template_override: value.template_override,
@@ -243,7 +243,7 @@ impl From<LlmModelDownloadTarget> for core::LlmModelDownloadTarget {
     }
 }
 
-impl From<core::GenerateSummary> for GenerateSummary {
+impl From<core::GenerateSummary> for LlmGenerateSummary {
     fn from(value: core::GenerateSummary) -> Self {
         Self {
             job_id: value.job_id,
@@ -275,7 +275,7 @@ impl From<core::LlmModelDownloadProgress> for LlmModelDownloadProgress {
     }
 }
 
-impl From<core::GenerateEvent> for GenerateEvent {
+impl From<core::GenerateEvent> for LlmGenerateEvent {
     fn from(value: core::GenerateEvent) -> Self {
         match value {
             core::GenerateEvent::Text {
@@ -304,7 +304,7 @@ fn u32_to_i32(value: u32) -> i32 {
 }
 
 struct CallbackSink {
-    callback: Box<dyn GenerateEventCallback>,
+    callback: Box<dyn LlmGenerateEventCallback>,
 }
 
 impl core::EventSink for CallbackSink {
@@ -314,24 +314,24 @@ impl core::EventSink for CallbackSink {
 }
 
 #[uniffi::export]
-pub fn init_backend() -> Result<(), InferenceError> {
-    core::init_backend().map_err(InferenceError::from)
+pub fn llm_init_backend() -> Result<(), LlmError> {
+    core::init_backend().map_err(LlmError::from)
 }
 
 #[uniffi::export]
-pub fn load_model(params: ModelLoadParams) -> Result<Arc<ModelHandle>, InferenceError> {
-    let model = core::load_model(params.into()).map_err(InferenceError::from)?;
-    Ok(Arc::new(ModelHandle { handle: model }))
+pub fn llm_load_model(params: LlmModelLoadParams) -> Result<Arc<LlmModelHandle>, LlmError> {
+    let model = core::load_model(params.into()).map_err(LlmError::from)?;
+    Ok(Arc::new(LlmModelHandle { handle: model }))
 }
 
 #[uniffi::export]
-pub fn create_context(
-    model: Arc<ModelHandle>,
-    params: ContextParams,
-) -> Result<Arc<ContextHandle>, InferenceError> {
+pub fn llm_create_context(
+    model: Arc<LlmModelHandle>,
+    params: LlmContextParams,
+) -> Result<Arc<LlmContextHandle>, LlmError> {
     let context =
-        core::create_context(model.handle.clone(), params.into()).map_err(InferenceError::from)?;
-    Ok(Arc::new(ContextHandle { handle: context }))
+        core::create_context(model.handle.clone(), params.into()).map_err(LlmError::from)?;
+    Ok(Arc::new(LlmContextHandle { handle: context }))
 }
 
 #[uniffi::export]
@@ -340,10 +340,10 @@ pub fn get_ensu_defaults() -> EnsuDefaults {
 }
 
 #[uniffi::export]
-pub fn download_llm_model_files(
+pub fn llm_download_model_files(
     targets: Vec<LlmModelDownloadTarget>,
     callback: Box<dyn LlmModelDownloadCallback>,
-) -> Result<(), InferenceError> {
+) -> Result<(), LlmError> {
     let callback: Arc<dyn LlmModelDownloadCallback> = Arc::from(callback);
     let progress_callback = Arc::clone(&callback);
     let cancel_callback = Arc::clone(&callback);
@@ -353,32 +353,32 @@ pub fn download_llm_model_files(
         move |progress| progress_callback.on_progress(progress.into()),
         move || cancel_callback.is_cancelled(),
     )
-    .map_err(InferenceError::from)
+    .map_err(LlmError::from)
 }
 
 #[uniffi::export]
-pub fn prewarm_multimodal_context(
-    context: Arc<ContextHandle>,
+pub fn llm_prewarm_multimodal_context(
+    context: Arc<LlmContextHandle>,
     mmproj_path: String,
     media_marker: Option<String>,
-) -> Result<(), InferenceError> {
+) -> Result<(), LlmError> {
     core::prewarm_multimodal_context(context.handle.as_ref(), mmproj_path, media_marker)
-        .map_err(InferenceError::from)
+        .map_err(LlmError::from)
 }
 
 #[uniffi::export]
-pub fn generate_chat_stream(
-    context: Arc<ContextHandle>,
-    request: GenerateChatRequest,
-    callback: Box<dyn GenerateEventCallback>,
-) -> Result<GenerateSummary, InferenceError> {
+pub fn llm_generate_chat_stream(
+    context: Arc<LlmContextHandle>,
+    request: LlmGenerateChatRequest,
+    callback: Box<dyn LlmGenerateEventCallback>,
+) -> Result<LlmGenerateSummary, LlmError> {
     let mut sink = CallbackSink { callback };
     core::generate_chat_stream(context.handle.as_ref(), request.into(), &mut sink)
         .map(Into::into)
-        .map_err(InferenceError::from)
+        .map_err(LlmError::from)
 }
 
 #[uniffi::export]
-pub fn cancel(job_id: i64) {
+pub fn llm_cancel(job_id: i64) {
     let _ = core::cancel(job_id);
 }

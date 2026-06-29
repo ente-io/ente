@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use ente_ensu::config;
-use ente_ensu::inference;
+use ente_ensu::llm;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
 use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
@@ -14,8 +14,8 @@ use crate::logging;
 
 #[derive(Default)]
 pub struct LlmState {
-    model: Mutex<Option<inference::ModelHandleRef>>,
-    context: Mutex<Option<inference::ContextHandleRef>>,
+    model: Mutex<Option<llm::ModelHandleRef>>,
+    context: Mutex<Option<llm::ContextHandleRef>>,
 }
 
 pub struct LlmModelDownloadState {
@@ -118,8 +118,8 @@ fn fs_thread_error() -> ApiError {
 
 pub(crate) fn replace_llm_state(
     llm_state: &LlmState,
-    model: Option<inference::ModelHandleRef>,
-    context: Option<inference::ContextHandleRef>,
+    model: Option<llm::ModelHandleRef>,
+    context: Option<llm::ContextHandleRef>,
 ) -> Result<(), ApiError> {
     let mut model_guard = llm_state
         .model
@@ -148,23 +148,23 @@ fn default_llm_threads() -> i32 {
 #[serde(tag = "type", rename_all = "snake_case")]
 enum LlmEvent {
     Text {
-        job_id: inference::JobId,
+        job_id: llm::JobId,
         text: String,
         token_id: Option<i32>,
     },
     Done {
-        summary: inference::GenerateSummary,
+        summary: llm::GenerateSummary,
     },
     Error {
-        job_id: inference::JobId,
+        job_id: llm::JobId,
         message: String,
     },
 }
 
-impl From<inference::GenerateEvent> for LlmEvent {
-    fn from(value: inference::GenerateEvent) -> Self {
+impl From<llm::GenerateEvent> for LlmEvent {
+    fn from(value: llm::GenerateEvent) -> Self {
         match value {
-            inference::GenerateEvent::Text {
+            llm::GenerateEvent::Text {
                 job_id,
                 text,
                 token_id,
@@ -173,8 +173,8 @@ impl From<inference::GenerateEvent> for LlmEvent {
                 text,
                 token_id,
             },
-            inference::GenerateEvent::Done { summary } => Self::Done { summary },
-            inference::GenerateEvent::Error { job_id, message } => Self::Error { job_id, message },
+            llm::GenerateEvent::Done { summary } => Self::Done { summary },
+            llm::GenerateEvent::Error { job_id, message } => Self::Error { job_id, message },
         }
     }
 }
@@ -185,7 +185,7 @@ const LLM_EVENT_BATCH_BYTES: usize = 2048;
 struct LlmEventSink {
     window: WebviewWindow,
     buffered_text: String,
-    buffered_job_id: Option<inference::JobId>,
+    buffered_job_id: Option<llm::JobId>,
     buffered_token_id: Option<i32>,
     last_emit: Instant,
 }
@@ -225,10 +225,10 @@ impl LlmEventSink {
     }
 }
 
-impl inference::EventSink for LlmEventSink {
-    fn add(&mut self, event: inference::GenerateEvent) {
+impl llm::EventSink for LlmEventSink {
+    fn add(&mut self, event: llm::GenerateEvent) {
         match event {
-            inference::GenerateEvent::Text {
+            llm::GenerateEvent::Text {
                 job_id,
                 text,
                 token_id,
@@ -254,11 +254,11 @@ impl inference::EventSink for LlmEventSink {
                     self.flush_text();
                 }
             }
-            inference::GenerateEvent::Done { summary } => {
+            llm::GenerateEvent::Done { summary } => {
                 self.flush_text();
                 let _ = self.window.emit("llm-event", LlmEvent::Done { summary });
             }
-            inference::GenerateEvent::Error { job_id, message } => {
+            llm::GenerateEvent::Error { job_id, message } => {
                 self.flush_text();
                 let _ = self
                     .window
@@ -283,7 +283,7 @@ pub async fn llm_download_model_files(
     cancel_requested.store(false, Ordering::SeqCst);
     let targets = downloads
         .into_iter()
-        .map(|download| inference::LlmModelDownloadTarget {
+        .map(|download| llm::LlmModelDownloadTarget {
             label: download.label,
             url: download.url,
             destination_path: download.path,
@@ -292,7 +292,7 @@ pub async fn llm_download_model_files(
 
     async_runtime::spawn_blocking(move || {
         let progress_window = window.clone();
-        inference::download_llm_model_files(
+        llm::download_llm_model_files(
             targets,
             move |progress| {
                 log_download_metrics(&progress);
@@ -313,7 +313,7 @@ pub fn llm_cancel_model_download(state: State<'_, LlmModelDownloadState>) {
 }
 
 fn tauri_download_progress(
-    progress: inference::LlmModelDownloadProgress,
+    progress: llm::LlmModelDownloadProgress,
 ) -> TauriLlmModelDownloadProgress {
     let percent = if progress.total_bytes.is_some() {
         progress.percentage.round().clamp(0.0, 100.0) as i32
@@ -333,7 +333,7 @@ fn tauri_download_progress(
     }
 }
 
-fn download_progress_status(progress: &inference::LlmModelDownloadProgress) -> String {
+fn download_progress_status(progress: &llm::LlmModelDownloadProgress) -> String {
     if progress.label == "Complete" {
         return "Download complete".to_string();
     }
@@ -358,7 +358,7 @@ fn download_progress_status(progress: &inference::LlmModelDownloadProgress) -> S
     }
 }
 
-fn log_download_metrics(progress: &inference::LlmModelDownloadProgress) {
+fn log_download_metrics(progress: &llm::LlmModelDownloadProgress) {
     if progress.file_complete {
         logging::log(
             "LLMDownload",
@@ -413,7 +413,7 @@ fn format_rate(bytes_per_second: f64) -> String {
 pub async fn llm_init_backend() -> Result<(), ApiError> {
     logging::log("LLM", "init backend requested");
     async_runtime::spawn_blocking(|| {
-        match catch_unwind(AssertUnwindSafe(inference::init_backend)) {
+        match catch_unwind(AssertUnwindSafe(llm::init_backend)) {
             Ok(result) => result.map_err(llm_error),
             Err(payload) => {
                 let message = panic_message(payload);
@@ -437,14 +437,14 @@ pub async fn llm_init_backend() -> Result<(), ApiError> {
 #[tauri::command]
 pub async fn llm_load_model(
     state: State<'_, LlmState>,
-    params: inference::ModelLoadParams,
+    params: llm::ModelLoadParams,
 ) -> Result<(), ApiError> {
     logging::log(
         "LLM",
         format!("load model requested model_path={}", params.model_path),
     );
     let model = async_runtime::spawn_blocking(move || {
-        match catch_unwind(AssertUnwindSafe(|| inference::load_model(params))) {
+        match catch_unwind(AssertUnwindSafe(|| llm::load_model(params))) {
             Ok(result) => result.map_err(llm_error),
             Err(payload) => {
                 let message = panic_message(payload);
@@ -470,7 +470,7 @@ pub async fn llm_load_model(
 #[tauri::command]
 pub async fn llm_create_context(
     state: State<'_, LlmState>,
-    params: inference::ContextParams,
+    params: llm::ContextParams,
 ) -> Result<(), ApiError> {
     let model = state
         .model
@@ -493,7 +493,7 @@ pub async fn llm_create_context(
 
     let context = async_runtime::spawn_blocking(move || {
         match catch_unwind(AssertUnwindSafe(|| {
-            inference::create_context(model, params)
+            llm::create_context(model, params)
         })) {
             Ok(result) => result.map_err(llm_error),
             Err(payload) => {
@@ -556,7 +556,7 @@ pub async fn llm_prewarm_multimodal_context(
     );
     async_runtime::spawn_blocking(move || {
         match catch_unwind(AssertUnwindSafe(|| {
-            inference::prewarm_multimodal_context(context.as_ref(), mmproj_path, media_marker)
+            llm::prewarm_multimodal_context(context.as_ref(), mmproj_path, media_marker)
         })) {
             Ok(result) => result.map_err(llm_error),
             Err(payload) => {
@@ -582,7 +582,7 @@ pub async fn llm_prewarm_multimodal_context(
 pub fn llm_generate_chat_stream(
     state: State<LlmState>,
     window: WebviewWindow,
-    request: inference::GenerateChatRequest,
+    request: llm::GenerateChatRequest,
 ) -> Result<(), ApiError> {
     let context = state
         .context
@@ -594,7 +594,7 @@ pub fn llm_generate_chat_stream(
     async_runtime::spawn_blocking(move || {
         match catch_unwind(AssertUnwindSafe(|| {
             let mut sink = LlmEventSink::new(window.clone());
-            let _ = inference::generate_chat_stream(context.as_ref(), request, &mut sink);
+            let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
         })) {
             Ok(()) => {}
             Err(payload) => {
@@ -616,7 +616,7 @@ pub fn llm_generate_chat_stream(
 
 #[tauri::command]
 pub fn llm_cancel(job_id: i64) -> Result<(), ApiError> {
-    inference::cancel(job_id).map_err(llm_error)
+    llm::cancel(job_id).map_err(llm_error)
 }
 
 pub(crate) fn clear_for_exit(app: &AppHandle) {
