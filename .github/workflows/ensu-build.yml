@@ -325,7 +325,7 @@ jobs:
                   EOF
 
             - name: Build signed Android artifacts
-              run: ./gradlew -PversionCode="${BUILD_NUMBER}" :app-ui:assembleRelease :app-ui:bundleRelease
+              run: ./gradlew -PversionCode="${BUILD_NUMBER}" :app:assembleRelease :app:bundleRelease
 
             - name: Prepare whatsnew
               run: |
@@ -335,7 +335,7 @@ jobs:
             - name: Prepare Android APK for GitHub release
               run: |
                   mkdir -p artifacts
-                  cp app-ui/build/outputs/apk/release/app-ui-release.apk "artifacts/${ANDROID_APK_NAME}"
+                  cp app/build/outputs/apk/release/app-release.apk "artifacts/${ANDROID_APK_NAME}"
 
             - name: Mint nightly token
               id: nightly_token
@@ -378,7 +378,7 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.ensu
-                  releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
+                  releaseFiles: mobile/native/android/apps/ensu/app/build/outputs/bundle/release/app-release.aab
                   tracks: internal
                   whatsNewDirectory: mobile/native/android/apps/ensu/whatsnew
 

@@ -308,7 +308,7 @@ Then, for example, to run the Ensu Android app:
 
 ```sh
 cd mobile/native/android/apps/ensu
-./gradlew :app-ui:installDebug
+./gradlew :app:installDebug
 adb shell am start -n io.ente.ensu.debug/io.ente.ensu.MainActivity
 ```
 
