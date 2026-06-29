@@ -11,10 +11,7 @@ class AccountDeletionSettings {
   AccountDeletionHost? _host;
   AccountDeletionService? _service;
 
-  void init({
-    required AccountDeletionHost host,
-    required Dio enteDio,
-  }) {
+  void init({required AccountDeletionHost host, required Dio enteDio}) {
     _host = host;
     _service = AccountDeletionService(enteDio);
   }
