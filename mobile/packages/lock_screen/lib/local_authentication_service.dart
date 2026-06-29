@@ -27,6 +27,7 @@ class LocalAuthenticationService {
   Future<bool> requestLocalAuthentication(
     BuildContext context,
     String infoMessage, {
+    String? title,
     bool refocusWindows = true,
     bool useDebugAuthCache = true,
   }) async {
@@ -47,6 +48,7 @@ class LocalAuthenticationService {
         result = await requestAuthentication(
           context,
           infoMessage,
+          title: title,
           macOSReason: context.strings.unlock,
           isAuthenticatingForInAppChange: true,
         );
