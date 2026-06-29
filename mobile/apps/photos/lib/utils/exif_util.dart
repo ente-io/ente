@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:computer/computer.dart";
 import 'package:exif_reader/exif_reader.dart';
+import "package:image/image.dart" as img;
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
@@ -37,6 +38,19 @@ final _offsetPattern = RegExp(r'^([Zz]|[+-](?:[01]\d|2[0-3]):?[0-5]\d)$');
 
 bool shouldReadExif(EnteFile file) {
   return file.fileType == FileType.image || file.fileType == FileType.livePhoto;
+}
+
+Future<img.ExifData> getExif2(EnteFile enteFile) async {
+  final file = await getFile(enteFile, isOrigin: true);
+  if (file == null) {
+    throw Exception("Failed to fetch origin file");
+  }
+  final bytes = await file.readAsBytes();
+  final image = img.decodeImage(bytes);
+  if (image == null) {
+    throw Exception("Failed to decode image");
+  }
+  return image.exif;
 }
 
 Future<Map<String, IfdTag>> getExif(EnteFile file) async {
