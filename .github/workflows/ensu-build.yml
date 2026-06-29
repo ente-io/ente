@@ -180,6 +180,7 @@ jobs:
               if: matrix.platform.os == 'windows-latest'
               shell: bash
               run: |
+                  test "${{ secrets.AZURE_ENDPOINT != '' && secrets.AZURE_CODE_SIGNING_NAME != '' && secrets.AZURE_CERT_PROFILE_NAME != '' }}" = true
                   cargo install --locked artifact-signing-cli --version 0.11.0
 
                   artifact_signing_cli="${CARGO_HOME:-$HOME/.cargo}/bin/artifact-signing-cli.exe"

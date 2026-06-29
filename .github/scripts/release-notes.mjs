@@ -68,13 +68,12 @@ function playStoreBody(body) {
     return Array.from(body || "Bug fixes and improvements").slice(0, 500).join("");
 }
 
-function output(name, value) {
-    const valueLines = new Set(String(value).split("\n"));
+function output(name, text) {
     let delimiter = "RELEASE_NOTES_EOF";
-    while (valueLines.has(delimiter)) delimiter += "_";
+    while (text.includes(delimiter)) delimiter += "_";
 
     console.log(`${name}<<${delimiter}`);
-    console.log(value);
+    console.log(text);
     console.log(delimiter);
 }
 
