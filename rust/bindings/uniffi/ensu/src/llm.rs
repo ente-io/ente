@@ -1,4 +1,3 @@
-use ente_ensu::config;
 use ente_ensu::llm as core;
 use std::sync::Arc;
 use thiserror::Error;
@@ -28,26 +27,6 @@ pub struct LlmContextParams {
     pub context_size: Option<i32>,
     pub n_threads: Option<i32>,
     pub n_batch: Option<i32>,
-}
-
-#[derive(Debug, Clone, uniffi::Record)]
-pub struct LlmModelPreset {
-    pub id: String,
-    pub title: String,
-    pub url: String,
-    pub mmproj_url: Option<String>,
-}
-
-#[derive(Debug, Clone, uniffi::Record)]
-pub struct EnsuDefaults {
-    pub mobile_system_prompt_body: String,
-    pub desktop_system_prompt_body: String,
-    pub system_prompt_date_placeholder: String,
-    pub session_summary_system_prompt: String,
-    pub mobile_default_model: LlmModelPreset,
-    pub mobile_model_presets: Vec<LlmModelPreset>,
-    pub desktop_default_model: LlmModelPreset,
-    pub desktop_model_presets: Vec<LlmModelPreset>,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
@@ -163,40 +142,6 @@ impl From<LlmContextParams> for core::ContextParams {
             context_size: value.context_size,
             n_threads: value.n_threads,
             n_batch: value.n_batch,
-        }
-    }
-}
-
-impl From<config::ModelPreset> for LlmModelPreset {
-    fn from(value: config::ModelPreset) -> Self {
-        Self {
-            id: value.id,
-            title: value.title,
-            url: value.url,
-            mmproj_url: value.mmproj_url,
-        }
-    }
-}
-
-impl From<config::Defaults> for EnsuDefaults {
-    fn from(value: config::Defaults) -> Self {
-        Self {
-            mobile_system_prompt_body: value.mobile_system_prompt_body,
-            desktop_system_prompt_body: value.desktop_system_prompt_body,
-            system_prompt_date_placeholder: value.system_prompt_date_placeholder,
-            session_summary_system_prompt: value.session_summary_system_prompt,
-            mobile_default_model: value.mobile_default_model.into(),
-            mobile_model_presets: value
-                .mobile_model_presets
-                .into_iter()
-                .map(Into::into)
-                .collect(),
-            desktop_default_model: value.desktop_default_model.into(),
-            desktop_model_presets: value
-                .desktop_model_presets
-                .into_iter()
-                .map(Into::into)
-                .collect(),
         }
     }
 }
@@ -332,11 +277,6 @@ pub fn llm_create_context(
     let context =
         core::create_context(model.handle.clone(), params.into()).map_err(LlmError::from)?;
     Ok(Arc::new(LlmContextHandle { handle: context }))
-}
-
-#[uniffi::export]
-pub fn get_ensu_defaults() -> EnsuDefaults {
-    config::defaults().into()
 }
 
 #[uniffi::export]

@@ -22,7 +22,7 @@ enum EnsuRustDefaults {
     static let shared: EnsuRustDefaultsValue = load()
 
     private static func load() -> EnsuRustDefaultsValue {
-        let defaults = getEnsuDefaults()
+        let defaults = configDefaults()
         return EnsuRustDefaultsValue(
             mobileSystemPromptBody: defaults.mobileSystemPromptBody,
             desktopSystemPromptBody: defaults.desktopSystemPromptBody,
@@ -36,7 +36,7 @@ enum EnsuRustDefaults {
     }
 }
 
-private extension LlmModelPreset {
+private extension ConfigModelPreset {
     func toLocal() -> EnsuRustModelPreset {
         EnsuRustModelPreset(
             id: id,

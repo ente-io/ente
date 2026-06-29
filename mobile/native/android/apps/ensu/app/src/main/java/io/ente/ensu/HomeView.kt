@@ -58,7 +58,7 @@ import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.chat.Attachment
 import io.ente.ensu.chat.AttachmentType
-import io.ente.ensu.llm.EnsuDefaults
+import io.ente.ensu.config.ConfigDefaults
 import io.ente.ensu.chat.MaxImageAttachmentsPerMessage
 import io.ente.ensu.AppState
 import io.ente.ensu.AppStore
@@ -81,7 +81,7 @@ fun HomeView(
     logRepository: FileLogRepository,
     advancedSettingsDataStore: AdvancedSettingsDataStore,
     appVersion: String,
-    ensuDefaults: EnsuDefaults
+    configDefaults: ConfigDefaults
 ) {
     val drawerState = androidx.compose.material3.rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -246,7 +246,7 @@ fun HomeView(
             logRepository = logRepository,
             advancedSettingsDataStore = advancedSettingsDataStore,
             appVersion = appVersion,
-            ensuDefaults = ensuDefaults,
+            configDefaults = configDefaults,
             navController = navController,
             drawerState = drawerState,
             currentRoute = currentRoute,

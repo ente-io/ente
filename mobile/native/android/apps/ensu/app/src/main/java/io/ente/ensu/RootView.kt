@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import io.ente.ensu.settings.AdvancedSettingsDataStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.logging.FileLogRepository
-import io.ente.ensu.llm.EnsuDefaults
+import io.ente.ensu.config.ConfigDefaults
 import io.ente.ensu.AppState
 import io.ente.ensu.AppStore
 
@@ -19,7 +19,7 @@ fun RootView(
     logRepository: FileLogRepository,
     advancedSettingsDataStore: AdvancedSettingsDataStore,
     appVersion: String,
-    ensuDefaults: EnsuDefaults
+    configDefaults: ConfigDefaults
 ) {
     Box(
         modifier = Modifier
@@ -32,7 +32,7 @@ fun RootView(
             logRepository = logRepository,
             advancedSettingsDataStore = advancedSettingsDataStore,
             appVersion = appVersion,
-            ensuDefaults = ensuDefaults
+            configDefaults = configDefaults
         )
     }
 }

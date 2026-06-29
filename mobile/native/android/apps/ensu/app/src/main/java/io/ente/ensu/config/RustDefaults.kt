@@ -1,16 +1,16 @@
-package io.ente.ensu.llm
+package io.ente.ensu.config
 
-import io.ente.ensu.llm.EnsuDefaults
-import io.ente.ensu.llm.EnsuModelPreset
-import io.ente.ensu.bindings.LlmModelPreset as NativeEnsuModelPreset
-import io.ente.ensu.bindings.getEnsuDefaults
+import io.ente.ensu.config.ConfigDefaults
+import io.ente.ensu.config.ConfigModelPreset
+import io.ente.ensu.bindings.ConfigModelPreset as NativeConfigModelPreset
+import io.ente.ensu.bindings.configDefaults
 import io.ente.ensu.bindings.uniffiEnsureInitialized
 
 object RustDefaults {
-    fun load(): EnsuDefaults {
+    fun load(): ConfigDefaults {
         uniffiEnsureInitialized()
-        val defaults = getEnsuDefaults()
-        return EnsuDefaults(
+        val defaults = configDefaults()
+        return ConfigDefaults(
             mobileSystemPromptBody = defaults.mobileSystemPromptBody,
             desktopSystemPromptBody = defaults.desktopSystemPromptBody,
             systemPromptDatePlaceholder = defaults.systemPromptDatePlaceholder,
@@ -23,8 +23,8 @@ object RustDefaults {
     }
 }
 
-private fun NativeEnsuModelPreset.toDomain(): EnsuModelPreset =
-    EnsuModelPreset(
+private fun NativeConfigModelPreset.toDomain(): ConfigModelPreset =
+    ConfigModelPreset(
         id = id,
         title = title,
         url = url,

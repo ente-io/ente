@@ -4,7 +4,7 @@ import io.ente.ensu.device.isChatSupported
 import io.ente.ensu.llm.LlmModelTarget
 import io.ente.ensu.llm.RustLlmProvider
 import io.ente.ensu.logging.FileLogRepository
-import io.ente.ensu.llm.EnsuDefaults
+import io.ente.ensu.config.ConfigDefaults
 import io.ente.ensu.logging.LogLevel
 import io.ente.ensu.settings.SessionPreferencesDataStore
 import io.ente.ensu.AppState
@@ -22,7 +22,7 @@ internal class ModelSettingsActions(
     private val sessionPreferences: SessionPreferencesDataStore,
     private val llmProvider: RustLlmProvider,
     private val logRepository: FileLogRepository,
-    private val ensuDefaults: EnsuDefaults
+    private val configDefaults: ConfigDefaults
 ) {
     private var scope: CoroutineScope? = null
     private var modelDownloadJob: Job? = null
@@ -371,11 +371,11 @@ internal class ModelSettingsActions(
 
     fun resolveTarget(settings: ModelSettingsState): LlmModelTarget {
         val useCustom = settings.useCustomModel && settings.modelUrl.isNotBlank()
-        val url = if (useCustom) settings.modelUrl else ensuDefaults.mobileDefaultModel.url
+        val url = if (useCustom) settings.modelUrl else configDefaults.mobileDefaultModel.url
         val mmproj = if (useCustom) {
             settings.mmprojUrl.takeIf { it.isNotBlank() }
         } else {
-            ensuDefaults.mobileDefaultModel.mmprojUrl
+            configDefaults.mobileDefaultModel.mmprojUrl
         }
         val contextLength = settings.contextLength.toIntOrNull()
         val maxTokens = settings.maxTokens.toIntOrNull()?.takeIf { it > 0 }

@@ -11,7 +11,7 @@ import io.ente.ensu.settings.AdvancedSettingsSnapshot
 import io.ente.ensu.device.AndroidDeviceCapabilityProvider
 import io.ente.ensu.settings.SessionPreferencesDataStore
 import io.ente.ensu.chat.RustChatRepository
-import io.ente.ensu.llm.RustDefaults
+import io.ente.ensu.config.RustDefaults
 import io.ente.ensu.llm.RustLlmProvider
 import io.ente.ensu.logging.FileLogRepository
 import io.ente.ensu.storage.CredentialStore
@@ -38,7 +38,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         deviceCapabilityProvider = deviceCapabilityProvider
     )
     private val chatRepository = RustChatRepository(application, credentialStore)
-    val ensuDefaults = runCatching { RustDefaults.load() }
+    val configDefaults = runCatching { RustDefaults.load() }
         .onFailure { error ->
             logRepository.log(
                 LogLevel.Error,
@@ -48,14 +48,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 throwable = error
             )
         }
-        .getOrElse { fallbackEnsuDefaults() }
+        .getOrElse { fallbackConfigDefaults() }
 
     val store = AppStore(
         sessionPreferences = sessionPreferences,
         chatRepository = chatRepository,
         llmProvider = llmProvider,
         deviceCapabilityProvider = deviceCapabilityProvider,
-        ensuDefaults = ensuDefaults,
+        configDefaults = configDefaults,
         logRepository = logRepository
     )
     init {
@@ -107,69 +107,69 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         return File(root, "llm")
     }
 
-    private fun fallbackEnsuDefaults() = io.ente.ensu.llm.EnsuDefaults(
+    private fun fallbackConfigDefaults() = io.ente.ensu.config.ConfigDefaults(
         mobileSystemPromptBody = "You are Ensu, an AI assistant built by Ente. Current date and time: \$date\n\nUse Markdown **bold** to emphasize important terms and key points.\n\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request.",
         desktopSystemPromptBody = "You are Ensu, an AI assistant built by Ente. Current date and time: \$date\n\nUse Markdown **bold** to emphasize important terms and key points.\n\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request.",
         systemPromptDatePlaceholder = "\$date",
         sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title.",
-        mobileDefaultModel = io.ente.ensu.llm.EnsuModelPreset(
+        mobileDefaultModel = io.ente.ensu.config.ConfigModelPreset(
             id = "lfm-vl-1.6b",
             title = "LFM 2.5 VL 1.6B (Q4_0)",
             url = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
             mmprojUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
         ),
         mobileModelPresets = listOf(
-            io.ente.ensu.llm.EnsuModelPreset(
+            io.ente.ensu.config.ConfigModelPreset(
                 id = "lfm-1.2b",
                 title = "LFM 2.5 1.2B Instruct (Q4_0)",
                 url = "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf?download=true",
                 mmprojUrl = null
             ),
-            io.ente.ensu.llm.EnsuModelPreset(
+            io.ente.ensu.config.ConfigModelPreset(
                 id = "qwen-0.8b",
                 title = "Qwen 3.5 0.8B (Q4_K_M)",
                 url = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
                 mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf"
             ),
-            io.ente.ensu.llm.EnsuModelPreset(
+            io.ente.ensu.config.ConfigModelPreset(
                 id = "qwen-2b-q8",
                 title = "Qwen 3.5 2B (Q8_0)",
                 url = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
                 mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
             ),
-            io.ente.ensu.llm.EnsuModelPreset(
+            io.ente.ensu.config.ConfigModelPreset(
                 id = "gemma-4-e2b-q4km",
                 title = "Gemma 4 E2B (Q4_K_M)",
                 url = "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_K_M.gguf?download=true",
                 mmprojUrl = "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/mmproj-F16.gguf"
             )
         ),
-        desktopDefaultModel = io.ente.ensu.llm.EnsuModelPreset(
+        desktopDefaultModel = io.ente.ensu.config.ConfigModelPreset(
             id = "qwen-4b-q4km",
             title = "Qwen 3.5 4B (Q4_K_M)",
             url = "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
             mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf"
         ),
         desktopModelPresets = listOf(
-            io.ente.ensu.llm.EnsuModelPreset(
+            io.ente.ensu.config.ConfigModelPreset(
                 id = "lfm-vl-1.6b",
                 title = "LFM 2.5 VL 1.6B (Q4_0)",
                 url = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
                 mmprojUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
             ),
-            io.ente.ensu.llm.EnsuModelPreset(
+            io.ente.ensu.config.ConfigModelPreset(
                 id = "lfm-1.2b",
                 title = "LFM 2.5 1.2B Instruct (Q4_0)",
                 url = "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf?download=true",
                 mmprojUrl = null
             ),
-            io.ente.ensu.llm.EnsuModelPreset(
+            io.ente.ensu.config.ConfigModelPreset(
                 id = "qwen-0.8b",
                 title = "Qwen 3.5 0.8B (Q4_K_M)",
                 url = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
                 mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf"
             ),
-            io.ente.ensu.llm.EnsuModelPreset(
+            io.ente.ensu.config.ConfigModelPreset(
                 id = "qwen-2b-q8",
                 title = "Qwen 3.5 2B (Q8_0)",
                 url = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",

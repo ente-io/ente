@@ -64,7 +64,7 @@ fn main() {
             commands::llm::llm_generate_chat_stream,
             commands::llm::llm_cancel,
             commands::system::system_info,
-            commands::llm::get_ensu_defaults,
+            commands::llm::config_defaults,
             commands::llm::llm_download_model_files,
             commands::llm::llm_cancel_model_download,
             commands::fs::fs_file_size,

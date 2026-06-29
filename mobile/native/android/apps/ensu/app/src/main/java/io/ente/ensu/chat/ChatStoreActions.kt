@@ -12,7 +12,7 @@ import io.ente.ensu.llm.RustLlmProvider
 import io.ente.ensu.chat.Attachment
 import io.ente.ensu.chat.ChatMessage
 import io.ente.ensu.chat.ChatSession
-import io.ente.ensu.llm.EnsuDefaults
+import io.ente.ensu.config.ConfigDefaults
 import io.ente.ensu.logging.LogLevel
 import io.ente.ensu.chat.MessageAuthor
 import io.ente.ensu.chat.sessionTitleFromText
@@ -45,7 +45,7 @@ internal class ChatStoreActions(
     private val messageStore: MutableMap<String, MutableList<ChatMessage>>,
     private val attachmentActions: AttachmentStoreActions,
     private val modelSettingsActions: ModelSettingsActions,
-    private val ensuDefaults: EnsuDefaults
+    private val configDefaults: ConfigDefaults
 ) {
     private val branchSelections = mutableMapOf<String, MutableMap<String, String>>()
     private val sessionSummaries = mutableMapOf<String, String>()
@@ -59,7 +59,7 @@ internal class ChatStoreActions(
     private var pendingOverflow: PendingOverflow? = null
     private var overflowBypassMessageId: String? = null
 
-    private val sessionSummarySystemPrompt = ensuDefaults.sessionSummarySystemPrompt
+    private val sessionSummarySystemPrompt = configDefaults.sessionSummarySystemPrompt
     private val sessionSummaryMaxWords = 7
 
     fun setScope(scope: CoroutineScope) {
@@ -1230,8 +1230,8 @@ internal class ChatStoreActions(
         val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
             .format(Date(nowMillis))
         val promptBody = state.value.developerSettings.systemPrompt.trim()
-            .ifEmpty { ensuDefaults.mobileSystemPromptBody }
-        return promptBody.replace(ensuDefaults.systemPromptDatePlaceholder, dateAndTime)
+            .ifEmpty { configDefaults.mobileSystemPromptBody }
+        return promptBody.replace(configDefaults.systemPromptDatePlaceholder, dateAndTime)
     }
 
     companion object {

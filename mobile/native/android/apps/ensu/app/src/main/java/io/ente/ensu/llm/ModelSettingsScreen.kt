@@ -35,13 +35,13 @@ import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
-import io.ente.ensu.llm.EnsuDefaults
+import io.ente.ensu.config.ConfigDefaults
 import io.ente.ensu.llm.ModelSettingsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelSettingsScreen(
-    defaults: EnsuDefaults,
+    defaults: ConfigDefaults,
     state: ModelSettingsState,
     onSave: (ModelSettingsState) -> Unit,
     onReset: () -> Unit

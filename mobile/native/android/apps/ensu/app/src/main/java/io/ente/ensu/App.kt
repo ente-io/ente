@@ -13,6 +13,6 @@ fun App(appViewModel: AppViewModel) {
         logRepository = appViewModel.logRepository,
         advancedSettingsDataStore = appViewModel.advancedSettingsDataStore,
         appVersion = appViewModel.appVersion,
-        ensuDefaults = appViewModel.ensuDefaults
+        configDefaults = appViewModel.configDefaults
     )
 }

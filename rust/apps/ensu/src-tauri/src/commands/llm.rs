@@ -269,7 +269,7 @@ impl llm::EventSink for EventSink {
 }
 
 #[tauri::command]
-pub fn get_ensu_defaults() -> Defaults {
+pub fn config_defaults() -> Defaults {
     config::defaults().into()
 }
 

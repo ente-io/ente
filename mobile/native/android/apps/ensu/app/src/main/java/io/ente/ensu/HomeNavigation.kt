@@ -30,7 +30,7 @@ import io.ente.ensu.settings.AdvancedSettingsDataStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.chat.Attachment
 import io.ente.ensu.chat.AttachmentType
-import io.ente.ensu.llm.EnsuDefaults
+import io.ente.ensu.config.ConfigDefaults
 import io.ente.ensu.AppState
 import io.ente.ensu.AppStore
 import io.ente.ensu.llm.ModelSettingsScreen
@@ -45,7 +45,7 @@ internal fun HomeNavigation(
     logRepository: io.ente.ensu.logging.FileLogRepository,
     advancedSettingsDataStore: AdvancedSettingsDataStore,
     appVersion: String,
-    ensuDefaults: EnsuDefaults,
+    configDefaults: ConfigDefaults,
     navController: NavHostController,
     drawerState: DrawerState,
     currentRoute: String,
@@ -176,7 +176,7 @@ internal fun HomeNavigation(
                     popExitTransition = { backExit() }
                 ) {
                     ModelSettingsScreen(
-                        defaults = ensuDefaults,
+                        defaults = configDefaults,
                         state = appState.modelSettings,
                         onSave = { modelSettings ->
                             store.updateModelSettings(modelSettings)
@@ -196,8 +196,8 @@ internal fun HomeNavigation(
                     popExitTransition = { backExit() }
                 ) {
                     SystemPromptSettingsScreen(
-                        defaultPromptBody = ensuDefaults.mobileSystemPromptBody,
-                        datePlaceholder = ensuDefaults.systemPromptDatePlaceholder,
+                        defaultPromptBody = configDefaults.mobileSystemPromptBody,
+                        datePlaceholder = configDefaults.systemPromptDatePlaceholder,
                         systemPrompt = appState.developerSettings.systemPrompt,
                         onSave = { value ->
                             val updated = appState.developerSettings.copy(systemPrompt = value)

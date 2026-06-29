@@ -10,7 +10,7 @@ import io.ente.ensu.llm.RustLlmProvider
 import io.ente.ensu.logging.FileLogRepository
 import io.ente.ensu.chat.Attachment
 import io.ente.ensu.chat.ChatMessage
-import io.ente.ensu.llm.EnsuDefaults
+import io.ente.ensu.config.ConfigDefaults
 import io.ente.ensu.logging.LogLevel
 import io.ente.ensu.settings.SessionPreferencesDataStore
 import io.ente.ensu.AppState
@@ -27,7 +27,7 @@ class AppStore(
     private val chatRepository: RustChatRepository,
     private val llmProvider: RustLlmProvider,
     private val deviceCapabilityProvider: AndroidDeviceCapabilityProvider,
-    val ensuDefaults: EnsuDefaults,
+    val configDefaults: ConfigDefaults,
     private val logRepository: FileLogRepository,
     private val clock: () -> Long = { System.currentTimeMillis() }
 ) {
@@ -37,7 +37,7 @@ class AppStore(
     private val messageStore = mutableMapOf<String, MutableList<ChatMessage>>()
     private val attachmentActions = AttachmentStoreActions(_state, messageStore)
     private val modelSettingsActions =
-        ModelSettingsActions(_state, sessionPreferences, llmProvider, logRepository, ensuDefaults)
+        ModelSettingsActions(_state, sessionPreferences, llmProvider, logRepository, configDefaults)
     private val chatActions = ChatStoreActions(
         state = _state,
         sessionPreferences = sessionPreferences,
@@ -48,7 +48,7 @@ class AppStore(
         messageStore = messageStore,
         attachmentActions = attachmentActions,
         modelSettingsActions = modelSettingsActions,
-        ensuDefaults = ensuDefaults
+        configDefaults = configDefaults
     )
     fun bootstrap(scope: CoroutineScope) {
         chatActions.setScope(scope)
