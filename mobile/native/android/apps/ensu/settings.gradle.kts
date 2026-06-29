@@ -17,4 +17,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "ensu"
 include(":app", ":rust")
-
