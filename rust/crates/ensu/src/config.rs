@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct ModelPreset {
     pub id: String,
     pub title: String,
@@ -8,7 +6,7 @@ pub struct ModelPreset {
     pub mmproj_url: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Defaults {
     pub mobile_system_prompt_body: String,
     pub desktop_system_prompt_body: String,
