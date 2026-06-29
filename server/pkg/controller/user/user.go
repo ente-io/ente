@@ -21,6 +21,7 @@ import (
 	"github.com/ente/museum/pkg/controller"
 	"github.com/ente/museum/pkg/controller/family"
 	"github.com/ente/museum/pkg/repo"
+	authenticatorRepo "github.com/ente/museum/pkg/repo/authenticator"
 	contactrepo "github.com/ente/museum/pkg/repo/contact"
 	"github.com/ente/museum/pkg/repo/datacleanup"
 	"github.com/ente/museum/pkg/repo/passkey"
@@ -43,6 +44,7 @@ type UserController struct {
 	TwoFactorRepo           *repo.TwoFactorRepository
 	PasskeyRepo             *passkey.Repository
 	StorageBonusRepo        *storageBonusRepo.Repository
+	AuthenticatorRepo       *authenticatorRepo.Repository
 	FileRepo                *repo.FileRepository
 	CollectionRepo          *repo.CollectionRepository
 	DataCleanupRepo         *datacleanup.Repository
@@ -114,6 +116,7 @@ func NewUserController(
 	twoFactorRepo *repo.TwoFactorRepository,
 	twoFactorRecoveryRepo *two_factor_recovery.Repository,
 	passkeyRepo *passkey.Repository,
+	authenticatorRepo *authenticatorRepo.Repository,
 	storageBonusRepo *storageBonusRepo.Repository,
 	fileRepo *repo.FileRepository,
 	collectionController *collections.CollectionController,
@@ -144,6 +147,7 @@ func NewUserController(
 		UserAuthRepo:            userAuthRepo,
 		StorageBonusRepo:        storageBonusRepo,
 		TwoFactorRepo:           twoFactorRepo,
+		AuthenticatorRepo:       authenticatorRepo,
 		PasskeyRepo:             passkeyRepo,
 		FileRepo:                fileRepo,
 		CollectionCtrl:          collectionController,

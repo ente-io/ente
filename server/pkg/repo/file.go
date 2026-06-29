@@ -653,6 +653,40 @@ func (repo *FileRepository) GetFileCountForUser(userID int64, app ente.App) (int
 	return fileCount, nil
 }
 
+// GetDeletableFileCount returns the owned file count that will be removed on account deletion.
+// It includes active files and files currently in trash, since account deletion empties both.
+func (repo *FileRepository) GetDeletableFileCount(ctx context.Context, userID int64, app ente.App) (int64, error) {
+	row := repo.DB.QueryRowContext(ctx, `
+		SELECT COUNT(DISTINCT file_id)
+		FROM (
+			SELECT files.file_id
+			FROM collection_files
+			JOIN collections c ON c.owner_id = $1
+				AND c.collection_id = collection_files.collection_id
+			JOIN files ON files.owner_id = $1
+				AND files.file_id = collection_files.file_id
+			WHERE c.app = $2
+				AND collection_files.is_deleted = false
+			UNION ALL
+			SELECT t.file_id
+			FROM trash t
+			JOIN collections c ON c.collection_id = t.collection_id
+			JOIN files f ON f.file_id = t.file_id
+				AND f.owner_id = $1
+			WHERE t.user_id = $1
+				AND c.app = $2
+				AND t.is_deleted = false
+				AND t.is_restored = false
+		) files_for_delete;`, userID, app)
+
+	var fileCount int64
+	err := row.Scan(&fileCount)
+	if err != nil {
+		return -1, stacktrace.Propagate(err, "")
+	}
+	return fileCount, nil
+}
+
 func (repo *FileRepository) GetFileAttributesFromObjectKey(objectKey string) (ente.File, error) {
 	s3ObjectKeys, err := repo.ObjectRepo.GetAllFileObjectsByObjectKey(objectKey)
 	if err != nil {
