@@ -1,7 +1,6 @@
 import "package:dio/dio.dart";
 import "package:photos/core/errors.dart";
 import "package:photos/core/network/endpoint_config.dart";
-import "package:photos/gateways/users/models/delete_account.dart";
 import "package:photos/gateways/users/models/key_attributes.dart";
 import "package:photos/gateways/users/models/sessions.dart";
 import "package:photos/gateways/users/models/set_recovery_key_request.dart";
@@ -138,38 +137,6 @@ class UsersGateway {
   /// Endpoint: POST /users/logout
   Future<void> logout() async {
     await _enteDio.post("/users/logout");
-  }
-
-  // ============================================================
-  // Account Deletion
-  // ============================================================
-
-  /// Get the challenge for account deletion.
-  ///
-  /// Endpoint: GET /users/delete-challenge
-  Future<DeleteChallengeResponse> getDeleteChallenge() async {
-    final response = await _enteDio.get("/users/delete-challenge");
-    return DeleteChallengeResponse(
-      encryptedChallenge: response.data["encryptedChallenge"],
-    );
-  }
-
-  /// Delete the user's account.
-  ///
-  /// Endpoint: DELETE /users/delete
-  Future<void> deleteAccount({
-    required String challengeResponse,
-    required String reasonCategory,
-    required String feedback,
-  }) async {
-    await _enteDio.delete(
-      "/users/delete",
-      data: {
-        "challenge": challengeResponse,
-        "reasonCategory": reasonCategory,
-        "feedback": feedback,
-      },
-    );
   }
 
   // ============================================================
