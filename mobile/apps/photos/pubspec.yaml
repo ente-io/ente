@@ -55,6 +55,8 @@ dependencies:
   dropdown_button2: 2.3.9
   email_validator: 3.0.0
   encrypt: 5.0.3
+  ente_account_deletion:
+    path: ../../packages/account_deletion
   ente_cast:
     path: plugins/ente_cast
   ente_components:

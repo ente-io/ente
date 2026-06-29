@@ -18,6 +18,8 @@ dependencies:
   dots_indicator: 4.0.1
   dotted_border: 3.1.0
   email_validator: 3.0.0
+  ente_account_deletion:
+    path: ../../packages/account_deletion
   ente_accounts:
     path: ../../packages/accounts
   ente_base:
@@ -36,7 +38,7 @@ dependencies:
     path: ../../packages/events
   ente_icons:
     path: ../../packages/ente_icons
-  ente_legacy: 
+  ente_legacy:
     path: ../../packages/legacy
   ente_lock_screen:
     path: ../../packages/lock_screen
