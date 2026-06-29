@@ -630,6 +630,7 @@
   "authToChangeYourEmail": "Please authenticate to change your email",
   "changePassword": "Change password",
   "authToChangeYourPassword": "Please authenticate to change your password",
+  "authToInitiateAccountDeletion": "Unlock to delete your account",
   "emailVerificationToggle": "Email verification",
   "authToChangeEmailVerificationSetting": "Please authenticate to change email verification",
   "exportYourData": "Export your data",

@@ -14,7 +14,6 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
-import 'package:ente_strings/ente_strings.dart';
 import 'package:flutter/material.dart';
 
 class AccountSectionWidget extends StatelessWidget {
@@ -127,8 +126,7 @@ class AccountSectionWidget extends StatelessWidget {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
                 context,
-                context.strings.unlockToDeleteAccount,
-                title: context.strings.authenticateToContinue,
+                l10n.authToInitiateAccountDeletion,
               );
           if (!context.mounted || !hasAuthenticated) {
             return;

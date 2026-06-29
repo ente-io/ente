@@ -119,11 +119,11 @@ class AccountSettingsPage extends StatelessWidget {
   }
 
   Future<void> _onDeleteAccountTapped(BuildContext context) async {
+    final l10n = context.l10n;
     final hasAuthenticated = await LocalAuthenticationService.instance
         .requestLocalAuthentication(
           context,
-          context.strings.unlockToDeleteAccount,
-          title: context.strings.authenticateToContinue,
+          l10n.authToInitiateAccountDeletion,
         );
     if (!context.mounted || !hasAuthenticated) {
       return;
