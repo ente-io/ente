@@ -149,7 +149,7 @@ jobs:
 
             - name: Build Ensu
               working-directory: mobile/native/android/apps/ensu
-              run: ./gradlew :app-ui:assembleDebug
+              run: ./gradlew :app:assembleDebug
 
     ensu-ios:
         # For ensu-ios-build.yml.

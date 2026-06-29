@@ -92,7 +92,7 @@ fn generate_native_android() -> Result<(), DynError> {
     let repo_root = rust_root
         .parent()
         .ok_or("failed to resolve repo root from rust/apps/codegen")?;
-    let rust_out_dir = repo_root.join("mobile/native/android/packages/rust/src/main/kotlin");
+    let rust_out_dir = repo_root.join("mobile/native/android/apps/ensu/rust/src/main/kotlin");
 
     fs::create_dir_all(&rust_out_dir)?;
 
@@ -186,12 +186,11 @@ fn format_frb_bindings(target: FrbTarget) -> Result<(), DynError> {
 }
 
 fn rust_root() -> Result<PathBuf, DynError> {
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    manifest_dir
-        .parent()
-        .and_then(Path::parent)
-        .map(Path::to_path_buf)
-        .ok_or_else(|| "failed to resolve rust workspace root".into())
+    let root = env::current_dir()?;
+    if !root.join("Cargo.toml").is_file() {
+        return Err("run cargo codegen from the Rust workspace root".into());
+    }
+    Ok(root)
 }
 
 fn target_dir() -> Result<PathBuf, DynError> {

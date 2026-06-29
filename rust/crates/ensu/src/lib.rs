@@ -1,6 +1,6 @@
+pub mod config;
 pub mod db;
-
-pub mod inference;
+pub mod llm;
 
 #[cfg(feature = "transcription")]
 pub mod transcription;

@@ -15,8 +15,8 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .manage(commands::inference::LlmState::default())
-        .manage(commands::inference::LlmModelDownloadState::default())
+        .manage(commands::llm::State::default())
+        .manage(commands::llm::ModelDownloadState::default())
         .manage(commands::chat_db::ChatDbState::default())
         .setup(|app| {
             logging::init_logging(app.handle());
@@ -55,18 +55,18 @@ fn main() {
             commands::chat_db::chat_db_compress_attachment_image_file,
             commands::chat_db::chat_db_reset,
             commands::chat_db::chat_db_migrate_legacy,
-            commands::inference::llm_init_backend,
-            commands::inference::llm_load_model,
-            commands::inference::llm_create_context,
-            commands::inference::llm_free_context,
-            commands::inference::llm_free_model,
-            commands::inference::llm_prewarm_multimodal_context,
-            commands::inference::llm_generate_chat_stream,
-            commands::inference::llm_cancel,
+            commands::llm::llm_init_backend,
+            commands::llm::llm_load_model,
+            commands::llm::llm_create_context,
+            commands::llm::llm_free_context,
+            commands::llm::llm_free_model,
+            commands::llm::llm_prewarm_multimodal_context,
+            commands::llm::llm_generate_chat_stream,
+            commands::llm::llm_cancel,
             commands::system::system_info,
-            commands::inference::get_ensu_defaults,
-            commands::inference::llm_download_model_files,
-            commands::inference::llm_cancel_model_download,
+            commands::config::config_defaults,
+            commands::llm::llm_download_model_files,
+            commands::llm::llm_cancel_model_download,
             commands::fs::fs_file_size,
             commands::fs::fs_read_head,
         ])
