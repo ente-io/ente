@@ -165,10 +165,6 @@
   "@androidBiometricSuccess": {
     "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
   },
-  "androidCancelButton": "Têk bibe",
-  "@androidCancelButton": {
-    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
-  },
   "create": "Biafirîne",
   "searchHint4": "Cih",
   "faces": "Rû",
