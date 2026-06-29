@@ -1,0 +1,1 @@
+- Fixed Auth Linux pacman package dependency metadata so libsodium is installed for crypto initialization.

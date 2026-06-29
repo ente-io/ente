@@ -1,7 +1,6 @@
 import { LazyNotification } from "@/app/lazy/global-ui";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
 import { downloadManager } from "@/public-album/download/services/download-manager";
-import type { AddSaveGroup } from "@/shared/state/save-groups";
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
@@ -27,12 +26,13 @@ import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { useBaseContext } from "ente-base/context";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
+import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
+import { createPSRegisterElementIconHTML } from "ente-gallery/components/viewer/icons";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createPSRegisterElementIconHTML } from "../lib/icons";
 import { FileViewer } from "./FileViewer";
 
 export interface PublicAlbumSingleFileViewerProps {

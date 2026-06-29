@@ -1,4 +1,4 @@
-import { useSaveGroups } from "@/shared/state/save-groups";
+import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import dynamic from "next/dynamic";
 import { type DownloadStatusNotificationsProps } from "./DownloadStatusNotifications";
 

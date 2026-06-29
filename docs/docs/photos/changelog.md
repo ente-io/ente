@@ -7,6 +7,15 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v1.3.57 (mobile) - Jun 2026
+
+- Redesigned the Search tab with improved spacing, previews, empty states, and keyboard handling.
+- Improved Albums with Shared/Received filters, refreshed empty states, and better add-to-album flows.
+- Fixed a bug in bulk file downloads and improved backup album selection.
+- Added skipped backup file reasons, such as “Deleted from Ente”.
+- Preserved draft comments when closing and reopening the photo comment panel.
+- Polished app lock, login/signup, gallery, trash, and warning screens.
+
 ## v1.3.56 (mobile) - Jun 2026
 
 - Update to media_kit v1.2.2 to fix app crashing on using media_kit video player.

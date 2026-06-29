@@ -1,8 +1,3 @@
-import {
-    isSaveComplete,
-    isSaveCompleteWithErrors,
-    type SaveGroup,
-} from "@/shared/state/save-groups";
 import { Notification } from "@/shared/ui/feedback/Notification";
 import {
     Download01Icon,
@@ -21,6 +16,11 @@ import {
     Typography,
 } from "@mui/material";
 import { useBaseContext } from "ente-base/context";
+import {
+    isSaveComplete,
+    isSaveCompleteWithErrors,
+    type SaveGroup,
+} from "ente-gallery/components/utils/save-groups";
 import { t } from "i18next";
 import { useState } from "react";
 

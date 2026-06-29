@@ -1,10 +1,10 @@
 import { lowercaseExtension } from "ente-base/file-name";
 import log from "ente-base/log";
+import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
 import type { EnteFile } from "ente-media/file";
 import { KnownFileTypeInfos } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
-import { detectFileTypeInfo } from "../utils/detect-type";
 import { convertToMP4 } from "./ffmpeg";
 
 /**
