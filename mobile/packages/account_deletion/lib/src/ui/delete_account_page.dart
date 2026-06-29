@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:ente_account_deletion/src/account_deletion_settings.dart';
 import 'package:ente_account_deletion/src/models/account_deletion_summary.dart';
 import 'package:ente_account_deletion/src/ui/delete_account_bottom_actions.dart';
@@ -7,7 +8,6 @@ import 'package:ente_account_deletion/src/ui/delete_account_confirmation_step.da
 import 'package:ente_account_deletion/src/ui/delete_account_reason_step.dart';
 import 'package:ente_components/ente_components.dart';
 import 'package:ente_strings/ente_strings.dart';
-import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -26,6 +26,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   bool _confirmationAccepted = false;
   bool _isDeleting = false;
   AccountDeletionSummary? _summary;
+  bool _summaryUnsupported = false;
   bool _summaryLoading = false;
 
   AccountDeletionSettings get _settings => AccountDeletionSettings.instance;
@@ -41,7 +42,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     final colors = context.componentColors;
     final isConfirmationStep = _step == _DeleteAccountStep.confirmation;
     final isActionEnabled = isConfirmationStep
-        ? _summary != null && _confirmationAccepted && !_isDeleting
+        ? (_summary != null || _summaryUnsupported) &&
+              _confirmationAccepted &&
+              !_isDeleting
         : _selectedReason != null && !_isDeleting;
 
     return Scaffold(
@@ -72,6 +75,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 child: isConfirmationStep
                     ? DeleteAccountConfirmationStep(
                         summary: _summary,
+                        summaryUnsupported: _summaryUnsupported,
                         isLoading: _summaryLoading,
                         confirmed: _confirmationAccepted,
                         onConfirmationChanged: (value) {
@@ -120,15 +124,21 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       }
       setState(() {
         _summary = summary;
+        _summaryUnsupported = false;
         _summaryLoading = false;
       });
     } catch (e, s) {
-      _logger.warning('Failed to load account deletion summary', e, s);
+      final summaryUnsupported =
+          e is DioException && e.response?.statusCode == 404;
+      if (!summaryUnsupported) {
+        _logger.warning('Failed to load account deletion summary', e, s);
+      }
       if (!mounted) {
         return;
       }
       setState(() {
         _summary = null;
+        _summaryUnsupported = summaryUnsupported;
         _summaryLoading = false;
       });
     }
@@ -151,7 +161,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       if (!mounted) {
         return;
       }
-      showToast(context, 'Your account is queued for deletion');
       Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e, s) {
       _logger.severe('Failed to delete account', e, s);

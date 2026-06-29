@@ -8,6 +8,7 @@ class DeleteAccountConfirmationStep extends StatelessWidget {
   const DeleteAccountConfirmationStep({
     super.key,
     required this.summary,
+    required this.summaryUnsupported,
     required this.isLoading,
     required this.confirmed,
     required this.onConfirmationChanged,
@@ -15,6 +16,7 @@ class DeleteAccountConfirmationStep extends StatelessWidget {
   });
 
   final AccountDeletionSummary? summary;
+  final bool summaryUnsupported;
   final bool isLoading;
   final bool confirmed;
   final ValueChanged<bool> onConfirmationChanged;
@@ -65,6 +67,9 @@ class DeleteAccountConfirmationStep extends StatelessWidget {
         child: Center(child: CircularProgressIndicator()),
       );
     }
+    if (summaryUnsupported) {
+      return const _SummaryRows();
+    }
     if (summary == null) {
       return MenuComponent(
         title: context.strings.somethingWentWrong,
@@ -88,34 +93,41 @@ class DeleteAccountConfirmationStep extends StatelessWidget {
 }
 
 class _SummaryRows extends StatelessWidget {
-  const _SummaryRows({required this.summary});
+  const _SummaryRows({this.summary});
 
-  final AccountDeletionSummary summary;
+  final AccountDeletionSummary? summary;
 
   @override
   Widget build(BuildContext context) {
+    final summary = this.summary;
     return Column(
       children: [
         _row(
           assetName: 'photos.png',
-          title: context.strings.photosAndVideosCount(
-            summary.photosAndVideosCount,
-          ),
-          subtitle: context.strings.entePhotos,
+          title: summary == null
+              ? context.strings.entePhotos
+              : context.strings.photosAndVideosCount(
+                  summary.photosAndVideosCount,
+                ),
+          subtitle: summary == null ? null : context.strings.entePhotos,
         ),
         const SizedBox(height: Spacing.sm),
         _row(
           assetName: 'auth.png',
-          title: context.strings.authenticatorCodesCount(
-            summary.authenticatorCodesCount,
-          ),
-          subtitle: context.strings.enteAuth,
+          title: summary == null
+              ? context.strings.enteAuth
+              : context.strings.authenticatorCodesCount(
+                  summary.authenticatorCodesCount,
+                ),
+          subtitle: summary == null ? null : context.strings.enteAuth,
         ),
         const SizedBox(height: Spacing.sm),
         _row(
           assetName: 'locker.png',
-          title: context.strings.lockerRecordsCount(summary.lockerRecordsCount),
-          subtitle: context.strings.enteLocker,
+          title: summary == null
+              ? context.strings.enteLocker
+              : context.strings.lockerRecordsCount(summary.lockerRecordsCount),
+          subtitle: summary == null ? null : context.strings.enteLocker,
         ),
       ],
     );
@@ -124,7 +136,7 @@ class _SummaryRows extends StatelessWidget {
   Widget _row({
     required String assetName,
     required String title,
-    required String subtitle,
+    String? subtitle,
   }) {
     return MenuComponent(
       title: title,
