@@ -138,6 +138,9 @@ jobs:
               # https://github.com/electron-userland/electron-builder/issues/4181
               run: sudo apt-get update && sudo apt-get install libarchive-tools
 
+            - name: Build
+              run: npm run build:ci
+
             - name: Mint nightly token
               id: nightly_token
               uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -147,15 +150,13 @@ jobs:
                   repositories: nightly,photos-desktop
                   permission-contents: write
 
-            - name: Build and publish
+            - name: Publish
               shell: bash
               run: |
                   if [ "${RUNNER_OS}" = "macOS" ]; then
                       export CSC_LINK="${MAC_OS_CERTIFICATE}"
                       export CSC_KEY_PASSWORD="${MAC_OS_CERTIFICATE_PASSWORD}"
                   fi
-
-                  npm run build:ci
 
                   platform=${{ startsWith(matrix.os, 'macos') && 'mac' || startsWith(matrix.os, 'windows') && 'windows' || 'linux' }}
 
