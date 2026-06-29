@@ -8,27 +8,26 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import io.ente.ensu.domain.preferences.SessionPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 
-class SessionPreferencesDataStore(context: Context) : SessionPreferences {
+class SessionPreferencesDataStore(context: Context) {
     private val dataStore: DataStore<Preferences> = getDataStore(context.applicationContext)
 
-    override val selectedSessionId: Flow<String?> = dataStore.data.map { preferences ->
+    val selectedSessionId: Flow<String?> = dataStore.data.map { preferences ->
         preferences[Keys.SELECTED_SESSION_ID]
     }
 
-    override val sessionSummaries: Flow<Map<String, String>> = dataStore.data.map { preferences ->
+    val sessionSummaries: Flow<Map<String, String>> = dataStore.data.map { preferences ->
         decodeSessionSummaries(preferences[Keys.SESSION_SUMMARIES])
     }
 
-    override val modelDownloadRequested: Flow<Boolean> = dataStore.data.map { preferences ->
+    val modelDownloadRequested: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[Keys.MODEL_DOWNLOAD_REQUESTED] ?: false
     }
 
-    override suspend fun setSelectedSessionId(sessionId: String?) {
+    suspend fun setSelectedSessionId(sessionId: String?) {
         dataStore.edit { preferences ->
             if (sessionId == null) {
                 preferences.remove(Keys.SELECTED_SESSION_ID)
@@ -38,7 +37,7 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
         }
     }
 
-    override suspend fun setSessionSummary(sessionId: String, summary: String?) {
+    suspend fun setSessionSummary(sessionId: String, summary: String?) {
         dataStore.edit { preferences ->
             val summaries = decodeSessionSummaries(preferences[Keys.SESSION_SUMMARIES]).toMutableMap()
             if (summary.isNullOrBlank()) {
@@ -50,7 +49,7 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
         }
     }
 
-    override suspend fun setModelDownloadRequested(requested: Boolean) {
+    suspend fun setModelDownloadRequested(requested: Boolean) {
         dataStore.edit { preferences ->
             preferences[Keys.MODEL_DOWNLOAD_REQUESTED] = requested
         }

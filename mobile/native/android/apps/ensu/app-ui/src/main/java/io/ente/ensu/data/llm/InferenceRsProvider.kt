@@ -5,13 +5,12 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
-import io.ente.ensu.domain.device.DeviceCapabilityProvider
+import io.ente.ensu.data.AndroidDeviceCapabilityProvider
 import io.ente.ensu.domain.device.requireChatSupported
 import io.ente.ensu.domain.llm.DownloadProgress
 import io.ente.ensu.domain.llm.GenerationSummary
 import io.ente.ensu.domain.llm.LlmMessage
 import io.ente.ensu.domain.llm.LlmModelTarget
-import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.util.formatBytes
 import io.ente.ensu.bindings.LlmContextHandle
 import io.ente.ensu.bindings.LlmContextParams
@@ -55,10 +54,10 @@ import kotlin.math.max
 class InferenceRsProvider(
     context: Context,
     private val modelDir: File,
-    private val deviceCapabilityProvider: DeviceCapabilityProvider,
+    private val deviceCapabilityProvider: AndroidDeviceCapabilityProvider,
     private val legacyModelDir: File? = null,
     private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
-) : LlmProvider {
+) {
     private data class LoadedModelKey(
         val id: String,
         val requestedContextLength: Int?
@@ -106,7 +105,7 @@ class InferenceRsProvider(
         modelDir.mkdirs()
     }
 
-    override suspend fun ensureModelReady(
+    suspend fun ensureModelReady(
         target: LlmModelTarget,
         onProgress: (DownloadProgress) -> Unit
     ) {
@@ -117,7 +116,7 @@ class InferenceRsProvider(
         }
     }
 
-    override suspend fun generateChat(
+    suspend fun generateChat(
         target: LlmModelTarget,
         messages: List<LlmMessage>,
         imageFiles: List<File>,
@@ -161,7 +160,7 @@ class InferenceRsProvider(
         GenerationSummary(summary.jobId, summary.generatedTokens ?: 0, summary.totalTimeMs)
     }
 
-    override suspend fun prewarmImageInference(target: LlmModelTarget) {
+    suspend fun prewarmImageInference(target: LlmModelTarget) {
         withContext(ioDispatcher) {
             runCatching {
                 modelLoadMutex.withLock {
@@ -181,14 +180,14 @@ class InferenceRsProvider(
         }
     }
 
-    override val isManualDownloadActive: Boolean get() = manualDownloadActive
+    val isManualDownloadActive: Boolean get() = manualDownloadActive
 
-    override fun isModelDownloaded(target: LlmModelTarget): Boolean {
+    fun isModelDownloaded(target: LlmModelTarget): Boolean {
         migrateLegacyDownloads(target)
         return isDownloadComplete(target)
     }
 
-    override suspend fun estimateModelDownloadSize(target: LlmModelTarget): Long? = withContext(ioDispatcher) {
+    suspend fun estimateModelDownloadSize(target: LlmModelTarget): Long? = withContext(ioDispatcher) {
         val modelFile = ModelDownloadSupport.modelPathFor(modelDir, target)
         val mmprojFile = ModelDownloadSupport.mmprojPathFor(modelDir, target)
         val mmprojUrl = target.mmprojUrl
@@ -210,7 +209,7 @@ class InferenceRsProvider(
         if (sizes.isEmpty()) null else sizes.sum()
     }
 
-    override suspend fun currentDownloadProgress(target: LlmModelTarget): DownloadProgress? =
+    suspend fun currentDownloadProgress(target: LlmModelTarget): DownloadProgress? =
         withContext(ioDispatcher) {
             migrateLegacyDownloads(target)
             val targets = ModelDownloadSupport.expectedTargets(modelDir, target)
@@ -300,7 +299,7 @@ class InferenceRsProvider(
             DownloadProgress(percent = percent, status = status)
         }
 
-    override fun loadedContextLength(target: LlmModelTarget): Int? {
+    fun loadedContextLength(target: LlmModelTarget): Int? {
         val modelKey = LoadedModelKey(target.id, target.contextLength)
         return if (currentModelKey == modelKey && contextHandle != null && modelHandle != null) {
             currentContextLength
@@ -309,7 +308,7 @@ class InferenceRsProvider(
         }
     }
 
-    override fun stopGeneration() {
+    fun stopGeneration() {
         val jobId = currentJobId
         if (jobId != null) {
             llmCancel(jobId)
@@ -318,7 +317,7 @@ class InferenceRsProvider(
         }
     }
 
-    override fun resetContext() {
+    fun resetContext() {
         val model = modelHandle ?: return
         val contextParams = LlmContextParams(
             contextSize = currentContextLength,
@@ -329,7 +328,7 @@ class InferenceRsProvider(
         contextHandle = llmCreateContext(model, contextParams)
     }
 
-    override fun cancelDownload() {
+    fun cancelDownload() {
         manualDownloadCancelled = true
         val ids = loadAllDownloadRecords().map { it.downloadId }.distinct()
         if (ids.isNotEmpty() && downloadManager != null) {

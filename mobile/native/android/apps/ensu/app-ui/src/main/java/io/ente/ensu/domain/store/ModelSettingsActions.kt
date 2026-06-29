@@ -2,11 +2,11 @@ package io.ente.ensu.domain.store
 
 import io.ente.ensu.domain.device.isChatSupported
 import io.ente.ensu.domain.llm.LlmModelTarget
-import io.ente.ensu.domain.llm.LlmProvider
-import io.ente.ensu.domain.logging.LogRepository
+import io.ente.ensu.data.llm.InferenceRsProvider
+import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogLevel
-import io.ente.ensu.domain.preferences.SessionPreferences
+import io.ente.ensu.data.SessionPreferencesDataStore
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.state.ModelSettingsState
 import kotlinx.coroutines.CoroutineScope
@@ -19,9 +19,9 @@ import kotlinx.coroutines.isActive
 
 internal class ModelSettingsActions(
     private val state: MutableStateFlow<AppState>,
-    private val sessionPreferences: SessionPreferences,
-    private val llmProvider: LlmProvider,
-    private val logRepository: LogRepository,
+    private val sessionPreferences: SessionPreferencesDataStore,
+    private val llmProvider: InferenceRsProvider,
+    private val logRepository: FileLogRepository,
     private val ensuDefaults: EnsuDefaults
 ) {
     private var scope: CoroutineScope? = null

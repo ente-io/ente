@@ -1,15 +1,15 @@
 package io.ente.ensu.domain.store
 
-import io.ente.ensu.domain.chat.ChatRepository
+import io.ente.ensu.data.chat.RustChatRepository
 import io.ente.ensu.domain.device.ChatDeviceCapability
-import io.ente.ensu.domain.device.DeviceCapabilityProvider
-import io.ente.ensu.domain.llm.LlmProvider
-import io.ente.ensu.domain.logging.LogRepository
+import io.ente.ensu.data.AndroidDeviceCapabilityProvider
+import io.ente.ensu.data.llm.InferenceRsProvider
+import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogLevel
-import io.ente.ensu.domain.preferences.SessionPreferences
+import io.ente.ensu.data.SessionPreferencesDataStore
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.state.DeveloperSettingsState
 import io.ente.ensu.domain.state.ModelSettingsState
@@ -20,12 +20,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AppStore(
-    private val sessionPreferences: SessionPreferences,
-    private val chatRepository: ChatRepository,
-    private val llmProvider: LlmProvider,
-    private val deviceCapabilityProvider: DeviceCapabilityProvider,
+    private val sessionPreferences: SessionPreferencesDataStore,
+    private val chatRepository: RustChatRepository,
+    private val llmProvider: InferenceRsProvider,
+    private val deviceCapabilityProvider: AndroidDeviceCapabilityProvider,
     val ensuDefaults: EnsuDefaults,
-    private val logRepository: LogRepository,
+    private val logRepository: FileLogRepository,
     private val clock: () -> Long = { System.currentTimeMillis() }
 ) {
     private val _state = MutableStateFlow(AppState())

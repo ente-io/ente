@@ -2,7 +2,6 @@ package io.ente.ensu.data.logging
 
 import android.content.Context
 import android.util.Log
-import io.ente.ensu.domain.logging.LogRepository
 import io.ente.ensu.domain.model.LogEntry
 import io.ente.ensu.domain.model.LogLevel
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +31,7 @@ class FileLogRepository(
     private val context: Context,
     private val maxLogFiles: Int = 5,
     private val maxEntriesInMemory: Int = 500
-) : LogRepository {
+) {
 
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val writeMutex = Mutex()
@@ -43,14 +42,14 @@ class FileLogRepository(
     private val logsDir: File = File(context.filesDir, "logs")
 
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
-    override val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
+    val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
 
     init {
         ensureLogDir()
         pruneOldLogFiles()
     }
 
-    override fun log(level: LogLevel, message: String, details: String?, tag: String?, throwable: Throwable?) {
+    fun log(level: LogLevel, message: String, details: String? = null, tag: String? = null, throwable: Throwable? = null) {
         val resolvedTag = tag ?: "ensu"
         val entry = LogEntryBuilder.buildEntry(
             level = level,

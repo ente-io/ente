@@ -1,12 +1,12 @@
 package io.ente.ensu.domain.store
 
-import io.ente.ensu.domain.chat.ChatRepository
+import io.ente.ensu.data.chat.RustChatRepository
 import io.ente.ensu.domain.device.isChatSupported
-import io.ente.ensu.domain.logging.LogRepository
+import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.domain.llm.LlmMessage
 import io.ente.ensu.domain.llm.LlmMessageRole
 import io.ente.ensu.domain.llm.LlmModelTarget
-import io.ente.ensu.domain.llm.LlmProvider
+import io.ente.ensu.data.llm.InferenceRsProvider
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
@@ -15,7 +15,7 @@ import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.model.MessageAuthor
 import io.ente.ensu.domain.model.sanitizeTitleText
 import io.ente.ensu.domain.model.sessionTitleFromText
-import io.ente.ensu.domain.preferences.SessionPreferences
+import io.ente.ensu.data.SessionPreferencesDataStore
 import io.ente.ensu.domain.state.AppState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,11 +36,11 @@ import kotlin.math.min
 
 internal class ChatStoreActions(
     private val state: MutableStateFlow<AppState>,
-    private val sessionPreferences: SessionPreferences,
-    private val chatRepository: ChatRepository,
-    private val llmProvider: LlmProvider,
+    private val sessionPreferences: SessionPreferencesDataStore,
+    private val chatRepository: RustChatRepository,
+    private val llmProvider: InferenceRsProvider,
     private val clock: () -> Long,
-    private val logRepository: LogRepository,
+    private val logRepository: FileLogRepository,
     private val messageStore: MutableMap<String, MutableList<ChatMessage>>,
     private val attachmentActions: AttachmentStoreActions,
     private val modelSettingsActions: ModelSettingsActions,

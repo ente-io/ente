@@ -3,7 +3,6 @@ package io.ente.ensu.data.chat
 import android.content.Context
 import io.ente.ensu.data.storage.CredentialStore
 import io.ente.ensu.data.storage.FilePathManager
-import io.ente.ensu.domain.chat.ChatRepository
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
@@ -20,7 +19,7 @@ import java.io.File
 class RustChatRepository(
     context: Context,
     private val credentialStore: CredentialStore
-) : ChatRepository {
+) {
 
     private val filePaths = FilePathManager(context)
     private val attachmentsDir = filePaths.attachmentsDir
@@ -29,7 +28,7 @@ class RustChatRepository(
     private var dbKey = credentialStore.getOrCreateChatDbKey()
     private var db: EnsuDb = openDb(dbFile, dbKey)
 
-    override fun listSessions(): List<ChatSession> = withDbRecovery {
+    fun listSessions(): List<ChatSession> = withDbRecovery {
         val sessions = db.listSessions()
         sessions.map { session ->
             val messages = runCatching { db.getMessages(session.uuid) }.getOrNull().orEmpty()
@@ -46,7 +45,7 @@ class RustChatRepository(
         }
     }
 
-    override fun createSession(title: String): ChatSession = withDbRecovery {
+    fun createSession(title: String): ChatSession = withDbRecovery {
         val session = db.createSession(title)
         ChatSession(
             id = session.uuid,
@@ -56,11 +55,11 @@ class RustChatRepository(
         )
     }
 
-    override fun deleteSession(sessionId: String) = withDbRecovery {
+    fun deleteSession(sessionId: String) = withDbRecovery {
         db.deleteSession(sessionId)
     }
 
-    override fun getMessages(sessionId: String): List<ChatMessage> = withDbRecovery {
+    fun getMessages(sessionId: String): List<ChatMessage> = withDbRecovery {
         db.getMessages(sessionId).map { message ->
             ChatMessage(
                 id = message.uuid,
@@ -89,7 +88,7 @@ class RustChatRepository(
         }
     }
 
-    override fun insertMessage(
+    fun insertMessage(
         sessionId: String,
         parentId: String?,
         author: MessageAuthor,
@@ -131,15 +130,15 @@ class RustChatRepository(
         )
     }
 
-    override fun updateMessageText(messageId: String, text: String) = withDbRecovery {
+    fun updateMessageText(messageId: String, text: String) = withDbRecovery {
         db.updateMessageText(messageId, text)
     }
 
-    override fun updateSessionTitle(sessionId: String, title: String) = withDbRecovery {
+    fun updateSessionTitle(sessionId: String, title: String) = withDbRecovery {
         db.updateSessionTitle(sessionId, title)
     }
 
-    override fun deleteAllData() {
+    fun deleteAllData() {
         // Full reset removes current storage plus legacy sync leftovers.
         dbFile.delete()
         attachmentsDbFile.delete()

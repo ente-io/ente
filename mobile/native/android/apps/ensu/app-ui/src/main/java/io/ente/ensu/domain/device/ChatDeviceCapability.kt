@@ -22,9 +22,6 @@ sealed interface ChatDeviceCapability {
     }
 }
 
-interface DeviceCapabilityProvider {
-    fun chatCapability(): ChatDeviceCapability
-}
 
 class UnsupportedDeviceMemoryException(
     val capability: ChatDeviceCapability.UnsupportedLowMemory

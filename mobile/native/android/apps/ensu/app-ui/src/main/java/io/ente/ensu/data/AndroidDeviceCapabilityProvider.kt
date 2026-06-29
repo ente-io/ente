@@ -4,12 +4,11 @@ import android.app.ActivityManager
 import android.content.Context
 import io.ente.ensu.domain.device.CHAT_MIN_RAM_BYTES
 import io.ente.ensu.domain.device.ChatDeviceCapability
-import io.ente.ensu.domain.device.DeviceCapabilityProvider
 
-class AndroidDeviceCapabilityProvider(context: Context) : DeviceCapabilityProvider {
+class AndroidDeviceCapabilityProvider(context: Context) {
     private val appContext = context.applicationContext
 
-    override fun chatCapability(): ChatDeviceCapability {
+    fun chatCapability(): ChatDeviceCapability {
         val activityManager = appContext.getSystemService(ActivityManager::class.java)
             ?: return ChatDeviceCapability.Unknown
         val memoryInfo = ActivityManager.MemoryInfo()
