@@ -7,7 +7,6 @@ import {
     type PublicFeedReaction,
 } from "@/public-album/social/api/public-reaction";
 import { useBrowserBackClose } from "@/shared/hooks/useBrowserBackClose";
-import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Avatar,
@@ -24,6 +23,7 @@ import { useInterval } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
+import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { t } from "i18next";
