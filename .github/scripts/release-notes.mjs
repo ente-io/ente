@@ -69,7 +69,10 @@ function playStoreBody(body) {
 }
 
 function output(name, value) {
-    const delimiter = "RELEASE_NOTES_EOF";
+    const valueLines = new Set(String(value).split("\n"));
+    let delimiter = "RELEASE_NOTES_EOF";
+    while (valueLines.has(delimiter)) delimiter += "_";
+
     console.log(`${name}<<${delimiter}`);
     console.log(value);
     console.log(delimiter);
