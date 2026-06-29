@@ -1,7 +1,6 @@
 import { downloadManager } from "@/public-album/download/services/download-manager";
 import { getStoredAnonIdentity } from "@/public-album/social/api/public-reaction";
 import { useBrowserBackClose } from "@/shared/hooks/useBrowserBackClose";
-import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Avatar,
@@ -15,6 +14,7 @@ import {
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
+import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
 import { t } from "i18next";
 import React, {

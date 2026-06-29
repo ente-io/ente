@@ -1,9 +1,12 @@
 import { downloadManager } from "@/public-album/download/services/download-manager";
-import type { AddSaveGroup, UpdateSaveGroup } from "@/shared/state/save-groups";
 import { assertionFailed } from "ente-base/assert";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
+import type {
+    AddSaveGroup,
+    UpdateSaveGroup,
+} from "ente-gallery/components/utils/save-groups";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";

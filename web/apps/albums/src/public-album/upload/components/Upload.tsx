@@ -26,7 +26,6 @@ import type {
 } from "@/public-album/upload/services/upload-manager";
 import { uploadManager } from "@/public-album/upload/services/upload-manager";
 import { hasReliableCanvasReadback } from "@/public-album/upload/utils/canvas-integrity";
-import { useFileInput } from "@/shared/hooks/useFileInput";
 import { Album02Icon, Folder01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -52,6 +51,7 @@ import { basename } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { UploadProgress } from "ente-gallery/components/UploadProgress";
+import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import { type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { firstNonEmpty } from "ente-utils/array";
