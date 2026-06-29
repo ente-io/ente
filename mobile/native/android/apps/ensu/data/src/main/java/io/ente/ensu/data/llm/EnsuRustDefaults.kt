@@ -2,7 +2,7 @@ package io.ente.ensu.data.llm
 
 import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.EnsuModelPreset
-import io.ente.ensu.bindings.EnsuModelPreset as NativeEnsuModelPreset
+import io.ente.ensu.bindings.LlmModelPreset as NativeEnsuModelPreset
 import io.ente.ensu.bindings.getEnsuDefaults
 import io.ente.ensu.bindings.uniffiEnsureInitialized
 

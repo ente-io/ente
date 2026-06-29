@@ -15,8 +15,8 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .manage(commands::llm::LlmState::default())
-        .manage(commands::llm::LlmModelDownloadState::default())
+        .manage(commands::llm::State::default())
+        .manage(commands::llm::ModelDownloadState::default())
         .manage(commands::chat_db::ChatDbState::default())
         .setup(|app| {
             logging::init_logging(app.handle());

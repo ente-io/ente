@@ -16,7 +16,7 @@ use std::sync::{Arc, OnceLock};
 use std::time::Instant;
 
 use super::context::ContextHandle;
-use super::event::{EventSink, GenerateEvent, GenerateSummary, JobId};
+use super::event::{EventSink, GenerationEvent, GenerationSummary, JobId};
 use super::format_error;
 
 static JOB_COUNTER: AtomicI64 = AtomicI64::new(1);
@@ -64,7 +64,7 @@ pub struct ChatMessage {
     pub content: String,
 }
 
-struct GenerateRequest {
+struct SamplingParams {
     temperature: Option<f32>,
     top_p: Option<f32>,
     top_k: Option<i32>,
@@ -76,7 +76,7 @@ struct GenerateRequest {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GenerateChatRequest {
+pub struct ChatRequest {
     pub messages: Vec<ChatMessage>,
     pub template_override: Option<String>,
     pub add_assistant: Option<bool>,
@@ -349,7 +349,7 @@ fn run_generation_loop(
         let step = decoder.push_bytes(&bytes);
 
         if let Some(text) = step.text {
-            sink.add(GenerateEvent::Text {
+            sink.add(GenerationEvent::Text {
                 job_id,
                 text,
                 token_id: Some(token.0),
@@ -375,7 +375,7 @@ fn run_generation_loop(
     if !stop_triggered {
         let step = decoder.flush();
         if let Some(text) = step.text {
-            sink.add(GenerateEvent::Text {
+            sink.add(GenerationEvent::Text {
                 job_id,
                 text,
                 token_id: None,
@@ -386,7 +386,7 @@ fn run_generation_loop(
     Ok(())
 }
 
-fn build_sampler(model: &LlamaModel, request: &GenerateRequest) -> Result<LlamaSampler, String> {
+fn build_sampler(model: &LlamaModel, request: &SamplingParams) -> Result<LlamaSampler, String> {
     let mut samplers = Vec::new();
 
     let mut repeat_penalty = request.repeat_penalty.unwrap_or(1.0);
@@ -449,10 +449,10 @@ fn build_sampler(model: &LlamaModel, request: &GenerateRequest) -> Result<LlamaS
 
 pub fn generate_chat_stream(
     context: &ContextHandle,
-    request: GenerateChatRequest,
+    request: ChatRequest,
     sink: &mut dyn EventSink,
-) -> Result<GenerateSummary, String> {
-    let GenerateChatRequest {
+) -> Result<GenerationSummary, String> {
+    let ChatRequest {
         messages,
         template_override,
         add_assistant,
@@ -475,7 +475,7 @@ pub fn generate_chat_stream(
     let _job_guard = JobGuard(job_id);
     let start = Instant::now();
 
-    sink.add(GenerateEvent::Text {
+    sink.add(GenerationEvent::Text {
         job_id,
         text: String::new(),
         token_id: None,
@@ -528,7 +528,7 @@ pub fn generate_chat_stream(
 
             let prompt = build_chat_prompt(ctx.model, messages, template_override, add_assistant)?;
 
-            let sampler_request = GenerateRequest {
+            let sampler_request = SamplingParams {
                 temperature,
                 top_p,
                 top_k,
@@ -706,7 +706,7 @@ pub fn generate_chat_stream(
         error_message = Some(err);
     }
 
-    let summary = GenerateSummary {
+    let summary = GenerationSummary {
         job_id,
         prompt_tokens: Some(prompt_tokens_count),
         generated_tokens: Some(generated_tokens_count),
@@ -714,10 +714,10 @@ pub fn generate_chat_stream(
     };
 
     if let Some(message) = error_message {
-        sink.add(GenerateEvent::Error { job_id, message });
+        sink.add(GenerationEvent::Error { job_id, message });
     }
 
-    sink.add(GenerateEvent::Done {
+    sink.add(GenerationEvent::Done {
         summary: summary.clone(),
     });
 

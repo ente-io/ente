@@ -21,14 +21,14 @@ const RESPONSE_START_TIMEOUT: Duration = Duration::from_secs(30);
 const READ_STALL_TIMEOUT: Duration = Duration::from_secs(30);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LlmModelDownloadTarget {
+pub struct ModelDownloadTarget {
     pub label: String,
     pub url: String,
     pub destination_path: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LlmModelDownloadProgress {
+pub struct ModelDownloadProgress {
     pub label: String,
     pub downloaded_bytes: u64,
     pub total_bytes: Option<u64>,
@@ -136,9 +136,9 @@ struct ContentRange {
     total: Option<u64>,
 }
 
-pub fn download_llm_model_files(
-    targets: Vec<LlmModelDownloadTarget>,
-    on_progress: impl FnMut(LlmModelDownloadProgress),
+pub fn download_model_files(
+    targets: Vec<ModelDownloadTarget>,
+    on_progress: impl FnMut(ModelDownloadProgress),
     is_cancelled: impl Fn() -> bool,
 ) -> Result<(), String> {
     let runtime = Builder::new_current_thread()
@@ -146,16 +146,16 @@ pub fn download_llm_model_files(
         .enable_time()
         .build()
         .map_err(|err| err.to_string())?;
-    runtime.block_on(download_llm_model_files_async(
+    runtime.block_on(download_model_files_async(
         targets,
         on_progress,
         is_cancelled,
     ))
 }
 
-async fn download_llm_model_files_async(
-    targets: Vec<LlmModelDownloadTarget>,
-    on_progress: impl FnMut(LlmModelDownloadProgress),
+async fn download_model_files_async(
+    targets: Vec<ModelDownloadTarget>,
+    on_progress: impl FnMut(ModelDownloadProgress),
     is_cancelled: impl Fn() -> bool,
 ) -> Result<(), String> {
     if targets.is_empty() {
@@ -253,7 +253,7 @@ async fn download_llm_model_files_async(
                 return Err("Download cancelled".to_string());
             }
 
-            let file_report = download_llm_model_file(
+            let file_report = download_model_file(
                 client,
                 target,
                 &destination,
@@ -336,9 +336,9 @@ async fn download_llm_model_files_async(
     Ok(())
 }
 
-async fn download_llm_model_file(
+async fn download_model_file(
     client: &Client,
-    target: &LlmModelDownloadTarget,
+    target: &ModelDownloadTarget,
     destination: &Path,
     download_probe: &DownloadProbe,
     mut on_progress: impl FnMut(FileDownloadProgress),
@@ -352,7 +352,7 @@ async fn download_llm_model_file(
     let mut range_error = None;
     if let Some(total) = download_probe.content_length {
         if should_use_range_download(destination, total, download_probe) {
-            match download_llm_model_file_ranged(
+            match download_model_file_ranged(
                 client,
                 target,
                 destination,
@@ -377,7 +377,7 @@ async fn download_llm_model_file(
         cleanup_range_download(destination);
     }
 
-    let single_result = download_llm_model_file_single(
+    let single_result = download_model_file_single(
         client,
         target,
         destination,
@@ -396,9 +396,9 @@ async fn download_llm_model_file(
     }
 }
 
-async fn download_llm_model_file_single(
+async fn download_model_file_single(
     client: &Client,
-    target: &LlmModelDownloadTarget,
+    target: &ModelDownloadTarget,
     destination: &Path,
     expected_file_total: Option<u64>,
     on_progress: &mut dyn FnMut(FileDownloadProgress),
@@ -614,9 +614,9 @@ async fn download_llm_model_file_single(
     Err("Failed to download model".to_string())
 }
 
-async fn download_llm_model_file_ranged(
+async fn download_model_file_ranged(
     client: &Client,
-    target: &LlmModelDownloadTarget,
+    target: &ModelDownloadTarget,
     destination: &Path,
     total: u64,
     response_metadata: Option<ResponseMetadata>,
@@ -749,7 +749,7 @@ async fn download_llm_model_file_ranged(
 #[allow(clippy::too_many_arguments)]
 async fn download_range_part(
     client: &Client,
-    target: &LlmModelDownloadTarget,
+    target: &ModelDownloadTarget,
     file: Rc<File>,
     part_index: usize,
     range: RangeDownloadPartMetadata,
@@ -1027,7 +1027,7 @@ fn is_download_cancelled_error(err: &str) -> bool {
 }
 
 fn prepare_range_download_metadata(
-    target: &LlmModelDownloadTarget,
+    target: &ModelDownloadTarget,
     destination: &Path,
     total: u64,
     response_metadata: Option<ResponseMetadata>,
@@ -1094,7 +1094,7 @@ fn range_download_parts(total: u64, concurrency: usize) -> Vec<RangeDownloadPart
 
 fn range_download_metadata_matches(
     metadata: &RangeDownloadMetadata,
-    target: &LlmModelDownloadTarget,
+    target: &ModelDownloadTarget,
     total: u64,
     response_metadata: Option<&ResponseMetadata>,
     ranges: &[RangeDownloadPartMetadata],
@@ -1271,7 +1271,7 @@ fn parse_content_range(value: &str) -> Option<ContentRange> {
     Some(ContentRange { start, end, total })
 }
 
-fn emit_progress_from_states<F: FnMut(LlmModelDownloadProgress)>(
+fn emit_progress_from_states<F: FnMut(ModelDownloadProgress)>(
     label: &str,
     total_bytes: Option<u64>,
     metrics: DownloadProgressMetrics,
@@ -1394,14 +1394,14 @@ fn emit_combined_progress(
     file_downloaded_bytes: u64,
     file_total_bytes: Option<u64>,
     metrics: DownloadProgressMetrics,
-    on_progress: &mut impl FnMut(LlmModelDownloadProgress),
+    on_progress: &mut impl FnMut(ModelDownloadProgress),
 ) {
     let percentage = total_bytes
         .filter(|value| *value > 0)
         .map(|total| ((downloaded_bytes as f64 / total as f64) * 100.0).clamp(0.0, 100.0))
         .unwrap_or(0.0);
 
-    on_progress(LlmModelDownloadProgress {
+    on_progress(ModelDownloadProgress {
         label: label.to_string(),
         downloaded_bytes,
         total_bytes,
@@ -1455,7 +1455,7 @@ fn bytes_per_second(bytes: u64, elapsed: Duration) -> f64 {
     }
 }
 
-fn prepare_cached_download(target: &LlmModelDownloadTarget, destination: &Path) -> bool {
+fn prepare_cached_download(target: &ModelDownloadTarget, destination: &Path) -> bool {
     if is_valid_gguf_download(destination) {
         if !download_metadata_matches(destination, &target.url) {
             let size = file_size(destination).unwrap_or(0);
@@ -1561,7 +1561,7 @@ fn download_metadata_matches(path: &Path, url: &str) -> bool {
 
 fn write_download_metadata(
     path: &Path,
-    target: &LlmModelDownloadTarget,
+    target: &ModelDownloadTarget,
     size_bytes: u64,
     response_metadata: Option<ResponseMetadata>,
 ) -> Result<(), String> {
@@ -1636,7 +1636,7 @@ fn now_ms() -> u64 {
 }
 
 fn existing_download_bytes(
-    target: &LlmModelDownloadTarget,
+    target: &ModelDownloadTarget,
     destination: &Path,
     probe: &DownloadProbe,
 ) -> u64 {
@@ -1916,8 +1916,8 @@ mod tests {
         assert_eq!(probe.content_length, Some(bytes.len() as u64));
         assert!(probe.supports_ranges);
 
-        let result = download_llm_model_files(
-            vec![LlmModelDownloadTarget {
+        let result = download_model_files(
+            vec![ModelDownloadTarget {
                 label: "Model".to_string(),
                 url,
                 destination_path: destination.display().to_string(),

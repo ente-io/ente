@@ -13,28 +13,28 @@ import io.ente.ensu.domain.llm.LlmMessage
 import io.ente.ensu.domain.llm.LlmModelTarget
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.util.formatBytes
-import io.ente.ensu.bindings.ContextHandle
-import io.ente.ensu.bindings.ContextParams
-import io.ente.ensu.bindings.InferenceException
-import io.ente.ensu.bindings.GenerateChatRequest
-import io.ente.ensu.bindings.GenerateEvent
-import io.ente.ensu.bindings.GenerateEventCallback
+import io.ente.ensu.bindings.LlmContextHandle
+import io.ente.ensu.bindings.LlmContextParams
+import io.ente.ensu.bindings.LlmException
+import io.ente.ensu.bindings.LlmChatRequest
+import io.ente.ensu.bindings.LlmGenerationEvent
+import io.ente.ensu.bindings.LlmGenerationEventCallback
 import io.ente.ensu.bindings.LlmModelDownloadCallback
 import io.ente.ensu.bindings.LlmModelDownloadProgress
 import io.ente.ensu.bindings.LlmModelDownloadTarget
-import io.ente.ensu.bindings.ModelHandle
-import io.ente.ensu.bindings.ModelLoadParams
-import io.ente.ensu.bindings.cancel
-import io.ente.ensu.bindings.createContext
-import io.ente.ensu.bindings.downloadLlmModelFiles
-import io.ente.ensu.bindings.generateChatStream
-import io.ente.ensu.bindings.initBackend
-import io.ente.ensu.bindings.loadModel
-import io.ente.ensu.bindings.prewarmMultimodalContext
+import io.ente.ensu.bindings.LlmModelHandle
+import io.ente.ensu.bindings.LlmModelLoadParams
+import io.ente.ensu.bindings.llmCancel
+import io.ente.ensu.bindings.llmCreateContext
+import io.ente.ensu.bindings.llmDownloadModelFiles
+import io.ente.ensu.bindings.llmGenerateChatStream
+import io.ente.ensu.bindings.llmInitBackend
+import io.ente.ensu.bindings.llmLoadModel
+import io.ente.ensu.bindings.llmPrewarmMultimodalContext
 import io.ente.ensu.bindings.uniffiEnsureInitialized
 import io.ente.ensu.bindings.unloadTranscriptionModel
-import io.ente.ensu.bindings.ChatMessage as NativeChatMessage
-import io.ente.ensu.bindings.GenerateSummary as NativeSummary
+import io.ente.ensu.bindings.LlmChatMessage as NativeChatMessage
+import io.ente.ensu.bindings.LlmGenerationSummary as NativeSummary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -89,8 +89,8 @@ class InferenceRsProvider(
         appContext.getSharedPreferences("ensu.system.downloads", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
 
-    @Volatile private var modelHandle: ModelHandle? = null
-    @Volatile private var contextHandle: ContextHandle? = null
+    @Volatile private var modelHandle: LlmModelHandle? = null
+    @Volatile private var contextHandle: LlmContextHandle? = null
     @Volatile private var currentModelKey: LoadedModelKey? = null
     @Volatile private var currentContextLength: Int? = null
     @Volatile private var currentJobId: Long? = null
@@ -135,7 +135,7 @@ class InferenceRsProvider(
         }
         val clampedTemperature = temperature.coerceIn(0.35f, 0.7f)
 
-        val request = GenerateChatRequest(
+        val request = LlmChatRequest(
             messages = messages.map { msg ->
                 NativeChatMessage(msg.roleString(), msg.text)
             },
@@ -173,7 +173,7 @@ class InferenceRsProvider(
                     ensureModelReadyLocked(target) { }
                     val context = contextHandle ?: return@withLock
                     unloadTranscriptionModelIfLoaded()
-                    prewarmMultimodalContext(context, mmprojPath, null)
+                    llmPrewarmMultimodalContext(context, mmprojPath, null)
                 }
             }.onFailure { error ->
                 Log.d("InferenceRsProvider", "Image inference prewarm skipped", error)
@@ -312,21 +312,21 @@ class InferenceRsProvider(
     override fun stopGeneration() {
         val jobId = currentJobId
         if (jobId != null) {
-            cancel(jobId)
+            llmCancel(jobId)
         } else {
-            cancel(0)
+            llmCancel(0)
         }
     }
 
     override fun resetContext() {
         val model = modelHandle ?: return
-        val contextParams = ContextParams(
+        val contextParams = LlmContextParams(
             contextSize = currentContextLength,
             nThreads = null,
             nBatch = null
         )
         contextHandle?.destroy()
-        contextHandle = createContext(model, contextParams)
+        contextHandle = llmCreateContext(model, contextParams)
     }
 
     override fun cancelDownload() {
@@ -370,7 +370,7 @@ class InferenceRsProvider(
         deviceCapabilityProvider.chatCapability().requireChatSupported()
         val modelKey = LoadedModelKey(target.id, target.contextLength)
         if (!backendInitialized) {
-            initBackend()
+            llmInitBackend()
             backendInitialized = true
         }
 
@@ -397,25 +397,25 @@ class InferenceRsProvider(
         val threads = max(1, Runtime.getRuntime().availableProcessors() - 1)
         val batch = 512
 
-        val modelParams = ModelLoadParams(
+        val modelParams = LlmModelLoadParams(
             modelPath = modelFile.absolutePath,
             nGpuLayers = 0,
             useMmap = true,
             useMlock = false
         )
 
-        val model = loadModel(modelParams)
+        val model = llmLoadModel(modelParams)
         modelHandle = model
 
         var lastError: Throwable? = null
         for (ctx in contexts) {
             try {
-                val contextParams = ContextParams(
+                val contextParams = LlmContextParams(
                     contextSize = ctx,
                     nThreads = threads,
                     nBatch = batch
                 )
-                contextHandle = createContext(model, contextParams)
+                contextHandle = llmCreateContext(model, contextParams)
                 currentModelKey = LoadedModelKey(target.id, target.contextLength)
                 currentContextLength = ctx
                 return
@@ -500,7 +500,7 @@ class InferenceRsProvider(
                         destinationPath = it.destination.absolutePath
                     )
                 }
-            downloadLlmModelFiles(
+            llmDownloadModelFiles(
                 targets,
                 object : LlmModelDownloadCallback {
                     override fun onProgress(progress: LlmModelDownloadProgress) {
@@ -784,33 +784,33 @@ class InferenceRsProvider(
     }
 
     private fun generateStreamWithCallback(
-        context: ContextHandle,
-        request: GenerateChatRequest,
+        context: LlmContextHandle,
+        request: LlmChatRequest,
         onToken: (String) -> Unit
     ): NativeSummary {
         var error: Throwable? = null
 
-        val callback = object : GenerateEventCallback {
-            override fun onEvent(event: GenerateEvent) {
+        val callback = object : LlmGenerationEventCallback {
+            override fun onEvent(event: LlmGenerationEvent) {
                 when (event) {
-                    is GenerateEvent.Text -> {
+                    is LlmGenerationEvent.Text -> {
                         currentJobId = event.jobId
                         if (event.text.isNotEmpty()) {
                             onToken(event.text)
                         }
                     }
-                    is GenerateEvent.Done -> {
+                    is LlmGenerationEvent.Done -> {
                         currentJobId = null
                     }
-                    is GenerateEvent.Error -> {
+                    is LlmGenerationEvent.Error -> {
                         currentJobId = null
-                        error = InferenceException.Message(event.message)
+                        error = LlmException.Message(event.message)
                     }
                 }
             }
         }
 
-        val summary = generateChatStream(context, request, callback)
+        val summary = llmGenerateChatStream(context, request, callback)
 
         error?.let { throw it }
         return summary

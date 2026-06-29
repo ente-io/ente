@@ -57,7 +57,7 @@ pub struct LlmChatMessage {
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct LlmGenerateChatRequest {
+pub struct LlmChatRequest {
     pub messages: Vec<LlmChatMessage>,
     pub template_override: Option<String>,
     pub add_assistant: Option<bool>,
@@ -77,7 +77,7 @@ pub struct LlmGenerateChatRequest {
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct LlmGenerateSummary {
+pub struct LlmGenerationSummary {
     pub job_id: i64,
     pub prompt_tokens: Option<i32>,
     pub generated_tokens: Option<i32>,
@@ -110,14 +110,14 @@ pub struct LlmModelDownloadProgress {
 }
 
 #[derive(Debug, Clone, uniffi::Enum)]
-pub enum LlmGenerateEvent {
+pub enum LlmGenerationEvent {
     Text {
         job_id: i64,
         text: String,
         token_id: Option<i32>,
     },
     Done {
-        summary: LlmGenerateSummary,
+        summary: LlmGenerationSummary,
     },
     Error {
         job_id: i64,
@@ -136,8 +136,8 @@ pub struct LlmContextHandle {
 }
 
 #[uniffi::export(callback_interface)]
-pub trait LlmGenerateEventCallback: Send + Sync {
-    fn on_event(&self, event: LlmGenerateEvent);
+pub trait LlmGenerationEventCallback: Send + Sync {
+    fn on_event(&self, event: LlmGenerationEvent);
 }
 
 #[uniffi::export(callback_interface)]
@@ -210,8 +210,8 @@ impl From<LlmChatMessage> for core::ChatMessage {
     }
 }
 
-impl From<LlmGenerateChatRequest> for core::GenerateChatRequest {
-    fn from(value: LlmGenerateChatRequest) -> Self {
+impl From<LlmChatRequest> for core::ChatRequest {
+    fn from(value: LlmChatRequest) -> Self {
         Self {
             messages: value.messages.into_iter().map(Into::into).collect(),
             template_override: value.template_override,
@@ -233,7 +233,7 @@ impl From<LlmGenerateChatRequest> for core::GenerateChatRequest {
     }
 }
 
-impl From<LlmModelDownloadTarget> for core::LlmModelDownloadTarget {
+impl From<LlmModelDownloadTarget> for core::ModelDownloadTarget {
     fn from(value: LlmModelDownloadTarget) -> Self {
         Self {
             label: value.label,
@@ -243,8 +243,8 @@ impl From<LlmModelDownloadTarget> for core::LlmModelDownloadTarget {
     }
 }
 
-impl From<core::GenerateSummary> for LlmGenerateSummary {
-    fn from(value: core::GenerateSummary) -> Self {
+impl From<core::GenerationSummary> for LlmGenerationSummary {
+    fn from(value: core::GenerationSummary) -> Self {
         Self {
             job_id: value.job_id,
             prompt_tokens: value.prompt_tokens,
@@ -254,8 +254,8 @@ impl From<core::GenerateSummary> for LlmGenerateSummary {
     }
 }
 
-impl From<core::LlmModelDownloadProgress> for LlmModelDownloadProgress {
-    fn from(value: core::LlmModelDownloadProgress) -> Self {
+impl From<core::ModelDownloadProgress> for LlmModelDownloadProgress {
+    fn from(value: core::ModelDownloadProgress) -> Self {
         Self {
             label: value.label,
             downloaded_bytes: u64_to_i64(value.downloaded_bytes),
@@ -275,10 +275,10 @@ impl From<core::LlmModelDownloadProgress> for LlmModelDownloadProgress {
     }
 }
 
-impl From<core::GenerateEvent> for LlmGenerateEvent {
-    fn from(value: core::GenerateEvent) -> Self {
+impl From<core::GenerationEvent> for LlmGenerationEvent {
+    fn from(value: core::GenerationEvent) -> Self {
         match value {
-            core::GenerateEvent::Text {
+            core::GenerationEvent::Text {
                 job_id,
                 text,
                 token_id,
@@ -287,10 +287,10 @@ impl From<core::GenerateEvent> for LlmGenerateEvent {
                 text,
                 token_id,
             },
-            core::GenerateEvent::Done { summary } => Self::Done {
+            core::GenerationEvent::Done { summary } => Self::Done {
                 summary: summary.into(),
             },
-            core::GenerateEvent::Error { job_id, message } => Self::Error { job_id, message },
+            core::GenerationEvent::Error { job_id, message } => Self::Error { job_id, message },
         }
     }
 }
@@ -304,11 +304,11 @@ fn u32_to_i32(value: u32) -> i32 {
 }
 
 struct CallbackSink {
-    callback: Box<dyn LlmGenerateEventCallback>,
+    callback: Box<dyn LlmGenerationEventCallback>,
 }
 
 impl core::EventSink for CallbackSink {
-    fn add(&mut self, event: core::GenerateEvent) {
+    fn add(&mut self, event: core::GenerationEvent) {
         self.callback.on_event(event.into());
     }
 }
@@ -348,7 +348,7 @@ pub fn llm_download_model_files(
     let progress_callback = Arc::clone(&callback);
     let cancel_callback = Arc::clone(&callback);
     let targets = targets.into_iter().map(Into::into).collect();
-    core::download_llm_model_files(
+    core::download_model_files(
         targets,
         move |progress| progress_callback.on_progress(progress.into()),
         move || cancel_callback.is_cancelled(),
@@ -369,9 +369,9 @@ pub fn llm_prewarm_multimodal_context(
 #[uniffi::export]
 pub fn llm_generate_chat_stream(
     context: Arc<LlmContextHandle>,
-    request: LlmGenerateChatRequest,
-    callback: Box<dyn LlmGenerateEventCallback>,
-) -> Result<LlmGenerateSummary, LlmError> {
+    request: LlmChatRequest,
+    callback: Box<dyn LlmGenerationEventCallback>,
+) -> Result<LlmGenerationSummary, LlmError> {
     let mut sink = CallbackSink { callback };
     core::generate_chat_stream(context.handle.as_ref(), request.into(), &mut sink)
         .map(Into::into)

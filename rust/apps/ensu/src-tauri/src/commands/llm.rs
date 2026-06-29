@@ -7,22 +7,22 @@ use ente_ensu::config;
 use ente_ensu::llm;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
-use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
+use tauri::{AppHandle, Emitter, Manager, State as TauriState, WebviewWindow};
 
 use crate::commands::common::{ApiError, log_command_panic, panic_message};
 use crate::logging;
 
 #[derive(Default)]
-pub struct LlmState {
+pub struct State {
     model: Mutex<Option<llm::ModelHandleRef>>,
     context: Mutex<Option<llm::ContextHandleRef>>,
 }
 
-pub struct LlmModelDownloadState {
+pub struct ModelDownloadState {
     cancel_requested: Arc<AtomicBool>,
 }
 
-impl Default for LlmModelDownloadState {
+impl Default for ModelDownloadState {
     fn default() -> Self {
         Self {
             cancel_requested: Arc::new(AtomicBool::new(false)),
@@ -30,11 +30,11 @@ impl Default for LlmModelDownloadState {
     }
 }
 
-const LLM_PANIC_JOB_ID: i64 = 0;
+const PANIC_JOB_ID: i64 = 0;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TauriEnsuModelPreset {
+pub struct ModelPreset {
     id: String,
     title: String,
     url: String,
@@ -43,20 +43,20 @@ pub struct TauriEnsuModelPreset {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TauriEnsuDefaults {
+pub struct Defaults {
     mobile_system_prompt_body: String,
     desktop_system_prompt_body: String,
     system_prompt_date_placeholder: String,
     session_summary_system_prompt: String,
-    mobile_default_model: TauriEnsuModelPreset,
-    mobile_model_presets: Vec<TauriEnsuModelPreset>,
-    desktop_default_model: TauriEnsuModelPreset,
-    desktop_model_presets: Vec<TauriEnsuModelPreset>,
+    mobile_default_model: ModelPreset,
+    mobile_model_presets: Vec<ModelPreset>,
+    desktop_default_model: ModelPreset,
+    desktop_model_presets: Vec<ModelPreset>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TauriLlmModelDownloadTarget {
+pub struct DownloadRequest {
     label: String,
     url: String,
     path: String,
@@ -64,7 +64,7 @@ pub struct TauriLlmModelDownloadTarget {
 
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct TauriLlmModelDownloadProgress {
+pub struct DownloadProgress {
     label: String,
     percent: i32,
     status: String,
@@ -74,7 +74,7 @@ pub struct TauriLlmModelDownloadProgress {
     file_total_bytes: Option<u64>,
 }
 
-impl From<config::ModelPreset> for TauriEnsuModelPreset {
+impl From<config::ModelPreset> for ModelPreset {
     fn from(p: config::ModelPreset) -> Self {
         Self {
             id: p.id,
@@ -85,7 +85,7 @@ impl From<config::ModelPreset> for TauriEnsuModelPreset {
     }
 }
 
-impl From<config::Defaults> for TauriEnsuDefaults {
+impl From<config::Defaults> for Defaults {
     fn from(d: config::Defaults) -> Self {
         Self {
             mobile_system_prompt_body: d.mobile_system_prompt_body,
@@ -116,16 +116,16 @@ fn fs_thread_error() -> ApiError {
     ApiError::new("io_thread", "FS task failed")
 }
 
-pub(crate) fn replace_llm_state(
-    llm_state: &LlmState,
+pub(crate) fn replace_state(
+    state: &State,
     model: Option<llm::ModelHandleRef>,
     context: Option<llm::ContextHandleRef>,
 ) -> Result<(), ApiError> {
-    let mut model_guard = llm_state
+    let mut model_guard = state
         .model
         .lock()
         .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
-    let mut context_guard = llm_state
+    let mut context_guard = state
         .context
         .lock()
         .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
@@ -135,7 +135,7 @@ pub(crate) fn replace_llm_state(
     Ok(())
 }
 
-fn default_llm_threads() -> i32 {
+fn default_threads() -> i32 {
     let available = std::thread::available_parallelism()
         .map(|count| count.get())
         .unwrap_or(2);
@@ -146,14 +146,14 @@ fn default_llm_threads() -> i32 {
 
 #[derive(Serialize, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
-enum LlmEvent {
+enum Event {
     Text {
         job_id: llm::JobId,
         text: String,
         token_id: Option<i32>,
     },
     Done {
-        summary: llm::GenerateSummary,
+        summary: llm::GenerationSummary,
     },
     Error {
         job_id: llm::JobId,
@@ -161,10 +161,10 @@ enum LlmEvent {
     },
 }
 
-impl From<llm::GenerateEvent> for LlmEvent {
-    fn from(value: llm::GenerateEvent) -> Self {
+impl From<llm::GenerationEvent> for Event {
+    fn from(value: llm::GenerationEvent) -> Self {
         match value {
-            llm::GenerateEvent::Text {
+            llm::GenerationEvent::Text {
                 job_id,
                 text,
                 token_id,
@@ -173,16 +173,16 @@ impl From<llm::GenerateEvent> for LlmEvent {
                 text,
                 token_id,
             },
-            llm::GenerateEvent::Done { summary } => Self::Done { summary },
-            llm::GenerateEvent::Error { job_id, message } => Self::Error { job_id, message },
+            llm::GenerationEvent::Done { summary } => Self::Done { summary },
+            llm::GenerationEvent::Error { job_id, message } => Self::Error { job_id, message },
         }
     }
 }
 
-const LLM_EVENT_BATCH_MS: u64 = 80;
-const LLM_EVENT_BATCH_BYTES: usize = 2048;
+const EVENT_BATCH_MS: u64 = 80;
+const EVENT_BATCH_BYTES: usize = 2048;
 
-struct LlmEventSink {
+struct EventSink {
     window: WebviewWindow,
     buffered_text: String,
     buffered_job_id: Option<llm::JobId>,
@@ -190,7 +190,7 @@ struct LlmEventSink {
     last_emit: Instant,
 }
 
-impl LlmEventSink {
+impl EventSink {
     fn new(window: WebviewWindow) -> Self {
         Self {
             window,
@@ -210,7 +210,7 @@ impl LlmEventSink {
         }
 
         if let Some(job_id) = self.buffered_job_id.take() {
-            let payload = LlmEvent::Text {
+            let payload = Event::Text {
                 job_id,
                 text: std::mem::take(&mut self.buffered_text),
                 token_id: self.buffered_token_id.take(),
@@ -225,10 +225,10 @@ impl LlmEventSink {
     }
 }
 
-impl llm::EventSink for LlmEventSink {
-    fn add(&mut self, event: llm::GenerateEvent) {
+impl llm::EventSink for EventSink {
+    fn add(&mut self, event: llm::GenerationEvent) {
         match event {
-            llm::GenerateEvent::Text {
+            llm::GenerationEvent::Text {
                 job_id,
                 text,
                 token_id,
@@ -248,42 +248,42 @@ impl llm::EventSink for LlmEventSink {
                 self.buffered_text.push_str(&text);
 
                 let elapsed = self.last_emit.elapsed();
-                if self.buffered_text.len() >= LLM_EVENT_BATCH_BYTES
-                    || elapsed >= Duration::from_millis(LLM_EVENT_BATCH_MS)
+                if self.buffered_text.len() >= EVENT_BATCH_BYTES
+                    || elapsed >= Duration::from_millis(EVENT_BATCH_MS)
                 {
                     self.flush_text();
                 }
             }
-            llm::GenerateEvent::Done { summary } => {
+            llm::GenerationEvent::Done { summary } => {
                 self.flush_text();
-                let _ = self.window.emit("llm-event", LlmEvent::Done { summary });
+                let _ = self.window.emit("llm-event", Event::Done { summary });
             }
-            llm::GenerateEvent::Error { job_id, message } => {
+            llm::GenerationEvent::Error { job_id, message } => {
                 self.flush_text();
                 let _ = self
                     .window
-                    .emit("llm-event", LlmEvent::Error { job_id, message });
+                    .emit("llm-event", Event::Error { job_id, message });
             }
         }
     }
 }
 
 #[tauri::command]
-pub fn get_ensu_defaults() -> TauriEnsuDefaults {
+pub fn get_ensu_defaults() -> Defaults {
     config::defaults().into()
 }
 
 #[tauri::command]
 pub async fn llm_download_model_files(
     window: WebviewWindow,
-    state: State<'_, LlmModelDownloadState>,
-    downloads: Vec<TauriLlmModelDownloadTarget>,
+    state: TauriState<'_, ModelDownloadState>,
+    downloads: Vec<DownloadRequest>,
 ) -> Result<(), ApiError> {
     let cancel_requested = Arc::clone(&state.cancel_requested);
     cancel_requested.store(false, Ordering::SeqCst);
     let targets = downloads
         .into_iter()
-        .map(|download| llm::LlmModelDownloadTarget {
+        .map(|download| llm::ModelDownloadTarget {
             label: download.label,
             url: download.url,
             destination_path: download.path,
@@ -292,7 +292,7 @@ pub async fn llm_download_model_files(
 
     async_runtime::spawn_blocking(move || {
         let progress_window = window.clone();
-        llm::download_llm_model_files(
+        llm::download_model_files(
             targets,
             move |progress| {
                 log_download_metrics(&progress);
@@ -308,13 +308,11 @@ pub async fn llm_download_model_files(
 }
 
 #[tauri::command]
-pub fn llm_cancel_model_download(state: State<'_, LlmModelDownloadState>) {
+pub fn llm_cancel_model_download(state: TauriState<'_, ModelDownloadState>) {
     state.cancel_requested.store(true, Ordering::SeqCst);
 }
 
-fn tauri_download_progress(
-    progress: llm::LlmModelDownloadProgress,
-) -> TauriLlmModelDownloadProgress {
+fn tauri_download_progress(progress: llm::ModelDownloadProgress) -> DownloadProgress {
     let percent = if progress.total_bytes.is_some() {
         progress.percentage.round().clamp(0.0, 100.0) as i32
     } else {
@@ -322,7 +320,7 @@ fn tauri_download_progress(
     };
     let status = download_progress_status(&progress);
 
-    TauriLlmModelDownloadProgress {
+    DownloadProgress {
         label: progress.label,
         percent,
         status,
@@ -333,7 +331,7 @@ fn tauri_download_progress(
     }
 }
 
-fn download_progress_status(progress: &llm::LlmModelDownloadProgress) -> String {
+fn download_progress_status(progress: &llm::ModelDownloadProgress) -> String {
     if progress.label == "Complete" {
         return "Download complete".to_string();
     }
@@ -358,7 +356,7 @@ fn download_progress_status(progress: &llm::LlmModelDownloadProgress) -> String 
     }
 }
 
-fn log_download_metrics(progress: &llm::LlmModelDownloadProgress) {
+fn log_download_metrics(progress: &llm::ModelDownloadProgress) {
     if progress.file_complete {
         logging::log(
             "LLMDownload",
@@ -412,17 +410,15 @@ fn format_rate(bytes_per_second: f64) -> String {
 #[tauri::command]
 pub async fn llm_init_backend() -> Result<(), ApiError> {
     logging::log("LLM", "init backend requested");
-    async_runtime::spawn_blocking(|| {
-        match catch_unwind(AssertUnwindSafe(llm::init_backend)) {
-            Ok(result) => result.map_err(llm_error),
-            Err(payload) => {
-                let message = panic_message(payload);
-                log_command_panic("llm_init_backend", &message);
-                Err(ApiError::new(
-                    "llm_panic",
-                    format!("llm_init_backend panicked: {message}"),
-                ))
-            }
+    async_runtime::spawn_blocking(|| match catch_unwind(AssertUnwindSafe(llm::init_backend)) {
+        Ok(result) => result.map_err(llm_error),
+        Err(payload) => {
+            let message = panic_message(payload);
+            log_command_panic("llm_init_backend", &message);
+            Err(ApiError::new(
+                "llm_panic",
+                format!("llm_init_backend panicked: {message}"),
+            ))
         }
     })
     .await
@@ -436,7 +432,7 @@ pub async fn llm_init_backend() -> Result<(), ApiError> {
 
 #[tauri::command]
 pub async fn llm_load_model(
-    state: State<'_, LlmState>,
+    state: TauriState<'_, State>,
     params: llm::ModelLoadParams,
 ) -> Result<(), ApiError> {
     logging::log(
@@ -461,7 +457,7 @@ pub async fn llm_load_model(
         logging::log("LLM", format!("load model join failed error={err}"));
         llm_thread_error()
     })??;
-    replace_llm_state(&state, Some(model), None)?;
+    replace_state(&state, Some(model), None)?;
 
     logging::log("LLM", "load model succeeded");
     Ok(())
@@ -469,7 +465,7 @@ pub async fn llm_load_model(
 
 #[tauri::command]
 pub async fn llm_create_context(
-    state: State<'_, LlmState>,
+    state: TauriState<'_, State>,
     params: llm::ContextParams,
 ) -> Result<(), ApiError> {
     let model = state
@@ -481,7 +477,7 @@ pub async fn llm_create_context(
 
     let mut params = params;
     if params.n_threads.is_none() {
-        params.n_threads = Some(default_llm_threads());
+        params.n_threads = Some(default_threads());
     }
     logging::log(
         "LLM",
@@ -492,9 +488,7 @@ pub async fn llm_create_context(
     );
 
     let context = async_runtime::spawn_blocking(move || {
-        match catch_unwind(AssertUnwindSafe(|| {
-            llm::create_context(model, params)
-        })) {
+        match catch_unwind(AssertUnwindSafe(|| llm::create_context(model, params))) {
             Ok(result) => result.map_err(llm_error),
             Err(payload) => {
                 let message = panic_message(payload);
@@ -523,7 +517,7 @@ pub async fn llm_create_context(
 }
 
 #[tauri::command]
-pub fn llm_free_context(state: State<LlmState>) -> Result<(), ApiError> {
+pub fn llm_free_context(state: TauriState<State>) -> Result<(), ApiError> {
     let mut context_guard = state
         .context
         .lock()
@@ -533,13 +527,13 @@ pub fn llm_free_context(state: State<LlmState>) -> Result<(), ApiError> {
 }
 
 #[tauri::command]
-pub fn llm_free_model(state: State<LlmState>) -> Result<(), ApiError> {
-    replace_llm_state(&state, None, None)
+pub fn llm_free_model(state: TauriState<State>) -> Result<(), ApiError> {
+    replace_state(&state, None, None)
 }
 
 #[tauri::command]
 pub async fn llm_prewarm_multimodal_context(
-    state: State<'_, LlmState>,
+    state: TauriState<'_, State>,
     mmproj_path: String,
     media_marker: Option<String>,
 ) -> Result<(), ApiError> {
@@ -580,9 +574,9 @@ pub async fn llm_prewarm_multimodal_context(
 
 #[tauri::command]
 pub fn llm_generate_chat_stream(
-    state: State<LlmState>,
+    state: TauriState<State>,
     window: WebviewWindow,
-    request: llm::GenerateChatRequest,
+    request: llm::ChatRequest,
 ) -> Result<(), ApiError> {
     let context = state
         .context
@@ -593,7 +587,7 @@ pub fn llm_generate_chat_stream(
 
     async_runtime::spawn_blocking(move || {
         match catch_unwind(AssertUnwindSafe(|| {
-            let mut sink = LlmEventSink::new(window.clone());
+            let mut sink = EventSink::new(window.clone());
             let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
         })) {
             Ok(()) => {}
@@ -602,8 +596,8 @@ pub fn llm_generate_chat_stream(
                 log_command_panic("llm_generate_chat_stream", &message);
                 let _ = window.emit(
                     "llm-event",
-                    LlmEvent::Error {
-                        job_id: LLM_PANIC_JOB_ID,
+                    Event::Error {
+                        job_id: PANIC_JOB_ID,
                         message: format!("Generation panicked: {message}"),
                     },
                 );
@@ -620,8 +614,8 @@ pub fn llm_cancel(job_id: i64) -> Result<(), ApiError> {
 }
 
 pub(crate) fn clear_for_exit(app: &AppHandle) {
-    if let Some(llm_state) = app.try_state::<LlmState>() {
-        match replace_llm_state(&llm_state, None, None) {
+    if let Some(state) = app.try_state::<State>() {
+        match replace_state(&state, None, None) {
             Ok(()) => {
                 logging::log("App", "cleared LLM model");
                 logging::log("App", "cleared LLM context");

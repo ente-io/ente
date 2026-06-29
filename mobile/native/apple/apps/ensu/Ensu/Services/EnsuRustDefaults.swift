@@ -36,7 +36,7 @@ enum EnsuRustDefaults {
     }
 }
 
-private extension EnsuModelPreset {
+private extension LlmModelPreset {
     func toLocal() -> EnsuRustModelPreset {
         EnsuRustModelPreset(
             id: id,
