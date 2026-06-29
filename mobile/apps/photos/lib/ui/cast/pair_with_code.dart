@@ -11,7 +11,11 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:uuid/uuid.dart";
 
-Future<bool> _pairWithCode(
+class _DeviceNotFoundException implements Exception {
+  const _DeviceNotFoundException();
+}
+
+Future<void> _pairWithCode(
   BuildContext context,
   Collection collection,
   String code,
@@ -19,7 +23,7 @@ Future<bool> _pairWithCode(
   final gw = CastGateway(NetworkClient.instance.enteDio);
   final publicKey = await gw.getPublicKey(code);
   if (publicKey == null) {
-    return false;
+    throw const _DeviceNotFoundException();
   }
   final castToken = const Uuid().v4();
   final castData = collectionsService.getCastData(
@@ -28,10 +32,9 @@ Future<bool> _pairWithCode(
     publicKey,
   );
   await gw.publishCastPayload(code, castData, collection.id, castToken);
-  return true;
 }
 
-Future<void> showPairWithCodeSheet(
+Future<bool> showPairWithCodeSheet(
   BuildContext context,
   Collection collection,
 ) async {
@@ -84,28 +87,25 @@ class _PairWithCodeSheetState extends State<_PairWithCodeSheet> {
           variant: .primary,
           onTap: () async {
             try {
-              final paired = await _pairWithCode(
-                context,
-                widget.collection,
-                _controller.text,
-              );
-              if (!paired) {
-                showToast(context, l10n.deviceNotFound);
-                return;
-              }
+              await _pairWithCode(context, widget.collection, _controller.text);
               if (mounted) {
-                await Navigator.maybePop(context);
+                await Navigator.of(context).maybePop(true);
               }
             } catch (e, s) {
-              if (e is CastIPMismatchException) {
+              if (e is _DeviceNotFoundException) {
+                showToast(context, l10n.deviceNotFound);
+                rethrow;
+              } else if (e is CastIPMismatchException) {
                 await showErrorDialog(
                   context,
                   l10n.castIPMismatchTitle,
                   l10n.castIPMismatchBody,
                 );
+                rethrow;
               } else {
                 logger.severe('Failed to pair with code: ', e, s);
                 await showGenericErrorDialog(context: context, error: e);
+                rethrow;
               }
             }
           },
