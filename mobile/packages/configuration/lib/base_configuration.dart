@@ -369,6 +369,15 @@ abstract class BaseConfiguration {
     return _secretKey == null ? null : CryptoUtil.base642bin(_secretKey!);
   }
 
+  String decryptDeleteChallenge(String encryptedChallenge) {
+    final challenge = CryptoUtil.openSealSync(
+      CryptoUtil.base642bin(encryptedChallenge),
+      CryptoUtil.base642bin(getKeyAttributes()!.publicKey),
+      getSecretKey()!,
+    );
+    return utf8.decode(challenge);
+  }
+
   Uint8List getRecoveryKey() {
     final keyAttributes = getKeyAttributes()!;
     return CryptoUtil.decryptSync(
