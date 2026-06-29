@@ -663,6 +663,24 @@ Yes! You can use Ente on as many devices as you want simultaneously. All your de
 
 The sync happens automatically in the background when devices are connected to the internet.
 
+### What is "Faster uploads"? {#what-is-faster-uploads}
+
+"Faster uploads" routes your uploads through Cloudflare's network (`uploader.ente.com`) instead of sending them directly to Ente's storage backend.
+
+Normally, your encrypted files are uploaded straight to the object storage server. With this option enabled, they go to the nearest Cloudflare edge node first, and Cloudflare's backbone network handles the final leg to storage. For most users - especially those geographically far from Ente's storage origin - this results in noticeably faster upload speeds, because the public internet leg of the journey is shorter.
+
+A few things to note:
+
+- It's available only on the production app, not on self-hosted instances.
+- Your files stay end-to-end encrypted throughout - Cloudflare only relays the already-encrypted data.
+- If you're having upload issues or slowness, turning it off is a useful troubleshooting step, since Cloudflare occasionally has routing issues that can slow things down for certain regions.
+
+**On desktop/web:**
+
+Toggle it under `Settings > Preferences > Advanced`.
+
+Learn more about [why uploads might fail on desktop or web](/photos/faq/troubleshooting#faster-uploads).
+
 ### Why is my mobile app and desktop app not syncing? {#mobile-desktop-not-syncing}
 
 This usually occurs due to a network connectivity issue:
