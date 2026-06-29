@@ -410,9 +410,6 @@
   "videoSmallCase": "vídeo",
   "photoSmallCase": "foto",
   "singleFileDeleteHighlight": "Será eliminado de todos os álbuns.",
-  "singleFileInBothLocalAndRemote": "Este encontra-se tanto no Ente como no seu dispositivo.",
-  "singleFileInRemoteOnly": "Este será eliminado do Ente.",
-  "singleFileDeleteFromDevice": "Este será eliminado do seu dispositivo.",
   "deleteFromEnte": "Apagar do Ente",
   "yesDelete": "Sim, apagar",
   "movedToTrash": "Mover para o lixo",
@@ -1175,10 +1172,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Definir raio",
-  "androidBiometricHint": "Verificar identidade",
-  "@androidBiometricHint": {
-    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
-  },
   "androidBiometricNotRecognized": "Não reconhecido. Tente novamente.",
   "@androidBiometricNotRecognized": {
     "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
@@ -1186,14 +1179,6 @@
   "androidBiometricSuccess": "Sucesso",
   "@androidBiometricSuccess": {
     "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
-  },
-  "androidCancelButton": "Cancelar",
-  "@androidCancelButton": {
-    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
-  },
-  "androidSignInTitle": "Autenticação necessária",
-  "@androidSignInTitle": {
-    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
   },
   "androidBiometricRequiredTitle": "Biometria necessária",
   "@androidBiometricRequiredTitle": {
@@ -1207,25 +1192,13 @@
   "@androidDeviceCredentialsSetupDescription": {
     "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
   },
-  "goToSettings": "Ir para as definições",
-  "@goToSettings": {
-    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
-  },
   "androidGoToSettingsDescription": "A autenticação biométrica não está configurada no seu dispositivo. Vá a “Definições > Segurança” para adicionar a autenticação biométrica.",
   "@androidGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
   },
-  "iOSLockOut": "A autenticação biométrica está desativada. Por favor, bloqueie e desbloqueie o ecrã para ativá-la.",
-  "@iOSLockOut": {
-    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
-  },
   "iOSGoToSettingsDescription": "A autenticação biométrica não está configurada no seu dispositivo. Active o Touch ID ou o Face ID no seu telemóvel.",
   "@iOSGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
-  },
-  "iOSOkButton": "OK",
-  "@iOSOkButton": {
-    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
   "openstreetmapContributors": "Contribuidores do OpenStreetMap",
   "hostedAtOsmFrance": "Hospedado na OSM France",
@@ -1401,20 +1374,13 @@
   "enableMLIndexingDesc": "O Ente suporta a aprendizagem automática no dispositivo para reconhecimento facial, pesquisa mágica e outras funcionalidades de pesquisa avançadas",
   "magicSearchHint": "A pesquisa mágica permite pesquisar fotos por seu conteúdo, por exemplo, 'flor', 'carro vermelho', 'documentos de identidade'",
   "panorama": "Panorama",
-  "reenterPassword": "Insira novamente a palavra-passe",
-  "reenterPin": "Inserir PIN novamente",
   "deviceLock": "Bloqueio do dispositivo",
   "pinLock": "Bloqueio por PIN",
   "next": "Seguinte",
-  "setNewPassword": "Definir nova palavra-passe",
-  "enterPin": "Introduzir PIN",
-  "setNewPin": "Definir novo PIN",
   "appLock": "Bloqueio de app",
   "noSystemLockFound": "Nenhum bloqueio de sistema encontrado",
-  "tapToUnlock": "Toque para desbloquear",
   "tooManyIncorrectAttempts": "Muitas tentativas incorretas",
   "videoInfo": "Informação de Vídeo",
-  "autoLock": "Bloqueio automático",
   "immediately": "Imediatamente",
   "autoLockFeatureDescription": "Tempo após o qual a aplicação bloqueia depois de ser colocada em segundo plano",
   "hideContent": "Ocultar conteúdo",

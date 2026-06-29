@@ -439,18 +439,57 @@
   "authToViewTrashedFiles": "Vui lòng xác thực để xem các tệp đã xóa",
   "trash": "Thùng rác",
   "uncategorized": "Chưa phân loại",
+  "uncategorizedItemsWillShowUpHere": "Những mục chưa phân loại sẽ hiển thị ở đây",
   "videoSmallCase": "video",
   "photoSmallCase": "ảnh",
   "singleFileDeleteHighlight": "Nó sẽ bị xóa khỏi tất cả album.",
-  "singleFileInBothLocalAndRemote": "Tệp này có trong cả Ente và thiết bị của bạn.",
-  "singleFileInRemoteOnly": "Tệp này sẽ bị xóa khỏi Ente.",
-  "singleFileDeleteFromDevice": "Tệp này sẽ bị xóa khỏi thiết bị của bạn.",
+  "singleFileInBothLocalAndRemote": "Mục này có sẵn trên thiết bị của bạn và Ente.",
+  "@singleFileInBothLocalAndRemote": {
+    "description": "Delete confirmation message for a single item that exists both on the device and in Ente."
+  },
+  "singleFileInRemoteOnly": "Mục này sẽ bị xóa khỏi tất cả album. Bạn có thể khôi phục nó từ Thùng rác.",
+  "@singleFileInRemoteOnly": {
+    "description": "Delete confirmation message for a single item that exists only in Ente."
+  },
+  "singleFileDeleteFromDevice": "Mục chưa được sao lưu. Xóa vĩnh viễn khỏi thiết bị?",
+  "@singleFileDeleteFromDevice": {
+    "description": "Delete confirmation message for a single item that exists only on the device."
+  },
+  "deleteItemsQuestion": "{count, plural, other {Xóa {count} mục?}}",
+  "@deleteItemsQuestion": {
+    "description": "Delete confirmation title for one or more selected items.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectedFilesSavedOnDeviceOnly": "Mục chưa được sao lưu. Xóa vĩnh viễn khỏi thiết bị?",
+  "@selectedFilesSavedOnDeviceOnly": {
+    "description": "Delete confirmation message for selected items that exist only on the device."
+  },
+  "selectedFilesBackedUpToEnte": "Những nục này sẽ bị xóa khỏi tất cả album. Bạn có thể khôi phục chúng từ Thùng rác.",
+  "@selectedFilesBackedUpToEnte": {
+    "description": "Delete confirmation message for selected items that are backed up to Ente."
+  },
+  "someSelectedFilesBackedUpToEnte": "Những mục này có sẵn trên thiết bị của bạn và Ente.",
+  "@someSelectedFilesBackedUpToEnte": {
+    "description": "Delete confirmation message for selected items that exist both on the device and in Ente."
+  },
   "deleteFromEnte": "Xóa khỏi Ente",
   "yesDelete": "Có, xóa",
   "movedToTrash": "Đã cho vào thùng rác",
   "deleteFromDeviceQuestion": "Xóa khỏi thiết bị?",
   "deleteFromDevice": "Xóa khỏi thiết bị",
   "deleteFromBoth": "Xóa khỏi cả hai",
+  "moreOptions": "Lựa chọn khác",
+  "@moreOptions": {
+    "description": "Button label for showing additional delete options."
+  },
+  "setAsMyDefaultChoice": "Đặt làm lựa chọn mặc định",
+  "@setAsMyDefaultChoice": {
+    "description": "Checkbox label for saving the selected delete action as the default choice."
+  },
   "newAlbum": "Album mới",
   "albums": "Album",
   "ente": "Ente",
@@ -627,6 +666,7 @@
   "backup": "Sao lưu",
   "freeUpDeviceSpace": "Giải phóng dung lượng thiết bị",
   "freeUpDeviceSpaceDesc": "Tiết kiệm dung lượng thiết bị của bạn bằng cách xóa các tệp đã được sao lưu.",
+  "freeUpDeviceSpaceConfirmDesc": "{count, plural, other{{count} tệp đã được sao lưu}} sẽ bị xóa vĩnh viễn khỏi thiết bị này.",
   "freeUpDeviceSpaceDescICloud": "Tệp trong album chia sẻ iCloud không thể xóa.",
   "@freeUpDeviceSpaceDescICloud": {
     "description": "Here 'cleared' means 'deleted' from the device"
@@ -635,6 +675,14 @@
   "noDeviceThatCanBeDeleted": "Bạn không có tệp nào có thể xóa trên thiết bị này",
   "removeDuplicates": "Xóa tệp trùng lặp",
   "removeDuplicatesDesc": "Xem và xóa các tệp hoàn toàn giống nhau.",
+  "mediaManagementHintTitle": "Mệt mỏi xác nhận mỗi lần xóa?",
+  "@mediaManagementHintTitle": {
+    "description": "Title of a sheet prompting Android users to enable media management permission."
+  },
+  "mediaManagementHintMessage": "Bật quản lý media cho Ente trong cài đặt, và nó sẽ ổn.",
+  "@mediaManagementHintMessage": {
+    "description": "Message explaining that enabling Android media management permission avoids repeated delete confirmations."
+  },
   "viewLargeFiles": "Xóa tệp dung lượng lớn",
   "viewLargeFilesDesc": "Xem các tệp đang chiếm dung lượng nhiều nhất.",
   "deleteSuggestions": "Gợi ý xóa",
@@ -1077,6 +1125,10 @@
   "albumsSharedEmptyFeatureShareLovedOnes": "Chia sẻ chúng với những người thân yêu",
   "albumsSharedEmptyFeatureReactAndComment": "Họ có thể xem, phản ứng và thêm nhận xét mà không cần có tài khoản",
   "albumsSharedEmptyFeaturePrivacy": "Hoàn toàn riêng tư với mã hóa đầu cuối",
+  "albumsReceivedEmptyTitle": "Xem những kỷ niệm đã chia sẻ\n với bạn",
+  "albumsReceivedEmptyFeatureSharedByOthers": "Ảnh được chia sẻ từ người khác sẽ xuất hiện ở đây",
+  "albumsReceivedEmptyFeatureAcceptInvites": "Chấp nhận lời mời để xem ảnh và video",
+  "albumsReceivedEmptyFeatureSaveToLibrary": "Lưu những kỷ niệm đã chia sẻ vào thư viện của bạn",
   "albumsOnDevicePermissionCta": "Cho phép truy cập",
   "albumsOnDevicePermissionFeatureAllowAccessFaceRecognition": "Cho phép Ente truy cập và sắp xếp ảnh của bạn bằng nhận dạng khuôn mặt",
   "albumsOnDevicePermissionFeatureLocalProcessing": "Tất cả quá trình xử lý diễn ra trên thiết bị của bạn",
@@ -1265,9 +1317,21 @@
   "photosAddedByYouWillBeRemovedFromTheAlbum": "Ảnh bạn đã thêm sẽ bị xóa khỏi album",
   "youveNoFilesInThisAlbumThatCanBeDeleted": "Bạn không có tệp nào có thể xóa trong album này",
   "youDontHaveAnyArchivedItems": "Bạn không có mục nào đã lưu trữ.",
+  "archivedItemsWillShowUpHere": "Các mục đã lưu trữ sẽ hiện ở đây",
   "deletedItemsStayHereForThirtyDays": "Các mục đã xóa sẽ được lưu giữ tại đây trong 30 ngày",
   "resetIgnoredFiles": "Đặt lại các tệp bị bỏ qua",
+  "resetIgnoredFilesDescription": "Đặt lại các tệp bị bỏ qua này để Ente có thể thử tải lên lại.",
+  "notBackedUp": "Chưa được sao lưu",
+  "backedUpAutomatically": "Đã sao lưu tự động",
+  "autoUploadFromThisDeviceFolder": "Tự động tải lên từ thư mục thiết bị này",
+  "skippedFiles": "Những tệp bị bỏ qua",
+  "chooseReasonToViewFiles": "Hãy chọn một lý do để xem các tệp này",
+  "deletedFromEnte": "Đã xóa khỏi Ente",
+  "iCloudUnavailable": "iCloud không khả dụng",
+  "others": "Khác",
+  "disableBackup": "Tắt tính năng sao lưu",
   "noHiddenPhotosOrVideos": "Không có ảnh hoặc video ẩn",
+  "hiddenItemsWillShowUpHere": "Các mục đã ẩn sẽ hiện ở đây",
   "toHideAPhotoOrVideo": "Để ẩn một ảnh hoặc video",
   "openTheItem": "• Mở mục",
   "clickOnTheOverflowMenu": "• Nhấn vào menu xổ xuống",
@@ -1630,10 +1694,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Đặt bán kính",
-  "androidBiometricHint": "Xác minh danh tính",
-  "@androidBiometricHint": {
-    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
-  },
   "androidBiometricNotRecognized": "Không nhận diện được. Thử lại.",
   "@androidBiometricNotRecognized": {
     "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
@@ -1641,14 +1701,6 @@
   "androidBiometricSuccess": "Thành công",
   "@androidBiometricSuccess": {
     "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
-  },
-  "androidCancelButton": "Hủy",
-  "@androidCancelButton": {
-    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
-  },
-  "androidSignInTitle": "Yêu cầu xác thực",
-  "@androidSignInTitle": {
-    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
   },
   "androidBiometricRequiredTitle": "Yêu cầu sinh trắc học",
   "@androidBiometricRequiredTitle": {
@@ -1662,25 +1714,13 @@
   "@androidDeviceCredentialsSetupDescription": {
     "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
   },
-  "goToSettings": "Đi đến cài đặt",
-  "@goToSettings": {
-    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
-  },
   "androidGoToSettingsDescription": "Xác thực sinh trắc học chưa được thiết lập trên thiết bị của bạn. Đi đến 'Cài đặt > Bảo mật' để thêm xác thực sinh trắc học.",
   "@androidGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
   },
-  "iOSLockOut": "Xác thực sinh trắc học đã bị vô hiệu hóa. Vui lòng khóa và mở khóa màn hình của bạn để kích hoạt lại.",
-  "@iOSLockOut": {
-    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
-  },
   "iOSGoToSettingsDescription": "Xác thực sinh trắc học chưa được thiết lập trên thiết bị của bạn. Vui lòng kích hoạt Touch ID hoặc Face ID.",
   "@iOSGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
-  },
-  "iOSOkButton": "OK",
-  "@iOSOkButton": {
-    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
   "openstreetmapContributors": "Người đóng góp OpenStreetMap",
   "hostedAtOsmFrance": "Được lưu trữ tại OSM Pháp",
@@ -1883,21 +1923,14 @@
   "enableMLIndexingDesc": "Ente hỗ trợ học máy trên-thiết-bị nhằm nhận diện khuôn mặt, tìm kiếm vi diệu và các tính năng tìm kiếm nâng cao khác",
   "magicSearchHint": "Tìm kiếm vi diệu cho phép tìm ảnh theo nội dung của chúng, ví dụ: 'xe hơi', 'xe hơi đỏ', 'Ferrari'",
   "panorama": "Panorama",
-  "reenterPassword": "Nhập lại mật khẩu",
-  "reenterPin": "Nhập lại PIN",
   "deviceLock": "Khóa thiết bị",
   "pinLock": "Khóa PIN",
   "next": "Tiếp theo",
-  "setNewPassword": "Đặt mật khẩu mới",
-  "enterPin": "Nhập PIN",
-  "setNewPin": "Đặt PIN mới",
   "appLock": "Khóa ứng dụng",
   "lockScreenType": "Kiểu khóa",
   "noSystemLockFound": "Không tìm thấy khóa hệ thống",
-  "tapToUnlock": "Nhấn để mở khóa",
   "tooManyIncorrectAttempts": "Thử sai nhiều lần",
   "videoInfo": "Thông tin video",
-  "autoLock": "Khóa tự động",
   "immediately": "Lập tức",
   "autoLockFeatureDescription": "Sau thời gian này, ứng dụng sẽ khóa sau khi được chạy ở chế độ nền",
   "hideContent": "Ẩn nội dung",
@@ -2022,6 +2055,7 @@
   "onlyThem": "Chỉ họ",
   "checkingModels": "Đang kiểm tra mô hình...",
   "enableMachineLearningBanner": "Bật học máy để tìm kiếm vi diệu và nhận diện khuôn mặt",
+  "machineLearningBannerSubtitle": "Để tìm kiếm thông minh và nhận diện khuôn mặt",
   "searchDiscoverEmptySection": "Ảnh sẽ được hiển thị ở đây sau khi xử lý và đồng bộ hoàn tất",
   "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Chưa thêm người xem} other {Đã thêm {count} người xem}}",
