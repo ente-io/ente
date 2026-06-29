@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:ente_account_deletion/account_deletion.dart';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_components/ente_components.dart' as components;
 import 'package:ente_crypto_api/ente_crypto_api.dart';
@@ -190,6 +191,10 @@ Future<void> _init(bool bool, {String? via}) async {
     await LockScreenSettings.instance.init(
       Configuration.instance,
       hideAppContentDefault: true,
+    );
+    AccountDeletionSettings.instance.init(
+      host: Configuration.instance,
+      enteDio: Network.instance.enteDio,
     );
     await CollectionApiClient.instance.init();
     await CollectionService.instance.init(preferences);
