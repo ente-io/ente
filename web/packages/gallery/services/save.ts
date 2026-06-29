@@ -17,7 +17,7 @@ import type {
     AddSaveGroup,
     UpdateSaveGroup,
 } from "../components/utils/save-groups";
-import { downloadAndSaveFilesWeb } from "./browser-save";
+import { downloadAndSaveFilesWeb } from "./save-core";
 
 /**
  * Save the given {@link files} to the user's device.
