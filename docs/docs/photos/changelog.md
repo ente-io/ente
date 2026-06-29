@@ -9,31 +9,12 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 
 ## v1.3.57 (mobile) - Jun 2026
 
-- Fixed the add-to-album sheet layout and shared-album confirmation flow.
-- Refreshed album empty states for Archive, Hidden, Uncategorized, and shared/received album views.
-- Fixed backup album selection to keep album order stable and show the selected badge inside album thumbnails.
-- Fixed bulk album downloads failing with an error.
-- See skipped backup files by reason, like Deleted from Ente.
-- Dismiss the keyboard when scrolling search screens.
-- Adjust search tab preview counts to fit the screen width.
-- Updated warning bottom sheets to use the grey warning illustration.
-- Updated home gallery banners to use the shared Ente component design.
-- Added empty states for album search, links, and trash.
-- Improved iOS Password AutoFill detection on Photos login and sign-up screens.
-- Improved QR code detection for rotated images on iOS.
-- Fixed extra app bar space in local gallery mode galleries.
-- Fix the uneven spacing issue in local gallery on the search tab.
-- Updated the app lock screen.
-- Update the Photos login and signup flow components and keyboard handling.
-- Improve the offline search processing card contrast.
-- Updated the app bar on person and face group screens to match the rest of the galleries.
-- Add a popup menu component
+- Redesigned the Search tab with improved spacing, previews, empty states, and keyboard handling.
+- Improved Albums with Shared/Received filters, refreshed empty states, and better add-to-album flows.
+- Fixed a bug in bulk file downloads and improved backup album selection.
+- Added skipped backup file reasons, such as “Deleted from Ente”.
 - Preserved draft comments when closing and reopening the photo comment panel.
-- Swipe down to dismiss the keyboard on settings screens, so the "Continue in mail app" button stays reachable on the Report an issue screen.
-- Refine search tab empty-state spacing and processing card alignment.
-- Search tab redesign.
-- Added separate Shared and Received filters to Albums.
-- Move the Trash page delete-all action into the app bar menu.
+- Polished app lock, login/signup, gallery, trash, and warning screens.
 
 ## v1.3.56 (mobile) - Jun 2026
 
