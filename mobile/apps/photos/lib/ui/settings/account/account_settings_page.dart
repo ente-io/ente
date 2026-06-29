@@ -125,7 +125,6 @@ class AccountSettingsPage extends StatelessWidget {
     if (hasAuthenticated) {
       unawaited(showChangeEmailBottomSheet(context));
     }
-    unawaited(showChangeEmailBottomSheet(context));
   }
 
   Future<void> _onChangePasswordTapped(BuildContext context) async {

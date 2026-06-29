@@ -47,8 +47,6 @@ class AccountSectionWidget extends StatelessWidget {
             // ignore: unawaited_futures
             showChangeEmailDialog(context);
           }
-          // ignore: unawaited_futures
-          showChangeEmailDialog(context);
         },
       ),
       sectionOptionSpacing,
