@@ -42,9 +42,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     final colors = context.componentColors;
     final isConfirmationStep = _step == _DeleteAccountStep.confirmation;
     final isActionEnabled = isConfirmationStep
-        ? (_summary != null || _summaryUnsupported) &&
-              _confirmationAccepted &&
-              !_isDeleting
+        ? _confirmationAccepted && !_summaryLoading && !_isDeleting
         : _selectedReason != null && !_isDeleting;
 
     return Scaffold(
