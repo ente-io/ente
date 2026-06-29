@@ -14,7 +14,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuTypography
-import io.ente.ensu.platform.rememberEnsuHaptics
+import io.ente.ensu.platform.rememberHaptics
 
 @Composable
 fun BranchSwitcher(
@@ -25,7 +25,7 @@ fun BranchSwitcher(
 ) {
     if (totalCount <= 1) return
 
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     Row(verticalAlignment = Alignment.CenterVertically) {
         TextButton(
             onClick = {

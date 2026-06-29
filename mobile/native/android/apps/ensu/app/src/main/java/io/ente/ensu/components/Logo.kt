@@ -18,7 +18,7 @@ import io.ente.ensu.R
 import io.ente.ensu.designsystem.EnsuColor
 
 @Composable
-fun EnsuLogo(
+fun Logo(
     modifier: Modifier = Modifier,
     height: Dp = 24.dp,
     horizontalPadding: Dp = 4.dp,

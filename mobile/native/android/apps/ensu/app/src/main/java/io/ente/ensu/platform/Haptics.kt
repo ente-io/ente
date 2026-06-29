@@ -14,7 +14,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 
-class EnsuHaptics(
+class Haptics(
     private val context: Context,
     private val view: View?
 ) {
@@ -100,10 +100,10 @@ class EnsuHaptics(
 }
 
 @Composable
-fun rememberEnsuHaptics(): EnsuHaptics {
+fun rememberHaptics(): Haptics {
     val context = LocalContext.current
     val view = LocalView.current
     return remember(context, view) {
-        EnsuHaptics(context, view)
+        Haptics(context, view)
     }
 }

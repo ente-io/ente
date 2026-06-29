@@ -65,7 +65,7 @@ internal fun HomeNavigation(
             when (currentRoute) {
                 HomeRoute.Chat -> {
                     Column {
-                        EnsuTopBar(
+                        TopBar(
                             sessionTitle = currentSession?.title,
                             showBrand = appState.chat.messages.isEmpty(),
                             attachmentDownloads = appState.chat.attachmentDownloads,

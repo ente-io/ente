@@ -5,7 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
 @Composable
-fun EnsuApp(appViewModel: AppViewModel) {
+fun App(appViewModel: AppViewModel) {
     val appState by appViewModel.store.state.collectAsState()
     RootView(
         appState = appState,

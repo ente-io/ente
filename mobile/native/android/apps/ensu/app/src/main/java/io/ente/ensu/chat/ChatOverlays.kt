@@ -31,7 +31,7 @@ import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.chat.OverflowDialogState
 import io.ente.ensu.format.formatBytes
-import io.ente.ensu.platform.rememberEnsuHaptics
+import io.ente.ensu.platform.rememberHaptics
 import kotlin.math.roundToLong
 
 @Composable
@@ -125,7 +125,7 @@ internal fun DownloadToastOverlay(
     isLoading: Boolean,
     onCancel: () -> Unit
 ) {
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     Box(
         modifier = Modifier
             .fillMaxWidth()

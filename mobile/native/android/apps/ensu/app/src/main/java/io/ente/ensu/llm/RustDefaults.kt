@@ -6,7 +6,7 @@ import io.ente.ensu.bindings.LlmModelPreset as NativeEnsuModelPreset
 import io.ente.ensu.bindings.getEnsuDefaults
 import io.ente.ensu.bindings.uniffiEnsureInitialized
 
-object EnsuRustDefaults {
+object RustDefaults {
     fun load(): EnsuDefaults {
         uniffiEnsureInitialized()
         val defaults = getEnsuDefaults()

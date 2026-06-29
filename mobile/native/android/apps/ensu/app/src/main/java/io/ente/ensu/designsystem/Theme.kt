@@ -157,7 +157,7 @@ object EnsuTypography {
 }
 
 @Composable
-fun EnsuTheme(content: @Composable () -> Unit) {
+fun Theme(content: @Composable () -> Unit) {
     val isDark = isSystemInDarkTheme()
     MaterialTheme(
         colorScheme = if (isDark) darkEnsuColorScheme() else lightEnsuColorScheme(),

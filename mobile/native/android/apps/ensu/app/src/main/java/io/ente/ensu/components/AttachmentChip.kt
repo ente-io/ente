@@ -27,7 +27,7 @@ import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
-import io.ente.ensu.platform.rememberEnsuHaptics
+import io.ente.ensu.platform.rememberHaptics
 
 @Composable
 fun AttachmentChip(
@@ -38,7 +38,7 @@ fun AttachmentChip(
     onDelete: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     val clickModifier = if (onClick != null) {
         Modifier.clickable {
             haptic.perform(HapticFeedbackType.TextHandleMove)

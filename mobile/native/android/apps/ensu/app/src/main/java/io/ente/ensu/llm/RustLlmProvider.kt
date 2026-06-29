@@ -51,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.coroutines.coroutineContext
 import kotlin.math.max
 
-class InferenceRsProvider(
+class RustLlmProvider(
     context: Context,
     private val modelDir: File,
     private val deviceCapabilityProvider: AndroidDeviceCapabilityProvider,
@@ -175,7 +175,7 @@ class InferenceRsProvider(
                     llmPrewarmMultimodalContext(context, mmprojPath, null)
                 }
             }.onFailure { error ->
-                Log.d("InferenceRsProvider", "Image inference prewarm skipped", error)
+                Log.d("RustLlmProvider", "Image inference prewarm skipped", error)
             }
         }
     }
@@ -358,7 +358,7 @@ class InferenceRsProvider(
         runCatching {
             unloadTranscriptionModel()
         }.onFailure { error ->
-            Log.d("InferenceRsProvider", "Transcription model unload skipped", error)
+            Log.d("RustLlmProvider", "Transcription model unload skipped", error)
         }
     }
 
@@ -440,7 +440,7 @@ class InferenceRsProvider(
             if (externalDownloadsRoot == null || downloadManager == null) {
                 throw error
             }
-            Log.w("InferenceRsProvider", "Rust model download failed; falling back to DownloadManager", error)
+            Log.w("RustLlmProvider", "Rust model download failed; falling back to DownloadManager", error)
             awaitBackgroundDownload(target, onProgress)
         }
     }
@@ -531,7 +531,7 @@ class InferenceRsProvider(
     private fun logDownloadMetrics(progress: LlmModelDownloadProgress) {
         if (progress.fileComplete) {
             Log.i(
-                "InferenceRsProvider",
+                "RustLlmProvider",
                 "Model download file complete label=${progress.label} " +
                     "bytes=${progress.fileDownloadedBytes} " +
                     "elapsedMs=${progress.fileElapsedMs} " +
@@ -541,7 +541,7 @@ class InferenceRsProvider(
         }
         if (progress.complete) {
             Log.i(
-                "InferenceRsProvider",
+                "RustLlmProvider",
                 "Model download complete bytes=${progress.downloadedBytes} " +
                     "elapsedMs=${progress.elapsedMs} " +
                     "rate=${formatRate(progress.bytesPerSecond)} " +
@@ -750,7 +750,7 @@ class InferenceRsProvider(
                         oldTarget.destination.delete()
                     }.onFailure { error ->
                         Log.w(
-                            "InferenceRsProvider",
+                            "RustLlmProvider",
                             "Legacy migration failed for ${oldTarget.destination.absolutePath}",
                             error
                         )

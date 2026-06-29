@@ -2,7 +2,7 @@ package io.ente.ensu.llm
 
 import io.ente.ensu.device.isChatSupported
 import io.ente.ensu.llm.LlmModelTarget
-import io.ente.ensu.llm.InferenceRsProvider
+import io.ente.ensu.llm.RustLlmProvider
 import io.ente.ensu.logging.FileLogRepository
 import io.ente.ensu.llm.EnsuDefaults
 import io.ente.ensu.logging.LogLevel
@@ -20,7 +20,7 @@ import kotlinx.coroutines.isActive
 internal class ModelSettingsActions(
     private val state: MutableStateFlow<AppState>,
     private val sessionPreferences: SessionPreferencesDataStore,
-    private val llmProvider: InferenceRsProvider,
+    private val llmProvider: RustLlmProvider,
     private val logRepository: FileLogRepository,
     private val ensuDefaults: EnsuDefaults
 ) {

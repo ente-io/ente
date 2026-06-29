@@ -74,7 +74,7 @@ import io.ente.ensu.chat.ChatMessage
 import io.ente.ensu.chat.MessageAuthor
 import io.ente.ensu.format.formatBytes
 import io.ente.ensu.format.formattedFileSize
-import io.ente.ensu.platform.rememberEnsuHaptics
+import io.ente.ensu.platform.rememberHaptics
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -127,7 +127,7 @@ internal fun MessageList(
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = if (messages.isNotEmpty()) messages.size else 0
     )
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     var autoScrollEnabled by remember { mutableStateOf(true) }
     var isAutoScrolling by remember { mutableStateOf(false) }
     var didPerformStreamingStartHaptic by remember { mutableStateOf(false) }
@@ -389,7 +389,7 @@ private fun DownloadOnboarding(
     modelDownloadSizeBytes: Long?,
     onDownload: () -> Unit
 ) {
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     val downloadAccent = EnsuColor.accentDark
     val downloadButtonTextColor = Color.Black
     val sizeText = modelDownloadSizeBytes?.let { "Approx. ${formatBytes(it)}" } ?: "Approx. size varies by model"
@@ -492,7 +492,7 @@ private fun UserMessageBubble(
     onOpenAttachment: (Attachment) -> Unit
 ) {
     val clipboard = LocalClipboardManager.current
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     var showMenu by remember { mutableStateOf(false) }
     var pressOffset by remember { mutableStateOf(Offset.Zero) }
     val bubbleShape = RoundedCornerShape(18.dp)
@@ -611,7 +611,7 @@ private fun AssistantMessageBubble(
     showsMetadata: Boolean
 ) {
     val clipboard = LocalClipboardManager.current
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     var showMenu by remember { mutableStateOf(false) }
     var pressOffset by remember { mutableStateOf(Offset.Zero) }
     Column(

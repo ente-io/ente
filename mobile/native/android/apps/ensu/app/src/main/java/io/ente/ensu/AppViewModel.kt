@@ -11,8 +11,8 @@ import io.ente.ensu.settings.AdvancedSettingsSnapshot
 import io.ente.ensu.device.AndroidDeviceCapabilityProvider
 import io.ente.ensu.settings.SessionPreferencesDataStore
 import io.ente.ensu.chat.RustChatRepository
-import io.ente.ensu.llm.EnsuRustDefaults
-import io.ente.ensu.llm.InferenceRsProvider
+import io.ente.ensu.llm.RustDefaults
+import io.ente.ensu.llm.RustLlmProvider
 import io.ente.ensu.logging.FileLogRepository
 import io.ente.ensu.storage.CredentialStore
 import io.ente.ensu.logging.LogLevel
@@ -31,14 +31,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val deviceCapabilityProvider = AndroidDeviceCapabilityProvider(application)
 
     val logRepository = FileLogRepository(application)
-    private val llmProvider = InferenceRsProvider(
+    private val llmProvider = RustLlmProvider(
         context = application,
         modelDir = resolveModelDir(application),
         legacyModelDir = File(application.filesDir, "llm"),
         deviceCapabilityProvider = deviceCapabilityProvider
     )
     private val chatRepository = RustChatRepository(application, credentialStore)
-    val ensuDefaults = runCatching { EnsuRustDefaults.load() }
+    val ensuDefaults = runCatching { RustDefaults.load() }
         .onFailure { error ->
             logRepository.log(
                 LogLevel.Error,

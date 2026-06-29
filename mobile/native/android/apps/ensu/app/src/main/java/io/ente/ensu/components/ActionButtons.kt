@@ -26,7 +26,7 @@ import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
-import io.ente.ensu.platform.rememberEnsuHaptics
+import io.ente.ensu.platform.rememberHaptics
 
 @Composable
 fun ActionButton(
@@ -35,7 +35,7 @@ fun ActionButton(
     contentDescription: String,
     color: Color = EnsuColor.textMuted()
 ) {
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     IconButton(
         onClick = {
             haptic.perform(HapticFeedbackType.TextHandleMove)
@@ -59,7 +59,7 @@ fun ActionButton(
     contentDescription: String,
     color: Color = EnsuColor.textMuted()
 ) {
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     IconButton(
         onClick = {
             haptic.perform(HapticFeedbackType.TextHandleMove)
@@ -81,7 +81,7 @@ fun TextActionButton(
     text: String,
     onTap: () -> Unit
 ) {
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     TextButton(onClick = {
         haptic.perform(HapticFeedbackType.TextHandleMove)
         onTap()

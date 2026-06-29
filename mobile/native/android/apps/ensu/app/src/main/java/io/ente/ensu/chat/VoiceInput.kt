@@ -485,7 +485,7 @@ internal class VoiceTranscriptionController(
     }
 
     private companion object {
-        const val TAG = "EnsuVoiceInput"
+        const val TAG = "VoiceInput"
         const val preferredSampleRate = 16_000
         const val bytesPerSample = 2
         const val transientErrorMillis = 10_000L

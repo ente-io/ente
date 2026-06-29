@@ -37,7 +37,7 @@ import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.designsystem.EnsuSpacing
-import io.ente.ensu.platform.rememberEnsuHaptics
+import io.ente.ensu.platform.rememberHaptics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -63,7 +63,7 @@ fun ImageAttachmentThumbnail(
     val image by produceState<DecodedImage?>(initialValue = null, path, targetWidthPx, targetHeightPx) {
         value = decodeSampledImage(path, targetWidthPx, targetHeightPx)
     }
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     val shape = RoundedCornerShape(EnsuCornerRadius.card.dp)
     val resolvedWidth = when {
         image?.isPortrait == true && portraitWidth != null -> portraitWidth

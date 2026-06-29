@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.ente.ensu.components.EnsuLogo
+import io.ente.ensu.components.Logo
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
@@ -32,7 +32,7 @@ import io.ente.ensu.chat.AttachmentDownloadItem
 import io.ente.ensu.chat.AttachmentDownloadStatus
 
 @Composable
-internal fun EnsuTopBar(
+internal fun TopBar(
     sessionTitle: String?,
     showBrand: Boolean,
     attachmentDownloads: List<AttachmentDownloadItem>,
@@ -48,7 +48,7 @@ internal fun EnsuTopBar(
     CenterAlignedTopAppBar(
         title = {
             if (showBrand) {
-                EnsuLogo(height = 23.dp)
+                Logo(height = 23.dp)
             } else {
                 Text(
                     text = titleText,

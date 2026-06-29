@@ -8,7 +8,7 @@ import io.ente.ensu.logging.FileLogRepository
 import io.ente.ensu.llm.LlmMessage
 import io.ente.ensu.llm.LlmMessageRole
 import io.ente.ensu.llm.LlmModelTarget
-import io.ente.ensu.llm.InferenceRsProvider
+import io.ente.ensu.llm.RustLlmProvider
 import io.ente.ensu.chat.Attachment
 import io.ente.ensu.chat.ChatMessage
 import io.ente.ensu.chat.ChatSession
@@ -39,7 +39,7 @@ internal class ChatStoreActions(
     private val state: MutableStateFlow<AppState>,
     private val sessionPreferences: SessionPreferencesDataStore,
     private val chatRepository: RustChatRepository,
-    private val llmProvider: InferenceRsProvider,
+    private val llmProvider: RustLlmProvider,
     private val clock: () -> Long,
     private val logRepository: FileLogRepository,
     private val messageStore: MutableMap<String, MutableList<ChatMessage>>,

@@ -59,7 +59,7 @@ import io.ente.ensu.chat.AttachmentType
 import io.ente.ensu.chat.ChatMessage
 import io.ente.ensu.chat.MaxImageAttachmentsPerMessage
 import io.ente.ensu.format.formattedFileSize
-import io.ente.ensu.platform.rememberEnsuHaptics
+import io.ente.ensu.platform.rememberHaptics
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -84,7 +84,7 @@ internal fun MessageInput(
     onVoiceInput: () -> Unit,
     focusRequestId: Int
 ) {
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     val placeholder = when {
         isAttachmentDownloadBlocked -> {
             val percent = attachmentDownloadPercent?.let { " ($it%)" } ?: ""
@@ -385,7 +385,7 @@ internal fun MessageInput(
 
 @Composable
 private fun EditBanner(message: ChatMessage, onCancelEdit: () -> Unit) {
-    val haptic = rememberEnsuHaptics()
+    val haptic = rememberHaptics()
     Row(
         modifier = Modifier
             .fillMaxWidth()

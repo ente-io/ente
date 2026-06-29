@@ -51,7 +51,7 @@ class FileLogRepository(
 
     fun log(level: LogLevel, message: String, details: String? = null, tag: String? = null, throwable: Throwable? = null) {
         val resolvedTag = tag ?: "ensu"
-        val entry = LogEntryBuilder.buildEntry(
+        val entry = buildLogEntry(
             level = level,
             message = message,
             details = details,

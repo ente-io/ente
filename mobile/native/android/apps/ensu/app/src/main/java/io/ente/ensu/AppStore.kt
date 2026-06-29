@@ -6,7 +6,7 @@ import io.ente.ensu.chat.ChatStoreActions
 import io.ente.ensu.chat.RustChatRepository
 import io.ente.ensu.device.ChatDeviceCapability
 import io.ente.ensu.device.AndroidDeviceCapabilityProvider
-import io.ente.ensu.llm.InferenceRsProvider
+import io.ente.ensu.llm.RustLlmProvider
 import io.ente.ensu.logging.FileLogRepository
 import io.ente.ensu.chat.Attachment
 import io.ente.ensu.chat.ChatMessage
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 class AppStore(
     private val sessionPreferences: SessionPreferencesDataStore,
     private val chatRepository: RustChatRepository,
-    private val llmProvider: InferenceRsProvider,
+    private val llmProvider: RustLlmProvider,
     private val deviceCapabilityProvider: AndroidDeviceCapabilityProvider,
     val ensuDefaults: EnsuDefaults,
     private val logRepository: FileLogRepository,
