@@ -351,6 +351,11 @@ jobs:
               shell: bash
               run: node ../../../.github/scripts/flutter-version.mjs auth set-build "${RELEASE_VERSION}" "${BUILD_NUMBER}"
 
+            # Needed for Pub to checkout flutter/packages on Windows.
+            # https://github.com/dart-lang/pub/issues/3803
+            - name: Enable Git long paths
+              run: git config --global core.longpaths true
+
             - run: flutter pub get --enforce-lockfile
 
             - name: Create artifacts directory
