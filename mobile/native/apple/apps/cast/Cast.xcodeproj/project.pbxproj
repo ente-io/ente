@@ -113,7 +113,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "Cast" */;
 			buildPhases = (
-				DAEC00012F40000000CABA11 /* Build Rust (ente-crypto) */,
+				DAEC00012F40000000CABA11 /* Build Rust (cast) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
 				DA72BC5E2E5F87A000D128FF /* Frameworks */,
 				DA72BC5F2E5F87A000D128FF /* Resources */,
@@ -245,16 +245,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		DAEC00012F40000000CABA11 /* Build Rust (ente-crypto) */ = {
+		DAEC00012F40000000CABA11 /* Build Rust (cast) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (ente-crypto)";
+			name = "Build Rust (cast)";
 			outputPaths = (
-				"$(TARGET_TEMP_DIR)/ente_crypto_rust/libente_crypto_ffi.a",
+				"$(TARGET_TEMP_DIR)/cast_rust/libcast.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -448,9 +448,10 @@
 				MARKETING_VERSION = 1.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-force_load",
-					"$(TARGET_TEMP_DIR)/ente_crypto_rust/libente_crypto_ffi.a",
+					"$(TARGET_TEMP_DIR)/cast_rust/libcast.a",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Cast/Generated/castFFI.modulemap";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/Cast/Generated";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tv.cast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -486,9 +487,10 @@
 				MARKETING_VERSION = 1.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-force_load",
-					"$(TARGET_TEMP_DIR)/ente_crypto_rust/libente_crypto_ffi.a",
+					"$(TARGET_TEMP_DIR)/cast_rust/libcast.a",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Cast/Generated/castFFI.modulemap";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/Cast/Generated";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.tv.cast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
