@@ -8,6 +8,9 @@ import (
 	"golang.org/x/text/language"
 )
 
+// Returns the type of device based on the user agent.
+// Example: Desktop, Mobile, Tablet, TV, etc.
+// Returns empty string if the user agent is invalid or the device type is not found, or err is not nil.
 func GetDeviceType(ua string) (string, error) {
 	dd, dderr := devicedetector.NewDeviceDetector()
 	if dderr != nil {
