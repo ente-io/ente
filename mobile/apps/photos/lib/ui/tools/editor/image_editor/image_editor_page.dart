@@ -35,7 +35,7 @@ import "package:photos/ui/tools/editor/image_editor/image_editor_text_bar.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_tune_bar.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/exif_util.dart";
+import 'package:photos/utils/file_util.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class ImageEditorPage extends StatefulWidget {
@@ -82,16 +82,18 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         format: CompressFormat.jpeg,
       );
       if (flagService.internalUser) {
-        final originalImageExif = await getExif2(widget.originalFile);
+        final originalImageExif = await _readOriginalImageExif(
+          widget.originalFile,
+        );
         final image = img.decodeJpg(result);
         if (image == null) {
           throw Exception("Failed to decode image");
         }
-        image.exif = originalImageExif;
+        if (originalImageExif != null) {
+          image.exif = originalImageExif;
+        }
         for (final key in [
           "Orientation",
-          "ColorSpace",
-          "Gamma",
           "WhitePoint",
           "PrimaryChromaticities",
           "PhotometricInterpretation",
@@ -100,9 +102,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           "Compression",
           "ImageWidth",
           "ImageHeight",
-          "ExifImageWidth",
-          "ExifImageHeight",
-          "ComponentsConfiguration",
           "YCbCrPositioning",
           "YCbCrSubSampling",
           "YCbCrCoefficients",
@@ -110,8 +109,21 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           "XResolution",
           "YResolution",
           "ResolutionUnit",
+        ]) {
+          image.exif.imageIfd[key] = null;
+        }
+        for (final key in [
           "JPEGInterchangeFormat",
           "JPEGInterchangeFormatLength",
+        ]) {
+          image.exif.thumbnailIfd[key] = null;
+        }
+        for (final key in [
+          "ColorSpace",
+          "Gamma",
+          "ExifImageWidth",
+          "ExifImageHeight",
+          "ComponentsConfiguration",
           "CustomRendered",
           "SceneCaptureType",
           "WhiteBalance",
@@ -196,6 +208,25 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     } finally {
       if (hasStoppedChangeNotify) {
         await PhotoManager.startChangeNotify();
+      }
+    }
+  }
+
+  Future<img.ExifData?> _readOriginalImageExif(ente.EnteFile enteFile) async {
+    final file = await getFile(enteFile, isOrigin: true);
+    if (file == null) {
+      return null;
+    }
+    try {
+      final bytes = await file.readAsBytes();
+      final image = img.decodeImage(bytes);
+      if (image == null) {
+        return null;
+      }
+      return image.exif;
+    } finally {
+      if (!enteFile.isRemoteFile && Platform.isIOS) {
+        await file.delete();
       }
     }
   }
