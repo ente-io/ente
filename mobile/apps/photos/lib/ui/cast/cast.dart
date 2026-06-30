@@ -58,11 +58,12 @@ Future<void> showCastSheet(BuildContext context, Collection collection) async {
             await showPairWithCodeSheet(context, collection);
           },
         ),
-        CastSessionsList(
-          showTitle: true,
-          fallback: const SizedBox.shrink(),
-          initialSessions: sessions,
-        ),
+        if (flagService.enableMultiCast)
+          CastSessionsList(
+            showTitle: true,
+            fallback: const SizedBox.shrink(),
+            initialSessions: sessions,
+          ),
       ],
     ),
   );
