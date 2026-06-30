@@ -43,11 +43,15 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       riveFactory: rive.Factory.flutter,
     );
     Future(_showAutoLogoutDialogIfRequired);
+    if (mounted) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    }
   }
 
   @override
   void dispose() {
     _onboardingAnimationLoader.dispose();
+    SystemChrome.setPreferredOrientations([]);
     super.dispose();
   }
 
