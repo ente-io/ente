@@ -190,7 +190,6 @@ class RealSlideshowService: ObservableObject {
             let validFileIDs = Set(await MainActor.run { allFiles.map { $0.id } })
             await cleanupExpiredCache(validFileIDs: validFileIDs)
             
-            // Initialize slideshow state
             await MainActor.run {
                 self.totalSlides = fileCount
                 self.currentFileIndex = 0
@@ -243,10 +242,7 @@ class RealSlideshowService: ObservableObject {
             error = nil
         }
         
-        // Clear cache to free memory only if explicitly needed
-        // await clearCache() // Commented out to preserve cache across sessions
         
-        // Print final cache statistics
         let stats = await getCacheStats()
         print("Final cache stats: \(stats.count) files, \(stats.totalSize) bytes")
         
@@ -279,7 +275,6 @@ class RealSlideshowService: ObservableObject {
             livePhotoVideoData = nil
         }
         // Don't clear cache automatically - preserve across sessions
-        // await clearCache() // Only clear if needed for debugging
     }
     
     // MARK: - File List Management
@@ -348,7 +343,6 @@ class RealSlideshowService: ObservableObject {
     }
     
     private func fetchFilesBatch(castPayload: CastPayload, sinceTime: Int64) async throws -> (files: [[String: Any]], hasMore: Bool, latestUpdateTime: Int64) {
-        // Use the collection ID and sinceTime in the API call
         let url = URL(string: "\(baseURL)/cast/diff?collectionID=\(castPayload.collectionID)&sinceTime=\(sinceTime)")!
         
         
@@ -441,7 +435,6 @@ class RealSlideshowService: ObservableObject {
                         currentFileIndex = 0 // Wrap around to beginning
                     }
                     
-                    // Remove from caches
                     prefetchCache.removeValue(forKey: id)
                     await removeCachedFileContent(fileID: id)
                     
@@ -567,7 +560,6 @@ class RealSlideshowService: ObservableObject {
             return
         }
         
-        // Load from network
         do {
             let file = allFiles[currentFileIndex]
             print("Loading file \(file.id): \(file.title) at index \(currentFileIndex)")
@@ -580,7 +572,6 @@ class RealSlideshowService: ObservableObject {
             
             print("Successfully loaded file \(file.id): \(file.title) (\(decryptedData.count) bytes)")
             
-            // Cache the data
             prefetchCache[currentFileIndex] = decryptedData
             
             await updateCurrentSlide(with: decryptedData, file: file)
@@ -723,7 +714,6 @@ class RealSlideshowService: ObservableObject {
     private func skipToNextSlide() async {
         guard !allFiles.isEmpty else { return }
         
-        // Move to next slide
         currentFileIndex = (currentFileIndex + 1) % allFiles.count
         
         // If we've gone through all files and still have errors, stop the slideshow
@@ -941,7 +931,7 @@ class RealSlideshowService: ObservableObject {
         
         isHandlingAuthExpiry = true
         
-        // CRITICAL: Stop screen saver prevention immediately before any UI transitions
+        // Stop screen saver prevention immediately before any UI transitions
         ScreenSaverManager.allowScreenSaver()
         
         // Stop all ongoing operations

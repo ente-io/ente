@@ -56,17 +56,13 @@ struct VideoPlayerView: View {
     private func setupVideoPlayer() {
         Task {
             do {
-                // Extract file extension from suggested filename
                 let suggestedExtension = suggestedFilename?.components(separatedBy: ".").last?.lowercased()
                 
-                // Create temporary file for video data with proper extension
                 let tempURL = try await createTemporaryVideoFile(from: videoData, suggestedExtension: suggestedExtension)
                 
                 await MainActor.run {
-                    // Validate that the video file can be played
                     let asset = AVURLAsset(url: tempURL)
                     
-                    // Check if the asset is playable
                     Task {
                         let isPlayable = try await asset.load(.isPlayable)
                         let hasVideoTracks = try await !asset.loadTracks(withMediaType: .video).isEmpty
@@ -84,7 +80,6 @@ struct VideoPlayerView: View {
                                 
                                 setupPlayer()
                             } else {
-                                // Try fallback with different extension
                                 self.tryVideoFallback(originalURL: tempURL)
                             }
                         }
@@ -93,7 +88,6 @@ struct VideoPlayerView: View {
             } catch {
                 print("Failed to setup video player: \(error)")
                 await MainActor.run {
-                    // Show error state
                     self.showErrorState()
                 }
             }
@@ -166,10 +160,8 @@ struct VideoPlayerView: View {
             print("Failed to set audio session: \(error)")
         }
         
-        // Add observers
         setupPlayerObservers()
         
-        // Start playing
         player.play()
         isPlaying = true
     }
@@ -188,7 +180,6 @@ struct VideoPlayerView: View {
             player.play()
         }
         
-        // Add observer for player status changes
         NotificationCenter.default.addObserver(
             forName: .AVPlayerItemFailedToPlayToEndTime,
             object: currentItem,
@@ -289,13 +280,11 @@ struct VideoPlayerView: View {
         
         // KVO observer removal no longer needed as we use modern async/await approach
         
-        // Remove all notification observers
         NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: nil)
         NotificationCenter.default.removeObserver(self, name: .AVPlayerItemFailedToPlayToEndTime, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         
-        // Deactivate audio session
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
@@ -309,7 +298,6 @@ struct VideoPlayerView: View {
 }
 
 #Preview {
-    // Create mock video data for preview
     let mockData = Data()
     VideoPlayerView(videoData: mockData, suggestedFilename: "sample_video.mp4")
 }

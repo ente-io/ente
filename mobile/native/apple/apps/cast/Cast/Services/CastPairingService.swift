@@ -159,7 +159,6 @@ class RealCastPairingService {
             }
             
             
-            // Decrypt the payload using our private key
             let payload = try await decryptPayload(
                 encryptedData: encryptedData,
                 publicKey: device.publicKey,

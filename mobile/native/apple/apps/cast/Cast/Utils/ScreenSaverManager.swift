@@ -42,7 +42,6 @@ class ScreenSaverManager: ObservableObject {
         isDisabled = false
     }
 
-    // Cleanup method for app termination
     static func cleanup() {
         shared.stopPrevention()
     }

@@ -6,8 +6,7 @@ struct SlideshowView: View {
     let videoData: Data?
     let isVideo: Bool
     @ObservedObject var slideshowService: RealSlideshowService
-    
-    // Computed property to determine if current file is a live photo
+
     private var isLivePhoto: Bool {
         slideshowService.currentFile?.isLivePhoto ?? false
     }
@@ -47,7 +46,7 @@ struct SlideshowView: View {
 
         return GeometryReader { geometry in
             ZStack {
-                // Background layer - FIXED VERSION
+                // Background layer
                 if let uiImage = mainUIImage {
                     Image(uiImage: uiImage)
                         .resizable()
@@ -185,7 +184,7 @@ struct SlideshowView: View {
             // Backup screen saver prevention at view level
             ScreenSaverManager.preventScreenSaver()
             
-            // CRITICAL FIX: Process initial image data if present and not already processed
+            // Process initial image data if present and not already processed
             // This handles the case where SlideshowView is created with imageData already populated
             // (e.g., when transitioning from .connecting to .slideshow state)
             // Without this, onChange won't fire and the image won't display
