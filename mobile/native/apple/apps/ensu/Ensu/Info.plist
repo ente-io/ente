@@ -41,16 +41,6 @@
         </dict>
     </array>
 
-    <key>UIAppFonts</key>
-    <array>
-        <string>Fonts/Inter-Regular.ttf</string>
-        <string>Fonts/Inter-Medium.ttf</string>
-        <string>Fonts/Inter-SemiBold.ttf</string>
-        <string>Fonts/Inter-Bold.ttf</string>
-        <string>Fonts/DMSerifText-Regular.ttf</string>
-        <string>Fonts/JetBrainsMono-Regular.ttf</string>
-    </array>
-
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Allow access to select photos and images to attach to chat messages.</string>
 
