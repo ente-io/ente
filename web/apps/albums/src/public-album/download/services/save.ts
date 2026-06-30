@@ -1,6 +1,6 @@
 import { downloadManager } from "@/public-album/download/services/download-manager";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
-import { downloadAndSaveFilesWeb } from "ente-gallery/services/browser-save";
+import { downloadAndSaveFilesWeb } from "ente-gallery/services/save-core";
 import type { EnteFile } from "ente-media/file";
 
 /**
