@@ -5,6 +5,7 @@ on:
         paths:
             - ".github/workflows/mobile-lint.yml"
             - "mobile/**"
+            - "!mobile/native/**"
             - "rust/apps/codegen/**"
             - "rust/bindings/frb/**"
             - "rust/Cargo.lock"
