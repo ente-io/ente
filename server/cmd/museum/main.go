@@ -530,6 +530,8 @@ func main() {
 
 	privateAPI := server.Group("/")
 	privateAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(nil), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	storageAPI := privateAPI.Group("/")
+	storageAPI.Use(middleware.RejectAuthApp())
 
 	adminAPI := server.Group("/admin")
 	adminAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(nil), authMiddleware.AdminAuthMiddleware())
@@ -588,40 +590,40 @@ func main() {
 		FileUrlCtrl:  fileLinkCtrl,
 	}
 	pasteHandler := &api.PasteHandler{Controller: pasteCtrl}
-	privateAPI.GET("/files/upload-eligibility", fileHandler.ValidateUploadEligibility)
-	privateAPI.GET("/files/upload-urls", fileHandler.GetUploadURLs)
-	privateAPI.GET("/files/multipart-upload-urls", fileHandler.GetMultipartUploadURLs)
-	privateAPI.POST("/files/upload-url", fileHandler.GetUploadURLV2)
-	privateAPI.POST("/files/multipart-upload-url", fileHandler.GetMultipartUploadURLV2)
-	privateAPI.GET("/files/download/:fileID", fileHandler.Get)
-	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
+	storageAPI.GET("/files/upload-eligibility", fileHandler.ValidateUploadEligibility)
+	storageAPI.GET("/files/upload-urls", fileHandler.GetUploadURLs)
+	storageAPI.GET("/files/multipart-upload-urls", fileHandler.GetMultipartUploadURLs)
+	storageAPI.POST("/files/upload-url", fileHandler.GetUploadURLV2)
+	storageAPI.POST("/files/multipart-upload-url", fileHandler.GetMultipartUploadURLV2)
+	storageAPI.GET("/files/download/:fileID", fileHandler.Get)
+	storageAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
 
-	privateAPI.POST("/files/share-url", fileHandler.ShareUrl)
-	privateAPI.GET("/files/share-url", fileHandler.GetUrls)
-	privateAPI.PUT("/files/share-url", fileHandler.UpdateFileURL)
-	privateAPI.DELETE("/files/share-url/:fileID", fileHandler.DisableUrl)
-	privateAPI.GET("/files/share-urls/", fileHandler.GetUrls)
+	storageAPI.POST("/files/share-url", fileHandler.ShareUrl)
+	storageAPI.GET("/files/share-url", fileHandler.GetUrls)
+	storageAPI.PUT("/files/share-url", fileHandler.UpdateFileURL)
+	storageAPI.DELETE("/files/share-url/:fileID", fileHandler.DisableUrl)
+	storageAPI.GET("/files/share-urls/", fileHandler.GetUrls)
 
-	privateAPI.PUT("/files/data", fileHandler.PutFileData)
-	privateAPI.PUT("/files/video-data", fileHandler.PutVideoData)
-	privateAPI.POST("/files/data/status-diff", fileHandler.FileDataStatusDiff)
-	privateAPI.POST("/files/data/fetch", fileHandler.GetFilesData)
-	privateAPI.GET("/files/data/fetch", fileHandler.GetFileData)
-	privateAPI.GET("/files/data/preview-upload-url", fileHandler.GetPreviewUploadURL)
-	privateAPI.GET("/files/data/preview", fileHandler.GetPreviewURL)
+	storageAPI.PUT("/files/data", fileHandler.PutFileData)
+	storageAPI.PUT("/files/video-data", fileHandler.PutVideoData)
+	storageAPI.POST("/files/data/status-diff", fileHandler.FileDataStatusDiff)
+	storageAPI.POST("/files/data/fetch", fileHandler.GetFilesData)
+	storageAPI.GET("/files/data/fetch", fileHandler.GetFileData)
+	storageAPI.GET("/files/data/preview-upload-url", fileHandler.GetPreviewUploadURL)
+	storageAPI.GET("/files/data/preview", fileHandler.GetPreviewURL)
 
-	privateAPI.POST("/files", fileHandler.CreateOrUpdate)
-	privateAPI.POST("/files/meta", fileHandler.CreateMetaFile)
-	privateAPI.POST("/files/copy", fileHandler.CopyFiles)
-	privateAPI.PUT("/files/update", fileHandler.Update)
-	privateAPI.POST("/files/trash", fileHandler.Trash)
-	privateAPI.POST("/files/size", fileHandler.GetSize)
-	privateAPI.POST("/files/info", fileHandler.GetInfo)
-	privateAPI.GET("/files/duplicates", fileHandler.GetDuplicates)
-	privateAPI.GET("/files/large-thumbnails", fileHandler.GetLargeThumbnailFiles)
-	privateAPI.PUT("/files/thumbnail", fileHandler.UpdateThumbnail)
-	privateAPI.PUT("/files/magic-metadata", fileHandler.UpdateMagicMetadata)
-	privateAPI.PUT("/files/public-magic-metadata", fileHandler.UpdatePublicMagicMetadata)
+	storageAPI.POST("/files", fileHandler.CreateOrUpdate)
+	storageAPI.POST("/files/meta", fileHandler.CreateMetaFile)
+	storageAPI.POST("/files/copy", fileHandler.CopyFiles)
+	storageAPI.PUT("/files/update", fileHandler.Update)
+	storageAPI.POST("/files/trash", fileHandler.Trash)
+	storageAPI.POST("/files/size", fileHandler.GetSize)
+	storageAPI.POST("/files/info", fileHandler.GetInfo)
+	storageAPI.GET("/files/duplicates", fileHandler.GetDuplicates)
+	storageAPI.GET("/files/large-thumbnails", fileHandler.GetLargeThumbnailFiles)
+	storageAPI.PUT("/files/thumbnail", fileHandler.UpdateThumbnail)
+	storageAPI.PUT("/files/magic-metadata", fileHandler.UpdateMagicMetadata)
+	storageAPI.PUT("/files/public-magic-metadata", fileHandler.UpdatePublicMagicMetadata)
 	publicAPI.GET("/files/count", fileHandler.GetTotalFileCount)
 	publicAPI.POST("/paste/create", pasteHandler.Create)
 	publicAPI.POST("/paste/guard", pasteHandler.Guard)
@@ -630,10 +632,10 @@ func main() {
 	trashHandler := &api.TrashHandler{
 		Controller: trashController,
 	}
-	privateAPI.GET("/trash/diff", trashHandler.GetDiff)
-	privateAPI.GET("/trash/v2/diff", trashHandler.GetDiffV2)
-	privateAPI.POST("/trash/delete", trashHandler.Delete)
-	privateAPI.POST("/trash/empty", trashHandler.Empty)
+	storageAPI.GET("/trash/diff", trashHandler.GetDiff)
+	storageAPI.GET("/trash/v2/diff", trashHandler.GetDiffV2)
+	storageAPI.POST("/trash/delete", trashHandler.Delete)
+	storageAPI.POST("/trash/empty", trashHandler.Empty)
 	commentsHandler := &api.CommentsHandler{Controller: commentsController}
 	reactionsHandler := &api.ReactionsHandler{Controller: reactionsController}
 	socialHandler := &api.SocialHandler{Controller: socialController}
@@ -642,19 +644,19 @@ func main() {
 		ReactionsCtrl:    publicReactionsCtrl,
 		AnonIdentityCtrl: anonIdentityCtrl,
 	}
-	privateAPI.GET("/comments/diff", commentsHandler.Diff)
-	privateAPI.POST("/comments", commentsHandler.Create)
-	privateAPI.PUT("/comments/:commentID", commentsHandler.Update)
-	privateAPI.DELETE("/comments/:commentID", commentsHandler.Delete)
+	storageAPI.GET("/comments/diff", commentsHandler.Diff)
+	storageAPI.POST("/comments", commentsHandler.Create)
+	storageAPI.PUT("/comments/:commentID", commentsHandler.Update)
+	storageAPI.DELETE("/comments/:commentID", commentsHandler.Delete)
 
-	privateAPI.GET("/reactions/diff", reactionsHandler.Diff)
-	privateAPI.PUT("/reactions", reactionsHandler.Upsert)
-	privateAPI.DELETE("/reactions/:reactionID", reactionsHandler.Delete)
+	storageAPI.GET("/reactions/diff", reactionsHandler.Diff)
+	storageAPI.PUT("/reactions", reactionsHandler.Upsert)
+	storageAPI.DELETE("/reactions/:reactionID", reactionsHandler.Delete)
 
-	privateAPI.GET("/social/diff", socialHandler.UnifiedDiff)
-	privateAPI.GET("/social/anon-profiles", socialHandler.AnonProfiles)
-	privateAPI.GET("/comments-reactions/counts", socialHandler.Counts)
-	privateAPI.GET("/comments-reactions/updated-at", socialHandler.LatestUpdates)
+	storageAPI.GET("/social/diff", socialHandler.UnifiedDiff)
+	storageAPI.GET("/social/anon-profiles", socialHandler.AnonProfiles)
+	storageAPI.GET("/comments-reactions/counts", socialHandler.Counts)
+	storageAPI.GET("/comments-reactions/updated-at", socialHandler.LatestUpdates)
 
 	emergencyCtrl := &emergency.Controller{
 		Repo:              emergencyContactRepository,
@@ -699,7 +701,7 @@ func main() {
 	privateAPI.GET("/users/accounts-token", userHandler.GetAccountsToken)
 	privateAPI.GET("/users/details/v2", userHandler.GetDetailsV2)
 	privateAPI.GET("/users/deletion-summary", userHandler.GetAccountDeletionSummary)
-	privateAPI.GET("/users/locker-usage", userHandler.GetLockerUsage)
+	storageAPI.GET("/users/locker-usage", userHandler.GetLockerUsage)
 	privateAPI.POST("/users/change-email", userHandler.ChangeEmail)
 	privateAPI.GET("/users/sessions", userHandler.GetActiveSessions)
 	privateAPI.DELETE("/users/session", userHandler.TerminateSession)
@@ -721,38 +723,38 @@ func main() {
 	collectionHandler := &api.CollectionHandler{
 		Controller: collectionController,
 	}
-	privateAPI.POST("/collections", collectionHandler.Create)
+	storageAPI.POST("/collections", collectionHandler.Create)
 	// Collection actions (exposed for clients to fetch suggestions/removals)
-	privateAPI.GET("/collection-actions/pending-remove", collectionActionsHandler.ListPendingRemove)
-	privateAPI.GET("/collection-actions/delete-suggestions", collectionActionsHandler.ListDeleteSuggestions)
-	privateAPI.POST("/collection-actions/reject-delete-suggestions", collectionActionsHandler.RejectDeleteSuggestions)
+	storageAPI.GET("/collection-actions/pending-remove", collectionActionsHandler.ListPendingRemove)
+	storageAPI.GET("/collection-actions/delete-suggestions", collectionActionsHandler.ListDeleteSuggestions)
+	storageAPI.POST("/collection-actions/reject-delete-suggestions", collectionActionsHandler.RejectDeleteSuggestions)
 
-	privateAPI.GET("/collections/:collectionID", collectionHandler.GetCollectionByID)
+	storageAPI.GET("/collections/:collectionID", collectionHandler.GetCollectionByID)
 	//lint:ignore SA1019 Deprecated API will be removed in the future
-	privateAPI.GET("/collections", collectionHandler.Get)
-	privateAPI.GET("/collections/v2", collectionHandler.GetV2)
-	privateAPI.GET("/collections/v3", collectionHandler.GetWithLimit)
-	privateAPI.POST("/collections/share", collectionHandler.Share)
-	privateAPI.POST("/collections/join-link", collectionHandler.JoinLink)
-	privateAPI.POST("/collections/share-url", collectionHandler.ShareURL)
-	privateAPI.PUT("/collections/share-url", collectionHandler.UpdateShareURL)
-	privateAPI.DELETE("/collections/share-url/:collectionID", collectionHandler.UnShareURL)
-	privateAPI.POST("/collections/unshare", collectionHandler.UnShare)
-	privateAPI.POST("/collections/leave/:collectionID", collectionHandler.Leave)
-	privateAPI.POST("/collections/add-files", collectionHandler.AddFiles)
-	privateAPI.POST("/collections/move-files", collectionHandler.MoveFiles)
-	privateAPI.POST("/collections/restore-files", collectionHandler.RestoreFiles)
+	storageAPI.GET("/collections", collectionHandler.Get)
+	storageAPI.GET("/collections/v2", collectionHandler.GetV2)
+	storageAPI.GET("/collections/v3", collectionHandler.GetWithLimit)
+	storageAPI.POST("/collections/share", collectionHandler.Share)
+	storageAPI.POST("/collections/join-link", collectionHandler.JoinLink)
+	storageAPI.POST("/collections/share-url", collectionHandler.ShareURL)
+	storageAPI.PUT("/collections/share-url", collectionHandler.UpdateShareURL)
+	storageAPI.DELETE("/collections/share-url/:collectionID", collectionHandler.UnShareURL)
+	storageAPI.POST("/collections/unshare", collectionHandler.UnShare)
+	storageAPI.POST("/collections/leave/:collectionID", collectionHandler.Leave)
+	storageAPI.POST("/collections/add-files", collectionHandler.AddFiles)
+	storageAPI.POST("/collections/move-files", collectionHandler.MoveFiles)
+	storageAPI.POST("/collections/restore-files", collectionHandler.RestoreFiles)
 
-	privateAPI.POST("/collections/v3/remove-files", collectionHandler.RemoveFilesV3)
-	privateAPI.POST("/collections/suggest-delete", collectionHandler.SuggestDeleteInSharedCollection)
-	privateAPI.GET("/collections/v2/diff", collectionHandler.GetDiffV2)
-	privateAPI.GET("/collections/file", collectionHandler.GetFile)
-	privateAPI.GET("/collections/sharees", collectionHandler.GetSharees)
-	privateAPI.DELETE("/collections/v3/:collectionID", collectionHandler.TrashV3)
-	privateAPI.POST("/collections/rename", collectionHandler.Rename)
-	privateAPI.PUT("/collections/magic-metadata", collectionHandler.PrivateMagicMetadataUpdate)
-	privateAPI.PUT("/collections/public-magic-metadata", collectionHandler.PublicMagicMetadataUpdate)
-	privateAPI.PUT("/collections/sharee-magic-metadata", collectionHandler.ShareeMagicMetadataUpdate)
+	storageAPI.POST("/collections/v3/remove-files", collectionHandler.RemoveFilesV3)
+	storageAPI.POST("/collections/suggest-delete", collectionHandler.SuggestDeleteInSharedCollection)
+	storageAPI.GET("/collections/v2/diff", collectionHandler.GetDiffV2)
+	storageAPI.GET("/collections/file", collectionHandler.GetFile)
+	storageAPI.GET("/collections/sharees", collectionHandler.GetSharees)
+	storageAPI.DELETE("/collections/v3/:collectionID", collectionHandler.TrashV3)
+	storageAPI.POST("/collections/rename", collectionHandler.Rename)
+	storageAPI.PUT("/collections/magic-metadata", collectionHandler.PrivateMagicMetadataUpdate)
+	storageAPI.PUT("/collections/public-magic-metadata", collectionHandler.PublicMagicMetadataUpdate)
+	storageAPI.PUT("/collections/sharee-magic-metadata", collectionHandler.ShareeMagicMetadataUpdate)
 
 	publicCollectionHandler := &api.PublicCollectionHandler{
 		Controller:             collectionLinkCtrl,
@@ -799,10 +801,10 @@ func main() {
 		FileDataCtrl: fileDataCtrl,
 	}
 
-	privateAPI.POST("/memory-share", memoryShareHandler.Create)
-	privateAPI.GET("/memory-share", memoryShareHandler.List)
-	privateAPI.GET("/memory-share/:shareID", memoryShareHandler.GetByID)
-	privateAPI.DELETE("/memory-share/:shareID", memoryShareHandler.Delete)
+	storageAPI.POST("/memory-share", memoryShareHandler.Create)
+	storageAPI.GET("/memory-share", memoryShareHandler.List)
+	storageAPI.GET("/memory-share/:shareID", memoryShareHandler.GetByID)
+	storageAPI.DELETE("/memory-share/:shareID", memoryShareHandler.Delete)
 
 	publicMemoryAPI.GET("/info", publicMemoryShareHandler.GetInfo)
 	publicMemoryAPI.GET("/files", publicMemoryShareHandler.GetFiles)
@@ -824,8 +826,8 @@ func main() {
 	}
 
 	publicAPI.POST("/cast/device-info", castHandler.RegisterDevice)
-	privateAPI.GET("/cast/device-info", castHandler.GetAllDevices)
-	privateAPI.DELETE("/cast/device-info/:deviceID", castHandler.DeleteDevice)
+	storageAPI.GET("/cast/device-info", castHandler.GetAllDevices)
+	storageAPI.DELETE("/cast/device-info/:deviceID", castHandler.DeleteDevice)
 	// Deprecated Nov 2024. Remove in a few months.
 	//
 	// This (and below) are deprecated copy of endpoints with a trailing slash.
@@ -833,14 +835,14 @@ func main() {
 	// redirect because of CORS headers missing on the 307. Can be safely
 	// removed in a few months after the desktop apps have updated.
 	publicAPI.POST("/cast/device-info/", castHandler.RegisterDevice)
-	privateAPI.GET("/cast/device-info/:deviceCode", castHandler.GetDeviceInfo)
+	storageAPI.GET("/cast/device-info/:deviceCode", castHandler.GetDeviceInfo)
 	publicAPI.GET("/cast/cast-data/:deviceCode", castHandler.GetCastData)
-	privateAPI.POST("/cast/cast-data", castHandler.InsertCastData)
+	storageAPI.POST("/cast/cast-data", castHandler.InsertCastData)
 	// Deprecated Nov 2024. Remove in a few months.
-	privateAPI.POST("/cast/cast-data/", castHandler.InsertCastData)
-	privateAPI.DELETE("/cast/revoke-all-tokens", castHandler.RevokeAllToken)
+	storageAPI.POST("/cast/cast-data/", castHandler.InsertCastData)
+	storageAPI.DELETE("/cast/revoke-all-tokens", castHandler.RevokeAllToken)
 	// Deprecated Nov 2024. Remove in a few months.
-	privateAPI.DELETE("/cast/revoke-all-tokens/", castHandler.RevokeAllToken)
+	storageAPI.DELETE("/cast/revoke-all-tokens/", castHandler.RevokeAllToken)
 
 	castAPI.GET("/files/preview/:fileID", castHandler.GetThumbnail)
 	castAPI.GET("/files/download/:fileID", castHandler.GetFile)
@@ -973,30 +975,30 @@ func main() {
 	userEntityController := &userEntityCtrl.Controller{Repo: userEntityRepo}
 	userEntityHandler := &api.UserEntityHandler{Controller: userEntityController}
 
-	privateAPI.POST("/user-entity/key", userEntityHandler.CreateKey)
-	privateAPI.GET("/user-entity/key", userEntityHandler.GetKey)
-	privateAPI.POST("/user-entity/entity", userEntityHandler.CreateEntity)
-	privateAPI.PUT("/user-entity/entity", userEntityHandler.UpdateEntity)
-	privateAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
-	privateAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
+	storageAPI.POST("/user-entity/key", userEntityHandler.CreateKey)
+	storageAPI.GET("/user-entity/key", userEntityHandler.GetKey)
+	storageAPI.POST("/user-entity/entity", userEntityHandler.CreateEntity)
+	storageAPI.PUT("/user-entity/entity", userEntityHandler.UpdateEntity)
+	storageAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
+	storageAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
 
 	contactController := contactCtrl.New(contactRepository, objectCleanupController, s3Config)
 	contactHandler := &api.ContactHandler{Controller: contactController}
 
-	privateAPI.POST("/contacts", contactHandler.Create)
-	privateAPI.GET("/contacts/:id", contactHandler.Get)
-	privateAPI.GET("/contacts/diff", contactHandler.GetDiff)
-	privateAPI.PUT("/contacts/:id", contactHandler.Update)
-	privateAPI.DELETE("/contacts/:id", contactHandler.Delete)
-	privateAPI.POST("/attachments/:type/upload-url", contactHandler.GetAttachmentUploadURL)
-	privateAPI.GET("/attachments/:type/:attachmentID", contactHandler.GetAttachment)
-	privateAPI.PUT("/contacts/:id/attachments/:type", contactHandler.AttachContactAttachment)
-	privateAPI.GET("/contacts/:id/attachments/:type", contactHandler.GetCurrentContactAttachment)
-	privateAPI.DELETE("/contacts/:id/attachments/:type", contactHandler.DeleteContactAttachment)
-	privateAPI.POST("/contacts/:id/profile-picture/upload-url", contactHandler.GetProfilePictureUploadURL)
-	privateAPI.PUT("/contacts/:id/profile-picture", contactHandler.AttachProfilePicture)
-	privateAPI.GET("/contacts/:id/profile-picture", contactHandler.GetProfilePicture)
-	privateAPI.DELETE("/contacts/:id/profile-picture", contactHandler.DeleteProfilePicture)
+	storageAPI.POST("/contacts", contactHandler.Create)
+	storageAPI.GET("/contacts/:id", contactHandler.Get)
+	storageAPI.GET("/contacts/diff", contactHandler.GetDiff)
+	storageAPI.PUT("/contacts/:id", contactHandler.Update)
+	storageAPI.DELETE("/contacts/:id", contactHandler.Delete)
+	storageAPI.POST("/attachments/:type/upload-url", contactHandler.GetAttachmentUploadURL)
+	storageAPI.GET("/attachments/:type/:attachmentID", contactHandler.GetAttachment)
+	storageAPI.PUT("/contacts/:id/attachments/:type", contactHandler.AttachContactAttachment)
+	storageAPI.GET("/contacts/:id/attachments/:type", contactHandler.GetCurrentContactAttachment)
+	storageAPI.DELETE("/contacts/:id/attachments/:type", contactHandler.DeleteContactAttachment)
+	storageAPI.POST("/contacts/:id/profile-picture/upload-url", contactHandler.GetProfilePictureUploadURL)
+	storageAPI.PUT("/contacts/:id/profile-picture", contactHandler.AttachProfilePicture)
+	storageAPI.GET("/contacts/:id/profile-picture", contactHandler.GetProfilePicture)
+	storageAPI.DELETE("/contacts/:id/profile-picture", contactHandler.DeleteProfilePicture)
 
 	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo, UserRepo: userRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}
