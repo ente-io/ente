@@ -67,8 +67,6 @@ fn main() {
             commands::config::config_defaults,
             commands::llm::llm_download_model_files,
             commands::llm::llm_cancel_model_download,
-            commands::fs::fs_file_size,
-            commands::fs::fs_read_head,
         ])
         .build(tauri::generate_context!())
         .unwrap_or_else(|err| {
