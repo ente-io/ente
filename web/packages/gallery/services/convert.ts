@@ -26,6 +26,8 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     const startTime = Date.now();
     const imageData = new Uint8Array(await imageBlob.arrayBuffer());
     const electron = globalThis.electron;
+    // If we're running in a worker, reroute the request back to the main
+    // thread since workers don't have access to window.electron.
     const jpegData = electron
         ? await electron.convertToJPEG(imageData)
         : await workerBridge!.convertToJPEG(imageData);
@@ -40,6 +42,9 @@ export const playableVideoURL = async (
 ): Promise<string> =>
     playableVideoURLWeb(videoFileName, videoBlob, {
         convertToMP4,
+        // isPlaybackPossible can return true when Chromium plays only the
+        // audio stream. For live photos on Linux desktop, force conversion as a
+        // pragmatic fallback; their video component is short.
         shouldConvertPlayableVideo: () =>
             isDesktop &&
             file.metadata.fileType == FileType.livePhoto &&
