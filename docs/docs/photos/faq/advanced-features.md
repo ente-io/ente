@@ -51,6 +51,24 @@ The exports are incremental and will gracefully handle interruptions - you can s
 
 For complete documentation, see the [CLI feature guide](/photos/features/utilities/cli#basic-usage).
 
+### Does the CLI export include albums shared with me? {#cli-export-shared-albums}
+
+Yes. By default, `ente export` includes albums that others have shared with you, so their photos are downloaded into your local export folder alongside your own.
+
+To export only the albums you own and skip everything shared with you, pass `--shared=false`:
+
+```sh
+ente export --shared=false
+```
+
+This is independent of the incremental behavior - incremental only controls whether already-exported files are downloaded again, not which albums are in scope.
+
+A few related notes:
+
+- Each album folder includes a `.meta` file that records the album's `ownerID`, and each file's metadata records its owner, so you can tell which items belong to you and which were shared.
+- `--shared=false` excludes albums owned by someone else. If you own a collaborative album that others have added photos to, those files still export, since the album itself is yours.
+- Hidden albums are excluded by default. Pass `--hidden=false` to include them.
+
 ### How do I keep NAS and Ente photos synced? {#nas-sync}
 
 The recommended approach is to use the CLI to pull data from Ente to your NAS:
