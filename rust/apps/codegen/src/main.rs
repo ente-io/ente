@@ -96,6 +96,12 @@ fn generate_native(target: NativeTarget) -> Result<(), DynError> {
             crate_dir: rust_root.join("bindings/uniffi/cast"),
         };
         generate_swift(&cast, "mobile/native/apple/apps/cast/Cast/Generated")?;
+        // TODO: Android cast bindings scaffold
+        // generate_kotlin(
+        //     &cast,
+        //     "mobile/native/android/apps/cast/app/src/main/kotlin",
+        //     "io/ente/cast/bindings/cast.kt",
+        // )?;
     }
 
     Ok(())
