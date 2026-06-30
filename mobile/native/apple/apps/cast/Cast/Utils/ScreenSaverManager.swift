@@ -17,13 +17,11 @@ class ScreenSaverManager: ObservableObject {
 
     private func startPrevention() {
         guard !isDisabled else {
-            print("🚫 Screen saver prevention already enabled")
             return
         }
 
         UIApplication.shared.isIdleTimerDisabled = true
         isDisabled = true
-        print("🚫 Screen saver prevention enabled")
 
         // Fallback for problematic tvOS versions where isIdleTimerDisabled doesn't work reliably
         // This timer periodically refreshes the setting to ensure it stays disabled
@@ -35,7 +33,6 @@ class ScreenSaverManager: ObservableObject {
 
     private func stopPrevention() {
         guard isDisabled else {
-            print("✅ Screen saver prevention already disabled")
             return
         }
 
@@ -43,7 +40,6 @@ class ScreenSaverManager: ObservableObject {
         refreshTimer = nil
         UIApplication.shared.isIdleTimerDisabled = false
         isDisabled = false
-        print("✅ Screen saver prevention disabled")
     }
 
     // Cleanup method for app termination

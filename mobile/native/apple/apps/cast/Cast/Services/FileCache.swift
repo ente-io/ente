@@ -70,7 +70,7 @@ actor ThreadSafeFileCache {
         // Save metadata
         saveCacheMetadata()
         
-        print("💾 Cached file \(fileID) content (\(data.count) bytes) - Cache size: \(cache.count) files")
+        print("Cached file \(fileID) content (\(data.count) bytes) - Cache size: \(cache.count) files")
     }
     
     func remove(_ fileID: Int) {
@@ -85,7 +85,7 @@ actor ThreadSafeFileCache {
             // Save updated metadata
             saveCacheMetadata()
             
-            print("🗑️ Removed cached content for file \(fileID) (\(removedData.count) bytes)")
+            print("Removed cached content for file \(fileID) (\(removedData.count) bytes)")
         }
     }
     
@@ -102,7 +102,7 @@ actor ThreadSafeFileCache {
         // Clear metadata
         try? FileManager.default.removeItem(at: metadataURL)
         
-        print("🗑️ Cleared file content cache (\(clearedCount) files)")
+        print("Cleared file content cache (\(clearedCount) files)")
     }
     
     func getStats() -> (count: Int, totalSize: Int) {
@@ -126,7 +126,7 @@ actor ThreadSafeFileCache {
                 let fileURL = cacheDirectory.appendingPathComponent("\(oldest).cache")
                 try? FileManager.default.removeItem(at: fileURL)
                 
-                print("🧹 Evicted file \(oldest) (\(data.count) bytes) to control cache size")
+                print("Evicted file \(oldest) (\(data.count) bytes) to control cache size")
             }
         }
         totalBytes -= removedBytes
@@ -134,18 +134,17 @@ actor ThreadSafeFileCache {
         // Save updated metadata after eviction
         saveCacheMetadata()
         
-        print("📦 Cache GC complete: now \(cache.count) files, \(totalBytes) bytes")
+        print("Cache GC complete: now \(cache.count) files, \(totalBytes) bytes")
     }
     
     private func loadCacheFromDisk() {
         // Load metadata
         guard let metadataData = try? Data(contentsOf: metadataURL),
               let metadata = try? JSONDecoder().decode(CacheMetadata.self, from: metadataData) else {
-            print("📂 No existing cache metadata found - starting fresh")
             return
         }
         
-        print("📂 Loading existing cache from disk - \(metadata.fileIDs.count) files")
+        print("Loading existing cache from disk - \(metadata.fileIDs.count) files")
         
         // Load cache order and calculate total bytes
         var loadedBytes = 0
@@ -165,7 +164,7 @@ actor ThreadSafeFileCache {
         cacheOrder = validFileIDs
         totalBytes = loadedBytes
         
-        print("📂 Loaded \(validFileIDs.count) cached files (\(loadedBytes) bytes) from disk")
+        print("Loaded \(validFileIDs.count) cached files (\(loadedBytes) bytes) from disk")
         
         // Clean up any invalid entries
         if validFileIDs.count != metadata.fileIDs.count {

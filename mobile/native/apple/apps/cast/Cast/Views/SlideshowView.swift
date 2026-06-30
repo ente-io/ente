@@ -41,7 +41,7 @@ struct SlideshowView: View {
     }
     
     var body: some View {
-        // ✅ OPTIMIZATION: Use pre-decoded images to avoid decoding during render
+        // Use pre-decoded images to avoid decoding during render
         let mainUIImage = preDecodedImage
         let previousUIImage = previousDecodedImage
 
@@ -133,7 +133,6 @@ struct SlideshowView: View {
                 actionFeedbackOverlay
                 controlsOverlay
                 toastOverlay
-//                ambientLightOverlay
             }
         }
         .onChange(of: imageData) { newValue in
@@ -349,7 +348,7 @@ struct SlideshowView: View {
             return uiImage
         } else {
             imageDecodeFailed = true
-            print("❌ UIImage decode failed (bytes: \(data.count))")
+            print("UIImage decode failed (bytes: \(data.count))")
             return nil
         }
     }
@@ -364,7 +363,7 @@ struct SlideshowView: View {
             previousImageOpacity = 0.0
         }
         
-        print("🖼️ Displaying \(isLive ? "live" : "static") image (\(bytes) bytes)")
+        print("Displaying \(isLive ? "live" : "static") image (\(bytes) bytes)")
         
         // Clean up previous image data after animation
         Task {

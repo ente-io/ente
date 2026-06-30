@@ -122,7 +122,6 @@ class RealSlideshowService: ObservableObject {
         
         // For single photo, just restart the timer without changing index
         if allFiles.count == 1 {
-            print("📸 Single photo in album - restarting timer")
             if isPlaying && !isPaused {
                 startSlideTimer()
             }
@@ -131,7 +130,6 @@ class RealSlideshowService: ObservableObject {
         
         // Check if current file was deleted and handle accordingly
         if currentFileWasDeleted {
-            print("⏭️ Handling deleted current file")
             currentFileWasDeleted = false
             // Current index already adjusted in processDiffBatch
             if currentFileIndex >= allFiles.count {
@@ -160,7 +158,6 @@ class RealSlideshowService: ObservableObject {
     // MARK: - Main Entry Points
     
     func start(castPayload: CastPayload) async {
-        print("🎬 Starting slideshow with payload:")
         
         // Enable screen saver prevention for slideshow
         ScreenSaverManager.preventScreenSaver()
@@ -175,7 +172,6 @@ class RealSlideshowService: ObservableObject {
         }
         
         do {
-            print("📡 Fetching files from Ente museum server...")
             
             // Initialize file list and fetch all files with pagination
             await initializeFileList(castPayload: castPayload)
@@ -188,7 +184,7 @@ class RealSlideshowService: ObservableObject {
                 return
             }
             
-            print("📁 Found \(fileCount) files total")
+            print("Found \(fileCount) files total")
             
             // Clean up cache for files no longer in the collection
             let validFileIDs = Set(await MainActor.run { allFiles.map { $0.id } })
@@ -208,15 +204,14 @@ class RealSlideshowService: ObservableObject {
             
             // For single photo, ensure timer is started even if it's an image
             if fileCount == 1 {
-                print("📸 Starting slideshow with single photo")
                 startSlideTimer()
             } else {
                 startSlideTimer()
             }
-            print("✅ Enhanced slideshow started with \(fileCount) slide(s)")
+            print("Enhanced slideshow started with \(fileCount) slide(s)")
             
         } catch {
-            print("❌ Failed to start slideshow: \(error)")
+            print("Failed to start slideshow: \(error)")
             await MainActor.run {
                 self.error = "Failed to load slideshow: \(error.localizedDescription)"
             }
@@ -224,7 +219,6 @@ class RealSlideshowService: ObservableObject {
     }
     
     func stop() async {
-        print("⏹️ Stopping real slideshow service...")
         
         // Disable screen saver prevention when stopping slideshow
         ScreenSaverManager.allowScreenSaver()
@@ -254,8 +248,7 @@ class RealSlideshowService: ObservableObject {
         
         // Print final cache statistics
         let stats = await getCacheStats()
-        print("📊 Final cache stats: \(stats.count) files, \(stats.totalSize) bytes")
-        print("✅ Real slideshow service stopped")
+        print("Final cache stats: \(stats.count) files, \(stats.totalSize) bytes")
         
         // Reset stopping flag for next session
         await MainActor.run {
@@ -264,7 +257,6 @@ class RealSlideshowService: ObservableObject {
     }
     
     func clearExpiredTokenState() async {
-        print("🧹 Clearing expired token state from slideshow service")
         
         // Ensure screen saver prevention is disabled when clearing expired state
         ScreenSaverManager.allowScreenSaver()
@@ -296,12 +288,11 @@ class RealSlideshowService: ObservableObject {
     private func initializeFileList(castPayload: CastPayload) async {
         // Check if we've already completed the initial fetch
         if hasCompletedInitialFetch && !allFiles.isEmpty {
-            print("📋 Using cached file list with \(allFiles.count) files")
+            print("Using cached file list with \(allFiles.count) files")
             return
         }
         
         // Reset state for fresh fetch
-        print("📡 Performing initial diff fetch...")
         allFiles.removeAll()
         lastUpdateTime = 0
         currentFileIndex = 0
@@ -315,11 +306,10 @@ class RealSlideshowService: ObservableObject {
             // Shuffle order to randomize slideshow similar to web experience
             if !allFiles.isEmpty {
                 allFiles.shuffle()
-                print("🔀 Shuffled file order for slideshow")
             }
-            print("✅ Initial diff fetch completed - \(allFiles.count) files cached (shuffled)")
+            print("Initial diff fetch completed - \(allFiles.count) files cached (shuffled)")
         } catch {
-            print("❌ Failed to fetch files: \(error)")
+            print("Failed to fetch files: \(error)")
             hasCompletedInitialFetch = false // Ensure we retry on next attempt
             self.error = "Failed to load files: \(error.localizedDescription)"
         }
@@ -330,7 +320,7 @@ class RealSlideshowService: ObservableObject {
         var sinceTime = await MainActor.run { lastUpdateTime }
         
         while hasMore {
-            if verboseFileLogging { print("📡 Fetching files since time: \(sinceTime)") }
+            if verboseFileLogging { print("Fetching files since time: \(sinceTime)") }
             let result = try await fetchFilesBatch(castPayload: castPayload, sinceTime: sinceTime)
             
             // Process the batch on MainActor
@@ -339,7 +329,7 @@ class RealSlideshowService: ObservableObject {
             // Update pagination state on MainActor
             await MainActor.run {
                 if result.latestUpdateTime > self.lastUpdateTime {
-                    print("📅 Initial fetch updating lastUpdateTime: \(self.lastUpdateTime) → \(result.latestUpdateTime)")
+                    print("Initial fetch updating lastUpdateTime: \(self.lastUpdateTime) → \(result.latestUpdateTime)")
                     self.lastUpdateTime = result.latestUpdateTime
                 }
             }
@@ -349,7 +339,7 @@ class RealSlideshowService: ObservableObject {
             
         }
         
-        print("🏁 Initial diff fetch complete - total files cached: \(await MainActor.run { allFiles.count })")
+        print("Initial diff fetch complete - total files cached: \(await MainActor.run { allFiles.count })")
         
         // Start periodic polling after initial fetch completes
         await MainActor.run {
@@ -390,7 +380,6 @@ class RealSlideshowService: ObservableObject {
         // Parse the diff response
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let diff = json["diff"] as? [[String: Any]] else {
-            print("❌ Failed to parse JSON response")
             throw CastError.networkError("Invalid JSON response")
         }
         
@@ -424,7 +413,6 @@ class RealSlideshowService: ObservableObject {
         
         for item in items {
             guard let id = item["id"] as? Int else {
-                print("  ❌ No ID found in item")
                 continue
             }
             
@@ -434,12 +422,11 @@ class RealSlideshowService: ObservableObject {
                 // Remove file from list if it exists
                 if let index = allFiles.firstIndex(where: { $0.id == id }) {
                     let removedFile = allFiles.remove(at: index)
-                    print("  🗑️ Removed deleted file: \(removedFile.title) (ID: \(id))")
+                    print("Removed deleted file: \(removedFile.title) (ID: \(id))")
                     
                     // Check if deleted file was the currently playing one
                     if originalCurrentFile?.id == id {
                         currentFileWasDeleted = true
-                        print("  ⚠️ Currently playing file was deleted - will handle gracefully")
                         
                         // Immediately move to next slide if current was deleted
                         Task {
@@ -459,7 +446,7 @@ class RealSlideshowService: ObservableObject {
                     await removeCachedFileContent(fileID: id)
                     
                 } else {
-                    print("  ⏭️ Skipping deleted file \(id) (not in list)")
+                    print("Skipping deleted file \(id) (not in list)")
                 }
             } else {
                 // Add or update file
@@ -468,18 +455,18 @@ class RealSlideshowService: ObservableObject {
                     if let file = try await decryptFileMetadata(item: item, collectionKey: collectionKey) {
                         // Skip pure videos (we only want images + live photos)
                         if file.isVideo && !file.isLivePhoto {
-                            if verboseFileLogging { print("  🚫 Skipping video file: \(file.title) (ID: \(id))") }
+                            if verboseFileLogging { print("Skipping video file: \(file.title) (ID: \(id))") }
                             continue
                         }
                         // Check if file already exists
                         if let existingIndex = allFiles.firstIndex(where: { $0.id == id }) {
                             let oldFile = allFiles[existingIndex]
                             allFiles[existingIndex] = file
-                            print("  🔄 Updated file: \(file.title) (ID: \(id))")
+                            print("Updated file: \(file.title) (ID: \(id))")
                             
                             // Check if hash changed - clear cache if so
                             if oldFile.hash != file.hash && file.hash != nil {
-                                print("  🧹 Hash changed for file \(id) - clearing cache")
+                                print("Hash changed for file \(id) - clearing cache")
                                 prefetchCache.removeValue(forKey: id)
                                 await removeCachedFileContent(fileID: id)
                             }
@@ -490,21 +477,20 @@ class RealSlideshowService: ObservableObject {
                             }
                         } else {
                             allFiles.append(file)
-                            print("  ✅ Added file: \(file.title) (ID: \(id))")
+                            print("Added file: \(file.title) (ID: \(id))")
                         }
                     }
                 } catch {
-                    print("  ❌ Error processing file \(id): \(error)")
+                    print("Error processing file \(id): \(error)")
                 }
             }
         }
         
-        print("📋 File list now contains \(allFiles.count) files")
+        print("File list now contains \(allFiles.count) files")
         
         // Handle state transitions
         if allFiles.isEmpty {
             // Transition to empty state
-            print("📭 All files removed - showing empty state")
             slideTimer?.invalidate()
             slideTimer = nil
             isPlaying = false
@@ -519,14 +505,13 @@ class RealSlideshowService: ObservableObject {
             error = "No media files available in this album"
         } else if wasEmpty {
             // Transition from empty to having files
-            print("📷 Files added to empty album - starting slideshow")
             currentFileIndex = 0
             currentSlideIndex = 0
             totalSlides = allFiles.count
             
             // Restart slideshow if we have a stored payload
             if let payload = storedCastPayload {
-                print("🔄 Restarting slideshow with \(allFiles.count) files")
+                print("Restarting slideshow with \(allFiles.count) files")
                 error = nil // Clear error first to avoid UI flicker
                 
                 // Display first slide and start slideshow
@@ -585,7 +570,7 @@ class RealSlideshowService: ObservableObject {
         // Load from network
         do {
             let file = allFiles[currentFileIndex]
-            print("🔄 Loading file \(file.id): \(file.title) at index \(currentFileIndex)")
+            print("Loading file \(file.id): \(file.title) at index \(currentFileIndex)")
             await MainActor.run { slideLoadingProgress = 0.5 }
             
             let decryptedData = try await downloadAndDecryptFileContent(
@@ -593,7 +578,7 @@ class RealSlideshowService: ObservableObject {
                 file: file
             )
             
-            print("✅ Successfully loaded file \(file.id): \(file.title) (\(decryptedData.count) bytes)")
+            print("Successfully loaded file \(file.id): \(file.title) (\(decryptedData.count) bytes)")
             
             // Cache the data
             prefetchCache[currentFileIndex] = decryptedData
@@ -606,7 +591,7 @@ class RealSlideshowService: ObservableObject {
             
         } catch {
             let file = allFiles[currentFileIndex]
-            print("❌ Failed to load file \(file.id): \(file.title) at index \(currentFileIndex) - \(error)")
+            print("Failed to load file \(file.id): \(file.title) at index \(currentFileIndex) - \(error)")
             
             // Auto-skip problematic files and continue slideshow
             await MainActor.run {
@@ -637,19 +622,17 @@ class RealSlideshowService: ObservableObject {
                 // For live photos, only set the image component for display
                 if let imageData = components.imageData {
                     currentImageData = imageData
-                    print("📸 Live photo image component loaded: \(imageData.count) bytes")
+                    print("Live photo image component loaded: \(imageData.count) bytes")
                 } else {
-                    print("⚠️ Live photo missing image component - using original data as fallback")
                     currentImageData = data
                 }
                 
                 // Store video component separately for long-press playback
                 if let videoData = components.videoData {
                     livePhotoVideoData = videoData
-                    print("🎥 Live photo video component stored: \(videoData.count) bytes")
+                    print("Live photo video component stored: \(videoData.count) bytes")
                 } else {
                     livePhotoVideoData = nil
-                    print("⚠️ Live photo missing video component")
                 }
                 
                 // Clear video properties to ensure image display
@@ -660,7 +643,7 @@ class RealSlideshowService: ObservableObject {
                 startSlideTimer()
                 
             } catch {
-                print("❌ Failed to extract live photo components: \(error)")
+                print("Failed to extract live photo components: \(error)")
                 // Fallback to treating as regular image
                 currentImageData = data
                 currentVideoData = nil
@@ -690,7 +673,7 @@ class RealSlideshowService: ObservableObject {
                 currentVideoData = nil // release raw data memory
                 prepareVideoPlayer(url: url)
             } catch {
-                print("❌ Failed to persist video temp file: \(error)")
+                print("Failed to persist video temp file: \(error)")
                 currentVideoURL = nil
             }
         } else {
@@ -706,7 +689,6 @@ class RealSlideshowService: ObservableObject {
         
         // If we just transitioned from empty to having content, notify the UI
         if wasEmpty {
-            print("📷 Slideshow restarted with image data - notifying UI")
             NotificationCenter.default.post(name: .slideshowRestarted, object: nil)
         }
     }
@@ -753,7 +735,7 @@ class RealSlideshowService: ObservableObject {
                 guard let payload = storedCastPayload else { return }
                 let file = allFiles[currentFileIndex]
                 
-                print("🔄 Attempting to load file \(file.id): \(file.title) at index \(currentFileIndex)")
+                print("Attempting to load file \(file.id): \(file.title) at index \(currentFileIndex)")
                 
                 let decryptedData = try await downloadAndDecryptFileContent(
                     castPayload: payload,
@@ -769,7 +751,7 @@ class RealSlideshowService: ObservableObject {
                     slideLoadingProgress = 1.0
                 }
                 
-                print("✅ Successfully loaded file \(file.id): \(file.title)")
+                print("Successfully loaded file \(file.id): \(file.title)")
                 
                 // Restart timer if playing
                 if isPlaying && !isPaused {
@@ -782,7 +764,7 @@ class RealSlideshowService: ObservableObject {
                 
             } catch {
                 let file = allFiles[currentFileIndex]
-                print("❌ Failed to load file \(file.id): \(file.title) - \(error)")
+                print("Failed to load file \(file.id): \(file.title) - \(error)")
                 currentFileIndex = (currentFileIndex + 1) % allFiles.count
                 retryCount += 1
             }
@@ -823,7 +805,7 @@ class RealSlideshowService: ObservableObject {
                     
                 } catch {
                     // Silently skip problematic files during prefetching
-                    print("⚠️ Prefetch failed for file \(prefetchIndex), will try on-demand")
+                    print("Prefetch failed for file \(prefetchIndex), will try on-demand")
                     continue
                 }
                 
@@ -896,7 +878,7 @@ class RealSlideshowService: ObservableObject {
         
         stopPeriodicDiffPolling() // Stop any existing timer
         
-        print("🔄 Starting periodic diff polling (every \(diffPollingInterval)s)")
+        print("Starting periodic diff polling (every \(diffPollingInterval)s)")
         
         diffPollingTimer = Timer.scheduledTimer(withTimeInterval: diffPollingInterval, repeats: true) { [weak self] _ in
             Task {
@@ -909,7 +891,6 @@ class RealSlideshowService: ObservableObject {
     private func stopPeriodicDiffPolling() {
         diffPollingTimer?.invalidate()
         diffPollingTimer = nil
-        print("⏹️ Stopped periodic diff polling")
     }
     
     private func performPeriodicDiffCheck() async {
@@ -923,28 +904,27 @@ class RealSlideshowService: ObservableObject {
             let result = try await fetchFilesBatch(castPayload: payload, sinceTime: currentTime)
             
             if !result.files.isEmpty {
-                print("🔄 Periodic poll found \(result.files.count) changes")
+                print("Periodic poll found \(result.files.count) changes")
                 
                 await processDiffBatch(result.files, collectionKey: payload.collectionKey)
                 
                 // Only update lastUpdateTime if we actually found items with valid updationTime
                 await MainActor.run {
                     if result.latestUpdateTime > self.lastUpdateTime {
-                        print("📅 Updating lastUpdateTime: \(self.lastUpdateTime) → \(result.latestUpdateTime)")
+                        print("Updating lastUpdateTime: \(self.lastUpdateTime) → \(result.latestUpdateTime)")
                         self.lastUpdateTime = result.latestUpdateTime
                     }
                 }
             } else {
-                print("🔄 Periodic poll found no changes since \(currentTime)")
+                print("Periodic poll found no changes since \(currentTime)")
             }
             
         } catch {
             if let castError = error as? CastError,
                case .serverError(401, _) = castError {
-                print("🔐 401 error during periodic polling - authentication expired")
                 // handleUnauthorizedError already called in fetchFilesBatch
             } else {
-                print("⚠️ Periodic diff check failed: \(error)")
+                print("Periodic diff check failed: \(error)")
                 // Continue polling on other errors
             }
         }
@@ -956,12 +936,10 @@ class RealSlideshowService: ObservableObject {
     private func handleUnauthorizedError() {
         // Prevent multiple concurrent auth expiry handling
         guard !isHandlingAuthExpiry else {
-            print("🔐 Auth expiry already being handled - ignoring duplicate")
             return
         }
         
         isHandlingAuthExpiry = true
-        print("🚨 Authentication expired - resetting to pairing mode")
         
         // CRITICAL: Stop screen saver prevention immediately before any UI transitions
         ScreenSaverManager.allowScreenSaver()
@@ -1003,7 +981,7 @@ class RealSlideshowService: ObservableObject {
         guard httpResponse.statusCode == 200 else {
             // Condensed error log
             let snippet = (String(data: data, encoding: .utf8) ?? "").prefix(160)
-            print("❌ Download error [\(httpResponse.statusCode)] fileID=\(fileID): \(snippet)")
+            print("Download error [\(httpResponse.statusCode)] fileID=\(fileID): \(snippet)")
             if httpResponse.statusCode == 401 {
                 await handleUnauthorizedError()
                 throw CastError.serverError(401, "Authentication expired - resetting to pairing mode")
@@ -1011,7 +989,7 @@ class RealSlideshowService: ObservableObject {
                 throw CastError.serverError(httpResponse.statusCode, String(snippet))
             }
         }
-        if verboseFileLogging { print("📥 Successfully downloaded \(data.count) bytes for file \(fileID)") }
+        if verboseFileLogging { print("Successfully downloaded \(data.count) bytes for file \(fileID)") }
         return data
     }
     
@@ -1024,15 +1002,15 @@ class RealSlideshowService: ObservableObject {
         
         // Check cache first
         if let cachedData = await getCachedFileContent(fileID: file.id) {
-            if verboseFileLogging { print("💾 Using cached content for file \(file.id): \(file.title) (\(cachedData.count) bytes)") }
+            if verboseFileLogging { print("Using cached content for file \(file.id): \(file.title) (\(cachedData.count) bytes)") }
             return cachedData
         }
         
-            if verboseFileLogging { print("🔍 Downloading and decrypting file \(file.id): \(file.title)") }
+            if verboseFileLogging { print("Downloading and decrypting file \(file.id): \(file.title)") }
         
         // Step 1: Download encrypted file
         let encryptedData = try await downloadEncryptedFile(castPayload: castPayload, fileID: file.id)
-            if verboseFileLogging { print("    📥 Downloaded \(encryptedData.count) bytes") }
+            if verboseFileLogging { print("Downloaded \(encryptedData.count) bytes") }
         
         // Step 2: Decrypt file key using collection key
         let fileKey = try decryptFileKey(
@@ -1067,7 +1045,7 @@ class RealSlideshowService: ObservableObject {
               let metadataHeader = metadataDict["decryptionHeader"] as? String,
               let fileDict = item["file"] as? [String: Any],
               let fileDecryptionHeader = fileDict["decryptionHeader"] as? String else {
-            print("    ❌ Missing required fields for file \(item["id"] ?? "unknown")")
+            print("Missing required fields for file \(item["id"] ?? "unknown")")
             return nil
         }
         
@@ -1078,7 +1056,7 @@ class RealSlideshowService: ObservableObject {
                 nonce: keyDecryptionNonce,
                 collectionKey: collectionKey
             )
-            if verboseDecryptionLogging { print("    🔑 File key decrypted successfully") }
+            if verboseDecryptionLogging { print("File key decrypted successfully") }
             
             // Step 2: Decrypt metadata using file key (XChaCha20-Poly1305)
             let metadata = try decryptMetadata(
@@ -1107,7 +1085,7 @@ class RealSlideshowService: ObservableObject {
             )
             
         } catch {
-            print("    ❌ Decryption failed: \(error)")
+            print("Decryption failed: \(error)")
             throw error
         }
     }
@@ -1135,11 +1113,11 @@ class RealSlideshowService: ObservableObject {
             throw CastError.decryptionError("Invalid base64 in metadata decryption")
         }
         
-        print("    🔍 XChaCha20: encrypted=\(encryptedBytes.count)b, header=\(headerBytes.count)b, key=\(fileKey.count)b")
+        print("XChaCha20: encrypted=\(encryptedBytes.count)b, header=\(headerBytes.count)b, key=\(fileKey.count)b")
         
         do {
             let decryptedData = try Crypto.decryptSecretStream(encryptedData: encryptedBytes, key: fileKey, header: headerBytes)
-            print("    ✅ Metadata decrypted using Rust crypto: \(decryptedData.count) bytes")
+            print("Metadata decrypted using Rust crypto: \(decryptedData.count) bytes")
             return decryptedData
         } catch {
             throw CastError.decryptionError("XChaCha20-Poly1305 decryption failed for metadata: \(error)")
@@ -1152,7 +1130,7 @@ class RealSlideshowService: ObservableObject {
             throw CastError.decryptionError("Invalid base64 in file decryption header")
         }
         
-    if verboseDecryptionLogging { print("    🔍 File decryption: encrypted=\(encryptedData.count)b, header=\(headerBytes.count)b, key=\(fileKey.count)b") }
+    if verboseDecryptionLogging { print("File decryption: encrypted=\(encryptedData.count)b, header=\(headerBytes.count)b, key=\(fileKey.count)b") }
         
         do {
             return try Crypto.decryptSecretStream(encryptedData: encryptedData, key: fileKey, header: headerBytes)
@@ -1194,7 +1172,7 @@ class RealSlideshowService: ObservableObject {
     
     private func cleanupExpiredCache(validFileIDs: Set<Int>) async {
         let stats = await getCacheStats()
-        print("🧹 Starting cache cleanup - current cache has \(stats.count) files")
+        print("Starting cache cleanup - current cache has \(stats.count) files")
         
         // Get all currently cached file IDs
         let cachedFileIDs = await fileCache.getCachedFileIDs()
@@ -1210,9 +1188,7 @@ class RealSlideshowService: ObservableObject {
         
         if removedCount > 0 {
             let newStats = await getCacheStats()
-            print("🧹 Cache cleanup complete - removed \(removedCount) expired files, now \(newStats.count) files (\(newStats.totalSize) bytes)")
-        } else {
-            print("🧹 Cache cleanup complete - no expired files found")
+            print("Cache cleanup complete - removed \(removedCount) expired files, now \(newStats.count) files (\(newStats.totalSize) bytes)")
         }
     }
     
@@ -1234,7 +1210,6 @@ class RealSlideshowService: ObservableObject {
 func extractZipUsingFoundation(zipURL: URL, to destinationURL: URL) throws {
     do {
         try FileManager.default.unzipItem(at: zipURL, to: destinationURL)
-        print("✅ Successfully extracted zip using ZipFoundation")
     } catch {
         throw CastError.decryptionError("ZipFoundation extraction failed: \(error)")
     }
@@ -1284,15 +1259,15 @@ func extractLivePhotoComponents(from zipData: Data) throws -> LivePhotoComponent
             if imageData == nil && isLikelyImage(fileURL) {
                 imageData = try Data(contentsOf: fileURL)
                 imagePath = fileURL
-                print("📸 Extracted live photo image: \(filename) (\(imageData?.count ?? 0) bytes)")
+                print("Extracted live photo image: \(filename) (\(imageData?.count ?? 0) bytes)")
             } else if videoData == nil && isLikelyVideo(fileURL) {
                 videoData = try Data(contentsOf: fileURL)
                 videoPath = fileURL
-                print("🎥 Extracted live photo video: \(filename) (\(videoData?.count ?? 0) bytes)")
+                print("Extracted live photo video: \(filename) (\(videoData?.count ?? 0) bytes)")
             } else {
                 // Only log unexpected files once both components missing to avoid noise
                 if imageData == nil || videoData == nil {
-                    print("ℹ️ Ignoring non-component file in live photo zip: \(filename)")
+                    print("Ignoring non-component file in live photo zip: \(filename)")
                 }
             }
         }
@@ -1304,14 +1279,14 @@ func extractLivePhotoComponents(from zipData: Data) throws -> LivePhotoComponent
                 if let guessImage = contents.first(where: { $0.pathExtension.isEmpty }) { // pick first extension-less file as possible image
                     imageData = try? Data(contentsOf: guessImage)
                     imagePath = guessImage
-                    if imageData != nil { print("📸 Heuristic image pick: \(guessImage.lastPathComponent)") }
+                    if imageData != nil { print("Heuristic image pick: \(guessImage.lastPathComponent)") }
                 }
             }
             if videoData == nil {
                 if let guessVideo = contents.first(where: { ["bin", "dat"].contains($0.pathExtension.lowercased()) }) {
                     videoData = try? Data(contentsOf: guessVideo)
                     videoPath = guessVideo
-                    if videoData != nil { print("🎥 Heuristic video pick: \(guessVideo.lastPathComponent)") }
+                    if videoData != nil { print("Heuristic video pick: \(guessVideo.lastPathComponent)") }
                 }
             }
         }
@@ -1328,7 +1303,7 @@ func extractLivePhotoComponents(from zipData: Data) throws -> LivePhotoComponent
         )
         
     } catch {
-        print("❌ Failed to extract live photo components: \(error)")
+        print("Failed to extract live photo components: \(error)")
         throw CastError.decryptionError("Failed to extract live photo zip: \(error)")
     }
 }

@@ -84,7 +84,6 @@ struct VideoPlayerView: View {
                                 
                                 setupPlayer()
                             } else {
-                                print("❌ Video asset is not playable or has no video tracks")
                                 // Try fallback with different extension
                                 self.tryVideoFallback(originalURL: tempURL)
                             }
@@ -92,7 +91,7 @@ struct VideoPlayerView: View {
                     }
                 }
             } catch {
-                print("❌ Failed to setup video player: \(error)")
+                print("Failed to setup video player: \(error)")
                 await MainActor.run {
                     // Show error state
                     self.showErrorState()
@@ -118,7 +117,7 @@ struct VideoPlayerView: View {
                     setupPlayer()
                 }
             } catch {
-                print("❌ Video fallback also failed: \(error)")
+                print("Video fallback also failed: \(error)")
                 showErrorState()
             }
         }
@@ -126,7 +125,6 @@ struct VideoPlayerView: View {
     
     private func showErrorState() {
         // Could show an error message or placeholder
-        print("❌ Unable to play video - showing error state")
     }
     
     private func monitorPlayerItemStatus(_ playerItem: AVPlayerItem) {
@@ -134,20 +132,19 @@ struct VideoPlayerView: View {
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             switch playerItem.status {
             case .readyToPlay:
-                print("✅ Video player ready to play")
                 timer.invalidate()
             case .failed:
                 if let error = playerItem.error {
-                    print("❌ Video player failed with error: \(error)")
-                    print("❌ Error details: \(error.localizedDescription)")
+                    print("Video player failed with error: \(error)")
+                    print("Error details: \(error.localizedDescription)")
                 }
                 timer.invalidate()
                 Task { @MainActor in
                     self.showErrorState()
                 }
             case .unknown:
-                print("⏳ Video player status unknown")
                 // Keep checking
+                break
             @unknown default:
                 timer.invalidate()
             }
@@ -198,7 +195,7 @@ struct VideoPlayerView: View {
             queue: .main
         ) { notification in
             if let error = notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error {
-                print("❌ Video playback failed: \(error)")
+                print("Video playback failed: \(error)")
             }
         }
         
@@ -251,10 +248,8 @@ struct VideoPlayerView: View {
                     let brand = headerBytes.subdata(in: 8..<12)
                     if brand == Data("mp41".utf8) || brand == Data("mp42".utf8) || 
                        brand == Data("isom".utf8) || brand == Data("M4V ".utf8) {
-                        print("🎥 Detected MP4 video format")
                         return "mp4"
                     } else if brand == Data("qt  ".utf8) {
-                        print("🎥 Detected MOV video format")
                         return "mov"
                     }
                 }
@@ -263,7 +258,6 @@ struct VideoPlayerView: View {
             // Check for H.264 NAL units (common in MP4)
             if headerBytes.count >= 4 {
                 if signature[0] == 0x00 && signature[1] == 0x00 && signature[2] == 0x00 && signature[3] == 0x01 {
-                    print("🎥 Detected H.264 stream, using MP4 container")
                     return "mp4"
                 }
             }
@@ -272,25 +266,21 @@ struct VideoPlayerView: View {
             if signature == Data("RIFF".utf8) && headerBytes.count >= 12 {
                 let aviSignature = headerBytes.subdata(in: 8..<12)
                 if aviSignature == Data("AVI ".utf8) {
-                    print("⚠️ Detected AVI format - may have compatibility issues")
                     return "avi"
                 }
             }
             
             // WebM format (limited support on tvOS)
             if signature == Data([0x1A, 0x45, 0xDF, 0xA3]) {
-                print("⚠️ Detected WebM format - may have compatibility issues")
                 return "webm"
             }
             
             // MKV format
             if signature == Data([0x1A, 0x45, 0xDF, 0xA3]) {
-                print("⚠️ Detected MKV format - may have compatibility issues")
                 return "mkv"
             }
         }
         
-        print("🎥 Unknown video format, defaulting to MP4")
         return "mp4"
     }
     
