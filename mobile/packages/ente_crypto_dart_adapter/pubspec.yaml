@@ -1,8 +1,7 @@
 name: ente_crypto_dart_adapter
 description: CryptoApi implementation backed by ente_crypto_dart.
-version: 0.0.1
-publish_to: none
 
+resolution: workspace
 environment:
   sdk: ">=3.10.0 <4.0.0"
 

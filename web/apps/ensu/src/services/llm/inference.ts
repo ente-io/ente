@@ -537,24 +537,30 @@ class TauriInference implements InferenceBackend {
     }
 
     async isModelAvailable(modelPath: string): Promise<boolean> {
-        const { exists } = await import("@tauri-apps/plugin-fs");
-        if (!(await exists(modelPath))) return false;
+        const { exists, open, stat } = await import("@tauri-apps/plugin-fs");
         try {
-            const size = await invoke<number | null>("fs_file_size", {
-                path: modelPath,
-            });
-            if (size !== null && size < MIN_GGUF_BYTES) {
+            if (!(await exists(modelPath))) return false;
+            const { size } = await stat(modelPath);
+            if (size < MIN_GGUF_BYTES) {
                 return false;
             }
-            const head = await invoke<number[]>("fs_read_head", {
-                path: modelPath,
-                length: 4,
-            });
-            if (!isGgufHeader(new Uint8Array(head))) {
-                return false;
+            const file = await open(modelPath, { read: true });
+            try {
+                const head = new Uint8Array(4);
+                let offset = 0;
+                while (offset < head.length) {
+                    const bytesRead = await file.read(head.subarray(offset));
+                    if (bytesRead === null) break;
+                    offset += bytesRead;
+                }
+                if (!isGgufHeader(head.subarray(0, offset))) {
+                    return false;
+                }
+            } finally {
+                await file.close().catch(() => undefined);
             }
         } catch {
-            // ignore validation failures
+            return false;
         }
         return true;
     }

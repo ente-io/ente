@@ -362,6 +362,7 @@
     "details": "Detalhes",
     "view_exif": "Visualizar todos os dados Exif",
     "no_exif": "Sem dados Exif",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Dois fatores",
     "two_factor_authentication": "Autenticação de dois fatores",

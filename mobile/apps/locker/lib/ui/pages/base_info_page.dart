@@ -61,6 +61,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   // Collection selection state
   List<Collection> _availableCollections = [];
   Set<int> _selectedCollectionIds = {};
+  bool _hasLoadedCollectionSelection = false;
 
   // Getter for current data - prioritizes updated data over existing file data
   T? get currentData {
@@ -98,7 +99,10 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   double get collectionSpacing => 24;
 
   @protected
-  bool get isSaveEnabled => !_isLoading && _selectedCollectionIds.isNotEmpty;
+  bool get isSaveEnabled =>
+      !_isLoading &&
+      _hasLoadedCollectionSelection &&
+      (widget.existingFile == null || _selectedCollectionIds.isNotEmpty);
 
   bool get _canEditExistingFile => widget.existingFile is! TrashFile;
 
@@ -191,18 +195,16 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _loadCollections() async {
     try {
+      final isEditingExistingFile = widget.existingFile != null;
       final filteredCollections = await CollectionService.instance
-          .getCollectionsForUI();
+          .getCollectionsForUI(includeUncategorized: isEditingExistingFile);
 
       Set<int> initialSelection = _selectedCollectionIds;
 
-      if (widget.existingFile != null) {
+      if (isEditingExistingFile) {
         final fileCollections = await CollectionService.instance
             .getCollectionsForFile(widget.existingFile!);
-        initialSelection = fileCollections
-            .where((c) => c.type != CollectionType.uncategorized)
-            .map((c) => c.id)
-            .toSet();
+        initialSelection = fileCollections.map((c) => c.id).toSet();
       }
 
       if (!mounted) {
@@ -212,6 +214,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       setState(() {
         _availableCollections = filteredCollections;
         _selectedCollectionIds = initialSelection;
+        _hasLoadedCollectionSelection = true;
       });
     } catch (e) {
       // Handle error silently or show a message
@@ -223,7 +226,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       if (_selectedCollectionIds.contains(collectionId)) {
         _selectedCollectionIds.remove(collectionId);
       } else {
-        // Allow multiple selections
         _selectedCollectionIds.add(collectionId);
       }
     });
@@ -333,6 +335,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _updateCollectionMembership() async {
     if (widget.existingFile == null) return;
+    if (!_hasLoadedCollectionSelection) return;
 
     // Get current collections for the file
     final currentCollections = await CollectionService.instance
@@ -365,7 +368,10 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       );
     }
 
-    // Get regular (non-favorites, non-uncategorized) collection IDs
+    // Only favorites is special-cased; Uncategorized is treated as a normal
+    // collection. A file can belong to multiple collections (incl.
+    // Uncategorized), so it is only removed from Uncategorized when the user
+    // explicitly deselects it.
     final regularCurrentIds = currentCollectionIds
         .where((id) => id != favoriteCollection.id)
         .toSet();
@@ -436,15 +442,15 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   }
 
   Future<void> _createNewFile(InfoItem infoItem) async {
-    if (_selectedCollectionIds.isEmpty) {
-      showToast(context, context.l10n.pleaseSelectAtLeastOneCollection);
-      return;
-    }
-
-    // Upload to all selected collections
     final selectedCollections = _availableCollections
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
+
+    if (selectedCollections.isEmpty) {
+      final uncategorizedCollection = await CollectionService.instance
+          .getOrCreateUncategorizedCollection();
+      selectedCollections.add(uncategorizedCollection);
+    }
 
     // Upload to the first collection
     final uploadedFile = await InfoFileService.instance.createAndUploadInfoFile(

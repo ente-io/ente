@@ -45,6 +45,14 @@ jobs:
             VERSION: ${{ inputs.version }}
 
         steps:
+            - name: Validate version input
+              shell: bash
+              run: |
+                  if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                      echo "::error::version must be x.y.z"
+                      exit 1
+                  fi
+
             - name: Checkout main
               if: inputs.action == 'start'
               uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0

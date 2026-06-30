@@ -163,7 +163,6 @@ smtp:
 | `smtp.sender-name` | Custom name for email sender |         |
 | `smtp.encryption`  | Encryption method (tls, ssl) |         |
 
-
 > [!NOTE]
 >
 > The legacy `transmail.key` is no longer supported, and should be converted to use [SMTP credentials](https://help.zoho.com/portal/en/kb/zeptomail/faqs/sending-emails/articles/how-to-configure-smtp) instead.

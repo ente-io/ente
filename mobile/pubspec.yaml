@@ -1,12 +1,112 @@
-# This pubspec.yaml is for the root of your monorepo.
-# Its purpose is to lock the version of the melos tool.
 name: ente_workspace
 publish_to: none
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
 
+workspace:
+  - apps/auth
+  - apps/locker
+  - apps/photos
+  - apps/photos/plugins/ente_cast
+  - apps/photos/plugins/ente_crypto
+  - apps/photos/plugins/ente_feature_flag
+  - apps/photos/plugins/onnx_dart
+  - packages/accounts
+  - packages/backup_exclusion
+  - packages/base
+  - packages/configuration
+  - packages/contacts
+  - packages/ente_components
+  - packages/ente_components/example
+  - packages/ente_crypto_api
+  - packages/ente_crypto_dart_adapter
+  - packages/ente_icons
+  - packages/ente_pure_utils
+  - packages/ente_qr
+  - packages/ente_qr_scanner
+  - packages/events
+  - packages/legacy
+  - packages/local_auth_linux
+  - packages/lock_screen
+  - packages/log_viewer
+  - packages/logging
+  - packages/native_video_editor
+  - packages/network
+  - packages/qr
+  - packages/rust
+  - packages/scoped_dir_access
+  - packages/screen_cover
+  - packages/sharing
+  - packages/strings
+  - packages/ui
+  - packages/utils
+
 dev_dependencies:
-  melos: 6.3.3
-dependencies:
   flutter_lints: 6.0.0
+  # Pinned: 7.8.2+ needs cli_util ^0.5.0, which conflicts with ffigen's ^0.4.x.
+  melos: 7.8.1
+
+dependency_overrides:
+  motion_sensors:
+    git:
+      url: https://github.com/deckerst/aves_panorama_motion_sensors.git
+      ref: 4b11d59f4bda152627f701070272f657f8358e67
+  # Fixes an iOS AVFoundation crash for videos whose minFrameDuration is zero.
+  # https://github.com/flutter/flutter/issues/151031
+  video_player_avfoundation:
+    git:
+      url: https://github.com/ente/packages.git
+      path: packages/video_player/video_player_avfoundation
+      ref: e6f7518a2ea4b31cf44e7bd6f44b35b1d66b2085
+
+melos:
+  command:
+    bootstrap:
+      enforceLockfile: true
+
+  scripts:
+    codegen:rust:
+      run: |
+        (cd ../rust && cargo codegen frb)
+      description: Generate Rust bindings for all packages using flutter_rust_bridge.
+
+    clean:all:
+      run: dart run melos exec -- "flutter clean"
+      description: Run "flutter clean" in all projects.
+
+    clean:photos:
+      run: dart run melos exec --scope="photos" -- "flutter clean"
+      description: Clean the 'photos' app.
+
+    clean:auth:
+      run: dart run melos exec --scope="auth" -- "flutter clean"
+      description: Clean the 'auth' app.
+
+    clean:locker:
+      run: dart run melos exec --scope="locker" -- "flutter clean"
+      description: Clean the 'locker' app.
+
+    run:photos:apk:
+      run: dart run melos exec --scope="photos" -- "flutter run --flavor independent"
+      description: Run the 'photos' app in independent mode.
+
+    run:auth:apk:
+      run: dart run melos exec --scope="auth" -- "flutter run --flavor independent"
+      description: Run the 'auth' app in independent mode.
+
+    run:locker:apk:
+      run: dart run melos exec --scope="locker" -- "flutter run --flavor independent"
+      description: Run the 'locker' app in independent mode.
+
+    build:photos:apk:
+      run: dart run melos exec --scope="photos" -- "flutter build apk --release"
+      description: Build a release APK for the 'photos' app.
+
+    build:auth:appbundle:
+      run: dart run melos exec --scope="auth" -- "flutter build appbundle --release"
+      description: Build a release AppBundle for the 'auth' app.
+
+    build:locker:ios:
+      run: dart run melos exec --scope="locker" -- "flutter build ios --release"
+      description: Build a release iOS archive for the 'locker' app.

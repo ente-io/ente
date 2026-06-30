@@ -90,7 +90,7 @@ func newFCMClient() (*fcmClient, error) {
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	creds, err := google.CredentialsFromJSON(context.Background(), data, fcmSendScope)
+	creds, err := google.CredentialsFromJSONWithType(context.Background(), data, google.ServiceAccount, fcmSendScope)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

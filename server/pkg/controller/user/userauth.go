@@ -93,9 +93,43 @@ func hardcodedOTTForEmail(hardCodedOTT HardCodedOTT, email string) string {
 
 // SendEmailOTT generates and sends an OTT to the provided email address
 func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpose string, mobile bool) error {
-	if err := c.validateSendOTT(context, email, purpose); err != nil {
+	if c.OTTSendLimiter.IsGloballyBlocked() {
+		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many OTT requests")
+	}
+
+	shouldSend, err := c.validateSendOTT(context, email, purpose)
+	if err != nil {
 		return err
 	}
+	if !shouldSend {
+		return nil
+	}
+	emailHash, err := crypto.GetHash(email, c.HashingKey)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	// check if user has already requested for more than 10 codes in last 10mins
+	app := auth.GetApp(context)
+	otts, err := c.UserAuthRepo.GetValidOTTs(emailHash, app)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if len(otts) >= OTTActiveCodeLimit {
+		alertMsg := fmt.Sprintf("Too many OTT requests for %s in %d minutes",
+			emailUtil.GetMaskedEmailWithHint(email),
+			OTTValidityDurationInMicroSeconds/(60*1000000))
+		go c.DiscordController.NotifyPotentialAbuse(alertMsg)
+		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many OTT requests")
+	}
+
+	decision := c.OTTSendLimiter.Allow(network.GetClientIP(context))
+	if decision.alert != "" {
+		go c.DiscordController.NotifyPotentialAbuse(decision.alert)
+	}
+	if !decision.allowed {
+		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "too many OTT requests")
+	}
+
 	ott, err := random.GenerateSixDigitOtp()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -109,18 +143,6 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 			hasHardcodedOTT = true
 			ott = hardCodedOTT
 		}
-	}
-	emailHash, err := crypto.GetHash(email, c.HashingKey)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	// check if user has already requested for more than 10 codes in last 10mins
-	app := auth.GetApp(context)
-	otts, _ := c.UserAuthRepo.GetValidOTTs(emailHash, app)
-	if len(otts) >= OTTActiveCodeLimit {
-		const msg = "Too many ott requests in a short duration"
-		go c.DiscordController.NotifyPotentialAbuse(msg)
-		return stacktrace.Propagate(ente.ErrTooManyBadRequest, msg)
 	}
 
 	err = c.UserAuthRepo.AddOTT(emailHash, app, ott, time.Microseconds()+OTTValidityDurationInMicroSeconds)
@@ -152,43 +174,61 @@ func (c *UserController) isEmailAlreadyUsed(email string) error {
 	return nil
 }
 
-func (c *UserController) validateSendOTT(ctx *gin.Context, email string, purpose string) error {
+func (c *UserController) validateSendOTT(ctx *gin.Context, email string, purpose string) (bool, error) {
+	var disclosureErr error
 	if purpose == ente.ChangeEmailOTTPurpose {
 		if err := c.isEmailAlreadyUsed(email); err != nil {
-			return err
+			if !errors.Is(err, ente.ErrPermissionDenied) {
+				return false, err
+			}
+			disclosureErr = err
 		}
 	}
-	signupState, err := c.getSignUpState(email)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") && signupState != signUpStateComplete {
-		return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
-	}
-	//
-	var registrationErr error
-	if purpose == ente.SignUpOTTPurpose && signupState == signUpStateComplete {
-		registrationErr = stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
-	}
-	if purpose == ente.LoginOTTPurpose && signupState == signUpStateNoAccount {
-		registrationErr = stacktrace.Propagate(ente.ErrUserNotRegistered, "user account does not exist")
-	}
-	if purpose == ente.LoginOTTPurpose && signupState == signUpStateIncomplete {
-		registrationErr = stacktrace.Propagate(ente.ErrUserSignupIncomplete, "user has not completed sign up process")
-	}
-	// if no registration error, return
-	if registrationErr == nil {
-		return registrationErr
-	}
-	// check & swallow registration information error if too many such
-	// errors are generated in a short time
-	if limiter, limitErr := c.OTTLimiter.Get(ctx, "send-ott"); limitErr != nil {
-		if limiter.Reached {
-			go c.DiscordController.NotifyPotentialAbuse("swallowing send-ott registration error")
-			return nil
+	if purpose != ente.ChangeEmailOTTPurpose {
+		signupState, err := c.getSignUpState(email)
+		if err != nil {
+			return false, stacktrace.Propagate(err, "")
+		}
+		if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") && signupState != signUpStateComplete {
+			return false, stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
+		}
+		if purpose == ente.SignUpOTTPurpose && signupState == signUpStateComplete {
+			disclosureErr = stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
+		}
+		if purpose == ente.LoginOTTPurpose && signupState == signUpStateNoAccount {
+			disclosureErr = stacktrace.Propagate(ente.ErrUserNotRegistered, "user account does not exist")
+		}
+		if purpose == ente.LoginOTTPurpose && signupState == signUpStateIncomplete {
+			disclosureErr = stacktrace.Propagate(ente.ErrUserSignupIncomplete, "user has not completed sign up process")
 		}
 	}
-	return registrationErr
+	// If there is no state-disclosing error, allow the OTT request.
+	if disclosureErr == nil {
+		return true, nil
+	}
+
+	if c.shouldSwallowSendOTTDisclosureError(ctx) {
+		return false, nil
+	}
+	return false, disclosureErr
+}
+
+func (c *UserController) shouldSwallowSendOTTDisclosureError(ctx *gin.Context) bool {
+	if c.OTTLimiter == nil {
+		return false
+	}
+	limitContext, limitErr := c.OTTLimiter.Get(ctx, "send-ott")
+	if limitErr != nil {
+		log.WithError(limitErr).Warn("Failed to check send-ott disclosure rate limit")
+		return false
+	}
+	if !limitContext.Reached {
+		return false
+	}
+	if c.DiscordController != nil {
+		go c.DiscordController.NotifyPotentialAbuse("swallowing send-ott disclosure error")
+	}
+	return true
 }
 
 // getSignUpState returns the signup state for an email.

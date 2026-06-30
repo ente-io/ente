@@ -1797,16 +1797,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "db"
-version = "0.0.0"
-dependencies = [
- "ensu-db",
- "thiserror 2.0.18",
- "uniffi",
- "uuid",
-]
-
-[[package]]
 name = "dbus"
 version = "0.9.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2266,26 +2256,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "66b7e2430c6dff6a955451e2cfc438f09cea1965a9d6f87f7e3b90decc014099"
 
 [[package]]
-name = "ensu-db"
-version = "0.0.0"
-dependencies = [
- "ente-core",
- "ente_image",
- "rusqlite",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "uuid",
- "zeroize",
-]
-
-[[package]]
 name = "ensu-desktop"
 version = "0.1.18-beta"
 dependencies = [
- "ensu-db",
  "ente-core",
- "inference_rs",
+ "ente-ensu",
  "keyring",
  "libc",
  "serde",
@@ -2299,20 +2274,6 @@ dependencies = [
  "tauri-plugin-updater",
  "uuid",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "ensu-transcription"
-version = "0.0.0"
-dependencies = [
- "flate2",
- "ort 2.0.0-rc.12",
- "regex",
- "reqwest 0.12.28",
- "rubato",
- "tar",
- "thiserror 2.0.18",
- "transcribe-rs",
 ]
 
 [[package]]
@@ -2399,6 +2360,75 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-ensu"
+version = "0.0.0"
+dependencies = [
+ "ente-core",
+ "ente-image",
+ "flate2",
+ "futures-util",
+ "llama-cpp-2",
+ "ort 2.0.0-rc.12",
+ "parking_lot",
+ "regex",
+ "reqwest 0.12.28",
+ "rubato",
+ "rusqlite",
+ "self_cell",
+ "serde",
+ "serde_json",
+ "tar",
+ "thiserror 2.0.18",
+ "tokio",
+ "transcribe-rs",
+ "uuid",
+ "zeroize",
+]
+
+[[package]]
+name = "ente-ensu-uniffi"
+version = "0.0.0"
+dependencies = [
+ "ente-ensu",
+ "thiserror 2.0.18",
+ "uniffi",
+ "uuid",
+]
+
+[[package]]
+name = "ente-image"
+version = "0.0.0"
+dependencies = [
+ "fast_image_resize",
+ "heic_decoder",
+ "image",
+ "kamadak-exif",
+ "thiserror 2.0.18",
+ "tiff 0.10.3",
+]
+
+[[package]]
+name = "ente-photos"
+version = "0.0.0"
+dependencies = [
+ "ente-image",
+ "fast_image_resize",
+ "half",
+ "html-escape",
+ "image",
+ "imageproc",
+ "nalgebra 0.33.3",
+ "once_cell",
+ "ort 2.0.0-rc.4",
+ "plsfix",
+ "quick-xml 0.37.5",
+ "regex",
+ "tempfile",
+ "thiserror 2.0.18",
+ "usearch",
+]
+
+[[package]]
 name = "ente-rs"
 version = "0.0.1"
 dependencies = [
@@ -2469,44 +2499,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "ente_image"
-version = "0.0.0"
-dependencies = [
- "fast_image_resize",
- "heic_decoder",
- "image",
- "kamadak-exif",
- "thiserror 2.0.18",
- "tiff 0.10.3",
-]
-
-[[package]]
-name = "ente_photos"
-version = "0.0.0"
-dependencies = [
- "ente_image",
- "fast_image_resize",
- "half",
- "html-escape",
- "image",
- "imageproc",
- "nalgebra 0.33.3",
- "once_cell",
- "ort 2.0.0-rc.4",
- "plsfix",
- "quick-xml 0.37.5",
- "regex",
- "tempfile",
- "thiserror 2.0.18",
- "usearch",
-]
-
-[[package]]
 name = "ente_photos_rust"
 version = "0.0.0"
 dependencies = [
- "ente_image",
- "ente_photos",
+ "ente-image",
+ "ente-photos",
  "flutter_rust_bridge",
 ]
 
@@ -4472,30 +4469,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a588916bfdfd92e71cacef98a63d9b1f0d74d6599980d11894290e7ddefffcf7"
 dependencies = [
  "cfb",
-]
-
-[[package]]
-name = "inference"
-version = "0.0.0"
-dependencies = [
- "inference_rs",
- "serde",
- "thiserror 1.0.69",
- "uniffi",
-]
-
-[[package]]
-name = "inference_rs"
-version = "0.0.0"
-dependencies = [
- "futures-util",
- "llama-cpp-2",
- "parking_lot",
- "reqwest 0.12.28",
- "self_cell",
- "serde",
- "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -9279,15 +9252,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.18",
-]
-
-[[package]]
-name = "transcription"
-version = "0.0.0"
-dependencies = [
- "ensu-transcription",
- "thiserror 2.0.18",
- "uniffi",
 ]
 
 [[package]]

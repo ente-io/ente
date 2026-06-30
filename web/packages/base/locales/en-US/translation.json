@@ -362,6 +362,7 @@
     "details": "Details",
     "view_exif": "View all Exif data",
     "no_exif": "No Exif data",
+    "use_shortcut_to_navigate": "Use <shortcut/> to navigate",
     "exif": "Exif",
     "two_factor": "Two-factor",
     "two_factor_authentication": "Two-factor authentication",

@@ -362,6 +362,7 @@
     "details": "Ayrıntılar",
     "view_exif": "Tüm Exif verilerini görüntüle",
     "no_exif": "Exif verisi yok",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "İki faktör",
     "two_factor_authentication": "İki faktörlü doğrulama",

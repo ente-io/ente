@@ -362,6 +362,7 @@
     "details": "Tiedot",
     "view_exif": "Näytä kaikki Exif -tiedot",
     "no_exif": "Ei Exif -tietoja",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "Kaksivaiheinen",
     "two_factor_authentication": "Kaksivaiheinen vahvistus",

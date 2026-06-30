@@ -27,7 +27,7 @@ func (h StorageBonusHandler) GetReferralView(context *gin.Context) {
 
 func (h StorageBonusHandler) UpdateReferralCode(context *gin.Context) {
 	var request entity.UpdateReferralCodeRequest
-	if err := context.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(context, &request); err != nil {
 		handler.Error(context, stacktrace.Propagate(ente.NewBadRequestWithMessage(err.Error()), ""))
 		return
 	}

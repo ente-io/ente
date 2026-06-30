@@ -26,6 +26,8 @@ class _EmergencyContactPageState
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_onFieldChanged);
+    _contactDetailsController.addListener(_onFieldChanged);
     _loadExistingData();
   }
 
@@ -46,6 +48,8 @@ class _EmergencyContactPageState
 
   @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _contactDetailsController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _contactDetailsController.dispose();
     _notesController.dispose();
@@ -66,6 +70,9 @@ class _EmergencyContactPageState
     return _nameController.text.trim().isNotEmpty &&
         _contactDetailsController.text.trim().isNotEmpty;
   }
+
+  @override
+  bool get isSaveEnabled => super.isSaveEnabled && validateForm();
 
   @override
   EmergencyContactData createInfoData() {
@@ -116,6 +123,12 @@ class _EmergencyContactPageState
       ),
       const SizedBox(height: 24),
     ];
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

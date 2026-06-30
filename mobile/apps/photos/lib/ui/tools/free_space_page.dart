@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:ente_components/ente_components.dart";
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -152,7 +153,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
           child: GradientButton(
             onTap: () async {
-              await _freeStorage(status);
+              await _showConfirmFreeSpaceSheet(context, status);
             },
             text: AppLocalizations.of(
               context,
@@ -185,5 +186,32 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     } else {
       showToast(context, AppLocalizations.of(context).couldNotFreeUpSpace);
     }
+  }
+
+  Future<void> _showConfirmFreeSpaceSheet(
+    BuildContext context,
+    FreeableSpaceInfo status,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    await showBottomSheetComponent(
+      context: context,
+      builder: (_) => BottomSheetComponent(
+        title: l10n.areYouSure,
+        message: l10n.freeUpDeviceSpaceConfirmDesc(
+          count: status.localIDs.length,
+        ),
+        illustration: Image.asset("assets/warning-red.png"),
+        actions: [
+          ButtonComponent(
+            label: l10n.yesDelete,
+            variant: .critical,
+            onTap: () async {
+              Navigator.of(context).pop();
+              await _freeStorage(status);
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,5 +1,5 @@
 [package]
-name = "ente_image"
+name = "ente-image"
 edition = "2024"
 
 [dependencies]

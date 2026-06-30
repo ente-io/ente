@@ -28,6 +28,8 @@ const String sharedMediaIdentifier = 'ente-shared-media://';
 
 const galleryThumbnailDiskLoadDeferDuration = Duration(milliseconds: 80);
 const galleryThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
+const mediaManagementHintDismissDuration = Duration(days: 7);
+const mediaManagementHintDeleteAttemptThreshold = 3;
 
 // 256 bit key maps to 24 words
 // https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Generating_the_mnemonic

@@ -40,8 +40,8 @@ You can alternatively install the build from PlayStore or F-Droid.
 1. Install [Flutter v3.38.10](https://flutter.dev/docs/get-started/install) and [Rust](https://www.rust-lang.org/tools/install).
 
 2. Install dependencies and generate Rust bindings using one of these methods:
-   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap` and `melos run codegen:rust`.
-   - **Using Flutter directly:** Run `flutter pub get --enforce-lockfile` in `packages/strings` and this folder, then from `rust/`, run `cargo codegen frb`.
+   - **Using Flutter:** From any folder inside `mobile/`, run `flutter pub get --enforce-lockfile`, then from `rust/`, run `cargo codegen frb`.
+   - **Using Melos:** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap` and `melos run codegen:rust`.
 
 3. Run the app:
    - Android: `flutter run --flavor independent`

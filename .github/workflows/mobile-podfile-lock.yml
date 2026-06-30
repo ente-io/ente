@@ -8,7 +8,6 @@ on:
             - ".github/workflows/mobile-podfile-lock.yml"
             - "mobile/**/pubspec.yaml"
             - "mobile/**/pubspec.lock"
-            - "mobile/**/pubspec_overrides.yaml"
             - "mobile/**/Podfile"
             - "mobile/**/Podfile.lock"
             - "mobile/**/*.podspec"
@@ -31,13 +30,12 @@ jobs:
             - name: Install Flutter
               uses: ./.github/actions/setup-flutter
 
+            - run: flutter pub get --enforce-lockfile
+              working-directory: mobile
+
             - name: Verify Podfile.lock is current
               run: |
                   for app in photos auth locker; do
                       echo "Checking $app"
-                      (
-                          cd "mobile/apps/$app"
-                          flutter pub get --enforce-lockfile
-                          cd ios && pod install --deployment
-                      )
+                      ( cd "mobile/apps/$app/ios" && pod install --deployment )
                   done

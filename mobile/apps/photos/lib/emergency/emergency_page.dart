@@ -559,7 +559,7 @@ class _WarningBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Image.asset("assets/warning-red.png", width: 32, height: 32),
+          Image.asset("assets/emergency-warning.png", width: 32, height: 32),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

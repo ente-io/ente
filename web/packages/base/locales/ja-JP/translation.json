@@ -362,6 +362,7 @@
     "details": "詳細",
     "view_exif": "すべての Exif データを表示",
     "no_exif": "Exifデータがありません",
+    "file_info_arrow_navigation_hint": "",
     "exif": "Exif",
     "two_factor": "二要素",
     "two_factor_authentication": "二要素認証",

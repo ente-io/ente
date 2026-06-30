@@ -37,7 +37,7 @@ func (h *FamilyHandler) CreateFamily(c *gin.Context) {
 // InviteMember sends out invitation to a user for joining acting user's family plan
 func (h *FamilyHandler) InviteMember(c *gin.Context) {
 	var request ente.InviteMemberRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
 		return
 	}
@@ -107,7 +107,7 @@ func (h *FamilyHandler) RevokeInvite(c *gin.Context) {
 // AcceptInvite allows user to join the family based on the token
 func (h *FamilyHandler) AcceptInvite(c *gin.Context) {
 	var request ente.AcceptInviteRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
 		return
 	}
@@ -123,7 +123,7 @@ func (h *FamilyHandler) AcceptInvite(c *gin.Context) {
 // ModifyStorageLimit allows adminUser to Modify the storage for a member in the Family.
 func (h *FamilyHandler) ModifyStorageLimit(c *gin.Context) {
 	var request ente.ModifyMemberStorage
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
 		return
 	}

@@ -1,11 +1,11 @@
 import { downloadManager } from "@/public-album/download/services/download-manager";
-import { extractRawExif, parseExif } from "@/public-album/media/metadata/exif";
 import {
     hlsPlaylistDataForFile,
     type HLSPlaylistDataForFile,
 } from "@/public-album/media/video/preview";
 import type { FileInfoExif } from "@/public-album/viewer/components/FileInfo";
 import log from "ente-base/log";
+import { extractRawExif, parseExif } from "ente-gallery/services/exif";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { ensureString } from "ente-utils/ensure";

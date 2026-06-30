@@ -18,7 +18,7 @@ type LegacyKitHandler struct {
 
 func (h *LegacyKitHandler) Create(c *gin.Context) {
 	var request ente.CreateLegacyKitRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
@@ -69,7 +69,7 @@ func (h *LegacyKitHandler) OwnerRecoverySession(c *gin.Context) {
 
 func (h *LegacyKitHandler) UpdateRecoveryNotice(c *gin.Context) {
 	var request ente.UpdateLegacyKitRecoveryNoticeRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
@@ -95,7 +95,7 @@ func (h *LegacyKitHandler) Delete(c *gin.Context) {
 
 func (h *LegacyKitHandler) BlockRecovery(c *gin.Context) {
 	var request ente.LegacyKitOwnerActionRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
@@ -108,7 +108,7 @@ func (h *LegacyKitHandler) BlockRecovery(c *gin.Context) {
 
 func (h *LegacyKitHandler) CreateChallenge(c *gin.Context) {
 	var request ente.LegacyKitChallengeRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
@@ -122,7 +122,7 @@ func (h *LegacyKitHandler) CreateChallenge(c *gin.Context) {
 
 func (h *LegacyKitHandler) OpenRecovery(c *gin.Context) {
 	var request ente.LegacyKitOpenRecoveryRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
@@ -136,7 +136,7 @@ func (h *LegacyKitHandler) OpenRecovery(c *gin.Context) {
 
 func (h *LegacyKitHandler) Session(c *gin.Context) {
 	var request ente.LegacyKitSessionRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
@@ -150,7 +150,7 @@ func (h *LegacyKitHandler) Session(c *gin.Context) {
 
 func (h *LegacyKitHandler) RecoveryInfo(c *gin.Context) {
 	var request ente.LegacyKitSessionRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
@@ -164,7 +164,7 @@ func (h *LegacyKitHandler) RecoveryInfo(c *gin.Context) {
 
 func (h *LegacyKitHandler) InitChangePassword(c *gin.Context) {
 	var request ente.LegacyKitRecoverySrpSetupRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
@@ -178,7 +178,7 @@ func (h *LegacyKitHandler) InitChangePassword(c *gin.Context) {
 
 func (h *LegacyKitHandler) ChangePassword(c *gin.Context) {
 	var request ente.LegacyKitRecoveryUpdateSRPRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "could not bind request params"))
 		return
 	}
