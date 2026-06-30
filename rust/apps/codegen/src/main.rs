@@ -103,7 +103,7 @@ fn generate_native(target: NativeTarget) -> Result<(), DynError> {
 
 fn generate_swift(uniffi_crate: &UniffiCrate<'_>, generated_rel: &str) -> Result<(), DynError> {
     let generated_dir = repo_root()?.join(generated_rel);
-    fs::create_dir_all(&generated_dir)?;
+    write_generated_gitignore(&generated_dir)?;
 
     build_host_library(&uniffi_crate.crate_dir)?;
     remove_paths(&swift_generated_paths(
@@ -126,15 +126,23 @@ fn generate_kotlin(
     generated_rel: &str,
 ) -> Result<(), DynError> {
     let rust_out_dir = repo_root()?.join(out_rel);
-    fs::create_dir_all(&rust_out_dir)?;
-
     let generated_path = rust_out_dir.join(generated_rel);
+    if let Some(bindings_dir) = generated_path.parent() {
+        write_generated_gitignore(bindings_dir)?;
+    }
 
     build_host_library(&uniffi_crate.crate_dir)?;
     remove_path(&generated_path)?;
     generate_bindings(TargetLanguage::Kotlin, &rust_out_dir, uniffi_crate)?;
 
     Ok(())
+}
+
+fn write_generated_gitignore(dir: &Path) -> Result<(), DynError> {
+    fs::create_dir_all(dir)?;
+    let path = dir.join(".gitignore");
+    fs::write(&path, "*\n!.gitignore\n")
+        .map_err(|error| format!("failed to write {}: {error}", path.display()).into())
 }
 
 fn generate_frb(target: FrbTarget) -> Result<(), DynError> {
