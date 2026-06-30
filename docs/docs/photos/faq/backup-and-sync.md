@@ -679,6 +679,10 @@ A few things to note:
 
 Toggle it under `Settings > Preferences > Advanced`.
 
+**On mobile:**
+
+Toggle it under `Settings > Backup > Backup settings`.
+
 Learn more about [why uploads might fail on desktop or web](/photos/faq/troubleshooting#faster-uploads).
 
 ### Why is my mobile app and desktop app not syncing? {#mobile-desktop-not-syncing}

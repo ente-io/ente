@@ -552,7 +552,7 @@ This creates copies that you fully own, so they remain in your library even if t
 
 When two people add photos to a shared album, Ente does not detect or warn about duplicates across the different owners. If you and another member each add the same video or photo (for example, one received it through another sharing method and already had it), both copies appear in the album.
 
-Deduplication and the similar-images tool only work within albums you own, not across photos owned by different people in a shared album. Removing duplicates from shared albums is on our roadmap, but we can't share a timeline yet.
+Deduplication and the similar-images tool only work within albums you own, not across photos owned by different people in a shared album.
 
 ### How do I see all my shared albums? {#view-shared-albums}
 
