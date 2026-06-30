@@ -155,6 +155,8 @@ Future<void> _exportCodes(
   if (!hasAuthenticated) {
     return;
   }
+  final mimeType = extension == "json" ? MimeType.json : MimeType.text;
+  final mimeString = extension == "json" ? 'application/json' : 'text/plain';
   Future.delayed(
     const Duration(milliseconds: 1200),
     () async => await auth_share.shareDialog(
@@ -165,7 +167,7 @@ Future<void> _exportCodes(
           exportFileName,
           extension,
           CryptoUtil.strToBin(fileContent),
-          MimeType.text,
+          mimeType,
         );
       },
       sendAction: () async {
@@ -179,7 +181,7 @@ Future<void> _exportCodes(
         final Size size = MediaQuery.of(context).size;
         await SharePlus.instance.share(
           ShareParams(
-            files: <XFile>[XFile(codeFile.path, mimeType: 'text/plain')],
+            files: <XFile>[XFile(codeFile.path, mimeType: mimeString)],
             sharePositionOrigin: Rect.fromLTWH(
               0,
               0,
