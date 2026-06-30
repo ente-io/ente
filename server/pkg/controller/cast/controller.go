@@ -32,9 +32,6 @@ func NewController(castRepo *castRepo.Repository,
 func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDeviceRequest) (string, error) {
 	ipAddress := network.GetClientIP(ctx)
 	userAgent := ctx.GetHeader("User-Agent")
-	if len(userAgent) > 5000 {
-		userAgent = userAgent[:5000]
-	}
 	deviceName, err := ua.GetDeviceType(userAgent)
 	if deviceName == "" || err != nil {
 		logrus.WithFields(logrus.Fields{
