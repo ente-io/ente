@@ -44,6 +44,27 @@ func TestRejectAuthAppKeepsAuthRoutesAndBlocksStorageRoutes(t *testing.T) {
 			wantStatus: http.StatusForbidden,
 		},
 		{
+			name:       "auth token cannot access user entity route",
+			path:       "/user-entity/entity/diff?type=contact&sinceTime=0&limit=1",
+			token:      tokens.auth,
+			clientPkg:  "io.ente.auth",
+			wantStatus: http.StatusForbidden,
+		},
+		{
+			name:       "auth token cannot access contact route",
+			path:       "/contacts/diff?sinceTime=0&limit=1",
+			token:      tokens.auth,
+			clientPkg:  "io.ente.auth",
+			wantStatus: http.StatusForbidden,
+		},
+		{
+			name:       "auth token cannot access contact attachment route",
+			path:       "/attachments/profile_picture/ua_test",
+			token:      tokens.auth,
+			clientPkg:  "io.ente.auth",
+			wantStatus: http.StatusForbidden,
+		},
+		{
 			name:       "photos token can access storage route",
 			path:       "/collections/v2",
 			token:      tokens.photos,
@@ -123,6 +144,15 @@ func setupAuthRouteTest(t *testing.T) (*gin.Engine, authRouteTestTokens) {
 	storageAPI := privateAPI.Group("/")
 	storageAPI.Use(RejectAuthApp())
 	storageAPI.GET("/collections/v2", func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+	storageAPI.GET("/user-entity/entity/diff", func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+	storageAPI.GET("/contacts/diff", func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+	storageAPI.GET("/attachments/:type/:attachmentID", func(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 	})
 

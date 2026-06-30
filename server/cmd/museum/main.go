@@ -975,30 +975,30 @@ func main() {
 	userEntityController := &userEntityCtrl.Controller{Repo: userEntityRepo}
 	userEntityHandler := &api.UserEntityHandler{Controller: userEntityController}
 
-	privateAPI.POST("/user-entity/key", userEntityHandler.CreateKey)
-	privateAPI.GET("/user-entity/key", userEntityHandler.GetKey)
-	privateAPI.POST("/user-entity/entity", userEntityHandler.CreateEntity)
-	privateAPI.PUT("/user-entity/entity", userEntityHandler.UpdateEntity)
-	privateAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
-	privateAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
+	storageAPI.POST("/user-entity/key", userEntityHandler.CreateKey)
+	storageAPI.GET("/user-entity/key", userEntityHandler.GetKey)
+	storageAPI.POST("/user-entity/entity", userEntityHandler.CreateEntity)
+	storageAPI.PUT("/user-entity/entity", userEntityHandler.UpdateEntity)
+	storageAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
+	storageAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
 
 	contactController := contactCtrl.New(contactRepository, objectCleanupController, s3Config)
 	contactHandler := &api.ContactHandler{Controller: contactController}
 
-	privateAPI.POST("/contacts", contactHandler.Create)
-	privateAPI.GET("/contacts/:id", contactHandler.Get)
-	privateAPI.GET("/contacts/diff", contactHandler.GetDiff)
-	privateAPI.PUT("/contacts/:id", contactHandler.Update)
-	privateAPI.DELETE("/contacts/:id", contactHandler.Delete)
-	privateAPI.POST("/attachments/:type/upload-url", contactHandler.GetAttachmentUploadURL)
-	privateAPI.GET("/attachments/:type/:attachmentID", contactHandler.GetAttachment)
-	privateAPI.PUT("/contacts/:id/attachments/:type", contactHandler.AttachContactAttachment)
-	privateAPI.GET("/contacts/:id/attachments/:type", contactHandler.GetCurrentContactAttachment)
-	privateAPI.DELETE("/contacts/:id/attachments/:type", contactHandler.DeleteContactAttachment)
-	privateAPI.POST("/contacts/:id/profile-picture/upload-url", contactHandler.GetProfilePictureUploadURL)
-	privateAPI.PUT("/contacts/:id/profile-picture", contactHandler.AttachProfilePicture)
-	privateAPI.GET("/contacts/:id/profile-picture", contactHandler.GetProfilePicture)
-	privateAPI.DELETE("/contacts/:id/profile-picture", contactHandler.DeleteProfilePicture)
+	storageAPI.POST("/contacts", contactHandler.Create)
+	storageAPI.GET("/contacts/:id", contactHandler.Get)
+	storageAPI.GET("/contacts/diff", contactHandler.GetDiff)
+	storageAPI.PUT("/contacts/:id", contactHandler.Update)
+	storageAPI.DELETE("/contacts/:id", contactHandler.Delete)
+	storageAPI.POST("/attachments/:type/upload-url", contactHandler.GetAttachmentUploadURL)
+	storageAPI.GET("/attachments/:type/:attachmentID", contactHandler.GetAttachment)
+	storageAPI.PUT("/contacts/:id/attachments/:type", contactHandler.AttachContactAttachment)
+	storageAPI.GET("/contacts/:id/attachments/:type", contactHandler.GetCurrentContactAttachment)
+	storageAPI.DELETE("/contacts/:id/attachments/:type", contactHandler.DeleteContactAttachment)
+	storageAPI.POST("/contacts/:id/profile-picture/upload-url", contactHandler.GetProfilePictureUploadURL)
+	storageAPI.PUT("/contacts/:id/profile-picture", contactHandler.AttachProfilePicture)
+	storageAPI.GET("/contacts/:id/profile-picture", contactHandler.GetProfilePicture)
+	storageAPI.DELETE("/contacts/:id/profile-picture", contactHandler.DeleteProfilePicture)
 
 	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo, UserRepo: userRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}
