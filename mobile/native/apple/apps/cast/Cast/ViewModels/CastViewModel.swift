@@ -1,9 +1,6 @@
 import SwiftUI
 import Combine
-
-#if canImport(UIKit)
 import UIKit
-#endif
 
 @MainActor
 class CastViewModel: ObservableObject {
@@ -20,8 +17,6 @@ class CastViewModel: ObservableObject {
     // MARK: - Private Properties
     private var cancellables = Set<AnyCancellable>()
     private let pairingService: RealCastPairingService
-    private var lastLoggedMessages: [String: Date] = [:]
-    private let logThrottleInterval: TimeInterval = 3.0 // 3 seconds
     private let castSession: CastSession
     
     // MARK: - Public Properties  

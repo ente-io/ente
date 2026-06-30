@@ -2,10 +2,7 @@ import SwiftUI
 import AVKit
 import Foundation
 import ZIPFoundation
-
-#if canImport(UIKit)
 import UIKit
-#endif
 
 @MainActor
 class RealSlideshowService: ObservableObject {
@@ -69,7 +66,6 @@ class RealSlideshowService: ObservableObject {
     // Configuration Flags
     private let verboseFileLogging = false          // Reduces per-file spam unless true
     private let verboseDecryptionLogging = false    // Detailed size/key logs
-    private let enablePreviewFallback = true        // Fetch preview image if full decrypt fails
     
     // 401 Error Handling
     private var isHandlingAuthExpiry: Bool = false
@@ -883,19 +879,6 @@ class RealSlideshowService: ObservableObject {
         slideTimer?.invalidate()
     }
     
-    func pauseVideo() {
-        videoPlayer?.pause()
-        isVideoPlaying = false
-    }
-    
-    func seekVideo(by seconds: Double) {
-        guard let player = videoPlayer else { return }
-        let current = player.currentTime().seconds
-        let target = max(0, current + seconds)
-        let time = CMTime(seconds: target, preferredTimescale: 600)
-        player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
-    }
-    
     @MainActor
     private func videoDidFinish() {
         isVideoPlaying = false
@@ -1000,29 +983,7 @@ class RealSlideshowService: ObservableObject {
     }
     
     // MARK: - Network & Download
-    
-    private func downloadImage(castPayload: CastPayload, fileID: Int) async throws -> Data {
-        // Use preview endpoint for thumbnails suitable for TV display
-        let url = URL(string: "https://cast-albums.ente.com/preview/?fileID=\(fileID)")!
-        
-        var request = URLRequest(url: url)
-        request.setValue(castPayload.castToken, forHTTPHeaderField: "X-Cast-Access-Token")
-        request.setValue(castPayload.collectionKey, forHTTPHeaderField: "X-Collection-Key")
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw CastError.networkError("Invalid response")
-        }
-        
-        guard httpResponse.statusCode == 200 else {
-            throw CastError.serverError(httpResponse.statusCode, String(data: data, encoding: .utf8))
-        }
-        
-    if verboseFileLogging { print("📥 Downloaded \(data.count) bytes for file \(fileID)") }
-        return data
-    }
-    
+
     private func downloadEncryptedFile(castPayload: CastPayload, fileID: Int) async throws -> Data {
         // Use the file download endpoint with cast-specific headers
         let url = URL(string: "\(castDownloadURL)/?fileID=\(fileID)")!
@@ -1266,21 +1227,10 @@ class RealSlideshowService: ObservableObject {
     private func getCacheStats() async -> (count: Int, totalSize: Int) {
         return await fileCache.getStats()
     }
-    
-    func clearAllCache() async {
-        print("🧹 Manually clearing all cache")
-        await fileCache.clear()
-    }
-    
-    func getCacheInfo() async -> String {
-        let stats = await getCacheStats()
-        return "Cache: \(stats.count) files, \(String(format: "%.1f", Double(stats.totalSize) / 1024 / 1024)) MB"
-    }
 }
 
 // MARK: - Live Photo Utilities
 
-#if os(tvOS)
 func extractZipUsingFoundation(zipURL: URL, to destinationURL: URL) throws {
     do {
         try FileManager.default.unzipItem(at: zipURL, to: destinationURL)
@@ -1289,7 +1239,6 @@ func extractZipUsingFoundation(zipURL: URL, to destinationURL: URL) throws {
         throw CastError.decryptionError("ZipFoundation extraction failed: \(error)")
     }
 }
-#endif
 
 func extractLivePhotoComponents(from zipData: Data) throws -> LivePhotoComponents {
     let tempDirectory = FileManager.default.temporaryDirectory
@@ -1310,21 +1259,8 @@ func extractLivePhotoComponents(from zipData: Data) throws -> LivePhotoComponent
     var videoPath: URL?
     
     do {
-        // Use NSTask instead of Process for tvOS compatibility
-        #if os(macOS)
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
-        task.arguments = ["-q", zipURL.path, "-d", extractDirectory.path]
-        try task.run()
-        task.waitUntilExit()
-        
-        if task.terminationStatus != 0 {
-            throw CastError.decryptionError("unzip command failed with status \(task.terminationStatus)")
-        }
-        #elseif os(tvOS)
         // For tvOS, we'll implement a simple zip reader using Foundation
         try extractZipUsingFoundation(zipURL: zipURL, to: extractDirectory)
-        #endif
         
         // Enumerate all extracted files (including nested) because zips may contain a folder structure.
         let resourceKeys: [URLResourceKey] = [.isDirectoryKey]

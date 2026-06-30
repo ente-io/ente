@@ -1,10 +1,7 @@
 import SwiftUI
 import AVFoundation
 import AVKit
-
-#if canImport(UIKit)
 import UIKit
-#endif
 
 struct VideoPlayerView: View {
     let videoData: Data
@@ -165,14 +162,12 @@ struct VideoPlayerView: View {
         player.automaticallyWaitsToMinimizeStalling = true
         
         // Set audio session for proper audio handling
-        #if os(tvOS)
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to set audio session: \(error)")
         }
-        #endif
         
         // Add observers
         setupPlayerObservers()
@@ -311,13 +306,11 @@ struct VideoPlayerView: View {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         
         // Deactivate audio session
-        #if os(tvOS)
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
             print("Failed to deactivate audio session: \(error)")
         }
-        #endif
         
         player = nil
         playerItem = nil

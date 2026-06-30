@@ -1,22 +1,16 @@
 import SwiftUI
-#if canImport(UIKit)
 import UIKit
-#endif
 
 struct FontUtils {
     
     // MARK: - Safe Font Creation
     
     private static func safeFont(name: String, size: CGFloat, fallback: Font) -> Font {
-        #if canImport(UIKit)
         if UIFont(name: name, size: size) != nil {
             return .custom(name, size: size)
         } else {
             return fallback
         }
-        #else
-        return .custom(name, size: size)
-        #endif
     }
     
     // MARK: - Font Presets

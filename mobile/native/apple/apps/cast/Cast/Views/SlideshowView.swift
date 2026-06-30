@@ -1,8 +1,5 @@
 import SwiftUI
-
-#if canImport(UIKit)
 import UIKit
-#endif
 
 struct SlideshowView: View {
     let imageData: Data?
@@ -34,10 +31,8 @@ struct SlideshowView: View {
     @State private var preDecodedImage: UIImage? = nil
     @State private var previousDecodedImage: UIImage? = nil
     
-    #if os(tvOS)
     @FocusState private var isFocused: Bool
-    #endif
-    
+
     init(imageData: Data? = nil, videoData: Data? = nil, isVideo: Bool = false, slideshowService: RealSlideshowService) {
         self.imageData = imageData
         self.videoData = videoData
@@ -174,7 +169,6 @@ struct SlideshowView: View {
         }
         .onTapGesture { Task { await handlePlayPauseAction() } }
         .onLongPressGesture { handleLongPressGesture() }
-        #if os(tvOS)
         .focusable()
         .focused($isFocused)
         .onMoveCommand { direction in Task { await handleDirectionalInput(direction) } }
@@ -186,14 +180,11 @@ struct SlideshowView: View {
             }
         }
         .onExitCommand { toggleControls() }
-        #endif
         .onAppear {
             startControlsTimer()
-            #if os(tvOS)
             isFocused = true
             // Backup screen saver prevention at view level
             ScreenSaverManager.preventScreenSaver()
-            #endif
             
             // CRITICAL FIX: Process initial image data if present and not already processed
             // This handles the case where SlideshowView is created with imageData already populated
@@ -214,10 +205,8 @@ struct SlideshowView: View {
             }
         }
         .onDisappear {
-            #if os(tvOS)
             // Ensure screen saver prevention is disabled when view disappears
             ScreenSaverManager.allowScreenSaver()
-            #endif
         }
     }
     
