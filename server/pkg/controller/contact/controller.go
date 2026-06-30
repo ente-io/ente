@@ -122,6 +122,7 @@ func (c *Controller) Update(ctx *gin.Context, contactID string, req contactmodel
 	if err := req.Validate(); err != nil {
 		return nil, stacktrace.Propagate(err, "invalid update contact request")
 	}
+	userID := auth.GetUserID(ctx.Request.Header)
 	exists, err := c.Repo.ContactUserExists(ctx, req.ContactUserID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to validate contact user")
@@ -132,7 +133,22 @@ func (c *Controller) Update(ctx *gin.Context, contactID string, req contactmodel
 			"",
 		)
 	}
-	userID := auth.GetUserID(ctx.Request.Header)
+	updateState, err := c.Repo.GetContactUpdateState(ctx, userID, contactID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to fetch contact")
+	}
+	if updateState.IsDeleted || updateState.ContactUserID != req.ContactUserID {
+		canUpdate, err := c.Repo.CanCreateContact(ctx, userID, req.ContactUserID)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to validate contact eligibility")
+		}
+		if !canUpdate {
+			return nil, stacktrace.Propagate(
+				ente.NewBadRequestWithMessage("contactUserID is not eligible to be added as a contact"),
+				"",
+			)
+		}
+	}
 	if err := c.Repo.Update(ctx, userID, contactID, req); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

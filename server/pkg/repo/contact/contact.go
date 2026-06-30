@@ -179,6 +179,30 @@ func (r *Repository) Get(ctx context.Context, userID int64, id string) (*contact
 	return entity, nil
 }
 
+type ContactUpdateState struct {
+	ContactUserID int64
+	IsDeleted     bool
+}
+
+func (r *Repository) GetContactUpdateState(ctx context.Context, userID int64, id string) (ContactUpdateState, error) {
+	var state ContactUpdateState
+	err := r.DB.QueryRowContext(
+		ctx,
+		`SELECT contact_user_id, is_deleted
+		   FROM contact_entity
+		  WHERE id = $1 AND user_id = $2`,
+		id,
+		userID,
+	).Scan(&state.ContactUserID, &state.IsDeleted)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ContactUpdateState{}, &ente.ErrNotFoundError
+		}
+		return ContactUpdateState{}, stacktrace.Propagate(err, "failed to get contact update state")
+	}
+	return state, nil
+}
+
 func (r *Repository) Update(ctx context.Context, userID int64, id string, req contactmodel.UpdateRequest) error {
 	result, err := r.DB.ExecContext(
 		ctx,
