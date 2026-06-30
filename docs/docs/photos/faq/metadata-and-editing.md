@@ -168,6 +168,14 @@ Photos sometimes have incorrect dates due to:
 
 Ente will store your corrections and sync them across all your devices.
 
+### What do the Fix time options mean? {#fix-time-options}
+
+- **Exif:DateTimeOriginal**: The original capture timestamp saved in the file's EXIF metadata.
+- **Exif:DateTimeDigitized**: The timestamp for when the image was converted to a digital file, such as when it was scanned.
+- **Exif:MetadataDate**: The timestamp for when the metadata was last updated. Use this only if the capture timestamps are incorrect.
+- **File name**: Parses a date from the file name, if it contains one.
+- **Custom time**: lets you enter the exact date and time manually.
+
 ### Are my metadata edits reversible? {#edits-reversible}
 
 Yes! When you edit metadata (dates, locations, descriptions) in Ente, the **original file is never modified**. Your edits are stored separately.
