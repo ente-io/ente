@@ -15,9 +15,9 @@ const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 const OVERFLOW_SAFETY_TOKENS = 256;
 const MIN_DESKTOP_DEFAULT_MEMORY_BYTES = 16 * 1024 * 1024 * 1024;
 
-// These fallback values must stay in sync with rust/crates/ensu/src/inference/defaults.rs.
+// These fallback values must stay in sync with rust/crates/ensu/src/config.rs.
 // When running inside Tauri, resolveDefaultModelForDevice() overwrites them with
-// values fetched from the Rust get_ensu_defaults command.
+// values fetched from the Rust config_defaults command.
 export const DEFAULT_MODEL: ModelInfo = {
     id: "lfm-vl-1.6b",
     name: "LFM 2.5 VL 1.6B (Q4_0)",
@@ -40,22 +40,22 @@ const DESKTOP_DEFAULT_MODEL: ModelInfo = {
     sizeHuman: "5.97 GB",
 };
 
-interface TauriEnsuModelPreset {
+interface ConfigModelPreset {
     id: string;
     title: string;
     url: string;
     mmprojUrl?: string | null;
 }
 
-interface TauriEnsuDefaults {
+interface ConfigDefaults {
     mobileSystemPromptBody: string;
     desktopSystemPromptBody: string;
     systemPromptDatePlaceholder: string;
     sessionSummarySystemPrompt: string;
-    mobileDefaultModel: TauriEnsuModelPreset;
-    mobileModelPresets: TauriEnsuModelPreset[];
-    desktopDefaultModel: TauriEnsuModelPreset;
-    desktopModelPresets: TauriEnsuModelPreset[];
+    mobileDefaultModel: ConfigModelPreset;
+    mobileModelPresets: ConfigModelPreset[];
+    desktopDefaultModel: ConfigModelPreset;
+    desktopModelPresets: ConfigModelPreset[];
 }
 
 interface TauriLlmModelDownloadProgress {
@@ -126,7 +126,7 @@ export class LlmProvider {
     private currentMmprojPath?: string;
     private currentContextKey?: string;
     private defaultModel = DEFAULT_MODEL;
-    private ensuDefaults?: TauriEnsuDefaults;
+    private configDefaults?: ConfigDefaults;
     private useDesktopRustDefaults = false;
 
     private downloadActive = false;
@@ -160,18 +160,18 @@ export class LlmProvider {
         return this.defaultModel;
     }
 
-    public getEnsuDefaults(): TauriEnsuDefaults | undefined {
-        return this.ensuDefaults;
+    public getConfigDefaults(): ConfigDefaults | undefined {
+        return this.configDefaults;
     }
 
     public getResolvedModelPresets(): ResolvedModelPreset[] | undefined {
-        if (!this.ensuDefaults) {
+        if (!this.configDefaults) {
             return undefined;
         }
 
         const presets = this.useDesktopRustDefaults
-            ? this.ensuDefaults.desktopModelPresets
-            : this.ensuDefaults.mobileModelPresets;
+            ? this.configDefaults.desktopModelPresets
+            : this.configDefaults.mobileModelPresets;
         return presets.map((preset) => ({
             name: preset.title,
             url: preset.url,
@@ -529,7 +529,7 @@ export class LlmProvider {
             // as fallbacks.
             try {
                 const defaults =
-                    await invoke<TauriEnsuDefaults>("get_ensu_defaults");
+                    await invoke<ConfigDefaults>("config_defaults");
                 const rustPreset = this.useDesktopRustDefaults
                     ? defaults.desktopDefaultModel
                     : defaults.mobileDefaultModel;
@@ -540,7 +540,7 @@ export class LlmProvider {
                     url: rustPreset.url,
                     mmprojUrl: rustPreset.mmprojUrl ?? undefined,
                 };
-                this.ensuDefaults = defaults;
+                this.configDefaults = defaults;
             } catch (defaultsError) {
                 log.warn(
                     "Failed to fetch ensu defaults from Rust",

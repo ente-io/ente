@@ -284,6 +284,20 @@ iCloud Shared Albums store compressed copies, not the original files. Because of
 
 Ente reads photos through Apple's photo library APIs, which don't always return every item shown in the Photos app. In particular, some burst frames and certain shared or synced assets are excluded from third-party app queries by iOS itself. This can make Ente's Recents count in the on-device section slightly lower than iOS's.
 
+### On iOS, which album should I back up to capture everything? {#ios-which-album-to-backup}
+
+On iOS, the photo library is split into several system albums (Recents, Live Photos, Portraits, Screenshots, and so on) that you cannot reorganize. If you're coming from an Android camera roll and want everything in one place, back up **Recents**.
+
+Recents is the smart album that shows every photo and video in your library, sorted by date added, regardless of where it came from (camera, screenshots, WhatsApp, AirDrop, browser downloads, etc.). It's the closest equivalent to the single Camera Roll in an Android gallery.
+
+**On iOS:**
+
+Open `Settings > Backup > Backed up folders`, enable backup for **Recents**, and disable the others (Live Photos, Portraits, and so on). Their photos are already included in Recents, so nothing is missed.
+
+> [!NOTE]
+>
+> iOS does not let any third-party app replace the native Photos app, so Ente cannot back up to a single custom album the way a default gallery would. See [Can Ente replace my default Photos or Camera gallery?](#ente-as-default-gallery).
+
 ### Why aren't photos from my Samsung "Gallery" folder backing up? {#samsung-gallery-folder}
 
 Ente backs up the folders you select under `Settings > Backup > Backed up folders`. On Samsung devices, photos restored by Samsung Cloud often land in a folder called **Gallery**, which is separate from the standard **Camera** folder.
@@ -649,6 +663,28 @@ Yes! You can use Ente on as many devices as you want simultaneously. All your de
 
 The sync happens automatically in the background when devices are connected to the internet.
 
+### What is "Faster uploads"? {#what-is-faster-uploads}
+
+"Faster uploads" routes your uploads through Cloudflare's network (`uploader.ente.com`) instead of sending them directly to Ente's storage backend.
+
+Normally, your encrypted files are uploaded straight to the object storage server. With this option enabled, they go to the nearest Cloudflare edge node first, and Cloudflare's backbone network handles the final leg to storage. For most users - especially those geographically far from Ente's storage origin - this results in noticeably faster upload speeds, because the public internet leg of the journey is shorter.
+
+A few things to note:
+
+- It's available only on the production app, not on self-hosted instances.
+- Your files stay end-to-end encrypted throughout - Cloudflare only relays the already-encrypted data.
+- If you're having upload issues or slowness, turning it off is a useful troubleshooting step, since Cloudflare occasionally has routing issues that can slow things down for certain regions.
+
+**On desktop/web:**
+
+Toggle it under `Settings > Preferences > Advanced`.
+
+**On mobile:**
+
+Toggle it under `Settings > Backup > Backup settings`.
+
+Learn more about [why uploads might fail on desktop or web](/photos/faq/troubleshooting#faster-uploads).
+
 ### Why is my mobile app and desktop app not syncing? {#mobile-desktop-not-syncing}
 
 This usually occurs due to a network connectivity issue:
@@ -732,3 +768,12 @@ Ente does not apply compression to uploaded photos. The file size of your photos
 If the app finds exact duplicates, it will show them in the manual deduplication tool. When you confirm removal, the app keeps one copy and creates symlinks for the duplicates in all albums. This helps save storage space while maintaining your album structure.
 
 Learn more about [manually removing duplicates](/photos/features/albums-and-organization/storage-optimization) and [automatic duplicate detection during backup](/photos/features/backup-and-sync/duplicate-detection).
+
+### Why do two exact duplicate files show different thumbnails? {#duplicate-thumbnails-differ}
+
+Deduplication is based on the file's content hash, not on its thumbnail. Thumbnails are generated independently for each file, so two identical files can still show different previews. This can happen because:
+
+- **Different upload clients**: If the same file was uploaded from the iOS app, Android app, and desktop, each client may have generated its thumbnail separately, using different methods, codecs, or frame-extraction logic - resulting in a different preview frame (common with videos and Live Photos).
+- **Different upload times**: Older versions of Ente may have used different thumbnail generation code than newer versions.
+
+The differing thumbnails don't affect deduplication. Ente still recognizes the files as exact duplicates and keeps a single underlying copy.

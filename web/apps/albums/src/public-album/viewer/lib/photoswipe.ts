@@ -3,6 +3,13 @@ import {
     enteWordmarkViewBox,
 } from "ente-base/components/ente-wordmark";
 import log from "ente-base/log";
+import {
+    commentSVGPath,
+    createPSRegisterElementIconHTML,
+    heartFillSVGPath,
+    heartSVGPath,
+    settingsSVGPath,
+} from "ente-gallery/components/viewer/icons";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import "hls-video-element";
@@ -26,13 +33,6 @@ import {
     updateFileInfoExifIfNeeded,
     type ItemData,
 } from "./data-source";
-import {
-    commentSVGPath,
-    createPSRegisterElementIconHTML,
-    heartFillSVGPath,
-    heartSVGPath,
-    settingsSVGPath,
-} from "./icons";
 
 export interface FileViewerPhotoSwipeDelegate {
     /**

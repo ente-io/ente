@@ -20,5 +20,13 @@ jobs:
       - name: Checkout PR
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
+      - name: Checkout trusted checker
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: trusted
+          sparse-checkout: .github/scripts/check_workflow_security.rb
+          sparse-checkout-cone-mode: false
+
       - name: Run workflow security checks
-        run: ruby .github/scripts/check_workflow_security.rb
+        run: ruby trusted/.github/scripts/check_workflow_security.rb
