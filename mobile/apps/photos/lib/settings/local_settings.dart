@@ -111,6 +111,9 @@ class LocalSettings {
       "media_management_hint_delete_attempts";
   static const _kMediaManagementHintDismissedAt =
       "media_management_hint_dismissed_at";
+  static const _kIsFromLocalGalleryToEnte =
+      "ls.pending_backup_selection_from_local_import";
+
   static const _kWidgetHideTextFlags = "ls.widget_hide_text_flags";
 
   /// Key used by the native (Android/iOS) widget providers to read the
@@ -135,6 +138,17 @@ class LocalSettings {
   /// false on the next app launch. Used to defer the get-started banner to
   /// the second app open (after onboarding).
   bool localGalleryModeEnabledThisSession = false;
+
+  /// Set after the first local-gallery import completes before an account is
+  /// configured. When the user later signs in or signs up, the online flow
+  /// replays first-import completion once so backup-folder selection can run
+  /// against the imported local rows, then clears this marker.
+  bool get isFromLocalGalleryToEnte =>
+      _prefs.getBool(_kIsFromLocalGalleryToEnte) ?? false;
+
+  Future<void> setIsFromLocalGalleryToEnte(bool value) async {
+    await _prefs.setBool(_kIsFromLocalGalleryToEnte, value);
+  }
 
   LocalSettings(this._prefs);
 

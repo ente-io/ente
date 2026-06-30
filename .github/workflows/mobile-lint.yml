@@ -1,10 +1,11 @@
-name: "Lint and test (Mobile)"
+name: "Lint (Mobile)"
 
 on:
     pull_request:
         paths:
             - ".github/workflows/mobile-lint.yml"
             - "mobile/**"
+            - "!mobile/native/**"
             - "rust/apps/codegen/**"
             - "rust/bindings/frb/**"
             - "rust/Cargo.lock"
@@ -17,6 +18,9 @@ on:
 
 permissions:
     contents: read
+
+env:
+    RUSTFLAGS: -D warnings
 
 jobs:
     lint:
@@ -76,10 +80,10 @@ jobs:
             - run: cargo codegen frb
               working-directory: rust
 
-            - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
+            - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked
               working-directory: rust
 
-            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
+            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked
               working-directory: rust
 
             - run: flutter pub get --enforce-lockfile

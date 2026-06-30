@@ -73,6 +73,17 @@ func (h *UserHandler) GetDetailsV2(c *gin.Context) {
 	c.JSON(http.StatusOK, details)
 }
 
+// GetAccountDeletionSummary returns counts for data that will be deleted.
+func (h *UserHandler) GetAccountDeletionSummary(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+	summary, err := h.UserController.GetAccountDeletionSummary(c.Request.Context(), userID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, summary)
+}
+
 // GetLockerUsage returns locker usage details for the requesting user.
 func (h *UserHandler) GetLockerUsage(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)

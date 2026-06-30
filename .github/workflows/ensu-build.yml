@@ -180,26 +180,43 @@ jobs:
               if: matrix.platform.os == 'windows-latest'
               shell: bash
               run: |
+                  test "${{ secrets.AZURE_ENDPOINT != '' && secrets.AZURE_CODE_SIGNING_NAME != '' && secrets.AZURE_CERT_PROFILE_NAME != '' }}" = true
                   cargo install --locked artifact-signing-cli --version 0.11.0
-                  echo "$(cygpath -w "$HOME/.cargo/bin")" >> $GITHUB_PATH
+
+                  artifact_signing_cli="${CARGO_HOME:-$HOME/.cargo}/bin/artifact-signing-cli.exe"
+                  test -f "$artifact_signing_cli" || { echo "::error::artifact-signing-cli not found at $artifact_signing_cli"; exit 1; }
+                  artifact_signing_cli="$(cygpath -w "$artifact_signing_cli")"
+
                   SIGNTOOL_PATH=$(powershell -NoProfile -Command "Get-ChildItem 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe' -ErrorAction Stop | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName" | tr -d '\r')
                   echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
 
-                  cat > rust/apps/ensu/tauri.ci.conf.json <<'EOF'
-                  {
-                      "plugins": {
-                          "updater": {
-                              "pubkey": ${{ toJSON(vars.ENSU_TAURI_UPDATER_PUBKEY) }}
+                  jq -n \
+                      --arg signer "$artifact_signing_cli" \
+                      '{
+                          plugins: {
+                              updater: { pubkey: ${{ toJSON(vars.ENSU_TAURI_UPDATER_PUBKEY) }} }
+                          },
+                          bundle: {
+                              createUpdaterArtifacts: "v1Compatible",
+                              windows: {
+                                  signCommand: {
+                                      cmd: $signer,
+                                      args: [
+                                          "-e",
+                                          ${{ toJSON(secrets.AZURE_ENDPOINT) }},
+                                          "-a",
+                                          ${{ toJSON(secrets.AZURE_CODE_SIGNING_NAME) }},
+                                          "-c",
+                                          ${{ toJSON(secrets.AZURE_CERT_PROFILE_NAME) }},
+                                          "-d",
+                                          "Ensu",
+                                          "%1"
+                                      ]
+                                  }
+                              }
                           }
-                      },
-                      "bundle": {
-                          "createUpdaterArtifacts": "v1Compatible",
-                          "windows": {
-                              "signCommand": ${{ toJSON(format('artifact-signing-cli -e {0} -a {1} -c {2} -d Ensu %1', secrets.AZURE_ENDPOINT, secrets.AZURE_CODE_SIGNING_NAME, secrets.AZURE_CERT_PROFILE_NAME)) }}
-                          }
-                      }
-                  }
-                  EOF
+                      }' \
+                      > rust/apps/ensu/tauri.ci.conf.json
 
             - name: Mint nightly token
               id: nightly_token
@@ -325,7 +342,7 @@ jobs:
                   EOF
 
             - name: Build signed Android artifacts
-              run: ./gradlew -PversionCode="${BUILD_NUMBER}" :app-ui:assembleRelease :app-ui:bundleRelease
+              run: ./gradlew -PversionCode="${BUILD_NUMBER}" :app:assembleRelease :app:bundleRelease
 
             - name: Prepare whatsnew
               run: |
@@ -335,7 +352,7 @@ jobs:
             - name: Prepare Android APK for GitHub release
               run: |
                   mkdir -p artifacts
-                  cp app-ui/build/outputs/apk/release/app-ui-release.apk "artifacts/${ANDROID_APK_NAME}"
+                  cp app/build/outputs/apk/release/app-release.apk "artifacts/${ANDROID_APK_NAME}"
 
             - name: Mint nightly token
               id: nightly_token
@@ -378,7 +395,7 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.ensu
-                  releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
+                  releaseFiles: mobile/native/android/apps/ensu/app/build/outputs/bundle/release/app-release.aab
                   tracks: internal
                   whatsNewDirectory: mobile/native/android/apps/ensu/whatsnew
 

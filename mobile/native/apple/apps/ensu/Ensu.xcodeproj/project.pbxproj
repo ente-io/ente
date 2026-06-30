@@ -132,7 +132,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "Ensu" */;
 			buildPhases = (
-				CC142736A470612F436ECF8E /* Build Rust (db/inference/transcription) */,
+				CC142736A470612F436ECF8E /* Build Rust (ensu) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
 				DA72BC5E2E5F87A000D128FF /* Frameworks */,
 				DA72BC5F2E5F87A000D128FF /* Resources */,

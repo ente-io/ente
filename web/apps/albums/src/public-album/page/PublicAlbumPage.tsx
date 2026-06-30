@@ -33,10 +33,6 @@ import type { PublicAlbumSingleFileViewerProps } from "@/public-album/viewer/com
 import { type PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
 import { LazyPublicFeedSidebar } from "@/public-album/viewer/lib/lazy";
 import {
-    useSaveGroupsActions,
-    type AddSaveGroup,
-} from "@/shared/state/save-groups";
-import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/shared/ui/gallery/GalleryItemsHeader";
@@ -75,6 +71,10 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiOrigin, isCustomAPIOrigin } from "ente-base/origins";
+import {
+    useSaveGroupsActions,
+    type AddSaveGroup,
+} from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";

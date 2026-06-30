@@ -44,3 +44,7 @@ jobs:
             - run: cargo clippy --all-targets --locked
 
             - run: cargo test --locked --workspace
+
+            - run: cargo install cargo-audit --version 0.22.2 --locked
+
+            - run: cargo audit

@@ -90,8 +90,8 @@ final class InferenceRsProvider {
 
     private let modelDir: URL
     private let downloadManager = ModelDownloadManager.shared
-    private var modelHandle: ModelHandle?
-    private var contextHandle: ContextHandle?
+    private var modelHandle: LlmModelHandle?
+    private var contextHandle: LlmContextHandle?
     private var currentModelKey: LoadedModelKey?
     private var currentContextLength: Int?
     private var backendInitialized = false
@@ -132,7 +132,7 @@ final class InferenceRsProvider {
         unloadModel()
 
         if !backendInitialized {
-            try initBackend()
+            try llmInitBackend()
             backendInitialized = true
         }
 
@@ -211,13 +211,13 @@ final class InferenceRsProvider {
         currentJobId = nil
 
         let nativeMessages = messages.map {
-            ChatMessage(role: $0.role.roleString, content: $0.text)
+            LlmChatMessage(role: $0.role.roleString, content: $0.text)
         }
 
         let mmprojPath = imageFiles.isEmpty ? nil : mmprojPathFor(target: target)?.path
         let clampedTemperature = min(max(temperature, 0.35), 0.7)
 
-        let request = GenerateChatRequest(
+        let request = LlmChatRequest(
             messages: nativeMessages,
             templateOverride: nil,
             addAssistant: true,
@@ -254,11 +254,11 @@ final class InferenceRsProvider {
             }
         }
 
-        let summary: GenerateSummary = try await withCheckedThrowingContinuation { continuation in
+        let summary: LlmGenerationSummary = try await withCheckedThrowingContinuation { continuation in
             Task.detached {
                 do {
                     self.unloadTranscriptionModelIfLoaded()
-                    let summary = try generateChatStream(context: context, request: request, callback: sink)
+                    let summary = try llmGenerateChatStream(context: context, request: request, callback: sink)
                     lock.lock()
                     let localError = error
                     lock.unlock()
@@ -282,9 +282,9 @@ final class InferenceRsProvider {
 
     func stopGeneration() {
         if let jobId = currentJobId {
-            cancel(jobId: jobId)
+            llmCancel(jobId: jobId)
         } else {
-            cancel(jobId: 0)
+            llmCancel(jobId: 0)
         }
     }
 
@@ -307,7 +307,7 @@ final class InferenceRsProvider {
                     }
 
                     self.unloadTranscriptionModelIfLoaded()
-                    try prewarmMultimodalContext(
+                    try llmPrewarmMultimodalContext(
                         context: context,
                         mmprojPath: mmprojPath.path,
                         mediaMarker: nil
@@ -321,9 +321,9 @@ final class InferenceRsProvider {
 
     func resetContext() {
         guard let model = modelHandle else { return }
-        let contextParams = ContextParams(contextSize: currentContextLength.map(Int32.init), nThreads: nil, nBatch: nil)
+        let contextParams = LlmContextParams(contextSize: currentContextLength.map(Int32.init), nThreads: nil, nBatch: nil)
         contextHandle = nil
-        contextHandle = try? createContext(model: model, params: contextParams)
+        contextHandle = try? llmCreateContext(model: model, params: contextParams)
     }
 
     func cancelDownload() {
@@ -406,8 +406,8 @@ final class InferenceRsProvider {
     }
 
     private func loadModelHandle(target: InferenceModelTarget, modelPath: URL) throws {
-        let params = ModelLoadParams(modelPath: modelPath.path, nGpuLayers: 0, useMmap: true, useMlock: false)
-        let model = try loadModel(params: params)
+        let params = LlmModelLoadParams(modelPath: modelPath.path, nGpuLayers: 0, useMmap: true, useMlock: false)
+        let model = try llmLoadModel(params: params)
         modelHandle = model
 
         let desiredContext = target.contextLength ?? 12000
@@ -418,8 +418,8 @@ final class InferenceRsProvider {
 
         for contextSize in candidates {
             do {
-                let contextParams = ContextParams(contextSize: Int32(contextSize), nThreads: Int32(threadCount), nBatch: Int32(512))
-                contextHandle = try createContext(model: model, params: contextParams)
+                let contextParams = LlmContextParams(contextSize: Int32(contextSize), nThreads: Int32(threadCount), nBatch: Int32(512))
+                contextHandle = try llmCreateContext(model: model, params: contextParams)
                 currentModelKey = LoadedModelKey(id: target.id, requestedContextLength: target.contextLength)
                 currentContextLength = contextSize
                 return
@@ -581,7 +581,7 @@ final class InferenceRsProvider {
                     (self?.isRustDownloadCancelled() ?? true) || Task.isCancelled
                 }
             )
-            try downloadLlmModelFiles(targets: targets, callback: callback)
+            try llmDownloadModelFiles(targets: targets, callback: callback)
         }
 
         try await withTaskCancellationHandler {
@@ -634,14 +634,14 @@ final class InferenceRsProvider {
     }
 }
 
-private final class CallbackSink: GenerateEventCallback, @unchecked Sendable {
-    private let handler: (GenerateEvent) -> Void
+private final class CallbackSink: LlmGenerationEventCallback, @unchecked Sendable {
+    private let handler: (LlmGenerationEvent) -> Void
 
-    init(handler: @escaping (GenerateEvent) -> Void) {
+    init(handler: @escaping (LlmGenerationEvent) -> Void) {
         self.handler = handler
     }
 
-    func onEvent(event: GenerateEvent) {
+    func onEvent(event: LlmGenerationEvent) {
         handler(event)
     }
 }

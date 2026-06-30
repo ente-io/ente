@@ -7,6 +7,20 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v1.7.25 (desktop) - Jun 2026
+
+- Reduce desktop app package size by excluding unused ONNX Runtime native binaries.
+- Sign shipped Windows native modules and DLLs.
+- Make the upload dialog draggable.
+- Import Google Takeout favourites into Favourite Album.
+- Navigate files keeping the File Info opened using Alt/Option + Arrow Keys
+- Use Google Takeout metadata titles when naming imported folders.
+- Update the Archive section to show only archived albums on the top bar.
+- Fix link icon visibility for albums shared with people and a public link. By @yashs33244.
+- Show files skipped during upload (hidden files and unreadable zips) in the upload progress.
+- Support Traditional Chinese and Urdu translations.
+- Update to Electron 42.
+
 ## v1.3.57 (mobile) - Jun 2026
 
 - Redesigned the Search tab with improved spacing, previews, empty states, and keyboard handling.

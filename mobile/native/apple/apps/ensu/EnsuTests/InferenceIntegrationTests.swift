@@ -1,10 +1,10 @@
 import XCTest
 @testable import Ensu
 
-private final class GenerateEventCollector: GenerateEventCallback {
-    private(set) var events: [GenerateEvent] = []
+private final class GenerateEventCollector: LlmGenerationEventCallback {
+    private(set) var events: [LlmGenerationEvent] = []
 
-    func onEvent(event: GenerateEvent) {
+    func onEvent(event: LlmGenerationEvent) {
         events.append(event)
     }
 
@@ -32,16 +32,16 @@ private final class GenerateEventCollector: GenerateEventCallback {
 
 final class InferenceIntegrationTests: XCTestCase {
     func testInitBackend() throws {
-        try initBackend()
+        try llmInitBackend()
     }
 
     func testGenerateChatStreamWhenModelProvided() throws {
         let modelPath = try requiredEnv("ENSU_TEST_MODEL")
 
-        try initBackend()
+        try llmInitBackend()
 
-        let model = try loadModel(
-            params: ModelLoadParams(
+        let model = try llmLoadModel(
+            params: LlmModelLoadParams(
                 modelPath: modelPath,
                 nGpuLayers: nil,
                 useMmap: nil,
@@ -49,15 +49,15 @@ final class InferenceIntegrationTests: XCTestCase {
             )
         )
 
-        let context = try createContext(
+        let context = try llmCreateContext(
             model: model,
-            params: ContextParams(contextSize: 2048, nThreads: nil, nBatch: nil)
+            params: LlmContextParams(contextSize: 2048, nThreads: nil, nBatch: nil)
         )
 
-        let request = GenerateChatRequest(
+        let request = LlmChatRequest(
             messages: [
-                ChatMessage(role: "system", content: "You are a helpful assistant."),
-                ChatMessage(role: "user", content: "Say hello in one short sentence.")
+                LlmChatMessage(role: "system", content: "You are a helpful assistant."),
+                LlmChatMessage(role: "user", content: "Say hello in one short sentence.")
             ],
             templateOverride: nil,
             addAssistant: true,
@@ -77,7 +77,7 @@ final class InferenceIntegrationTests: XCTestCase {
         )
 
         let collector = GenerateEventCollector()
-        let summary = try generateChatStream(context: context, request: request, callback: collector)
+        let summary = try llmGenerateChatStream(context: context, request: request, callback: collector)
 
         XCTAssertGreaterThan(summary.jobId, 0)
         XCTAssertTrue(collector.hasDone)
@@ -90,10 +90,10 @@ final class InferenceIntegrationTests: XCTestCase {
         let mmprojPath = try requiredEnv("ENSU_TEST_MMPROJ")
         let imagePath = try requiredEnv("ENSU_TEST_IMAGE")
 
-        try initBackend()
+        try llmInitBackend()
 
-        let model = try loadModel(
-            params: ModelLoadParams(
+        let model = try llmLoadModel(
+            params: LlmModelLoadParams(
                 modelPath: modelPath,
                 nGpuLayers: nil,
                 useMmap: nil,
@@ -101,15 +101,15 @@ final class InferenceIntegrationTests: XCTestCase {
             )
         )
 
-        let context = try createContext(
+        let context = try llmCreateContext(
             model: model,
-            params: ContextParams(contextSize: 2048, nThreads: nil, nBatch: nil)
+            params: LlmContextParams(contextSize: 2048, nThreads: nil, nBatch: nil)
         )
 
-        let request = GenerateChatRequest(
+        let request = LlmChatRequest(
             messages: [
-                ChatMessage(role: "system", content: "You are a helpful assistant."),
-                ChatMessage(role: "user", content: "What color is the car? Answer in one word.")
+                LlmChatMessage(role: "system", content: "You are a helpful assistant."),
+                LlmChatMessage(role: "user", content: "What color is the car? Answer in one word.")
             ],
             templateOverride: nil,
             addAssistant: true,
@@ -129,7 +129,7 @@ final class InferenceIntegrationTests: XCTestCase {
         )
 
         let collector = GenerateEventCollector()
-        let summary = try generateChatStream(context: context, request: request, callback: collector)
+        let summary = try llmGenerateChatStream(context: context, request: request, callback: collector)
 
         XCTAssertGreaterThan(summary.jobId, 0)
         XCTAssertTrue(collector.hasDone)

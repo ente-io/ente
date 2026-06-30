@@ -4,7 +4,7 @@ on:
     pull_request:
         paths:
             - "mobile/native/android/apps/ensu/**"
-            - "mobile/native/android/packages/rust/**"
+            - "mobile/native/android/apps/ensu/rust/**"
             - "rust/apps/codegen/**"
             - "rust/crates/core/**"
             - "rust/crates/ensu/**"
@@ -42,4 +42,4 @@ jobs:
 
             - name: Build Ensu
               working-directory: mobile/native/android/apps/ensu
-              run: ./gradlew :app-ui:assembleDebug
+              run: ./gradlew :app:assembleDebug

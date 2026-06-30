@@ -1,5 +1,6 @@
 uniffi::setup_scaffolding!("ensu");
 
+pub mod config;
 pub mod db;
-pub mod inference;
+pub mod llm;
 pub mod transcription;
