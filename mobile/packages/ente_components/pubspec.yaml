@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  fluttertoast: 8.2.14
   hugeicons: 1.1.7
 
 dev_dependencies:
