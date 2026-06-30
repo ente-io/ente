@@ -94,6 +94,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                       children: [
                         FutureBuilder<EnteFile?>(
                           future: CollectionsService.instance.getCover(c),
+                          initialData: CollectionsService.instance
+                              .getCoverCache(c),
                           builder: (context, snapshot) {
                             EnteFile? thumbnail;
                             if (snapshot.hasData) {

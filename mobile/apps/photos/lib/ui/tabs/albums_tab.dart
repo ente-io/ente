@@ -610,7 +610,6 @@ class _AlbumsTabState extends State<AlbumsTab>
     return ValueKey<Object>((
       _hasSearchQuery ? "search" : "filter",
       _effectiveFilter,
-      _viewType.value,
       contentPhase,
     ));
   }
