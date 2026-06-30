@@ -49,6 +49,8 @@ jobs:
 
             - run: cargo test --locked --workspace --no-run
 
+            - run: cargo install cargo-audit --version 0.22.2 --locked
+
     rust-flutter:
         # For the cargo steps of mobile-lint.yml.
         runs-on: ubuntu-latest
