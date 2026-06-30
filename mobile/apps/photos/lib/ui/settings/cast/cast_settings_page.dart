@@ -1,3 +1,5 @@
+import "dart:math";
+
 import "package:ente_components/ente_components.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
@@ -29,7 +31,9 @@ class CastSettingsPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: MediaQuery.sizeOf(context).height * 0.5 - 200),
+              SizedBox(
+                height: max(0, MediaQuery.sizeOf(context).height * 0.5 - 200),
+              ),
               Image.asset("assets/empty_casts.png"),
               const SizedBox(height: 16),
               Text(l10n.noSessionsFound, style: textTheme.h4Bold),
