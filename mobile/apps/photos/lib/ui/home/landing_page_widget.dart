@@ -163,9 +163,10 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Widget _buildOnboardingAnimation() {
-    return SizedBox(
-      height: 280,
-      width: double.infinity,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.35,
+      ),
       child: rive.RiveWidgetBuilder(
         fileLoader: _onboardingAnimationLoader,
         builder: (BuildContext context, rive.RiveState state) {
