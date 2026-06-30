@@ -1,10 +1,3 @@
-//
-//  CastPairingService.swift
-//  tv
-//
-//  Created by Neeraj Gupta on 28/08/25.
-//
-
 import SwiftUI
 import Foundation
 
@@ -47,8 +40,6 @@ class CastSession: ObservableObject {
 class RealCastPairingService {
     private let baseURL = "https://api.ente.com"
     private var pollingTimer: Timer?
-    private var lastLoggedMessages: [String: Date] = [:]
-    private let logThrottleInterval: TimeInterval = 5.0 // 5 seconds
     private var isPolling: Bool = false
     private var isFetchingPayload: Bool = false
     private var hasDeliveredPayload: Bool = false
@@ -65,7 +56,7 @@ class RealCastPairingService {
         
         // Log when switching to extended interval for the first time
         if elapsed >= pollingIntervalSwitchTime && newInterval == extendedPollingInterval && !hasLoggedIntervalSwitch {
-            print("🕐 Switched to extended polling interval (\(extendedPollingInterval)s) after \(Int(elapsed))s")
+            print("Switched to extended polling interval (\(extendedPollingInterval)s) after \(Int(elapsed))s")
             hasLoggedIntervalSwitch = true
         }
         
@@ -77,12 +68,10 @@ class RealCastPairingService {
     }
     
     func registerDevice() async throws -> CastDevice {
-        print("🔑 Generating real X25519 keypair...")
         let keys = try generateKeyPair()
         let publicKeyBase64 = keys.publicKey.base64EncodedString()
         
-        print("📡 Registering device with Ente production server...")
-        print("🌐 POST \(baseURL)/cast/device-info")
+        print("POST \(baseURL)/cast/device-info")
         
         let url = URL(string: "\(baseURL)/cast/device-info")!
         var request = URLRequest(url: url)
@@ -104,7 +93,7 @@ class RealCastPairingService {
         
         let deviceResponse = try JSONDecoder().decode(DeviceRegistrationResponse.self, from: data)
         
-        print("✅ Device registered! Code from server: \(deviceResponse.deviceCode)")
+        print("Device registered! Code from server: \(deviceResponse.deviceCode)")
         
         return CastDevice(
             deviceCode: deviceResponse.deviceCode,
@@ -116,7 +105,6 @@ class RealCastPairingService {
     func startPolling(device: CastDevice, onPayloadReceived: @escaping (CastPayload) -> Void, onError: @escaping (Error) -> Void) {
         guard !hasDeliveredPayload else { return }
         guard !isPolling else { return }
-        print("🔍 Starting real polling of Ente production server...")
         pollingTimer?.invalidate()
         isPolling = true
         pollingStartTime = Date()
@@ -147,7 +135,7 @@ class RealCastPairingService {
         defer { isFetchingPayload = false }
         do {
             let url = URL(string: "\(baseURL)/cast/cast-data/\(device.deviceCode)")!
-            print("📡 GET \(url.absoluteString)")
+            print("GET \(url.absoluteString)")
             
             let (data, response) = try await URLSession.shared.data(from: url)
             
@@ -157,7 +145,6 @@ class RealCastPairingService {
             
             if httpResponse.statusCode == 404 {
                 // No payload available yet - this is expected
-                print("⏳ No encrypted payload available yet")
                 return
             }
             
@@ -168,20 +155,16 @@ class RealCastPairingService {
             let castDataResponse = try JSONDecoder().decode(CastDataResponse.self, from: data)
             
             guard let encryptedData = castDataResponse.encCastData else {
-                print("⏳ No encrypted payload in response yet")
                 return
             }
             
-            print("🔓 Received encrypted payload! Decrypting...")
             
-            // Decrypt the payload using our private key
             let payload = try await decryptPayload(
                 encryptedData: encryptedData,
                 publicKey: device.publicKey,
                 privateKey: device.privateKey
             )
             
-            print("✅ Successfully decrypted cast payload!")
             hasDeliveredPayload = true
             stopPolling()
             
@@ -190,7 +173,7 @@ class RealCastPairingService {
             }
             
         } catch {
-            print("❌ Polling error: \(error)")
+            print("Polling error: \(error)")
             await MainActor.run {
                 onError(error)
             }
@@ -233,11 +216,9 @@ class RealCastPairingService {
         pollingTimer = nil
         isPolling = false
         pollingStartTime = nil
-        print("⏹️ Stopped polling production server")
     }
     
     func resetForNewSession() {
-        print("🔄 Resetting pairing service for new session")
         stopPolling()
         hasDeliveredPayload = false
         hasLoggedIntervalSwitch = false

@@ -2,13 +2,20 @@
 set -eu
 
 # This script is invoked from Xcode's "Run Script" build phase.
-# It builds the Rust crypto static lib for the current tvOS target.
+# It builds the cast UniFFI static lib for the current tvOS target.
 
 REPO_ROOT=$(cd "$SRCROOT/../../../../.." && pwd)
-OUT_DIR="$TARGET_TEMP_DIR/ente_crypto_rust"
-LIB=libente_crypto_ffi.a
+GENERATED_DIR="$SRCROOT/Cast/Generated"
+OUT_DIR="$TARGET_TEMP_DIR/cast_rust"
+LIB=libcast.a
 
 export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+if [ ! -f "$GENERATED_DIR/cast.swift" ] || [ ! -f "$GENERATED_DIR/castFFI.h" ] || [ ! -f "$GENERATED_DIR/castFFI.modulemap" ]; then
+    echo "error: missing generated cast UniFFI bindings in $GENERATED_DIR" >&2
+    echo "  run: (cd $REPO_ROOT/rust && cargo codegen native cast)" >&2
+    exit 1
+fi
 
 mkdir -p "$OUT_DIR"
 
@@ -43,7 +50,7 @@ for arch in $ARCHS; do
         CC="$clang" \
             CFLAGS="-isysroot $sdk" \
             RUSTFLAGS="$rustflags" \
-            cargo +nightly build -Z build-std --locked -p ente_crypto_ffi --target "$target" $release_flag
+            cargo +nightly build -Z build-std --locked -p ente-cast-uniffi --target "$target" $release_flag
     )
 
     built="$REPO_ROOT/rust/target/$target/$profile/$LIB"

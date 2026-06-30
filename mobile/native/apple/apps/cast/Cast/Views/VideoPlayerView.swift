@@ -1,10 +1,7 @@
 import SwiftUI
 import AVFoundation
 import AVKit
-
-#if canImport(UIKit)
 import UIKit
-#endif
 
 struct VideoPlayerView: View {
     let videoData: Data
@@ -59,17 +56,13 @@ struct VideoPlayerView: View {
     private func setupVideoPlayer() {
         Task {
             do {
-                // Extract file extension from suggested filename
                 let suggestedExtension = suggestedFilename?.components(separatedBy: ".").last?.lowercased()
                 
-                // Create temporary file for video data with proper extension
                 let tempURL = try await createTemporaryVideoFile(from: videoData, suggestedExtension: suggestedExtension)
                 
                 await MainActor.run {
-                    // Validate that the video file can be played
                     let asset = AVURLAsset(url: tempURL)
                     
-                    // Check if the asset is playable
                     Task {
                         let isPlayable = try await asset.load(.isPlayable)
                         let hasVideoTracks = try await !asset.loadTracks(withMediaType: .video).isEmpty
@@ -87,17 +80,14 @@ struct VideoPlayerView: View {
                                 
                                 setupPlayer()
                             } else {
-                                print("❌ Video asset is not playable or has no video tracks")
-                                // Try fallback with different extension
                                 self.tryVideoFallback(originalURL: tempURL)
                             }
                         }
                     }
                 }
             } catch {
-                print("❌ Failed to setup video player: \(error)")
+                print("Failed to setup video player: \(error)")
                 await MainActor.run {
-                    // Show error state
                     self.showErrorState()
                 }
             }
@@ -121,7 +111,7 @@ struct VideoPlayerView: View {
                     setupPlayer()
                 }
             } catch {
-                print("❌ Video fallback also failed: \(error)")
+                print("Video fallback also failed: \(error)")
                 showErrorState()
             }
         }
@@ -129,7 +119,6 @@ struct VideoPlayerView: View {
     
     private func showErrorState() {
         // Could show an error message or placeholder
-        print("❌ Unable to play video - showing error state")
     }
     
     private func monitorPlayerItemStatus(_ playerItem: AVPlayerItem) {
@@ -137,20 +126,19 @@ struct VideoPlayerView: View {
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             switch playerItem.status {
             case .readyToPlay:
-                print("✅ Video player ready to play")
                 timer.invalidate()
             case .failed:
                 if let error = playerItem.error {
-                    print("❌ Video player failed with error: \(error)")
-                    print("❌ Error details: \(error.localizedDescription)")
+                    print("Video player failed with error: \(error)")
+                    print("Error details: \(error.localizedDescription)")
                 }
                 timer.invalidate()
                 Task { @MainActor in
                     self.showErrorState()
                 }
             case .unknown:
-                print("⏳ Video player status unknown")
                 // Keep checking
+                break
             @unknown default:
                 timer.invalidate()
             }
@@ -165,19 +153,15 @@ struct VideoPlayerView: View {
         player.automaticallyWaitsToMinimizeStalling = true
         
         // Set audio session for proper audio handling
-        #if os(tvOS)
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to set audio session: \(error)")
         }
-        #endif
         
-        // Add observers
         setupPlayerObservers()
         
-        // Start playing
         player.play()
         isPlaying = true
     }
@@ -196,14 +180,13 @@ struct VideoPlayerView: View {
             player.play()
         }
         
-        // Add observer for player status changes
         NotificationCenter.default.addObserver(
             forName: .AVPlayerItemFailedToPlayToEndTime,
             object: currentItem,
             queue: .main
         ) { notification in
             if let error = notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error {
-                print("❌ Video playback failed: \(error)")
+                print("Video playback failed: \(error)")
             }
         }
         
@@ -256,10 +239,8 @@ struct VideoPlayerView: View {
                     let brand = headerBytes.subdata(in: 8..<12)
                     if brand == Data("mp41".utf8) || brand == Data("mp42".utf8) || 
                        brand == Data("isom".utf8) || brand == Data("M4V ".utf8) {
-                        print("🎥 Detected MP4 video format")
                         return "mp4"
                     } else if brand == Data("qt  ".utf8) {
-                        print("🎥 Detected MOV video format")
                         return "mov"
                     }
                 }
@@ -268,7 +249,6 @@ struct VideoPlayerView: View {
             // Check for H.264 NAL units (common in MP4)
             if headerBytes.count >= 4 {
                 if signature[0] == 0x00 && signature[1] == 0x00 && signature[2] == 0x00 && signature[3] == 0x01 {
-                    print("🎥 Detected H.264 stream, using MP4 container")
                     return "mp4"
                 }
             }
@@ -277,25 +257,21 @@ struct VideoPlayerView: View {
             if signature == Data("RIFF".utf8) && headerBytes.count >= 12 {
                 let aviSignature = headerBytes.subdata(in: 8..<12)
                 if aviSignature == Data("AVI ".utf8) {
-                    print("⚠️ Detected AVI format - may have compatibility issues")
                     return "avi"
                 }
             }
             
             // WebM format (limited support on tvOS)
             if signature == Data([0x1A, 0x45, 0xDF, 0xA3]) {
-                print("⚠️ Detected WebM format - may have compatibility issues")
                 return "webm"
             }
             
             // MKV format
             if signature == Data([0x1A, 0x45, 0xDF, 0xA3]) {
-                print("⚠️ Detected MKV format - may have compatibility issues")
                 return "mkv"
             }
         }
         
-        print("🎥 Unknown video format, defaulting to MP4")
         return "mp4"
     }
     
@@ -304,20 +280,16 @@ struct VideoPlayerView: View {
         
         // KVO observer removal no longer needed as we use modern async/await approach
         
-        // Remove all notification observers
         NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: nil)
         NotificationCenter.default.removeObserver(self, name: .AVPlayerItemFailedToPlayToEndTime, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         
-        // Deactivate audio session
-        #if os(tvOS)
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
             print("Failed to deactivate audio session: \(error)")
         }
-        #endif
         
         player = nil
         playerItem = nil
@@ -326,7 +298,6 @@ struct VideoPlayerView: View {
 }
 
 #Preview {
-    // Create mock video data for preview
     let mockData = Data()
     VideoPlayerView(videoData: mockData, suggestedFilename: "sample_video.mp4")
 }

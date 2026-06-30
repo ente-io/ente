@@ -9,5 +9,5 @@ kamadak-exif = "0.6.1"
 ente_heic = { package = "heic_decoder", git = "https://github.com/ente/heic-decoder.git", rev = "34f09f38ff25cb84d5fff14c8b9d3ff908b4c679", features = [
     "image-integration",
 ] }
-thiserror = "2.0.11"
+thiserror.workspace = true
 tiff = "0.10.3"

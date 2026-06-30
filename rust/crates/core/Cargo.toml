@@ -6,7 +6,7 @@ edition = "2024"
 reqwest = { version = "0.12", default-features = false, features = ["http2", "charset", "system-proxy", "json", "rustls-tls-native-roots", "rustls-tls-webpki-roots"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-thiserror = "2"
+thiserror.workspace = true
 
 # Pure Rust Cryptography
 xsalsa20poly1305 = "0.9"

@@ -1,9 +1,5 @@
-
 import SwiftUI
-
-#if canImport(UIKit)
 import UIKit
-#endif
 
 struct PairingView: View {
     let deviceCode: String

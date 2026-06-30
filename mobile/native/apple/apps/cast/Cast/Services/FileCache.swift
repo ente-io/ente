@@ -1,10 +1,3 @@
-//
-//  FileCache.swift
-//  tv
-//
-//  Created by Neeraj Gupta on 28/08/25.
-//
-
 import Foundation
 
 // MARK: - Persistent Thread-Safe File Cache
@@ -22,7 +15,6 @@ actor ThreadSafeFileCache {
         self.maxBytes = maxBytes
         self.shrinkTargetBytes = shrinkTargetBytes
         
-        // Create persistent cache directory
         let documentsPath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         self.cacheDirectory = documentsPath.appendingPathComponent("EnteFileCache")
         self.metadataURL = cacheDirectory.appendingPathComponent("cache_metadata.json")
@@ -30,17 +22,14 @@ actor ThreadSafeFileCache {
         // Create cache directory if it doesn't exist
         try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
         
-        // Load existing cache from disk
         loadCacheFromDisk()
     }
     
     func get(_ fileID: Int) -> Data? {
-        // Check memory cache first
         if let data = cache[fileID] {
             return data
         }
         
-        // Check disk cache
         let fileURL = cacheDirectory.appendingPathComponent("\(fileID).cache")
         if let data = try? Data(contentsOf: fileURL) {
             // Load into memory cache for faster future access
@@ -56,28 +45,23 @@ actor ThreadSafeFileCache {
     }
     
     func set(_ fileID: Int, data: Data) {
-        // Remove existing data if present
         if let existingData = cache[fileID] {
             totalBytes -= existingData.count
             cacheOrder.removeAll { $0 == fileID }
         }
         
-        // Add new data to memory cache
         cache[fileID] = data
         cacheOrder.append(fileID)
         totalBytes += data.count
         
-        // Save to disk cache
         let fileURL = cacheDirectory.appendingPathComponent("\(fileID).cache")
         try? data.write(to: fileURL)
         
-        // Enforce limits
         enforceLimits()
         
-        // Save metadata
         saveCacheMetadata()
         
-        print("💾 Cached file \(fileID) content (\(data.count) bytes) - Cache size: \(cache.count) files")
+        print("Cached file \(fileID) content (\(data.count) bytes) - Cache size: \(cache.count) files")
     }
     
     func remove(_ fileID: Int) {
@@ -85,14 +69,12 @@ actor ThreadSafeFileCache {
             totalBytes -= removedData.count
             cacheOrder.removeAll { $0 == fileID }
             
-            // Remove from disk cache
             let fileURL = cacheDirectory.appendingPathComponent("\(fileID).cache")
             try? FileManager.default.removeItem(at: fileURL)
             
-            // Save updated metadata
             saveCacheMetadata()
             
-            print("🗑️ Removed cached content for file \(fileID) (\(removedData.count) bytes)")
+            print("Removed cached content for file \(fileID) (\(removedData.count) bytes)")
         }
     }
     
@@ -102,14 +84,12 @@ actor ThreadSafeFileCache {
         cacheOrder.removeAll()
         totalBytes = 0
         
-        // Clear disk cache
         try? FileManager.default.removeItem(at: cacheDirectory)
         try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
         
-        // Clear metadata
         try? FileManager.default.removeItem(at: metadataURL)
         
-        print("🗑️ Cleared file content cache (\(clearedCount) files)")
+        print("Cleared file content cache (\(clearedCount) files)")
     }
     
     func getStats() -> (count: Int, totalSize: Int) {
@@ -129,11 +109,10 @@ actor ThreadSafeFileCache {
             if let data = cache.removeValue(forKey: oldest) {
                 removedBytes += data.count
                 
-                // Remove from disk cache
                 let fileURL = cacheDirectory.appendingPathComponent("\(oldest).cache")
                 try? FileManager.default.removeItem(at: fileURL)
                 
-                print("🧹 Evicted file \(oldest) (\(data.count) bytes) to control cache size")
+                print("Evicted file \(oldest) (\(data.count) bytes) to control cache size")
             }
         }
         totalBytes -= removedBytes
@@ -141,20 +120,17 @@ actor ThreadSafeFileCache {
         // Save updated metadata after eviction
         saveCacheMetadata()
         
-        print("📦 Cache GC complete: now \(cache.count) files, \(totalBytes) bytes")
+        print("Cache GC complete: now \(cache.count) files, \(totalBytes) bytes")
     }
     
     private func loadCacheFromDisk() {
-        // Load metadata
         guard let metadataData = try? Data(contentsOf: metadataURL),
               let metadata = try? JSONDecoder().decode(CacheMetadata.self, from: metadataData) else {
-            print("📂 No existing cache metadata found - starting fresh")
             return
         }
         
-        print("📂 Loading existing cache from disk - \(metadata.fileIDs.count) files")
+        print("Loading existing cache from disk - \(metadata.fileIDs.count) files")
         
-        // Load cache order and calculate total bytes
         var loadedBytes = 0
         var validFileIDs: [Int] = []
         
@@ -172,7 +148,7 @@ actor ThreadSafeFileCache {
         cacheOrder = validFileIDs
         totalBytes = loadedBytes
         
-        print("📂 Loaded \(validFileIDs.count) cached files (\(loadedBytes) bytes) from disk")
+        print("Loaded \(validFileIDs.count) cached files (\(loadedBytes) bytes) from disk")
         
         // Clean up any invalid entries
         if validFileIDs.count != metadata.fileIDs.count {

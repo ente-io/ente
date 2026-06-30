@@ -1,16 +1,12 @@
 import SwiftUI
-
-#if canImport(UIKit)
 import UIKit
-#endif
 
 struct SlideshowView: View {
     let imageData: Data?
     let videoData: Data?
     let isVideo: Bool
     @ObservedObject var slideshowService: RealSlideshowService
-    
-    // Computed property to determine if current file is a live photo
+
     private var isLivePhoto: Bool {
         slideshowService.currentFile?.isLivePhoto ?? false
     }
@@ -34,10 +30,8 @@ struct SlideshowView: View {
     @State private var preDecodedImage: UIImage? = nil
     @State private var previousDecodedImage: UIImage? = nil
     
-    #if os(tvOS)
     @FocusState private var isFocused: Bool
-    #endif
-    
+
     init(imageData: Data? = nil, videoData: Data? = nil, isVideo: Bool = false, slideshowService: RealSlideshowService) {
         self.imageData = imageData
         self.videoData = videoData
@@ -46,13 +40,13 @@ struct SlideshowView: View {
     }
     
     var body: some View {
-        // ✅ OPTIMIZATION: Use pre-decoded images to avoid decoding during render
+        // Use pre-decoded images to avoid decoding during render
         let mainUIImage = preDecodedImage
         let previousUIImage = previousDecodedImage
 
         return GeometryReader { geometry in
             ZStack {
-                // Background layer - FIXED VERSION
+                // Background layer
                 if let uiImage = mainUIImage {
                     Image(uiImage: uiImage)
                         .resizable()
@@ -138,7 +132,6 @@ struct SlideshowView: View {
                 actionFeedbackOverlay
                 controlsOverlay
                 toastOverlay
-//                ambientLightOverlay
             }
         }
         .onChange(of: imageData) { newValue in
@@ -174,7 +167,6 @@ struct SlideshowView: View {
         }
         .onTapGesture { Task { await handlePlayPauseAction() } }
         .onLongPressGesture { handleLongPressGesture() }
-        #if os(tvOS)
         .focusable()
         .focused($isFocused)
         .onMoveCommand { direction in Task { await handleDirectionalInput(direction) } }
@@ -186,16 +178,13 @@ struct SlideshowView: View {
             }
         }
         .onExitCommand { toggleControls() }
-        #endif
         .onAppear {
             startControlsTimer()
-            #if os(tvOS)
             isFocused = true
             // Backup screen saver prevention at view level
             ScreenSaverManager.preventScreenSaver()
-            #endif
             
-            // CRITICAL FIX: Process initial image data if present and not already processed
+            // Process initial image data if present and not already processed
             // This handles the case where SlideshowView is created with imageData already populated
             // (e.g., when transitioning from .connecting to .slideshow state)
             // Without this, onChange won't fire and the image won't display
@@ -214,10 +203,8 @@ struct SlideshowView: View {
             }
         }
         .onDisappear {
-            #if os(tvOS)
             // Ensure screen saver prevention is disabled when view disappears
             ScreenSaverManager.allowScreenSaver()
-            #endif
         }
     }
     
@@ -360,7 +347,7 @@ struct SlideshowView: View {
             return uiImage
         } else {
             imageDecodeFailed = true
-            print("❌ UIImage decode failed (bytes: \(data.count))")
+            print("UIImage decode failed (bytes: \(data.count))")
             return nil
         }
     }
@@ -375,7 +362,7 @@ struct SlideshowView: View {
             previousImageOpacity = 0.0
         }
         
-        print("🖼️ Displaying \(isLive ? "live" : "static") image (\(bytes) bytes)")
+        print("Displaying \(isLive ? "live" : "static") image (\(bytes) bytes)")
         
         // Clean up previous image data after animation
         Task {

@@ -4,9 +4,9 @@ members = [
     "apps/cli",
     "apps/codegen",
     "apps/ensu/src-tauri",
-    "bindings/ffi/crypto",
     "bindings/frb/ente-rust",
     "bindings/frb/photos",
+    "bindings/uniffi/cast",
     "bindings/uniffi/ensu",
     "bindings/wasm/ente-wasm",
     "bindings/wasm/core",
@@ -29,4 +29,6 @@ ente-image = { path = "crates/image" }
 ente-photos = { path = "crates/photos" }
 ente-rs = { path = "apps/cli" }
 ente-test-support = { path = "crates/test-support" }
+thiserror = "2.0.18"
+uniffi = { version = "0.31.0" }
 wasm-bindgen = "0.2.125"

@@ -19,6 +19,13 @@ struct UniffiCrate<'a> {
 }
 
 #[derive(Clone, Copy)]
+enum NativeTarget {
+    All,
+    Ensu,
+    Cast,
+}
+
+#[derive(Clone, Copy)]
 enum FrbTarget {
     All,
     Shared,
@@ -35,7 +42,18 @@ fn main() {
 fn run() -> Result<(), DynError> {
     let mut args = env::args().skip(1);
     match args.next().as_deref() {
-        Some("native") if args.next().is_none() => generate_native(),
+        Some("native") => {
+            let target = match args.next().as_deref() {
+                None => NativeTarget::All,
+                Some("ensu") => NativeTarget::Ensu,
+                Some("cast") => NativeTarget::Cast,
+                _ => return Err(usage_error()),
+            };
+            if args.next().is_some() {
+                return Err(usage_error());
+            }
+            generate_native(target)
+        }
         Some("frb") => {
             let target = match args.next().as_deref() {
                 None => FrbTarget::All,
@@ -53,60 +71,84 @@ fn run() -> Result<(), DynError> {
 }
 
 fn usage_error() -> DynError {
-    "usage: cargo codegen <native|frb [shared|photos]>".into()
+    "usage: cargo codegen <native [ensu|cast]|frb [shared|photos]>".into()
 }
 
-fn generate_native() -> Result<(), DynError> {
-    generate_native_ios()?;
-    generate_native_android()
-}
-
-fn generate_native_ios() -> Result<(), DynError> {
+fn generate_native(target: NativeTarget) -> Result<(), DynError> {
     let rust_root = rust_root()?;
-    let repo_root = rust_root
-        .parent()
-        .ok_or("failed to resolve repo root from rust/apps/codegen")?;
-    let generated_dir = repo_root.join("mobile/native/apple/apps/ensu/Ensu/Generated");
 
-    fs::create_dir_all(&generated_dir)?;
+    if matches!(target, NativeTarget::All | NativeTarget::Ensu) {
+        let ensu = UniffiCrate {
+            crate_name: "ensu",
+            crate_dir: rust_root.join("bindings/uniffi/ensu"),
+        };
+        generate_swift(&ensu, "mobile/native/apple/apps/ensu/Ensu/Generated")?;
+        generate_kotlin(
+            &ensu,
+            "mobile/native/android/apps/ensu/rust/src/main/kotlin",
+            "io/ente/ensu/bindings/ensu.kt",
+        )?;
+    }
 
-    let uniffi_crate = UniffiCrate {
-        crate_name: "ensu",
-        crate_dir: rust_root.join("bindings/uniffi/ensu"),
-    };
+    if matches!(target, NativeTarget::All | NativeTarget::Cast) {
+        let cast = UniffiCrate {
+            crate_name: "cast",
+            crate_dir: rust_root.join("bindings/uniffi/cast"),
+        };
+        generate_swift(&cast, "mobile/native/apple/apps/cast/Cast/Generated")?;
+        // TODO: Android cast bindings scaffold
+        // generate_kotlin(
+        //     &cast,
+        //     "mobile/native/android/apps/cast/app/src/main/kotlin",
+        //     "io/ente/cast/bindings/cast.kt",
+        // )?;
+    }
+
+    Ok(())
+}
+
+fn generate_swift(uniffi_crate: &UniffiCrate<'_>, generated_rel: &str) -> Result<(), DynError> {
+    let generated_dir = repo_root()?.join(generated_rel);
+    write_generated_gitignore(&generated_dir)?;
 
     build_host_library(&uniffi_crate.crate_dir)?;
     remove_paths(&swift_generated_paths(
         &generated_dir,
         uniffi_crate.crate_name,
     ))?;
-    generate_bindings(TargetLanguage::Swift, &generated_dir, &uniffi_crate)?;
+    generate_bindings(TargetLanguage::Swift, &generated_dir, uniffi_crate)?;
 
-    sanitize_generated_swift_bindings(&generated_dir.join("ensu.swift"), "ensu")?;
+    sanitize_generated_swift_bindings(
+        &generated_dir.join(format!("{}.swift", uniffi_crate.crate_name)),
+        uniffi_crate.crate_name,
+    )?;
 
     Ok(())
 }
 
-fn generate_native_android() -> Result<(), DynError> {
-    let rust_root = rust_root()?;
-    let repo_root = rust_root
-        .parent()
-        .ok_or("failed to resolve repo root from rust/apps/codegen")?;
-    let rust_out_dir = repo_root.join("mobile/native/android/apps/ensu/rust/src/main/kotlin");
-
-    fs::create_dir_all(&rust_out_dir)?;
-
-    let uniffi_crate = UniffiCrate {
-        crate_name: "ensu",
-        crate_dir: rust_root.join("bindings/uniffi/ensu"),
-    };
-    let generated_path = rust_out_dir.join("io/ente/ensu/bindings/ensu.kt");
+fn generate_kotlin(
+    uniffi_crate: &UniffiCrate<'_>,
+    out_rel: &str,
+    generated_rel: &str,
+) -> Result<(), DynError> {
+    let rust_out_dir = repo_root()?.join(out_rel);
+    let generated_path = rust_out_dir.join(generated_rel);
+    if let Some(bindings_dir) = generated_path.parent() {
+        write_generated_gitignore(bindings_dir)?;
+    }
 
     build_host_library(&uniffi_crate.crate_dir)?;
     remove_path(&generated_path)?;
-    generate_bindings(TargetLanguage::Kotlin, &rust_out_dir, &uniffi_crate)?;
+    generate_bindings(TargetLanguage::Kotlin, &rust_out_dir, uniffi_crate)?;
 
     Ok(())
+}
+
+fn write_generated_gitignore(dir: &Path) -> Result<(), DynError> {
+    fs::create_dir_all(dir)?;
+    let path = dir.join(".gitignore");
+    fs::write(&path, "*\n!.gitignore\n")
+        .map_err(|error| format!("failed to write {}: {error}", path.display()).into())
 }
 
 fn generate_frb(target: FrbTarget) -> Result<(), DynError> {
@@ -191,6 +233,13 @@ fn rust_root() -> Result<PathBuf, DynError> {
         return Err("run cargo codegen from the Rust workspace root".into());
     }
     Ok(root)
+}
+
+fn repo_root() -> Result<PathBuf, DynError> {
+    Ok(rust_root()?
+        .parent()
+        .ok_or("failed to resolve repo root from rust/apps/codegen")?
+        .to_path_buf())
 }
 
 fn target_dir() -> Result<PathBuf, DynError> {

@@ -2297,6 +2297,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-cast-uniffi"
+version = "0.0.0"
+dependencies = [
+ "ente-core",
+ "thiserror 2.0.18",
+ "uniffi",
+]
+
+[[package]]
 name = "ente-contacts"
 version = "0.0.0"
 dependencies = [
@@ -2489,13 +2498,6 @@ version = "0.0.0"
 dependencies = [
  "ente-core",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "ente_crypto_ffi"
-version = "0.0.0"
-dependencies = [
- "ente-core",
 ]
 
 [[package]]
