@@ -168,6 +168,18 @@ Try these steps first:
 
 If the People section is still empty, please [send logs](/photos/faq/troubleshooting#sharing-logs) from your desktop app so we can investigate further.
 
+### Why do some people in my People section show letters instead of face thumbnails? {#face-thumbnails-show-letters}
+
+The letter placeholders are a fallback the app shows when it can't load the face thumbnail for someone yet. This often happens after adding new photos, when the app still needs to generate the thumbnails and download the original photos it needs.
+
+Try the following:
+
+1. Force-quit and reopen the Ente app.
+2. Open the People section and leave it on screen for a few minutes, with the app in the foreground and your device on WiFi. This gives the app a chance to generate the thumbnails and download the originals.
+3. If the thumbnails are still letters after 10-15 minutes, force-quit and reopen once more.
+
+The faces should gradually reappear as the app catches up.
+
 ### How do I enable face recognition? {#enable-face-recognition}
 
 Face recognition requires enabling **Machine Learning** first:
