@@ -3,7 +3,7 @@
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
-import type { CryptoWorker } from "ente-base/crypto/worker";
+import { type CryptoWorker } from "ente-base/crypto/worker";
 import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
