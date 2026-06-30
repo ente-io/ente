@@ -4,14 +4,14 @@ use ente_core::crypto;
 use thiserror::Error;
 
 #[derive(Debug, Error, uniffi::Error)]
-pub enum CastError {
+pub enum CastCryptoError {
     #[error("{0}")]
     Message(String),
 }
 
-impl From<crypto::CryptoError> for CastError {
+impl From<crypto::CryptoError> for CastCryptoError {
     fn from(err: crypto::CryptoError) -> Self {
-        CastError::Message(err.to_string())
+        CastCryptoError::Message(err.to_string())
     }
 }
 
@@ -36,7 +36,7 @@ pub fn open_sealed_box(
     ciphertext: Vec<u8>,
     public_key: Vec<u8>,
     private_key: Vec<u8>,
-) -> Result<Vec<u8>, CastError> {
+) -> Result<Vec<u8>, CastCryptoError> {
     let public_key = crypto::PublicKey::try_from_slice(&public_key)?;
     let private_key = crypto::SecretKey::try_from_slice(&private_key)?;
     Ok(crypto::sealed::open(
@@ -51,7 +51,7 @@ pub fn open_secret_box(
     ciphertext: Vec<u8>,
     nonce: Vec<u8>,
     key: Vec<u8>,
-) -> Result<Vec<u8>, CastError> {
+) -> Result<Vec<u8>, CastCryptoError> {
     let nonce = crypto::Nonce::try_from_slice(&nonce)?;
     let key = crypto::Key::try_from_slice(&key)?;
     Ok(crypto::secretbox::decrypt(&ciphertext, &nonce, &key)?)
@@ -62,7 +62,7 @@ pub fn decrypt_secret_stream(
     encrypted_data: Vec<u8>,
     header: Vec<u8>,
     key: Vec<u8>,
-) -> Result<Vec<u8>, CastError> {
+) -> Result<Vec<u8>, CastCryptoError> {
     let header = crypto::Header::try_from_slice(&header)?;
     let key = crypto::Key::try_from_slice(&key)?;
     Ok(crypto::stream::decrypt_file_data(
