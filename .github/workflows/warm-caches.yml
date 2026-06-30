@@ -57,6 +57,8 @@ jobs:
         defaults:
             run:
                 working-directory: rust
+        env:
+            RUSTFLAGS: -D warnings
         steps:
             - name: Checkout code and submodules
               uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -74,9 +76,9 @@ jobs:
 
             - run: cargo codegen frb
 
-            - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked -- -D warnings
+            - run: cargo clippy -p ente_photos_rust --features flutter --all-targets --locked
 
-            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked -- -D warnings
+            - run: cargo clippy -p ente_rust --features flutter --all-targets --locked
 
     rust-wasm:
         # For web-lint.yml's npm run build:wasm.
