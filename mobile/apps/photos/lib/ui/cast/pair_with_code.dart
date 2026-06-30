@@ -76,6 +76,7 @@ class _PairWithCodeSheetState extends State<_PairWithCodeSheet> {
         l10n.castInstruction(castUrl: flagService.castUrl),
         style: textStyles.smallMuted,
       ),
+      isKeyboardAware: true,
       actions: [
         TextInputComponent(
           controller: _controller,
