@@ -1,10 +1,3 @@
-//
-//  FileCache.swift
-//  tv
-//
-//  Created by Neeraj Gupta on 28/08/25.
-//
-
 import Foundation
 
 // MARK: - Persistent Thread-Safe File Cache

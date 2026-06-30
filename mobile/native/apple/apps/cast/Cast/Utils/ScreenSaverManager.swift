@@ -1,10 +1,3 @@
-//
-//  ScreenSaverManager.swift
-//  tv
-//
-//  Created by Claude on 03/09/25.
-//
-
 import Foundation
 import UIKit
 

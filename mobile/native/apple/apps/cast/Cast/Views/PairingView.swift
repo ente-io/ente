@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 #if canImport(UIKit)

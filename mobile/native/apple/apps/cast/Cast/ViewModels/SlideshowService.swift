@@ -1,10 +1,3 @@
-//
-//  SlideshowService.swift
-//  tv
-//
-//  Created by Neeraj Gupta on 28/08/25.
-//
-
 import SwiftUI
 import AVKit
 import Foundation
