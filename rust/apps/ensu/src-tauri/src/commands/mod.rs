@@ -2,7 +2,6 @@ pub(crate) mod chat_db;
 mod common;
 pub(crate) mod config;
 pub(crate) mod crypto;
-pub(crate) mod fs;
 pub(crate) mod llm;
 pub(crate) mod secure_storage;
 pub(crate) mod system;
