@@ -21,6 +21,9 @@ Future<void> _pairWithCode(
   String code,
 ) async {
   final gw = CastGateway(NetworkClient.instance.enteDio);
+  if (!flagService.enableMultiCast) {
+    await gw.revokeAllTokens();
+  }
   final publicKey = await gw.getPublicKey(code);
   if (publicKey == null) {
     throw const _DeviceNotFoundException();
