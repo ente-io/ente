@@ -66,6 +66,33 @@ func TestEnsureStorageWarningDeletionLoginAllowedHonorsActiveLoginGrace(t *testi
 	}
 }
 
+func TestEnsureStorageWarningDeletionLoginAllowedDoesNotBlockAuthApp(t *testing.T) {
+	db := testutil.RequireTestDB(t)
+	testutil.ResetTables(t, db)
+	t.Cleanup(func() {
+		testutil.ResetTables(t, db)
+	})
+
+	const userID int64 = 12347
+	testutil.InsertUser(t, db, testutil.UserFixture{
+		UserID:       userID,
+		Email:        "auth-user@example.com",
+		CreationTime: 1,
+	})
+	testutil.InsertNotificationHistory(t, db, testutil.NotificationHistoryFixture{
+		UserID:     userID,
+		TemplateID: repo.StorageWarningExpiredScheduledDeletionTemplateID,
+		SentTime:   100,
+	})
+
+	err := (&UserController{
+		NotificationHistoryRepo: &repo.NotificationHistoryRepository{DB: db},
+	}).ensureStorageWarningDeletionLoginAllowed(userID, ente.Auth)
+	if err != nil {
+		t.Fatalf("expected auth app login to remain allowed, got %v", err)
+	}
+}
+
 func TestEnsureStorageWarningDeletionLoginAllowedBlocksAfterLoginGraceExpires(t *testing.T) {
 	db := testutil.RequireTestDB(t)
 	testutil.ResetTables(t, db)
