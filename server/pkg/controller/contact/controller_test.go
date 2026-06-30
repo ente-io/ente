@@ -460,6 +460,53 @@ func TestUpdateContactAllowsSameContactUserIDAfterRelationshipEnds(t *testing.T)
 	}
 }
 
+func TestUpdateContactRequiresEligibleRelationshipToReviveDeletedContact(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	created := createContactForTest(t, db, ctrl, ctx, 41, "wrapped-key-1", "payload-1")
+	if err := ctrl.Delete(ctx, created.ID); err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if _, err := db.Exec(
+		`UPDATE emergency_contact
+		    SET state = $1,
+		        encrypted_key = NULL
+		  WHERE user_id = $2 AND emergency_contact_id = $3`,
+		ente.ContactLeft,
+		int64(1),
+		int64(41),
+	); err != nil {
+		t.Fatalf("failed to end emergency contact relationship: %v", err)
+	}
+
+	_, err := ctrl.Update(ctx, created.ID, contactmodel.UpdateRequest{
+		ContactUserID: 41,
+		EncryptedData: []byte("payload-2"),
+	})
+	if err == nil {
+		t.Fatal("expected ineligible deleted contact update to fail")
+	}
+	if !strings.Contains(err.Error(), "not eligible to be added as a contact") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got, err := ctrl.Get(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("Get() error = %v", err)
+	}
+	if !got.IsDeleted {
+		t.Fatalf("contact should remain deleted: %+v", got)
+	}
+	if got.ContactUserID != 41 {
+		t.Fatalf("contactUserID = %d, want 41", got.ContactUserID)
+	}
+	if got.Email != nil {
+		t.Fatalf("deleted contact leaked email: %v", got.Email)
+	}
+	if got.EncryptedData != nil {
+		t.Fatalf("deleted contact restored encryptedData: %v", got.EncryptedData)
+	}
+}
+
 func TestCreateAndUpdateRejectUnknownContactUserID(t *testing.T) {
 	ctrl, db, ctx, _ := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)

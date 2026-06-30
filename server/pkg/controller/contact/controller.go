@@ -133,11 +133,11 @@ func (c *Controller) Update(ctx *gin.Context, contactID string, req contactmodel
 			"",
 		)
 	}
-	currentContactUserID, err := c.Repo.GetContactUserID(ctx, userID, contactID)
+	updateState, err := c.Repo.GetContactUpdateState(ctx, userID, contactID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to fetch contact")
 	}
-	if currentContactUserID != req.ContactUserID {
+	if updateState.IsDeleted || updateState.ContactUserID != req.ContactUserID {
 		canUpdate, err := c.Repo.CanCreateContact(ctx, userID, req.ContactUserID)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "failed to validate contact eligibility")
