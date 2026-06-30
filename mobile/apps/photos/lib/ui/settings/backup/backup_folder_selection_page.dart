@@ -204,7 +204,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -218,11 +218,12 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     : null,
               ),
               if (_treatAsOnboarding) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 ButtonComponent(
                   key: const ValueKey("skipBackupButton"),
                   label: l10n.skip,
                   variant: ButtonComponentVariant.link,
+                  size: ButtonComponentSize.small,
                   onTap: () async {
                     Navigator.of(context).pop(false);
                   },
