@@ -17,7 +17,6 @@ import {
     uploadManager,
 } from "@/services/upload-manager";
 import watcher from "@/services/watch";
-import { hasReliableCanvasReadback } from "@/utils/upload/canvas-integrity";
 import { Album02Icon, Folder01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -55,6 +54,7 @@ import type {
     ZipItem,
 } from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
+import { CanvasReadbackBlockedDialog } from "ente-gallery/components/upload/CanvasReadbackBlockedDialog";
 import { UploadProgress } from "ente-gallery/components/UploadProgress";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import {
@@ -75,6 +75,7 @@ import {
     storageLimitExceededErrorMessage,
     subscriptionExpiredErrorMessage,
 } from "ente-gallery/services/upload/upload-service";
+import { hasReliableCanvasReadback } from "ente-gallery/utils/upload/canvas-integrity";
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
@@ -100,7 +101,6 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
 
 interface UploadProps {
     /** The logged in user, if any. */

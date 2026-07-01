@@ -5,15 +5,6 @@ import {
     handleSelectCreator,
     handleSelectCreatorMulti,
 } from "@/public-album/utils/photo-frame";
-import {
-    LoadingThumbnail,
-    StaticThumbnail,
-} from "@/shared/ui/media/PlaceholderThumbnails";
-import {
-    computeThumbnailGridLayoutParams,
-    thumbnailGap,
-    type ThumbnailGridLayoutParams,
-} from "@/shared/utils/thumbnail-grid-layout";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
@@ -23,6 +14,15 @@ import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import {
+    LoadingThumbnail,
+    StaticThumbnail,
+} from "ente-new/photos/components/PlaceholderThumbnails";
+import {
+    computeThumbnailGridLayoutParams,
+    thumbnailGap,
+    type ThumbnailGridLayoutParams,
+} from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { batch } from "ente-utils/array";
 import { t } from "i18next";
 import React, {
