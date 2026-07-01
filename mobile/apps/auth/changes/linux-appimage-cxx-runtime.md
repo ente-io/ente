@@ -1,1 +1,0 @@
-- Fixed Auth AppImage startup on Linux systems where bundled C++ runtime libraries could conflict with host graphics drivers.
