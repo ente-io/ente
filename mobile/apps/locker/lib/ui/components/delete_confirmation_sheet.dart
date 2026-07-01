@@ -1,10 +1,10 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/ui/components/gradient_button.dart";
 
 class DeleteConfirmationResult {
   final ButtonResult buttonResult;
@@ -153,20 +153,17 @@ class _DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
                 ),
               ],
               const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: GradientButton(
-                  onTap: () {
-                    Navigator.of(context).pop(
-                      DeleteConfirmationResult(
-                        buttonResult: ButtonResult(ButtonAction.first),
-                        deleteFromAllCollections: _deleteFromAllCollections,
-                      ),
-                    );
-                  },
-                  text: widget.deleteButtonLabel,
-                  backgroundColor: colorScheme.warning400,
-                ),
+              ButtonComponent(
+                label: widget.deleteButtonLabel,
+                variant: ButtonComponentVariant.critical,
+                onTap: () {
+                  Navigator.of(context).pop(
+                    DeleteConfirmationResult(
+                      buttonResult: ButtonResult(ButtonAction.first),
+                      deleteFromAllCollections: _deleteFromAllCollections,
+                    ),
+                  );
+                },
               ),
             ],
           ),
