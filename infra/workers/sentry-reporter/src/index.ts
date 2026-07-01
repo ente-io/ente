@@ -85,7 +85,7 @@ const mapDSN = (originalBody: string, originalDSNString: string) => {
 
 const isEnteSentryDSN = (dsn: URL) =>
     dsn.protocol === "https:" &&
-    (dsn.hostname === "sentry.ente.com" || dsn.hostname === "sentry.ente.io");
+    (dsn.host === "sentry.ente.com" || dsn.host === "sentry.ente.io");
 
 const dsnMappings: Record<string, string> = {
     // photos-mobile
