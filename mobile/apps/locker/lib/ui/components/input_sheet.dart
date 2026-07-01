@@ -1,153 +1,6 @@
 import "package:ente_base/typedefs.dart";
 import "package:ente_components/ente_components.dart";
-import "package:ente_ui/components/base_bottom_sheet.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-
-class InputSheet extends StatefulWidget {
-  final String title;
-  final String hintText;
-  final String submitButtonLabel;
-  final FutureVoidCallbackParamStr onSubmit;
-  final String? initialValue;
-  final TextCapitalization textCapitalization;
-  final int? maxLength;
-  final bool isPasswordInput;
-
-  const InputSheet({
-    super.key,
-    required this.title,
-    required this.hintText,
-    required this.submitButtonLabel,
-    required this.onSubmit,
-    this.initialValue,
-    this.textCapitalization = TextCapitalization.words,
-    this.maxLength = 200,
-    this.isPasswordInput = false,
-  });
-
-  @override
-  State<InputSheet> createState() => _InputSheetState();
-}
-
-class _InputSheetState extends State<InputSheet> {
-  late final TextEditingController _textController;
-  bool _isSubmitting = false;
-  bool _isInputValid = false;
-  bool _isPasswordVisible = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _textController = TextEditingController(text: widget.initialValue ?? '');
-    _isInputValid = _textController.text.trim().isNotEmpty;
-    _textController.addListener(_onTextChanged);
-  }
-
-  @override
-  void dispose() {
-    _textController.removeListener(_onTextChanged);
-    _textController.dispose();
-    super.dispose();
-  }
-
-  void _onTextChanged() {
-    final isValid = _textController.text.trim().isNotEmpty;
-    if (isValid != _isInputValid) {
-      setState(() {
-        _isInputValid = isValid;
-      });
-    }
-  }
-
-  Future<void> _onSubmit() async {
-    final text = widget.isPasswordInput
-        ? _textController.text
-        : _textController.text.trim();
-
-    if (text.trim().isEmpty || _isSubmitting) {
-      return;
-    }
-
-    _isSubmitting = true;
-
-    try {
-      await widget.onSubmit(text);
-
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      if (mounted) {
-        _isSubmitting = false;
-        Navigator.of(context).pop(e);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _textController,
-          autofocus: true,
-          textCapitalization: widget.textCapitalization,
-          maxLength: widget.maxLength,
-          obscureText: widget.isPasswordInput && !_isPasswordVisible,
-          enableSuggestions: !widget.isPasswordInput,
-          autocorrect: !widget.isPasswordInput,
-          decoration: InputDecoration(
-            hintText: widget.hintText,
-            hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
-            filled: true,
-            fillColor: colorScheme.fillFaint,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: colorScheme.strokeFaint),
-            ),
-            suffixIcon: widget.isPasswordInput
-                ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: colorScheme.textMuted,
-                    ),
-                  )
-                : null,
-            counterText: "",
-          ),
-          style: textTheme.body.copyWith(color: colorScheme.textBase),
-          onSubmitted: (_) => _onSubmit(),
-        ),
-        const SizedBox(height: 28),
-        ButtonComponent(
-          label: widget.submitButtonLabel,
-          onTap: _isInputValid ? _onSubmit : null,
-        ),
-      ],
-    );
-  }
-}
 
 Future<dynamic> showInputSheet(
   BuildContext context, {
@@ -159,21 +12,60 @@ Future<dynamic> showInputSheet(
   TextCapitalization textCapitalization = TextCapitalization.words,
   int? maxLength = 200,
   bool isPasswordInput = false,
-}) async {
-  return showBaseBottomSheet<dynamic>(
-    context,
-    title: title,
-    headerSpacing: 20,
-    isKeyboardAware: true,
-    child: InputSheet(
+}) {
+  var currentText = initialValue ?? '';
+  var isSubmitting = false;
+
+  final canSubmit = ValueNotifier<bool>(currentText.trim().isNotEmpty);
+
+  Future<void> submit(BuildContext sheetContext, String value) async {
+    final text = isPasswordInput ? value : value.trim();
+    if (text.trim().isEmpty || isSubmitting) {
+      return;
+    }
+
+    isSubmitting = true;
+
+    try {
+      await onSubmit(text);
+      if (sheetContext.mounted) {
+        Navigator.of(sheetContext).pop();
+      }
+    } catch (e) {
+      isSubmitting = false;
+      if (sheetContext.mounted) {
+        Navigator.of(sheetContext).pop(e);
+      }
+    }
+  }
+
+  return showBottomSheetComponent<dynamic>(
+    context: context,
+    builder: (sheetContext) => BottomSheetComponent(
       title: title,
-      hintText: hintText,
-      submitButtonLabel: submitButtonLabel,
-      onSubmit: onSubmit,
-      initialValue: initialValue,
-      textCapitalization: textCapitalization,
-      maxLength: maxLength,
-      isPasswordInput: isPasswordInput,
+      isKeyboardAware: true,
+      content: TextInputComponent(
+        initialValue: initialValue,
+        hintText: hintText,
+        autofocus: true,
+        maxLength: maxLength,
+        textCapitalization: textCapitalization,
+        isPasswordInput: isPasswordInput,
+        onChanged: (value) {
+          currentText = value;
+          canSubmit.value = value.trim().isNotEmpty;
+        },
+        onSubmit: (value) => submit(sheetContext, value),
+      ),
+      actions: [
+        ValueListenableBuilder<bool>(
+          valueListenable: canSubmit,
+          builder: (_, enabled, _) => ButtonComponent(
+            label: submitButtonLabel,
+            onTap: enabled ? () => submit(sheetContext, currentText) : null,
+          ),
+        ),
+      ],
     ),
   );
 }
