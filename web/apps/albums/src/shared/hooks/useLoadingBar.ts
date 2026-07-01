@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { type LoadingBarRef } from "react-top-loading-bar";
+import type { LoadingBarRef } from "react-top-loading-bar";
 
 /**
  * A convenience hook for returning stable functions tied to a

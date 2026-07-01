@@ -1,5 +1,5 @@
 import Avatar from "@/components/Avatar";
-import { type SelectedState } from "@/utils/file";
+import type { SelectedState } from "@/utils/file";
 import {
     handleSelectCreator,
     handleSelectCreatorMulti,

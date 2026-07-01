@@ -29,7 +29,7 @@ import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconB
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { useInterval, useIsSmallWidth } from "ente-base/components/utils/hooks";
-import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
 import { formattedListJoin, ut } from "ente-base/i18n";
@@ -54,7 +54,7 @@ import {
 } from "ente-new/photos/components/ImageEditorOverlay";
 import { getCollectionByID } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
-import { type Comment } from "ente-new/photos/services/comment";
+import type { Comment } from "ente-new/photos/services/comment";
 import { addReaction, deleteReaction } from "ente-new/photos/services/reaction";
 import {
     getAnonProfiles,

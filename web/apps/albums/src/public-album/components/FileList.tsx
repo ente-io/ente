@@ -1,6 +1,6 @@
 import { AddPhotosIcon } from "@/public-album/components/ActionIcons";
 import { thumbnailManager } from "@/public-album/media/thumbnails/thumbnail-manager";
-import { type SelectedState } from "@/public-album/utils/file";
+import type { SelectedState } from "@/public-album/utils/file";
 import {
     handleSelectCreator,
     handleSelectCreatorMulti,

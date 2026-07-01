@@ -3,7 +3,7 @@
 import { ensureElectron } from "ente-base/electron";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
-import { type Location } from "ente-base/types";
+import type { Location } from "ente-base/types";
 import type {
     UploadItem,
     UploadPathPrefix,

@@ -19,9 +19,9 @@ import { MediaMuteButton } from "media-chrome";
 import "media-chrome/menu";
 import { MediaChromeMenu, MediaChromeMenuButton } from "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
-import {
-    type FileViewerAnnotatedFile,
-    type FileViewerProps,
+import type {
+    FileViewerAnnotatedFile,
+    FileViewerProps,
 } from "../components/FileViewer";
 import {
     fileViewerDidClose,

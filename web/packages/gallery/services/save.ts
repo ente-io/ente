@@ -2,7 +2,7 @@ import { assertionFailed } from "ente-base/assert";
 import { suppressMainWindowBlurForTrustedPrompt } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import { type Electron } from "ente-base/types/ipc";
+import type { Electron } from "ente-base/types/ipc";
 import { downloadManager } from "ente-gallery/services/download";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";

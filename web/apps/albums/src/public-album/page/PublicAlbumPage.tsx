@@ -13,7 +13,7 @@ import {
     FeedIcon,
     ShareIcon,
 } from "@/public-album/components/ActionIcons";
-import { type FileListHeaderOrFooter } from "@/public-album/components/FileList";
+import type { FileListHeaderOrFooter } from "@/public-album/components/FileList";
 import { FileListWithViewer } from "@/public-album/components/FileListWithViewer";
 import type { TripLayoutProps } from "@/public-album/components/TripLayout";
 import { setPublicAlbumsCredentials } from "@/public-album/data/auth/public-link-credentials";
@@ -28,9 +28,9 @@ import {
     getSelectedFiles,
     type SelectedState,
 } from "@/public-album/utils/file";
-import { type FileViewerInitialSidebar } from "@/public-album/viewer/components/FileViewer";
+import type { FileViewerInitialSidebar } from "@/public-album/viewer/components/FileViewer";
 import type { PublicAlbumSingleFileViewerProps } from "@/public-album/viewer/components/PublicAlbumSingleFileViewer";
-import { type PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
+import type { PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
 import { LazyPublicFeedSidebar } from "@/public-album/viewer/lib/lazy";
 import {
     GalleryItemsHeaderAdapter,
@@ -76,7 +76,7 @@ import {
     type AddSaveGroup,
 } from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
-import { type EnteFile } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { t } from "i18next";
@@ -91,7 +91,7 @@ import {
     type ComponentType,
     type PropsWithChildren,
 } from "react";
-import { type FileWithPath } from "react-dropzone";
+import type { FileWithPath } from "react-dropzone";
 
 const LazyPublicAlbumSingleFileViewer =
     dynamic<PublicAlbumSingleFileViewerProps>(

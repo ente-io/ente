@@ -54,7 +54,7 @@ import type {
     SkippedFile,
     ZipItem,
 } from "ente-base/types/ipc";
-import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
+import type { UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { UploadProgress } from "ente-gallery/components/UploadProgress";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import {

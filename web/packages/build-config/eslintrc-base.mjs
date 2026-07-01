@@ -33,6 +33,9 @@ export default tseslint.config(
                 "error",
                 { checksVoidReturn: { arguments: false, attributes: false } },
             ],
+            // Avoid type-only inline imports becoming runtime side-effect
+            // imports under verbatimModuleSyntax.
+            "@typescript-eslint/no-import-type-side-effects": "error",
             // Allow force unwrapping potentially optional values.
             //
             // [Note: non-null-assertions have better stack trace]

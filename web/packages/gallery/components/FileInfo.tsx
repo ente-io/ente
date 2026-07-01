@@ -38,7 +38,7 @@ import {
     type DialogProps,
 } from "@mui/material";
 import { LinkButtonUndecorated } from "ente-base/components/LinkButton";
-import { type ButtonishProps } from "ente-base/components/mui";
+import type { ButtonishProps } from "ente-base/components/mui";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import {
     SidebarDrawer,
@@ -59,7 +59,7 @@ import type { Location } from "ente-base/types";
 import { CopyButton } from "ente-gallery/components/FileInfoComponents";
 import { tagNumericValue, type RawExifTags } from "ente-gallery/services/exif";
 import { formattedByteSize } from "ente-gallery/utils/units";
-import { type EnteFile } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoDate,
     fileFileName,

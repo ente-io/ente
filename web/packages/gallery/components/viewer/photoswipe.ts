@@ -18,10 +18,7 @@ import {
     updateFileInfoExifIfNeeded,
     type ItemData,
 } from "./data-source";
-import {
-    type FileViewerAnnotatedFile,
-    type FileViewerProps,
-} from "./FileViewer";
+import type { FileViewerAnnotatedFile, FileViewerProps } from "./FileViewer";
 import {
     commentSVGPath,
     createPSRegisterElementIconHTML,

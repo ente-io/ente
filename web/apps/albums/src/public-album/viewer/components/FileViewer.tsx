@@ -22,7 +22,7 @@ import {
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { useInterval, useIsSmallWidth } from "ente-base/components/utils/hooks";
-import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { formattedListJoin, ut } from "ente-base/i18n";
@@ -39,7 +39,7 @@ import {
     resetMoreMenuButtonOnMenuClose,
     type FileViewerPhotoSwipeDelegate,
 } from "../lib/photoswipe";
-import { type Comment, type UnifiedReaction } from "../lib/social-types";
+import type { Comment, UnifiedReaction } from "../lib/social-types";
 import { AddNameModal } from "./AddNameModal";
 import { CommentsSidebar } from "./CommentsSidebar";
 import { FileInfo, type FileInfoExif } from "./FileInfo";
