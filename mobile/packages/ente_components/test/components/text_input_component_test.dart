@@ -304,27 +304,6 @@ void main() {
     expect(isEmptyNotifier.value, isFalse);
   });
 
-  testWidgets("TextInputComponent forwards groupId to text field regions", (
-    tester,
-  ) async {
-    final groupId = Object();
-
-    await tester.pumpWidget(_wrap(TextInputComponent(groupId: groupId)));
-
-    expect(tester.widget<TextField>(find.byType(TextField)).groupId, groupId);
-    expect(
-      tester
-          .widget<TextFieldTapRegion>(
-            find.ancestor(
-              of: _fieldContainers().first,
-              matching: find.byType(TextFieldTapRegion),
-            ),
-          )
-          .groupId,
-      groupId,
-    );
-  });
-
   testWidgets(
     "TextInputComponent supports clear and password visibility affordances",
     (tester) async {

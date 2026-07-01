@@ -24,7 +24,6 @@ class TextInputComponent extends StatefulWidget {
     super.key,
     this.controller,
     this.focusNode,
-    this.groupId = EditableText,
     this.label,
     this.message,
     this.hintText,
@@ -61,7 +60,6 @@ class TextInputComponent extends StatefulWidget {
 
   final TextEditingController? controller;
   final FocusNode? focusNode;
-  final Object groupId;
   final String? label;
   final String? message;
   final String? hintText;
@@ -235,7 +233,6 @@ class _TextInputComponentState extends State<TextInputComponent> {
           const SizedBox(height: Spacing.sm),
         ],
         TextFieldTapRegion(
-          groupId: widget.groupId,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.isDisabled ? null : _focusNode.requestFocus,
@@ -269,7 +266,6 @@ class _TextInputComponentState extends State<TextInputComponent> {
                         ],
                         Expanded(
                           child: TextField(
-                            groupId: widget.groupId,
                             controller: _controller,
                             focusNode: _focusNode,
                             enabled: !widget.isDisabled,
