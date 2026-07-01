@@ -152,13 +152,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     //
     // The word "dynamic" here means a prop on whose change we should not
     // recreate the photoswipe dialog.
-    const delegateRef = useRef<FileViewerPhotoSwipeDelegate | undefined>(
-        undefined,
-    );
+    const delegateRef = useRef<
+        FileViewerPhotoSwipeDelegate<FileViewerAnnotatedFile> | undefined
+    >(undefined);
 
     // We also need to maintain a ref to the currently displayed dialog since we
     // might need to ask it to refresh its contents.
-    const psRef = useRef<FileViewerPhotoSwipe | undefined>(undefined);
+    const psRef = useRef<
+        FileViewerPhotoSwipe<FileViewerAnnotatedFile> | undefined
+    >(undefined);
     const handleCloseRef = useRef<() => void>(() => undefined);
     const browserBackStateRef = useRef<string | undefined>(undefined);
 
@@ -403,7 +405,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     activeAnnotatedFileRef.current = activeAnnotatedFile;
 
     const haveUser = false;
-    const isPublicAlbum = true;
 
     // Called when the like button (heart) is clicked in public album mode.
     const handleLikeClick = useCallback(() => {
@@ -826,7 +827,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const performKeyAction = useCallback<
-        FileViewerPhotoSwipeDelegate["performKeyAction"]
+        FileViewerPhotoSwipeDelegate<FileViewerAnnotatedFile>["performKeyAction"]
     >(
         (action) => {
             switch (action) {
@@ -1173,8 +1174,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
-                haveUser,
-                isPublicAlbum,
                 showSocialButtons,
                 enableComment,
                 showFullscreenButton,

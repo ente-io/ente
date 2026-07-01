@@ -32,15 +32,6 @@ import { type FileViewerInitialSidebar } from "@/public-album/viewer/components/
 import type { PublicAlbumSingleFileViewerProps } from "@/public-album/viewer/components/PublicAlbumSingleFileViewer";
 import { type PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
 import { LazyPublicFeedSidebar } from "@/public-album/viewer/lib/lazy";
-import {
-    GalleryItemsHeaderAdapter,
-    GalleryItemsSummary,
-} from "@/shared/ui/gallery/GalleryItemsHeader";
-import {
-    LoadingThumbnail,
-    StaticThumbnail,
-} from "@/shared/ui/media/PlaceholderThumbnails";
-import { thumbnailGap } from "@/shared/utils/thumbnail-grid-layout";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -79,6 +70,15 @@ import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "ente-new/photos/components/gallery/ListHeader";
+import {
+    LoadingThumbnail,
+    StaticThumbnail,
+} from "ente-new/photos/components/PlaceholderThumbnails";
+import { thumbnailGap } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { t } from "i18next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
