@@ -1,6 +1,5 @@
 import "package:ente_components/ente_components.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
-import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -22,11 +21,10 @@ Future<void> showShareLinkSheet(
 ) async {
   final rootContext = context;
 
-  await showBaseBottomSheet<void>(
-    context,
-    title: context.l10n.share,
-    headerSpacing: 20,
-    child: ShareLinkSheet(url: url, file: file, rootContext: rootContext),
+  await showBottomSheetComponent<void>(
+    context: context,
+    builder: (_) =>
+        ShareLinkSheet(url: url, file: file, rootContext: rootContext),
   );
 }
 
@@ -53,61 +51,65 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
     final textTheme = getEnteTextTheme(context);
     final l10n = context.l10n;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.shareThisLink,
-          style: textTheme.body.copyWith(color: colorScheme.textMuted),
-        ),
-        const SizedBox(height: 24),
-        Container(
-          decoration: BoxDecoration(
-            color: colorScheme.backgroundElevated,
-            borderRadius: BorderRadius.circular(12),
+    return BottomSheetComponent(
+      title: l10n.share,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.shareThisLink,
+            style: textTheme.body.copyWith(color: colorScheme.textMuted),
           ),
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 16,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SelectableText(
-                        widget.url,
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textBase,
-                          fontFamily: 'monospace',
+          const SizedBox(height: 24),
+          Container(
+            decoration: BoxDecoration(
+              color: colorScheme.backgroundElevated,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SelectableText(
+                          widget.url,
+                          style: textTheme.small.copyWith(
+                            color: colorScheme.textBase,
+                            fontFamily: 'monospace',
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Center(
-                  child: IconButton(
-                    onPressed: () => _copyToClipboard(),
-                    visualDensity: VisualDensity.compact,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCopy01,
-                      color: colorScheme.textBase,
-                      size: 18,
-                    ),
-                    tooltip: 'Copy link',
+                    ],
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Center(
+                    child: IconButton(
+                      onPressed: () => _copyToClipboard(),
+                      visualDensity: VisualDensity.compact,
+                      icon: HugeIcon(
+                        icon: HugeIcons.strokeRoundedCopy01,
+                        color: colorScheme.textBase,
+                        size: 18,
+                      ),
+                      tooltip: 'Copy link',
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 24),
+        ],
+      ),
+      actions: [
         ButtonComponent(
           label: l10n.shareLink,
           onTap: () async {
@@ -115,22 +117,13 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
             await shareText(widget.url, context: widget.rootContext);
           },
         ),
-        const SizedBox(height: 16),
-        Center(
-          child: GestureDetector(
-            onTap: () async {
-              Navigator.of(context).pop();
-              await _deleteShareLink(widget.rootContext);
-            },
-            child: Text(
-              l10n.deleteLink,
-              style: textTheme.bodyBold.copyWith(
-                color: colorScheme.warning500,
-                decoration: TextDecoration.underline,
-                decorationColor: colorScheme.warning500,
-              ),
-            ),
-          ),
+        ButtonComponent(
+          label: l10n.deleteLink,
+          variant: ButtonComponentVariant.tertiaryCritical,
+          onTap: () async {
+            Navigator.of(context).pop();
+            await _deleteShareLink(widget.rootContext);
+          },
         ),
       ],
     );
